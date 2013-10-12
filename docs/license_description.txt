@@ -1,5 +1,5 @@
-Licenses
-========
+License
+=======
 
 
 The Salish Sea MEOPAR tools and documentation are copyright 2013 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia'.
