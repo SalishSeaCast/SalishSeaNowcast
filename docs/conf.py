@@ -32,6 +32,11 @@ extensions = [
     'sphinx.ext.mathjax',
 ]
 
+intersphinx_mapping = {
+    'docs': ('http://salishsea-meopar-docs.readthedocs.org/en/latest/',
+             '../../docs/_build/html/objects.inv'),
+}
+
 todo_include_todos = True
 
 # Add any paths that contain templates here, relative to this directory.
