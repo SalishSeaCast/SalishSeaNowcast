@@ -33,8 +33,7 @@ extensions = [
 ]
 
 intersphinx_mapping = {
-    'docs': ('http://salishsea-meopar-docs.readthedocs.org/en/latest/',
-             '../../docs/_build/html/objects.inv'),
+    'docs': ('http://salishsea-meopar-docs.readthedocs.org/en/latest/', None),
 }
 
 todo_include_todos = True
