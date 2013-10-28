@@ -13,6 +13,7 @@
 
 import os
 import sys
+import mock
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -38,6 +39,20 @@ intersphinx_mapping = {
 }
 
 todo_include_todos = True
+
+# Mock interface for importing packages with C-extensions that aren't installed
+# in the docs build environment
+# (especially that on readthedocs.org build servers)
+MOCK_MODULES = [
+    'matplotlib',
+    'matplotlib.pyplot',
+    'matplotlib.colors',
+    'matplotlib.ticker',
+    'numpy',
+]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
