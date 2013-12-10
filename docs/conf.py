@@ -18,7 +18,8 @@ import mock
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../SalishSeaTools'))
+sys.path.insert(0, os.path.abspath('../SalishSeaCmd/salishsea_cmd'))
+sys.path.insert(0, os.path.abspath('../SalishSeaTools/salishsea_tools'))
 
 # -- General configuration -----------------------------------------------------
 
@@ -40,22 +41,20 @@ intersphinx_mapping = {
 
 todo_include_todos = True
 
-on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
-if on_rtd:
-    # Mock interface for importing packages with C-extensions that aren't installed
-    # in the docs build environment
-    # (especially that on readthedocs.org build servers)
-    MOCK_MODULES = [
-        'matplotlib',
-        'matplotlib.pyplot',
-        'matplotlib.colors',
-        'matplotlib.ticker',
-        'numpy',
-        'salishsea_cmd',
-        'salishsea_tools',
-    ]
-    for mod_name in MOCK_MODULES:
-        sys.modules[mod_name] = mock.Mock()
+# Mock interface for importing packages with C-extensions that aren't installed
+# in the docs build environment
+# (especially that on readthedocs.org build servers)
+MOCK_MODULES = [
+    'matplotlib',
+    'matplotlib.pyplot',
+    'matplotlib.colors',
+    'matplotlib.ticker',
+    'numpy',
+    'salishsea_cmd',
+    'salishsea_tools',
+]
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = mock.Mock()
 
 
 # Add any paths that contain templates here, relative to this directory.
