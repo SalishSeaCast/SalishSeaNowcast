@@ -49,7 +49,11 @@ MOCK_MODULES = [
     'matplotlib.pyplot',
     'matplotlib.colors',
     'matplotlib.ticker',
+    'netCDF4',
     'numpy',
+    'pandas',
+    'pytz',
+    'requests',
     'salishsea_cmd',
     'salishsea_tools',
 ]
