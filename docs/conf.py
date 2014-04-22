@@ -34,6 +34,7 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
+    'sphinxcontrib.programoutput',
 ]
 
 intersphinx_mapping = {
