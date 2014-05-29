@@ -48,6 +48,7 @@ todo_include_todos = True
 # in the docs build environment
 # (especially that on readthedocs.org build servers)
 MOCK_MODULES = [
+    'angles',
     'matplotlib',
     'matplotlib.pyplot',
     'matplotlib.colors',
