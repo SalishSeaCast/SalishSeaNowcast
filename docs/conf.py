@@ -33,8 +33,9 @@ sys.path.insert(0, os.path.abspath('../SalishSeaTools/salishsea_tools'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
-    'sphinx.ext.todo',
     'sphinx.ext.mathjax',
+    'sphinx.ext.todo',
+    'sphinx.ext.viewcode',
 ]
 
 intersphinx_mapping = {
