@@ -59,6 +59,7 @@ MOCK_MODULES = [
     'pytz',
     'requests',
     'salishsea_tools',
+    'scipy',
     'zmq',
 ]
 for mod_name in MOCK_MODULES:
