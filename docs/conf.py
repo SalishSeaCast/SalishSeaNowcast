@@ -52,7 +52,7 @@ MOCK_MODULES = [
     'matplotlib',
     'matplotlib.pyplot',
     'matplotlib.colors',
-    'matplotlib.gridspec',   
+    'matplotlib.gridspec',
     'matplotlib.dates',
     'matplotlib.ticker',
     'netCDF4',
