@@ -62,6 +62,7 @@ MOCK_MODULES = [
     'paramiko',
     'pytz',
     'requests',
+    'salishsea_cmd',
     'salishsea_tools',
     'scipy',
     'zmq',
