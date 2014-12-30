@@ -50,6 +50,7 @@ todo_include_todos = True
 MOCK_MODULES = [
     'angles',
     'matplotlib',
+    'matplotlib.backends',
     'matplotlib.cm',
     'matplotlib.colors',
     'matplotlib.dates',
