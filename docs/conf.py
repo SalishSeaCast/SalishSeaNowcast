@@ -56,6 +56,7 @@ MOCK_MODULES = [
     'matplotlib.dates',
     'matplotlib.gridspec',
     'matplotlib.ticker',
+    'matplotlib.patches',
     'matplotlib.pyplot',
     'netCDF4',
     'numpy',
