@@ -67,6 +67,7 @@ MOCK_MODULES = [
     'salishsea_cmd',
     'salishsea_tools',
     'scipy',
+    'scipy.optimize',
     'zmq',
 ]
 for mod_name in MOCK_MODULES:
