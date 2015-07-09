@@ -72,6 +72,7 @@ MOCK_MODULES = [
 ]
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = mock.Mock()
+sys.modules['numpy'].pi = 3.1415927
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
