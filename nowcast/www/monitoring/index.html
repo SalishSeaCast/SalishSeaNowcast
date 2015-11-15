@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width initial-scale=1">
+
+  <title>Salish Sea NEMO Nowcast</title>
+
+  <style>
+  table {
+    width:40%;
+  }
+  table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+  }
+  th, td {
+      padding: 5px;
+      text-align: center;
+  }
+  </style>
+</head>
+
+<body>
+<h1>Salish Sea NEMO Nowcast Monitoring Information</h1>
+<p>
+  This page presents monitoring information from the
+  <a href="http://salishsea.eos.ubc.ca/nemo/">Salish Sea NEMO model</a>
+  daily nowcast and forecast runs.
+  It is primarily intended for members of the Salish Sea NEMO modeling team.
+  Public results of the preceding 21 days runs are linked from
+  <a href="http://salishsea.eos.ubc.ca/nemo/results/">
+    http://salishsea.eos.ubc.ca/nemo/results/
+  </a>.
+</p>
+<p>
+  On this page are:
+  <ul>
+     <li>
+       Link to the
+       <a href="#checklist">nowcast manager process's checklist</a>
+       that shows the status of the system
+     </li>
+     <li>
+       Links to the present and preceding 7 day's
+       <a href="#log-files">log files</a>
+     </li>
+     <li>
+       Images produced from the
+       <a href="#grib_to_netcdf-image">weather forcing dataset</a>
+     </li>
+     <li>
+       An image produced from the
+      <a href="#get_NeahBay_ssh-image">sea surface height</a>
+      observation and forecast datasets used to force the western boundary
+      of the model at the mouth of the Strait of Juan de Fuca
+     </li>
+   </ul>
+</p>
+<p>
+  Also here (for now) are links to
+  <a href="#archival-results-plots-pages">archival results plots pages</a>
+  for the period from 17-Nov-2014 until 18-Jan-2015.
+  Those pages (mostly iPython Notebooks) were created by team members
+  prior to the nowcast software automation being extended to production
+  and publication of results pages.
+</p>
+<p>
+  Team members can access the run results files at these locations on the
+  <code>ocean</code> filesystem:
+  <dl>
+    <dt>nowcast</dt>
+    <dd><code>/data/dlatorne/MEOPAR/SalishSea/nowcast/</code></dd>
+    <dt>forecast</dt>
+    <dd><code>/ocean/sallen/allen/research/MEOPAR/SalishSea/forecast/</code></dd>
+    <dt>forecast2</dt>
+    <dd><code>/ocean/sallen/allen/research/MEOPAR/SalishSea/forecast2/</code></dd>
+  </dl>
+  Within those directories the results files are contained in directories
+  named for the run date; e.g. <code>09feb15/</code>.
+  Those directories contain the netCDF4 results files from the run,
+  other NEMO output files,
+  the configuration files used to produce the run,
+  and metadata files that identify the Mercurial revisions of the code
+  and forcing data repos used for the runs.
+  Each day's results directory also contains a <code>figures/</code>
+  subdirectory where SVG renderings of the day's results page(s) plots
+  can be found.
+</p>
+
+
+<h2 id="checklist">Checklist</h2>
+  <p>
+    The <a href="nowcast_checklist.yaml">nowcast_checklist.yaml</a> file
+    is a YAML representation of the checklist dictionary that is maintained
+    by the nowcast manager process.
+    It reflects the present state of the nowcast system,
+    showing the information returned to the manager from each of the workers.
+    It is both (somewhat) human-readable,
+    and machine-readable.
+    The checklist is reset each morning after the forecast2 run results have been
+    pushed to the <a href="http://salishsea.eos.ubc.ca/">salishsea site</a>
+    (see the discussion of log file rollovers above).
+    That means that the <a href="nowcast_checklist.yaml">nowcast_checklist.yaml</a>
+    page will be empty for a period of time each morning.
+  </p>
+
+
+<h2 id="log-files">Log Files</h2>
+  <p>
+    The log files contain messages from the nowcast automation workers and manager processes.
+    Each day's nowcast processing is in a separate log file.
+    When the day's processing is completed the log file is rolled over,
+    as are the previous log files.
+    The log for the current day's run (<code>nowcast.log</code>) is rolled over to <code>nowcast.log.1</code>,
+    and the previous <code>nowcast.log.1</code> is rolled over to <code>nowcast.log.2</code>,
+    etc.
+    A total of 7 day's log files are retained.
+  </p>
+  <p>
+    There are 3 flavours of log files:
+    <ul>
+      <li>
+        <code>nowcast.log</code> which contains messages logged at the <code>info</code> level and above
+        (<code>warning</code>, <code>error</code>, etc.).
+        This is the most concise log file.
+      </li>
+      <li>
+        <code>nowcast.debug.log</code> which contains messages logged at the <code>debug</code> level and above;
+        i.e. all of the nitty-gritty details.
+      </li>
+      <li>
+        <code>nowcast_checklist.log</code> which contains a snapshot of the checklist file each morning before it is reset.
+      </li>
+    </ul>
+  </p>
+  <p>
+    The log file rollovers happen each morning after the forecast2 run results have been pushed to the <a href="http://salishsea.eos.ubc.ca/">salishsea site</a> as both a
+    <a href="http://salishsea.eos.ubc.ca/nemo/results/">results page</a>
+    and as the storm surge
+    <a href="http://salishsea.eos.ubc.ca/storm-surge/forecast.html">
+    forecast page</a>.
+  </p>
+  <dl>
+    <dt>
+      <a href="nowcast.log"><code>nowcast.log</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast.debug.log"><code>nowcast.debug.log</code></a>
+    </dt>
+    <dd>
+      Current log files.
+      Nearly empty after the forecast run results have been pushed to the
+      <a href="http://salishsea.eos.ubc.ca/">salishsea site</a>
+      and the current day's run log files are rolled over to
+      <a href="nowcast.log.1"><code>nowcast.log.1</code></a>
+      and <a href="nowcast.debug.log.1"><code>nowcast.debug.log.1</code></a>.
+      </dd>
+    <dt>
+      <a href="nowcast.log.1"><code>nowcast.log.1</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast.debug.log.1"><code>nowcast.debug.log.1</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast_checklist.log.1"><code>nowcast_checklist.log.1</code></a>
+    </dt>
+    <dd>
+      Previous log files.
+      Roll over to
+      <a href="nowcast.log.2"><code>nowcast.log.2</code></a>,
+      <a href="nowcast.debug.log.2"><code>nowcast.debug.log.2</code></a>,
+      and <a href="nowcast_checklist.log.2"><code>nowcast_checklist.log.2</code></a>
+      when <code>nowcast.log</code> rolls over to <code>nowcast.log.1</code>.
+    </dd>
+  </dl>
+  <p>Older log files:</p>
+  <ul>
+    <li>
+      <a href="nowcast.log.2"><code>nowcast.log.2</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast.debug.log.2"><code>nowcast.debug.log.2</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast_checklist.log.2"><code>nowcast_checklist.log.2</code></a>
+    </li>
+    <li>
+      <a href="nowcast.log.3"><code>nowcast.log.3</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast.debug.log.3"><code>nowcast.debug.log.3</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast_checklist.log.3"><code>nowcast_checklist.log.3</code></a>
+    </li>
+    <li>
+      <a href="nowcast.log.4"><code>nowcast.log.4</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast.debug.log.4"><code>nowcast.debug.log.4</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast_checklist.log.4"><code>nowcast_checklist.log.4</code></a>
+    </li>
+    <li>
+      <a href="nowcast.log.5"><code>nowcast.log.5</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast.debug.log.5"><code>nowcast.debug.log.5</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast_checklist.log.5"><code>nowcast_checklist.log.5</code></a>
+    </li>
+    <li>
+      <a href="nowcast.log.6"><code>nowcast.log.6</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast.debug.log.6"><code>nowcast.debug.log.6</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast_checklist.log.6"><code>nowcast_checklist.log.6</code></a>
+    </li>
+    <li>
+      <a href="nowcast.log.7"><code>nowcast.log.7</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast.debug.log.7"><code>nowcast.debug.log.7</code></a>
+      &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+      <a href="nowcast_checklist.log.7"><code>nowcast_checklist.log.7</code></a>
+    </li>
+  </ul>
+
+
+<h2 id="grib_to_netcdf-image">grib_to_netcdf Worker Monitoring Plots</h2>
+  <figure>
+    <img src="wg.png" alt="grib_to_netcdf Worker Plots">
+  </figure>
+
+<h2 id="get_NeahBay_ssh-image">get_NeahBay_ssh Worker Monitoring Plots</h2>
+  <figure>
+    <img src="NBssh.png" alt="get_NeahBay_ssh Worker Plots">
+  </figure>
+
+
+<h2 id="archival-results-plots-pages">
+  Archival Daily Results Pages (Pre-Automation)
+</h2>
+  <table>
+    <tr>
+      <th>SSH and Weather</th>
+      <th>Tracers and Currents</th>
+      <th>SSH and Weather Forecast</th>
+  </tr>
+    <tr>
+      <td><a href="http://salishsea.eos.ubc.ca/nemo/results/nowcast/publish_18jan15.html">18jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/nemo/results/nowcast/research_18jan15.html">18jan15</a></td>
+  </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/17jan15Figures_Out.ipynb">17jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/17jan15Figures_In.ipynb">17jan15</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/16jan15Figures_Out.ipynb">16jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/16jan15Figures_In.ipynb">16jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/nemo/results/forecast/publish_17jan15.html">16jan15 + 1.25 days</a></td>
+    </tr
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/15jan15Figures_Out.ipynb">15jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/15jan15Figures_In.ipynb">15jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/nemo/results/forecast/publish_16jan15.html">15jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/14jan15Figures_Out.ipynb">14jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/14jan15Figures_In.ipynb">14jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_15jan15.html">14jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/13jan15Figures_Out.ipynb">13jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/13jan15Figures_In.ipynb">13jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_14jan15.html">13jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/12jan15Figures_Out.ipynb">12jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/12jan15Figures_In.ipynb">12jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_13jan15.html">12jan15 + 1.25 days</a></td>
+  </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/11jan15Figures_Out.ipynb">11jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/11jan15Figures_In.ipynb">11jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_12jan15.html">11jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/10jan15Figures_Out.ipynb">10jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/10jan15Figures_In.ipynb">10jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_11jan15.html">10jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/09jan15Figures_Out.ipynb">09jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/09jan15Figures_In.ipynb">09jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_10jan15.html">09jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/08jan15Figures_Out.ipynb">08jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/08jan15Figures_In.ipynb">08jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_09jan15.html">08jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/07jan15Figures_Out.ipynb">07jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/07jan15Figures_In.ipynb">07jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_08jan15.html">07jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eos.ubc.ca/~imachuca/MEOPAR/nowcast/06jan15Figures_Out.ipynb">06jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eos.ubc.ca/~imachuca/MEOPAR/nowcast/06jan15Figures_In.ipynb">06jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_07jan15.html">06jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eos.ubc.ca/~nsoontie/MEOPAR/nowcast/05jan15Figures_Out.ipynb">05jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eos.ubc.ca/~nsoontie/MEOPAR/nowcast/05jan15Figures_In.ipynb">05jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_06jan15.html">05jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/04jan15Figures_Out.ipynb">04jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/04jan15Figures_In.ipynb">04jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_05jan15.html">04jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/03jan15Figures_Out.ipynb">03jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/03jan15Figures_In.ipynb">03jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_04jan15.html">03jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/02jan15Figures_Out.ipynb">02jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/02jan15Figures_In.ipynb">02jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_03jan15.html">02jan15 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/01jan15Figures_Out.ipynb">01jan15</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/01jan15Figures_In.ipynb">01jan15</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_02jan15.html">01jan15 + 1.25 days</a></td>
+  </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/31dec14Figures_Out.ipynb">31dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/31dec14Figures_In.ipynb">31dec14</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_01jan15.html">31dec14 + 1.25 days</a></td>
+  </tr>
+  <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/30dec14Figures_Out.ipynb">30dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/30dec14Figures_In.ipynb">30dec14</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_31dec14.html">30dec14 + 1.25 days</a></td>
+  </tr>
+  <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/29dec14Figures_Out.ipynb">29dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/29dec14Figures_In.ipynb">29dec14</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_30dec14.html">29dec14 + 1.25 days</a></td>
+  </tr> <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/28dec14Figures_Out.ipynb">28dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/28dec14Figures_In.ipynb">28dec14</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_29dec14.html">28dec14 + 1.25 days</a></td></tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/27dec14Figures_Out.ipynb">27dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/27dec14Figures_In.ipynb">27dec14</a></td>
+      <td><a href="http://salishsea.eos.ubc.ca/storm-surge/forecast_28dec14.html">27dec14 + 1.25 days</a></td></tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/26dec14Figures_Out.ipynb">26dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/26dec14Figures_In.ipynb">26dec14</a></td>
+      <td><a href="http://eos.ubc.ca/~sallen/MEOPAR/site/storm-surge/forecast_27dec14.html">26dec14 + 1.25 days</a></td></tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/25dec14Figures_Out.ipynb">25dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/25dec14Figures_In.ipynb">25dec14</a></td>
+      <td><a href="http://eos.ubc.ca/~sallen/MEOPAR/site/storm-surge/forecast_26dec14.html">25dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/24dec14Figures_Out.ipynb">24dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/24dec14Figures_In.ipynb">24dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/24dec14Figures_FCST.ipynb">24dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/23dec14Figures_Out.ipynb">23dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/23dec14Figures_In.ipynb">23dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/23dec14Figures_FCST.ipynb">23dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/22dec14Figures_Out.ipynb">22dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/22dec14Figures_In.ipynb">22dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/22dec14Figures_FCST.ipynb">22dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/21dec14Figures_Out.ipynb">21dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/21dec14Figures_In.ipynb">21dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/21dec14Figures_FCST.ipynb">21dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/20dec14Figures_Out.ipynb">20dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/20dec14Figures_In.ipynb">20dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/20dec14Figures_FCST.ipynb">20dec14 + 1.25 days</a></td>
+  </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/19dec14Figures_Out.ipynb">19dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/19dec14Figures_In.ipynb">19dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/forecast/19dec14Figures_FCST.ipynb">19dec14 + 1.25 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/18dec14Figures_Out.ipynb">18dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/18dec14Figures_In.ipynb">18dec14</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/17dec14Figures_Out.ipynb">17dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/17dec14Figures_In.ipynb">17dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/17dec14Figures_FCST.ipynb">17dec14 + 1.25 days</a></td>
+    </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/16dec14Figures_Out.ipynb">16dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/16dec14Figures_In.ipynb">16dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/forecast/16dec14Figures_FCST.ipynb">16dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/15dec14Figures_Out.ipynb">15dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/15dec14Figures_In.ipynb">15dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/15dec14Figures_FCST.ipynb">15dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/14dec14Figures_Out.ipynb">14dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/14dec14Figures_In.ipynb">14dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/14dec14Figures_FCST.ipynb">14dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/13dec14Figures_Out.ipynb">13dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/13dec14Figures_In.ipynb">13dec14</a></td>
+  </tr>
+  <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/12dec14Figures_Out.ipynb">12dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/12dec14Figures_In.ipynb">12dec14</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/11dec14Figures_Out.ipynb">11dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/11dec14Figures_In.ipynb">11dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/11dec14Figures_FCST.ipynb">11dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/10dec14Figures_Out.ipynb">10dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/10dec14Figures_In.ipynb">10dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/10dec14Figures_FCST.ipynb">10dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/09dec14Figures_Out.ipynb">09dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/09dec14Figures_In.ipynb">09dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/forecast/09dec14Figures_FCST.ipynb">09dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/08dec14Figures_Out.ipynb">08dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/08dec14Figures_In.ipynb">08dec14</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/07dec14Figures_Out.ipynb">07dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/07dec14Figures_In.ipynb">07dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/07dec14Figures_FCST.ipynb">07dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/06dec14Figures_Out.ipynb">06dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/06dec14Figures_In.ipynb">06dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/06dec14Figures_FCST.ipynb">06dec14 + 1.25 days</a></td>
+  </tr>
+   <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/05dec14Figures_Out.ipynb">05dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/05dec14Figures_In.ipynb">05dec14</a></td>
+  </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/04dec14Figures_Out.ipynb">04dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/04dec14Figures_In.ipynb">04dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/04dec14Figures_FCST.ipynb">04dec14 + 1.25 days</a></td>
+  </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/03dec14Figures_Out.ipynb">03dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/03dec14Figures_In.ipynb">03dec14</a></td>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/02dec14Figures_Out.ipynb">02dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/02dec14Figures_In.ipynb">02dec14</a></td>
+  </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/01dec14Figures_Out.ipynb">01dec14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/01dec14Figures_In.ipynb">01dec14</a></td>
+  </tr>
+  <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/30nov14Figures_Out.ipynb">30nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/30nov14Figures_In.ipynb">30nov14</a></td>
+  </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/29nov14Figures_Out.ipynb">29nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/29nov14Figures_In.ipynb">29nov14</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/28nov14Figures_Out.ipynb">28nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/28nov14Figures_In.ipynb">28nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/28nov14Figures_FCST.ipynb">28nov14 + 1.75 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/27nov14Figures_Out.ipynb">27nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/27nov14Figures_In.ipynb">27nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/27nov14Figures_FCST.ipynb">27nov14 + 1.75 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/26nov14Figures_Out.ipynb">26nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/26nov14Figures_In.ipynb">26nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/26nov14Figures_FCST.ipynb">26nov14 + 1.75 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/25nov14Figures_Out.ipynb">25nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/25nov14Figures_In.ipynb">25nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~nsoontie/MEOPAR/nowcast/25nov14Figures_FCST.ipynb">25nov14 + 1.5 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/24nov14Figures_Out.ipynb">24nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/24nov14Figures_In.ipynb">24nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/forecast/24nov14Figures_FCST.ipynb">24nov14 + 1.5 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/23nov14Figures_Out.ipynb">23nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/23nov14Figures_In.ipynb">23nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/23nov14Figures_FCST.ipynb">23nov14 + 1.5 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/22nov14Figures_Out.ipynb">22nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/22nov14Figures_In.ipynb">22nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/22nov14Figures_FCST.ipynb">22nov14 + 25 hours</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/21nov14Figures_Out.ipynb">21nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/nowcast/21nov14Figures_In.ipynb">21nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/21nov14Figures_FCST.ipynb">21nov14 + 1.5 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/20nov14Figures_Out.ipynb">20nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/20nov14Figures_In.ipynb">20nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~sallen/MEOPAR/forecast/20nov14Figures_FCST.ipynb">20nov14 + 1.5 days</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/19nov14Figures_Out.ipynb">19nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/19nov14Figures_In.ipynb">19nov14</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/18nov14Figures_Out.ipynb">18nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/18nov14Figures_In.ipynb">18nov14</a></td>
+    </tr>
+    <tr>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/17nov14Figures_Out.ipynb">17nov14</a></td>
+      <td><a href="http://nbviewer.ipython.org/url/www.eoas.ubc.ca/~imachuca/MEOPAR/nowcast/17nov14Figures_In.ipynb">17nov14</a></td>
+    </tr>
+  </table>
+
+</body>
+</html>

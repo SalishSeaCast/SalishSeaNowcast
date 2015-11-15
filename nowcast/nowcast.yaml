@@ -1,0 +1,302 @@
+# Example configuration file for Salish Sea NEMO model nowcast system
+
+# Python interpreter in environment with all dependencies installed
+python: /home/dlatorne/anaconda/envs/nowcast/bin/python
+
+# Filesystem group name to use for ownership of newly created files
+file group: sallen
+
+bathymetry: /data/dlatorne/MEOPAR/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
+
+rivers:
+  # River name: wateroffice.ec.gc.ca station number
+  Fraser: 08MF005
+  # Destination directory for river runoff forcing file
+  rivers_dir: /ocean/sallen/allen/research/MEOPAR/Rivers/
+  # File that describes Fraser River climatology separation from measured
+  # flow at Hope
+  Fraser climatology: /ocean/sallen/allen/research/MEOPAR/Tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
+  # File containing daily average Fraser river flow at Hope
+  ECget Fraser flow: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
+  # Monthly climatology
+  monthly climatology: /ocean/sallen/allen/research/MEOPAR/nemo-forcing/rivers/rivers_month.nc
+
+ssh:
+  # Destination directory for Neah Bay sea surface height open boundary files
+  ssh_dir: /ocean/nsoontie/MEOPAR/sshNeahBay/
+
+weather:
+  # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
+  GRIB_dir: /ocean/sallen/allen/research/MEOPAR/GRIB/
+  # Destination directory for NEMO forcing files generated from GRIB2 files
+  ops_dir: /ocean/sallen/allen/research/MEOPAR/Operational/
+  # Location of wgrib2 executable
+  wgrib2: /ocean/sallen/allen/research/MEOPAR/private-tools/grib2/wgrib2/wgrib2
+  # Location of Pramod Thupaki's grid_defn.pl script
+  grid_defn.pl: /ocean/sallen/allen/research/MEOPAR/private-tools/PThupaki/grid_defn.pl
+
+run_types:
+  # List of run types to execute
+  # Note that forecast requires a nowcast to have been completed,
+  # and forecast2 requires a forecast to have been completed.
+  - nowcast
+  - forecast
+  - forecast2
+
+run:
+  # If the `cloud host` key is present, the cloud will be prepared
+  # and the nowcast and forecast runs executed on it automatically.
+  #
+  # Remove or comment out the next line to prevent running in the cloud
+  cloud host: west.cloud-nowcast
+  west.cloud-nowcast:
+    nodes: 9
+    mpi decomposition: 8x18
+    images:
+      head node: nowcast-head-node-v4
+      compute node: nowcast-compute-node-v4
+    flavor name: c16-30g-200
+    network label: NEMO-network
+    ssh key name:
+      image: doug-nefos
+      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
+    floating ip pool: VLAN3337
+    sshfs storage:
+      host name: ncnfs1.neptune.uvic.ca
+      user name: nemo
+      host path: /gss_onc/NEMO
+      mount point: /home/ubuntu/MEOPAR
+    rivers_dir: /home/ubuntu/MEOPAR/rivers/
+    # Location of rivers runoff monthly climatology file
+    rivers_month.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+    ssh_dir: /home/ubuntu/MEOPAR/sshNeahBay/
+    weather_dir: /home/ubuntu/MEOPAR/GEM2.5/ops/NEMO-atmos/
+    nowcast_dir: /home/ubuntu/MEOPAR/nowcast/
+    # Location of no_snow.nc constraint file
+    no_snow.nc: /home/ubuntu/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
+    # Location of NEMO on-the-fly interpolation weights file
+    # for GEM 2.5km operational forecast
+    weights: /home/ubuntu/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
+    run_prep_dir: /home/ubuntu/MEOPAR/nowcast/
+    results:
+      nowcast: /home/ubuntu/MEOPAR/SalishSea/nowcast/
+      forecast: /home/ubuntu/MEOPAR/SalishSea/forecast/
+      forecast2: /home/ubuntu/MEOPAR/SalishSea/forecast2/
+
+  # If the `hpc host` key is present, the forcing files will be uploaded
+  # to the HPC cluster and the symlinks created ready for the runs to be
+  # prepared and queued at the command-line on the cluster.
+  #
+  # Remove or comment out the next line to prevent running on the HPC cluster
+#  hpc host: orcinus-nowcast
+  orcinus-nowcast:
+    ssh key name:
+      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
+      # Susan's is /home/sallen/.ssh/id_rsa
+    rivers_dir: /home/sallen/MEOPAR/rivers/
+    # Location of rivers runoff monthly climatology file
+    rivers_month.nc: /home/dlatorne/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+    ssh_dir: /home/sallen/MEOPAR/sshNeahBay/
+    weather_dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
+    nowcast_dir: /home/sallen/MEOPAR/nowcast/
+    # Location of no_snow.nc constraint file
+    no_snow.nc: /home/dlatorne/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
+    # Location of NEMO on-the-fly interpolation weights file
+    # for GEM 2.5km operational forecast
+    weights: /home/dlatorne/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
+    results:
+      nowcast: /home/dlatorne/MEOPAR/SalishSea/nowcast/
+      forecast: /home/dlatorne/MEOPAR/SalishSea/forecast/
+      forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
+
+  results archive:
+    nowcast: /data/dlatorne/MEOPAR/SalishSea/nowcast/
+    forecast: /ocean/sallen/allen/research/MEOPAR/SalishSea/forecast/
+    forecast2: /ocean/sallen/allen/research/MEOPAR/SalishSea/forecast2/
+
+
+web:
+  site_repo_url: https://bitbucket.org/salishsea/salishsea-site
+  site_storm_surge_path: site/storm-surge
+  site_storm_surge_plot_path: site/_static/storm-surge
+  site_storm_surge_plot: Website_thumbnail
+  site_nemo_results_path: site/nemo/results
+  site_plots_path: site/_static/nemo/results_figures
+  www_path: www
+  templates_path: www/templates
+  server_path: shelob-salishsea:/www/salishsea/data
+  salinity_comparison:
+    web_path: eoas.ubc.ca/~jieliu/MEOPAR/nowcast
+    filesystem_path: /home/jieliu/public_html/MEOPAR/nowcast
+    fileroot: SaliCom
+
+
+logging:
+  # Log files are created in the same directory as the nowcast YAML
+  # config file that is used for the nowcast_mgr process
+  log_files:
+    # Keys are the logging level that messages at and above will be sent
+    # to the file named in the value
+    debug: nowcast.debug.log
+    info: nowcast.log
+  backup_count: 7
+  checklist_log_file: nowcast_checklist.log
+  wgrib2_log_file: wgrib2.log
+  # Format strings must be quoted to protect % characters
+  message_format: '%(asctime)s %(levelname)s [%(name)s] %(message)s'
+  datetime_format: '%Y-%m-%d %H:%M:%S'
+  email:
+    level: critical
+    # Subject string must be quoted to protect {} characters
+    subject: '{level} Message from Salish Sea Nowcast System'
+    mailhost: localhost
+    fromaddr: salishsea_nowcast@eos.ubc.ca
+    toaddrs:
+      - dlatornell@eos.ubc.ca
+      - sallen@eos.ubc.ca
+      - nsoontiens@eos.ubc.ca
+      - eolson@eos.ubc.ca
+      - bmooremaley@eos.ubc.ca
+      - jieliu@eos.ubc.ca
+
+# Message system
+zmq:
+  server: salish.eos.ubc.ca
+  ports:
+    # traffic between nowcast_mgr and broker
+    backend: 5554
+    # traffic between workers and broker
+    frontend: 5555
+
+msg_types:
+  # message types registry
+  nowcast_mgr:
+    ack: message acknowledged
+    undefined msg: ERROR - message type is not defined
+  download_weather:
+    success 00: 00 weather forecast ready
+    failure 00: 00 weather forecast download failed
+    success 06: 06 weather forecast ready
+    failure 06: 06 weather forecast download failed
+    success 12: 12 weather forecast ready
+    failure 12: 12 weather forecast download failed
+    success 18: 18 weather forecast ready
+    failure 18: 18 weather forecast download failed
+    crash: download_weather worker crashed
+  make_runoff_file:
+    success: rivers forcing ready
+    failure: rivers forcing files preparation failed
+    crash: make_runoff_file worker crashed
+  get_NeahBay_ssh:
+    success nowcast: Neah Bay ssh for nowcast ready
+    failure nowcast: Neah Bay sea surface height file prep for nowcast failed
+    success forecast: Neah Bay ssh for forecast ready
+    failure forecast : Neah Bay sea surface height file prep for forecast failed
+    success forecast2: Neah Bay ssh for forecast2 ready
+    failure forecast2: Neah Bay sea surface height file prep for forecast2 failed
+    crash: get_NeahBay_ssh worker crashed
+  grib_to_netcdf:
+    success nowcast+: atmospheric nowcast/forecast forcing ready
+    failure nowcast+: atmospheric nowcast forcing files preparation failed
+    success forecast2: atmospheric forecast2 forcing ready
+    failure forecast2: atmospheric forecast2 forcing files preparation failed
+    crash: grib_to_netcdf worker crashed
+  init_cloud:
+    success: cloud nodes initialization underway
+    failure: cloud nodes initialization failed
+    crash: init_cloud worker crashed
+  create_compute_node:
+    success: compute node created
+    failure: compute node creation failed
+    crash: create_compute_node worker crashed
+  set_head_node_ip:
+    success: head node IP address assigned
+    failure: head node IP address assignment failed
+    crash: set_head_node_ip worker crashed
+  set_ssh_config:
+    need: node names and ip addresses requested
+    success: cloud .ssh/config installed
+    failure: cloud .ssh/config installation failed
+    crash: set_ssh_config worker crashed
+  set_mpi_hosts:
+    need: node names and ip addresses requested
+    success: cloud mpi_hosts installed
+    failure: cloud mpi_hosts installation failed
+    crash: set_mpi_hosts worker crashed
+  mount_sshfs:
+    need: node names and ip addresses requested
+    success: sshfs filesystem mounted on cloud nodes
+    failure: mounting sshfs filesystem on cloud nodes failed
+    crash: mount_sshfs worker crashed
+  upload_forcing:
+    success nowcast+: forcing files for nowcast/forecast uploaded
+    failure nowcast+: forcing files for nowcast/forecast upload failed
+    success forecast2: forcing files for forecast2 uploaded
+    failure forecast2: forcing files for forecast2 upload failed
+    success ssh: sea surface height forcing files for forecast uploaded
+    failure ssh: sea surface height forcing files for forecast upload failed
+    crash: upload_forcing worker crashed
+  upload_all_files:
+    success: all files for nowcast uploaded
+    failure: uploading all files filed
+    crash: upload_all_files worker crashed
+  make_forcing_links:
+    success nowcast+: forcing file links for nowcast/forecast created
+    failure nowcast+: forcing file links for nowcast/forecast failed
+    success forecast2: forcing file links for forecast2 created
+    failure forecast2: forcing file links for forecast2 failed
+    success ssh: sea surface height forcing file links for forecast created
+    failure ssh: sea surface height forcing file links for forecast failed
+    crash: make_forcing_links worker crashed
+  run_NEMO:
+    log.debug: debug level logging message
+    log.info: info level logging message
+    log.error: error level logging message
+    need: NEMO run information dict requested
+    success: NEMO run started
+    failure: NEMO run failed
+    crash: run_NEMO worker crashed
+  watch_NEMO:
+    log.debug: debug level logging message
+    log.info: info level logging message
+    log.error: error level logging message
+    need: NEMO run information dict requested
+    success nowcast: nowcast NEMO run completed
+    failure nowcast: nowcast NEMO run failed
+    success forecast: forecast NEMO run completed
+    failure forecast: forecast NEMO run failed
+    success forecast2: forecast2 NEMO run completed
+    failure forecast2: forecast2 NEMO run failed
+    crash: watch_NEMO worker crashed
+  download_results:
+    success nowcast: nowcast results files downloaded
+    failure nowcast: nowcast results files download failed
+    success forecast: forecast results files downloaded
+    failure forecast: forecast results files download failed
+    success forecast2: forecast2 results files downloaded
+    failure forecast2: forecast2 results files download failed
+    crash: download_results worker crashed
+  make_plots:
+    success nowcast publish: nowcast publish plots produced
+    success nowcast research: nowcast reseach plots produced
+    success nowcast comparison: nowcast comparison plots produced
+    failure nowcast publish: nowcast publish plots failed
+    failure nowcast research: nowcast research plots failed
+    failure nowcast comparison: nowcast comparison plots failed
+    success forecast publish: forecast publish plots produced
+    failure forecast publish: forecast publish plots failed
+    success forecast2 publish: forecast2 publish plots produced
+    failure forecast2 publish: forecast2 publish plots failed
+    crash: make_plots worker crashed
+  make_site_page:
+    success index: index page ready for push to salishsea site
+    failure index: index page for salishsea site, preparation failed
+    success publish: publish page ready for push to salishsea site
+    failure publish: publish page for salishsea site, preparation failed
+    success research: research page ready for push to salishsea site
+    failure research: research page for salishsea site, preparation failed
+    crash: make_site_page worker crashed
+  push_to_web:
+    success: publish page and figures pushed to salishsea site
+    failure: publish page and figures push to salishsea site failed
+    crash: push_to_web worker crashed
