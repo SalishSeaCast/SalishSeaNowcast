@@ -86,9 +86,9 @@ def main():
         # Process messages from workers
         logger.debug('listening...')
         try:
-            message = socket.recv()
+            message = socket.recv_string()
             reply, next_steps = message_processor(config, message)
-            socket.send(reply)
+            socket.send_string(reply)
             if next_steps is not None:
                 for next_step, next_step_args in next_steps:
                     next_step(*next_step_args)

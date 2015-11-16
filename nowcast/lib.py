@@ -340,14 +340,14 @@ def tell_manager(
     """
     # Send message to nowcast manager
     message = serialize_message(worker_name, msg_type, payload)
-    socket.send(message)
+    socket.send_string(message)
     logger.debug(
         'sent message: ({msg_type}) {msg_words}'
         .format(
             msg_type=msg_type,
             msg_words=config['msg_types'][worker_name][msg_type]))
     # Wait for and process response
-    msg = socket.recv()
+    msg = socket.recv_string()
     message = deserialize_message(msg)
     source = message['source']
     msg_type = message['msg_type']
