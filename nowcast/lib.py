@@ -28,12 +28,11 @@ import sys
 import time
 
 import arrow
+import driftwood
 import paramiko
 import requests
 import yaml
 import zmq
-
-from salishsea_tools.nowcast.json_logging import JSONFormatter
 
 
 # File permissions:
@@ -200,7 +199,7 @@ def configure_logging(config, logger, debug, email=True):
     text_formatter = logging.Formatter(
         config['logging']['message_format'],
         datefmt=config['logging']['datetime_format'])
-    json_formatter = JSONFormatter(extra_attrs=[
+    json_formatter = driftwood.JSONFormatter(extra_attrs=[
         'forecast',
         'date',
         'run_type',

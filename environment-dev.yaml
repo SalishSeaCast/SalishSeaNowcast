@@ -33,5 +33,6 @@ dependencies:
   - angles
   - arrow
   - BeautifulSoup4
+  - driftwood
   - ipdb
   - sphinx-bootstrap-theme
