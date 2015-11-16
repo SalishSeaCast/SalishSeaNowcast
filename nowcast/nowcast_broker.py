@@ -26,7 +26,7 @@ import traceback
 
 import zmq
 
-from salishsea_tools.nowcast import lib
+from nowcast import lib
 
 
 broker_name = lib.get_module_name()
