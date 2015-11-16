@@ -33,7 +33,7 @@ import netCDF4 as nc
 import numpy as np
 import zmq
 
-from salishsea_tools.nowcast import (
+from nowcast import (
     figures,
     lib,
 )

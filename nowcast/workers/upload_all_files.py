@@ -26,8 +26,8 @@ import traceback
 import arrow
 import zmq
 
-from salishsea_tools.nowcast import lib
-from salishsea_tools.nowcast.workers import (
+from nowcast import lib
+from nowcast.workers import (
     get_NeahBay_ssh,
     grib_to_netcdf,
     make_runoff_file,

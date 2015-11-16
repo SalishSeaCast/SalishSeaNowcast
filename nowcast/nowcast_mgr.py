@@ -26,7 +26,7 @@ import traceback
 import yaml
 import zmq
 
-from salishsea_tools.nowcast import lib
+from nowcast import lib
 
 
 mgr_name = lib.get_module_name()
