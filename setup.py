@@ -46,6 +46,7 @@ install_requires = [
     # see environment-prod.yaml for conda environment production installation,
     # see environment-dev.yaml for conda environment dev installation,
     # see requirements.pip for package versions used during recent development
+    'driftwood',
     'mako',
     'matplotlib',
     'netCDF4',

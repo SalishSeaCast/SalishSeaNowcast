@@ -29,4 +29,5 @@ dependencies:
   - angles
   - arrow
   - BeautifulSoup4
+  - driftwood
   - sphinx-bootstrap-theme
