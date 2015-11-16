@@ -367,10 +367,7 @@ class NowcastManager:
         else:
             cmd = ['ssh', host, 'python', '-m']
             config_file = '/home/ubuntu/MEOPAR/nowcast/nowcast.yaml'
-        cmd.extend([
-            'salishsea_tools.nowcast.workers.{}'.format(worker),
-            config_file,
-        ])
+        cmd.extend(['nowcast.workers.{}'.format(worker), config_file])
         if cmd_line_args:
             cmd.extend(cmd_line_args)
         self.logger.info('launching {} worker on {}'.format(worker, host))
