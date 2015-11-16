@@ -31,7 +31,7 @@ import scipy.io as sio
 import zmq
 
 matplotlib.use('Agg')
-from salishsea_tools.nowcast import (
+from nowcast import (
     figures,
     lib,
     research_VENUS,

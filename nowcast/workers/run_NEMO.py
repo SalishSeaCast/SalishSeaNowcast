@@ -1,4 +1,3 @@
-
 # Copyright 2013-2015 The Salish Sea MEOPAR contributors
 # and The University of British Columbia
 
@@ -34,7 +33,8 @@ import zmq
 import salishsea_cmd.api
 import salishsea_cmd.lib
 from salishsea_tools.namelist import namelist2dict
-from salishsea_tools.nowcast import lib
+
+from nowcast import lib
 
 
 worker_name = lib.get_module_name()

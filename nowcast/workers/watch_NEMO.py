@@ -28,8 +28,8 @@ import traceback
 import arrow
 import zmq
 
-from salishsea_tools.nowcast import lib
-from salishsea_tools.nowcast.workers import run_NEMO
+from nowcast import lib
+from nowcast.workers import run_NEMO
 
 
 worker_name = lib.get_module_name()

@@ -32,7 +32,8 @@ import pandas as pd
 import zmq
 
 from salishsea_tools import nc_tools
-from salishsea_tools.nowcast import (
+
+from nowcast import (
     figures,
     lib,
 )

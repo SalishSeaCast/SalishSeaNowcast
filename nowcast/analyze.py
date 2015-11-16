@@ -37,7 +37,7 @@ from salishsea_tools import (
     tidetools,
 )
 
-from salishsea_tools.nowcast import figures
+from nowcast import figures
 
 
 # Paths for model results
