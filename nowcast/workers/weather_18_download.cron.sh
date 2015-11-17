@@ -1,11 +1,13 @@
 # cron script to run Salish Sea NEMO model nowcast weather download worker.
 #
 # usage:
-#   MEOPAR=/data/dlatorne/MEOPAR
-#   NOWCAST_TOOLS=tools/SalishSeaTools/salishsea_tools/nowcast
-#   0 15 * * *  ${MEOPAR}/${NOWCAST_TOOLS}/workers/weather_18_download.cron.sh
+#   NOWCAST=/results/nowcast-sys
+#   WORKERS=tools/SalishSeaNowcast/nowcast/workers
+#   0 16 * * *  ${NOWCAST}/${WORKERS}/weather_18_download.cron.sh
 
-PYTHON=/home/dlatorne/anaconda/envs/nowcast/bin/python
-NOWCAST=/home/dlatorne/public_html/MEOPAR/nowcast
+PYTHON=/results/nowcast-sys/nowcast-env/bin/python
+# NOWCAST=/home/dlatorne/public_html/MEOPAR/nowcast
+# CONFIG=${NOWCAST}/nowcast.yaml
+NOWCAST=/results/nowcast-sys/nowcast
 CONFIG=${NOWCAST}/nowcast.yaml
-${PYTHON} -m salishsea_tools.nowcast.workers.download_weather ${CONFIG} 18
+${PYTHON} -m nowcast.workers.download_weather ${CONFIG} 18
