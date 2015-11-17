@@ -167,9 +167,9 @@ class NowcastWorker(object):
             # Normal termination
             pass
         except:
-            self.logger.critical('unhandled exception:')
-            for line in traceback.format_exc().splitlines():
-                self.logger.error(line)
+            self.logger.critical(
+                'unhandled exception:\n{traceback}'
+                .format(traceback=traceback.format_exc()))
             lib.tell_manager(
                 self.name, 'crash', self.config, self.logger, self.socket)
         self.context.destroy()
