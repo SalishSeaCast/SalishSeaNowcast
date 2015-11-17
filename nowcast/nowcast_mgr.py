@@ -81,7 +81,7 @@ class NowcastManager:
             'download_weather': self._after_download_weather,
             'get_NeahBay_ssh': self._after_get_NeahBay_ssh,
             # 'make_runoff_file': self._after_make_runoff_file,
-            # 'grib_to_netcdf': self._after_grib_to_netcdf,
+            'grib_to_netcdf': self._after_grib_to_netcdf,
             # 'init_cloud': self._after_init_cloud,
             # 'create_compute_node': self._after_create_compute_node,
             # 'set_head_node_ip': self._after_set_head_node_ip,
@@ -333,19 +333,46 @@ class NowcastManager:
                 (self._update_checklist, [worker, 'Neah Bay ssh', payload]),
             ],
         }
-        if 'forecast' in self.config['run_types']:
-            if 'hpc host' in self.config['run']:
-                actions['success forecast'].append(
-                    (self._launch_worker,
-                        ['upload_forcing',
-                            [self.config['run']['hpc host'], 'ssh']])
-                )
-            if 'cloud host' in self.config['run']:
-                actions['success forecast'].append(
-                    (self._launch_worker,
-                        ['upload_forcing',
-                            [self.config['run']['cloud host'], 'ssh']])
-                )
+        for host in ('hpc host', 'cloud host'):
+            if 'forecast' in self.config['run_types']:
+                if host in self.config['run']:
+                    actions['success forecast'].append(
+                        (self._launch_worker,
+                            ['upload_forcing',
+                                [self.config['run'][host], 'ssh']])
+                    )
+        return actions[msg_type]
+
+    def _after_grib_to_netcdf(self, worker, msg_type, payload):
+        """Return list of next step action method(s) and args to take
+        upon receipt of success, failure, or crash message from
+        grib_to_netcdf worker.
+        """
+        actions = {
+            'crash': None,
+            'failure nowcast+': None,
+            'failure forecast2': None,
+            'success nowcast+': [
+                (self._update_checklist, [worker, 'weather forcing', payload]),
+            ],
+            'success forecast2': [
+                (self._update_checklist, [worker, 'weather forcing', payload]),
+            ],
+        }
+        for host in ('hpc host', 'cloud host'):
+            if host in self.config['run']:
+                if 'nowcast' in self.config['run_types']:
+                    actions['success nowcast+'].append(
+                        (self._launch_worker,
+                            ['upload_forcing',
+                                [self.config['run'][host], 'nowcast+']])
+                    )
+                if 'forecast2' in self.config['run_types']:
+                    actions['success forecast2'].append(
+                        (self._launch_worker,
+                            ['upload_forcing',
+                                [self.config['run'][host], 'forecast2']])
+                    )
         return actions[msg_type]
 
     def _update_checklist(self, worker, key, worker_checklist):
