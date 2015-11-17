@@ -504,6 +504,55 @@ class TestAfterGetNeahBaySSH:
         assert actions[1] == expected
 
 
+class TestAfterGRIBtoNetCDF:
+    """Unit tests for the NowcastManager._after_grib_to_netcdf method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast+',
+        'failure forecast2',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        mgr.config = {'run_types': [], 'run': []}
+        actions = mgr._after_grib_to_netcdf(
+            'grib_to_netcdf', msg_type, 'payload')
+        assert actions is None
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nowcast+',
+        'success forecast2',
+    ])
+    def test_update_checklist_on_success(self, msg_type, mgr):
+        mgr.config = {'run_types': [], 'run': []}
+        actions = mgr._after_grib_to_netcdf(
+            'grib_to_netcdf', msg_type, 'payload')
+        expected = (
+            mgr._update_checklist,
+            ['grib_to_netcdf', 'weather forcing', 'payload'],
+        )
+        assert actions[0] == expected
+
+    @pytest.mark.parametrize('host_type, host_name, run_type', [
+        ('hpc host', 'orcinus-nowcast', 'nowcast+'),
+        ('hpc host', 'orcinus-nowcast', 'forecast2'),
+        ('cloud host', 'west.cloud-nowcast', 'nowcast+'),
+        ('cloud host', 'west.cloud-nowcast', 'forecast2'),
+    ])
+    def test_success_launch_upload_forcing_worker(
+        self, host_type, host_name, run_type, mgr,
+    ):
+        mgr.config = {
+            'run_types': ['nowcast', 'forecast2'],
+            'run': {host_type: host_name}
+        }
+        actions = mgr._after_grib_to_netcdf(
+            'grib_to_netcdf', 'success {}'.format(run_type), 'payload')
+        expected = (
+            mgr._launch_worker, ['upload_forcing', [host_name, run_type]],
+        )
+        assert actions[1] == expected
+
+
 class TestUpdateChecklist:
     """Unit tests for the NowcastManager._update_checklist method.
     """
