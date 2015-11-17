@@ -30,13 +30,6 @@ def worker_module():
     return grib_to_netcdf
 
 
-## TODO: Move to a conftest.py module
-@pytest.fixture
-def lib_module():
-    from nowcast import lib
-    return lib
-
-
 @patch.object(worker_module(), 'NowcastWorker')
 class TestMain:
     """Unit tests for main() function.

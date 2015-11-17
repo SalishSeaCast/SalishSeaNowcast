@@ -299,27 +299,25 @@ class TestNowcastWorkerDoWork:
         m_tell_mgr.assert_called_once_with(
             'name', 'success', m_config, m_logger, m_socket, 'checklist')
 
-    def test_failure_func(self, worker):
-        from nowcast import lib
+    def test_failure_func(self, worker, lib_module):
         worker.parsed_args = m_parsed_args = Mock(name='parsed_args')
         worker.config = Mock(name='config')
         worker.logger = Mock(name='logger')
         worker.socket = Mock(name='socket')
         worker.worker_func = Mock(
-            name='worker_func', side_effect=lib.WorkerError)
+            name='worker_func', side_effect=lib_module.WorkerError)
         worker.failure = Mock(name='failure')
         with patch.object(worker_module().lib, 'tell_manager'):
             worker._do_work()
         worker.failure.assert_called_once_with(m_parsed_args)
 
-    def test_failure_tell_manager(self, worker):
-        from nowcast import lib
+    def test_failure_tell_manager(self, worker, lib_module):
         worker.parsed_args = Mock(name='parsed_args')
         worker.config = m_config = Mock(name='config')
         worker.logger = m_logger = Mock(name='logger')
         worker.socket = m_socket = Mock(name='socket')
         worker.worker_func = Mock(
-            name='worker_func', side_effect=lib.WorkerError)
+            name='worker_func', side_effect=lib_module.WorkerError)
         worker.failure = Mock(name='failure', return_value='failure')
         p_tell_mgr = patch.object(worker_module().lib, 'tell_manager')
         with p_tell_mgr as m_tell_mgr:
