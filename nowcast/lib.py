@@ -456,7 +456,7 @@ def get_web_data(
         requests.exceptions.HTTPError,
         socket.error,
     ) as e:
-        logger.debug('received {0.message} from {url}'.format(e, url=url))
+        logger.debug('received {0} from {url}'.format(e, url=url))
         delay = first_retry_delay
         retries = 0
         while delay <= retry_time_limit:
@@ -472,7 +472,7 @@ def get_web_data(
                 socket.error,
             ) as e:
                 logger.debug(
-                    'received {0.message} from {url}'.format(e, url=url))
+                    'received {0} from {url}'.format(e, url=url))
                 delay *= retry_backoff_factor
                 retries += 1
         logger.error(
