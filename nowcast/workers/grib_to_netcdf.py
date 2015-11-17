@@ -283,10 +283,19 @@ def _rotate_grib_wind(config, fcst_section_hrs):
                 pass
             # Consolidate u and v wind component values into one file
             for fpattern in ['*UGRD*', '*VGRD*']:
-                fn = glob.glob(
-                    os.path.join(GRIBdir, day_fcst, sfhour, fpattern))
-                if os.stat(fn[0]).st_size == 0:
-                    logger.critical('Problem, 0 size file {}'.format(fn[0]))
+                pattern = os.path.join(GRIBdir, day_fcst, sfhour, fpattern)
+                fn = glob.glob(pattern)
+                try:
+                    if os.stat(fn[0]).st_size == 0:
+                        logger.critical(
+                            'Problem: 0 size file {}'.format(fn[0]))
+                        raise lib.WorkerError
+                except IndexError:
+                    logger.critical(
+                        'No GRIB files match pattern; '
+                        'a previous download may have failed: {}'
+                        .format(pattern)
+                    )
                     raise lib.WorkerError
                 cmd = [wgrib2, fn[0], '-append', '-grib', outuv]
                 lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
