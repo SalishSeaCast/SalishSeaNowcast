@@ -22,13 +22,6 @@ import arrow
 import pytest
 
 
-## TODO: Move to a conftest.py module
-@pytest.fixture
-def lib_module():
-    from nowcast import lib
-    return lib
-
-
 class TestArrowDate:
     """Unit tests for arrow_date() function.
     """
