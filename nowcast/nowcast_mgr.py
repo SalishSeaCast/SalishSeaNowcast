@@ -66,6 +66,7 @@ class NowcastManager:
     def __init__(self):
         self.name = lib.get_module_name()
         self.logger = logging.getLogger(self.name)
+        self.checklist_logger = logging.getLogger('checklist')
         self.worker_loggers = {}
         self.context = zmq.Context()
         self.checklist = {}
@@ -144,6 +145,18 @@ class NowcastManager:
         self.logger.info('running in process {}'.format(os.getpid()))
         self.logger.debug(
             'read config from {.config_file}'.format(self.parsed_args))
+        self.checklist_logger.setLevel(logging.INFO)
+        formatter = logging.Formatter(
+            self.config['logging']['message_format'],
+            datefmt=self.config['logging']['datetime_format'])
+        log_file = os.path.join(
+            os.path.dirname(self.config['config_file']),
+            self.config['logging']['checklist_log_file'])
+        handler = logging.handlers.RotatingFileHandler(
+            log_file, backupCount=self.config['logging']['backup_count'])
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(formatter)
+        self.checklist_logger.addHandler(handler)
 
     def _install_signal_handlers(self):
         """Install signal handlers for hangup, interrupt, and terminate signals.

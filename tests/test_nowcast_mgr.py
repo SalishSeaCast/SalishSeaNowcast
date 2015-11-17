@@ -198,7 +198,15 @@ class TestPrepLogging:
     @patch.object(mgr_module().lib, 'configure_logging')
     def test_prep_logging(self, m_config_logging, mgr):
         mgr.parsed_args = Mock(name='parsed_args')
-        mgr.config = Mock(name='config')
+        mgr.config = {
+            'config_file': 'nowcast.yaml',
+            'logging': {
+                'checklist_log_file': 'nowcast_checklist.log',
+                'message_format': '%(asctime)s %(levelname)s %(message)s',
+                'datetime_format': '%Y-%m-%d %H:%M:%S',
+                'backup_count': 7,
+            }
+        }
         mgr._prep_logging()
         m_config_logging.assert_called_once_with(
             mgr.config, mgr.logger, mgr.parsed_args.debug)
@@ -206,7 +214,15 @@ class TestPrepLogging:
     @patch.object(mgr_module().lib, 'configure_logging')
     def test_prep_logging_info_msgs(self, m_config_logging, mgr):
         mgr.parsed_args = Mock(name='parsed_args')
-        mgr.config = Mock(name='config')
+        mgr.config = {
+            'config_file': 'nowcast.yaml',
+            'logging': {
+                'checklist_log_file': 'nowcast_checklist.log',
+                'message_format': '%(asctime)s %(levelname)s %(message)s',
+                'datetime_format': '%Y-%m-%d %H:%M:%S',
+                'backup_count': 7,
+            }
+        }
         mgr.logger = Mock(name='logger')
         mgr._prep_logging()
         assert mgr.logger.info.call_count == 1
@@ -214,7 +230,15 @@ class TestPrepLogging:
     @patch.object(mgr_module().lib, 'configure_logging')
     def test_prep_logging_debug_msgs(self, m_config_logging, mgr):
         mgr.parsed_args = Mock(name='parsed_args')
-        mgr.config = Mock(name='config')
+        mgr.config = {
+            'config_file': 'nowcast.yaml',
+            'logging': {
+                'checklist_log_file': 'nowcast_checklist.log',
+                'message_format': '%(asctime)s %(levelname)s %(message)s',
+                'datetime_format': '%Y-%m-%d %H:%M:%S',
+                'backup_count': 7,
+            }
+        }
         mgr.logger = Mock(name='logger')
         mgr._prep_logging()
         assert mgr.logger.debug.call_count == 1
