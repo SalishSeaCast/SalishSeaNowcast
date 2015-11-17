@@ -173,7 +173,7 @@ class NowcastManager:
                 self.logger.info(
                     'checklist:\n{}'.format(pprint.pformat(self.checklist)))
         except FileNotFoundError as e:
-            self.logger.warning('checklist load failed: {.strerror}'.format(e))
+            self.logger.warning('checklist load failed: {}'.format(e))
             self.logger.warning('running with empty checklist')
 
     def _process_messages(self):
