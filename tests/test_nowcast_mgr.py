@@ -504,6 +504,29 @@ class TestAfterGetNeahBaySSH:
         assert actions[1] == expected
 
 
+class TestAfterMakeRunoffFile:
+    """Unit tests for the NowcastManager._after_make_runoff_file method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        mgr.config = {'run_types': [], 'run': []}
+        actions = mgr._after_make_runoff_file(
+            'make_runoff_file', msg_type, 'payload')
+        assert actions is None
+
+    def test_update_checklist_on_success(self, mgr):
+        mgr.config = {'run_types': [], 'run': []}
+        actions = mgr._after_make_runoff_file(
+            'make_runoff_file', 'success', 'payload')
+        expected = (
+            mgr._update_checklist, ['make_runoff_file', 'rivers', 'payload'],
+        )
+        assert actions[0] == expected
+
+
 class TestAfterGRIBtoNetCDF:
     """Unit tests for the NowcastManager._after_grib_to_netcdf method.
     """
