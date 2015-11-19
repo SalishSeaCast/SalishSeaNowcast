@@ -80,7 +80,7 @@ class NowcastManager:
             # worker name: method to calculate next step action(s)
             'download_weather': self._after_download_weather,
             'get_NeahBay_ssh': self._after_get_NeahBay_ssh,
-            # 'make_runoff_file': self._after_make_runoff_file,
+            'make_runoff_file': self._after_make_runoff_file,
             'grib_to_netcdf': self._after_grib_to_netcdf,
             # 'init_cloud': self._after_init_cloud,
             # 'create_compute_node': self._after_create_compute_node,
@@ -314,7 +314,7 @@ class NowcastManager:
         return actions[msg_type]
 
     def _after_get_NeahBay_ssh(self, worker, msg_type, payload):
-        """Return list of next step action method(s) and args to take
+        """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         get_NeahBay_ssh worker.
         """
@@ -343,8 +343,20 @@ class NowcastManager:
                     )
         return actions[msg_type]
 
+    def _after_make_runoff_file(self, worker, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        make_runoff_file worker.
+        """
+        actions = {
+            'crash': None,
+            'failure': None,
+            'success': [(self._update_checklist, [worker, 'rivers', payload])],
+        }
+        return actions[msg_type]
+
     def _after_grib_to_netcdf(self, worker, msg_type, payload):
-        """Return list of next step action method(s) and args to take
+        """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         grib_to_netcdf worker.
         """
