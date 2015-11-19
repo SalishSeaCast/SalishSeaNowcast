@@ -17,8 +17,6 @@
 Blends EC Data for the Fraser River at Hope with climatology
 for all other rivers and generates runoff file.
 """
-from __future__ import division
-
 import logging
 import os
 
