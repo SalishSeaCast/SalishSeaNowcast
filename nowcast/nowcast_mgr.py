@@ -87,7 +87,7 @@ class NowcastManager:
             # 'make_forcing_links': self._after_make_forcing_links,
             # 'run_NEMO': self._after_run_NEMO,
             # 'watch_NEMO': self._after_watch_NEMO,
-            # 'download_results': self._after_download_results,
+            'download_results': self._after_download_results,
             # 'make_plots': self._after_make_plots,
             # 'make_site_page': self._after_make_site_page,
             # 'push_to_web': self._after_push_to_web,
@@ -379,6 +379,28 @@ class NowcastManager:
                             ['upload_forcing',
                                 [self.config['run'][host], 'forecast2']])
                     )
+        return actions[msg_type]
+
+    def _after_download_results(self, worker, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        download_results worker.
+        """
+        actions = {
+            'crash': None,
+            'failure nowcast': None,
+            'failure forecast': None,
+            'failure forecast2': None,
+            'success nowcast': [
+                (self._update_checklist, [worker, 'results files', payload]),
+            ],
+            'success forecast': [
+                (self._update_checklist, [worker, 'results files', payload]),
+            ],
+            'success forecast2': [
+                (self._update_checklist, [worker, 'results files', payload]),
+            ],
+        }
         return actions[msg_type]
 
     def _update_checklist(self, worker, key, worker_checklist):

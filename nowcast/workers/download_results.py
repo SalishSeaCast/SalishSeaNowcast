@@ -16,101 +16,65 @@
 """Salish Sea NEMO nowcast worker that downloads the results files
 from a nowcast run on the HPC/cloud facility to archival storage.
 """
-import argparse
 import glob
 import logging
 import os
-import traceback
 
 import arrow
-import zmq
 
-from nowcast import lib
+from .. import lib
+from ..nowcast_worker import NowcastWorker
 
 
 worker_name = lib.get_module_name()
-
 logger = logging.getLogger(worker_name)
-
-context = zmq.Context()
 
 
 def main():
-    # Prepare the worker
-    base_parser = lib.basic_arg_parser(
-        worker_name, description=__doc__, add_help=False)
-    parser = configure_argparser(
-        prog=base_parser.prog,
-        description=base_parser.description,
-        parents=[base_parser],
+    worker = NowcastWorker(worker_name, description=__doc__)
+    salishsea_today = arrow.now('Canada/Pacific').floor('day')
+    worker.arg_parser.add_argument(
+        'host_name',
+        help='Name of the host to download results files from',
     )
-    parsed_args = parser.parse_args()
-    config = lib.load_config(parsed_args.config_file)
-    lib.configure_logging(config, logger, parsed_args.debug)
-    logger.debug('running in process {}'.format(os.getpid()))
-    logger.debug('read config from {.config_file}'.format(parsed_args))
-    lib.install_signal_handlers(logger, context)
-    socket = lib.init_zmq_req_rep_worker(context, config, logger)
-    # Do the work
-    try:
-        checklist = download_results(
-            parsed_args.host_name, parsed_args.run_type, parsed_args.run_date,
-            config)
-        logger.info(
-            '{0.run_type} results files from {0.host_name} downloaded'
-            .format(parsed_args), extra={
-                'run_type': parsed_args.run_type,
-                'host_name': parsed_args.host_name,
-                'date': parsed_args.run_date,
-            })
-        # Exchange success messages with the nowcast manager process
-        msg_type = 'success {.run_type}'.format(parsed_args)
-        lib.tell_manager(
-            worker_name, msg_type, config, logger, socket, checklist)
-    except lib.WorkerError:
-        logger.critical(
-            '{0.run_type} results files download from {0.host_name} failed'
-            .format(parsed_args), extra={
-                'run_type': parsed_args.run_type,
-                'host_name': parsed_args.host_name,
-                'date': parsed_args.run_date,
-            })
-        # Exchange failure messages with the nowcast manager process
-        msg_type = 'failure {.run_type}'.format(parsed_args)
-        lib.tell_manager(worker_name, msg_type, config, logger, socket)
-    except SystemExit:
-        # Normal termination
-        pass
-    except:
-        logger.critical('unhandled exception:')
-        for line in traceback.format_exc().splitlines():
-            logger.error(line)
-        # Exchange crash messages with the nowcast manager process
-        lib.tell_manager(worker_name, 'crash', config, logger, socket)
-    # Finish up
-    context.destroy()
-    logger.debug('task completed; shutting down')
-
-
-def configure_argparser(prog, description, parents):
-    parser = argparse.ArgumentParser(
-        prog=prog, description=description, parents=parents)
-    parser.add_argument(
-        'host_name', help='Name of the host to download results files from')
-    parser.add_argument(
+    worker.arg_parser.add_argument(
         'run_type', choices=set(('nowcast', 'forecast', 'forecast2')),
-        help='Type of run to download results files from.'
+        help='Type of run to download results files from.',
     )
-    parser.add_argument(
+    worker.arg_parser.add_argument(
         '--run-date', type=lib.arrow_date,
-        default=arrow.now().date(),
+        default=salishsea_today,
         help='''
         Date of the run to download results files from;
         use YYYY-MM-DD format.
-        Defaults to %(default)s.
-        ''',
+        Defaults to {}.
+        '''.format(salishsea_today.format('YYYY-MM-DD')),
     )
-    return parser
+    worker.run(download_results, success, failure)
+
+
+def success(parsed_args):
+    logger.info(
+        '{0.run_type} results files from {0.host_name} downloaded'
+        .format(parsed_args), extra={
+            'run_type': parsed_args.run_type,
+            'host_name': parsed_args.host_name,
+            'date': parsed_args.run_date,
+        })
+    msg_type = '{} {}'.format('success', parsed_args.run_type)
+    return msg_type
+
+
+def failure(parsed_args):
+    logger.critical(
+        '{0.run_type} results files download from {0.host_name} failed'
+        .format(parsed_args), extra={
+            'run_type': parsed_args.run_type,
+            'host_name': parsed_args.host_name,
+            'date': parsed_args.run_date,
+        })
+    msg_type = '{} {}'.format('failure', parsed_args.run_type)
+    return msg_type
 
 
 def download_results(host_name, run_type, run_date, config):
