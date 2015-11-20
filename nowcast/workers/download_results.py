@@ -77,7 +77,10 @@ def failure(parsed_args):
     return msg_type
 
 
-def download_results(host_name, run_type, run_date, config):
+def download_results(parsed_args, config):
+    host_name = parsed_args.host_name
+    run_date = parsed_args.run_date
+    run_type = parsed_args.run_type
     host = config['run'][host_name]
     results_dir = run_date.strftime('%d%b%y').lower()
     src_dir = os.path.join(host['results'][run_type], results_dir)
