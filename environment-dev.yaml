@@ -9,6 +9,7 @@
 #    $ source activate nowcast
 #    $ pip install --editable SalishSeaTools/
 #    $ pip install --editable SalishSeaCmd/
+#    $ pip install --editable SalishSeaNowcast/
 
 name: nowcast
 dependencies:
