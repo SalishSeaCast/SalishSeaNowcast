@@ -37,7 +37,7 @@ logger = logging.getLogger(worker_name)
 
 #: Rivers runoff forcing file name template
 FILENAME_TMPL = {'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
-                 'long': 'RLonFraCElse_{:y&Ym%md%d}.nc'}
+                 'long': 'RLonFraCElse_{:y%Ym%md%d}.nc'}
 
 
 def main():
@@ -163,16 +163,21 @@ def _fraser_climatology(config):
 
 def _fraser_correction(
     pd, fraserflux, yesterday, afterHope, NonFraser, fraserratio, otherratio,
-    runoff
+    runoff, riverdepth
 ):
     """For the Fraser Basin only, replace basic values with the new
     climatology after Hope and the observed values for Hope.
-    Note, we are changing runoff only and not using/changing river depth.
+    Note, we are changing runoff and ensuring river depth is not 0.
     """
     for key, river in pd.items():
         if "Fraser" in key:
             flux = _calculate_daily_flow(yesterday, afterHope) + fraserflux
             subarea = fraserratio
+            if river['depth'] == 0:
+                river['depth'] = 3
+        elif "Zero" in key:
+            flux = 0.
+            subarea = 1.  # to avoid division by zero
         else:
             flux = _calculate_daily_flow(yesterday, NonFraser)
             subarea = otherratio
@@ -191,7 +196,7 @@ def _combine_runoff(length, flow_at_hope, yesterday, afterHope,
     pd = rivertools.get_watershed_prop_dict('fraser', Fraser_River=length)
     runoff = _fraser_correction(
         pd, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-        otherratio, driverflow)
+        otherratio, driverflow, riverdepth)
     # set up filename to follow NEMO conventions
     filename = FILENAME_TMPL[length].format(yesterday.date())
     filepath = os.path.join(directory, filename)
@@ -200,6 +205,7 @@ def _combine_runoff(length, flow_at_hope, yesterday, afterHope,
         'File written to {directory}/{filename}'
         .format(directory=directory, filename=filename))
     return filepath
+
 
 def _write_file(filepath, yesterday, flow, lat, lon, riverdepth):
     """Create the rivers runoff netCDF4 file.
