@@ -36,7 +36,8 @@ logger = logging.getLogger(worker_name)
 
 
 #: Rivers runoff forcing file name template
-FILENAME_TMPL = 'RFraserCElse_{:y%Ym%md%d}.nc'
+FILENAME_TMPL = {'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
+                 'long': 'RLonFraCElse_{:y&Ym%md%d}.nc'}
 
 
 def main():
@@ -86,20 +87,18 @@ def make_runoff_file(parsed_args, config):
         .format(yesterday=yesterday.format('YYYY-MM-DD')))
     # Get Fraser Watershed Climatology without Fraser
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
-    # Calculate combined runoff
-    pd = rivertools.get_watershed_prop_dict('fraser')
-    runoff = _fraser_correction(
-        pd, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-        otherratio, driverflow)
-    # and make the file
+    # Calculate combined runoff for each case and write files
     directory = config['rivers']['rivers_dir']
-    # set up filename to follow NEMO conventions
-    filename = FILENAME_TMPL.format(yesterday.date())
-    filepath = os.path.join(directory, filename)
-    _write_file(filepath, yesterday, runoff, lat, lon, riverdepth)
-    logger.debug(
-        'File written to {directory}/{filename}'
-        .format(directory=directory, filename=filename))
+    filepath = {}
+    filepath['short'] = _combine_runoff(
+        'short', flow_at_hope, yesterday, afterHope,
+        nonFraser, fraserratio, otherratio, driverflow, lat,
+        lon, riverdepth, directory)
+    filepath['long'] = _combine_runoff(
+        'long', flow_at_hope, yesterday, afterHope,
+        nonFraser, fraserratio, otherratio, driverflow, lat,
+        lon, riverdepth, directory)
+
     return filepath
 
 
@@ -184,6 +183,23 @@ def _fraser_correction(
             river['depth'], runoff, np.empty_like(runoff))[0]
     return runoff
 
+
+def _combine_runoff(length, flow_at_hope, yesterday, afterHope,
+                    nonFraser, fraserratio, otherratio, driverflow, lat,
+                    lon, riverdepth, directory):
+
+    pd = rivertools.get_watershed_prop_dict('fraser', Fraser_River=length)
+    runoff = _fraser_correction(
+        pd, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
+        otherratio, driverflow)
+    # set up filename to follow NEMO conventions
+    filename = FILENAME_TMPL[length].format(yesterday.date())
+    filepath = os.path.join(directory, filename)
+    _write_file(filepath, yesterday, runoff, lat, lon, riverdepth)
+    logger.debug(
+        'File written to {directory}/{filename}'
+        .format(directory=directory, filename=filename))
+    return filepath
 
 def _write_file(filepath, yesterday, flow, lat, lon, riverdepth):
     """Create the rivers runoff netCDF4 file.
