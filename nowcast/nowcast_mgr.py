@@ -82,7 +82,7 @@ class NowcastManager:
             'get_NeahBay_ssh': self._after_get_NeahBay_ssh,
             'make_runoff_file': self._after_make_runoff_file,
             'grib_to_netcdf': self._after_grib_to_netcdf,
-            # 'upload_forcing': self._after_upload_forcing,
+            'upload_forcing': self._after_upload_forcing,
             # 'upload_all_files': self._after_upload_all_files,
             # 'make_forcing_links': self._after_make_forcing_links,
             # 'run_NEMO': self._after_run_NEMO,
@@ -379,6 +379,46 @@ class NowcastManager:
                             ['upload_forcing',
                                 [self.config['run'][host], 'forecast2']])
                     )
+        return actions[msg_type]
+
+    def _after_upload_forcing(self, worker, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        upload_forcing worker.
+        """
+        try:
+            host_name = payload.keys()[0]
+        except (AttributeError, IndexError):
+            # Malformed payload of no host name in payload;
+            # upload_forcing worker probably crashed
+            return None
+        actions = {
+            'crash': None,
+            'failure nowcast+': None,
+            'failure forecast2': None,
+            'failure ssh': None,
+            'success nowcast+': [
+                (self._update_checklist, [worker, 'forcing upload', payload]),
+            ],
+            'success forecast2': [
+                (self._update_checklist, [worker, 'forcing upload', payload]),
+            ],
+            'success ssh': [
+                (self._update_checklist, [worker, 'forcing upload', payload]),
+            ],
+        }
+        run_types = [
+            # (upload_forcing, make_forcing_links)
+            ('nowcast', 'nowcast+'),
+            ('forecast', 'ssh'),
+            ('forecast2', 'forecast2'),
+        ]
+        for run_type, upload_run_type in run_types:
+            if run_type in self.config['run_types']:
+                actions['success {}'.format(upload_run_type)].append(
+                    (self._launch_worker,
+                        ['make_forcing_links', [host_name, upload_run_type]])
+                )
         return actions[msg_type]
 
     def _after_download_results(self, worker, msg_type, payload):

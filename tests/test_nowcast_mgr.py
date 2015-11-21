@@ -576,6 +576,42 @@ class TestAfterGRIBtoNetCDF:
         assert actions[1] == expected
 
 
+class TestAfterUploadForcing:
+    """Unit tests for the NowcastManager._after_upload_forcing method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast+',
+        'failure forecast2',
+        'failure ssh',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        mgr.config = {'run_types': [], 'run': []}
+        actions = mgr._after_upload_forcing(
+            'upload_forcing', msg_type, 'payload')
+        assert actions is None
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nowcast+',
+        'success forecast2',
+        'success ssh',
+    ])
+    def test_update_checklist_on_success(self, msg_type, mgr):
+        mgr.config = {'run_types': [], 'run': []}
+        actions = mgr._after_upload_forcing(
+            'upload_forcing', msg_type, 'payload')
+        expected = (
+            mgr._update_checklist,
+            ['upload_forcing', 'forcing upload', 'payload'],
+        )
+        assert actions[0] == expected
+
+    def test_success_launch_make_forcing_links(self):
+        mgr.config = {
+            'run_types': ['nowcast', 'forecast', 'forecast2'],
+        }
+
+
 class TestDownloadResults:
     """Unit tests for the NowcastManager._afterdownload_results method.
     """
