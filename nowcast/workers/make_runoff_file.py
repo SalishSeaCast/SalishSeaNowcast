@@ -35,9 +35,11 @@ worker_name = lib.get_module_name()
 logger = logging.getLogger(worker_name)
 
 
-#: Rivers runoff forcing file name template
-FILENAME_TMPL = {'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
-                 'long': 'RLonFraCElse_{:y%Ym%md%d}.nc'}
+#: Rivers runoff forcing file name templates
+FILENAME_TMPLS = {
+    'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
+    'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
+}
 
 
 def main():
