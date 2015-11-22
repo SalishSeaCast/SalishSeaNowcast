@@ -387,7 +387,7 @@ class NowcastManager:
         upload_forcing worker.
         """
         try:
-            host_name = payload.keys()[0]
+            host_name = list(payload.keys())[0]
         except (AttributeError, IndexError):
             # Malformed payload of no host name in payload;
             # upload_forcing worker probably crashed
