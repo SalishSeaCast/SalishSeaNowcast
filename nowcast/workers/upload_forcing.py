@@ -120,11 +120,11 @@ def upload_forcing(parsed_args, config):
         ssh_client.close()
         return {host_name: True}
     # Rivers runoff
-    filename = make_runoff_file.FILENAME_TMPL.format(
-        run_date.replace(days=-1).date())
-    localpath = os.path.join(config['rivers']['rivers_dir'], filename)
-    remotepath = os.path.join(host['rivers_dir'], filename)
-    _upload_file(sftp_client, host_name, localpath, remotepath)
+    for tmpl in make_runoff_file.FILENAME_TMPLS.values():
+        filename = tmpl.format(run_date.replace(days=-1).date())
+        localpath = os.path.join(config['rivers']['rivers_dir'], filename)
+        remotepath = os.path.join(host['rivers_dir'], filename)
+        _upload_file(sftp_client, host_name, localpath, remotepath)
     # Weather
     if run_type == 'nowcast+':
         weather_start = 0
