@@ -598,18 +598,46 @@ class TestAfterUploadForcing:
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
+        payload = {'west.cloud': True}
         actions = mgr._after_upload_forcing(
-            'upload_forcing', msg_type, 'payload')
+            'upload_forcing', msg_type, payload)
         expected = (
             mgr._update_checklist,
-            ['upload_forcing', 'forcing upload', 'payload'],
+            ['upload_forcing', 'forcing upload', payload],
         )
         assert actions[0] == expected
 
-    def test_success_launch_make_forcing_links(self):
+    @pytest.mark.parametrize('msg_type, upload_run_type', [
+        ('success nowcast+', 'nowcast+'),
+        ('success forecast2', 'forecast2'),
+        ('success ssh', 'ssh'),
+    ])
+    def test_success_launch_make_forcing_links(
+        self, msg_type, upload_run_type, mgr,
+    ):
         mgr.config = {
             'run_types': ['nowcast', 'forecast', 'forecast2'],
         }
+        payload = {'west.cloud': True}
+        actions = mgr._after_upload_forcing(
+            'upload_forcing', msg_type, payload)
+        expected = (
+            mgr._launch_worker,
+            ['make_forcing_links', ['west.cloud', upload_run_type]]
+        )
+        assert actions[1] == expected
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nowcast+',
+        'success forecast2',
+        'success ssh',
+    ])
+    def test_success_run_type_disabled(self, msg_type, mgr):
+        mgr.config = {'run_types': []}
+        payload = {'west.cloud': True}
+        actions = mgr._after_upload_forcing(
+            'upload_forcing', msg_type, payload)
+        assert len(actions) == 1
 
 
 class TestDownloadResults:
