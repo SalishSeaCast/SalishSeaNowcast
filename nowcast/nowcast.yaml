@@ -4,35 +4,35 @@
 checklist file: /results/nowcast-sys/nowcast/nowcast_checklist.yaml
 
 # Python interpreter in environment with all dependencies installed
-python: /home/dlatorne/anaconda/envs/nowcast/bin/python
+python: /results/nowcast-sys/nowcast-env/bin/python
 
 # Filesystem group name to use for ownership of newly created files
 file group: sallen
 
-bathymetry: /data/dlatorne/MEOPAR/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
+bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
 
 rivers:
   # River name: wateroffice.ec.gc.ca station number
   Fraser: 08MF005
   # Destination directory for river runoff forcing file
-  rivers_dir: /ocean/sallen/allen/research/MEOPAR/Rivers/
+  rivers_dir: /results/forcing/rivers/
   # File that describes Fraser River climatology separation from measured
   # flow at Hope
-  Fraser climatology: /ocean/sallen/allen/research/MEOPAR/Tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
+  Fraser climatology: /results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
   # File containing daily average Fraser river flow at Hope
   ECget Fraser flow: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
   # Monthly climatology
-  monthly climatology: /ocean/sallen/allen/research/MEOPAR/nemo-forcing/rivers/rivers_month.nc
+  monthly climatology: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
 
 ssh:
   # Destination directory for Neah Bay sea surface height open boundary files
-  ssh_dir: /ocean/nsoontie/MEOPAR/sshNeahBay/
+  ssh_dir: /results/forcing/sshNeahBay/
 
 weather:
   # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
-  GRIB_dir: /ocean/sallen/allen/research/MEOPAR/GRIB/
+  GRIB_dir: /results/forcing/atmospheric/GEM2.5/GRIB/
   # Destination directory for NEMO forcing files generated from GRIB2 files
-  ops_dir: /ocean/sallen/allen/research/MEOPAR/Operational/
+  ops_dir: /results/forcing/atmospheric/GEM2.5/operational/
   # Location of wgrib2 executable
   wgrib2: /ocean/sallen/allen/research/MEOPAR/private-tools/grib2/wgrib2/wgrib2
   # Location of Pramod Thupaki's grid_defn.pl script
@@ -47,6 +47,11 @@ run_types:
   - forecast2
 
 run:
+  results archive:
+    nowcast: /results/SalishSea/nowcast/
+    forecast: /results/SalishSea/forecast/
+    forecast2: /results/SalishSea/forecast2/
+
   # If the `cloud host` key is present, the cloud will be prepared
   # and the nowcast and forecast runs executed on it automatically.
   #
@@ -111,11 +116,6 @@ run:
       nowcast: /home/dlatorne/MEOPAR/SalishSea/nowcast/
       forecast: /home/dlatorne/MEOPAR/SalishSea/forecast/
       forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
-
-  results archive:
-    nowcast: /data/dlatorne/MEOPAR/SalishSea/nowcast/
-    forecast: /ocean/sallen/allen/research/MEOPAR/SalishSea/forecast/
-    forecast2: /ocean/sallen/allen/research/MEOPAR/SalishSea/forecast2/
 
 
 web:
