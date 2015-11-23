@@ -42,8 +42,8 @@ from nowcast import figures
 
 # Paths for model results
 paths = {'nowcast': '/data/dlatorne/MEOPAR/SalishSea/nowcast/',
-         'forecast': '/ocean/sallen/allen/research/MEOPAR/SalishSea/forecast/',
-         'forecast2': '/ocean/sallen/allen/research/MEOPAR/SalishSea/forecast2/'}
+         'forecast': '/results/SalishSea/forecast/',
+         'forecast2': '/results/SalishSea/forecast2/'}
 
 # Colours for plots
 colours = {'nowcast': 'DodgerBlue',
