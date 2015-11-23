@@ -200,7 +200,7 @@ def _combine_runoff(length, flow_at_hope, yesterday, afterHope,
         pd, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
         otherratio, driverflow, riverdepth)
     # set up filename to follow NEMO conventions
-    filename = FILENAME_TMPL[length].format(yesterday.date())
+    filename = FILENAME_TMPLS[length].format(yesterday.date())
     filepath = os.path.join(directory, filename)
     _write_file(filepath, yesterday, runoff, lat, lon, riverdepth)
     logger.debug(
