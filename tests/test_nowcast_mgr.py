@@ -640,6 +640,38 @@ class TestAfterUploadForcing:
         assert len(actions) == 1
 
 
+class TestAfterMakeForcingLinks:
+    """Unit tests for the NowcastManager._after_make_forcing_links method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast+',
+        'failure forecast2',
+        'failure ssh',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        mgr.config = {'run_types': [], 'run': []}
+        actions = mgr._after_make_forcing_links(
+            'make_forcing_links', msg_type, 'payload')
+        assert actions is None
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nowcast+',
+        'success forecast2',
+        'success ssh',
+    ])
+    def test_update_checklist_on_success(self, msg_type, mgr):
+        mgr.config = {'run_types': [], 'run': []}
+        payload = {'west.cloud': True}
+        actions = mgr._after_make_forcing_links(
+            'make_forcing_links', msg_type, payload)
+        expected = (
+            mgr._update_checklist,
+            ['make_forcing_links', 'forcing links', payload],
+        )
+        assert actions[0] == expected
+
+
 class TestDownloadResults:
     """Unit tests for the NowcastManager._afterdownload_results method.
     """
