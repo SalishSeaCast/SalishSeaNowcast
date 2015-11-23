@@ -124,7 +124,7 @@ def load_VENUS(station):
     response = requests.get(url, params=params)
 
     # Parse data
-    fakefile = StringIO(response.content)
+    fakefile = StringIO(response.text)
     data = pd.read_csv(
         fakefile, delimiter=' ,', skiprows=17,
         names=[
