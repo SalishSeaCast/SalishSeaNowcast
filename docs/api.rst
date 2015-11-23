@@ -14,32 +14,32 @@
 .. limitations under the License.
 
 
-*********************************************
-:py:mod:`salishsea_tools.nowcast` Package API
-*********************************************
+**************************************
+:py:mod:`SalishSeaNowcast` Package API
+**************************************
 
-.. _salishsea_tools.nowcast.figures:
+.. _nowcast.figures:
 
 :py:mod:`nowcast.figures` Module
 ================================
 
-.. automodule:: salishsea_tools.nowcast.figures
+.. automodule:: nowcast.figures
     :members:
 
 
-.. _salishsea_tools.nowcast.lib:
+.. _nowcast.lib:
 
 :py:mod:`nowcast.lib` Module
 ============================
 
-.. automodule:: salishsea_tools.nowcast.lib
+.. automodule:: nowcast.lib
     :members:
 
 
-.. _salishsea_tools.nowcast.nowcast_worker:
+.. _nowcast.nowcast_worker:
 
 :py:mod:`nowcast.nowcast_worker` Module
 =======================================
 
-.. automodule:: salishsea_tools.nowcast.nowcast_worker
+.. automodule:: nowcast.nowcast_worker
     :members:
