@@ -84,7 +84,7 @@ class NowcastManager:
             'grib_to_netcdf': self._after_grib_to_netcdf,
             'upload_forcing': self._after_upload_forcing,
             # 'upload_all_files': self._after_upload_all_files,
-            # 'make_forcing_links': self._after_make_forcing_links,
+            'make_forcing_links': self._after_make_forcing_links,
             # 'run_NEMO': self._after_run_NEMO,
             # 'watch_NEMO': self._after_watch_NEMO,
             'download_results': self._after_download_results,
@@ -419,6 +419,28 @@ class NowcastManager:
                     (self._launch_worker,
                         ['make_forcing_links', [host_name, upload_run_type]])
                 )
+        return actions[msg_type]
+
+    def _after_make_forcing_links(self, worker, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        make_forcing_links worker.
+        """
+        actions = {
+            'crash': None,
+            'failure nowcast+': None,
+            'failure forecast2': None,
+            'failure ssh': None,
+            'success nowcast+': [
+                (self._update_checklist, [worker, 'forcing links', payload]),
+            ],
+            'success forecast2': [
+                (self._update_checklist, [worker, 'forcing links', payload]),
+            ],
+            'success ssh': [
+                (self._update_checklist, [worker, 'forcing links', payload]),
+            ],
+        }
         return actions[msg_type]
 
     def _after_download_results(self, worker, msg_type, payload):
