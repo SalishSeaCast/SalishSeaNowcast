@@ -169,11 +169,13 @@ def _make_publish_plots(
     dmy, model_path, bathy, results_dir, plots_dir, coastline, *args
 ):
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
-    grids_15m = {}
-    names = ['Point Atkinson', 'Victoria', 'Campbell River']
-    for name in names:
-        f = os.path.join(results_dir, '{}.nc'.format(name.replace(" ", "")))
-        grids_15m[name] = nc.Dataset(f)
+    names = ['Point Atkinson', 'Victoria', 'Campbell River',
+             'Friday Harbor', 'Neah Bay', 'Nanaimo', 'Sandheads']
+    filepath_tmpl = os.path.join(results_dir, '{}.nc')
+    grids_15m = {
+        name: nc.Dataset(filepath_tmpl.format(name.replace(' ',  '')))
+        for name in names
+    }
 
     fig = figures.website_thumbnail(
         bathy, grid_T_hr, grids_15m, model_path, coastline)
@@ -222,7 +224,7 @@ def _make_publish_plots(
         plots_dir, 'CP_maxSSH_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = figures.compare_water_levels(grid_T_hr, bathy, coastline)
+    fig = figures.compare_water_levels(grid_T_hr, bathy, grids_15m, coastline)
     filename = os.path.join(
         plots_dir, 'NOAA_ssh_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
