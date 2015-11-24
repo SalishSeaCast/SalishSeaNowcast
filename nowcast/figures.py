@@ -1083,14 +1083,8 @@ def plot_map(
     return ax
 
 
-def load_model_ssh(grid_B, grid_T, grids, name):
-    """Load the model ssh time series.
-
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
-    :type grid_B: :class:`netCDF4.Dataset`
-
-    :arg grid_T: Hourly tracer results dataset from NEMO.
-    :type grid_T: :class:`netCDF4.Dataset`
+def load_model_ssh(grids, name):
+    """Load the model high frequency (15m) ssh time series.
 
     :arg grids: high frequency model results
     :type grids: dictionary
@@ -1100,20 +1094,10 @@ def load_model_ssh(grid_B, grid_T, grids, name):
 
     :returns: ssh, time - the ssh array and time array
     """
-    if name in ['Point Atkinson', 'Victoria', 'Campbell River']:
-        grid = grids[name]
-        ssh = grid.variables['sossheig'][:, 0, 0]
-        t_orig, t_final, t = get_model_time_variables(grid)
-    else:
-        # Bathymetry
-        bathy, X, Y = tidetools.get_bathy_data(grid_B)
-        lat = SITES[name]['lat']
-        lon = SITES[name]['lon']
-        # Get sea surface height
-        j, i = tidetools.find_closest_model_point(
-            lon, lat, X, Y, bathy, allow_land=False)
-        ssh = grid_T.variables['sossheig'][:, j, i]
-        t_orig, t_final, t = get_model_time_variables(grid_T)
+    grid = grids[name]
+    ssh = grid.variables['sossheig'][:, 0, 0]
+    t_orig, t_final, t = get_model_time_variables(grid)
+
     return ssh, t
 
 
@@ -1184,7 +1168,7 @@ def website_thumbnail(grid_B, grid_T, grids, model_path, PNW_coastline,
     plot_map(ax, grid_B, PNW_coastline)
 
     for name in TIDAL_SITES:
-        ssh_loc, t = load_model_ssh(grid_B, grid_T, grids, name)
+        ssh_loc, t = load_model_ssh(grids, name)
         lat = SITES[name]['lat']
         lon = SITES[name]['lon']
         # Get tides and ssh
@@ -1509,7 +1493,7 @@ def compare_tidalpredictions_maxSSH(
     bathy, X, Y = tidetools.get_bathy_data(grid_B)
 
     # Get sea surface height
-    ssh_loc, t = load_model_ssh(grid_B, grid_T, grids, name)
+    ssh_loc, t = load_model_ssh(grids, name)
     # full field
     ssh = grid_T.variables['sossheig'][:]
 
@@ -1695,7 +1679,7 @@ def plot_thresholds_all(
 
     for M, name in enumerate(TIDAL_SITES):
         # Get sea surface height
-        ssh_loc, t = load_model_ssh(grid_B, grid_T, grids, name)
+        ssh_loc, t = load_model_ssh(grids, name)
         msl = SITES[name]['msl']
 
         # Plot tides, corrected model and original model
@@ -2496,7 +2480,7 @@ def plot_threshold_website(
 
     for name in TIDAL_SITES:
         # Get sea surface height
-        ssh_loc, t = load_model_ssh(grid_B, grid_T, grids, name)
+        ssh_loc, t = load_model_ssh(grids, name)
         lon = SITES[name]['lon']
         lat = SITES[name]['lat']
         # Get tides and ssh
