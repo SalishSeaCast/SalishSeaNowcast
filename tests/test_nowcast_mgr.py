@@ -397,7 +397,7 @@ class TestHandleActionMsg:
         reply, next_steps = mgr._handle_action_msg(
             'download_weather', 'success 00', True)
         mgr._after_download_weather.assert_called_once_with(
-            'download_weather', 'success 00', True)
+            'success 00', True)
         assert next_steps == mgr._after_download_weather()
 
 
@@ -413,8 +413,7 @@ class TestAfterDownloadWeather:
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
         mgr.config = {'run_types': []}
-        actions = mgr._after_download_weather(
-            'download_weather', msg_type, 'payload')
+        actions = mgr._after_download_weather(msg_type, 'payload')
         assert actions is None
 
     @pytest.mark.parametrize('msg_type', [
@@ -425,8 +424,7 @@ class TestAfterDownloadWeather:
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
         mgr.config = {'run_types': []}
-        actions = mgr._after_download_weather(
-            'download_weather', msg_type, 'payload')
+        actions = mgr._after_download_weather(msg_type, 'payload')
         expected = (
             mgr._update_checklist, ['download_weather', 'weather', 'payload'],
         )
@@ -434,8 +432,7 @@ class TestAfterDownloadWeather:
 
     def test_success_06_launch_make_runoff_file_worker(self, mgr):
         mgr.config = {'run_types': []}
-        actions = mgr._after_download_weather(
-            'download_weather', 'success 06', 'payload')
+        actions = mgr._after_download_weather('success 06', 'payload')
         expected = (
             mgr._launch_worker, ['make_runoff_file', mgr.config],
         )
@@ -447,8 +444,7 @@ class TestAfterDownloadWeather:
     ])
     def test_success_12_launch_workers(self, index, worker, worker_args, mgr):
         mgr.config = {'run_types': ['nowcast']}
-        actions = mgr._after_download_weather(
-            'download_weather', 'success 12', 'payload')
+        actions = mgr._after_download_weather('success 12', 'payload')
         expected = (mgr._launch_worker, [worker, [worker_args]],)
         assert actions[index] == expected
 
@@ -458,8 +454,7 @@ class TestAfterDownloadWeather:
     ])
     def test_success_06_launch_workers(self, index, worker, worker_args, mgr):
         mgr.config = {'run_types': ['forecast2']}
-        actions = mgr._after_download_weather(
-            'download_weather', 'success 06', 'payload')
+        actions = mgr._after_download_weather('success 06', 'payload')
         expected = (mgr._launch_worker, [worker, [worker_args]],)
         assert actions[index] == expected
 
@@ -475,8 +470,7 @@ class TestAfterGetNeahBaySSH:
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
-        actions = mgr._after_get_NeahBay_ssh(
-            'get_NeahBay_ssh', msg_type, 'payload')
+        actions = mgr._after_get_NeahBay_ssh(msg_type, 'payload')
         assert actions is None
 
     @pytest.mark.parametrize('msg_type', [
@@ -486,8 +480,7 @@ class TestAfterGetNeahBaySSH:
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
-        actions = mgr._after_get_NeahBay_ssh(
-            'get_NeahBay_ssh', msg_type, 'payload')
+        actions = mgr._after_get_NeahBay_ssh(msg_type, 'payload')
         expected = (
             mgr._update_checklist,
             ['get_NeahBay_ssh', 'Neah Bay ssh', 'payload'],
@@ -502,8 +495,7 @@ class TestAfterGetNeahBaySSH:
         self, host_type, host_name, mgr,
     ):
         mgr.config = {'run_types': ['forecast'], 'run': {host_type: host_name}}
-        actions = mgr._after_get_NeahBay_ssh(
-            'get_NeahBay_ssh', 'success forecast', 'payload')
+        actions = mgr._after_get_NeahBay_ssh('success forecast', 'payload')
         expected = (
             mgr._launch_worker, ['upload_forcing', [host_name, 'ssh']],
         )
@@ -543,8 +535,7 @@ class TestAfterGRIBtoNetCDF:
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
-        actions = mgr._after_grib_to_netcdf(
-            'grib_to_netcdf', msg_type, 'payload')
+        actions = mgr._after_grib_to_netcdf(msg_type, 'payload')
         assert actions is None
 
     @pytest.mark.parametrize('msg_type', [
@@ -553,8 +544,7 @@ class TestAfterGRIBtoNetCDF:
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
-        actions = mgr._after_grib_to_netcdf(
-            'grib_to_netcdf', msg_type, 'payload')
+        actions = mgr._after_grib_to_netcdf(msg_type, 'payload')
         expected = (
             mgr._update_checklist,
             ['grib_to_netcdf', 'weather forcing', 'payload'],
@@ -575,7 +565,7 @@ class TestAfterGRIBtoNetCDF:
             'run': {host_type: host_name}
         }
         actions = mgr._after_grib_to_netcdf(
-            'grib_to_netcdf', 'success {}'.format(run_type), 'payload')
+            'success {}'.format(run_type), 'payload')
         expected = (
             mgr._launch_worker, ['upload_forcing', [host_name, run_type]],
         )
@@ -593,8 +583,7 @@ class TestAfterUploadForcing:
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
-        actions = mgr._after_upload_forcing(
-            'upload_forcing', msg_type, 'payload')
+        actions = mgr._after_upload_forcing(msg_type, 'payload')
         assert actions is None
 
     @pytest.mark.parametrize('msg_type', [
@@ -605,8 +594,7 @@ class TestAfterUploadForcing:
     def test_update_checklist_on_success(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
         payload = {'west.cloud': True}
-        actions = mgr._after_upload_forcing(
-            'upload_forcing', msg_type, payload)
+        actions = mgr._after_upload_forcing(msg_type, payload)
         expected = (
             mgr._update_checklist,
             ['upload_forcing', 'forcing upload', payload],
@@ -625,8 +613,7 @@ class TestAfterUploadForcing:
             'run_types': ['nowcast', 'forecast', 'forecast2'],
         }
         payload = {'west.cloud': True}
-        actions = mgr._after_upload_forcing(
-            'upload_forcing', msg_type, payload)
+        actions = mgr._after_upload_forcing(msg_type, payload)
         expected = (
             mgr._launch_worker,
             ['make_forcing_links', ['west.cloud', upload_run_type]]
@@ -641,8 +628,7 @@ class TestAfterUploadForcing:
     def test_success_run_type_disabled(self, msg_type, mgr):
         mgr.config = {'run_types': []}
         payload = {'west.cloud': True}
-        actions = mgr._after_upload_forcing(
-            'upload_forcing', msg_type, payload)
+        actions = mgr._after_upload_forcing(msg_type, payload)
         assert len(actions) == 1
 
 
@@ -657,8 +643,7 @@ class TestAfterMakeForcingLinks:
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
-        actions = mgr._after_make_forcing_links(
-            'make_forcing_links', msg_type, 'payload')
+        actions = mgr._after_make_forcing_links(msg_type, 'payload')
         assert actions is None
 
     @pytest.mark.parametrize('msg_type', [
@@ -669,8 +654,7 @@ class TestAfterMakeForcingLinks:
     def test_update_checklist_on_success(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
         payload = {'west.cloud': True}
-        actions = mgr._after_make_forcing_links(
-            'make_forcing_links', msg_type, payload)
+        actions = mgr._after_make_forcing_links(msg_type, payload)
         expected = (
             mgr._update_checklist,
             ['make_forcing_links', 'forcing links', payload]
@@ -688,8 +672,7 @@ class TestAfterDownloadResults:
         'failure forecast2',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        actions = mgr._after_download_results(
-            'download_results', msg_type, 'payload')
+        actions = mgr._after_download_results(msg_type, 'payload')
         assert actions is None
 
     @pytest.mark.parametrize('msg_type', [
@@ -705,8 +688,7 @@ class TestAfterDownloadResults:
                 'forecast2': {'run date': '2015-11-24'},
             },
         }
-        actions = mgr._after_download_results(
-            'download_results', msg_type, 'payload')
+        actions = mgr._after_download_results(msg_type, 'payload')
         expected = (
             mgr._update_checklist,
             ['download_results', 'results files', 'payload'],
@@ -728,8 +710,7 @@ class TestAfterDownloadResults:
                 'forecast2': {'run date': '2015-11-24'},
             },
         }
-        actions = mgr._after_download_results(
-            'download_results', msg_type, 'payload')
+        actions = mgr._after_download_results(msg_type, 'payload')
         expected = (
             mgr._launch_worker,
             ['make_plots', [run_type, plot_type, '--run-date', '2015-11-24']],
@@ -749,7 +730,7 @@ class TestAfterMakePlots:
         'failure forecast2 publish',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        actions = mgr._after_make_plots('make_plots', msg_type, 'payload')
+        actions = mgr._after_make_plots(msg_type, 'payload')
         assert actions is None
 
     @pytest.mark.parametrize('msg_type', [
@@ -760,7 +741,7 @@ class TestAfterMakePlots:
         'success forecast2 publish',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
-        actions = mgr._after_make_plots('make_plots', msg_type, 'payload')
+        actions = mgr._after_make_plots(msg_type, 'payload')
         expected = (mgr._update_checklist, ['make_plots', 'plots', 'payload'])
         assert actions[0] == expected
 
