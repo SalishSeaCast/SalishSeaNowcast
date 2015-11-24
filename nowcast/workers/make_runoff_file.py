@@ -95,11 +95,11 @@ def make_runoff_file(parsed_args, config):
     filepath['short'] = _combine_runoff(
         'short', flow_at_hope, yesterday, afterHope,
         nonFraser, fraserratio, otherratio, driverflow, lat,
-        lon, riverdepth, directory)
+        lon, riverdepth, directory, config)
     filepath['long'] = _combine_runoff(
         'long', flow_at_hope, yesterday, afterHope,
         nonFraser, fraserratio, otherratio, driverflow, lat,
-        lon, riverdepth, directory)
+        lon, riverdepth, directory, config)
 
     return filepath
 
@@ -165,7 +165,7 @@ def _fraser_climatology(config):
 
 def _fraser_correction(
     pd, fraserflux, yesterday, afterHope, NonFraser, fraserratio, otherratio,
-    runoff, riverdepth
+    runoff, riverdepth, config
 ):
     """For the Fraser Basin only, replace basic values with the new
     climatology after Hope and the observed values for Hope.
@@ -187,18 +187,19 @@ def _fraser_correction(
             flux*river['prop']/subarea,
             river['i'], river['di'],
             river['j'], river['dj'],
-            river['depth'], runoff, np.empty_like(runoff))[0]
+            river['depth'], runoff, np.empty_like(runoff),
+            grid=config['coordinates'])[0]
     return runoff
 
 
 def _combine_runoff(length, flow_at_hope, yesterday, afterHope,
                     nonFraser, fraserratio, otherratio, driverflow, lat,
-                    lon, riverdepth, directory):
+                    lon, riverdepth, directory, config):
 
     pd = rivertools.get_watershed_prop_dict('fraser', Fraser_River=length)
     runoff = _fraser_correction(
         pd, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-        otherratio, driverflow, riverdepth)
+        otherratio, driverflow, riverdepth, config)
     # set up filename to follow NEMO conventions
     filename = FILENAME_TMPLS[length].format(yesterday.date())
     filepath = os.path.join(directory, filename)
