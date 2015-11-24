@@ -266,11 +266,11 @@ class NowcastManager:
         """Handle success, failure, or crash message from worker with
         appropriate next step action(s).
         """
-        next_steps = self._after_actions[worker](worker, msg_type, payload)
+        next_steps = self._after_actions[worker](msg_type, payload)
         reply = lib.serialize_message(self.name, 'ack')
         return reply, next_steps
 
-    def _after_download_weather(self, worker, msg_type, payload):
+    def _after_download_weather(self, msg_type, payload):
         """Return list of next step action method(s) and args to take
         upon receipt of success, failure, or crash message from
         download_weather worker.
@@ -282,17 +282,21 @@ class NowcastManager:
             'failure 12': None,
             'failure 18': None,
             'success 00': [
-                (self._update_checklist, [worker, 'weather', payload]),
+                (self._update_checklist,
+                    ['download_weather', 'weather', payload]),
             ],
             'success 06': [
-                (self._update_checklist, [worker, 'weather', payload]),
+                (self._update_checklist,
+                    ['download_weather', 'weather', payload]),
                 (self._launch_worker, ['make_runoff_file', self.config]),
             ],
             'success 12': [
-                (self._update_checklist, [worker, 'weather', payload]),
+                (self._update_checklist,
+                    ['download_weather', 'weather', payload]),
             ],
             'success 18': [
-                (self._update_checklist, [worker, 'weather', payload]),
+                (self._update_checklist,
+                    ['download_weather', 'weather', payload]),
             ],
         }
         if 'nowcast' in self.config['run_types']:
@@ -307,7 +311,7 @@ class NowcastManager:
             ])
         return actions[msg_type]
 
-    def _after_get_NeahBay_ssh(self, worker, msg_type, payload):
+    def _after_get_NeahBay_ssh(self, msg_type, payload):
         """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         get_NeahBay_ssh worker.
@@ -318,13 +322,16 @@ class NowcastManager:
             'failure forecast': None,
             'failure forecast2': None,
             'success nowcast': [
-                (self._update_checklist, [worker, 'Neah Bay ssh', payload]),
+                (self._update_checklist,
+                    ['get_NeahBay_ssh', 'Neah Bay ssh', payload]),
             ],
             'success forecast': [
-                (self._update_checklist, [worker, 'Neah Bay ssh', payload]),
+                (self._update_checklist,
+                    ['get_NeahBay_ssh', 'Neah Bay ssh', payload]),
             ],
             'success forecast2': [
-                (self._update_checklist, [worker, 'Neah Bay ssh', payload]),
+                (self._update_checklist,
+                    ['get_NeahBay_ssh', 'Neah Bay ssh', payload]),
             ],
         }
         for host in ('hpc host', 'cloud host'):
@@ -349,7 +356,7 @@ class NowcastManager:
         }
         return actions[msg_type]
 
-    def _after_grib_to_netcdf(self, worker, msg_type, payload):
+    def _after_grib_to_netcdf(self, msg_type, payload):
         """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         grib_to_netcdf worker.
@@ -359,10 +366,12 @@ class NowcastManager:
             'failure nowcast+': None,
             'failure forecast2': None,
             'success nowcast+': [
-                (self._update_checklist, [worker, 'weather forcing', payload]),
+                (self._update_checklist,
+                    ['grib_to_netcdf', 'weather forcing', payload]),
             ],
             'success forecast2': [
-                (self._update_checklist, [worker, 'weather forcing', payload]),
+                (self._update_checklist,
+                    ['grib_to_netcdf', 'weather forcing', payload]),
             ],
         }
         for host in ('hpc host', 'cloud host'):
@@ -381,7 +390,7 @@ class NowcastManager:
                     )
         return actions[msg_type]
 
-    def _after_upload_forcing(self, worker, msg_type, payload):
+    def _after_upload_forcing(self, msg_type, payload):
         """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         upload_forcing worker.
@@ -398,13 +407,16 @@ class NowcastManager:
             'failure forecast2': None,
             'failure ssh': None,
             'success nowcast+': [
-                (self._update_checklist, [worker, 'forcing upload', payload]),
+                (self._update_checklist,
+                    ['upload_forcing', 'forcing upload', payload]),
             ],
             'success forecast2': [
-                (self._update_checklist, [worker, 'forcing upload', payload]),
+                (self._update_checklist,
+                    ['upload_forcing', 'forcing upload', payload]),
             ],
             'success ssh': [
-                (self._update_checklist, [worker, 'forcing upload', payload]),
+                (self._update_checklist,
+                    ['upload_forcing', 'forcing upload', payload]),
             ],
         }
         run_types = [
@@ -421,7 +433,7 @@ class NowcastManager:
                 )
         return actions[msg_type]
 
-    def _after_make_forcing_links(self, worker, msg_type, payload):
+    def _after_make_forcing_links(self, msg_type, payload):
         """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         make_forcing_links worker.
@@ -432,18 +444,21 @@ class NowcastManager:
             'failure forecast2': None,
             'failure ssh': None,
             'success nowcast+': [
-                (self._update_checklist, [worker, 'forcing links', payload]),
+                (self._update_checklist,
+                    ['make_forcing_links', 'forcing links', payload]),
             ],
             'success forecast2': [
-                (self._update_checklist, [worker, 'forcing links', payload]),
+                (self._update_checklist,
+                    ['make_forcing_links', 'forcing links', payload]),
             ],
             'success ssh': [
-                (self._update_checklist, [worker, 'forcing links', payload]),
+                (self._update_checklist,
+                    ['make_forcing_links', 'forcing links', payload]),
             ],
         }
         return actions[msg_type]
 
-    def _after_download_results(self, worker, msg_type, payload):
+    def _after_download_results(self, msg_type, payload):
         """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         download_results worker.
@@ -458,14 +473,15 @@ class NowcastManager:
             run_type = msg_type.split()[1]
             plot_type = 'research' if run_type == 'nowcast' else 'publish'
             actions[msg_type] = [
-                (self._update_checklist, [worker, 'results files', payload]),
+                (self._update_checklist,
+                    ['download_results', 'results files', payload]),
                 (self._launch_worker,
                     ['make_plots', [run_type, plot_type, '--run-date',
                      self.checklist['NEMO run'][run_type]['run date']]]),
             ]
         return actions[msg_type]
 
-    def _after_make_plots(self, worker, msg_type, payload):
+    def _after_make_plots(self, msg_type, payload):
         """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         make_plots worker.
@@ -480,7 +496,7 @@ class NowcastManager:
         }
         if msg_type.startswith('success'):
             actions[msg_type] = [
-                (self._update_checklist, [worker, 'plots', payload]),
+                (self._update_checklist, ['make_plots', 'plots', payload]),
             ]
         return actions[msg_type]
 
