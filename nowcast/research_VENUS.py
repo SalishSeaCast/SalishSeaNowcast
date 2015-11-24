@@ -34,7 +34,11 @@ from salishsea_tools import (
     tidetools as tt,
     viz_tools
 )
-from salishsea_tools.nowcast import (figures, analyze)
+
+from . import (
+    analyze,
+    figures,
+)
 
 # Font format
 title_font = {
