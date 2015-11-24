@@ -79,7 +79,7 @@ def success(parsed_args):
         .format(parsed_args), extra={
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
-            'date': parsed_args.run_date,
+            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     msg_type = 'success {0.run_type} {0.plot_type}'.format(parsed_args)
     return msg_type
@@ -91,7 +91,7 @@ def failure(parsed_args):
         .format(parsed_args), extra={
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
-            'date': parsed_args.run_date,
+            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     msg_type = 'failure {0.run_type} {0.plot_type}'.format(parsed_args)
     return msg_type
