@@ -433,9 +433,7 @@ class TestAfterDownloadWeather:
     def test_success_06_launch_make_runoff_file_worker(self, mgr):
         mgr.config = {'run_types': []}
         actions = mgr._after_download_weather('success 06', 'payload')
-        expected = (
-            mgr._launch_worker, ['make_runoff_file', mgr.config],
-        )
+        expected = (mgr._launch_worker, ['make_runoff_file'])
         assert actions[1] == expected
 
     @pytest.mark.parametrize('index, worker, worker_args', [
