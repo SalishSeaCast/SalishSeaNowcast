@@ -1326,7 +1326,7 @@ def PA_tidal_predictions(grid_T, PST=1, MSL=0, figsize=(20, 5)):
 
 
 def compare_water_levels(
-        grid_T, grid_B, PNW_coastline, PST=1, figsize=(20, 15)):
+        grid_T, grid_B, grids, PNW_coastline, PST=1, figsize=(20, 15)):
     """Compares modelled water levels to observed water levels and tides at a
     NOAA station over one day.
 
@@ -1340,6 +1340,9 @@ def compare_water_levels(
 
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
+
+    :arg grids: high frequency model results
+    :type grids: dictionary
 
     :arg PST: Specifies if plot should be presented in PST.
               1 = plot in PST, 0 = plot in UTC.
@@ -1397,9 +1400,7 @@ def compare_water_levels(
         tides = get_NOAA_tides(SITES[name]['stn_no'], start_date, end_date)
 
         # Get sea surface height
-        j, i = tidetools.find_closest_model_point(
-            lon, lat, X, Y, bathy, allow_land=False)
-        ssh = grid_T.variables['sossheig'][:, j, i]
+        ssh, t = load_model_ssh(grids, name)
 
         # Sea surface height plots
         ax = fig.add_subplot(gs[M, 0])
