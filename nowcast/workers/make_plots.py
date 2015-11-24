@@ -99,7 +99,7 @@ def failure(parsed_args):
 
 def make_plots(parsed_args, config):
     run_date = parsed_args.run_date
-    dmy = run_date.format('DDMMYY').lower()
+    dmy = run_date.format('DDMMMYY').lower()
     run_type = parsed_args.run_type
     plot_type = parsed_args.plot_type
     results_home = config['run']['results archive'][run_type]
@@ -131,7 +131,7 @@ def _make_plot_files(
     bathy = nc.Dataset(config['bathymetry'])
     coastline = sio.loadmat(config['coastline'])
     mesh_mask = nc.Dataset(config['mesh_mask'])
-    make_plots_funcs[run_type](
+    make_plots_funcs[plot_type](
         dmy, model_path, bathy, results_dir, plots_dir, coastline, mesh_mask)
 
 
