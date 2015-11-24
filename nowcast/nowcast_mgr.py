@@ -281,34 +281,26 @@ class NowcastManager:
             'failure 06': None,
             'failure 12': None,
             'failure 18': None,
-            'success 00': [
-                (self._update_checklist,
-                    ['download_weather', 'weather', payload]),
-            ],
-            'success 06': [
-                (self._update_checklist,
-                    ['download_weather', 'weather', payload]),
-                (self._launch_worker, ['make_runoff_file', self.config]),
-            ],
-            'success 12': [
-                (self._update_checklist,
-                    ['download_weather', 'weather', payload]),
-            ],
-            'success 18': [
-                (self._update_checklist,
-                    ['download_weather', 'weather', payload]),
-            ],
         }
-        if 'nowcast' in self.config['run_types']:
-            actions['success 12'].extend([
-                (self._launch_worker, ['get_NeahBay_ssh', ['nowcast']]),
-                (self._launch_worker, ['grib_to_netcdf', ['nowcast+']]),
-            ])
-        if 'forecast2' in self.config['run_types']:
-            actions['success 06'].extend([
-                (self._launch_worker, ['get_NeahBay_ssh', ['forecast2']]),
-                (self._launch_worker, ['grib_to_netcdf', ['forecast2']]),
-            ])
+        if msg_type.startswith('success'):
+            actions[msg_type] = [
+                (self._update_checklist,
+                    ['download_weather', 'weather', payload]),
+            ]
+            if msg_type.endswith('06'):
+                actions['success 06'].extend([
+                    (self._launch_worker, ['make_runoff_file']),
+                ])
+            if 'nowcast' in self.config['run_types']:
+                actions['success 12'].extend([
+                    (self._launch_worker, ['get_NeahBay_ssh', ['nowcast']]),
+                    (self._launch_worker, ['grib_to_netcdf', ['nowcast+']]),
+                ])
+            if 'forecast2' in self.config['run_types']:
+                actions['success 06'].extend([
+                    (self._launch_worker, ['get_NeahBay_ssh', ['forecast2']]),
+                    (self._launch_worker, ['grib_to_netcdf', ['forecast2']]),
+                ])
         return actions[msg_type]
 
     def _after_get_NeahBay_ssh(self, msg_type, payload):
@@ -321,19 +313,12 @@ class NowcastManager:
             'failure nowcast': None,
             'failure forecast': None,
             'failure forecast2': None,
-            'success nowcast': [
-                (self._update_checklist,
-                    ['get_NeahBay_ssh', 'Neah Bay ssh', payload]),
-            ],
-            'success forecast': [
-                (self._update_checklist,
-                    ['get_NeahBay_ssh', 'Neah Bay ssh', payload]),
-            ],
-            'success forecast2': [
-                (self._update_checklist,
-                    ['get_NeahBay_ssh', 'Neah Bay ssh', payload]),
-            ],
         }
+        if msg_type.startswith('success'):
+            actions[msg_type] = [
+                (self._update_checklist,
+                    ['get_NeahBay_ssh', 'Neah Bay ssh', payload]),
+            ]
         for host in ('hpc host', 'cloud host'):
             if 'forecast' in self.config['run_types']:
                 if host in self.config['run']:
@@ -443,19 +428,12 @@ class NowcastManager:
             'failure nowcast+': None,
             'failure forecast2': None,
             'failure ssh': None,
-            'success nowcast+': [
-                (self._update_checklist,
-                    ['make_forcing_links', 'forcing links', payload]),
-            ],
-            'success forecast2': [
-                (self._update_checklist,
-                    ['make_forcing_links', 'forcing links', payload]),
-            ],
-            'success ssh': [
-                (self._update_checklist,
-                    ['make_forcing_links', 'forcing links', payload]),
-            ],
         }
+        if msg_type.startswith('success'):
+            actions[msg_type] = [
+                (self._update_checklist,
+                    ['make_forcing_links', 'forcing links', payload]),
+            ]
         return actions[msg_type]
 
     def _after_download_results(self, msg_type, payload):
