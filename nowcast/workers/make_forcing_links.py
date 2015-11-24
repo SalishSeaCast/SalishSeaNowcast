@@ -67,7 +67,7 @@ def success(parsed_args):
         .format(parsed_args), extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
-            'date': parsed_args.run_date,
+            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     msg_type = 'success {.run_type}'.format(parsed_args)
     return msg_type
@@ -79,7 +79,7 @@ def failure(parsed_args):
         .format(parsed_args), extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
-            'date': parsed_args.run_date,
+            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     msg_type = 'failure {.run_type}'.format(parsed_args)
     return msg_type
