@@ -72,7 +72,7 @@ class NowcastManager:
         self.checklist = {}
 
     @property
-    def after_actions(self):
+    def _after_actions(self):
         """Registry of methods used to calculate next step action(s)
         upon completion of a worker's task.
         """
@@ -88,7 +88,7 @@ class NowcastManager:
             # 'run_NEMO': self._after_run_NEMO,
             # 'watch_NEMO': self._after_watch_NEMO,
             'download_results': self._after_download_results,
-            # 'make_plots': self._after_make_plots,
+            'make_plots': self._after_make_plots,
             # 'make_site_page': self._after_make_site_page,
             # 'push_to_web': self._after_push_to_web,
         }
@@ -266,7 +266,7 @@ class NowcastManager:
         """Handle success, failure, or crash message from worker with
         appropriate next step action(s).
         """
-        next_steps = self.after_actions[worker](worker, msg_type, payload)
+        next_steps = self._after_actions[worker](worker, msg_type, payload)
         reply = lib.serialize_message(self.name, 'ack')
         return reply, next_steps
 
@@ -453,16 +453,35 @@ class NowcastManager:
             'failure nowcast': None,
             'failure forecast': None,
             'failure forecast2': None,
-            'success nowcast': [
-                (self._update_checklist, [worker, 'results files', payload]),
-            ],
-            'success forecast': [
-                (self._update_checklist, [worker, 'results files', payload]),
-            ],
-            'success forecast2': [
-                (self._update_checklist, [worker, 'results files', payload]),
-            ],
         }
+        if msg_type.startswith('success'):
+            run_type = msg_type.split()[1]
+            plot_type = 'research' if run_type == 'nowcast' else 'publish'
+            actions[msg_type] = [
+                (self._update_checklist, [worker, 'results files', payload]),
+                (self._launch_worker,
+                    ['make_plots', [run_type, plot_type, '--run-date',
+                     self.checklist['NEMO run'][run_type]['run date']]]),
+            ]
+        return actions[msg_type]
+
+    def _after_make_plots(self, worker, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        make_plots worker.
+        """
+        actions = {
+            'crash': None,
+            'failure nowcast research': None,
+            'failure nowcast publish': None,
+            'failure nowcast comparison': None,
+            'failure forecast publish': None,
+            'failure forecast2 publish': None,
+        }
+        if msg_type.startswith('success'):
+            actions[msg_type] = [
+                (self._update_checklist, [worker, 'plots', payload]),
+            ]
         return actions[msg_type]
 
     def _update_checklist(self, worker, key, worker_checklist):
