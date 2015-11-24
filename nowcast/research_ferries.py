@@ -33,7 +33,8 @@ from salishsea_tools import (
     viz_tools,
     tidetools,
 )
-from salishsea_tools.nowcast import figures
+
+from . import figures
 
 
 # Font format
