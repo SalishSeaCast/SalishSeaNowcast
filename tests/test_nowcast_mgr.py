@@ -84,11 +84,17 @@ class TestNowcastManagerConstructor:
 @pytest.mark.parametrize('worker', [
     'download_weather',
     'get_NeahBay_ssh',
+    'make_runoff_file',
+    'grib_to_netcdf',
+    'upload_forcing',
+    'make_forcing_links',
+    'download_results',
+    'make_plots',
 ])
 def test_after_actions(worker, mgr):
     """Unit tests for NowcastManager.acter_actions property.
     """
-    assert worker in mgr.after_actions
+    assert worker in mgr._after_actions
 
 
 class TestNowcastManagerRun:
@@ -667,13 +673,13 @@ class TestAfterMakeForcingLinks:
             'make_forcing_links', msg_type, payload)
         expected = (
             mgr._update_checklist,
-            ['make_forcing_links', 'forcing links', payload],
+            ['make_forcing_links', 'forcing links', payload]
         )
         assert actions[0] == expected
 
 
-class TestDownloadResults:
-    """Unit tests for the NowcastManager._afterdownload_results method.
+class TestAfterDownloadResults:
+    """Unit tests for the NowcastManager._after_download_results method.
     """
     @pytest.mark.parametrize('msg_type', [
         'crash',
@@ -682,7 +688,6 @@ class TestDownloadResults:
         'failure forecast2',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
         actions = mgr._after_download_results(
             'download_results', msg_type, 'payload')
         assert actions is None
@@ -693,13 +698,70 @@ class TestDownloadResults:
         'success forecast2',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2015-11-24'},
+                'forecast': {'run date': '2015-11-24'},
+                'forecast2': {'run date': '2015-11-24'},
+            },
+        }
         actions = mgr._after_download_results(
             'download_results', msg_type, 'payload')
         expected = (
             mgr._update_checklist,
             ['download_results', 'results files', 'payload'],
         )
+        assert actions[0] == expected
+
+    @pytest.mark.parametrize('msg_type, run_type, plot_type', [
+        ('success nowcast', 'nowcast', 'research'),
+        ('success forecast', 'forecast', 'publish'),
+        ('success forecast2', 'forecast2', 'publish'),
+    ])
+    def test_success_launch_make_plot_worker(
+        self, msg_type, run_type, plot_type, mgr,
+    ):
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2015-11-24'},
+                'forecast': {'run date': '2015-11-24'},
+                'forecast2': {'run date': '2015-11-24'},
+            },
+        }
+        actions = mgr._after_download_results(
+            'download_results', msg_type, 'payload')
+        expected = (
+            mgr._launch_worker,
+            ['make_plots', [run_type, plot_type, '--run-date', '2015-11-24']],
+        )
+        assert actions[1] == expected
+
+
+class TestAfterMakePlots:
+    """Unit tests for the NowcastManager._after_make_plots method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast research',
+        'failure nowcast publish',
+        'failure nowcast comparison',
+        'failure forecast publish',
+        'failure forecast2 publish',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        actions = mgr._after_make_plots('make_plots', msg_type, 'payload')
+        assert actions is None
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nowcast research',
+        'success nowcast publish',
+        'success nowcast comparison',
+        'success forecast publish',
+        'success forecast2 publish',
+    ])
+    def test_update_checklist_on_success(self, msg_type, mgr):
+        actions = mgr._after_make_plots('make_plots', msg_type, 'payload')
+        expected = (mgr._update_checklist, ['make_plots', 'plots', 'payload'])
         assert actions[0] == expected
 
 

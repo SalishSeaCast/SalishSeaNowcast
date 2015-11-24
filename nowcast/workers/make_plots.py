@@ -13,169 +13,129 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Salish Sea NEMO nowcast worker that produces the ssh and weather
-plot files from run results.
+"""Salish Sea NEMO nowcast worker that produces visualization images for
+the web site from run results.
 """
-import argparse
 import datetime
 from glob import glob
 import logging
 import os
 import shutil
-import traceback
 
 import arrow
 import matplotlib
 import netCDF4 as nc
 import scipy.io as sio
-import zmq
 
 matplotlib.use('Agg')
-from nowcast import (
+from .. import (
     figures,
     lib,
     research_VENUS,
     research_ferries,
 )
+from ..nowcast_worker import NowcastWorker
 
 
 worker_name = lib.get_module_name()
-
 logger = logging.getLogger(worker_name)
-
-context = zmq.Context()
 
 
 def main():
-    # Prepare the worker
-    base_parser = lib.basic_arg_parser(
-        worker_name, description=__doc__, add_help=False)
-    parser = configure_argparser(
-        prog=base_parser.prog,
-        description=base_parser.description,
-        parents=[base_parser],
-    )
-    parsed_args = parser.parse_args()
-    config = lib.load_config(parsed_args.config_file)
-    lib.configure_logging(config, logger, parsed_args.debug)
-    logger.debug(
-        '{0.plot_type} {0.run_type}: running in process {pid}'
-        .format(parsed_args, pid=os.getpid()))
-    logger.debug(
-        '{0.plot_type} {0.run_type}: read config from {0.config_file}'
-        .format(parsed_args))
-    lib.install_signal_handlers(logger, context)
-    socket = lib.init_zmq_req_rep_worker(context, config, logger)
-    # Do the work
-    try:
-        checklist = make_plots(
-            parsed_args.run_date, parsed_args.run_type,
-            parsed_args.plot_type, config,
-            socket)
-        logger.info(
-            '{0.plot_type} plots for {0.run_type} completed'
-            .format(parsed_args), extra={
-                'run_type': parsed_args.run_type,
-                'plot_type': parsed_args.plot_type,
-                'date': parsed_args.run_date,
-            })
-        # Exchange success messages with the nowcast manager process
-        msg_type = 'success {0.run_type} {0.plot_type}'.format(parsed_args)
-        lib.tell_manager(
-            worker_name, msg_type, config, logger, socket, checklist)
-    except lib.WorkerError:
-        logger.critical(
-            '{0.plot_type} plots failed for {0.run_type} failed'
-            .format(parsed_args), extra={
-                'run_type': parsed_args.run_type,
-                'plot_type': parsed_args.plot_type,
-                'date': parsed_args.run_date,
-            })
-        # Exchange failure messages with the nowcast manager process
-        msg_type = 'failure {0.run_type} {0.plot_type}'.format(parsed_args)
-        lib.tell_manager(worker_name, msg_type, config, logger, socket)
-    except SystemExit:
-        # Normal termination
-        pass
-    except:
-        logger.critical(
-            '{0.plot_type} {0.run_type}: unhandled exception:'
-            .format(parsed_args))
-        for line in traceback.format_exc().splitlines():
-            logger.error(
-                '{0.plot_type} {0.run_type}: {line}'
-                .format(parsed_args, line=line))
-        # Exchange crash messages with the nowcast manager process
-        lib.tell_manager(worker_name, 'crash', config, logger, socket)
-    # Finish up
-    context.destroy()
-    logger.debug(
-        '{0.plot_type} {0.run_type}: task completed; shutting down'
-        .format(parsed_args))
-
-
-def configure_argparser(prog, description, parents):
-    parser = argparse.ArgumentParser(
-        prog=prog, description=description, parents=parents)
-    parser.add_argument(
+    worker = NowcastWorker(worker_name, description=__doc__)
+    worker.arg_parser.add_argument(
         'run_type', choices=set(('nowcast', 'forecast', 'forecast2')),
         help='''
-        Which results set to produce plot files for:
-        "nowcast" means nowcast,
-        "forecast" means forecast directly following nowcast,
-        "forecast2" means the second forecast, following forecast
-        ''')
-    parser.add_argument(
+        Type of run to symlink files for:
+        'nowcast+' means nowcast & 1st forecast runs,
+        'forecast2' means 2nd forecast run,
+        'ssh' means Neah Bay sea surface height files only (for forecast run).
+        ''',
+    )
+    worker.arg_parser.add_argument(
         'plot_type', choices=set(('publish', 'research', 'comparison')),
         help='''
         Which type of plots to produce:
         "publish" means ssh, weather and other approved plots for publishing,
         "research" means tracers, currents and other research plots
         "comparison" means ferry salinity plots
-        ''')
-    parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=arrow.now().date(),
-        help='''
-        Date of the run to download results files from;
-        use YYYY-MM-DD format.
-        Defaults to %(default)s.
-        ''',
+        '''
     )
-    return parser
+    salishsea_today = arrow.now('Canada/Pacific').floor('day')
+    worker.arg_parser.add_argument(
+        '--run-date', type=lib.arrow_date,
+        default=salishsea_today,
+        help='''
+        Date of the run to symlink files for; use YYYY-MM-DD format.
+        Defaults to {}.
+        '''.format(salishsea_today.format('YYYY-MM-DD')),
+    )
+    worker.run(make_plots, success, failure)
 
 
-def make_plots(run_date, run_type, plot_type, config, socket):
-    # set-up, read from config file
+def success(parsed_args):
+    logger.info(
+        '{0.plot_type} plots for {0.run_type} completed'
+        .format(parsed_args), extra={
+            'run_type': parsed_args.run_type,
+            'plot_type': parsed_args.plot_type,
+            'date': parsed_args.run_date,
+        })
+    msg_type = 'success {0.run_type} {0.plot_type}'.format(parsed_args)
+    return msg_type
+
+
+def failure(parsed_args):
+    logger.critical(
+        '{0.plot_type} plots failed for {0.run_type} failed'
+        .format(parsed_args), extra={
+            'run_type': parsed_args.run_type,
+            'plot_type': parsed_args.plot_type,
+            'date': parsed_args.run_date,
+        })
+    msg_type = 'failure {0.run_type} {0.plot_type}'.format(parsed_args)
+    return msg_type
+
+
+def make_plots(parsed_args, config):
+    run_date = parsed_args.run_date
+    dmy = run_date.format('DDMMYY').lower()
+    run_type = parsed_args.run_type
+    plot_type = parsed_args.plot_type
     results_home = config['run']['results archive'][run_type]
-    results_dir = os.path.join(
-        results_home, run_date.strftime('%d%b%y').lower())
+    plots_dir = os.path.join(results_home, dmy, 'figures')
+    lib.mkdir(plots_dir, logger, grp_name='sallen')
+    _make_plot_files(
+        config, run_type, plot_type, dmy, results_home, plots_dir)
+    checklist = _copy_plots_to_www_path(
+        config, run_type, plot_type, dmy, plots_dir)
+    if plot_type == 'publish' and run_type in ('forecast', 'forecast2'):
+        summary_plot = _install_storm_surge_summary_plot(
+            config, dmy, plots_dir)
+        checklist['Most recent summary plot'] = summary_plot
+    return checklist
+
+
+def _make_plot_files(
+    config, run_type, plot_type, dmy, results_home, plots_dir,
+):
+    make_plots_funcs = {
+        'publish': _make_publish_plots,
+        'research': _make_research_plots,
+        'comparison': _make_comparisons_plots,
+    }
     model_path = config['weather']['ops_dir']
     if run_type in ['forecast', 'forecast2']:
         model_path = os.path.join(model_path, 'fcst/')
+    results_dir = os.path.join(results_home, dmy)
     bathy = nc.Dataset(config['bathymetry'])
-    coastline = sio.loadmat('/ocean/rich/more/mmapbase/bcgeo/PNW.mat')
-    mesh_mask = nc.Dataset(
-        '/data/nsoontie/MEOPAR/NEMO-forcing/grid/mesh_mask_SalishSea2.nc')
+    coastline = sio.loadmat(config['coastline'])
+    mesh_mask = nc.Dataset(config['mesh_mask'])
+    make_plots_funcs[run_type](
+        dmy, model_path, bathy, results_dir, plots_dir, coastline, mesh_mask)
 
-    # configure plot directory for saving
-    dmy = run_date.strftime('%d%b%y').lower()
-    plots_dir = os.path.join(results_home, dmy, 'figures')
-    lib.mkdir(plots_dir, logger, grp_name='sallen')
 
-    if plot_type == 'publish':
-        make_publish_plots(
-            dmy, model_path, bathy, results_dir, plots_dir, coastline)
-    elif plot_type == 'comparison':
-        make_comparisons_plots(
-            dmy, model_path, bathy, results_dir, plots_dir, coastline)
-    else:
-        make_research_plots(
-            dmy, model_path, bathy, results_dir, plots_dir, coastline,
-            mesh_mask)
-
-    # Fix permissions on image files and copy them to salishsea site
-    # prep directory
+def _copy_plots_to_www_path(config, run_type, plot_type, dmy, plots_dir):
     www_plots_path = os.path.join(
         config['web']['www_path'],
         os.path.basename(config['web']['site_repo_url']),
@@ -188,37 +148,33 @@ def make_plots(run_date, run_type, plot_type, config, socket):
         shutil.copy2(f, www_plots_path)
     checklist = {' '.join((run_type, plot_type)):
                  glob(os.path.join(www_plots_path, '*'))}
-    if plot_type == 'publish' and run_type in ('forecast', 'forecast2'):
-        summary_plot = os.path.join(
-            config['web']['www_path'],
-            os.path.basename(config['web']['site_repo_url']),
-            config['web']['site_storm_surge_plot_path'],
-            '.'.join((config['web']['site_storm_surge_plot'], 'png'))
-            )
-        f = '{plot_name}_{date}.png'.format(
-            plot_name=config['web']['site_storm_surge_plot'],
-            date=dmy)
-        shutil.copy2(os.path.join(plots_dir, f), summary_plot)
-        checklist['Most recent summary plot'] = summary_plot
-
     return checklist
 
 
-def make_publish_plots(
-    dmy, model_path, bathy, results_dir, plots_dir, coastline,
-):
-    """Make the plots we wish to publish.
-    """
+def _install_storm_surge_summary_plot(config, dmy, plots_dir):
+    site_storm_surge_plot_name = config['web']['site_storm_surge_plot']
+    dmy_plot = '{plot_name}_{dmy}.png'.format(
+        plot_name=site_storm_surge_plot_name,
+        dmy=dmy)
+    summary_plot = os.path.join(
+        config['web']['www_path'],
+        os.path.basename(config['web']['site_repo_url']),
+        config['web']['site_storm_surge_plot_path'],
+        '{plot_name}.png'.format(config['web']['site_storm_surge_plot']))
+    shutil.copy2(os.path.join(plots_dir, dmy_plot), summary_plot)
+    return summary_plot
 
-    # get the results
-    grid_T_hr = results_dataset('1h', 'grid_T', results_dir)
+
+def _make_publish_plots(
+    dmy, model_path, bathy, results_dir, plots_dir, coastline, *args
+):
+    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     grids_15m = {}
     names = ['Point Atkinson', 'Victoria', 'Campbell River']
     for name in names:
         f = os.path.join(results_dir, '{}.nc'.format(name.replace(" ", "")))
         grids_15m[name] = nc.Dataset(f)
 
-    # do the plots
     fig = figures.website_thumbnail(
         bathy, grid_T_hr, grids_15m, model_path, coastline)
     filename = os.path.join(
@@ -297,19 +253,16 @@ def make_publish_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
 
-def make_comparisons_plots(
+def _make_comparisons_plots(
     dmy, model_path, bathy, results_dir, plots_dir, coastline
 ):
     """Make the plots we wish to look at for comparisons purposes.
     """
     # get the results
-    grid_T_dy = results_dataset('1d', 'grid_T', results_dir)
-    grid_T_hr = results_dataset('1h', 'grid_T', results_dir)
-    grid_U_dy = results_dataset('1d', 'grid_U', results_dir)
-    grid_V_dy = results_dataset('1d', 'grid_V', results_dir)
-    grid_c = results_dataset_gridded('central', results_dir)
-    grid_e = results_dataset_gridded('east', results_dir)
-    grid_d = results_dataset_gridded('ddl', results_dir)
+    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
+    grid_c = _results_dataset_gridded('central', results_dir)
+    grid_e = _results_dataset_gridded('east', results_dir)
+    grid_d = _results_dataset_gridded('ddl', results_dir)
 
     # ONC ADCP data
     grid_oc = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat')
@@ -381,20 +334,20 @@ def make_comparisons_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
 
-def make_research_plots(
+def _make_research_plots(
     dmy, model_path, bathy, results_dir, plots_dir, coastline, mesh_mask
 ):
     """Make the plots we wish to look at for research purposes.
     """
 
     # get the results
-    grid_T_dy = results_dataset('1d', 'grid_T', results_dir)
-    grid_T_hr = results_dataset('1h', 'grid_T', results_dir)
-    grid_U_dy = results_dataset('1d', 'grid_U', results_dir)
-    grid_V_dy = results_dataset('1d', 'grid_V', results_dir)
-    grid_c = results_dataset_gridded(
+    grid_T_dy = _results_dataset('1d', 'grid_T', results_dir)
+    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
+    grid_U_dy = _results_dataset('1d', 'grid_U', results_dir)
+    grid_V_dy = _results_dataset('1d', 'grid_V', results_dir)
+    grid_c = _results_dataset_gridded(
         'central', results_dir)
-    grid_e = results_dataset_gridded('east', results_dir)
+    grid_e = _results_dataset_gridded('east', results_dir)
 
     # do the plots
     fig = figures.thalweg_salinity(grid_T_dy, mesh_mask, bathy)
@@ -433,7 +386,7 @@ def make_research_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
 
-def results_dataset(period, grid, results_dir):
+def _results_dataset(period, grid, results_dir):
     """Return the results dataset for period (e.g. 1h or 1d)
     and grid (e.g. grid_T, grid_U) from results_dir.
     """
@@ -443,14 +396,15 @@ def results_dataset(period, grid, results_dir):
     return nc.Dataset(filepaths[0])
 
 
-def results_dataset_gridded(station, results_dir):
+def _results_dataset_gridded(station, results_dir):
     """Return the results dataset for station (e.g. central or east)
-     for the quarter hourly data from results_dir.
+    for the quarter hourly data from results_dir.
     """
     filename_pattern = 'VENUS_{station}_gridded.nc'
     filepaths = glob(os.path.join(
         results_dir, filename_pattern.format(station=station)))
     return nc.Dataset(filepaths[0])
+
 
 if __name__ == '__main__':
     main()
