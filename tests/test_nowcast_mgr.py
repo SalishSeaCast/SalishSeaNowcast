@@ -89,6 +89,7 @@ class TestNowcastManagerConstructor:
     'upload_forcing',
     'make_forcing_links',
     'run_NEMO',
+    'watch_NEMO',
     'download_results',
     'make_plots',
 ])
@@ -711,6 +712,81 @@ class TestAfterRunNEMO:
         mgr.worker_loggers = {'run_NEMO': m_worker_logger}
         mgr._after_run_NEMO('success', 'payload')
         m_worker_logger.removeHandler.assert_called_once_with(m_handler)
+
+
+class TestAfterWatchNEMO:
+    """Unit tests for the NowcastManager._after_watch_NEMO method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+        'failure forecast',
+        'failure forecast2',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        mgr.worker_loggers = {
+            'watch_NEMO': Mock(name='logger', handlers=[Mock(name='handler')])
+        }
+        actions = mgr._after_watch_NEMO(msg_type, 'payload')
+        assert actions is None
+
+    @pytest.mark.parametrize('msg_type, payload', [
+        ('success nowcast', {'nowcast': {'run date': '2015-11-25'}}),
+        ('success forecast', {'forecast': {'run date': '2015-11-25'}}),
+        ('success forecast2', {'forecast2': {'run date': '2015-11-25'}}),
+    ])
+    def test_update_checklist_on_success(self, msg_type, payload, mgr):
+        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        mgr.worker_loggers = {
+            'watch_NEMO': Mock(name='logger', handlers=[Mock(name='handler')])
+        }
+        actions = mgr._after_watch_NEMO(msg_type, payload)
+        expected = (
+            mgr._update_checklist, ['watch_NEMO', 'NEMO run', payload],
+        )
+        assert actions[0] == expected
+
+    def test_remove_worker_logger_handlers(self, mgr):
+        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        m_handler = Mock(name='handler')
+        m_worker_logger = Mock(name='logger', handlers=[m_handler])
+        mgr.worker_loggers = {'watch_NEMO': m_worker_logger}
+        payload = {'nowcast': {'run date': '2015-11-25'}}
+        mgr._after_watch_NEMO('success nowcast', payload)
+        m_worker_logger.removeHandler.assert_called_once_with(m_handler)
+
+    @pytest.mark.parametrize('msg_type, run_type, payload', [
+        ('success nowcast', 'nowcast',
+            {'nowcast': {'run date': '2015-11-25'}}),
+        ('success forecast', 'forecast',
+            {'forecast': {'run date': '2015-11-25'}}),
+        ('success forecast2', 'forecast2',
+            {'forecast2': {'run date': '2015-11-25'}}),
+    ])
+    def test_success_launch_download_results(
+        self, msg_type, run_type, payload, mgr,
+    ):
+        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        mgr.worker_loggers = {
+            'watch_NEMO': Mock(name='logger', handlers=[Mock(name='handler')])
+        }
+        actions = mgr._after_watch_NEMO(msg_type, payload)
+        expected = (
+            mgr._launch_worker,
+            ['download_results',
+                ['west.cloud', run_type, '--run-date', '2015-11-25']],
+        )
+        assert actions[-1] == expected
+
+    def test_success_nowcast_launch_get_NeahBay_ssh(self, mgr):
+        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        mgr.worker_loggers = {
+            'watch_NEMO': Mock(name='logger', handlers=[Mock(name='handler')])
+        }
+        payload = {'nowcast': {'run date': '2015-11-25'}}
+        actions = mgr._after_watch_NEMO('success nowcast', payload)
+        expected = (mgr._launch_worker, ['get_NeahBay_ssh', ['forecast']])
+        assert actions[1] == expected
 
 
 class TestAfterDownloadResults:
