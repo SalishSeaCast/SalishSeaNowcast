@@ -85,7 +85,7 @@ class NowcastManager:
             'upload_forcing': self._after_upload_forcing,
             # 'upload_all_files': self._after_upload_all_files,
             'make_forcing_links': self._after_make_forcing_links,
-            # 'run_NEMO': self._after_run_NEMO,
+            'run_NEMO': self._after_run_NEMO,
             # 'watch_NEMO': self._after_watch_NEMO,
             'download_results': self._after_download_results,
             'make_plots': self._after_make_plots,
@@ -329,7 +329,7 @@ class NowcastManager:
                     )
         return actions[msg_type]
 
-    def _after_make_runoff_file(self, worker, msg_type, payload):
+    def _after_make_runoff_file(self, msg_type, payload):
         """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
         make_runoff_file worker.
@@ -337,7 +337,9 @@ class NowcastManager:
         actions = {
             'crash': None,
             'failure': None,
-            'success': [(self._update_checklist, [worker, 'rivers', payload])],
+            'success':
+                [(self._update_checklist,
+                    ['make_runoff_file', 'rivers', payload])],
         }
         return actions[msg_type]
 
@@ -450,6 +452,22 @@ class NowcastManager:
                     (self._launch_worker, ['run_NEMO', [run_type],
                      self.config['run']['cloud host']])
                 )
+        return actions[msg_type]
+
+    def _after_run_NEMO(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        run_NEMO worker.
+        """
+        for handler in self.worker_loggers['run_NEMO'].handlers:
+            self.worker_loggers['run_NEMO'].removeHandler(handler)
+        actions = {
+            'crash': None,
+            'failure': None,
+            'success':
+                [(self._update_checklist,
+                    ['run_NEMO', 'NEMO run', payload])],
+        }
         return actions[msg_type]
 
     def _after_download_results(self, msg_type, payload):
