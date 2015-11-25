@@ -965,6 +965,33 @@ class TestAfterMakeSitePage:
         assert actions[1] == expected
 
 
+class TestAfterMakeSitePage:
+    """Unit tests for the NowcastManager._after_make_site_page method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure index',
+        'failure research',
+        'failure publish',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        actions = mgr._after_make_site_page(msg_type, 'payload')
+        assert actions is None
+
+    @pytest.mark.parametrize('msg_type', [
+        'success index',
+        'success research',
+        'success publish',
+    ])
+    def test_update_checklist_on_success(self, msg_type, mgr):
+        actions = mgr._after_make_site_page(msg_type, 'payload')
+        expected = (
+            mgr._update_checklist,
+            ['make_site_page', 'salishsea site pages', 'payload'],
+        )
+        assert actions[0] == expected
+
+
 class TestUpdateChecklist:
     """Unit tests for the NowcastManager._update_checklist method.
     """
