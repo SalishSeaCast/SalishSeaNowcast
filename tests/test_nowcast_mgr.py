@@ -868,9 +868,40 @@ class TestAfterMakePlots:
         'success forecast2 publish',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2015-11-25'},
+                'forecast': {'run date': '2015-11-25'},
+                'forecast2': {'run date': '2015-11-25'},
+            },
+        }
         actions = mgr._after_make_plots(msg_type, 'payload')
         expected = (mgr._update_checklist, ['make_plots', 'plots', 'payload'])
         assert actions[0] == expected
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nowcast research',
+        'success nowcast publish',
+        'success nowcast comparison',
+        'success forecast publish',
+        'success forecast2 publish',
+    ])
+    def test_success_launch_make_site_page(self, msg_type, mgr):
+        _, run_type, page_type = msg_type.split()
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2015-11-25'},
+                'forecast': {'run date': '2015-11-25'},
+                'forecast2': {'run date': '2015-11-25'},
+            },
+        }
+        actions = mgr._after_make_plots(msg_type, 'payload')
+        expected = (
+            mgr._launch_worker,
+            ['make_site_page', run_type, page_type,
+             '--run-date', '2015-11-25'],
+        )
+        assert actions[1] == expected
 
 
 class TestUpdateChecklist:
