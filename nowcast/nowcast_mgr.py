@@ -89,7 +89,7 @@ class NowcastManager:
             'watch_NEMO': self._after_watch_NEMO,
             'download_results': self._after_download_results,
             'make_plots': self._after_make_plots,
-            # 'make_site_page': self._after_make_site_page,
+            'make_site_page': self._after_make_site_page,
             # 'push_to_web': self._after_push_to_web,
         }
 
@@ -539,9 +539,37 @@ class NowcastManager:
             actions[msg_type] = [
                 (self._update_checklist, ['make_plots', 'plots', payload]),
                 (self._launch_worker,
-                    ['make_site_page', run_type, page_type, '--run-date',
-                     self.checklist['NEMO run'][run_type]['run date']])
+                    ['make_site_page', [run_type, page_type, '--run-date',
+                     self.checklist['NEMO run'][run_type]['run date']]])
             ]
+        return actions[msg_type]
+
+    def _after_make_site_page(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        make_site_page worker.
+        """
+        actions = {
+            'crash': None,
+            'failure index': None,
+            'failure research': None,
+            'failure publish': None,
+        }
+        if msg_type.startswith('success'):
+            _, page_type = msg_type.split()
+            actions[msg_type] = [
+                (self._update_checklist,
+                    ['make_site_page', 'salishsea site pages', payload]),
+            ]
+            if page_type in ('index', 'publish'):
+                actions[msg_type].append(
+                    (self._launch_worker, ['push_to_web']))
+            if page_type == 'research':
+                actions[msg_type].append(
+                    (self._launch_worker,
+                        ['make_plots', ['nowcast', 'publish', '--run-date',
+                         self.checklist['NEMO run']['nowcast']['run date']]])
+                )
         return actions[msg_type]
 
     def _update_checklist(self, worker, key, worker_checklist):
