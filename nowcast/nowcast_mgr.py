@@ -434,6 +434,22 @@ class NowcastManager:
                 (self._update_checklist,
                     ['make_forcing_links', 'forcing links', payload]),
             ]
+            if ('cloud host' in self.config['run']
+                    and self.config['run']['cloud host'] in payload):
+                for worker in ('run_NEMO', 'watch_NEMO'):
+                    self.worker_loggers[worker] = logging.getLogger(worker)
+                    lib.configure_logging(
+                        self.config, self.worker_loggers[worker],
+                        self.parsed_args.debug)
+                run_type = {
+                    'nowcast+': 'nowcast',
+                    'forecast2': 'forecast2',
+                    'ssh': 'forecast',
+                }[msg_type.split()[1]]
+                actions[msg_type].append(
+                    (self._launch_worker, ['run_NEMO', [run_type],
+                     self.config['run']['cloud host']])
+                )
         return actions[msg_type]
 
     def _after_download_results(self, msg_type, payload):

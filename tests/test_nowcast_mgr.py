@@ -659,6 +659,30 @@ class TestAfterMakeForcingLinks:
         )
         assert actions[0] == expected
 
+    @patch.object(mgr_module().lib, 'configure_logging')
+    def test_success_configure_run_loggers(self, m_config_logging, mgr):
+        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        mgr.parsed_args = Mock(debug=False)
+        payload = {'west.cloud': True}
+        mgr._after_make_forcing_links('success nowcast+', payload)
+        assert mgr.worker_loggers['run_NEMO'].name == 'run_NEMO'
+        assert mgr.worker_loggers['watch_NEMO'].name == 'watch_NEMO'
+        assert m_config_logging.call_count == 2
+
+    @pytest.mark.parametrize('msg_type, run_type', [
+        ('success nowcast+', 'nowcast'),
+        ('success forecast2', 'forecast2'),
+        ('success ssh', 'forecast'),
+    ])
+    def test_success_launch_run_NEMO(self, msg_type, run_type, mgr):
+        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        mgr.parsed_args = Mock(debug=False)
+        payload = {'west.cloud': True}
+        with patch.object(mgr_module().lib, 'configure_logging'):
+            actions = mgr._after_make_forcing_links(msg_type, payload)
+        expected = (mgr._launch_worker, ['run_NEMO', [run_type], 'west.cloud'])
+        assert actions[1] == expected
+
 
 class TestAfterDownloadResults:
     """Unit tests for the NowcastManager._after_download_results method.
