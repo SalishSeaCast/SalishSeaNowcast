@@ -93,6 +93,7 @@ class TestNowcastManagerConstructor:
     'download_results',
     'make_plots',
     'make_site_page',
+    'push_to_web',
 ])
 def test_after_actions(worker, mgr):
     """Unit tests for NowcastManager.acter_actions property.
@@ -965,63 +966,31 @@ class TestAfterMakeSitePage:
         assert actions[1] == expected
 
 
-class TestAfterMakeSitePage:
-    """Unit tests for the NowcastManager._after_make_site_page method.
+class TestAfterPushToWeb:
+    """Unit tests for the NowcastManager._after_push_to_web method.
     """
     @pytest.mark.parametrize('msg_type', [
         'crash',
-        'failure index',
-        'failure research',
-        'failure publish',
+        'failure',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        actions = mgr._after_make_site_page(msg_type, 'payload')
+        mgr.checklist = {'salishsea site pages': {}}
+        actions = mgr._after_push_to_web(msg_type, 'payload')
         assert actions is None
 
-    @pytest.mark.parametrize('msg_type', [
-        'success index',
-        'success research',
-        'success publish',
-    ])
-    def test_update_checklist_on_success(self, msg_type, mgr):
-        mgr.checklist = {
-            'NEMO run': {
-                'nowcast': {'run date': '2015-11-25'},
-                'forecast': {'run date': '2015-11-25'},
-                'forecast2': {'run date': '2015-11-25'},
-            },
-        }
-        actions = mgr._after_make_site_page(msg_type, 'payload')
+    def test_update_checklist_on_success(self, mgr):
+        mgr.checklist = {'salishsea site pages': {}}
+        actions = mgr._after_push_to_web('success', 'payload')
         expected = (
             mgr._update_checklist,
-            ['make_site_page', 'salishsea site pages', 'payload'],
+            ['push_to_web', 'push to salishsea site', 'payload'],
         )
         assert actions[0] == expected
 
-    @pytest.mark.parametrize('msg_type', [
-        'success index',
-        'success publish',
-    ])
-    def test_success_launch_push_to_web_worker(self, msg_type, mgr):
-        actions = mgr._after_make_site_page(msg_type, 'payload')
-        expected = (mgr._launch_worker, ['push_to_web'])
-        assert actions[1] == expected
-
-    def test_success_research_launch_make_plots_worker_nowcast_publish(
-        self, mgr
-    ):
-        mgr.checklist = {
-            'NEMO run': {
-                'nowcast': {'run date': '2015-11-25'},
-                'forecast': {'run date': '2015-11-25'},
-                'forecast2': {'run date': '2015-11-25'},
-            },
-        }
-        actions = mgr._after_make_site_page('success research', 'payload')
-        expected = (
-            mgr._launch_worker,
-            ['make_plots', ['nowcast', 'publish', '--run-date', '2015-11-25']],
-        )
+    def test_finish_the_day(self, mgr):
+        mgr.checklist = {'salishsea site pages': {'finish the day': True}}
+        actions = mgr._after_push_to_web('success', 'payload')
+        expected = (mgr._finish_the_day, [])
         assert actions[1] == expected
 
 
