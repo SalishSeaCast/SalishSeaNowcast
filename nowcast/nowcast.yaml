@@ -10,6 +10,7 @@ python: /results/nowcast-sys/nowcast-env/bin/python
 file group: sallen
 
 coordinates: /results/nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc
+
 bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
 mesh_mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
 coastline: /ocean/rich/more/mmapbase/bcgeo/PNW.mat
