@@ -88,6 +88,7 @@ class TestNowcastManagerConstructor:
     'grib_to_netcdf',
     'upload_forcing',
     'make_forcing_links',
+    'run_NEMO',
     'download_results',
     'make_plots',
 ])
@@ -508,15 +509,11 @@ class TestAfterMakeRunoffFile:
         'failure',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
-        actions = mgr._after_make_runoff_file(
-            'make_runoff_file', msg_type, 'payload')
+        actions = mgr._after_make_runoff_file(msg_type, 'payload')
         assert actions is None
 
     def test_update_checklist_on_success(self, mgr):
-        mgr.config = {'run_types': [], 'run': []}
-        actions = mgr._after_make_runoff_file(
-            'make_runoff_file', 'success', 'payload')
+        actions = mgr._after_make_runoff_file('success', 'payload')
         expected = (
             mgr._update_checklist, ['make_runoff_file', 'rivers', 'payload'],
         )
@@ -682,6 +679,38 @@ class TestAfterMakeForcingLinks:
             actions = mgr._after_make_forcing_links(msg_type, payload)
         expected = (mgr._launch_worker, ['run_NEMO', [run_type], 'west.cloud'])
         assert actions[1] == expected
+
+
+class TestAfterRunNEMO:
+    """Unit tests for the NowcastManager._after_run_NEMO method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        mgr.worker_loggers = {
+            'run_NEMO': Mock(name='logger', handlers=[Mock(name='handler')])
+        }
+        actions = mgr._after_run_NEMO(msg_type, 'payload')
+        assert actions is None
+
+    def test_update_checklist_on_success(self, mgr):
+        mgr.worker_loggers = {
+            'run_NEMO': Mock(name='logger', handlers=[Mock(name='handler')])
+        }
+        actions = mgr._after_run_NEMO('success', 'payload')
+        expected = (
+            mgr._update_checklist, ['run_NEMO', 'NEMO run', 'payload'],
+        )
+        assert actions[0] == expected
+
+    def test_remove_worker_logger_handlers(self, mgr):
+        m_handler = Mock(name='handler')
+        m_worker_logger = Mock(name='logger', handlers=[m_handler])
+        mgr.worker_loggers = {'run_NEMO': m_worker_logger}
+        mgr._after_run_NEMO('success', 'payload')
+        m_worker_logger.removeHandler.assert_called_once_with(m_handler)
 
 
 class TestAfterDownloadResults:
