@@ -30,13 +30,13 @@ def linear_depths():
     return np.arange(0, 40)
 
 
-@pytest.fixture
-def nonuniform_depths():
-    # Don't like that these tests depend on the existence of this file
-    base = '/data/dlatorne/MEOPAR/SalishSea/nowcast/01oct15'
-    path = os.path.join(base, 'SalishSea_1d_20151001_20151001_grid_T.nc')
-    f = nc.Dataset(path, 'r')
-    return f.variables['deptht'][:]
+# @pytest.fixture
+# def nonuniform_depths():
+#     # Don't like that these tests depend on the existence of this file
+#     base = '/data/dlatorne/MEOPAR/SalishSea/nowcast/01oct15'
+#     path = os.path.join(base, 'SalishSea_1d_20151001_20151001_grid_T.nc')
+#     f = nc.Dataset(path, 'r')
+#     return f.variables['deptht'][:]
 
 
 class TestDepthAverage:
@@ -120,13 +120,14 @@ class TestDepthAverage:
         result = analyze.depth_average(var, linear_depths, depth_axis=1)
         np.testing.assert_array_equal(result, expected)
 
-    @pytest.mark.parametrize('var, depth_axis, expected', [
-        # In all cases, 40 is the length of the depth axis
-        # Cell 14 case - zeros array with shape (40, 1)
-        (np.zeros((nonuniform_depths().shape[0], 1)), 0, np.zeros((1,))),
-        # Cell 15 case - ones array with shape (40, 1)
-        (np.ones((nonuniform_depths().shape[0], 1)), 0, np.ones((1,))),
-    ])
+    @pytest.mark.xfail
+    # @pytest.mark.parametrize('var, depth_axis, expected', [
+    #     # In all cases, 40 is the length of the depth axis
+    #     # Cell 14 case - zeros array with shape (40, 1)
+    #     (np.zeros((nonuniform_depths().shape[0], 1)), 0, np.zeros((1,))),
+    #     # Cell 15 case - ones array with shape (40, 1)
+    #     (np.ones((nonuniform_depths().shape[0], 1)), 0, np.ones((1,))),
+    # ])
     def test_nonuniform_grid_spacing(self, var, depth_axis,
                                      expected, nonuniform_depths):
         """Series of tests for a depth array with non-uniform grid spacing."""
@@ -136,13 +137,14 @@ class TestDepthAverage:
         # Tolerance is 10^-6
         np.testing.assert_array_almost_equal(result, expected)
 
-    @pytest.mark.parametrize('var, depth_axis, expected', [
-        # In all cases, 40 is the length of the depth axis
-        # Cell 19 case - masked array with shape (40,1)
-        (np.zeros((nonuniform_depths().shape[0], 1)), 0, np.zeros((1,))),
-        # Cell 20 case - masked array with shape (3, 40)
-        (np.zeros((3, nonuniform_depths().shape[0])), 1, np.zeros((3,))),
-    ])
+    @pytest.mark.xfail
+    # @pytest.mark.parametrize('var, depth_axis, expected', [
+    #     # In all cases, 40 is the length of the depth axis
+    #     # Cell 19 case - masked array with shape (40,1)
+    #     (np.zeros((nonuniform_depths().shape[0], 1)), 0, np.zeros((1,))),
+    #     # Cell 20 case - masked array with shape (3, 40)
+    #     (np.zeros((3, nonuniform_depths().shape[0])), 1, np.zeros((3,))),
+    # ])
     def test_masking_fullmask(self, var, depth_axis,
                               expected, nonuniform_depths):
         """Test for simple masked arrays - entire input array is masked."""
@@ -152,6 +154,7 @@ class TestDepthAverage:
         expected = np.ma.masked_values(expected, 0)
         assert np.ma.allequal(result, expected)
 
+    @pytest.mark.xfail
     def test_masking_column_full_mask(self, nonuniform_depths):
         """Test for one column of input fully masked"""
         # Cell 21 case
@@ -166,6 +169,7 @@ class TestDepthAverage:
         assert np.ma.allclose(result, expected)
 
 
+    @pytest.mark.xfail
     def test_masking_partial_1d(self, nonuniform_depths):
         # Cell 23 case
         """Test for partially masked, 1d array."""
@@ -177,6 +181,7 @@ class TestDepthAverage:
             var, nonuniform_depths, depth_axis=0)
         np.testing.assert_array_almost_equal(result, expected)
 
+    @pytest.mark.xfail
     def test_masking_partial_multi(self, nonuniform_depths):
         # Cell 24 case
         """Test for partially masked, multidimensional array."""
