@@ -169,7 +169,7 @@ def _make_publish_plots(
     dmy, model_path, bathy, results_dir, plots_dir, coastline, *args
 ):
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
-    names = ['Point Atkinson', 'Victoria', 'Campbell River',
+    names = ['Point Atkinson', 'Victoria', 'Campbell River', 'Cherry Point',
              'Friday Harbor', 'Neah Bay', 'Nanaimo', 'Sandheads']
     filepath_tmpl = os.path.join(results_dir, '{}.nc')
     grids_15m = {
