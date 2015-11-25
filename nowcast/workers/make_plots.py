@@ -256,7 +256,7 @@ def _make_publish_plots(
 
 
 def _make_comparisons_plots(
-    dmy, model_path, bathy, results_dir, plots_dir, coastline
+    dmy, model_path, bathy, results_dir, plots_dir, coastline, *args
 ):
     """Make the plots we wish to look at for comparisons purposes.
     """
@@ -264,7 +264,7 @@ def _make_comparisons_plots(
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     grid_c = _results_dataset_gridded('central', results_dir)
     grid_e = _results_dataset_gridded('east', results_dir)
-    grid_d = _results_dataset_gridded('ddl', results_dir)
+    grid_d = _results_dataset_gridded('delta', results_dir)
 
     # ONC ADCP data
     grid_oc = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat')
