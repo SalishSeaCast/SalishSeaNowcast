@@ -86,7 +86,7 @@ class NowcastManager:
             # 'upload_all_files': self._after_upload_all_files,
             'make_forcing_links': self._after_make_forcing_links,
             'run_NEMO': self._after_run_NEMO,
-            # 'watch_NEMO': self._after_watch_NEMO,
+            'watch_NEMO': self._after_watch_NEMO,
             'download_results': self._after_download_results,
             'make_plots': self._after_make_plots,
             # 'make_site_page': self._after_make_site_page,
@@ -468,6 +468,34 @@ class NowcastManager:
                 [(self._update_checklist,
                     ['run_NEMO', 'NEMO run', payload])],
         }
+        return actions[msg_type]
+
+    def _after_watch_NEMO(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        watch_NEMO worker.
+        """
+        for handler in self.worker_loggers['watch_NEMO'].handlers:
+            self.worker_loggers['watch_NEMO'].removeHandler(handler)
+        actions = {
+            'crash': None,
+            'failure nowcast': None,
+            'failure forecast': None,
+            'failure forecast2': None,
+        }
+        if msg_type.startswith('success'):
+            run_type = msg_type.split()[1]
+            actions[msg_type] = [
+                (self._update_checklist, ['watch_NEMO', 'NEMO run', payload]),
+                (self._launch_worker,
+                    ['download_results',
+                        [self.config['run']['cloud host'], run_type,
+                         '--run-date', payload[run_type]['run date']]]),
+            ]
+            if msg_type == 'success nowcast':
+                actions[msg_type].insert(
+                    1, (self._launch_worker, ['get_NeahBay_ssh', ['forecast']])
+                )
         return actions[msg_type]
 
     def _after_download_results(self, msg_type, payload):
