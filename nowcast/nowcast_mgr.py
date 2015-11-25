@@ -535,8 +535,12 @@ class NowcastManager:
             'failure forecast2 publish': None,
         }
         if msg_type.startswith('success'):
+            _, run_type, page_type = msg_type.split()
             actions[msg_type] = [
                 (self._update_checklist, ['make_plots', 'plots', payload]),
+                (self._launch_worker,
+                    ['make_site_page', run_type, page_type, '--run-date',
+                     self.checklist['NEMO run'][run_type]['run date']])
             ]
         return actions[msg_type]
 
