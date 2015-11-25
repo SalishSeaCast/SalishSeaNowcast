@@ -984,12 +984,45 @@ class TestAfterMakeSitePage:
         'success publish',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2015-11-25'},
+                'forecast': {'run date': '2015-11-25'},
+                'forecast2': {'run date': '2015-11-25'},
+            },
+        }
         actions = mgr._after_make_site_page(msg_type, 'payload')
         expected = (
             mgr._update_checklist,
             ['make_site_page', 'salishsea site pages', 'payload'],
         )
         assert actions[0] == expected
+
+    @pytest.mark.parametrize('msg_type', [
+        'success index',
+        'success publish',
+    ])
+    def test_success_launch_push_to_web_worker(self, msg_type, mgr):
+        actions = mgr._after_make_site_page(msg_type, 'payload')
+        expected = (mgr._launch_worker, ['push_to_web'])
+        assert actions[1] == expected
+
+    def test_success_research_launch_make_plots_worker_nowcast_publish(
+        self, mgr
+    ):
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2015-11-25'},
+                'forecast': {'run date': '2015-11-25'},
+                'forecast2': {'run date': '2015-11-25'},
+            },
+        }
+        actions = mgr._after_make_site_page('success research', 'payload')
+        expected = (
+            mgr._launch_worker,
+            ['make_plots', ['nowcast', 'publish', '--run-date', '2015-11-25']],
+        )
+        assert actions[1] == expected
 
 
 class TestUpdateChecklist:
