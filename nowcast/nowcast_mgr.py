@@ -90,7 +90,7 @@ class NowcastManager:
             'download_results': self._after_download_results,
             'make_plots': self._after_make_plots,
             'make_site_page': self._after_make_site_page,
-            # 'push_to_web': self._after_push_to_web,
+            'push_to_web': self._after_push_to_web,
         }
 
     def run(self):
@@ -572,6 +572,22 @@ class NowcastManager:
                 )
         return actions[msg_type]
 
+    def _after_push_to_web(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        push_to_web worker.
+        """
+        actions = {
+            'crash': None,
+            'failure': None,
+            'success':
+                [(self._update_checklist,
+                    ['push_to_web', 'push to salishsea site', payload])],
+        }
+        if 'finish the day' in self.checklist['salishsea site pages']:
+            actions['success'].append((self._finish_the_day, []))
+        return actions[msg_type]
+
     def _update_checklist(self, worker, key, worker_checklist):
         """Update the checklist value at key with the items passed from
         the worker.
@@ -610,6 +626,11 @@ class NowcastManager:
         self.logger.info('launching {} worker on {}'.format(worker, host))
         self.logger.debug(cmd)
         subprocess.Popen(cmd)
+
+    def _finish_the_day(self):
+        """
+        """
+        pass
 
 
 if __name__ == '__main__':
