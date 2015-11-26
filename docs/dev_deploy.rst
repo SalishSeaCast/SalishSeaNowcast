@@ -100,7 +100,7 @@ used for the salishsea.eos.ubc.ca site:
 
 The above packages are sufficient to run the nowcast system.
 For development and debugging of Python code,
-:ref:`salishsea_tools.nowcast.figures` functions,
+:ref:`nowcast.figures` functions,
 etc.,
 you may also want to install IPython and IPython Notebook,
 the pytest and coverage unit testing tools,
