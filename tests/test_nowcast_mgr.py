@@ -998,26 +998,28 @@ class TestUpdateChecklist:
     """Unit tests for the NowcastManager._update_checklist method.
     """
     def test_update_existing_value(self, mgr):
-        mgr.config = {'checklist file': 'nowcast_checklist.yaml'}
         mgr.checklist = {'foo': 'bar'}
-        with patch.object(mgr_module(), 'open', mock_open()):
-            mgr._update_checklist('worker', 'foo', 'baz')
+        mgr._write_checklist_to_disk = Mock(name='_write_checklist_to_disk')
+        mgr._update_checklist('worker', 'foo', 'baz')
         assert mgr.checklist['foo'] == 'baz'
 
     def test_keyerror_adds_key_and_value(self, mgr):
-        pass
-
-    def test_valueerror_adds_key_and_value(self, mgr):
-        pass
-
-    def test_attributeerror_adds_key_and_value(self, mgr):
-        pass
+        mgr.checklist = {'foo': 'bar'}
+        mgr._write_checklist_to_disk = Mock(name='_write_checklist_to_disk')
+        mgr._update_checklist('worker', 'fop', 'baz')
+        assert mgr.checklist == {'foo': 'bar', 'fop': 'baz'}
 
     def test_log_info_msg(self, mgr):
-        pass
+        mgr._write_checklist_to_disk = Mock(name='_write_checklist_to_disk')
+        mgr.logger = Mock(name='logger')
+        mgr._update_checklist('worker', 'foo', 'baz')
+        mgr.logger.info.assert_called_once_with(
+            'checklist updated with foo items from worker worker')
 
     def test_yaml_dump_checklist_to_disk(self, mgr):
-        pass
+        mgr._write_checklist_to_disk = Mock(name='_write_checklist_to_disk')
+        mgr._update_checklist('worker', 'foo', 'baz')
+        mgr._write_checklist_to_disk.assert_called_once_with()
 
 
 class TestFinishTheDay:
