@@ -112,7 +112,7 @@ The minimum set of imports that a worker needs are:
 
 The :py:mod:`logging` module is a Python standard library module that provides the mechanism that we use to print output about the worker's progress and status to the log file or the screen,
 effectively developer-approved print statements on steroids :-)
-The :ref:`salishsea_tools.nowcast.lib` is our collection of functions that are used across workers.
+The :ref:`nowcast.lib` is our collection of functions that are used across workers.
 If you find yourself writing the same function in more than one worker it should probably be generalized and included in :py:mod:`lib`.
 The :py:class:`NowcastWorker` class provides the interface to the nowcast framework.
 We use relative imports for :py:mod:`lib` and :py:class:`NowcastWorker` because they are defined within the :py:mod:`SalishSeaNowcast` package.
