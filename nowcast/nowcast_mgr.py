@@ -605,6 +605,12 @@ class NowcastManager:
         self.logger.info(
             'checklist updated with {} items from {} worker'
             .format(key, worker))
+        self._write_checklist_to_disk()
+
+    def _write_checklist_to_disk(self):
+        """Write the checklist to disk as a YAML file so that it can be
+        inspected and/or recovered if the manager instance is restarted.
+        """
         with open(self.config['checklist file'], 'wt') as f:
             yaml.dump(self.checklist, f)
 
@@ -628,9 +634,44 @@ class NowcastManager:
         subprocess.Popen(cmd)
 
     def _finish_the_day(self):
+        """Finish automation process for the day.
+
+        Clear the checklist and rotate the log files.
         """
-        """
-        pass
+        self.logger.info('nowcast and forecast processing completed for today')
+        self.checklist_logger.info(
+            'checklist:\n{}'.format(pprint.pformat(self.checklist)))
+        self.checklist = {}
+        self.logger.info('checklist cleared')
+        self._write_checklist_to_disk()
+        self._rotate_log_files()
+
+    def _rotate_log_files(self):
+        self.logger.info('rotating log files')
+        for handler in self.logger.handlers:
+            if not hasattr(handler, 'when'):
+                try:
+                    handler.doRollover()
+                except AttributeError:
+                    # Logging handler has no rolloever;
+                    # probably a StreamHandler
+                    continue
+                level = logging.getLevelName(handler.level).lower()
+                log_file = self.config['logging']['log_files'][level]
+                lib.fix_perms(log_file)
+                self.logger.info(
+                    'log file rotated: {}'.format(log_file))
+        for handler in self.checklist_logger.handlers:
+            try:
+                handler.doRollover()
+            except AttributeError:
+                # Logging handler has no rolloever; probably a StreamHandler
+                continue
+            log_file = self.config['logging']['checklist_log_file']
+            lib.fix_perms(log_file)
+            self.logger.info('log file rotated: {}'.format(log_file))
+        self.logger.debug('running in process {}'.format(os.getpid()))
+
 
 
 if __name__ == '__main__':

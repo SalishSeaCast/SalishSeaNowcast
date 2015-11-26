@@ -1018,3 +1018,30 @@ class TestUpdateChecklist:
 
     def test_yaml_dump_checklist_to_disk(self, mgr):
         pass
+
+
+class TestFinishTheDay:
+    """Unit tests for the NowcastManager._finish_the_day method.
+    """
+    def test_checklist_is_logged(self, mgr):
+        mgr.checklist = {'foo': 'bar'}
+        mgr.checklist_logger = Mock(name='checklist_logger')
+        mgr._rotate_log_files = Mock(name='_rotate_log_files')
+        with patch.object(mgr, '_write_checklist_to_disk'):
+            mgr._finish_the_day()
+        mgr.checklist_logger.info.assert_called_once_with(
+            "checklist:\n{'foo': 'bar'}")
+
+    def test_checklist_cleared_and_written_to_disk(self, mgr):
+        mgr.checklist = {'foo': 'bar'}
+        mgr._write_checklist_to_disk = Mock(name='_write_checklist_to_disk')
+        mgr._rotate_log_files = Mock(name='_rotate_log_files')
+        mgr._finish_the_day()
+        assert mgr.checklist == {}
+        mgr._write_checklist_to_disk.assert_called_once_with()
+
+    def test_rotate_log_files(self, mgr):
+        mgr._rotate_log_files = Mock(name='_rotate_log_files')
+        with patch.object(mgr, '_write_checklist_to_disk'):
+            mgr._finish_the_day()
+        mgr._rotate_log_files.assert_called_once_with()
