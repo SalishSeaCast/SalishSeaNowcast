@@ -2029,10 +2029,10 @@ def thalweg_salinity(
     :arg list salinity_levels: Salinity values for contour levels shading.
 
     :arg mesh_mask: NEMO mesh_mask file.
-    :type mesh_mask: :class:`netCDF4.Dataset
+    :type mesh_mask: :class:`netCDF4.Dataset`
 
     :arg grid_B: Model bathymetry file.
-    :type grid_B: :class:`netCDF4.Dataset
+    :type grid_B: :class:`netCDF4.Dataset`
 
     :arg cmap: Colour map to use for the contour shading.
     :type cmap: str or :py:class:`matplotlib.colors.Colormap`
@@ -2152,10 +2152,10 @@ def thalweg_temperature(
     :type grid_T_d: :class:`netCDF4.Dataset`
 
     :arg mesh_mask: NEMO mesh_mask file.
-    :type mesh_mask: :class:`netCDF4.Dataset
+    :type mesh_mask: :class:`netCDF4.Dataset`
 
     :arg grid_B: Model bathymetry file.
-    :type grid_B: :class:`netCDF4.Dataset
+    :type grid_B: :class:`netCDF4.Dataset`
 
     :arg figsize:  Figure size (width, height) in inches.
     :type figsize: 2-tuple
