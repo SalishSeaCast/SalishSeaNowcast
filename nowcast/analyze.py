@@ -41,7 +41,7 @@ from nowcast import figures
 
 
 # Paths for model results
-paths = {'nowcast': '/data/dlatorne/MEOPAR/SalishSea/nowcast/',
+paths = {'nowcast': '/results/SalishSea/nowcast/',
          'forecast': '/results/SalishSea/forecast/',
          'forecast2': '/results/SalishSea/forecast2/'}
 
