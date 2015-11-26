@@ -16,7 +16,6 @@
 """Salish Sea NEMO nowcast manager.
 """
 import argparse
-from copy import copy
 import logging
 import os
 import pprint
@@ -35,31 +34,43 @@ def main():
 
 
 class NowcastManager:
-    """Construct a :py:class:`nowcast_mgr.NowcastManager` instance.
+    """Construct a :py:class:`nowcast.nowcast_mgr.NowcastManager` instance.
 
     A manager instance has the following atrributes:
 
-    * :py:attr:`name` The name of the manager instance -
-                      the manager's module name without the
-                      :kbd:`.py` extension;
-                      obtained by calling the
-                      :py:func:`nowcast.lib.get_module_name` function
-                      in the constructor.
+    * :py:attr:`name` - The name of the manager instance:
+      the manager's module name without the :kbd:`.py` extension;
+      obtained by calling the :py:func:`nowcast.lib.get_module_name`
+      function in the constructor.
 
-    * :py:attr:`logger` - A :py:class:`logging.Logger` instance named
-      :py:attr:`name`
+    * :py:attr:`logger` - A :py:class:`logging.Logger` instance
+      named :py:attr:`name`
 
-    * :py:attr:`worker_loggers`
+    * :py:attr:`checklist_logger` - A :py:class:`logging.Logger` instance
+      named :kbd:`checklist`;
+      used to log the :py:attr:`checklist` at the end of each day's
+      processing.
+
+    * :py:attr:`worker_loggers` - A :py:class:`dict` of
+      :py:class:`logging.Logger` instances;
+      used to log messages from the :py:mod:`nowcast.workers.run_NEMO`
+      and :py:mod:`nowcast.workers.watch_NEMO` workers that typically run
+      on a different machine than the manager.
 
     * :py:attr:`context` - A :py:class:`zmq.Context` instance that
       provides the basis for the worker's interface to the nowcast
       messaging framework
 
-    * :py:attr:`checklist`
+    * :py:attr:`checklist` - A :py:class:`dict` containing the nowcast
+      system state as updated by the workers.
 
-    * :py:attr:`parsed_args`
+    * :py:attr:`parsed_args` - An :py:class:`argparse.Namespace` instance
+      containing the arguments and option flags and values parsed from the
+      command-line when the manager was started.
 
-    * :py:attr:`config`
+    * :py:attr:`config` - A :py:class:`dict` containing the nowcast system
+      configuration that was read from the configuration file given on the
+      command-line when the manager was started.
 
     :returns: :py:class:`nowcast_mgr.NowcastManager` instance
     """

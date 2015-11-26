@@ -36,6 +36,15 @@
     :members:
 
 
+.. _nowcast.nowcast_mgr:
+
+:py:mod:`nowcast.nowcast_mgr` Module
+====================================
+
+.. automodule:: nowcast.nowcast_mgr
+    :members:
+
+
 .. _nowcast.nowcast_worker:
 
 :py:mod:`nowcast.nowcast_worker` Module
