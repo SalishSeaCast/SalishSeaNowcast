@@ -302,15 +302,20 @@ class NowcastManager:
                 actions['success 06'].extend([
                     (self._launch_worker, ['make_runoff_file']),
                 ])
-            if 'nowcast' in self.config['run_types']:
+                if 'forecast2' in self.config['run_types']:
+                    actions['success 06'].extend([
+                        (self._launch_worker,
+                            ['get_NeahBay_ssh', ['forecast2']]),
+                        (self._launch_worker,
+                            ['grib_to_netcdf', ['forecast2']]),
+                    ])
+            if all((
+                msg_type.endswith('12'),
+                'nowcast' in self.config['run_types']
+            )):
                 actions['success 12'].extend([
                     (self._launch_worker, ['get_NeahBay_ssh', ['nowcast']]),
                     (self._launch_worker, ['grib_to_netcdf', ['nowcast+']]),
-                ])
-            if 'forecast2' in self.config['run_types']:
-                actions['success 06'].extend([
-                    (self._launch_worker, ['get_NeahBay_ssh', ['forecast2']]),
-                    (self._launch_worker, ['grib_to_netcdf', ['forecast2']]),
                 ])
         return actions[msg_type]
 
