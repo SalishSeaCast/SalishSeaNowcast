@@ -203,7 +203,7 @@ def run_NEMO(host_name, run_type, config, socket):
         'run dir': run_dir,
         'pid': run_process.pid,
         'watcher pid': watcher_process.pid,
-        'run_date': run_date.strftime('%Y-%m-%d'),
+        'run date': run_date.strftime('%Y-%m-%d'),
     }}
 
 

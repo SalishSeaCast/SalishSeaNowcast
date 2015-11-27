@@ -152,7 +152,7 @@ def watch_NEMO(run_type, pid, config, socket):
     # TODO: confirm that the run and subsequent results gathering
     # completed successfully
     return {run_type: {
-        'run_date': run_info[run_type]['run_date'],
+        'run date': run_info[run_type]['run date'],
         'completed': True,
     }}
 
