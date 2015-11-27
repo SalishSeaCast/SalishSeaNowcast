@@ -167,7 +167,7 @@ logging:
 
 # Message system
 zmq:
-  server: salish.eos.ubc.ca
+  server: skookum.eos.ubc.ca
   ports:
     # traffic between nowcast_mgr and broker
     backend: 5554
