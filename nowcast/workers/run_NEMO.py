@@ -336,7 +336,7 @@ def build_script(run_desc_file, procs, results_dir):
     # files
     script += (
         u'echo "Results gathering and deflation started at $(date)" >>${RESULTS_DIR}/stdout\n'
-        u'${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR} >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
+        u'${GATHER} ${RUN_DESC} ${RESULTS_DIR} >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
         u'echo "Results gathering and deflation ended at $(date) >>${RESULTS_DIR}/stdout"\n'
         u'\n'
     )
@@ -357,7 +357,6 @@ def _definitions(run_id, run_desc_file, results_dir, procs):
         u'RESULTS_DIR="{results_dir}"\n'
         u'MPIRUN="{mpirun}"\n'
         u'GATHER="{salishsea_cmd} gather"\n'
-        u'GATHER_OPTS="--no-compress"\n'
     ).format(
         run_id=run_id,
         run_desc_file=run_desc_file,
