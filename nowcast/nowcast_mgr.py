@@ -335,14 +335,17 @@ class NowcastManager:
                 (self._update_checklist,
                     ['get_NeahBay_ssh', 'Neah Bay ssh', payload]),
             ]
-        for host in ('hpc host', 'cloud host'):
-            if 'forecast' in self.config['run_types']:
-                if host in self.config['run']:
-                    actions['success forecast'].append(
-                        (self._launch_worker,
-                            ['upload_forcing',
-                                [self.config['run'][host], 'ssh']])
-                    )
+            for host in ('hpc host', 'cloud host'):
+                if 'forecast' in self.config['run_types']:
+                    if all((
+                        host in self.config['run'],
+                        msg_type.endswith('forecast')
+                    )):
+                        actions['success forecast'].append(
+                            (self._launch_worker,
+                                ['upload_forcing',
+                                    [self.config['run'][host], 'ssh']])
+                        )
         return actions[msg_type]
 
     def _after_make_runoff_file(self, msg_type, payload):
