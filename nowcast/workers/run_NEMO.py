@@ -187,11 +187,10 @@ def run_NEMO(host_name, run_type, config, socket):
     msg = 'launching watch_NEMO worker on {}'.format(run_type, host_name)
     logger.info(msg)
     lib.tell_manager(worker_name, 'log.info', config, logger, socket, msg)
-    cmd = shlex.split(
-        'python -m salishsea_tools.nowcast.workers.watch_NEMO '
-        '/home/ubuntu/MEOPAR/nowcast/nowcast.yaml '
-        '{run_type} {pid}'.format(run_type=run_type, pid=run_process.pid)
-    )
+    cmd = [
+        host['python'], '-m', 'nowcast.workers.watch_NEMO',
+        host['config_file'], run_type, run_process.pid
+    ]
     msg = '{}: running command in subprocess: {}'.format(run_type, cmd)
     logger.debug(cmd)
     lib.tell_manager(worker_name, 'log.debug', config, logger, socket, msg)
