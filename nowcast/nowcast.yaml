@@ -61,6 +61,8 @@ run:
   # Remove or comment out the next line to prevent running in the cloud
   cloud host: west.cloud-nowcast
   west.cloud-nowcast:
+    python: /usr/bin/python3
+    config_file: /home/ubuntu/MEOPAR/nowcast/nowcast.yaml
     nodes: 9
     mpi decomposition: 8x18
     images:
