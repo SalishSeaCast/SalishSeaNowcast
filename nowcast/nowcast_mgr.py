@@ -643,8 +643,8 @@ class NowcastManager:
             cmd = [self.config['python'], '-m']
             config_file = self.config['config_file']
         else:
-            cmd = ['ssh', host, 'python', '-m']
-            config_file = '/home/ubuntu/MEOPAR/nowcast/nowcast.yaml'
+            cmd = ['ssh', host, self.config['run'][host]['python'], '-m']
+            config_file = self.config['run'][host]['config_file']
         cmd.extend(['nowcast.workers.{}'.format(worker), config_file])
         if cmd_line_args:
             cmd.extend(cmd_line_args)
@@ -690,7 +690,6 @@ class NowcastManager:
             lib.fix_perms(log_file)
             self.logger.info('log file rotated: {}'.format(log_file))
         self.logger.debug('running in process {}'.format(os.getpid()))
-
 
 
 if __name__ == '__main__':
