@@ -160,7 +160,8 @@ def _install_storm_surge_summary_plot(config, dmy, plots_dir):
         config['web']['www_path'],
         os.path.basename(config['web']['site_repo_url']),
         config['web']['site_storm_surge_plot_path'],
-        '{plot_name}.png'.format(config['web']['site_storm_surge_plot']))
+        '{plot_name}.png'
+        .format(plot_name=config['web']['site_storm_surge_plot']))
     shutil.copy2(os.path.join(plots_dir, dmy_plot), summary_plot)
     return summary_plot
 
