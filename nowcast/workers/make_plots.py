@@ -174,7 +174,7 @@ def _make_publish_plots(
              'Friday Harbor', 'Neah Bay', 'Nanaimo', 'Sandheads']
     filepath_tmpl = os.path.join(results_dir, '{}.nc')
     grids_15m = {
-        name: nc.Dataset(filepath_tmpl.format(name.replace(' ',  '')))
+        name: nc.Dataset(filepath_tmpl.format(name.replace(' ', '')))
         for name in names
     }
 
