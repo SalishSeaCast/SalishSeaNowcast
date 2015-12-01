@@ -1,0 +1,34 @@
+# conda environment description file for SalishSeaNowcast package
+# production deployment environment
+#
+# Create a conda environment for production deployment
+# of the Salish Sea Nowcast system with:
+#
+#    $ cd tools
+#    $ conda env create -f SalishSeaNowcast/environment-prod.yaml
+#    $ source activate nowcast
+#    $ pip install --editable SalishSeaTools/
+#    $ pip install --editable SalishSeaCmd/
+#    $ pip install --editable SalishSeaNowcast/
+
+name: nowcast-env
+dependencies:
+- mako
+- matplotlib
+- netCDF4
+- numpy
+- pandas
+- paramiko
+- pyyaml
+- pyzmq
+- pip
+- python=3
+- requests
+- scipy
+- sphinx
+- pip:
+  - angles
+  - arrow
+  - BeautifulSoup4
+  - driftwood
+  - sphinx-bootstrap-theme

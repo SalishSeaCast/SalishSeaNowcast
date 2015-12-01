@@ -1,0 +1,1 @@
+../__pkg_metadata__.py
