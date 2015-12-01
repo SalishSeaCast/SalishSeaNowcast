@@ -613,28 +613,26 @@ def compute_residual(ssh, t_model, ttide):
     return res
 
 
-def get_tides(name):
-    """ Returns the tidal predictions at a given station. Tidal
-    predictions are calculated for 2014 and 2015.
+def get_tides(name, path='tidal_predictions/'):
+    """ Returns the tidal predictions at a given station.
 
-    This function is only for Victoria, Campbell River, Point Atkinson and
-    Patricia Bay. Tidal predictions are stored in a specific location.
+    :arg str name: The name of the station.
 
-    :arg name: The name of the station.
-    :type name: string
+    :arg str path: Path to the directory containing the tidal prediction
+                   .csv files to use.
+                   Default value resolves to
+                   :file:`SalishSeaNowcast/nowcast/tidal_predications/
+                   for calls elsewhere in the
+                   :py:mod:`~SalishSeaNowcast.nowcast.figures` module.
 
     :returns: DataFrame object (ttide) with tidal predictions and columns time,
               pred_all, pred_8.
     """
 
     # Tide file covers 2014 and 2015. Harmonics were from CHS.
-    path = (
-        '/data/nsoontie/MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/'
-        'tidal_predictions/')
     fname = '{}_tidal_prediction_01-Jan-2015_01-Jan-2020.csv'.format(name)
     tfile = os.path.join(path, fname)
     ttide, msl = stormtools.load_tidal_predictions(tfile)
-
     return ttide
 
 
