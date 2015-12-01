@@ -127,7 +127,7 @@ def get_NeahBay_ssh(parsed_args, config):
     # Loop through full days and save netcdf
     ip = 0
     for d in dates_list:
-        surges, tc, forecast_flag = _retrieve_surge(d, dates, data)
+        surges, tc, forecast_flag = _retrieve_surge(d, dates, data, config)
         # Plotting
         if ip < 3:
             ax.plot(surges, '-o', lw=2, label=d.strftime('%d-%b-%Y'))
@@ -321,7 +321,7 @@ def _save_netcdf(
     return filepath
 
 
-def _retrieve_surge(day, dates, data):
+def _retrieve_surge(day, dates, data, config):
     """Gather the surge information for a single day.
 
     Return the surges in metres, an array with time_counter,
@@ -331,7 +331,10 @@ def _retrieve_surge(day, dates, data):
     forecast_flag = False
     surge = []
     # Load tides
-    ttide = figures.get_tides('Neah Bay')
+    ttide = figures.get_tides(
+        'Neah Bay',
+        path=config['ssh']['tidal_predictions'],
+    )
     # Grab list of times on this day
     tc, ds = _isolate_day(day, dates)
     for d in ds:
