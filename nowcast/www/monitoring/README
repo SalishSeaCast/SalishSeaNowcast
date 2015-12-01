@@ -1,0 +1,26 @@
+***********************************
+Nowcast Monitoring Information Page
+***********************************
+
+The index.html file in this directory is used as the monitoring
+information page for the Salish Sea NEMO nowcast automation system.
+
+At present,
+this page resides at /home/dlatorne/public_html/MEOPAR/nowcast/index.html
+which makes it accessible at http://eos.ubc.ca/~dlatorne/MEOPAR/nowcast/.
+Unfortunately,
+the index.html file at that location must be a regular file,
+not a symbolic link,
+so the file in this directory may be out of sync with the deployed version.
+Since the deployed version is public it is considered to be cannonical.
+
+The ideal workflow for making changes to index.html is:
+
+* Check for differences between the group-editable deployed version
+  and the version-controlled file in this directory.
+  If differences exist copy the deployed version into this directory
+  and commit the update.
+
+* Edit, test, and commit changes to the file here,
+  then copy it to /home/dlatorne/public_html/MEOPAR/nowcast/ to make
+  your changes public.
