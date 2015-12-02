@@ -32,10 +32,11 @@ and documentation of the nowcast system is:
 
     $ conda update conda
     $ cd MEOPAR/tools
-    $ conda env create -f SalishSeaTools/salishsea_tools/nowcast/environment.yaml
+    $ conda env create -f SalishSeaNowcast/environment-dev.yaml
     $ source activate nowcast
     (nowcast)$ pip install --editable SalishSeaTools
     (nowcast)$ pip install --editable SalishSeaCmd
+    (nowcast)$ pip install --editable SalishSeaNowcast
 
 The explanation of what those commands accomplish follows:
 
@@ -45,12 +46,12 @@ Ensure that your :program:`conda` package manager is up to date:
 
     $ conda update conda
 
-Create a new :program:`conda` environment with Python 2.7 and program:`pip` installed in it,
+Create a new :program:`conda` environment with Python 3 and program:`pip` installed in it,
 and activate the environment:
 
 .. code-block:: bash
 
-    $ conda create -n nowcast python=2.7 pip
+    $ conda create -n nowcast python=3 pip
 
     ...
 
@@ -149,12 +150,12 @@ The directory structure looks like::
           |-- salishsea-site/
           `-- templates@
 
-:file:`nowcast.yaml` is a symlink to your :file:`MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/nowcast.yaml` configuration file.
+:file:`nowcast.yaml` is a symlink to your :file:`MEOPAR/tools/SalishSeaNowcast/nowcast/nowcast.yaml` configuration file.
 
 The :file:`salishsea-site/` directory tree is a clone of the :ref:`salishsea-site-repo` repo.
 This clone is for automation testing only - you should not make commits in it.
 
-:file:`templates` is a symlink to your :file:`MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/www/templates/` directory,
+:file:`templates` is a symlink to your :file:`MEOPAR/tools/SalishSeaNowcast/nowcast/www/templates/` directory,
 where the templates for the pages that nowcast creates on the :kbd:`salishsea.eos.ubc.ca` site are stored.
 
 So,
@@ -165,10 +166,10 @@ the commands to create the directory structure are:
     (nowcast)$ cd MEOPAR/
     (nowcast)$ mkdir -p nowcast/www/
     (nowcast)$ cd nowcast/
-    (nowcast)$ ln -s ../tools/SalishSeaTools/salishsea_tools/nowcast/nowcast.yaml
+    (nowcast)$ ln -s ../tools/SalishSeaNowcast/nowcast/nowcast.yaml
     (nowcast)$ cd www/
     (nowcast)$ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site
-    (nowcast)$ ln -s ../../tools/SalishSeaTools/salishsea_tools/nowcast/www/templates
+    (nowcast)$ ln -s ../../tools/SalishSeaNowcast/nowcast/www/templates
 
 
 Mitigating a :mod:`download_weather` Worker Failure
@@ -179,7 +180,7 @@ They are also the only input source that is transient -
 each of the 4 daily forecast data sets are only available for slightly over a day,
 and EC does not maintain an archive of the HRDPS products.
 
-The HRDPS products files that we use are downloaded every 6 hours via the :py:mod:`SalishSeaTools.salishsea_tools.nowcast.workers.download_weather` worker.
+The HRDPS products files that we use are downloaded every 6 hours via the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker.
 The downloads are controlled by 4 :program:`cron` jobs that run on :kbd:`salish`:
 
   * The :kbd:`06` forecast download starts at 04:00
@@ -202,7 +203,7 @@ The `debug log file`_ will show more details about the specific file downloads a
 .. _info log file: eoas.ubc.ca/~dlatorne/MEOPAR/nowcast/nowcast.log
 .. _debug log file: eoas.ubc.ca/~dlatorne/MEOPAR/nowcast/nowcast.debug.log
 
-In the rare event that the nowcast automation system fails to download the HRDPS products every 6 hours via the :py:mod:`SalishSeaTools.salishsea_tools.nowcast.workers.download_weather` worker,
+In the rare event that the nowcast automation system fails to download the HRDPS products every 6 hours via the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker,
 it is critical that someone re-run that worker.
 Even if the worker cannot be re-run in the nowcast system deployment environment on :kbd:`salish` due to permission issues the forecast products can be downloaded using a development and testing environment and directory structure as described above
 (see :ref:`SalishSeaNowcastPythnonPackageEnvironmwnt` and :ref:`SalishSeaNowcastDirectoryStructure`).
@@ -234,7 +235,7 @@ That can be accomplished as follows:
 
             $ mkdir -p /ocean/<your_userid>/MEOPAR/GRIB/
 
-#. Run the :py:mod:`SalishSeaTools.salishsea_tools.nowcast.workers.download_weather` worker for the appropriate forecast with debug logging,
+#. Run the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker for the appropriate forecast with debug logging,
    for example:
 
    .. code-block:: bash
@@ -309,7 +310,7 @@ to see if files for 2 days exist.
 Testing :kbd:`salishsea.eos.ubc.ca` Site Page Templates
 -------------------------------------------------------
 
-The pages that the nowcast automation maintains on the :kbd:`salishsea.eos.ubc.ca` site are generated from templates stored in :file:`MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/www/templates/`.
+The pages that the nowcast automation maintains on the :kbd:`salishsea.eos.ubc.ca` site are generated from templates stored in :file:`MEOPAR/tools/SalishSeaNowcast/nowcast/www/templates/`.
 Those templates are reStructuredText files that contain `Mako`_ directives that facilitate,
 among other things,
 substitution of concrete values (like specific dates) into placeholder variables,
@@ -325,7 +326,7 @@ the process to get from a `Mako`_ page template to an HTML page happens in 2 sta
 
 #. Use :command:`sphinx-build` to render the :file:`.rst` file to a :file:`.html` file.
 
-In the nowcast production deployment the :file:`make_site_page.py` worker processes one or more page template(s) from the :file:`MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/www/templates/` directory to create one or more :file:`.rst` file(s) in the :file:`MEOPAR/nowcast/www/salishsea-site/` directory tree.
+In the nowcast production deployment the :file:`make_site_page.py` worker processes one or more page template(s) from the :file:`MEOPAR/tools/SalishSeaNowcast/nowcast/www/templates/` directory to create one or more :file:`.rst` file(s) in the :file:`MEOPAR/nowcast/www/salishsea-site/` directory tree.
 When the :file:`make_site_page.py` worker sends a success message to the nowcast manager the :file:`push_to_web.py` worker is launched to:
 
 #. Execute the :command:`hg update` command in :file:`MEOPAR/nowcast/www/salishsea-site/` to pull in any changes from other sources.
