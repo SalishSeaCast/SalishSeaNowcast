@@ -19,11 +19,16 @@ Development and Deployment
 
 .. _SalishSeaNowcastPythnonPackageEnvironmwnt:
 
-Salish Sea Nowcast Python Package Environment
----------------------------------------------
+:kbd:`SalishSeaNowcast` Python Package Environment
+--------------------------------------------------
 
 The nowcast manager and workers require several Python packages that are not part of the default :ref:`AnacondaPythonDistro` environment.
 To avoid adding complexity and potential undesirable interactions and/or side-effects to the default Anaconda Python environment we create an isolated environment for nowcast.
+
+
+The Fast Way to Create a :kbd:`nowcast` Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 The fast way to set up an environment for development,
 testing,
 and documentation of the nowcast system is:
@@ -34,9 +39,25 @@ and documentation of the nowcast system is:
     $ cd MEOPAR/tools
     $ conda env create -f SalishSeaNowcast/environment-dev.yaml
     $ source activate nowcast
-    (nowcast)$ pip install --editable SalishSeaTools
-    (nowcast)$ pip install --editable SalishSeaCmd
-    (nowcast)$ pip install --editable SalishSeaNowcast
+    (nowcast)$ pip install --editable SalishSeaTools/
+    (nowcast)$ pip install --editable SalishSeaCmd/
+    (nowcast)$ pip install --editable SalishSeaNowcast/
+
+To deactivate the :kbd:`nowcast` environment and return to your root Anaconda Python environment use:
+
+.. code-block:: bash
+
+    (nowcast)$ source deactivate
+
+If you need to set up a nowcast system test space to run workers in,
+jump to :ref:`SalishSeaNowcastDirectoryStructure`.
+
+If you want to know the nitty-gritty details of what the above commands do,
+read on...
+
+
+The Details of Creating a :kbd:`nowcast` Environment
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The explanation of what those commands accomplish follows:
 
