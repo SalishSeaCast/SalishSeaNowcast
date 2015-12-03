@@ -17,8 +17,6 @@
 """A collection of Python functions to produce model results visualization
 figures for analysis and model evaluation of daily nowcast/forecast runs.
 """
-from __future__ import division
-
 import datetime
 import glob
 from io import StringIO
