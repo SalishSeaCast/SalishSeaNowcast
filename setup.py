@@ -64,6 +64,7 @@ install_requires = [
     'sphinx-bootstrap-theme',
     # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools/
     # 'SalishSeaCmd',  # use cd tools; pip install -e SalishSeaCmd/
+    # 'SalishSeaCmd',  # use cd tools; pip install -e SalishSeaNowcast/
 ]
 
 setup(
