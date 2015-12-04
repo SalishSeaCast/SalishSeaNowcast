@@ -193,8 +193,30 @@ the commands to create the directory structure are:
     (nowcast)$ ln -s ../../tools/SalishSeaNowcast/nowcast/www/templates
 
 
-Mitigating a :mod:`download_weather` Worker Failure
----------------------------------------------------
+Mitigating Worker Failures
+--------------------------
+
+:mod:`get_NeahBay_ssh` Worker Failure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The sea surface height anomaly at the western Juan de Fuca boundary is taken from a `NOAA forecast`_ of storm surge at Neah Bay.
+If this page is not accessible then the :mod:`get_NeahBay_ssh` worker may fail.
+In this case, we can recover observed sea surface heights from the `NOAA tides and water levels`_ which may be used in the future.
+
+To recover the observed sea surface anomaly, run through this `SSH_NeahBay`_ notebook with the approriate date.
+The notebook is located in :file:`SalishSeaNowcast/nowcast/notebooks/SSH_NeahBay`.
+
+This notebook calcualted the sea surface height anomaly by removing tidal predictions from the NOAA Neah Bay observations.
+It then saves the result in a netCDF file for use in NEMO simulations. 
+
+.. _NOAA forecast: http://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
+
+.. _NOAA tides and water levels: http://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
+
+.. _SSH_NeahBay: http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/nowcast/notebooks/SSH_NeahBay.ipynb
+
+:mod:`download_weather` Worker Failure
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The Environment Canada (EC) 2.5 km resolution GEM forecast model products from the High Resolution Deterministic Prediction System (HRDPS) are critical inputs for the nowcast system.
 They are also the only input source that is transient -
