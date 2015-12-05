@@ -57,9 +57,11 @@ run:
     nowcast: /results/SalishSea/nowcast/
     forecast: /results/SalishSea/forecast/
     forecast2: /results/SalishSea/forecast2/
+    nowcast-green: /results/SalishSea/nowcast-green/
 
   # If the `cloud host` key is present, the cloud will be prepared
-  # and the nowcast and forecast runs executed on it automatically.
+  # and the nowcast, forecast, and forecast2 runs executed on it
+  # automatically.
   #
   # Remove or comment out the next line to prevent running in the cloud
   cloud host: west.cloud-nowcast
@@ -125,12 +127,17 @@ run:
       forecast: /home/dlatorne/MEOPAR/SalishSea/forecast/
       forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
 
-  # If the `nowcast-green host` key is present, the nowcast-green run on salish
-  # will be prepared for
+  # If the `nowcast-green host` key is present, the forcing files will be
+  # symlinked and the nowcast-green run will be executed on it automatically.
+  # It is assumed that the nowcast-green run shares storage with the machine
+  # that the nowcast manager is running on, so uploading or forcing files,
+  # and downloaded of results files is not necessary.
   #
   # Remove or comment out the next line to prevent running nowcast-green
   nowcast-green host: salish-nowcast
   salish-nowcast:
+    python: /results/nowcast-sys/nowcast-env/bin/python
+    config_file: /results/nowcast-sys/nowcast/nowcast.yaml
     ssh key name:
       nowcast: /home/dlatorne/.ssh/id_rsa
     nowcast_dir: /data/dlatorne/MEOPAR/nowcast-green/
