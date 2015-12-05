@@ -569,6 +569,23 @@ class TestAfterGRIBtoNetCDF:
         )
         assert actions[1] == expected
 
+    def test_success_nowcastp_launch_make_forcing_links_nowcast_green(
+        self, mgr,
+    ):
+        mgr.config = {
+            'run_types': ['nowcast-green'],
+            'run': {
+                'cloud host': 'west.cloud-nowcast',
+                'nowcast-green host': 'salish-nowcast',
+            },
+        }
+        actions = mgr._after_grib_to_netcdf('success nowcast+', 'payload')
+        expected = (
+            mgr._launch_worker,
+            ['make_forcing_links', ['salish-nowcast', 'nowcast-green']]
+        )
+        assert actions[2] == expected
+
 
 class TestAfterUploadForcing:
     """Unit tests for the NowcastManager._after_upload_forcing method.
@@ -638,6 +655,7 @@ class TestAfterMakeForcingLinks:
         'failure nowcast+',
         'failure forecast2',
         'failure ssh',
+        'failure nowcast-green',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
@@ -648,6 +666,7 @@ class TestAfterMakeForcingLinks:
         'success nowcast+',
         'success forecast2',
         'success ssh',
+        'success nowcast-green',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
         mgr.config = {'run_types': [], 'run': []}
