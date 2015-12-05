@@ -41,12 +41,14 @@ def main():
     worker.arg_parser.add_argument(
         'host_name', help='Name of the host to symlink forcing files on')
     worker.arg_parser.add_argument(
-        'run_type', choices=set(('nowcast+', 'forecast2', 'ssh')),
+        'run_type', choices=set(
+            ('nowcast+', 'forecast2', 'ssh', 'nowcast-green')),
         help='''
         Type of run to symlink files for:
         'nowcast+' means nowcast & 1st forecast runs,
         'forecast2' means 2nd forecast run,
         'ssh' means Neah Bay sea surface height files only (for forecast run).
+        'nowcast-green' means nowcast green ocean run,
         ''',
     )
     salishsea_today = arrow.now('Canada/Pacific').floor('day')

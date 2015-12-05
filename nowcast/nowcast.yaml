@@ -50,6 +50,7 @@ run_types:
   - nowcast
   - forecast
   - forecast2
+  - nowcast-green
 
 run:
   results archive:
@@ -123,6 +124,28 @@ run:
       nowcast: /home/dlatorne/MEOPAR/SalishSea/nowcast/
       forecast: /home/dlatorne/MEOPAR/SalishSea/forecast/
       forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
+
+  # If the `nowcast-green host` key is present, the nowcast-green run on salish
+  # will be prepared for
+  #
+  # Remove or comment out the next line to prevent running nowcast-green
+  nowcast-green host: salish-nowcast
+  salish-nowcast:
+    ssh key name:
+      nowcast: /home/dlatorne/.ssh/id_rsa
+    nowcast_dir: /data/dlatorne/MEOPAR/nowcast-green/
+    results:
+      nowcast-green: /results/SalishSea/nowcast-green/
+    rivers_dir: /results/forcing/rivers/
+    # Location of rivers runoff monthly climatology file
+    rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
+    ssh_dir: /results/forcing/sshNeahBay/
+    weather_dir: /results/forcing/atmospheric/GEM2.5/operational/
+    # Location of no_snow.nc constraint file
+    no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
+    # Location of NEMO on-the-fly interpolation weights file
+    # for GEM 2.5km operational forecast
+    weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
 
 
 web:
@@ -257,6 +280,8 @@ msg_types:
     failure forecast2: forcing file links for forecast2 failed
     success ssh: sea surface height forcing file links for forecast created
     failure ssh: sea surface height forcing file links for forecast failed
+    success nowcast-green: forcing file links for nowcast-green created
+    failure nowcast-green: forcing file links for nowcast-green failed
     crash: make_forcing_links worker crashed
   run_NEMO:
     log.debug: debug level logging message

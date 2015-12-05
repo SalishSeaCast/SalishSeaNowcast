@@ -380,13 +380,19 @@ class NowcastManager:
                     ['grib_to_netcdf', 'weather forcing', payload]),
             ],
         }
-        for host in ('hpc host', 'cloud host'):
+        for host in ('cloud host', 'hpc host', 'nowcast-green host'):
             if host in self.config['run']:
                 if 'nowcast' in self.config['run_types']:
                     actions['success nowcast+'].append(
                         (self._launch_worker,
                             ['upload_forcing',
                                 [self.config['run'][host], 'nowcast+']])
+                    )
+                if 'nowcast-green' in self.config['run_types']:
+                    actions['success nowcast+'].append(
+                        (self._launch_worker,
+                            ['make_forcing_links',
+                                [self.config['run'][host], 'nowcast-green']])
                     )
                 if 'forecast2' in self.config['run_types']:
                     actions['success forecast2'].append(
@@ -449,6 +455,7 @@ class NowcastManager:
             'failure nowcast+': None,
             'failure forecast2': None,
             'failure ssh': None,
+            'failure nowcast-green': None,
         }
         if msg_type.startswith('success'):
             actions[msg_type] = [
