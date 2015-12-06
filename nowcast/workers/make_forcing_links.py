@@ -149,14 +149,15 @@ def _make_weather_links(
         src = host_run_config[linkfile]
         dest = os.path.join(NEMO_atmos_dir, os.path.basename(src))
         _create_symlink(sftp_client, host_name, src, dest)
-    if run_type == 'nowcast+':
+    nowcast_runs = {'nowcast+', 'nowcast-green'}
+    if run_type in nowcast_runs:
         weather_start = -1
     else:
         weather_start = 0
     for day in range(weather_start, 3):
         filename = grib_to_netcdf.FILENAME_TMPL.format(
             run_date.replace(days=day).date())
-        if run_type == 'nowcast+':
+        if run_type in nowcast_runs:
             dir = '' if day <= 0 else 'fcst'
         else:
             dir = 'fcst'
