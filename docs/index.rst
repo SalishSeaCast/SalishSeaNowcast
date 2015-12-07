@@ -41,8 +41,7 @@ The automation architecture is presently under development.
 It consists of a long-running manager process and a collection of worker processes which are launched by the manager or by cron to perform specific tasks.
 
 The :kbd:`SalishSeaNowcast` package is a Python 3 package.
-It was developed and tested under Python 3.4 and should work with that and later versions of Python.
-
+It was developed and tested under Python 3.5 and should work with that and later versions of Python.
 
 
 Contents:
@@ -51,7 +50,8 @@ Contents:
    :maxdepth: 2
 
    framework
-   workers
-   config
    dev_deploy
+   workers
+   deploy
+   config
    api
