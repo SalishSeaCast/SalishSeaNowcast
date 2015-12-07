@@ -84,7 +84,7 @@ not all of the packages that we need are available in the :program:`conda` repos
 
 .. _Python Package Index: https://pypi.python.org/pypi
 
-Install the packages that the :ref:`SalishSeaTools` depends on,
+Install the packages that the :ref:`SalishSeaToolsPackage` depends on,
 the package itself,
 and its companion package :ref:`SalishSeaCmdProcessor`:
 
