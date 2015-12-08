@@ -380,7 +380,7 @@ class NowcastManager:
                     ['grib_to_netcdf', 'weather forcing', payload]),
             ],
         }
-        for host in ('cloud host', 'hpc host', 'nowcast-green host'):
+        for host in ('cloud host', 'hpc host'):
             if host in self.config['run']:
                 if 'nowcast' in self.config['run_types']:
                     actions['success nowcast+'].append(
@@ -388,18 +388,21 @@ class NowcastManager:
                             ['upload_forcing',
                                 [self.config['run'][host], 'nowcast+']])
                     )
-                if 'nowcast-green' in self.config['run_types']:
-                    actions['success nowcast+'].append(
-                        (self._launch_worker,
-                            ['make_forcing_links',
-                                [self.config['run'][host], 'nowcast-green']])
-                    )
                 if 'forecast2' in self.config['run_types']:
                     actions['success forecast2'].append(
                         (self._launch_worker,
                             ['upload_forcing',
                                 [self.config['run'][host], 'forecast2']])
                     )
+        if all(
+            ('nowcast-green host' in self.config['run'],
+             'nowcast-green' in self.config['run_types'])):
+                actions['success nowcast+'].append(
+                    (self._launch_worker,
+                        ['make_forcing_links',
+                            [self.config['run']['nowcast-green host'],
+                             'nowcast-green']])
+                )
         return actions[msg_type]
 
     def _after_upload_forcing(self, msg_type, payload):
