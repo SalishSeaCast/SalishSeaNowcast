@@ -2633,7 +2633,8 @@ def interp_to_model_time(time_model, varp, tp):
     varp_interp = []
     for t in time_model:
         mod_wrt_epoc = (t-epoc).total_seconds()
-        varp_interp.append(np.interp(mod_wrt_epoc, tp_wrt_epoc, varp))
+        varp_interp.append(np.interp(mod_wrt_epoc, tp_wrt_epoc, varp,
+                                     left=float('nan'), right=float('nan')))
 
     return varp_interp
 
