@@ -20,6 +20,7 @@ visualizations.
 import datetime
 
 from dateutil import tz
+import pytz
 
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
@@ -38,7 +39,8 @@ from nowcast import (
 
 paths = {'nowcast': '/results/SalishSea/nowcast/',
          'forecast': '/results/SalishSea/forecast/',
-         'forecast2': '/results/SalishSea/forecast2/'}
+         'forecast2': '/results/SalishSea/forecast2/',
+         'tides': '/data/nsoontie/MEOPAR/tools/SalishSeaNowcast/nowcast/tidal_predictions/'}
 
 colours = {'nowcast': 'DodgerBlue',
            'forecast': 'ForestGreen',
@@ -49,31 +51,6 @@ colours = {'nowcast': 'DodgerBlue',
            'residual': 'DimGray'}
 
 # Module functions
-
-
-def calculate_residual(ssh, time_ssh, tides, time_tides):
-    """ Calculates the residual of the model sea surface height or
-    observed water levels with respect to the predicted tides.
-
-    :arg ssh: Sea surface height (observed or modelled).
-    :type ssh: numpy array
-
-    :arg time_ssh: Time component for sea surface height (observed or modelled)
-    :type time_ssh: numpy array
-
-    :arg tides: Predicted tides.
-    :type tides: dataFrame object
-
-    :arg time_tides: Time component for predicted tides.
-    :type time_tides: dataFrame object
-
-    :returns: res, the residual
-    """
-
-    tides_interp = figures.interp_to_model_time(time_ssh, tides, time_tides)
-    res = ssh - tides_interp
-
-    return res
 
 
 def plot_residual_forcing(ax, runs_list, t_orig):
@@ -98,12 +75,8 @@ def plot_residual_forcing(ax, runs_list, t_orig):
     edt = sdt + datetime.timedelta(days=1)
 
     # retrieve observations, tides and residual
-    start_date = t_orig.strftime('%d-%b-%Y')
-    end_date = start_date
-    stn_no = figures.SITES['Neah Bay']['stn_no']
-    obs = figures.get_NOAA_wlevels(stn_no, start_date, end_date)
-    tides = figures.get_NOAA_tides(stn_no, start_date, end_date)
-    res_obs = calculate_residual(obs.wlev, obs.time, tides.pred, tides.time)
+    tides = figures.get_tides('Neah Bay', path=paths['tides'])
+    res_obs, obs = obs_residual_ssh_NOAA('Neah Bay', tides, sdt, sdt)
     # truncate and plot
     res_obs_trun, time_trun = analyze.truncate_data(
         np.array(res_obs), np.array(obs.time), sdt, edt)
@@ -114,8 +87,8 @@ def plot_residual_forcing(ax, runs_list, t_orig):
     for mode in runs_list:
         filename_NB, run_date = analyze.create_path(mode, t_orig, 'ssh*.txt')
         if filename_NB:
-            data = _load_surge_data(filename_NB)
-            surge, dates = _retrieve_surge(data, run_date)
+            dates, surge, fflag = NeahBay_forcing_anom(filename_NB, run_date,
+                                                       paths['tides'])
             surge_t, dates_t = analyze.truncate_data(np.array(surge),
                                                      np.array(dates), sdt, edt)
             ax.plot(dates_t, surge_t, label=mode, lw=2.5, color=colours[mode])
@@ -157,18 +130,15 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
     edt = sdt + datetime.timedelta(days=1)
 
     for ax, name in zip(axs, names):
+        # Identify model grid point
         lat = figures.SITES[name]['lat']
         lon = figures.SITES[name]['lon']
-        msl = figures.SITES[name]['msl']
         j, i = tidetools.find_closest_model_point(
             lon, lat, X, Y, bathy, allow_land=False)
-        ttide = figures.get_tides(name)
-        wlev_meas = figures.load_archived_observations(
-            name, t_orig_obs.strftime('%d-%b-%Y'),
-            t_final_obs.strftime('%d-%b-%Y'))
-        res_obs = calculate_residual(
-            wlev_meas.wlev, wlev_meas.time,
-            ttide.pred_all + msl, ttide.time)
+        # Observed residuals and wlevs and tides
+        ttide = figures.get_tides(name, path=paths['tides'])
+        res_obs, wlev_meas = obs_residual_ssh(
+            name, ttide, t_orig_obs, t_final_obs)
         # truncate and plot
         res_obs_trun, time_obs_trun = analyze.truncate_data(
             np.array(res_obs), np.array(wlev_meas.time), sdt, edt)
@@ -179,10 +149,8 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
             filename, run_date = analyze.create_path(
                 mode, t_orig, 'SalishSea_1h_*_grid_T.nc')
             grid_T = nc.Dataset(filename)
-            ssh_loc = grid_T.variables['sossheig'][:, j, i]
-            t_s, t_f, t_model = figures.get_model_time_variables(grid_T)
-            res_mod = calculate_residual(
-                ssh_loc, t_model, ttide.pred_8, ttide.time)
+            res_mod, t_model, ssh_corr, ssh_mod = model_residual_ssh(
+                grid_T, j, i, ttide)
             # truncate and plot
             res_mod_trun, t_mod_trun = analyze.truncate_data(
                 res_mod, t_model, sdt, edt)
@@ -190,7 +158,7 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
                     c=colours[mode], lw=2.5)
 
         ax.set_title('Comparison of modelled sea surface height residuals at'
-                     '{station}: {t:%d-%b-%Y}'.format(station=name, t=t_orig))
+                     ' {station}: {t:%d-%b-%Y}'.format(station=name, t=t_orig))
 
 
 def get_error_model(names, runs_list, grid_B, t_orig):
@@ -224,31 +192,30 @@ def get_error_model(names, runs_list, grid_B, t_orig):
     for name in names:
         error_mod_dict[name] = {}
         t_mod_dict[name] = {}
+        # Look up model grid
         lat = figures.SITES[name]['lat']
         lon = figures.SITES[name]['lon']
-        msl = figures.SITES[name]['msl']
         j, i = tidetools.find_closest_model_point(
             lon, lat, X, Y, bathy, allow_land=False)
-        ttide = figures.get_tides(name)
-        wlev_meas = figures.load_archived_observations(
-            name, t_orig_obs.strftime('%d-%b-%Y'),
-            t_final_obs.strftime('%d-%b-%Y'))
-        res_obs = calculate_residual(wlev_meas.wlev, wlev_meas.time,
-                                     ttide.pred_all + msl, ttide.time)
+        # Observed residuals and wlevs and tides
+        ttide = figures.get_tides(name, path=paths['tides'])
+        res_obs, wlev_meas = obs_residual_ssh(
+            name, ttide, t_orig_obs, t_final_obs)
+        res_obs_trun, time_obs_trun = analyze.truncate_data(
+            np.array(res_obs), np.array(wlev_meas.time), sdt, edt)
 
         for mode in runs_list:
             filename, run_date = analyze.create_path(
                 mode, t_orig, 'SalishSea_1h_*_grid_T.nc')
             grid_T = nc.Dataset(filename)
-            ssh_loc = grid_T.variables['sossheig'][:, j, i]
-            t_s, t_f, t_model = figures.get_model_time_variables(grid_T)
-            res_mod = calculate_residual(ssh_loc, t_model,
-                                         ttide.pred_8, ttide.time)
-            # truncate
+            res_mod, t_model, ssh_corr, ssh_mod = model_residual_ssh(
+                grid_T, j, i, ttide)
+            # Truncate
             res_mod_trun, t_mod_trun = analyze.truncate_data(
                 res_mod, t_model, sdt, edt)
+            # Error
             error_mod = analyze.calculate_error(res_mod_trun, t_mod_trun,
-                                                res_obs, wlev_meas.time)
+                                                res_obs_trun, time_obs_trun)
             error_mod_dict[name][mode] = error_mod
             t_mod_dict[name][mode] = t_mod_trun
 
@@ -272,12 +239,10 @@ def get_error_forcing(runs_list, t_orig):
     edt = sdt + datetime.timedelta(days=1)
 
     # retrieve observed residual
-    start_date = t_orig.strftime('%d-%b-%Y')
-    end_date = start_date
-    stn_no = figures.SITES['Neah Bay']['stn_no']
-    obs = figures.get_NOAA_wlevels(stn_no, start_date, end_date)
-    tides = figures.get_NOAA_tides(stn_no, start_date, end_date)
-    res_obs_NB = calculate_residual(obs.wlev, obs.time, tides.pred, tides.time)
+    tides = figures.get_tides('Neah Bay', path=paths['tides'])
+    res_obs, obs = obs_residual_ssh_NOAA('Neah Bay', tides, sdt, sdt)
+    res_obs_trun, time_trun = analyze.truncate_data(
+        np.array(res_obs), np.array(obs.time), sdt, edt)
 
     # calculate forcing error
     error_frc_dict = {}
@@ -285,12 +250,12 @@ def get_error_forcing(runs_list, t_orig):
     for mode in runs_list:
         filename_NB, run_date = analyze.create_path(mode, t_orig, 'ssh*.txt')
         if filename_NB:
-            data = _load_surge_data(filename_NB)
-            surge, dates = _retrieve_surge(data, run_date)
+            dates, surge, fflag = NeahBay_forcing_anom(filename_NB, run_date,
+                                                       paths['tides'])
             surge_t, dates_t = analyze.truncate_data(
                 np.array(surge), np.array(dates), sdt, edt)
             error_frc = analyze.calculate_error(
-                surge_t, dates_t, res_obs_NB, obs.time)
+                surge_t, dates_t, res_obs_trun, obs.time)
             error_frc_dict[mode] = error_frc
             t_frc_dict[mode] = dates_t
 
@@ -446,9 +411,9 @@ def combine_errors(name, mode, dates, grid_B):
             model['error'] = np.append(model['error'], e_mod_tmp[name][mode])
             time = np.append(time, t_mod_tmp[name][mode])
             # append daily mean error
-            force['daily'] = np.append(force['daily'], np.mean(e_frc_tmp))
+            force['daily'] = np.append(force['daily'], np.nanmean(e_frc_tmp))
             model['daily'] = np.append(model['daily'],
-                                       np.mean(e_mod_tmp[name][mode]))
+                                       np.nanmean(e_mod_tmp[name][mode]))
             daily_time = np.append(daily_time,
                                    t_sim + datetime.timedelta(hours=12))
         else:
@@ -471,7 +436,7 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
     fig, axs = plt.subplots(3, 1, figsize=figsize)
 
     force, model, time, daily_time = combine_errors(name, mode, dates, grid_B)
-    ttide = figures.get_tides(name)
+    ttide = figures.get_tides(name, path=paths['tides'])
 
     # Plotting time series
     ax = axs[0]
@@ -487,12 +452,12 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
     ax.plot(daily_time, force['daily'], 'b',
             label='Forcing daily mean error', lw=2)
     ax.plot([time[0], time[-1]],
-            [np.mean(force['error']), np.mean(force['error'])],
+            [np.nanmean(force['error']), np.nanmean(force['error'])],
             '--b', label='Mean forcing error', lw=2)
     ax.plot(daily_time, model['daily'], 'g', lw=2,
             label='Model daily mean error')
     ax.plot([time[0], time[-1]],
-            [np.mean(model['error']), np.mean(model['error'])],
+            [np.nanmean(model['error']), np.nanmean(model['error'])],
             '--g', label='Mean model error', lw=2)
     ax.set_title('Comparison of {mode} daily mean error at'
                  ' {name}'.format(mode=mode, name=name))
@@ -516,145 +481,87 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
     return fig
 
 
-def _feet_to_metres(feet):
-    """ Converts feet to metres.
+def model_residual_ssh(grid_T, j, i, tides):
+    """Calcuates the model residual at coordinate j, i.
 
-    :returns: metres
-    """
+    :arg grid_T: hourly model results file
+    :type grid_T: netCDF file
 
-    metres = feet*0.3048
-    return metres
+    :arg j: model y-index
+    :type j: integer 0<=j<898
 
+    :arg i: model i-index
+    :type i: integer 0<=i<398
 
-def _load_surge_data(filename_NB):
-    """Loads the textfile with surge predictions for Neah Bay.
+    :arg tides: tidal predictions at grid point
+    :type tides: pandas DataFrame
 
-    :arg filename_NB: Path to file of predicted water levels at Neah Bay.
-    :type filename_NB: string
-
-    :returns: data (data structure)
-    """
-
-    # Loading the data from that text file.
-    data = pd.read_csv(filename_NB, skiprows=3,
-                       names=['date', 'surge', 'tide', 'obs',
-                              'fcst', 'anom', 'comment'], comment='#')
-    # Drop rows with all Nans
-    data = data.dropna(how='all')
-
-    return data
+    :returns: res_mod, t_model, ssh_corr, ssh_mod
+    The model residual, model times, model corrected ssh, and
+    unmodified model ssh"""
+    ssh_mod = grid_T.variables['sossheig'][:, j, i]
+    t_s, t_f, t_model = figures.get_model_time_variables(grid_T)
+    ssh_corr = figures.correct_model_ssh(ssh_mod, t_model, tides)
+    res_mod = figures.compute_residual(
+        ssh_corr, t_model, tides)
+    return res_mod, t_model, ssh_corr, ssh_mod
 
 
-def _to_datetime(datestr, year, isDec, isJan):
-    """ Converts the string given by datestr to a datetime object.
-    The year is an argument because the datestr in the NOAA data
-    doesn't have a year. Times are in UTC/GMT.
-
-    :arg datestr: Date of data.
-    :type datestr: datetime object
-
-    :arg year: Year of data.
-    :type year: datetime object
-
-    :arg isDec: True if run date was December.
-    :type isDec: Boolean
-
-    :arg isJan: True if run date was January.
-    :type isJan: Boolean
-
-    :returns: dt (datetime representation of datestr)
-    """
-
-    dt = datetime.datetime.strptime(datestr, '%m/%d %HZ')
-    # Dealing with year changes.
-    if isDec and dt.month == 1:
-        dt = dt.replace(year=year+1)
-    elif isJan and dt.month == 12:
-        dt = dt.replace(year=year-1)
-    else:
-        dt = dt.replace(year=year)
-    dt = dt.replace(tzinfo=tz.tzutc())
-
-    return dt
-
-
-def _retrieve_surge(data, run_date):
-    """ Gathers the surge information a forcing file from on run_date.
-
-    :arg data: Surge predictions data.
-    :type data: data structure
-
-    :arg run_date: Simulation run date.
-    :type run_date: datetime object
-
-    :returns: surges (meteres), times (array with time_counter)
-    """
-
-    surge = []
-    times = []
-    isDec, isJan = False, False
-    if run_date.month == 1:
-        isJan = True
-    if run_date.month == 12:
-        isDec = True
-    # Convert datetime to string for comparing with times in data
-    for d in data.date:
-
-        dt = _to_datetime(d, run_date.year, isDec, isJan)
-        times.append(dt)
-        daystr = dt.strftime('%m/%d %HZ')
-        tide = data.tide[data.date == daystr].item()
-        obs = data.obs[data.date == daystr].item()
-        fcst = data.fcst[data.date == daystr].item()
-        if obs == 99.90:
-            # Fall daylight savings
-            if fcst == 99.90:
-                # If surge is empty, just append 0
-                if not surge:
-                    surge.append(0)
-                else:
-                    # Otherwise append previous value
-                    surge.append(surge[-1])
-            else:
-                surge.append(_feet_to_metres(fcst-tide))
-        else:
-            surge.append(_feet_to_metres(obs-tide))
-
-    return surge, times
-
-
-def calculate_wlev_residual_NOAA(name, t_orig):
-    """ Calculates the residual of the observed water levels with respect
-    to the predicted tides at a specific station and for a specific date.
+def obs_residual_ssh(name, tides, sdt, edt):
+    """Calculates the observed residual at Point Atkinson, Campbell River,
+    or Victoria.
 
     :arg name: Name of station.
     :type name: string
 
-    :arg t_orig: The beginning of the date range of interest.
-    :type t_orig: datetime object
+    :arg sdt: The beginning of the date range of interest.
+    :type sdt: datetime object
+
+    :arg edt: The end of the date range of interest.
+    :type edt: datetime object
+
+    :returns: residual (calculated residual), obs (observed water levels),
+              tides (predicted tides)"""
+    msl = figures.SITES[name]['msl']
+    obs = figures.load_archived_observations(
+        name, sdt.strftime('%d-%b-%Y'),
+        edt.strftime('%d-%b-%Y'))
+    residual = figures.compute_residual(obs.wlev-msl, obs.time, tides)
+
+    return residual, obs
+
+
+def obs_residual_ssh_NOAA(name, tides, sdt, edt, product='hourly_height'):
+    """ Calculates the residual of the observed water levels with respect
+    to the predicted tides at a specific NOAA station and for a date range.
+
+    :arg name: Name of station.
+    :type name: string
+
+    :arg sdt: The beginning of the date range of interest.
+    :type sdt: datetime object
+
+    :arg edt: The end of the date range of interest.
+    :type edt: datetime object
+
+    :arg product: defines frequency of observed water levels
+    'hourly_height' for hourly or 'water_levels' for 6 min
+    :type product: string
 
     :returns: residual (calculated residual), obs (observed water levels),
               tides (predicted tides)
     """
-    stations = {'Cherry Point': 9449424,
-                'Neah Bay': 9443090,
-                'Friday Harbor': 9449880}
-    start_date = t_orig.strftime('%d-%b-%Y')
-    end_date = start_date
-    obs = figures.get_NOAA_wlevels(stations[name], start_date, end_date)
-    tides = figures.get_NOAA_tides(stations[name], start_date, end_date)
+    sites = figures.SITES
+    start_date = sdt.strftime('%d-%b-%Y')
+    end_date = edt.strftime('%d-%b-%Y')
+    obs = figures.get_NOAA_wlevels(sites[name]['stn_no'],
+                                   start_date, end_date,
+                                   product=product)
 
     # Prepare to find residual
-    residual = np.zeros(len(obs.time))
+    residual = figures.compute_residual(obs.wlev, obs.time, tides)
 
-    # Residual and time check
-    for i in np.arange(0, len(obs.time)):
-        if any(tides.time == obs.time[i]):
-            residual[i] = obs.wlev[i] - tides.pred[tides.time == obs.time[i]]
-        else:
-            residual[i] = float('Nan')
-
-    return residual, obs, tides
+    return residual, obs
 
 
 def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
@@ -675,8 +582,8 @@ def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
 
     :returns: fig
     """
-
-    residual, obs, tides = calculate_wlev_residual_NOAA('Neah Bay', t_orig)
+    tides = figures.get_tides('Neah Bay', path=paths['tides'])
+    residual, obs = obs_residual_ssh_NOAA('Neah Bay', tides, t_orig, t_orig)
 
     # Figure
     fig, ax = plt.subplots(1, 1, figsize=figsize)
@@ -701,3 +608,109 @@ def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
     ax.grid()
 
     return fig
+
+
+def NeahBay_forcing_anom(textfile, run_date, tide_file):
+    """Calculate the Neah Bay forcing anomaly for the data stored in textfile.
+
+    :arg textfile: the textfile containing forecast/observations
+    :type textfile: string
+
+    :arg run_date: date of the simulation
+    :type run_date: datetime object
+
+    :arg tide_file: path for the tide file
+    :type tide_file: string
+
+    :returns: dates, surge, forecast_flag
+    The dates, surges and a flag specifying if each point was a forecast
+    """
+
+    data = _load_surge_data(textfile)
+    dates = np.array(data.date.values)
+    # Check if today is Jan or Dec
+    isDec, isJan = False, False
+    if run_date.month == 1:
+        isJan = True
+    if run_date.month == 12:
+        isDec = True
+    for i in range(dates.shape[0]):
+        dates[i] = _to_datetime(dates[i], run_date.year, isDec, isJan)
+    surge, forecast_flag = _calculate_forcing_surge(data, dates, tide_file)
+    return dates, surge, forecast_flag
+
+
+def _load_surge_data(filename):
+    """Load the storm surge observations & predictions table from filename
+    and return is as a Pandas DataFrame.
+    """
+    col_names = 'date surge tide obs fcst anom comment'.split()
+    data = pd.read_csv(filename, skiprows=3, names=col_names, comment='#')
+    data = data.dropna(how='all')
+    return data
+
+
+def _calculate_forcing_surge(data, dates, tide_file):
+    """Given Neah Bay water levels stored in data, calculate the sea surface
+    height anomaly by removing tides.
+
+    Return the surges in metres,and a flag indicating if each anomaly
+    was a forecast.
+    """
+    # Initialize forecast flag and surge array
+    forecast_flag = []
+    surge = []
+    # Load tides
+    ttide = figures.get_tides(
+        'Neah Bay',
+        path=tide_file,
+    )
+    for d in dates:
+        # Convert datetime to string for comparing with times in data
+        daystr = d.strftime('%m/%d %HZ')
+        tide = ttide.pred_all[ttide.time == d].item()
+        obs = data.obs[data.date == daystr].item()
+        fcst = data.fcst[data.date == daystr].item()
+        if obs == 99.90:
+            # Fall daylight savings
+            if fcst == 99.90:
+                try:
+                    # No new forecast value, so persist the previous value
+                    surge.append(surge[-1])
+                except IndexError:
+                    # No values yet, so initialize with zero
+                    surge = [0]
+                forecast_flag.append(False)
+            else:
+                surge.append(_feet_to_metres(fcst) - tide)
+                forecast_flag.append(True)
+        else:
+            surge.append(_feet_to_metres(obs) - tide)
+            forecast_flag.append(False)
+    return surge, forecast_flag
+
+
+def _feet_to_metres(feet):
+    metres = feet*0.3048
+    return metres
+
+
+def _to_datetime(datestr,  year, isDec, isJan):
+    """Convert the string given by datestr to a datetime object.
+
+    The year is an argument because the datestr in the NOAA data doesn't
+    have a year.
+    Times are in UTC/GMT.
+
+    Return a datetime representation of datestr.
+    """
+    dt = datetime.datetime.strptime(datestr, '%m/%d %HZ')
+    # Dealing with year changes.
+    if isDec and dt.month == 1:
+        dt = dt.replace(year=year+1)
+    elif isJan and dt.month == 12:
+        dt = dt.replace(year=year-1)
+    else:
+        dt = dt.replace(year=year)
+    dt = dt.replace(tzinfo=pytz.timezone('UTC'))
+    return dt

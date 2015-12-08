@@ -14,9 +14,9 @@
 .. limitations under the License.
 
 
-**************************************
-:py:mod:`SalishSeaNowcast` Package API
-**************************************
+***********************************
+:kbd:`SalishSeaNowcast` Package API
+***********************************
 
 .. _nowcast.figures:
 

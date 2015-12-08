@@ -35,7 +35,7 @@ from salishsea_tools import (
     viz_tools
 )
 
-from . import (
+from nowcast import (
     analyze,
     figures,
 )

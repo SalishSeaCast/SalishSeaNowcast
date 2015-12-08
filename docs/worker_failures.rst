@@ -14,172 +14,41 @@
 .. limitations under the License.
 
 
-Development and Deployment
-==========================
+.. _MitigatingWorkerFailures:
 
-.. _SalishSeaNowcastPythnonPackageEnvironmwnt:
+**************************
+Mitigating Worker Failures
+**************************
 
-Salish Sea Nowcast Python Package Environment
----------------------------------------------
+:py:mod:`get_NeahBay_ssh` Worker Failure
+========================================
 
-The nowcast manager and workers require several Python packages that are not part of the default :ref:`AnacondaPythonDistro` environment.
-To avoid adding complexity and potential undesirable interactions and/or side-effects to the default Anaconda Python environment we create an isolated environment for nowcast.
-The fast way to set up an environment for development,
-testing,
-and documentation of the nowcast system is:
+The sea surface height anomaly at the western Juan de Fuca boundary is taken from a `NOAA forecast`_ of storm surge at Neah Bay.
+If this page is not accessible then the :mod:`get_NeahBay_ssh` worker may fail.
+In this case, we can recover observed sea surface heights from the `NOAA tides and water levels`_ which may be used in the future.
 
-.. code-block:: bash
+To recover the observed sea surface anomaly, run through this `SSH_NeahBay`_ notebook with the approriate date.
+The notebook is located in :file:`SalishSeaNowcast/nowcast/notebooks/SSH_NeahBay.ipynb`.
 
-    $ conda update conda
-    $ cd MEOPAR/tools
-    $ conda env create -f SalishSeaTools/salishsea_tools/nowcast/environment.yaml
-    $ source activate nowcast
-    (nowcast)$ pip install --editable SalishSeaTools
-    (nowcast)$ pip install --editable SalishSeaCmd
+This notebook calcualtes the sea surface height anomaly by removing tidal predictions from the NOAA Neah Bay observations.
+It then saves the result in a netCDF file for use in NEMO simulations.
 
-The explanation of what those commands accomplish follows:
+.. _NOAA forecast: http://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
 
-Ensure that your :program:`conda` package manager is up to date:
+.. _NOAA tides and water levels: http://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
 
-.. code-block:: bash
-
-    $ conda update conda
-
-Create a new :program:`conda` environment with Python 2.7 and program:`pip` installed in it,
-and activate the environment:
-
-.. code-block:: bash
-
-    $ conda create -n nowcast python=2.7 pip
-
-    ...
-
-    $ source activate nowcast
-
-Our first choice for installing packages is the :program:`conda` installer because it uses pre-built binary packages so it is faster and avoids problems that can arise with compilation of C extensions that are part of some of the packages.
-Unfortunately,
-not all of the packages that we need are available in the :program:`conda` repositories so we use :program:`pip` to install those from the `Python Package Index`_ (PyPI).
-
-.. _Python Package Index: https://pypi.python.org/pypi
-
-Install the packages that the :ref:`SalishSeaTools` depends on,
-the package itself,
-and its companion package :ref:`SalishSeaCmdProcessor`:
-
-.. code-block:: bash
-
-    (nowcast)$ conda install matplotlib netCDF4 numpy pandas pyyaml requests scipy
-    (nowcast)$ pip install arrow angles
-    (nowcast)$ cd MEOPAR/tools
-    (nowcast)$ pip install --editable SalishSeaTools
-    (nowcast)$ pip install --editable SalishSeaCmd
-
-Install the additional packages that the nowcast manager and workers depend on:
-
-* thee paramiko package that provides a Python implementation of the SSH2 protocol
-* the Python bindings to the `ZeroMQ`_ messaging library
-* the BeautifulSoup HTML parsing package
-
-.. _ZeroMQ: http://zeromq.org/
-
-.. code-block:: bash
-
-    (nowcast)$ conda install paramiko pyzmq
-    (nowcast)$ pip install BeautifulSoup4
-
-Finally,
-install Sphinx,
-the mako template library,
-and the sphinx-bootstrap-theme,
-used for the salishsea.eos.ubc.ca site:
-
-.. code-block:: bash
-
-    (nowcast)$ conda install mako sphinx
-    (nowcast)$ pip install sphinx-bootstrap-theme
-
-The above packages are sufficient to run the nowcast system.
-For development and debugging of Python code,
-:ref:`nowcast.figures` functions,
-etc.,
-you may also want to install IPython and IPython Notebook,
-the pytest and coverage unit testing tools,
-and the ipdb debugger:
-
-.. code-block:: bash
-
-    (nowcast)$ conda install ipython jupyter pytest coverage
-    (nowcast)$ pip install ipdb
-
-The complete list of Python packages installed including their version numbers (at time of writing) created by the :command:`pip freeze` command is available in :file:`salishsea_tools/nowcast/requirements.pip`.
-
-To deactivate the :kbd:`nowcast` environment and return to your root Anaconda Python environment use:
-
-.. code-block:: bash
-
-    (nowcast)$ source deactivate
+.. _SSH_NeahBay: http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/nowcast/notebooks/SSH_NeahBay.ipynb
 
 
-.. _SalishSeaNowcastDirectoryStructure:
-
-Directory Structure for Development and Testing
------------------------------------------------
-
-.. warning::
-
-    Development and testing of nowcast workers, etc. should only be done on machines *other than* :kbd:`salish`.
-    If you test on :kbd:`salish` your test runs will interact with the production nowcast manager process and,
-    in all likelihood,
-    cause other workers to run at in appropriate times,
-    potentially disrupting the production real-time runs.
-
-The directory structure described in this section mirrors the one used for the production deployment of the nowcast system.
-It can be used to:
-
-* test nowcast workers during development
-* test rendering of page templates for the :kbd:`salishsea.eos.ubc.ca` site
-* download EC weather model products in the event of an automation failure
-
-The directory structure looks like::
-
-  MEOPAR/
-  `-- nowcast/
-      |-- nowcast.yaml@
-      `-- www/
-          |-- salishsea-site/
-          `-- templates@
-
-:file:`nowcast.yaml` is a symlink to your :file:`MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/nowcast.yaml` configuration file.
-
-The :file:`salishsea-site/` directory tree is a clone of the :ref:`salishsea-site-repo` repo.
-This clone is for automation testing only - you should not make commits in it.
-
-:file:`templates` is a symlink to your :file:`MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/www/templates/` directory,
-where the templates for the pages that nowcast creates on the :kbd:`salishsea.eos.ubc.ca` site are stored.
-
-So,
-the commands to create the directory structure are:
-
-.. code-block:: bash
-
-    (nowcast)$ cd MEOPAR/
-    (nowcast)$ mkdir -p nowcast/www/
-    (nowcast)$ cd nowcast/
-    (nowcast)$ ln -s ../tools/SalishSeaTools/salishsea_tools/nowcast/nowcast.yaml
-    (nowcast)$ cd www/
-    (nowcast)$ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site
-    (nowcast)$ ln -s ../../tools/SalishSeaTools/salishsea_tools/nowcast/www/templates
-
-
-Mitigating a :mod:`download_weather` Worker Failure
----------------------------------------------------
+:py:mod:`download_weather` Worker Failure
+=========================================
 
 The Environment Canada (EC) 2.5 km resolution GEM forecast model products from the High Resolution Deterministic Prediction System (HRDPS) are critical inputs for the nowcast system.
 They are also the only input source that is transient -
 each of the 4 daily forecast data sets are only available for slightly over a day,
 and EC does not maintain an archive of the HRDPS products.
 
-The HRDPS products files that we use are downloaded every 6 hours via the :py:mod:`SalishSeaTools.salishsea_tools.nowcast.workers.download_weather` worker.
+The HRDPS products files that we use are downloaded every 6 hours via the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker.
 The downloads are controlled by 4 :program:`cron` jobs that run on :kbd:`salish`:
 
   * The :kbd:`06` forecast download starts at 04:00
@@ -202,7 +71,7 @@ The `debug log file`_ will show more details about the specific file downloads a
 .. _info log file: eoas.ubc.ca/~dlatorne/MEOPAR/nowcast/nowcast.log
 .. _debug log file: eoas.ubc.ca/~dlatorne/MEOPAR/nowcast/nowcast.debug.log
 
-In the rare event that the nowcast automation system fails to download the HRDPS products every 6 hours via the :py:mod:`SalishSeaTools.salishsea_tools.nowcast.workers.download_weather` worker,
+In the rare event that the nowcast automation system fails to download the HRDPS products every 6 hours via the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker,
 it is critical that someone re-run that worker.
 Even if the worker cannot be re-run in the nowcast system deployment environment on :kbd:`salish` due to permission issues the forecast products can be downloaded using a development and testing environment and directory structure as described above
 (see :ref:`SalishSeaNowcastPythnonPackageEnvironmwnt` and :ref:`SalishSeaNowcastDirectoryStructure`).
@@ -234,7 +103,7 @@ That can be accomplished as follows:
 
             $ mkdir -p /ocean/<your_userid>/MEOPAR/GRIB/
 
-#. Run the :py:mod:`SalishSeaTools.salishsea_tools.nowcast.workers.download_weather` worker for the appropriate forecast with debug logging,
+#. Run the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker for the appropriate forecast with debug logging,
    for example:
 
    .. code-block:: bash
@@ -309,7 +178,7 @@ to see if files for 2 days exist.
 Testing :kbd:`salishsea.eos.ubc.ca` Site Page Templates
 -------------------------------------------------------
 
-The pages that the nowcast automation maintains on the :kbd:`salishsea.eos.ubc.ca` site are generated from templates stored in :file:`MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/www/templates/`.
+The pages that the nowcast automation maintains on the :kbd:`salishsea.eos.ubc.ca` site are generated from templates stored in :file:`MEOPAR/tools/SalishSeaNowcast/nowcast/www/templates/`.
 Those templates are reStructuredText files that contain `Mako`_ directives that facilitate,
 among other things,
 substitution of concrete values (like specific dates) into placeholder variables,
@@ -325,7 +194,7 @@ the process to get from a `Mako`_ page template to an HTML page happens in 2 sta
 
 #. Use :command:`sphinx-build` to render the :file:`.rst` file to a :file:`.html` file.
 
-In the nowcast production deployment the :file:`make_site_page.py` worker processes one or more page template(s) from the :file:`MEOPAR/tools/SalishSeaTools/salishsea_tools/nowcast/www/templates/` directory to create one or more :file:`.rst` file(s) in the :file:`MEOPAR/nowcast/www/salishsea-site/` directory tree.
+In the nowcast production deployment the :file:`make_site_page.py` worker processes one or more page template(s) from the :file:`MEOPAR/tools/SalishSeaNowcast/nowcast/www/templates/` directory to create one or more :file:`.rst` file(s) in the :file:`MEOPAR/nowcast/www/salishsea-site/` directory tree.
 When the :file:`make_site_page.py` worker sends a success message to the nowcast manager the :file:`push_to_web.py` worker is launched to:
 
 #. Execute the :command:`hg update` command in :file:`MEOPAR/nowcast/www/salishsea-site/` to pull in any changes from other sources.

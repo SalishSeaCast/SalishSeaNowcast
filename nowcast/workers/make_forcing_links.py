@@ -23,9 +23,9 @@ import os
 
 import arrow
 
-from .. import lib
-from ..nowcast_worker import NowcastWorker
-from . import (
+from nowcast import lib
+from nowcast.nowcast_worker import NowcastWorker
+from nowcast.workers import (
     get_NeahBay_ssh,
     grib_to_netcdf,
     make_runoff_file,
@@ -41,12 +41,14 @@ def main():
     worker.arg_parser.add_argument(
         'host_name', help='Name of the host to symlink forcing files on')
     worker.arg_parser.add_argument(
-        'run_type', choices=set(('nowcast+', 'forecast2', 'ssh')),
+        'run_type', choices=set(
+            ('nowcast+', 'forecast2', 'ssh', 'nowcast-green')),
         help='''
         Type of run to symlink files for:
         'nowcast+' means nowcast & 1st forecast runs,
         'forecast2' means 2nd forecast run,
         'ssh' means Neah Bay sea surface height files only (for forecast run).
+        'nowcast-green' means nowcast green ocean run,
         ''',
     )
     salishsea_today = arrow.now('Canada/Pacific').floor('day')
@@ -147,14 +149,15 @@ def _make_weather_links(
         src = host_run_config[linkfile]
         dest = os.path.join(NEMO_atmos_dir, os.path.basename(src))
         _create_symlink(sftp_client, host_name, src, dest)
-    if run_type == 'nowcast+':
+    nowcast_runs = {'nowcast+', 'nowcast-green'}
+    if run_type in nowcast_runs:
         weather_start = -1
     else:
         weather_start = 0
     for day in range(weather_start, 3):
         filename = grib_to_netcdf.FILENAME_TMPL.format(
             run_date.replace(days=day).date())
-        if run_type == 'nowcast+':
+        if run_type in nowcast_runs:
             dir = '' if day <= 0 else 'fcst'
         else:
             dir = 'fcst'
