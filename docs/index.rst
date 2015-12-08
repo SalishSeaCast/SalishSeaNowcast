@@ -50,8 +50,9 @@ Contents:
    :maxdepth: 2
 
    framework
-   dev_deploy
+   development
    workers
    deploy
    config
+   worker_failures
    api
