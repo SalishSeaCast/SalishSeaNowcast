@@ -24,6 +24,7 @@ import os
 import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
+import pandas as pd
 import scipy.io as sio
 
 from salishsea_tools import (
@@ -156,26 +157,23 @@ def salinity_fxn(route_name, bathy, grid_T_hr, dmy):
 
     # Create datetime object for start and end of route times
     date = datetime.datetime.strptime(dmy, '%d%b%y')
-    start_time = date.replace(hour=route[route_name]['start']['hour'], minute=route[route_name]['start']['minute'])
-    end_time = date.replace(hour=route[route_name]['end']['hour'], minute=route[route_name]['end']['minute'])
+    start_time = date.replace(
+        hour=route[route_name]['start']['hour'],
+        minute=route[route_name]['start']['minute'])
+    end_time = date.replace(
+        hour=route[route_name]['end']['hour'],
+        minute=route[route_name]['end']['minute'])
 
+    # Slice the observational arrays to only have "during route" data
+    time_obs = datenum2datetime(obs[0])
+    df = pd.DataFrame(time_obs)
+    j = np.logical_and(df>start_time, df<end_time)
+    j = np.array(j)
+    obs_route = obs[0:4,j]
 
-    for i in np.arange(0, a):
-        matlab_datenum = np.float(obs[0])
-        python_datetime = datetime.datetime.fromordinal(
-            int(matlab_datenum)) + timedelta(days=matlab_datenum % 1) - timedelta(days=366)
-        if (python_datetime >= run_lower) & (python_datetime <= run_upper):
-            lon_obs[i] = lon_obs[i]
-            lat_obs[i] = lat_obs[i]
-            sal_obs[i] = sal_obs[i]
+    # High frequency ferry data, take every 20th value
+    obs_slice = obs_route[:, 0:-1:20]
 
-    mask = lon1[:, 0] != 0
-    lon1_2_4 = lon1[mask]
-    lat1_2_4 = lat1[mask]
-    salinity1_2_4 = salinity1[mask]
-    lon11 = lon1_2_4[0:-1:20]
-    lat11 = lat1_2_4[0:-1:20]
-    salinity11 = salinity1_2_4[0:-1:20]
 
     saline_nemo = grid_T_hr.variables['vosaline']
 
@@ -201,19 +199,23 @@ def salinity_fxn(route_name, bathy, grid_T_hr, dmy):
     return lon11, lat11, lon1_2_4, lat1_2_4, value_mean_3rd_hour, value_mean_4rd_hour, salinity11, salinity1_2_4, date_str_title
 
 
-def _get_sal_data(route_name, date):
+def _get_sal_data(route_name, dmy):
     """ Retrieve the ferry route data from matlab.
 
     :arg route_name: name for one of three ferry routes
     :type route_name: string
 
-    :arg date: date in form yyyymmdd
+    :arg date: date in form ddmonyy
     :type date: string
 
-    return lon_obs, lat_obs, sal_obs
+    return list containing time_obs, lon_obs, lat_obs, sal_obs
     """
+
+    date = datetime.datetime.strptime(dmy, "%d%b%y")
+    date = date.strftime('%Y%m%d')
+
     saline = sio.loadmat(
-        '/data/jieliu/MEOPAR/FerrySalinity/%s/%s_TSG%s.mat' % (
+        '/ocean/jieliu/research/meopar/ONC_ferries/%s/%s_TSG%s.mat' % (
             route_name, route_name, date))
     struct = (
         ((saline['%s_TSG' % route_name])
@@ -225,9 +227,22 @@ def _get_sal_data(route_name, date):
     lon_obs = struct['longitude'][0, 0]
     lat_obs = struct['latitude'][0, 0]
 
-    obs = [time_obs, lon_obs, lat_obs, sal_obs]
+    obs = np.array([time_obs[:], lon_obs[:], lat_obs[:], sal_obs[:]])
 
     return obs
+
+
+def datenum2datetime(datenum):
+    """Convert MATLAB datenum array into python Datetime array."""
+
+    timearray = []
+    for mattime, count in zip(datenum, np.arange(len(datenum))):
+        time = datetime.datetime.fromordinal(
+            int(mattime[0])) + datetime.timedelta(
+            days=mattime[0] % 1) - datetime.timedelta(days=366)
+        timearray.append(time)
+
+    return timearray
 
 
 def salinity_ferry_route(grid_T_hr, bathy, coastline, route_name):
