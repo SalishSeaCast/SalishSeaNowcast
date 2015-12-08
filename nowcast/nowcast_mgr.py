@@ -25,7 +25,7 @@ import traceback
 import yaml
 import zmq
 
-from . import lib
+from nowcast import lib
 
 
 def main():

@@ -61,8 +61,8 @@ worker modules can be found in :file:`tools/SalishSeaNowcast/nowcast/workers/`.
     """
     import logging
 
-    from .. import lib
-    from ..nowcast_worker import NowcastWorker
+    from nowcast import lib
+    from nowcast.nowcast_worker import NowcastWorker
 
 
     worker_name = lib.get_module_name()
@@ -107,8 +107,8 @@ The minimum set of imports that a worker needs are:
 
     import logging
 
-    from .. import lib
-    from ..nowcast_worker import NowcastWorker
+    from nowcast import lib
+    from nowcast.nowcast_worker import NowcastWorker
 
 The :py:mod:`logging` module is a Python standard library module that provides the mechanism that we use to print output about the worker's progress and status to the log file or the screen,
 effectively developer-approved print statements on steroids :-)

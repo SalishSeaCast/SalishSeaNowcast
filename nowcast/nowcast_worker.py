@@ -22,7 +22,7 @@ import traceback
 
 import zmq
 
-from . import lib
+from nowcast import lib
 
 
 class NowcastWorker(object):
