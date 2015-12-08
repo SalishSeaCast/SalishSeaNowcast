@@ -559,7 +559,7 @@ class TestAfterGRIBtoNetCDF:
         self, host_type, host_name, run_type, mgr,
     ):
         mgr.config = {
-            'run_types': ['nowcast', 'forecast2'],
+            'run_types': ['nowcast', 'forecast', 'forecast2', 'nowcast-green'],
             'run': {host_type: host_name}
         }
         actions = mgr._after_grib_to_netcdf(
@@ -568,12 +568,13 @@ class TestAfterGRIBtoNetCDF:
             mgr._launch_worker, ['upload_forcing', [host_name, run_type]],
         )
         assert actions[1] == expected
+        assert len(actions) == 2
 
     def test_success_nowcastp_launch_make_forcing_links_nowcast_green(
         self, mgr,
     ):
         mgr.config = {
-            'run_types': ['nowcast-green'],
+            'run_types': ['nowcast', 'forecast', 'forecast2', 'nowcast-green'],
             'run': {
                 'cloud host': 'west.cloud-nowcast',
                 'nowcast-green host': 'salish-nowcast',
@@ -585,6 +586,7 @@ class TestAfterGRIBtoNetCDF:
             ['make_forcing_links', ['salish-nowcast', 'nowcast-green']]
         )
         assert actions[2] == expected
+        assert len(actions) == 3
 
 
 class TestAfterUploadForcing:
