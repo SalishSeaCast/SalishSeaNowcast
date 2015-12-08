@@ -22,8 +22,8 @@ import os
 
 import arrow
 
-from .. import lib
-from ..nowcast_worker import NowcastWorker
+from nowcast import lib
+from nowcast.nowcast_worker import NowcastWorker
 
 
 worker_name = lib.get_module_name()

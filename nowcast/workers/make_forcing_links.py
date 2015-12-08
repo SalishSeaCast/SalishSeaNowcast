@@ -23,9 +23,9 @@ import os
 
 import arrow
 
-from .. import lib
-from ..nowcast_worker import NowcastWorker
-from . import (
+from nowcast import lib
+from nowcast.nowcast_worker import NowcastWorker
+from nowcast.workers import (
     get_NeahBay_ssh,
     grib_to_netcdf,
     make_runoff_file,
