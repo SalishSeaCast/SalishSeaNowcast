@@ -263,7 +263,7 @@ def get_namelist_value(key, lines):
 
 
 def run_description(host, run_type, run_day, run_id, restart_timestep):
-    # Relative paths from MEOPAR/nowcast/
+    # Relative paths from /results/nowcast-sys/nowcast/
 
     if run_type != 'forecast2':
         restart_dir = host['results']['nowcast']
@@ -283,6 +283,7 @@ def run_description(host, run_type, run_day, run_id, restart_timestep):
             os.path.join(forcing_home, '../NEMO-forcing/')),
         runs_dir=os.path.abspath(os.path.join(forcing_home, '../SalishSea/')),
         init_conditions=os.path.abspath(init_conditions),
+        nemo34=True,
     )
     run_desc['run_id'] = run_id
     # Paths to run-specific forcing directories

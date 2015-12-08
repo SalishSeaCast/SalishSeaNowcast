@@ -14,13 +14,13 @@
 .. limitations under the License.
 
 
-.. _salishsea_tools.nowcast:
+.. _SalishSeaNowcastPackage:
 
-*****************************************
-:py:mod:`salishsea_tools.nowcast` Package
-*****************************************
+*******************************
+:kbd:`SalishSeaNowcast` Package
+*******************************
 
-The :py:mod:`salishsea_tools.nowcast` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
+The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
 The runs use as-recent-as-available
 (typically previous day)
 forcing data for the western boundary sea surface height and the Fraser River flow,
@@ -40,6 +40,9 @@ message-based architecture that:
 The automation architecture is presently under development.
 It consists of a long-running manager process and a collection of worker processes which are launched by the manager or by cron to perform specific tasks.
 
+The :kbd:`SalishSeaNowcast` package is a Python 3 package.
+It was developed and tested under Python 3.5 and should work with that and later versions of Python.
+
 
 Contents:
 
@@ -47,7 +50,9 @@ Contents:
    :maxdepth: 2
 
    framework
+   development
    workers
+   deploy
    config
-   dev_deploy
+   worker_failures
    api

@@ -28,13 +28,13 @@ import netCDF4 as nc
 import scipy.io as sio
 
 matplotlib.use('Agg')
-from .. import (
+from nowcast import (
     figures,
     lib,
     research_VENUS,
     research_ferries,
 )
-from ..nowcast_worker import NowcastWorker
+from nowcast.nowcast_worker import NowcastWorker
 
 
 worker_name = lib.get_module_name()

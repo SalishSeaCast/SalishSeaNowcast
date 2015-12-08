@@ -25,7 +25,7 @@ import traceback
 import yaml
 import zmq
 
-from . import lib
+from nowcast import lib
 
 
 def main():
@@ -380,7 +380,7 @@ class NowcastManager:
                     ['grib_to_netcdf', 'weather forcing', payload]),
             ],
         }
-        for host in ('hpc host', 'cloud host'):
+        for host in ('cloud host', 'hpc host'):
             if host in self.config['run']:
                 if 'nowcast' in self.config['run_types']:
                     actions['success nowcast+'].append(
@@ -394,6 +394,15 @@ class NowcastManager:
                             ['upload_forcing',
                                 [self.config['run'][host], 'forecast2']])
                     )
+        if all(
+            ('nowcast-green host' in self.config['run'],
+             'nowcast-green' in self.config['run_types'])):
+                actions['success nowcast+'].append(
+                    (self._launch_worker,
+                        ['make_forcing_links',
+                            [self.config['run']['nowcast-green host'],
+                             'nowcast-green']])
+                )
         return actions[msg_type]
 
     def _after_upload_forcing(self, msg_type, payload):
@@ -449,6 +458,7 @@ class NowcastManager:
             'failure nowcast+': None,
             'failure forecast2': None,
             'failure ssh': None,
+            'failure nowcast-green': None,
         }
         if msg_type.startswith('success'):
             actions[msg_type] = [

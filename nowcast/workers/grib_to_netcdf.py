@@ -28,11 +28,11 @@ import matplotlib
 import netCDF4 as nc
 import numpy as np
 
-from .. import (
+from nowcast import (
     figures,
     lib,
 )
-from ..nowcast_worker import NowcastWorker
+from nowcast.nowcast_worker import NowcastWorker
 
 
 worker_name = lib.get_module_name()

@@ -19,11 +19,11 @@
 Creating Nowcast Workers
 ========================
 
-Nowcast workers are Python modules that can be imported from :py:mod:`salishsea_tools.nowcast.workers`.
+Nowcast workers are Python modules that can be imported from :py:mod:`nowcast.workers`.
 They are composed of some standard code to enable them to interface with the nowcast system messaging and logging framework,
 and one or more functions to execute their task in the nowcast system.
-Most of the standard code is centred around setup of a :py:class:`~SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWorker` object and executing method calls on it.
-The worker object is an instance of the :py:class:`SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWorker` class.
+Most of the standard code is centred around setup of a :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker` object and executing method calls on it.
+The worker object is an instance of the :py:class:`SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker` class.
 
 Here is a skeleton example of a worker module showing the standard code.
 It is explained,
@@ -31,11 +31,11 @@ line by line,
 below.
 Actual
 (and obviously, more complicated)
-worker modules can be found in :file:`tools/SalishSeaTools/salishsea_tools/nowcast/workers/`.
+worker modules can be found in :file:`tools/SalishSeaNowcast/nowcast/workers/`.
 
 .. note::
-    The skeleton code below describes :py:class:`~SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWorker`-based workers.
-    Not all workers have been re-implemented to use :py:class:`~SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWorker`.
+    The skeleton code below describes :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker`-based workers.
+    Not all workers have been re-implemented to use :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker`.
 
 
 .. code-block:: python
@@ -61,8 +61,8 @@ worker modules can be found in :file:`tools/SalishSeaTools/salishsea_tools/nowca
     """
     import logging
 
-    from .. import lib
-    from ..nowcast_worker import NowcastWorker
+    from nowcast import lib
+    from nowcast.nowcast_worker import NowcastWorker
 
 
     worker_name = lib.get_module_name()
@@ -107,8 +107,8 @@ The minimum set of imports that a worker needs are:
 
     import logging
 
-    from .. import lib
-    from ..nowcast_worker import NowcastWorker
+    from nowcast import lib
+    from nowcast.nowcast_worker import NowcastWorker
 
 The :py:mod:`logging` module is a Python standard library module that provides the mechanism that we use to print output about the worker's progress and status to the log file or the screen,
 effectively developer-approved print statements on steroids :-)
@@ -128,7 +128,7 @@ Next up are 2 module level variables:
 
 :py:data:`worker_name` is used to identify the source of logging messages,
 and messages exchanged between the worker and the nowcast manager process.
-:py:func:`~SalishSeaTools.salishsea_tools.nowcast.lib.get_module_name` provides the worker's module name stripped of its path and :kbd:`.py` suffix.
+:py:func:`~SalishSeaNowcast.nowcast.lib.get_module_name` provides the worker's module name stripped of its path and :kbd:`.py` suffix.
 
 :py:data:`logger` is our interface to the Python standard library logging framework and we give this module's instance the worker's name.
 
@@ -157,10 +157,10 @@ The minimum possible :py:func:`main` function is shown in lines 32 to 34:
         worker.run(worker_func, success, failure)
 
 First,
-we create an instance of the :py:class:`~SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWorker` class that we call,
+we create an instance of the :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker` class that we call,
 by convention,
 :py:data:`worker`.
-The :py:class:`~SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWorker` constructor takes 2 arguments:
+The :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker` constructor takes 2 arguments:
 
 * the :py:data:`worker_name` that we defined as a module-level variable above
 * a :py:data:`description` string that is used as the description element of the worker's command-line help message;
@@ -185,7 +185,7 @@ The :py:class:`~SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWor
 
       ...
 
-See the :py:class:`nowcast.nowcast_worker.NowcastWorker` documentation for details of the :py:class:`~SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWorker` object's contructor arguments,
+See the :py:class:`nowcast.nowcast_worker.NowcastWorker` documentation for details of the :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker` object's contructor arguments,
 other attributes,
 and methods.
 
@@ -307,7 +307,7 @@ A simple example of a :py:data:`checklist` from the :py:mod:`download_weather` w
     checklist = {'{} forecast'.format(forecast): True}
 
 which just indicates that the particular forecast download was successful.
-A more sophisticated :py:data:`checklist` such as the one produced by the :py:mod:`SalishSeaTools.salishsea_tools.nowcast.workers.get_NeahBay_ssh` worker contains multiple keys and lists of filenames.
+A more sophisticated :py:data:`checklist` such as the one produced by the :py:mod:`SalishSeaNowcast.nowcast.workers.get_NeahBay_ssh` worker contains multiple keys and lists of filenames.
 
 The function whose name is passed as the 1st argument to the :py:meth:`worker.run` method can be a driver function that calls other functions in the worker module to subdivide the worker task into smaller,
 more readable,
@@ -363,7 +363,7 @@ The :py:meth:`worker.arg_parser.add_argument` method takes the same arguments as
     Add a link to the Python docs for argparse.ArgumentParser.add_argument
 
 .. note::
-    When the :py:class:`~SalishSeaTools.salishsea_tools.nowcast.nowcast_worker.NowcastWorker` object is set up its base command-line parser is created as :py:attr:`worker.arg_parser`.
+    When the :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker` object is set up its base command-line parser is created as :py:attr:`worker.arg_parser`.
     That parser provides help messages,
     and handles the :option:`config_file` argument,
     and the :option:`--debug` option.

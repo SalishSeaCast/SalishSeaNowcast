@@ -20,6 +20,9 @@ from unittest import mock
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
+sys.path.insert(0, os.path.abspath('../SalishSeaNowcast'))
+sys.path.insert(0, os.path.abspath('../SalishSeaCmd'))
+sys.path.insert(0, os.path.abspath('../SalishSeaTools'))
 
 
 # -- General configuration ----------------------------------------------------
@@ -47,6 +50,7 @@ todo_include_todos = True
 # (especially that on readthedocs.org build servers)
 MOCK_MODULES = [
     'angles',
+    'driftwood.formatters',
     'matplotlib',
     'matplotlib.backends',
     'matplotlib.cm',
