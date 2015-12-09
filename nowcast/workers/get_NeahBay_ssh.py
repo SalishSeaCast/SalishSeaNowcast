@@ -28,9 +28,9 @@ import pytz
 import matplotlib
 import netCDF4 as nc
 import numpy as np
-import pandas as pd
 
 from salishsea_tools import nc_tools
+from nowcast import residuals
 
 from nowcast import (
     figures,
@@ -98,7 +98,6 @@ def get_NeahBay_ssh(parsed_args, config):
     utc_now = datetime.datetime.now(pytz.timezone('UTC'))
     textfile = _read_website(config['ssh']['ssh_dir'])
     lib.fix_perms(textfile, grp_name=config['file group'])
-    data = _load_surge_data(textfile)
     checklist = {'txt': os.path.basename(textfile)}
     # Store a copy of the text file in the run results directory so that
     # there is definitive record of the sea surface height data that was
@@ -111,29 +110,25 @@ def get_NeahBay_ssh(parsed_args, config):
     lib.mkdir(
         results_dir, logger, grp_name=config['file group'], exist_ok=True)
     shutil.copy2(textfile, results_dir)
-    # Process the dates to find days with a full prediction
-    dates = np.array(data.date.values)
-    # Check if today is Jan or Dec
-    isDec, isJan = False, False
-    if utc_now.month == 1:
-        isJan = True
-    if utc_now.month == 12:
-        isDec = True
-    for i in range(dates.shape[0]):
-        dates[i] = _to_datetime(dates[i], utc_now.year, isDec, isJan)
-    dates_list = _list_full_days(dates)
+    # Grab all surge data in the textfile
+    dates, sshs, fflags = residuals.NeahBay_forcing_anom(
+        textfile, run_date, config['ssh']['tidal_predictions'])
+    # Identify days with full ssh information
+    dates_full = _list_full_days(dates, sshs, fflags)
     # Set up plotting
     fig, ax = _setup_plotting()
     # Loop through full days and save netcdf
     ip = 0
-    for d in dates_list:
-        surges, tc, forecast_flag = _retrieve_surge(d, dates, data, config)
+    for d in dates_full:
+        tc, _, sshd, fflagd = _isolate_day(d, dates, sshs, fflags)
+        forecast_flag = fflagd.any()
+        print(d, fflagd)
         # Plotting
         if ip < 3:
-            ax.plot(surges, '-o', lw=2, label=d.strftime('%d-%b-%Y'))
+            ax.plot(sshd, '-o', lw=2, label=d.strftime('%d-%b-%Y'))
         ip = ip + 1
         filepath = _save_netcdf(
-            d, tc, surges, forecast_flag, textfile,
+            d, tc, sshd, forecast_flag, textfile,
             config['ssh']['ssh_dir'], lats, lons)
         filename = os.path.basename(filepath)
         lib.fix_perms(filename, grp_name=config['file group'])
@@ -181,18 +176,6 @@ def _read_website(save_path):
     logger.debug(
         'observations & predictions table saved to {}'.format(filepath))
     return filepath
-
-
-def _load_surge_data(filename):
-    """Load the storm surge observations & predictions table from filename
-    and return is as a Pandas DataFrame.
-    """
-    col_names = 'date surge tide obs fcst anom comment'.split()
-    data = pd.read_csv(filename, skiprows=3, names=col_names, comment='#')
-    data = data.dropna(how='all')
-    logger.debug(
-        'loaded observations & predictions table into Pandas DataFrame')
-    return data
 
 
 def _utc_now_to_run_date(utc_now, run_type):
@@ -321,63 +304,29 @@ def _save_netcdf(
     return filepath
 
 
-def _retrieve_surge(day, dates, data, config):
-    """Gather the surge information for a single day.
-
-    Return the surges in metres, an array with time_counter,
-    and a flag indicating if this day was a forecast.
-    """
-    # Initialize forecast flag and surge array
-    forecast_flag = False
-    surge = []
-    # Load tides
-    ttide = figures.get_tides(
-        'Neah Bay',
-        path=config['ssh']['tidal_predictions'],
-    )
-    # Grab list of times on this day
-    tc, ds = _isolate_day(day, dates)
-    for d in ds:
-        # Convert datetime to string for comparing with times in data
-        daystr = d.strftime('%m/%d %HZ')
-        tide = ttide.pred_all[ttide.time == d].item()
-        obs = data.obs[data.date == daystr].item()
-        fcst = data.fcst[data.date == daystr].item()
-        if obs == 99.90:
-            # Fall daylight savings
-            if fcst == 99.90:
-                try:
-                    # No new forecast value, so persist the previous value
-                    surge.append(surge[-1])
-                except IndexError:
-                    # No values yet, so initialize with zero
-                    surge = [0]
-            else:
-                surge.append(_feet_to_metres(fcst) - tide)
-                forecast_flag = True
-        else:
-            surge.append(_feet_to_metres(obs) - tide)
-    return surge, tc, forecast_flag
-
-
-def _isolate_day(day, dates):
+def _isolate_day(day, dates, surges, forecast_flags):
     """Return array of time_counter and datetime objects over a 24 hour
     period covering one full day.
+    Returns the surge and forecast_flag for that day as well
     """
     tc = np.arange(24)
-    dates_return = []
-    for t in dates:
+    dates_r = []
+    surge_r = []
+    flag_r = []
+    for t, surge, flag in zip(dates, surges, forecast_flags):
         if t.month == day.month:
             if t.day == day.day:
-                dates_return.append(t)
-    return tc, np.array(dates_return)
+                dates_r.append(t)
+                surge_r.append(surge)
+                flag_r.append(flag)
+    return tc, np.array(dates_r), np.array(surge_r), np.array(flag_r)
 
 
-def _list_full_days(dates):
+def _list_full_days(dates, surges, forecast_flags):
     """Return a list of days that have a full 24 hour data set.
     """
     # Check if first day is a full day
-    tc, ds = _isolate_day(dates[0], dates)
+    tc, ds, _, _ = _isolate_day(dates[0], dates, surges, forecast_flags)
     if ds.shape[0] == tc.shape[0]:
         start = dates[0]
     else:
@@ -385,7 +334,7 @@ def _list_full_days(dates):
     start = datetime.datetime(
         start.year, start.month, start.day, tzinfo=pytz.timezone('UTC'))
     # Check if last day is a full day
-    tc, ds = _isolate_day(dates[-1], dates)
+    tc, ds, _, _ = _isolate_day(dates[-1], dates, surges, forecast_flags)
     if ds.shape[0] == tc.shape[0]:
         end = dates[-1]
     else:
@@ -396,32 +345,6 @@ def _list_full_days(dates):
     dates_list = [
         start + datetime.timedelta(days=i) for i in range((end-start).days+1)]
     return dates_list
-
-
-def _to_datetime(datestr, year, isDec, isJan):
-    """Convert the string given by datestr to a datetime object.
-
-    The year is an argument because the datestr in the NOAA data doesn't
-    have a year.
-    Times are in UTC/GMT.
-
-    Return a datetime representation of datestr.
-    """
-    dt = datetime.datetime.strptime(datestr, '%m/%d %HZ')
-    # Dealing with year changes.
-    if isDec and dt.month == 1:
-        dt = dt.replace(year=year+1)
-    elif isJan and dt.month == 12:
-        dt = dt.replace(year=year-1)
-    else:
-        dt = dt.replace(year=year)
-    dt = dt.replace(tzinfo=pytz.timezone('UTC'))
-    return dt
-
-
-def _feet_to_metres(feet):
-    metres = feet*0.3048
-    return metres
 
 
 def _setup_plotting():
