@@ -30,11 +30,11 @@ import netCDF4 as nc
 import numpy as np
 
 from salishsea_tools import nc_tools
-from nowcast import residuals
 
 from nowcast import (
     figures,
     lib,
+    residuals,
 )
 from nowcast.nowcast_worker import NowcastWorker
 
