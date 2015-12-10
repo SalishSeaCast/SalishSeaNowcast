@@ -72,88 +72,76 @@ route = {'HBDB': {'start': {'hour': 2,
          }
 
 
-def find_dist(q, lon11, lat11, bathy, grid_T_hr, saline_nemo_a, saline_nemo_b):
-    """This function is used to calculate the integral of model salinity
-    values divided by distance between this model point and observation
-    point, weights for each observation point that they hold for its
-    surrounding model points.
+def model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
+    """Perform a inverse distance weighted (IDW) interpolation with 8 nearest
+    points to the model value that is nearest to a ferry observation point.
 
-    :arg q: total number of observation grid points on the ferry track
-    :type q: numpy.integer
-
-    :arg lon11: longitude of observation grid points on the ferry track
-    :type lon11: numpy array
-
-    :arg lat11: latitude of observation grid points on the ferry track
-    :type lat11: numpy array
+    :arg obs: Array containing time, lon, lat and salinity or a single point
+    :type obs: numpy array
 
     :arg bathy: model bathymetry
     :type bathy: numpy array
 
-    :arg longitude: longitude of grid_T in the model
-    :type longitude: numpy array
+    :arg grid_T: Hourly tracer results dataset from NEMO.
+    :type grid_T: :class:`netCDF4.Dataset`
 
-    :arg latitude: latitude of grid_T in the model
-    :type latitude: numpy array
+    :arg sal_a: 1.5 m depth for 3 am (if TWDP route, 2am)
+    :type sal_a: numpy array
 
-    :arg saline_nemo_1: 1.5 m depth for 2 or 3 am model salinity
-    :type saline_nemo_3rd: numpy array
-
-    :arg saline_nemo_2: 1.5 m depth for 3 or 4 am model salinity
-    :arg saline_nemo_4rd:numpy array
+    :arg sal_b: 1.5 m depth for 4 am (if TWDP route, 3am)
+    :arg sal_b: numpy array
 
     :return: integral of model salinity values divided by weights for
-            time in saline_nemo_3rd and saline_nemo_4rd respectively.
+            sal_a and sal_b.
     """
     Y = grid_T_hr.variables['nav_lat']
     X = grid_T_hr.variables['nav_lon']
 
-    k = 0
-    values = 0
-    valuess = 0
-    dist = np.zeros(9)
-    weights = np.zeros(9)
-    value_3rd = np.zeros(9)
-    value_4rd = np.zeros(9)
+    # Find nearest model point to a ferry route point
+    [x1, y1] = tidetools.find_closest_model_point(obs[1],
+                                                  obs[2],
+                                                  X,
+                                                  Y,
+                                                  bathy)
 
-    [x1, j1] = tidetools.find_closest_model_point(lon11[q],
-                                                 lat11[q],
-                                                 X,
-                                                 Y,
-                                                 bathy,
-                                                 lat_tol=0.00210)
+    # Inverse distance weighted interpolation with the 8 nearest model values.
+    val_a_sum = 0
+    val_b_sum = 0
+    weight_sum = 0
+
     for i in np.arange(x1 - 1, x1 + 2):
-        for j in np.arange(j1 - 1, j1 + 2):
-            dist[k] = tidetools.haversine(
-                lon11[q], lat11[q], X[
-                    i, j], Y[
-                    i, j])
-            weights[k] = 1.0 / dist[k]
-            value_a[k] = saline_nemo_a[i, j] * weights[k]
-            value_b[k] = saline_nemo_b[i, j] * weights[k]
-            values = values + value_3rd[k]
-            valuess = valuess + value_4rd[k]
-            k += 1
+        for j in np.arange(y1 - 1, y1 + 2):
+            dist = tidetools.haversine(
+                obs[1], obs[2], X[i, j], Y[i, j])
+            weight = 1.0 / dist
+            weight_sum = weight_sum + weight
+            val_a = sal_a[i, j] * weight
+            val_b = sal_b[i, j] * weight
+            val_a_sum = val_a_sum + val_a
+            val_b_sum = val_a_sum + val_b
 
-    return values, valuess, weights
+    sal_a_idw = val_a_sum / weight_sum
+    sal_b_idw = val_b_sum / weight_sum
+
+    return sal_a_idw, sal_b_idw
 
 
-def salinity_fxn(route_name, bathy, grid_T_hr, dmy):
-    """This function was made to return several outputs to make the plot
-    finally, for exmaple, longitude, latitude and salinity values of grid
-    points for both observations and model.
+def ferry_salinity(route_name, dmyf, dmy, step=20):
+    """Load ferry data and slice it to contain only the during route values.
 
-    :arg saline: daily ferry salinity file
-    :type saline: dictionary of .mat file loaded from matlab
-
-    :arg route_name: name for one of three ferry routes
+    :arg route_name: name of a ferre route. HBDB, TWDP or TWSB.
     :type route_name: string
 
-    :arg today: today's datetime
-    :type today: datetime.datetime
+    :arg dmy: today's date in ddmonyy format
+    :type dmy: string
+
+    :arg step: selecting every nth data point
+    :type step: int
+
+    return matrix containing time, lon, lat and salinity of ferry observations
     """
     # Load observation ferry salinity data with locations and time
-    obs = _get_sal_data(route_name, dmy)
+    obs = _get_sal_data(route_name, dmyf)
 
     # Create datetime object for start and end of route times
     date = datetime.datetime.strptime(dmy, '%d%b%y')
@@ -167,36 +155,28 @@ def salinity_fxn(route_name, bathy, grid_T_hr, dmy):
     # Slice the observational arrays to only have "during route" data
     time_obs = datenum2datetime(obs[0])
     df = pd.DataFrame(time_obs)
-    j = np.logical_and(df>start_time, df<end_time)
+    j = np.logical_and(df >= start_time, df <= end_time)
     j = np.array(j)
-    obs_route = obs[0:4,j]
+    obs_route = obs[0:4, j]
 
     # High frequency ferry data, take every 20th value
-    obs_slice = obs_route[:, 0:-1:20]
+    obs_slice = obs_route[:, 0:-1:step]
+
+    return obs_slice
 
 
-    saline_nemo = grid_T_hr.variables['vosaline']
+def _get_nemo_salinity(route_name, grid_T_hr):
+    """Load and select the salinity value of the ferry route time."""
+    sal_nemo = grid_T_hr.variables['vosaline']
 
     if route_name == 'TWSB':
-        saline_nemo_3rd = saline_nemo[2, 1, 0:898, 0:398]
-        saline_nemo_4rd = saline_nemo[3, 1, 0:898, 0:398]
+        sal3 = sal_nemo[2, 1, :, :]
+        sal4 = sal_nemo[3, 1, :, :]
     else:
-        saline_nemo_3rd = saline_nemo[3, 1, 0:898, 0:398]
-        saline_nemo_4rd = saline_nemo[4, 1, 0:898, 0:398]
+        sal3 = sal_nemo[3, 1, :, :]
+        sal4 = sal_nemo[4, 1, :, :]
 
-    matrix = np.zeros([len(lon11), 9])
-    values = np.zeros([len(lon11), 1])
-    valuess = np.zeros([len(lon11), 1])
-    value_mean_3rd_hour = np.zeros([len(lon11), 1])
-    value_mean_4rd_hour = np.zeros([len(lon11), 1])
-    for q in np.arange(0, len(lon11)):
-        values[q], valuess[q], matrix[
-            q, :] = find_dist(
-            q, lon11, lat11, bathy, grid_T_hr, saline_nemo_3rd, saline_nemo_4rd)
-        value_mean_3rd_hour[q] = values[q] / sum(matrix[q])
-        value_mean_4rd_hour[q] = valuess[q] / sum(matrix[q])
-
-    return lon11, lat11, lon1_2_4, lat1_2_4, value_mean_3rd_hour, value_mean_4rd_hour, salinity11, salinity1_2_4, date_str_title
+    return sal3, sal4
 
 
 def _get_sal_data(route_name, dmy):
@@ -245,7 +225,27 @@ def datenum2datetime(datenum):
     return timearray
 
 
-def salinity_ferry_route(grid_T_hr, bathy, coastline, route_name):
+def nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal):
+    """Get the salanity data form the NEMO run that matches the time and
+    locations of the ferry route by integrated distance weighted interpolation."""
+
+    # Get the salinity data
+    sal_a, sal_b = _get_nemo_salinity(route_name, grid_T_hr)
+
+    sal_a_route = np.zeros(obs_sal.shape[1])
+    sal_b_route = np.zeros(obs_sal.shape[1])
+
+    # Perform the IDW on each data point and put them into an array for
+    # the whole route.
+    for i in np.arange(obs_sal.shape[1]):
+        sal_a_route[i], sal_b_route[i] = model_IDW(
+            obs_sal[:, i], bathy, grid_T_hr, sal_a, sal_b)
+
+    return sal_a_route, sal_b_route
+
+
+def salinity_ferry_route(
+        grid_T_hr, grid_B, bathy, coastline, route_name, dmyf, dmy):
     """plot daily salinity comparisons between ferry observations and model
     results as well as ferry route with model salinity distribution.
 
@@ -256,20 +256,27 @@ def salinity_ferry_route(grid_T_hr, bathy, coastline, route_name):
     """
     fig, axs = plt.subplots(1, 2, figsize=(15, 8))
 
-    latitude = grid_T_hr.variables['nav_lat']
-    longitude = grid_T_hr.variables['nav_lon']
+    lat = grid_T_hr.variables['nav_lat']
+    lon = grid_T_hr.variables['nav_lon']
 
+    # Salinity over the whole domain
     sal_hr = grid_T_hr.variables['vosaline']
     t, z = 3, 1
     sal_hr = np.ma.masked_values(sal_hr[t, z], 0)
 
-    figures.plot_map(axs[1], bathy, coastline)
+    # Load ferry route salinity
+    obs_sal = ferry_salinity(route_name, dmyf, dmy)
+
+    # Load model salinity for ferry route
+    nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal)
+
+    figures.plot_map(axs[1], grid_B, coastline)
     axs[1].set_xlim(-124.5, -122.5)
     axs[1].set_ylim(48.2, 49.6)
-    viz_tools.set_aspect(axs[1], coords='map', lats=latitude)
+    viz_tools.set_aspect(axs[1], coords='map', lats=lat)
     cmap = plt.get_cmap('spectral')
     cmap.set_bad('burlywood')
-    mesh = axs[1].contourf(longitude[:], latitude[:], sal_hr[:], 10, cmap=cmap)
+    mesh = axs[1].contourf(lon[:], lat[:], sal_hr[:], 10, cmap=cmap)
     cbar = fig.colorbar(mesh)
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
     cbar.set_label('Pratical Salinity', color='white')
@@ -327,27 +334,21 @@ def salinity_ferry_route(grid_T_hr, bathy, coastline, route_name):
 
     figures.axis_colors(axs[1], 'white')
 
-    saline = sio.loadmat(
-        '/data/jieliu/MEOPAR/FerrySalinity/%s/%s_TSG%s.mat' %
-        (route_name, route_name, date_str_yesterday))
-
-    lon11, lat11, lon1_2_4, lat1_2_4, value_mean_3rd_hour, value_mean_4rd_hour, salinity11, salinity1_2_4, date_str_title = salinity_fxn(
-        saline, route_name, today)
-    axs[1].plot(lon11, lat11, 'black', linewidth=4)
+    axs[1].plot(obs_sal[1], obs_sal[2], 'black', linewidth=4)
     if route_name == 'TWSB':
-        model_salinity_3rd_hour = axs[0].plot(lon11, value_mean_3rd_hour, 'DodgerBlue',
-                                              linewidth=2, label='2 am [UTC]')
-        model_salinity_4rd_hour = axs[0].plot(lon11, value_mean_4rd_hour, 'MediumBlue',
-                                              linewidth=2, label="3 am [UTC]")
+        label_a = '2 am [UTC]'
+        label_b = '3 am [UTC]'
     else:
-        model_salinity_3rd_hour = axs[0].plot(lon11, value_mean_3rd_hour, 'DodgerBlue',
-                                              linewidth=2, label='3 am [UTC]')
-        model_salinity_4rd_hour = axs[0].plot(lon11, value_mean_4rd_hour, 'MediumBlue',
-                                              linewidth=2, label="4 am [UTC]")
+        label_a = '3 am [UTC]'
+        label_b = '4 am [UTC]'
 
-    observation_salinity = axs[0].plot(
-        lon1_2_4,
-        salinity1_2_4,
+    axs[0].plot(obs_sal[1], nemo_a, 'DodgerBlue', linewidth=2, label=label_a)
+    axs[0].plot(obs_sal[1], nemo_b, 'MediumBlue',linewidth=2, label=label_b)
+
+
+    axs[0].plot(
+        obs_sal[1],
+        obs_sal[3],
         'DarkGreen',
         linewidth=2,
         label="Observed")
@@ -356,7 +357,7 @@ def salinity_ferry_route(grid_T_hr, bathy, coastline, route_name):
 
     axs[0].set_xlim(-124, -123)
     axs[0].set_ylim(5, 32)
-    axs[0].set_title('Surface Salinity: ' + date_str_title, **title_font)
+    axs[0].set_title('Surface Salinity: ' + dmy, **title_font)
     axs[0].set_xlabel('Longitude', **axis_font)
     axs[0].set_ylabel('Practical Salinity', **axis_font)
     axs[0].legend(loc=3)
