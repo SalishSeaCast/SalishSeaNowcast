@@ -799,7 +799,7 @@ def plot_corrected_model(
     return ssh_corr
 
 
-def plot_tides(ax, name, PST, MSL, color=predictions_c):
+def plot_tides(ax, name, PST, MSL, tidal_predications, color=predictions_c):
     """Plots and returns the tidal predictions at a given station during the
     year of t_orig.
 
@@ -810,25 +810,24 @@ def plot_tides(ax, name, PST, MSL, color=predictions_c):
     :arg ax: The axis where the tides are plotted.
     :type ax: axis object
 
-    :arg name: The name of the station.
-    :type name: string
+    :arg str name: The name of the station.
 
-    :arg PST: Specifies if plot should be presented in PST.
-              1 = plot in PST, 0 = plot in UTC.
-    :type PST: 0 or 1
+    :arg int PST: Specifies if plot should be presented in PST.
+                  1 = plot in PST, 0 = plot in UTC.
 
-    :arg MSL: Specifies if the plot should be centred about mean sea level.
-              1=centre about MSL, 0=centre about 0.
-    :type MSL: 0 or 1
+    :arg int MSL: Specifies if the plot should be centred about mean sea level.
+                  1=centre about MSL, 0=centre about 0.
 
-    :arg color: The color for the tidal predictions plot.
-    :type color: string
+    :arg str tidal_predications: Path to directory of tidal prediction
+                                 file.
+
+    :arg str color: The color for the tidal predictions plot.
 
     :returns: DataFrame object (ttide) with tidal predictions and
               columns time, pred_all, pred_8.
     """
 
-    ttide = get_tides(name)
+    ttide = get_tides(name, tidal_predications)
     ax.plot(
         ttide.time + PST * time_shift,
         ttide.pred_all + SITES[name]['msl'] * MSL,
@@ -1097,8 +1096,10 @@ def load_model_ssh(grids, name):
     return ssh, t
 
 
-def website_thumbnail(grid_B, grid_T, grids, model_path, PNW_coastline,
-                      scale=0.1, PST=1, figsize=(18, 20)):
+def website_thumbnail(
+    grid_B, grid_T, grids, model_path, PNW_coastline, tidal_predications,
+    scale=0.1, PST=1, figsize=(18, 20),
+):
     """Thumbnail for the UBC Storm Surge website includes the thresholds
     indicating the risk of flooding in three stations and the wind speeds and
     directions. It also includes a brief description of threshold colours.
@@ -1117,6 +1118,9 @@ def website_thumbnail(grid_B, grid_T, grids, model_path, PNW_coastline,
 
     :arg PNW_coastline: Coastline dataset.
     :type PNW_coastline: :class:`mat.Dataset`
+
+    :arg str tidal_predications: Path to directory of tidal prediction
+                                 file.
 
     :arg scale: scale factor or wind arrows
     :type scale: float
@@ -1168,7 +1172,7 @@ def website_thumbnail(grid_B, grid_T, grids, model_path, PNW_coastline,
         lat = SITES[name]['lat']
         lon = SITES[name]['lon']
         # Get tides and ssh
-        ttide = get_tides(name)
+        ttide = get_tides(name, tidal_predications)
         ssh_corr = correct_model_ssh(ssh_loc, t, ttide)
 
         # Plot thresholds
@@ -1250,7 +1254,9 @@ def website_thumbnail(grid_B, grid_T, grids, model_path, PNW_coastline,
     return fig
 
 
-def PA_tidal_predictions(grid_T, PST=1, MSL=0, figsize=(20, 5)):
+def PA_tidal_predictions(
+    grid_T, tidal_predications, PST=1, MSL=0, figsize=(20, 5),
+):
     """Plots the tidal cycle at Point Atkinson during a 4 week period centred
     around the simulation start date.
 
@@ -1263,16 +1269,16 @@ def PA_tidal_predictions(grid_T, PST=1, MSL=0, figsize=(20, 5)):
     :arg grid_T: Hourly tracer results dataset from NEMO.
     :type grid_T: :class:`netCDF4.Dataset`
 
-    :arg PST: Specifies if plot should be presented in PST.
-              1 = plot in PST, 0 = plot in UTC.
-    :type PST: 0 or 1
+    :arg str tidal_predications: Path to directory of tidal prediction
+                                 file.
 
-    :arg MSL: Specifies if the plot should be centred about mean sea level.
-              1=centre about MSL, 0=centre about 0.
-    :type MSL: 0 or 1
+    :arg int PST: Specifies if plot should be presented in PST.
+                  1 = plot in PST, 0 = plot in UTC.
 
-    :arg figsize: Figure size (width, height) in inches.
-    :type figsize: 2-tuple
+    :arg int MSL: Specifies if the plot should be centred about mean sea level.
+                  1=centre about MSL, 0=centre about 0.
+
+    :arg 2-tuple figsize: Figure size (width, height) in inches.
 
     :returns: matplotlib figure object instance (fig).
     """
@@ -1291,7 +1297,7 @@ def PA_tidal_predictions(grid_T, PST=1, MSL=0, figsize=(20, 5)):
     ax = fig.add_subplot(1, 1, 1)
     fig.patch.set_facecolor('#2B3E50')
     fig.autofmt_xdate()
-    plot_tides(ax, 'Point Atkinson', PST, MSL, 'black')
+    plot_tides(ax, 'Point Atkinson', PST, MSL, tidal_predications, 'black')
 
     # Line indicating current date
     ax.plot([t_orig + time_shift * PST, t_orig + time_shift * PST],
@@ -1433,8 +1439,8 @@ def compare_water_levels(
 
 
 def compare_tidalpredictions_maxSSH(
-    grid_T, grid_B, grids, model_path, PST=1, MSL=0, name='Point Atkinson',
-    figsize=(20, 12),
+    grid_T, grid_B, grids, model_path, tidal_predications,
+    PST=1, MSL=0, name='Point Atkinson', figsize=(20, 12),
 ):
     """Plots a map for sea surface height when it was at its maximum at Point
     Atkinson and compares modelled water levels to tidal predications over one
@@ -1455,25 +1461,22 @@ def compare_tidalpredictions_maxSSH(
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
-    :arg grids: high frequency model results
-    :type grids: dictionary
+    :arg dict grids: high frequency model results
 
-    :arg model_path: The directory where the model wind files are stored.
-    :type model_path: string
+    :arg str model_path: The directory where the model wind files are stored.
 
-    :arg PST: Specifies if plot should be presented in PST.
-              1 = plot in PST, 0 = plot in UTC.
-    :type PST: 0 or 1
+    :arg str tidal_predications: Path to directory of tidal prediction
+                                 file.
 
-    :arg MSL: Specifies if the plot should be centred about mean sea level.
-              1=centre about MSL, 0=centre about 0.
-    :type MSL: 0 or 1
+    :arg int PST: Specifies if plot should be presented in PST.
+                  1 = plot in PST, 0 = plot in UTC.
 
-    :arg name: Name of station.
-    :type name: string
+    :arg int MSL: Specifies if the plot should be centred about mean sea level.
+                  1=centre about MSL, 0=centre about 0.
 
-    :arg figsize:  Figure size (width, height) in inches.
-    :type figsize: 2-tuple
+    :arg str name: Name of station.
+
+    :arg 2-tuple figsize:  Figure size (width, height) in inches.
 
     :returns: matplotlib figure object instance (fig).
     """
@@ -1511,7 +1514,7 @@ def compare_tidalpredictions_maxSSH(
     ax3 = fig.add_subplot(gs[2, 0])  # residual
 
     # Sea surface height plot
-    ttide = plot_tides(ax1, name, PST, MSL)
+    ttide = plot_tides(ax1, name, PST, MSL, tidal_predications)
     ssh_corr = plot_corrected_model(
         ax1, t, ssh_loc, ttide, PST, MSL, SITES[name]['msl'])
     ax1.plot(
@@ -1618,8 +1621,8 @@ def compare_tidalpredictions_maxSSH(
 
 
 def plot_thresholds_all(
-    grid_T, grid_B, grids, model_path, PNW_coastline, PST=1, MSL=1,
-    figsize=(20, 25),
+    grid_T, grid_B, grids, model_path, PNW_coastline, tidal_predications,
+    PST=1, MSL=1, figsize=(20, 25),
 ):
     """Plots sea surface height over one day with respect to warning
     thresholds.
@@ -1636,22 +1639,21 @@ def plot_thresholds_all(
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
-    :arg model_path: The directory where the model wind files are stored.
-    :type model_path: string
+    :arg str model_path: The directory where the model wind files are stored.
 
     :arg PNW_coastline: Coastline dataset.
     :type PNW_coastline: :class:`mat.Dataset`
 
-    :arg PST: Specifies if plot should be presented in PST.
-              1 = plot in PST, 0 = plot in UTC.
-    :type PST: 0 or 1
+    :arg str tidal_predications: Path to directory of tidal prediction
+                                 file.
 
-    :arg MSL: Specifies if the plot should be centred about mean sea level.
-              1=centre about MSL, 0=centre about 0.
-    :type MSL: 0 or 1
+    :arg int PST: Specifies if plot should be presented in PST.
+                  1 = plot in PST, 0 = plot in UTC.
 
-    :arg figsize:  Figure size (width, height) in inches.
-    :type figsize: 2-tuple
+    :arg int MSL: Specifies if the plot should be centred about mean sea level.
+                  1=centre about MSL, 0=centre about 0.
+
+    :arg 2-tuple figsize:  Figure size (width, height) in inches.
 
     :returns: matplotlib figure object instance (fig).
     """
@@ -1683,7 +1685,7 @@ def plot_thresholds_all(
         ax = fig.add_subplot(gs[M, 0])
         if name == 'Point Atkinson':
             plot_PA_observations(ax, PST)
-        ttide = plot_tides(ax, name, PST, MSL)
+        ttide = plot_tides(ax, name, PST, MSL, tidal_predications)
         ssh_corr = plot_corrected_model(ax, t, ssh_loc, ttide, PST, MSL, msl)
         ax.plot(
             t + t_shift, ssh_loc + msl*MSL, '--',
@@ -2389,8 +2391,8 @@ def ssh_PtAtkinson(grid_T, grid_B=None, figsize=(20, 5)):
 
 
 def plot_threshold_website(
-    grid_B, grid_T, grids, model_path, PNW_coastline, scale=0.1, PST=1,
-    figsize=(18, 20),
+    grid_B, grid_T, grids, model_path, PNW_coastline, tidal_predications,
+    scale=0.1, PST=1, figsize=(18, 20),
 ):
     """Overview image for Salish Sea website.
 
@@ -2406,21 +2408,23 @@ def plot_threshold_website(
     :arg grid_T: Hourly tracer results dataset from NEMO.
     :type grid_T: :class:`netCDF4.Dataset`
 
-    :arg grids: high frequency model results
-    :type grids: dictionary
+    :arg dict grids: high frequency model results
 
-    :arg model_path: The directory where the model wind files are stored.
-    :type model_path: string
+    :arg str model_path: The directory where the model wind files are
+                         stored.
 
-    :arg scale: scale factor or wind arrows
-    :type scale: float
+    :arg PNW_coastline: Coastline dataset.
+    :type PNW_coastline: :class:`mat.Dataset`
 
-    :arg PST: Specifies if plot should be presented in PST.
-              1 = plot in PST, 0 = plot in UTC.
-    :type PST: 0 or 1
+    :arg str tidal_predications: Path to directory of tidal prediction
+                                 file.
 
-    :arg figsize: Figure size (width, height) in inches.
-    :type figsize: 2-tuple
+    :arg float scale: scale factor or wind arrows
+
+    :arg int PST: Specifies if plot should be presented in PST.
+                  1 = plot in PST, 0 = plot in UTC.
+
+    :arg 2-tuple figsize: Figure size (width, height) in inches.
 
     :returns: matplotlib figure object instance (fig).
     """
@@ -2481,7 +2485,7 @@ def plot_threshold_website(
         lon = SITES[name]['lon']
         lat = SITES[name]['lat']
         # Get tides and ssh
-        ttide = get_tides(name)
+        ttide = get_tides(name, tidal_predications)
         ssh_corr = correct_model_ssh(ssh_loc, t, ttide)
 
         # Plot thresholds
