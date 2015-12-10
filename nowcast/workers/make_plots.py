@@ -240,8 +240,8 @@ def _make_publish_plots(
         plots_dir, 'NOAA_ssh_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
-    fig = figures.plot_thresholds_all(grid_T_hr, bathy, grids_15m, model_path,
-                                      coastline)
+    fig = figures.plot_thresholds_all(
+        grid_T_hr, bathy, grids_15m, model_path, coastline, tidal_predictions)
     filename = os.path.join(
         plots_dir, 'WaterLevel_Thresholds_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
