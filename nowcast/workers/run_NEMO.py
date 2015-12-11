@@ -283,6 +283,7 @@ def run_description(host, run_type, run_day, run_id, restart_timestep):
             os.path.join(forcing_home, '../NEMO-forcing/')),
         runs_dir=os.path.abspath(os.path.join(forcing_home, '../SalishSea/')),
         init_conditions=os.path.abspath(init_conditions),
+        mpi_decomposition=host['mpi decomposition'],
         nemo34=True,
     )
     run_desc['run_id'] = run_id
