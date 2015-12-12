@@ -217,7 +217,10 @@ class TestPrepLogging:
                 'backup_count': 7,
             }
         }
-        mgr._prep_logging()
+        p_RotatingFileHandler = patch.object(
+            mgr_module().logging.handlers, 'RotatingFileHandler')
+        with p_RotatingFileHandler:
+            mgr._prep_logging()
         m_config_logging.assert_called_once_with(
             mgr.config, mgr.logger, mgr.parsed_args.debug)
 
@@ -234,7 +237,10 @@ class TestPrepLogging:
             }
         }
         mgr.logger = Mock(name='logger')
-        mgr._prep_logging()
+        p_RotatingFileHandler = patch.object(
+            mgr_module().logging.handlers, 'RotatingFileHandler')
+        with p_RotatingFileHandler:
+            mgr._prep_logging()
         assert mgr.logger.info.call_count == 1
 
     @patch.object(mgr_module().lib, 'configure_logging')
@@ -250,7 +256,10 @@ class TestPrepLogging:
             }
         }
         mgr.logger = Mock(name='logger')
-        mgr._prep_logging()
+        p_RotatingFileHandler = patch.object(
+            mgr_module().logging.handlers, 'RotatingFileHandler')
+        with p_RotatingFileHandler:
+            mgr._prep_logging()
         assert mgr.logger.debug.call_count == 1
 
 
@@ -1057,6 +1066,7 @@ class TestFinishTheDay:
 
     def test_checklist_cleared_and_written_to_disk(self, mgr):
         mgr.checklist = {'foo': 'bar'}
+        mgr.checklist_logger = Mock(name='checklist_logger')
         mgr._write_checklist_to_disk = Mock(name='_write_checklist_to_disk')
         mgr._rotate_log_files = Mock(name='_rotate_log_files')
         mgr._finish_the_day()
@@ -1064,6 +1074,7 @@ class TestFinishTheDay:
         mgr._write_checklist_to_disk.assert_called_once_with()
 
     def test_rotate_log_files(self, mgr):
+        mgr.checklist_logger = Mock(name='checklist_logger')
         mgr._rotate_log_files = Mock(name='_rotate_log_files')
         with patch.object(mgr, '_write_checklist_to_disk'):
             mgr._finish_the_day()
