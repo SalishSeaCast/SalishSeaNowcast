@@ -18,8 +18,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import numpy as np
-import netCDF4 as nc
-import os
 import pytest
 
 from nowcast import analyze
@@ -32,11 +30,19 @@ def linear_depths():
 
 @pytest.fixture
 def nonuniform_depths():
-    # Don't like that these tests depend on the existence of this file
-    base = '/data/dlatorne/MEOPAR/SalishSea/nowcast/01oct15'
-    path = os.path.join(base, 'SalishSea_1d_20151001_20151001_grid_T.nc')
-    f = nc.Dataset(path, 'r')
-    return f.variables['deptht'][:]
+    return np.array([
+        0.5000003,    1.5000031,    2.50001144,    3.50003052,
+        4.50007057,    5.50015068,    6.50031042,    7.50062323,
+        8.50123596,    9.50243282,   10.50476551,   11.50931168,
+        12.51816654,   13.53541183,   14.56898212,   15.63428783,
+        16.76117325,   18.00713539,   19.48178482,   21.38997841,
+        24.10025597,   28.22991562,   34.68575668,   44.51772308,
+        58.48433304,   76.58558655,   98.06295776,  121.86651611,
+        147.08946228,  173.11448669,  199.57304382,  226.26029968,
+        253.06663513,  279.93453979,  306.834198,  333.75018311,
+        360.67453003,  387.60321045,  414.53408813,  441.46609497],
+        dtype=np.float32,
+    )
 
 
 class TestDepthAverage:
