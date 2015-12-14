@@ -1078,21 +1078,18 @@ def plot_map(
     return ax
 
 
-def load_model_ssh(grids, name):
-    """Load the model high frequency (15m) ssh time series.
+def load_model_ssh(grid_T):
+    """Load an sea surface hieght (ssh) time series from a NEMO tracer
+    results dataset.
 
-    :arg grids: high frequency model results
-    :type grids: dictionary
+    :arg grid_T: Tracer results dataset from NEMO.
+    :type grid_T: :py:class:`netCDF4.Dataset`
 
-    :arg name: station name
-    :type name: string
-
-    :returns: ssh, time - the ssh array and time array
+    :returns: ssh, time - the ssh and time arrays
+    :rtype: 2-tuple of :py:class:`numpy.ndarray`
     """
-    grid = grids[name]
-    ssh = grid.variables['sossheig'][:, 0, 0]
-    t_orig, t_final, t = get_model_time_variables(grid)
-
+    ssh = grid_T.variables['sossheig'][:, 0, 0]
+    t_orig, t_final, t = get_model_time_variables(grid_T)
     return ssh, t
 
 
@@ -1168,7 +1165,7 @@ def website_thumbnail(
     plot_map(ax, grid_B, PNW_coastline)
 
     for name in TIDAL_SITES:
-        ssh_loc, t = load_model_ssh(grids, name)
+        ssh_loc, t = load_model_ssh(grids[name])
         lat = SITES[name]['lat']
         lon = SITES[name]['lon']
         # Get tides and ssh
@@ -1402,7 +1399,7 @@ def compare_water_levels(
         tides = get_NOAA_tides(SITES[name]['stn_no'], start_date, end_date)
 
         # Get sea surface height
-        ssh, t = load_model_ssh(grids, name)
+        ssh, t = load_model_ssh(grids[name])
 
         # Sea surface height plots
         ax = fig.add_subplot(gs[M, 0])
@@ -1493,7 +1490,7 @@ def compare_tidalpredictions_maxSSH(
     bathy, X, Y = tidetools.get_bathy_data(grid_B)
 
     # Get sea surface height
-    ssh_loc, t = load_model_ssh(grids, name)
+    ssh_loc, t = load_model_ssh(grids[name])
     # full field
     ssh = grid_T.variables['sossheig'][:]
 
@@ -1678,7 +1675,7 @@ def plot_thresholds_all(
 
     for M, name in enumerate(TIDAL_SITES):
         # Get sea surface height
-        ssh_loc, t = load_model_ssh(grids, name)
+        ssh_loc, t = load_model_ssh(grids[name])
         msl = SITES[name]['msl']
 
         # Plot tides, corrected model and original model
@@ -2481,7 +2478,7 @@ def plot_threshold_website(
 
     for name in TIDAL_SITES:
         # Get sea surface height
-        ssh_loc, t = load_model_ssh(grids, name)
+        ssh_loc, t = load_model_ssh(grids[name])
         lon = SITES[name]['lon']
         lat = SITES[name]['lat']
         # Get tides and ssh
