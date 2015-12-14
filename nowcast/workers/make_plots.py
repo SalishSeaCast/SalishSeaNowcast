@@ -124,16 +124,16 @@ def _make_plot_files(
         'research': _make_research_plots,
         'comparison': _make_comparisons_plots,
     }
-    model_path = config['weather']['ops_dir']
+    weather_path = config['weather']['ops_dir']
     if run_type in ['forecast', 'forecast2']:
-        model_path = os.path.join(model_path, 'fcst/')
+        weather_path = os.path.join(weather_path, 'fcst/')
     results_dir = os.path.join(results_home, dmy)
     bathy = nc.Dataset(config['bathymetry'])
     coastline = sio.loadmat(config['coastline'])
     mesh_mask = nc.Dataset(config['mesh_mask'])
     tidal_predictions = config['ssh']['tidal_predictions']
     make_plots_funcs[plot_type](
-        dmy, model_path, bathy, results_dir, plots_dir, coastline,
+        dmy, weather_path, bathy, results_dir, plots_dir, coastline,
         tidal_predictions=tidal_predictions,
         mesh_mask=mesh_mask,
     )
@@ -171,7 +171,7 @@ def _install_storm_surge_summary_plot(config, dmy, plots_dir):
 
 
 def _make_publish_plots(
-    dmy, model_path, bathy, results_dir, plots_dir, coastline,
+    dmy, weather_path, bathy, results_dir, plots_dir, coastline,
     tidal_predictions, **kwargs
 ):
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
@@ -184,13 +184,15 @@ def _make_publish_plots(
     }
 
     fig = figures.website_thumbnail(
-        bathy, grid_T_hr, grids_15m, model_path, coastline, tidal_predictions)
+        bathy, grid_T_hr, grids_15m, weather_path, coastline,
+        tidal_predictions)
     filename = os.path.join(
         plots_dir, 'Website_thumbnail_{date}.png'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.plot_threshold_website(
-        bathy, grid_T_hr, grids_15m, model_path, coastline, tidal_predictions)
+        bathy, grid_T_hr, grids_15m, weather_path, coastline,
+        tidal_predictions)
     filename = os.path.join(
         plots_dir, 'Threshold_website_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
@@ -201,35 +203,35 @@ def _make_publish_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, model_path, tidal_predictions,
+        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
         name='Victoria')
     filename = os.path.join(
         plots_dir, 'Vic_maxSSH_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, model_path, tidal_predictions,
+        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
         name='Point Atkinson')
     filename = os.path.join(
         plots_dir, 'PA_maxSSH_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, model_path, tidal_predictions,
+        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
         name='Campbell River')
     filename = os.path.join(
         plots_dir, 'CR_maxSSH_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, model_path, tidal_predictions,
+        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
         name='Nanaimo')
     filename = os.path.join(
         plots_dir, 'Nan_maxSSH_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, model_path, tidal_predictions,
+        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
         name='Cherry Point')
     filename = os.path.join(
         plots_dir, 'CP_maxSSH_{date}.svg'.format(date=dmy))
@@ -246,20 +248,20 @@ def _make_publish_plots(
         plots_dir, 'WaterLevel_Thresholds_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
-    fig = figures.Sandheads_winds(grid_T_hr, bathy, model_path, coastline)
+    fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
     filename = os.path.join(
         plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.winds_average_max(
-        grid_T_hr, bathy, model_path, coastline,
+        grid_T_hr, bathy, weather_path, coastline,
         station='all', wind_type='average')
     filename = os.path.join(
         plots_dir, 'Avg_wind_vectors_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.winds_average_max(
-        grid_T_hr, bathy, model_path, coastline,
+        grid_T_hr, bathy, weather_path, coastline,
         station='all', wind_type='max')
     filename = os.path.join(
         plots_dir, 'Wind_vectors_at_max_{date}.svg'.format(date=dmy))
@@ -267,7 +269,7 @@ def _make_publish_plots(
 
 
 def _make_comparisons_plots(
-    dmy, model_path, bathy, results_dir, plots_dir, coastline, **kwargs
+    dmy, weather_path, bathy, results_dir, plots_dir, coastline, **kwargs
 ):
     """Make the plots we wish to look at for comparisons purposes.
     """
@@ -330,7 +332,7 @@ def _make_comparisons_plots(
 
     # This will overwrite the images made previously
     # Sandheads winds
-    fig = figures.Sandheads_winds(grid_T_hr, bathy, model_path, coastline)
+    fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
     filename = os.path.join(
         plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
@@ -348,7 +350,7 @@ def _make_comparisons_plots(
 
 
 def _make_research_plots(
-    dmy, model_path, bathy, results_dir, plots_dir, coastline, mesh_mask,
+    dmy, weather_path, bathy, results_dir, plots_dir, coastline, mesh_mask,
     **kwargs
 ):
     """Make the plots we wish to look at for research purposes.
