@@ -104,7 +104,7 @@ def salinity_ferry_route(
     sal_hr = grid_T_hr.variables['vosaline']
     t, z = 3, 1
     sal_hr = np.ma.masked_values(sal_hr[t, z], 0)
-
+    sal_t = teos_tools.psu_teos(sal_hr)
     # Load ferry route salinity
     obs_sal = ferry_salinity(route_name, dmy)
 
@@ -119,10 +119,10 @@ def salinity_ferry_route(
     cmap.set_bad('burlywood')
 
     # Plot model salinity
-    mesh = axs[1].contourf(lon[:], lat[:], sal_hr[:], 10, cmap=cmap)
+    mesh = axs[1].contourf(lon[:], lat[:], sal_t[:], 10, cmap=cmap)
     cbar = fig.colorbar(mesh)
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
-    cbar.set_label('Pratical Salinity', color='white')
+    cbar.set_label('Absolute Salinity [g/kg]', color='white')
     axs[1].set_title('Ferry Route: 3am[UTC] 1.5m model result ', **title_font)
 
     # Plot ferry route.
@@ -193,7 +193,7 @@ def salinity_ferry_route(
     axs[0].set_ylim(20, 32)
     axs[0].set_title('Surface Salinity: ' + dmy, **title_font)
     axs[0].set_xlabel('Longitude', **axis_font)
-    axs[0].set_ylabel('Practical Salinity', **axis_font)
+    axs[0].set_ylabel('Absolute Salinity [g/kg]', **axis_font)
     axs[0].legend(loc=3)
     axs[0].grid()
 
@@ -244,6 +244,9 @@ def ferry_salinity(route_name, dmy, step=20):
     # High frequency ferry data, take every 20th value
     obs_slice = obs_route[:, 0:-1:step]
 
+    # Convert to TEOS-10
+    obs_slice[3] = teos_tools.psu_teos(obs_slice[3])
+
     return obs_slice
 
 
@@ -279,7 +282,11 @@ def nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal):
         sal_a_route[i], sal_b_route[i] = _model_IDW(
             obs_sal[:, i], bathy, grid_T_hr, sal_a, sal_b)
 
-    return sal_a_route, sal_b_route
+    # Convert to TEOS-10
+    sal_a_t = teos_tools.psu_teos(sal_a_route)
+    sal_b_t = teos_tools.psu_teos(sal_b_route)
+
+    return sal_a_t, sal_b_t
 
 
 def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
