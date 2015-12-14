@@ -536,9 +536,9 @@ def get_NOAA_tides(station_no, start_date, end_date, interval=''):
     return tides
 
 
-def get_maxes(ssh, t, res, lon, lat, model_path):
-    """Identifies maximum ssh and other important features such as the timing,
-    residual, and wind speed.
+def get_maxes(ssh, t, res, lon, lat, weather_path):
+    """Identifies maximum ssh and other important features such as the
+    timing, residual, and wind speed.
 
     :arg ssh: The ssh field to be maximized.
     :type ssh: numpy array
@@ -549,14 +549,12 @@ def get_maxes(ssh, t, res, lon, lat, model_path):
     :arg res: The residual.
     :type res: numpy array
 
-    :arg lon: The longitude of the station for looking up model winds.
-    :type lon: float
+    :arg float lon: The longitude of the station for looking up wind.
 
-    :arg lat: The latitude of the station for looking up model winds.
-    :type lat: float
+    :arg float lat: The latitude of the station for looking up wind.
 
-    :arg model_path: The directory where the model wind files are stored.
-    :type model_path: string
+    :arg str weather_path: The directory where the weather forcing files
+                           are stored.
 
     :returns: maxmimum ssh (max_ssh), index of maximum ssh (index_ssh),
               time of maximum ssh (tmax), residual at that time (max_res),
@@ -574,7 +572,7 @@ def get_maxes(ssh, t, res, lon, lat, model_path):
     t_orig = t[0]
     t_final = t[-1]
     [wind, direc, t_wind, pr, tem, sol, the, qr, pre] = get_model_winds(
-        lon, lat, t_orig, t_final, model_path)
+        lon, lat, t_orig, t_final, weather_path)
     # Index where t_wind=tmax
     # (Find a match between the year, month, day and hour)
     ind_w = np.where(
@@ -634,18 +632,16 @@ def get_tides(name, path='tidal_predictions/'):
     return ttide
 
 
-def get_weather_filenames(t_orig, t_final, model_path):
+def get_weather_filenames(t_orig, t_final, weather_path):
     """Gathers a list of "Operational" atmospheric model filenames in a
     specifed date range.
 
-    :arg t_orig: The beginning of the date range of interest.
-    :type t_orig: datetime object
+    :arg datetime t_orig: The beginning of the date range of interest.
 
-    :arg t_final: The end of the date range of interest.
-    :type t_final: datetime object
+    :arg datetime t_final: The end of the date range of interest.
 
-    :arg model_path: The directory where the model files are stored.
-    :type model_path: string
+    :arg str weather_path: The directory where the weather forcing files
+                           are stored.
 
     :returns: list of files names (files) from the Operational model.
     """
@@ -655,9 +651,9 @@ def get_weather_filenames(t_orig, t_final, model_path):
         for num in range(0, numdays + 1)]
     dates.sort()
 
-    allfiles = glob.glob(os.path.join(model_path, 'ops_y*'))
-    sstr = os.path.join(model_path, dates[0].strftime('ops_y%Ym%md%d.nc'))
-    estr = os.path.join(model_path, dates[-1].strftime('ops_y%Ym%md%d.nc'))
+    allfiles = glob.glob(os.path.join(weather_path, 'ops_y*'))
+    sstr = os.path.join(weather_path, dates[0].strftime('ops_y%Ym%md%d.nc'))
+    estr = os.path.join(weather_path, dates[-1].strftime('ops_y%Ym%md%d.nc'))
     files = []
     for filename in allfiles:
         if filename >= sstr:
@@ -668,24 +664,20 @@ def get_weather_filenames(t_orig, t_final, model_path):
     return files
 
 
-def get_model_winds(lon, lat, t_orig, t_final, model_path):
+def get_model_winds(lon, lat, t_orig, t_final, weather_path):
     """Returns meteorological fields for the "Operational" model at a given
     longitude and latitude over a date range.
 
-    :arg lon: The specified longitude.
-    :type lon: float
+    :arg float lon: The specified longitude.
 
-    :arg lat: The specified latitude.
-    :type lat: float
+    :arg float lat: The specified latitude.
 
-    :arg t_orig: The beginning of the date range of interest.
-    :type t_orig: datetime object
+    :arg datetime t_orig: The beginning of the date range of interest.
 
-    :arg t_final: The end of the date range of interest.
-    :type t_final: datetime object
+    :arg datetime t_final: The end of the date range of interest.
 
-    :arg model_path: The directory where the model files are stored.
-    :type model_path: string
+    :arg str weather_path: The directory where the weather forcing files
+                           are stored.
 
     :returns: wind speed (wind), wind direction (direc), time (t),
               pressure (pr), temperature (tem), solar radiation (sol),
@@ -693,7 +685,7 @@ def get_model_winds(lon, lat, t_orig, t_final, model_path):
     """
 
     # Weather file names
-    files = get_weather_filenames(t_orig, t_final, model_path)
+    files = get_weather_filenames(t_orig, t_final, weather_path)
     weather = nc.Dataset(files[0])
     Y = weather.variables['nav_lat'][:]
     X = weather.variables['nav_lon'][:] - 360
@@ -885,7 +877,7 @@ def plot_threshold_map(ax, ttide, ssh_corr, marker, msize, alpha, name):
     return max_tides, mid_tides, extreme_ssh
 
 
-def plot_wind_vector(ax, name, t_orig, t_final, model_path, inds, scale):
+def plot_wind_vector(ax, name, t_orig, t_final, weather_path, inds, scale):
     """ Plots a single wind vector at a station in an axis.
 
     Winds are averaged over the times represented by the indices in
@@ -894,26 +886,21 @@ def plot_wind_vector(ax, name, t_orig, t_final, model_path, inds, scale):
     :arg ax: The axis for plotting.
     :type ax: an axis object
 
-    :arg name: The name of the station, can be Neah Bay, Point Atkinson,
-               Campbell River, Victoria, Friday Harbor, Cherry Point,
-               Sandheads.
-    :type name: string
+    :arg str name: The name of the station, can be Neah Bay, Point Atkinson,
+                   Campbell River, Victoria, Friday Harbor, Cherry Point,
+                   Sandheads.
 
-    :arg t_orig: start time of the simulation.
-    :type t_orig: datetime object
+    :arg datetime t_orig: start time of the simulation.
 
-    :arg t_final: end time fo simulation.
-    :type t_final: datetime object
+    :arg datetime t_final: end time fo simulation.
 
-    :arg model_path: path to the weather model data.
-    :type model_path: string
+    :arg str weather_path: Path to the weather forcing files.
 
     :arg inds: indices corresponding to the time range of desired wind plots.
                If inds='all', the average will span the entire simulation.
     :type inds: numpy array, or string 'all'
 
-    :arg scale: scale of arrows for plotting wind vector.
-    :type scale: float
+    :arg float scale: scale of arrows for plotting wind vector.
 
     :returns: tplot, an array with the time range winds were averaged:
               tplot[0] and tplot[-1] .
@@ -922,7 +909,7 @@ def plot_wind_vector(ax, name, t_orig, t_final, model_path, inds, scale):
     lon = SITES[name]['lon']
 
     [wind, direc, t, pr, tem, sol, the, qr, pre] = get_model_winds(
-        lon, lat, t_orig, t_final, model_path)
+        lon, lat, t_orig, t_final, weather_path)
 
     if inds == 'all':
         inds = np.array([0, np.shape(wind)[0] - 1])
@@ -947,13 +934,12 @@ def plot_wind_vector(ax, name, t_orig, t_final, model_path, inds, scale):
 
 
 def isolate_wind_timing(
-        name, grid_T, grid_B, model_path, t, hour=4, average=True):
+        name, grid_T, grid_B, weather_path, t, hour=4, average=True):
     """Isolates indices timing of wind vectors. The timing is based on x number
     of hours before the max water level at a station.
 
-    :arg name: The name of the station, Point Atkinson, Victora,
-               Campbell River are good choices.
-    :type name: string
+    :arg str name: The name of the station, Point Atkinson, Victora,
+                   Campbell River are good choices.
 
     :arg grid_T: Hourly tracer results dataset from NEMO.
     :type grid_T: :class:`netCDF4.Dataset`
@@ -961,18 +947,16 @@ def isolate_wind_timing(
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
-    :arg model_path: path to the weather model data.
-    :type model_path: string
+    :arg str weather_path: Path to the weather forcing files.
 
     :arg t: An array of outut times from the NEMO model.
     :type t: numpy array consisting of datetime objects
 
-    :arg hour: The number of hours before max ssh to plt.
-    :type hour: integer
+    :arg int hour: The number of hours before max ssh to plt.
 
     :arg average: Flag to determine if plotting should be averaged over
                   x hours before ssh or just a single time.
-    :type average: Boolean
+    :type average: boolean
                    (True=average over times,
                    False = only a single time_counter)
 
@@ -995,7 +979,7 @@ def isolate_wind_timing(
 
     # Index at which sea surface height is at its maximum at Point Atkinson
     max_ssh, index_ssh, tmax, max_res, max_wind, ind_w = get_maxes(
-        ssh, t, placeholder_res, lon, lat, model_path)
+        ssh, t, placeholder_res, lon, lat, weather_path)
 
     # Build indices based on x hours before max ssh if possible. If not, start
     # at beginning of file.
@@ -1094,7 +1078,7 @@ def load_model_ssh(grid_T):
 
 
 def website_thumbnail(
-    grid_B, grid_T, grids, model_path, PNW_coastline, tidal_predications,
+    grid_B, grid_T, grids, weather_path, PNW_coastline, tidal_predications,
     scale=0.1, PST=1, figsize=(18, 20),
 ):
     """Thumbnail for the UBC Storm Surge website includes the thresholds
@@ -1110,8 +1094,8 @@ def website_thumbnail(
     :arg grids: high frequency model results
     :type grids: dictionary
 
-    :arg model_path: The directory where the model wind files are stored.
-    :type model_path: string
+    :arg str weather_path: The directory where weather forcing wind files
+                           are stored.
 
     :arg PNW_coastline: Coastline dataset.
     :type PNW_coastline: :class:`mat.Dataset`
@@ -1144,8 +1128,8 @@ def website_thumbnail(
     t_orig, t_final, t = get_model_time_variables(grid_T)
 
     # Wind time
-    inds = isolate_wind_timing('Point Atkinson', grid_T, grid_B,
-                               model_path, t, 4, average=True)
+    inds = isolate_wind_timing(
+        'Point Atkinson', grid_T, grid_B, weather_path, t, 4, average=True)
 
     # Set up Information
     max_sshs = {}
@@ -1182,16 +1166,15 @@ def website_thumbnail(
          tmax,
          max_res,
          max_wind,
-         ind_w] = get_maxes(
-            ssh_corr, t, res, lon, lat, model_path)
+         ind_w] = get_maxes(ssh_corr, t, res, lon, lat, weather_path)
         max_sshs[name] = max_ssh
         max_times[name] = tmax
         max_winds[name] = max_wind
 
     # Add winds for other stations
     for name in WIND_SITES:
-        twind = plot_wind_vector(ax, name, t_orig, t_final,
-                                 model_path, inds, scale)
+        twind = plot_wind_vector(
+            ax, name, t_orig, t_final, weather_path, inds, scale)
 
     # Reference arrow
     # for m/s
@@ -1436,7 +1419,7 @@ def compare_water_levels(
 
 
 def compare_tidalpredictions_maxSSH(
-    grid_T, grid_B, grids, model_path, tidal_predications,
+    grid_T, grid_B, grids, weather_path, tidal_predications,
     PST=1, MSL=0, name='Point Atkinson', figsize=(20, 12),
 ):
     """Plots a map for sea surface height when it was at its maximum at Point
@@ -1460,7 +1443,8 @@ def compare_tidalpredictions_maxSSH(
 
     :arg dict grids: high frequency model results
 
-    :arg str model_path: The directory where the model wind files are stored.
+    :arg str weather_path: The directory where the weather forcing files
+                           are stored.
 
     :arg str tidal_predications: Path to directory of tidal prediction
                                  file.
@@ -1523,7 +1507,7 @@ def compare_tidalpredictions_maxSSH(
 
     # Find maximim sea surface height and timing
     max_ssh, index, tmax, max_res, max_wind, ind_w = get_maxes(
-        ssh_corr, t, res, lon, lat, model_path)
+        ssh_corr, t, res, lon, lat, weather_path)
     ax0.text(0.05, 0.9, name, fontsize=20,
              horizontalalignment='left',
              verticalalignment='top', color='white')
@@ -1618,7 +1602,7 @@ def compare_tidalpredictions_maxSSH(
 
 
 def plot_thresholds_all(
-    grid_T, grid_B, grids, model_path, PNW_coastline, tidal_predications,
+    grid_T, grid_B, grids, weather_path, PNW_coastline, tidal_predications,
     PST=1, MSL=1, figsize=(20, 25),
 ):
     """Plots sea surface height over one day with respect to warning
@@ -1636,7 +1620,8 @@ def plot_thresholds_all(
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
-    :arg str model_path: The directory where the model wind files are stored.
+    :arg str weather_path: The directory where the weather forcing files
+                           are stored.
 
     :arg PNW_coastline: Coastline dataset.
     :type PNW_coastline: :class:`mat.Dataset`
@@ -1736,7 +1721,7 @@ def plot_thresholds_all(
 
 
 def Sandheads_winds(
-        grid_T, grid_B, model_path, PNW_coastline, PST=1, figsize=(20, 12)):
+        grid_T, grid_B, weather_path, PNW_coastline, PST=1, figsize=(20, 12)):
     """Plots the observed and modelled winds at Sandheads during the
     simulation.
 
@@ -1750,8 +1735,8 @@ def Sandheads_winds(
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
-    :arg model_path: The directory where the model files are stored.
-    :type model_path: string
+    :arg str weather_path: The directory where the weather forcing files
+                           are stored.
 
     :arg PST: Specifies if plot should be presented in PST.
               1 = plot in PST, 0 = plot in UTC.
@@ -1778,7 +1763,7 @@ def Sandheads_winds(
 
     # Get modelled winds
     wind, direc, t, pr, tem, sol, the, qr, pre = get_model_winds(
-        lon, lat, t_orig, t_end, model_path)
+        lon, lat, t_orig, t_end, weather_path)
     gs = gridspec.GridSpec(2, 2, width_ratios=[1.5, 1])
     gs.update(wspace=0.13, hspace=0.2)
 
@@ -1858,7 +1843,7 @@ def Sandheads_winds(
 
 
 def winds_average_max(
-        grid_T, grid_B, model_path, PNW_coastline, station, wind_type,
+        grid_T, grid_B, weather_path, PNW_coastline, station, wind_type,
         figsize=(20, 15)):
     """Plots wind vectors at several stations over domain. Wind vecors can be
     averaged over the entire simulation or plotted at 4 hours before max ssh
@@ -1870,8 +1855,8 @@ def winds_average_max(
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
-    :arg model_path: The directory where the model files are stored.
-    :type model_path: string
+    :arg str weather_path: The directory where the weather forcing files
+                           are stored.
 
     :arg station: Name of one station or 'all' for all stations.
     :type station: string
@@ -1914,12 +1899,7 @@ def winds_average_max(
     t_orig, t_final, t = get_model_time_variables(grid_T)
     if wind_type == 'max':
         inds = isolate_wind_timing(
-            'Point Atkinson',
-            grid_T,
-            grid_B,
-            model_path,
-            t,
-            4,
+            'Point Atkinson', grid_T, grid_B, weather_path, t, 4,
             average=False)
     elif wind_type == 'average':
         inds = 'all'
@@ -1929,7 +1909,7 @@ def winds_average_max(
         lat = SITES[name]['lat']
         lon = SITES[name]['lon']
         plot_time = plot_wind_vector(
-            ax, name, t_orig, t_final, model_path, inds, scale)
+            ax, name, t_orig, t_final, weather_path, inds, scale)
         ax.plot(
             lon, lat,
             marker='D', markersize=14, markeredgewidth=2,
@@ -2388,7 +2368,7 @@ def ssh_PtAtkinson(grid_T, grid_B=None, figsize=(20, 5)):
 
 
 def plot_threshold_website(
-    grid_B, grid_T, grids, model_path, PNW_coastline, tidal_predications,
+    grid_B, grid_T, grids, weather_path, PNW_coastline, tidal_predications,
     scale=0.1, PST=1, figsize=(18, 20),
 ):
     """Overview image for Salish Sea website.
@@ -2407,8 +2387,8 @@ def plot_threshold_website(
 
     :arg dict grids: high frequency model results
 
-    :arg str model_path: The directory where the model wind files are
-                         stored.
+    :arg str weather_path: The directory where the weather forcing files
+                           are stored.
 
     :arg PNW_coastline: Coastline dataset.
     :type PNW_coastline: :class:`mat.Dataset`
@@ -2433,8 +2413,8 @@ def plot_threshold_website(
     t_orig, t_final, t = get_model_time_variables(grid_T)
 
     # Wind time
-    inds = isolate_wind_timing('Point Atkinson', grid_T, grid_B,
-                               model_path, t, 4, average=True)
+    inds = isolate_wind_timing(
+        'Point Atkinson', grid_T, grid_B, weather_path, t, 4, average=True)
 
     # Set up Information
     max_sshs = {}
@@ -2483,13 +2463,13 @@ def plot_threshold_website(
         residual = compute_residual(ssh_corr, t_model, ttide)
         max_sshs[name], _, max_times[name], _, max_winds[name], _ = get_maxes(
             ssh_corr, t_model, residual,
-            SITES[name]['lon'], SITES[name]['lat'], model_path)
+            SITES[name]['lon'], SITES[name]['lat'], weather_path)
         plot_threshold_map(ax, ttide, ssh_corr, 'o', 55, 0.3, name)
 
     # Add winds for other stations
     for name in WIND_SITES:
-        twind = plot_wind_vector(ax, name, t_orig, t_final,
-                                 model_path, inds, scale)
+        twind = plot_wind_vector(
+            ax, name, t_orig, t_final, weather_path, inds, scale)
 
     # Reference arrow
     ax.arrow(-122.5, 50.65, 0. * scale, -5. * scale,
