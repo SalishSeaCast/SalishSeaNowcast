@@ -2477,33 +2477,14 @@ def plot_threshold_website(
     legend.get_title().set_fontsize('20')
 
     for name in TIDAL_SITES:
-        # Get sea surface height
-        ssh_loc, t = load_model_ssh(grids[name])
-        lon = SITES[name]['lon']
-        lat = SITES[name]['lat']
-        # Get tides and ssh
+        ssh_model, t_model = load_model_ssh(grids[name])
         ttide = get_tides(name, tidal_predications)
-        ssh_corr = correct_model_ssh(ssh_loc, t, ttide)
-
-        # Plot thresholds
+        ssh_corr = correct_model_ssh(ssh_model, t_model, ttide)
+        residual = compute_residual(ssh_corr, t_model, ttide)
+        max_sshs[name], _, max_times[name], _, max_winds[name], _ = get_maxes(
+            ssh_corr, t_model, residual,
+            SITES[name]['lon'], SITES[name]['lat'], model_path)
         plot_threshold_map(ax, ttide, ssh_corr, 'o', 55, 0.3, name)
-
-        # Information
-        res = compute_residual(ssh_corr, t, ttide)
-        [max_ssh,
-         index_ssh,
-         tmax,
-         max_res,
-         max_wind,
-         ind_w] = get_maxes(ssh_corr,
-                            t,
-                            res,
-                            lon,
-                            lat,
-                            model_path)
-        max_sshs[name] = max_ssh
-        max_times[name] = tmax
-        max_winds[name] = max_wind
 
     # Add winds for other stations
     for name in WIND_SITES:
@@ -2601,7 +2582,6 @@ def plot_threshold_website(
             0.05, 0.5, 'Wind speed: {:.1f} m/s'
             .format(float(max_winds[name])), fontsize=15,
             horizontalalignment='left', verticalalignment='top', color='w')
-
     return fig
 
 
