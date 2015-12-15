@@ -68,10 +68,10 @@ route = {'HBDB': {'start': {'station': 'Horseshoe Bay',
                           'hour': 4,
                           'minute': 15}},
          'TWSB': {'start': {'station': 'Tsawwassen',
-                            'hour': 1,
+                            'hour': 2,
                             'minute': 0},
                   'end': {'station': 'Swartz Bay',
-                          'hour': 3,
+                          'hour': 4,
                           'minute': 0}}
          }
 
@@ -134,8 +134,9 @@ def salinity_ferry_route(
     stations = [route[route_name]['start']['station'],
                 route[route_name]['end']['station'],
                 'Vancouver']
+    location = [0.04, -0.6, 0.09]
 
-    for stn in stations:
+    for stn, loc in zip(stations, location):
         axs[1].plot(
             ferry_stations[stn]['lon'],
             ferry_stations[stn]['lat'],
@@ -144,37 +145,11 @@ def salinity_ferry_route(
             markersize=10,
             markeredgewidth=2)
 
-    axs[1].annotate(
-        stations[0],
-        (ferry_stations[
-            stations[0]]['lon'] +
-            0.02,
-            ferry_stations[
-            stations[0]]['lat'] +
-            0.12),
-        fontsize=15,
-        color='black',
-        bbox=bbox_args)
-    axs[1].annotate(
-        stations[1],
-        (ferry_stations[
-            stations[1]]['lon'] -
-            0.55,
-            ferry_stations[
-            stations[1]]['lat']),
-        fontsize=15,
-        color='black',
-        bbox=bbox_args)
-    axs[1].annotate(
-        stations[2],
-        (ferry_stations[
-            stations[2]]['lon'],
-            ferry_stations[
-            stations[2]]['lat'] +
-            0.09),
-        fontsize=15,
-        color='black',
-        bbox=bbox_args)
+        axs[1].annotate(stn, (ferry_stations[stn]['lon'] + loc,
+                              ferry_stations[stn]['lat']),
+                        fontsize=15,
+                        color='black',
+                        bbox=bbox_args)
 
     # Set up model part of salinity comparison plot
     model_time_b = route[route_name]['start']['hour'] + 1
@@ -189,8 +164,12 @@ def salinity_ferry_route(
     axs[0].text(0.25, -0.1, 'Observations from Ocean Networks Canada',
                 transform=axs[0].transAxes, color='white')
 
-    axs[0].set_xlim(-124, -123)
-    axs[0].set_ylim(20, 32)
+    # Setting plot limits
+    mina = np.amin(nemo_a)
+    minlon = np.amin(obs_sal[1])
+
+    axs[0].set_xlim(minlon-0.1, -123)
+    axs[0].set_ylim(mina-5, 32)
     axs[0].set_title('Surface Salinity: ' + dmy, **title_font)
     axs[0].set_xlabel('Longitude', **axis_font)
     axs[0].set_ylabel('Absolute Salinity [g/kg]', **axis_font)
@@ -329,14 +308,20 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
 
     for i in np.arange(x1 - 1, x1 + 2):
         for j in np.arange(y1 - 1, y1 + 2):
-            dist = tidetools.haversine(
-                obs[1], obs[2], X[i, j], Y[i, j])
-            weight = 1.0 / dist
-            weight_sum = weight_sum + weight
-            val_a = sal_a[i, j] * weight
-            val_b = sal_b[i, j] * weight
-            val_a_sum = val_a_sum + val_a
-            val_b_sum = val_b_sum + val_b
+            # Some adjacent points are land we don't count them into the
+            # salinity average.
+            if sal_a[i, j] == 0:
+                val_a_sum = val_a_sum
+                val_b_sum = val_b_sum
+            else:
+                dist = tidetools.haversine(
+                    obs[1], obs[2], X[i, j], Y[i, j])
+                weight = 1.0 / dist
+                weight_sum = weight_sum + weight
+                val_a = sal_a[i, j] * weight
+                val_b = sal_b[i, j] * weight
+                val_a_sum = val_a_sum + val_a
+                val_b_sum = val_b_sum + val_b
 
     sal_a_idw = val_a_sum / weight_sum
     sal_b_idw = val_b_sum / weight_sum
