@@ -137,8 +137,8 @@ Install the additional packages that the nowcast manager and workers depend on:
 
 .. code-block:: bash
 
-    (nowcast)$ conda install paramiko pyzmq
-    (nowcast)$ pip install BeautifulSoup4
+    (nowcast)$ conda install lxml paramiko pyzmq
+    (nowcast)$ pip install BeautifulSoup4 driftwood feedgen
 
 Finally,
 install Sphinx,

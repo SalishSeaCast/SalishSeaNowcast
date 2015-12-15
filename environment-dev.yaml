@@ -16,6 +16,7 @@ dependencies:
 - coverage
 - ipython
 - jupyter
+- lxml
 - mako
 - matplotlib
 - netCDF4
@@ -35,5 +36,6 @@ dependencies:
   - arrow
   - BeautifulSoup4
   - driftwood
+  - feedgen
   - ipdb
   - sphinx-bootstrap-theme
