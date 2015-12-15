@@ -132,7 +132,13 @@ SITES = {
         'lat': 49.10,
         'lon': -123.30},
     'Tofino': {
+        'lat': 49.15,
+        'lon': -125.91,
         'stn_no': 8615},
+    'Bamfield': {
+        'lat': 48.84,
+        'lon': -125.14,
+        'stn_no': 8545},
     'VENUS': {
         'East': {
             'lat': 49.0419,
