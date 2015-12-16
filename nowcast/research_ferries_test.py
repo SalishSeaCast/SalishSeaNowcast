@@ -304,15 +304,18 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
                                                   X,
                                                   Y,
                                                   bathy,
-                                                  lat_tol=0.00210)
+                                                  lat_tol=0.00210,
+                                                  allow_land=True)
 
     # Inverse distance weighted interpolation with the 8 nearest model values.
     val_a_sum = 0
     val_b_sum = 0
     weight_sum = 0
 
+    # Some ferry model routes go over land, replace locations when 4 or
+    # more of the surrounding grid point are land with NaN.
     interp_area = sal_a[x1-1:x1+2, y1-1:y1+2]
-    if interp_area.size-np.count_nonzero(interp_area) >= 3:
+    if interp_area.size-np.count_nonzero(interp_area) >= 4:
         sal_a_idw = np.NaN
         sal_b_idw = np.NaN
     else:
