@@ -77,9 +77,13 @@ route = {'HBDB': {'start': {'station': 'Horseshoe Bay',
 
 
 def salinity_ferry_route(
-        grid_T_hr, grid_B, bathy, coastline, route_name, dmy):
+        ferry_data_path, grid_T_hr, grid_B,
+        bathy, coastline, route_name, dmy):
     """Plot daily salinity comparisons between ferry observations and model
     results as well as ferry route with model salinity distribution.
+
+    :arg ferry_data_path: storage file location for ONC ferry data.
+    :type ferry_data_path: string
 
     :arg grid_T_hr: Hourly tracer results dataset from NEMO.
     :type grid_T_hr: :class:`netCDF4.Dataset
@@ -106,7 +110,7 @@ def salinity_ferry_route(
     sal_hr = np.ma.masked_values(sal_hr[t, z], 0)
     sal_t = teos_tools.psu_teos(sal_hr)
     # Load ferry route salinity
-    obs_sal = ferry_salinity(route_name, dmy)
+    obs_sal = ferry_salinity(ferry_data_path, route_name, dmy)
 
     # Load model salinity for ferry route
     nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal)
@@ -152,9 +156,8 @@ def salinity_ferry_route(
                         bbox=bbox_args)
 
     # Set up model part of salinity comparison plot
-    model_time_b = route[route_name]['start']['hour'] + 1
-    label_a = '%s am [UTC]' % route[route_name]['start']['hour']
-    label_b = '%s am [UTC]' % model_time_b
+    label_a = '{} am [UTC]'.format(route[route_name]['start']['hour'])
+    label_b = '{} am [UTC]'.format(route[route_name]['start']['hour'] + 1)
     axs[0].plot(obs_sal[1], nemo_a, 'DodgerBlue', linewidth=2, label=label_a)
     axs[0].plot(obs_sal[1], nemo_b, 'MediumBlue', linewidth=2, label=label_b)
 
@@ -165,11 +168,10 @@ def salinity_ferry_route(
                 transform=axs[0].transAxes, color='white')
 
     # Setting plot limits
-    mina = np.amin(nemo_a)
     minlon = np.amin(obs_sal[1])
 
     axs[0].set_xlim(minlon-0.1, -123)
-    axs[0].set_ylim(mina-5, 32)
+    axs[0].set_ylim(10, 32)
     axs[0].set_title('Surface Salinity: ' + dmy, **title_font)
     axs[0].set_xlabel('Longitude', **axis_font)
     axs[0].set_ylabel('Absolute Salinity [g/kg]', **axis_font)
@@ -182,8 +184,11 @@ def salinity_ferry_route(
     return fig
 
 
-def ferry_salinity(route_name, dmy, step=20):
+def ferry_salinity(ferry_data_path, route_name, dmy, step=20):
     """Load ferry data and slice it to contain only the during route values.
+
+    :arg ferry_data_path: storage file location for ONC ferry data.
+    :type ferry_data_path: string
 
     :arg route_name: name of a ferre route. HBDB, TWDP or TWSB.
     :type route_name: string
@@ -202,7 +207,7 @@ def ferry_salinity(route_name, dmy, step=20):
     dayf = date - datetime.timedelta(days=1)
     dmyf = dayf.strftime('%d%b%y').lower()
 
-    obs = _get_sal_data(route_name, dmyf)
+    obs = _get_sal_data(ferry_data_path, route_name, dmyf)
 
     # Create datetime object for start and end of route times
     date = datetime.datetime.strptime(dmy, '%d%b%y')
@@ -306,14 +311,15 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
     val_b_sum = 0
     weight_sum = 0
 
-    for i in np.arange(x1 - 1, x1 + 2):
-        for j in np.arange(y1 - 1, y1 + 2):
-            # Some adjacent points are land we don't count them into the
-            # salinity average.
-            if sal_a[i, j] == 0:
-                val_a_sum = val_a_sum
-                val_b_sum = val_b_sum
-            else:
+    interp_area = sal_a[x1-1:x1+2, y1-1:y1+2]
+    if interp_area.size-np.count_nonzero(interp_area) >= 3:
+        sal_a_idw = np.NaN
+        sal_b_idw = np.NaN
+    else:
+        for i in np.arange(x1 - 1, x1 + 2):
+            for j in np.arange(y1 - 1, y1 + 2):
+                # Some adjacent points are land we don't count them into the
+                # salinity average.
                 dist = tidetools.haversine(
                     obs[1], obs[2], X[i, j], Y[i, j])
                 weight = 1.0 / dist
@@ -323,8 +329,8 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
                 val_a_sum = val_a_sum + val_a
                 val_b_sum = val_b_sum + val_b
 
-    sal_a_idw = val_a_sum / weight_sum
-    sal_b_idw = val_b_sum / weight_sum
+        sal_a_idw = val_a_sum / weight_sum
+        sal_b_idw = val_b_sum / weight_sum
 
     return sal_a_idw, sal_b_idw
 
@@ -341,8 +347,11 @@ def _get_nemo_salinity(route_name, grid_T_hr):
     return sal_a, sal_b
 
 
-def _get_sal_data(route_name, dmy):
+def _get_sal_data(ferry_data_path, route_name, dmy):
     """Retrieve the ferry route data from matlab.
+
+    :arg ferry_data_path: storage file location for ONC ferry data.
+    :type ferry_data_path: string
 
     :arg route_name: name for one of three ferry routes
     :type route_name: string
@@ -356,11 +365,10 @@ def _get_sal_data(route_name, dmy):
     date = datetime.datetime.strptime(dmy, "%d%b%y")
     date = date.strftime('%Y%m%d')
 
-    saline = sio.loadmat(
-        '/ocean/jieliu/research/meopar/ONC_ferries/%s/%s_TSG%s.mat' % (
-            route_name, route_name, date))
+    saline = sio.loadmat('{}/{}/{}_TSG{}.mat'.format(
+        ferry_data_path, route_name, route_name, date))
     struct = (
-        ((saline['%s_TSG' % route_name])
+        ((saline['{}_TSG'.format(route_name)])
             ['output'])[0, 0])['Practical_Salinity'][0, 0]
 
     # Assigns variable for the samples data and location
@@ -378,10 +386,10 @@ def datenum2datetime(datenum):
     """Convert MATLAB datenum array into python Datetime array."""
 
     timearray = []
-    for mattime, count in zip(datenum, np.arange(len(datenum))):
+    for i in np.arange(len(datenum)):
         time = datetime.datetime.fromordinal(
-            int(mattime[0])) + datetime.timedelta(
-            days=mattime[0] % 1) - datetime.timedelta(days=366)
+            int(datenum[i][0])) + datetime.timedelta(
+            days=datenum[i][0] % 1) - datetime.timedelta(days=366)
         timearray.append(time)
 
     return timearray
