@@ -19,7 +19,7 @@ figures for analysis and model evaluation of daily nowcast/forecast runs.
 """
 import datetime
 import glob
-from io import StringIO
+import io
 import os
 
 import arrow
@@ -27,7 +27,9 @@ from dateutil import tz
 from matplotlib.backends import backend_agg as backend
 import matplotlib.cm as cm
 import matplotlib.dates as mdates
+from matplotlib.figure import Figure
 import matplotlib.gridspec as gridspec
+import matplotlib.image
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import netCDF4 as nc
@@ -183,6 +185,13 @@ def save_image(fig, filename, **kwargs):
     """
     canvas = backend.FigureCanvasAgg(fig)
     canvas.print_figure(filename, **kwargs)
+
+
+def _render_png_buffer(fig):
+    canvas = backend.FigureCanvasAgg(fig)
+    buffer = io.BytesIO()
+    canvas.print_figure(buffer, format='png')
+    return buffer
 
 
 def axis_colors(ax, plot):
@@ -398,7 +407,7 @@ def load_archived_observations(name, start_date, end_date):
         s.post(base_url + form_handler, data=sitedata)
         r = s.get(base_url + data_provider)
     # Write the data to a fake file
-    fakefile = StringIO(r.text)
+    fakefile = io.StringIO(r.text)
     # Read the fake file
     try:
         wlev_meas = pd.read_csv(
@@ -477,7 +486,7 @@ def get_NOAA_wlevels(station_no, start_date, end_date, product='water_level'):
     }
     response = requests.get(base_url, params=params)
 
-    fakefile = StringIO(response.text)
+    fakefile = io.StringIO(response.text)
     try:
         obs = pd.read_csv(
             fakefile, parse_dates=[0], date_parser=dateparse_NOAA)
@@ -531,7 +540,7 @@ def get_NOAA_tides(station_no, start_date, end_date, interval=''):
 
     response = requests.get(base_url, params=params)
 
-    fakefile = StringIO(response.text)
+    fakefile = io.StringIO(response.text)
     try:
         tides = pd.read_csv(
             fakefile, parse_dates=[0], date_parser=dateparse_NOAA)
@@ -999,13 +1008,45 @@ def isolate_wind_timing(
     return inds
 
 
+def make_background_map(
+        coastline, lat_range=(47.5, 50.7), lon_range=(-126, -122),
+        land_patch_min_area=1e-4, land_c='burlywood'):
+    '''Plot the map as a single png like image'''
+
+    coast_lat = coastline['ncst'][:, 1]
+    coast_lon = coastline['ncst'][:, 0]
+    fig = Figure(figsize=(15, 15))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.plot(coast_lon, coast_lat, '-k', rasterized=True, markersize=1)
+
+    k = coastline['k'][:, 0]
+    Area = coastline['Area'][0]
+    mask = Area > land_patch_min_area
+    kss = k[:-1][mask]
+    kee = k[1:][mask]
+
+    for ks, ke in zip(kss, kee):
+        poly = list(zip(coast_lon[ks:ke-2], coast_lat[ks:ke-2]))
+        ax.add_patch(
+            patches.Polygon(
+                poly, facecolor=land_c, rasterized=True))
+
+    ax.set_frame_on(False)
+    ax.axes.get_yaxis().set_visible(False)
+    ax.axes.get_xaxis().set_visible(False)
+    ax.set_xlim(lon_range)
+    ax.set_ylim(lat_range)
+    fig.set_tight_layout({'pad': 0})
+    return fig
+
+
 def plot_map(
     ax,
-    grid_B,
     PNW_coastline,
-    coastline='full',
+    lat_range=(47.5, 50.7),
+    lon_range=(-126, -122),
     land_c='burlywood',
-    domain_c='none',
+    land_patch_min_area=1e-3,
 ):
     """Plot map of Salish Sea region, including the options to add a
     coastline, colour of the land, and colour of the domain.
@@ -1013,59 +1054,37 @@ def plot_map(
     :arg ax: Axis for map.
     :type ax: axis object
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
-    :type grid_B: :class:`netCDF4.Dataset`
-
     :arg PNW_coastline: Coastline dataset.
     :type PNW_coastline: :class:`mat.Dataset`
 
-    :arg coastline: Extent of coastline.
-                    'full' for Pacific Northwest coast,
-                    'partial' for model coastline, or 'none'.
-    :type coastline: string
+    :arg tuple lat_range: latitude range to be plotted
 
-    :arg land_c: 'none' or colour of land if coastline is 'full'.
-    :type land_c: string
+    :arg tuple lon_range: longitude range to be plotted
 
-    :arg domain_c: 'none' or colour of domain area.
-    :type domain_c: string
+    :arg string land_c: colour of land if coastline
+
+    :arg float land_patch_min_area: minimum area of land patch
+                    that is plotted
 
     :returns: axis
     """
 
-    # coastline
-    if coastline == 'partial':
-        viz_tools.plot_coastline(ax, grid_B, coords='map')
-    elif coastline == 'full':
-        [ax, coast] = draw_coast(ax, PNW_coastline)
-    elif coastline == 'none':
-        pass
-
-    # land_c - threshold area for plotting a polygon
-    thres = 1e-4
-    if coastline == 'full':
-        k = PNW_coastline['k']
-        Area = PNW_coastline['Area']
-        for ks, ke, A in zip(k[0:-1], k[1:], Area[0, :]):
-            if A > thres:
-                poly = list(zip(coast['lon'][ks:ke-2], coast['lat'][ks:ke-2]))
-                ax.add_patch(
-                    patches.Polygon(
-                        poly,
-                        closed=True,
-                        facecolor=land_c,
-                        rasterized=True))
-
-    # domain_c
-    viz_tools.plot_land_mask(ax, grid_B, color=domain_c, coords='map')
+    mapfig = make_background_map(
+        PNW_coastline, lat_range=lat_range, lon_range=lon_range,
+        land_c=land_c, land_patch_min_area=land_patch_min_area)
+    buffer_ = _render_png_buffer(mapfig)
+    img = matplotlib.image.imread(buffer_, format='anything')
+    ax.imshow(
+        img, zorder=0,
+        extent=[lon_range[0], lon_range[1], lat_range[0], lat_range[1]])
 
     # labels
+    ax.set_xlim(lon_range[0], lon_range[1])
+    ax.set_ylim(lat_range[0], lat_range[1])
     ax.set_xlabel('Longitude', **axis_font)
     ax.set_ylabel('Latitude', **axis_font)
     ax.grid()
     viz_tools.set_aspect(ax)
-
-    return ax
 
 
 def load_model_ssh(grid_T):
@@ -1152,7 +1171,7 @@ def website_thumbnail(
     ax3 = fig.add_subplot(gs[1, 2])
 
     # Map
-    plot_map(ax, grid_B, PNW_coastline)
+    plot_map(ax, PNW_coastline)
 
     for name in TIDAL_SITES:
         ssh_loc, t = load_model_ssh(grids[name])
@@ -1880,7 +1899,7 @@ def winds_average_max(
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(1, 1, 1)
     fig.patch.set_facecolor('#2B3E50')
-    plot_map(ax, grid_B, PNW_coastline)
+    plot_map(ax, PNW_coastline)
     scale = 0.1
     # Reference for m/s
     ax.arrow(-122.5, 50.65, 0. * scale, -5. * scale,
@@ -2437,7 +2456,7 @@ def plot_threshold_website(
     ax3 = fig.add_subplot(gs[1, 2])
 
     # Map
-    plot_map(ax, grid_B, PNW_coastline)
+    plot_map(ax, PNW_coastline)
 
     # Legend
     handles, labels = ax.get_legend_handles_labels()
@@ -2669,8 +2688,6 @@ def _plot_stations_map(
     :type ylim: 2-tuple
     """
 
-    plot_map(ax, grid_B, PNW_coastline)
-    ax.set_xlim(xlim)
-    ax.set_ylim(ylim)
+    plot_map(ax, PNW_coastline, lon_range=xlim, lat_range=ylim)
     ax.set_title(title, **title_font)
     axis_colors(ax, 'gray')
