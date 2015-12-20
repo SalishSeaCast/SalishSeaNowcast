@@ -112,12 +112,9 @@ def salinity_ferry_route(
     # Load model salinity for ferry route
     nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal)
 
-    # set lat and lon range
-    lat_range = (48.2, 49.6)
-    lon_range = (-124.5, -122.5)
     figures.plot_map(
         axs[1], coastline,
-        lat_range=lat_range, lon_range=lon_range)
+        lat_range=(48.2, 49.6), lon_range=(-124.5, -122.5))
     viz_tools.set_aspect(axs[1], coords='map', lats=lat)
     cmap = plt.get_cmap('spectral')
     cmap.set_bad('burlywood')
