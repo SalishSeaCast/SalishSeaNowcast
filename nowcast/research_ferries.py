@@ -306,11 +306,9 @@ def salinity_ferry_route(route_name):
     sal_hr = grid_T_hr.variables['vosaline']
     t, z = 3, 1
     sal_hr = np.ma.masked_values(sal_hr[t, z], 0)
-    grid_B = nc.Dataset(
-        '/data/nsoontie/MEOPAR/NEMO-forcing/grid/bathy_meter_SalishSea2.nc')
     PNW_coastline = sio.loadmat('/ocean/rich/more/mmapbase/bcgeo/PNW.mat')
 
-    figures.plot_map(axs[1], grid_B, PNW_coastline)
+    figures.plot_map(axs[1], PNW_coastline)
     axs[1].set_xlim(-124.5, -122.5)
     axs[1].set_ylim(48.2, 49.6)
     viz_tools.set_aspect(axs[1], coords='map', lats=latitude)

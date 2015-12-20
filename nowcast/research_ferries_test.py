@@ -77,7 +77,7 @@ route = {'HBDB': {'start': {'station': 'Horseshoe Bay',
 
 
 def salinity_ferry_route(
-        ferry_data_path, grid_T_hr, grid_B,
+        ferry_data_path, grid_T_hr,
         bathy, coastline, route_name, dmy):
     """Plot daily salinity comparisons between ferry observations and model
     results as well as ferry route with model salinity distribution.
@@ -87,9 +87,6 @@ def salinity_ferry_route(
 
     :arg grid_T_hr: Hourly tracer results dataset from NEMO.
     :type grid_T_hr: :class:`netCDF4.Dataset
-
-    :arg bathy: model bathymetry
-    :type bathy: numpy array
 
     :arg route_name: route name of these three ferry routes respectively
     :type route_name: string
@@ -115,9 +112,12 @@ def salinity_ferry_route(
     # Load model salinity for ferry route
     nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal)
 
-    figures.plot_map(axs[1], grid_B, coastline)
-    axs[1].set_xlim(-124.5, -122.5)
-    axs[1].set_ylim(48.2, 49.6)
+    # set lat and lon range
+    lat_range = (48.2, 49.6)
+    lon_range = (-124.5, -122.5)
+    figures.plot_map(
+        axs[1], coastline,
+        lat_range=lat_range, lon_range=lon_range)
     viz_tools.set_aspect(axs[1], coords='map', lats=lat)
     cmap = plt.get_cmap('spectral')
     cmap.set_bad('burlywood')
