@@ -53,6 +53,7 @@ install_requires = [
     'numpy',
     'pandas',
     'paramiko',
+    'pillow',
     'pyyaml',
     'pyzmq',
     'requests',
@@ -64,7 +65,7 @@ install_requires = [
     'sphinx-bootstrap-theme',
     # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools/
     # 'SalishSeaCmd',  # use cd tools; pip install -e SalishSeaCmd/
-    # 'SalishSeaCmd',  # use cd tools; pip install -e SalishSeaNowcast/
+    # 'SalishSeaNowcast',  # use cd tools; pip install -e SalishSeaNowcast/
 ]
 
 setup(
