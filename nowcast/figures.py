@@ -741,27 +741,6 @@ def get_model_winds(lon, lat, t_orig, t_final, weather_path):
     return wind, direc, t, pr, tem, sol, the, qr, pre
 
 
-def draw_coast(ax, PNW_coastline):
-    """Plots the coastline of the Pacific Northwest.
-
-    :arg ax: The axis where coastline is drawn.
-    :type ax: axis object
-
-    :arg PNW_coastline: Coastline dataset.
-    :type PNW_coastline: :class:`mat.Dataset`
-
-    :returns: ax, information about coastline (coast)
-    """
-    coast = {}
-    coast['lat'] = PNW_coastline['ncst'][:, 1]
-    coast['lon'] = PNW_coastline['ncst'][:, 0]
-    ax.plot(coast['lon'], coast['lat'], '-k', rasterized=True, markersize=1)
-    ax.set_xlim([-126, -122])
-    ax.set_ylim([47.5, 50.7])
-
-    return ax, coast
-
-
 def plot_corrected_model(
         ax, t, ssh_loc, ttide, PST, MSL, msl):
     """Plots and returns corrected model.
@@ -1011,7 +990,24 @@ def isolate_wind_timing(
 def make_background_map(
         coastline, lat_range=(47.5, 50.7), lon_range=(-126, -122),
         land_patch_min_area=1e-4, land_c='burlywood'):
-    '''Plot the map as a single png like image'''
+    '''
+    Create a figure from an mmap dataset showing a lat-lon patch.
+
+    The map is intended for use as the background in figures on which model
+    results are plotted. It is rasterized to minimize file size.
+
+    :arg coastline: Coastline dataset.
+    :type coastline: :class:`mat.Dataset`
+
+    :arg tuple lat_range:  latitude range to be plotted
+
+    :arg tuple lon_range: longitude range to be plotted
+
+    :arg string land_c: colour of land if coastline
+
+    :arg float land_patch_min_area: minimum area of land patch
+                    that is plotted
+    '''
 
     coast_lat = coastline['ncst'][:, 1]
     coast_lon = coastline['ncst'][:, 0]
@@ -1042,7 +1038,7 @@ def make_background_map(
 
 def plot_map(
     ax,
-    PNW_coastline,
+    coastline,
     lat_range=(47.5, 50.7),
     lon_range=(-126, -122),
     land_c='burlywood',
@@ -1054,8 +1050,8 @@ def plot_map(
     :arg ax: Axis for map.
     :type ax: axis object
 
-    :arg PNW_coastline: Coastline dataset.
-    :type PNW_coastline: :class:`mat.Dataset`
+    :arg coastline: Coastline dataset.
+    :type coastline: :class:`mat.Dataset`
 
     :arg tuple lat_range: latitude range to be plotted
 
@@ -1065,12 +1061,10 @@ def plot_map(
 
     :arg float land_patch_min_area: minimum area of land patch
                     that is plotted
-
-    :returns: axis
     """
 
     mapfig = make_background_map(
-        PNW_coastline, lat_range=lat_range, lon_range=lon_range,
+        coastline, lat_range=lat_range, lon_range=lon_range,
         land_c=land_c, land_patch_min_area=land_patch_min_area)
     buffer_ = _render_png_buffer(mapfig)
     img = matplotlib.image.imread(buffer_, format='anything')
@@ -1103,7 +1097,7 @@ def load_model_ssh(grid_T):
 
 
 def website_thumbnail(
-    grid_B, grid_T, grids, weather_path, PNW_coastline, tidal_predications,
+    grid_B, grid_T, grids, weather_path, coastline, tidal_predications,
     scale=0.1, PST=1, figsize=(18, 20),
 ):
     """Thumbnail for the UBC Storm Surge website includes the thresholds
@@ -1122,8 +1116,8 @@ def website_thumbnail(
     :arg str weather_path: The directory where weather forcing wind files
                            are stored.
 
-    :arg PNW_coastline: Coastline dataset.
-    :type PNW_coastline: :class:`mat.Dataset`
+    :arg coastline: Coastline dataset.
+    :type coastline: :class:`mat.Dataset`
 
     :arg str tidal_predications: Path to directory of tidal prediction
                                  file.
@@ -1171,7 +1165,7 @@ def website_thumbnail(
     ax3 = fig.add_subplot(gs[1, 2])
 
     # Map
-    plot_map(ax, PNW_coastline)
+    plot_map(ax, coastline)
 
     for name in TIDAL_SITES:
         ssh_loc, t = load_model_ssh(grids[name])
@@ -1333,7 +1327,7 @@ def PA_tidal_predictions(
 
 
 def compare_water_levels(
-        grid_T, grid_B, grids, PNW_coastline, PST=1, figsize=(20, 15)):
+        grid_T, grid_B, grids, coastline, PST=1, figsize=(20, 15)):
     """Compares modelled water levels to observed water levels and tides at a
     NOAA station over one day.
 
@@ -1378,7 +1372,7 @@ def compare_water_levels(
 
     # Map
     ax0 = fig.add_subplot(gs[:, 1])
-    _plot_stations_map(ax0, grid_B, PNW_coastline, title='Station Locations')
+    _plot_stations_map(ax0, coastline, title='Station Locations')
 
     # Citation
     ax0.text(
@@ -1627,7 +1621,7 @@ def compare_tidalpredictions_maxSSH(
 
 
 def plot_thresholds_all(
-    grid_T, grid_B, grids, weather_path, PNW_coastline, tidal_predications,
+    grid_T, grid_B, grids, weather_path, coastline, tidal_predications,
     PST=1, MSL=1, figsize=(20, 25),
 ):
     """Plots sea surface height over one day with respect to warning
@@ -1648,8 +1642,8 @@ def plot_thresholds_all(
     :arg str weather_path: The directory where the weather forcing files
                            are stored.
 
-    :arg PNW_coastline: Coastline dataset.
-    :type PNW_coastline: :class:`mat.Dataset`
+    :arg coastline: Coastline dataset.
+    :type coastline: :class:`mat.Dataset`
 
     :arg str tidal_predications: Path to directory of tidal prediction
                                  file.
@@ -1674,7 +1668,7 @@ def plot_thresholds_all(
     # Map of region
     ax0 = fig.add_subplot(gs[:, 1])
     _plot_stations_map(
-        ax0, grid_B, PNW_coastline, title='Degree of Flood Risk',
+        ax0, coastline, title='Degree of Flood Risk',
         xlim=(-125.4, -122.2), ylim=(48, 50.3))
 
     # Bathymetry and model time
@@ -1746,7 +1740,7 @@ def plot_thresholds_all(
 
 
 def Sandheads_winds(
-        grid_T, grid_B, weather_path, PNW_coastline, PST=1, figsize=(20, 12)):
+        grid_T, grid_B, weather_path, coastline, PST=1, figsize=(20, 12)):
     """Plots the observed and modelled winds at Sandheads during the
     simulation.
 
@@ -1841,7 +1835,7 @@ def Sandheads_winds(
     ax1.set_xticks(ax2.get_xticks())
 
     # Map
-    _plot_stations_map(ax0, grid_B, PNW_coastline, title='Station Locations')
+    _plot_stations_map(ax0, coastline, title='Station Locations')
 
     ax0.plot(
         lon, lat,
@@ -1868,7 +1862,7 @@ def Sandheads_winds(
 
 
 def winds_average_max(
-        grid_T, grid_B, weather_path, PNW_coastline, station, wind_type,
+        grid_T, grid_B, weather_path, coastline, station, wind_type,
         figsize=(20, 15)):
     """Plots wind vectors at several stations over domain. Wind vecors can be
     averaged over the entire simulation or plotted at 4 hours before max ssh
@@ -1899,7 +1893,7 @@ def winds_average_max(
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(1, 1, 1)
     fig.patch.set_facecolor('#2B3E50')
-    plot_map(ax, PNW_coastline)
+    plot_map(ax, coastline)
     scale = 0.1
     # Reference for m/s
     ax.arrow(-122.5, 50.65, 0. * scale, -5. * scale,
@@ -2393,7 +2387,7 @@ def ssh_PtAtkinson(grid_T, grid_B=None, figsize=(20, 5)):
 
 
 def plot_threshold_website(
-    grid_B, grid_T, grids, weather_path, PNW_coastline, tidal_predications,
+    grid_B, grid_T, grids, weather_path, coastline, tidal_predications,
     scale=0.1, PST=1, figsize=(18, 20),
 ):
     """Overview image for Salish Sea website.
@@ -2415,8 +2409,8 @@ def plot_threshold_website(
     :arg str weather_path: The directory where the weather forcing files
                            are stored.
 
-    :arg PNW_coastline: Coastline dataset.
-    :type PNW_coastline: :class:`mat.Dataset`
+    :arg coastline: Coastline dataset.
+    :type coastline: :class:`mat.Dataset`
 
     :arg str tidal_predications: Path to directory of tidal prediction
                                  file.
@@ -2430,9 +2424,6 @@ def plot_threshold_website(
 
     :returns: matplotlib figure object instance (fig).
     """
-
-    # Bathymetry
-    bathy, X, Y = tidetools.get_bathy_data(grid_B)
 
     # Time range
     t_orig, t_final, t = get_model_time_variables(grid_T)
@@ -2456,7 +2447,7 @@ def plot_threshold_website(
     ax3 = fig.add_subplot(gs[1, 2])
 
     # Map
-    plot_map(ax, PNW_coastline)
+    plot_map(ax, coastline)
 
     # Legend
     handles, labels = ax.get_legend_handles_labels()
@@ -2662,21 +2653,16 @@ def correct_model_ssh(ssh_model, t_model, ttide):
 
 
 def _plot_stations_map(
-    ax, grid_B, PNW_coastline, title, xlim=(-125.4, -122.2), ylim=(48, 50.3)
+    ax, coastline, title, xlim=(-125.4, -122.2), ylim=(48, 50.3)
 ):
     """Plots map of Salish Sea region, including the options to add a
-    coastline, land colour(fill), or domain colour(domain).
-
-    Note that fill will only be applicable if coastline is 'full'.
+    coastline
 
     :arg ax: Axis for map.
     :type ax: axis object
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
-    :type grid_B: :class:`netCDF4.Dataset`
-
-    :arg PNW_coastline: Coastline dataset.
-    :type PNW_coastline: :class:`mat.Dataset`
+    :arg coastline: Coastline dataset.
+    :type coastline: :class:`mat.Dataset`
 
     :arg title: An informative title for the axis
     :type title: string
@@ -2688,6 +2674,6 @@ def _plot_stations_map(
     :type ylim: 2-tuple
     """
 
-    plot_map(ax, PNW_coastline, lon_range=xlim, lat_range=ylim)
+    plot_map(ax, coastline, lon_range=xlim, lat_range=ylim)
     ax.set_title(title, **title_font)
     axis_colors(ax, 'gray')
