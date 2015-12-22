@@ -304,27 +304,19 @@ def interpolate_depth(data, depth_array, depth_new):
 
 
 def get_model_time_variables(grid_T):
-    """Returns important model time variables.
+    """Return start time, end time, and the time counter values from a
+    NEMO tracer results dataset.
 
-    :arg grid_T: Hourly tracer results dataset from NEMO.
-    :type grid_T: :class:`netCDF4.Dataset`
+    :arg grid_T: Tracer results dataset from NEMO.
+    :type grid_T: :py:class:`netCDF4.Dataset`
 
-    :returns: simulation star time (t_orig), simulation end time (t_final),
-              and array (t) of output times all as datetime objects.
+    :returns: dataset start time (t_orig), dataset end time (t_final),
+              and array (time_) of output times all as datetime objects.
     """
-
-    # Time range
-    t_orig = (nc_tools.timestamp(grid_T, 0)).datetime
-    t_final = (nc_tools.timestamp(grid_T, -1)).datetime
-
-    # Time for curve
-    count = grid_T.variables['time_counter'][:]
-    t = nc_tools.timestamp(grid_T, np.arange(count.shape[0]))
-    for ind in range(len(t)):
-        t[ind] = t[ind].datetime
-    t = np.array(t)
-
-    return t_orig, t_final, t
+    time_ = nc_tools.timestamp(
+        grid_T, range(grid_T.variables['time_counter'].size))
+    time_ = [t.datetime for t in time_]
+    return time_[0], time_[-1], time_
 
 
 def dateparse_NOAA(s):
@@ -1082,7 +1074,7 @@ def plot_map(
 
 
 def load_model_ssh(grid_T):
-    """Load an sea surface hieght (ssh) time series from a NEMO tracer
+    """Load an sea surface height (ssh) time series from a NEMO tracer
     results dataset.
 
     :arg grid_T: Tracer results dataset from NEMO.
@@ -1092,8 +1084,8 @@ def load_model_ssh(grid_T):
     :rtype: 2-tuple of :py:class:`numpy.ndarray`
     """
     ssh = grid_T.variables['sossheig'][:, 0, 0]
-    t_orig, t_final, t = get_model_time_variables(grid_T)
-    return ssh, t
+    t_orig, t_final, time_ = get_model_time_variables(grid_T)
+    return ssh, time_
 
 
 def website_thumbnail(
