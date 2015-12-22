@@ -156,6 +156,7 @@ run:
 
 
 web:
+  domain: salishsea.eos.ubc.ca
   site_repo_url: https://bitbucket.org/salishsea/salishsea-site
   site_storm_surge_path: site/storm-surge
   site_storm_surge_plot_path: site/_static/storm-surge
@@ -165,10 +166,17 @@ web:
   www_path: www
   templates_path: www/templates
   server_path: shelob-salishsea:/www/salishsea/data
+
   salinity_comparison:
     web_path: eoas.ubc.ca/~jieliu/MEOPAR/nowcast
     filesystem_path: /home/jieliu/public_html/MEOPAR/nowcast
     fileroot: SaliCom
+
+  atom_path: storm-surge/atom
+  feeds:
+    pmv.xml:
+      title: Salish Sea NEMO Model Storm Surge Alerts for Port Metro Vancouver
+      tide_gauge_stn: Point Atkinson
 
 
 logging:
@@ -338,6 +346,12 @@ msg_types:
     success research: research page ready for push to salishsea site
     failure research: research page for salishsea site, preparation failed
     crash: make_site_page worker crashed
+  make_feeds:
+    success forecast: forecast results ATOM feeds produced
+    failure forecast: forecast results ATOM feeds creation failed
+    success forecast2: forecast2 results ATOM feeds produced
+    failure forecast2: forecast2 results ATOM feeds creation failed
+    crash: make_feeds worker crashed
   push_to_web:
     success: publish page and figures pushed to salishsea site
     failure: publish page and figures push to salishsea site failed
