@@ -32,6 +32,18 @@ def worker_module():
     return make_feeds
 
 
+@pytest.fixture
+def web_config():
+    return {
+        'domain': 'salishsea.eos.ubc.ca',
+        'atom_path': 'storm-surge/atom',
+        'feeds': {'pmv.xml': {
+            'title': 'PMV Feed',
+            'tide_gauge_stn': 'Point Atkinson',
+        }},
+    }
+
+
 @patch.object(worker_module(), 'NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
@@ -106,19 +118,15 @@ class TestGenerateFeed:
     """Unit test for _generate_feed() function.
     """
     @patch.object(worker_module().arrow, 'utcnow')
-    def test_generate_feed(self, m_utcnow, worker_module):
-        web_config = {
-            'domain': 'salishsea.eos.ubc.ca',
-            'atom_path': 'storm-surge/atom',
-            'feeds': {'pmv.xml': {'title': 'PMV Feed'}},
-        }
-        m_utcnow.return_value = arrow.get(2015, 12, 21, 17, 54, 42)
+    def test_generate_feed(self, m_utcnow, worker_module, web_config):
+        m_utcnow.return_value = arrow.get('2015-12-21 17:54:42')
         fg = worker_module._generate_feed('pmv.xml', web_config)
         feed = fg.atom_str(pretty=True).decode('ascii')
         expected = [
             "<?xml version='1.0' encoding='UTF-8'?>",
             '<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-ca">',
-            '  <id>tag:salishsea.eos.ubc.ca,2015-12-12:/storm-surge/atom/pmv/20151221175442</id>',
+            '  <id>tag:salishsea.eos.ubc.ca,2015-12-12:/storm-surge/atom/pmv/'
+            '20151221175442</id>',
             '  <title>PMV Feed</title>',
         ]
         assert feed.splitlines()[:4] == expected
@@ -131,16 +139,64 @@ class TestGenerateFeed:
             '    <name>Salish Sea MEOPAR Project</name>',
             '    <url>http://salishsea.eos.ubc.ca/</url>',
             '  </author>',
-            '  <link href="http://salishsea.eos.ubc.ca/storm-surge/atom/pmv.xml" '
-            'rel="self" type="application/atom+xml"/>',
-            '  <link href="http://salishsea.eos.ubc.ca/storm-surge/forecast.html" '
-            'rel="related" type="text/html"/>',
+            '  <link href="http://salishsea.eos.ubc.ca/storm-surge/atom/'
+            'pmv.xml" rel="self" type="application/atom+xml"/>',
+            '  <link href="http://salishsea.eos.ubc.ca/storm-surge/'
+            'forecast.html" rel="related" type="text/html"/>',
             '  <generator version="0.3.2">python-feedgen</generator>',
-            '  <rights>Copyright 2015, Salish Sea MEOPAR Project Contributors and The '
-            'University of British Columbia</rights>',
+            '  <rights>Copyright 2015, Salish Sea MEOPAR Project Contributors '
+            'and The University of British Columbia</rights>',
             '</feed>',
         ]
         assert feed.splitlines()[5:] == expected
+
+
+@patch.object(worker_module().arrow, 'now')
+@patch.object(worker_module(), '_render_entry_content', return_value=b'')
+@patch.object(worker_module(), 'FeedEntry')
+class TestGenerateFeedEntry:
+    """Unit tests for _generate_feed_entry() function.
+    """
+    def test_title(self, m_fe, m_rec, m_now, worker_module, web_config):
+        run_date = arrow.get('2015-12-24').floor('day')
+        worker_module._generate_feed_entry(
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+        m_fe().title.assert_called_once_with(
+            'Storm Surge Alert for Point Atkinson')
+
+    def test_id(self, m_fe, m_rec, m_now, worker_module, web_config):
+        run_date = arrow.get('2015-12-24').floor('day')
+        m_now.return_value = arrow.get('2015-12-24 15:10:42')
+        worker_module._generate_feed_entry(
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+        m_fe().id.assert_called_once_with(
+            worker_module._build_tag_uri(
+                '2015-12-24', 'pmv.sml', m_now(), web_config))
+
+    def test_author(self, m_fe, m_rec, m_now, worker_module, web_config):
+        run_date = arrow.get('2015-12-24').floor('day')
+        worker_module._generate_feed_entry(
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+        m_fe().author.assert_called_once_with(
+            name='Salish Sea MEOPAR Project',
+            uri='http://salishsea.eos.ubc.ca/')
+
+    def test_content(self, m_fe, m_rec, m_now, worker_module, web_config):
+        run_date = arrow.get('2015-12-24').floor('day')
+        worker_module._generate_feed_entry(
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+        m_fe().content.assert_called_once_with(
+            m_rec(), type='html')
+
+    def test_link(self, m_fe, m_rec, m_now, worker_module, web_config):
+        run_date = arrow.get('2015-12-24').floor('day')
+        m_now.return_value = arrow.get('2015-12-24 15:10:42')
+        worker_module._generate_feed_entry(
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+        m_fe().link.assert_called_once_with(
+            href='http://salishsea.eos.ubc.ca/nemo/results/forecast/'
+            'publish_25dec15.html',
+            rel='alternate', type='text/html')
 
 
 class TestBuildTagURI:
@@ -152,7 +208,7 @@ class TestBuildTagURI:
             'atom_path': 'storm-surge/atom',
         }
         tag = worker_module._build_tag_uri(
-            '2015-12-12', 'pmv.xml', arrow.get(2015, 12, 21, 9, 31, 42),
+            '2015-12-12', 'pmv.xml', arrow.get('2015-12-21 09:31:42'),
             web_config)
         expected = (
             'tag:salishsea.eos.ubc.ca,2015-12-12:'
@@ -181,7 +237,7 @@ class TestCalcMaxSshRisk:
                     }},
             },
         }
-        run_date = arrow.get(2015, 12, 24, 0, 0, 0)
+        run_date = arrow.get('2015-12-24').floor('day')
         max_ssh = np.array([5.09])
         max_ssh_time = np.array([datetime.datetime(2015, 12, 25, 19, 59, 42)])
         m_cms.return_value = (max_ssh, max_ssh_time)
@@ -228,8 +284,8 @@ class TestCalcMaxSsh:
             np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)]))
         m_cmssh.return_value = np.array(2)
         max_ssh, max_ssh_time = worker_module._calc_max_ssh(
-            'pmv.xml', 'ttide', arrow.get(2015, 12, 22, 0, 0, 0), 'forecast',
-            config)
+            'pmv.xml', 'ttide', arrow.get('2015-12-22').floor('day'),
+            'forecast', config)
         m_ncd.assert_called_once_with(
             '/results/SalishSea/forecast/22dec15/PointAtkinson.nc')
         m_ssht.assert_called_once_with(m_ncd(), datetimes=True)
