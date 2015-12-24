@@ -24,14 +24,17 @@ from feedgen.feed import FeedGenerator
 import netCDF4 as nc
 import numpy as np
 
-from salishsea_tools import nc_tools
+from salishsea_tools import (
+    nc_tools,
+    stormtools,
+)
+from salishsea_tools.places import PLACES
 
 from nowcast import (
     figures,
     lib,
 )
 from nowcast.nowcast_worker import NowcastWorker
-from nowcast.places import PLACES
 
 
 worker_name = lib.get_module_name()
@@ -87,8 +90,10 @@ def make_feeds(parsed_args, config):
     run_type = parsed_args.run_type
     web_config = config['web']
     for feed in web_config['feeds']:
-        _generate_feed(feed, web_config)
-        max_ssh, max_ssh_time = _calc_max_ssh(feed, run_date, run_type, config)
+        fg = _generate_feed(feed, web_config)
+        max_ssh_info = _calc_max_ssh_risk(feed, run_date, run_type, config)
+        if max_ssh_info['risk_level'] is not None:
+            _generate_feed_entry(fg, max_ssh_info)
     return checklist
 
 
@@ -127,7 +132,24 @@ def _build_tag_uri(tag_date, feed, now, web_config):
             now=now.format('YYYYMMDDHHmmss')))
 
 
-def _calc_max_ssh(feed, run_date, run_type, config):
+def _calc_max_ssh_risk(feed, run_date, run_type, config):
+    feed_config = config['web']['feeds'][feed]
+    ttide = stormtools.load_tidal_predictions(
+        os.path.join(
+            config['ssh']['tidal_predictions'],
+            feed_config['tidal predictions']))
+    max_ssh, max_ssh_time = _calc_max_ssh(
+        feed, ttide, run_date, run_type, config)
+    risk_level = stormtools.storm_surge_risk_level(
+        feed_config['tide_gauge_stn'], max_ssh, ttide)
+    return {
+        'max_ssh': max_ssh,
+        'max_ssh_time': max_ssh_time,
+        'risk_level': risk_level,
+    }
+
+
+def _calc_max_ssh(feed, ttide, run_date, run_type, config):
     results_path = config['run']['results archive'][run_type]
     tide_gauge_stn = config['web']['feeds'][feed]['tide_gauge_stn']
     grid_T_15m = nc.Dataset(
@@ -138,9 +160,7 @@ def _calc_max_ssh(feed, run_date, run_type, config):
             .format(
                 tide_gauge_stn=tide_gauge_stn.replace(' ', ''))))
     ssh_model, t_model = nc_tools.ssh_timeseries(grid_T_15m, datetimes=True)
-    ttide = figures.get_tides(
-        tide_gauge_stn, config['ssh']['tidal_predictions'])
     ssh_corr = figures.correct_model_ssh(ssh_model, t_model, ttide)
-    max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea level']
+    max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
     max_ssh_time = t_model[np.argmax(ssh_corr)]
     return max_ssh, max_ssh_time

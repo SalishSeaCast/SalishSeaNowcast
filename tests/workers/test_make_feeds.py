@@ -160,14 +160,53 @@ class TestBuildTagURI:
         assert tag == expected
 
 
+class TestCalcMaxSshRisk:
+    """Unit test for _calc_max_ssh_risk() function.
+    """
+    @patch.object(worker_module().stormtools, 'load_tidal_predictions')
+    @patch.object(worker_module(), '_calc_max_ssh')
+    @patch.object(worker_module().stormtools, 'storm_surge_risk_level')
+    def test_calc_max_ssh_risk(self, m_ssrl, m_cms, m_ltp, worker_module):
+        config = {
+            'ssh': {
+                'tidal_predictions': '/nowcast/tidal_predictions/',
+            },
+            'web': {
+                'feeds': {'pmv.xml': {
+                    'title': 'PMV Feed',
+                    'tide_gauge_stn': 'Point Atkinson',
+                    'tidal predictions':
+                        'PointAtkinson_tidal_prediction_'
+                        '01-Jan-2015_01-Jan-2020.csv'
+                    }},
+            },
+        }
+        run_date = arrow.get(2015, 12, 24, 0, 0, 0)
+        max_ssh = np.array([5.09])
+        max_ssh_time = np.array([datetime.datetime(2015, 12, 25, 19, 59, 42)])
+        m_cms.return_value = (max_ssh, max_ssh_time)
+        max_ssh_info = worker_module._calc_max_ssh_risk(
+            'pmv.xml', run_date, 'forecast', config)
+        m_ltp.assert_called_once_with(
+            '/nowcast/tidal_predictions/PointAtkinson_tidal_prediction_'
+            '01-Jan-2015_01-Jan-2020.csv')
+        m_cms.assert_called_once_with(
+            'pmv.xml', m_ltp(), run_date, 'forecast', config)
+        m_ssrl.assert_called_once_with('Point Atkinson', max_ssh, m_ltp())
+        np.testing.assert_array_equal(
+            max_ssh_info['max_ssh'], np.array([5.09]))
+        np.testing.assert_array_equal(
+            max_ssh_info['max_ssh_time'], max_ssh_time)
+        assert max_ssh_info['risk_level'] == m_ssrl()
+
+
 class TestCalcMaxSsh:
     """Unit test for _calc_max_ssh() function.
     """
     @patch.object(worker_module().nc, 'Dataset')
     @patch.object(worker_module().nc_tools, 'ssh_timeseries')
-    @patch.object(worker_module().figures, 'get_tides', return_value={})
     @patch.object(worker_module().figures, 'correct_model_ssh')
-    def test_calc_max_ssh(self, m_cmssh, m_gt, m_ssht, m_ncd, worker_module):
+    def test_calc_max_ssh(self, m_cmssh, m_ssht, m_ncd, worker_module):
         config = {
             'ssh': {
                 'tidal_predictions': '/nowcast/tidal_predictions/',
@@ -189,12 +228,11 @@ class TestCalcMaxSsh:
             np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)]))
         m_cmssh.return_value = np.array(2)
         max_ssh, max_ssh_time = worker_module._calc_max_ssh(
-            'pmv.xml', arrow.get(2015, 12, 22, 0, 0, 0), 'forecast', config)
+            'pmv.xml', 'ttide', arrow.get(2015, 12, 22, 0, 0, 0), 'forecast',
+            config)
         m_ncd.assert_called_once_with(
             '/results/SalishSea/forecast/22dec15/PointAtkinson.nc')
         m_ssht.assert_called_once_with(m_ncd(), datetimes=True)
-        m_gt.assert_called_once_with(
-            'Point Atkinson', '/nowcast/tidal_predictions/')
         np.testing.assert_array_equal(max_ssh, np.array([5.09]))
         np.testing.assert_array_equal(
             max_ssh_time,
