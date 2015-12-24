@@ -20,6 +20,7 @@ import logging
 import os
 
 import arrow
+from feedgen.entry import FeedEntry
 from feedgen.feed import FeedGenerator
 import netCDF4 as nc
 import numpy as np
@@ -90,10 +91,12 @@ def make_feeds(parsed_args, config):
     run_type = parsed_args.run_type
     web_config = config['web']
     for feed in web_config['feeds']:
+        feed_config = config['web']['feeds'][feed]
         fg = _generate_feed(feed, web_config)
         max_ssh_info = _calc_max_ssh_risk(feed, run_date, run_type, config)
         if max_ssh_info['risk_level'] is not None:
-            _generate_feed_entry(fg, max_ssh_info)
+            fe = _generate_feed_entry(fg, max_ssh_info, feed_config)
+            fg.add_entry(fe)
     return checklist
 
 
@@ -122,6 +125,30 @@ def _generate_feed(feed, web_config):
     return fg
 
 
+def _generate_feed_entry(feed, max_ssh_info, run_date, run_type, web_config):
+    now = arrow.now()
+    fe = FeedEntry()
+    fe.title(
+        'Storm Surge Alert for {[tide_gauge_stn]}'
+        .format(web_config['feeds'][feed]))
+    fe.id(_build_tag_uri(now.format('YYYY-MM-DD'), feed, now, web_config))
+    fe.author(
+        name='Salish Sea MEOPAR Project',
+        uri='http://{0[domain]}/'.format(web_config))
+    fe.content(
+        _render_entry_content(feed, max_ssh_info, web_config),
+        type='html')
+    fe.link(
+        rel='alternate', type='text/html',
+        href='http://{0[domain]}/nemo/results/{forecast}/publish_{day}.html'
+        .format(
+            web_config,
+            forecast=run_type,
+            day=run_date.replace(days=+1).format('DDMMMYY').lower()),
+    )
+    return fe
+
+
 def _build_tag_uri(tag_date, feed, now, web_config):
     return (
         'tag:{0[domain]},{tag_date}:/{0[atom_path]}/{feed}/{now}'
@@ -130,6 +157,13 @@ def _build_tag_uri(tag_date, feed, now, web_config):
             tag_date=tag_date,
             feed=os.path.splitext(feed)[0],
             now=now.format('YYYYMMDDHHmmss')))
+
+
+def _render_entry_content(feed, max_ssh_info, web_config):
+    max_ssh_time_local = arrow.get(max_ssh_info['max_ssh_time']).to('local')
+    values = {
+        'city': web_config['feeds'][feed]['city'],
+    }
 
 
 def _calc_max_ssh_risk(feed, run_date, run_type, config):

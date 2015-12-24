@@ -176,7 +176,9 @@ web:
   feeds:
     pmv.xml:
       title: Salish Sea NEMO Model Storm Surge Alerts for Port Metro Vancouver
+      city: Vancouver
       tide_gauge_stn: Point Atkinson
+      tidal predictions: PointAtkinson_tidal_prediction_01-Jan-2015_01-Jan-2020.csv
 
 
 logging:
