@@ -517,6 +517,9 @@ def _change_to_NEMO_variable_names(outnetcdf, axs, ip):
     data.renameVariable('latitude', 'nav_lat')
     data.renameVariable('longitude', 'nav_lon')
     data.renameVariable('time', 'time_counter')
+    time_counter = data.variables['time_counter']
+    time_counter.time_origin = arrow.get(
+        '1970-01-01 00:00:00').format('YYYY-MMM-DD HH:mm:ss')
     data.renameVariable('UGRD_10maboveground', 'u_wind')
     data.renameVariable('VGRD_10maboveground', 'v_wind')
     data.renameVariable('DSWRF_surface', 'solar')
