@@ -15,6 +15,7 @@
 
 """Unit tests for Salish Sea NEMO nowcast make_feeds worker.
 """
+from collections import namedtuple
 import datetime
 from unittest.mock import (
     Mock,
@@ -152,19 +153,18 @@ class TestGenerateFeed:
 
 
 @patch.object(worker_module().arrow, 'now')
-@patch.object(worker_module(), '_render_entry_content', return_value=b'')
 @patch.object(worker_module(), 'FeedEntry')
 class TestGenerateFeedEntry:
     """Unit tests for _generate_feed_entry() function.
     """
-    def test_title(self, m_fe, m_rec, m_now, worker_module, web_config):
+    def test_title(self, m_fe, m_now, worker_module, web_config):
         run_date = arrow.get('2015-12-24').floor('day')
         worker_module._generate_feed_entry(
             'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
         m_fe().title.assert_called_once_with(
             'Storm Surge Alert for Point Atkinson')
 
-    def test_id(self, m_fe, m_rec, m_now, worker_module, web_config):
+    def test_id(self, m_fe, m_now, worker_module, web_config):
         run_date = arrow.get('2015-12-24').floor('day')
         m_now.return_value = arrow.get('2015-12-24 15:10:42')
         worker_module._generate_feed_entry(
@@ -173,7 +173,7 @@ class TestGenerateFeedEntry:
             worker_module._build_tag_uri(
                 '2015-12-24', 'pmv.sml', m_now(), web_config))
 
-    def test_author(self, m_fe, m_rec, m_now, worker_module, web_config):
+    def test_author(self, m_fe, m_now, worker_module, web_config):
         run_date = arrow.get('2015-12-24').floor('day')
         worker_module._generate_feed_entry(
             'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
@@ -181,14 +181,7 @@ class TestGenerateFeedEntry:
             name='Salish Sea MEOPAR Project',
             uri='http://salishsea.eos.ubc.ca/')
 
-    def test_content(self, m_fe, m_rec, m_now, worker_module, web_config):
-        run_date = arrow.get('2015-12-24').floor('day')
-        worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
-        m_fe().content.assert_called_once_with(
-            m_rec(), type='html')
-
-    def test_link(self, m_fe, m_rec, m_now, worker_module, web_config):
+    def test_link(self, m_fe, m_now, worker_module, web_config):
         run_date = arrow.get('2015-12-24').floor('day')
         m_now.return_value = arrow.get('2015-12-24 15:10:42')
         worker_module._generate_feed_entry(
@@ -260,9 +253,9 @@ class TestCalcMaxSsh:
     """Unit test for _calc_max_ssh() function.
     """
     @patch.object(worker_module().nc, 'Dataset')
-    @patch.object(worker_module().nc_tools, 'ssh_timeseries')
+    @patch.object(worker_module().nc_tools, 'ssh_timeseries_at_point')
     @patch.object(worker_module().figures, 'correct_model_ssh')
-    def test_calc_max_ssh(self, m_cmssh, m_ssht, m_ncd, worker_module):
+    def test_calc_max_ssh(self, m_cmssh, m_sshtapt, m_ncd, worker_module):
         config = {
             'ssh': {
                 'tidal_predictions': '/nowcast/tidal_predictions/',
@@ -279,7 +272,8 @@ class TestCalcMaxSsh:
                 }},
             },
         }
-        m_ssht.return_value = (
+        ssh_ts = namedtuple('ssh_ts', 'ssh, time')
+        m_sshtapt.return_value = ssh_ts(
             np.array([1.93]),
             np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)]))
         m_cmssh.return_value = np.array(2)
@@ -288,7 +282,7 @@ class TestCalcMaxSsh:
             'forecast', config)
         m_ncd.assert_called_once_with(
             '/results/SalishSea/forecast/22dec15/PointAtkinson.nc')
-        m_ssht.assert_called_once_with(m_ncd(), datetimes=True)
+        m_sshtapt.assert_called_once_with(m_ncd(), 0, 0, datetimes=True)
         np.testing.assert_array_equal(max_ssh, np.array([5.09]))
         np.testing.assert_array_equal(
             max_ssh_time,
