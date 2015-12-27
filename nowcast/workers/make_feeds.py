@@ -20,8 +20,10 @@ import logging
 import os
 
 import arrow
+import docutils.core
 from feedgen.entry import FeedEntry
 from feedgen.feed import FeedGenerator
+import mako.template
 import netCDF4 as nc
 import numpy as np
 
@@ -30,6 +32,7 @@ from salishsea_tools import (
     stormtools,
 )
 from salishsea_tools.places import PLACES
+import salishsea_tools.unit_conversions as converters
 
 from nowcast import (
     figures,
@@ -136,7 +139,7 @@ def _generate_feed_entry(feed, max_ssh_info, run_date, run_type, web_config):
         name='Salish Sea MEOPAR Project',
         uri='http://{0[domain]}/'.format(web_config))
     fe.content(
-        _render_entry_content(feed, max_ssh_info, web_config),
+        '',
         type='html')
     fe.link(
         rel='alternate', type='text/html',
@@ -157,13 +160,6 @@ def _build_tag_uri(tag_date, feed, now, web_config):
             tag_date=tag_date,
             feed=os.path.splitext(feed)[0],
             now=now.format('YYYYMMDDHHmmss')))
-
-
-def _render_entry_content(feed, max_ssh_info, web_config):
-    max_ssh_time_local = arrow.get(max_ssh_info['max_ssh_time']).to('local')
-    values = {
-        'city': web_config['feeds'][feed]['city'],
-    }
 
 
 def _calc_max_ssh_risk(feed, run_date, run_type, config):
@@ -193,8 +189,8 @@ def _calc_max_ssh(feed, ttide, run_date, run_type, config):
             '{tide_gauge_stn}.nc'
             .format(
                 tide_gauge_stn=tide_gauge_stn.replace(' ', ''))))
-    ssh_model, t_model = nc_tools.ssh_timeseries(grid_T_15m, datetimes=True)
-    ssh_corr = figures.correct_model_ssh(ssh_model, t_model, ttide)
+    ssh_ts = nc_tools.ssh_timeseries_at_point(grid_T_15m, 0, 0, datetimes=True)
+    ssh_corr = figures.correct_model_ssh(ssh_ts.ssh, ssh_ts.time, ttide)
     max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
-    max_ssh_time = t_model[np.argmax(ssh_corr)]
+    max_ssh_time = ssh_ts.time[np.argmax(ssh_corr)]
     return max_ssh, max_ssh_time
