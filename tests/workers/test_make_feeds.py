@@ -34,14 +34,27 @@ def worker_module():
 
 
 @pytest.fixture
-def web_config():
+def config():
     return {
-        'domain': 'salishsea.eos.ubc.ca',
-        'atom_path': 'storm-surge/atom',
-        'feeds': {'pmv.xml': {
-            'title': 'PMV Feed',
-            'tide_gauge_stn': 'Point Atkinson',
-        }},
+        'ssh': {'tidal_predictions': '/nowcast/tidal_predictions/'},
+        'run': {
+            'results archive': {
+                'forecast': '/results/SalishSea/forecast/',
+            }},
+        'web': {
+            'domain': 'salishsea.eos.ubc.ca',
+            'templates_path': 'www/templates',
+            'atom_path': 'storm-surge/atom',
+            'feed_entry_template': 'storm_surge_advisory.mako',
+            'feeds': {'pmv.xml': {
+                'title': 'PMV Feed',
+                'city': 'Vancouver',
+                'tide_gauge_stn': 'Point Atkinson',
+                'tidal predictions':
+                    'PointAtkinson_tidal_prediction_'
+                    '01-Jan-2015_01-Jan-2020.csv'
+                }},
+        },
     }
 
 
@@ -119,9 +132,9 @@ class TestGenerateFeed:
     """Unit test for _generate_feed() function.
     """
     @patch.object(worker_module().arrow, 'utcnow')
-    def test_generate_feed(self, m_utcnow, worker_module, web_config):
+    def test_generate_feed(self, m_utcnow, worker_module, config):
         m_utcnow.return_value = arrow.get('2015-12-21 17:54:42')
-        fg = worker_module._generate_feed('pmv.xml', web_config)
+        fg = worker_module._generate_feed('pmv.xml', config['web'])
         feed = fg.atom_str(pretty=True).decode('ascii')
         expected = [
             "<?xml version='1.0' encoding='UTF-8'?>",
@@ -153,39 +166,47 @@ class TestGenerateFeed:
 
 
 @patch.object(worker_module().arrow, 'now')
+@patch.object(worker_module(), '_render_entry_content', return_value=b'')
 @patch.object(worker_module(), 'FeedEntry')
 class TestGenerateFeedEntry:
     """Unit tests for _generate_feed_entry() function.
     """
-    def test_title(self, m_fe, m_now, worker_module, web_config):
+    def test_title(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
         worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
         m_fe().title.assert_called_once_with(
             'Storm Surge Alert for Point Atkinson')
 
-    def test_id(self, m_fe, m_now, worker_module, web_config):
+    def test_id(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
         m_now.return_value = arrow.get('2015-12-24 15:10:42')
         worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
         m_fe().id.assert_called_once_with(
             worker_module._build_tag_uri(
-                '2015-12-24', 'pmv.sml', m_now(), web_config))
+                '2015-12-24', 'pmv.sml', m_now(), config['web']))
 
-    def test_author(self, m_fe, m_now, worker_module, web_config):
+    def test_author(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
         worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
         m_fe().author.assert_called_once_with(
             name='Salish Sea MEOPAR Project',
             uri='http://salishsea.eos.ubc.ca/')
 
-    def test_link(self, m_fe, m_now, worker_module, web_config):
+    def test_content(self, m_fe, m_rec, m_now, worker_module, config):
+        run_date = arrow.get('2015-12-24').floor('day')
+        worker_module._generate_feed_entry(
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
+        m_fe().content.assert_called_once_with(
+            m_rec(), type='html')
+
+    def test_link(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
         m_now.return_value = arrow.get('2015-12-24 15:10:42')
         worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', web_config)
+            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
         m_fe().link.assert_called_once_with(
             href='http://salishsea.eos.ubc.ca/nemo/results/forecast/'
             'publish_25dec15.html',
@@ -195,18 +216,40 @@ class TestGenerateFeedEntry:
 class TestBuildTagURI:
     """Unit test for _build_tag_uri() function.
     """
-    def test_build_tag_uri(self, worker_module):
-        web_config = {
-            'domain': 'salishsea.eos.ubc.ca',
-            'atom_path': 'storm-surge/atom',
-        }
+    def test_build_tag_uri(self, worker_module, config):
         tag = worker_module._build_tag_uri(
             '2015-12-12', 'pmv.xml', arrow.get('2015-12-21 09:31:42'),
-            web_config)
+            config['web'])
         expected = (
             'tag:salishsea.eos.ubc.ca,2015-12-12:'
             '/storm-surge/atom/pmv/20151221093142')
         assert tag == expected
+
+
+class TestRenderEntryContent:
+    """Unit test for _render_entry_content() function.
+    """
+    @patch.object(worker_module(), '_calc_wind_4h_avg')
+    @patch.object(worker_module().mako.template, 'Template')
+    @patch.object(worker_module().docutils.core, 'publish_parts')
+    def test_render_entry_content(
+        self, m_pp, m_tmpl, m_cw4a, worker_module, config,
+    ):
+        max_ssh_info = {
+            'max_ssh': 5.0319,
+            'max_ssh_time': arrow.get('2015-12-27 15:22:30'),
+            'risk_level': 'moderate risk',
+        }
+        m_cw4a.return_value = {
+            'wind_speed_4h_avg': 0.826,
+            'wind_dir_4h_avg': 236.97,
+        }
+        content = worker_module._render_entry_content(
+            'pmv.xml', max_ssh_info, config)
+        m_tmpl.assert_called_once_with(
+            filename='www/templates/storm_surge_advisory.mako')
+        assert m_tmpl().render.called
+        assert content == m_pp()['body']
 
 
 class TestCalcMaxSshRisk:
@@ -215,21 +258,9 @@ class TestCalcMaxSshRisk:
     @patch.object(worker_module().stormtools, 'load_tidal_predictions')
     @patch.object(worker_module(), '_calc_max_ssh')
     @patch.object(worker_module().stormtools, 'storm_surge_risk_level')
-    def test_calc_max_ssh_risk(self, m_ssrl, m_cms, m_ltp, worker_module):
-        config = {
-            'ssh': {
-                'tidal_predictions': '/nowcast/tidal_predictions/',
-            },
-            'web': {
-                'feeds': {'pmv.xml': {
-                    'title': 'PMV Feed',
-                    'tide_gauge_stn': 'Point Atkinson',
-                    'tidal predictions':
-                        'PointAtkinson_tidal_prediction_'
-                        '01-Jan-2015_01-Jan-2020.csv'
-                    }},
-            },
-        }
+    def test_calc_max_ssh_risk(
+        self, m_ssrl, m_cms, m_ltp, worker_module, config,
+    ):
         run_date = arrow.get('2015-12-24').floor('day')
         max_ssh = np.array([5.09])
         max_ssh_time = np.array([datetime.datetime(2015, 12, 25, 19, 59, 42)])
@@ -255,23 +286,9 @@ class TestCalcMaxSsh:
     @patch.object(worker_module().nc, 'Dataset')
     @patch.object(worker_module().nc_tools, 'ssh_timeseries_at_point')
     @patch.object(worker_module().figures, 'correct_model_ssh')
-    def test_calc_max_ssh(self, m_cmssh, m_sshtapt, m_ncd, worker_module):
-        config = {
-            'ssh': {
-                'tidal_predictions': '/nowcast/tidal_predictions/',
-            },
-            'run': {
-                'results archive': {
-                    'forecast': '/results/SalishSea/forecast/',
-                },
-            },
-            'web': {
-                'feeds': {'pmv.xml': {
-                    'title': 'PMV Feed',
-                    'tide_gauge_stn': 'Point Atkinson',
-                }},
-            },
-        }
+    def test_calc_max_ssh(
+        self, m_cmssh, m_sshtapt, m_ncd, worker_module, config,
+    ):
         ssh_ts = namedtuple('ssh_ts', 'ssh, time')
         m_sshtapt.return_value = ssh_ts(
             np.array([1.93]),

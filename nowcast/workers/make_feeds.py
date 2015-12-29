@@ -30,6 +30,7 @@ import numpy as np
 from salishsea_tools import (
     nc_tools,
     stormtools,
+    wind_tools,
 )
 from salishsea_tools.places import PLACES
 import salishsea_tools.unit_conversions as converters
@@ -94,11 +95,11 @@ def make_feeds(parsed_args, config):
     run_type = parsed_args.run_type
     web_config = config['web']
     for feed in web_config['feeds']:
-        feed_config = config['web']['feeds'][feed]
         fg = _generate_feed(feed, web_config)
         max_ssh_info = _calc_max_ssh_risk(feed, run_date, run_type, config)
         if max_ssh_info['risk_level'] is not None:
-            fe = _generate_feed_entry(fg, max_ssh_info, feed_config)
+            fe = _generate_feed_entry(
+                feed, max_ssh_info, run_date, run_type, config)
             fg.add_entry(fe)
     return checklist
 
@@ -128,24 +129,24 @@ def _generate_feed(feed, web_config):
     return fg
 
 
-def _generate_feed_entry(feed, max_ssh_info, run_date, run_type, web_config):
+def _generate_feed_entry(feed, max_ssh_info, run_date, run_type, config):
     now = arrow.now()
     fe = FeedEntry()
     fe.title(
         'Storm Surge Alert for {[tide_gauge_stn]}'
-        .format(web_config['feeds'][feed]))
-    fe.id(_build_tag_uri(now.format('YYYY-MM-DD'), feed, now, web_config))
+        .format(config['web']['feeds'][feed]))
+    fe.id(_build_tag_uri(now.format('YYYY-MM-DD'), feed, now, config['web']))
     fe.author(
         name='Salish Sea MEOPAR Project',
-        uri='http://{0[domain]}/'.format(web_config))
+        uri='http://{0[domain]}/'.format(config['web']))
     fe.content(
-        '',
+        _render_entry_content(feed, max_ssh_info, config),
         type='html')
     fe.link(
         rel='alternate', type='text/html',
         href='http://{0[domain]}/nemo/results/{forecast}/publish_{day}.html'
         .format(
-            web_config,
+            config['web'],
             forecast=run_type,
             day=run_date.replace(days=+1).format('DDMMMYY').lower()),
     )
@@ -160,6 +161,44 @@ def _build_tag_uri(tag_date, feed, now, web_config):
             tag_date=tag_date,
             feed=os.path.splitext(feed)[0],
             now=now.format('YYYYMMDDHHmmss')))
+
+
+def _render_entry_content(feed, max_ssh_info, config):
+    max_ssh_time_local = arrow.get(max_ssh_info['max_ssh_time']).to('local')
+    tide_gauge_stn = config['web']['feeds'][feed]['tide_gauge_stn']
+    max_ssh_info.update(_calc_wind_4h_avg(
+        feed, max_ssh_info['max_ssh_time'], config))
+    values = {
+        'city': config['web']['feeds'][feed]['city'],
+        'tide_gauge_stn': tide_gauge_stn,
+        'conditions': {
+            tide_gauge_stn: {
+                'risk_level': max_ssh_info['risk_level'],
+                'max_ssh_msl': max_ssh_info['max_ssh'],
+                'wind_speed_4h_avg_kph':
+                    converters.mps_kph(max_ssh_info['wind_speed_4h_avg']),
+                'wind_speed_4h_avg_knots':
+                    converters.mps_knots(max_ssh_info['wind_speed_4h_avg']),
+                'wind_dir_4h_avg_heading':
+                    converters.bearing_heading(
+                        converters.wind_to_from(
+                            max_ssh_info['wind_dir_4h_avg'])),
+                'wind_dir_4h_avg_bearing':
+                    converters.wind_to_from(max_ssh_info['wind_dir_4h_avg']),
+                'max_ssh_time': max_ssh_time_local,
+                'max_ssh_time_tzname': max_ssh_time_local.tzinfo.tzname(
+                    max_ssh_time_local.datetime),
+                'humanized_max_ssh_time':
+                    converters.humanize_time_of_day(max_ssh_time_local),
+            }}
+    }
+    template = mako.template.Template(
+        filename=os.path.join(
+            config['web']['templates_path'],
+            config['web']['feed_entry_template']))
+    rendered_rst = template.render(**values)
+    html = docutils.core.publish_parts(rendered_rst, writer_name='html')
+    return html['body']
 
 
 def _calc_max_ssh_risk(feed, run_date, run_type, config):
@@ -194,3 +233,25 @@ def _calc_max_ssh(feed, ttide, run_date, run_type, config):
     max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
     max_ssh_time = ssh_ts.time[np.argmax(ssh_corr)]
     return max_ssh, max_ssh_time
+
+
+def _calc_wind_4h_avg(feed, max_ssh_time, config):
+    weather_path = config['weather']['ops_dir']
+    weather_grid = nc.Dataset(
+        os.path.join(weather_path, '{:ops_y%Ym%md%d.nc}'.format(max_ssh_time)))
+    tide_gauge_stn = config['web']['feeds'][feed]['tide_gauge_stn']
+    wind = nc_tools.uv_wind_timeseries_at_point(
+        weather_grid, *PLACES[tide_gauge_stn]['wind grid ji'])
+    i_max_ssh_wind = np.asscalar(
+        np.where(
+            wind.time == arrow.get(
+                max_ssh_time.year, max_ssh_time.month, max_ssh_time.day,
+                max_ssh_time.hour))[0])
+    u_wind_4h_avg = np.mean(wind.u[max(i_max_ssh_wind-4, 0):i_max_ssh_wind])
+    v_wind_4h_avg = np.mean(wind.v[max(i_max_ssh_wind-4, 0):i_max_ssh_wind])
+    wind_speed_4h_avg, wind_dir_4h_avg = wind_tools.wind_speed_dir(
+        u_wind_4h_avg, v_wind_4h_avg)
+    return {
+        'wind_speed_4h_avg': np.asscalar(wind_speed_4h_avg),
+        'wind_dir_4h_avg': np.asscalar(wind_dir_4h_avg),
+    }
