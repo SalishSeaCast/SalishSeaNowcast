@@ -203,7 +203,7 @@ def _render_entry_content(feed, max_ssh_info, config):
 
 def _calc_max_ssh_risk(feed, run_date, run_type, config):
     feed_config = config['web']['feeds'][feed]
-    ttide = stormtools.load_tidal_predictions(
+    ttide, _ = stormtools.load_tidal_predictions(
         os.path.join(
             config['ssh']['tidal_predictions'],
             feed_config['tidal predictions']))

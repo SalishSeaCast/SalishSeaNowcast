@@ -265,14 +265,15 @@ class TestCalcMaxSshRisk:
         max_ssh = np.array([5.09])
         max_ssh_time = np.array([datetime.datetime(2015, 12, 25, 19, 59, 42)])
         m_cms.return_value = (max_ssh, max_ssh_time)
+        m_ltp.return_value = ('ttide', 'msl')
         max_ssh_info = worker_module._calc_max_ssh_risk(
             'pmv.xml', run_date, 'forecast', config)
         m_ltp.assert_called_once_with(
             '/nowcast/tidal_predictions/PointAtkinson_tidal_prediction_'
             '01-Jan-2015_01-Jan-2020.csv')
         m_cms.assert_called_once_with(
-            'pmv.xml', m_ltp(), run_date, 'forecast', config)
-        m_ssrl.assert_called_once_with('Point Atkinson', max_ssh, m_ltp())
+            'pmv.xml', m_ltp()[0], run_date, 'forecast', config)
+        m_ssrl.assert_called_once_with('Point Atkinson', max_ssh, m_ltp()[0])
         np.testing.assert_array_equal(
             max_ssh_info['max_ssh'], np.array([5.09]))
         np.testing.assert_array_equal(
