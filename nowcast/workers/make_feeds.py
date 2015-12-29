@@ -94,6 +94,11 @@ def make_feeds(parsed_args, config):
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type
     web_config = config['web']
+    feeds_path = os.path.join(
+        web_config['www_path'], web_config['site_repo_url'].rsplit('/')[-1],
+        'site', '_build', 'html', web_config['atom_path'],
+    )
+    checklist = {}
     for feed in web_config['feeds']:
         fg = _generate_feed(feed, web_config)
         max_ssh_info = _calc_max_ssh_risk(feed, run_date, run_type, config)
@@ -101,6 +106,7 @@ def make_feeds(parsed_args, config):
             fe = _generate_feed_entry(
                 feed, max_ssh_info, run_date, run_type, config)
             fg.add_entry(fe)
+        fg.atom_file(os.path.join(feeds_path, feed), pretty=True)
     return checklist
 
 
@@ -255,3 +261,7 @@ def _calc_wind_4h_avg(feed, max_ssh_time, config):
         'wind_speed_4h_avg': np.asscalar(wind_speed_4h_avg),
         'wind_dir_4h_avg': np.asscalar(wind_dir_4h_avg),
     }
+
+
+if __name__ == '__main__':
+    main()
