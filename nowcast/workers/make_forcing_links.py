@@ -20,6 +20,7 @@ executed.
 """
 import logging
 import os
+import shutil
 
 import arrow
 
@@ -60,6 +61,14 @@ def main():
         Defaults to {}.
         '''.format(salishsea_today.format('YYYY-MM-DD')),
     )
+    worker.arg_parser.add_argument(
+        '--shared-storage', action='store_true',
+        help='''
+        If running on a machine (Salish) that directly accesses
+        the repo datafiles, copy the ssh files so that the nowcast
+        does not change the files while nowcast-green is running
+        ''',
+    )
     worker.run(make_forcing_links, success, failure)
 
 
@@ -91,10 +100,12 @@ def make_forcing_links(parsed_args, config):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
+    shared_storage = parsed_args.shared_storage
     host_run_config = config['run'][host_name]
     ssh_client, sftp_client = lib.sftp(
         host_name, host_run_config['ssh key name']['nowcast'])
-    _make_NeahBay_ssh_links(sftp_client, host_run_config, run_date, host_name)
+    _make_NeahBay_ssh_links(
+        sftp_client, host_run_config, run_date, host_name, shared_storage)
     if run_type == 'ssh':
         sftp_client.close()
         ssh_client.close()
@@ -107,7 +118,8 @@ def make_forcing_links(parsed_args, config):
     return {host_name: True}
 
 
-def _make_NeahBay_ssh_links(sftp_client, host_run_config, run_date, host_name):
+def _make_NeahBay_ssh_links(
+        sftp_client, host_run_config, run_date, host_name, shared_storage):
     _clear_links(sftp_client, host_run_config, 'open_boundaries/west/ssh/')
     for day in range(-1, 3):
         filename = get_NeahBay_ssh.FILENAME_TMPL.format(
@@ -118,7 +130,10 @@ def _make_NeahBay_ssh_links(sftp_client, host_run_config, run_date, host_name):
             host_run_config['nowcast_dir'],
             'open_boundaries/west/ssh/',
             filename)
-        _create_symlink(sftp_client, host_name, src, dest)
+        if shared_storage:
+            shutil.copy2(src, dest)
+        else:
+            _create_symlink(sftp_client, host_name, src, dest)
 
 
 def _make_runoff_links(sftp_client, host_run_config, run_date, host_name):
