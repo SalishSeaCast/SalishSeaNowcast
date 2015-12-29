@@ -173,6 +173,7 @@ web:
     fileroot: SaliCom
 
   atom_path: storm-surge/atom
+  feed_entry_template: storm_surge_advisory.mako
   feeds:
     pmv.xml:
       title: Salish Sea NEMO Model Storm Surge Alerts for Port Metro Vancouver
