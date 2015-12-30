@@ -310,13 +310,13 @@ def get_model_time_variables(grid_T):
     :arg grid_T: Tracer results dataset from NEMO.
     :type grid_T: :py:class:`netCDF4.Dataset`
 
-    :returns: dataset start time (t_orig), dataset end time (t_final),
-              and array (time_) of output times all as datetime objects.
+    :returns: dataset start time, dataset end time,
+              and array of output times all as datetime objects.
     """
-    time_ = nc_tools.timestamp(
+    time = nc_tools.timestamp(
         grid_T, range(grid_T.variables['time_counter'].size))
-    time_ = [t.datetime for t in time_]
-    return time_[0], time_[-1], time_
+    time = np.array([t.datetime for t in time])
+    return time[0], time[-1], time
 
 
 def dateparse_NOAA(s):
@@ -1084,8 +1084,8 @@ def load_model_ssh(grid_T):
     :rtype: 2-tuple of :py:class:`numpy.ndarray`
     """
     ssh = grid_T.variables['sossheig'][:, 0, 0]
-    t_orig, t_final, time_ = get_model_time_variables(grid_T)
-    return ssh, time_
+    t_orig, t_final, time = get_model_time_variables(grid_T)
+    return ssh, time
 
 
 def website_thumbnail(
