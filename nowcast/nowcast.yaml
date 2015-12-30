@@ -1,7 +1,7 @@
 # Configuration file for Salish Sea NEMO model nowcast system
 
 # System status checklist file
-checklist file: /results/nowcast-sys/nowcast/nowcast_checklist.yaml
+checklist file: /home/dlatorne/public_html/MEOPAR/nowcast/nowcast_checklist.yaml
 
 # Python interpreter in environment with all dependencies installed
 python: /results/nowcast-sys/nowcast-env/bin/python
