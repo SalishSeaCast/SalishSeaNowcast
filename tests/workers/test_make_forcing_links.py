@@ -63,6 +63,13 @@ class TestMain:
         assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
         assert 'help' in kwargs
 
+    def test_add_shared_storage_arg(self, m_worker, worker_module, lib_module):
+        worker_module.main()
+        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[3]
+        assert args == ('--shared-storage',)
+        assert kwargs['action'] == 'store_true'
+        assert 'help' in kwargs
+
     def test_run_worker(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker().run.call_args

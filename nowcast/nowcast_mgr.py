@@ -401,7 +401,7 @@ class NowcastManager:
                     (self._launch_worker,
                         ['make_forcing_links',
                             [self.config['run']['nowcast-green host'],
-                             'nowcast-green']])
+                             'nowcast-green', '--shared-storage']])
                 )
         return actions[msg_type]
 
