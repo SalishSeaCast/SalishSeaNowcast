@@ -58,7 +58,7 @@ def update_yaml_file(run_prep_dir, run_date, restart_timestep):
     trcrestartfile = (config['forcing']['restart_trc.nc']['link to'])
     for f, s in zip((restartfile, trcrestartfile),
                     ('restart.nc', 'restart_trc.nc')):
-        parts = restartfile.split('/')
+        parts = f.split('/')
         parts[4] = dmy
         fparts = parts[5].split('_')
         fparts[1] = '{:08d}'.format(restart_timestep)
