@@ -592,7 +592,8 @@ class TestAfterGRIBtoNetCDF:
         actions = mgr._after_grib_to_netcdf('success nowcast+', 'payload')
         expected = (
             mgr._launch_worker,
-            ['make_forcing_links', ['salish-nowcast', 'nowcast-green']]
+            ['make_forcing_links',
+             ['salish-nowcast', 'nowcast-green', '--shared-storage']]
         )
         assert actions[2] == expected
         assert len(actions) == 3
