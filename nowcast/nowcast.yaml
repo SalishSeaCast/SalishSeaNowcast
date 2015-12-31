@@ -114,7 +114,7 @@ run:
     config_file: /home/dlatorne/public_html/MEOPAR/nowcast/nowcast.yaml
     run_prep_dir: /results/nowcast-sys/nowcast-green/
     ssh key name:
-      nowcast: /home/dlatorne/.ssh/id_rsa
+      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
     nowcast_dir: /data/dlatorne/MEOPAR/nowcast-green/
     results:
       nowcast-green: /results/SalishSea/nowcast-green/
