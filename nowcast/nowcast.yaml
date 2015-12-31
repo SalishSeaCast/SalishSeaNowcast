@@ -44,13 +44,13 @@ weather:
   grid_defn.pl: /results/nowcast-sys/private-tools/PThupaki/grid_defn.pl
 
 run_types:
-  # List of run types to execute
+  # Keys are run types to execute, values are NEMO configurations to use
   # Note that forecast requires a nowcast to have been completed,
   # and forecast2 requires a forecast to have been completed.
-  - nowcast
-  - forecast
-  - forecast2
-  - nowcast-green
+  nowcast: SalishSea
+  forecast: SalishSea
+  forecast2: SalishSea
+  nowcast-green: SOG
 
 run:
   results archive:
@@ -101,6 +101,34 @@ run:
       forecast: /home/ubuntu/MEOPAR/SalishSea/forecast/
       forecast2: /home/ubuntu/MEOPAR/SalishSea/forecast2/
 
+  # If the `nowcast-green host` key is present, the forcing files will be
+  # symlinked and the nowcast-green run will be executed on it automatically.
+  # It is assumed that the nowcast-green run shares storage with the machine
+  # that the nowcast manager is running on, so uploading or forcing files,
+  # and downloaded of results files is not necessary.
+  #
+  # Remove or comment out the next line to prevent running nowcast-green
+  nowcast-green host: salish-nowcast
+  salish-nowcast:
+    python: /results/nowcast-sys/nowcast-env/bin/python
+    config_file: /home/dlatorne/public_html/MEOPAR/nowcast/nowcast.yaml
+    run_prep_dir: /results/nowcast-sys/nowcast-green/
+    ssh key name:
+      nowcast: /home/dlatorne/.ssh/id_rsa
+    nowcast_dir: /data/dlatorne/MEOPAR/nowcast-green/
+    results:
+      nowcast-green: /results/SalishSea/nowcast-green/
+    rivers_dir: /results/forcing/rivers/
+    # Location of rivers runoff monthly climatology file
+    rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
+    ssh_dir: /results/forcing/sshNeahBay/
+    weather_dir: /results/forcing/atmospheric/GEM2.5/operational/
+    # Location of no_snow.nc constraint file
+    no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
+    # Location of NEMO on-the-fly interpolation weights file
+    # for GEM 2.5km operational forecast
+    weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
+
   # If the `hpc host` key is present, the forcing files will be uploaded
   # to the HPC cluster and the symlinks created ready for the runs to be
   # prepared and queued at the command-line on the cluster.
@@ -126,33 +154,6 @@ run:
       nowcast: /home/dlatorne/MEOPAR/SalishSea/nowcast/
       forecast: /home/dlatorne/MEOPAR/SalishSea/forecast/
       forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
-
-  # If the `nowcast-green host` key is present, the forcing files will be
-  # symlinked and the nowcast-green run will be executed on it automatically.
-  # It is assumed that the nowcast-green run shares storage with the machine
-  # that the nowcast manager is running on, so uploading or forcing files,
-  # and downloaded of results files is not necessary.
-  #
-  # Remove or comment out the next line to prevent running nowcast-green
-  nowcast-green host: salish-nowcast
-  salish-nowcast:
-    python: /results/nowcast-sys/nowcast-env/bin/python
-    config_file: /results/nowcast-sys/nowcast/nowcast.yaml
-    ssh key name:
-      nowcast: /home/dlatorne/.ssh/id_rsa
-    nowcast_dir: /data/dlatorne/MEOPAR/nowcast-green/
-    results:
-      nowcast-green: /results/SalishSea/nowcast-green/
-    rivers_dir: /results/forcing/rivers/
-    # Location of rivers runoff monthly climatology file
-    rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
-    ssh_dir: /results/forcing/sshNeahBay/
-    weather_dir: /results/forcing/atmospheric/GEM2.5/operational/
-    # Location of no_snow.nc constraint file
-    no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
-    # Location of NEMO on-the-fly interpolation weights file
-    # for GEM 2.5km operational forecast
-    weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
 
 
 web:
