@@ -279,7 +279,7 @@ def run_description(host, run_type, run_day, run_id, restart_timestep):
     forcing_home = host['run_prep_dir']
     run_desc = salishsea_cmd.api.run_description(
         NEMO_code=os.path.abspath(os.path.join(forcing_home, '../NEMO-code/')),
-        forcing=os.path.abspath(
+        forcing_path=os.path.abspath(
             os.path.join(forcing_home, '../NEMO-forcing/')),
         runs_dir=os.path.abspath(os.path.join(forcing_home, '../SalishSea/')),
         init_conditions=os.path.abspath(init_conditions),
