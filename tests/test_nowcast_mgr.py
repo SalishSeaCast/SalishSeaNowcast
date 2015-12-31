@@ -425,7 +425,7 @@ class TestAfterDownloadWeather:
         'failure 18',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.config = {'run_types': []}
+        mgr.config = {'run_types': {}}
         actions = mgr._after_download_weather(msg_type, 'payload')
         assert actions is None
 
@@ -436,7 +436,7 @@ class TestAfterDownloadWeather:
         'success 18',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
-        mgr.config = {'run_types': []}
+        mgr.config = {'run_types': {}}
         actions = mgr._after_download_weather(msg_type, 'payload')
         expected = (
             mgr._update_checklist, ['download_weather', 'weather', 'payload'],
@@ -444,7 +444,7 @@ class TestAfterDownloadWeather:
         assert actions[0] == expected
 
     def test_success_06_launch_make_runoff_file_worker(self, mgr):
-        mgr.config = {'run_types': []}
+        mgr.config = {'run_types': {}}
         actions = mgr._after_download_weather('success 06', 'payload')
         expected = (mgr._launch_worker, ['make_runoff_file'])
         assert actions[1] == expected
@@ -454,7 +454,7 @@ class TestAfterDownloadWeather:
         (2, 'grib_to_netcdf', 'nowcast+'),
     ])
     def test_success_12_launch_workers(self, index, worker, worker_args, mgr):
-        mgr.config = {'run_types': ['nowcast']}
+        mgr.config = {'run_types': {'nowcast': 'SalishSea'}}
         actions = mgr._after_download_weather('success 12', 'payload')
         expected = (mgr._launch_worker, [worker, [worker_args]],)
         assert actions[index] == expected
@@ -464,7 +464,7 @@ class TestAfterDownloadWeather:
         (3, 'grib_to_netcdf', 'forecast2'),
     ])
     def test_success_06_launch_workers(self, index, worker, worker_args, mgr):
-        mgr.config = {'run_types': ['forecast2']}
+        mgr.config = {'run_types': {'forecast2': 'SalishSea'}}
         actions = mgr._after_download_weather('success 06', 'payload')
         expected = (mgr._launch_worker, [worker, [worker_args]],)
         assert actions[index] == expected
@@ -480,7 +480,7 @@ class TestAfterGetNeahBaySSH:
         'failure forecast2',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.config = {'run_types': {}, 'run': []}
         actions = mgr._after_get_NeahBay_ssh(msg_type, 'payload')
         assert actions is None
 
@@ -490,7 +490,7 @@ class TestAfterGetNeahBaySSH:
         'success forecast2',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.config = {'run_types': {}, 'run': []}
         actions = mgr._after_get_NeahBay_ssh(msg_type, 'payload')
         expected = (
             mgr._update_checklist,
@@ -505,7 +505,10 @@ class TestAfterGetNeahBaySSH:
     def test_success_forecast_launch_upload_forcing_worker(
         self, host_type, host_name, mgr,
     ):
-        mgr.config = {'run_types': ['forecast'], 'run': {host_type: host_name}}
+        mgr.config = {
+            'run_types': {'forecast': 'SalishSea'},
+            'run': {host_type: host_name}
+        }
         actions = mgr._after_get_NeahBay_ssh('success forecast', 'payload')
         expected = (
             mgr._launch_worker, ['upload_forcing', [host_name, 'ssh']],
@@ -541,7 +544,7 @@ class TestAfterGRIBtoNetCDF:
         'failure forecast2',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.config = {'run_types': {}, 'run': []}
         actions = mgr._after_grib_to_netcdf(msg_type, 'payload')
         assert actions is None
 
@@ -550,7 +553,7 @@ class TestAfterGRIBtoNetCDF:
         'success forecast2',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.config = {'run_types': {}, 'run': []}
         actions = mgr._after_grib_to_netcdf(msg_type, 'payload')
         expected = (
             mgr._update_checklist,
@@ -568,7 +571,12 @@ class TestAfterGRIBtoNetCDF:
         self, host_type, host_name, run_type, mgr,
     ):
         mgr.config = {
-            'run_types': ['nowcast', 'forecast', 'forecast2', 'nowcast-green'],
+            'run_types': {
+                'nowcast': 'SalishSea',
+                'forecast': 'SalishSea',
+                'forecast2': 'SalishSea',
+                'nowcast-green': 'SOG',
+            },
             'run': {host_type: host_name}
         }
         actions = mgr._after_grib_to_netcdf(
@@ -583,7 +591,12 @@ class TestAfterGRIBtoNetCDF:
         self, mgr,
     ):
         mgr.config = {
-            'run_types': ['nowcast', 'forecast', 'forecast2', 'nowcast-green'],
+            'run_types': {
+                'nowcast': 'SalishSea',
+                'forecast': 'SalishSea',
+                'forecast2': 'SalishSea',
+                'nowcast-green': 'SOG',
+            },
             'run': {
                 'cloud host': 'west.cloud-nowcast',
                 'nowcast-green host': 'salish-nowcast',
@@ -609,7 +622,7 @@ class TestAfterUploadForcing:
         'failure ssh',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.config = {'run_types': {}, 'run': []}
         actions = mgr._after_upload_forcing(msg_type, 'payload')
         assert actions is None
 
@@ -619,7 +632,7 @@ class TestAfterUploadForcing:
         'success ssh',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.config = {'run_types': {}, 'run': []}
         payload = {'west.cloud': True}
         actions = mgr._after_upload_forcing(msg_type, payload)
         expected = (
@@ -637,7 +650,11 @@ class TestAfterUploadForcing:
         self, msg_type, upload_run_type, mgr,
     ):
         mgr.config = {
-            'run_types': ['nowcast', 'forecast', 'forecast2'],
+            'run_types': {
+                'nowcast': 'SalishSea',
+                'forecast': 'SalishSea',
+                'forecast2': 'SalishSea',
+            },
         }
         payload = {'west.cloud': True}
         actions = mgr._after_upload_forcing(msg_type, payload)
@@ -653,7 +670,7 @@ class TestAfterUploadForcing:
         'success ssh',
     ])
     def test_success_run_type_disabled(self, msg_type, mgr):
-        mgr.config = {'run_types': []}
+        mgr.config = {'run_types': {}}
         payload = {'west.cloud': True}
         actions = mgr._after_upload_forcing(msg_type, payload)
         assert len(actions) == 1
@@ -670,7 +687,7 @@ class TestAfterMakeForcingLinks:
         'failure nowcast-green',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.config = {'run_types': {}, 'run': []}
         actions = mgr._after_make_forcing_links(msg_type, 'payload')
         assert actions is None
 
@@ -681,7 +698,7 @@ class TestAfterMakeForcingLinks:
         'success nowcast-green',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
-        mgr.config = {'run_types': [], 'run': []}
+        mgr.config = {'run_types': {}, 'run': []}
         payload = {'west.cloud': True}
         actions = mgr._after_make_forcing_links(msg_type, payload)
         expected = (
