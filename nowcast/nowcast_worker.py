@@ -154,7 +154,8 @@ class NowcastWorker(object):
         and handle any exceptions it raises.
         """
         try:
-            checklist = self.worker_func(self.parsed_args, self.config)
+            checklist = self.worker_func(
+                self.parsed_args, self.config, self.tell_manager)
             msg_type = self.success(self.parsed_args)
             lib.tell_manager(
                 self.name, msg_type, self.config, self.logger, self.socket,

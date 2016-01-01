@@ -97,7 +97,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def make_plots(parsed_args, config):
+def make_plots(parsed_args, config, *args):
     run_date = parsed_args.run_date
     dmy = run_date.format('DDMMMYY').lower()
     run_type = parsed_args.run_type

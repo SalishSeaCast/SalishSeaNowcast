@@ -90,7 +90,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def make_feeds(parsed_args, config):
+def make_feeds(parsed_args, config, *args):
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type
     web_config = config['web']

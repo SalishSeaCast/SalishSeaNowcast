@@ -98,31 +98,29 @@ def failure(parsed_args):
     return msg_type
 
 
-## TODO: add msg_socket to args passed in _do_work & propagate to other workers
-def run_NEMO(parsed_args, config, msg_socket):
+def run_NEMO(parsed_args, config, tell_manager):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     if not run_type.startswith('nowcast'):
-        run_info = lib.tell_manager(
-            worker_name, 'need', config, logger, msg_socket, 'NEMO run')
+        run_info = lib.tell_manager('need', 'NEMO run')
         run_date = arrow.get(run_info['nowcast']['run date'])
     run_desc_filepath = _create_run_desc_file(
-        run_date, run_type, host_name, config, msg_socket)
+        run_date, run_type, host_name, config, tell_manager)
 ## TODO: figure out path for iodef.xml in absence of os.chdir()
     run_dir = salishsea_cmd.api.prepare(run_desc_filepath, 'iodef.xml')
     _log_msg(
         '{}: temporary run directory: {}'.format(run_type, run_dir),
-        'debug', config, msg_socket)
+        'debug', tell_manager)
     os.unlink(run_desc_filepath)
     run_script_filepath = _create_run_script(
         run_date, run_type, run_dir, run_desc_filepath, host_name, config,
-        msg_socket)
+        tell_manager)
     run_process = _launch_run_script(
-        run_type, run_script_filepath, host_name, config, msg_socket)
+        run_type, run_script_filepath, host_name, tell_manager)
     if run_type != 'nowcast-green':
         watcher_process = _launch_run_watcher(
-            run_type, run_process, host_name, config, msg_socket)
+            run_type, run_process, host_name, config, tell_manager)
         watcher_pid = watcher_process.pid
     else:
         watcher_pid = None
@@ -134,15 +132,12 @@ def run_NEMO(parsed_args, config, msg_socket):
     }}
 
 
-def _log_msg(msg, level, config, msg_socket):
+def _log_msg(msg, level, tell_manager):
     logger.log(level, msg)
-    lib.tell_manager(
-        worker_name, 'log.{}'.format(level), config, logger, msg_socket, msg)
+    tell_manager('log.{}'.format(level), msg)
 
 
-def _create_run_desc_file(
-    run_date, run_type, host_name, config, msg_socket,
-):
+def _create_run_desc_file(run_date, run_type, host_name, config, tell_manager):
     dmy = run_date.format('DDMMMYY').lower()
     run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
     run_days = {
@@ -163,7 +158,7 @@ def _create_run_desc_file(
         yaml.dump(run_desc, f, default_flow_style=False)
     _log_msg(
         '{}: run description file: {}'.format(run_type, run_desc_filepath),
-        'debug', config, msg_socket)
+        'debug', tell_manager)
     return run_desc_filepath
 
 
@@ -314,7 +309,7 @@ def _run_description(
 
 def _create_run_script(
     run_date, run_type, run_dir, run_desc_filepath, host_name, config,
-    msg_socket,
+    tell_manager,
 ):
     namelist = namelist2dict(os.path.join(run_dir, 'namelist'))
     cores = namelist['nammpp'][0]['jpnij']
@@ -328,32 +323,32 @@ def _create_run_script(
     lib.fix_perms(run_script_filepath, mode=lib.PERMS_RWX_RWX_R)
     _log_msg(
         '{}: run script: {}'.format(run_type, run_script_filepath),
-        'debug', config, msg_socket)
+        'debug', tell_manager)
     return run_script_filepath
 
 
-def _launch_run_script(
-    run_type, run_script_filepath, host_name, config, msg_socket,
-):
+def _launch_run_script(run_type, run_script_filepath, host_name, tell_manager):
     _log_msg(
         '{}: launching {} on {}'
         .format(run_type, run_script_filepath, host_name),
-        'info', config, msg_socket)
+        'info', tell_manager)
     cmd = shlex.split(run_script_filepath)
     _log_msg(
         '{}: running command in subprocess: {}'.format(run_type, cmd),
-        'debug', config, msg_socket)
+        'debug', tell_manager)
     run_process = subprocess.Popen(cmd)
     _log_msg(
         '{}: run pid: {.pid}'.format(run_type, run_process),
-        'debug', config, msg_socket)
+        'debug', tell_manager)
     return run_process
 
 
-def _launch_run_watcher(run_type, run_process, host_name, config, msg_socket):
+def _launch_run_watcher(
+    run_type, run_process, host_name, config, tell_manager,
+):
     _log_msg(
         'launching watch_NEMO worker on {}'.format(run_type, host_name),
-        'info', config, msg_socket)
+        'info', tell_manager)
     host_run_config = config['run'][host_name]
     cmd = [
         host_run_config['python'], '-m', 'nowcast.workers.watch_NEMO',
@@ -361,11 +356,11 @@ def _launch_run_watcher(run_type, run_process, host_name, config, msg_socket):
     ]
     _log_msg(
         '{}: running command in subprocess: {}'.format(run_type, cmd),
-        'debug', config, msg_socket)
+        'debug', tell_manager)
     watcher_process = subprocess.Popen(cmd)
     _log_msg(
         '{}: watcher pid: {.pid}'.format(run_type, watcher_process),
-        'debug', config, msg_socket)
+        'debug', tell_manager)
     return watcher_process
 
 

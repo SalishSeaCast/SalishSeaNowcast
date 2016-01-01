@@ -93,7 +93,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def grib_to_netcdf(parsed_args, config):
+def grib_to_netcdf(parsed_args, config, *args):
     """Collect weather forecast results from hourly GRIB2 files
     and produces day-long NEMO atmospheric forcing netCDF files.
     """

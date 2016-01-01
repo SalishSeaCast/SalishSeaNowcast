@@ -96,7 +96,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def make_forcing_links(parsed_args, config):
+def make_forcing_links(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
