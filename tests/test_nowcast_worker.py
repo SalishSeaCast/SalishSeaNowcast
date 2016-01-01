@@ -276,7 +276,8 @@ class TestNowcastWorkerDoWork:
         worker.worker_func = Mock(name='worker_func')
         with patch.object(worker_module().lib, 'tell_manager'):
             worker._do_work()
-        worker.worker_func.assert_called_once_with(m_parsed_args, m_config)
+        worker.worker_func.assert_called_once_with(
+            m_parsed_args, m_config, worker.tell_manager)
 
     def test_success_func(self, worker):
         worker.parsed_args = m_parsed_args = Mock(name='parsed_args')

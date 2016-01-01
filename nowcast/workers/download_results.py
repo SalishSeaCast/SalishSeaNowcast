@@ -77,7 +77,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def download_results(parsed_args, config):
+def download_results(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type

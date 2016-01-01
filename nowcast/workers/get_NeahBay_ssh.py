@@ -81,7 +81,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def get_NeahBay_ssh(parsed_args, config):
+def get_NeahBay_ssh(parsed_args, config, *args):
     """Generate sea surface height forcing files from the Neah Bay
     storm surge website.
     """

@@ -68,7 +68,7 @@ def failure(parsed_args):
     return 'failure'
 
 
-def make_runoff_file(parsed_args, config):
+def make_runoff_file(parsed_args, config, *args):
     """Create a rivers runoff file from real-time Fraser River at Hope
     average flow yesterday and climatology for all of the other rivers.
     """

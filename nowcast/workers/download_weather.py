@@ -81,7 +81,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def get_grib(parsed_args, config):
+def get_grib(parsed_args, config, *args):
     forecast = parsed_args.forecast
     date = _calc_date(parsed_args, forecast)
     logger.info(
