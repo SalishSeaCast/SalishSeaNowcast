@@ -306,6 +306,8 @@ def init_zmq_req_rep_worker(context, config, logger, mgr_host='localhost'):
     return socket
 
 
+## TODO: This function can be deleted once all of the workers have been
+## ported to the NowcastWorker architecture
 def tell_manager(
     worker_name, msg_type, config, logger, socket, payload=None,
 ):
