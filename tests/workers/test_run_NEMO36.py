@@ -33,6 +33,7 @@ def worker_module():
 @pytest.fixture
 def config():
     return {
+        'bathymetry': 'bathy_meter_SalishSea.nc',
         'run_types': {
             'nowcast': 'SalishSea',
             'forecast': 'SalishSea',
@@ -41,6 +42,9 @@ def config():
         },
         'run': {
             'salish': {
+                'run_prep_dir': '/nowcast-sys/nowcast/',
+                'mpi decomposition': '3x5',
+                'nowcast_dir': '/nowcast-sys/nowcast/',
                 'results': {
                     'nowcast': '/results/SalishSea/nowcast/',
                     'nowcast-green': '/results/SalishSea/nowcast-green/',
@@ -200,8 +204,211 @@ class TestRunDescription:
         self, run_type, expected, worker_module, config,
     ):
         run_date = arrow.get('2015-12-30')
-        dmy = run_date.format('DDMMMYY')
+        dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
             run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['config_name'] == expected
+
+    @pytest.mark.parametrize('run_type, expected', [
+        ('nowcast', '31dec15nowcast'),
+        ('nowcast-green', '31dec15nowcast-green'),
+        ('forecast', '31dec15forecast'),
+        ('forecast2', '31dec15forecast2'),
+    ])
+    def test_run_id(
+        self, run_type, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        run_desc = worker_module._run_description(
+            run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['run_id'] == expected
+
+    @pytest.mark.parametrize('run_type, expected', [
+        ('nowcast', '3x5'),
+    ])
+    def test_mpi_decomposition(
+        self, run_type, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        run_desc = worker_module._run_description(
+            run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['MPI decomposition'] == expected
+
+    @pytest.mark.parametrize('run_type, expected', [
+        ('nowcast-green', '16:00:00'),
+    ])
+    def test_walltime(
+        self, run_type, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        with patch.dict(config['run']['salish'], walltime='16:00:00'):
+            run_desc = worker_module._run_description(
+                run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['walltime'] == expected
+
+    @pytest.mark.parametrize('run_type, expected', [
+        ('nowcast', None),
+    ])
+    def test_no_walltime(
+        self, run_type, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        run_desc = worker_module._run_description(
+            run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['walltime'] == expected
+
+    @pytest.mark.parametrize('run_type, path, expected', [
+        ('nowcast', 'NEMO-code', '/nowcast-sys/nowcast/../NEMO-3.6-code'),
+        ('nowcast-green', 'XIOS', '/nowcast-sys/nowcast/../XIOS-code'),
+        ('forecast', 'forcing', '/nowcast-sys/nowcast/../NEMO-forcing'),
+        ('forecast2', 'runs directory', '/nowcast-sys/nowcast/../SalishSea'),
+    ])
+    def test_paths(
+        self, run_type, path, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        run_desc = worker_module._run_description(
+            run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['paths'][path] == expected
+
+    @pytest.mark.parametrize('run_type, path, expected', [
+        ('nowcast', 'coordinates', 'coordinates_seagrid_SalishSea.nc'),
+    ])
+    def test_grid_coordinates(
+        self, run_type, path, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        run_desc = worker_module._run_description(
+            run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['grid'][path] == expected
+
+    @pytest.mark.parametrize('run_type, path, expected', [
+        ('nowcast', 'bathymetry', 'bathy_meter_SalishSea.nc'),
+    ])
+    def test_grid_bathymetry_default(
+        self, run_type, path, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        run_desc = worker_module._run_description(
+            run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['grid'][path] == expected
+
+    @pytest.mark.parametrize('run_type, path, expected', [
+        ('nowcast-green', 'bathymetry', 'bathy_meter_SalishSea6.nc'),
+    ])
+    def test_grid_bathymetry_run_type(
+        self, run_type, path, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        with patch.dict(config['run']['salish'], bathymetry=expected):
+            run_desc = worker_module._run_description(
+                run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['grid'][path] == expected
+
+    @pytest.mark.parametrize('run_type, link_name, expected', [
+        ('nowcast', 'NEMO-atmos', '/nowcast-sys/nowcast/NEMO-atmos'),
+        ('forecast', 'open_boundaries',
+         '/nowcast-sys/nowcast/open_boundaries'),
+        ('forecast2', 'rivers', '/nowcast-sys/nowcast/rivers'),
+        ('nowcast', 'restart.nc',
+         '/results/SalishSea/nowcast/30dec15/'
+         'SalishSea_00002160_restart.nc'),
+        ('nowcast-green', 'restart_trc.nc',
+         '/results/SalishSea/nowcast-green/30dec15/'
+         'SalishSea_00002160_restart_trc.nc'),
+    ])
+    def test_forcing(
+        self, run_type, link_name, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        run_desc = worker_module._run_description(
+            run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['forcing'][link_name]['link to'] == expected
+
+    @pytest.mark.parametrize('run_type, link_name, expected', [
+        ('nowcast', 'NEMO-atmos', '/nowcast-sys/nowcast/NEMO-atmos'),
+    ])
+    def test_forcing_atmospheric_link_check(
+        self, run_type, link_name, expected, worker_module, config,
+    ):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        run_desc = worker_module._run_description(
+            run_date, run_type, run_id, 2160, 'salish', config)
+        check_link_dict = run_desc['forcing'][link_name]['check link']
+        assert check_link_dict['type'] == 'atmospheric'
+        assert check_link_dict['namelist filename'] == 'namelist_cfg'
+
+    def test_namelists(self, worker_module, config):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}nowcast'.format(dmy=dmy)
+        run_desc = worker_module._run_description(
+            run_date, 'nowcast', run_id, 2160, 'salish', config)
+        expected = [
+            './namelist.time',
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist.domain',
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist.surface',
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist.lateral',
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist.bottom',
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist.tracer',
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist.dynamics',
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist.vertical',
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist.compute',
+        ]
+        assert run_desc['namelists']['namelist_cfg'] == expected
+        expected = [
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist_top_cfg'
+        ]
+        assert run_desc['namelists']['namelist_top_cfg'] == expected
+        expected = [
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/namelist_pisces_cfg'
+        ]
+        assert run_desc['namelists']['namelist_pisces_cfg'] == expected
+
+    def test_output(self, worker_module, config):
+        run_date = arrow.get('2015-12-31')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}nowcast'.format(dmy=dmy)
+        run_desc = worker_module._run_description(
+            run_date, 'nowcast', run_id, 2160, 'salish', config)
+        expected = (
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'domain_def.xml')
+        assert run_desc['output']['domain'] == expected
+        expected = (
+            '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
+            'nowcast/field_def.xml')
+        assert run_desc['output']['fields'] == expected
+        assert run_desc['output']['separate XIOS server']
+        assert run_desc['output']['XIOS servers'] == 1

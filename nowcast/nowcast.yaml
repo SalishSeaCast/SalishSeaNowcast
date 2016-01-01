@@ -113,6 +113,8 @@ run:
     python: /results/nowcast-sys/nowcast-env/bin/python
     config_file: /home/dlatorne/public_html/MEOPAR/nowcast/nowcast.yaml
     run_prep_dir: /results/nowcast-sys/nowcast-green/
+    mpi decomposition: 3x5
+    walltime: 16:00:00
     ssh key name:
       nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
     nowcast_dir: /data/dlatorne/MEOPAR/nowcast-green/
