@@ -61,22 +61,25 @@ class TestNowcastWorkerConstructor:
         assert isinstance(worker.arg_parser, argparse.ArgumentParser)
 
 
-@patch.object(worker_module().argparse, 'ArgumentParser')
-def test_add_argument(m_arg_parser, worker):
-    """add_argument() wraps argparse.ArgumentParser.add_argument()
+class TestAddArgument:
+    """Unit test for NowcastWorker.add_argument() method.
     """
-    worker.add_argument(
-        '--yesterday', action='store_true',
-        help="Download forecast files for previous day's date."
-    )
-    m_arg_parser().add_argument.assert_called_once_with(
-        '--yesterday', action='store_true',
-        help="Download forecast files for previous day's date."
-    )
+    @patch.object(worker_module().argparse, 'ArgumentParser')
+    def test_add_argument(self, m_arg_parser, worker):
+        """add_argument() wraps argparse.ArgumentParser.add_argument()
+        """
+        worker.add_argument(
+            '--yesterday', action='store_true',
+            help="Download forecast files for previous day's date."
+        )
+        m_arg_parser().add_argument.assert_called_once_with(
+            '--yesterday', action='store_true',
+            help="Download forecast files for previous day's date."
+        )
 
 
 class TestNowcastWorkerRun:
-    """Unit tests for NowcastWorker.run method.
+    """Unit tests for NowcastWorker.run() method.
     """
     def test_worker_func(self, worker):
         m_worker_func = Mock(name='worker_func')
@@ -264,7 +267,7 @@ class TestNowcastWorkerRun:
 
 
 class TestNowcastWorkerDoWork:
-    """Unit tests for NowcastWorker._do_work method.
+    """Unit tests for NowcastWorker._do_work() method.
     """
     def test_worker_func(self, worker):
         worker.parsed_args = m_parsed_args = Mock(name='parsed_args')
@@ -344,3 +347,25 @@ class TestNowcastWorkerDoWork:
         worker._do_work()
         worker.logger.debug.assert_called_once_with(
             'task completed; shutting down')
+
+
+class TestTellManager:
+    """Unit test for NowcastWorker.tell_manager() method.
+    """
+    @patch.object(worker_module().lib, 'serialize_message')
+    @patch.object(worker_module().lib, 'deserialize_message')
+    def test_tell_manager(self, m_ldm, m_lsm, worker, worker_module):
+        worker.name = 'test_worker'
+        worker.socket = Mock(name='socket')
+        worker.config = {
+            'msg_types': {
+                'nowcast_mgr': {'ack': 'message acknowledged'},
+                'test_worker': {'success': 'success message'},
+            }}
+        m_ldm.return_value = {
+            'source': 'nowcast_mgr',
+            'msg_type': 'ack',
+            'payload': 'payload',
+        }
+        response_payload = worker.tell_manager('success', 'payload')
+        assert response_payload == m_ldm()['payload']

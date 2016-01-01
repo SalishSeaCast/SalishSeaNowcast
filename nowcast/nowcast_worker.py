@@ -174,3 +174,40 @@ class NowcastWorker(object):
                 self.name, 'crash', self.config, self.logger, self.socket)
         self.context.destroy()
         self.logger.debug('task completed; shutting down')
+
+    def tell_manager(self, msg_type, payload=None):
+        """Exchange messages with the nowcast manager process.
+
+        Message is composed of workers name, msg_type, and payload.
+        Acknowledgement message from manager process is logged,
+        and payload of that message is returned.
+
+        :arg str msg_type: Key of the message type to send; must be defined for
+                       worker name in the configuration data structure.
+
+        :arg payload: Data object to send in the message;
+                      e.g. dict containing worker's checklist of
+                      accomplishments.
+
+        :returns: Payload included in acknowledgement message from manager
+                  process.
+        """
+        # Send message to nowcast manager
+        message = lib.serialize_message(self.name, msg_type, payload)
+        self.socket.send_string(message)
+        self.logger.debug(
+            'sent message: ({msg_type}) {msg_words}'
+            .format(
+                msg_type=msg_type,
+                msg_words=self.config['msg_types'][self.name][msg_type]))
+        # Wait for and process response
+        msg = self.socket.recv_string()
+        message = lib.deserialize_message(msg)
+        source = message['source']
+        msg_type = message['msg_type']
+        self.logger.debug(
+            'received message from {source}: ({msg_type}) {msg_words}'
+            .format(source=source,
+                    msg_type=message['msg_type'],
+                    msg_words=self.config['msg_types'][source][msg_type]))
+        return message['payload']
