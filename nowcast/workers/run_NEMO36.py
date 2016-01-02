@@ -19,7 +19,6 @@ forecast or forecast2 run on the ONC cloud or salish,
 and launches the run.
 """
 import logging
-import os
 from pathlib import Path
 import shlex
 import subprocess
@@ -108,11 +107,11 @@ def run_NEMO(parsed_args, config, tell_manager):
     run_desc_filepath = _create_run_desc_file(
         run_date, run_type, host_name, config, tell_manager)
 ## TODO: figure out path for iodef.xml in absence of os.chdir()
-    run_dir = salishsea_cmd.api.prepare(run_desc_filepath, 'iodef.xml')
+    run_dir = Path(salishsea_cmd.api.prepare(run_desc_filepath, 'iodef.xml'))
     _log_msg(
         '{}: temporary run directory: {}'.format(run_type, run_dir),
         'debug', tell_manager)
-    os.unlink(run_desc_filepath)
+    run_desc_filepath.unlink()
     run_script_filepath = _create_run_script(
         run_date, run_type, run_dir, run_desc_filepath, host_name, config,
         tell_manager)
@@ -125,7 +124,7 @@ def run_NEMO(parsed_args, config, tell_manager):
     else:
         watcher_pid = None
     return {run_type: {
-        'run dir': run_dir,
+        'run dir': str(run_dir),
         'pid': run_process.pid,
         'watcher pid': watcher_pid,
         'run date': run_date.format('YYYY-MM-DD'),
@@ -154,7 +153,7 @@ def _create_run_desc_file(run_date, run_type, host_name, config, tell_manager):
         run_days[run_type], run_type, run_id, restart_timestep, host_name,
         config)
     run_desc_filepath = run_prep_dir/'{}.yaml'.format(run_id)
-    with open(run_desc_filepath, 'wt') as f:
+    with run_desc_filepath.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
     _log_msg(
         '{}: run description file: {}'.format(run_type, run_desc_filepath),
@@ -173,13 +172,13 @@ def _update_time_namelist(run_date, run_type, host_run_config):
     prev_run_type, date_offset = prev_runs[run_type]
     results_dir = Path(host_run_config['results'][prev_run_type])
     dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
-    prev_run_namelist = namelist2dict(results_dir/dmy/'namelist')
+    prev_run_namelist = namelist2dict(str(results_dir/dmy/'namelist'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
     prev_itend = prev_run_namelist['namrun'][0]['nn_itend']
     prev_date0 = prev_run_namelist['namrun'][0]['nn_date0']
     run_prep_dir = Path(host_run_config['run_prep_dir'])
     namelist_domain = namelist2dict(
-        run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/namelist.domain')
+        str(run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/namelist.domain'))
     rdt = namelist_domain['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
     namelist_time = run_prep_dir/'namelist.time'
@@ -311,16 +310,16 @@ def _create_run_script(
     run_date, run_type, run_dir, run_desc_filepath, host_name, config,
     tell_manager,
 ):
-    namelist = namelist2dict(os.path.join(run_dir, 'namelist'))
+    namelist = namelist2dict((str(run_dir/'namelist')))
     cores = namelist['nammpp'][0]['jpnij']
     host_run_config = config['run'][host_name]
     dmy = run_date.format('DDMMMYY').lower()
-    results_dir = os.path.join(host_run_config['results'][run_type], dmy)
-    script = _build_script(run_desc_filepath, cores, results_dir)
-    run_script_filepath = os.path.join(run_dir, 'SalishSeaNEMO.sh')
-    with open(run_script_filepath, 'wt') as f:
+    results_dir = Path(host_run_config['results'][run_type])
+    script = _build_script(run_desc_filepath, cores, results_dir/dmy)
+    run_script_filepath = run_dir/'SalishSeaNEMO.sh'
+    with run_script_filepath.open('wt') as f:
         f.write(script)
-    lib.fix_perms(run_script_filepath, mode=lib.PERMS_RWX_RWX_R)
+    lib.fix_perms(str(run_script_filepath), mode=lib.PERMS_RWX_RWX_R)
     _log_msg(
         '{}: run script: {}'.format(run_type, run_script_filepath),
         'debug', tell_manager)
