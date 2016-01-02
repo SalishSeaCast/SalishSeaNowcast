@@ -194,6 +194,16 @@ class TestGetNamelistValue:
 class TestRunDescription:
     """Unit tests for _run_description() function.
     """
+    def test_config_missing_results_dir(self, worker_module, config):
+        run_date = arrow.get('2015-12-30')
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type='nowcast')
+        with patch.dict(config['run']['salish'], results={}):
+            with pytest.raises(worker_module.WorkerError):
+                worker_module._run_description(
+                    run_date, 'nowcast', run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
+
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast', 'SalishSea'),
         ('nowcast-green', 'SOG'),
@@ -207,7 +217,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         assert run_desc['config_name'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -223,7 +234,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         assert run_desc['run_id'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -236,7 +248,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         assert run_desc['MPI decomposition'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -250,7 +263,8 @@ class TestRunDescription:
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         with patch.dict(config['run']['salish'], walltime='16:00:00'):
             run_desc = worker_module._run_description(
-                run_date, run_type, run_id, 2160, 'salish', config)
+                run_date, run_type, run_id, 2160, 'salish', config,
+                Mock(name='tell_manager'))
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -263,7 +277,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -279,7 +294,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         assert run_desc['paths'][path] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -292,7 +308,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         assert run_desc['grid'][path] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -305,7 +322,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         assert run_desc['grid'][path] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -319,7 +337,8 @@ class TestRunDescription:
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         with patch.dict(config['run']['salish'], bathymetry=expected):
             run_desc = worker_module._run_description(
-                run_date, run_type, run_id, 2160, 'salish', config)
+                run_date, run_type, run_id, 2160, 'salish', config,
+                Mock(name='tell_manager'))
         assert run_desc['grid'][path] == expected
 
     @pytest.mark.parametrize('run_type, link_name, expected', [
@@ -341,7 +360,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         assert run_desc['forcing'][link_name]['link to'] == expected
 
     @pytest.mark.parametrize('run_type, link_name, expected', [
@@ -354,7 +374,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config)
+            run_date, run_type, run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         check_link_dict = run_desc['forcing'][link_name]['check link']
         assert check_link_dict['type'] == 'atmospheric'
         assert check_link_dict['namelist filename'] == 'namelist_cfg'
@@ -364,7 +385,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         run_desc = worker_module._run_description(
-            run_date, 'nowcast', run_id, 2160, 'salish', config)
+            run_date, 'nowcast', run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         expected = [
             './namelist.time',
             '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
@@ -401,7 +423,8 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         run_desc = worker_module._run_description(
-            run_date, 'nowcast', run_id, 2160, 'salish', config)
+            run_date, 'nowcast', run_id, 2160, 'salish', config,
+            Mock(name='tell_manager'))
         expected = (
             '/nowcast-sys/nowcast/../SS-run-sets/SalishSea/nemo3.6/'
             'domain_def.xml')

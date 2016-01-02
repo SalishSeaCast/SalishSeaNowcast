@@ -30,7 +30,10 @@ import salishsea_cmd.api
 from salishsea_tools.namelist import namelist2dict
 
 from nowcast import lib
-from nowcast.nowcast_worker import NowcastWorker
+from nowcast.nowcast_worker import (
+    NowcastWorker,
+    WorkerError,
+)
 
 
 worker_name = lib.get_module_name()
@@ -102,7 +105,7 @@ def run_NEMO(parsed_args, config, tell_manager):
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     if not run_type.startswith('nowcast'):
-        run_info = lib.tell_manager('need', 'NEMO run')
+        run_info = tell_manager('need', 'NEMO run')
         run_date = arrow.get(run_info['nowcast']['run date'])
     run_desc_filepath = _create_run_desc_file(
         run_date, run_type, host_name, config, tell_manager)
@@ -132,7 +135,7 @@ def run_NEMO(parsed_args, config, tell_manager):
 
 
 def _log_msg(msg, level, tell_manager):
-    logger.log(level, msg)
+    logger.log(getattr(logging, level.upper()), msg)
     tell_manager('log.{}'.format(level), msg)
 
 
@@ -151,7 +154,7 @@ def _create_run_desc_file(run_date, run_type, host_name, config, tell_manager):
         run_date, run_type, host_run_config)
     run_desc = _run_description(
         run_days[run_type], run_type, run_id, restart_timestep, host_name,
-        config)
+        config, tell_manager)
     run_desc_filepath = run_prep_dir/'{}.yaml'.format(run_id)
     with run_desc_filepath.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
@@ -172,7 +175,7 @@ def _update_time_namelist(run_date, run_type, host_run_config):
     prev_run_type, date_offset = prev_runs[run_type]
     results_dir = Path(host_run_config['results'][prev_run_type])
     dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
-    prev_run_namelist = namelist2dict(str(results_dir/dmy/'namelist'))
+    prev_run_namelist = namelist2dict(str(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
     prev_itend = prev_run_namelist['namrun'][0]['nn_itend']
     prev_date0 = prev_run_namelist['namrun'][0]['nn_date0']
@@ -182,11 +185,11 @@ def _update_time_namelist(run_date, run_type, host_run_config):
     rdt = namelist_domain['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
     namelist_time = run_prep_dir/'namelist.time'
-    with open(namelist_time, 'rt') as f:
+    with namelist_time.open('rt') as f:
         lines = f.readlines()
     new_lines, restart_timestep = _calc_new_namelist_lines(
         run_type, prev_it000, prev_itend, prev_date0, timesteps_per_day, lines)
-    with open(namelist_time, 'wt') as f:
+    with namelist_time.open('wt') as f:
         f.writelines(new_lines)
     return restart_timestep
 
@@ -222,16 +225,18 @@ def _get_namelist_value(key, lines):
 
 
 def _run_description(
-    run_date, run_type, run_id, restart_timestep, host_name, config
+    run_date, run_type, run_id, restart_timestep, host_name, config,
+    tell_manager,
 ):
     host_run_config = config['run'][host_name]
-    restart_dirs = {
-        # run-type: results dir containing restart file(s)
-        'nowcast': Path(host_run_config['results']['nowcast']),
-        'nowcast-green': Path(host_run_config['results']['nowcast-green']),
-        'forecast': Path(host_run_config['results']['nowcast']),
-        'forecast2': Path(host_run_config['results']['forecast']),
-    }
+    try:
+        restart_dir = Path(host_run_config['results'][run_type])
+    except KeyError:
+        _log_msg(
+            'no results directory for {run_type} in {host_name} run config'
+            .format(run_type=run_type, host_name=host_name),
+            'critical', tell_manager)
+        raise WorkerError
     prev_run_dmys = {
         # run-type: previous run's ddmmmyy results directory name
         'nowcast': run_date.replace(days=-1).format('DDMMMYY').lower(),
@@ -242,13 +247,13 @@ def _run_description(
     restart_filepaths = {
         'restart.nc': {
             'link to': str(Path(
-                restart_dirs[run_type]/prev_run_dmys[run_type] /
+                restart_dir/prev_run_dmys[run_type] /
                 'SalishSea_{:08d}_restart.nc'.format(restart_timestep)))
         }}
     if run_type == 'nowcast-green':
         restart_filepaths['restart_trc.nc'] = {
             'link to': str(Path(
-                restart_dirs[run_type]/prev_run_dmys[run_type] /
+                restart_dir/prev_run_dmys[run_type] /
                 'SalishSea_{:08d}_restart_trc.nc'.format(restart_timestep)))
             }
     run_prep_dir = Path(host_run_config['run_prep_dir'])
