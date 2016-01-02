@@ -143,8 +143,7 @@ class NowcastWorker(object):
         self.logger.debug(
             'read config from {.config_file}'.format(self.parsed_args))
         lib.install_signal_handlers(self.logger, self.context)
-        self.socket = lib.init_zmq_req_rep_worker(
-            self.context, self.config, self.logger)
+        self.socket = self._init_zmq_interface()
         self._do_work()
 
     def _do_work(self):
@@ -175,6 +174,24 @@ class NowcastWorker(object):
                 self.name, 'crash', self.config, self.logger, self.socket)
         self.context.destroy()
         self.logger.debug('task completed; shutting down')
+
+    def _init_zmq_interface(self, mgr_host='localhost'):
+        """Initialize a ZeroMQ request/reply (REQ/REP) interface.
+
+        :arg str mgr_host: Host name or IP address of the nost that the nowcast
+                           manager process runs on.
+                           Defaults to 'localhost'.
+
+        :returns: ZeroMQ socket for communication with nowcast manager process.
+        """
+        socket = self.context.socket(zmq.REQ)
+        port = self.config['zmq']['ports']['frontend']
+        socket.connect(
+            'tcp://{mgr_host}:{port}'.format(mgr_host=mgr_host, port=port))
+        self.logger.debug(
+            'connected to {mgr_host} port {port}'
+            .format(mgr_host=mgr_host, port=port))
+        return socket
 
     def tell_manager(self, msg_type, payload=None):
         """Exchange messages with the nowcast manager process.

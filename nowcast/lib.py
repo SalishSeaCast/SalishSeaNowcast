@@ -277,6 +277,8 @@ def install_signal_handlers(logger, context):
     signal.signal(signal.SIGTERM, sigterm_handler)
 
 
+## TODO: This function can be deleted once all of the workers have been
+## ported to the NowcastWorker architecture
 def init_zmq_req_rep_worker(context, config, logger, mgr_host='localhost'):
     """Initialize a ZeroMQ request/reply (REQ/REP) worker.
 
