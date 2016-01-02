@@ -156,13 +156,10 @@ class NowcastWorker(object):
             checklist = self.worker_func(
                 self.parsed_args, self.config, self.tell_manager)
             msg_type = self.success(self.parsed_args)
-            lib.tell_manager(
-                self.name, msg_type, self.config, self.logger, self.socket,
-                checklist)
+            self.tell_manager(msg_type, checklist)
         except lib.WorkerError:
             msg_type = self.failure(self.parsed_args)
-            lib.tell_manager(
-                self.name, msg_type, self.config, self.logger, self.socket)
+            self.tell_manager(msg_type)
         except SystemExit:
             # Normal termination
             pass
@@ -170,8 +167,7 @@ class NowcastWorker(object):
             self.logger.critical(
                 'unhandled exception:\n{traceback}'
                 .format(traceback=traceback.format_exc()))
-            lib.tell_manager(
-                self.name, 'crash', self.config, self.logger, self.socket)
+            self.tell_manager('crash')
         self.context.destroy()
         self.logger.debug('task completed; shutting down')
 
