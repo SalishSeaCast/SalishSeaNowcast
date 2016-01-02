@@ -57,6 +57,8 @@ PERMS_RWX_RWX_R_X = (
 )
 
 
+## TODO: This exception can be deleted once all of the workers have been
+## ported to the NowcastWorker architecture
 class WorkerError(Exception):
     """Raised when a worker encounters an error or exception that it can'try:
     recover from.

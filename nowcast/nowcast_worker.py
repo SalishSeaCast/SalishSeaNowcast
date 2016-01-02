@@ -25,6 +25,12 @@ import zmq
 from nowcast import lib
 
 
+class WorkerError(Exception):
+    """Raised when a worker encounters an error or exception that it can'try:
+    recover from.
+    """
+
+
 class NowcastWorker(object):
     """Construct a :py:class:`nowcast_worker.NowcastWorker` instance.
 
@@ -157,7 +163,7 @@ class NowcastWorker(object):
                 self.parsed_args, self.config, self.tell_manager)
             msg_type = self.success(self.parsed_args)
             self.tell_manager(msg_type, checklist)
-        except lib.WorkerError:
+        except WorkerError:
             msg_type = self.failure(self.parsed_args)
             self.tell_manager(msg_type)
         except SystemExit:

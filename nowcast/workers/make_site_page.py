@@ -29,6 +29,7 @@ import mako.template
 import zmq
 
 from nowcast import lib
+from nowcast.nowcast_worker import WorkerError
 
 
 worker_name = lib.get_module_name()
@@ -77,7 +78,7 @@ def main():
         msg_type = 'success {.page_type}'.format(parsed_args)
         lib.tell_manager(
             worker_name, msg_type, config, logger, socket, checklist)
-    except lib.WorkerError:
+    except WorkerError:
         logger.critical(
             '{0.run_type} {0.page_type} page preparation failed'
             .format(parsed_args), extra={

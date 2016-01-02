@@ -27,6 +27,7 @@ import arrow
 import zmq
 
 from nowcast import lib
+from nowcast.nowcast_worker import WorkerError
 from nowcast.workers import (
     get_NeahBay_ssh,
     grib_to_netcdf,
@@ -71,7 +72,7 @@ def main():
         # Exchange success messages with the nowcast manager process
         lib.tell_manager(
             worker_name, 'success', config, logger, socket, checklist)
-    except lib.WorkerError:
+    except WorkerError:
         logger.critical(
             'Nowcast ALL files upload to {0.host_name} failed'
             .format(parsed_args), extra={

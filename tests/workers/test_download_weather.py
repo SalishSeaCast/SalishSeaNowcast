@@ -215,6 +215,6 @@ class TestGetFile():
         self, m_get_web_data, m_logger, worker_module,
     ):
         m_get_web_data.return_value = {'Content-Length': 0}
-        with pytest.raises(worker_module.lib.WorkerError):
+        with pytest.raises(worker_module.WorkerError):
             worker_module._get_file(
                 'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001')

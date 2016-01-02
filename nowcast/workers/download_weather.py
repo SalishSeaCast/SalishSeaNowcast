@@ -23,7 +23,10 @@ import os
 import arrow
 
 from nowcast import lib
-from nowcast.nowcast_worker import NowcastWorker
+from nowcast.nowcast_worker import (
+    NowcastWorker,
+    WorkerError,
+)
 
 
 worker_name = lib.get_module_name()
@@ -139,7 +142,7 @@ def _get_file(var, dest_dir_root, date, forecast, hr_str):
         logger.critical(
             'Problem, 0 size file {}'.format(fileURL),
             extra={'forecast': forecast})
-        raise lib.WorkerError
+        raise WorkerError
     return filepath
 
 
