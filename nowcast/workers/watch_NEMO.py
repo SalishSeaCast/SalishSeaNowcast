@@ -29,6 +29,7 @@ import arrow
 import zmq
 
 from nowcast import lib
+from nowcast.nowcast_worker import WorkerError
 from nowcast.workers import run_NEMO
 
 
@@ -71,7 +72,7 @@ def main():
         msg_type = 'success {.run_type}'.format(parsed_args)
         lib.tell_manager(
             worker_name, msg_type, config, logger, socket, checklist)
-    except lib.WorkerError:
+    except WorkerError:
         logger.critical(
             '{.run_type} NEMO run in {host_name} failed'
             .format(parsed_args, host_name=host_name))
@@ -112,7 +113,7 @@ def watch_NEMO(run_type, pid, config, socket):
         msg = '{}: NEMO run pid {} does not exist'.format(run_type, pid)
         logger.error(msg)
         lib.tell_manager(worker_name, 'log.error', config, logger, socket, msg)
-        raise lib.WorkerError()
+        raise WorkerError
     # Get directory that NEMO is running from
     run_info = lib.tell_manager(
         worker_name, 'need', config, logger, socket, 'NEMO run')

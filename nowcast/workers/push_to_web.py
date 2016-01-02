@@ -24,6 +24,7 @@ import traceback
 import zmq
 
 from nowcast import lib
+from nowcast.nowcast_worker import WorkerError
 
 
 worker_name = lib.get_module_name()
@@ -51,7 +52,7 @@ def main():
         # Exchange success messages with the nowcast manager process
         lib.tell_manager(
             worker_name, 'success', config, logger, socket, checklist)
-    except lib.WorkerError:
+    except WorkerError:
         logger.critical('push to salishsea.eos.ubc.ca site failed')
         # Exchange failure messages with the nowcast manager process
         lib.tell_manager(worker_name, 'failure', config, logger, socket)

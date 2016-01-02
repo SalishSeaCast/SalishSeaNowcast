@@ -35,6 +35,7 @@ import salishsea_cmd.lib
 from salishsea_tools.namelist import namelist2dict
 
 from nowcast import lib
+from nowcast.nowcast_worker import WorkerError
 
 
 worker_name = lib.get_module_name()
@@ -85,7 +86,7 @@ def main():
         # Exchange success messages with the nowcast manager process
         lib.tell_manager(
             worker_name, 'success', config, logger, socket, checklist)
-    except lib.WorkerError:
+    except WorkerError:
         logger.critical(
             '{.run_type} NEMO run in {host_name} failed'
             .format(parsed_args, host_name=host_name))

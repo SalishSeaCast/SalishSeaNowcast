@@ -286,21 +286,21 @@ class TestNowcastWorkerDoWork:
         worker._do_work()
         worker.tell_manager.assert_called_once_with('success', 'checklist')
 
-    def test_failure_func(self, worker, lib_module):
+    def test_failure_func(self, worker, worker_module):
         worker.parsed_args = m_parsed_args = Mock(name='parsed_args')
         worker.config = Mock(name='config')
         worker.worker_func = Mock(
-            name='worker_func', side_effect=lib_module.WorkerError)
+            name='worker_func', side_effect=worker_module.WorkerError)
         worker.tell_manager = Mock(name='tell_manager')
         worker.failure = Mock(name='failure')
         worker._do_work()
         worker.failure.assert_called_once_with(m_parsed_args)
 
-    def test_failure_tell_manager(self, worker, lib_module):
+    def test_failure_tell_manager(self, worker, worker_module):
         worker.parsed_args = Mock(name='parsed_args')
         worker.config = Mock(name='config')
         worker.worker_func = Mock(
-            name='worker_func', side_effect=lib_module.WorkerError)
+            name='worker_func', side_effect=worker_module.WorkerError)
         worker.failure = Mock(name='failure', return_value='failure')
         worker.tell_manager = Mock(name='tell_manager')
         worker._do_work()

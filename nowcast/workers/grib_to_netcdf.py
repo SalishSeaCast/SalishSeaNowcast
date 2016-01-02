@@ -32,7 +32,10 @@ from nowcast import (
     figures,
     lib,
 )
-from nowcast.nowcast_worker import NowcastWorker
+from nowcast.nowcast_worker import (
+    NowcastWorker,
+    WorkerError,
+)
 
 
 worker_name = lib.get_module_name()
@@ -289,14 +292,14 @@ def _rotate_grib_wind(config, fcst_section_hrs):
                     if os.stat(fn[0]).st_size == 0:
                         logger.critical(
                             'Problem: 0 size file {}'.format(fn[0]))
-                        raise lib.WorkerError
+                        raise WorkerError
                 except IndexError:
                     logger.critical(
                         'No GRIB files match pattern; '
                         'a previous download may have failed: {}'
                         .format(pattern)
                     )
-                    raise lib.WorkerError
+                    raise WorkerError
                 cmd = [wgrib2, fn[0], '-append', '-grib', outuv]
                 lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
             # rotate
@@ -568,7 +571,7 @@ def _netCDF4_deflate(outnetcdf):
     try:
         lib.run_in_subprocess(cmd, logger.debug, logger.error)
         logger.debug('netCDF4 deflated {}'.format(outnetcdf))
-    except lib.WorkerError:
+    except WorkerError:
         raise
 
 
