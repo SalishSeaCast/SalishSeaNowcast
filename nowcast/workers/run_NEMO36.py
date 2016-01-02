@@ -178,7 +178,6 @@ def _update_time_namelist(run_date, run_type, host_run_config):
     prev_run_namelist = namelist2dict(str(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
     prev_itend = prev_run_namelist['namrun'][0]['nn_itend']
-    prev_date0 = prev_run_namelist['namrun'][0]['nn_date0']
     run_prep_dir = Path(host_run_config['run_prep_dir'])
     namelist_domain = namelist2dict(
         str(run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/namelist.domain'))
@@ -188,14 +187,15 @@ def _update_time_namelist(run_date, run_type, host_run_config):
     with namelist_time.open('rt') as f:
         lines = f.readlines()
     new_lines, restart_timestep = _calc_new_namelist_lines(
-        run_type, prev_it000, prev_itend, prev_date0, timesteps_per_day, lines)
+        run_date, run_type, prev_it000, prev_itend, timesteps_per_day, lines)
     with namelist_time.open('wt') as f:
         f.writelines(new_lines)
     return restart_timestep
 
 
 def _calc_new_namelist_lines(
-    run_type, prev_it000, prev_itend, prev_date0, timesteps_per_day, lines,
+    run_date, run_type, prev_it000, prev_itend, timesteps_per_day,
+    lines,
 ):
     it000_line, it000 = _get_namelist_value('nn_it000', lines)
     itend_line, itend = _get_namelist_value('nn_itend', lines)
@@ -209,10 +209,8 @@ def _calc_new_namelist_lines(
     new_itend = int(restart_timestep + (run_duration * timesteps_per_day))
     lines[itend_line] = lines[itend_line].replace(itend, str(new_itend))
     date0_line, date0 = _get_namelist_value('nn_date0', lines)
-    date_format = 'YYYYMMDD'
-    new_date0 = arrow.get(date0, date_format).replace(days=+1)
     lines[date0_line] = lines[date0_line].replace(
-        date0, new_date0.format(date_format))
+        date0, run_date.format('YYYYMMDD'))
     return lines, restart_timestep
 
 
