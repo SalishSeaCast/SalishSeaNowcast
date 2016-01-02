@@ -135,23 +135,28 @@ class TestCalcNewNamelistLines:
     """Unit tests for _calc_new_namelist_lines() function.
     """
     @pytest.mark.parametrize(
-        'run_type, prev_itend, dt_per_day, it000, itend, date0, restart', [
-            ('nowcast', 2160, 2160, 2161, 4320, '20151230', 2160),
-            ('nowcast-green', 2160, 2160, 2161, 4320, '20151230', 2160),
-            ('forecast', 2160, 2160, 2161, 4860, '20151230', 2160),
-            ('forecast2', 2700, 2160, 2161, 4860, '20151230', 2160),
+        'run_type, run_date, prev_itend, dt_per_day, it000, itend, date0, '
+        'restart', [
+            ('nowcast', arrow.get('2015-12-30'), 2160, 2160, 2161, 4320,
+                '20151230', 2160),
+            ('nowcast-green', arrow.get('2015-12-30'), 2160, 2160, 2161, 4320,
+                '20151230', 2160),
+            ('forecast', arrow.get('2015-12-30'), 2160, 2160, 2161, 4860,
+                '20151230', 2160),
+            ('forecast2', arrow.get('2015-12-30'), 2700, 2160, 2161, 4860,
+                '20151230', 2160),
         ])
     def test_calc_new_namelist_lines(
-        self, run_type, prev_itend, dt_per_day, it000, itend, date0, restart,
-        worker_module,
+        self, run_date, run_type, prev_itend, dt_per_day, it000, itend, date0,
+        restart, worker_module,
     ):
         lines = [
             '  nn_it000 = 1\n',
             '  nn_itend = 2160\n',
-            '  nn_date0 = 20151229\n',
+            '  nn_date0 = 20160102\n',
         ]
         new_lines, restart_timestep = worker_module._calc_new_namelist_lines(
-            run_type, 1, prev_itend, 20151229, dt_per_day, lines)
+            run_date, run_type, 1, prev_itend, dt_per_day, lines)
         assert new_lines == [
             '  nn_it000 = {}\n'.format(it000),
             '  nn_itend = {}\n'.format(itend),
