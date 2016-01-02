@@ -90,12 +90,11 @@ class TestNowcastWorkerRun:
             config_file='nowcast.yaml',
             debug=False)
         p_load_config = patch.object(worker_module().lib, 'load_config')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config, p_init_zmq, p_config_logging:
+        with p_load_config, p_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
         assert worker.worker_func == m_worker_func
 
@@ -108,12 +107,11 @@ class TestNowcastWorkerRun:
             config_file='nowcast.yaml',
             debug=False)
         p_load_config = patch.object(worker_module().lib, 'load_config')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config, p_init_zmq, p_config_logging:
+        with p_load_config, p_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
         assert worker.success == m_success
 
@@ -126,12 +124,11 @@ class TestNowcastWorkerRun:
             config_file='nowcast.yaml',
             debug=False)
         p_load_config = patch.object(worker_module().lib, 'load_config')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config, p_init_zmq, p_config_logging:
+        with p_load_config, p_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
         assert worker.failure == m_failure
 
@@ -141,12 +138,11 @@ class TestNowcastWorkerRun:
         m_failure = Mock(name='failure')
         worker.arg_parser.parse_args = Mock(name='parse_args')
         p_load_config = patch.object(worker_module().lib, 'load_config')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config, p_init_zmq, p_config_logging:
+        with p_load_config, p_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
         worker.arg_parser.parse_args.assert_called_once_with()
 
@@ -159,12 +155,11 @@ class TestNowcastWorkerRun:
             config_file='nowcast.yaml',
             debug=False)
         p_load_config = patch.object(worker_module().lib, 'load_config')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config as m_load_config, p_init_zmq, p_config_logging:
+        with p_load_config as m_load_config, p_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
         assert worker.config == m_load_config()
 
@@ -179,10 +174,9 @@ class TestNowcastWorkerRun:
         p_load_config = patch.object(worker_module().lib, 'load_config')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config, p_config_logging as m_config_logging, p_init_zmq:
+        with p_load_config, p_config_logging as m_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
         m_config_logging.assert_called_once_with(
             worker.config, worker.logger, worker.parsed_args.debug)
@@ -196,14 +190,13 @@ class TestNowcastWorkerRun:
             config_file='nowcast.yaml',
             debug=False)
         p_load_config = patch.object(worker_module().lib, 'load_config')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
         m_logger_debug = Mock(name='logger.debug')
         worker.logger.debug = m_logger_debug
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config, p_init_zmq, p_config_logging:
+        with p_load_config, p_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
         assert m_logger_debug.call_count == 2
 
@@ -218,13 +211,12 @@ class TestNowcastWorkerRun:
         p_load_config = patch.object(worker_module().lib, 'load_config')
         p_inst_sig_handlers = patch.object(
             worker_module().lib, 'install_signal_handlers')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
         with p_load_config, p_inst_sig_handlers as m_inst_sig_handlers:
-            with p_init_zmq, p_config_logging:
+            with p_config_logging:
                 worker.run(m_worker_func, m_success, m_failure)
         m_inst_sig_handlers.assert_called_once_with(
             worker.logger, worker.context)
@@ -238,14 +230,13 @@ class TestNowcastWorkerRun:
             config_file='nowcast.yaml',
             debug=False)
         p_load_config = patch.object(worker_module().lib, 'load_config')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config, p_init_zmq as m_init_zmq, p_config_logging:
+        with p_load_config, p_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
-        assert worker.socket == m_init_zmq()
+        assert worker.socket == worker._init_zmq_interface()
 
     def test_do_work(self, worker):
         m_worker_func = Mock(name='worker_func')
@@ -256,12 +247,11 @@ class TestNowcastWorkerRun:
             config_file='nowcast.yaml',
             debug=False)
         p_load_config = patch.object(worker_module().lib, 'load_config')
-        p_init_zmq = patch.object(
-            worker_module().lib, 'init_zmq_req_rep_worker')
         p_config_logging = patch.object(
             worker_module().lib, 'configure_logging')
+        worker._init_zmq_interface = Mock(name='_init_zmq_interface')
         worker._do_work = Mock(name='_do_work')
-        with p_load_config, p_init_zmq, p_config_logging:
+        with p_load_config, p_config_logging:
             worker.run(m_worker_func, m_success, m_failure)
         assert worker._do_work.call_count == 1
 
@@ -348,6 +338,23 @@ class TestNowcastWorkerDoWork:
         worker._do_work()
         worker.logger.debug.assert_called_once_with(
             'task completed; shutting down')
+
+
+class TestInitZmqInterface:
+    """Unit tests for NowcastWorker._init_zmq_interface() method.
+    """
+    def test_socket_connected(self, worker, worker_module):
+        worker.config = {'zmq': {'ports': {'frontend': 5555}}}
+        worker.context = Mock(name='context')
+        worker._init_zmq_interface()
+        worker.context.socket().connect.assert_called_once_with(
+            'tcp://localhost:5555')
+
+    def test_socket_returned(self, worker, worker_module):
+        worker.config = {'zmq': {'ports': {'frontend': 5555}}}
+        worker.context = Mock(name='context')
+        socket = worker._init_zmq_interface()
+        assert socket == worker.context.socket()
 
 
 class TestTellManager:
