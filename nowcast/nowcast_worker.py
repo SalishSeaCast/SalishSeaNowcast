@@ -186,6 +186,9 @@ class NowcastWorker(object):
 
         :returns: ZeroMQ socket for communication with nowcast manager process.
         """
+        if self.parsed_args.debug:
+            self.logger.debug('**debug mode** no connection to manager')
+            return
         socket = self.context.socket(zmq.REQ)
         port = self.config['zmq']['ports']['frontend']
         socket.connect(
@@ -212,6 +215,15 @@ class NowcastWorker(object):
         :returns: Payload included in acknowledgement message from manager
                   process.
         """
+        if self.parsed_args.debug:
+            self.logger.debug(
+                '**debug mode** '
+                'message that would have been sent to manager: '
+                '({msg_type} {msg_words})'
+                .format(
+                    msg_type=msg_type,
+                    msg_words=self.config['msg_types'][self.name][msg_type]))
+            return
         # Send message to nowcast manager
         message = lib.serialize_message(self.name, msg_type, payload)
         self.socket.send_string(message)

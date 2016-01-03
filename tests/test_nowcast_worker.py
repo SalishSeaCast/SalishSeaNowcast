@@ -330,7 +330,15 @@ class TestNowcastWorkerDoWork:
 class TestInitZmqInterface:
     """Unit tests for NowcastWorker._init_zmq_interface() method.
     """
+    def test_debug_mode(self, worker, worker_module):
+        worker.parsed_args = Mock(name='parsed_args', debug=True)
+        worker.logger = Mock(name='logger')
+        worker._init_zmq_interface()
+        worker.logger.debug.assert_called_once_with(
+            '**debug mode** no connection to manager')
+
     def test_socket_connected(self, worker, worker_module):
+        worker.parsed_args = Mock(name='parsed_args', debug=False)
         worker.config = {'zmq': {'ports': {'frontend': 5555}}}
         worker.context = Mock(name='context')
         worker._init_zmq_interface()
@@ -338,6 +346,7 @@ class TestInitZmqInterface:
             'tcp://localhost:5555')
 
     def test_socket_returned(self, worker, worker_module):
+        worker.parsed_args = Mock(name='parsed_args', debug=False)
         worker.config = {'zmq': {'ports': {'frontend': 5555}}}
         worker.context = Mock(name='context')
         socket = worker._init_zmq_interface()
@@ -345,12 +354,25 @@ class TestInitZmqInterface:
 
 
 class TestTellManager:
-    """Unit test for NowcastWorker.tell_manager() method.
+    """Unit tests for NowcastWorker.tell_manager() method.
     """
-    @patch.object(worker_module().lib, 'serialize_message')
-    @patch.object(worker_module().lib, 'deserialize_message')
-    def test_tell_manager(self, m_ldm, m_lsm, worker, worker_module):
+    def test_debug_mode(self, worker, worker_module):
         worker.name = 'test_worker'
+        worker.parsed_args = Mock(name='parsed_args', debug=True)
+        worker.logger = Mock(name='logger')
+        worker.config = {
+            'msg_types': {
+                'test_worker': {'success': 'tell_manager debug mode test'},
+            }}
+        worker.tell_manager('success', 'payload')
+        worker.logger.debug.assert_called_once_with(
+            '**debug mode** message that would have been sent to manager: '
+            '(success tell_manager debug mode test)')
+
+    @patch.object(worker_module().lib, 'deserialize_message')
+    def test_tell_manager(self, m_ldm, worker, worker_module):
+        worker.name = 'test_worker'
+        worker.parsed_args = Mock(name='parsed_args', debug=False)
         worker.socket = Mock(name='socket')
         worker.config = {
             'msg_types': {
