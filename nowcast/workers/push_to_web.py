@@ -119,8 +119,10 @@ def sphinx_build(repo_path):
     build_path = os.path.join(site_path, '_build')
     html_path = os.path.join(build_path, 'html')
     logger.debug('starting sphinx-build of {}'.format(site_path))
-    cmd = 'rm -rf {}'.format(os.path.join(build_path, '*'))
-    subprocess.check_call(cmd, shell=True)
+    ## TODO: Change to control cleaning building of the site with a
+    ## command-line option flag, probably --clean
+#    cmd = 'rm -rf {}'.format(os.path.join(build_path, '*'))
+#    subprocess.check_call(cmd, shell=True)
     cmd = [
         'sphinx-build',
         '-b', 'html',
