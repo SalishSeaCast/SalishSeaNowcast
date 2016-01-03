@@ -92,6 +92,7 @@ class TestNowcastManagerConstructor:
     'watch_NEMO',
     'download_results',
     'make_plots',
+    'make_feeds',
     'make_site_page',
     'push_to_web',
 ])
@@ -952,6 +953,41 @@ class TestAfterMakePlots:
              '--run-date', '2015-11-25']],
         )
         assert actions[1] == expected
+
+    @pytest.mark.parametrize('msg_type', [
+        'success forecast publish',
+        'success forecast2 publish',
+    ])
+    def test_success_forecast_launch_make_feeds_worker(self, msg_type, mgr):
+        _, run_type, _ = msg_type.split()
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2016-01-03'},
+                'forecast': {'run date': '2016-01-03'},
+                'forecast2': {'run date': '2016-01-03'},
+            },
+        }
+        actions = mgr._after_make_plots(msg_type, 'payload')
+        expected = (
+            mgr._launch_worker,
+            ['make_feeds', [run_type, '--run-date', '2016-01-03']]
+        )
+        assert actions[2] == expected
+
+
+class TestAfterMakeFeeds:
+    """Unit tests for the NowcastManager._after_make_feeds method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'success forecast',
+        'failure forecast',
+        'success forecast2',
+        'failure forecast2',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        actions = mgr._after_make_feeds(msg_type, 'payload')
+        assert actions is None
 
 
 class TestAfterMakeSitePage:
