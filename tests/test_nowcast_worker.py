@@ -367,7 +367,7 @@ class TestTellManager:
         worker.tell_manager('success', 'payload')
         worker.logger.debug.assert_called_once_with(
             '**debug mode** message that would have been sent to manager: '
-            '(success tell_manager debug mode test)')
+            '(success tell_manager debug mode test) payload')
 
     @patch.object(worker_module().lib, 'deserialize_message')
     def test_tell_manager(self, m_ldm, worker, worker_module):

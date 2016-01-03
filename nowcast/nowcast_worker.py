@@ -219,10 +219,11 @@ class NowcastWorker(object):
             self.logger.debug(
                 '**debug mode** '
                 'message that would have been sent to manager: '
-                '({msg_type} {msg_words})'
+                '({msg_type} {msg_words}) {payload}'
                 .format(
                     msg_type=msg_type,
-                    msg_words=self.config['msg_types'][self.name][msg_type]))
+                    msg_words=self.config['msg_types'][self.name][msg_type],
+                    payload=payload))
             return
         # Send message to nowcast manager
         message = lib.serialize_message(self.name, msg_type, payload)
