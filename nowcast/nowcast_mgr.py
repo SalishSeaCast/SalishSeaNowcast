@@ -100,6 +100,7 @@ class NowcastManager:
             'watch_NEMO': self._after_watch_NEMO,
             'download_results': self._after_download_results,
             'make_plots': self._after_make_plots,
+            'make_feeds': self._after_make_feeds,
             'make_site_page': self._after_make_site_page,
             'push_to_web': self._after_push_to_web,
         }
@@ -571,6 +572,25 @@ class NowcastManager:
                     ['make_site_page', [run_type, page_type, '--run-date',
                      self.checklist['NEMO run'][run_type]['run date']]])
             ]
+            if run_type.startswith('forecast'):
+                actions[msg_type].append((
+                    self._launch_worker,
+                    ['make_feeds', [run_type, '--run-date',
+                     self.checklist['NEMO run']['nowcast']['run date']]]))
+        return actions[msg_type]
+
+    def _after_make_feeds(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from make_feeds
+        worker.
+        """
+        actions = {
+            'crash': None,
+            'success forecast': None,
+            'failure forecast': None,
+            'success forecast2': None,
+            'failure forecast2': None,
+        }
         return actions[msg_type]
 
     def _after_make_site_page(self, msg_type, payload):
