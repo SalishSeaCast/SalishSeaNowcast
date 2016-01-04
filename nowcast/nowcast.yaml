@@ -112,7 +112,7 @@ run:
   salish-nowcast:
     python: /results/nowcast-sys/nowcast-env/bin/python
     config_file: /home/dlatorne/public_html/MEOPAR/nowcast/nowcast.yaml
-    run_prep_dir: /results/nowcast-sys/nowcast-green/
+    run_prep_dir: /results/nowcast-sys/nowcast-prep/
     mpi decomposition: 3x5
     walltime: 16:00:00
     ssh key name:
@@ -312,6 +312,14 @@ msg_types:
     success: NEMO run started
     failure: NEMO run failed
     crash: run_NEMO worker crashed
+  run_NEMO36:
+    log.debug: debug level logging message
+    log.info: info level logging message
+    log.error: error level logging message
+    need: NEMO run information dict requested
+    success: NEMO run started
+    failure: NEMO run failed
+    crash: run_NEMO worker crashed
   watch_NEMO:
     log.debug: debug level logging message
     log.info: info level logging message
@@ -344,6 +352,12 @@ msg_types:
     success forecast2 publish: forecast2 publish plots produced
     failure forecast2 publish: forecast2 publish plots failed
     crash: make_plots worker crashed
+  make_feeds:
+    success forecast: forecast results ATOM feeds produced
+    failure forecast: forecast results ATOM feeds creation failed
+    success forecast2: forecast2 results ATOM feeds produced
+    failure forecast2: forecast2 results ATOM feeds creation failed
+    crash: make_feeds worker crashed
   make_site_page:
     success index: index page ready for push to salishsea site
     failure index: index page for salishsea site, preparation failed
@@ -352,12 +366,6 @@ msg_types:
     success research: research page ready for push to salishsea site
     failure research: research page for salishsea site, preparation failed
     crash: make_site_page worker crashed
-  make_feeds:
-    success forecast: forecast results ATOM feeds produced
-    failure forecast: forecast results ATOM feeds creation failed
-    success forecast2: forecast2 results ATOM feeds produced
-    failure forecast2: forecast2 results ATOM feeds creation failed
-    crash: make_feeds worker crashed
   push_to_web:
     success: publish page and figures pushed to salishsea site
     failure: publish page and figures push to salishsea site failed
