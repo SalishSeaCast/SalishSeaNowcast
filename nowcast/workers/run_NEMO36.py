@@ -109,8 +109,8 @@ def run_NEMO(parsed_args, config, tell_manager):
         run_date = arrow.get(run_info['nowcast']['run date'])
     run_desc_filepath = _create_run_desc_file(
         run_date, run_type, host_name, config, tell_manager)
-## TODO: figure out path for iodef.xml in absence of os.chdir()
-    run_dir = Path(salishsea_cmd.api.prepare(run_desc_filepath, 'iodef.xml'))
+    run_dir = Path(salishsea_cmd.api.prepare(
+        str(run_desc_filepath), 'iodef.xml'))
     _log_msg(
         '{}: temporary run directory: {}'.format(run_type, run_dir),
         'debug', tell_manager)
@@ -244,15 +244,19 @@ def _run_description(
     }
     restart_filepaths = {
         'restart.nc': {
-            'link to': str(Path(
-                restart_dir/prev_run_dmys[run_type] /
-                'SalishSea_{:08d}_restart.nc'.format(restart_timestep)))
+            'link to': str(
+                Path(
+                    restart_dir/prev_run_dmys[run_type] /
+                    'SalishSea_{:08d}_restart.nc'.format(restart_timestep))
+                .resolve())
         }}
     if run_type == 'nowcast-green':
         restart_filepaths['restart_trc.nc'] = {
-            'link to': str(Path(
-                restart_dir/prev_run_dmys[run_type] /
-                'SalishSea_{:08d}_restart_trc.nc'.format(restart_timestep)))
+            'link to': str(
+                Path(
+                    restart_dir/prev_run_dmys[run_type] /
+                    'SalishSea_{:08d}_restart_trc.nc'.format(restart_timestep))
+                .resolve())
             }
     run_prep_dir = Path(host_run_config['run_prep_dir'])
     NEMO_config_name = config['run_types'][run_type]
@@ -260,41 +264,44 @@ def _run_description(
     nowcast_dir = Path(host_run_config['nowcast_dir'])
     forcing = {
         'NEMO-atmos': {
-            'link to': str(nowcast_dir/'NEMO-atmos'),
+            'link to': str((nowcast_dir/'NEMO-atmos').resolve()),
             'check link': {
                 'type': 'atmospheric',
                 'namelist filename': 'namelist_cfg',
             }},
-        'open_boundaries': {'link to': str(nowcast_dir/'open_boundaries/')},
-        'rivers': {'link to': str(nowcast_dir/'rivers/')},
+        'open_boundaries': {
+            'link to': str((nowcast_dir/'open_boundaries/').resolve())},
+        'rivers': {
+            'link to': str((nowcast_dir/'rivers/').resolve())},
     }
     forcing.update(restart_filepaths)
     run_sets_dir = run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/'
     namelists = {
         'namelist_cfg': [
-            './namelist.time',
-            str(run_sets_dir/'nowcast/namelist.domain'),
-            str(run_sets_dir/'nowcast/namelist.surface'),
-            str(run_sets_dir/'nowcast/namelist.lateral'),
-            str(run_sets_dir/'nowcast/namelist.bottom'),
-            str(run_sets_dir/'nowcast/namelist.tracer'),
-            str(run_sets_dir/'nowcast/namelist.dynamics'),
-            str(run_sets_dir/'nowcast/namelist.vertical'),
-            str(run_sets_dir/'nowcast/namelist.compute'),
+            str((Path.cwd()/'namelist.time').resolve()),
+            str((run_sets_dir/'nowcast/namelist.domain').resolve()),
+            str((run_sets_dir/'nowcast/namelist.surface').resolve()),
+            str((run_sets_dir/'nowcast/namelist.lateral').resolve()),
+            str((run_sets_dir/'nowcast/namelist.bottom').resolve()),
+            str((run_sets_dir/'nowcast/namelist.tracer').resolve()),
+            str((run_sets_dir/'nowcast/namelist.dynamics').resolve()),
+            str((run_sets_dir/'nowcast/namelist.vertical').resolve()),
+            str((run_sets_dir/'nowcast/namelist.compute').resolve()),
         ],
-        'namelist_top_cfg': [str(run_sets_dir/'nowcast/namelist_top_cfg')],
+        'namelist_top_cfg': [
+            str((run_sets_dir/'nowcast/namelist_top_cfg').resolve())],
         'namelist_pisces_cfg': [
-            str(run_sets_dir/'nowcast/namelist_pisces_cfg')],
+            str((run_sets_dir/'nowcast/namelist_pisces_cfg').resolve())],
     }
     run_desc = salishsea_cmd.api.run_description(
         run_id=run_id,
         config_name=NEMO_config_name,
         mpi_decomposition=host_run_config['mpi decomposition'],
         walltime=walltime,
-        NEMO_code=str(run_prep_dir/'../NEMO-3.6-code/'),
-        XIOS_code=str(run_prep_dir/'../XIOS-code/'),
-        forcing_path=str(run_prep_dir/'../NEMO-forcing/'),
-        runs_dir=str(run_prep_dir/'../SalishSea/'),
+        NEMO_code=str((run_prep_dir/'../NEMO-3.6-code/').resolve()),
+        XIOS_code=str((run_prep_dir/'../XIOS/').resolve()),
+        forcing_path=str((run_prep_dir/'../NEMO-forcing/').resolve()),
+        runs_dir=str(run_prep_dir.resolve()),
         forcing=forcing,
         namelists=namelists,
     )
@@ -303,9 +310,11 @@ def _run_description(
     except KeyError:
         run_desc['grid']['bathymetry'] = config['bathymetry']
     run_desc['output']['domain'] = str(
-        run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')
+        (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')
+        .resolve())
     run_desc['output']['fields'] = str(
-        run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast/field_def.xml')
+        (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast/field_def.xml')
+        .resolve())
     return run_desc
 
 
@@ -313,12 +322,10 @@ def _create_run_script(
     run_date, run_type, run_dir, run_desc_filepath, host_name, config,
     tell_manager,
 ):
-    namelist = namelist2dict((str(run_dir/'namelist')))
-    cores = namelist['nammpp'][0]['jpnij']
     host_run_config = config['run'][host_name]
     dmy = run_date.format('DDMMMYY').lower()
     results_dir = Path(host_run_config['results'][run_type])
-    script = _build_script(run_desc_filepath, cores, results_dir/dmy)
+    script = _build_script(run_desc_filepath, results_dir/dmy)
     run_script_filepath = run_dir/'SalishSeaNEMO.sh'
     with run_script_filepath.open('wt') as f:
         f.write(script)
