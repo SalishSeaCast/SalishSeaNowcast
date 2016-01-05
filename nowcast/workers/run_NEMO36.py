@@ -78,8 +78,10 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} NEMO run for {0.run_date} on {0.host_name} started'
-        .format(parsed_args), extra={
+        '{0.run_type} NEMO run for {run_date} on {0.host_name} started'
+        .format(
+            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -90,8 +92,10 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} NEMO run for {0.run_date} on {0.host_name} failed'
-        .format(parsed_args), extra={
+        '{0.run_type} NEMO run for {run_date} on {0.host_name} failed'
+        .format(
+            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -118,18 +122,23 @@ def run_NEMO(parsed_args, config, tell_manager):
         run_date, run_type, run_dir, run_desc_filepath, host_name, config,
         tell_manager)
     run_desc_filepath.unlink()
-    run_process = _launch_run_script(
-        run_type, run_script_filepath, host_name, tell_manager)
-    if run_type != 'nowcast-green':
-        watcher_process = _launch_run_watcher(
-            run_type, run_process, host_name, config, tell_manager)
-        watcher_pid = watcher_process.pid
+    if host_name.startswith('salish'):
+        run_process_id = _launch_run_script(
+            run_type, run_script_filepath, host_name, tell_manager)
     else:
-        watcher_pid = None
+        ## TODO: Handle run launching on west.cloud
+        pass
+    ## TODO: Add launch of watch_nemo worker
+    # if run_type != 'nowcast-green':
+    #     watcher_process = _launch_run_watcher(
+    #         run_type, run_process, host_name, config, tell_manager)
+    #     watcher_pid = watcher_process.pid
+    # else:
+    #     watcher_pid = None
     return {run_type: {
         'run dir': str(run_dir),
-        'pid': run_process.pid,
-        'watcher pid': watcher_pid,
+        'pid': run_process_id,
+#        'watcher pid': watcher_pid,
         'run date': run_date.format('YYYY-MM-DD'),
     }}
 
@@ -428,36 +437,18 @@ def _launch_run_script(run_type, run_script_filepath, host_name, tell_manager):
         '{}: launching {} on {}'
         .format(run_type, run_script_filepath, host_name),
         'info', tell_manager)
-    cmd = shlex.split(run_script_filepath)
-    _log_msg(
-        '{}: running command in subprocess: {}'.format(run_type, cmd),
-        'debug', tell_manager)
-    run_process = subprocess.Popen(cmd)
-    _log_msg(
-        '{}: run pid: {.pid}'.format(run_type, run_process),
-        'debug', tell_manager)
-    return run_process
-
-
-def _launch_run_watcher(
-    run_type, run_process, host_name, config, tell_manager,
-):
-    _log_msg(
-        'launching watch_NEMO worker on {}'.format(run_type, host_name),
-        'info', tell_manager)
-    host_run_config = config['run'][host_name]
-    cmd = [
-        host_run_config['python'], '-m', 'nowcast.workers.watch_NEMO',
-        host_run_config['config_file'], run_type, str(run_process.pid),
-    ]
-    _log_msg(
-        '{}: running command in subprocess: {}'.format(run_type, cmd),
-        'debug', tell_manager)
-    watcher_process = subprocess.Popen(cmd)
-    _log_msg(
-        '{}: watcher pid: {.pid}'.format(run_type, watcher_process),
-        'debug', tell_manager)
-    return watcher_process
+    if host_name.startswith('salish'):
+        cmd = shlex.split('qsub {}'.format(run_script_filepath))
+        _log_msg(
+            '{}: running command in subprocess: {}'.format(run_type, cmd),
+            'debug', tell_manager)
+#        qsub_msg = subprocess.check_output(cmd, universal_newlines=True)
+        qsub_msg = 'wooho'
+        _log_msg(
+            '{}: TORQUE/PBD job id: {}'.format(run_type, qsub_msg),
+            'debug', tell_manager)
+        return qsub_msg
+    ## TODO: Launch runs on west.cloud
 
 
 if __name__ == '__main__':
