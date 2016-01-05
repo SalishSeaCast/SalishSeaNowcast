@@ -442,8 +442,7 @@ def _launch_run_script(run_type, run_script_filepath, host_name, tell_manager):
         _log_msg(
             '{}: running command in subprocess: {}'.format(run_type, cmd),
             'debug', tell_manager)
-#        qsub_msg = subprocess.check_output(cmd, universal_newlines=True)
-        qsub_msg = 'wooho'
+        qsub_msg = subprocess.check_output(cmd, universal_newlines=True)
         _log_msg(
             '{}: TORQUE/PBD job id: {}'.format(run_type, qsub_msg),
             'debug', tell_manager)
