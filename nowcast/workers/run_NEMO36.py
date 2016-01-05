@@ -114,10 +114,10 @@ def run_NEMO(parsed_args, config, tell_manager):
     _log_msg(
         '{}: temporary run directory: {}'.format(run_type, run_dir),
         'debug', tell_manager)
-    run_desc_filepath.unlink()
     run_script_filepath = _create_run_script(
         run_date, run_type, run_dir, run_desc_filepath, host_name, config,
         tell_manager)
+    run_desc_filepath.unlink()
     run_process = _launch_run_script(
         run_type, run_script_filepath, host_name, tell_manager)
     if run_type != 'nowcast-green':
@@ -325,7 +325,8 @@ def _create_run_script(
     host_run_config = config['run'][host_name]
     dmy = run_date.format('DDMMMYY').lower()
     results_dir = Path(host_run_config['results'][run_type])
-    script = _build_script(run_desc_filepath, results_dir/dmy)
+    script = _build_script(
+        run_dir, run_desc_filepath, results_dir/dmy, host_run_config)
     run_script_filepath = run_dir/'SalishSeaNEMO.sh'
     with run_script_filepath.open('wt') as f:
         f.write(script)
@@ -334,6 +335,92 @@ def _create_run_script(
         '{}: run script: {}'.format(run_type, run_script_filepath),
         'debug', tell_manager)
     return run_script_filepath
+
+
+def _build_script(run_dir, run_desc_filepath, results_dir, host_run_config):
+    run_desc = salishsea_cmd.lib.load_run_desc(str(run_desc_filepath))
+    jpni, jpnj = map(int, run_desc['MPI decomposition'].split('x'))
+    nemo_processors = jpni * jpnj
+    xios_processors = int(run_desc['output']['XIOS servers'])
+    email = 'sallen@eos.ubc.ca'
+    script = u'#!/bin/bash\n'
+    script = u'\n'.join((
+        script,
+        u'{pbs_common}\n'
+        u'{defns}\n'
+        u'{execute}\n'
+        u'{fix_permissions}\n'
+        u'{cleanup}'
+        .format(
+            pbs_common=salishsea_cmd.api.pbs_common(
+                run_desc, nemo_processors + xios_processors, email,
+                results_dir),
+            defns=_definitions(
+                run_desc, run_desc_filepath, run_dir, results_dir,
+                host_run_config),
+            execute=_execute(nemo_processors, xios_processors),
+            fix_permissions=_fix_permissions(),
+            cleanup=_cleanup(),
+        )
+    ))
+    return script
+
+
+def _definitions(
+    run_desc, run_desc_filepath, run_dir, results_dir, host_run_config,
+):
+    defns = (
+        u'RUN_ID="{run_id}"\n'
+        u'RUN_DESC="{run_desc_file}"\n'
+        u'WORK_DIR="{run_dir}"\n'
+        u'RESULTS_DIR="{results_dir}"\n'
+        u'GATHER="{salishsea_cmd} gather"\n'
+    ).format(
+        run_id=run_desc['run_id'],
+        run_desc_file=run_desc_filepath.name,
+        run_dir=run_dir,
+        results_dir=results_dir,
+        salishsea_cmd=host_run_config['salishsea_cmd'],
+    )
+    return defns
+
+
+def _execute(nemo_processors, xios_processors):
+    mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
+    if xios_processors:
+        mpirun = u' '.join((
+            mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
+    script = (
+        u'cd ${WORK_DIR}\n'
+        u'echo "working dir: $(pwd)"\n'
+        u'\n'
+        u'echo "Starting run at $(date)"\n'
+        u'mkdir -p ${RESULTS_DIR}\n')
+    script += u'{mpirun}\n'.format(mpirun=mpirun)
+    script += (
+        u'echo "Ended run at $(date)"\n'
+        u'\n'
+        u'echo "Results gathering started at $(date)"\n'
+        u'${GATHER} ${RUN_DESC} ${RESULTS_DIR}\n'
+        u'echo "Results gathering ended at $(date)"\n'
+    )
+    return script
+
+
+def _fix_permissions():
+    script = (
+        u'chmod g+rwx ${RESULTS_DIR}\n'
+        u'chmod o+rx ${RESULTS_DIR}\n'
+    )
+    return script
+
+
+def _cleanup():
+    script = (
+        u'echo "Deleting run directory"\n'
+        u'rmdir $(pwd)\n'
+    )
+    return script
 
 
 def _launch_run_script(run_type, run_script_filepath, host_name, tell_manager):
