@@ -27,10 +27,10 @@ The sea surface height anomaly at the western Juan de Fuca boundary is taken fro
 If this page is not accessible then the :mod:`get_NeahBay_ssh` worker may fail.
 In this case, we can recover observed sea surface heights from the `NOAA tides and water levels`_ which may be used in the future.
 
-To recover the observed sea surface anomaly, run through this `SSH_NeahBay`_ notebook with the approriate date.
+To recover the observed sea surface anomaly, run through this `SSH_NeahBay`_ notebook with the appropriate date.
 The notebook is located in :file:`SalishSeaNowcast/nowcast/notebooks/SSH_NeahBay.ipynb`.
 
-This notebook calcualtes the sea surface height anomaly by removing tidal predictions from the NOAA Neah Bay observations.
+This notebook calculates the sea surface height anomaly by removing tidal predictions from the NOAA Neah Bay observations.
 It then saves the result in a netCDF file for use in NEMO simulations.
 
 .. _NOAA forecast: http://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
