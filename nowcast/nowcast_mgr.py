@@ -97,6 +97,7 @@ class NowcastManager:
             # 'upload_all_files': self._after_upload_all_files,
             'make_forcing_links': self._after_make_forcing_links,
             'run_NEMO': self._after_run_NEMO,
+            'run_NEMO36': self._after_run_NEMO36,
             'watch_NEMO': self._after_watch_NEMO,
             'download_results': self._after_download_results,
             'make_plots': self._after_make_plots,
@@ -468,7 +469,7 @@ class NowcastManager:
             ]
             if ('cloud host' in self.config['run']
                     and self.config['run']['cloud host'] in payload):
-                for worker in ('run_NEMO', 'watch_NEMO'):
+                for worker in ('run_NEMO', 'run_NEMO36', 'watch_NEMO'):
                     self.worker_loggers[worker] = logging.getLogger(worker)
                     lib.configure_logging(
                         self.config, self.worker_loggers[worker],
@@ -495,6 +496,22 @@ class NowcastManager:
             'crash': None,
             'failure': None,
             'success':
+                [(self._update_checklist,
+                    ['run_NEMO', 'NEMO run', payload])],
+        }
+        return actions[msg_type]
+
+    def _after_run_NEMO36(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        run_NEMO worker.
+        """
+        for handler in self.worker_loggers['run_NEMO'].handlers:
+            self.worker_loggers['run_NEMO'].removeHandler(handler)
+        actions = {
+            'crash': None,
+            'failure nowcast-green': None,
+            'success nowcast-green':
                 [(self._update_checklist,
                     ['run_NEMO', 'NEMO run', payload])],
         }
