@@ -70,8 +70,10 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        'ATOM feeds for {0.run_date} {0.run_type} run completed'
-        .format(parsed_args), extra={
+        'ATOM feeds for {run_date} {0.run_type} run completed'
+        .format(
+            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
@@ -81,8 +83,10 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        'ATOM feeds for {0.run_date} {0.run_type} run failed'
-        .format(parsed_args), extra={
+        'ATOM feeds for {run_date} {0.run_type} run failed'
+        .format(
+            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
