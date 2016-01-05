@@ -319,8 +319,8 @@ msg_types:
     log.info: info level logging message
     log.error: error level logging message
     need: NEMO run information dict requested
-    success: NEMO run started
-    failure: NEMO run failed
+    success nowcast-green: nowcast-green NEMO run started
+    failure nowcast-green: nowcast-green NEMO run failed
     crash: run_NEMO worker crashed
   watch_NEMO:
     log.debug: debug level logging message
