@@ -297,68 +297,120 @@ class TestRunDescription:
                     Mock(name='tell_manager'))
         assert run_desc['config_name'] == expected
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, expected', [
-        ('nowcast', '31dec15nowcast'),
-        ('nowcast-green', '31dec15nowcast-green'),
-        ('forecast', '31dec15forecast'),
-        ('forecast2', '31dec15forecast2'),
+        ('nowcast', '04jan16nowcast'),
+        ('nowcast-green', '04jan16nowcast-green'),
+        ('forecast', '04jan16forecast'),
+        ('forecast2', '04jan16forecast2'),
     ])
     def test_run_id(
-        self, run_type, expected, worker_module, config,
+        self, run_type, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config,
-            Mock(name='tell_manager'))
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
         assert run_desc['run_id'] == expected
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast', '3x5'),
     ])
     def test_mpi_decomposition(
-        self, run_type, expected, worker_module, config,
+        self, run_type, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config,
-            Mock(name='tell_manager'))
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
         assert run_desc['MPI decomposition'] == expected
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast-green', '16:00:00'),
     ])
     def test_walltime(
-        self, run_type, expected, worker_module, config,
+        self, run_type, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        with patch.dict(config['run']['salish'], walltime='16:00:00'):
-            run_desc = worker_module._run_description(
-                run_date, run_type, run_id, 2160, 'salish', config,
-                Mock(name='tell_manager'))
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                with patch.dict(config['run']['salish'], walltime='16:00:00'):
+                    run_desc = worker_module._run_description(
+                        run_date, run_type, run_id, 2160, 'salish', config,
+                        Mock(name='tell_manager'))
         assert run_desc['walltime'] == expected
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast', None),
     ])
     def test_no_walltime(
-        self, run_type, expected, worker_module, config,
+        self, run_type, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config,
-            Mock(name='tell_manager'))
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
         assert run_desc['walltime'] == expected
 
     @pytest.mark.xfail
