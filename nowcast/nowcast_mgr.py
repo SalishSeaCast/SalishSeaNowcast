@@ -469,7 +469,7 @@ class NowcastManager:
             ]
             if ('cloud host' in self.config['run']
                     and self.config['run']['cloud host'] in payload):
-                for worker in ('run_NEMO', 'run_NEMO36', 'watch_NEMO'):
+                for worker in ('run_NEMO', 'watch_NEMO'):
                     self.worker_loggers[worker] = logging.getLogger(worker)
                     lib.configure_logging(
                         self.config, self.worker_loggers[worker],
