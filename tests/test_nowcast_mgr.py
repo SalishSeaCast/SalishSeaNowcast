@@ -716,9 +716,8 @@ class TestAfterMakeForcingLinks:
         payload = {'west.cloud': True}
         mgr._after_make_forcing_links('success nowcast+', payload)
         assert mgr.worker_loggers['run_NEMO'].name == 'run_NEMO'
-        assert mgr.worker_loggers['run_NEMO36'].name == 'run_NEMO36'
         assert mgr.worker_loggers['watch_NEMO'].name == 'watch_NEMO'
-        assert m_config_logging.call_count == 3
+        assert m_config_logging.call_count == 2
 
     @pytest.mark.parametrize('msg_type, run_type', [
         ('success nowcast+', 'nowcast'),
