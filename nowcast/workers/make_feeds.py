@@ -248,7 +248,8 @@ def _calc_max_ssh(feed, ttide, run_date, run_type, config):
 def _calc_wind_4h_avg(feed, max_ssh_time, config):
     weather_path = config['weather']['ops_dir']
     weather_grid = nc.Dataset(
-        os.path.join(weather_path, '{:ops_y%Ym%md%d.nc}'.format(max_ssh_time)))
+        os.path.join(
+            weather_path, 'fcst', '{:ops_y%Ym%md%d.nc}'.format(max_ssh_time)))
     tide_gauge_stn = config['web']['feeds'][feed]['tide_gauge_stn']
     wind = nc_tools.uv_wind_timeseries_at_point(
         weather_grid, *PLACES[tide_gauge_stn]['wind grid ji'])
