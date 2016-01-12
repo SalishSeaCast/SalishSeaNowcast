@@ -247,7 +247,8 @@ class TestRenderEntryContent:
         content = worker_module._render_entry_content(
             'pmv.xml', max_ssh_info, config)
         m_tmpl.assert_called_once_with(
-            filename='www/templates/storm_surge_advisory.mako')
+            filename='www/templates/storm_surge_advisory.mako',
+            input_encoding='utf-8')
         assert m_tmpl().render.called
         assert content == m_pp()['body']
 
