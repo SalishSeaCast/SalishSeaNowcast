@@ -205,7 +205,8 @@ def _render_entry_content(feed, max_ssh_info, config):
     template = mako.template.Template(
         filename=os.path.join(
             config['web']['templates_path'],
-            config['web']['feed_entry_template']))
+            config['web']['feed_entry_template']),
+        input_encoding='utf-8')
     rendered_rst = template.render(**values)
     html = docutils.core.publish_parts(rendered_rst, writer_name='html')
     return html['body']
