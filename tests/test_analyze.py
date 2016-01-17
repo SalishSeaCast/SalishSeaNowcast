@@ -1,21 +1,19 @@
-"""Unit tests for bathy_tools.
-"""
-from __future__ import division
-"""
-Copyright 2013-2015 The Salish Sea MEOPAR contributors
-and The University of British Columbia
+# Copyright 2013-2015 The Salish Sea MEOPAR contributors
+# and The University of British Columbia
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
-   http://www.apache.org/licenses/LICENSE-2.0
+#    http://www.apache.org/licenses/LICENSE-2.0
 
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Unit tests for analyze module.
 """
 import numpy as np
 import pytest
@@ -60,9 +58,10 @@ class TestDepthAverage:
         assert result.shape == (1,)
 
     def test_1d_zeros_array_n(self, linear_depths):
-        # Case with var shape (40,). Result is not an array so should not use
-        # array equailty check
         """Cell 5 case
+
+        Case with var shape (40,).
+        Result is not an array so should not use array equailty check.
         """
         var = np.zeros((linear_depths.shape[0]))
         result = analyze.depth_average(var, linear_depths, depth_axis=0)
@@ -95,15 +94,18 @@ class TestDepthAverage:
         (np.ones((1, 2, linear_depths().shape[0])), 2, np.ones((1, 2))),
     ])
     def test_multi_dim_array(self, var, depth_axis, expected, linear_depths):
-        """Series of tests for multi-dimensional arrays"""
+        """Series of tests for multi-dimensional arrays
+        """
         result = analyze.depth_average(
             var, linear_depths, depth_axis=depth_axis)
         np.testing.assert_array_equal(result, expected)
 
     def test_multi_dim_nonuniform_t(self, linear_depths):
-        # Cell 11 case
         """Test for multidimensional array with non uniform values along the
-        time axis"""
+        time axis
+
+        Cell 11 case
+        """
         ts = 3
         xs = 2
         var = np.ones((ts, linear_depths.shape[0], xs))
@@ -114,9 +116,11 @@ class TestDepthAverage:
         np.testing.assert_array_equal(result, expected)
 
     def test_multi_dim_nonuniform_x(self, linear_depths):
-        # Cell 12 case
         """Test for multidimensional array with non uniform values along the
-        x axis"""
+        x axis
+
+        Cell 12 case
+        """
         ts = 3
         xs = 2
         var = np.ones((ts, linear_depths.shape[0], xs))
@@ -135,7 +139,8 @@ class TestDepthAverage:
     ])
     def test_nonuniform_grid_spacing(self, var, depth_axis,
                                      expected, nonuniform_depths):
-        """Series of tests for a depth array with non-uniform grid spacing."""
+        """Series of tests for a depth array with non-uniform grid spacing.
+        """
         result = analyze.depth_average(
             var, nonuniform_depths, depth_axis=depth_axis)
         # using almost equal because of some floating point differences
@@ -151,7 +156,8 @@ class TestDepthAverage:
     ])
     def test_masking_fullmask(self, var, depth_axis,
                               expected, nonuniform_depths):
-        """Test for simple masked arrays - entire input array is masked."""
+        """Test for simple masked arrays - entire input array is masked.
+        """
         var = np.ma.masked_values(var, 0)
         result = analyze.depth_average(
             var, nonuniform_depths, depth_axis=depth_axis)
@@ -159,38 +165,42 @@ class TestDepthAverage:
         assert np.ma.allequal(result, expected)
 
     def test_masking_column_full_mask(self, nonuniform_depths):
-        """Test for one column of input fully masked"""
-        # Cell 21 case
+        """Test for one column of input fully masked
+
+        Cell 21 case
+        """
         ts = 4
-        var = np.ones((ts,nonuniform_depths.shape[0]))
-        var[0,:]=0
-        var=np.ma.masked_values(var,0)
+        var = np.ones((ts, nonuniform_depths.shape[0]))
+        var[0, :] = 0
+        var = np.ma.masked_values(var, 0)
         expected = np.ones((ts,))
         expected[0] = 0
         expected = np.ma.masked_values(expected, 0)
-        result = analyze.depth_average(var,nonuniform_depths,depth_axis=1)
+        result = analyze.depth_average(var, nonuniform_depths, depth_axis=1)
         assert np.ma.allclose(result, expected)
 
-
     def test_masking_partial_1d(self, nonuniform_depths):
-        # Cell 23 case
-        """Test for partially masked, 1d array."""
+        """Test for partially masked, 1d array.
+
+        Cell 23 case
+        """
         var = np.ones((nonuniform_depths.shape[0], 1))
         var[10:] = 0
-        var=np.ma.masked_values(var, 0)
+        var = np.ma.masked_values(var, 0)
         expected = np.ones((1,))
         result = analyze.depth_average(
             var, nonuniform_depths, depth_axis=0)
         np.testing.assert_array_almost_equal(result, expected)
 
     def test_masking_partial_multi(self, nonuniform_depths):
-        # Cell 24 case
-        """Test for partially masked, multidimensional array."""
-        ts=2
-        xs=3
+        """Test for partially masked, multidimensional array.
+
+        Cell 24 case
+        """
+        ts, xs = 2, 3
         var = np.ones((ts, nonuniform_depths.shape[0], xs))
         var[0, 10:, 0] = 0
-        var=np.ma.masked_values(var,0)
+        var = np.ma.masked_values(var, 0)
         expected = np.ones((ts, xs))
         result = analyze.depth_average(
             var, nonuniform_depths, depth_axis=1)
