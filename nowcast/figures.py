@@ -40,10 +40,13 @@ from scipy import interpolate as interp
 
 from salishsea_tools import (
     nc_tools,
-    viz_tools,
     stormtools,
     tidetools,
+    unit_conversions,
+    viz_tools,
+    wind_tools,
 )
+from salishsea_tools.places import PLACES
 
 # =============================== #
 # <------- Kyle 2015/08/25
@@ -57,13 +60,30 @@ model_c = 'MediumBlue'
 observations_c = 'DarkGreen'
 predictions_c = 'MediumVioletRed'
 stations_c = cm.rainbow(np.linspace(0, 1, 7))
-colours = {
+SITE_BACKGROUND_COLOUR = '#2B3E50'  # salishsea site Superhero theme background
+COLOURS = {
     'figure': {
-        'facecolor': '#2B3E50',  # salishsea site Superhero theme background
+        'facecolor': SITE_BACKGROUND_COLOUR,
+        'location label': 'DimGray',
+    },
+    'axis': {
+        'labels': 'white',
+        'spines': 'white',
+        'ticks': 'white',
+        'title': 'white',
     },
     'cbar': {
         'label': 'white',
         'tick labels': 'white',
+    },
+    'wind arrow': {
+        'facecolor': 'DarkMagenta',
+        'edgecolor': 'black',
+    },
+    'risk level colours': {
+        'extreme risk': 'red',
+        'moderate risk': 'Gold',
+        None: 'green',
     },
 }
 # Time shift for plotting in PST
@@ -76,6 +96,14 @@ title_font = {
     'weight': 'medium'
 }
 axis_font = {'fontname': 'Bitstream Vera Sans', 'size': '13'}
+FONTS = {
+    'website_thumbnail_title': {
+        'fontname': 'Bitstream Vera Sans',
+        'size': '40',
+        'color': 'white',
+        'weight': 'medium',
+    }
+}
 
 # Constant with station information: mean sea level, latitude,
 # longitude, station number, historical extreme ssh, etc.
@@ -227,6 +255,27 @@ def axis_colors(ax, plot):
     ax.title.set_color('white')
 
     return ax
+
+
+def set_axis_colors(ax, colours):
+    """Formats the background colour of plots and colours of labels.
+
+    :arg ax: Axis to be formatted.
+    :type ax: axis object
+
+    :arg plot: Keyword for background needed for plot.
+    :type plot: string
+
+    :returns: axis format
+    """
+    ax.xaxis.label.set_color(colours['axis']['labels'])
+    ax.yaxis.label.set_color(colours['axis']['labels'])
+    ax.tick_params(axis='x', colors=colours['axis']['ticks'])
+    ax.tick_params(axis='y', colors=colours['axis']['ticks'])
+    ax.spines['bottom'].set_color(colours['axis']['spines'])
+    ax.spines['top'].set_color(colours['axis']['spines'])
+    ax.spines['left'].set_color(colours['axis']['spines'])
+    ax.spines['right'].set_color(colours['axis']['spines'])
 
 
 def find_model_point(lon, lat, X, Y, tol_lon=0.016, tol_lat=0.011):
@@ -832,6 +881,16 @@ def plot_PA_observations(ax, PST):
         color=observations_c, lw=2, label='Observations')
 
 
+def plot_risk_level_marker(
+    ax, name, risk_level, colours, marker, msize, alpha,
+):
+    lat, lon = PLACES[name]['lat lon']
+    ax.plot(
+        lon, lat,
+        marker=marker, markersize=msize, markeredgewidth=2,
+        color=colours['risk level colours'][risk_level], alpha=alpha)
+
+
 def plot_threshold_map(ax, ttide, ssh_corr, marker, msize, alpha, name):
     """Determines category (green, yellow, red) in which the max sea surface
     height at a station falls.
@@ -1088,22 +1147,91 @@ def load_model_ssh(grid_T):
     return ssh, time
 
 
+def find_ssh_max(tide_gauge_stn, ssh_ts, ttide):
+    """
+    Find the maximum corrected ssh value at a station.  Return the value
+    and the index
+
+    :arg str tide_gauge_stn: Name of station
+
+    :arg ssh_ts.ssh: sea surface height values
+    :type ssh_ts.ssh: :py:class:`numpy.ndarray`
+
+    :arg ssh_ts.time: times
+    :type ssh_ts.time: :py:class:`numpy.ndarray`
+
+    :arg ttide: tidal predictions
+    :type ttide: :py:class:`pandas.DataFrame`
+    """
+
+    ssh_corr = correct_model_ssh(ssh_ts.ssh, ssh_ts.time, ttide)
+    max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
+    max_ssh_time = ssh_ts.time[np.argmax(ssh_corr)]
+    return max_ssh, max_ssh_time
+
+
+def plot_wind_arrow(
+    ax, lon, lat, u_wind, v_wind,
+    colours=COLOURS,
+    wind_arrow_scale_factor=0.1,
+):
+    """Draw a wind arrow on an plot axes.
+
+    The axes is assumed to be using lon/lat scales.
+
+    This just a wrapper that applies particular formatting to the
+    :py:meth:`matplotlib.axes.arrow` method.
+
+    :arg ax: Plot axes to draw the arrow on.
+    :type ax: :py:class:`matplotlib.axes.Axes`
+
+    :arg float lon: Longitude of the arrow starting point.
+
+    :arg float lat: Latitude of the arrow starting point.
+
+    :arg float u_wind: Zonal (u) direction component of wind speed;
+                       value will be scaled to give longitude direction
+                       length of arrow.
+
+    :arg float v_wind: Meridional (v) direction component of wind speed;
+                       value will be scaled to give latitude direction
+                       length of arrow.
+
+    :arg dict colours: Colours to use for the arrow face and edge colours.
+                       Defaults to :py:data:`figures.COLOURS`.
+
+    :arg float wind_arrow_scale_factor: Scale factor applied to wind
+                                        speed components to convert them
+                                        to lon/lat scale of plot;
+                                        defaults to 0.1.
+    """
+    ax.arrow(
+        lon, lat,
+        wind_arrow_scale_factor * u_wind,
+        wind_arrow_scale_factor * v_wind,
+        head_width=0.05, head_length=0.1, width=0.02,
+        facecolor=colours['wind arrow']['facecolor'],
+        edgecolor=colours['wind arrow']['edgecolor'])
+
+
+## Called by make_plots (publish)
 def website_thumbnail(
     grid_B, grid_T, grids, weather_path, coastline, tidal_predications,
-    scale=0.1, PST=1, figsize=(18, 20),
+    colours=COLOURS,
+    fonts=FONTS,
+    figsize=(18, 20),
 ):
     """Thumbnail for the UBC Storm Surge website includes the thresholds
     indicating the risk of flooding in three stations and the wind speeds and
     directions. It also includes a brief description of threshold colours.
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.  ***NOT USED***
     :type grid_B: :class:`netCDF4.Dataset`
 
-    :arg grid_T: Hourly tracer results dataset from NEMO.
+    :arg grid_T: Hourly tracer results dataset from NEMO.           ***NOT USED***
     :type grid_T: :class:`netCDF4.Dataset`
 
-    :arg grids: high frequency model results
-    :type grids: dictionary
+    :arg dict grids: high frequency model results
 
     :arg str weather_path: The directory where weather forcing wind files
                            are stored.
@@ -1114,137 +1242,92 @@ def website_thumbnail(
     :arg str tidal_predications: Path to directory of tidal prediction
                                  file.
 
-    :arg scale: scale factor or wind arrows
-    :type scale: float
-
-    :arg PST: Specifies if plot should be presented in PST.
-              1 = plot in PST, 0 = plot in UTC.
-    :type PST: 0 or 1
-
-    :arg figsize: Figure size (width, height) in inches.
-    :type figsize: 2-tuple
+    :arg 2-tuple figsize: Figure size (width, height) in inches.
 
     :returns: matplotlib figure object instance (fig).
     """
-
-    title_font_thumb = {
-        'fontname': 'Bitstream Vera Sans', 'size': '40', 'color': 'black',
-        'weight': 'medium'
-    }
-
-    # Bathymetry
-    bathy, X, Y = tidetools.get_bathy_data(grid_B)
-
-    # Time range
-    t_orig, t_final, t = get_model_time_variables(grid_T)
-
-    # Wind time
-    inds = isolate_wind_timing(
-        'Point Atkinson', grid_T, grid_B, weather_path, t, 4, average=True)
-
-    # Set up Information
-    max_sshs = {}
-    max_times = {}
-    max_winds = {}
-
-    # Figure
-    fig = plt.figure(figsize=figsize)
+    fig = plt.figure(figsize=figsize, facecolor=colours['figure']['facecolor'])
     gs = gridspec.GridSpec(2, 3, width_ratios=[1, 1, 1], height_ratios=[6, 1])
     gs.update(hspace=0.15, wspace=0.05)
     ax = fig.add_subplot(gs[0, :])
-    ax1 = fig.add_subplot(gs[1, 0])
-    ax2 = fig.add_subplot(gs[1, 1])
-    ax3 = fig.add_subplot(gs[1, 2])
-
-    # Map
     plot_map(ax, coastline)
-
     for name in TIDAL_SITES:
-        ssh_loc, t = load_model_ssh(grids[name])
-        lat = SITES[name]['lat']
-        lon = SITES[name]['lon']
-        # Get tides and ssh
+        ssh_ts = nc_tools.ssh_timeseries_at_point(
+            grids[name], 0, 0, datetimes=True)
         ttide = get_tides(name, tidal_predications)
-        ssh_corr = correct_model_ssh(ssh_loc, t, ttide)
-
-        # Plot thresholds
-        plot_threshold_map(ax, ttide, ssh_corr, 'o', 70, 0.3, name)
-
-        # Information
-        res = compute_residual(ssh_corr, t, ttide)
-        [max_ssh,
-         index_ssh,
-         tmax,
-         max_res,
-         max_wind,
-         ind_w] = get_maxes(ssh_corr, t, res, lon, lat, weather_path)
-        max_sshs[name] = max_ssh
-        max_times[name] = tmax
-        max_winds[name] = max_wind
-
-    # Add winds for other stations
-    for name in WIND_SITES:
-        twind = plot_wind_vector(
-            ax, name, t_orig, t_final, weather_path, inds, scale)
-
-    # Reference arrow
-    # for m/s
-    ax.arrow(-122.2, 50.6, 0. * scale, -5. * scale,
-             head_width=0.05, head_length=0.1, width=0.02,
-             color='white', fc='DarkMagenta', ec='black')
-    ax.text(-122.28, 50.55, "Reference: 5 m/s", rotation=90, fontsize=20)
-    # for knots
-    ax.arrow(-122.45, 50.6, 0. * scale * k2ms, -5. * scale * k2ms,
-             head_width=0.05, head_length=0.1, width=0.02,
-             color='white', fc='DarkMagenta', ec='black')
-    ax.text(-122.53, 50.55, "Reference: 5 knots", rotation=90, fontsize=20)
-
-    # Location labels
-    ax.text(-125.7, 47.7, 'Pacific\nOcean',
-            fontsize=30, color='DimGray')
-    ax.text(-123.2, 50.1, '  British\nColumbia',
-            fontsize=30, color='DimGray')
-    ax.text(-124.2, 47.8, 'Washington\n    State',
-            fontsize=30, color='DimGray')
-    ax.text(-122.3, 47.65, ' Puget\nSound',
-            fontsize=20, color='DimGray')
-    ax.text(-124.35, 48.35, 'Strait of\nJuan de Fuca',
-            fontsize=20, color='DimGray', rotation=-18)
-    ax.text(-124, 49.3, 'Strait of \n Georgia',
-            fontsize=20, color='DimGray', rotation=-12)
-
-    # Figure format
-    # Don't shift to PST because we want the date to represent the model run
-    t = (twind[0]).strftime('%A, %B %d, %Y')
+        max_ssh, max_ssh_time = find_ssh_max(name, ssh_ts, ttide)
+        risk_level = stormtools.storm_surge_risk_level(name, max_ssh, ttide)
+        lat, lon = PLACES[name]['lat lon']
+        plot_risk_level_marker(ax, name, risk_level, colours, 'o', 70, 0.3)
+        u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
+            arrow.get(max_ssh_time), weather_path,
+            PLACES[name]['wind grid ji'], avg_hrs=-4)
+        plot_wind_arrow(ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, colours)
+    # Wind speed legend
+    legend_wind_speed = 5  # m/s or knots
+    plot_wind_arrow(ax, -122.2, 50.6, 0, -legend_wind_speed, colours) #location different
+    ax.text(-122.28, 50.55, "Reference: 5 m/s", rotation=90, fontsize=20)  #location different
+    plot_wind_arrow(
+        ax, -122.45, 50.6, 0, -unit_conversions.knots_mps(legend_wind_speed), #location different
+        colours)
+    ax.text(-122.53, 50.55, "Reference: 5 knots", rotation=90, fontsize=20) #location different
+    # Title and axis spines, ticks & labels colours
     ax.set_title(
-        'Marine and Atmospheric Conditions\n {time}'.format(
-            time=t),
-        **title_font_thumb)
-    fig.patch.set_facecolor('#2B3E50')
-    axis_colors(ax, 'gray')
-
-    # Legend
-    axs = [ax1, ax2, ax3]
-    cs = ['green', 'Gold', 'red']
-    for ax, thresh_c in zip(axs, cs):
+        'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
+        .format(ssh_ts.time[0]),
+        **fonts['website_thumbnail_title'])
+    set_axis_colors(ax, colours)
+    # Location labels
+    ax.text(
+        -125.7, 47.7,
+        'Pacific\nOcean',
+        fontsize=30, color=colours['figure']['location label'])
+    ax.text(
+        -123.2, 50.1,
+        '  British\nColumbia',
+        fontsize=30, color=colours['figure']['location label'])
+    ax.text(
+        -124.2, 47.8, 'Washington\n      State',
+        fontsize=30, color=colours['figure']['location label'])
+    ax.text(
+        -122.3, 47.65, ' Puget\nSound',
+        fontsize=20, color=colours['figure']['location label'])
+    ax.text(
+        -124.35, 48.325,
+        '    Strait of\nJuan de Fuca',
+        fontsize=20, color=colours['figure']['location label'], rotation=-18)
+    ax.text(
+        -124, 49.3,
+        'Strait of\nGeorgia',
+        fontsize=20, color=colours['figure']['location label'], rotation=-12)
+    # Risk level legend
+    axes = [fig.add_subplot(gs[1, i]) for i in range(3)]
+    risk_level_colours = (
+        colours['risk level colours'][None],
+        colours['risk level colours']['moderate risk'],
+        colours['risk level colours']['extreme risk'],
+    )
+    for ax, risk_level_colour in zip(axes, risk_level_colours):
         plt.setp(list(ax.spines.values()), visible=False)
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
-        axis_colors(ax, 'blue')
+        ax.set_axis_bgcolor(colours['figure']['facecolor'])
         ax.set_xlim([0, 1])
         ax.set_ylim([0, 1])
         ax.plot(
             0.2, 0.5,
             marker='o', markersize=70, markeredgewidth=2,
-            color=thresh_c, alpha=0.6)
-    ax1.text(0.4, 0.2, 'Green:\nNo flooding\nrisk', fontsize=25, color='w')
-    ax2.text(0.4, 0.2, 'Yellow:\nRisk of\nhigh water', fontsize=25, color='w')
-    ax3.text(0.4, 0.2, 'Red:\nExtreme risk\nof flooding',
-             fontsize=25, color='w')
-
+            color=risk_level_colour, alpha=0.6)
+    axes[0].text(
+        0.4, 0.2, 'Green:\nNo flooding\nrisk', fontsize=25, color='w')
+    axes[1].text(
+        0.4, 0.2, 'Yellow:\nRisk of\nhigh water', fontsize=25, color='w')
+    axes[2].text(
+        0.4, 0.2, 'Red:\nExtreme risk\nof flooding', fontsize=25, color='w')
     return fig
 
 
+## Called by make_plots (publish)
 def PA_tidal_predictions(
     grid_T, tidal_predications, PST=1, MSL=0, figsize=(20, 5),
 ):
@@ -1317,7 +1400,7 @@ def PA_tidal_predictions(
 
     return fig
 
-
+## Called by make_plots (publish)
 def compare_water_levels(
         grid_T, grid_B, grids, coastline, PST=1, figsize=(20, 15)):
     """Compares modelled water levels to observed water levels and tides at a
@@ -1428,7 +1511,7 @@ def compare_water_levels(
 
     return fig
 
-
+## Called by make_plots (publish)
 def compare_tidalpredictions_maxSSH(
     grid_T, grid_B, grids, weather_path, tidal_predications,
     PST=1, MSL=0, name='Point Atkinson', figsize=(20, 12),
@@ -1611,7 +1694,7 @@ def compare_tidalpredictions_maxSSH(
 
     return fig
 
-
+## Called by make_plots (publish)
 def plot_thresholds_all(
     grid_T, grid_B, grids, weather_path, coastline, tidal_predications,
     PST=1, MSL=1, figsize=(20, 25),
@@ -1730,7 +1813,7 @@ def plot_thresholds_all(
 
     return fig
 
-
+## Called by make_plots (publish)
 def Sandheads_winds(
         grid_T, grid_B, weather_path, coastline, PST=1, figsize=(20, 12)):
     """Plots the observed and modelled winds at Sandheads during the
@@ -1852,7 +1935,7 @@ def Sandheads_winds(
 
     return fig
 
-
+## Called by make_plots (publish)
 def winds_average_max(
         grid_T, grid_B, weather_path, coastline, station, wind_type,
         figsize=(20, 15)):
@@ -1993,14 +2076,14 @@ def add_bathy_patch(distance, grid_B, lines,  ax, color='burlywood',
     ax.add_patch(patches.Polygon(poly, facecolor=color,
                                  edgecolor=color))
 
-
+## Called by make_plots (research)
 def thalweg_salinity(
     grid_T_d, mesh_mask, grid_B,
     thalweg_pts_file='/data/nsoontie/MEOPAR/tools/bathymetry/thalweg_working.txt',
     salinity_levels=[
         26, 27, 28, 29, 30, 30.2, 30.4, 30.6, 30.8, 31, 32, 33, 34],
     cmap='hsv',
-    colours=colours,
+    colours=COLOURS,
     figsize=(20, 8),
 ):
     """Plot the daily average salinity field along the thalweg with
@@ -2124,7 +2207,7 @@ def fill_in_bathy(variable, mesh_mask, lines):
         newvar[i, level] = variable[i, level-1]
     return newvar
 
-
+## Called by make_plots (research)
 def thalweg_temperature(
     grid_T_d, mesh_mask, grid_B,
     thalweg_pts_file='/data/nsoontie/MEOPAR/tools/bathymetry/thalweg_working.txt',
@@ -2197,7 +2280,7 @@ def thalweg_temperature(
 
     return fig
 
-
+## Called by make_plots (research)
 def plot_surface(
     grid_T_d, grid_U_d, grid_V_d, grid_B,
     limits=[0, 398, 0, 898], figsize=(20, 12),
@@ -2378,16 +2461,17 @@ def ssh_PtAtkinson(grid_T, grid_B=None, figsize=(20, 5)):
     return fig
 
 
+## Called by make_plots (publish)
 def plot_threshold_website(
     grid_B, grid_T, grids, weather_path, coastline, tidal_predications,
-    scale=0.1, PST=1, figsize=(18, 20),
+    scale=0.1, PST=1, colours=COLOURS, fonts=FONTS, figsize=(18, 20),
 ):
     """Overview image for Salish Sea website.
 
     Plots a map of the Salish Sea with markers indicating extreme water
-    at Point Atkinson, Victoria and Campbell River.
-    Also plots wind vectors averaged over 4 ours before the max ssh at
-    Point Atkinson.
+    at Point Atkinson, Victoria, Campbell River, Nanaimo and Cherry Point
+    Also plots wind vectors averaged over 4 hours before the max ssh at
+    each station.
     Includes text boxes with max water level and timing.
 
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
@@ -2417,18 +2501,6 @@ def plot_threshold_website(
     :returns: matplotlib figure object instance (fig).
     """
 
-    # Time range
-    t_orig, t_final, t = get_model_time_variables(grid_T)
-
-    # Wind time
-    inds = isolate_wind_timing(
-        'Point Atkinson', grid_T, grid_B, weather_path, t, 4, average=True)
-
-    # Set up Information
-    max_sshs = {}
-    max_times = {}
-    max_winds = {}
-
     # Figure
     fig = plt.figure(figsize=figsize)
     gs = gridspec.GridSpec(2, 3, width_ratios=[1, 1, 1], height_ratios=[6, 1])
@@ -2441,7 +2513,31 @@ def plot_threshold_website(
     # Map
     plot_map(ax, coastline)
 
-    # Legend
+    max_ssh_time = {}
+    max_ssh = {}
+    max_windavg = {}
+    for name in TIDAL_SITES:
+        ssh_ts = nc_tools.ssh_timeseries_at_point(
+            grids[name], 0, 0, datetimes=True)
+        ttide = get_tides(name, tidal_predications)
+        max_ssh[name], max_ssh_time[name] = find_ssh_max(name, ssh_ts, ttide)
+        risk_level = stormtools.storm_surge_risk_level(
+                     name, max_ssh[name], ttide)
+        lat, lon = PLACES[name]['lat lon']
+        plot_risk_level_marker(ax, name, risk_level, colours, 'o', 55, 0.3)
+        u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
+            arrow.get(max_ssh_time[name]), weather_path,
+            PLACES[name]['wind grid ji'], avg_hrs=-4)
+        plot_wind_arrow(ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, colours)
+        max_windavg[name], _ = wind_tools.wind_speed_dir(
+                               u_wind_4h_avg, v_wind_4h_avg)
+
+    # Box for Winds
+    textstr = "Winds are 4 hour\nAverage Before\nMaximum Sea Level"
+    props = dict(facecolor='white')
+    ax.text(0.8, 0.78, textstr, transform=ax.transAxes, fontsize=14,
+            verticalalignment='top', bbox=props)
+    # Legend SSH
     handles, labels = ax.get_legend_handles_labels()
     display = (0, 1, 2)
     green = plt.Line2D((0, 0), (0, 1),
@@ -2463,21 +2559,6 @@ def plot_threshold_website(
                        bbox_to_anchor=(0.9, 1.05), loc=2,
                        title=' Possible\nWarnings')
     legend.get_title().set_fontsize('20')
-
-    for name in TIDAL_SITES:
-        ssh_model, t_model = load_model_ssh(grids[name])
-        ttide = get_tides(name, tidal_predications)
-        ssh_corr = correct_model_ssh(ssh_model, t_model, ttide)
-        residual = compute_residual(ssh_corr, t_model, ttide)
-        max_sshs[name], _, max_times[name], _, max_winds[name], _ = get_maxes(
-            ssh_corr, t_model, residual,
-            SITES[name]['lon'], SITES[name]['lat'], weather_path)
-        plot_threshold_map(ax, ttide, ssh_corr, 'o', 55, 0.3, name)
-
-    # Add winds for other stations
-    for name in WIND_SITES:
-        twind = plot_wind_vector(
-            ax, name, t_orig, t_final, weather_path, inds, scale)
 
     # Reference arrow
     ax.arrow(-122.5, 50.65, 0. * scale, -5. * scale,
@@ -2508,23 +2589,16 @@ def plot_threshold_website(
 
     # Figure format
     # Don't shift to PST because we want the date to represent the model run.
-    time = (twind[0]).strftime('%A, %B %d, %Y')
     ax.set_title(
-        'Marine and Atmospheric Conditions\n {Time}'.format(
-            Time=time),
+        'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
+        .format(ssh_ts.time[0]),
         **title_font)
     fig.patch.set_facecolor('#2B3E50')
     axis_colors(ax, 'gray')
 
     # Citation
-    t1 = (twind[0] + PST * time_shift).strftime('%Y/%m/%d %H:%M')
-    t2 = (twind[-1] + PST * time_shift).strftime('%Y/%m/%d %H:%M')
-    timezone = PST * '[PST]' + abs((PST - 1)) * '[UTC]'
     ax.text(0.4, -0.25,
-            'Wind vectors averaged over: {time1} to {time2} {tzone}'.format(
-                time1=t1,
-                time2=t2,
-                tzone=timezone),
+            'Wind vectors averaged over four hours previous to maximum ssh',
             horizontalalignment='left',
             verticalalignment='top',
             transform=ax.transAxes, color='white', fontsize=14)
@@ -2552,23 +2626,24 @@ def plot_threshold_website(
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
         axis_colors(ax, 'blue')
-        display_time = (max_times[name] +
-                        PST * time_shift).strftime('%b %d, %Y %H:%M')
+
+        display_time = arrow.get(max_ssh_time[name]).to('local')
 
         ax.text(
             0.05, 0.9, name, fontsize=20,
             horizontalalignment='left', verticalalignment='top', color='w')
         ax.text(
-            0.05, 0.7, 'Maximum Water Level: {:.2f} m'
-            .format(max_sshs[name] + SITES[name]['msl']), fontsize=15,
+            0.05, 0.7, 'Maximum Water Level: {:.1f} m'
+            .format(max_ssh[name] + SITES[name]['msl']), fontsize=15,
             horizontalalignment='left', verticalalignment='top', color='w')
         ax.text(
             0.05, 0.3, 'Time: {time} {tzone}'
-            .format(time=display_time, tzone=timezone), fontsize=15,
+            .format(time=display_time.format('YYYY-MM-DD HH:mm'),
+                    tzone='PLT'), fontsize=15,
             horizontalalignment='left', verticalalignment='top', color='w')
         ax.text(
-            0.05, 0.5, 'Wind speed: {:.1f} m/s'
-            .format(float(max_winds[name])), fontsize=15,
+            0.05, 0.5, 'Wind speed: {:.0f} kph'
+            .format(unit_conversions.mps_kph(max_windavg[name])), fontsize=15,
             horizontalalignment='left', verticalalignment='top', color='w')
     return fig
 
