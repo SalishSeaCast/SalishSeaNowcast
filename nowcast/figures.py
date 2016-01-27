@@ -1265,12 +1265,12 @@ def website_thumbnail(
         plot_wind_arrow(ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, colours)
     # Wind speed legend
     legend_wind_speed = 5  # m/s or knots
-    plot_wind_arrow(ax, -122.2, 50.6, 0, -legend_wind_speed, colours) #location different
-    ax.text(-122.28, 50.55, "Reference: 5 m/s", rotation=90, fontsize=20)  #location different
+    plot_wind_arrow(ax, -122.2, 50.6, 0, -legend_wind_speed, colours)
+    ax.text(-122.28, 50.55, "Reference: 5 m/s", rotation=90, fontsize=20)
     plot_wind_arrow(
-        ax, -122.45, 50.6, 0, -unit_conversions.knots_mps(legend_wind_speed), #location different
+        ax, -122.45, 50.6, 0, -unit_conversions.knots_mps(legend_wind_speed),
         colours)
-    ax.text(-122.53, 50.55, "Reference: 5 knots", rotation=90, fontsize=20) #location different
+    ax.text(-122.53, 50.55, "Reference: 5 knots", rotation=90, fontsize=20)
     # Title and axis spines, ticks & labels colours
     ax.set_title(
         'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
@@ -2634,7 +2634,7 @@ def plot_threshold_website(
             horizontalalignment='left', verticalalignment='top', color='w')
         ax.text(
             0.05, 0.7, 'Maximum Water Level: {:.1f} m'
-            .format(max_ssh[name] + SITES[name]['msl']), fontsize=15,
+            .format(max_ssh[name]), fontsize=15,
             horizontalalignment='left', verticalalignment='top', color='w')
         ax.text(
             0.05, 0.3, 'Time: {time} {tzone}'
