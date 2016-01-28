@@ -2637,9 +2637,10 @@ def plot_threshold_website(
             .format(max_ssh[name]), fontsize=15,
             horizontalalignment='left', verticalalignment='top', color='w')
         ax.text(
-            0.05, 0.3, 'Time: {time} {tzone}'
+            0.05, 0.3, 'Time: {time} [{tzone}]'
             .format(time=display_time.format('YYYY-MM-DD HH:mm'),
-                    tzone='PLT'), fontsize=15,
+                    tzone=display_time.tzinfo.tzname(display_time.datetime)),
+            fontsize=15,
             horizontalalignment='left', verticalalignment='top', color='w')
         ax.text(
             0.05, 0.5, 'Wind speed: {:.0f} kph'
