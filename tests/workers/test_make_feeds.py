@@ -36,7 +36,7 @@ def worker_module():
 @pytest.fixture
 def config():
     return {
-        'ssh': {'tidal_predictions': '/nowcast/tidal_predictions/'},
+        'ssh': {'tidal_predictions': 'tidal_predictions/'},
         'run': {
             'results archive': {
                 'forecast': '/results/SalishSea/forecast/',
@@ -270,7 +270,7 @@ class TestCalcMaxSshRisk:
         max_ssh_info = worker_module._calc_max_ssh_risk(
             'pmv.xml', run_date, 'forecast', config)
         m_ltp.assert_called_once_with(
-            '/nowcast/tidal_predictions/PointAtkinson_tidal_prediction_'
+            'tidal_predictions/PointAtkinson_tidal_prediction_'
             '01-Jan-2015_01-Jan-2020.csv')
         m_cms.assert_called_once_with(
             'pmv.xml', m_ltp()[0], run_date, 'forecast', config)

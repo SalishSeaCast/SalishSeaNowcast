@@ -29,7 +29,7 @@ rivers:
 
 ssh:
   # Directory containing tidal predication file for sea surface height correction
-  tidal_predictions: /results/nowcast-sys/tools/SalishSeaNowcast/nowcast/tidal_predictions/
+  tidal_predictions: /results/nowcast-sys/tools/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
   ssh_dir: /results/forcing/sshNeahBay/
 

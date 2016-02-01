@@ -665,7 +665,7 @@ def compute_residual(ssh, t_model, ttide):
     return res
 
 
-def get_tides(name, path='tidal_predictions/'):
+def get_tides(name, path='../tidal_predictions/'):
     """ Returns the tidal predictions at a given station.
 
     :arg str name: The name of the station.
@@ -673,7 +673,7 @@ def get_tides(name, path='tidal_predictions/'):
     :arg str path: Path to the directory containing the tidal prediction
                    .csv files to use.
                    Default value resolves to
-                   :file:`SalishSeaNowcast/nowcast/tidal_predications/
+                   :file:`SalishSeaNowcast/tidal_predications/
                    for calls elsewhere in the
                    :py:mod:`~SalishSeaNowcast.nowcast.figures` module.
 

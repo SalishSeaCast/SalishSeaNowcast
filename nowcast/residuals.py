@@ -40,7 +40,7 @@ from nowcast import (
 paths = {'nowcast': '/results/SalishSea/nowcast/',
          'forecast': '/results/SalishSea/forecast/',
          'forecast2': '/results/SalishSea/forecast2/',
-         'tides': '/data/nsoontie/MEOPAR/tools/SalishSeaNowcast/nowcast/tidal_predictions/'}
+         'tides': '/data/nsoontie/MEOPAR/tools/SalishSeaNowcast/tidal_predictions/'}
 
 colours = {'nowcast': 'DodgerBlue',
            'forecast': 'ForestGreen',
