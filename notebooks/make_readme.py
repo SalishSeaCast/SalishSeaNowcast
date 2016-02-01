@@ -33,14 +33,20 @@ def main():
     url = os.path.join(NBVIEWER, REPO, REPO_DIR)
     readme = """\
 The Jupyter Notebooks in this directory document
-various aspects of the developemtn and maintenance of the Salish Sea
+various aspects of the development and maintenance of the Salish Sea
 model nowcast system.
 
-In particular,
-the [ERDDAP_datasets.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/ERDDAP_datasets.ipynb)
-notebook describes and partially automates the process of generating
-XML fragments for model results datasets to be included in the ERDDAP
-server system.
+In particular:
+
+* The [ERDDAP_datasets.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/ERDDAP_datasets.ipynb)
+  notebook describes and partially automates the process of generating
+  XML fragments for model results datasets to be included in the ERDDAP
+  server system.
+* The
+[DevelopingNowcastFigureFunctions.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DevelopingNowcastFigureFunctions.ipynb)
+  notebook describes the recommended process for development of those functions,
+  and provides an example of development of one.
+
 
 The links below are to static renderings of the notebooks via
 [nbviewer.ipython.org](http://nbviewer.ipython.org/).
