@@ -103,6 +103,7 @@ class NowcastManager:
             'make_plots': self._after_make_plots,
             'make_feeds': self._after_make_feeds,
             'make_site_page': self._after_make_site_page,
+            'hg_update_site': self._after_hg_update_site,
             'push_to_web': self._after_push_to_web,
         }
 
@@ -629,13 +630,30 @@ class NowcastManager:
             ]
             if page_type in ('index', 'publish'):
                 actions[msg_type].append(
-                    (self._launch_worker, ['push_to_web']))
+                    (self._launch_worker, ['hg_update_site']))
             if page_type == 'research':
                 actions[msg_type].append(
                     (self._launch_worker,
                         ['make_plots', ['nowcast', 'publish', '--run-date',
                          self.checklist['NEMO run']['nowcast']['run date']]])
                 )
+        return actions[msg_type]
+
+    def _after_hg_update_site(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        hg_update_site worker.
+        """
+        actions = {
+            'crash': None,
+            'failure': None,
+            'success': [
+                (self._update_checklist,
+                    ['hg_update_site',
+                     'salishsea site repo updated', payload]),
+                (self._launch_worker, ['push_to_web']),
+            ],
+        }
         return actions[msg_type]
 
     def _after_push_to_web(self, msg_type, payload):
