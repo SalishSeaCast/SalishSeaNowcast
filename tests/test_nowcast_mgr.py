@@ -95,6 +95,7 @@ class TestNowcastManagerConstructor:
     'make_plots',
     'make_feeds',
     'make_site_page',
+    'hg_update_site',
     'push_to_web',
 ])
 def test_after_actions(worker, mgr):
@@ -1028,9 +1029,9 @@ class TestAfterMakeSitePage:
         'success index',
         'success publish',
     ])
-    def test_success_launch_push_to_web_worker(self, msg_type, mgr):
+    def test_success_launch_hg_update_site_worker(self, msg_type, mgr):
         actions = mgr._after_make_site_page(msg_type, 'payload')
-        expected = (mgr._launch_worker, ['push_to_web'])
+        expected = (mgr._launch_worker, ['hg_update_site'])
         assert actions[1] == expected
 
     def test_success_research_launch_make_plots_worker_nowcast_publish(
@@ -1048,6 +1049,33 @@ class TestAfterMakeSitePage:
             mgr._launch_worker,
             ['make_plots', ['nowcast', 'publish', '--run-date', '2015-11-25']],
         )
+        assert actions[1] == expected
+
+
+class TestAfterHgUpdateSite:
+    """Unit tests for the NowcastManager._after_hg_update_site method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        mgr.checklist = {'salishsea site pages': {}}
+        actions = mgr._after_hg_update_site(msg_type, 'payload')
+        assert actions is None
+
+    def test_update_checklist_on_success(self, mgr):
+        mgr.checklist = {'salishsea site repo updated': {}}
+        actions = mgr._after_hg_update_site('success', 'payload')
+        expected = (
+            mgr._update_checklist,
+            ['hg_update_site', 'salishsea site repo updated', 'payload'],
+        )
+        assert actions[0] == expected
+
+    def test_success_launch_push_to_web_worker(self, mgr):
+        actions = mgr._after_hg_update_site('success', 'payload')
+        expected = (mgr._launch_worker, ['push_to_web'])
         assert actions[1] == expected
 
 

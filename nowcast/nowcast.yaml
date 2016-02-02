@@ -368,6 +368,10 @@ msg_types:
     success research: research page ready for push to salishsea site
     failure research: research page for salishsea site, preparation failed
     crash: make_site_page worker crashed
+  hg_update_site:
+    success: hg updated salishsea-site repo
+    failure: hg update of salishsea-site repo failed
+    crash: hg_update worker crashed
   push_to_web:
     success: publish page and figures pushed to salishsea site
     failure: publish page and figures push to salishsea site failed

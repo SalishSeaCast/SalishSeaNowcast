@@ -18,7 +18,6 @@ pages of the salishsea.eos.ubc.ca web site and pushes them to the site.
 """
 import logging
 import os
-import subprocess
 import traceback
 
 import zmq
@@ -71,8 +70,8 @@ def main():
 
 
 def push_to_web(config):
-    repo_path = hg_update(
-        config['web']['site_repo_url'], config['web']['www_path'])
+    repo_name = config['web']['site_repo_url'].rsplit('/')[-1]
+    repo_path = os.path.join(config['web']['www_path'], repo_name)
     html_path = sphinx_build(repo_path)
     results_pages = [
         os.path.join(
@@ -91,24 +90,6 @@ def push_to_web(config):
         html_path, results_pages, plots_paths, config['web']['server_path'])
     checklist = True
     return checklist
-
-
-def hg_update(repo_url, www_path):
-    """Pull changes from repo_url and update its clone in www_path.
-
-    If the clone does not yet exist, create it.
-    """
-    repo_name = repo_url.rsplit('/')[-1]
-    repo = os.path.join(www_path, repo_name)
-    if os.path.exists(repo):
-        cmd = ['hg', 'pull', '--update', '--cwd', repo]
-        logger.debug('pulling updates from {}'.format(repo_url))
-    else:
-        cmd = ['hg', 'clone', repo_url, repo]
-        logger.debug('cloning{}'.format(repo_url))
-    lib.run_in_subprocess(cmd, logger.debug, logger.error)
-    logger.info('hg updated {}'.format(repo))
-    return repo
 
 
 def sphinx_build(repo_path):
