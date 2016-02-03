@@ -248,26 +248,16 @@ def _calc_max_ssh(feed, ttide, run_date, run_type, config):
 
 def _calc_wind_4h_avg(feed, max_ssh_time, config):
     weather_path = config['weather']['ops_dir']
-    weather_grid = nc.Dataset(
-        os.path.join(
-            weather_path, 'fcst', '{:ops_y%Ym%md%d.nc}'.format(max_ssh_time)))
     tide_gauge_stn = config['web']['feeds'][feed]['tide_gauge_stn']
-    wind = nc_tools.uv_wind_timeseries_at_point(
-        weather_grid, *PLACES[tide_gauge_stn]['wind grid ji'])
-    i_max_ssh_wind = np.asscalar(
-        np.where(
-            wind.time == arrow.get(
-                max_ssh_time.year, max_ssh_time.month, max_ssh_time.day,
-                max_ssh_time.hour))[0])
-    u_wind_4h_avg = np.mean(wind.u[max(i_max_ssh_wind-4, 0):i_max_ssh_wind])
-    v_wind_4h_avg = np.mean(wind.v[max(i_max_ssh_wind-4, 0):i_max_ssh_wind])
-    wind_speed_4h_avg, wind_dir_4h_avg = wind_tools.wind_speed_dir(
-        u_wind_4h_avg, v_wind_4h_avg)
+    wind_avg = wind_tools.calc_wind_avg_at_point(
+        arrow.get(max_ssh_time), weather_path,
+        PLACES[tide_gauge_stn]['wind grid ji'], avg_hrs=-4)
+    wind_vector = wind_tools.wind_speed_dir(wind_avg.u, wind_avg.v)
     return {
-        'wind_speed_4h_avg': np.asscalar(wind_speed_4h_avg),
-        'wind_dir_4h_avg': np.asscalar(wind_dir_4h_avg),
+        'wind_speed_4h_avg': np.asscalar(wind_vector.speed),
+        'wind_dir_4h_avg': np.asscalar(wind_vector.dir),
     }
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover
