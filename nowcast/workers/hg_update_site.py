@@ -58,8 +58,8 @@ def hg_update_site(parsed_args, config, *args):
         logger.debug('cloning {}'.format(repo_url))
     lib.run_in_subprocess(shlex.split(cmd), logger.debug, logger.error)
     logger.info('hg updated {repo}'.format(repo=www_path/repo_name))
-    return www_path/repo_name
+    return str(www_path/repo_name)
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover
