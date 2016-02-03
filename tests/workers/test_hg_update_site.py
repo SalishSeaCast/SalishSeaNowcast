@@ -15,6 +15,7 @@
 
 """Unit tests for Salish Sea NEMO nowcast hg_update_site worker.
 """
+import shlex
 from unittest.mock import (
     Mock,
     patch,
@@ -60,3 +61,47 @@ def test_failure(worker_module):
     parsed_args = Mock()
     msg_typ = worker_module.failure(parsed_args)
     assert msg_typ == 'failure'
+
+
+class TestHgUpdateSite:
+    """Unit tests for hg_update_site() function.
+    """
+    @patch.object(worker_module(), 'logger')
+    @patch.object(worker_module().lib, 'run_in_subprocess')
+    def test_hg_update(self, m_lib_ris, m_logger, worker_module, tmpdir):
+        parsed_args = Mock()
+        tmp_www_path = tmpdir.ensure_dir('www')
+        tmp_repo_path = tmp_www_path.ensure_dir('salishsea-site')
+        config = {
+            'web': {
+                'site_repo_url':
+                    'https://bitbucket.org/salishsea/salishsea-site',
+                'www_path': str(tmp_www_path),
+            }}
+        checklist = worker_module.hg_update_site(parsed_args, config)
+        expected = shlex.split(
+            'hg pull --update --cwd {}'.format(tmp_repo_path))
+        m_lib_ris.assert_called_once_with(
+            expected, m_logger.debug, m_logger.error)
+        assert checklist == str(tmp_repo_path)
+
+    @patch.object(worker_module(), 'logger')
+    @patch.object(worker_module().lib, 'run_in_subprocess')
+    def test_hg_clone(self, m_lib_ris, m_logger, worker_module, tmpdir):
+        parsed_args = Mock()
+        tmp_www_path = tmpdir.ensure_dir('www')
+        config = {
+            'web': {
+                'site_repo_url':
+                    'https://bitbucket.org/salishsea/salishsea-site',
+                'www_path': str(tmp_www_path),
+            }}
+        checklist = worker_module.hg_update_site(parsed_args, config)
+        expected = shlex.split(
+            'hg clone {repo_url} {repo}'
+            .format(
+                repo_url=config['web']['site_repo_url'],
+                repo=tmp_www_path.join('salishsea-site')))
+        m_lib_ris.assert_called_once_with(
+            expected, m_logger.debug, m_logger.error)
+        assert checklist == str(tmp_www_path.join('salishsea-site'))
