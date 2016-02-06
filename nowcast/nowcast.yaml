@@ -187,6 +187,25 @@ web:
       tidal predictions: 'Point Atkinson_tidal_prediction_01-Jan-2015_01-Jan-2020.csv'
 
 
+erddap:
+  flag_dir: /results/erddap/flag/
+  datasetIDs:
+    nowcast:
+      - ubcSSn3DTracerFields1hV1
+      - ubcSSnSurfaceTracerFields1hV1
+      - ubcSSn3DuVelocity1hV1
+      - ubcSSn3DvVelocity1hV1
+      - ubcSSn3DwVelocity1hV1
+      - ubcSSn3DwVelocity1hV2
+      - ubcSSnPointAtkinsonSSH15mV1
+    forecast:
+      -
+    forecast2:
+      -
+    nowcast-green:
+      -
+
+
 logging:
   # Log files are created in the same directory as the nowcast YAML
   # config file that is used for the nowcast_mgr process
@@ -342,6 +361,16 @@ msg_types:
     success forecast2: forecast2 results files downloaded
     failure forecast2: forecast2 results files download failed
     crash: download_results worker crashed
+  ping_erddap:
+    success nowcast: nowcast ERDDAP dataset flag files created
+    failure nowcast: nowcast ERDDAP dataset flag files creation failed
+    success forecast: forecast ERDDAP dataset flag files created
+    failure forecast: forecast ERDDAP dataset flag files creation failed
+    success forecast2: forecast2 ERDDAP dataset flag files created
+    failure forecast2: forecast2 ERDDAP dataset flag files creation failed
+    success nowcast-green: nowcast-green ERDDAP dataset flag files created
+    failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
+    crash: ping_erddap worker crashed
   make_plots:
     success nowcast publish: nowcast publish plots produced
     success nowcast research: nowcast reseach plots produced

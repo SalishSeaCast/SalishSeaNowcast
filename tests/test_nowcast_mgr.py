@@ -92,6 +92,7 @@ class TestNowcastManagerConstructor:
     'run_NEMO36',
     'watch_NEMO',
     'download_results',
+    'ping_erddap',
     'make_plots',
     'make_feeds',
     'make_site_page',
@@ -896,6 +897,61 @@ class TestAfterDownloadResults:
             ['make_plots', [run_type, plot_type, '--run-date', '2015-11-24']],
         )
         assert actions[1] == expected
+
+    @pytest.mark.parametrize('msg_type, run_type', [
+        ('success nowcast', 'nowcast'),
+        ('success forecast', 'forecast'),
+        ('success forecast2', 'forecast2'),
+        ('success nowcast-green', 'nowcast-green'),
+    ])
+    def test_success_launch_ping_erddap_worker(self, msg_type, run_type, mgr):
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2016-02-05'},
+                'forecast': {'run date': '2016-02-05'},
+                'forecast2': {'run date': '2016-02-05'},
+                'nowcast-green': {'run date': '2016-02-05'},
+            },
+        }
+        actions = mgr._after_download_results(msg_type, 'payload')
+        expected = (mgr._launch_worker, ['ping_erddap', [run_type]])
+        assert actions[2] == expected
+
+
+class TestAfterPingErddap:
+    """Unit tests for the NowcastManager._after_ping_erddap method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+        'failure forecast',
+        'failure forecast2',
+        'failure nowcast-green',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        actions = mgr._after_ping_erddap(msg_type, 'payload')
+        assert actions is None
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nowcast',
+        'success forecast',
+        'success forecast2',
+        'success nowcast-green',
+    ])
+    def test_update_checklist_on_success(self, msg_type, mgr):
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2016-02-05'},
+                'forecast': {'run date': '2016-02-05'},
+                'forecast2': {'run date': '2016-02-05'},
+                'nowcast-green': {'run date': '2016-02-05'},
+            },
+        }
+        actions = mgr._after_ping_erddap(msg_type, 'payload')
+        expected = (
+            mgr._update_checklist, ['ping_erddap', 'flag files', 'payload'],
+        )
+        assert actions[0] == expected
 
 
 class TestAfterMakePlots:
