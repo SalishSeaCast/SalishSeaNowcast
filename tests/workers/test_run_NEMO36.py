@@ -413,23 +413,36 @@ class TestRunDescription:
                     Mock(name='tell_manager'))
         assert run_desc['walltime'] == expected
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast', 'NEMO-code', '/nowcast-sys/nowcast/../NEMO-3.6-code'),
-        ('nowcast-green', 'XIOS', '/nowcast-sys/nowcast/../XIOS'),
-        ('forecast', 'forcing', '/nowcast-sys/nowcast/../NEMO-forcing'),
-        ('forecast2', 'runs directory', '/nowcast-sys/nowcast'),
+        ('nowcast', 'NEMO-code', 'NEMO-3.6-code'),
+        ('nowcast-green', 'XIOS', 'XIOS'),
+        ('forecast', 'forcing', 'NEMO-forcing'),
+####        ('forecast2', 'runs directory', 'nowcast'),
     ])
     def test_paths(
-        self, run_type, path, expected, worker_module, config,
+        self, run_type, path, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config,
-            Mock(name='tell_manager'))
-        assert run_desc['paths'][path] == expected
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
+        assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
 
     @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, path, expected', [
