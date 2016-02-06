@@ -100,6 +100,7 @@ class NowcastManager:
             'run_NEMO36': self._after_run_NEMO36,
             'watch_NEMO': self._after_watch_NEMO,
             'download_results': self._after_download_results,
+            'ping_erddap': self._after_ping_erddap,
             'make_plots': self._after_make_plots,
             'make_feeds': self._after_make_feeds,
             'make_site_page': self._after_make_site_page,
@@ -566,6 +567,26 @@ class NowcastManager:
                 (self._launch_worker,
                     ['make_plots', [run_type, plot_type, '--run-date',
                      self.checklist['NEMO run'][run_type]['run date']]]),
+                (self._launch_worker, ['ping_erddap', [run_type]]),
+            ]
+        return actions[msg_type]
+
+    def _after_ping_erddap(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        ping_erddap worker.
+        """
+        actions = {
+            'crash': None,
+            'failure nowcast': None,
+            'failure forecast': None,
+            'failure forecast2': None,
+            'failure nowcast-green': None,
+        }
+        if msg_type.startswith('success'):
+            actions[msg_type] = [
+                (self._update_checklist,
+                    ['ping_erddap', 'flag files', payload]),
             ]
         return actions[msg_type]
 
