@@ -136,9 +136,7 @@ class TestPingErddap:
                         'ubcSSf23DTracerFields1hV1', 'ubcSSf23DuVelocity1hV1'],
                     'nowcast-green': [
                         'ubcSSng3DTracerFields1hV1', 'ubcSSng3DuVelocity1hV1'],
-                }
-            }
-        }
+                }}}
         with patch.object(worker_module, 'logger') as m_logger:
             checklist = worker_module.ping_erddap(parsed_args, config)
             dataset_ids = config['erddap']['datasetIDs'][run_type]
@@ -148,3 +146,22 @@ class TestPingErddap:
             m_logger.debug.calls[i] == expected
         expected = {run_type: config['erddap']['datasetIDs'][run_type]}
         assert checklist == expected
+
+    def test_no_datasetID(self, worker_module, tmpdir):
+        parsed_args = Mock(run_type='nowcast-green')
+        tmp_flag_dir = tmpdir.ensure_dir('flag')
+        config = {
+            'erddap': {
+                'flag_dir': str(tmp_flag_dir),
+                'datasetIDs': {
+                    'nowcast':
+                        ['ubcSSn3DTracerFields1hV1', 'ubcSSn3DuVelocity1hV1'],
+                    'forecast':
+                        ['ubcSSf3DTracerFields1hV1', 'ubcSSf3DuVelocity1hV1'],
+                    'forecast2': [
+                        'ubcSSf23DTracerFields1hV1', 'ubcSSf23DuVelocity1hV1'],
+                }}}
+        with patch.object(worker_module, 'logger') as m_logger:
+            checklist = worker_module.ping_erddap(parsed_args, config)
+        assert not m_logger.debug.called
+        assert checklist == {'nowcast-green': []}

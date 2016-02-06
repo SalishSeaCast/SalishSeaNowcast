@@ -198,12 +198,6 @@ erddap:
       - ubcSSn3DwVelocity1hV1
       - ubcSSn3DwVelocity1hV2
       - ubcSSnPointAtkinsonSSH15mV1
-    forecast:
-      -
-    forecast2:
-      -
-    nowcast-green:
-      -
 
 
 logging:
