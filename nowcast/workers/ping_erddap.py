@@ -55,7 +55,7 @@ def failure(parsed_args):
     logger.critical(
         '{.run_type} ERDDAP dataset flag files creation failed'
         .format(parsed_args),
-        extra={'run_type': parsed_args.run})
+        extra={'run_type': parsed_args.run_type})
     msg_type = 'failure {.run_type}'.format(parsed_args)
     return msg_type
 
