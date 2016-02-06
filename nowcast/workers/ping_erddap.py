@@ -64,10 +64,14 @@ def ping_erddap(parsed_args, config, *args):
     run_type = parsed_args.run_type
     flag_path = Path(config['erddap']['flag_dir'])
     checklist = {run_type: []}
-    for dataset_id in config['erddap']['datasetIDs'][run_type]:
-        (flag_path/dataset_id).touch()
-        logger.debug('{} touched'.format(flag_path/dataset_id))
-        checklist[run_type].append(dataset_id)
+    try:
+        for dataset_id in config['erddap']['datasetIDs'][run_type]:
+            (flag_path/dataset_id).touch()
+            logger.debug('{} touched'.format(flag_path/dataset_id))
+            checklist[run_type].append(dataset_id)
+    except KeyError:
+        # run type is not in datasetIDs dict
+        pass
     return checklist
 
 
