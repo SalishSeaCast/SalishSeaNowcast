@@ -187,12 +187,9 @@ def _update_time_namelist(run_date, run_type, host_run_config):
     prev_run_namelist = namelist2dict(str(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
     prev_itend = prev_run_namelist['namrun'][0]['nn_itend']
-    run_prep_dir = Path(host_run_config['run_prep_dir'])
-    namelist_domain = namelist2dict(
-        str(run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/namelist.domain'))
-    rdt = namelist_domain['namdom'][0]['rn_rdt']
+    rdt = prev_run_namelist['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
-    namelist_time = run_prep_dir/'namelist.time'
+    namelist_time = Path(host_run_config['run_prep_dir'], 'namelist.time')
     with namelist_time.open('rt') as f:
         lines = f.readlines()
     new_lines, restart_timestep = _calc_new_namelist_lines(
