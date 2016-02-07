@@ -46,7 +46,7 @@ def main():
 def success(parsed_args):
     logger.info(
         '{.run_type} ERDDAP dataset flag files created'.format(parsed_args),
-        extra={'run_type': parsed_args.run})
+        extra={'run_type': parsed_args.run_type})
     msg_type = 'success {.run_type}'.format(parsed_args)
     return msg_type
 
