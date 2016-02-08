@@ -1,6 +1,8 @@
 :orphan: True
 
-.. _top:
+.. raw:: html
+
+    <span id="top"></span>
 
 **********************************************************************
 Salish Sea Model Research Evaluation Results from ${run_title}
