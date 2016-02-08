@@ -173,7 +173,7 @@ web:
 
   figures:
     storage_path: /results/nowcast-sys/figures
-    server_path: /nowcast-sys/figures
+    server_path: nowcast-sys/figures
 
   salinity_comparison:
     web_path: eoas.ubc.ca/~jieliu/MEOPAR/nowcast
