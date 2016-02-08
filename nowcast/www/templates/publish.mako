@@ -1,6 +1,8 @@
 :orphan: True
 
-.. _top:
+.. raw:: html
+
+    <span id="top"></span>
 
 **********************************************************************************
 ${results_date.format('dddd, D MMMM YYYY')} -- Salish Sea Storm Surge ${run_title}
