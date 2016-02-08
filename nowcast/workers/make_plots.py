@@ -107,7 +107,7 @@ def make_plots(parsed_args, config, *args):
     lib.mkdir(plots_dir, logger, grp_name='sallen')
     _make_plot_files(
         config, run_type, plot_type, dmy, results_home, plots_dir)
-    checklist = _copy_plots_to_www_path(
+    checklist = _link_plots_to_figures_server(
         config, run_type, plot_type, dmy, plots_dir)
     if plot_type == 'publish' and run_type in ('forecast', 'forecast2'):
         summary_plot = _install_storm_surge_summary_plot(
@@ -139,19 +139,15 @@ def _make_plot_files(
     )
 
 
-def _copy_plots_to_www_path(config, run_type, plot_type, dmy, plots_dir):
-    www_plots_path = os.path.join(
-        config['web']['www_path'],
-        os.path.basename(config['web']['site_repo_url']),
-        config['web']['site_plots_path'],
-        run_type,
-        dmy)
-    lib.mkdir(www_plots_path, logger, grp_name=config['file group'])
+def _link_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
+    dest_dir = os.path.join(
+        config['web']['figures']['storage_path'], run_type, dmy)
+    lib.mkdir(dest_dir, logger, grp_name=config['file group'])
     for f in glob(os.path.join(plots_dir, '*')):
         lib.fix_perms(f, grp_name=config['file group'])
-        shutil.copy2(f, www_plots_path)
-    checklist = {' '.join((run_type, plot_type)):
-                 glob(os.path.join(www_plots_path, '*'))}
+        os.link(f, dest_dir)
+    checklist = {
+        ' '.join((run_type, plot_type)): glob(os.path.join(dest_dir, '*'))}
     return checklist
 
 

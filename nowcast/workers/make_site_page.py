@@ -139,27 +139,35 @@ def configure_argparser(prog, description, parents):
 def make_site_page(run_type, page_type, run_date, config):
     svg_file_roots = {
         'publish': [
-            'Threshold_website',
-            'PA_tidal_predictions',
-            'Vic_maxSSH',
-            'PA_maxSSH',
-            'CR_maxSSH',
-            'Nan_maxSSH',
-            'CP_maxSSH',
-            'NOAA_ssh',
-            'WaterLevel_Thresholds',
-            'SH_wind',
-            'Avg_wind_vectors',
-            'Wind_vectors_at_max',
+            ('Threshold_website',
+                'Marine and Atmospheric Conditions - Storm Surge Alerts'),
+            ('PA_tidal_predictions', 'Tidal Predictions for Point Atkinson'),
+            ('Vic_maxSSH', 'Victoria Sea Surface Height'),
+            ('CP_maxSSH', 'Cherry Point Sea Surface Height'),
+            ('PA_maxSSH', 'Point Atkinson Sea Surface Height'),
+            ('Nan_maxSSH', 'Nanaimo Sea Surface Height'),
+            ('CR_maxSSH', 'Campbell River Sea Surface Height'),
+            ('NOAA_ssh', 'Sea Surface Height at Selected NOAA Stations'),
+            ('WaterLevel_Thresholds', 'Storm Surge Alert Thresholds'),
+            ('SH_wind', 'Sandheads Wind'),
+            ('Avg_wind_vectors',
+                '4 hr Average Winds from Atmospheric Forcing'),
+            ('Wind_vectors_at_max',
+                'Instantaneous Winds from Atmospheric Forcing'),
         ],
         'research': [
-            'Salinity_on_thalweg',
-            'Temperature_on_thalweg',
-            'T_S_Currents_on_surface',
-            'Compare_VENUS_East',
-            'Compare_VENUS_Central',
-            'Currents_at_VENUS_East',
-            'Currents_at_VENUS_Central',
+            ('Salinity_on_thalweg', 'Salinity Field Along Thalweg'),
+            ('Temperature_on_thalweg', 'Temperature Field Along Thalweg'),
+            ('T_S_Currents_on_surface',
+                'Surface Salinity, Temperature and Currents'),
+            ('Currents_at_VENUS_East',
+                'Model Currents at ONC VENUS East Node'),
+            ('Currents_at_VENUS_Central',
+                'Model Currents at ONC VENUS Central Node'),
+            ('Compare_VENUS_East',
+                'Salinity and Temperature at ONC VENUS East Node'),
+            ('Compare_VENUS_Central',
+                'Salinity and Temperature at ONC VENUS Central Node'),
         ],
     }
     # Functions to render rst files for various run types
@@ -172,7 +180,7 @@ def make_site_page(run_type, page_type, run_date, config):
     mako_file = os.path.join(
         config['web']['templates_path'],
         '{page_type}.mako'.format(page_type=page_type))
-    tmpl = mako.template.Template(filename=mako_file)
+    tmpl = mako.template.Template(filename=mako_file, input_encoding='utf-8')
     logger.debug(
         '{run_type} {page_type}: read template: {mako_file}'
         .format(run_type=run_type, page_type=page_type, mako_file=mako_file),
@@ -225,12 +233,18 @@ def render_nowcast_rst(
         .format(page_type=page_type,
                 dmy=run_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'nowcast', rst_filename)
+    figures_server = (
+        'http://{domain}/{path}'
+        .format(
+            domain=config['web']['domain'],
+            path=config['web']['figures']['server_path']))
     vars = {
         'run_date': run_date,
         'run_type': 'nowcast',
         'results_date': run_date,
         'run_title': 'Nowcast',
         'svg_file_roots': svg_file_roots[page_type],
+        'figures_server': figures_server,
     }
     tmpl_to_rst(tmpl, rst_file, vars, config)
     logger.debug(
@@ -253,12 +267,18 @@ def render_forecast_rst(
         .format(page_type=page_type,
                 dmy=results_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'forecast', rst_filename)
+    figures_server = (
+        'http://{domain}/{path}'
+        .format(
+            domain=config['web']['domain'],
+            path=config['web']['figures']['server_path']))
     vars = {
         'run_date': run_date,
         'run_type': 'forecast',
         'results_date': results_date,
         'run_title': 'Forecast',
         'svg_file_roots': svg_file_roots[page_type],
+        'figures_server': figures_server,
     }
     tmpl_to_rst(tmpl, rst_file, vars, config)
     logger.debug(
@@ -283,12 +303,18 @@ def render_forecast2_rst(
         .format(page_type=page_type,
                 dmy=results_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'forecast2', rst_filename)
+    figures_server = (
+        'http://{domain}/{path}'
+        .format(
+            domain=config['web']['domain'],
+            path=config['web']['figures']['server_path']))
     vars = {
         'run_date': run_date,
         'run_type': 'forecast2',
         'results_date': results_date,
         'run_title': 'Preliminary Forecast',
         'svg_file_roots': svg_file_roots[page_type],
+        'figures_server': figures_server,
     }
     tmpl_to_rst(tmpl, rst_file, vars, config)
     logger.debug(

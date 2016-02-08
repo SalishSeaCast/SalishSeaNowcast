@@ -101,30 +101,45 @@ class TestMakeSitePage(object):
 
 @patch.object(make_site_page_module(), 'tmpl_to_rst')
 def test_render_nowcast_rst_run_date(m_tmpl_to_rst, make_site_page_module):
+    config = {
+        'web': {
+            'domain': 'salishsea.eos.ubc.ca',
+            'figures': {'server_path': '/nowcast-sys/figures'},
+        }}
     svg_file_roots = {'publish': []}
     make_site_page_module.render_nowcast_rst(
         'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
-        'config')
+        config)
     expected = 'rst_path/nowcast/publish_08feb15.rst'
     assert m_tmpl_to_rst.call_args[0][1] == expected
 
 
 @patch.object(make_site_page_module(), 'tmpl_to_rst')
 def test_render_forecast_rst_run_date(m_tmpl_to_rst, make_site_page_module):
+    config = {
+        'web': {
+            'domain': 'salishsea.eos.ubc.ca',
+            'figures': {'server_path': '/nowcast-sys/figures'},
+        }}
     svg_file_roots = {'publish': []}
     make_site_page_module.render_forecast_rst(
         'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
-        'config')
+        config)
     expected = 'rst_path/forecast/publish_09feb15.rst'
     assert m_tmpl_to_rst.call_args[0][1] == expected
 
 
 @patch.object(make_site_page_module(), 'tmpl_to_rst')
 def test_render_forecast2_rst_run_date(m_tmpl_to_rst, make_site_page_module):
+    config = {
+        'web': {
+            'domain': 'salishsea.eos.ubc.ca',
+            'figures': {'server_path': '/nowcast-sys/figures'},
+        }}
     svg_file_roots = {'publish': []}
     make_site_page_module.render_forecast2_rst(
         'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
-        'config')
+        config)
     expected = 'rst_path/forecast2/publish_10feb15.rst'
     assert m_tmpl_to_rst.call_args[0][1] == expected
 

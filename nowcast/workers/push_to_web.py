@@ -18,6 +18,7 @@ pages of the salishsea.eos.ubc.ca web site and pushes them to the site.
 """
 import logging
 import os
+import subprocess
 import traceback
 
 import zmq
@@ -83,8 +84,6 @@ def push_to_web(config):
         os.path.join(
             *config['web']['site_storm_surge_plot_path']
             .split(os.path.sep)[1:]),
-        os.path.join(
-            *config['web']['site_plots_path'].split(os.path.sep)[1:]),
     ]
     rsync_to_site(
         html_path, results_pages, plots_paths, config['web']['server_path'])
@@ -102,8 +101,8 @@ def sphinx_build(repo_path):
     logger.debug('starting sphinx-build of {}'.format(site_path))
     ## TODO: Change to control cleaning building of the site with a
     ## command-line option flag, probably --clean
-#    cmd = 'rm -rf {}'.format(os.path.join(build_path, '*'))
-#    subprocess.check_call(cmd, shell=True)
+    cmd = 'rm -rf {}'.format(os.path.join(build_path, '*'))
+    subprocess.check_call(cmd, shell=True)
     cmd = [
         'sphinx-build',
         '-b', 'html',

@@ -167,10 +167,13 @@ web:
   site_storm_surge_plot_path: site/_static/storm-surge
   site_storm_surge_plot: Website_thumbnail
   site_nemo_results_path: site/nemo/results
-  site_plots_path: site/_static/nemo/results_figures
   www_path: www
   templates_path: www/templates
   server_path: shelob-salishsea:/www/salishsea/data
+
+  figures:
+    storage_path: /results/nowcast-sys/figures
+    server_path: /nowcast-sys/figures
 
   salinity_comparison:
     web_path: eoas.ubc.ca/~jieliu/MEOPAR/nowcast
