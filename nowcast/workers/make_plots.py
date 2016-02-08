@@ -145,7 +145,7 @@ def _link_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
     lib.mkdir(dest_dir, logger, grp_name=config['file group'])
     for f in glob(os.path.join(plots_dir, '*')):
         lib.fix_perms(f, grp_name=config['file group'])
-        os.link(f, dest_dir)
+        os.link(f, os.path.join(dest_dir, os.path.basename(f)))
     checklist = {
         ' '.join((run_type, plot_type)): glob(os.path.join(dest_dir, '*'))}
     return checklist
