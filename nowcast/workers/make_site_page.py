@@ -1,4 +1,4 @@
-# Copyright 2013-2015 The Salish Sea MEOPAR contributors
+# Copyright 2013-2016 The Salish Sea MEOPAR contributors
 # and The University of British Columbia
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,127 +16,91 @@
 """Salish Sea NEMO nowcast worker that creates pages for the salishsea
 site from page templates.
 """
-import argparse
 from copy import copy
 from glob import glob
 import logging
 import os
 import shutil
-import traceback
 
 import arrow
 import mako.template
-import zmq
 
 from nowcast import lib
-from nowcast.nowcast_worker import WorkerError
+from nowcast.nowcast_worker import NowcastWorker
 
 
 worker_name = lib.get_module_name()
-
 logger = logging.getLogger(worker_name)
-
-context = zmq.Context()
 
 # Number of days in index page grid
 INDEX_GRID_COLS = 21
 
 
 def main():
-    # Prepare the worker
-    base_parser = lib.basic_arg_parser(
-        worker_name, description=__doc__, add_help=False)
-    parser = configure_argparser(
-        prog=base_parser.prog,
-        description=base_parser.description,
-        parents=[base_parser],
-    )
-    parsed_args = parser.parse_args()
-    config = lib.load_config(parsed_args.config_file)
-    lib.configure_logging(config, logger, parsed_args.debug)
-    logger.debug(
-        '{0.run_type} {0.page_type}: running in process {1}'
-        .format(parsed_args, os.getpid()))
-    logger.debug(
-        '{0.run_type} {0.page_type}: read config from {0.config_file}'
-        .format(parsed_args))
-    lib.install_signal_handlers(logger, context)
-    socket = lib.init_zmq_req_rep_worker(context, config, logger)
-    # Do the work
-    try:
-        checklist = make_site_page(
-            parsed_args.run_type, parsed_args.page_type, parsed_args.run_date,
-            config)
-        logger.info(
-            '{0.run_type} {0.page_type} pages for salishsea site prepared'
-            .format(parsed_args), extra={
-                'run_type': parsed_args.run_type,
-                'page_type': parsed_args.page_type,
-                'date': parsed_args.run_date,
-            })
-        # Exchange success messages with the nowcast manager process
-        msg_type = 'success {.page_type}'.format(parsed_args)
-        lib.tell_manager(
-            worker_name, msg_type, config, logger, socket, checklist)
-    except WorkerError:
-        logger.critical(
-            '{0.run_type} {0.page_type} page preparation failed'
-            .format(parsed_args), extra={
-                'run_type': parsed_args.run_type,
-                'page_type': parsed_args.page_type,
-                'date': parsed_args.run_date,
-            })
-        # Exchange failure messages with the nowcast manager process
-        msg_type = 'failure {.page_type}'.format(parsed_args)
-        lib.tell_manager(worker_name, msg_type, config, logger, socket)
-    except SystemExit:
-        # Normal termination
-        pass
-    except:
-        logger.critical(
-            '{0.run_type} {0.page_type}: unhandled exception:'
-            .format(parsed_args))
-        for line in traceback.format_exc().splitlines():
-            logger.error(line)
-        # Exchange crash messages with the nowcast manager process
-        lib.tell_manager(worker_name, 'crash', config, logger, socket)
-    # Finish up
-    context.destroy()
-    logger.debug(
-        '{0.run_type} {0.page_type}: task completed; shutting down'
-        .format(parsed_args))
-
-
-def configure_argparser(prog, description, parents):
-    parser = argparse.ArgumentParser(
-        prog=prog, description=description, parents=parents)
-    parser.add_argument(
+    worker = NowcastWorker(worker_name, description=__doc__)
+    worker.arg_parser.add_argument(
         'run_type',
-        choices=set(('nowcast', 'forecast', 'forecast2',)),
+        choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
         help='''
-        Type of run that the results come from.
-        '''
+        Type of run to execute:
+        'nowcast' means nowcast physics run,
+        'nowcast-green' means nowcast green ocean run,
+        'forecast' means updated forecast run,
+        'forecast2' means preliminary forecast run,
+        ''',
     )
-    parser.add_argument(
+    worker.arg_parser.add_argument(
         'page_type',
         choices=set(('index', 'publish', 'research',)),
         help='''
         Type of page to render from template to salishsea site prep directory.
         '''
     )
-    parser.add_argument(
+    salishsea_today = arrow.now('Canada/Pacific').floor('day')
+    worker.arg_parser.add_argument(
         '--run-date', type=lib.arrow_date,
-        default=arrow.now().floor('day'),
+        default=salishsea_today,
         help='''
-        Date of the run to download results files from;
-        use YYYY-MM-DD format.
+        Date to execute the run for; use YYYY-MM-DD format.
         Defaults to {}.
-        '''.format(arrow.now().floor('day').format('YYYY-MM-DD')),
+        '''.format(salishsea_today.format('YYYY-MM-DD')),
     )
-    return parser
+    worker.run(make_site_page, success, failure)
 
 
-def make_site_page(run_type, page_type, run_date, config):
+def success(parsed_args):
+    logger.info(
+        '{0.run_type} {0.page_type} {run_date} '
+        'pages for salishsea site prepared'
+        .format(
+            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
+            'run_type': parsed_args.run_type,
+            'page_type': parsed_args.page_type,
+            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
+        })
+    msg_type = 'success {.page_type}'.format(parsed_args)
+    return msg_type
+
+
+def failure(parsed_args):
+    logger.critical(
+        '{0.run_type} {0.page_type} {run_date} ''page preparation failed'
+        .format(
+            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
+            'run_type': parsed_args.run_type,
+            'page_type': parsed_args.page_type,
+            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
+        })
+    msg_type = 'failure {.page_type}'.format(parsed_args)
+    return msg_type
+
+
+def make_site_page(parsed_args, config, *args):
+    run_type = parsed_args.run_type
+    page_type = parsed_args.page_type
+    run_date = parsed_args.run_date
     svg_file_roots = {
         'publish': [
             ('Threshold_website',
@@ -172,9 +136,9 @@ def make_site_page(run_type, page_type, run_date, config):
     }
     # Functions to render rst files for various run types
     render_rst = {
-        'nowcast': render_nowcast_rst,
-        'forecast': render_forecast_rst,
-        'forecast2': render_forecast2_rst,
+        'nowcast': _render_nowcast_rst,
+        'forecast': _render_forecast_rst,
+        'forecast2': _render_forecast2_rst,
     }
     # Load template
     mako_file = os.path.join(
@@ -202,7 +166,7 @@ def make_site_page(run_type, page_type, run_date, config):
             config))
     # Render index page template to rst
     checklist.update(
-        render_index_rst(
+        _render_index_rst(
             page_type, run_type, run_date, results_pages_path, config))
     # If appropriate copy rst file to forecast file
     if run_type in ('forecast', 'forecast2') and page_type == 'publish':
@@ -225,7 +189,7 @@ def make_site_page(run_type, page_type, run_date, config):
     return checklist
 
 
-def render_nowcast_rst(
+def _render_nowcast_rst(
     tmpl, page_type, run_date, svg_file_roots, rst_path, config,
 ):
     rst_filename = (
@@ -246,7 +210,7 @@ def render_nowcast_rst(
         'svg_file_roots': svg_file_roots[page_type],
         'figures_server': figures_server,
     }
-    tmpl_to_rst(tmpl, rst_file, vars, config)
+    _tmpl_to_rst(tmpl, rst_file, vars, config)
     logger.debug(
         'nowcast {page_type}: rendered page: {rst_file}'
         .format(page_type=page_type, rst_file=rst_file), extra={
@@ -258,7 +222,7 @@ def render_nowcast_rst(
     return checklist
 
 
-def render_forecast_rst(
+def _render_forecast_rst(
     tmpl, page_type, run_date, svg_file_roots, rst_path, config,
 ):
     results_date = run_date.replace(days=1)
@@ -280,7 +244,7 @@ def render_forecast_rst(
         'svg_file_roots': svg_file_roots[page_type],
         'figures_server': figures_server,
     }
-    tmpl_to_rst(tmpl, rst_file, vars, config)
+    _tmpl_to_rst(tmpl, rst_file, vars, config)
     logger.debug(
         'forecast {page_type}: rendered page: {rst_file}'
         .format(page_type=page_type, rst_file=rst_file), extra={
@@ -294,7 +258,7 @@ def render_forecast_rst(
     return checklist
 
 
-def render_forecast2_rst(
+def _render_forecast2_rst(
     tmpl, page_type, run_date, svg_file_roots, rst_path, config,
 ):
     results_date = run_date.replace(days=2)
@@ -316,7 +280,7 @@ def render_forecast2_rst(
         'svg_file_roots': svg_file_roots[page_type],
         'figures_server': figures_server,
     }
-    tmpl_to_rst(tmpl, rst_file, vars, config)
+    _tmpl_to_rst(tmpl, rst_file, vars, config)
     logger.debug(
         'forecast2 {page_type}: rendered page: {rst_file}'
         .format(page_type=page_type, rst_file=rst_file), extra={
@@ -331,7 +295,7 @@ def render_forecast2_rst(
     return checklist
 
 
-def render_index_rst(page_type, run_type, run_date, rst_path, config):
+def _render_index_rst(page_type, run_type, run_date, rst_path, config):
     mako_file = os.path.join(config['web']['templates_path'], 'index.mako')
     tmpl = mako.template.Template(filename=mako_file)
     logger.debug(
@@ -355,27 +319,27 @@ def render_index_rst(page_type, run_type, run_date, rst_path, config):
     else:
         this_month_cols, last_month_cols = INDEX_GRID_COLS, 0
     # Replace dates for which there is no results page with None
-    prelim_fcst_dates = exclude_missing_dates(
+    prelim_fcst_dates = _exclude_missing_dates(
         copy(dates), os.path.join(rst_path, 'forecast2', 'publish_*.rst'))
     nowcast_pub_dates = (
         copy(dates[:-1]) if run_type in 'nowcast forecast'.split()
         else copy(dates[:-2]))
-    nowcast_pub_dates = exclude_missing_dates(
+    nowcast_pub_dates = _exclude_missing_dates(
         nowcast_pub_dates, os.path.join(rst_path, 'nowcast', 'publish_*.rst'))
     nowcast_res_dates = (
         copy(dates[:-1]) if run_type in 'nowcast forecast'.split()
         else copy(dates[:-2]))
-    nowcast_res_dates = exclude_missing_dates(
+    nowcast_res_dates = _exclude_missing_dates(
         nowcast_res_dates, os.path.join(rst_path, 'nowcast', 'research_*.rst'))
     fcst_dates = copy(dates[:-1]) if run_type != 'forecast' else copy(dates)
-    fcst_dates = exclude_missing_dates(
+    fcst_dates = _exclude_missing_dates(
         fcst_dates,
         os.path.join(rst_path, 'forecast', '{}_*.rst'.format(page_type)))
     sal_comp_dates = (
         copy(dates[:-1]) if run_type in 'nowcast forecast'.split()
         else copy(dates[:-2]))
     sal_comp_fileroot = config['web']['salinity_comparison']['fileroot']
-    sal_comp_dates = exclude_missing_dates(
+    sal_comp_dates = _exclude_missing_dates(
         sal_comp_dates,
         os.path.join(
             config['web']['salinity_comparison']['filesystem_path'],
@@ -396,7 +360,7 @@ def render_index_rst(page_type, run_type, run_date, rst_path, config):
         'sal_comp_path': config['web']['salinity_comparison']['web_path'],
         'sal_comp_fileroot': sal_comp_fileroot,
     }
-    tmpl_to_rst(tmpl, rst_file, vars, config)
+    _tmpl_to_rst(tmpl, rst_file, vars, config)
     logger.debug(
         '{run_type} {page_type}: rendered index page: {rst_file}'
         .format(run_type=run_type, page_type=page_type, rst_file=rst_file),
@@ -411,7 +375,7 @@ def render_index_rst(page_type, run_type, run_date, rst_path, config):
     return checklist
 
 
-def exclude_missing_dates(grid_dates, file_pattern):
+def _exclude_missing_dates(grid_dates, file_pattern):
     files = [os.path.basename(f) for f in glob(file_pattern)]
     file_date_strs = [
         os.path.splitext(f)[0].split('_')[1].title() for f in files]
@@ -422,11 +386,11 @@ def exclude_missing_dates(grid_dates, file_pattern):
     return grid_dates
 
 
-def tmpl_to_rst(tmpl, rst_file, vars, config):
+def _tmpl_to_rst(tmpl, rst_file, vars, config):
     with open(rst_file, 'wt') as f:
         f.write(tmpl.render(**vars))
     lib.fix_perms(rst_file, grp_name=config['file group'])
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover

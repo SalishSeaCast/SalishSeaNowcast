@@ -15,38 +15,163 @@
 
 """Unit tests for Salish Sea NEMO nowcast make_site_page worker.
 """
-from unittest.mock import patch
+from unittest.mock import (
+    patch,
+    Mock,
+)
 
 import arrow
 import pytest
 
 
 @pytest.fixture()
-def make_site_page_module():
+def worker_module():
     from nowcast.workers import make_site_page
     return make_site_page
 
 
-class TestConfigureArgParser(object):
-    """Unit test for configure_argparser() function.
+@patch.object(worker_module(), 'NowcastWorker')
+class TestMain:
+    """Unit tests for main() function.
     """
-    @patch.object(make_site_page_module().arrow, 'now')
-    def test_run_date_default_value(self, m_now, make_site_page_module):
-        m_now.return_value = arrow.get(2015, 2, 8, 17, 40, 42)
-        parser = make_site_page_module.configure_argparser(
-            'make_site_page', 'description from docstring', parents=[])
-        assert parser.get_default('run_date') == arrow.get(2015, 2, 8)
+    @patch.object(worker_module(), 'worker_name')
+    def test_instantiate_worker(self, m_name, m_worker, worker_module):
+        worker_module.main()
+        args, kwargs = m_worker.call_args
+        assert args == (m_name,)
+        assert list(kwargs.keys()) == ['description']
+
+    def test_add_run_type_arg(self, m_worker, worker_module):
+        worker_module.main()
+        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        assert args == ('run_type',)
+        assert kwargs['choices'] == {
+            'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
+        assert 'help' in kwargs
+
+    def test_add_page_type_arg(self, m_worker, worker_module):
+        worker_module.main()
+        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
+        assert args == ('page_type',)
+        assert kwargs['choices'] == {'index', 'publish', 'research'}
+        assert 'help' in kwargs
+
+    def test_add_run_date_arg(self, m_worker, worker_module, lib_module):
+        worker_module.main()
+        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[2]
+        assert args == ('--run-date',)
+        assert kwargs['type'] == lib_module.arrow_date
+        assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
+        assert 'help' in kwargs
+
+    def test_run_worker(self, m_worker, worker_module):
+        worker_module.main()
+        args, kwargs = m_worker().run.call_args
+        assert args == (
+            worker_module.make_site_page,
+            worker_module.success,
+            worker_module.failure,
+        )
 
 
-class TestMakeSitePage(object):
+class TestSuccess:
+    """Unit tests for success() function.
+    """
+    @pytest.mark.parametrize('run_type, page_type', [
+        ('nowcast', 'research'),
+        ('nowcast', 'publish'),
+        ('nowcast', 'index'),
+        ('forecast', 'publish'),
+        ('forecast', 'index'),
+        ('forecast2', 'publish'),
+        ('forecast2', 'index'),
+        ('nowcast-green', 'research'),
+        ('nowcast-green', 'index'),
+    ])
+    def test_success_log_info(self, run_type, page_type, worker_module):
+        parsed_args = Mock(
+            run_type=run_type, page_type=page_type,
+            run_date=arrow.get('2016-02-08'))
+        with patch.object(worker_module.logger, 'info') as m_logger:
+            worker_module.success(parsed_args)
+        assert m_logger.called
+
+    @pytest.mark.parametrize('run_type, page_type, expected', [
+        ('nowcast', 'research', 'success research'),
+        ('nowcast', 'publish', 'success publish'),
+        ('nowcast', 'index', 'success index'),
+        ('forecast', 'publish', 'success publish'),
+        ('forecast', 'index', 'success index'),
+        ('forecast2', 'publish', 'success publish'),
+        ('forecast2', 'index', 'success index'),
+        ('nowcast-green', 'research', 'success research'),
+        ('nowcast-green', 'index', 'success index'),
+    ])
+    def test_success_msg_type(
+        self, run_type, page_type, expected, worker_module,
+    ):
+        parsed_args = Mock(
+            run_type=run_type, page_type=page_type,
+            run_date=arrow.get('2016-02-08'))
+        msg_type = worker_module.success(parsed_args)
+        assert msg_type == expected
+
+
+class TestFailure:
+    """Unit tests for failure() function.
+    """
+    @pytest.mark.parametrize('run_type, page_type', [
+        ('nowcast', 'research'),
+        ('nowcast', 'publish'),
+        ('nowcast', 'index'),
+        ('forecast', 'publish'),
+        ('forecast', 'index'),
+        ('forecast2', 'publish'),
+        ('forecast2', 'index'),
+        ('nowcast-green', 'research'),
+        ('nowcast-green', 'index'),
+    ])
+    def test_failure_log_error(self, run_type, page_type, worker_module):
+        parsed_args = Mock(
+            run_type=run_type, page_type=page_type,
+            run_date=arrow.get('2016-02-08'))
+        with patch.object(worker_module.logger, 'critical') as m_logger:
+            worker_module.failure(parsed_args)
+        assert m_logger.called
+
+    @pytest.mark.parametrize('run_type, page_type, expected', [
+        ('nowcast', 'research', 'failure research'),
+        ('nowcast', 'publish', 'failure publish'),
+        ('nowcast', 'index', 'failure index'),
+        ('forecast', 'publish', 'failure publish'),
+        ('forecast', 'index', 'failure index'),
+        ('forecast2', 'publish', 'failure publish'),
+        ('forecast2', 'index', 'failure index'),
+        ('nowcast-green', 'research', 'failure research'),
+        ('nowcast-green', 'index', 'failure index'),
+    ])
+    def test_failure_msg_type(
+        self, run_type, page_type, expected, worker_module,
+    ):
+        parsed_args = Mock(
+            run_type=run_type, page_type=page_type,
+            run_date=arrow.get('2016-02-08'))
+        msg_type = worker_module.failure(parsed_args)
+        assert msg_type == expected
+
+
+class TestMakeSitePage:
     """Unit tests for make_site_page() function.
     """
-    @patch.object(make_site_page_module().mako.template, 'Template')
-    @patch.object(make_site_page_module(), 'render_index_rst')
-    @patch.object(make_site_page_module(), 'render_nowcast_rst')
+    @patch.object(worker_module().mako.template, 'Template')
+    @patch.object(worker_module(), '_render_index_rst')
+    @patch.object(worker_module(), '_render_nowcast_rst')
     def test_nowcast_publish_render_rst_run_date(
-        self, m_render_rst, m_render_index, m_tmpl, make_site_page_module,
+        self, m_render_rst, m_render_index, m_tmpl, worker_module,
     ):
+        parsed_args = Mock(
+            run_type='nowcast', page_type='publish',
+            run_date=arrow.get(2015, 2, 8))
         config = {
             'web': {
                 'site_repo_url': 'http://example.com/bar',
@@ -54,18 +179,20 @@ class TestMakeSitePage(object):
                 'templates_path': 'bar',
                 'www_path': 'www',
             }}
-        make_site_page_module.make_site_page(
-            'nowcast', 'publish', arrow.get(2015, 2, 8), config)
+        worker_module.make_site_page(parsed_args, config)
         assert m_render_rst.call_args[0][2] == arrow.get(2015, 2, 8)
 
-    @patch.object(make_site_page_module().shutil, 'copy2')
-    @patch.object(make_site_page_module().mako.template, 'Template')
-    @patch.object(make_site_page_module(), 'render_index_rst')
-    @patch.object(make_site_page_module(), 'render_forecast2_rst')
+    @patch.object(worker_module().shutil, 'copy2')
+    @patch.object(worker_module().mako.template, 'Template')
+    @patch.object(worker_module(), '_render_index_rst')
+    @patch.object(worker_module(), '_render_forecast2_rst')
     def test_forecast2_publish_render_rst_run_date(
         self, m_render_rst, m_render_index, m_tmpl, m_copy2,
-        make_site_page_module,
+        worker_module,
     ):
+        parsed_args = Mock(
+            run_type='forecast2', page_type='publish',
+            run_date=arrow.get(2015, 2, 8))
         config = {
             'web': {
                 'site_repo_url': 'http://example.com/bar',
@@ -76,16 +203,18 @@ class TestMakeSitePage(object):
             }}
         m_render_rst.return_value = {
             'forecast2 publish': 'publish_08feb15.rst'}
-        make_site_page_module.make_site_page(
-            'forecast2', 'publish', arrow.get(2015, 2, 8), config)
+        worker_module.make_site_page(parsed_args, config)
         assert m_render_rst.call_args[0][2] == arrow.get(2015, 2, 8)
 
-    @patch.object(make_site_page_module().mako.template, 'Template')
-    @patch.object(make_site_page_module(), 'render_index_rst')
-    @patch.object(make_site_page_module(), 'render_nowcast_rst')
+    @patch.object(worker_module().mako.template, 'Template')
+    @patch.object(worker_module(), '_render_index_rst')
+    @patch.object(worker_module(), '_render_nowcast_rst')
     def test_render_index_rst_run_date(
-        self, m_render_rst, m_render_index, m_tmpl, make_site_page_module,
+        self, m_render_rst, m_render_index, m_tmpl, worker_module,
     ):
+        parsed_args = Mock(
+            run_type='nowcast', page_type='index',
+            run_date=arrow.get(2015, 2, 8))
         config = {
             'web': {
                 'site_repo_url': 'http://example.com/bar',
@@ -93,51 +222,50 @@ class TestMakeSitePage(object):
                 'templates_path': 'bar',
                 'www_path': 'www',
             }}
-        make_site_page_module.make_site_page(
-            'nowcast', 'index', arrow.get(2015, 2, 8), config)
+        worker_module.make_site_page(parsed_args, config)
         assert m_render_index.call_args[0][2] == arrow.get(2015, 2, 8)
         assert not m_render_rst.called
 
 
-@patch.object(make_site_page_module(), 'tmpl_to_rst')
-def test_render_nowcast_rst_run_date(m_tmpl_to_rst, make_site_page_module):
+@patch.object(worker_module(), '_tmpl_to_rst')
+def test_render_nowcast_rst_run_date(m_tmpl_to_rst, worker_module):
     config = {
         'web': {
             'domain': 'salishsea.eos.ubc.ca',
             'figures': {'server_path': '/nowcast-sys/figures'},
         }}
     svg_file_roots = {'publish': []}
-    make_site_page_module.render_nowcast_rst(
+    worker_module._render_nowcast_rst(
         'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
         config)
     expected = 'rst_path/nowcast/publish_08feb15.rst'
     assert m_tmpl_to_rst.call_args[0][1] == expected
 
 
-@patch.object(make_site_page_module(), 'tmpl_to_rst')
-def test_render_forecast_rst_run_date(m_tmpl_to_rst, make_site_page_module):
+@patch.object(worker_module(), '_tmpl_to_rst')
+def test_render_forecast_rst_run_date(m_tmpl_to_rst, worker_module):
     config = {
         'web': {
             'domain': 'salishsea.eos.ubc.ca',
             'figures': {'server_path': '/nowcast-sys/figures'},
         }}
     svg_file_roots = {'publish': []}
-    make_site_page_module.render_forecast_rst(
+    worker_module._render_forecast_rst(
         'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
         config)
     expected = 'rst_path/forecast/publish_09feb15.rst'
     assert m_tmpl_to_rst.call_args[0][1] == expected
 
 
-@patch.object(make_site_page_module(), 'tmpl_to_rst')
-def test_render_forecast2_rst_run_date(m_tmpl_to_rst, make_site_page_module):
+@patch.object(worker_module(), '_tmpl_to_rst')
+def test_render_forecast2_rst_run_date(m_tmpl_to_rst, worker_module):
     config = {
         'web': {
             'domain': 'salishsea.eos.ubc.ca',
             'figures': {'server_path': '/nowcast-sys/figures'},
         }}
     svg_file_roots = {'publish': []}
-    make_site_page_module.render_forecast2_rst(
+    worker_module._render_forecast2_rst(
         'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
         config)
     expected = 'rst_path/forecast2/publish_10feb15.rst'
@@ -147,12 +275,12 @@ def test_render_forecast2_rst_run_date(m_tmpl_to_rst, make_site_page_module):
 class TestRenderIndexRst(object):
     """Unit tests for render_index_rst() function.
     """
-    @patch.object(make_site_page_module().mako.template, 'Template')
-    @patch.object(make_site_page_module(), 'tmpl_to_rst')
-    @patch.object(make_site_page_module(), 'exclude_missing_dates')
+    @patch.object(worker_module().mako.template, 'Template')
+    @patch.object(worker_module(), '_tmpl_to_rst')
+    @patch.object(worker_module(), '_exclude_missing_dates')
     def test_nowcast_run_date(
         self, m_exclude_missing_dates, m_tmpl_to_rst, m_tmpl,
-        make_site_page_module,
+        worker_module,
     ):
         config = {
             'web': {
@@ -162,17 +290,17 @@ class TestRenderIndexRst(object):
                     'filesystem_path': '/home/jie/public_html/MEOPAR/nowcast',
                     'fileroot': 'SaliCom',
                 }}}
-        make_site_page_module.render_index_rst(
+        worker_module._render_index_rst(
             'publish', 'nowcast', arrow.get(2015, 2, 8), 'rst_path', config)
         expected = arrow.get(2015, 2, 9)
         assert m_exclude_missing_dates.call_args_list[0][0][0][-1] == expected
 
-    @patch.object(make_site_page_module().mako.template, 'Template')
-    @patch.object(make_site_page_module(), 'tmpl_to_rst')
-    @patch.object(make_site_page_module(), 'exclude_missing_dates')
+    @patch.object(worker_module().mako.template, 'Template')
+    @patch.object(worker_module(), '_tmpl_to_rst')
+    @patch.object(worker_module(), '_exclude_missing_dates')
     def test_forecast2_run_date(
         self, m_exclude_missing_dates, m_tmpl_to_rst, m_tmpl,
-        make_site_page_module,
+        worker_module,
     ):
         config = {
             'web': {
@@ -182,7 +310,7 @@ class TestRenderIndexRst(object):
                     'filesystem_path': '/home/jie/public_html/MEOPAR/nowcast',
                     'fileroot': 'SaliCom',
                 }}}
-        make_site_page_module.render_index_rst(
+        worker_module._render_index_rst(
             'publish', 'forecast2', arrow.get(2015, 2, 8), 'rst_path', config)
         expected = arrow.get(2015, 2, 10)
         assert m_exclude_missing_dates.call_args_list[0][0][0][-1] == expected
