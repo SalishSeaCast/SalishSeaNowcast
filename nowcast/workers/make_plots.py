@@ -145,7 +145,13 @@ def _link_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
     lib.mkdir(dest_dir, logger, grp_name=config['file group'])
     for f in glob(os.path.join(plots_dir, '*')):
         lib.fix_perms(f, grp_name=config['file group'])
-        os.link(f, os.path.join(dest_dir, os.path.basename(f)))
+        try:
+            os.link(f, os.path.join(dest_dir, os.path.basename(f)))
+        except FileExistsError:
+            # File was probably hard-linked into destination directory
+            # by a prior run of the make_plot_worker;
+            # e.g. nowcast research before publish
+            pass
     checklist = {
         ' '.join((run_type, plot_type)): glob(os.path.join(dest_dir, '*'))}
     return checklist
