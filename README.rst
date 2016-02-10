@@ -25,7 +25,7 @@ Documentation for the command processor is in the ``docs/`` directory and is ren
 License
 =======
 
-The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2015 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
+The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2016 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
 http://www.apache.org/licenses/LICENSE-2.0
