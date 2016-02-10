@@ -115,7 +115,7 @@ def make_site_page(parsed_args, config, *args):
             ('WaterLevel_Thresholds', 'Storm Surge Alert Thresholds'),
             ('SH_wind', 'Sandheads Wind'),
             ('Avg_wind_vectors',
-                '4 hr Average Winds from Atmospheric Forcing'),
+                'Winds from Atmospheric Forcing Averaged Over Run Duration'),
             ('Wind_vectors_at_max',
                 'Instantaneous Winds from Atmospheric Forcing'),
         ],
