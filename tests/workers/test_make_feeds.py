@@ -1,4 +1,4 @@
-# Copyright 2013-2015 The Salish Sea MEOPAR contributors
+# Copyright 2013-2016 The Salish Sea MEOPAR contributors
 # and The University of British Columbia
 
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -158,7 +158,7 @@ class TestGenerateFeed:
             '  <link href="http://salishsea.eos.ubc.ca/storm-surge/'
             'forecast.html" rel="related" type="text/html"/>',
             '  <generator version="0.3.2">python-feedgen</generator>',
-            '  <rights>Copyright 2015, Salish Sea MEOPAR Project Contributors '
+            '  <rights>Copyright 2013-2016, Salish Sea MEOPAR Project Contributors '
             'and The University of British Columbia</rights>',
             '</feed>',
         ]
