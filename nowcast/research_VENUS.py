@@ -120,17 +120,12 @@ def load_VENUS(station):
                 '-VIP-State_of_Ocean.txt'.format(station))
 
     # Access website
-    url = 'http://venus.uvic.ca/scripts/log_download.php'
-    params = {
-        'userid': 'nsoontie@eos.ubc.ca',
-        'filename': filename,
-    }
-    response = requests.get(url, params=params)
+    url = 'ftp://ftp.neptunecanada.ca/pub/DataProducts/SOO/'
 
     # Parse data
-    fakefile = StringIO(response.text)
+    data_file = url + filename
     data = pd.read_csv(
-        fakefile, delimiter=' ,', skiprows=17,
+        data_file, delimiter=' ,', skiprows=17,
         names=[
             'date', 'pressure', 'pflag', 'temp', 'tflag', 'sal', 'sflag',
             'sigmaT', 'stflag', 'oxygen', 'oflag',
