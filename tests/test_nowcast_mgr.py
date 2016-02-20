@@ -949,7 +949,7 @@ class TestAfterPingErddap:
         }
         actions = mgr._after_ping_erddap(msg_type, 'payload')
         expected = (
-            mgr._update_checklist, ['ping_erddap', 'flag files', 'payload'],
+            mgr._update_checklist, ['ping_erddap', 'ERDDAP flag files', 'payload'],
         )
         assert actions[0] == expected
 
