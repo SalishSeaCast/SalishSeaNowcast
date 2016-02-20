@@ -46,7 +46,7 @@ class TestMain:
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
         assert args == ('--run-date',)
         assert kwargs['type'] == lib_module.arrow_date
-        assert kwargs['default'] == arrow.now().floor('day')
+        assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker, worker_module):
