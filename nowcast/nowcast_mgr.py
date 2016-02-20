@@ -586,7 +586,7 @@ class NowcastManager:
         if msg_type.startswith('success'):
             actions[msg_type] = [
                 (self._update_checklist,
-                    ['ping_erddap', 'flag files', payload]),
+                    ['ping_erddap', 'ERDDAP flag files', payload]),
             ]
         return actions[msg_type]
 
