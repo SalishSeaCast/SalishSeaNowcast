@@ -133,14 +133,14 @@ class TestGenerateFeed:
     """
     @patch.object(worker_module().arrow, 'utcnow')
     def test_generate_feed(self, m_utcnow, worker_module, config):
-        m_utcnow.return_value = arrow.get('2015-12-21 17:54:42')
+        m_utcnow.return_value = arrow.get('2016-02-20 11:02:42')
         fg = worker_module._generate_feed('pmv.xml', config['web'])
         feed = fg.atom_str(pretty=True).decode('ascii')
         expected = [
             "<?xml version='1.0' encoding='UTF-8'?>",
             '<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-ca">',
             '  <id>tag:salishsea.eos.ubc.ca,2015-12-12:/storm-surge/atom/pmv/'
-            '20151221175442</id>',
+            '20160220110242</id>',
             '  <title>PMV Feed</title>',
         ]
         assert feed.splitlines()[:4] == expected
@@ -158,7 +158,7 @@ class TestGenerateFeed:
             '  <link href="http://salishsea.eos.ubc.ca/storm-surge/'
             'forecast.html" rel="related" type="text/html"/>',
             '  <generator version="0.3.2">python-feedgen</generator>',
-            '  <rights>Copyright 2013-2016, Salish Sea MEOPAR Project Contributors '
+            '  <rights>Copyright 2015-2016, Salish Sea MEOPAR Project Contributors '
             'and The University of British Columbia</rights>',
             '</feed>',
         ]
