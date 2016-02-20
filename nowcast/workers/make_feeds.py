@@ -124,7 +124,7 @@ def _generate_feed(feed, web_config):
         name='Salish Sea MEOPAR Project',
         uri='http://{0[domain]}/'.format(web_config))
     fg.rights(
-        'Copyright {this_year}, '
+        'Copyright 2015-{this_year}, '
         'Salish Sea MEOPAR Project Contributors and '
         'The University of British Columbia'
         .format(this_year=utcnow.year))
