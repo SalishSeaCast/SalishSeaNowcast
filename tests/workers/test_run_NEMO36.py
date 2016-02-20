@@ -80,6 +80,7 @@ def tmp_results(tmpdir, run_date, scope='function'):
         run_date.replace(days=-1).format('DDMMMYY').lower(),
         'SalishSea_00002160_restart_trc.nc')
     tmp_run_prep = tmp_results.ensure_dir('nowcast-sys', 'nowcast-prep')
+    tmp_run_prep.ensure('namelist.time')
     tmp_namelists = tmp_run_prep.ensure_dir(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast')
     namelist_sections = (
@@ -91,6 +92,7 @@ def tmp_results(tmpdir, run_date, scope='function'):
     tmp_namelists.ensure('namelist_pisces_cfg')
     for dir in ('NEMO-3.6-code', 'XIOS', 'NEMO-forcing'):
         tmp_run_prep.ensure_dir('..', dir)
+    tmp_run_prep.ensure('iodef.xml')
     tmp_run_prep.ensure(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
     tmp_run_prep.ensure(
@@ -567,7 +569,7 @@ class TestRunDescription:
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'))
         expected = [
-            tmp_cwd.join('namelist.time'),
+            tmp_run_prep.join('namelist.time'),
             tmp_run_prep.join(
                 *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.domain'
                 .split('/')),
