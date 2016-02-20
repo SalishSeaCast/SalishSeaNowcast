@@ -108,13 +108,15 @@ def run_NEMO(parsed_args, config, tell_manager):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
+    host_run_config = config['run'][host_name]
     if not run_type.startswith('nowcast'):
         run_info = tell_manager('need', 'NEMO run')
         run_date = arrow.get(run_info['nowcast']['run date'])
     run_desc_filepath = _create_run_desc_file(
         run_date, run_type, host_name, config, tell_manager)
+    run_prep_dir = Path(host_run_config['run_prep_dir'])
     run_dir = Path(salishsea_cmd.api.prepare(
-        str(run_desc_filepath), 'iodef.xml'))
+        str(run_desc_filepath), str((run_prep_dir/'iodef.xml').resolve())))
     _log_msg(
         '{}: temporary run directory: {}'.format(run_type, run_dir),
         'debug', tell_manager)
@@ -284,7 +286,7 @@ def _run_description(
     run_sets_dir = run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/'
     namelists = {
         'namelist_cfg': [
-            str((Path.cwd()/'namelist.time').resolve()),
+            str((run_prep_dir/'namelist.time').resolve()),
             str((run_sets_dir/'nowcast/namelist.domain').resolve()),
             str((run_sets_dir/'nowcast/namelist.surface').resolve()),
             str((run_sets_dir/'nowcast/namelist.lateral').resolve()),

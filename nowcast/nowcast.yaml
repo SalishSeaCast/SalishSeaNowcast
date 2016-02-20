@@ -115,6 +115,7 @@ run:
     salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
     config_file: /home/dlatorne/public_html/MEOPAR/nowcast/nowcast.yaml
     run_prep_dir: /results/nowcast-sys/nowcast-prep/
+    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea6.nc
     mpi decomposition: 1x7
     walltime: 16:00:00
     ssh key name:
