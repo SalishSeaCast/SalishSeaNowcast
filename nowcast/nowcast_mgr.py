@@ -469,6 +469,12 @@ class NowcastManager:
                 (self._update_checklist,
                     ['make_forcing_links', 'forcing links', payload]),
             ]
+            run_type = {
+                'nowcast+': 'nowcast',
+                'nowcast-green': 'nowcast-green',
+                'ssh': 'forecast',
+                'forecast2': 'forecast2',
+            }[msg_type.split()[1]]
             if ('cloud host' in self.config['run']
                     and self.config['run']['cloud host'] in payload):
                 for worker in ('run_NEMO', 'watch_NEMO'):
@@ -476,15 +482,16 @@ class NowcastManager:
                     lib.configure_logging(
                         self.config, self.worker_loggers[worker],
                         self.parsed_args.debug)
-                run_type = {
-                    'nowcast+': 'nowcast',
-                    'forecast2': 'forecast2',
-                    'ssh': 'forecast',
-                }[msg_type.split()[1]]
                 actions[msg_type].append(
                     (self._launch_worker, ['run_NEMO', [run_type],
                      self.config['run']['cloud host']])
                 )
+            if ('nowcast-green host' in self.config['run']
+                    and self.config['run']['nowcast-green host'] in payload):
+                host = self.config['run']['nowcast-green host']
+                actions[msg_type].append(
+                    (self._launch_worker,
+                        ['run_NEMO36', [host, run_type], host]))
         return actions[msg_type]
 
     def _after_run_NEMO(self, msg_type, payload):
@@ -508,8 +515,6 @@ class NowcastManager:
         upon receipt of success, failure, or crash message from
         run_NEMO worker.
         """
-        for handler in self.worker_loggers['run_NEMO'].handlers:
-            self.worker_loggers['run_NEMO'].removeHandler(handler)
         actions = {
             'crash': None,
             'failure nowcast-green': None,

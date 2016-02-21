@@ -721,19 +721,25 @@ class TestAfterMakeForcingLinks:
         assert mgr.worker_loggers['watch_NEMO'].name == 'watch_NEMO'
         assert m_config_logging.call_count == 2
 
-    @pytest.mark.parametrize('msg_type, run_type', [
-        ('success nowcast+', 'nowcast'),
-        ('success forecast2', 'forecast2'),
-        ('success ssh', 'forecast'),
+    @pytest.mark.parametrize('msg_type, worker, worker_args, host', [
+        ('success nowcast+', 'run_NEMO', ['nowcast'], 'west.cloud-nowcast'),
+        ('success ssh', 'run_NEMO', ['forecast'], 'west.cloud-nowcast'),
+        ('success forecast2', 'run_NEMO', ['forecast2'], 'west.cloud-nowcast'),
+        ('success nowcast-green', 'run_NEMO36',
+         ['salish-nowcast', 'nowcast-green'], 'salish-nowcast'),
     ])
-    def test_success_launch_run_NEMO_worker(self, msg_type, run_type, mgr):
-        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+    def test_success_launch_run_NEMO_worker(
+        self, msg_type, worker, worker_args, host, mgr,
+    ):
+        mgr.config = {'run': {
+            'cloud host': 'west.cloud-nowcast',
+            'nowcast-green host': 'salish-nowcast',
+        }}
         mgr.parsed_args = Mock(debug=False)
-        payload = {'west.cloud': True}
+        payload = {host: True}
         with patch.object(mgr_module().lib, 'configure_logging'):
             actions = mgr._after_make_forcing_links(msg_type, payload)
-        expected = (mgr._launch_worker, ['run_NEMO', [run_type], 'west.cloud'])
-        assert actions[1] == expected
+        assert actions[1] == (mgr._launch_worker, [worker, worker_args, host])
 
 
 class TestAfterRunNEMO:
@@ -766,6 +772,25 @@ class TestAfterRunNEMO:
         mgr.worker_loggers = {'run_NEMO': m_worker_logger}
         mgr._after_run_NEMO('success', 'payload')
         m_worker_logger.removeHandler.assert_called_once_with(m_handler)
+
+
+class TestAfterRunNEMO36:
+    """Unit tests for the NowcastManager._after_run_NEMO36 method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast-green',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        actions = mgr._after_run_NEMO36(msg_type, 'payload')
+        assert actions is None
+
+    def test_update_checklist_on_success(self, mgr):
+        actions = mgr._after_run_NEMO36('success nowcast-green', 'payload')
+        expected = (
+            mgr._update_checklist, ['run_NEMO', 'NEMO run', 'payload'],
+        )
+        assert actions[0] == expected
 
 
 class TestAfterWatchNEMO:
@@ -949,7 +974,8 @@ class TestAfterPingErddap:
         }
         actions = mgr._after_ping_erddap(msg_type, 'payload')
         expected = (
-            mgr._update_checklist, ['ping_erddap', 'ERDDAP flag files', 'payload'],
+            mgr._update_checklist,
+            ['ping_erddap', 'ERDDAP flag files', 'payload'],
         )
         assert actions[0] == expected
 
