@@ -147,7 +147,9 @@ def run_NEMO(parsed_args, config, tell_manager):
 
 def _log_msg(msg, level, tell_manager):
     logger.log(getattr(logging, level.upper()), msg)
-    tell_manager('log.{}'.format(level), msg)
+    ## TODO: Only need to send logging messages to manager when NOT using
+    # shared storage (i.e. on west.cloud)
+    #tell_manager('log.{}'.format(level), msg)
 
 
 def _create_run_desc_file(run_date, run_type, host_name, config, tell_manager):
