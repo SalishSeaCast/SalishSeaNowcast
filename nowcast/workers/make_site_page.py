@@ -151,7 +151,7 @@ def make_site_page(parsed_args, config, *args):
         extra={
             'run_type': run_type,
             'page_type': page_type,
-            'date': run_date,
+            'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     # Render template to rst
     repo_name = config['web']['site_repo_url'].rsplit('/')[-1]
@@ -183,7 +183,7 @@ def make_site_page(parsed_args, config, *args):
             extra={
                 'run_type': run_type,
                 'page_type': page_type,
-                'date': run_date,
+                'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
             })
         checklist['most recent forecast'] = forecast_file
     return checklist
@@ -216,7 +216,7 @@ def _render_nowcast_rst(
         .format(page_type=page_type, rst_file=rst_file), extra={
             'run_type': 'nowcast',
             'page_type': page_type,
-            'date': run_date,
+            'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     checklist = {'nowcast {}'.format(page_type): rst_file}
     return checklist
@@ -250,7 +250,7 @@ def _render_forecast_rst(
         .format(page_type=page_type, rst_file=rst_file), extra={
             'run_type': 'forecast',
             'page_type': page_type,
-            'date': run_date,
+            'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     checklist = {
         'forecast {}'.format(page_type): rst_file,
@@ -286,7 +286,7 @@ def _render_forecast2_rst(
         .format(page_type=page_type, rst_file=rst_file), extra={
             'run_type': 'forecast2',
             'page_type': page_type,
-            'date': run_date,
+            'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     checklist = {
         'forecast2 {}'.format(page_type): rst_file,
@@ -304,7 +304,7 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         extra={
             'run_type': run_type,
             'page_type': page_type,
-            'date': run_date,
+            'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     # Calculate the date range to display in the grid and the number of
     # columns for the month headings of the grid
@@ -367,7 +367,7 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         extra={
             'run_type': run_type,
             'page_type': page_type,
-            'date': run_date,
+            'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     checklist = {
         '{run_type} {page_type} index page'
