@@ -117,7 +117,7 @@ run:
     run_prep_dir: /results/nowcast-sys/nowcast-prep/
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea6.nc
     mpi decomposition: 1x7
-    walltime: 16:00:00
+    walltime: 23:30:00
     ssh key name:
       nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
     nowcast_dir: /data/dlatorne/MEOPAR/nowcast-green/
