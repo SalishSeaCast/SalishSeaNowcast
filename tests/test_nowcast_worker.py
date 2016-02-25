@@ -339,15 +339,19 @@ class TestInitZmqInterface:
 
     def test_socket_connected(self, worker, worker_module):
         worker.parsed_args = Mock(name='parsed_args', debug=False)
-        worker.config = {'zmq': {'ports': {'frontend': 5555}}}
+        worker.config = {'zmq': {
+            'server': 'skookum.eos.ubc.ca',
+            'ports': {'frontend': 5555}}}
         worker.context = Mock(name='context')
         worker._init_zmq_interface()
         worker.context.socket().connect.assert_called_once_with(
-            'tcp://localhost:5555')
+            'tcp://skookum.eos.ubc.ca:5555')
 
     def test_socket_returned(self, worker, worker_module):
         worker.parsed_args = Mock(name='parsed_args', debug=False)
-        worker.config = {'zmq': {'ports': {'frontend': 5555}}}
+        worker.config = {'zmq': {
+            'server': 'skookum.eos.ubc.ca',
+            'ports': {'frontend': 5555}}}
         worker.context = Mock(name='context')
         socket = worker._init_zmq_interface()
         assert socket == worker.context.socket()

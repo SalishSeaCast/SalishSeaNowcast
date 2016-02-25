@@ -177,12 +177,8 @@ class NowcastWorker(object):
         self.context.destroy()
         self.logger.debug('task completed; shutting down')
 
-    def _init_zmq_interface(self, mgr_host='localhost'):
+    def _init_zmq_interface(self):
         """Initialize a ZeroMQ request/reply (REQ/REP) interface.
-
-        :arg str mgr_host: Host name or IP address of the nost that the nowcast
-                           manager process runs on.
-                           Defaults to 'localhost'.
 
         :returns: ZeroMQ socket for communication with nowcast manager process.
         """
@@ -190,6 +186,7 @@ class NowcastWorker(object):
             self.logger.debug('**debug mode** no connection to manager')
             return
         socket = self.context.socket(zmq.REQ)
+        mgr_host = self.config['zmq']['server']
         port = self.config['zmq']['ports']['frontend']
         socket.connect(
             'tcp://{mgr_host}:{port}'.format(mgr_host=mgr_host, port=port))
