@@ -704,7 +704,8 @@ def _to_datetime(datestr,  year, isDec, isJan):
 
     Return a datetime representation of datestr.
     """
-    dt = datetime.datetime.strptime(datestr, '%m/%d %HZ')
+    dt = datetime.datetime.strptime(
+        '{year}/{datestr}'.format(year=year, datestr=datestr), '%Y/%m/%d %HZ')
     # Dealing with year changes.
     if isDec and dt.month == 1:
         dt = dt.replace(year=year+1)
