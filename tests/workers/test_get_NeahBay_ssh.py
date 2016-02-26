@@ -71,7 +71,7 @@ def test_failure(worker_module):
     assert msg_typ == 'failure nowcast'
 
 
-class TestUTCNowToRunDate(object):
+class TestUTCNowToRunDate:
     """Unit tests for _utc_now_to_run_date() function.
     """
     def test_nowcast(self, worker_module):
