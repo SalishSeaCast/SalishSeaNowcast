@@ -14,151 +14,149 @@
 # limitations under the License.
 
 """Salish Sea NEMO nowcast worker that monitors and reports on the
-progress of a run in the cloud computing facility.
+progress of a run on the ONC cloud computing facility or salish.
 """
-from __future__ import division
-
-import argparse
-import errno
 import logging
 import os
+from pathlib import Path
 import time
-import traceback
 
-import arrow
-import zmq
+from salishsea_tools.namelist import namelist2dict
 
 from nowcast import lib
-from nowcast.nowcast_worker import WorkerError
-from nowcast.workers import run_NEMO
+from nowcast.nowcast_worker import (
+    NowcastWorker,
+    WorkerError,
+)
 
 
 worker_name = lib.get_module_name()
-
 logger = logging.getLogger(worker_name)
-
-context = zmq.Context()
 
 
 POLL_INTERVAL = 5 * 60  # seconds
 
 
 def main():
-    # Prepare the worker
-    base_parser = lib.basic_arg_parser(
-        worker_name, description=__doc__, add_help=False)
-    parser = configure_argparser(
-        prog=base_parser.prog,
-        description=base_parser.description,
-        parents=[base_parser],
+    worker = NowcastWorker(worker_name, description=__doc__)
+    worker.arg_parser.add_argument(
+        'host_name',
+        help='Name of the host to monitor the run on')
+    worker.arg_parser.add_argument(
+        'run_type',
+        choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
+        help='''
+        Type of run to monitor:
+        'nowcast' means nowcast physics run,
+        'nowcast-green' means nowcast green ocean run,
+        'forecast' means updated forecast run,
+        'forecast2' means preliminary forecast run,
+        ''',
     )
-    parsed_args = parser.parse_args()
-    config = lib.load_config(parsed_args.config_file)
-    lib.configure_logging(config, logger, parsed_args.debug, email=False)
-    logger.debug('running in process {}'.format(os.getpid()))
-    logger.debug('read config from {.config_file}'.format(parsed_args))
-    lib.install_signal_handlers(logger, context)
-    socket = lib.init_zmq_req_rep_worker(
-        context, config, logger, config['zmq']['server'])
-    # Do the work
-    host_name = config['run']['cloud host']
-    try:
-        checklist = watch_NEMO(
-            parsed_args.run_type, parsed_args.pid, config, socket)
-        logger.info(
-            '{.run_type} NEMO run in {host_name} completed'
-            .format(parsed_args, host_name=host_name))
-        # Exchange success messages with the nowcast manager process
-        msg_type = 'success {.run_type}'.format(parsed_args)
-        lib.tell_manager(
-            worker_name, msg_type, config, logger, socket, checklist)
-    except WorkerError:
-        logger.critical(
-            '{.run_type} NEMO run in {host_name} failed'
-            .format(parsed_args, host_name=host_name))
-        # Exchange failure messages with the nowcast manager process
-        msg_type = 'failure {.run_type}'.format(parsed_args)
-        lib.tell_manager(worker_name, msg_type, config, logger, socket)
-    except SystemExit:
-        # Normal termination
-        pass
-    except:
-        logger.critical('unhandled exception:')
-        for line in traceback.format_exc().splitlines():
-            logger.error(line)
-        # Exchange crash messages with the nowcast manager process
-        lib.tell_manager(worker_name, 'crash', config, logger, socket)
-    # Finish up
-    context.destroy()
-    logger.debug('task completed; shutting down')
-
-
-def configure_argparser(prog, description, parents):
-    parser = argparse.ArgumentParser(
-        prog=prog, description=description, parents=parents)
-    parser.add_argument(
-        'run_type', choices=set(('nowcast', 'forecast', 'forecast2')),
-        help='Type of run to execute.'
-    )
-    parser.add_argument(
+    worker.arg_parser.add_argument(
         'pid', type=int,
         help='PID of the NEMO run bash script to monitor.'
     )
-    return parser
+    worker.arg_parser.add_argument(
+        '--shared-storage', action='store_true',
+        help='''
+        Indicates that the NEMO run is on a machine (e.g. salish) that
+        shares storage with the machine on which the nowcast manager is
+        running. That affects how log messages are handled.
+        ''',
+    )
+    worker.run(watch_NEMO, success, failure)
 
 
-def watch_NEMO(run_type, pid, config, socket):
+def success(parsed_args):
+    logger.info(
+        '{0.run_type} NEMO run on {0.host_name} completed'.format(parsed_args),
+        extra={
+            'run_type': parsed_args.run_type,
+            'host_name': parsed_args.host_name,
+        })
+    msg_type = 'success {.run_type}'.format(parsed_args)
+    return msg_type
+
+
+def failure(parsed_args):
+    logger.critical(
+        '{0.run_type} NEMO run on {0.host_name} failed'.format(parsed_args),
+        extra={
+            'run_type': parsed_args.run_type,
+            'host_name': parsed_args.host_name,
+        })
+    msg_type = 'failure {.run_type}'.format(parsed_args)
+    return msg_type
+
+
+def watch_NEMO(parsed_args, config, tell_manager):
+    host_name = parsed_args.host_name
+    run_type = parsed_args.run_type
+    pid = parsed_args.pid
+    shared_storage = parsed_args.shared_storage
     # Ensure that the run is in progress
-    if not pid_exists(pid):
-        msg = '{}: NEMO run pid {} does not exist'.format(run_type, pid)
-        logger.error(msg)
-        lib.tell_manager(worker_name, 'log.error', config, logger, socket, msg)
+    if not _pid_exists(pid):
+        _log_msg(
+            '{}: NEMO run pid {} on {} does not exist'
+            .format(run_type, pid, host_name),
+            'error', tell_manager, shared_storage)
         raise WorkerError
-    # Get directory that NEMO is running from
-    run_info = lib.tell_manager(
-        worker_name, 'need', config, logger, socket, 'NEMO run')
-    run_dir = run_info[run_type]['run dir']
-    time_step_file = os.path.join(run_dir, 'time.step')
-    namelist = os.path.join(run_dir, 'namelist')
-    with open(namelist, 'rt') as f:
-        lines = f.readlines()
-    _, it000 = run_NEMO.get_namelist_value('nn_it000', lines)
-    _, itend = run_NEMO.get_namelist_value('nn_itend', lines)
-    _, date0 = run_NEMO.get_namelist_value('nn_date0', lines)
-    it000, itend = map(int, (it000, itend))
-    date0 = arrow.get(date0, 'YYYYMMDD')
+    # Get monitored run info from manager and namelist
+    run_info = tell_manager('need', 'NEMO run')
+    run_dir = Path(run_info[run_type]['run dir'])
+    try:
+        namelist = namelist2dict(str(run_dir/'namelist_cfg'))
+        NEMO36 = True
+    except FileNotFoundError:
+        # NEMO-3.4
+        namelist = namelist2dict(str(run_dir/'namelist'))
+        NEMO36 = False
+    it000 = namelist['namrun'][0]['nn_it000']
+    itend = namelist['namrun'][0]['nn_itend']
+    date0 = namelist['namrun'][0]['nn_date0']
+    rdt = namelist['namdom'][0]['rn_rdt']
     # Watch for the run bash script process to end
-    while pid_exists(pid):
+    while _pid_exists(pid):
         try:
-            with open(time_step_file, 'rt') as f:
+            with (run_dir/'time.step').open('rt') as f:
                 time_step = int(f.read().strip())
-            model_seconds = time_step * 86400 / run_NEMO.TIMESTEPS_PER_DAY
+            model_seconds = (
+                (time_step - it000) * rdt if NEMO36
+                else time_step * rdt)
             model_time = (
                 date0.replace(seconds=model_seconds)
                 .format('YYYY-MM-DD HH:mm:ss UTC'))
             fraction_done = (time_step - it000) / (itend - it000)
             msg = (
-                '{}: timestep: {} = {}, {:.1%} complete'
-                .format(run_type, time_step, model_time, fraction_done))
-        except IOError:
-            # time.step file not found; assument that run is young and it
+                '{} on {}: timestep: {} = {}, {:.1%} complete'
+                .format(
+                    run_type, host_name, time_step, model_time, fraction_done))
+        except FileNotFoundError:
+            # time.step file not found; assume that run is young and it
             # hasn't been created yet, or has finished and it has been
             # moved to the results directory
             msg = (
-                '{}: time.step not found; continuing to watch...'
-                .format(run_type))
-        logger.info(msg)
-        lib.tell_manager(worker_name, 'log.info', config, logger, socket, msg)
+                '{} on {}: time.step not found; continuing to watch...'
+                .format(run_type, host_name))
+        _log_msg(msg, 'info', tell_manager, shared_storage)
         time.sleep(POLL_INTERVAL)
-    # TODO: confirm that the run and subsequent results gathering
-    # completed successfully
+    ## TODO: confirm that the run and subsequent results gathering
+    ## completed successfully
     return {run_type: {
+        'host': host_name,
         'run date': run_info[run_type]['run date'],
         'completed': True,
     }}
 
 
-def pid_exists(pid):
+def _log_msg(msg, level, tell_manager, shared_storage):
+    logger.log(getattr(logging, level.upper()), msg)
+    if not shared_storage:
+        tell_manager('log.{}'.format(level), msg)
+
+
+def _pid_exists(pid):
     """Check whether pid exists in the current process table.
 
     From: http://stackoverflow.com/a/6940314
@@ -173,19 +171,15 @@ def pid_exists(pid):
         raise ValueError('invalid PID 0')
     try:
         os.kill(pid, 0)
-    except OSError as err:
-        if err.errno == errno.ESRCH:
-            # ESRCH == No such process
-            return False
-        elif err.errno == errno.EPERM:
-            # EPERM clearly means there's a process to deny access to
-            return True
-        else:
-            # According to "man 2 kill" possible error values are
-            # (EINVAL, EPERM, ESRCH)
-            raise
-    else:
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        # PermissionError clearly means there's a process to deny access to
         return True
+    except OSError:
+        raise
+    return True
+
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover

@@ -346,6 +346,8 @@ msg_types:
     need: NEMO run information dict requested
     success nowcast: nowcast NEMO run completed
     failure nowcast: nowcast NEMO run failed
+    success nowcast-green: nowcast-green NEMO run completed
+    failure nowcast-green: nowcast-green NEMO run failed
     success forecast: forecast NEMO run completed
     failure forecast: forecast NEMO run failed
     success forecast2: forecast2 NEMO run completed
