@@ -185,11 +185,11 @@ def run_NEMO(host_name, run_type, config, socket):
     lib.tell_manager(worker_name, 'log.debug', config, logger, socket, msg)
 
     # Launch the run watcher worker
-    msg = 'launching watch_NEMO worker on {}'.format(run_type, host_name)
+    msg = 'launching {} watch_NEMO worker on {}'.format(run_type, host_name)
     logger.info(msg)
     lib.tell_manager(worker_name, 'log.info', config, logger, socket, msg)
     cmd = [
-        host['python'], '-m', 'nowcast.workers.watch_NEMO',
+        host['python'], '-m', 'nowcast.workers.watch_NEMO', host_name,
         host['config_file'], run_type, str(run_process.pid),
     ]
     msg = '{}: running command in subprocess: {}'.format(run_type, cmd)
@@ -200,6 +200,7 @@ def run_NEMO(host_name, run_type, config, socket):
     logger.debug(msg)
     lib.tell_manager(worker_name, 'log.debug', config, logger, socket, msg)
     return {run_type: {
+        'host': host_name,
         'run dir': run_dir,
         'pid': run_process.pid,
         'watcher pid': watcher_process.pid,

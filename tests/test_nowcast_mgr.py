@@ -702,9 +702,14 @@ class TestAfterMakeForcingLinks:
         'success nowcast-green',
     ])
     def test_update_checklist_on_success(self, msg_type, mgr):
-        mgr.config = {'run_types': {}, 'run': []}
-        payload = {'west.cloud': True}
-        actions = mgr._after_make_forcing_links(msg_type, payload)
+        mgr.config = {'run': {
+            'cloud host': 'west.cloud-nowcast',
+            'nowcast-green host': 'salish-nowcast',
+        }}
+        mgr.parsed_args = Mock(debug=False)
+        payload = {'west.cloud-nowcast': True}
+        with patch.object(mgr_module().lib, 'configure_logging'):
+            actions = mgr._after_make_forcing_links(msg_type, payload)
         expected = (
             mgr._update_checklist,
             ['make_forcing_links', 'forcing links', payload]
@@ -713,9 +718,12 @@ class TestAfterMakeForcingLinks:
 
     @patch.object(mgr_module().lib, 'configure_logging')
     def test_success_configure_run_loggers(self, m_config_logging, mgr):
-        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        mgr.config = {'run': {
+            'cloud host': 'west.cloud-nowcast',
+            'nowcast-green host': 'salish-nowcast',
+        }}
         mgr.parsed_args = Mock(debug=False)
-        payload = {'west.cloud': True}
+        payload = {'west.cloud-nowcast': True}
         mgr._after_make_forcing_links('success nowcast+', payload)
         assert mgr.worker_loggers['run_NEMO'].name == 'run_NEMO'
         assert mgr.worker_loggers['watch_NEMO'].name == 'watch_NEMO'
@@ -799,6 +807,7 @@ class TestAfterWatchNEMO:
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast',
+        'failure nowcast-green',
         'failure forecast',
         'failure forecast2',
     ])
@@ -811,11 +820,16 @@ class TestAfterWatchNEMO:
 
     @pytest.mark.parametrize('msg_type, payload', [
         ('success nowcast', {'nowcast': {'run date': '2015-11-25'}}),
+        ('success nowcast-green',
+            {'nowcast-green': {'run date': '2016-02-23'}}),
         ('success forecast', {'forecast': {'run date': '2015-11-25'}}),
         ('success forecast2', {'forecast2': {'run date': '2015-11-25'}}),
     ])
     def test_update_checklist_on_success(self, msg_type, payload, mgr):
-        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        mgr.config = {'run': {
+            'cloud host': 'west.cloud-nowcast',
+            'nowcast-green host': 'salish-nowcast',
+        }}
         mgr.worker_loggers = {
             'watch_NEMO': Mock(name='logger', handlers=[Mock(name='handler')])
         }
@@ -857,12 +871,31 @@ class TestAfterWatchNEMO:
         )
         assert actions[-1] == expected
 
+    def test_success_nowcast_green_no_download_results_worker(self, mgr):
+        mgr.config = {'run': {
+            'cloud host': 'west.cloud-nowcast',
+            'nowcast-green host': 'salish-nowcast',
+        }}
+        mgr.worker_loggers = {'watch_NEMO': Mock(name='logger', handlers=[])}
+        actions = mgr._after_watch_NEMO('success nowcast-green', 'payload')
+        assert len(actions) == 1
+        expected = (
+            mgr._update_checklist, ['watch_NEMO', 'NEMO run', 'payload'],
+        )
+        assert actions[0] == expected
+
     def test_success_nowcast_launch_get_NeahBay_ssh_worker(self, mgr):
-        mgr.config = {'run': {'cloud host': 'west.cloud'}}
+        mgr.config = {'run': {
+            'cloud host': 'west.cloud-nowcast',
+            'nowcast-green host': 'salish-nowcast',
+        }}
         mgr.worker_loggers = {
             'watch_NEMO': Mock(name='logger', handlers=[Mock(name='handler')])
         }
-        payload = {'nowcast': {'run date': '2015-11-25'}}
+        payload = {'nowcast': {
+            'host': 'west.cloud-nowcast',
+            'run date': '2015-11-25',
+        }}
         actions = mgr._after_watch_NEMO('success nowcast', payload)
         expected = (mgr._launch_worker, ['get_NeahBay_ssh', ['forecast']])
         assert actions[1] == expected

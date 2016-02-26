@@ -475,8 +475,9 @@ class NowcastManager:
                 'ssh': 'forecast',
                 'forecast2': 'forecast2',
             }[msg_type.split()[1]]
-            if ('cloud host' in self.config['run']
-                    and self.config['run']['cloud host'] in payload):
+            if all(
+                ('cloud host' in self.config['run'],
+                 self.config['run']['cloud host'] in payload)):
                 for worker in ('run_NEMO', 'watch_NEMO'):
                     self.worker_loggers[worker] = logging.getLogger(worker)
                     lib.configure_logging(
@@ -486,8 +487,9 @@ class NowcastManager:
                     (self._launch_worker, ['run_NEMO', [run_type],
                      self.config['run']['cloud host']])
                 )
-            if ('nowcast-green host' in self.config['run']
-                    and self.config['run']['nowcast-green host'] in payload):
+            if all(
+                ('nowcast-green host' in self.config['run'],
+                 self.config['run']['nowcast-green host'] in payload)):
                 host = self.config['run']['nowcast-green host']
                 actions[msg_type].append(
                     (self._launch_worker,
@@ -534,6 +536,7 @@ class NowcastManager:
         actions = {
             'crash': None,
             'failure nowcast': None,
+            'failure nowcast-green': None,
             'failure forecast': None,
             'failure forecast2': None,
         }
@@ -541,14 +544,17 @@ class NowcastManager:
             run_type = msg_type.split()[1]
             actions[msg_type] = [
                 (self._update_checklist, ['watch_NEMO', 'NEMO run', payload]),
-                (self._launch_worker,
-                    ['download_results',
-                        [self.config['run']['cloud host'], run_type,
-                         '--run-date', payload[run_type]['run date']]]),
             ]
-            if msg_type == 'success nowcast':
-                actions[msg_type].insert(
-                    1, (self._launch_worker, ['get_NeahBay_ssh', ['forecast']])
+            if run_type == 'nowcast':
+                actions[msg_type].append(
+                    (self._launch_worker, ['get_NeahBay_ssh', ['forecast']])
+                )
+            if run_type != 'nowcast-green':
+                actions[msg_type].append(
+                    (self._launch_worker,
+                        ['download_results',
+                            [self.config['run']['cloud host'], run_type,
+                             '--run-date', payload[run_type]['run date']]]),
                 )
         return actions[msg_type]
 

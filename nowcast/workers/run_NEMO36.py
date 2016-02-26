@@ -52,7 +52,8 @@ RUN_DURATIONS = {
 def main():
     worker = NowcastWorker(worker_name, description=__doc__)
     worker.arg_parser.add_argument(
-        'host_name', help='Name of the host to execute the run on')
+        'host_name',
+        help='Name of the host to execute the run on')
     worker.arg_parser.add_argument(
         'run_type',
         choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
@@ -130,17 +131,16 @@ def run_NEMO(parsed_args, config, tell_manager):
     else:
         ## TODO: Handle run launching on west.cloud
         pass
-    ## TODO: Add launch of watch_nemo worker
-    # if run_type != 'nowcast-green':
-    #     watcher_process = _launch_run_watcher(
-    #         run_type, run_process, host_name, config, tell_manager)
-    #     watcher_pid = watcher_process.pid
-    # else:
-    #     watcher_pid = None
+    watcher_process = _launch_run_watcher(
+        run_type, run_process_id, host_name, config, tell_manager,
+        ## TODO: add shared-storage command-line arg
+        shared_storage=True)
+    watcher_pid = watcher_process.pid
     return {run_type: {
+        'host': host_name,
         'run dir': str(run_dir),
         'pid': run_process_id,
-#        'watcher pid': watcher_pid,
+        'watcher pid': watcher_pid,
         'run date': run_date.format('YYYY-MM-DD'),
     }}
 
@@ -444,13 +444,52 @@ def _launch_run_script(run_type, run_script_filepath, host_name, tell_manager):
         _log_msg(
             '{}: running command in subprocess: {}'.format(run_type, cmd),
             'debug', tell_manager)
-        qsub_msg = subprocess.check_output(cmd, universal_newlines=True)
+        torque_id = subprocess.check_output(cmd, universal_newlines=True)
         _log_msg(
-            '{}: TORQUE/PBD job id: {}'.format(run_type, qsub_msg),
+            '{}: TORQUE/PBD job id: {}'.format(run_type, torque_id),
             'debug', tell_manager)
-        return qsub_msg
+        cmd = shlex.split('pgrep {}'.format(torque_id))
+        run_process_id = None
+        while not run_process_id:
+            try:
+                run_process_id = int(
+                    subprocess.check_output(cmd, universal_newlines=True))
+            except subprocess.CalledProcessError:
+                # TORQUE queue manager has not yet spawned run process
+                pass
+        _log_msg(
+            '{} on {}: run pid: {}'
+            .format(run_type, host_name, run_process_id),
+            'debug', tell_manager)
+        return run_process_id
     ## TODO: Launch runs on west.cloud
 
 
+def _launch_run_watcher(
+    run_type, run_process_id, host_name, config, tell_manager, shared_storage,
+):
+    host_run_config = config['run'][host_name]
+    _log_msg(
+        'launching {} watch_NEMO worker on {}'.format(run_type, host_name),
+        'info', tell_manager)
+    cmd = shlex.split(
+        '{0[python]} -m nowcast.workers.watch_NEMO {0[config_file]} '
+        '{host_name} {run_type} {run_process_id}'
+        .format(
+            host_run_config, host_name=host_name, run_type=run_type,
+            run_process_id=run_process_id))
+    if shared_storage:
+        cmd.append('--shared-storage')
+    _log_msg(
+        '{}: running command in subprocess: {}'.format(run_type, cmd),
+        'debug', tell_manager)
+    watcher_process = subprocess.Popen(cmd, universal_newlines=True)
+    _log_msg(
+        '{} on {}: watcher pid: {.pid}'
+        .format(run_type, host_name, watcher_process),
+        'debug', tell_manager)
+    return watcher_process.pid
+
+
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover
