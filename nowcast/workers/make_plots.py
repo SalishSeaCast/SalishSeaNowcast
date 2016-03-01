@@ -210,7 +210,7 @@ def _make_publish_plots(
         ('Point Atkinson', 'PA_maxSSH'),
         ('Campbell River', 'CR_maxSSH'),
         ('Nanaimo', 'Nan_maxSSH'),
-        ('Cherry Point' 'CP_maxSSH'),
+        ('Cherry Point', 'CP_maxSSH'),
     )
     for stn_name, fig_file_prefix in tide_gauge_stns:
         fig = figures.compare_tidalpredictions_maxSSH(
