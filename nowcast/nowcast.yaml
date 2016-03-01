@@ -396,6 +396,8 @@ msg_types:
     failure publish: publish page for salishsea site, preparation failed
     success research: research page ready for push to salishsea site
     failure research: research page for salishsea site, preparation failed
+    success comparison: comparison page ready for push to salishsea site
+    failure comparison: comparison page for salishsea site, preparation failed
     crash: make_site_page worker crashed
   hg_update_site:
     success: hg updated salishsea-site repo
