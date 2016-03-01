@@ -22,6 +22,7 @@ import pprint
 import subprocess
 import traceback
 
+import arrow
 import yaml
 import zmq
 
@@ -572,12 +573,13 @@ class NowcastManager:
         if msg_type.startswith('success'):
             run_type = msg_type.split()[1]
             plot_type = 'research' if run_type == 'nowcast' else 'publish'
+            run_date = self.checklist['NEMO run'][run_type]['run date']
             actions[msg_type] = [
                 (self._update_checklist,
                     ['download_results', 'results files', payload]),
                 (self._launch_worker,
-                    ['make_plots', [run_type, plot_type, '--run-date',
-                     self.checklist['NEMO run'][run_type]['run date']]]),
+                    ['make_plots', [run_type, plot_type,
+                     '--run-date', run_date]]),
                 (self._launch_worker, ['ping_erddap', [run_type]]),
             ]
         return actions[msg_type]
@@ -616,17 +618,23 @@ class NowcastManager:
         }
         if msg_type.startswith('success'):
             _, run_type, page_type = msg_type.split()
+            run_date = self.checklist['NEMO run'][run_type]['run date']
             actions[msg_type] = [
                 (self._update_checklist, ['make_plots', 'plots', payload]),
                 (self._launch_worker,
-                    ['make_site_page', [run_type, page_type, '--run-date',
-                     self.checklist['NEMO run'][run_type]['run date']]])
+                    ['make_site_page', [run_type, page_type,
+                     '--run-date', run_date]])
             ]
             if run_type.startswith('forecast'):
                 actions[msg_type].append((
                     self._launch_worker,
-                    ['make_feeds', [run_type, '--run-date',
-                     self.checklist['NEMO run']['nowcast']['run date']]]))
+                    ['make_feeds', [run_type, '--run-date', run_date]]))
+            if run_type == 'nowcast' and page_type == 'publish':
+                run_date = arrow.get(run_date).replace(days=-1)
+                actions[msg_type].append(
+                    (self._launch_worker,
+                        ['make_plots', ['nowcast', 'comparison',
+                         '--run-date', run_date.format('YYYY-MM-DD')]]))
         return actions[msg_type]
 
     def _after_make_feeds(self, msg_type, payload):

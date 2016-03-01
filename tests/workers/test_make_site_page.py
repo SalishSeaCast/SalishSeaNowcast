@@ -53,7 +53,8 @@ class TestMain:
         worker_module.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
         assert args == ('page_type',)
-        assert kwargs['choices'] == {'index', 'publish', 'research'}
+        assert kwargs['choices'] == {
+            'index', 'publish', 'research', 'comparison'}
         assert 'help' in kwargs
 
     def test_add_run_date_arg(self, m_worker, worker_module, lib_module):

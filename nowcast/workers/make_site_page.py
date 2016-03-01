@@ -51,7 +51,7 @@ def main():
     )
     worker.arg_parser.add_argument(
         'page_type',
-        choices=set(('index', 'publish', 'research',)),
+        choices=set(('index', 'publish', 'research', 'comparison')),
         help='''
         Type of page to render from template to salishsea site prep directory.
         '''
@@ -103,6 +103,7 @@ def make_site_page(parsed_args, config, *args):
     run_date = parsed_args.run_date
     svg_file_roots = {
         'publish': [
+            # SVG figure filename root, figure heading
             ('Threshold_website',
                 'Marine and Atmospheric Conditions - Storm Surge Alerts'),
             ('PA_tidal_predictions', 'Tidal Predictions for Point Atkinson'),
@@ -120,6 +121,7 @@ def make_site_page(parsed_args, config, *args):
                 'Instantaneous Winds from Atmospheric Forcing'),
         ],
         'research': [
+            # SVG figure filename root, figure heading
             ('Salinity_on_thalweg', 'Salinity Field Along Thalweg'),
             ('Temperature_on_thalweg', 'Temperature Field Along Thalweg'),
             ('T_S_Currents_on_surface',
@@ -128,10 +130,14 @@ def make_site_page(parsed_args, config, *args):
                 'Model Currents at ONC VENUS East Node'),
             ('Currents_at_VENUS_Central',
                 'Model Currents at ONC VENUS Central Node'),
-            ('Compare_VENUS_East',
-                'Salinity and Temperature at ONC VENUS East Node'),
-            ('Compare_VENUS_Central',
-                'Salinity and Temperature at ONC VENUS Central Node'),
+        ],
+        'comparison': [
+            # SVG figure filename root, figure heading
+            ('SH_wind', 'Modeled and Observed Winds at Sandheads'),
+            # ('Compare_VENUS_East',
+            #     'Salinity and Temperature at ONC VENUS East Node'),
+            # ('Compare_VENUS_Central',
+            #     'Salinity and Temperature at ONC VENUS Central Node'),
         ],
     }
     # Functions to render rst files for various run types
@@ -335,6 +341,12 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
     fcst_dates = _exclude_missing_dates(
         fcst_dates,
         os.path.join(rst_path, 'forecast', '{}_*.rst'.format(page_type)))
+    nowcast_comp_dates = (
+        copy(dates[:-2]) if run_type in 'nowcast forecast'.split()
+        else copy(dates[:-3]))
+    nowcast_comp_dates = _exclude_missing_dates(
+        nowcast_comp_dates, os.path.join(
+            rst_path, 'nowcast', 'comparison_*.rst'))
     sal_comp_dates = (
         copy(dates[:-1]) if run_type in 'nowcast forecast'.split()
         else copy(dates[:-2]))
@@ -356,6 +368,7 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         'nowcast_pub_dates': nowcast_pub_dates,
         'nowcast_res_dates': nowcast_res_dates,
         'fcst_dates': fcst_dates,
+        'nowcast_comp_dates': nowcast_comp_dates,
         'sal_comp_dates': sal_comp_dates,
         'sal_comp_path': config['web']['salinity_comparison']['web_path'],
         'sal_comp_fileroot': sal_comp_fileroot,

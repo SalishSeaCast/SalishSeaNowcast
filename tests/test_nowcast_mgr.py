@@ -1091,6 +1091,18 @@ class TestAfterMakePlots:
         )
         assert actions[2] == expected
 
+    def test_success_nowcast_publish_launch_make_plots_comparison(self, mgr):
+        mgr.checklist = {
+            'NEMO run': {
+                'nowcast': {'run date': '2016-02-27'},
+            }}
+        actions = mgr._after_make_plots('success nowcast publish', 'payload')
+        expected = (
+            mgr._launch_worker,
+            ['make_plots',
+                ['nowcast', 'comparison', '--run-date', '2016-02-26']])
+        assert actions[2] == expected
+
 
 class TestAfterMakeFeeds:
     """Unit tests for the NowcastManager._after_make_feeds method.
