@@ -21,6 +21,8 @@ import os
 from pathlib import Path
 import time
 
+import arrow
+
 from salishsea_tools.namelist import namelist2dict
 
 from nowcast import lib
@@ -114,7 +116,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
         NEMO36 = False
     it000 = namelist['namrun'][0]['nn_it000']
     itend = namelist['namrun'][0]['nn_itend']
-    date0 = namelist['namrun'][0]['nn_date0']
+    date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
     rdt = namelist['namdom'][0]['rn_rdt']
     # Watch for the run bash script process to end
     while _pid_exists(pid):
