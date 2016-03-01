@@ -371,25 +371,15 @@ def _make_research_plots(
         plots_dir, 'T_S_Currents_on_surface_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = research_VENUS.compare_VENUS('East', grid_T_hr, bathy)
+    fig = research_VENUS.plot_vel_NE_gridded('Central', grid_c)
     filename = os.path.join(
-        plots_dir, 'Compare_VENUS_East_{date}.svg'.format(date=dmy))
+        plots_dir, 'Currents_at_VENUS_Central_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = research_VENUS.compare_VENUS('Central', grid_T_hr, bathy)
+    fig = research_VENUS.plot_vel_NE_gridded('East', grid_e)
     filename = os.path.join(
-        plots_dir, 'Compare_VENUS_Central_{date}.svg'.format(date=dmy))
+        plots_dir, 'Currents_at_VENUS_East_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
-    # fig = research_VENUS.plot_vel_NE_gridded('Central', grid_c)
-    # filename = os.path.join(
-    #     plots_dir, 'Currents_at_VENUS_Central_{date}.svg'.format(date=dmy))
-    # fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
-    # fig = research_VENUS.plot_vel_NE_gridded('East', grid_e)
-    # filename = os.path.join(
-    #     plots_dir, 'Currents_at_VENUS_East_{date}.svg'.format(date=dmy))
-    # fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
 
 def _results_dataset(period, grid, results_dir):
