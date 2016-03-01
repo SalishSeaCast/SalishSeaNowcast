@@ -32,9 +32,10 @@ Log files from the model run automation system and forcing data monitoring plots
           ${grid_row("Nowcast", nowcast_pub_dates, "nowcast", "publish")}
 
           <tr>
-            <th>Tracers &amp; Currents</th>
+            <th>Tracers, Currents &amp; Comparison to Observations</th>
           </tr>
           ${grid_row("Nowcast", nowcast_res_dates, "nowcast", "research")}
+          ${grid_row("Model vs. Observations", nowcast_comp_dates, "nowcast", "comparison")}
           ${ipynb_row("Surface Salinity", sal_comp_dates, sal_comp_path, sal_comp_fileroot)}
         </table>
       </div>

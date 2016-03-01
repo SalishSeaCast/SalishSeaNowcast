@@ -75,7 +75,7 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.plot_type} plots for {0.run_type} completed'
+        '{0.plot_type} plots for {0.run_date} {0.run_type} completed'
         .format(parsed_args), extra={
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
@@ -87,7 +87,7 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        '{0.plot_type} plots failed for {0.run_type} failed'
+        '{0.plot_type} plots failed for {0.run_date} {0.run_type} failed'
         .format(parsed_args), extra={
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
@@ -204,40 +204,23 @@ def _make_publish_plots(
         plots_dir, 'PA_tidal_predictions_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
-        name='Victoria')
-    filename = os.path.join(
-        plots_dir, 'Vic_maxSSH_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
-    fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
-        name='Point Atkinson')
-    filename = os.path.join(
-        plots_dir, 'PA_maxSSH_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
-    fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
-        name='Campbell River')
-    filename = os.path.join(
-        plots_dir, 'CR_maxSSH_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
-    fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
-        name='Nanaimo')
-    filename = os.path.join(
-        plots_dir, 'Nan_maxSSH_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
-    fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
-        name='Cherry Point')
-    filename = os.path.join(
-        plots_dir, 'CP_maxSSH_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
+    tide_gauge_stns = (
+        # stn name, figure filename prefix
+        ('Victoria', 'Vic_maxSSH'),
+        ('Point Atkinson', 'PA_maxSSH'),
+        ('Campbell River', 'CR_maxSSH'),
+        ('Nanaimo', 'Nan_maxSSH'),
+        ('Cherry Point' 'CP_maxSSH'),
+    )
+    for stn_name, fig_file_prefix in tide_gauge_stns:
+        fig = figures.compare_tidalpredictions_maxSSH(
+            grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
+            name=stn_name)
+        filename = os.path.join(
+            plots_dir, '{fig_file_prefix}_{date}.svg'
+            .format(date=dmy, fig_file_prefix=fig_file_prefix))
+        fig.savefig(
+            filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_water_levels(grid_T_hr, bathy, grids_15m, coastline)
     filename = os.path.join(
@@ -276,18 +259,33 @@ def _make_comparisons_plots(
 ):
     """Make the plots we wish to look at for comparisons purposes.
     """
-    # get the results
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
+
+    fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
+    filename = os.path.join(plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
+    fig.savefig(filename, facecolor=fig.get_facecolor())
+
+
+def _future_comparison_plots(
+    dmy, weather_path, bathy, results_dir, plots_dir, coastline, adcp_dir,
+    **kwargs
+):
+    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
+
+    venus_nodes = {
+        'Central': {
+            'grid_15m': nc.Dataset(
+                os.path.join(results_dir, 'VENUS_central_gridded.nc')),
+            'grid_obs': sio.loadmat(os.path.join(adcp_dir, 'ADCPcentral.mat')),
+        }
+    }
     grid_c = _results_dataset_gridded('central', results_dir)
     grid_e = _results_dataset_gridded('east', results_dir)
     grid_d = _results_dataset_gridded('delta', results_dir)
-
-    # ONC ADCP data
     grid_oc = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat')
     grid_oe = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPeast.mat')
     grid_od = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPddl.mat')
 
-    # do the plots
     # Ferry plots
     fig = research_ferries.salinity_ferry_route('HBDB')
     filename = os.path.join(
@@ -333,13 +331,6 @@ def _make_comparisons_plots(
                                                                 date=dmy))
         fig.savefig(filename, facecolor=fig.get_facecolor())
 
-    # This will overwrite the images made previously
-    # Sandheads winds
-    fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
-    filename = os.path.join(
-        plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor())
-
     # VENUS bottom temperature and salinity
     fig = research_VENUS.compare_VENUS('East', grid_T_hr, bathy)
     filename = os.path.join(
@@ -358,17 +349,13 @@ def _make_research_plots(
 ):
     """Make the plots we wish to look at for research purposes.
     """
-
-    # get the results
     grid_T_dy = _results_dataset('1d', 'grid_T', results_dir)
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     grid_U_dy = _results_dataset('1d', 'grid_U', results_dir)
     grid_V_dy = _results_dataset('1d', 'grid_V', results_dir)
-    grid_c = _results_dataset_gridded(
-        'central', results_dir)
+    grid_c = _results_dataset_gridded('central', results_dir)
     grid_e = _results_dataset_gridded('east', results_dir)
 
-    # do the plots
     fig = figures.thalweg_salinity(grid_T_dy, mesh_mask, bathy)
     filename = os.path.join(
         plots_dir, 'Salinity_on_thalweg_{date}.svg'.format(date=dmy))
@@ -394,15 +381,15 @@ def _make_research_plots(
         plots_dir, 'Compare_VENUS_Central_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = research_VENUS.plot_vel_NE_gridded('Central', grid_c)
-    filename = os.path.join(
-        plots_dir, 'Currents_at_VENUS_Central_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
+    # fig = research_VENUS.plot_vel_NE_gridded('Central', grid_c)
+    # filename = os.path.join(
+    #     plots_dir, 'Currents_at_VENUS_Central_{date}.svg'.format(date=dmy))
+    # fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = research_VENUS.plot_vel_NE_gridded('East', grid_e)
-    filename = os.path.join(
-        plots_dir, 'Currents_at_VENUS_East_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
+    # fig = research_VENUS.plot_vel_NE_gridded('East', grid_e)
+    # filename = os.path.join(
+    #     plots_dir, 'Currents_at_VENUS_East_{date}.svg'.format(date=dmy))
+    # fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
 
 def _results_dataset(period, grid, results_dir):
