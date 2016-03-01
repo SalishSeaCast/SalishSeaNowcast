@@ -419,7 +419,6 @@ class TestRunDescription:
         ('nowcast', 'NEMO-code', 'NEMO-3.6-code'),
         ('nowcast-green', 'XIOS', 'XIOS'),
         ('forecast', 'forcing', 'NEMO-forcing'),
-####        ('forecast2', 'runs directory', 'nowcast'),
     ])
     def test_paths(
         self, run_type, path, expected, worker_module, config, run_date,
@@ -446,74 +445,181 @@ class TestRunDescription:
                     Mock(name='tell_manager'))
         assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
 
-    @pytest.mark.xfail
+    @pytest.mark.parametrize('run_type, path', [
+        ('forecast2', 'runs directory'),
+    ])
+    def test_runs_dir_path(
+        self, run_type, path, worker_module, config, run_date, tmp_results,
+        tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
+        assert run_desc['paths'][path] == tmp_run_prep
+
     @pytest.mark.parametrize('run_type, path, expected', [
         ('nowcast', 'coordinates', 'coordinates_seagrid_SalishSea.nc'),
     ])
     def test_grid_coordinates(
-        self, run_type, path, expected, worker_module, config,
+        self, run_type, path, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config,
-            Mock(name='tell_manager'))
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
         assert run_desc['grid'][path] == expected
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, path, expected', [
         ('nowcast', 'bathymetry', 'bathy_meter_SalishSea.nc'),
     ])
     def test_grid_bathymetry_default(
-        self, run_type, path, expected, worker_module, config,
+        self, run_type, path, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config,
-            Mock(name='tell_manager'))
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
         assert run_desc['grid'][path] == expected
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, path, expected', [
         ('nowcast-green', 'bathymetry', 'bathy_meter_SalishSea6.nc'),
     ])
     def test_grid_bathymetry_run_type(
-        self, run_type, path, expected, worker_module, config,
+        self, run_type, path, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        with patch.dict(config['run']['salish'], bathymetry=expected):
-            run_desc = worker_module._run_description(
-                run_date, run_type, run_id, 2160, 'salish', config,
-                Mock(name='tell_manager'))
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                with patch.dict(config['run']['salish'], bathymetry=expected):
+                    run_desc = worker_module._run_description(
+                        run_date, run_type, run_id, 2160, 'salish', config,
+                        Mock(name='tell_manager'))
         assert run_desc['grid'][path] == expected
 
-    @pytest.mark.xfail
     @pytest.mark.parametrize('run_type, link_name, expected', [
-        ('nowcast', 'NEMO-atmos', '/nowcast-sys/nowcast/NEMO-atmos'),
-        ('forecast', 'open_boundaries',
-         '/nowcast-sys/nowcast/open_boundaries'),
-        ('forecast2', 'rivers', '/nowcast-sys/nowcast/rivers'),
-        ('nowcast', 'restart.nc',
-         '/results/SalishSea/nowcast/30dec15/'
-         'SalishSea_00002160_restart.nc'),
-        ('nowcast-green', 'restart_trc.nc',
-         '/results/SalishSea/nowcast-green/30dec15/'
-         'SalishSea_00002160_restart_trc.nc'),
+        ('nowcast', 'NEMO-atmos', 'NEMO-atmos'),
+        ('forecast', 'open_boundaries', 'open_boundaries'),
+        ('forecast2', 'rivers', 'rivers'),
     ])
-    def test_forcing(
-        self, run_type, link_name, expected, worker_module, config,
+    def test_forcing_links(
+        self, run_type, link_name, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
     ):
-        run_date = arrow.get('2015-12-31')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        run_desc = worker_module._run_description(
-            run_date, run_type, run_id, 2160, 'salish', config,
-            Mock(name='tell_manager'))
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
+        tmp_nowcast_dir = tmp_results['nowcast_dir']
+        expected = tmp_nowcast_dir.join(expected)
+        assert run_desc['forcing'][link_name]['link to'] == expected
+
+    @pytest.mark.parametrize('run_type, link_name, expected', [
+        ('nowcast', 'restart.nc', '03jan16/SalishSea_00002160_restart.nc'),
+        ('nowcast-green', 'restart_trc.nc',
+         '03jan16/SalishSea_00002160_restart_trc.nc'),
+    ])
+    def test_restart_links(
+        self, run_type, link_name, expected, worker_module, config, run_date,
+        tmp_results, tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            nowcast_dir=str(tmp_results['nowcast_dir']))
+        tmp_run_prep = tmp_results['run_prep_dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
+        tmp_results_dir = tmp_results['results'][run_type]
+        expected = tmp_results_dir.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
 
     @pytest.mark.parametrize('run_type, link_name, expected', [
