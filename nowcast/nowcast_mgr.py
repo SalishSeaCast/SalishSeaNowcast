@@ -619,6 +619,9 @@ class NowcastManager:
         if msg_type.startswith('success'):
             _, run_type, page_type = msg_type.split()
             run_date = self.checklist['NEMO run'][run_type]['run date']
+            if page_type == 'comparison':
+                run_date = (
+                    arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD'))
             actions[msg_type] = [
                 (self._update_checklist, ['make_plots', 'plots', payload]),
                 (self._launch_worker,
@@ -630,11 +633,12 @@ class NowcastManager:
                     self._launch_worker,
                     ['make_feeds', [run_type, '--run-date', run_date]]))
             if run_type == 'nowcast' and page_type == 'publish':
-                run_date = arrow.get(run_date).replace(days=-1)
+                run_date = (
+                    arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD'))
                 actions[msg_type].append(
                     (self._launch_worker,
                         ['make_plots', ['nowcast', 'comparison',
-                         '--run-date', run_date.format('YYYY-MM-DD')]]))
+                         '--run-date', run_date]]))
         return actions[msg_type]
 
     def _after_make_feeds(self, msg_type, payload):
