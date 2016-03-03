@@ -75,8 +75,10 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.plot_type} plots for {0.run_date} {0.run_type} completed'
-        .format(parsed_args), extra={
+        '{0.plot_type} plots for {run_date} {0.run_type} completed'
+        .format(
+            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -87,8 +89,10 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        '{0.plot_type} plots failed for {0.run_date} {0.run_type} failed'
-        .format(parsed_args), extra={
+        '{0.plot_type} plots failed for {run_date} {0.run_type} failed'
+        .format(
+            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
