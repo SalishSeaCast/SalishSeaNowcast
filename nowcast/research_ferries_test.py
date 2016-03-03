@@ -164,10 +164,7 @@ def salinity_ferry_route(
     axs[0].text(0.25, -0.1, 'Observations from Ocean Networks Canada',
                 transform=axs[0].transAxes, color='white')
 
-    # Setting plot limits
-    minlon = np.amin(obs_sal[1])
-
-    axs[0].set_xlim(minlon-0.1, -123)
+    axs[0].set_xlim(-124, -123)
     axs[0].set_ylim(10, 32)
     axs[0].set_title('Surface Salinity: ' + dmy, **title_font)
     axs[0].set_xlabel('Longitude', **axis_font)
