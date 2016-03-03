@@ -120,7 +120,7 @@ def salinity_ferry_route(
     cmap.set_bad('burlywood')
 
     # Plot model salinity
-    mesh = axs[1].contourf(lon[:], lat[:], sal_t[:], 10, cmap=cmap)
+    mesh = axs[1].pcolormesh(lon[:], lat[:], sal_t[:], cmap=cmap)
     cbar = fig.colorbar(mesh)
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
     cbar.set_label('Absolute Salinity [g/kg]', color='white')
