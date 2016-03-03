@@ -29,6 +29,7 @@ from salishsea_tools import (
     tidetools,
     teos_tools
 )
+from salishsea_tools.places import PLACES
 
 from nowcast import figures
 
@@ -40,20 +41,6 @@ title_font = {
 }
 axis_font = {'fontname': 'Bitstream Vera Sans', 'size': '13'}
 
-# Ferry stations
-ferry_stations = {'Tsawwassen': {'lat': 49.0084,
-                                 'lon': -123.1281},
-                  'Duke Pt.': {'lat': 49.1632,
-                               'lon': -123.8909},
-                  'Vancouver': {'lat': 49.2827,
-                                'lon': -123.1207},
-                  'Horseshoe Bay': {'lat': 49.3742,
-                                    'lon': -123.2728},
-                  'Nanaimo': {'lat': 49.1632,
-                              'lon': -123.8909},
-                  'Swartz Bay': {'lat': 48.6882,
-                                 'lon': -123.4102}
-                  }
 
 route = {'HBDB': {'start': {'station': 'Horseshoe Bay',
                             'hour': 1,
@@ -135,22 +122,14 @@ def salinity_ferry_route(
     stations = [route[route_name]['start']['station'],
                 route[route_name]['end']['station'],
                 'Vancouver']
-    location = [0.04, -0.6, 0.09]
-
-    for stn, loc in zip(stations, location):
+    label_offsets = [0.04, -0.6, 0.09]
+    for stn, loc in zip(stations, label_offsets):
         axs[1].plot(
-            ferry_stations[stn]['lon'],
-            ferry_stations[stn]['lat'],
-            marker='D',
-            color='white',
-            markersize=10,
-            markeredgewidth=2)
-
-        axs[1].annotate(stn, (ferry_stations[stn]['lon'] + loc,
-                              ferry_stations[stn]['lat']),
-                        fontsize=15,
-                        color='black',
-                        bbox=bbox_args)
+            PLACES[stn]['lat lon'][1], PLACES[stn]['lat lon'][0],
+            marker='D', color='white', markersize=10, markeredgewidth=2)
+        axs[1].annotate(
+            stn, (PLACES[stn]['lat lon'][1] + loc, PLACES[stn]['lat lon'][0]),
+            fontsize=15, color='black', bbox=bbox_args)
 
     # Set up model part of salinity comparison plot
     label_a = '{} am [UTC]'.format(route[route_name]['start']['hour'])
