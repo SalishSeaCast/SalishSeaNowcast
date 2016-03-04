@@ -151,11 +151,11 @@ class TestGenerateFeed:
         expected = [
             '  <author>',
             '    <name>Salish Sea MEOPAR Project</name>',
-            '    <url>http://salishsea.eos.ubc.ca/</url>',
+            '    <url>https://salishsea.eos.ubc.ca/</url>',
             '  </author>',
-            '  <link href="http://salishsea.eos.ubc.ca/storm-surge/atom/'
+            '  <link href="https://salishsea.eos.ubc.ca/storm-surge/atom/'
             'pmv.xml" rel="self" type="application/atom+xml"/>',
-            '  <link href="http://salishsea.eos.ubc.ca/storm-surge/'
+            '  <link href="https://salishsea.eos.ubc.ca/storm-surge/'
             'forecast.html" rel="related" type="text/html"/>',
             '  <generator version="0.3.2">python-feedgen</generator>',
             '  <rights>Copyright 2015-2016, Salish Sea MEOPAR Project Contributors '
@@ -193,7 +193,7 @@ class TestGenerateFeedEntry:
             'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
         m_fe().author.assert_called_once_with(
             name='Salish Sea MEOPAR Project',
-            uri='http://salishsea.eos.ubc.ca/')
+            uri='https://salishsea.eos.ubc.ca/')
 
     def test_content(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
@@ -208,7 +208,7 @@ class TestGenerateFeedEntry:
         worker_module._generate_feed_entry(
             'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
         m_fe().link.assert_called_once_with(
-            href='http://salishsea.eos.ubc.ca/nemo/results/forecast/'
+            href='https://salishsea.eos.ubc.ca/nemo/results/forecast/'
             'publish_25dec15.html',
             rel='alternate', type='text/html')
 

@@ -7,7 +7,7 @@ information page for the Salish Sea NEMO nowcast automation system.
 
 At present,
 this page resides at /home/dlatorne/public_html/MEOPAR/nowcast/index.html
-which makes it accessible at http://eos.ubc.ca/~dlatorne/MEOPAR/nowcast/.
+which makes it accessible at https://eos.ubc.ca/~dlatorne/MEOPAR/nowcast/.
 Unfortunately,
 the index.html file at that location must be a regular file,
 not a symbolic link,

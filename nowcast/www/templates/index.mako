@@ -8,7 +8,7 @@ ${calendar_grid(last_month_cols, this_month_cols, prelim_fcst_dates, fcst_dates,
 
 Log files from the model run automation system and forcing data monitoring plots can be found on the `nowcast monitoring information`_ page.
 
-.. _nowcast monitoring information: http://eos.ubc.ca/~dlatorne/MEOPAR/nowcast/
+.. _nowcast monitoring information: https://eos.ubc.ca/~dlatorne/MEOPAR/nowcast/
 
 
 <%def name="calendar_grid(last_month_cols, this_month_cols, prelim_fcst_dates, fcst_dates, nowcast_dates)">

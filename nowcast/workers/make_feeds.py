@@ -122,7 +122,7 @@ def _generate_feed(feed, web_config):
     fg.language('en-ca')
     fg.author(
         name='Salish Sea MEOPAR Project',
-        uri='http://{0[domain]}/'.format(web_config))
+        uri='https://{0[domain]}/'.format(web_config))
     fg.rights(
         'Copyright 2015-{this_year}, '
         'Salish Sea MEOPAR Project Contributors and '
@@ -130,11 +130,11 @@ def _generate_feed(feed, web_config):
         .format(this_year=utcnow.year))
     fg.link(
         href=(
-            'http://{0[domain]}/{0[atom_path]}/{feed}'
+            'https://{0[domain]}/{0[atom_path]}/{feed}'
             .format(web_config, feed=feed)),
         rel='self', type='application/atom+xml')
     fg.link(
-        href='http://{0[domain]}/storm-surge/forecast.html'.format(web_config),
+        href='https://{0[domain]}/storm-surge/forecast.html'.format(web_config),
         rel='related', type='text/html')
     return fg
 
@@ -148,13 +148,13 @@ def _generate_feed_entry(feed, max_ssh_info, run_date, run_type, config):
     fe.id(_build_tag_uri(now.format('YYYY-MM-DD'), feed, now, config['web']))
     fe.author(
         name='Salish Sea MEOPAR Project',
-        uri='http://{0[domain]}/'.format(config['web']))
+        uri='https://{0[domain]}/'.format(config['web']))
     fe.content(
         _render_entry_content(feed, max_ssh_info, config),
         type='html')
     fe.link(
         rel='alternate', type='text/html',
-        href='http://{0[domain]}/nemo/results/{forecast}/publish_{day}.html'
+        href='https://{0[domain]}/nemo/results/{forecast}/publish_{day}.html'
         .format(
             config['web'],
             forecast=run_type,
