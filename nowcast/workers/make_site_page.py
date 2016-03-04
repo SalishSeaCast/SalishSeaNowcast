@@ -204,7 +204,7 @@ def _render_nowcast_rst(
                 dmy=run_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'nowcast', rst_filename)
     figures_server = (
-        'http://{domain}/{path}'
+        'https://{domain}/{path}'
         .format(
             domain=config['web']['domain'],
             path=config['web']['figures']['server_path']))
@@ -238,7 +238,7 @@ def _render_forecast_rst(
                 dmy=results_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'forecast', rst_filename)
     figures_server = (
-        'http://{domain}/{path}'
+        'https://{domain}/{path}'
         .format(
             domain=config['web']['domain'],
             path=config['web']['figures']['server_path']))
@@ -274,7 +274,7 @@ def _render_forecast2_rst(
                 dmy=results_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'forecast2', rst_filename)
     figures_server = (
-        'http://{domain}/{path}'
+        'https://{domain}/{path}'
         .format(
             domain=config['web']['domain'],
             path=config['web']['figures']['server_path']))
