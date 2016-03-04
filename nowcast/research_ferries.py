@@ -175,23 +175,19 @@ def salinity_ferry_route(
     return fig
 
 
-def ferry_salinity(ferry_data_path, route_name, dmy, step=20):
+def ferry_salinity(ferry_data_path, route_name, dmy, step=1):
     """Load ferry data and slice it to contain only the during route values.
 
-    :arg ferry_data_path: storage file location for ONC ferry data.
-    :type ferry_data_path: string
+    :arg str ferry_data_path: storage file location for ONC ferry data.
 
-    :arg route_name: name of a ferre route. HBDB, TWDP or TWSB.
-    :type route_name: string
+    :arg str route_name: name of a ferre route. HBDB, TWDP or TWSB.
 
-    :arg dmy: today's date in ddmonyy format
-    :type dmy: string
+    :arg str dmy: today's date in :kbd:`ddmmmyy` format
 
-    :arg step: selecting every nth data point
-    :type step: int
+    :arg int step: selecting every nth data point
 
-    :return matrix containing time, lon, lat and salinity of ferry
-        observations
+    :returns: matrix containing time, lon, lat and salinity of ferry
+              observations
     """
     # Load observation ferry salinity data with locations and time
     date = datetime.datetime.strptime(dmy, "%d%b%y")
