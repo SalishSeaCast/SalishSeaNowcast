@@ -41,6 +41,15 @@ Descriptions under the links below are from the first cell of the notebooks
     
     This notebook creates daily forcing files for the sea surface height (hourly frequency) at Neah Bay. This can be used to create "obs" forcing files for nowcasts in the event of a automation system error.  
 
+* ##[TestResearchFerriesModule.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/TestResearchFerriesModule.ipynb)  
+    
+    **Test New `research_ferries` Module**  
+      
+    Render figure objects returned by `nowcast.research_ferries.salinity_ferry_route()` function.  
+    Provides data for visual testing to confirm that refactoring has not adversely changed figures for web pages.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
+
 * ##[FCST_Template.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/FCST_Template.ipynb)  
     
     Forecast template  
