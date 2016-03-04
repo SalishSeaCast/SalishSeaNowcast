@@ -170,10 +170,10 @@ web:
   site_nemo_results_path: site/nemo/results
   www_path: www
   templates_path: www/templates
-  server_path: shelob-salishsea:/www/salishsea/data
+  server_path: skookum-salishsea:/var/www/html
 
   figures:
-    storage_path: /results/nowcast-sys/figures
+    storage_path: /var/www/html/nowcast-sys/figures
     server_path: nowcast-sys/figures
 
   salinity_comparison:
