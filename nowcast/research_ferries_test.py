@@ -18,6 +18,7 @@ salinity of British Columbia ferry observations data and the model results with
 visualization figures for analysis of daily nowcast runs.
 """
 import datetime
+import os
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -42,30 +43,42 @@ title_font = {
 axis_font = {'fontname': 'Bitstream Vera Sans', 'size': '13'}
 
 
-route = {'HBDB': {'start': {'station': 'Horseshoe Bay',
-                            'hour': 1,
-                            'minute': 40},
-                  'end': {'station': 'Nanaimo',
-                          'hour': 3,
-                          'minute': 20}},
-         'TWDP': {'start': {'station': 'Tsawwassen',
-                            'hour': 2,
-                            'minute': 0},
-                  'end': {'station': 'Duke Pt.',
-                          'hour': 4,
-                          'minute': 15}},
-         'TWSB': {'start': {'station': 'Tsawwassen',
-                            'hour': 2,
-                            'minute': 0},
-                  'end': {'station': 'Swartz Bay',
-                          'hour': 4,
-                          'minute': 0}}
-         }
+FERRY_ROUTES = {
+    'HB_DB': {
+        'start': {
+            'terminal': 'Horseshoe Bay',
+            'hour': 1,
+            'minute': 40},
+        'end': {
+            'terminal': 'Departure Bay',
+            'hour': 3,
+            'minute': 20},
+        },
+    'TW_DP': {
+        'start': {
+            'terminal': 'Tsawwassen',
+            'hour': 2,
+            'minute': 0},
+        'end': {
+            'terminal': 'Duke Pt.',
+            'hour': 4,
+            'minute': 15},
+        },
+    'TW_SB': {
+        'start': {
+            'terminal': 'Tsawwassen',
+            'hour': 2,
+            'minute': 0},
+        'end': {
+            'terminal': 'Swartz Bay',
+            'hour': 4,
+            'minute': 0}
+    }}
 
 
 def salinity_ferry_route(
-        ferry_data_path, grid_T_hr,
-        bathy, coastline, route_name, dmy):
+    ferry_data_path, grid_T_hr, bathy, coastline, route_name, dmy,
+):
     """Plot daily salinity comparisons between ferry observations and model
     results as well as ferry route with model salinity distribution.
 
@@ -119,11 +132,12 @@ def salinity_ferry_route(
 
     # Add locations and markers on plot for orientation
     bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.7)
-    stations = [route[route_name]['start']['station'],
-                route[route_name]['end']['station'],
-                'Vancouver']
+    places = [
+        FERRY_ROUTES[route_name]['start']['terminal'],
+        FERRY_ROUTES[route_name]['end']['terminal'],
+        'Vancouver']
     label_offsets = [0.04, -0.6, 0.09]
-    for stn, loc in zip(stations, label_offsets):
+    for stn, loc in zip(places, label_offsets):
         axs[1].plot(
             PLACES[stn]['lat lon'][1], PLACES[stn]['lat lon'][0],
             marker='D', color='white', markersize=10, markeredgewidth=2)
@@ -132,10 +146,14 @@ def salinity_ferry_route(
             fontsize=15, color='black', bbox=bbox_args)
 
     # Set up model part of salinity comparison plot
-    label_a = '{} am [UTC]'.format(route[route_name]['start']['hour'])
-    label_b = '{} am [UTC]'.format(route[route_name]['start']['hour'] + 1)
-    axs[0].plot(obs_sal[1], nemo_a, 'DodgerBlue', linewidth=2, label=label_a)
-    axs[0].plot(obs_sal[1], nemo_b, 'MediumBlue', linewidth=2, label=label_b)
+    axs[0].plot(
+        obs_sal[1], nemo_a, 'DodgerBlue', linewidth=2,
+        label='{} am [UTC]'
+        .format(FERRY_ROUTES[route_name]['start']['hour']))
+    axs[0].plot(
+        obs_sal[1], nemo_b, 'MediumBlue', linewidth=2,
+        label='{} am [UTC]'
+        .format(FERRY_ROUTES[route_name]['start']['hour']+1))
 
     # Observational component of salinity comparisons plot
     axs[0].plot(obs_sal[1], obs_sal[3],
@@ -185,11 +203,11 @@ def ferry_salinity(ferry_data_path, route_name, dmy, step=20):
     # Create datetime object for start and end of route times
     date = datetime.datetime.strptime(dmy, '%d%b%y')
     start_time = date.replace(
-        hour=route[route_name]['start']['hour'],
-        minute=route[route_name]['start']['minute'])
+        hour=FERRY_ROUTES[route_name]['start']['hour'],
+        minute=FERRY_ROUTES[route_name]['start']['minute'])
     end_time = date.replace(
-        hour=route[route_name]['end']['hour'],
-        minute=route[route_name]['end']['minute'])
+        hour=FERRY_ROUTES[route_name]['end']['hour'],
+        minute=FERRY_ROUTES[route_name]['end']['minute'])
 
     # Slice the observational arrays to only have "during route" data
     time_obs = datenum2datetime(obs[0])
@@ -315,8 +333,8 @@ def _get_nemo_salinity(route_name, grid_T_hr):
     """Load and select the salinity value of the ferry route time."""
     sal_nemo = grid_T_hr.variables['vosaline']
 
-    a_start = route[route_name]['start']['hour']
-    b_start = route[route_name]['start']['hour'] + 1
+    a_start = FERRY_ROUTES[route_name]['start']['hour']
+    b_start = FERRY_ROUTES[route_name]['start']['hour'] + 1
     sal_a = sal_nemo[a_start, 1, :, :]
     sal_b = sal_nemo[b_start, 1, :, :]
 
@@ -326,36 +344,28 @@ def _get_nemo_salinity(route_name, grid_T_hr):
 def _get_sal_data(ferry_data_path, route_name, dmy):
     """Retrieve the ferry route data from matlab.
 
-    :arg ferry_data_path: storage file location for ONC ferry data.
-    :type ferry_data_path: string
+    :arg str ferry_data_path: storage file location for ONC ferry data.
 
-    :arg route_name: name for one of three ferry routes
-    :type route_name: string
+    :arg str route_name: name for one of three ferry routes
 
-    :arg dmy: date in form ddmonyy
-    :type dmy: string
+    :arg str dmy: date in form ddmonyy
 
-    :return: list containing time_obs, lon_obs, lat_obs, sal_obs
+    :returns: list containing time_obs, lon_obs, lat_obs, sal_obs
     """
-
+    route = route_name.replace('_', '')
     date = datetime.datetime.strptime(dmy, "%d%b%y")
     date = date.strftime('%Y%m%d')
-
-    saline = sio.loadmat('{}/{}/{}_TSG{}.mat'.format(
-        ferry_data_path, route_name, route_name, date))
+    saline = sio.loadmat(
+        os.path.join(
+            ferry_data_path, route, '{}_TSG{}.mat'.format(route, date)))
     struct = (
-        ((saline['{}_TSG'.format(route_name)])
+        ((saline['{}_TSG'.format(route)])
             ['output'])[0, 0])['Practical_Salinity'][0, 0]
-
-    # Assigns variable for the samples data and location
     sal_obs = struct['data'][0, 0]
     time_obs = struct['matlabTime'][0, 0]
     lon_obs = struct['longitude'][0, 0]
     lat_obs = struct['latitude'][0, 0]
-
-    obs = np.array([time_obs[:], lon_obs[:], lat_obs[:], sal_obs[:]])
-
-    return obs
+    return np.array([time_obs[:], lon_obs[:], lat_obs[:], sal_obs[:]])
 
 
 def datenum2datetime(datenum):
