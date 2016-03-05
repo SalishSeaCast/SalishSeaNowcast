@@ -173,7 +173,7 @@ web:
   server_path: skookum-salishsea:/var/www/html
 
   figures:
-    storage_path: /var/www/html/nowcast-sys/figures
+    storage_path: /results/nowcast-sys/figures
     server_path: nowcast-sys/figures
 
   salinity_comparison:
