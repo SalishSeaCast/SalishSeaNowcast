@@ -151,7 +151,13 @@ def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
     lib.mkdir(dest_dir, logger, grp_name=config['file group'])
     for f in glob(os.path.join(plots_dir, '*')):
         lib.fix_perms(f, grp_name=config['file group'])
-        shutil.copy2(f, dest_dir)
+        try:
+            shutil.copy2(f, dest_dir)
+        except shutil.SameFileError:
+            # File was probably copied into destination directory
+            # by a prior run of the make_plots worker;
+            # e.g. nowcast research before publish
+            pass
     checklist = {
         ' '.join((run_type, plot_type)): glob(os.path.join(dest_dir, '*'))}
     return checklist
