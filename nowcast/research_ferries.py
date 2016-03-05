@@ -279,26 +279,18 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
     :arg sal_b: 1.5 m depth for 4 am (if TWDP route, 3am)
     :arg sal_b: numpy array
 
-    :return: integral of model salinity values divided by weights for
-            sal_a and sal_b.
+    :returns: integral of model salinity values divided by weights for
+              sal_a and sal_b.
     """
-    Y = grid_T_hr.variables['nav_lat']
-    X = grid_T_hr.variables['nav_lon']
-
-    # Find nearest model point to a ferry route point
-    [x1, y1] = tidetools.find_closest_model_point(obs[1],
-                                                  obs[2],
-                                                  X,
-                                                  Y,
-                                                  bathy,
-                                                  lat_tol=0.00210,
-                                                  allow_land=True)
-
+    lats = grid_T_hr.variables['nav_lat']
+    lons = grid_T_hr.variables['nav_lon']
+    depths = bathy.variables['Bathymetry'][:]
+    x1, y1 = tidetools.find_closest_model_point(
+        obs[1], obs[2], lons, lats, depths, lat_tol=0.00210, allow_land=True)
     # Inverse distance weighted interpolation with the 8 nearest model values.
     val_a_sum = 0
     val_b_sum = 0
     weight_sum = 0
-
     # Some ferry model routes go over land, replace locations when 4 or
     # more of the surrounding grid point are land with NaN.
     interp_area = sal_a[x1-1:x1+2, y1-1:y1+2]
@@ -311,17 +303,15 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
                 # Some adjacent points are land we don't count them into the
                 # salinity average.
                 dist = tidetools.haversine(
-                    obs[1], obs[2], X[i, j], Y[i, j])
+                    obs[1], obs[2], lons[i, j], lats[i, j])
                 weight = 1.0 / dist
                 weight_sum = weight_sum + weight
                 val_a = sal_a[i, j] * weight
                 val_b = sal_b[i, j] * weight
                 val_a_sum = val_a_sum + val_a
                 val_b_sum = val_b_sum + val_b
-
         sal_a_idw = val_a_sum / weight_sum
         sal_b_idw = val_b_sum / weight_sum
-
     return sal_a_idw, sal_b_idw
 
 
