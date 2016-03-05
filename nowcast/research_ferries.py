@@ -77,13 +77,13 @@ FERRY_ROUTES = {
 
 
 def salinity_ferry_route(
-    ferry_data_path, grid_T_hr, bathy, coastline, route_name, dmy,
+    ferry_data_dir, grid_T_hr, bathy, coastline, route_name, dmy,
 ):
     """Plot daily salinity comparisons between ferry observations and model
     results as well as ferry route with model salinity distribution.
 
-    :arg ferry_data_path: storage file location for ONC ferry data.
-    :type ferry_data_path: string
+    :arg ferry_data_dir: storage file location for ONC ferry data.
+    :type ferry_data_dir: string
 
     :arg grid_T_hr: Hourly tracer results dataset from NEMO.
     :type grid_T_hr: :class:`netCDF4.Dataset
@@ -107,7 +107,7 @@ def salinity_ferry_route(
     sal_hr = np.ma.masked_values(sal_hr[t, z], 0)
     sal_t = teos_tools.psu_teos(sal_hr)
     # Load ferry route salinity
-    obs_sal = ferry_salinity(ferry_data_path, route_name, dmy)
+    obs_sal = ferry_salinity(ferry_data_dir, route_name, dmy)
 
     # Load model salinity for ferry route
     nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal)
@@ -175,10 +175,10 @@ def salinity_ferry_route(
     return fig
 
 
-def ferry_salinity(ferry_data_path, route_name, dmy, step=1):
+def ferry_salinity(ferry_data_dir, route_name, dmy, step=1):
     """Load ferry data and slice it to contain only the during route values.
 
-    :arg str ferry_data_path: storage file location for ONC ferry data.
+    :arg str ferry_data_dir: storage file location for ONC ferry data.
 
     :arg str route_name: name of a ferre route. HBDB, TWDP or TWSB.
 
@@ -194,7 +194,7 @@ def ferry_salinity(ferry_data_path, route_name, dmy, step=1):
     dayf = date - datetime.timedelta(days=1)
     dmyf = dayf.strftime('%d%b%y').lower()
 
-    obs = _get_sal_data(ferry_data_path, route_name, dmyf)
+    obs = _get_sal_data(ferry_data_dir, route_name, dmyf)
 
     # Create datetime object for start and end of route times
     date = datetime.datetime.strptime(dmy, '%d%b%y')
@@ -327,10 +327,10 @@ def _get_nemo_salinity(route_name, grid_T_hr):
     return sal_a, sal_b
 
 
-def _get_sal_data(ferry_data_path, route_name, dmy):
+def _get_sal_data(ferry_data_dir, route_name, dmy):
     """Retrieve the ferry route data from matlab.
 
-    :arg str ferry_data_path: storage file location for ONC ferry data.
+    :arg str ferry_data_dir: storage file location for ONC ferry data.
 
     :arg str route_name: name for one of three ferry routes
 
@@ -343,7 +343,7 @@ def _get_sal_data(ferry_data_path, route_name, dmy):
     date = date.strftime('%Y%m%d')
     saline = sio.loadmat(
         os.path.join(
-            ferry_data_path, route, '{}_TSG{}.mat'.format(route, date)))
+            ferry_data_dir, route, '{}_TSG{}.mat'.format(route, date)))
     struct = (
         ((saline['{}_TSG'.format(route)])
             ['output'])[0, 0])['Practical_Salinity'][0, 0]
