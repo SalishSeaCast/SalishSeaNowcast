@@ -136,10 +136,12 @@ def _make_plot_files(
     coastline = sio.loadmat(config['coastline'])
     mesh_mask = nc.Dataset(config['mesh_mask'])
     tidal_predictions = config['ssh']['tidal_predictions']
+    ferry_data_dir = config['observations']['ferry data']
     make_plots_funcs[plot_type](
         dmy, weather_path, bathy, results_dir, plots_dir, coastline,
         tidal_predictions=tidal_predictions,
         mesh_mask=mesh_mask,
+        ferry_data_dir=ferry_data_dir,
     )
 
 
@@ -253,7 +255,8 @@ def _make_publish_plots(
 
 
 def _make_comparisons_plots(
-    dmy, weather_path, bathy, results_dir, plots_dir, coastline, **kwargs
+    dmy, weather_path, bathy, results_dir, plots_dir, coastline,
+    ferry_data_dir, **kwargs
 ):
     """Make the plots we wish to look at for comparisons purposes.
     """
@@ -261,6 +264,12 @@ def _make_comparisons_plots(
 
     fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
     filename = os.path.join(plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
+    fig.savefig(filename, facecolor=fig.get_facecolor())
+
+    fig = research_ferries.salinity_ferry_route(
+        ferry_data_dir, grid_T_hr, bathy, coastline, 'TW_DP', dmy)
+    filename = os.path.join(
+        plots_dir, 'TW_DP_ferry_salinity_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
 
@@ -288,11 +297,6 @@ def _future_comparison_plots(
     fig = research_ferries.salinity_ferry_route('HBDB')
     filename = os.path.join(
         plots_dir, 'HBDB_ferry_salinity_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor())
-
-    fig = research_ferries.salinity_ferry_route('TWDP')
-    filename = os.path.join(
-        plots_dir, 'TWDP_ferry_salinity_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = research_ferries.salinity_ferry_route('TWSB')

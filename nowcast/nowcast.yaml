@@ -43,6 +43,9 @@ weather:
   # Location of Pramod Thupaki's grid_defn.pl script
   grid_defn.pl: /results/nowcast-sys/private-tools/PThupaki/grid_defn.pl
 
+observations:
+  ferry data: /ocean/jieliu/research/meopar/ONC_ferries/
+
 run_types:
   # Keys are run types to execute, values are NEMO configurations to use
   # Note that forecast requires a nowcast to have been completed,
