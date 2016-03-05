@@ -96,7 +96,7 @@ def salinity_ferry_route(
 
     :return: fig
     """
-    fig, axs = plt.subplots(1, 2, figsize=(15, 8))
+    fig, axs = plt.subplots(1, 2, figsize=(20, 7.5))
 
     lat = grid_T_hr.variables['nav_lat']
     lon = grid_T_hr.variables['nav_lon']
@@ -112,23 +112,32 @@ def salinity_ferry_route(
     # Load model salinity for ferry route
     nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal)
 
-    figures.plot_map(
-        axs[1], coastline,
-        lat_range=(48.2, 49.6), lon_range=(-124.5, -122.5))
+    axs[1].set_axis_bgcolor("burlywood")
     viz_tools.set_aspect(axs[1], coords='map', lats=lat)
-    cmap = plt.get_cmap('spectral')
-    cmap.set_bad('burlywood')
+    cmap = plt.get_cmap('plasma')
+    axs[1].set_xlim((-124.5, -122.5))
+    axs[1].set_ylim((48.3, 49.6))
+
+    # Reduce size of salinity that is plotted
+    si = 200
+    ei = 610
+    sj = 20
+    ej = 370
 
     # Plot model salinity
-    mesh = axs[1].pcolormesh(lon[:], lat[:], sal_t[:], cmap=cmap)
+    mesh = axs[1].contourf(
+        lon[si:ei, sj:ej], lat[si:ei, sj:ej], sal_t[si:ei, sj:ej],
+        20, cmap=cmap)
     cbar = fig.colorbar(mesh)
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
     cbar.set_label('Absolute Salinity [g/kg]', color='white')
     axs[1].set_title('Ferry Route: 3am[UTC] 1.5m model result ', **title_font)
+    axs[1].set_xlabel('Longitude', **axis_font)
+    axs[1].set_ylabel('Latitute', **axis_font)
 
     # Plot ferry route.
     axs[1].plot(obs_sal[1], obs_sal[2], 'black', linewidth=4)
-    figures.axis_colors(axs[1], 'white')
+    figures.axis_colors(axs[1], 'grey')
 
     # Add locations and markers on plot for orientation
     bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.7)
@@ -136,7 +145,7 @@ def salinity_ferry_route(
         FERRY_ROUTES[route_name]['start']['terminal'],
         FERRY_ROUTES[route_name]['end']['terminal'],
         'Vancouver']
-    label_offsets = [0.04, -0.6, 0.09]
+    label_offsets = [0.04, -0.4, 0.09]
     for stn, loc in zip(places, label_offsets):
         axs[1].plot(
             PLACES[stn]['lat lon'][1], PLACES[stn]['lat lon'][0],
@@ -170,7 +179,7 @@ def salinity_ferry_route(
     axs[0].grid()
 
     fig.patch.set_facecolor('#2B3E50')
-    figures.axis_colors(axs[0], 'gray')
+    figures.axis_colors(axs[0], 'grey')
 
     return fig
 
