@@ -956,6 +956,9 @@ def plot_wind_vector(ax, name, t_orig, t_final, weather_path, inds, scale):
     [wind, direc, t, pr, tem, sol, the, qr, pre] = get_model_winds(
         lon, lat, t_orig, t_final, weather_path)
 
+    ## TODO: Fix this. It produces a warning exception:
+    ## FutureWarning: elementwise comparison failed; returning scalar instead,
+    ## but in the future will perform elementwise comparison
     if inds == 'all':
         inds = np.array([0, np.shape(wind)[0] - 1])
     # Calculate U and V
