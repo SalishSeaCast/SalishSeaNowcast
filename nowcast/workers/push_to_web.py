@@ -121,7 +121,7 @@ def rsync_to_site(html_path, results_pages, plots_paths, server_path):
     """
     for results_path in results_pages:
         cmd = [
-            'rsync', '-rRtv',
+            'rsync', '-rRv',
             '{}/./{}/'.format(html_path, results_path),
             server_path,
         ]
@@ -130,7 +130,7 @@ def rsync_to_site(html_path, results_pages, plots_paths, server_path):
             'pushed {} results pages to {}/'.format(results_path, server_path))
     for plots_path in plots_paths:
         cmd = [
-            'rsync', '-rRtv',
+            'rsync', '-rRv',
             '{}/./{}/'.format(html_path, plots_path),
             server_path,
         ]
