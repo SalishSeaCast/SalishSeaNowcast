@@ -140,8 +140,13 @@ def _make_runoff_links(sftp_client, host_run_config, run_date, host_name):
     _clear_links(sftp_client, host_run_config, 'rivers/')
     src = host_run_config['rivers_month.nc']
     dest = os.path.join(
-        host_run_config['nowcast_dir'], 'rivers/', os.path.basename(src))
+        host_run_config['nowcast_dir'], 'rivers', os.path.basename(src))
     _create_symlink(sftp_client, host_name, src, dest)
+    if 'rivers_bio_dir' in host_run_config:
+        src = host_run_config['rivers_bio_dir']
+        dest = os.path.join(
+            host_run_config['nowcast_dir'], 'rivers', 'bio_climatology')
+        _create_symlink(sftp_client, host_name, src, dest)
     for tmpl in make_runoff_file.FILENAME_TMPLS.values():
         src = os.path.join(
             host_run_config['rivers_dir'],
@@ -150,7 +155,7 @@ def _make_runoff_links(sftp_client, host_run_config, run_date, host_name):
         for day in range(-1, 3):
             filename = tmpl.format(run_date.replace(days=day).date())
             dest = os.path.join(
-                host_run_config['nowcast_dir'], 'rivers/', filename)
+                host_run_config['nowcast_dir'], 'rivers', filename)
             _create_symlink(sftp_client, host_name, src, dest)
 
 
@@ -196,4 +201,4 @@ def _create_symlink(sftp_client, host_name, src, dest):
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover

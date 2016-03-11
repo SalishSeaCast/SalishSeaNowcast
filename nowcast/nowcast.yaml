@@ -127,8 +127,10 @@ run:
     results:
       nowcast-green: /results/SalishSea/nowcast-green/
     rivers_dir: /results/forcing/rivers/
-    # Location of rivers runoff monthly climatology file
-    rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
+    # Location of rivers runoff monthly temperature/salinity climatology file
+    rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.ncnfs1
+    # Location of the rivers runoff daily tracers climatology directory
+    rivers_bio_dir: /results/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
     ssh_dir: /results/forcing/sshNeahBay/
     weather_dir: /results/forcing/atmospheric/GEM2.5/operational/
     # Location of no_snow.nc constraint file
