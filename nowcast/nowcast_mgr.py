@@ -379,6 +379,8 @@ class NowcastManager:
             'success nowcast+': [
                 (self._update_checklist,
                     ['grib_to_netcdf', 'weather forcing', payload]),
+                (self._launch_worker,
+                    ['ping_erddap', ['download_weather']]),
             ],
             'success forecast2': [
                 (self._update_checklist,

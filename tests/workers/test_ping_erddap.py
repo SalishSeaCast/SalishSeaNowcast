@@ -45,7 +45,8 @@ class TestMain:
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
+            'nowcast', 'nowcast-green', 'forecast', 'forecast2',
+            'download_weather'}
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker, worker_module):
@@ -66,6 +67,7 @@ class TestSuccess:
         'forecast',
         'forecast2',
         'nowcast-green',
+        'download_weather',
     ])
     def test_success_log_info(self, run_type, worker_module):
         parsed_args = Mock(run_type=run_type)
@@ -78,6 +80,7 @@ class TestSuccess:
         ('forecast', 'success forecast'),
         ('forecast2', 'success forecast2'),
         ('nowcast-green', 'success nowcast-green'),
+        ('download_weather', 'success download_weather'),
     ])
     def test_success_msg_type(self, run_type, expected, worker_module):
         parsed_args = Mock(run_type=run_type)
@@ -93,6 +96,7 @@ class TestFailure:
         'forecast',
         'forecast2',
         'nowcast-green',
+        'download_weather',
     ])
     def test_failure_log_error(self, run_type, worker_module):
         parsed_args = Mock(run_type=run_type)
@@ -105,6 +109,7 @@ class TestFailure:
         ('forecast', 'failure forecast'),
         ('forecast2', 'failure forecast2'),
         ('nowcast-green', 'failure nowcast-green'),
+        ('download_weather', 'failure download_weather'),
     ])
     def test_failure_msg_type(self, run_type, expected, worker_module):
         parsed_args = Mock(run_type=run_type)
@@ -120,6 +125,7 @@ class TestPingErddap:
         'forecast',
         'forecast2',
         'nowcast-green',
+        'download_weather',
     ])
     def test_ping_erddap(self, run_type, worker_module, tmpdir):
         parsed_args = Mock(run_type=run_type)
@@ -128,6 +134,8 @@ class TestPingErddap:
             'erddap': {
                 'flag_dir': str(tmp_flag_dir),
                 'datasetIDs': {
+                    'download_weather':
+                        ['ubcSSaSurfaceAtmosphereFieldsV1'],
                     'nowcast':
                         ['ubcSSn3DTracerFields1hV1', 'ubcSSn3DuVelocity1hV1'],
                     'forecast':

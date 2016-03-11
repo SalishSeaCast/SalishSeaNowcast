@@ -565,13 +565,43 @@ class TestAfterGRIBtoNetCDF:
         )
         assert actions[0] == expected
 
+    def test_success_nowcastp_launch_ping_erddap_worker(self, mgr):
+        mgr.config = {'run_types': {}, 'run': []}
+        actions = mgr._after_grib_to_netcdf('success nowcast+', 'payload')
+        expected = (
+            mgr._launch_worker, ['ping_erddap', ['download_weather']]
+        )
+        assert actions[1] == expected
+
     @pytest.mark.parametrize('host_type, host_name, run_type', [
         ('hpc host', 'orcinus-nowcast', 'nowcast+'),
-        ('hpc host', 'orcinus-nowcast', 'forecast2'),
         ('cloud host', 'west.cloud-nowcast', 'nowcast+'),
+    ])
+    def test_success_nowcastp_launch_upload_forcing_worker(
+        self, host_type, host_name, run_type, mgr,
+    ):
+        mgr.config = {
+            'run_types': {
+                'nowcast': 'SalishSea',
+                'forecast': 'SalishSea',
+                'forecast2': 'SalishSea',
+                'nowcast-green': 'SOG',
+            },
+            'run': {host_type: host_name}
+        }
+        actions = mgr._after_grib_to_netcdf(
+            'success {}'.format(run_type), 'payload')
+        expected = (
+            mgr._launch_worker, ['upload_forcing', [host_name, run_type]],
+        )
+        assert actions[2] == expected
+        assert len(actions) == 3
+
+    @pytest.mark.parametrize('host_type, host_name, run_type', [
+        ('hpc host', 'orcinus-nowcast', 'forecast2'),
         ('cloud host', 'west.cloud-nowcast', 'forecast2'),
     ])
-    def test_success_launch_upload_forcing_worker(
+    def test_success_forecast2_launch_upload_forcing_worker(
         self, host_type, host_name, run_type, mgr,
     ):
         mgr.config = {
@@ -612,8 +642,8 @@ class TestAfterGRIBtoNetCDF:
             ['make_forcing_links',
              ['salish-nowcast', 'nowcast-green', '--shared-storage']]
         )
-        assert actions[2] == expected
-        assert len(actions) == 3
+        assert actions[3] == expected
+        assert len(actions) == 4
 
 
 class TestAfterUploadForcing:
