@@ -31,13 +31,16 @@ def main():
     worker = NowcastWorker(worker_name, description=__doc__)
     worker.arg_parser.add_argument(
         'run_type',
-        choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
+        choices={
+            'nowcast', 'nowcast-green', 'forecast', 'forecast2',
+            'download_weather'},
         help='''
-        Type of run to execute:
+        Type of run to notify ERDDAP of:
         'nowcast' means nowcast physics run,
         'nowcast-green' means nowcast green ocean run,
         'forecast' means updated forecast run,
         'forecast2' means preliminary forecast run,
+        'download_weather' means atmospheric forcing downloaded & processed
         ''',
     )
     worker.run(ping_erddap, success, failure)
