@@ -209,6 +209,7 @@ erddap:
       - ubcSSn3DwVelocity1hV1
       - ubcSSn3DwVelocity1hV2
       - ubcSSnCampbellRiverSSH15mV1
+      - ubcSSnCherryPointSSH15mV1
       - ubcSSnPointAtkinsonSSH15mV1
 
 
