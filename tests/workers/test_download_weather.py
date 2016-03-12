@@ -95,9 +95,9 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_error(self, worker_module):
+    def test_failure_log_critical(self, worker_module):
         parsed_args = Mock(forecast='12')
-        with patch.object(worker_module.logger, 'error') as m_logger:
+        with patch.object(worker_module.logger, 'critical') as m_logger:
             worker_module.failure(parsed_args)
         assert m_logger.called
 

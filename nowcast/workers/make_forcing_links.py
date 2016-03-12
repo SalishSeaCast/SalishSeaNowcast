@@ -85,7 +85,7 @@ def success(parsed_args):
 
 
 def failure(parsed_args):
-    logger.error(
+    logger.critical(
         '{0.run_type} forcing file links creation on {0.host_name} failed'
         .format(parsed_args), extra={
             'run_type': parsed_args.run_type,

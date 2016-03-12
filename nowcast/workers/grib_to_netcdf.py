@@ -89,7 +89,7 @@ def success(parsed_args):
 
 
 def failure(parsed_args):
-    logger.error(
+    logger.critical(
         'NEMO-atmos forcing file creation for {.run_type} failed'
         .format(parsed_args), extra={'run_type': parsed_args.run_type})
     msg_type = 'failure {.run_type}'.format(parsed_args)

@@ -64,7 +64,7 @@ def success(parsed_args):
 
 
 def failure(parsed_args):
-    logger.error('runoff file creation failed')
+    logger.critical('runoff file creation failed')
     return 'failure'
 
 
