@@ -77,7 +77,7 @@ def success(parsed_args):
 
 
 def failure(parsed_args):
-    logger.error(
+    logger.critical(
         'weather forecast {.forecast} downloads failed'
         .format(parsed_args), extra={'forecast': parsed_args.forecast})
     msg_type = '{} {}'.format('failure', parsed_args.forecast)

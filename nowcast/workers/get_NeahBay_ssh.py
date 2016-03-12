@@ -73,7 +73,7 @@ def success(parsed_args):
 
 
 def failure(parsed_args):
-    logger.error(
+    logger.critical(
         'Neah Bay sea surface height web scraping and open boundary file '
         'creation for {.run_type} failed'
         .format(parsed_args), extra={'run_type': parsed_args.run_type})
