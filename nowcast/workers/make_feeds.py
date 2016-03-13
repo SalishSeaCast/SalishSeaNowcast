@@ -139,7 +139,7 @@ def _generate_feed(feed, web_config):
     return fg
 
 
-def _generate_feed_entry(feed, max_ssh_info, run_date, run_type, config):
+def _generate_feed_entry(feed, max_ssh_info, config):
     now = arrow.now()
     fe = FeedEntry()
     fe.title(
@@ -154,11 +154,8 @@ def _generate_feed_entry(feed, max_ssh_info, run_date, run_type, config):
         type='html')
     fe.link(
         rel='alternate', type='text/html',
-        href='https://{0[domain]}/nemo/results/{forecast}/publish_{day}.html'
-        .format(
-            config['web'],
-            forecast=run_type,
-            day=run_date.replace(days=+1).format('DDMMMYY').lower()),
+        href='https://{[domain]}/storm-surge/forecast.html'
+        .format(config['web'])
     )
     return fe
 

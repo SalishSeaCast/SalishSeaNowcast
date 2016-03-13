@@ -110,18 +110,17 @@ class TestSuccess:
         msg_type = worker_module.success(parsed_args)
         assert msg_type == 'success forecast2'
 
-
+@patch.object(worker_module().logger, 'critical')
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_error(self, worker_module):
+    def test_failure_log_error(self, m_logger, worker_module):
         parsed_args = Mock(
             run_type='forecast', run_date=arrow.get('2015-12-21'))
-        with patch.object(worker_module.logger, 'critical') as m_logger:
-            worker_module.failure(parsed_args)
+        worker_module.failure(parsed_args)
         assert m_logger.called
 
-    def test_failure_msg_type(self, worker_module):
+    def test_failure_msg_type(self, m_logger, worker_module):
         parsed_args = Mock(
             run_type='forecast2', run_date=arrow.get('2015-12-21'))
         msg_type = worker_module.failure(parsed_args)
@@ -173,43 +172,34 @@ class TestGenerateFeedEntry:
     """
     def test_title(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
-        worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
+        worker_module._generate_feed_entry('pmv.xml', 'max_ssh_info', config)
         m_fe().title.assert_called_once_with(
             'Storm Surge Alert for Point Atkinson')
 
     def test_id(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
         m_now.return_value = arrow.get('2015-12-24 15:10:42')
-        worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
+        worker_module._generate_feed_entry('pmv.xml', 'max_ssh_info', config)
         m_fe().id.assert_called_once_with(
             worker_module._build_tag_uri(
                 '2015-12-24', 'pmv.sml', m_now(), config['web']))
 
     def test_author(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
-        worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
+        worker_module._generate_feed_entry('pmv.xml', 'max_ssh_info', config)
         m_fe().author.assert_called_once_with(
             name='Salish Sea MEOPAR Project',
             uri='https://salishsea.eos.ubc.ca/')
 
     def test_content(self, m_fe, m_rec, m_now, worker_module, config):
         run_date = arrow.get('2015-12-24').floor('day')
-        worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
-        m_fe().content.assert_called_once_with(
-            m_rec(), type='html')
+        worker_module._generate_feed_entry('pmv.xml', 'max_ssh_info', config)
+        m_fe().content.assert_called_once_with(m_rec(), type='html')
 
     def test_link(self, m_fe, m_rec, m_now, worker_module, config):
-        run_date = arrow.get('2015-12-24').floor('day')
-        m_now.return_value = arrow.get('2015-12-24 15:10:42')
-        worker_module._generate_feed_entry(
-            'pmv.xml', 'max_ssh_info', run_date, 'forecast', config)
+        worker_module._generate_feed_entry('pmv.xml', 'max_ssh_info', config)
         m_fe().link.assert_called_once_with(
-            href='https://salishsea.eos.ubc.ca/nemo/results/forecast/'
-            'publish_25dec15.html',
+            href='https://salishsea.eos.ubc.ca/storm-surge/forecast.html',
             rel='alternate', type='text/html')
 
 
