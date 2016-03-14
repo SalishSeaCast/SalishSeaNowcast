@@ -212,6 +212,7 @@ erddap:
       - ubcSSnCherryPointSSH15mV1
       - ubcSSnFridayHarborSSH15mV1
       - ubcSSnNanaimoSSH15mV1
+      - ubcSSnNeahBaySSH15mV1
       - ubcSSnPointAtkinsonSSH15mV1
 
 
