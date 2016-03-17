@@ -76,23 +76,21 @@ FERRY_ROUTES = {
     }}
 
 
-def salinity_ferry_route(
-    ferry_data_dir, grid_T_hr, bathy, coastline, route_name, dmy,
-):
+def salinity_ferry_route(ferry_data_dir, grid_T_hr, bathy, route_name, dmy):
     """Plot daily salinity comparisons between ferry observations and model
     results as well as ferry route with model salinity distribution.
 
-    :arg ferry_data_dir: storage file location for ONC ferry data.
-    :type ferry_data_dir: string
+    :arg str ferry_data_dir: storage file location for ONC ferry data.
 
     :arg grid_T_hr: Hourly tracer results dataset from NEMO.
     :type grid_T_hr: :class:`netCDF4.Dataset
 
-    :arg route_name: route name of these three ferry routes respectively
-    :type route_name: string
+    :arg bathy: model bathymetry
+    :type bathy: numpy array
 
-    :arg dmy: date in form ddmonyy
-    :type dmy: string
+    :arg str route_name: route name of these three ferry routes respectively
+
+    :arg str dmy: date in form ddmonyy
 
     :return: fig
     """
