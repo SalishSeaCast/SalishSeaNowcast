@@ -277,8 +277,8 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
     :arg bathy: model bathymetry
     :type bathy: numpy array
 
-    :arg grid_T: Hourly tracer results dataset from NEMO.
-    :type grid_T: :class:`netCDF4.Dataset`
+    :arg grid_T_hr: Hourly tracer results dataset from NEMO.
+    :type grid_T_hr: :class:`netCDF4.Dataset`
 
     :arg sal_a: 1.5 m depth for 3 am (if TWDP route, 2am)
     :type sal_a: numpy array
@@ -312,11 +312,11 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
                 dist = tidetools.haversine(
                     obs[1], obs[2], lons[i, j], lats[i, j])
                 weight = 1.0 / dist
-                weight_sum = weight_sum + weight
+                weight_sum += weight
                 val_a = sal_a[i, j] * weight
                 val_b = sal_b[i, j] * weight
-                val_a_sum = val_a_sum + val_a
-                val_b_sum = val_b_sum + val_b
+                val_a_sum += val_a
+                val_b_sum += val_b
         sal_a_idw = val_a_sum / weight_sum
         sal_b_idw = val_b_sum / weight_sum
     return sal_a_idw, sal_b_idw
