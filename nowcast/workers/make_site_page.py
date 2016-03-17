@@ -51,7 +51,7 @@ def main():
     )
     worker.arg_parser.add_argument(
         'page_type',
-        choices=set(('index', 'publish', 'research', 'comparison')),
+        choices={'index', 'publish', 'research', 'comparison'},
         help='''
         Type of page to render from template to salishsea site prep directory.
         '''
@@ -211,7 +211,7 @@ def _render_nowcast_rst(
         .format(
             domain=config['web']['domain'],
             path=config['web']['figures']['server_path']))
-    vars = {
+    data = {
         'run_date': run_date,
         'run_type': 'nowcast',
         'results_date': run_date,
@@ -219,7 +219,7 @@ def _render_nowcast_rst(
         'svg_file_roots': svg_file_roots[page_type],
         'figures_server': figures_server,
     }
-    _tmpl_to_rst(tmpl, rst_file, vars, config)
+    _tmpl_to_rst(tmpl, rst_file, data, config)
     logger.debug(
         'nowcast {page_type}: rendered page: {rst_file}'
         .format(page_type=page_type, rst_file=rst_file), extra={
@@ -245,7 +245,7 @@ def _render_forecast_rst(
         .format(
             domain=config['web']['domain'],
             path=config['web']['figures']['server_path']))
-    vars = {
+    data = {
         'run_date': run_date,
         'run_type': 'forecast',
         'results_date': results_date,
@@ -253,7 +253,7 @@ def _render_forecast_rst(
         'svg_file_roots': svg_file_roots[page_type],
         'figures_server': figures_server,
     }
-    _tmpl_to_rst(tmpl, rst_file, vars, config)
+    _tmpl_to_rst(tmpl, rst_file, data, config)
     logger.debug(
         'forecast {page_type}: rendered page: {rst_file}'
         .format(page_type=page_type, rst_file=rst_file), extra={
@@ -281,7 +281,7 @@ def _render_forecast2_rst(
         .format(
             domain=config['web']['domain'],
             path=config['web']['figures']['server_path']))
-    vars = {
+    data = {
         'run_date': run_date,
         'run_type': 'forecast2',
         'results_date': results_date,
@@ -289,7 +289,7 @@ def _render_forecast2_rst(
         'svg_file_roots': svg_file_roots[page_type],
         'figures_server': figures_server,
     }
-    _tmpl_to_rst(tmpl, rst_file, vars, config)
+    _tmpl_to_rst(tmpl, rst_file, data, config)
     logger.debug(
         'forecast2 {page_type}: rendered page: {rst_file}'
         .format(page_type=page_type, rst_file=rst_file), extra={
@@ -362,7 +362,7 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
     # Render the template using the calculated varible values to produce
     # the index rst file
     rst_file = os.path.join(rst_path, 'index.rst')
-    vars = {
+    data = {
         'first_date': dates[0],
         'last_date': dates[-1],
         'this_month_cols': this_month_cols,
@@ -376,7 +376,7 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         'sal_comp_path': config['web']['salinity_comparison']['web_path'],
         'sal_comp_fileroot': sal_comp_fileroot,
     }
-    _tmpl_to_rst(tmpl, rst_file, vars, config)
+    _tmpl_to_rst(tmpl, rst_file, data, config)
     logger.debug(
         '{run_type} {page_type}: rendered index page: {rst_file}'
         .format(run_type=run_type, page_type=page_type, rst_file=rst_file),
@@ -402,9 +402,9 @@ def _exclude_missing_dates(grid_dates, file_pattern):
     return grid_dates
 
 
-def _tmpl_to_rst(tmpl, rst_file, vars, config):
+def _tmpl_to_rst(tmpl, rst_file, data, config):
     with open(rst_file, 'wt') as f:
-        f.write(tmpl.render(**vars))
+        f.write(tmpl.render(**data))
     lib.fix_perms(rst_file, grp_name=config['file group'])
 
 
