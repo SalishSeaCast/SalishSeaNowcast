@@ -273,7 +273,7 @@ def _make_comparisons_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = research_ferries.salinity_ferry_route(
-        ferry_data_dir, grid_T_hr, bathy, coastline, 'TW_DP', dmy)
+        ferry_data_dir, grid_T_hr, bathy, 'TW_DP', dmy)
     filename = os.path.join(
         plots_dir, 'TW_DP_ferry_salinity_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
