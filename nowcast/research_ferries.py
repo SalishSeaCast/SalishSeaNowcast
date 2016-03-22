@@ -76,7 +76,10 @@ FERRY_ROUTES = {
     }}
 
 
-def salinity_ferry_route(ferry_data_dir, grid_T_hr, bathy, route_name, dmy):
+def salinity_ferry_route(
+    ferry_data_dir, grid_T_hr, bathy, route_name, dmy,
+    figsize=(20, 7.5),
+):
     """Plot daily salinity comparisons between ferry observations and model
     results as well as ferry route with model salinity distribution.
 
@@ -92,10 +95,10 @@ def salinity_ferry_route(ferry_data_dir, grid_T_hr, bathy, route_name, dmy):
 
     :arg str dmy: date in form ddmonyy
 
-    :return: fig
-    """
-    fig, axs = plt.subplots(1, 2, figsize=(20, 7.5))
+    :arg 2-tuple figsize: Figure size (width, height) in inches.
 
+    :returns: matplotlib figure object instance (fig).
+    """
     lat = grid_T_hr.variables['nav_lat']
     lon = grid_T_hr.variables['nav_lon']
 
@@ -110,6 +113,7 @@ def salinity_ferry_route(ferry_data_dir, grid_T_hr, bathy, route_name, dmy):
     # Load model salinity for ferry route
     nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal)
 
+    fig, axs = plt.subplots(1, 2, figsize=figsize)
     axs[1].set_axis_bgcolor("burlywood")
     viz_tools.set_aspect(axs[1], coords='map', lats=lat)
     cmap = plt.get_cmap('plasma')
