@@ -310,14 +310,15 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
             for j in np.arange(y1 - 1, y1 + 2):
                 # Some adjacent points are land we don't count them into the
                 # salinity average.
-                dist = tidetools.haversine(
-                    obs[1], obs[2], lons[i, j], lats[i, j])
-                weight = 1.0 / dist
-                weight_sum += weight
-                val_a = sal_a[i, j] * weight
-                val_b = sal_b[i, j] * weight
-                val_a_sum += val_a
-                val_b_sum += val_b
+                if depths[i, j] > 0:
+                    dist = tidetools.haversine(
+                        obs[1], obs[2], lons[i, j], lats[i, j])
+                    weight = 1.0 / dist
+                    weight_sum += weight
+                    val_a = sal_a[i, j] * weight
+                    val_b = sal_b[i, j] * weight
+                    val_a_sum += val_a
+                    val_b_sum += val_b
         sal_a_idw = val_a_sum / weight_sum
         sal_b_idw = val_b_sum / weight_sum
     return sal_a_idw, sal_b_idw
