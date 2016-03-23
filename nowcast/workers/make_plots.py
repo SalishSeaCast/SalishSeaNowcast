@@ -273,7 +273,19 @@ def _make_comparisons_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = research_ferries.salinity_ferry_route(
+        ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy)
+    filename = os.path.join(
+        plots_dir, 'TW_DP_ferry_salinity_{date}.svg'.format(date=dmy))
+    fig.savefig(filename, facecolor=fig.get_facecolor())
+
+    fig = research_ferries.salinity_ferry_route(
         ferry_data_dir, grid_T_hr, bathy, 'TW_DP', dmy)
+    filename = os.path.join(
+        plots_dir, 'TW_DP_ferry_salinity_{date}.svg'.format(date=dmy))
+    fig.savefig(filename, facecolor=fig.get_facecolor())
+
+    fig = research_ferries.salinity_ferry_route(
+        ferry_data_dir, grid_T_hr, bathy, 'TW_SB', dmy)
     filename = os.path.join(
         plots_dir, 'TW_DP_ferry_salinity_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
@@ -298,17 +310,6 @@ def _future_comparison_plots(
     grid_oc = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat')
     grid_oe = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPeast.mat')
     grid_od = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPddl.mat')
-
-    # Ferry plots
-    fig = research_ferries.salinity_ferry_route('HBDB')
-    filename = os.path.join(
-        plots_dir, 'HBDB_ferry_salinity_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor())
-
-    fig = research_ferries.salinity_ferry_route('TWSB')
-    filename = os.path.join(
-        plots_dir, 'TWSB_ferry_salinity_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor())
 
     # ADCP plots
     date = datetime.datetime.strptime(dmy, '%d%b%y')
