@@ -340,8 +340,7 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         nowcast_res_dates, os.path.join(rst_path, 'nowcast', 'research_*.rst'))
     fcst_dates = copy(dates[:-1]) if run_type != 'forecast' else copy(dates)
     fcst_dates = _exclude_missing_dates(
-        fcst_dates,
-        os.path.join(rst_path, 'forecast', '{}_*.rst'.format(page_type)))
+        fcst_dates, os.path.join(rst_path, 'forecast', 'publish_*.rst'))
     nowcast_comp_dates = (
         copy(dates[:-3]) if run_type == 'forecast2' else copy(dates[:-2]))
     nowcast_comp_dates = _exclude_missing_dates(
