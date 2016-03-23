@@ -134,9 +134,15 @@ def make_site_page(parsed_args, config, *args):
         'comparison': [
             # SVG figure filename root, figure heading
             ('SH_wind', 'Modeled and Observed Winds at Sandheads'),
+            ('HB_DB_ferry_salinity',
+                'Modeled and Observed Surface Salinity '
+                'Along Horseshoe Bay-Departure Bay Ferry Route'),
             ('TW_DP_ferry_salinity',
                 'Modeled and Observed Surface Salinity '
                 'Along Tsawwassen-Duke Pt. Ferry Route'),
+            ('TW_SB_ferry_salinity',
+                'Modeled and Observed Surface Salinity '
+                'Along Tsawwassen-Schwartz Bay Ferry Route'),
             # ('Compare_VENUS_East',
             #     'Salinity and Temperature at ONC VENUS East Node'),
             # ('Compare_VENUS_Central',
