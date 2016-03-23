@@ -331,13 +331,11 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
     prelim_fcst_dates = _exclude_missing_dates(
         copy(dates), os.path.join(rst_path, 'forecast2', 'publish_*.rst'))
     nowcast_pub_dates = (
-        copy(dates[:-1]) if run_type in 'nowcast forecast'.split()
-        else copy(dates[:-2]))
+        copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
     nowcast_pub_dates = _exclude_missing_dates(
         nowcast_pub_dates, os.path.join(rst_path, 'nowcast', 'publish_*.rst'))
     nowcast_res_dates = (
-        copy(dates[:-1]) if run_type in 'nowcast forecast'.split()
-        else copy(dates[:-2]))
+        copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
     nowcast_res_dates = _exclude_missing_dates(
         nowcast_res_dates, os.path.join(rst_path, 'nowcast', 'research_*.rst'))
     fcst_dates = copy(dates[:-1]) if run_type != 'forecast' else copy(dates)
@@ -345,14 +343,12 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         fcst_dates,
         os.path.join(rst_path, 'forecast', '{}_*.rst'.format(page_type)))
     nowcast_comp_dates = (
-        copy(dates[:-2]) if run_type in 'nowcast forecast'.split()
-        else copy(dates[:-3]))
+        copy(dates[:-3]) if run_type == 'forecast2' else copy(dates[:-2]))
     nowcast_comp_dates = _exclude_missing_dates(
         nowcast_comp_dates, os.path.join(
             rst_path, 'nowcast', 'comparison_*.rst'))
     sal_comp_dates = (
-        copy(dates[:-1]) if run_type in 'nowcast forecast'.split()
-        else copy(dates[:-2]))
+        copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
     sal_comp_fileroot = config['web']['salinity_comparison']['fileroot']
     sal_comp_dates = _exclude_missing_dates(
         sal_comp_dates,
