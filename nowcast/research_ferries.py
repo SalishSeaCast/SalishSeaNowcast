@@ -99,37 +99,34 @@ def salinity_ferry_route(
 
     :returns: matplotlib figure object instance (fig).
     """
-    lat = grid_T_hr.variables['nav_lat']
-    lon = grid_T_hr.variables['nav_lon']
-
-    # Salinity over the whole domain
+    # Grid region to plot
+    si, ei = 200, 610
+    sj, ej = 20, 370
+    lons = grid_T_hr.variables['nav_lon'][si:ei, sj:ej]
+    lats = grid_T_hr.variables['nav_lat'][si:ei, sj:ej]
+    # Salinity calculated by NEMO and observed by ONC ferry package
+    model_depth_level = 1  # 1.5 m
+    ## TODO: model time step for salinity contour map should be calculated from
+    ##       ferry route time
+    model_time_step = 3  # 02:30 UTC
     sal_hr = grid_T_hr.variables['vosaline']
-    t, z = 3, 1
-    sal_hr = np.ma.masked_values(sal_hr[t, z], 0)
-    sal_t = teos_tools.psu_teos(sal_hr)
-    # Load ferry route salinity
-    obs_sal = ferry_salinity(ferry_data_dir, route_name, dmy)
-
-    # Load model salinity for ferry route
-    nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, obs_sal)
+    ## TODO: Use mesh mask instead of 0 for masking
+    sal_masked = np.ma.masked_values(
+        sal_hr[model_time_step, model_depth_level, si:ei, sj:ej], 0)
+    sal_t = teos_tools.psu_teos(sal_masked)
+    sal_obs = ferry_salinity(ferry_data_dir, route_name, dmy)
+    nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, sal_obs)
 
     fig, axs = plt.subplots(1, 2, figsize=figsize)
     axs[1].set_axis_bgcolor("burlywood")
-    viz_tools.set_aspect(axs[1], coords='map', lats=lat)
+    viz_tools.set_aspect(axs[1], coords='map', lats=lats)
     cmap = plt.get_cmap('plasma')
     axs[1].set_xlim((-124.5, -122.5))
     axs[1].set_ylim((48.3, 49.6))
 
-    # Reduce size of salinity that is plotted
-    si = 200
-    ei = 610
-    sj = 20
-    ej = 370
-
     # Plot model salinity
-    mesh = axs[1].contourf(
-        lon[si:ei, sj:ej], lat[si:ei, sj:ej], sal_t[si:ei, sj:ej],
-        20, cmap=cmap)
+    ## TODO: Promote number of contour levels to defaulted function argument
+    mesh = axs[1].contourf(lons, lats, sal_t, 20, cmap=cmap)
     cbar = fig.colorbar(mesh)
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
     cbar.set_label('Absolute Salinity [g/kg]', color='white')
@@ -138,7 +135,7 @@ def salinity_ferry_route(
     axs[1].set_ylabel('Latitute', **axis_font)
 
     # Plot ferry route.
-    axs[1].plot(obs_sal[1], obs_sal[2], 'black', linewidth=4)
+    axs[1].plot(sal_obs[1], sal_obs[2], 'black', linewidth=4)
     figures.axis_colors(axs[1], 'grey')
 
     # Add locations and markers on plot for orientation
@@ -158,16 +155,16 @@ def salinity_ferry_route(
 
     # Set up model part of salinity comparison plot
     axs[0].plot(
-        obs_sal[1], nemo_a, 'DodgerBlue', linewidth=2,
+        sal_obs[1], nemo_a, 'DodgerBlue', linewidth=2,
         label='{} am [UTC]'
         .format(FERRY_ROUTES[route_name]['start']['hour']))
     axs[0].plot(
-        obs_sal[1], nemo_b, 'MediumBlue', linewidth=2,
+        sal_obs[1], nemo_b, 'MediumBlue', linewidth=2,
         label='{} am [UTC]'
         .format(FERRY_ROUTES[route_name]['start']['hour']+1))
 
     # Observational component of salinity comparisons plot
-    axs[0].plot(obs_sal[1], obs_sal[3],
+    axs[0].plot(sal_obs[1], sal_obs[3],
                 'DarkGreen', linewidth=2, label="Observed")
     axs[0].text(0.25, -0.1, 'Observations from Ocean Networks Canada',
                 transform=axs[0].transAxes, color='white')
