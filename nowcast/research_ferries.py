@@ -47,22 +47,22 @@ FERRY_ROUTES = {
     'HB_DB': {
         'start': {
             'terminal': 'Horseshoe Bay',
-            'hour': 1,
-            'minute': 40},
+            'hour': 2,
+            'minute': 0},
         'end': {
             'terminal': 'Departure Bay',
-            'hour': 3,
-            'minute': 20},
+            'hour': 4,
+            'minute': 30},
         },
     'TW_DP': {
         'start': {
             'terminal': 'Tsawwassen',
-            'hour': 2,
+            'hour': 1,
             'minute': 0},
         'end': {
             'terminal': 'Duke Pt.',
-            'hour': 4,
-            'minute': 15},
+            'hour': 3,
+            'minute': 45},
         },
     'TW_SB': {
         'start': {
