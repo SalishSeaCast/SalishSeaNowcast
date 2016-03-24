@@ -28,9 +28,9 @@ import netCDF4 as nc
 import scipy.io as sio
 
 matplotlib.use('Agg')
-from nowcast import (
+from nowcast import lib
+from nowcast.figures import (
     figures,
-    lib,
     research_VENUS,
     research_ferries,
 )

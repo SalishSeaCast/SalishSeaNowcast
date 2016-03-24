@@ -35,10 +35,8 @@ from salishsea_tools import (
 from salishsea_tools.places import PLACES
 import salishsea_tools.unit_conversions as converters
 
-from nowcast import (
-    figures,
-    lib,
-)
+from nowcast.figures import figures
+from nowcast import lib
 from nowcast.nowcast_worker import NowcastWorker
 
 

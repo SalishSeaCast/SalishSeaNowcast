@@ -2687,6 +2687,7 @@ def interp_to_model_time(time_model, varp, tp):
     return varp_interp
 
 
+## TODO: Move to stormtools module and/or merge w/ stormtools.correct_model()
 def correct_model_ssh(ssh_model, t_model, ttide):
     """
     Adjusts model output by correcting for error in using only 8 constituents.
