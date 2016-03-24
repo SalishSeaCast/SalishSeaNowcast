@@ -1218,6 +1218,7 @@ def plot_wind_arrow(
 
 
 ## Called by make_plots (publish)
+## TODO: Move/rename to figures.publish as storm_surge_alerts_thumbnail module
 def website_thumbnail(
     grid_B, grid_T, grids, weather_path, coastline, tidal_predications,
     colours=COLOURS,
@@ -1331,6 +1332,7 @@ def website_thumbnail(
 
 
 ## Called by make_plots (publish)
+## TODO: Move/rename to figures.publish as pt_atkinson_tide module
 def PA_tidal_predictions(
     grid_T, tidal_predications, PST=1, MSL=0, figsize=(20, 5),
 ):
@@ -1404,6 +1406,7 @@ def PA_tidal_predictions(
     return fig
 
 ## Called by make_plots (publish)
+## TODO: Move/rename to figures.publish as compare_water_levels module
 def compare_water_levels(
         grid_T, grid_B, grids, coastline, PST=1, figsize=(20, 15)):
     """Compares modelled water levels to observed water levels and tides at a
@@ -1515,6 +1518,7 @@ def compare_water_levels(
     return fig
 
 ## Called by make_plots (publish)
+## TODO: Move/rename to figures.publish as compare_tide_prediction_max_ssh module
 def compare_tidalpredictions_maxSSH(
     grid_T, grid_B, grids, weather_path, tidal_predications,
     PST=1, MSL=0, name='Point Atkinson', figsize=(20, 12),
@@ -1698,6 +1702,7 @@ def compare_tidalpredictions_maxSSH(
     return fig
 
 ## Called by make_plots (publish)
+## TODO: Move/rename to figures.publish as water_level_thresholds module
 def plot_thresholds_all(
     grid_T, grid_B, grids, weather_path, coastline, tidal_predications,
     PST=1, MSL=1, figsize=(20, 25),
@@ -1817,6 +1822,7 @@ def plot_thresholds_all(
     return fig
 
 ## Called by make_plots (publish)
+## TODO: Move/rename to figures.publish as sandheads_winds
 def Sandheads_winds(
         grid_T, grid_B, weather_path, coastline, PST=1, figsize=(20, 12)):
     """Plots the observed and modelled winds at Sandheads during the
@@ -1939,10 +1945,13 @@ def Sandheads_winds(
     return fig
 
 ## Called by make_plots (publish)
+## TODO: Move/rename to figures.publish as wind_vectors_at_stations module
+## TODO: Refactor to separate averaged and wind at time functionality
+## TODO: Maybe refactor to accept a list of stations instead of one or 'all'
 def winds_average_max(
         grid_T, grid_B, weather_path, coastline, station, wind_type,
         figsize=(20, 15)):
-    """Plots wind vectors at several stations over domain. Wind vecors can be
+    """Plots wind vectors at several stations over domain. Wind vectors can be
     averaged over the entire simulation or plotted at 4 hours before max ssh
     at Point Atkinson
 
@@ -2080,6 +2089,8 @@ def add_bathy_patch(distance, grid_B, lines,  ax, color='burlywood',
                                  edgecolor=color))
 
 ## Called by make_plots (research)
+
+## TODO: Move/rename to figures.research as thalweg_salinity module
 def thalweg_salinity(
     grid_T_d, mesh_mask, grid_B,
     thalweg_pts_file='/data/nsoontie/MEOPAR/tools/bathymetry/thalweg_working.txt',
@@ -2211,6 +2222,7 @@ def fill_in_bathy(variable, mesh_mask, lines):
     return newvar
 
 ## Called by make_plots (research)
+## TODO: Move/rename to figures.research as thalweg_temperature module
 def thalweg_temperature(
     grid_T_d, mesh_mask, grid_B,
     thalweg_pts_file='/data/nsoontie/MEOPAR/tools/bathymetry/thalweg_working.txt',
@@ -2284,6 +2296,7 @@ def thalweg_temperature(
     return fig
 
 ## Called by make_plots (research)
+## TODO: Move/rename to figures.research as surface_daily_avg_s_t_currents module
 def plot_surface(
     grid_T_d, grid_U_d, grid_V_d, grid_B,
     limits=[0, 398, 0, 898], figsize=(20, 12),
@@ -2465,6 +2478,7 @@ def ssh_PtAtkinson(grid_T, grid_B=None, figsize=(20, 5)):
 
 
 ## Called by make_plots (publish)
+## TODO: Move/rename to figures.publish as storm_surge_alerts
 def plot_threshold_website(
     grid_B, grid_T, grids, weather_path, coastline, tidal_predications,
     scale=0.1, PST=1, colours=COLOURS, fonts=FONTS, figsize=(18, 20),

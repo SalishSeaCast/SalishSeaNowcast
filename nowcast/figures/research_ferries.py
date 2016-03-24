@@ -32,7 +32,7 @@ from salishsea_tools import (
 )
 from salishsea_tools.places import PLACES
 
-from nowcast import figures
+from nowcast.figures import figures
 
 
 # Font format

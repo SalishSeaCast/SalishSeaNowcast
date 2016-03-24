@@ -35,10 +35,9 @@ from salishsea_tools import (
     viz_tools
 )
 
-from nowcast import (
-    analyze,
-    figures,
-)
+from nowcast import analyze
+from nowcast.figures import figures
+
 
 # Font format
 title_font = {
@@ -268,6 +267,8 @@ def unstag_rot(ugrid, vgrid):
     return u_E, v_N
 
 
+## Called by make_plots (research)
+## TODO: Move/rename to figures.research as hr_avg_venus_uv module
 def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     """Plots the hourly averaged North/South and East/West velocities at a chosen
     VENUS node station using data that is calculated every 15 minutes.
@@ -543,6 +544,7 @@ def load_vel(day, grid, source, station, deprange):
     return u, v, dep
 
 
+## TODO: Move/rename to figures.comparison as adcp_something module
 def plotADCP(grid_m, grid_o, day, station, profile):
     """ This function will plots the velocities on a colour map with depth of the
     model and observational values.
@@ -636,6 +638,7 @@ def plotADCP(grid_m, grid_o, day, station, profile):
     return fig
 
 
+## TODO: Move/rename to figures.comparison as adcp_time_avg module
 def plottimeavADCP(grid_m, grid_o, day, station):
     """ This function plots a comparison of the time averaged velocities of the
     model and the observations.
@@ -698,6 +701,7 @@ def plottimeavADCP(grid_m, grid_o, day, station):
     return fig
 
 
+## TODO: Move/rename to figures.comparison as adcp_depth_avg module
 def plotdepavADCP(grid_m, grid_o, day, station):
     """ This function plots a comparison of the depth averaged velocities of
     the model and the observations.
