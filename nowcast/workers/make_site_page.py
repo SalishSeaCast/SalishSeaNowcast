@@ -352,14 +352,6 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
     nowcast_comp_dates = _exclude_missing_dates(
         nowcast_comp_dates, os.path.join(
             rst_path, 'nowcast', 'comparison_*.rst'))
-    sal_comp_dates = (
-        copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
-    sal_comp_fileroot = config['web']['salinity_comparison']['fileroot']
-    sal_comp_dates = _exclude_missing_dates(
-        sal_comp_dates,
-        os.path.join(
-            config['web']['salinity_comparison']['filesystem_path'],
-            '{}_*.ipynb'.format(sal_comp_fileroot)))
     # Render the template using the calculated varible values to produce
     # the index rst file
     rst_file = os.path.join(rst_path, 'index.rst')
@@ -373,9 +365,6 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         'nowcast_res_dates': nowcast_res_dates,
         'fcst_dates': fcst_dates,
         'nowcast_comp_dates': nowcast_comp_dates,
-        'sal_comp_dates': sal_comp_dates,
-        'sal_comp_path': config['web']['salinity_comparison']['web_path'],
-        'sal_comp_fileroot': sal_comp_fileroot,
     }
     _tmpl_to_rst(tmpl, rst_file, data, config)
     logger.debug(

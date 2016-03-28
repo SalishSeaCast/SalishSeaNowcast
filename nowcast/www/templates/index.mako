@@ -4,14 +4,14 @@
 Salish Sea NEMO Model Daily Results
 ***********************************
 
-${calendar_grid(last_month_cols, this_month_cols, prelim_fcst_dates, fcst_dates, nowcast_dates)}
+${calendar_grid()}
 
 Log files from the model run automation system and forcing data monitoring plots can be found on the `nowcast monitoring information`_ page.
 
 .. _nowcast monitoring information: https://eos.ubc.ca/~dlatorne/MEOPAR/nowcast/
 
 
-<%def name="calendar_grid(last_month_cols, this_month_cols, prelim_fcst_dates, fcst_dates, nowcast_dates)">
+<%def name="calendar_grid()">
 .. raw:: html
 
     <div class="row">
@@ -36,7 +36,6 @@ Log files from the model run automation system and forcing data monitoring plots
           </tr>
           ${grid_row("Nowcast", nowcast_res_dates, "nowcast", "research")}
           ${grid_row("Model vs. Observations", nowcast_comp_dates, "nowcast", "comparison")}
-          ${ipynb_row("Surface Salinity", sal_comp_dates, sal_comp_path, sal_comp_fileroot)}
         </table>
       </div>
     </div>
@@ -63,24 +62,6 @@ Log files from the model run automation system and forcing data monitoring plots
           &nbsp;
         %else:
           <a href="${run_type}/${page_type}_${d.format("DDMMMYY").lower()}.html">
-            ${d.format("D")}
-          </a>
-        %endif
-      </td>
-    %endfor
-  </tr>
-</%def>
-
-
-<%def name="ipynb_row(title, dates, path, fileroot)">
-  <tr>
-    <td class="text-right">${title}</td>
-    %for d in dates:
-      <td class="text-center">
-        %if d is None:
-          &nbsp;
-        %else:
-          <a href="http://nbviewer.ipython.org/url/${path}/${fileroot}_${d.format("DDMMMYY").lower()}.ipynb#Plot">
             ${d.format("D")}
           </a>
         %endif
