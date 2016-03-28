@@ -48,6 +48,8 @@ from salishsea_tools import (
 )
 from salishsea_tools.places import PLACES
 
+from nowcast.figures import website_theme
+
 # =============================== #
 # <------- Kyle 2015/08/25
 ms2k = 1/0.514444
@@ -255,27 +257,6 @@ def axis_colors(ax, plot):
     ax.title.set_color('white')
 
     return ax
-
-
-def set_axis_colors(ax, colours):
-    """Formats the background colour of plots and colours of labels.
-
-    :arg ax: Axis to be formatted.
-    :type ax: axis object
-
-    :arg plot: Keyword for background needed for plot.
-    :type plot: string
-
-    :returns: axis format
-    """
-    ax.xaxis.label.set_color(colours['axis']['labels'])
-    ax.yaxis.label.set_color(colours['axis']['labels'])
-    ax.tick_params(axis='x', colors=colours['axis']['ticks'])
-    ax.tick_params(axis='y', colors=colours['axis']['ticks'])
-    ax.spines['bottom'].set_color(colours['axis']['spines'])
-    ax.spines['top'].set_color(colours['axis']['spines'])
-    ax.spines['left'].set_color(colours['axis']['spines'])
-    ax.spines['right'].set_color(colours['axis']['spines'])
 
 
 def find_model_point(lon, lat, X, Y, tol_lon=0.016, tol_lat=0.011):
@@ -1280,7 +1261,7 @@ def website_thumbnail(
         'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
         .format(ssh_ts.time[0]),
         **fonts['website_thumbnail_title'])
-    set_axis_colors(ax, colours)
+    website_theme.set_axis_colors(ax)
     # Location labels
     ax.text(
         -125.7, 47.7,
