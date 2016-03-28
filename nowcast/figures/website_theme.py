@@ -1,0 +1,69 @@
+# Copyright 2013-2016 The Salish Sea MEOPAR contributors
+# and The University of British Columbia
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    http://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""
+"""
+
+
+SITE_BACKGROUND_COLOUR = '#2B3E50'  # salishsea site Superhero theme background
+
+COLOURS = {
+    'figure': {
+        'facecolor': SITE_BACKGROUND_COLOUR,
+    },
+    'axis': {
+        'labels': 'white',
+        'spines': 'white',
+        'ticks': 'white',
+    },
+    'cbar': {
+        'label': 'white',
+        'tick labels': 'white',
+    },
+    'contour mesh': {
+        'land': 'burlywood',
+    }
+}
+
+FONTS = {
+    'axes title': {
+        'fontname': 'Bitstream Vera Sans',
+        'size': '15',
+        'color': 'white',
+        'weight': 'medium',
+    },
+    'axis': {
+        'fontname': 'Bitstream Vera Sans',
+        'size': '13',
+        'color': 'white',
+        'weight': 'medium',
+    },
+}
+
+
+def set_axis_colors(ax):
+    """Set the colours of axis labels, ticks and spines.
+
+    :arg ax: Axes to be formatted.
+    :type ax: :py:class:`matplotlib.axes.Axes`
+    """
+    ax.xaxis.label.set_color(COLOURS['axis']['labels'])
+    ax.yaxis.label.set_color(COLOURS['axis']['labels'])
+    ax.tick_params(axis='x', colors=COLOURS['axis']['ticks'])
+    ax.tick_params(axis='y', colors=COLOURS['axis']['ticks'])
+    ax.spines['bottom'].set_color(COLOURS['axis']['spines'])
+    ax.spines['top'].set_color(COLOURS['axis']['spines'])
+    ax.spines['left'].set_color(COLOURS['axis']['spines'])
+    ax.spines['right'].set_color(COLOURS['axis']['spines'])

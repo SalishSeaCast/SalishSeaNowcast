@@ -38,7 +38,7 @@ The web site figures that display the nowcast system run results are calculated 
 Within each of those namespaces the figure producing functions are organized into a module for each figure.
 So,
 for example,
-the :py:mod:`nowcast.figures.comparison.salinity_ferry_route` module contains the code to produce a figure that compares salinity at 1.5m depth model results to
+the :py:mod:`nowcast.figures.comparison.salinity_ferry_track` module contains the code to produce a figure that compares salinity at 1.5m depth model results to
 salinity observations from the ONC instrument package aboard a BC Ferries
 vessel.
 
