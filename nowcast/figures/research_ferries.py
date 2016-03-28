@@ -121,18 +121,17 @@ def salinity_ferry_route(
     axs[1].set_axis_bgcolor("burlywood")
     viz_tools.set_aspect(axs[1], coords='map', lats=lats)
     cmap = plt.get_cmap('plasma')
-    axs[1].set_xlim((-124.5, -122.5))
-    axs[1].set_ylim((48.3, 49.6))
+    axs[1].set_xlim(-124.5, -122.5)
+    axs[1].set_ylim(48.3, 49.6)
 
     # Plot model salinity
-    ## TODO: Promote number of contour levels to defaulted function argument
     mesh = axs[1].contourf(lons, lats, sal_t, 20, cmap=cmap)
-    cbar = fig.colorbar(mesh)
-    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
-    cbar.set_label('Absolute Salinity [g/kg]', color='white')
+    cbar = plt.colorbar(mesh, ax=axs[1])
+    cbar.ax.axes.tick_params(labelcolor='w')
+    cbar.set_label('Absolute Salinity [g/kg]', color='white', **axis_font)
     axs[1].set_title('Ferry Route: 3am[UTC] 1.5m model result ', **title_font)
-    axs[1].set_xlabel('Longitude', **axis_font)
-    axs[1].set_ylabel('Latitute', **axis_font)
+    axs[1].set_xlabel('Longitude [°E]', **axis_font)
+    axs[1].set_ylabel('Latitude [°N]', **axis_font)
 
     # Plot ferry route.
     axs[1].plot(sal_obs[1], sal_obs[2], 'black', linewidth=4)
@@ -175,7 +174,7 @@ def salinity_ferry_route(
     axs[0].set_xlabel('Longitude', **axis_font)
     axs[0].set_ylabel('Absolute Salinity [g/kg]', **axis_font)
     axs[0].legend(loc=3)
-    axs[0].grid()
+    axs[0].grid(axis='both')
 
     fig.patch.set_facecolor('#2B3E50')
     figures.axis_colors(axs[0], 'grey')
