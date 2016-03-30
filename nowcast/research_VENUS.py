@@ -510,18 +510,17 @@ def load_vel(day, grid, source, station, deprange):
         timemat = grid['mtime']
         # Find index in matlab datenum values that corresponds with the day of
         # interest.
-        for mattime, count in zip(timemat[0], np.arange(len(timemat[0]))):
-            time = (
-                datetime.datetime.fromordinal(int(mattime)) +
-                datetime.timedelta(days=mattime % 1) -
-                datetime.timedelta(days=366))
-            if time == day:
-                # The -1 is because we access the 00:45:00 index which is the
-                # second value of the day.
-                ind = count-1
+        comp_date = datetime.datetime(day.year, day.month, day.day)
+        pytime = np.array([datetime.datetime.fromordinal(int(mattime)) +
+                           datetime.timedelta(days=mattime % 1) -
+                           datetime.timedelta(days=366)
+                           for mattime in timemat[0]])
+        # Look up indices where pytime spans comp_date
+        timeinds = np.where(
+            np.logical_and(pytime >= comp_date,
+                           pytime < comp_date + datetime.timedelta(days=1)))
+        timeinds = timeinds[0]
 
-        # The obs values are every half hour. 48 values spans the whole day.
-        oneday = 48
         dep = grid['chartdepth'][:][0]
         if np.logical_and(deprange[0] < 30, station == 'Central'):
             deprangeo = 30
@@ -534,8 +533,8 @@ def load_vel(day, grid, source, station, deprange):
         j = np.where(np.logical_and(dep[:] > deprangeo, dep[:] < deprange[1]))
         dep = dep[j[0]]
         # The velocities are in cm/s we want them in m/s.
-        u0 = grid['utrue'][:][j[0], ind:ind+oneday]/100
-        v0 = grid['vtrue'][:][j[0], ind:ind+oneday]/100
+        u0 = grid['utrue'][:][j[0], timeinds[0]:timeinds[-1]+1]/100
+        v0 = grid['vtrue'][:][j[0], timeinds[0]:timeinds[-1]+1]/100
 
         u = np.ma.masked_invalid(u0)
         v = np.ma.masked_invalid(v0)
