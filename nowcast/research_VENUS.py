@@ -511,6 +511,10 @@ def load_vel(day, grid, source, station, deprange):
         # Find index in matlab datenum values that corresponds with the day of
         # interest.
         comp_date = datetime.datetime(day.year, day.month, day.day)
+        # added comp_date variable because the function was orginially
+        # written to compare exact equality of dates formatted like this:
+        # datetime.datetime(2016,3,28,0,45,0)
+        # This exact comparison behaves poorly on different systems.
         pytime = np.array([datetime.datetime.fromordinal(int(mattime)) +
                            datetime.timedelta(days=mattime % 1) -
                            datetime.timedelta(days=366)
