@@ -587,7 +587,7 @@ def plotADCP(grid_m, grid_o, day, station, profile):
     max_vm = np.nanmax(abs(v_N))
     max_um = np.nanmax(abs(u_E))
     max_speed = np.amax([max_v, max_u, max_vm, max_um])
-    vmax = round(max_speed, 1)
+    vmax = np.ceil(max_speed*10)/10.0
     vmin = - vmax
     step = 0.05
     cs = np.arange(vmin, vmax + step, step)
