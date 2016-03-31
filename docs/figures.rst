@@ -345,7 +345,7 @@ The function code does 4 things:
      one for each axes in the figure
 
    The :py:func:`matplotlib.pyplot.subplots` and :py:func:`_prep_fig_axes` functions accept keyword arguments named :kbd:`figsize` and :kbd:`facecolor` to set the size and shape of the figure area,
-   and its background colour as defined in the :ref:`nowcast.figures.website_theme` by :py:attr:`COLOURS['figure']['facecolor']`.
+   and its background colour as defined in the :py:mod:`nowcast.figures.website_theme` :ref:`WebsiteTheme` module by :py:attr:`COLOURS['figure']['facecolor']`.
 
    A :py:func:`_prep_fig_axes` function would be used :py:class:`matplotlib.gridspec.Gridspec` is used to define more complex layout of axes than can be provided by :py:func:`matplotlib.pyplot.subplots`.
 
@@ -375,9 +375,9 @@ the content added to :file:`tools/SalishSeaNowcast/docs/api.rst` is:
 
 
 
-.. _nowcast.figures.website_theme:
+.. _WebsiteTheme:
 
 Website Theme
-=============
+-------------
 
 TODO
