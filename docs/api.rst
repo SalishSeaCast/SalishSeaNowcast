@@ -18,24 +18,6 @@
 :kbd:`SalishSeaNowcast` Package API
 ***********************************
 
-.. _nowcast.figures:
-
-:py:mod:`nowcast.figures` Module
-================================
-
-.. automodule:: nowcast.figures
-    :members:
-
-
-.. _nowcast.lib:
-
-:py:mod:`nowcast.lib` Module
-============================
-
-.. automodule:: nowcast.lib
-    :members:
-
-
 .. _nowcast.nowcast_mgr:
 
 :py:mod:`nowcast.nowcast_mgr` Module
@@ -51,4 +33,41 @@
 =======================================
 
 .. automodule:: nowcast.nowcast_worker
+    :members:
+
+
+.. _nowcast.lib:
+
+:py:mod:`nowcast.lib` Module
+============================
+
+.. automodule:: nowcast.lib
+    :members:
+
+
+.. _nowcast.figures:
+
+Nowcast System Results Figures
+==============================
+
+.. _nowcast.figures.website_theme:
+
+:py:mod:`nowcast.figures.website_theme` Module
+----------------------------------------------
+
+.. automodule:: nowcast.figures.website_theme
+    :members:
+
+
+.. _nowcast.figures.comparison:
+
+:py:obj:`nowcast.figures.comparison`  Figure Modules
+----------------------------------------------------
+
+.. _nowcast.figures.comparison.salinity_ferry_track:
+
+:py:mod:`nowcast.figures.comparison.salinity_ferry_track` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.comparison.salinity_ferry_track
     :members:

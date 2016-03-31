@@ -28,9 +28,9 @@ import netCDF4 as nc
 import scipy.io as sio
 
 matplotlib.use('Agg')
-from nowcast import (
+from nowcast import lib
+from nowcast.figures import (
     figures,
-    lib,
     research_VENUS,
     research_ferries,
 )
@@ -44,7 +44,7 @@ logger = logging.getLogger(worker_name)
 def main():
     worker = NowcastWorker(worker_name, description=__doc__)
     worker.arg_parser.add_argument(
-        'run_type', choices=set(('nowcast', 'forecast', 'forecast2')),
+        'run_type', choices={'nowcast', 'forecast', 'forecast2'},
         help='''
         Type of run to symlink files for:
         'nowcast+' means nowcast & 1st forecast runs,
@@ -53,7 +53,7 @@ def main():
         ''',
     )
     worker.arg_parser.add_argument(
-        'plot_type', choices=set(('publish', 'research', 'comparison')),
+        'plot_type', choices={'publish', 'research', 'comparison'},
         help='''
         Which type of plots to produce:
         "publish" means ssh, weather and other approved plots for publishing,
