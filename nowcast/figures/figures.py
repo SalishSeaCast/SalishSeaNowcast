@@ -23,21 +23,21 @@ import io
 import os
 
 import arrow
-from dateutil import tz
-from matplotlib.backends import backend_agg as backend
 import matplotlib.cm as cm
 import matplotlib.dates as mdates
-from matplotlib.figure import Figure
 import matplotlib.gridspec as gridspec
-import matplotlib.image
-import matplotlib.pyplot as plt
 import matplotlib.patches as patches
+import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
 import pandas as pd
 import requests
+from dateutil import tz
+from matplotlib.backends import backend_agg as backend
 from scipy import interpolate as interp
 
+from nowcast.figures import shared
+from nowcast.figures import website_theme
 from salishsea_tools import (
     nc_tools,
     stormtools,
@@ -47,8 +47,6 @@ from salishsea_tools import (
     wind_tools,
 )
 from salishsea_tools.places import PLACES
-
-from nowcast.figures import website_theme
 
 # =============================== #
 # <------- Kyle 2015/08/25
@@ -215,13 +213,6 @@ def save_image(fig, filename, **kwargs):
     """
     canvas = backend.FigureCanvasAgg(fig)
     canvas.print_figure(filename, **kwargs)
-
-
-def _render_png_buffer(fig):
-    canvas = backend.FigureCanvasAgg(fig)
-    buffer = io.BytesIO()
-    canvas.print_figure(buffer, format='png')
-    return buffer
 
 
 def axis_colors(ax, plot):
@@ -1022,100 +1013,6 @@ def isolate_wind_timing(
     return inds
 
 
-def make_background_map(
-        coastline, lat_range=(47.5, 50.7), lon_range=(-126, -122),
-        land_patch_min_area=1e-4, land_c='burlywood'):
-    '''
-    Create a figure from an mmap dataset showing a lat-lon patch.
-
-    The map is intended for use as the background in figures on which model
-    results are plotted. It is rasterized to minimize file size.
-
-    :arg coastline: Coastline dataset.
-    :type coastline: :class:`mat.Dataset`
-
-    :arg tuple lat_range:  latitude range to be plotted
-
-    :arg tuple lon_range: longitude range to be plotted
-
-    :arg string land_c: colour of land if coastline
-
-    :arg float land_patch_min_area: minimum area of land patch
-                    that is plotted
-    '''
-
-    coast_lat = coastline['ncst'][:, 1]
-    coast_lon = coastline['ncst'][:, 0]
-    fig = Figure(figsize=(15, 15))
-    ax = fig.add_subplot(1, 1, 1)
-    ax.plot(coast_lon, coast_lat, '-k', rasterized=True, markersize=1)
-
-    k = coastline['k'][:, 0]
-    Area = coastline['Area'][0]
-    mask = Area > land_patch_min_area
-    kss = k[:-1][mask]
-    kee = k[1:][mask]
-
-    for ks, ke in zip(kss, kee):
-        poly = list(zip(coast_lon[ks:ke-2], coast_lat[ks:ke-2]))
-        ax.add_patch(
-            patches.Polygon(
-                poly, facecolor=land_c, rasterized=True))
-
-    ax.set_frame_on(False)
-    ax.axes.get_yaxis().set_visible(False)
-    ax.axes.get_xaxis().set_visible(False)
-    ax.set_xlim(lon_range)
-    ax.set_ylim(lat_range)
-    fig.set_tight_layout({'pad': 0})
-    return fig
-
-
-def plot_map(
-    ax,
-    coastline,
-    lat_range=(47.5, 50.7),
-    lon_range=(-126, -122),
-    land_c='burlywood',
-    land_patch_min_area=1e-3,
-):
-    """Plot map of Salish Sea region, including the options to add a
-    coastline, colour of the land, and colour of the domain.
-
-    :arg ax: Axis for map.
-    :type ax: axis object
-
-    :arg coastline: Coastline dataset.
-    :type coastline: :class:`mat.Dataset`
-
-    :arg tuple lat_range: latitude range to be plotted
-
-    :arg tuple lon_range: longitude range to be plotted
-
-    :arg string land_c: colour of land if coastline
-
-    :arg float land_patch_min_area: minimum area of land patch
-                    that is plotted
-    """
-
-    mapfig = make_background_map(
-        coastline, lat_range=lat_range, lon_range=lon_range,
-        land_c=land_c, land_patch_min_area=land_patch_min_area)
-    buffer_ = _render_png_buffer(mapfig)
-    img = matplotlib.image.imread(buffer_, format='anything')
-    ax.imshow(
-        img, zorder=0,
-        extent=[lon_range[0], lon_range[1], lat_range[0], lat_range[1]])
-
-    # labels
-    ax.set_xlim(lon_range[0], lon_range[1])
-    ax.set_ylim(lat_range[0], lat_range[1])
-    ax.set_xlabel('Longitude', **axis_font)
-    ax.set_ylabel('Latitude', **axis_font)
-    ax.grid()
-    viz_tools.set_aspect(ax)
-
-
 def load_model_ssh(grid_T):
     """Load an sea surface height (ssh) time series from a NEMO tracer
     results dataset.
@@ -1235,7 +1132,11 @@ def website_thumbnail(
     gs = gridspec.GridSpec(2, 3, width_ratios=[1, 1, 1], height_ratios=[6, 1])
     gs.update(hspace=0.15, wspace=0.05)
     ax = fig.add_subplot(gs[0, :])
-    plot_map(ax, coastline)
+    shared.plot_map(ax, coastline)
+    ax.set_xlabel('Longitude', **axis_font)
+    ax.set_ylabel('Latitude', **axis_font)
+    ax.grid()
+    viz_tools.set_aspect(ax)
     for name in TIDAL_SITES:
         ssh_ts = nc_tools.ssh_timeseries_at_point(
             grids[name], 0, 0, datetimes=True)
@@ -1961,7 +1862,11 @@ def winds_average_max(
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(1, 1, 1)
     fig.patch.set_facecolor('#2B3E50')
-    plot_map(ax, coastline)
+    shared.plot_map(ax, coastline)
+    ax.set_xlabel('Longitude', **axis_font)
+    ax.set_ylabel('Latitude', **axis_font)
+    ax.grid()
+    viz_tools.set_aspect(ax)
     scale = 0.1
     # Reference for m/s
     ax.arrow(-122.5, 50.65, 0. * scale, -5. * scale,
@@ -2509,7 +2414,11 @@ def plot_threshold_website(
     ax3 = fig.add_subplot(gs[1, 2])
 
     # Map
-    plot_map(ax, coastline)
+    shared.plot_map(ax, coastline)
+    ax.set_xlabel('Longitude', **axis_font)
+    ax.set_ylabel('Latitude', **axis_font)
+    ax.grid()
+    viz_tools.set_aspect(ax)
 
     max_ssh_time = {}
     max_ssh = {}
@@ -2741,6 +2650,10 @@ def _plot_stations_map(
     :type ylim: 2-tuple
     """
 
-    plot_map(ax, coastline, lon_range=xlim, lat_range=ylim)
+    shared.plot_map(ax, coastline, lon_range=xlim, lat_range=ylim)
+    ax.set_xlabel('Longitude', **axis_font)
+    ax.set_ylabel('Latitude', **axis_font)
+    ax.grid()
+    viz_tools.set_aspect(ax)
     ax.set_title(title, **title_font)
     axis_colors(ax, 'gray')
