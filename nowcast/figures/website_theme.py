@@ -13,13 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""Colour, fonts, and utility functions that define the look of figures for the
+https://salishsea.eos.ubc.ca/nemo/ web pages.
 """
-"""
+
+#: The :kbd:`salishsea.eos.ubc.ca/nemo/` pages background colour,
+#: from the http://bootswatch.com/superhero/ theme.
+SITE_BACKGROUND_COLOUR = '#2B3E50'
 
 
-SITE_BACKGROUND_COLOUR = '#2B3E50'  # salishsea site Superhero theme background
-
-
+#: Colours of various figure elements;
+#: the dict key(s) should be descriptive enough to identify the element
+#: to which the colour applies.
 COLOURS = {
     'axis': {
         'labels': 'white',
@@ -35,6 +40,13 @@ COLOURS = {
     },
     'land': 'burlywood',
 }
+
+
+#: Font properties of various figure text elements;
+#: the top level dict keys should be descriptive enough to identify the element
+#: to which the font properties apply.
+#: The font property keys are names of the attributes of a
+#: :py:class:`matplotlib.font_manager.FontProperties` object.
 FONTS = {
     'axes title': {
         'fontname': 'Bitstream Vera Sans',
@@ -54,7 +66,7 @@ FONTS = {
 def set_axis_colors(ax):
     """Set the colours of axis labels, ticks and spines.
 
-    :arg ax: Axes to be formatted.
+    :arg ax: Axes object to be formatted.
     :type ax: :py:class:`matplotlib.axes.Axes`
     """
     ax.xaxis.label.set_color(COLOURS['axis']['labels'])
