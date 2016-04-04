@@ -347,7 +347,7 @@ The function code does 4 things:
    The :py:func:`matplotlib.pyplot.subplots` and :py:func:`_prep_fig_axes` functions accept keyword arguments named :kbd:`figsize` and :kbd:`facecolor` to set the size and shape of the figure area,
    and its background colour as defined in the :py:mod:`nowcast.figures.website_theme` :ref:`WebsiteTheme` module by :py:attr:`COLOURS['figure']['facecolor']`.
 
-   A :py:func:`_prep_fig_axes` function would be used :py:class:`matplotlib.gridspec.Gridspec` is used to define more complex layout of axes than can be provided by :py:func:`matplotlib.pyplot.subplots`.
+   A :py:func:`_prep_fig_axes` function is be used if :py:class:`matplotlib.gridspec.Gridspec` is used to define more complex layout of axes than can be provided by :py:func:`matplotlib.pyplot.subplots`.
 
 3. For each axes object returned by :py:func:`matplotlib.pyplot.subplots` or :py:func:`_prep_fig_axes`,
    call a module-private function whose name starts with :py:func:`_plot_` to draw all the things on the axes
