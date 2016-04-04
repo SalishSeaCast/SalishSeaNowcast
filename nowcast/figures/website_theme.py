@@ -26,6 +26,9 @@ SITE_BACKGROUND_COLOUR = '#2B3E50'
 #: the dict key(s) should be descriptive enough to identify the element
 #: to which the colour applies.
 COLOURS = {
+    'axes textbox': {
+        'facecolor': 'white',
+    },
     'axis': {
         'labels': 'white',
         'spines': 'white',
@@ -58,16 +61,40 @@ COLOURS = {
 #: The font property keys are names of the attributes of a
 #: :py:class:`matplotlib.font_manager.FontProperties` object.
 FONTS = {
+    'axes annotation': {
+        'fontname': 'Bitstream Vera Sans',
+        'size': 14,
+        'color': 'black',
+        'weight': 'medium',
+    },
     'axes title': {
         'fontname': 'Bitstream Vera Sans',
-        'size': '15',
+        'size': 15,
         'color': 'white',
         'weight': 'medium',
     },
     'axis': {
         'fontname': 'Bitstream Vera Sans',
-        'size': '13',
+        'size': 13,
         'color': 'white',
+        'weight': 'medium',
+    },
+    'figure annotation': {
+        'fontname': 'Bitstream Vera Sans',
+        'size': 14,
+        'color': 'white',
+        'weight': 'medium',
+    },
+    'legend label': {
+        # 'fontname': 'Bitstream Vera Sans',
+        'size': 15,
+        # 'color': 'black',
+        # 'weight': 'medium',
+    },
+    'legend title': {
+        'fontname': 'Bitstream Vera Sans',
+        'size': 20,
+        'color': 'black',
         'weight': 'medium',
     },
 }
