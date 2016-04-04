@@ -19,10 +19,8 @@
 
 SITE_BACKGROUND_COLOUR = '#2B3E50'  # salishsea site Superhero theme background
 
+
 COLOURS = {
-    'figure': {
-        'facecolor': SITE_BACKGROUND_COLOUR,
-    },
     'axis': {
         'labels': 'white',
         'spines': 'white',
@@ -32,11 +30,11 @@ COLOURS = {
         'label': 'white',
         'tick labels': 'white',
     },
-    'contour mesh': {
-        'land': 'burlywood',
-    }
+    'figure': {
+        'facecolor': SITE_BACKGROUND_COLOUR,
+    },
+    'land': 'burlywood',
 }
-
 FONTS = {
     'axes title': {
         'fontname': 'Bitstream Vera Sans',
