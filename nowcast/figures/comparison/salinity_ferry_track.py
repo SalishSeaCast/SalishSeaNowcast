@@ -79,7 +79,7 @@ def _prep_plot_data(grid_T_hr):
 
 
 def _plot_salinity_map(ax, lons, lats, sal_model, sal_obs, theme):
-    ax.set_axis_bgcolor(theme.COLOURS['contour mesh']['land'])
+    ax.set_axis_bgcolor(theme.COLOURS['land'])
     cmap = plt.get_cmap('plasma')
     contour_levels = 20
     mesh = ax.contourf(

@@ -13,7 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
+"""A collection of functions for use by multiple figure modules in the
+:kbd:`nowcast.figures` namespaces.
+
+.. note::
+    These functions are intended for use *only* by :kbd:`nowcast.figures`
+    modules.
+    If you find that you want to use one of these functions outside of those
+    namespaces please talk to the group about refactoring the function into
+    the :ref:`SalishSeaToolsPackage`.
 """
 import io
 
@@ -22,88 +30,69 @@ from matplotlib import patches as patches
 from matplotlib.backends import backend_agg as backend
 from matplotlib.figure import Figure
 
+import nowcast.figures.website_theme
+
 
 def plot_map(
     ax,
     coastline,
     lat_range=(47.5, 50.7),
     lon_range=(-126, -122),
-    land_c='burlywood',
     land_patch_min_area=1e-3,
+    theme=nowcast.figures.website_theme,
 ):
-    """Plot map of Salish Sea region, including the options to add a
+    """Plot a map of the Salish Sea region, including the options to add a
     coastline, colour of the land, and colour of the domain.
 
-    :arg ax: Axis for map.
-    :type ax: axis object
+    The map produced by this function is intended for use as the background for
+    figures on which model results are plotted.
+    It is rasterized to minimize the file size of the resulting rendered
+    figure image, an important consideration for web site figure images.
 
-    :arg coastline: Coastline dataset.
-    :type coastline: :class:`mat.Dataset`
+    :arg ax: Axes object to plot the map on.
+    :type ax: :py:class:`matplotlib.axes.Axes`
 
-    :arg tuple lat_range: latitude range to be plotted
+    :arg dict coastline: Pacific Northwest Coastline from matlab :kbd:`.mat`
+                         file.
 
-    :arg tuple lon_range: longitude range to be plotted
+    :arg 2-tuple lat_range: Latitude range to be plotted.
 
-    :arg string land_c: colour of land if coastline
+    :arg 2-tuple lon_range: Longitude range to be plotted.
 
-    :arg float land_patch_min_area: minimum area of land patch
-                    that is plotted
+    :arg float land_patch_min_area: Minimum area of land patch to be plotted.
+
+    :arg theme: Module-like object that defines the style elements for the
+                figure. See :py:mod:`nowcast.figures.website_theme` for an
+                example.
     """
-
-    mapfig = make_background_map(
-        coastline, lat_range=lat_range, lon_range=lon_range,
-        land_c=land_c, land_patch_min_area=land_patch_min_area)
+    mapfig = _make_background_map(
+        coastline, lat_range, lon_range, land_patch_min_area, theme)
     buffer_ = _render_png_buffer(mapfig)
     img = matplotlib.image.imread(buffer_, format='anything')
-    ax.imshow(
-        img, zorder=0,
-        extent=[lon_range[0], lon_range[1], lat_range[0], lat_range[1]])
-    ax.set_xlim(lon_range[0], lon_range[1])
-    ax.set_ylim(lat_range[0], lat_range[1])
+    ax.imshow(img, zorder=0, extent=[*lon_range, *lat_range])
+    ax.set_xlim(lon_range)
+    ax.set_ylim(lat_range)
 
 
-def make_background_map(
-        coastline, lat_range=(47.5, 50.7), lon_range=(-126, -122),
-        land_patch_min_area=1e-4, land_c='burlywood'):
-    """
-    Create a figure from an mmap dataset showing a lat-lon patch.
-
-    The map is intended for use as the background in figures on which model
-    results are plotted. It is rasterized to minimize file size.
-
-    :arg coastline: Coastline dataset.
-    :type coastline: :class:`mat.Dataset`
-
-    :arg tuple lat_range:  latitude range to be plotted
-
-    :arg tuple lon_range: longitude range to be plotted
-
-    :arg string land_c: colour of land if coastline
-
-    :arg float land_patch_min_area: minimum area of land patch
-                    that is plotted
-    """
-
-    coast_lat = coastline['ncst'][:, 1]
-    coast_lon = coastline['ncst'][:, 0]
+def _make_background_map(
+    coastline, lat_range, lon_range, land_patch_min_area, theme,
+):
     fig = Figure(figsize=(15, 15))
     ax = fig.add_subplot(1, 1, 1)
+    # Plot coastline
+    coast_lat = coastline['ncst'][:, 1]
+    coast_lon = coastline['ncst'][:, 0]
     ax.plot(coast_lon, coast_lat, '-k', rasterized=True, markersize=1)
-
-    k = coastline['k'][:, 0]
-    area_ = coastline['Area'][0]
-    ## WTF???
-    Area = area_
-    mask = Area > land_patch_min_area
-    kss = k[:-1][mask]
-    kee = k[1:][mask]
-
+    # Plot land patches
+    mask = coastline['Area'][0] > land_patch_min_area
+    kss = coastline['k'][:, 0][:-1][mask]
+    kee = coastline['k'][:, 0][1:][mask]
     for ks, ke in zip(kss, kee):
         poly = list(zip(coast_lon[ks:ke-2], coast_lat[ks:ke-2]))
         ax.add_patch(
             patches.Polygon(
-                poly, facecolor=land_c, rasterized=True))
-
+                poly, facecolor=theme.COLOURS['land'], rasterized=True))
+    # Format the axes
     ax.set_frame_on(False)
     ax.axes.get_yaxis().set_visible(False)
     ax.axes.get_xaxis().set_visible(False)

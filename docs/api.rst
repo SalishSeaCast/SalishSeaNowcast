@@ -50,6 +50,15 @@
 Nowcast System Results Figures
 ==============================
 
+.. _nowcast.figures.shared:
+
+:py:mod:`nowcast.figures.shared` Module
+---------------------------------------
+
+.. automodule:: nowcast.figures.shared
+    :members:
+
+
 .. _nowcast.figures.website_theme:
 
 :py:mod:`nowcast.figures.website_theme` Module
