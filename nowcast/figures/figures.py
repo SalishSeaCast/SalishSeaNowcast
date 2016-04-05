@@ -637,29 +637,6 @@ def compute_residual(ssh, t_model, ttide):
     return res
 
 
-def get_tides(name, path='../tidal_predictions/'):
-    """ Returns the tidal predictions at a given station.
-
-    :arg str name: The name of the station.
-
-    :arg str path: Path to the directory containing the tidal prediction
-                   .csv files to use.
-                   Default value resolves to
-                   :file:`SalishSeaNowcast/tidal_predications/
-                   for calls elsewhere in the
-                   :py:mod:`~SalishSeaNowcast.nowcast.figures` module.
-
-    :returns: DataFrame object (ttide) with tidal predictions and columns time,
-              pred_all, pred_8.
-    """
-
-    # Tide file covers 2014 and 2015. Harmonics were from CHS.
-    fname = '{}_tidal_prediction_01-Jan-2015_01-Jan-2020.csv'.format(name)
-    tfile = os.path.join(path, fname)
-    ttide, msl = stormtools.load_tidal_predictions(tfile)
-    return ttide
-
-
 def get_weather_filenames(t_orig, t_final, weather_path):
     """Gathers a list of "Operational" atmospheric model filenames in a
     specifed date range.
@@ -798,7 +775,7 @@ def plot_corrected_model(
     return ssh_corr
 
 
-def plot_tides(ax, name, PST, MSL, tidal_predications, color=predictions_c):
+def plot_tides(ax, name, PST, MSL, tidal_predictions, color=predictions_c):
     """Plots and returns the tidal predictions at a given station during the
     year of t_orig.
 
@@ -817,7 +794,7 @@ def plot_tides(ax, name, PST, MSL, tidal_predications, color=predictions_c):
     :arg int MSL: Specifies if the plot should be centred about mean sea level.
                   1=centre about MSL, 0=centre about 0.
 
-    :arg str tidal_predications: Path to directory of tidal prediction
+    :arg str tidal_predictions: Path to directory of tidal prediction
                                  file.
 
     :arg str color: The color for the tidal predictions plot.
@@ -826,7 +803,7 @@ def plot_tides(ax, name, PST, MSL, tidal_predications, color=predictions_c):
               columns time, pred_all, pred_8.
     """
 
-    ttide = get_tides(name, tidal_predications)
+    ttide = shared.get_tides(name, tidal_predictions)
     ax.plot(
         ttide.time + PST * time_shift,
         ttide.pred_all + SITES[name]['msl'] * MSL,
@@ -1097,7 +1074,7 @@ def plot_wind_arrow(
 ## Called by make_plots (publish)
 ## TODO: Move/rename to figures.publish as storm_surge_alerts_thumbnail module
 def website_thumbnail(
-    grid_B, grid_T, grids, weather_path, coastline, tidal_predications,
+    grid_B, grid_T, grids, weather_path, coastline, tidal_predictions,
     colours=COLOURS,
     fonts=FONTS,
     figsize=(18, 20),
@@ -1106,10 +1083,12 @@ def website_thumbnail(
     indicating the risk of flooding in three stations and the wind speeds and
     directions. It also includes a brief description of threshold colours.
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.  ***NOT USED***
+    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.  ***NOT
+    USED***
     :type grid_B: :class:`netCDF4.Dataset`
 
-    :arg grid_T: Hourly tracer results dataset from NEMO.           ***NOT USED***
+    :arg grid_T: Hourly tracer results dataset from NEMO.           ***NOT
+    USED***
     :type grid_T: :class:`netCDF4.Dataset`
 
     :arg dict grids: high frequency model results
@@ -1120,7 +1099,7 @@ def website_thumbnail(
     :arg coastline: Coastline dataset.
     :type coastline: :class:`mat.Dataset`
 
-    :arg str tidal_predications: Path to directory of tidal prediction
+    :arg str tidal_predictions: Path to directory of tidal prediction
                                  file.
 
     :arg 2-tuple figsize: Figure size (width, height) in inches.
@@ -1139,7 +1118,7 @@ def website_thumbnail(
     for name in TIDAL_SITES:
         ssh_ts = nc_tools.ssh_timeseries_at_point(
             grids[name], 0, 0, datetimes=True)
-        ttide = get_tides(name, tidal_predications)
+        ttide = shared.get_tides(name, tidal_predictions)
         max_ssh, max_ssh_time = find_ssh_max(name, ssh_ts, ttide)
         risk_level = stormtools.storm_surge_risk_level(name, max_ssh, ttide)
         plot_risk_level_marker(ax, name, risk_level, colours, 'o', 70, 0.3)
@@ -2365,7 +2344,7 @@ def ssh_PtAtkinson(grid_T, grid_B=None, figsize=(20, 5)):
 ## Called by make_plots (publish)
 ## TODO: Move/rename to figures.publish as storm_surge_alerts
 def plot_threshold_website(
-    grid_B, grid_T, grids, weather_path, coastline, tidal_predications,
+    grid_B, grid_T, grids, weather_path, coastline, tidal_predictions,
     scale=0.1, PST=1, colours=COLOURS, fonts=FONTS, figsize=(18, 20),
 ):
     """Overview image for Salish Sea website.
@@ -2390,7 +2369,7 @@ def plot_threshold_website(
     :arg coastline: Coastline dataset.
     :type coastline: :class:`mat.Dataset`
 
-    :arg str tidal_predications: Path to directory of tidal prediction
+    :arg str tidal_predictions: Path to directory of tidal prediction
                                  file.
 
     :arg float scale: scale factor or wind arrows
@@ -2425,7 +2404,7 @@ def plot_threshold_website(
     for name in TIDAL_SITES:
         ssh_ts = nc_tools.ssh_timeseries_at_point(
             grids[name], 0, 0, datetimes=True)
-        ttide = get_tides(name, tidal_predications)
+        ttide = shared.get_tides(name, tidal_predictions)
         max_ssh[name], max_ssh_time[name] = find_ssh_max(name, ssh_ts, ttide)
         risk_level = stormtools.storm_surge_risk_level(
                      name, max_ssh[name], ttide)

@@ -24,11 +24,14 @@
     the :ref:`SalishSeaToolsPackage`.
 """
 import io
+import os
 
 import matplotlib.image
-from matplotlib import patches as patches
+from matplotlib import patches
 from matplotlib.backends import backend_agg as backend
 from matplotlib.figure import Figure
+
+from salishsea_tools import stormtools
 
 import nowcast.figures.website_theme
 
@@ -107,3 +110,23 @@ def _render_png_buffer(fig):
     buffer = io.BytesIO()
     canvas.print_figure(buffer, format='png')
     return buffer
+
+
+def get_tides(stn_name, path='../../tidal_predictions/'):
+    """Return the tidal predictions at the named tide gauge station station.
+
+    :arg str stn_name: Name of the tide gauge station.
+
+    :arg str path: Path to the directory containing the tidal prediction
+                   .csv files to use.
+                   Default value resolves to
+                   :file:`SalishSeaNowcast/tidal_predications/
+                   for calls elsewhere in the
+                   :py:mod:`~SalishSeaNowcast.nowcast.figures` namespace.
+
+    :returns: Tidal predictions object with columns time, pred_all, pred_8.
+    :rtype: :py:class:`pandas.Dataframe`
+    """
+    fname = '{}_tidal_prediction_01-Jan-2015_01-Jan-2020.csv'.format(stn_name)
+    ttide, _ = stormtools.load_tidal_predictions(os.path.join(path, fname))
+    return ttide
