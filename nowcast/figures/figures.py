@@ -856,9 +856,8 @@ def plot_PA_observations(ax, PST):
 def plot_risk_level_marker(
     ax, name, risk_level, colours, marker, msize, alpha,
 ):
-    lat, lon = PLACES[name]['lat lon']
     ax.plot(
-        lon, lat,
+        *PLACES[name]['lon lat'],
         marker=marker, markersize=msize, markeredgewidth=2,
         color=colours['risk level colours'][risk_level], alpha=alpha)
 
@@ -1143,8 +1142,8 @@ def website_thumbnail(
         ttide = get_tides(name, tidal_predications)
         max_ssh, max_ssh_time = find_ssh_max(name, ssh_ts, ttide)
         risk_level = stormtools.storm_surge_risk_level(name, max_ssh, ttide)
-        lat, lon = PLACES[name]['lat lon']
         plot_risk_level_marker(ax, name, risk_level, colours, 'o', 70, 0.3)
+        lon, lat = PLACES[name]['lon lat']
         u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
             arrow.get(max_ssh_time), weather_path,
             PLACES[name]['wind grid ji'], avg_hrs=-4)
@@ -2430,8 +2429,8 @@ def plot_threshold_website(
         max_ssh[name], max_ssh_time[name] = find_ssh_max(name, ssh_ts, ttide)
         risk_level = stormtools.storm_surge_risk_level(
                      name, max_ssh[name], ttide)
-        lat, lon = PLACES[name]['lat lon']
         plot_risk_level_marker(ax, name, risk_level, colours, 'o', 55, 0.3)
+        lon, lat = PLACES[name]['lon lat']
         u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
             arrow.get(max_ssh_time[name]), weather_path,
             PLACES[name]['wind grid ji'], avg_hrs=-4)
