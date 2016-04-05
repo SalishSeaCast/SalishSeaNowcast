@@ -30,8 +30,10 @@ import matplotlib.image
 from matplotlib import patches
 from matplotlib.backends import backend_agg as backend
 from matplotlib.figure import Figure
+import numpy as np
 
 from salishsea_tools import stormtools
+from salishsea_tools.places import PLACES
 
 import nowcast.figures.website_theme
 
@@ -130,3 +132,88 @@ def get_tides(stn_name, path='../../tidal_predictions/'):
     fname = '{}_tidal_prediction_01-Jan-2015_01-Jan-2020.csv'.format(stn_name)
     ttide, _ = stormtools.load_tidal_predictions(os.path.join(path, fname))
     return ttide
+
+
+def find_ssh_max(tide_gauge_stn, ssh_ts, ttide):
+    """Find the maximum corrected sea surface height at a tide gauge station,
+    and the date/time at which it occurrs.
+
+    :arg str tide_gauge_stn: Name of tide gauge station.
+
+    :arg ssh_ts: Sea surface height time series.
+                 :py:attr:`ssh` attribute is a :py:class:`numpy.ndarray` of
+                 sea surface height values.
+                 :py:attr:`time` attribute is a :py:class:`numpy.ndarray` of
+                 :py:class:`~datetime.datetime` object.
+    :type ssh_ts: :py:class:`collections.namedtuple`
+
+    :arg ttide: Tidal predictions data structure with :kbd:`time`,
+                :kbd:`pred_all`, :kbd:`pred_8`, and :kbd:`pred_noshallow`
+                columns.
+    :type ttide: :py:class:`pandas.DataFrame`
+    """
+    ssh_corr = correct_model_ssh(*ssh_ts, ttide)
+    max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
+    max_ssh_time = ssh_ts.time[np.argmax(ssh_corr)]
+    return max_ssh, max_ssh_time
+
+
+## TODO: Move to stormtools module and/or merge w/ stormtools.correct_model()
+## TODO: Perhaps refactor to accept a ssh_ts namedtuple
+def correct_model_ssh(ssh_model, t_model, ttide):
+    """Adjust model sea surface height by correcting for error due to using
+    only 8 tidal constituents.
+
+    Based on :py:func:`salishsea_tools.stormtools.correct_model`.
+    Uses a tidal prediction with no shallow water minus a tidal prediction with
+    8 constituents.
+
+    :arg ssh_model: Sea surface height model results.
+    :type ssh_model: :py:class:`numpy.ndarray`
+
+    :arg t_model: Model :py:class:`~datetime.datetime` objects corresponding to
+                  :kbd:`ssh_model`.
+    :type t_model: :py:class:`numpy.ndarray`
+
+    :arg ttide: Tidal predictions data structure with :kbd:`time`,
+                :kbd:`pred_all`, :kbd:`pred_8`, and :kbd:`pred_noshallow`
+                columns.
+    :type ttide: :py:class:`pandas.DataFrame`
+
+    :returns: Corrected model sea surface height.
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    difference = np.array(ttide[' pred_noshallow '] - ttide['pred_8'])
+    corr = interp_to_model_time(t_model, difference, ttide.time)
+    corr_model = ssh_model + corr
+    return corr_model
+
+
+## TODO: This should probably be in a salishsea_tools module.
+def interp_to_model_time(t_model, values, t_values):
+    """Interpolate a an array of values to model output times.
+
+    Strategy: Convert times to seconds past a reference value and use those
+    as the independent variable in interpolation.
+
+    :arg t_model: Model output times as :py:class:`~datetime.datetime` objects.
+    :type t_model: :py:class:`numpy.ndarray`
+
+    :arg values: Values to be interpolated to model output times.
+    :type values: :py:class:`numpy.ndarray`
+
+    :arg t_values: Times corresponding to :kbd:`values` as
+                   :py:class:`~datetime.datetime` objects.
+    :type t_values: :py:class:`numpy.ndarray`
+
+    :returns: Values interpolated to :kbd:`t_model` times.
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    epoch = t_model[0]
+    t_values_wrt_epoch = np.array(
+        [(t - epoch).total_seconds() for t in t_values])
+    t_model_wrt_epoch = np.array(
+        [(t - epoch).total_seconds() for t in t_model])
+    return np.interp(
+        t_model_wrt_epoch, t_values_wrt_epoch, values,
+        left=np.NaN, right=np.NaN)

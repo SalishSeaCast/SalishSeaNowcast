@@ -36,8 +36,6 @@ from dateutil import tz
 from matplotlib.backends import backend_agg as backend
 from scipy import interpolate as interp
 
-from nowcast.figures import shared
-from nowcast.figures import website_theme
 from salishsea_tools import (
     nc_tools,
     stormtools,
@@ -47,6 +45,12 @@ from salishsea_tools import (
     wind_tools,
 )
 from salishsea_tools.places import PLACES
+
+from nowcast.figures import (
+    shared,
+    website_theme,
+)
+
 
 # =============================== #
 # <------- Kyle 2015/08/25
@@ -630,7 +634,7 @@ def compute_residual(ssh, t_model, ttide):
     """
 
     # interpolate tides to model time
-    tides_interp = interp_to_model_time(t_model, ttide.pred_all, ttide.time)
+    tides_interp = shared.interp_to_model_time(t_model, ttide.pred_all, ttide.time)
 
     res = ssh - tides_interp
 
@@ -765,7 +769,7 @@ def plot_corrected_model(
     """
 
     # Correct the ssh
-    ssh_corr = correct_model_ssh(ssh_loc, t, ttide)
+    ssh_corr = shared.correct_model_ssh(ssh_loc, t, ttide)
 
     ax.plot(
         t + PST * time_shift,
@@ -1004,29 +1008,6 @@ def load_model_ssh(grid_T):
     return ssh, time
 
 
-def find_ssh_max(tide_gauge_stn, ssh_ts, ttide):
-    """
-    Find the maximum corrected ssh value at a station.  Return the value
-    and the index
-
-    :arg str tide_gauge_stn: Name of station
-
-    :arg ssh_ts.ssh: sea surface height values
-    :type ssh_ts.ssh: :py:class:`numpy.ndarray`
-
-    :arg ssh_ts.time: times
-    :type ssh_ts.time: :py:class:`numpy.ndarray`
-
-    :arg ttide: tidal predictions
-    :type ttide: :py:class:`pandas.DataFrame`
-    """
-
-    ssh_corr = correct_model_ssh(ssh_ts.ssh, ssh_ts.time, ttide)
-    max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
-    max_ssh_time = ssh_ts.time[np.argmax(ssh_corr)]
-    return max_ssh, max_ssh_time
-
-
 def plot_wind_arrow(
     ax, lon, lat, u_wind, v_wind,
     colours=COLOURS,
@@ -1119,7 +1100,7 @@ def website_thumbnail(
         ssh_ts = nc_tools.ssh_timeseries_at_point(
             grids[name], 0, 0, datetimes=True)
         ttide = shared.get_tides(name, tidal_predictions)
-        max_ssh, max_ssh_time = find_ssh_max(name, ssh_ts, ttide)
+        max_ssh, max_ssh_time = shared.find_ssh_max(name, ssh_ts, ttide)
         risk_level = stormtools.storm_surge_risk_level(name, max_ssh, ttide)
         plot_risk_level_marker(ax, name, risk_level, colours, 'o', 70, 0.3)
         lon, lat = PLACES[name]['lon lat']
@@ -2405,7 +2386,8 @@ def plot_threshold_website(
         ssh_ts = nc_tools.ssh_timeseries_at_point(
             grids[name], 0, 0, datetimes=True)
         ttide = shared.get_tides(name, tidal_predictions)
-        max_ssh[name], max_ssh_time[name] = find_ssh_max(name, ssh_ts, ttide)
+        max_ssh[name], max_ssh_time[name] = shared.find_ssh_max(
+            name, ssh_ts, ttide)
         risk_level = stormtools.storm_surge_risk_level(
                      name, max_ssh[name], ttide)
         plot_risk_level_marker(ax, name, risk_level, colours, 'o', 55, 0.3)
@@ -2532,78 +2514,6 @@ def plot_threshold_website(
             .format(unit_conversions.mps_kph(max_windavg[name])), fontsize=15,
             horizontalalignment='left', verticalalignment='top', color='w')
     return fig
-
-
-def interp_to_model_time(time_model, varp, tp):
-    """
-    Interpolates a variable to model ouput times.
-
-    :arg model_time: array of model ouput times as datetime objects
-    :type model_time: array with datetimes
-
-    :arg varp: array of variable to be interpolated
-    :type varp: array
-
-    :arg tp: array of times associated with variable
-    :type tp: array
-
-    :returns: varp_interp, the variable interpolated to model_times
-    """
-    # Strategy: convert times to seconds past a reference value.
-    # Use this as the independent variable in interpolation.
-    # Set epoc (reference) time.
-    epoc = time_model[0]
-
-    #  Determine tp times wrt epc
-    tp_wrt_epoc = []
-    for t in tp:
-        tp_wrt_epoc.append((t-epoc).total_seconds())
-
-    # Interpolate observations to model times
-    varp_interp = []
-    for t in time_model:
-        mod_wrt_epoc = (t-epoc).total_seconds()
-        varp_interp.append(np.interp(mod_wrt_epoc, tp_wrt_epoc, varp,
-                                     left=float('nan'), right=float('nan')))
-
-    return varp_interp
-
-
-## TODO: Move to stormtools module and/or merge w/ stormtools.correct_model()
-def correct_model_ssh(ssh_model, t_model, ttide):
-    """
-    Adjusts model output by correcting for error in using only 8 constituents.
-    Based on stormtools.correct_model()
-    Uses a tidal prediction with no shallow water - a tidal predcition with 8.
-
-    :arg ssh_model: an array with model ssh data
-    :type ssh_model: array of numbers
-
-    :arg t_model: model output times as datetime objects
-    :type t_model: array of datetime objects
-
-    :arg ttide: struc with tidal predictions.
-    :type ttide: struc with dimension time, pred_all, pred_8, pred_noshallow
-
-    :arg sdt: datetime object representing start date of simulation
-    :type sdt: datetime object
-
-    :arg edt: datetime object representing end date of simulation
-    :type edt: datetime object
-
-    :returns: corr_model: the corrected model output
-    """
-    # difference in tidal predictions
-    difference = ttide[' pred_noshallow ']-ttide['pred_8']
-    # Note: can use pred_noshallow is a tidal prediction without shallow water.
-    # Another option is pred_all (all significant constituents)
-    difference = np.array(difference)
-    # interpolate difference onto model times
-    corr = interp_to_model_time(t_model, difference, ttide.time)
-
-    corr_model = ssh_model + corr
-
-    return corr_model
 
 
 def _plot_stations_map(
