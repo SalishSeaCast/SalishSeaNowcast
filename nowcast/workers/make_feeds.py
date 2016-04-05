@@ -35,8 +35,8 @@ from salishsea_tools import (
 from salishsea_tools.places import PLACES
 import salishsea_tools.unit_conversions as converters
 
-from nowcast.figures import figures
 from nowcast import lib
+import nowcast.figures.shared
 from nowcast.nowcast_worker import NowcastWorker
 
 
@@ -235,7 +235,8 @@ def _calc_max_ssh(feed, ttide, run_date, run_type, config):
             .format(
                 tide_gauge_stn=tide_gauge_stn.replace(' ', ''))))
     ssh_ts = nc_tools.ssh_timeseries_at_point(grid_T_15m, 0, 0, datetimes=True)
-    ssh_corr = figures.correct_model_ssh(ssh_ts.ssh, ssh_ts.time, ttide)
+    ssh_corr = nowcast.figures.shared.correct_model_ssh(
+        ssh_ts.ssh, ssh_ts.time, ttide)
     max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
     max_ssh_time = ssh_ts.time[np.argmax(ssh_corr)]
     return max_ssh, max_ssh_time
