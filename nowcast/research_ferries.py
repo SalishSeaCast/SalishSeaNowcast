@@ -147,10 +147,10 @@ def salinity_ferry_route(
     label_offsets = [0.04, -0.4, 0.09]
     for stn, loc in zip(places, label_offsets):
         axs[1].plot(
-            PLACES[stn]['lat lon'][1], PLACES[stn]['lat lon'][0],
+            *PLACES[stn]['lon lat'],
             marker='D', color='white', markersize=10, markeredgewidth=2)
         axs[1].annotate(
-            stn, (PLACES[stn]['lat lon'][1] + loc, PLACES[stn]['lat lon'][0]),
+            stn, (PLACES[stn]['lon lat'][0] + loc, PLACES[stn]['lon lat'][1]),
             fontsize=15, color='black', bbox=bbox_args)
 
     # Set up model part of salinity comparison plot
