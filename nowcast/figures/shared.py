@@ -217,3 +217,39 @@ def interp_to_model_time(t_model, values, t_values):
     return np.interp(
         t_model_wrt_epoch, t_values_wrt_epoch, values,
         left=np.NaN, right=np.NaN)
+
+
+def plot_risk_level_marker(
+    ax, tide_gauge_name, risk_level, marker, msize, alpha, theme,
+):
+    """Plot storm surge risk level marker at tide gauge location.
+
+    :arg ax: Axes object to plot the marker on.
+    :type ax: :py:class:`matplotlib.axes.Axes`
+
+    :arg str tide_gauge_name: Name of the tide gauge site at which to plot the
+                              marker.
+
+    :arg str risk_level: Storm surge risk level identifier,
+                         perhaps from
+                         :py:func:`salishsea_tools.stormtools.storm_surge_risk_level`:
+                         :py:obj:`None` for no storm surge risk,
+                         :kbd:`moderate risk` for water level between max tide
+                         level and the half-way threshold,
+                         and :kbd:`extreme risk` for water level above the
+                         half-way threshold
+
+    :arg str marker: Marker identifier from :py:mod:`matplotlib.markers`.
+
+    :arg float msize: Marker size.
+
+    :arg float alpha: Marker transparency.
+
+    :arg theme: Module-like object that defines the style elements for the
+                figure. See :py:mod:`nowcast.figures.website_theme` for an
+                example.
+    """
+    ax.plot(
+        *PLACES[tide_gauge_name]['lon lat'],
+        marker=marker, markersize=msize, markeredgewidth=2, alpha=alpha,
+        color=theme.COLOURS['storm surge risk levels'][risk_level])
