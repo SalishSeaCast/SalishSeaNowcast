@@ -44,7 +44,11 @@ COLOURS = {
         'extreme risk': 'red',
         'moderate risk': 'Gold',
         None: 'green',
-    }
+    },
+    'wind arrow': {
+        'facecolor': 'DarkMagenta',
+        'edgecolor': 'black',
+    },
 }
 
 

@@ -222,9 +222,11 @@ def interp_to_model_time(t_model, values, t_values):
 def plot_risk_level_marker(
     ax, tide_gauge_name, risk_level, marker, msize, alpha, theme,
 ):
-    """Plot storm surge risk level marker at tide gauge location.
+    """Draw a storm surge risk level marker at tide gauge location.
 
-    :arg ax: Axes object to plot the marker on.
+    The axes is assumed to be using lon/lat scales.
+
+    :arg ax: Axes object to draw the marker on.
     :type ax: :py:class:`matplotlib.axes.Axes`
 
     :arg str tide_gauge_name: Name of the tide gauge site at which to plot the
@@ -253,3 +255,46 @@ def plot_risk_level_marker(
         *PLACES[tide_gauge_name]['lon lat'],
         marker=marker, markersize=msize, markeredgewidth=2, alpha=alpha,
         color=theme.COLOURS['storm surge risk levels'][risk_level])
+
+
+def plot_wind_arrow(
+    ax, lon, lat, u_wind, v_wind, theme, wind_arrow_scale_factor=0.1,
+):
+    """Draw a wind arrow on an plot axes.
+
+    The axes is assumed to be using lon/lat scales.
+
+    This just a wrapper that applies particular formatting to the
+    :py:meth:`matplotlib.axes.arrow` method.
+
+    :arg ax: Axes object to draw the arrow on.
+    :type ax: :py:class:`matplotlib.axes.Axes`
+
+    :arg float lon: Longitude of the arrow starting point.
+
+    :arg float lat: Latitude of the arrow starting point.
+
+    :arg float u_wind: Zonal (u) direction component of wind speed;
+                       value will be scaled to give longitude direction
+                       length of arrow.
+
+    :arg float v_wind: Meridional (v) direction component of wind speed;
+                       value will be scaled to give latitude direction
+                       length of arrow.
+
+    :arg float wind_arrow_scale_factor: Scale factor applied to wind
+                                        speed components to convert them
+                                        to lon/lat scale of plot;
+                                        defaults to 0.1.
+
+    :arg theme: Module-like object that defines the style elements for the
+                figure. See :py:mod:`nowcast.figures.website_theme` for an
+                example.
+    """
+    ax.arrow(
+        lon, lat,
+        wind_arrow_scale_factor * u_wind,
+        wind_arrow_scale_factor * v_wind,
+        head_width=0.05, head_length=0.1, width=0.02,
+        facecolor=theme.COLOURS['wind arrow']['facecolor'],
+        edgecolor=theme.COLOURS['wind arrow']['edgecolor'])
