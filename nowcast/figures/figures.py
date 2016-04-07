@@ -999,50 +999,6 @@ def load_model_ssh(grid_T):
     return ssh, time
 
 
-def plot_wind_arrow(
-    ax, lon, lat, u_wind, v_wind,
-    colours=COLOURS,
-    wind_arrow_scale_factor=0.1,
-):
-    """Draw a wind arrow on an plot axes.
-
-    The axes is assumed to be using lon/lat scales.
-
-    This just a wrapper that applies particular formatting to the
-    :py:meth:`matplotlib.axes.arrow` method.
-
-    :arg ax: Plot axes to draw the arrow on.
-    :type ax: :py:class:`matplotlib.axes.Axes`
-
-    :arg float lon: Longitude of the arrow starting point.
-
-    :arg float lat: Latitude of the arrow starting point.
-
-    :arg float u_wind: Zonal (u) direction component of wind speed;
-                       value will be scaled to give longitude direction
-                       length of arrow.
-
-    :arg float v_wind: Meridional (v) direction component of wind speed;
-                       value will be scaled to give latitude direction
-                       length of arrow.
-
-    :arg dict colours: Colours to use for the arrow face and edge colours.
-                       Defaults to :py:data:`figures.COLOURS`.
-
-    :arg float wind_arrow_scale_factor: Scale factor applied to wind
-                                        speed components to convert them
-                                        to lon/lat scale of plot;
-                                        defaults to 0.1.
-    """
-    ax.arrow(
-        lon, lat,
-        wind_arrow_scale_factor * u_wind,
-        wind_arrow_scale_factor * v_wind,
-        head_width=0.05, head_length=0.1, width=0.02,
-        facecolor=colours['wind arrow']['facecolor'],
-        edgecolor=colours['wind arrow']['edgecolor'])
-
-
 ## Called by make_plots (publish)
 ## TODO: Move/rename to figures.publish as storm_surge_alerts_thumbnail module
 def website_thumbnail(
@@ -1099,14 +1055,15 @@ def website_thumbnail(
         u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
             arrow.get(max_ssh_time), weather_path,
             PLACES[name]['wind grid ji'], avg_hrs=-4)
-        plot_wind_arrow(ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, colours)
+        shared.plot_wind_arrow(ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, colours)
     # Wind speed legend
     legend_wind_speed = 5  # m/s or knots
-    plot_wind_arrow(ax, -122.2, 50.6, 0, -legend_wind_speed, colours)
+    shared.plot_wind_arrow(
+        ax, -122.2, 50.6, 0, -legend_wind_speed, website_theme)
     ax.text(-122.28, 50.55, "Reference: 5 m/s", rotation=90, fontsize=20)
-    plot_wind_arrow(
+    shared.plot_wind_arrow(
         ax, -122.45, 50.6, 0, -unit_conversions.knots_mps(legend_wind_speed),
-        colours)
+        website_theme)
     ax.text(-122.53, 50.55, "Reference: 5 knots", rotation=90, fontsize=20)
     # Title and axis spines, ticks & labels colours
     ax.set_title(
@@ -2388,7 +2345,8 @@ def plot_threshold_website(
         u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
             arrow.get(max_ssh_time[name]), weather_path,
             PLACES[name]['wind grid ji'], avg_hrs=-4)
-        plot_wind_arrow(ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, colours)
+        shared.plot_wind_arrow(
+            ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, website_theme)
         max_windavg[name], _ = wind_tools.wind_speed_dir(
                                u_wind_4h_avg, v_wind_4h_avg)
 
