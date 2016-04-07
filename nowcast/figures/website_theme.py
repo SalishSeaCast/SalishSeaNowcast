@@ -39,6 +39,12 @@ COLOURS = {
         'facecolor': SITE_BACKGROUND_COLOUR,
     },
     'land': 'burlywood',
+
+    'storm surge risk levels': {
+        'extreme risk': 'red',
+        'moderate risk': 'Gold',
+        None: 'green',
+    }
 }
 
 

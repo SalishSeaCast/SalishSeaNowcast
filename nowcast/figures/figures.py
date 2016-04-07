@@ -834,15 +834,6 @@ def plot_PA_observations(ax, PST):
         color=observations_c, lw=2, label='Observations')
 
 
-def plot_risk_level_marker(
-    ax, name, risk_level, colours, marker, msize, alpha,
-):
-    ax.plot(
-        *PLACES[name]['lon lat'],
-        marker=marker, markersize=msize, markeredgewidth=2,
-        color=colours['risk level colours'][risk_level], alpha=alpha)
-
-
 def plot_threshold_map(ax, ttide, ssh_corr, marker, msize, alpha, name):
     """Determines category (green, yellow, red) in which the max sea surface
     height at a station falls.
@@ -1102,7 +1093,8 @@ def website_thumbnail(
         ttide = shared.get_tides(name, tidal_predictions)
         max_ssh, max_ssh_time = shared.find_ssh_max(name, ssh_ts, ttide)
         risk_level = stormtools.storm_surge_risk_level(name, max_ssh, ttide)
-        plot_risk_level_marker(ax, name, risk_level, colours, 'o', 70, 0.3)
+        shared.plot_risk_level_marker(
+            ax, name, risk_level, 'o', 70, 0.3, website_theme)
         lon, lat = PLACES[name]['lon lat']
         u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
             arrow.get(max_ssh_time), weather_path,
@@ -2390,7 +2382,8 @@ def plot_threshold_website(
             name, ssh_ts, ttide)
         risk_level = stormtools.storm_surge_risk_level(
                      name, max_ssh[name], ttide)
-        plot_risk_level_marker(ax, name, risk_level, colours, 'o', 55, 0.3)
+        shared.plot_risk_level_marker(
+            ax, name, risk_level, 'o', 55, 0.3, website_theme)
         lon, lat = PLACES[name]['lon lat']
         u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
             arrow.get(max_ssh_time[name]), weather_path,
