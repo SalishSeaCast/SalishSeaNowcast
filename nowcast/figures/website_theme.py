@@ -93,18 +93,10 @@ FONTS = {
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'legend title': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=20),
-    'location label large': {
-        'fontname': 'Bitstream Vera Sans',
-        'size': 20,
-        'color': 'black',
-        'weight': 'medium',
-    },
-    'location label small': {
-        'fontname': 'Bitstream Vera Sans',
-        'size': 13,
-        'color': 'black',
-        'weight': 'medium',
-    },
+    'location label large': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=20),
+    'location label small': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=13),
 }
 
 
