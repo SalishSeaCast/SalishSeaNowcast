@@ -27,14 +27,11 @@ from collections import namedtuple
 import arrow
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
-import numpy as np
 
 from salishsea_tools import (
     places,
     nc_tools,
     stormtools,
-    teos_tools,
-    viz_tools,
     unit_conversions,
     wind_tools,
 )
@@ -128,16 +125,6 @@ def _prep_fig_axes(figsize, theme):
     return fig, (ax_map, ax_pa_info, ax_cr_info, ax_vic_info)
 
 
-def _alerts_map_marker_legend(ax, theme):
-    ax.plot(
-        0, 0, marker='o', linestyle='', markersize=25, alpha=0.5,
-        label='No flooding\nrisk')
-    ax.legend(
-        title='Possible\nWarnings', numpoints=1,
-        loc='upper left', bbox_to_anchor=(0.9, 1.05),
-        prop=theme.FONTS['legend label'])
-
-
 def _plot_alerts_map(ax, coastline, plot_data, theme):
     shared.plot_map(ax, coastline)
     for name in places.TIDE_GAUGE_SITES:
@@ -151,9 +138,12 @@ def _plot_alerts_map(ax, coastline, plot_data, theme):
     _alerts_map_axis_labels(ax, plot_data.ssh_ts.time[0], theme)
     _alerts_map_marker_legend(ax, theme)
     _alerts_map_wind_legend(ax, theme)
+    _alerts_map_geo_labels(ax, theme)
 
 
 def _alerts_map_axis_labels(ax, date_time, theme):
+    ## TODO: Change all text drawing to use:
+    ## prop=theme.FONTS[...], color=THEME.COLOURS['text'][...]
     ax.set_title(
         'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
         .format(date_time),
@@ -167,6 +157,28 @@ def _alerts_map_axis_labels(ax, date_time, theme):
         transform=ax.transAxes, **theme.FONTS['figure annotation'])
     ax.grid(axis='both')
     theme.set_axis_colors(ax)
+
+
+def _alerts_map_marker_legend(ax, theme):
+    # This is a bit of a hack. Plot markers at coordinates way outside the
+    # axes limits to provide content for the legend.
+    risk_levels = (
+        # (Risk level key in theme.COLOURS, legend label)
+        (None, 'No floosing\nrisk'),
+        ('moderate risk', 'Risk of\nhigh water'),
+        ('extreme risk', 'Extreme risk\nof flooding'),
+    )
+    for level, label in risk_levels:
+        ax.plot(
+            0, 0, marker='o', linestyle='', markersize=25, alpha=0.5,
+            color=theme.COLOURS['storm surge risk levels'][level],
+            label=label)
+    legend = ax.legend(
+        numpoints=1, loc='upper left', bbox_to_anchor=(0.9, 1.05),
+        prop=theme.FONTS['legend label'])
+    legend.set_title(
+        ' Possible\nWarnings',
+        prop=theme.FONTS['legend title'])
 
 
 def _alerts_map_wind_legend(ax, theme):
@@ -189,6 +201,40 @@ def _alerts_map_wind_legend(ax, theme):
         **theme.FONTS['axes annotation'])
 
 
+def _alerts_map_geo_labels(ax, theme):
+    ## TODO: Refactor to use lons/lats from places.PLACES and just apply
+    ## offsets and rotations here.
+    ## Also try to use places.PLACES keys as label text.
+    geo_labels = {
+        'large': {
+            ' Point\nAtkinson': (-123.21, 49.4),
+            'Campbell\n River': (-125.76, 50.05),
+            'Victoria': (-123.8, 48.43),
+            'Cherry\n Point': (-122.7, 48.9),
+            'Nanaimo': (-124.2, 49),
+        },
+        'small': {
+            'Pacific Ocean': (-125.6, 48.1),
+            'British Columbia': (-123.3, 50.3),
+            'Washington \n State': (-123.8, 47.8),
+            'Puget Sound': (-122.38, 47.68),
+        },
+        'small rotated': {
+            'Strait of Juan de Fuca': (-124.7, 48.47, -18),
+            'Strait of \n Georgia': (-123.95, 49.28, -20),
+        },
+    }
+    ## TODO: put text size in dict & collapse to 1 loop
+    for label, (lon, lat) in geo_labels['large'].items():
+        ax.text(lon, lat, label, **theme.FONTS['location label large'])
+    for label, (lon, lat) in geo_labels['small'].items():
+        ax.text(lon, lat, label, **theme.FONTS['location label small'])
+    for label, (lon, lat, rotation) in geo_labels['small rotated'].items():
+        ax.text(
+            lon, lat, label, rotation=rotation,
+            **theme.FONTS['location label small'])
+
+
 def _plot_info_box(ax, place):
     pass
 
@@ -209,4 +255,3 @@ def _plot_attribution_text(ax, theme):
         'and WA Marine Shorelines files and compiled by Rich Pawlowicz.',
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes, **theme.FONTS['figure annotation'])
-
