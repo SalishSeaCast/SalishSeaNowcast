@@ -202,37 +202,26 @@ def _alerts_map_wind_legend(ax, theme):
 
 
 def _alerts_map_geo_labels(ax, theme):
-    ## TODO: Refactor to use lons/lats from places.PLACES and just apply
-    ## offsets and rotations here.
-    ## Also try to use places.PLACES keys as label text.
-    geo_labels = {
-        'large': {
-            ' Point\nAtkinson': (-123.21, 49.4),
-            'Campbell\n River': (-125.76, 50.05),
-            'Victoria': (-123.8, 48.43),
-            'Cherry\n Point': (-122.7, 48.9),
-            'Nanaimo': (-124.2, 49),
-        },
-        'small': {
-            'Pacific Ocean': (-125.6, 48.1),
-            'British Columbia': (-123.3, 50.3),
-            'Washington \n State': (-123.8, 47.8),
-            'Puget Sound': (-122.38, 47.68),
-        },
-        'small rotated': {
-            'Strait of Juan de Fuca': (-124.7, 48.47, -18),
-            'Strait of \n Georgia': (-123.95, 49.28, -20),
-        },
-    }
-    ## TODO: put text size in dict & collapse to 1 loop
-    for label, (lon, lat) in geo_labels['large'].items():
-        ax.text(lon, lat, label, **theme.FONTS['location label large'])
-    for label, (lon, lat) in geo_labels['small'].items():
-        ax.text(lon, lat, label, **theme.FONTS['location label small'])
-    for label, (lon, lat, rotation) in geo_labels['small rotated'].items():
+    geo_labels = (
+        # PLACES key, offset x, y, rotation, text size
+        ('Pacific Ocean', 0, 0, 0, 'left', 'small'),
+        ('Juan de Fuca Strait', 0, 0, -18, 'left', 'small'),
+        ('Puget Sound', 0, 0, -30, 'left', 'small'),
+        ('Strait of Georgia', 0, 0, -20, 'left', 'small'),
+        ('Victoria', -0.04, 0.04, 0, 'right', 'large'),
+        ('Cherry Point', 0.04, 0, 0, 'left', 'large'),
+        ('Point Atkinson', 0.06, 0.16, 0, 'left', 'large'),
+        ('Nanaimo', -0.04, 0, 0, 'right', 'large'),
+        ('Campbell River', -0.04, -0.04, 0, 'right', 'large'),
+        ('British Columbia', 0, 0, 0, 'left', 'small'),
+        ('Washington State', 0, 0, 0, 'left', 'small'),
+    )
+    for place, dx, dy, rotation, justify, label_size in geo_labels:
+        lon, lat = places.PLACES[place]['lon lat']
         ax.text(
-            lon, lat, label, rotation=rotation,
-            **theme.FONTS['location label small'])
+            lon + dx, lat + dy, place, rotation=rotation,
+            horizontalalignment=justify,
+            fontproperties=theme.FONTS['location label {}'.format(label_size)])
 
 
 def _plot_info_box(ax, place):
