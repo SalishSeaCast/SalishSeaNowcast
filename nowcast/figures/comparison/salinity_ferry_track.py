@@ -106,15 +106,25 @@ def _salinity_map_axis_labels(ax, sal_model, theme):
         .format(
             time=sal_time.format('HH:mm'),
             tzone=sal_time.tzinfo.tzname(sal_time.datetime)),
-        **theme.FONTS['axes title'])
-    ax.set_xlabel('Longitude [°E]', **theme.FONTS['axis'])
-    ax.set_ylabel('Latitude [°N]', **theme.FONTS['axis'])
+        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS['text']['axis'])
+    ax.set_xlabel(
+        'Longitude [°E]',
+        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS['text']['axis'])
+    ax.set_ylabel(
+        'Latitude [°N]',
+        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS['text']['axis'])
     theme.set_axis_colors(ax)
 
 
 def _salinity_map_cbar_labels(cbar, theme):
     cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
-    cbar.set_label('Absolute Salinity [g/kg]', **theme.FONTS['axis'])
+    cbar.set_label(
+        'Absolute Salinity [g/kg]',
+        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS['text']['axis'])
 
 
 def _salinity_map_set_view(ax, lats):
@@ -134,8 +144,14 @@ def _plot_salinity_comparison(ax, sal_model, sal_obs, theme):
 def _salinity_comparison_axis_labels(ax, theme):
     ## TODO: Put time range in title
     # ax.set_title('Surface Salinity: ' + dmy, **theme.FONTS['axes title'])
-    ax.set_xlabel('Longitude', **theme.FONTS['axis'])
-    ax.set_ylabel('Absolute Salinity [g/kg]', **theme.FONTS['axis'])
+    ax.set_xlabel(
+        'Longitude',
+        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS['text']['axis'])
+    ax.set_ylabel(
+        'Absolute Salinity [g/kg]',
+        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS['text']['axis'])
     ax.grid(axis='both')
     ax.legend(loc='lower left')
     ## TODO: Perhaps move ONC acknowledgement into frame, just below legend
