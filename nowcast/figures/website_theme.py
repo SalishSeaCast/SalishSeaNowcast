@@ -52,6 +52,12 @@ COLOURS = {
         'moderate risk': 'Gold',
         None: 'green',
     },
+    'text': {
+        'axes annotation': 'black',
+        'axes title': 'white',
+        'axis': 'white',
+        'figure annotation': 'white',
+    },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
         'edgecolor': 'black',
@@ -62,33 +68,15 @@ COLOURS = {
 #: Font properties of various figure text elements;
 #: the top level dict keys should be descriptive enough to identify the element
 #: to which the font properties apply.
-#: The font property keys are names of the attributes of a
-#: :py:class:`matplotlib.font_manager.FontProperties` object.
 FONTS = {
-    'axes annotation': {
-        'fontname': 'Bitstream Vera Sans',
-        'size': 14,
-        'color': 'black',
-        'weight': 'medium',
-    },
-    'axes title': {
-        'fontname': 'Bitstream Vera Sans',
-        'size': 15,
-        'color': 'white',
-        'weight': 'medium',
-    },
-    'axis': {
-        'fontname': 'Bitstream Vera Sans',
-        'size': 13,
-        'color': 'white',
-        'weight': 'medium',
-    },
-    'figure annotation': {
-        'fontname': 'Bitstream Vera Sans',
-        'size': 14,
-        'color': 'white',
-        'weight': 'medium',
-    },
+    'axes annotation': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
+    'axes title': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
+    'axis': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
+    'figure annotation': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'legend label': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'legend title': FontProperties(
