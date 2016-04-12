@@ -142,19 +142,26 @@ def _plot_alerts_map(ax, coastline, plot_data, theme):
 
 
 def _alerts_map_axis_labels(ax, date_time, theme):
-    ## TODO: Change all text drawing to use:
-    ## prop=theme.FONTS[...], color=THEME.COLOURS['text'][...]
     ax.set_title(
         'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
         .format(date_time),
-        **theme.FONTS['axes title'])
-    ax.set_xlabel('Longitude [°E]', **theme.FONTS['axis'])
-    ax.set_ylabel('Latitude [°N]', **theme.FONTS['axis'])
+        fontproperties=theme.FONTS['axes title'],
+        color=theme.COLOURS['text']['axes title'])
+    ax.set_xlabel(
+        'Longitude [°E]',
+        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS['text']['axis'])
+    ax.set_ylabel(
+        'Latitude [°N]',
+        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS['text']['axis'])
     ax.text(
         0.4, -0.25,
         'Wind vectors averaged over four hours prior to maximum water level',
         horizontalalignment='left', verticalalignment='top',
-        transform=ax.transAxes, **theme.FONTS['figure annotation'])
+        transform=ax.transAxes,
+        fontproperties=theme.FONTS['figure annotation'],
+        color=theme.COLOURS['text']['figure annotation'])
     ax.grid(axis='both')
     theme.set_axis_colors(ax)
 
@@ -185,12 +192,14 @@ def _alerts_map_wind_legend(ax, theme):
     shared.plot_wind_arrow(ax, -122.5, 50.65, 0, -5, theme)
     ax.text(
         -122.58, 50.5, 'Reference: 5 m/s', rotation=90,
-        **theme.FONTS['axes annotation'])
+        fontproperties=theme.FONTS['axes annotation'],
+        color=theme.COLOURS['text']['axes annotation'])
     shared.plot_wind_arrow(
         ax, -122.75, 50.65, 0, unit_conversions.knots_mps(-5), theme)
     ax.text(
         -122.83, 50.5, 'Reference: 5 knots', rotation=90,
-        **theme.FONTS['axes annotation'])
+        fontproperties=theme.FONTS['axes annotation'],
+        color=theme.COLOURS['text']['axes annotation'])
     ax.text(
         -122.85, 49.9,
         'Winds are 4 hour\n'
@@ -198,7 +207,8 @@ def _alerts_map_wind_legend(ax, theme):
         'maximum water level',
         verticalalignment='top',
         bbox=theme.COLOURS['axes textbox'],
-        **theme.FONTS['axes annotation'])
+        fontproperties=theme.FONTS['axes annotation'],
+        color=theme.COLOURS['text']['axes annotation'])
 
 
 def _alerts_map_geo_labels(ax, theme):
@@ -236,11 +246,15 @@ def _plot_attribution_text(ax, theme):
         'of Environment Canada: '
         'https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html.',
         horizontalalignment='left', verticalalignment='top',
-        transform=ax.transAxes, **theme.FONTS['figure annotation'])
+        transform=ax.transAxes,
+        fontproperties=theme.FONTS['figure annotation'],
+        color=theme.COLOURS['text']['figure annotation'])
     ax.text(
         0.4, -0.35,
         'Pacific North-West coastline was created from BC Freshwater Atlas '
         'Coastline\n'
         'and WA Marine Shorelines files and compiled by Rich Pawlowicz.',
         horizontalalignment='left', verticalalignment='top',
-        transform=ax.transAxes, **theme.FONTS['figure annotation'])
+        transform=ax.transAxes,
+        fontproperties=theme.FONTS['figure annotation'],
+        color=theme.COLOURS['text']['figure annotation'])
