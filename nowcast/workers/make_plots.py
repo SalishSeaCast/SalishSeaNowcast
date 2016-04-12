@@ -34,6 +34,7 @@ from nowcast.figures import (
     research_VENUS,
     research_ferries,
 )
+from nowcast.figures.publish import storm_surge_alerts
 from nowcast.nowcast_worker import NowcastWorker
 
 
@@ -198,9 +199,8 @@ def _make_publish_plots(
         plots_dir, 'Website_thumbnail_{date}.png'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = figures.plot_threshold_website(
-        bathy, grid_T_hr, grids_15m, weather_path, coastline,
-        tidal_predictions)
+    fig = storm_surge_alerts.storm_surge_alerts(
+        grids_15m, weather_path, coastline, tidal_predictions)
     filename = os.path.join(
         plots_dir, 'Threshold_website_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())

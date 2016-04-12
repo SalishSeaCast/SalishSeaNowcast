@@ -57,6 +57,8 @@ COLOURS = {
         'axes title': 'white',
         'axis': 'white',
         'figure annotation': 'white',
+        'info box title': 'white',
+        'info box content': 'white',
     },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
@@ -76,6 +78,10 @@ FONTS = {
     'axis': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'figure annotation': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
+    'info box title': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=20),
+    'info box content': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'legend label': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),

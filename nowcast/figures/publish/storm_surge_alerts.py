@@ -41,19 +41,12 @@ import nowcast.figures.website_theme
 
 
 def storm_surge_alerts(
-    bathy, grid_T_hr, grids_15m, weather_path, coastline, tidal_predictions,
+    grids_15m, weather_path, coastline, tidal_predictions,
     figsize=(18, 20),
     theme=nowcast.figures.website_theme,
 ):
     """Plot high water level risk indication markers and 4h average wind
     vectors on a Salish Sea map with summary text below.
-
-    :arg bathy: Bathymetry dataset for the Salish Sea NEMO model.
-    :type bathy: :py:class:`netCDF4.Dataset`
-
-    :arg grid_T_hr: Hourly tracer results dataset from the Salish Sea NEMO
-                    model.
-    :type grid_T_hr: :py:class:`netCDF4.Dataset`
 
     :arg dict grids_15m: Collection of 15m sea surface height datasets at tide
                          gauge locations,
@@ -64,7 +57,7 @@ def storm_surge_alerts(
     :arg coastline: Coastline dataset.
     :type coastline: :class:`mat.Dataset`
 
-    arg str tidal_predications: Path to directory of tidal prediction
+    :arg str tidal_predictions: Path to directory of tidal prediction
                                 file.
 
     :arg 2-tuple figsize: Figure size (width, height) in inches.
@@ -82,7 +75,7 @@ def storm_surge_alerts(
     info_boxes = (ax_pa_info, ax_cr_info, ax_vic_info)
     info_places = ('Point Atkinson', 'Campbell River', 'Victoria')
     for ax, place in zip(info_boxes, info_places):
-        _plot_info_box(ax, place)
+        _plot_info_box(ax, place, plot_data, theme)
     _plot_attribution_text(ax_map, theme)
     return fig
 
@@ -117,7 +110,7 @@ def _prep_fig_axes(figsize, theme):
     fig = plt.figure(
         figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
     gs = gridspec.GridSpec(2, 3, width_ratios=[1, 1, 1], height_ratios=[6, 1])
-    gs.update(hspace=0.1, wspace=0.05)
+    gs.update(hspace=-0.05, wspace=0.05)
     ax_map = fig.add_subplot(gs[0, :])
     ax_pa_info = fig.add_subplot(gs[1, 0])
     ax_cr_info = fig.add_subplot(gs[1, 1])
@@ -156,7 +149,7 @@ def _alerts_map_axis_labels(ax, date_time, theme):
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis'])
     ax.text(
-        0.4, -0.25,
+        0.4, -0.3,
         'Wind vectors averaged over four hours prior to maximum water level',
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes,
@@ -234,13 +227,49 @@ def _alerts_map_geo_labels(ax, theme):
             fontproperties=theme.FONTS['location label {}'.format(label_size)])
 
 
-def _plot_info_box(ax, place):
-    pass
+def _plot_info_box(ax, place, plot_data, theme):
+    ax.text(
+        0.05, 0.9, place,
+        horizontalalignment='left', verticalalignment='top',
+        fontproperties=theme.FONTS['info box title'],
+        color=theme.COLOURS['text']['info box title'])
+    ax.text(
+        0.05, 0.7,
+        'Maximum Water Level: {:.1f} m'.format(plot_data.max_ssh[place]),
+        horizontalalignment='left', verticalalignment='top',
+        fontproperties=theme.FONTS['info box content'],
+        color=theme.COLOURS['text']['info box content'])
+    ax.text(
+        0.05, 0.5,
+        'Wind Speed: {:.0f} km/hr'
+        .format(unit_conversions.mps_kph(plot_data.max_wind_avg[place])),
+        horizontalalignment='left', verticalalignment='top',
+        fontproperties=theme.FONTS['info box content'],
+        color=theme.COLOURS['text']['info box content'])
+    display_time = arrow.get(plot_data.max_ssh_time[place]).to('local')
+    ax.text(
+        0.05, 0.3,
+        'Time: {time} {tzone}'
+        .format(
+            time=display_time.format('YYYY-MM-DD HH:mm'),
+            tzone=display_time.tzinfo.tzname(display_time.datetime)),
+        horizontalalignment='left', verticalalignment='top',
+        fontproperties=theme.FONTS['info box content'],
+        color=theme.COLOURS['text']['info box content'])
+    _info_box_hide_frame(ax, theme)
+
+
+def _info_box_hide_frame(ax, theme):
+    ax.set_axis_bgcolor(theme.COLOURS['figure']['facecolor'])
+    ax.xaxis.set_visible(False)
+    ax.yaxis.set_visible(False)
+    for spine in ax.spines:
+        ax.spines[spine].set_visible(False)
 
 
 def _plot_attribution_text(ax, theme):
     ax.text(
-        0.4, -0.29,
+        0.4, -0.34,
         'Modelled winds are from the High Resolution Deterministic Prediction '
         'System\n'
         'of Environment Canada: '
@@ -250,7 +279,7 @@ def _plot_attribution_text(ax, theme):
         fontproperties=theme.FONTS['figure annotation'],
         color=theme.COLOURS['text']['figure annotation'])
     ax.text(
-        0.4, -0.35,
+        0.4, -0.4,
         'Pacific North-West coastline was created from BC Freshwater Atlas '
         'Coastline\n'
         'and WA Marine Shorelines files and compiled by Rich Pawlowicz.',
