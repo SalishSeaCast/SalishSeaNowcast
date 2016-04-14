@@ -1,0 +1,32 @@
+# conda environment description file for docs build envioronment
+# on readthedocs.org
+#
+# This file is a union of the environment.yaml files in the
+# SalishSeaCmd, SalishSeaNowcast, SalishSeaTools, and Marlin packages.
+
+name: sphinx-build
+dependencies:
+- lxml
+- mako
+- matplotlib
+- netCDF4
+- numpy
+- pandas
+- paramiko
+- pillow
+- pip
+- python=3
+- pytz
+- pyyaml
+- pyzmq
+- requests
+- scipy
+- sphinx
+- pip:
+  - angles
+  - arrow
+  - BeautifulSoup4
+  - cliff
+  - driftwood
+  - feedgen
+  - sphinx-bootstrap-theme
