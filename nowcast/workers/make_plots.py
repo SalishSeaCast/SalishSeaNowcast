@@ -160,6 +160,16 @@ def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
             pass
     checklist = {
         ' '.join((run_type, plot_type)): glob(os.path.join(dest_dir, '*'))}
+    # Undated storm surge alerts thumbnail for storm-surge/index.html page
+    thumbnail_root = config['figures']['storm_surge_alerts_thumbnail']
+    dmy_thumbnail = (
+        '{plot_name}_{dmy}.png'.format(plot_name=thumbnail_root, dmy=dmy))
+    dest_dir = os.path.join(
+        config['web']['figures']['storage_path'],
+        config['web']['storm_surge_path'])
+    undated_thumbnail = os.path.join(dest_dir, '{}.png'.format(thumbnail_root))
+    shutil.copy2(os.path.join(plots_dir, dmy_thumbnail), undated_thumbnail)
+    checklist[' '.join((run_type, plot_type))].append(undated_thumbnail)
     return checklist
 
 
