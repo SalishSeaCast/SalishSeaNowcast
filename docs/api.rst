@@ -80,3 +80,17 @@ Nowcast System Results Figures
 
 .. automodule:: nowcast.figures.comparison.salinity_ferry_track
     :members:
+
+
+.. _nowcast.figures.publish:
+
+:py:obj:`nowcast.figures.publish`  Figure Modules
+-------------------------------------------------
+
+.. _nowcast.figures.publish.storm_surge_alerts:
+
+:py:mod:`nowcast.figures.publish.storm_surge_alerts` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.storm_surge_alerts
+    :members:
