@@ -169,9 +169,13 @@ run:
 web:
   domain: salishsea.eos.ubc.ca
   site_repo_url: https://bitbucket.org/salishsea/salishsea-site
+  storm_surge_path: storm-surge
+
+  ## TODO: Should be able to delete these 3 itmes
   site_storm_surge_path: site/storm-surge
   site_storm_surge_plot_path: site/_static/storm-surge
   site_storm_surge_plot: Website_thumbnail
+
   site_nemo_results_path: site/nemo/results
   www_path: www
   templates_path: www/templates
@@ -180,6 +184,7 @@ web:
   figures:
     storage_path: /results/nowcast-sys/figures
     server_path: nowcast-sys/figures
+    storm_surge_alerts_thumbnail: Website_thumbnail
 
   atom_path: storm-surge/atom
   feed_entry_template: storm_surge_advisory.mako
