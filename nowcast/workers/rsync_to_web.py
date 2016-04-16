@@ -51,6 +51,7 @@ def failure(parsed_args):
 
 
 def rsync_to_web(parsed_args, config, *args):
+    checklist = {}
     repo_name = config['web']['site_repo_url'].rsplit('/')[-1]
     repo_path = Path(config['web']['www_path'], repo_name)
     site_path = Path(config['web']['www_site'])
@@ -64,6 +65,8 @@ def rsync_to_web(parsed_args, config, *args):
         lib.run_in_subprocess(shlex.split(cmd), logger.debug, logger.error)
         logger.info(
             'rsync-ed {} results pages to {}'.format(results_path, server_path))
+        checklist[results_path] = True
+    return checklist
 
 
 if __name__ == '__main__':

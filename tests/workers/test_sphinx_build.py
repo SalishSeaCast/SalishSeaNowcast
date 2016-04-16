@@ -102,10 +102,11 @@ class TestSphinxBuild:
                 'site_repo_url': 'https://bitbucket.org/salishsea-site',
                 'www_path': 'www',
             }}
-        worker_module.sphinx_build(parsed_args, config)
+        checklist = worker_module.sphinx_build(parsed_args, config)
         assert m_debug.call_count == 2
         assert m_run.call_args_list[0] == call(
             ['rm', '-rf', 'www/salishsea-site/site/_build'], check=True)
+        assert checklist == {'www/salishsea-site/site/_build/html': True}
 
     @patch.object(worker_module().logger, 'error')
     @patch.object(worker_module().subprocess, 'run')
@@ -133,7 +134,7 @@ class TestSphinxBuild:
                 'site_repo_url': 'https://bitbucket.org/salishsea-site',
                 'www_path': 'www',
             }}
-        worker_module.sphinx_build(parsed_args, config)
+        checklist = worker_module.sphinx_build(parsed_args, config)
         assert m_debug.called
         m_ris.assert_called_once_with(
             ['sphinx-build',
@@ -145,3 +146,4 @@ class TestSphinxBuild:
             m_debug, m_error,
         )
         assert m_info.called
+        assert checklist == {'www/salishsea-site/site/_build/html': True}

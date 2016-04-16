@@ -100,7 +100,7 @@ class TestSphinxBuild:
                 'storm_surge_path': 'storm-surge',
                 'nemo_results_path': 'nemo/results',
             }}
-        worker_module.rsync_to_web(parsed_args, config)
+        checklist = worker_module.rsync_to_web(parsed_args, config)
         assert m_ris.call_args_list[0] == call(
             ['rsync', '-rRv',
              'www/salishsea-site/site/_build/html/./storm-surge/',
@@ -112,3 +112,4 @@ class TestSphinxBuild:
              '/var/www/html'],
             m_debug, m_error)
         assert m_info.called
+        assert checklist == {'storm-surge': True, 'nemo/results': True}
