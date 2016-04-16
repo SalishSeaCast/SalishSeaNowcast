@@ -93,8 +93,9 @@ class TestFailure:
 class TestSphinxBuild:
     """Unit tests for sphinx_build() function.
     """
+    @patch.object(worker_module().lib, 'run_in_subprocess')
     @patch.object(worker_module().subprocess, 'run')
-    def test_clean_build(self, m_run, m_debug, worker_module):
+    def test_clean_build(self, m_run, m_ris, m_debug, worker_module):
         parsed_args = Mock(clean=True)
         config = {
             'web': {
@@ -102,9 +103,7 @@ class TestSphinxBuild:
                 'www_path': 'www',
             }}
         worker_module.sphinx_build(parsed_args, config)
-        assert m_debug.call_args_list[0] == call(
-            'running rm -rf www/salishsea-site/site/_build '
-            'to cause a full site build')
+        assert m_debug.call_count == 2
         assert m_run.call_args_list[0] == call(
             ['rm', '-rf', 'www/salishsea-site/site/_build'], check=True)
 
@@ -121,8 +120,7 @@ class TestSphinxBuild:
         m_run.side_effect = subprocess.CalledProcessError(2, 'cmd')
         with pytest.raises(WorkerError):
             worker_module.sphinx_build(parsed_args, config)
-        m_error.assert_called_once_with(
-            'rm -rf www/salishsea-site/site/_build failed with exit code 2')
+        assert m_error.called
 
     @patch.object(worker_module().logger, 'error')
     @patch.object(worker_module().logger, 'info')
@@ -136,8 +134,7 @@ class TestSphinxBuild:
                 'www_path': 'www',
             }}
         worker_module.sphinx_build(parsed_args, config)
-        m_debug.assert_called_once_with(
-            'starting sphinx-build of www/salishsea-site/site')
+        assert m_debug.called
         m_ris.assert_called_once_with(
             ['sphinx-build',
              '-b', 'html',
@@ -147,5 +144,4 @@ class TestSphinxBuild:
              'www/salishsea-site/site/_build/html'],
             m_debug, m_error,
         )
-        m_info.assert_called_once_with(
-            'finished sphinx-build of www/salishsea-site/site')
+        assert m_info.called
