@@ -176,7 +176,7 @@ class TestMakeSitePage:
         config = {
             'web': {
                 'site_repo_url': 'http://example.com/bar',
-                'site_nemo_results_path': 'foo',
+                'nemo_results_path': 'foo',
                 'templates_path': 'bar',
                 'www_path': 'www',
             }}
@@ -197,8 +197,8 @@ class TestMakeSitePage:
         config = {
             'web': {
                 'site_repo_url': 'http://example.com/bar',
-                'site_nemo_results_path': 'foo',
-                'site_storm_surge_path': 'bar',
+                'nemo_results_path': 'foo',
+                'storm_surge_path': 'bar',
                 'templates_path': 'baz',
                 'www_path': 'www',
             }}
@@ -219,7 +219,7 @@ class TestMakeSitePage:
         config = {
             'web': {
                 'site_repo_url': 'http://example.com/bar',
-                'site_nemo_results_path': 'foo',
+                'nemo_results_path': 'foo',
                 'templates_path': 'bar',
                 'www_path': 'www',
             }}

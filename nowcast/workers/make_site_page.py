@@ -172,8 +172,7 @@ def make_site_page(parsed_args, config, *args):
     repo_name = config['web']['site_repo_url'].rsplit('/')[-1]
     repo_path = os.path.join(config['web']['www_path'], repo_name)
     results_pages_path = os.path.join(
-        repo_path,
-        config['web']['site_nemo_results_path'])
+        repo_path, 'site', config['web']['nemo_results_path'])
     checklist = {}
     if page_type != 'index':
         checklist.update(render_rst[run_type](
@@ -187,7 +186,8 @@ def make_site_page(parsed_args, config, *args):
     if run_type in ('forecast', 'forecast2') and page_type == 'publish':
         rst_file = checklist['{} publish'.format(run_type)]
         forecast_file = os.path.join(
-            repo_path, config['web']['site_storm_surge_path'], 'forecast.rst')
+            repo_path, 'site', config['web']['storm_surge_path'],
+            'forecast.rst')
         shutil.copy2(rst_file, forecast_file)
         logger.debug(
             '{run_type} {page_type}: copied page to forecast: {forecast_file}'

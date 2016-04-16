@@ -176,9 +176,6 @@ web:
   storm_surge_path: storm-surge
   nemo_results_path: nemo/results
 
-  site_storm_surge_path: site/storm-surge
-  site_nemo_results_path: site/nemo/results
-
   figures:
     storage_path: /results/nowcast-sys/figures
     server_path: nowcast-sys/figures
