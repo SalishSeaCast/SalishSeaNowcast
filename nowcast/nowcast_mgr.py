@@ -106,7 +106,8 @@ class NowcastManager:
             'make_feeds': self._after_make_feeds,
             'make_site_page': self._after_make_site_page,
             'hg_update_site': self._after_hg_update_site,
-            'push_to_web': self._after_push_to_web,
+            'sphinx_build': self._after_sphinx_build,
+            'rsync_to_web': self._after_rsync_to_web,
         }
 
     def run(self):
@@ -697,24 +698,41 @@ class NowcastManager:
                 (self._update_checklist,
                     ['hg_update_site',
                      'salishsea site repo updated', payload]),
-                (self._launch_worker, ['push_to_web']),
+                (self._launch_worker, ['sphinx_build']),
             ],
         }
         return actions[msg_type]
 
-    def _after_push_to_web(self, msg_type, payload):
+    def _after_sphinx_build(self, msg_type, payload):
         """Return list of next step action method(s) and args to execute
         upon receipt of success, failure, or crash message from
-        push_to_web worker.
+        sphinx_build worker.
+        """
+        actions = {
+            'crash': None,
+            'failure': None,
+            'success': [
+                (self._update_checklist,
+                    ['sphinx_build',
+                     'salishsea site sphinx build', payload]),
+                (self._launch_worker, ['rsync_to_web']),
+            ],
+        }
+        return actions[msg_type]
+
+    def _after_rsync_to_web(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        rsync_to_web worker.
         """
         actions = {
             'crash': None,
             'failure': None,
             'success':
                 [(self._update_checklist,
-                    ['push_to_web', 'push to salishsea site', payload])],
+                    ['rsync_to_web', 'salishsea site rsync to web', payload])],
         }
-        if 'finish the day' in self.checklist['salishsea site pages']:
+        if 'finish the day' in self.checklist['salishsea site rsync to web']:
             actions['success'].append((self._finish_the_day, []))
         return actions[msg_type]
 
