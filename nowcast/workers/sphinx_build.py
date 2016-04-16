@@ -74,7 +74,8 @@ def sphinx_build(parsed_args, config, *args):
             html_path=repo_path/'site'/'_build'/'html'))
     lib.run_in_subprocess(shlex.split(cmd), logger.debug, logger.error)
     logger.info('finished sphinx-build of {}'.format(repo_path/'site'))
+    return {str(repo_path/'site'/'_build'/'html') :True}
 
 
-    if __name__ == '__main__':
-        main()  # pragma: no cover
+if __name__ == '__main__':
+    main()  # pragma: no cover
