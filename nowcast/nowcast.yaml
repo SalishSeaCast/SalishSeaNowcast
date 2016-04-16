@@ -171,11 +171,7 @@ web:
   site_repo_url: https://bitbucket.org/salishsea/salishsea-site
   storm_surge_path: storm-surge
 
-  ## TODO: Should be able to delete these 3 itmes
   site_storm_surge_path: site/storm-surge
-  site_storm_surge_plot_path: site/_static/storm-surge
-  site_storm_surge_plot: Website_thumbnail
-
   site_nemo_results_path: site/nemo/results
   www_path: www
   templates_path: www/templates

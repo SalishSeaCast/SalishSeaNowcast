@@ -160,32 +160,19 @@ def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
             pass
     checklist = {
         ' '.join((run_type, plot_type)): glob(os.path.join(dest_dir, '*'))}
-    # Undated storm surge alerts thumbnail for storm-surge/index.html page
-    thumbnail_root = config['figures']['storm_surge_alerts_thumbnail']
-    dmy_thumbnail = (
-        '{plot_name}_{dmy}.png'.format(plot_name=thumbnail_root, dmy=dmy))
-    dest_dir = os.path.join(
-        config['web']['figures']['storage_path'],
-        config['web']['storm_surge_path'])
-    undated_thumbnail = os.path.join(dest_dir, '{}.png'.format(thumbnail_root))
-    shutil.copy2(os.path.join(plots_dir, dmy_thumbnail), undated_thumbnail)
-    checklist[' '.join((run_type, plot_type))].append(undated_thumbnail)
+    if plot_type == 'publish' and run_type in ('forecast', 'forecast2'):
+        # Undated storm surge alerts thumbnail for storm-surge/index.html page
+        thumbnail_root = config['web']['figures']['storm_surge_alerts_thumbnail']
+        dmy_thumbnail = (
+            '{plot_name}_{dmy}.png'.format(plot_name=thumbnail_root, dmy=dmy))
+        dest_dir = os.path.join(
+            config['web']['figures']['storage_path'],
+            config['web']['storm_surge_path'])
+        undated_thumbnail = os.path.join(
+            dest_dir, '{}.png'.format(thumbnail_root))
+        shutil.copy2(os.path.join(plots_dir, dmy_thumbnail), undated_thumbnail)
+        checklist['storm surge alerts thumbnail'] = undated_thumbnail
     return checklist
-
-
-def _install_storm_surge_summary_plot(config, dmy, plots_dir):
-    site_storm_surge_plot_name = config['web']['site_storm_surge_plot']
-    dmy_plot = '{plot_name}_{dmy}.png'.format(
-        plot_name=site_storm_surge_plot_name,
-        dmy=dmy)
-    summary_plot = os.path.join(
-        config['web']['www_path'],
-        os.path.basename(config['web']['site_repo_url']),
-        config['web']['site_storm_surge_plot_path'],
-        '{plot_name}.png'
-        .format(plot_name=config['web']['site_storm_surge_plot']))
-    shutil.copy2(os.path.join(plots_dir, dmy_plot), summary_plot)
-    return summary_plot
 
 
 def _make_publish_plots(
