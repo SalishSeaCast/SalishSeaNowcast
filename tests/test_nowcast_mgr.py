@@ -97,7 +97,8 @@ class TestNowcastManagerConstructor:
     'make_feeds',
     'make_site_page',
     'hg_update_site',
-    'push_to_web',
+    'sphinx_build',
+    'rsync_to_web',
 ])
 def test_after_actions(worker, mgr):
     """Unit tests for NowcastManager.acter_actions property.
@@ -1219,7 +1220,7 @@ class TestAfterHgUpdateSite:
         'failure',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.checklist = {'salishsea site pages': {}}
+        mgr.checklist = {'salishsea site repo updated': {}}
         actions = mgr._after_hg_update_site(msg_type, 'payload')
         assert actions is None
 
@@ -1232,36 +1233,64 @@ class TestAfterHgUpdateSite:
         )
         assert actions[0] == expected
 
-    def test_success_launch_push_to_web_worker(self, mgr):
+    def test_success_launch_sphinx_build_worker(self, mgr):
         actions = mgr._after_hg_update_site('success', 'payload')
-        expected = (mgr._launch_worker, ['push_to_web'])
+        expected = (mgr._launch_worker, ['sphinx_build'])
         assert actions[1] == expected
 
 
-class TestAfterPushToWeb:
-    """Unit tests for the NowcastManager._after_push_to_web method.
+class TestAfterSphinxBuild:
+    """Unit tests for the NowcastManager._after_sphinx_build method.
     """
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.checklist = {'salishsea site pages': {}}
-        actions = mgr._after_push_to_web(msg_type, 'payload')
+        mgr.checklist = {'salishsea site sphinx build': {}}
+        actions = mgr._after_sphinx_build(msg_type, 'payload')
         assert actions is None
 
     def test_update_checklist_on_success(self, mgr):
-        mgr.checklist = {'salishsea site pages': {}}
-        actions = mgr._after_push_to_web('success', 'payload')
+        mgr.checklist = {'salishsea site sphinx build': {}}
+        actions = mgr._after_sphinx_build('success', 'payload')
         expected = (
             mgr._update_checklist,
-            ['push_to_web', 'push to salishsea site', 'payload'],
+            ['sphinx_build', 'salishsea site sphinx build', 'payload'],
+        )
+        assert actions[0] == expected
+
+    def test_success_launch_sphinx_build_worker(self, mgr):
+        actions = mgr._after_sphinx_build('success', 'payload')
+        expected = (mgr._launch_worker, ['rsync_to_web'])
+        assert actions[1] == expected
+
+
+class TestAfterRsyncToWeb:
+    """Unit tests for the NowcastManager._after_rsync_to_web method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        mgr.checklist = {'salishsea site rsync to web': {}}
+        actions = mgr._after_rsync_to_web(msg_type, 'payload')
+        assert actions is None
+
+    def test_update_checklist_on_success(self, mgr):
+        mgr.checklist = {'salishsea site rsync to web': {}}
+        actions = mgr._after_rsync_to_web('success', 'payload')
+        expected = (
+            mgr._update_checklist,
+            ['rsync_to_web', 'salishsea site rsync to web', 'payload'],
         )
         assert actions[0] == expected
 
     def test_finish_the_day(self, mgr):
-        mgr.checklist = {'salishsea site pages': {'finish the day': True}}
-        actions = mgr._after_push_to_web('success', 'payload')
+        mgr.checklist = {
+            'salishsea site rsync to web': {'finish the day': True}}
+        actions = mgr._after_rsync_to_web('success', 'payload')
         expected = (mgr._finish_the_day, [])
         assert actions[1] == expected
 

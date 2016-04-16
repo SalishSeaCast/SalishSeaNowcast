@@ -414,7 +414,11 @@ msg_types:
     success: hg updated salishsea-site repo
     failure: hg update of salishsea-site repo failed
     crash: hg_update worker crashed
-  push_to_web:
-    success: publish page and figures pushed to salishsea site
-    failure: publish page and figures push to salishsea site failed
-    crash: push_to_web worker crashed
+  sphinx_build:
+    success: sphinx built salishsea site
+    failure: sphinx build of salishsea site failed
+    crash: sphinx_build worker crashed
+  rsync_to_web:
+    success: rsync-ed salishsea site pages to web server
+    failure: rsync of salishsea site pages to web server failed
+    crash: rsync_to_web worker crashed
