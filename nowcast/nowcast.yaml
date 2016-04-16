@@ -169,13 +169,15 @@ run:
 web:
   domain: salishsea.eos.ubc.ca
   site_repo_url: https://bitbucket.org/salishsea/salishsea-site
+  server_path: /var/www/html
+  www_path: www
+  site_path: www/site
+  templates_path: www/templates
   storm_surge_path: storm-surge
+  nemo_results_path: nemo/results
 
   site_storm_surge_path: site/storm-surge
   site_nemo_results_path: site/nemo/results
-  www_path: www
-  templates_path: www/templates
-  server_path: /var/www/html
 
   figures:
     storage_path: /results/nowcast-sys/figures
