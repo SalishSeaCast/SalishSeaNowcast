@@ -96,7 +96,7 @@ class TestSphinxBuild:
                 'site_repo_url': 'https://bitbucket.org//salishsea-site',
                 'server_path': '/var/www/html',
                 'www_path': 'www',
-                'www_site': 'www/site',
+                'site_path': 'www/site',
                 'storm_surge_path': 'storm-surge',
                 'nemo_results_path': 'nemo/results',
             }}
