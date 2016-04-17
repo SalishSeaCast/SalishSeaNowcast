@@ -113,10 +113,6 @@ def make_plots(parsed_args, config, *args):
         config, run_type, plot_type, dmy, results_home, plots_dir)
     checklist = _copy_plots_to_figures_server(
         config, run_type, plot_type, dmy, plots_dir)
-    if plot_type == 'publish' and run_type in ('forecast', 'forecast2'):
-        summary_plot = _install_storm_surge_summary_plot(
-            config, dmy, plots_dir)
-        checklist['Most recent summary plot'] = summary_plot
     return checklist
 
 
