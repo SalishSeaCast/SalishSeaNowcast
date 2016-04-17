@@ -156,8 +156,17 @@ def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
             pass
     checklist = {
         ' '.join((run_type, plot_type)): glob(os.path.join(dest_dir, '*'))}
-    if plot_type == 'publish' and run_type in ('forecast', 'forecast2'):
-        # Undated storm surge alerts thumbnail for storm-surge/index.html page
+    # Undated storm surge alerts thumbnail for storm-surge/index.html page
+    now = arrow.now()
+    today_dmy = now.format('DDMMMYY').lower()
+    yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
+    if all((
+            plot_type == 'publish',
+            any((
+                run_type == 'forecast' and dmy == today_dmy,
+                run_type == 'forecast2' and dmy == yesterday_dmy,
+            ))
+    )):
         thumbnail_root = config['web']['figures']['storm_surge_alerts_thumbnail']
         dmy_thumbnail = (
             '{plot_name}_{dmy}.png'.format(plot_name=thumbnail_root, dmy=dmy))
