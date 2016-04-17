@@ -1274,12 +1274,12 @@ class TestAfterRsyncToWeb:
         'failure',
     ])
     def test_no_action_msg_types(self, msg_type, mgr):
-        mgr.checklist = {'salishsea site rsync to web': {}}
+        mgr.checklist = {'salishsea site pages': {}}
         actions = mgr._after_rsync_to_web(msg_type, 'payload')
         assert actions is None
 
     def test_update_checklist_on_success(self, mgr):
-        mgr.checklist = {'salishsea site rsync to web': {}}
+        mgr.checklist = {'salishsea site pages': {}}
         actions = mgr._after_rsync_to_web('success', 'payload')
         expected = (
             mgr._update_checklist,
@@ -1289,7 +1289,7 @@ class TestAfterRsyncToWeb:
 
     def test_finish_the_day(self, mgr):
         mgr.checklist = {
-            'salishsea site rsync to web': {'finish the day': True}}
+            'salishsea site pages': {'finish the day': True}}
         actions = mgr._after_rsync_to_web('success', 'payload')
         expected = (mgr._finish_the_day, [])
         assert actions[1] == expected
