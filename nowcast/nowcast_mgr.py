@@ -732,7 +732,7 @@ class NowcastManager:
                 [(self._update_checklist,
                     ['rsync_to_web', 'salishsea site rsync to web', payload])],
         }
-        if 'finish the day' in self.checklist['salishsea site rsync to web']:
+        if 'finish the day' in self.checklist['salishsea site pages']:
             actions['success'].append((self._finish_the_day, []))
         return actions[msg_type]
 
