@@ -54,7 +54,7 @@ def rsync_to_web(parsed_args, config, *args):
     checklist = {}
     repo_name = config['web']['site_repo_url'].rsplit('/')[-1]
     repo_path = Path(config['web']['www_path'], repo_name)
-    site_path = Path(config['web']['www_site'])
+    site_path = Path(config['web']['site_path'])
     server_path = config['web']['server_path']
     for path in ('storm_surge_path', 'nemo_results_path'):
         results_path = config['web'][path]
