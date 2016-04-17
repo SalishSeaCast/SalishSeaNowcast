@@ -37,7 +37,7 @@ logger = logging.getLogger(worker_name)
 def main():
     worker = NowcastWorker(worker_name, description=__doc__)
     worker.arg_parser.add_argument(
-        'clean', action='store_true',
+        '--clean', action='store_true',
         help='Do a clean build instead of just updating new/changed files.'
     )
     worker.run(sphinx_build, success, failure)
