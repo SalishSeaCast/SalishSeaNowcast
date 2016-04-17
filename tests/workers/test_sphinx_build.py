@@ -45,7 +45,7 @@ class TestMain:
     def test_add_clean_arg(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
-        assert args == ('clean',)
+        assert args == ('--clean',)
         assert kwargs['action'] == 'store_true'
         assert 'help' in kwargs
 
