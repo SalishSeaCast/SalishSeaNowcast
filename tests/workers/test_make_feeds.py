@@ -277,7 +277,7 @@ class TestCalcMaxSsh:
     """
     @patch.object(worker_module().nc, 'Dataset')
     @patch.object(worker_module().nc_tools, 'ssh_timeseries_at_point')
-    @patch.object(worker_module().figures, 'correct_model_ssh')
+    @patch.object(worker_module().nowcast.figures.shared, 'correct_model_ssh')
     def test_calc_max_ssh(
         self, m_cmssh, m_sshtapt, m_ncd, worker_module, config,
     ):
