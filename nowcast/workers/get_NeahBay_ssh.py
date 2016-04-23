@@ -25,17 +25,17 @@ import shutil
 
 from bs4 import BeautifulSoup
 import pytz
-import matplotlib
+import matplotlib.figure
 import netCDF4 as nc
 import numpy as np
 
 from salishsea_tools import nc_tools
 
 from nowcast import (
-    figures,
     lib,
     residuals,
 )
+from nowcast.figures import figures
 from nowcast.nowcast_worker import NowcastWorker
 
 
