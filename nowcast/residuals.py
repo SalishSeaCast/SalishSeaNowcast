@@ -73,7 +73,7 @@ def plot_residual_forcing(ax, runs_list, t_orig):
     edt = sdt + datetime.timedelta(days=1)
 
     # retrieve observations, tides and residual
-    tides = figures.get_tides('Neah Bay', path=paths['tides'])
+    tides = figures.shared.get_tides('Neah Bay', path=paths['tides'])
     res_obs, obs = obs_residual_ssh_NOAA('Neah Bay', tides, sdt, sdt)
     # truncate and plot
     res_obs_trun, time_trun = analyze.truncate_data(
@@ -134,7 +134,7 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
         j, i = tidetools.find_closest_model_point(
             lon, lat, X, Y, bathy, allow_land=False)
         # Observed residuals and wlevs and tides
-        ttide = figures.get_tides(name, path=paths['tides'])
+        ttide = figures.shared.get_tides(name, path=paths['tides'])
         res_obs, wlev_meas = obs_residual_ssh(
             name, ttide, t_orig_obs, t_final_obs)
         # truncate and plot
@@ -196,7 +196,7 @@ def get_error_model(names, runs_list, grid_B, t_orig):
         j, i = tidetools.find_closest_model_point(
             lon, lat, X, Y, bathy, allow_land=False)
         # Observed residuals and wlevs and tides
-        ttide = figures.get_tides(name, path=paths['tides'])
+        ttide = figures.shared.get_tides(name, path=paths['tides'])
         res_obs, wlev_meas = obs_residual_ssh(
             name, ttide, t_orig_obs, t_final_obs)
         res_obs_trun, time_obs_trun = analyze.truncate_data(
@@ -237,7 +237,7 @@ def get_error_forcing(runs_list, t_orig):
     edt = sdt + datetime.timedelta(days=1)
 
     # retrieve observed residual
-    tides = figures.get_tides('Neah Bay', path=paths['tides'])
+    tides = figures.shared.get_tides('Neah Bay', path=paths['tides'])
     res_obs, obs = obs_residual_ssh_NOAA('Neah Bay', tides, sdt, sdt)
     res_obs_trun, time_trun = analyze.truncate_data(
         np.array(res_obs), np.array(obs.time), sdt, edt)
@@ -434,7 +434,7 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
     fig, axs = plt.subplots(3, 1, figsize=figsize)
 
     force, model, time, daily_time = combine_errors(name, mode, dates, grid_B)
-    ttide = figures.get_tides(name, path=paths['tides'])
+    ttide = figures.shared.get_tides(name, path=paths['tides'])
 
     # Plotting time series
     ax = axs[0]
@@ -580,7 +580,7 @@ def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
 
     :returns: fig
     """
-    tides = figures.get_tides('Neah Bay', path=paths['tides'])
+    tides = figures.shared.get_tides('Neah Bay', path=paths['tides'])
     residual, obs = obs_residual_ssh_NOAA('Neah Bay', tides, t_orig, t_orig)
 
     # Figure
@@ -659,7 +659,7 @@ def _calculate_forcing_surge(data, dates, tide_file):
     forecast_flag = []
     surge = []
     # Load tides
-    ttide = figures.get_tides(
+    ttide = figures.shared.get_tides(
         'Neah Bay',
         path=tide_file,
     )
