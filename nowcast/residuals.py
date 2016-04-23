@@ -30,10 +30,8 @@ import pandas as pd
 
 from salishsea_tools import tidetools
 
-from nowcast import (
-    figures,
-    analyze,
-)
+from nowcast import analyze
+from nowcast.figures import figures
 
 # Module constants
 
