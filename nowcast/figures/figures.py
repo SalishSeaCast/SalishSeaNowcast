@@ -1055,7 +1055,8 @@ def website_thumbnail(
         u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
             arrow.get(max_ssh_time), weather_path,
             PLACES[name]['wind grid ji'], avg_hrs=-4)
-        shared.plot_wind_arrow(ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, colours)
+        shared.plot_wind_arrow(
+            ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, website_theme)
     # Wind speed legend
     legend_wind_speed = 5  # m/s or knots
     shared.plot_wind_arrow(
