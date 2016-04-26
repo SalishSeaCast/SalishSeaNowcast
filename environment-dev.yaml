@@ -39,4 +39,5 @@ dependencies:
   - driftwood
   - feedgen
   - ipdb
+  - nbsphinx
   - sphinx-bootstrap-theme

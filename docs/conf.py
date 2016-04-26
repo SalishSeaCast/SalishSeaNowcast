@@ -31,6 +31,8 @@ sys.path.insert(0, os.path.abspath('../SalishSeaTools'))
 # (named 'sphinx.ext.*')
 # or your custom ones.
 extensions = [
+    'nbsphinx',
+    'IPython.sphinxext.ipython_console_highlighting',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.mathjax',
@@ -73,7 +75,7 @@ release = ''
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = 'sphinx'

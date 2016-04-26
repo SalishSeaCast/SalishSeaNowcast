@@ -29,4 +29,5 @@ dependencies:
   - cliff
   - driftwood
   - feedgen
+  - nbsphinx
   - sphinx-bootstrap-theme
