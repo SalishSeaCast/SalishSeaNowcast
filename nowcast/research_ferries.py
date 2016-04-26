@@ -26,9 +26,10 @@ import pandas as pd
 import scipy.io as sio
 
 from salishsea_tools import (
+    geo_tools,
     viz_tools,
     tidetools,
-    teos_tools
+    teos_tools,
 )
 from salishsea_tools.places import PLACES
 
@@ -311,7 +312,7 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
                 # Some adjacent points are land we don't count them into the
                 # salinity average.
                 if depths[i, j] > 0:
-                    dist = tidetools.haversine(
+                    dist = geo_tools.haversine(
                         obs[1], obs[2], lons[i, j], lats[i, j])
                     weight = 1.0 / dist
                     weight_sum += weight
