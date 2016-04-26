@@ -13,9 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 """A collection of Python functions to produce model results visualization
 figures for analysis and model evaluation of daily nowcast/forecast runs.
+
+.. warning::
+    This module will soon disappear.
+    It is in the process of being refactored into a new
+    one-module-per-figure architecture.
+    **Please do not add code to this module.**
+    If you are importing this module to use functions from it,
+    please create an issue at https://bitbucket.org/salishsea/tools/issues
+    that describes the function you are using and your use-case.
+    Such functions will be moved into the :ref:`SalishSeaToolsPackage`.
 """
 import datetime
 import glob
