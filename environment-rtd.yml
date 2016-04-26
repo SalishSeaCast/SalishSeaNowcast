@@ -6,6 +6,7 @@
 
 name: sphinx-build
 dependencies:
+- ipython
 - lxml
 - mako
 - matplotlib
