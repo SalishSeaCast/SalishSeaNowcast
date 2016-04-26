@@ -37,6 +37,7 @@ from matplotlib.backends import backend_agg as backend
 from scipy import interpolate as interp
 
 from salishsea_tools import (
+    geo_tools,
     nc_tools,
     stormtools,
     tidetools,
@@ -1985,7 +1986,7 @@ def thalweg_distance(lons, lats):
     """
     dist = [0]
     for i in np.arange(1, lons.shape[0]):
-        newdist = dist[i-1] + tidetools.haversine(lons[i], lats[i],
+        newdist = dist[i-1] + geo_tools.haversine(lons[i], lats[i],
                                                   lons[i-1], lats[i-1])
         dist.append(newdist)
     dist = np.array(dist)
