@@ -19,15 +19,6 @@
 Creating Nowcast Figures
 ========================
 
-.. note::
-    This is work-in-progress.
-
-    The :py:mod:`nowcast.figures`,
-    :py:mod:`nowcast.research_ferries`,
-    and :py:mod:`nowcast.research_VENUS` modules are being refactored in the :kbd:`refactor-nowcast-figures` branch of the repo.
-
-    The docs in this section reflect the organization of files and their contents that will result from that refactoring.
-
 The web site figures that display the nowcast system run results are calculated by the :py:mod:`nowcast.workers.make_plots` worker using a collection of modules imported from :py:obj:`nowcast.figures`.
 :py:obj:`nowcast.figures` is subdivided into 3 namespaces:
 
