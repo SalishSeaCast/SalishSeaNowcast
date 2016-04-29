@@ -14,10 +14,11 @@
 # limitations under the License.
 
 """Produce a figure that shows a map of the Salish Sea with markers indicating
-the risks of high water levels at the Point Atkinson, Victoria, Campbel River,
+the risks of high water levels at the Point Atkinson, Victoria, Campbell River,
 Nanaimo, and Cherry Point tide gauge locations.
 The figure also shows wind vectors that indicate the average wind speed and
-direction averaged over the 4 hours preceding the maximum sea surface height.
+direction averaged over the 4 hours preceding the maximum sea surface height
+at each location.
 Text below the map provides quantitative information about the maximum water
 level, when it occurs, and the 4 hr averaged wind speed, as well as
 acknowledgement of data sources.
