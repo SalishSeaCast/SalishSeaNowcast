@@ -34,7 +34,10 @@ from nowcast.figures import (
     research_VENUS,
     research_ferries,
 )
-from nowcast.figures.publish import storm_surge_alerts
+from nowcast.figures.publish import (
+    storm_surge_alerts,
+    storm_surge_alerts_thumbnail,
+)
 from nowcast.nowcast_worker import NowcastWorker
 
 
@@ -194,9 +197,8 @@ def _make_publish_plots(
         for name in names
     }
 
-    fig = figures.website_thumbnail(
-        bathy, grid_T_hr, grids_15m, weather_path, coastline,
-        tidal_predictions)
+    fig = storm_surge_alerts_thumbnail.storm_surge_alerts_thumbnail(
+        grids_15m, weather_path, coastline, tidal_predictions)
     filename = os.path.join(
         plots_dir, 'Website_thumbnail_{date}.png'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')

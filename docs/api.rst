@@ -94,3 +94,11 @@ Nowcast System Results Figures
 
 .. automodule:: nowcast.figures.publish.storm_surge_alerts
     :members:
+
+.. _nowcast.figures.publish.storm_surge_alerts_thumbnail:
+
+:py:mod:`nowcast.figures.publish.storm_surge_alerts_thumbnail` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.storm_surge_alerts_thumbnail
+    :members:

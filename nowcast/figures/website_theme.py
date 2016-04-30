@@ -59,6 +59,7 @@ COLOURS = {
         'figure annotation': 'white',
         'info box title': 'white',
         'info box content': 'white',
+        'risk level label': 'white',
     },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
@@ -75,6 +76,8 @@ FONTS = {
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'axes title': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
+    'axes title large': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=35),
     'axis': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'figure annotation': FontProperties(
@@ -85,6 +88,8 @@ FONTS = {
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'legend label': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
+    'legend label large': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=25),
     'legend title': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=20),
     'location label large': FontProperties(
