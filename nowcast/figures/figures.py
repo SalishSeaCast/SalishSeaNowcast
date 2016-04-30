@@ -50,16 +50,10 @@ from salishsea_tools import (
     nc_tools,
     stormtools,
     tidetools,
-    unit_conversions,
     viz_tools,
-    wind_tools,
 )
-from salishsea_tools.places import PLACES
 
-from nowcast.figures import (
-    shared,
-    website_theme,
-)
+from nowcast.figures import shared
 
 
 # =============================== #
@@ -1007,129 +1001,6 @@ def load_model_ssh(grid_T):
     ssh = grid_T.variables['sossheig'][:, 0, 0]
     t_orig, t_final, time = get_model_time_variables(grid_T)
     return ssh, time
-
-
-## Called by make_plots (publish)
-## TODO: Move/rename to figures.publish as storm_surge_alerts_thumbnail module
-def website_thumbnail(
-    grid_B, grid_T, grids, weather_path, coastline, tidal_predictions,
-    colours=COLOURS,
-    fonts=FONTS,
-    figsize=(18, 20),
-):
-    """Thumbnail for the UBC Storm Surge website includes the thresholds
-    indicating the risk of flooding in three stations and the wind speeds and
-    directions. It also includes a brief description of threshold colours.
-
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.  ***NOT
-    USED***
-    :type grid_B: :class:`netCDF4.Dataset`
-
-    :arg grid_T: Hourly tracer results dataset from NEMO.           ***NOT
-    USED***
-    :type grid_T: :class:`netCDF4.Dataset`
-
-    :arg dict grids: high frequency model results
-
-    :arg str weather_path: The directory where weather forcing wind files
-                           are stored.
-
-    :arg coastline: Coastline dataset.
-    :type coastline: :class:`mat.Dataset`
-
-    :arg str tidal_predictions: Path to directory of tidal prediction
-                                 file.
-
-    :arg 2-tuple figsize: Figure size (width, height) in inches.
-
-    :returns: matplotlib figure object instance (fig).
-    """
-    fig = plt.figure(figsize=figsize, facecolor=colours['figure']['facecolor'])
-    gs = gridspec.GridSpec(2, 3, width_ratios=[1, 1, 1], height_ratios=[6, 1])
-    gs.update(hspace=0.15, wspace=0.05)
-    ax = fig.add_subplot(gs[0, :])
-    shared.plot_map(ax, coastline)
-    ax.set_xlabel('Longitude', **axis_font)
-    ax.set_ylabel('Latitude', **axis_font)
-    ax.grid()
-    viz_tools.set_aspect(ax)
-    for name in TIDAL_SITES:
-        ssh_ts = nc_tools.ssh_timeseries_at_point(
-            grids[name], 0, 0, datetimes=True)
-        ttide = shared.get_tides(name, tidal_predictions)
-        max_ssh, max_ssh_time = shared.find_ssh_max(name, ssh_ts, ttide)
-        risk_level = stormtools.storm_surge_risk_level(name, max_ssh, ttide)
-        shared.plot_risk_level_marker(
-            ax, name, risk_level, 'o', 70, 0.3, website_theme)
-        lon, lat = PLACES[name]['lon lat']
-        u_wind_4h_avg, v_wind_4h_avg = wind_tools.calc_wind_avg_at_point(
-            arrow.get(max_ssh_time), weather_path,
-            PLACES[name]['wind grid ji'], avg_hrs=-4)
-        shared.plot_wind_arrow(
-            ax, lon, lat, u_wind_4h_avg, v_wind_4h_avg, website_theme)
-    # Wind speed legend
-    legend_wind_speed = 5  # m/s or knots
-    shared.plot_wind_arrow(
-        ax, -122.2, 50.6, 0, -legend_wind_speed, website_theme)
-    ax.text(-122.28, 50.55, "Reference: 5 m/s", rotation=90, fontsize=20)
-    shared.plot_wind_arrow(
-        ax, -122.45, 50.6, 0, -unit_conversions.knots_mps(legend_wind_speed),
-        website_theme)
-    ax.text(-122.53, 50.55, "Reference: 5 knots", rotation=90, fontsize=20)
-    # Title and axis spines, ticks & labels colours
-    ax.set_title(
-        'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
-        .format(ssh_ts.time[0]),
-        **fonts['website_thumbnail_title'])
-    website_theme.set_axis_colors(ax)
-    # Location labels
-    ax.text(
-        -125.7, 47.7,
-        'Pacific\nOcean',
-        fontsize=30, color=colours['figure']['location label'])
-    ax.text(
-        -123.2, 50.1,
-        '  British\nColumbia',
-        fontsize=30, color=colours['figure']['location label'])
-    ax.text(
-        -124.2, 47.8, 'Washington\n      State',
-        fontsize=30, color=colours['figure']['location label'])
-    ax.text(
-        -122.3, 47.65, ' Puget\nSound',
-        fontsize=20, color=colours['figure']['location label'])
-    ax.text(
-        -124.35, 48.325,
-        '    Strait of\nJuan de Fuca',
-        fontsize=20, color=colours['figure']['location label'], rotation=-18)
-    ax.text(
-        -124, 49.3,
-        'Strait of\nGeorgia',
-        fontsize=20, color=colours['figure']['location label'], rotation=-12)
-    # Risk level legend
-    axes = [fig.add_subplot(gs[1, i]) for i in range(3)]
-    risk_level_colours = (
-        colours['risk level colours'][None],
-        colours['risk level colours']['moderate risk'],
-        colours['risk level colours']['extreme risk'],
-    )
-    for ax, risk_level_colour in zip(axes, risk_level_colours):
-        plt.setp(list(ax.spines.values()), visible=False)
-        ax.xaxis.set_visible(False)
-        ax.yaxis.set_visible(False)
-        ax.set_axis_bgcolor(colours['figure']['facecolor'])
-        ax.set_xlim([0, 1])
-        ax.set_ylim([0, 1])
-        ax.plot(
-            0.2, 0.5,
-            marker='o', markersize=70, markeredgewidth=2,
-            color=risk_level_colour, alpha=0.6)
-    axes[0].text(
-        0.4, 0.2, 'Green:\nNo flooding\nrisk', fontsize=25, color='w')
-    axes[1].text(
-        0.4, 0.2, 'Yellow:\nRisk of\nhigh water', fontsize=25, color='w')
-    axes[2].text(
-        0.4, 0.2, 'Red:\nExtreme risk\nof flooding', fontsize=25, color='w')
-    return fig
 
 
 ## Called by make_plots (publish)
