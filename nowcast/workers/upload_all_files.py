@@ -139,9 +139,8 @@ def upload_all_files(host_name, run_date, config):
                 })
             upload_file(sftp_client, host_name, localpath, remotepath)
     # Rivers runoff
-    for day in range(-1, 0):
-        filename = make_runoff_file.FILENAME_TMPL.format(
-            run_date.replace(days=day).date())
+    for tmpl in make_runoff_file.FILENAME_TMPLS.values():
+        filename = tmpl.format(run_date.replace(days=-1).date())
         localpath = os.path.join(config['rivers']['rivers_dir'], filename)
         remotepath = os.path.join(host['rivers_dir'], filename)
         upload_file(sftp_client, host_name, localpath, remotepath)
