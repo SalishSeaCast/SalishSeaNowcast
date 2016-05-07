@@ -21,20 +21,22 @@ from datetime import datetime
 import arrow
 import pytest
 
+from nowcast import lib
+
 
 class TestArrowDate:
     """Unit tests for arrow_date() function.
     """
-    def test_arrow_date_default_timezone(self, lib_module):
-        arw = lib_module.arrow_date('2015-07-26')
+    def test_arrow_date_default_timezone(self):
+        arw = lib.arrow_date('2015-07-26')
         expected = arrow.get(datetime(2015, 7, 26, 0, 0, 0), 'Canada/Pacific')
         assert arw == expected
 
-    def test_arrow_date_timezone(self, lib_module):
-        arw = lib_module.arrow_date('2015-07-26', 'Canada/Atlantic')
+    def test_arrow_date_timezone(self):
+        arw = lib.arrow_date('2015-07-26', 'Canada/Atlantic')
         expected = arrow.get(datetime(2015, 7, 26, 0, 0, 0), 'Canada/Atlantic')
         assert arw == expected
 
-    def test_arrow_date_parse_erroe(self, lib_module):
+    def test_arrow_date_parse_erroe(self):
         with pytest.raises(argparse.ArgumentTypeError):
-            lib_module.arrow_date('205-7-261')
+            lib.arrow_date('205-7-261')
