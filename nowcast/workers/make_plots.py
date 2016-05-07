@@ -278,11 +278,15 @@ def _make_comparisons_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     # Ferry routes surface salinity
-    fig = research_ferries.salinity_ferry_route(
-        ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy)
-    filename = os.path.join(
-        plots_dir, 'HB_DB_ferry_salinity_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor())
+    try:
+        fig = research_ferries.salinity_ferry_route(
+            ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy)
+        filename = os.path.join(
+            plots_dir, 'HB_DB_ferry_salinity_{date}.svg'.format(date=dmy))
+        fig.savefig(filename, facecolor=fig.get_facecolor())
+    except ValueError:
+        # Observations missing salinity data so abort plot creation
+        pass
 
     fig = research_ferries.salinity_ferry_route(
         ferry_data_dir, grid_T_hr, bathy, 'TW_DP', dmy)
