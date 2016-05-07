@@ -272,10 +272,12 @@ def _make_comparisons_plots(
     """
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
 
+    # Wind speed and direction at Sandheads
     fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
     filename = os.path.join(plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
+    # Ferry routes surface salinity
     fig = research_ferries.salinity_ferry_route(
         ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy)
     filename = os.path.join(
@@ -293,6 +295,17 @@ def _make_comparisons_plots(
     filename = os.path.join(
         plots_dir, 'TW_SB_ferry_salinity_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
+
+    # VENUS bottom temperature and salinity
+    fig = research_VENUS.compare_VENUS('East', grid_T_hr, bathy)
+    filename = os.path.join(
+        plots_dir, 'Compare_VENUS_East_{date}.svg'.format(date=dmy))
+    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
+
+    fig = research_VENUS.compare_VENUS('Central', grid_T_hr, bathy)
+    filename = os.path.join(
+        plots_dir, 'Compare_VENUS_Central_{date}.svg'.format(date=dmy))
+    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
 
 def _future_comparison_plots(
@@ -343,17 +356,6 @@ def _future_comparison_plots(
             plots_dir, '{station}_timeavADCP_{date}.svg'.format(station=name,
                                                                 date=dmy))
         fig.savefig(filename, facecolor=fig.get_facecolor())
-
-    # VENUS bottom temperature and salinity
-    fig = research_VENUS.compare_VENUS('East', grid_T_hr, bathy)
-    filename = os.path.join(
-        plots_dir, 'Compare_VENUS_East_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
-    fig = research_VENUS.compare_VENUS('Central', grid_T_hr, bathy)
-    filename = os.path.join(
-        plots_dir, 'Compare_VENUS_Central_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
 
 def _make_research_plots(

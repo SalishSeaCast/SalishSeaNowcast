@@ -143,10 +143,10 @@ def make_site_page(parsed_args, config, *args):
             ('TW_SB_ferry_salinity',
                 'Modeled and Observed Surface Salinity '
                 'Along Tsawwassen-Schwartz Bay Ferry Route'),
-            # ('Compare_VENUS_East',
-            #     'Salinity and Temperature at ONC VENUS East Node'),
-            # ('Compare_VENUS_Central',
-            #     'Salinity and Temperature at ONC VENUS Central Node'),
+            ('Compare_VENUS_East',
+                'Salinity and Temperature at ONC VENUS East Node'),
+            ('Compare_VENUS_Central',
+                'Salinity and Temperature at ONC VENUS Central Node'),
         ],
     }
     # Functions to render rst files for various run types
