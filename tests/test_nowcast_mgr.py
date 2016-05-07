@@ -26,29 +26,19 @@ import pytest
 import yaml
 import zmq
 
+from nowcast import nowcast_mgr
+from nowcast.nowcast_mgr import NowcastManager
 
 @pytest.fixture
-def mgr_module():
-    from nowcast import nowcast_mgr
-    return nowcast_mgr
+def mgr():
+    return NowcastManager()
 
 
-@pytest.fixture
-def mgr_class():
-    from nowcast.nowcast_mgr import NowcastManager
-    return NowcastManager
-
-
-@pytest.fixture
-def mgr(mgr_class):
-    return mgr_class()
-
-
-@patch.object(mgr_module(), 'NowcastManager')
-def test_main(m_mgr, mgr_module):
+@patch.object(nowcast_mgr, 'NowcastManager')
+def test_main(m_mgr):
     """Unit test for nowcast_mgr.main function.
     """
-    mgr_module.main()
+    nowcast_mgr.main()
     assert m_mgr().run.called
 
 
@@ -57,18 +47,18 @@ class TestNowcastManagerConstructor:
     """
     def test_name(self):
         p_get_module_name = patch.object(
-            mgr_module().lib, 'get_module_name', return_value='nowcast_mgr',
+            nowcast_mgr.lib, 'get_module_name', return_value='nowcast_mgr',
         )
         with p_get_module_name:
-            mgr = mgr_class()()
+            mgr = NowcastManager()
         assert mgr.name == 'nowcast_mgr'
 
-    def test_logger(self, mgr):
+    def test_logger(self):
         p_get_module_name = patch.object(
-            mgr_module().lib, 'get_module_name', return_value='nowcast_mgr',
+            nowcast_mgr.lib, 'get_module_name', return_value='nowcast_mgr',
         )
         with p_get_module_name:
-            mgr = mgr_class()()
+            mgr = NowcastManager()
         assert mgr.logger.name == 'nowcast_mgr'
 
     def test_worker_loggers(self, mgr):
@@ -193,13 +183,13 @@ class TestNowcastManagerRun:
 class TestLoadConfig:
     """Unit tests for NowcastManager._load_config method.
     """
-    @patch.object(mgr_module().lib, 'load_config')
+    @patch.object(nowcast_mgr.lib, 'load_config')
     def test_load_config(self, m_load_config, mgr):
         mgr.parsed_args = Mock(config_file='nowcast.yaml')
         mgr._load_config()
         m_load_config.assert_called_once_with('nowcast.yaml')
 
-    @patch.object(mgr_module().lib, 'load_config')
+    @patch.object(nowcast_mgr.lib, 'load_config')
     def test_load_config_console_logging(self, m_load_config, mgr):
         mgr.parsed_args = Mock(config_file='nowcast.yaml', debug=True)
         m_load_config.return_value = {'logging': {}}
@@ -210,7 +200,7 @@ class TestLoadConfig:
 class TestPrepLogging:
     """Unit tests for NowcastManager._prep_logging method.
     """
-    @patch.object(mgr_module().lib, 'configure_logging')
+    @patch.object(nowcast_mgr.lib, 'configure_logging')
     def test_prep_logging(self, m_config_logging, mgr):
         mgr.parsed_args = Mock(name='parsed_args')
         mgr.config = {
@@ -223,13 +213,13 @@ class TestPrepLogging:
             }
         }
         p_RotatingFileHandler = patch.object(
-            mgr_module().logging.handlers, 'RotatingFileHandler')
+            nowcast_mgr.logging.handlers, 'RotatingFileHandler')
         with p_RotatingFileHandler:
             mgr._prep_logging()
         m_config_logging.assert_called_once_with(
             mgr.config, mgr.logger, mgr.parsed_args.debug)
 
-    @patch.object(mgr_module().lib, 'configure_logging')
+    @patch.object(nowcast_mgr.lib, 'configure_logging')
     def test_prep_logging_info_msgs(self, m_config_logging, mgr):
         mgr.parsed_args = Mock(name='parsed_args')
         mgr.config = {
@@ -243,12 +233,12 @@ class TestPrepLogging:
         }
         mgr.logger = Mock(name='logger')
         p_RotatingFileHandler = patch.object(
-            mgr_module().logging.handlers, 'RotatingFileHandler')
+            nowcast_mgr.logging.handlers, 'RotatingFileHandler')
         with p_RotatingFileHandler:
             mgr._prep_logging()
         assert mgr.logger.info.call_count == 1
 
-    @patch.object(mgr_module().lib, 'configure_logging')
+    @patch.object(nowcast_mgr.lib, 'configure_logging')
     def test_prep_logging_debug_msgs(self, m_config_logging, mgr):
         mgr.parsed_args = Mock(name='parsed_args')
         mgr.config = {
@@ -262,7 +252,7 @@ class TestPrepLogging:
         }
         mgr.logger = Mock(name='logger')
         p_RotatingFileHandler = patch.object(
-            mgr_module().logging.handlers, 'RotatingFileHandler')
+            nowcast_mgr.logging.handlers, 'RotatingFileHandler')
         with p_RotatingFileHandler:
             mgr._prep_logging()
         assert mgr.logger.debug.call_count == 1
@@ -281,7 +271,7 @@ class TestLoadChecklist:
     """Unit tests for NowcastManager._load_checklist method.
     """
     def test_load_checklist(self, mgr):
-        p_open = patch.object(mgr_module(), 'open', mock_open(), create=True)
+        p_open = patch.object(nowcast_mgr, 'open', mock_open(), create=True)
         mgr.config = {'checklist file': 'nowcast_checklist.yaml'}
         with p_open as m_open:
             mgr._load_checklist()
@@ -739,7 +729,7 @@ class TestAfterMakeForcingLinks:
         }}
         mgr.parsed_args = Mock(debug=False)
         payload = {'west.cloud-nowcast': True}
-        with patch.object(mgr_module().lib, 'configure_logging'):
+        with patch.object(nowcast_mgr.lib, 'configure_logging'):
             actions = mgr._after_make_forcing_links(msg_type, payload)
         expected = (
             mgr._update_checklist,
@@ -747,7 +737,7 @@ class TestAfterMakeForcingLinks:
         )
         assert actions[0] == expected
 
-    @patch.object(mgr_module().lib, 'configure_logging')
+    @patch.object(nowcast_mgr.lib, 'configure_logging')
     def test_success_configure_run_loggers(self, m_config_logging, mgr):
         mgr.config = {'run': {
             'cloud host': 'west.cloud-nowcast',
@@ -776,7 +766,7 @@ class TestAfterMakeForcingLinks:
         }}
         mgr.parsed_args = Mock(debug=False)
         payload = {host: True}
-        with patch.object(mgr_module().lib, 'configure_logging'):
+        with patch.object(nowcast_mgr.lib, 'configure_logging'):
             actions = mgr._after_make_forcing_links(msg_type, payload)
         assert actions[1] == (mgr._launch_worker, [worker, worker_args, host])
 

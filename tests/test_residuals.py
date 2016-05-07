@@ -20,12 +20,7 @@ from datetime import datetime
 import pytest
 import pytz
 
-
-@pytest.fixture
-def residuals_module(scope='module'):
-    from nowcast import residuals
-    return residuals
-
+from nowcast import residuals
 
 class TestToDatetime:
     """Unit tests for _to_datetime() function.
@@ -38,8 +33,6 @@ class TestToDatetime:
         ('12/31 00Z', 2016, False, True,
             datetime(2015, 12, 31, 0, 0, tzinfo=pytz.timezone('UTC'))),
     ])
-    def test_to_datetie(
-        self, datestr, year, isDec, isJan, expected, residuals_module,
-    ):
-        dt = residuals_module._to_datetime(datestr, year, isDec, isJan)
+    def test_to_datetie(self, datestr, year, isDec, isJan, expected):
+        dt = residuals._to_datetime(datestr, year, isDec, isJan)
         assert dt == expected
