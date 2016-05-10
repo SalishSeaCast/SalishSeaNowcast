@@ -6,6 +6,7 @@
 
 name: sphinx-build
 dependencies:
+- h5py
 - ipython
 - lxml
 - mako
