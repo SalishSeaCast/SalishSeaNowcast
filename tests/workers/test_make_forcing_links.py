@@ -24,6 +24,8 @@ from unittest.mock import (
 import arrow
 import pytest
 
+import nowcast.lib
+
 
 @pytest.fixture
 def worker_module():
@@ -56,15 +58,15 @@ class TestMain:
             ('nowcast+', 'forecast2', 'ssh', 'nowcast-green'))
         assert 'help' in kwargs
 
-    def test_add_run_date_arg(self, m_worker, worker_module, lib_module):
+    def test_add_run_date_arg(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[2]
         assert args == ('--run-date',)
-        assert kwargs['type'] == lib_module.arrow_date
+        assert kwargs['type'] == nowcast.lib.arrow_date
         assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
         assert 'help' in kwargs
 
-    def test_add_shared_storage_arg(self, m_worker, worker_module, lib_module):
+    def test_add_shared_storage_arg(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[3]
         assert args == ('--shared-storage',)
