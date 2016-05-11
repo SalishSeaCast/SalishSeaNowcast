@@ -60,7 +60,7 @@ class TestMain:
         assert args == ('pid',)
         assert 'help' in kwargs
 
-    def test_add_shared_storage_arg(self, m_worker, worker_module, lib_module):
+    def test_add_shared_storage_arg(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[3]
         assert args == ('--shared-storage',)
