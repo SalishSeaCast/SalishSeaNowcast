@@ -336,23 +336,23 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
     # Replace dates for which there is no results page with None
     prelim_fcst_dates = _exclude_missing_dates(
         copy(dates), os.path.join(rst_path, 'forecast2', 'publish_*.rst'))
-    nowcast_pub_dates = (
-        copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
+    # nowcast_pub_dates = (
+    #     copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
     nowcast_pub_dates = _exclude_missing_dates(
-        nowcast_pub_dates, os.path.join(rst_path, 'nowcast', 'publish_*.rst'))
-    nowcast_res_dates = (
-        copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
+        copy(dates), os.path.join(rst_path, 'nowcast', 'publish_*.rst'))
+    # nowcast_res_dates = (
+    #     copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
     nowcast_res_dates = _exclude_missing_dates(
-        nowcast_res_dates, os.path.join(rst_path, 'nowcast', 'research_*.rst'))
-    fcst_dates = copy(dates[:-1]) if run_type != 'forecast' else copy(dates)
+        copy(dates), os.path.join(rst_path, 'nowcast', 'research_*.rst'))
+    # fcst_dates = copy(dates[:-1]) if run_type != 'forecast' else copy(dates)
     fcst_dates = _exclude_missing_dates(
-        fcst_dates, os.path.join(rst_path, 'forecast', 'publish_*.rst'))
-    nowcast_comp_dates = (
-        copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
+        copy(dates), os.path.join(rst_path, 'forecast', 'publish_*.rst'))
+    # nowcast_comp_dates = (
+    #     copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
     nowcast_comp_dates = _exclude_missing_dates(
-        nowcast_comp_dates, os.path.join(
+        copy(dates), os.path.join(
             rst_path, 'nowcast', 'comparison_*.rst'))
-    # Render the template using the calculated varible values to produce
+    # Render the template using the calculated variable values to produce
     # the index rst file
     rst_file = os.path.join(rst_path, 'index.rst')
     data = {
