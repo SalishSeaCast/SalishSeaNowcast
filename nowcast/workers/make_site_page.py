@@ -114,7 +114,7 @@ def make_site_page(parsed_args, config, *args):
             ('CR_maxSSH', 'Campbell River Sea Surface Height'),
             ('NOAA_ssh', 'Sea Surface Height at Selected NOAA Stations'),
             ('WaterLevel_Thresholds', 'Storm Surge Alert Thresholds'),
-            ('SH_wind', 'Sandheads Wind'),
+            # ('SH_wind', 'Sandheads Wind'),
             ('Avg_wind_vectors',
                 'Winds from Atmospheric Forcing Averaged Over Run Duration'),
             ('Wind_vectors_at_max',
@@ -133,7 +133,7 @@ def make_site_page(parsed_args, config, *args):
         ],
         'comparison': [
             # SVG figure filename root, figure heading
-            ('SH_wind', 'Modeled and Observed Winds at Sandheads'),
+            # ('SH_wind', 'Modeled and Observed Winds at Sandheads'),
             ('HB_DB_ferry_salinity',
                 'Modeled and Observed Surface Salinity '
                 'Along Horseshoe Bay-Departure Bay Ferry Route'),
