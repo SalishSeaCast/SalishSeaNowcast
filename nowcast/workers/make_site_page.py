@@ -96,7 +96,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def make_site_page(parsed_args, config):
+def make_site_page(parsed_args, config, *args):
     run_type = parsed_args.run_type
     page_type = parsed_args.page_type
     run_date = parsed_args.run_date
