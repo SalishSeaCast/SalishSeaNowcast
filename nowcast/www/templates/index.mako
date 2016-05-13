@@ -27,15 +27,15 @@ Log files from the model run automation system and forcing data monitoring plots
           <tr>
             <th>Sea Surface Height &amp; Weather</th>
           </tr>
-          ${grid_row("Preliminary Forecast", prelim_fcst_dates, "forecast2", "publish")}
-          ${grid_row("Forecast", fcst_dates, "forecast", "publish")}
-          ${grid_row("Nowcast", nowcast_pub_dates, "nowcast", "publish")}
+          ${grid_row("Preliminary Forecast", grid__dates['prelim forecast'], "forecast2", "publish")}
+          ${grid_row("Forecast", grid_dates['forecast'], "forecast", "publish")}
+          ${grid_row("Nowcast", grid_dates['nowcast publish'], "nowcast", "publish")}
 
           <tr>
             <th>Tracers, Currents &amp; Comparison to Observations</th>
           </tr>
-          ${grid_row("Nowcast", nowcast_res_dates, "nowcast", "research")}
-          ${grid_row("Model vs. Observations", nowcast_comp_dates, "nowcast", "comparison")}
+          ${grid_row("Nowcast", grid_dates['nowcast research'], "nowcast", "research")}
+          ${grid_row("Model vs. Observations", grid_dates['nowcast comparison'], "nowcast", "comparison")}
         </table>
       </div>
     </div>

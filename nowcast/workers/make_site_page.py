@@ -16,7 +16,6 @@
 """Salish Sea NEMO nowcast worker that creates pages for the salishsea
 site from page templates.
 """
-from copy import copy
 from glob import glob
 import logging
 import os
@@ -97,7 +96,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def make_site_page(parsed_args, config, *args):
+def make_site_page(parsed_args, config):
     run_type = parsed_args.run_type
     page_type = parsed_args.page_type
     run_date = parsed_args.run_date
@@ -334,24 +333,18 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
     else:
         this_month_cols, last_month_cols = INDEX_GRID_COLS, 0
     # Replace dates for which there is no results page with None
-    prelim_fcst_dates = _exclude_missing_dates(
-        copy(dates), os.path.join(rst_path, 'forecast2', 'publish_*.rst'))
-    # nowcast_pub_dates = (
-    #     copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
-    nowcast_pub_dates = _exclude_missing_dates(
-        copy(dates), os.path.join(rst_path, 'nowcast', 'publish_*.rst'))
-    # nowcast_res_dates = (
-    #     copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
-    nowcast_res_dates = _exclude_missing_dates(
-        copy(dates), os.path.join(rst_path, 'nowcast', 'research_*.rst'))
-    # fcst_dates = copy(dates[:-1]) if run_type != 'forecast' else copy(dates)
-    fcst_dates = _exclude_missing_dates(
-        copy(dates), os.path.join(rst_path, 'forecast', 'publish_*.rst'))
-    # nowcast_comp_dates = (
-    #     copy(dates[:-2]) if run_type == 'forecast2' else copy(dates[:-1]))
-    nowcast_comp_dates = _exclude_missing_dates(
-        copy(dates), os.path.join(
-            rst_path, 'nowcast', 'comparison_*.rst'))
+    grid_rows = (
+        ('prelim forecast', 'forecast2', 'publish'),
+        ('forecast', 'forecast', 'publish'),
+        ('nowcast publish', 'nowcast', 'publish'),
+        ('nowcast research', 'nowcast', 'research'),
+        ('nowcast comparison', 'nowcast', 'comparison'),
+    )
+    grid_dates = {
+        row: _exclude_missing_dates(
+            dates, os.path.join(rst_path, run, '{}_*.rst'.format(pages)))
+        for row, run, pages in grid_rows
+    }
     # Render the template using the calculated variable values to produce
     # the index rst file
     rst_file = os.path.join(rst_path, 'index.rst')
@@ -360,11 +353,7 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         'last_date': dates[-1],
         'this_month_cols': this_month_cols,
         'last_month_cols': last_month_cols,
-        'prelim_fcst_dates': prelim_fcst_dates,
-        'nowcast_pub_dates': nowcast_pub_dates,
-        'nowcast_res_dates': nowcast_res_dates,
-        'fcst_dates': fcst_dates,
-        'nowcast_comp_dates': nowcast_comp_dates,
+        'grid_dates': grid_dates,
     }
     _tmpl_to_rst(tmpl, rst_file, data, config)
     logger.debug(
