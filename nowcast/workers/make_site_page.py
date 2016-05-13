@@ -16,6 +16,7 @@
 """Salish Sea NEMO nowcast worker that creates pages for the salishsea
 site from page templates.
 """
+from copy import copy
 from glob import glob
 import logging
 import os
@@ -342,7 +343,7 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
     )
     grid_dates = {
         row: _exclude_missing_dates(
-            dates, os.path.join(rst_path, run, '{}_*.rst'.format(pages)))
+            copy(dates), os.path.join(rst_path, run, '{}_*.rst'.format(pages)))
         for row, run, pages in grid_rows
     }
     # Render the template using the calculated variable values to produce
