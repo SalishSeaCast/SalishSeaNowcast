@@ -27,7 +27,7 @@ Log files from the model run automation system and forcing data monitoring plots
           <tr>
             <th>Sea Surface Height &amp; Weather</th>
           </tr>
-          ${grid_row("Preliminary Forecast", grid__dates['prelim forecast'], "forecast2", "publish")}
+          ${grid_row("Preliminary Forecast", grid_dates['prelim forecast'], "forecast2", "publish")}
           ${grid_row("Forecast", grid_dates['forecast'], "forecast", "publish")}
           ${grid_row("Nowcast", grid_dates['nowcast publish'], "nowcast", "publish")}
 
