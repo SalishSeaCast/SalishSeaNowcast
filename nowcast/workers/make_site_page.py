@@ -322,9 +322,9 @@ def _render_index_rst(page_type, run_type, run_date, rst_path, config):
         })
     # Calculate the date range to display in the grid and the number of
     # columns for the month headings of the grid
-    fcst_date = (
-        run_date.replace(days=+1) if run_type != 'forecast2'
-        else run_date.replace(days=+2))
+    fcst_date = run_date.replace(days=+1)
+    if run_type == 'forecast2' or page_type == 'comparison':
+        fcst_date = run_date.replace(days=+2)
     dates = arrow.Arrow.range(
         'day', fcst_date.replace(days=-(INDEX_GRID_COLS - 1)), fcst_date)
     if dates[0].month != dates[-1].month:
