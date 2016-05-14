@@ -244,10 +244,10 @@ def _make_publish_plots(
         plots_dir, 'WaterLevel_Thresholds_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
-    # fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
-    # filename = os.path.join(
-    #     plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
-    # fig.savefig(filename, facecolor=fig.get_facecolor())
+    fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
+    filename = os.path.join(
+        plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
+    fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.winds_average_max(
         grid_T_hr, bathy, weather_path, coastline,
