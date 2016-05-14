@@ -273,9 +273,9 @@ def _make_comparisons_plots(
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
 
     # Wind speed and direction at Sandheads
-    # fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
-    # filename = os.path.join(plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
-    # fig.savefig(filename, facecolor=fig.get_facecolor())
+    fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
+    filename = os.path.join(plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
+    fig.savefig(filename, facecolor=fig.get_facecolor())
 
     # Ferry routes surface salinity
     for ferry_route in ('HB_DB', 'TW_DP', 'TW_SB'):
