@@ -281,7 +281,7 @@ def _make_comparisons_plots(
     for ferry_route in ('HB_DB', 'TW_DP', 'TW_SB'):
         try:
             fig = research_ferries.salinity_ferry_route(
-                ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy)
+                ferry_data_dir, grid_T_hr, bathy, ferry_route, dmy)
             filename = os.path.join(
                 plots_dir, '{route}_ferry_salinity_{date}.svg'
                 .format(route=ferry_route, date=dmy))
