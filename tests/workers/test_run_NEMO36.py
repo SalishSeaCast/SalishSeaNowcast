@@ -739,6 +739,7 @@ class TestRunDescription:
                 run_desc = worker_module._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'))
+        assert run_desc['output']['files'] == tmp_run_prep.join('iodef.xml')
         expected = tmp_run_prep.join(
             '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
         assert run_desc['output']['domain'] == expected
