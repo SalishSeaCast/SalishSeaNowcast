@@ -38,7 +38,8 @@ def main():
         help='Name of the host to download results files from',
     )
     worker.arg_parser.add_argument(
-        'run_type', choices=set(('nowcast', 'forecast', 'forecast2')),
+        'run_type',
+        choices=set(('nowcast', 'nowcast-green', 'forecast', 'forecast2')),
         help='Type of run to download results files from.',
     )
     worker.arg_parser.add_argument(
