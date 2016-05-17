@@ -147,8 +147,7 @@ def run_NEMO(host_name, run_type, config, socket):
     lib.tell_manager(worker_name, 'log.debug', config, logger, socket, msg)
 
     # Create and populate the temporary run directory
-    run_dir = salishsea_cmd.api.prepare(
-        run_desc_file, 'iodef.xml', nemo34=True)
+    run_dir = salishsea_cmd.api.prepare(run_desc_file, nemo34=True)
     msg = '{}: temporary run directory: {}'.format(run_type, run_dir)
     logger.debug(msg)
     lib.tell_manager(worker_name, 'log.debug', config, logger, socket, msg)
