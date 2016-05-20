@@ -32,7 +32,8 @@ import netCDF4 as nc
 from salishsea_tools import (
     nc_tools,
     tidetools as tt,
-    viz_tools
+    viz_tools,
+    geo_tools
 )
 
 from nowcast import analyze
@@ -49,7 +50,7 @@ axis_font = {'fontname': 'Bitstream Vera Sans', 'size': '13', 'color': 'white'}
 # Constants defined for the VENUS nodes
 # Lat/lon/depth from the VENUS website. Depth is in meters.
 # i,j are python grid coordinates as returned from
-# tidetools.find_closest_model_point()
+# geo_tools.find_closest_model_point()
 SITES = {
     'Vancouver': {
         'lat': 49.2827,
@@ -198,8 +199,8 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
     plot_VENUS(ax_sal, ax_temp, station, t_orig, t_end)
 
     # Grid point of VENUS station
-    [j, i] = tt.find_closest_model_point(
-        lon, lat, X, Y, bathy, allow_land=True)
+    [j, i] = geo_tools.find_closest_model_point(
+        lon, lat, X, Y)
 
     # Model data
     sal = grid_T.variables['vosaline'][:, :, j, i]

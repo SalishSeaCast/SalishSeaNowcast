@@ -28,7 +28,9 @@ import netCDF4 as nc
 import numpy as np
 import pandas as pd
 
-from salishsea_tools import tidetools
+from salishsea_tools import(tidetools,
+                            geo_tools,
+)
 
 from nowcast import analyze
 from nowcast.figures import figures
@@ -81,7 +83,7 @@ def plot_residual_forcing(ax, runs_list, t_orig):
     ax.plot(time_trun, res_obs_trun, colours['observed'],
             label='observed', lw=2.5)
 
-    # plot forcing for each simulation
+   # plot forcing for each simulation
     for mode in runs_list:
         filename_NB, run_date = analyze.create_path(mode, t_orig, 'ssh*.txt')
         if filename_NB:
@@ -131,8 +133,8 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
         # Identify model grid point
         lat = figures.SITES[name]['lat']
         lon = figures.SITES[name]['lon']
-        j, i = tidetools.find_closest_model_point(
-            lon, lat, X, Y, bathy, allow_land=False)
+        j, i = geo_tools.find_closest_model_point(
+            lon, lat, X, Y, land_mask=bathy.mask)
         # Observed residuals and wlevs and tides
         ttide = figures.shared.get_tides(name, path=paths['tides'])
         res_obs, wlev_meas = obs_residual_ssh(
@@ -193,8 +195,8 @@ def get_error_model(names, runs_list, grid_B, t_orig):
         # Look up model grid
         lat = figures.SITES[name]['lat']
         lon = figures.SITES[name]['lon']
-        j, i = tidetools.find_closest_model_point(
-            lon, lat, X, Y, bathy, allow_land=False)
+        j, i = geo_tools.find_closest_model_point(
+            lon, lat, X, Y, land_mask=bathy.mask)
         # Observed residuals and wlevs and tides
         ttide = figures.shared.get_tides(name, path=paths['tides'])
         res_obs, wlev_meas = obs_residual_ssh(
