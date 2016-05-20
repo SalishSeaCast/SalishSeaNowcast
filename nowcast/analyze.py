@@ -35,6 +35,7 @@ import pandas as pd
 from salishsea_tools import (
     nc_tools,
     tidetools,
+    geo_tools,
 )
 
 from nowcast import figures
@@ -236,8 +237,8 @@ def plot_files(ax, grid_B, files, var, depth, t_orig, t_final,
     bathy, X, Y = tidetools.get_bathy_data(grid_B)
 
     # Get index
-    [j, i] = tidetools.find_closest_model_point(lon, lat, X, Y,
-                                                bathy, allow_land=False)
+    [j, i] = geo_tools.find_closest_model_point(lon, lat, X, Y,
+                                                land_mask=bathy.mask)
 
     # Call function
     var_ary, time = combine_files(files, var, depth, j, i)

@@ -258,50 +258,6 @@ def axis_colors(ax, plot):
     return ax
 
 
-def find_model_point(lon, lat, X, Y, tol_lon=0.016, tol_lat=0.011):
-    """Finds a model grid point close to a specified latitude and longitude.
-    Should be used for non-NEMO grids like the atmospheric forcing grid.
-
-    :arg lon: The longitude we are trying to match.
-    :type lon: float
-
-    :arg lat: The latitude we are trying to match.
-    :type lat: float
-
-    :arg X: The model longitude grid.
-    :type X: numpy array
-
-    :arg Y: The model latitude grid.
-    :type Y: numpy array
-
-    :arg tol_lon: tolerance on grid spacing for longitude
-    :type tol_lon: float
-
-    :arg tol_lat: tolerance on grid spacing for latitude
-    :type tol_lat: float
-
-    :returns: j-index and i-index of the closest model grid point.
-    """
-
-    # Search for a grid point with longitude or latitude within
-    # tolerance of measured location
-    j, i = np.where(
-        np.logical_and(
-            (np.logical_and(X > lon - tol_lon, X < lon + tol_lon)),
-            (np.logical_and(Y > lat - tol_lat, Y < lat + tol_lat))))
-
-    if j.size > 1 or i.size > 1:
-        raise ValueError(
-            'Multiple model points found. tol_lon/tol_lat too big.'
-        )
-    elif not j or not i:
-        raise ValueError(
-            'No model point found. tol_lon/tol_lat too small or '
-            'lon/lat outside of domain.'
-        )
-    return j, i
-
-
 def interpolate_depth(data, depth_array, depth_new):
     """Interpolates data field to a desired depth.
 
@@ -703,7 +659,7 @@ def get_model_winds(lon, lat, t_orig, t_final, weather_path):
     Y = weather.variables['nav_lat'][:]
     X = weather.variables['nav_lon'][:] - 360
 
-    [j, i] = find_model_point(lon, lat, X, Y)
+    [j, i] = geo_tools.find_closest_model_point(lon, lat, X, Y, grid="GEM2.5")
 
     wind = np.array([])
     direc = np.array([], 'double')
@@ -965,8 +921,8 @@ def isolate_wind_timing(
     bathy, X, Y = tidetools.get_bathy_data(grid_B)
 
     # Get sea surface height
-    j, i = tidetools.find_closest_model_point(
-        lon, lat, X, Y, bathy, allow_land=False)
+    j, i = geo_tools.find_closest_model_point(
+        lon, lat, X, Y, land_mask=bathy.mask)
     ssh = grid_T.variables['sossheig'][:, j, i]
 
     # "Place holder" residual so function can be used
@@ -1340,7 +1296,9 @@ def compare_tidalpredictions_maxSSH(
 
     # Map of sea surface height
     cs = [-1, -0.5, 0.5, 1, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.4, 2.6]
-    [j, i] = tidetools.find_closest_model_point(lon, lat, X, Y, bathy)
+    [j, i] = geo_tools.find_closest_model_point(
+        lon, lat, X, Y, land_mask=bathy.mask
+    )
     hourly_maxssh = np.argmax(ssh[:, j, i])
 
     ssh_max_field = np.ma.masked_values(ssh[hourly_maxssh], 0)
