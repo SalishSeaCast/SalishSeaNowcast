@@ -55,3 +55,51 @@ The :py:obj:`SalishSeaNowcast` package holds the Python modules that power the n
 The system workflow looks like:
 
 .. image:: ProcessFlow.svg
+
+Each box in the figure above is a :ref:`NowcastSystemWorker`,
+a Python process that is launched by the system to do a particular job and terminate when that job is finished.
+The workers are defined in Python modules in the :py:obj:`nowcast.workers` namespace.
+
+The workers are
+(almost all)
+launched and coordinated by the :ref:`NowcastSystemManager`,
+:py:mod:`nowcast.nowcast_mgr`.
+Unlike the workers that come and go as needed to do their jobs,
+the manager is a long-running Python process that is only stopped and restarted when the system configuration needs to be changed.
+
+After the manager launches a worker they communicate with each other using a messaging system based on the `ZeroMQ`_ distributed messaging framework.
+
+.. _ZeroMQ: http://zeromq.org/
+
+Before we get into the details of the :ref:`NowcastMessagingSystem`,
+it is important to mention one more piece of the architecture:
+the :ref:`NowcastMessageBroker`,
+:py:mod:`nowcast.nowcast_broker`.
+The message broker is also a long-running Python process that is almost never stopped and restarted.
+It buffers and relays messages between the workers and the manager so that both the workers and the manager can start,
+stop,
+or restart without affecting one another.
+
+
+.. _NowcastMessagingSystem:
+
+Nowcast Messaging System
+========================
+
+
+.. _NowcastMessageBroker:
+
+Nowcast Message Broker
+======================
+
+
+.. _NowcastSystemManager:
+
+Nowcast System Manager
+======================
+
+
+.. _NowcastSystemWorker:
+
+Nowcast System Worker
+=====================
