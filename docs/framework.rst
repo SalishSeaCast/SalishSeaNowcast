@@ -86,6 +86,137 @@ or restart without affecting one another.
 Nowcast Messaging System
 ========================
 
+Inside the code of a worker and the nowcast manager,
+a nowcast message is a Python dictionary:
+
+.. code-block:: python
+
+    message = {
+        'source': 'download_weather',
+        'msg_type': 'success 12',
+        'payload': {'12 forecast': True},
+    }
+
+The value associated with the :kbd:`source` key is the name of process that is sending the message;
+i.e. the worker name,
+or :kbd:`nowcast_mgr`.
+
+The :kbd:`msg_type` value is a key associated with the message sender in the message registry section of the :ref:`NowcastConfigFile`.
+For example,
+the message registry entries for the :py:mod:`~nowcast.workers.download_weather` worker is:
+
+.. code-block:: yaml
+
+    msg_types:
+      ...
+      download_weather:
+        success 00: 00 weather forecast ready
+        failure 00: 00 weather forecast download failed
+        success 06: 06 weather forecast ready
+        failure 06: 06 weather forecast download failed
+        success 12: 12 weather forecast ready
+        failure 12: 12 weather forecast download failed
+        success 18: 18 weather forecast ready
+        failure 18: 18 weather forecast download failed
+        crash: download_weather worker crashed
+      ...
+
+The message :kbd:`payload` value can be any Python object
+(including :py:obj:`None`)
+that can be a value in a dictionary.
+The payload value is inserted into a :kbd:`checklist` dictionary that the nowcast manager uses to maintain information about the state of the nowcast system.
+Message payloads vary markedly from one worker to another depending on what information a worker needs to convey to the manager,
+other workers,
+or nowcast system users inspecting the system state.
+
+Message exchanges are always initiated by workers.
+Workers send a message to the manager when they have something significant to report:
+
+* Successful completion of their task
+* Failure to complete their task
+* Crashing due to an unhandled exception
+* Needing information from the manager about the state of the nowcast system
+* Providing a message to be included in the nowcast system logging output
+  (only from workers running on remote hosts)
+
+When the manager receives a message from a worker it acknowledges the message with one of two types of return message.
+Those messages are also defined in the message registry section of the :ref:`NowcastConfigFile`:
+
+.. code-block:: yaml
+
+    msg_types:
+      ...
+      nowcast_mgr:
+        ack: message acknowledged
+        undefined msg: ERROR - message type is not defined
+      ...
+
+So,
+an "all is good" acknowledgment message from the manager in response to a message from a worker might look like:
+
+.. code-block:: python
+
+    message = {
+        'source': 'nowcast_mgr',
+        'msg_type': 'ack',
+        'payload': None,
+    }
+
+Before messages can be passed among a worker,
+the :ref:`NowcastMessageBroker`,
+and the :ref:`NowcastSystemManager` they must be transformed into strings for transmission across the network.
+That is done by transforming the Python dictionary object into a `YAML document`_,
+a process that is known as "serialization".
+The message recipient transforms the YAML document back into a Python dictionary
+("deserialization").
+
+.. _YAML document: http://pyyaml.org/wiki/PyYAMLDocumentation#YAMLsyntax
+
+Deserialization is done using the :py:func:`yaml.safe_load()` function.
+That function limits the types of Python objects that can be in a message to
+(more or less)
+the Python data
+(:py:obj:`True`,
+:py:obj:`False`,
+:py:obj:`None`,
+:py:obj:`float`,
+:py:obj:`int`,
+etc.)
+and data container objects
+(:py:obj:`dict`,
+:py:obj:`list`,
+:py:obj:`tuple`,
+etc.).
+Doing so is a security measure to prevent the possibility of injection into the system of a maliciously crafted message that could execute arbitrary code on the nowcast system server.
+
+Messages are transmitted among the workers,
+broker,
+and the manager on the TCP network layer using dedicated ports.
+
+* When the broker is started it binds to a "front-end" port to listen for messages from workers,
+  and a "back-end" port to listen for messages from the manager.
+  After that,
+  the broker simply listens for messages and queues them in both directions between the front-end and back-end ports.
+  It does not deserialize the YAML documents,
+  it just passes them along.
+
+* When the manager is started it connects to the back-end port and listens for messages.
+  When it receives a message it deserializes it,
+  handles it,
+  and send the appropriate acknowledgment message back.
+
+* When a worker is started it connects to the front-end port.
+  When it has something to report to the manager it serializes the message,
+  sends it,
+  and waits for an acknowledgment from the manager.
+
+The server on which the broker is running,
+and the front-end and back-end port numbers that the system uses are defined in the :ref:`NowcastConfigFile`.
+
+The nowcast messaging system is based on the `ZeroMQ`_ distributed messaging framework.
+You probably don't need to delve into the details of ZeroMQ,
+but it is important to note that this is one of the situations where the nowcast system "stands on the shoulders of giants" rather than "re-inventing the wheel".
+
 
 .. _NowcastMessageBroker:
 
