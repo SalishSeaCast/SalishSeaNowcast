@@ -110,8 +110,7 @@ def basic_arg_parser(worker_name, description=None, add_help=True):
     """
     parser = argparse.ArgumentParser(
         description=description, add_help=add_help)
-    parser.prog = (
-        'python -m salishsea_tools.nowcast.workers.{}'.format(worker_name))
+    parser.prog = 'python -m nowcast.workers.{}'.format(worker_name)
     parser.add_argument(
         'config_file',
         help='''
