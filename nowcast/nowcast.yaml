@@ -69,7 +69,7 @@ run:
   # Remove or comment out the next line to prevent running in the cloud
   cloud host: west.cloud-nowcast
   west.cloud-nowcast:
-    python: /usr/bin/python3
+    python: /home/ubuntu/miniconda3/envs/nowcast-env/bin/python3
     salishsea_cmd: /home/ubuntu/.local/bin/salishsea
     config_file: /home/ubuntu/MEOPAR/nowcast/nowcast.yaml
     nodes: 9
