@@ -39,7 +39,7 @@ def main():
     )
     worker.arg_parser.add_argument(
         'run_type',
-        choices=set(('nowcast', 'nowcast-green', 'forecast', 'forecast2')),
+        choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
         help='Type of run to download results files from.',
     )
     worker.arg_parser.add_argument(
