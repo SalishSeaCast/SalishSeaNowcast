@@ -53,7 +53,8 @@ class TestMain:
         worker_module.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        assert kwargs['choices'] == set(('nowcast', 'forecast', 'forecast2'))
+        expected = {'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
+        assert kwargs['choices'] == expected
         assert 'help' in kwargs
 
     def test_add_run_date_arg(self, m_worker, worker_module):
