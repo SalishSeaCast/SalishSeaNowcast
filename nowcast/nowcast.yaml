@@ -152,6 +152,8 @@ run:
     rivers_dir: /home/sallen/MEOPAR/rivers/
     # Location of rivers runoff monthly climatology file
     rivers_month.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+    # Location of the rivers runoff daily tracers climatology directory
+    rivers_bio_dir: /home/sallen/MEOPAR/NEMO-forcing/rivers/bio_climatology/
     ssh_dir: /home/sallen/MEOPAR/sshNeahBay/
     weather_dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
     nowcast_dir: /home/sallen/MEOPAR/nowcast/
