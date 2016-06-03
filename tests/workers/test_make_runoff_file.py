@@ -54,14 +54,33 @@ class TestMain:
             make_runoff_file.failure,
         )
 
+class TestSuccess:
+    """Unit tests for success() function.
+    """
+    def test_success_log_info(self):
+        parsed_args = Mock()
+        with patch('nowcast.workers.make_runoff_file.logger') as m_logger:
+            make_runoff_file.success(parsed_args)
+        assert m_logger.info.called
 
-def test_success():
-    parsed_args = Mock()
-    msg_typ = make_runoff_file.success(parsed_args)
-    assert msg_typ == 'success'
+    def test_success_msg_type(self):
+        parsed_args = Mock()
+        with patch('nowcast.workers.make_runoff_file.logger') as m_logger:
+            msg_typ = make_runoff_file.success(parsed_args)
+        assert msg_typ == 'success'
 
 
-def test_failure():
-    parsed_args = Mock()
-    msg_typ = make_runoff_file.failure(parsed_args)
-    assert msg_typ == 'failure'
+class TestFailure:
+    """Unit tests for failure() function.
+    """
+    def test_failure_log_critical(self):
+        parsed_args = Mock()
+        with patch('nowcast.workers.make_runoff_file.logger') as m_logger:
+            make_runoff_file.failure(parsed_args)
+        assert m_logger.critical.called
+
+    def test_failure_msg_type(self):
+        parsed_args = Mock()
+        with patch('nowcast.workers.make_runoff_file.logger') as m_logger:
+            msg_typ = make_runoff_file.failure(parsed_args)
+        assert msg_typ == 'failure'
