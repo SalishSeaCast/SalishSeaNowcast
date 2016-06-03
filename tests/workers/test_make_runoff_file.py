@@ -21,53 +21,47 @@ from unittest.mock import (
 )
 
 import arrow
-import pytest
 
 import nowcast.lib
+from nowcast.workers import make_runoff_file
 
 
-@pytest.fixture
-def worker_module():
-    from nowcast.workers import make_runoff_file
-    return make_runoff_file
-
-
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.make_runoff_file.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
-        worker_module.main()
+    @patch('nowcast.workers.make_runoff_file.worker_name')
+    def test_instantiate_worker(self, m_name, m_worker):
+        make_runoff_file.main()
         args, kwargs = m_worker.call_args
         assert args == (m_name,)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_run_date_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_date_arg(self, m_worker):
+        make_runoff_file.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
         assert args == ('--run-date',)
         assert kwargs['type'] == nowcast.lib.arrow_date
         assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
         assert 'help' in kwargs
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        make_runoff_file.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.make_runoff_file,
-            worker_module.success,
-            worker_module.failure,
+            make_runoff_file.make_runoff_file,
+            make_runoff_file.success,
+            make_runoff_file.failure,
         )
 
 
-def test_success(worker_module):
+def test_success():
     parsed_args = Mock()
-    msg_typ = worker_module.success(parsed_args)
+    msg_typ = make_runoff_file.success(parsed_args)
     assert msg_typ == 'success'
 
 
-def test_failure(worker_module):
+def test_failure():
     parsed_args = Mock()
-    msg_typ = worker_module.failure(parsed_args)
+    msg_typ = make_runoff_file.failure(parsed_args)
     assert msg_typ == 'failure'
