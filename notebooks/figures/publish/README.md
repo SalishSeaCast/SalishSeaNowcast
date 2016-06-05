@@ -15,6 +15,24 @@ Descriptions under the links below are from the first cell of the notebooks
       
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
 
+* ##[TestPtAtkinsonTideModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb)  
+    
+    **Test `pt_atkinson_tide` Module**  
+      
+    Render figure object produced by the `nowcast.figures.publish.pt_atkinson_tide` module.  
+    Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
+
+* ##[TestStormSurgeAlertsThumbnailModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb)  
+    
+    **Test `storm_surge_alerts_thumbnail` Module**  
+      
+    Render figure object produced by the `nowcast.figures.publish.storm_surge_alerts_thumbnail` module.  
+    Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
+
 
 ##License
 
