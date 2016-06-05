@@ -739,6 +739,9 @@ def plot_corrected_model(
     return ssh_corr
 
 
+## TODO: This function will be orphaned when compare_tidalpredictions_maxSSH
+## and plot_thresholds_all are refactored into function modules.
+## Need to consult with Nancy about its ultimate fate.
 def plot_tides(ax, name, PST, MSL, tidal_predictions, color=predictions_c):
     """Plots and returns the tidal predictions at a given station during the
     year of t_orig.
@@ -958,80 +961,6 @@ def load_model_ssh(grid_T):
     t_orig, t_final, time = get_model_time_variables(grid_T)
     return ssh, time
 
-
-## Called by make_plots (publish)
-## TODO: Move/rename to figures.publish as pt_atkinson_tide module
-def PA_tidal_predictions(
-    grid_T, tidal_predications, PST=1, MSL=0, figsize=(20, 5),
-):
-    """Plots the tidal cycle at Point Atkinson during a 4 week period centred
-    around the simulation start date.
-
-    This function assumes that a tidal prediction file exists in a
-    specific directory.
-    Tidal predictions were calculated with ttide based on a time series
-    from 2013.
-    Plots are of predictions caluclated with all consituents.
-
-    :arg grid_T: Hourly tracer results dataset from NEMO.
-    :type grid_T: :class:`netCDF4.Dataset`
-
-    :arg str tidal_predications: Path to directory of tidal prediction
-                                 file.
-
-    :arg int PST: Specifies if plot should be presented in PST.
-                  1 = plot in PST, 0 = plot in UTC.
-
-    :arg int MSL: Specifies if the plot should be centred about mean sea level.
-                  1=centre about MSL, 0=centre about 0.
-
-    :arg 2-tuple figsize: Figure size (width, height) in inches.
-
-    :returns: matplotlib figure object instance (fig).
-    """
-
-    # Time range
-    t_orig, t_end, t_nemo = get_model_time_variables(grid_T)
-    timezone = PST * '[PST]' + abs((PST - 1)) * '[UTC]'
-
-    # Axis limits are set as 2 weeks before and after start date.
-    ax_start = t_orig - datetime.timedelta(weeks=2)
-    ax_end = t_orig + datetime.timedelta(weeks=2)
-    ylims = [-3, 3]
-
-    # Figure
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(1, 1, 1)
-    fig.patch.set_facecolor('#2B3E50')
-    fig.autofmt_xdate()
-    plot_tides(ax, 'Point Atkinson', PST, MSL, tidal_predications, 'black')
-
-    # Line indicating current date
-    ax.plot([t_orig + time_shift * PST, t_orig + time_shift * PST],
-            ylims, '-r', lw=2)
-    ax.plot([t_end + time_shift * PST, t_end + time_shift * PST],
-            ylims, '-r', lw=2)
-
-    # Axis
-    ax.set_xlim([ax_start + time_shift * PST, ax_end + time_shift * PST])
-    ax.set_ylim(ylims)
-    ax.set_title(
-        'Tidal Predictions at Point Atkinson: ' + t_orig.strftime('%d-%b-%Y'),
-        **title_font)
-    ax.set_ylabel('Sea Surface Height [m]', **axis_font)
-    ax.set_xlabel('Time {}'.format(timezone), **axis_font)
-    ax.grid()
-    axis_colors(ax, 'gray')
-    ax.text(
-        1., -0.2,
-        'Tidal predictions calculated with t_tide: '
-        'http://www.eos.ubc.ca/~rich/#T_Tide\n'
-        'using CHS tidal constituents',
-        horizontalalignment='right',
-        verticalalignment='top',
-        transform=ax.transAxes, color='white')
-
-    return fig
 
 ## Called by make_plots (publish)
 ## TODO: Move/rename to figures.publish as compare_water_levels module
