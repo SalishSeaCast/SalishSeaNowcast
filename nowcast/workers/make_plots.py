@@ -35,6 +35,7 @@ from nowcast.figures import (
     research_ferries,
 )
 from nowcast.figures.publish import (
+    pt_atkinson_tide,
     storm_surge_alerts,
     storm_surge_alerts_thumbnail,
 )
@@ -140,6 +141,7 @@ def _make_plot_files(
     make_plots_funcs[plot_type](
         dmy, weather_path, bathy, results_dir, plots_dir, coastline,
         tidal_predictions=tidal_predictions,
+        timezone=config['timezone'],
         mesh_mask=mesh_mask,
         ferry_data_dir=ferry_data_dir,
     )
@@ -186,7 +188,7 @@ def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
 
 def _make_publish_plots(
     dmy, weather_path, bathy, results_dir, plots_dir, coastline,
-    tidal_predictions, **kwargs
+    tidal_predictions, timezone, **kwargs
 ):
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     names = ['Point Atkinson', 'Victoria', 'Campbell River', 'Cherry Point',
@@ -209,7 +211,8 @@ def _make_publish_plots(
         plots_dir, 'Threshold_website_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
-    fig = figures.PA_tidal_predictions(grid_T_hr, tidal_predictions)
+    fig = pt_atkinson_tide.pt_atkinson_tide(
+        grid_T_hr, tidal_predictions, timezone)
     filename = os.path.join(
         plots_dir, 'PA_tidal_predictions_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')

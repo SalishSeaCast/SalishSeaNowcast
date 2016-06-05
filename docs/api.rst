@@ -87,6 +87,14 @@ Nowcast System Results Figures
 :py:obj:`nowcast.figures.publish`  Figure Modules
 -------------------------------------------------
 
+.. _nowcast.figures.publish.pt_atkinson_tide:
+
+:py:mod:`nowcast.figures.publish.pt_atkinson_tide` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.pt_atkinson_tide
+    :members:
+
 .. _nowcast.figures.publish.storm_surge_alerts:
 
 :py:mod:`nowcast.figures.publish.storm_surge_alerts` Module

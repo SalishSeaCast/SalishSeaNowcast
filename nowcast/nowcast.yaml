@@ -1,5 +1,8 @@
 # Configuration file for Salish Sea NEMO model nowcast system
 
+# Timezone to use for model results
+timezone = Canada/Pacific
+
 # System status checklist file
 checklist file: /home/dlatorne/public_html/MEOPAR/nowcast/nowcast_checklist.yaml
 

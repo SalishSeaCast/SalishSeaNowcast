@@ -30,6 +30,9 @@ SITE_BACKGROUND_COLOUR = '#2B3E50'
 #: the dict key(s) should be descriptive enough to identify the element
 #: to which the colour applies.
 COLOURS = {
+    'axes': {
+        'background': '#dbdee1',
+    },
     'axes textbox': {
         'facecolor': 'white',
     },
@@ -61,6 +64,10 @@ COLOURS = {
         'info box content': 'white',
         'risk level label': 'white',
     },
+    'time series': {
+        'datetime line': 'red',
+        'tidal prediction': 'black',
+    },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
         'edgecolor': 'black',
@@ -82,6 +89,8 @@ FONTS = {
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
     'figure annotation': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
+    'figure annotation small': FontProperties(
+        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=10),
     'info box title': FontProperties(
         family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=20),
     'info box content': FontProperties(
