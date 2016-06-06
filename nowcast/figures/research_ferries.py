@@ -290,8 +290,8 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
     :returns: integral of model salinity values divided by weights for
               sal_a and sal_b.
     """
-    lats = grid_T_hr.variables['nav_lat']
-    lons = grid_T_hr.variables['nav_lon']
+    lats = grid_T_hr.variables['nav_lat'][:, :]
+    lons = grid_T_hr.variables['nav_lon'][:, :]
     depths = bathy.variables['Bathymetry'][:]
     x1, y1 = geo_tools.find_closest_model_point(
         obs[1], obs[2], lons, lats)  # Removed 'lat_tol=0.00210'
