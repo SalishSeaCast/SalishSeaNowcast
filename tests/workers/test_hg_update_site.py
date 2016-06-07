@@ -23,52 +23,48 @@ from unittest.mock import (
 
 import pytest
 
-
-@pytest.fixture
-def worker_module(scope='module'):
-    from nowcast.workers import hg_update_site
-    return hg_update_site
+from nowcast.workers import hg_update_site
 
 
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.hg_update_site.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
-        worker_module.main()
+    @patch('nowcast.workers.hg_update_site.worker_name')
+    def test_instantiate_worker(self, m_name, m_worker):
+        hg_update_site.main()
         args, kwargs = m_worker.call_args
         assert args == (m_name,)
         assert list(kwargs.keys()) == ['description']
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        hg_update_site.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.hg_update_site,
-            worker_module.success,
-            worker_module.failure,
+            hg_update_site.hg_update_site,
+            hg_update_site.success,
+            hg_update_site.failure,
         )
 
 
-def test_success(worker_module):
+def test_success():
     parsed_args = Mock()
-    msg_typ = worker_module.success(parsed_args)
+    msg_typ = hg_update_site.success(parsed_args)
     assert msg_typ == 'success'
 
 
-def test_failure(worker_module):
+def test_failure():
     parsed_args = Mock()
-    msg_typ = worker_module.failure(parsed_args)
+    msg_typ = hg_update_site.failure(parsed_args)
     assert msg_typ == 'failure'
 
 
 class TestHgUpdateSite:
     """Unit tests for hg_update_site() function.
     """
-    @patch.object(worker_module(), 'logger')
-    @patch.object(worker_module().lib, 'run_in_subprocess')
-    def test_hg_update(self, m_lib_ris, m_logger, worker_module, tmpdir):
+    @patch('nowcast.workers.hg_update_site.logger')
+    @patch('nowcast.workers.hg_update_site.lib.run_in_subprocess')
+    def test_hg_update(self, m_lib_ris, m_logger, tmpdir):
         parsed_args = Mock()
         tmp_www_path = tmpdir.ensure_dir('www')
         tmp_repo_path = tmp_www_path.ensure_dir('salishsea-site')
@@ -78,16 +74,16 @@ class TestHgUpdateSite:
                     'https://bitbucket.org/salishsea/salishsea-site',
                 'www_path': str(tmp_www_path),
             }}
-        checklist = worker_module.hg_update_site(parsed_args, config)
+        checklist = hg_update_site.hg_update_site(parsed_args, config)
         expected = shlex.split(
             'hg pull --update --cwd {}'.format(tmp_repo_path))
         m_lib_ris.assert_called_once_with(
             expected, m_logger.debug, m_logger.error)
         assert checklist == str(tmp_repo_path)
 
-    @patch.object(worker_module(), 'logger')
-    @patch.object(worker_module().lib, 'run_in_subprocess')
-    def test_hg_clone(self, m_lib_ris, m_logger, worker_module, tmpdir):
+    @patch('nowcast.workers.hg_update_site.logger')
+    @patch('nowcast.workers.hg_update_site.lib.run_in_subprocess')
+    def test_hg_clone(self, m_lib_ris, m_logger, tmpdir):
         parsed_args = Mock()
         tmp_www_path = tmpdir.ensure_dir('www')
         config = {
@@ -96,7 +92,7 @@ class TestHgUpdateSite:
                     'https://bitbucket.org/salishsea/salishsea-site',
                 'www_path': str(tmp_www_path),
             }}
-        checklist = worker_module.hg_update_site(parsed_args, config)
+        checklist = hg_update_site.hg_update_site(parsed_args, config)
         expected = shlex.split(
             'hg clone {repo_url} {repo}'
             .format(
