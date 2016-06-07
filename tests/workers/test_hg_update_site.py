@@ -47,16 +47,36 @@ class TestMain:
         )
 
 
-def test_success():
-    parsed_args = Mock()
-    msg_typ = hg_update_site.success(parsed_args)
-    assert msg_typ == 'success'
+class TestSuccess:
+    """Unit tests for success() function.
+    """
+    def test_success_log_info(self):
+        parsed_args = Mock()
+        with patch('nowcast.workers.hg_update_site.logger') as m_logger:
+            hg_update_site.success(parsed_args)
+        assert m_logger.info.called
+
+    def test_success_msg_type(self):
+        parsed_args = Mock()
+        with patch('nowcast.workers.hg_update_site.logger'):
+            msg_typ = hg_update_site.success(parsed_args)
+        assert msg_typ == 'success'
 
 
-def test_failure():
-    parsed_args = Mock()
-    msg_typ = hg_update_site.failure(parsed_args)
-    assert msg_typ == 'failure'
+class TestFailure:
+    """Unit tests for failure() function.
+    """
+    def test_failure_log_critical(self):
+        parsed_args = Mock()
+        with patch('nowcast.workers.hg_update_site.logger') as m_logger:
+            hg_update_site.failure(parsed_args)
+        assert m_logger.critical.called
+
+    def test_failure_msg_type(self):
+        parsed_args = Mock()
+        with patch('nowcast.workers.hg_update_site.logger'):
+            msg_typ = hg_update_site.failure(parsed_args)
+        assert msg_typ == 'failure'
 
 
 class TestHgUpdateSite:
