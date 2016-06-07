@@ -70,13 +70,61 @@ class TestMain:
         )
 
 
-def test_success():
-    parsed_args = Mock(run_type='nowcast')
-    msg_typ = download_results.success(parsed_args)
-    assert msg_typ == 'success nowcast'
+class TestSuccess:
+    """Unit tests for success() function.
+    """
+    @pytest.mark.parametrize('run_type, host_name', [
+        ('nowcast', 'west.cloud-nowcast'),
+        ('nowcast-green', 'salish-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
+        ('forecast2', 'west.cloud-nowcast'),
+    ])
+    def test_success_log_info(self, run_type, host_name):
+        parsed_args = Mock(host_name=host_name, run_type=run_type)
+        with patch('nowcast.workers.download_results.logger') as m_logger:
+            download_results.success(parsed_args)
+        assert m_logger.info.called
+        assert m_logger.info.call_args[1]['extra']['run_type'] == run_type
+        assert m_logger.info.call_args[1]['extra']['host_name'] == host_name
+
+    @pytest.mark.parametrize('run_type, host_name', [
+        ('nowcast', 'west.cloud-nowcast'),
+        ('nowcast-green', 'salish-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
+        ('forecast2', 'west.cloud-nowcast'),
+    ])
+    def test_success_msg_type(self, run_type, host_name):
+        parsed_args = Mock(host_name=host_name, run_type=run_type)
+        with patch('nowcast.workers.download_results.logger'):
+            msg_typ = download_results.success(parsed_args)
+        assert msg_typ == 'success {}'.format(run_type)
 
 
-def test_failure():
-    parsed_args = Mock(run_type='nowcast')
-    msg_typ = download_results.failure(parsed_args)
-    assert msg_typ == 'failure nowcast'
+class TestFailure:
+    """Unit tests for failure() function.
+    """
+    @pytest.mark.parametrize('run_type, host_name', [
+        ('nowcast', 'west.cloud-nowcast'),
+        ('nowcast-green', 'salish-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
+        ('forecast2', 'west.cloud-nowcast'),
+    ])
+    def test_failure_log_critical(self, run_type, host_name):
+        parsed_args = Mock(host_name=host_name, run_type=run_type)
+        with patch('nowcast.workers.download_results.logger') as m_logger:
+            download_results.failure(parsed_args)
+        assert m_logger.critical.called
+        assert m_logger.critical.call_args[1]['extra']['run_type'] == run_type
+        assert m_logger.critical.call_args[1]['extra']['host_name'] == host_name
+
+    @pytest.mark.parametrize('run_type, host_name', [
+        ('nowcast', 'west.cloud-nowcast'),
+        ('nowcast-green', 'salish-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
+        ('forecast2', 'west.cloud-nowcast'),
+    ])
+    def test_failure_msg_type(self, run_type, host_name):
+        parsed_args = Mock(run_type=run_type, host_name=host_name)
+        with patch('nowcast.workers.download_results.logger'):
+            msg_typ = download_results.failure(parsed_args)
+        assert msg_typ == 'failure {}'.format(run_type)
