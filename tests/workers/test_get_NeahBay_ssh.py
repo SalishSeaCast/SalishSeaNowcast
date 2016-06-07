@@ -21,6 +21,7 @@ from unittest.mock import (
     patch,
 )
 
+import pytest
 import pytz
 
 from nowcast.workers import get_NeahBay_ssh
@@ -57,33 +58,55 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self):
-        parsed_args = Mock(run_type='nowcast')
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'forecast',
+        'forecast2',
+    ])
+    def test_success_log_info(self, run_type):
+        parsed_args = Mock(run_type=run_type)
         with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
             get_NeahBay_ssh.success(parsed_args)
         assert m_logger.info.called
+        assert m_logger.info.call_args[1]['extra']['run_type'] == run_type
 
-    def test_success_msg_type(self):
-        parsed_args = Mock(run_type='nowcast')
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'forecast',
+        'forecast2',
+    ])
+    def test_success_msg_type(self, run_type):
+        parsed_args = Mock(run_type=run_type)
         with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
             msg_typ = get_NeahBay_ssh.success(parsed_args)
-        assert msg_typ == 'success nowcast'
+        assert msg_typ == 'success {}'.format(run_type)
 
 
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_critical(self):
-        parsed_args = Mock(run_type='nowcast')
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'forecast',
+        'forecast2',
+    ])
+    def test_failure_log_critical(self, run_type):
+        parsed_args = Mock(run_type=run_type)
         with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
             get_NeahBay_ssh.failure(parsed_args)
         assert m_logger.critical.called
+        assert m_logger.critical.call_args[1]['extra']['run_type'] == run_type
 
-    def test_failure_msg_type(self):
-        parsed_args = Mock(run_type='nowcast')
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'forecast',
+        'forecast2',
+    ])
+    def test_failure_msg_type(self, run_type):
+        parsed_args = Mock(run_type=run_type)
         with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
             msg_typ = get_NeahBay_ssh.failure(parsed_args)
-        assert msg_typ == 'failure nowcast'
+        assert msg_typ == 'failure {}'.format(run_type)
 
 
 class TestUTCNowToRunDate:
