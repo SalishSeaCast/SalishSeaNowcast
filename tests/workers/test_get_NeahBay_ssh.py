@@ -77,7 +77,7 @@ class TestSuccess:
     ])
     def test_success_msg_type(self, run_type):
         parsed_args = Mock(run_type=run_type)
-        with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
+        with patch('nowcast.workers.get_NeahBay_ssh.logger'):
             msg_typ = get_NeahBay_ssh.success(parsed_args)
         assert msg_typ == 'success {}'.format(run_type)
 
@@ -104,7 +104,7 @@ class TestFailure:
     ])
     def test_failure_msg_type(self, run_type):
         parsed_args = Mock(run_type=run_type)
-        with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
+        with patch('nowcast.workers.get_NeahBay_ssh.logger'):
             msg_typ = get_NeahBay_ssh.failure(parsed_args)
         assert msg_typ == 'failure {}'.format(run_type)
 
