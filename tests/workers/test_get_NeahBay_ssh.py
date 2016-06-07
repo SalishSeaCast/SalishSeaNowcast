@@ -21,76 +21,91 @@ from unittest.mock import (
     patch,
 )
 
-import pytest
 import pytz
 
-
-@pytest.fixture
-def worker_module():
-    from nowcast.workers import get_NeahBay_ssh
-    return get_NeahBay_ssh
+from nowcast.workers import get_NeahBay_ssh
 
 
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.get_NeahBay_ssh.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
-        worker_module.main()
+    @patch('nowcast.workers.get_NeahBay_ssh.worker_name')
+    def test_instantiate_worker(self, m_name, m_worker):
+        get_NeahBay_ssh.main()
         args, kwargs = m_worker.call_args
         assert args == (m_name,)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_run_type_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_type_arg(self, m_worker):
+        get_NeahBay_ssh.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
         assert args == ('run_type',)
-        assert kwargs['choices'] == set(('nowcast', 'forecast', 'forecast2'))
+        assert kwargs['choices'] == {'nowcast', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        get_NeahBay_ssh.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.get_NeahBay_ssh,
-            worker_module.success,
-            worker_module.failure,
+            get_NeahBay_ssh.get_NeahBay_ssh,
+            get_NeahBay_ssh.success,
+            get_NeahBay_ssh.failure,
         )
 
 
-def test_success(worker_module):
-    parsed_args = Mock(run_type='nowcast')
-    msg_typ = worker_module.success(parsed_args)
-    assert msg_typ == 'success nowcast'
+class TestSuccess:
+    """Unit tests for success() function.
+    """
+    def test_success_log_info(self):
+        parsed_args = Mock(run_type='nowcast')
+        with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
+            get_NeahBay_ssh.success(parsed_args)
+        assert m_logger.info.called
+
+    def test_success_msg_type(self):
+        parsed_args = Mock(run_type='nowcast')
+        with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
+            msg_typ = get_NeahBay_ssh.success(parsed_args)
+        assert msg_typ == 'success nowcast'
 
 
-def test_failure(worker_module):
-    parsed_args = Mock(run_type='nowcast')
-    msg_typ = worker_module.failure(parsed_args)
-    assert msg_typ == 'failure nowcast'
+class TestFailure:
+    """Unit tests for failure() function.
+    """
+    def test_failure_log_critical(self):
+        parsed_args = Mock(run_type='nowcast')
+        with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
+            get_NeahBay_ssh.failure(parsed_args)
+        assert m_logger.critical.called
+
+    def test_failure_msg_type(self):
+        parsed_args = Mock(run_type='nowcast')
+        with patch('nowcast.workers.get_NeahBay_ssh.logger') as m_logger:
+            msg_typ = get_NeahBay_ssh.failure(parsed_args)
+        assert msg_typ == 'failure nowcast'
 
 
 class TestUTCNowToRunDate:
     """Unit tests for _utc_now_to_run_date() function.
     """
-    def test_nowcast(self, worker_module):
+    def test_nowcast(self):
         utc_now = datetime.datetime(
             2014, 12, 25, 17, 52, 42, tzinfo=pytz.timezone('UTC'))
-        run_day = worker_module._utc_now_to_run_date(
+        run_day = get_NeahBay_ssh._utc_now_to_run_date(
             utc_now, 'nowcast')
         assert run_day == datetime.date(2014, 12, 25)
 
-    def test_forecast(self, worker_module):
+    def test_forecast(self):
         utc_now = datetime.datetime(
             2014, 12, 25, 19, 54, 42, tzinfo=pytz.timezone('UTC'))
-        run_day = worker_module._utc_now_to_run_date(
+        run_day = get_NeahBay_ssh._utc_now_to_run_date(
             utc_now, 'forecast')
         assert run_day == datetime.date(2014, 12, 25)
 
-    def test_forecast2(self, worker_module):
+    def test_forecast2(self):
         utc_now = datetime.datetime(
             2014, 12, 26, 12, 53, 42, tzinfo=pytz.timezone('UTC'))
-        run_day = worker_module._utc_now_to_run_date(
+        run_day = get_NeahBay_ssh._utc_now_to_run_date(
             utc_now, 'forecast2')
         assert run_day == datetime.date(2014, 12, 25)
