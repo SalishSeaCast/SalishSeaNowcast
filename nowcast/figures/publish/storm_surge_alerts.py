@@ -52,6 +52,7 @@ def storm_surge_alerts(
     :arg dict grids_15m: Collection of 15m sea surface height datasets at tide
                          gauge locations,
                          keyed by tide gauge station name.
+
     :arg str weather_path: The directory where the weather forcing files
                            are stored.
 
