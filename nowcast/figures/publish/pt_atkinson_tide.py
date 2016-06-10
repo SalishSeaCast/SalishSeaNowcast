@@ -61,7 +61,7 @@ def pt_atkinson_tide(
     """
     plot_data = _prep_plot_data(grid_T_hr, timezone, tidal_predictions)
     fig, ax = _prep_fig_axes(figsize, theme)
-    _plot_tide_cycle(ax, plot_data, tidal_predictions, theme)
+    _plot_tide_cycle(ax, plot_data, theme)
     _attribution_text(ax, theme)
     return fig
 
@@ -86,9 +86,7 @@ def _prep_fig_axes(figsize, theme):
     return fig, ax
 
 
-def _plot_tide_cycle(ax, plot_data, tidal_predictions, theme, ylims=(-3, 3)):
-    # plot_tides(ax, 'Point Atkinson', 1, 0, tidal_predictions, 'black')
-    # ax.plot()
+def _plot_tide_cycle(ax, plot_data, theme, ylims=(-3, 3)):
     ax.plot(
         plot_data.ttide.time, plot_data.ttide.pred_all,
         linewidth=2,
