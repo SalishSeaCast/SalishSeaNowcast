@@ -165,7 +165,7 @@ def _alerts_map_marker_legend(ax, theme):
     # axes limits to provide content for the legend.
     risk_levels = (
         # (Risk level key in theme.COLOURS, legend label)
-        (None, 'No floosing\nrisk'),
+        (None, 'No flooding\nrisk'),
         ('moderate risk', 'Risk of\nhigh water'),
         ('extreme risk', 'Extreme risk\nof flooding'),
     )
