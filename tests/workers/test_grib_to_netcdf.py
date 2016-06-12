@@ -66,28 +66,48 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self):
-        parsed_args = Mock(run_type='nowcast+')
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+    ])
+    def test_success_log_info(self, run_type):
+        parsed_args = Mock(run_type=run_type)
         with patch('nowcast.workers.grib_to_netcdf.logger') as m_logger:
             grib_to_netcdf.success(parsed_args)
         assert m_logger.info.called
+        assert m_logger.info.call_args[1]['extra']['run_type'] == run_type
 
-    def test_success_msg_type(self):
-        parsed_args = Mock(run_type='forecast2')
-        msg_type = grib_to_netcdf.success(parsed_args)
-        assert msg_type == 'success forecast2'
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+    ])
+    def test_success_msg_type(self, run_type):
+        parsed_args = Mock(run_type=run_type)
+        with patch('nowcast.workers.grib_to_netcdf.logger') as m_logger:
+            msg_type = grib_to_netcdf.success(parsed_args)
+        assert msg_type == 'success {}'.format(run_type)
 
 
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_critical(self):
-        parsed_args = Mock(run_type='nowcast+')
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+    ])
+    def test_failure_log_critical(self, run_type):
+        parsed_args = Mock(run_type=run_type)
         with patch('nowcast.workers.grib_to_netcdf.logger') as m_logger:
             grib_to_netcdf.failure(parsed_args)
         assert m_logger.critical.called
+        assert m_logger.critical.call_args[1]['extra']['run_type'] == run_type
 
-    def test_failure_msg_type(self):
-        parsed_args = Mock(run_type='forecast2')
-        msg_type = grib_to_netcdf.failure(parsed_args)
-        assert msg_type == 'failure forecast2'
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+    ])
+    def test_failure_msg_type(self, run_type):
+        parsed_args = Mock(run_type=run_type)
+        with patch('nowcast.workers.grib_to_netcdf.logger') as m_logger:
+            msg_type = grib_to_netcdf.failure(parsed_args)
+        assert msg_type == 'failure {}'.format(run_type)
