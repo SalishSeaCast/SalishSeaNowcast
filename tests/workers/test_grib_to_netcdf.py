@@ -24,75 +24,70 @@ import arrow
 import pytest
 
 import nowcast.lib
+from nowcast.workers import grib_to_netcdf
 
 
-@pytest.fixture
-def worker_module():
-    from nowcast.workers import grib_to_netcdf
-    return grib_to_netcdf
-
-
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.grib_to_netcdf.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
-        worker_module.main()
+    @patch('nowcast.workers.grib_to_netcdf.worker_name')
+    def test_instantiate_worker(self, m_name, m_worker):
+        grib_to_netcdf.main()
         args, kwargs = m_worker.call_args
         assert args == (m_name,)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_run_type_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_type_arg(self, m_worker):
+        grib_to_netcdf.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
         assert args == ('run_type',)
-        assert kwargs['choices'] == set(('nowcast+', 'forecast2'))
+        assert kwargs['choices'] == {'nowcast+', 'forecast2'}
         assert 'help' in kwargs
 
-    def test_add_run_date_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_date_arg(self, m_worker):
+        grib_to_netcdf.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
         assert args == ('--run-date',)
         assert kwargs['type'] == nowcast.lib.arrow_date
         assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
         assert 'help' in kwargs
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        grib_to_netcdf.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.grib_to_netcdf,
-            worker_module.success,
-            worker_module.failure,
+            grib_to_netcdf.grib_to_netcdf,
+            grib_to_netcdf.success,
+            grib_to_netcdf.failure,
         )
 
 
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self, worker_module):
+    def test_success_log_info(self):
         parsed_args = Mock(run_type='nowcast+')
-        with patch.object(worker_module.logger, 'info') as m_logger:
-            worker_module.success(parsed_args)
-        assert m_logger.called
+        with patch('nowcast.workers.grib_to_netcdf.logger') as m_logger:
+            grib_to_netcdf.success(parsed_args)
+        assert m_logger.info.called
 
-    def test_success_msg_type(self, worker_module):
+    def test_success_msg_type(self):
         parsed_args = Mock(run_type='forecast2')
-        msg_type = worker_module.success(parsed_args)
+        msg_type = grib_to_netcdf.success(parsed_args)
         assert msg_type == 'success forecast2'
 
 
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_critical(self, worker_module):
+    def test_failure_log_critical(self):
         parsed_args = Mock(run_type='nowcast+')
-        with patch.object(worker_module.logger, 'critical') as m_logger:
-            worker_module.failure(parsed_args)
-        assert m_logger.called
+        with patch('nowcast.workers.grib_to_netcdf.logger') as m_logger:
+            grib_to_netcdf.failure(parsed_args)
+        assert m_logger.critical.called
 
-    def test_failure_msg_type(self, worker_module):
+    def test_failure_msg_type(self):
         parsed_args = Mock(run_type='forecast2')
-        msg_type = worker_module.failure(parsed_args)
+        msg_type = grib_to_netcdf.failure(parsed_args)
         assert msg_type == 'failure forecast2'
