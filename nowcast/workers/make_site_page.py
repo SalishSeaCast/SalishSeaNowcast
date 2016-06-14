@@ -213,7 +213,7 @@ def _render_nowcast_rst(
                 dmy=run_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'nowcast', rst_filename)
     svg_files_available = _svg_files_available(
-        svg_file_roots, 'nowcast', page_type, run_date, config)
+        svg_file_roots[page_type], 'nowcast', run_date, config)
     if not svg_files_available:
         checklist = {'nowcast {}'.format(page_type): None}
         return checklist
@@ -252,7 +252,7 @@ def _render_forecast_rst(
                 dmy=results_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'forecast', rst_filename)
     svg_files_available = _svg_files_available(
-        svg_file_roots, 'forecast', page_type, run_date, config)
+        svg_file_roots[page_type], 'forecast', run_date, config)
     if not svg_files_available:
         checklist = {'forecast {}'.format(page_type): None}
         return checklist
@@ -291,7 +291,7 @@ def _render_forecast2_rst(
                 dmy=results_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'forecast2', rst_filename)
     svg_files_available = _svg_files_available(
-        svg_file_roots, 'forecast2', page_type, run_date, config)
+        svg_file_roots[page_type], 'forecast2', run_date, config)
     if not svg_files_available:
         checklist = {
             'forecast2 {}'.format(page_type): None,
@@ -326,12 +326,12 @@ def _render_forecast2_rst(
     return checklist
 
 
-def _svg_files_available(svg_file_roots, run_type, page_type, run_date, config):
-    run_dmy = run_date.format('ddmmmyy')
+def _svg_files_available(svg_file_roots, run_type, run_date, config):
+    run_dmy = run_date.format('DDMMMYY').lower()
     figures_path = os.path.join(
         config['web']['figures']['storage_path'], run_type, run_dmy)
     svg_files_available = [
-        (f, title) for f, title in svg_file_roots[page_type]
+        (f, title) for f, title in svg_file_roots
         if os.path.exists(os.path.join(
             figures_path,
             '{svg_file}_{run_dmy}.svg'.format(svg_file=f, run_dmy=run_dmy)))
