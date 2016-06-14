@@ -1468,7 +1468,7 @@ def Sandheads_winds(
     ax2.set_ylim([0, 360])
     ax2.set_xlabel(
         'Time ' + PST * '[PST]' + abs((PST - 1)) * '[UTC]', **axis_font)
-    ax2.set_ylabel('Wind Direction \n (degress CCW of East)', **axis_font)
+    ax2.set_ylabel('Wind To Direction \n (degrees CCW of East)', **axis_font)
     ax2.legend(loc=0)
     ax2.grid()
     axis_colors(ax2, 'gray')
