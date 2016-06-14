@@ -212,6 +212,11 @@ def _render_nowcast_rst(
         .format(page_type=page_type,
                 dmy=run_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'nowcast', rst_filename)
+    svg_files_available = _svg_files_available(
+        svg_file_roots, 'nowcast', page_type, run_date, config)
+    if not svg_files_available:
+        checklist = {'nowcast {}'.format(page_type): None}
+        return checklist
     figures_server = (
         'https://{domain}/{path}'
         .format(
@@ -222,7 +227,7 @@ def _render_nowcast_rst(
         'run_type': 'nowcast',
         'results_date': run_date,
         'run_title': 'Nowcast',
-        'svg_file_roots': svg_file_roots[page_type],
+        'svg_file_roots': svg_files_available,
         'figures_server': figures_server,
     }
     _tmpl_to_rst(tmpl, rst_file, data, config)
@@ -246,6 +251,11 @@ def _render_forecast_rst(
         .format(page_type=page_type,
                 dmy=results_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'forecast', rst_filename)
+    svg_files_available = _svg_files_available(
+        svg_file_roots, 'forecast', page_type, run_date, config)
+    if not svg_files_available:
+        checklist = {'forecast {}'.format(page_type): None}
+        return checklist
     figures_server = (
         'https://{domain}/{path}'
         .format(
@@ -256,7 +266,7 @@ def _render_forecast_rst(
         'run_type': 'forecast',
         'results_date': results_date,
         'run_title': 'Forecast',
-        'svg_file_roots': svg_file_roots[page_type],
+        'svg_file_roots': svg_files_available,
         'figures_server': figures_server,
     }
     _tmpl_to_rst(tmpl, rst_file, data, config)
@@ -267,9 +277,7 @@ def _render_forecast_rst(
             'page_type': page_type,
             'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    checklist = {
-        'forecast {}'.format(page_type): rst_file,
-    }
+    checklist = {'forecast {}'.format(page_type): rst_file}
     return checklist
 
 
@@ -282,6 +290,14 @@ def _render_forecast2_rst(
         .format(page_type=page_type,
                 dmy=results_date.format('DDMMMYY').lower()))
     rst_file = os.path.join(rst_path, 'forecast2', rst_filename)
+    svg_files_available = _svg_files_available(
+        svg_file_roots, 'forecast2', page_type, run_date, config)
+    if not svg_files_available:
+        checklist = {
+            'forecast2 {}'.format(page_type): None,
+            'finish the day': True,
+        }
+        return checklist
     figures_server = (
         'https://{domain}/{path}'
         .format(
@@ -292,7 +308,7 @@ def _render_forecast2_rst(
         'run_type': 'forecast2',
         'results_date': results_date,
         'run_title': 'Preliminary Forecast',
-        'svg_file_roots': svg_file_roots[page_type],
+        'svg_file_roots': svg_files_available,
         'figures_server': figures_server,
     }
     _tmpl_to_rst(tmpl, rst_file, data, config)
@@ -308,6 +324,19 @@ def _render_forecast2_rst(
         'finish the day': True,
     }
     return checklist
+
+
+def _svg_files_available(svg_file_roots, run_type, page_type, run_date, config):
+    run_dmy = run_date.format('ddmmmyy')
+    figures_path = os.path.join(
+        config['web']['figures']['storage_path'], run_type, run_dmy)
+    svg_files_available = [
+        (f, title) for f, title in svg_file_roots[page_type]
+        if os.path.exists(
+            figures_path,
+            '{svg_file}_{run_dmy}.svg'.format(svg_file=f, run_dmy=run_dmy))
+        ]
+    return svg_files_available
 
 
 def _render_index_rst(page_type, run_type, run_date, rst_path, config):
