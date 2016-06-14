@@ -231,54 +231,114 @@ class TestMakeSitePage:
 
 
 @patch.object(worker_module(), '_tmpl_to_rst')
-def test_render_nowcast_rst_run_date(m_tmpl_to_rst, worker_module):
-    config = {
-        'web': {
-            'domain': 'salishsea.eos.ubc.ca',
-            'figures': {
-                'storage_path': '/nowcast-sys/figures',
-                'server_path': 'nowcast-sys/figures',
-        }}}
-    svg_file_roots = {'publish': []}
-    worker_module._render_nowcast_rst(
-        'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
-        config)
-    expected = 'rst_path/nowcast/publish_08feb15.rst'
-    assert m_tmpl_to_rst.call_args[0][1] == expected
+class TestRenderNowcastRst:
+    """Unit tests for _render_nowcast_rst() function.
+    """
+    def test_no_figures(self, m_tmpl_to_rst, worker_module):
+        config = {
+            'web': {
+                'domain': 'salishsea.eos.ubc.ca',
+                'figures': {
+                    'storage_path': '/nowcast-sys/figures',
+                    'server_path': 'nowcast-sys/figures',
+            }}}
+        svg_file_roots = {'publish': []}
+        checklist = worker_module._render_nowcast_rst(
+            'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
+            config)
+        assert not m_tmpl_to_rst.called
+        assert checklist['nowcast publish'] is None
+
+    def test_render_nowcast_rst_run_date(self, m_tmpl_to_rst, worker_module):
+        config = {
+            'web': {
+                'domain': 'salishsea.eos.ubc.ca',
+                'figures': {
+                    'storage_path': '/nowcast-sys/figures',
+                    'server_path': 'nowcast-sys/figures',
+            }}}
+        svg_file_roots = {'publish': []}
+        with patch.object(worker_module, '_svg_files_available') as m_sfa:
+            m_sfa.return_value = [('foo', 'bar')]
+            worker_module._render_nowcast_rst(
+                'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots,
+                'rst_path', config)
+        expected = 'rst_path/nowcast/publish_08feb15.rst'
+        assert m_tmpl_to_rst.call_args[0][1] == expected
 
 
 @patch.object(worker_module(), '_tmpl_to_rst')
-def test_render_forecast_rst_run_date(m_tmpl_to_rst, worker_module):
-    config = {
-        'web': {
-            'domain': 'salishsea.eos.ubc.ca',
-            'figures': {
-                'storage_path': '/nowcast-sys/figures',
-                'server_path': 'nowcast-sys/figures',
-        }}}
-    svg_file_roots = {'publish': []}
-    worker_module._render_forecast_rst(
-        'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
-        config)
-    expected = 'rst_path/forecast/publish_09feb15.rst'
-    assert m_tmpl_to_rst.call_args[0][1] == expected
+class TestRenderForecastRst:
+    """Unit tests for _render_forecast_rst() function.
+    """
+    def test_no_figures(self, m_tmpl_to_rst, worker_module):
+        config = {
+            'web': {
+                'domain': 'salishsea.eos.ubc.ca',
+                'figures': {
+                    'storage_path': '/nowcast-sys/figures',
+                    'server_path': 'nowcast-sys/figures',
+            }}}
+        svg_file_roots = {'publish': []}
+        checklist = worker_module._render_forecast_rst(
+            'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
+            config)
+        assert not m_tmpl_to_rst.called
+        assert checklist['forecast publish'] is None
+
+    def test_render_forecast_rst_run_date(self, m_tmpl_to_rst, worker_module):
+        config = {
+            'web': {
+                'domain': 'salishsea.eos.ubc.ca',
+                'figures': {
+                    'storage_path': '/nowcast-sys/figures',
+                    'server_path': 'nowcast-sys/figures',
+            }}}
+        svg_file_roots = {'publish': []}
+        with patch.object(worker_module, '_svg_files_available') as m_sfa:
+            m_sfa.return_value = [('foo', 'bar')]
+            worker_module._render_forecast_rst(
+                'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots,
+                'rst_path', config)
+        expected = 'rst_path/forecast/publish_09feb15.rst'
+        assert m_tmpl_to_rst.call_args[0][1] == expected
 
 
 @patch.object(worker_module(), '_tmpl_to_rst')
-def test_render_forecast2_rst_run_date(m_tmpl_to_rst, worker_module):
-    config = {
-        'web': {
-            'domain': 'salishsea.eos.ubc.ca',
-            'figures': {
-                'storage_path': '/nowcast-sys/figures',
-                'server_path': 'nowcast-sys/figures',
-        }}}
-    svg_file_roots = {'publish': []}
-    worker_module._render_forecast2_rst(
-        'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
-        config)
-    expected = 'rst_path/forecast2/publish_10feb15.rst'
-    assert m_tmpl_to_rst.call_args[0][1] == expected
+class TestRenderForecast2Rst:
+    """Unit tests for _render_forecast2_rst() function.
+    """
+    def test_no_figures(self, m_tmpl_to_rst, worker_module):
+        config = {
+            'web': {
+                'domain': 'salishsea.eos.ubc.ca',
+                'figures': {
+                    'storage_path': '/nowcast-sys/figures',
+                    'server_path': 'nowcast-sys/figures',
+            }}}
+        svg_file_roots = {'publish': []}
+        checklist = worker_module._render_forecast2_rst(
+            'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots, 'rst_path',
+            config)
+        assert not m_tmpl_to_rst.called
+        assert checklist == {'forecast2 publish': None, 'finish the day': True}
+
+    def test_render_forecast2_rst_run_date(self, m_tmpl_to_rst, worker_module):
+        config = {
+            'web': {
+                'domain': 'salishsea.eos.ubc.ca',
+                'figures': {
+                    'storage_path': '/nowcast-sys/figures',
+                    'server_path': 'nowcast-sys/figures',
+            }}}
+        svg_file_roots = {'publish': []}
+        with patch.object(worker_module, '_svg_files_available') as m_sfa:
+            m_sfa.return_value = [('foo', 'bar')]
+            worker_module._render_forecast2_rst(
+                'tmpl', 'publish', arrow.get(2015, 2, 8), svg_file_roots,
+                'rst_path', config)
+        expected = 'rst_path/forecast2/publish_10feb15.rst'
+        assert m_tmpl_to_rst.call_args[0][1] == expected
 
 
 class TestRenderIndexRst(object):
