@@ -332,9 +332,9 @@ def _svg_files_available(svg_file_roots, run_type, page_type, run_date, config):
         config['web']['figures']['storage_path'], run_type, run_dmy)
     svg_files_available = [
         (f, title) for f, title in svg_file_roots[page_type]
-        if os.path.exists(
+        if os.path.exists(os.path.join(
             figures_path,
-            '{svg_file}_{run_dmy}.svg'.format(svg_file=f, run_dmy=run_dmy))
+            '{svg_file}_{run_dmy}.svg'.format(svg_file=f, run_dmy=run_dmy)))
         ]
     return svg_files_available
 
