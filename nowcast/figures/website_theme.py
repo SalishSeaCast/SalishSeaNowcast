@@ -50,6 +50,10 @@ COLOURS = {
     },
     'land': 'burlywood',
 
+    'marker': {
+        'place': 'white',
+        'max ssh': 'white',
+    },
     'storm surge risk levels': {
         'extreme risk': 'red',
         'moderate risk': 'Gold',
@@ -66,7 +70,10 @@ COLOURS = {
     },
     'time series': {
         'datetime line': 'red',
+        'ssh residual': 'black',
         'tidal prediction': 'black',
+        'tidal prediction vs model': 'red',
+        'tide gauge ssh': 'MediumBlue',
     },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
