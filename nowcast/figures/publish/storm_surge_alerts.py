@@ -49,8 +49,8 @@ def storm_surge_alerts(
     """Plot high water level risk indication markers and 4h average wind
     vectors on a Salish Sea map with summary text below.
 
-    :arg dict grids_15m: Collection of 15m sea surface height datasets at tide
-                         gauge locations,
+    :arg dict grids_15m: Collection of 15 minute averaged sea surface height
+                         datasets at tide gauge locations,
                          keyed by tide gauge station name.
 
     :arg str weather_path: The directory where the weather forcing files
