@@ -87,6 +87,15 @@ Nowcast System Results Figures
 :py:obj:`nowcast.figures.publish`  Figure Modules
 -------------------------------------------------
 
+.. _nowcast.figures.publish.compare_tide_prediction_max_ssh:
+
+:py:mod:`nowcast.figures.publish.compare_tide_prediction_max_ssh`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.compare_tide_prediction_max_ssh
+    :members:
+
+
 .. _nowcast.figures.publish.pt_atkinson_tide:
 
 :py:mod:`nowcast.figures.publish.pt_atkinson_tide` Module
@@ -95,6 +104,7 @@ Nowcast System Results Figures
 .. automodule:: nowcast.figures.publish.pt_atkinson_tide
     :members:
 
+
 .. _nowcast.figures.publish.storm_surge_alerts:
 
 :py:mod:`nowcast.figures.publish.storm_surge_alerts` Module
@@ -102,6 +112,7 @@ Nowcast System Results Figures
 
 .. automodule:: nowcast.figures.publish.storm_surge_alerts
     :members:
+
 
 .. _nowcast.figures.publish.storm_surge_alerts_thumbnail:
 

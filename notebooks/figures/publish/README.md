@@ -6,20 +6,29 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[TestStormSurgeAlertsModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb)  
-    
-    **Test `storm_surge_alerts` Module**  
-      
-    Render figure object produced by the `nowcast.figures.publish.storm_surge_alerts` module.  
-    Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.  
-      
-    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
-
 * ##[TestPtAtkinsonTideModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb)  
     
     **Test `pt_atkinson_tide` Module**  
       
     Render figure object produced by the `nowcast.figures.publish.pt_atkinson_tide` module.  
+    Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
+
+* ##[TestCompareTidePredictionMaxSSH.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb)  
+    
+    **Test `compare_tide_prediction_max_ssh` Module**  
+      
+    Render figure object produced by the `nowcast.figures.publish.compare_tide_prediction_max_ssh` module.  
+    Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
+
+* ##[TestStormSurgeAlertsModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb)  
+    
+    **Test `storm_surge_alerts` Module**  
+      
+    Render figure object produced by the `nowcast.figures.publish.storm_surge_alerts` module.  
     Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.  
       
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  

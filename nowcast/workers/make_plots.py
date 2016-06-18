@@ -38,6 +38,7 @@ from nowcast.figures.publish import (
     pt_atkinson_tide,
     storm_surge_alerts,
     storm_surge_alerts_thumbnail,
+    compare_tide_prediction_max_ssh,
 )
 from nowcast.nowcast_worker import NowcastWorker
 
@@ -226,9 +227,9 @@ def _make_publish_plots(
         ('Cherry Point', 'CP_maxSSH'),
     )
     for stn_name, fig_file_prefix in tide_gauge_stns:
-        fig = figures.compare_tidalpredictions_maxSSH(
-            grid_T_hr, bathy, grids_15m, weather_path, tidal_predictions,
-            name=stn_name)
+        fig = compare_tide_prediction_max_ssh.compare_tide_prediction_max_ssh(
+            stn_name, grid_T_hr, grids_15m, bathy, weather_path,
+            tidal_predictions, timezone)
         filename = os.path.join(
             plots_dir, '{fig_file_prefix}_{date}.svg'
             .format(date=dmy, fig_file_prefix=fig_file_prefix))
