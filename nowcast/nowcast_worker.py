@@ -26,7 +26,7 @@ from nowcast import lib
 
 
 class WorkerError(Exception):
-    """Raised when a worker encounters an error or exception that it can'try:
+    """Raised when a worker encounters an error or exception that it can't
     recover from.
     """
 
