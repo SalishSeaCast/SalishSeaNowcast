@@ -31,7 +31,7 @@ class WorkerError(Exception):
     """
 
 
-class NowcastWorker(object):
+class NowcastWorker:
     """Construct a :py:class:`nowcast_worker.NowcastWorker` instance.
 
     In addition to the constructor arguments below,
