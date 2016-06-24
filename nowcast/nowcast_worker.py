@@ -96,7 +96,7 @@ class NowcastWorker:
         Preparations include:
 
         * Parsing the worker's command-line argument into a
-          :py:class:`argparse.ArgumentParser.Namepsace` instance
+          :py:class:`argparse.Namespace` instance
 
         * Reading the nowcast configuration file named on the command
           line to a dict
@@ -110,34 +110,28 @@ class NowcastWorker:
 
         :arg worker_func: Function to be called to do the worker's job.
                           Called with the worker's parsed command-line
-                          arguments
-                          :py:class:`argparse.ArgumentParser.Namepsace`
-                          instance,
+                          arguments :py:class:`argparse.Namespace` instance,
                           and the worker's configuration dict.
         :type worker_func: Python function
 
         :arg success: Function to be called when the worker finishes
                       successfully.
                       Called with the worker's parsed command-line
-                      arguments
-                      :py:class:`argparse.ArgumentParser.Namepsace`
-                      instance.
+                      arguments :py:class:`argparse.Namespace` instance.
                       Must return a string whose value is a success
                       message type defined for the worker in the nowcast
                       configuration file.
 
-        :type worker_func: Python function
+        :type success: Python function
 
         :arg failure: Function to be called when the worker fails.
                       Called with the worker's parsed command-line
-                      arguments
-                      :py:class:`argparse.ArgumentParser.Namepsace`
-                      instance.
+                      arguments :py:class:`argparse.Namespace` instance.
                       Must return a string whose value is a failure
                       message type defined for the worker in the nowcast
                       configuration file.
 
-        :type worker_func: Python function
+        :type failure: Python function
         """
         self.worker_func = worker_func
         self.success = success
