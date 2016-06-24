@@ -28,12 +28,16 @@ import netCDF4 as nc
 import numpy as np
 import pandas as pd
 
-from salishsea_tools import(tidetools,
-                            geo_tools,
+from salishsea_tools import(
+    geo_tools,
+    tidetools,
 )
 
 from nowcast import analyze
-from nowcast.figures import figures
+from nowcast.figures import (
+    figures,
+    shared,
+)
 
 # Module constants
 
@@ -502,7 +506,7 @@ def model_residual_ssh(grid_T, j, i, tides):
     ssh_mod = grid_T.variables['sossheig'][:, j, i]
     t_s, t_f, t_model = figures.get_model_time_variables(grid_T)
     ssh_corr = figures.correct_model_ssh(ssh_mod, t_model, tides)
-    res_mod = figures.compute_residual(
+    res_mod = compute_residual(
         ssh_corr, t_model, tides)
     return res_mod, t_model, ssh_corr, ssh_mod
 
@@ -526,7 +530,7 @@ def obs_residual_ssh(name, tides, sdt, edt):
     obs = figures.load_archived_observations(
         name, sdt.strftime('%d-%b-%Y'),
         edt.strftime('%d-%b-%Y'))
-    residual = figures.compute_residual(obs.wlev-msl, obs.time, tides)
+    residual = compute_residual(obs.wlev - msl, obs.time, tides)
 
     return residual, obs
 
@@ -559,7 +563,7 @@ def obs_residual_ssh_NOAA(name, tides, sdt, edt, product='hourly_height'):
                                    product=product)
 
     # Prepare to find residual
-    residual = figures.compute_residual(obs.wlev, obs.time, tides)
+    residual = compute_residual(obs.wlev, obs.time, tides)
 
     return residual, obs
 
@@ -715,3 +719,30 @@ def _to_datetime(datestr,  year, isDec, isJan):
         dt = dt.replace(year=year)
     dt = dt.replace(tzinfo=pytz.timezone('UTC'))
     return dt
+
+
+def compute_residual(ssh, t_model, ttide):
+    """Compute the difference between modelled ssh and tidal predictions for a
+    range of dates.
+
+    Both modelled ssh and tidal predictions use eight tidal constituents.
+
+    :arg ssh: The model sea surface height with tidal constituents corrections
+              applied.
+    :type ssh: numpy array
+
+    :arg t_model: model output times
+    :type t_model: array of datetime objects
+
+    :arg ttide: The tidal predictions.
+    :type ttide: DateFrame object with columns time, pred_all and pred_8
+
+    :returns: numpy array for residual (res).
+    """
+
+    # interpolate tides to model time
+    tides_interp = shared.interp_to_model_time(t_model, ttide.pred_all, ttide.time)
+
+    res = ssh - tides_interp
+
+    return res

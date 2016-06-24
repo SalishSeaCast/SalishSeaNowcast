@@ -45,6 +45,7 @@ from dateutil import tz
 from matplotlib.backends import backend_agg as backend
 from scipy import interpolate as interp
 
+from nowcast.figures import shared
 from salishsea_tools import (
     geo_tools,
     nc_tools,
@@ -52,9 +53,6 @@ from salishsea_tools import (
     tidetools,
     viz_tools,
 )
-
-from nowcast.figures import shared
-
 
 # =============================== #
 # <------- Kyle 2015/08/25
@@ -573,32 +571,6 @@ def get_maxes(ssh, t, res, lon, lat, weather_path):
     max_wind = wind[ind_w]
 
     return max_ssh, index_ssh, tmax, max_res, max_wind, ind_w
-
-
-def compute_residual(ssh, t_model, ttide):
-    """Compute the difference between modelled ssh and tidal predictions for a
-    range of dates.
-
-    Both modelled ssh and tidal predictions use eight tidal constituents.
-
-    :arg ssh: The modelled ssh (without corrections).
-    :type ssh: numpy array
-
-    :arg t_model: model output times
-    :type t_model: array of datetime objects
-
-    :arg ttide: The tidal predictions.
-    :type ttide: DateFrame object with columns time, pred_all and pred_8
-
-    :returns: numpy array for residual (res).
-    """
-
-    # interpolate tides to model time
-    tides_interp = shared.interp_to_model_time(t_model, ttide.pred_all, ttide.time)
-
-    res = ssh - tides_interp
-
-    return res
 
 
 def get_weather_filenames(t_orig, t_final, weather_path):
