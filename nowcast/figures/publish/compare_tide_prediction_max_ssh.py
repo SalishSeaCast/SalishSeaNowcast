@@ -130,8 +130,7 @@ def _prep_plot_data(
         place, ssh_15m_ts, ttide)
     tides_15m = shared.interp_to_model_time(
         ssh_15m_ts.time, ttide.pred_all, ttide.time)
-    ## TODO: Confirm with Nancy whether to calc residual from ssh_corr or ssh_15m_ts.ssh
-    residual = ssh_15m_ts.ssh - tides_15m
+    residual = ssh_corr - tides_15m
     max_ssh_residual = residual[ssh_15m_ts.time == time_max_ssh_15m][0]
     wind_4h_avg = wind_tools.calc_wind_avg_at_point(
         arrow.get(time_max_ssh_15m), weather_path,
