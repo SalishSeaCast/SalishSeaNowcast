@@ -101,7 +101,7 @@ def compare_tide_prediction_max_ssh(
         tidal_predictions)
     fig, (ax_info, ax_ssh, ax_map, ax_res) = _prep_fig_axes(figsize, theme)
     _plot_info_box(ax_info, place, plot_data, theme)
-    _plot_ssh_time_series(ax_ssh, place, plot_data, theme)
+    _plot_ssh_time_series(ax_ssh, place, plot_data, timezone, theme)
     _plot_residual_time_series(ax_res, plot_data, timezone, theme)
     _plot_ssh_map(ax_map, plot_data, place, theme)
     return fig
@@ -229,9 +229,9 @@ def _info_box_hide_frame(ax, theme):
         ax.spines[spine].set_visible(False)
 
 
-def _plot_ssh_time_series(ax, place, plot_data, theme, ylims=(-3, 3)):
+def _plot_ssh_time_series(ax, place, plot_data, timezone, theme, ylims=(-3, 3)):
     time = [
-        t.astimezone(pytz.timezone('Canada/Pacific'))
+        t.astimezone(pytz.timezone(timezone))
         for t in plot_data.ssh_15m_ts.time]
     ax.plot(
         plot_data.ttide.time, plot_data.ttide.pred_all,
