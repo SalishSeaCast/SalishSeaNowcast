@@ -416,8 +416,9 @@ def _execute(nemo_processors, xios_processors):
 
 def _fix_permissions():
     script = (
-        u'chmod go+rx ${RESULTS_DIR}\n'
+        u'chmod g+rwx ${RESULTS_DIR}\n'
         u'chmod g+rw ${RESULTS_DIR}/*\n'
+        u'chmod o+rx ${RESULTS_DIR}\n'
         u'chmod o+r ${RESULTS_DIR}/*\n'
     )
     return script
