@@ -78,6 +78,7 @@ def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
             'place name or info key not found in '
             'salishsea_tools.places.PLACES: {}'.format(e))
     node_depth = places.PLACES[place]['depth']
+    station_code = places.PLACES[place]['ONC stationCode']
     model_time = nc_tools.timestamp(
         grid_T_hr, range(grid_T_hr.variables['time_counter'].size))
     tracer_depths = mesh_mask.variables['gdept'][..., j, i][0]
@@ -93,7 +94,8 @@ def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
         tracer_depths, tracer_mask, w_depths)
     onc_data = data_tools.get_onc_data(
         'scalardata', 'getByStation', os.environ['ONC_USER_TOKEN'],
-        station='SCVIP', deviceCategory='CTD', sensors='salinity,temperature',
+        station=station_code,
+        deviceCategory='CTD', sensors='salinity,temperature',
         dateFrom=data_tools.onc_datetime(model_time[0], 'utc'),
         dateTo=data_tools.onc_datetime(model_time[-1], 'utc'))
     plot_data = namedtuple(
