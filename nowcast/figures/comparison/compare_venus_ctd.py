@@ -30,6 +30,7 @@ from salishsea_tools import (
     nc_tools,
 )
 
+from nowcast.figures import shared
 import nowcast.figures.website_theme
 
 
@@ -70,7 +71,6 @@ def compare_venus_ctd(
 
 
 def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
-    time_series = namedtuple('TimeSeries', 'var, time')
     try:
         j, i = places.PLACES[place]['NEMO grid ji']
     except KeyError as e:
@@ -80,25 +80,17 @@ def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
     node_depth = places.PLACES[place]['depth']
     model_time = nc_tools.timestamp(
         grid_T_hr, range(grid_T_hr.variables['time_counter'].size))
-    # model_depths = mesh_mask.variables['gdept'][..., j, i][0]
-    model_depths = grid_T_hr.variables['deptht']
+    tracer_depths = mesh_mask.variables['gdept'][..., j, i][0]
     tracer_mask = mesh_mask.variables['tmask'][..., j, i][0]
+    w_depths = mesh_mask.variables['gdepw'][..., j, i][0]
     salinity_profiles = grid_T_hr.variables['vosaline'][..., j, i]
     temperature_profiles = grid_T_hr.variables['votemper'][..., j, i]
-    model_salinity_ts = time_series(
-        var=[
-            data_tools.interpolate_to_depth(
-                salinity_profiles[i, :], model_depths, node_depth,
-                var_mask=tracer_mask, var_depth_mask=tracer_mask)
-        for i in range(salinity_profiles.shape[0])],
-        time=[t.to(timezone) for t in model_time])
-    model_temperature_ts = time_series(
-        var=[
-            data_tools.interpolate_to_depth(
-                temperature_profiles[i, :], model_depths, node_depth,
-                var_mask=tracer_mask, var_depth_mask=tracer_mask)
-        for i in range(salinity_profiles.shape[0])],
-        time=[t.to(timezone) for t in model_time])
+    model_salinity_ts = _calc_results_time_series(
+        salinity_profiles, model_time, node_depth, timezone,
+        tracer_depths, tracer_mask, w_depths)
+    model_temperature_ts = _calc_results_time_series(
+        temperature_profiles, model_time, node_depth, timezone,
+        tracer_depths, tracer_mask, w_depths)
     onc_data = data_tools.get_onc_data(
         'scalardata', 'getByStation', os.environ['ONC_USER_TOKEN'],
         station='SCVIP', deviceCategory='CTD', sensors='salinity,temperature',
@@ -111,6 +103,20 @@ def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
         model_temperature_ts=model_temperature_ts,
         ctd_data=data_tools.onc_json_to_dataset(onc_data),
     )
+
+
+def _calc_results_time_series(
+    tracer, model_time, node_depth, timezone, tracer_depths, tracer_mask,
+    w_depths,
+):
+    time_series = namedtuple('TimeSeries', 'var, time')
+    return time_series(
+        var=[
+            shared.interpolate_tracer_to_depths(
+                tracer[i, :], tracer_depths, node_depth,
+                tracer_mask, w_depths)
+            for i in range(tracer.shape[0])],
+        time=[t.to(timezone) for t in model_time])
 
 
 def _prep_fig_axes(figsize, theme):

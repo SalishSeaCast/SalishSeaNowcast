@@ -31,6 +31,7 @@ from matplotlib import patches
 from matplotlib.backends import backend_agg as backend
 from matplotlib.figure import Figure
 import numpy as np
+import scipy.interpolate
 
 from salishsea_tools import stormtools
 from salishsea_tools.places import PLACES
@@ -298,3 +299,56 @@ def plot_wind_arrow(
         head_width=0.05, head_length=0.1, width=0.02,
         facecolor=theme.COLOURS['wind arrow']['facecolor'],
         edgecolor=theme.COLOURS['wind arrow']['edgecolor'])
+
+
+def interpolate_tracer_to_depths(
+    tracer, tracer_depths, interp_depths, tracer_mask, w_depths
+):
+    """Calculate the interpolated value of :kbd:`tracer` at :kbd:`interp_depths`
+    using linear interpolation.
+
+    :arg tracer: Depth profile of a model tracer variable.
+    :type tracer: :py:class:`numpy.ndarray`
+
+    :arg tracer_depths: Depths at which the model tracer variable has values.
+    :type tracer_depths: :py:class:`numpy.ndarray`
+
+    :arg interp_depths: Depth(s) at which to calculate the interpolated value
+                        of the model variable or data quantity.
+    :type interp_depths: :py:class:`numpy.ndarray` or number
+
+    :arg tracer_mask: Mask to use obtain the water sections of :kbd:`tracer`
+                      and :kbd:`tracer_depths`;
+                      i.e. a 1D slice of :py:attr:`tmask` from the mesh mask.
+    :type tracer_mask: :py:class:`numpy.ndarray`
+
+    :arg w_depths: Mask to use for the depths.
+                         For model results it is best to use the a 1D slice
+                         of the appropriate mesh mask array;
+                         e.g. :py:attr:`tmask` for tracers.
+                         Masking the depths array increases the accuracy of
+                         the interpolation.
+                         If var_depth_mask is not provided the depths array
+                         is zero-masked.
+    :type w_depths: :py:class:`numpy.ndarray`
+
+    :returns: Value(s) of :kbd:`tracer` linearly interpolated to
+              :kbd:`interp_depths`.
+    :rtype: :py:class:`numpy.ndarray` or number
+
+    :raises: :py:exc:`ValueError` if any of the values in :kbd:`interp_depths`
+             exceed the maximum model grid depth.
+    """
+    try:
+        if any(interp_depths > w_depths[tracer_mask == False][0]):
+            raise ValueError(
+                'A requested depth is outside the interpolation range.')
+    except TypeError:
+        if interp_depths > w_depths[tracer_mask == False][0]:
+            raise ValueError(
+                'A requested depth is outside the interpolation range.')
+    depth_interp = scipy.interpolate.interp1d(
+        tracer_depths[tracer_mask == True], tracer[tracer_mask == True],
+        fill_value='extrapolate',
+        assume_sorted=True)
+    return depth_interp(interp_depths)
