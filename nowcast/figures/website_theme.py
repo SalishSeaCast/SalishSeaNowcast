@@ -75,8 +75,10 @@ COLOURS = {
         'tidal prediction vs model': 'red',
         'tide gauge ssh': 'MediumBlue',
         'VENUS node model salinity': 'blue',
+        'VENUS node dev model salinity': 'magenta',
         'VENUS CTD salinity': 'green',
         'VENUS node model temperature': 'blue',
+        'VENUS node dev model temperature': 'magenta',
         'VENUS CTD temperature': 'green',
     },
     'wind arrow': {

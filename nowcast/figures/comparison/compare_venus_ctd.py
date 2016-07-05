@@ -35,7 +35,7 @@ import nowcast.figures.website_theme
 
 
 def compare_venus_ctd(
-    node_name, grid_T_hr, timezone, mesh_mask,
+    node_name, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask, dev_mesh_mask,
     figsize=(7, 10),
     theme=nowcast.figures.website_theme,
 ):
@@ -46,13 +46,19 @@ def compare_venus_ctd(
                         must be a key in
                         :py:obj:`salishsea_tools.places.PLACES`.
 
-    :arg grid_T_hr: Hourly tracer results dataset from NEMO.
+    :arg grid_T_hr: Hourly tracer results dataset from production NEMO run.
     :type grid_T_hr: :class:`netCDF4.Dataset`
+
+    :arg dev_grid_T_hr: Hourly tracer results dataset from development NEMO run.
+    :type dev_grid_T_hr: :class:`netCDF4.Dataset`
 
     :arg str timezone: Timezone to use for display of model results.
 
-    :arg mesh_mask:
+    :arg mesh_mask: NEMO mesh mask for production NEMO run.
     :type mesh_mask: :class:`netCDF4.Dataset`
+
+    :arg dev_mesh_mask: NEMO mesh mask for development NEMO run.
+    :type dev_mesh_mask: :class:`netCDF4.Dataset`
 
     :arg 2-tuple figsize: Figure size (width, height) in inches.
 
@@ -62,7 +68,8 @@ def compare_venus_ctd(
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
-    plot_data = _prep_plot_data(node_name, grid_T_hr, timezone, mesh_mask)
+    plot_data = _prep_plot_data(
+        node_name, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask, dev_mesh_mask)
     fig, (ax_sal, ax_temp) = _prep_fig_axes(figsize, theme)
     _plot_salinity_time_series(ax_sal, node_name, plot_data, theme)
     _plot_temperature_time_series(ax_temp, plot_data, timezone, theme)
@@ -70,7 +77,9 @@ def compare_venus_ctd(
     return fig
 
 
-def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
+def _prep_plot_data(
+    place, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask, dev_mesh_mask,
+):
     try:
         j, i = places.PLACES[place]['NEMO grid ji']
     except KeyError as e:
@@ -79,6 +88,7 @@ def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
             'salishsea_tools.places.PLACES: {}'.format(e))
     node_depth = places.PLACES[place]['depth']
     station_code = places.PLACES[place]['ONC stationCode']
+    # Production model results
     model_time = nc_tools.timestamp(
         grid_T_hr, range(grid_T_hr.variables['time_counter'].size))
     tracer_depths = mesh_mask.variables['gdept'][..., j, i][0]
@@ -92,6 +102,21 @@ def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
     model_temperature_ts = _calc_results_time_series(
         temperature_profiles, model_time, node_depth, timezone,
         tracer_depths, tracer_mask, w_depths)
+    # Development model results
+    dev_model_time = nc_tools.timestamp(
+        dev_grid_T_hr, range(grid_T_hr.variables['time_counter'].size))
+    tracer_depths = dev_mesh_mask.variables['gdept_0'][..., j, i][0]
+    tracer_mask = dev_mesh_mask.variables['tmask'][..., j, i][0]
+    w_depths = dev_mesh_mask.variables['gdepw_0'][..., j, i][0]
+    salinity_profiles = dev_grid_T_hr.variables['vosaline'][..., j, i]
+    temperature_profiles = dev_grid_T_hr.variables['votemper'][..., j, i]
+    dev_model_salinity_ts = _calc_results_time_series(
+        salinity_profiles, dev_model_time, node_depth, timezone,
+        tracer_depths, tracer_mask, w_depths)
+    dev_model_temperature_ts = _calc_results_time_series(
+        temperature_profiles, dev_model_time, node_depth, timezone,
+        tracer_depths, tracer_mask, w_depths)
+    # Observations
     onc_data = data_tools.get_onc_data(
         'scalardata', 'getByStation', os.environ['ONC_USER_TOKEN'],
         station=station_code,
@@ -99,10 +124,15 @@ def _prep_plot_data(place, grid_T_hr, timezone, mesh_mask):
         dateFrom=data_tools.onc_datetime(model_time[0], 'utc'),
         dateTo=data_tools.onc_datetime(model_time[-1], 'utc'))
     plot_data = namedtuple(
-        'PlotData', 'model_salinity_ts, model_temperature_ts, ctd_data')
+        'PlotData',
+        'model_salinity_ts, model_temperature_ts, '
+        'dev_model_salinity_ts, dev_model_temperature_ts, '
+        'ctd_data')
     return plot_data(
         model_salinity_ts=model_salinity_ts,
         model_temperature_ts=model_temperature_ts,
+        dev_model_salinity_ts=dev_model_salinity_ts,
+        dev_model_temperature_ts=dev_model_temperature_ts,
         ctd_data=data_tools.onc_json_to_dataset(onc_data),
     )
 
@@ -135,6 +165,12 @@ def _plot_salinity_time_series(ax, place, plot_data, theme):
         plot_data.model_salinity_ts.var,
         linewidth=2, label='Model',
         color=theme.COLOURS['time series']['VENUS node model salinity'],
+    )
+    ax.plot(
+        [t.datetime for t in plot_data.dev_model_salinity_ts.time],
+        plot_data.dev_model_salinity_ts.var,
+        linewidth=2, label='Dev Model',
+        color=theme.COLOURS['time series']['VENUS node dev model salinity'],
     )
     ax.plot(
         plot_data.ctd_data.salinity.sampleTime, plot_data.ctd_data.salinity,
@@ -173,6 +209,12 @@ def _plot_temperature_time_series(ax, plot_data, timezone, theme):
         plot_data.model_temperature_ts.var,
         linewidth=2, label='Model',
         color=theme.COLOURS['time series']['VENUS node model temperature'],
+    )
+    ax.plot(
+        [t.datetime for t in plot_data.dev_model_temperature_ts.time],
+        plot_data.dev_model_temperature_ts.var,
+        linewidth=2, label='Dev Model',
+        color=theme.COLOURS['time series']['VENUS node dev model temperature'],
     )
     ax.plot(
         plot_data.ctd_data.temperature.sampleTime,
