@@ -36,7 +36,7 @@ import nowcast.figures.website_theme
 
 def compare_venus_ctd(
     node_name, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask, dev_mesh_mask,
-    figsize=(7, 10),
+    figsize=(8, 10),
     theme=nowcast.figures.website_theme,
 ):
     """Plot the temperature and salinity time series of observations and model
@@ -188,7 +188,9 @@ def _salinity_axis_labels(ax, place, plot_data, theme):
         title_dates = ' and '.join(
             (title_dates, last_model_day.format('DD-MMM-YYYY')))
     ax.set_title(
-        'VENUS {place} {dates}'.format(place=place.title(), dates=title_dates),
+        'VENUS {place} {depth}m {dates}'
+        .format(place=place.title(), depth=places.PLACES[place]['depth'],
+                dates=title_dates),
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
     ax.set_ylabel(
