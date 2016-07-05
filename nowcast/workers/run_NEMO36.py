@@ -265,7 +265,7 @@ def _run_description(
                 .resolve())
             }
     run_prep_dir = Path(host_run_config['run_prep_dir'])
-    NEMO_config_name = config['run_types'][run_type]
+    NEMO_config_name = config['run_types'][run_type]['config name']
     walltime = host_run_config.get('walltime')
     nowcast_dir = Path(host_run_config['nowcast_dir'])
     forcing = {
