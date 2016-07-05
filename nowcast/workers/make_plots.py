@@ -34,6 +34,7 @@ from nowcast.figures import (
     research_VENUS,
     research_ferries,
 )
+from nowcast.figures.comparison import compare_venus_ctd
 from nowcast.figures.publish import (
     pt_atkinson_tide,
     storm_surge_alerts,
@@ -113,17 +114,19 @@ def make_plots(parsed_args, config, *args):
     run_type = parsed_args.run_type
     plot_type = parsed_args.plot_type
     results_home = config['run']['results archive'][run_type]
+    dev_results_home = config['run']['results archive']['nowcast-green']
     plots_dir = os.path.join(results_home, dmy, 'figures')
-    lib.mkdir(plots_dir, logger, grp_name='sallen')
+    lib.mkdir(plots_dir, logger, grp_name=config['file group'])
     _make_plot_files(
-        config, run_type, plot_type, dmy, results_home, plots_dir)
+        config, run_type, plot_type, dmy, results_home, dev_results_home,
+        plots_dir)
     checklist = _copy_plots_to_figures_server(
         config, run_type, plot_type, dmy, plots_dir)
     return checklist
 
 
 def _make_plot_files(
-    config, run_type, plot_type, dmy, results_home, plots_dir,
+    config, run_type, plot_type, dmy, results_home, dev_results_home, plots_dir,
 ):
     make_plots_funcs = {
         'publish': _make_publish_plots,
@@ -134,9 +137,12 @@ def _make_plot_files(
     if run_type in ['forecast', 'forecast2']:
         weather_path = os.path.join(weather_path, 'fcst/')
     results_dir = os.path.join(results_home, dmy)
+    dev_results_dir = os.path.join(dev_results_home, dmy)
     bathy = nc.Dataset(config['bathymetry'])
     coastline = sio.loadmat(config['coastline'])
-    mesh_mask = nc.Dataset(config['mesh_mask'])
+    mesh_mask = nc.Dataset(config['run_types'][run_type]['mesh_mask'])
+    dev_mesh_mask = nc.Dataset(
+        config['run_types']['nowcast-green']['mesh_mask'])
     tidal_predictions = config['ssh']['tidal_predictions']
     ferry_data_dir = config['observations']['ferry data']
     make_plots_funcs[plot_type](
@@ -144,7 +150,9 @@ def _make_plot_files(
         tidal_predictions=tidal_predictions,
         timezone=config['timezone'],
         mesh_mask=mesh_mask,
+        dev_mesh_mask=dev_mesh_mask,
         ferry_data_dir=ferry_data_dir,
+        dev_results_dir=dev_results_dir,
     )
 
 
@@ -270,11 +278,13 @@ def _make_publish_plots(
 
 def _make_comparisons_plots(
     dmy, weather_path, bathy, results_dir, plots_dir, coastline,
-    ferry_data_dir, **kwargs
+    timezone, mesh_mask, dev_mesh_mask, ferry_data_dir, dev_results_dir,
+    **kwargs
 ):
     """Make the plots we wish to look at for comparisons purposes.
     """
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
+    dev_grid_T_hr = _results_dataset('1h', 'grid_T', dev_results_dir)
 
     # Wind speed and direction at Sandheads
     fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
@@ -295,15 +305,16 @@ def _make_comparisons_plots(
             pass
 
     # VENUS bottom temperature and salinity
-    fig = research_VENUS.compare_VENUS('East', grid_T_hr, bathy)
-    filename = os.path.join(
-        plots_dir, 'Compare_VENUS_East_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
-    fig = research_VENUS.compare_VENUS('Central', grid_T_hr, bathy)
-    filename = os.path.join(
-        plots_dir, 'Compare_VENUS_Central_{date}.svg'.format(date=dmy))
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
+    node_names = (
+        'East node', 'Central node', 'Delta BBL node', 'Delta DDL node')
+    for node_name in node_names:
+        fig = compare_venus_ctd.compare_venus_ctd(
+            node_name, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
+            dev_mesh_mask)
+        filename = os.path.join(
+            plots_dir, 'Compare_VENUS_{node}_{date}.svg'
+            .format(node=node_name.rstrip(' node').replace(' ', '_'), date=dmy))
+        fig.savefig(filename, facecolor=fig.get_facecolor())
 
 
 def _future_comparison_plots(
