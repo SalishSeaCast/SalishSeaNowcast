@@ -183,6 +183,7 @@ def combine_files(files, var, kss, jss, iss):
         except TypeError:
             t = t.datetime
         time = np.append(time, t)
+        G.close()
 
     var_ary = np.concatenate(var_list, axis=0)
     return var_ary, time
