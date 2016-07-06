@@ -6,6 +6,7 @@
 
 name: sphinx-build
 dependencies:
+- bottleneck
 - h5py
 - ipython
 - lxml
@@ -24,6 +25,7 @@ dependencies:
 - requests
 - scipy
 - sphinx
+- xarray
 - pip:
   - angles
   - arrow
@@ -32,4 +34,5 @@ dependencies:
   - driftwood
   - feedgen
   - nbsphinx
+  - retrying
   - sphinx-bootstrap-theme
