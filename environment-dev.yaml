@@ -13,6 +13,7 @@
 
 name: nowcast
 dependencies:
+- bottleneck
 - coverage
 - ipython
 - jupyter
@@ -32,6 +33,7 @@ dependencies:
 - requests
 - scipy
 - sphinx
+- xarray
 - pip:
   - angles
   - arrow
@@ -40,4 +42,5 @@ dependencies:
   - feedgen
   - ipdb
   - nbsphinx
+  - retrying
   - sphinx-bootstrap-theme
