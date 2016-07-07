@@ -166,24 +166,23 @@ def combine_files(files, var, kss, jss, iss):
     var_list = []
 
     for f in files:
-        G = nc.Dataset(f)
-        if kss == 'None':
-            try:  # for variavles with no depht like ssh
-                var_tmp = G.variables[var][..., jss, iss]
-            except IndexError:  # for variables with depth
-                var_tmp = G.variables[var][:, :, jss, iss]
-        else:
-            var_tmp = G.variables[var][..., kss, jss, iss]
+        with nc.Dataset(f) as G:
+            if kss == 'None':
+                try:  # for variavles with no depht like ssh
+                    var_tmp = G.variables[var][..., jss, iss]
+                except IndexError:  # for variables with depth
+                    var_tmp = G.variables[var][:, :, jss, iss]
+            else:
+                var_tmp = G.variables[var][..., kss, jss, iss]
 
-        var_list.append(var_tmp)
-        t = nc_tools.timestamp(G, np.arange(var_tmp.shape[0]))
-        try:
-            for ind in range(len(t)):
-                t[ind] = t[ind].datetime
-        except TypeError:
-            t = t.datetime
-        time = np.append(time, t)
-        G.close()
+            var_list.append(var_tmp)
+            t = nc_tools.timestamp(G, np.arange(var_tmp.shape[0]))
+            try:
+                for ind in range(len(t)):
+                    t[ind] = t[ind].datetime
+            except TypeError:
+                t = t.datetime
+            time = np.append(time, t)
 
     var_ary = np.concatenate(var_list, axis=0)
     return var_ary, time
