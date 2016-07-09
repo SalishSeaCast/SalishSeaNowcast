@@ -38,10 +38,30 @@ def config(scope='function'):
     return {
         'bathymetry': 'bathy_meter_SalishSea.nc',
         'run_types': {
-            'nowcast': 'SalishSea',
-            'forecast': 'SalishSea',
-            'forecast2': 'SalishSea',
-            'nowcast-green': 'SOG',
+            'nowcast': {
+                'config name': 'SalishSea',
+                'bathymetry':
+                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
+                'mesh_mask':
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc'},
+            'nowcast-green': {
+                'config name': 'SOG',
+                'bathymetry':
+                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
+                'mesh_mask':
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc'},
+            'forecast': {
+                'config name': 'SalishSea',
+                'bathymetry':
+                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
+                'mesh_mask':
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc'},
+            'forecast2': {
+                'config name': 'SalishSea',
+                'bathymetry':
+                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
+                'mesh_mask':
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc'},
         },
         'run': {
             'salish': {
