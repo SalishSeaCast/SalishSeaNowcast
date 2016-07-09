@@ -675,7 +675,7 @@ class NowcastManager:
                 (self._update_checklist,
                     ['make_site_page', 'salishsea site pages', payload]),
             ]
-            if page_type in ('index', 'publish'):
+            if page_type in ('index', 'comparison'):
                 actions[msg_type].append(
                     (self._launch_worker, ['hg_update_site']))
             if page_type == 'research':
