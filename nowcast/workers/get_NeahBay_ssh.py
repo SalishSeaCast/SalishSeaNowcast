@@ -122,7 +122,6 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     for d in dates_full:
         tc, _, sshd, fflagd = _isolate_day(d, dates, sshs, fflags)
         forecast_flag = fflagd.any()
-        print(d, fflagd)
         # Plotting
         if ip < 3:
             ax.plot(sshd, '-o', lw=2, label=d.strftime('%d-%b-%Y'))
