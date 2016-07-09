@@ -1177,7 +1177,7 @@ class TestAfterMakeSitePage:
 
     @pytest.mark.parametrize('msg_type', [
         'success index',
-        'success publish',
+        'success comparison',
     ])
     def test_success_launch_hg_update_site_worker(self, msg_type, mgr):
         actions = mgr._after_make_site_page(msg_type, 'payload')
