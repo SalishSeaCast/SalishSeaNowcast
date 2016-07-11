@@ -300,8 +300,11 @@ def _make_comparisons_plots(
                 plots_dir, '{route}_ferry_salinity_{date}.svg'
                 .format(route=ferry_route, date=dmy))
             fig.savefig(filename, facecolor=fig.get_facecolor())
-        except ValueError:
-            # Observations missing salinity data so abort plot creation
+        except (ValueError, FileNotFoundError):
+            # Observations missing salinity data,
+            # or ferry data or run results (most likely the former)
+            # file not found,
+            # so abort plot creation
             pass
 
     # VENUS bottom temperature and salinity
