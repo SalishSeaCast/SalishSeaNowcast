@@ -28,6 +28,7 @@ from salishsea_tools import (
     data_tools,
     places,
     nc_tools,
+    teos_tools,
 )
 
 from nowcast.figures import shared
@@ -98,7 +99,7 @@ def _prep_plot_data(
     temperature_profiles = grid_T_hr.variables['votemper'][..., j, i]
     model_salinity_ts = _calc_results_time_series(
         salinity_profiles, model_time, node_depth, timezone,
-        tracer_depths, tracer_mask, w_depths)
+        tracer_depths, tracer_mask, w_depths, psu_to_teos=True)
     model_temperature_ts = _calc_results_time_series(
         temperature_profiles, model_time, node_depth, timezone,
         tracer_depths, tracer_mask, w_depths)
@@ -137,18 +138,21 @@ def _prep_plot_data(
     )
 
 
-def _calc_results_time_series(
-    tracer, model_time, node_depth, timezone, tracer_depths, tracer_mask,
-    w_depths,
-):
+def _calc_results_time_series(tracer, model_time, node_depth, timezone,
+                              tracer_depths, tracer_mask, w_depths,
+                              psu_to_teos=False):
     time_series = namedtuple('TimeSeries', 'var, time')
-    return time_series(
-        var=[
-            shared.interpolate_tracer_to_depths(
-                tracer[i, :], tracer_depths, node_depth,
-                tracer_mask, w_depths)
-            for i in range(tracer.shape[0])],
-        time=[t.to(timezone) for t in model_time])
+    if psu_to_teos:
+        var = teos_tools.psu_teos(
+            [shared.interpolate_tracer_to_depths(
+                 tracer[i, :], tracer_depths, node_depth, tracer_mask, w_depths)
+             for i in range(tracer.shape[0])])
+    else:
+        var = [shared.interpolate_tracer_to_depths(
+                   tracer[i, :], tracer_depths, node_depth, tracer_mask,
+                   w_depths)
+               for i in range(tracer.shape[0])]
+    return time_series(var=var, time=[t.to(timezone) for t in model_time])
 
 
 def _prep_fig_axes(figsize, theme):
@@ -194,7 +198,7 @@ def _salinity_axis_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
     ax.set_ylabel(
-        'Practical Salinity',
+        'Salinity [g/kg]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis'])
     ymin, ymax = ax.get_ylim()
