@@ -176,8 +176,11 @@ def _plot_salinity_time_series(ax, place, plot_data, theme):
         linewidth=2, label='Dev Model',
         color=theme.COLOURS['time series']['VENUS node dev model salinity'],
     )
+    ctd_data = plot_data.ctd_data
+    qaqc_mask = ctd_data.salinity.attrs['qaqcFlag'] == 1
     ax.plot(
-        plot_data.ctd_data.salinity.sampleTime, plot_data.ctd_data.salinity,
+        ctd_data.salinity.sampleTime[qaqc_mask],
+        ctd_data.salinity[qaqc_mask],
         linewidth=2, label='Observations',
         color=theme.COLOURS['time series']['VENUS CTD salinity'],
     )
