@@ -74,7 +74,7 @@ def compare_venus_ctd(
     fig, (ax_sal, ax_temp) = _prep_fig_axes(figsize, theme)
     _plot_salinity_time_series(ax_sal, node_name, plot_data, theme)
     _plot_temperature_time_series(ax_temp, plot_data, timezone, theme)
-    _plot_attribution_text(ax_temp, theme)
+    _attribution_text(ax_temp, theme)
     return fig
 
 
@@ -251,5 +251,11 @@ def _temperature_axis_labels(ax, timezone, tzname, theme):
     theme.set_axis_colors(ax)
 
 
-def _plot_attribution_text(ax, theme):
-    pass
+def _attribution_text(ax, theme):
+    ax.text(
+        1, -0.3,
+        'Observations from Ocean Networks Canada',
+        horizontalalignment='right', verticalalignment='top',
+        transform=ax.transAxes,
+        fontproperties=theme.FONTS['figure annotation small'],
+        color=theme.COLOURS['text']['figure annotation'])
