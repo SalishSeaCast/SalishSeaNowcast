@@ -87,7 +87,7 @@ def basic_arg_parser(worker_name, description=None, add_help=True):
     """Return a command-line argument parser w/ handling for always-used args.
 
     The returned parser provides help messages, and handles the
-    :option:`config_file` argument, and the :option:`--debug` option.
+    :kbd:`config_file` argument, and the :kbd:`--debug` option.
     It can be used as the parser for a worker,
     or as a parent parser if the worker has additional arguments
     and/or options.
