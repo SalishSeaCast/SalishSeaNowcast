@@ -581,8 +581,8 @@ class NowcastManager:
                 (self._update_checklist,
                     ['download_results', 'results files', payload]),
                 (self._launch_worker,
-                    ['make_plots', [run_type, plot_type,
-                     '--run-date', run_date]]),
+                    ['make_plots',
+                        [run_type, plot_type, '--run-date', run_date]]),
                 (self._launch_worker, ['ping_erddap', [run_type]]),
             ]
         return actions[msg_type]
@@ -628,20 +628,19 @@ class NowcastManager:
             actions[msg_type] = [
                 (self._update_checklist, ['make_plots', 'plots', payload]),
                 (self._launch_worker,
-                    ['make_site_page', [run_type, page_type,
-                     '--run-date', run_date]])
+                    ['make_site_page',
+                        [run_type, page_type, '--run-date', run_date]])
             ]
             if run_type.startswith('forecast'):
                 actions[msg_type].append((
                     self._launch_worker,
                     ['make_feeds', [run_type, '--run-date', run_date]]))
-            if run_type == 'nowcast' and page_type == 'publish':
-                run_date = (
-                    arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD'))
+            if run_type == 'nowcast' and page_type == 'comparison':
+                run_date = self.checklist['NEMO run'][run_type]['run date']
                 actions[msg_type].append(
                     (self._launch_worker,
-                        ['make_plots', ['nowcast', 'comparison',
-                         '--run-date', run_date]]))
+                        ['make_plots',
+                            ['nowcast', 'publish', '--run-date', run_date]]))
         return actions[msg_type]
 
     def _after_make_feeds(self, msg_type, payload):
@@ -675,14 +674,17 @@ class NowcastManager:
                 (self._update_checklist,
                     ['make_site_page', 'salishsea site pages', payload]),
             ]
-            if page_type in ('index', 'comparison'):
+            if page_type in ('index', 'publish'):
                 actions[msg_type].append(
                     (self._launch_worker, ['hg_update_site']))
             if page_type == 'research':
+                run_date = self.checklist['NEMO run']['nowcast']['run date']
+                run_date = (
+                    arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD'))
                 actions[msg_type].append(
                     (self._launch_worker,
-                        ['make_plots', ['nowcast', 'publish', '--run-date',
-                         self.checklist['NEMO run']['nowcast']['run date']]])
+                        ['make_plots',
+                            ['nowcast', 'comparison', '--run-date', run_date]])
                 )
         return actions[msg_type]
 

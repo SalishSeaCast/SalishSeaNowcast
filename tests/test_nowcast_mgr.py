@@ -1114,16 +1114,16 @@ class TestAfterMakePlots:
         )
         assert actions[2] == expected
 
-    def test_success_nowcast_publish_launch_make_plots_comparison(self, mgr):
+    def test_success_nowcast_comparison_launch_make_plots_publish(self, mgr):
         mgr.checklist = {
             'NEMO run': {
                 'nowcast': {'run date': '2016-02-27'},
             }}
-        actions = mgr._after_make_plots('success nowcast publish', 'payload')
+        actions = mgr._after_make_plots('success nowcast comparison', 'payload')
         expected = (
             mgr._launch_worker,
             ['make_plots',
-                ['nowcast', 'comparison', '--run-date', '2016-02-26']])
+                ['nowcast', 'publish', '--run-date', '2016-02-27']])
         assert actions[2] == expected
 
 
@@ -1177,14 +1177,14 @@ class TestAfterMakeSitePage:
 
     @pytest.mark.parametrize('msg_type', [
         'success index',
-        'success comparison',
+        'success publish',
     ])
     def test_success_launch_hg_update_site_worker(self, msg_type, mgr):
         actions = mgr._after_make_site_page(msg_type, 'payload')
         expected = (mgr._launch_worker, ['hg_update_site'])
         assert actions[1] == expected
 
-    def test_success_research_launch_make_plots_worker_nowcast_publish(
+    def test_success_research_launch_make_plots_worker_nowcast_comparison(
         self, mgr
     ):
         mgr.checklist = {
@@ -1197,7 +1197,7 @@ class TestAfterMakeSitePage:
         actions = mgr._after_make_site_page('success research', 'payload')
         expected = (
             mgr._launch_worker,
-            ['make_plots', ['nowcast', 'publish', '--run-date', '2015-11-25']],
+            ['make_plots', ['nowcast', 'comparison', '--run-date', '2015-11-24']],
         )
         assert actions[1] == expected
 
