@@ -365,10 +365,10 @@ The :py:meth:`worker.arg_parser.add_argument` method takes the same arguments as
 .. note::
     When the :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker` object is set up its base command-line parser is created as :py:attr:`worker.arg_parser`.
     That parser provides help messages,
-    and handles the :option:`config_file` argument,
-    and the :option:`--debug` option.
+    and handles the :kbd:`config_file` argument,
+    and the :kbd:`--debug` option.
 
-For workers that require a :option:`run-date` command-line option,
+For workers that require a :kbd:`run-date` command-line option,
 use this pattern:
 
 .. code-block:: python
@@ -386,4 +386,4 @@ use this pattern:
 The above pattern causes :py:data:`parsed_args.run_date` to have a value which is an :py:class:`arrow.Arrow` object with the given date,
 :kbd:`00:00:00` as its time part,
 and :kbd:`Canada/Pacific` as its timezone.
-If the :option:`--run-date` option is not specified :py:data:`parsed_args.run_date` will have the present date in :kbd:`Canada/Pacific` as its date.
+If the :kbd:`--run-date` option is not specified :py:data:`parsed_args.run_date` will have the present date in :kbd:`Canada/Pacific` as its date.
