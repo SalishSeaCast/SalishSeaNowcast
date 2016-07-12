@@ -43,12 +43,35 @@ The Python packages that the system depends on are installed in a conda environm
 
     $ cd /results/nowcast-sys/
     $ conda update conda
-    $ conda env create -f /results/nowcast-sys/nowcast-env
+    $ conda create --prefix /results/nowcast-sys/nowcast-env \
+        bottleneck lxml mako matplotlib netCDF4 numpy pandas paramiko pillow \
+        pyyaml pyzmq pip python=3 requests scipy sphinx xarray
     $ source activate /results/nowcast-sys/nowcast-env
+    (/results/nowcast-sys/nowcast-env)$ pip install \
+      angles arrow BeautifulSoup4 driftwood feedgen retrying sphinx-bootstrap-theme
     (/results/nowcast-sys/nowcast-env)$ cd /results/nowcast-sys/tools
     (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaTools/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaCmd/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaNowcast/
+
+
+Environment Variables
+=====================
+
+Add the following files to the :file:`/results/nowcast-sys/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
+
+.. code-block:: bash
+
+    $ cd /results/nowcast-sys/nowcast-env
+    $ mkdir -p etc/conda/activate.d
+    $ echo export ONC_USER_TOKEN=a_valid_ONC_data_API_user_token > envvars.sh
+
+and :command:`unset` them when it is deactivated.
+
+.. code-block:: bash
+
+    $ mkdir -p etc/conda/deactivate.d
+    $ echo unset ONC_USER_TOKEN > envvars.sh
 
 
 Nowcast Manager Directory
