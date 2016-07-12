@@ -138,6 +138,7 @@ class TestSphinxBuild:
         assert m_debug.called
         m_ris.assert_called_once_with(
             ['sphinx-build',
+             '-q',
              '-b', 'html',
              '-d', 'www/salishsea-site/site/_build/doctrees',
              '-E',

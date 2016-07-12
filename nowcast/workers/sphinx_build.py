@@ -67,7 +67,7 @@ def sphinx_build(parsed_args, config, *args):
             raise WorkerError
     logger.debug('starting sphinx-build of {}'.format(repo_path/'site'))
     cmd = (
-        'sphinx-build -b html -d {doctrees} -E {rst_path} {html_path}'
+        'sphinx-build -q -b html -d {doctrees} -E {rst_path} {html_path}'
         .format(
             doctrees=repo_path/'site'/'_build'/'doctrees',
             rst_path=repo_path/'site',
