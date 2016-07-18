@@ -311,7 +311,7 @@ def _make_comparisons_plots(
                 .format(route=ferry_route, date=dmy))
             fig.savefig(filename, facecolor=fig.get_facecolor())
             logger.debug('{} saved'.format(filename))
-        except (ValueError, FileNotFoundError):
+        except (KeyError, ValueError, FileNotFoundError):
             # Observations missing salinity data,
             # or ferry data or run results (most likely the former)
             # file not found,
