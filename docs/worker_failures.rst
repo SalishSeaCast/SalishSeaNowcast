@@ -49,12 +49,12 @@ each of the 4 daily forecast data sets are only available for slightly over a da
 and EC does not maintain an archive of the HRDPS products.
 
 The HRDPS products files that we use are downloaded every 6 hours via the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker.
-The downloads are controlled by 4 :program:`cron` jobs that run on :kbd:`salish`:
+The downloads are controlled by 4 :program:`cron` jobs that run on :kbd:`skookum`:
 
-  * The :kbd:`06` forecast download starts at 04:00
-  * The :kbd:`12` forecast download starts at 10:00
-  * The :kbd:`18` forecast download starts at 16:00
-  * The :kbd:`00` forecast download starts at 22:00
+  * The :kbd:`06` UTC forecast download starts at 05:00 Pacific time
+  * The :kbd:`12` UTC forecast download starts at 11:00 Pacific time
+  * The :kbd:`18` UTC forecast download starts at 17:00 Pacific time
+  * The :kbd:`00` UTC forecast download starts at 23:00 Pacific time
 
 The :py:mod:`download_weather` worker uses an exponential back-off and retry strategy to try very hard to get the required files in the face of network congestion and errors.
 If things are going really badly it can take nearly 5 hours to complete or fail to complete a forecast download.
@@ -73,47 +73,38 @@ The `debug log file`_ will show more details about the specific file downloads a
 
 In the rare event that the nowcast automation system fails to download the HRDPS products every 6 hours via the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker,
 it is critical that someone re-run that worker.
-Even if the worker cannot be re-run in the nowcast system deployment environment on :kbd:`salish` due to permission issues the forecast products can be downloaded using a development and testing environment and directory structure as described above
-(see :ref:`SalishSeaNowcastPythnonPackageEnvironmwnt` and :ref:`SalishSeaNowcastDirectoryStructure`).
 That can be accomplished as follows:
 
-#. Activate your nowcast :program:`conda` environment,
-   and navigate to your nowcast development and testing environment:
+#. :command:`ssh` on to :kbd:`skookum`,
+   activate the production nowcast :program:`conda` environment,
+   and navigate to the nowcast configuration and logging directory:
 
    .. code-block:: bash
 
-       $ source activate nowcast
-       (nowcast)$ cd MEOPAR/nowcast/
-
-#. Edit the :file:`MEOPAR/nowcast/nowcast.yaml` file to set a destination in your filespace for the GRIB2 files that the worker downloads:
-
-   .. code-block:: yaml
-
-       weather:
-         # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
-         # GRIB_dir: /ocean/sallen/allen/research/MEOPAR/GRIB/
-         GRIB_dir: /ocean/<your_userid>/MEOPAR/GRIB/
+       $ ssh skookum
+       skookum$ source activate /results/nowcast-sys/nowcast-env
+       (/results/nowcast-sys/nowcast-env)skookum$ cd /home/dlatorne/public_html/MEOPAR/nowcast/
 
    .. note::
+      If :command:`source activate /results/nowcast-sys/nowcast-env` fails because it can't find :command:`activate`,
+      you may be able to use:
 
-        The directory :file:`/ocean/<your_userid>/MEOPAR/GRIB/` must exist.
-        Create it if necessary with:
+      .. code-block:: bash
 
-        .. code-block:: bash
+          skookum$ source /results/nowcast-sys/nowcast-env/bin/activate /results/nowcast-sys/nowcast-env
 
-            $ mkdir -p /ocean/<your_userid>/MEOPAR/GRIB/
+      as a work-around.
 
 #. Run the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker for the appropriate forecast with debug logging,
    for example:
 
    .. code-block:: bash
 
-       (nowcast)$ python -m salishsea_tools.nowcast.workers.download_weather nowcast.yaml 12 --debug
-
-   You will need to hit :kbd:`Ctrl-C` at least once (maybe twice) to terminate the worker because it ends by waiting indefinitely for confirmation of its success or failure from the nowcast manager.
+       (/results/nowcast-sys/nowcast-env)skookum$ python -m salishsea_tools.nowcast.workers.download_weather nowcast.yaml 12 --debug
 
    The command above downloads the 12 forecast.
    The :kbd:`--debug` flag causes the logging output of the worker to be displayed on the screen (so that you can see what is going on) instead of being written to a file.
+   It also disconnects the worker from the nowcast messaging system so that there is no interaction with the manager and the ongoing automation.
    The (abridged) output should look like::
 
      2015-07-08 17:59:34 DEBUG [download_weather] running in process 5506
@@ -173,6 +164,38 @@ Use that flag only during the several hour period for which two day's forecast f
 To determine if the :kbd:`--yesterday` flag can be used check the contents of a forecast's hourly directories;
 e.g. http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/,
 to see if files for 2 days exist.
+
+Even if the worker cannot be re-run in the nowcast system deployment environment on :kbd:`skookum` due to permission issues the forecast products can be downloaded using a development and testing environment and directory structure as described above
+(see :ref:`SalishSeaNowcastPythnonPackageEnvironmwnt` and :ref:`SalishSeaNowcastDirectoryStructure`).
+That can be accomplished as follows:
+
+#. Activate your nowcast :program:`conda` environment,
+   and navigate to your nowcast development and testing environment:
+
+   .. code-block:: bash
+
+       $ source activate nowcast
+       (nowcast)$ cd MEOPAR/nowcast/
+
+#. Edit the :file:`MEOPAR/nowcast/nowcast.yaml` file to set a destination in your filespace for the GRIB2 files that the worker downloads:
+
+   .. code-block:: yaml
+
+       weather:
+         # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
+         # GRIB_dir: /ocean/sallen/allen/research/MEOPAR/GRIB/
+         GRIB_dir: /ocean/<your_userid>/MEOPAR/GRIB/
+
+   .. note::
+
+        The directory :file:`/ocean/<your_userid>/MEOPAR/GRIB/` must exist.
+        Create it if necessary with:
+
+        .. code-block:: bash
+
+            $ mkdir -p /ocean/<your_userid>/MEOPAR/GRIB/
+
+#. Continue from step 2 above.
 
 
 Testing :kbd:`salishsea.eos.ubc.ca` Site Page Templates
