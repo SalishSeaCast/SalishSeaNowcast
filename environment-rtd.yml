@@ -5,6 +5,11 @@
 # SalishSeaCmd, SalishSeaNowcast, SalishSeaTools, and Marlin packages.
 
 name: sphinx-build
+
+channels:
+  - defaults
+  - conda-forge
+
 dependencies:
 - bottleneck
 - h5py
@@ -18,6 +23,7 @@ dependencies:
 - paramiko
 - pillow
 - pip
+- pynco
 - python=3
 - pytz
 - pyyaml
