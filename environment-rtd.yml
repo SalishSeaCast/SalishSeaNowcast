@@ -35,6 +35,6 @@ dependencies:
   - driftwood
   - feedgen
   - nbsphinx
-  - pynco
+  - nco
   - retrying
   - sphinx-bootstrap-theme
