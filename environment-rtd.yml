@@ -6,6 +6,10 @@
 
 name: sphinx-build
 
+channels:
+  - defaults
+  - ioos
+
 dependencies:
 - bottleneck
 - h5py
@@ -19,6 +23,7 @@ dependencies:
 - paramiko
 - pillow
 - pip
+- pynco
 - python=3
 - pytz
 - pyyaml
@@ -35,6 +40,5 @@ dependencies:
   - driftwood
   - feedgen
   - nbsphinx
-  - nco
   - retrying
   - sphinx-bootstrap-theme
