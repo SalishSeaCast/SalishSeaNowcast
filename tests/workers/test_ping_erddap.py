@@ -40,10 +40,10 @@ class TestMain:
         assert args == (m_name,)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_run_type_arg(self, m_worker, worker_module):
+    def test_add_dataset_arg(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
-        assert args == ('run_type',)
+        assert args == ('dataset',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather'}
@@ -62,28 +62,28 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    @pytest.mark.parametrize('run_type', [
+    @pytest.mark.parametrize('dataset', [
         'nowcast',
         'forecast',
         'forecast2',
         'nowcast-green',
         'download_weather',
     ])
-    def test_success_log_info(self, run_type, worker_module):
-        parsed_args = Mock(run_type=run_type)
+    def test_success_log_info(self, dataset, worker_module):
+        parsed_args = Mock(dataset=dataset)
         with patch.object(worker_module.logger, 'info') as m_logger:
             worker_module.success(parsed_args)
         assert m_logger.called
 
-    @pytest.mark.parametrize('run_type, expected', [
+    @pytest.mark.parametrize('dataset, expected', [
         ('nowcast', 'success nowcast'),
         ('forecast', 'success forecast'),
         ('forecast2', 'success forecast2'),
         ('nowcast-green', 'success nowcast-green'),
         ('download_weather', 'success download_weather'),
     ])
-    def test_success_msg_type(self, run_type, expected, worker_module):
-        parsed_args = Mock(run_type=run_type)
+    def test_success_msg_type(self, dataset, expected, worker_module):
+        parsed_args = Mock(dataset=dataset)
         msg_type = worker_module.success(parsed_args)
         assert msg_type == expected
 
@@ -91,28 +91,28 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
-    @pytest.mark.parametrize('run_type', [
+    @pytest.mark.parametrize('dataset', [
         'nowcast',
         'forecast',
         'forecast2',
         'nowcast-green',
         'download_weather',
     ])
-    def test_failure_log_error(self, run_type, worker_module):
-        parsed_args = Mock(run_type=run_type)
+    def test_failure_log_error(self, dataset, worker_module):
+        parsed_args = Mock(dataset=dataset)
         with patch.object(worker_module.logger, 'critical') as m_logger:
             worker_module.failure(parsed_args)
         assert m_logger.called
 
-    @pytest.mark.parametrize('run_type, expected', [
+    @pytest.mark.parametrize('dataset, expected', [
         ('nowcast', 'failure nowcast'),
         ('forecast', 'failure forecast'),
         ('forecast2', 'failure forecast2'),
         ('nowcast-green', 'failure nowcast-green'),
         ('download_weather', 'failure download_weather'),
     ])
-    def test_failure_msg_type(self, run_type, expected, worker_module):
-        parsed_args = Mock(run_type=run_type)
+    def test_failure_msg_type(self, dataset, expected, worker_module):
+        parsed_args = Mock(dataset=dataset)
         msg_type = worker_module.failure(parsed_args)
         assert msg_type == expected
 
@@ -120,15 +120,15 @@ class TestFailure:
 class TestPingErddap:
     """Unit tests for ping_erddap() function.
     """
-    @pytest.mark.parametrize('run_type', [
+    @pytest.mark.parametrize('dataset', [
         'nowcast',
         'forecast',
         'forecast2',
         'nowcast-green',
         'download_weather',
     ])
-    def test_ping_erddap(self, run_type, worker_module, tmpdir):
-        parsed_args = Mock(run_type=run_type)
+    def test_ping_erddap(self, dataset, worker_module, tmpdir):
+        parsed_args = Mock(dataset=dataset)
         tmp_flag_dir = tmpdir.ensure_dir('flag')
         config = {
             'erddap': {
@@ -147,16 +147,16 @@ class TestPingErddap:
                 }}}
         with patch.object(worker_module, 'logger') as m_logger:
             checklist = worker_module.ping_erddap(parsed_args, config)
-            dataset_ids = config['erddap']['datasetIDs'][run_type]
+            dataset_ids = config['erddap']['datasetIDs'][dataset]
         for i, dataset_id in enumerate(dataset_ids):
             assert tmp_flag_dir.join(dataset_id).exists
             expected = '{} touched'.format(tmp_flag_dir.join(dataset_id))
             m_logger.debug.calls[i] == expected
-        expected = {run_type: config['erddap']['datasetIDs'][run_type]}
+        expected = {dataset: config['erddap']['datasetIDs'][dataset]}
         assert checklist == expected
 
     def test_no_datasetID(self, worker_module, tmpdir):
-        parsed_args = Mock(run_type='nowcast-green')
+        parsed_args = Mock(dataset='nowcast-green')
         tmp_flag_dir = tmpdir.ensure_dir('flag')
         config = {
             'erddap': {

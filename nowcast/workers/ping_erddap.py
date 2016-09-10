@@ -30,12 +30,13 @@ logger = logging.getLogger(worker_name)
 def main():
     worker = NowcastWorker(worker_name, description=__doc__)
     worker.arg_parser.add_argument(
-        'run_type',
+        'dataset',
         choices={
             'nowcast', 'nowcast-green', 'forecast', 'forecast2',
-            'download_weather'},
+            'download_weather',
+        },
         help='''
-        Type of run to notify ERDDAP of:
+        Type of dataset to notify ERDDAP of:
         'nowcast' means nowcast physics run,
         'nowcast-green' means nowcast green ocean run,
         'forecast' means updated forecast run,
@@ -48,30 +49,30 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{.run_type} ERDDAP dataset flag files created'.format(parsed_args),
-        extra={'run_type': parsed_args.run_type})
-    msg_type = 'success {.run_type}'.format(parsed_args)
+        '{.dataset} ERDDAP dataset flag files created'.format(parsed_args),
+        extra={'dataset': parsed_args.dataset})
+    msg_type = 'success {.dataset}'.format(parsed_args)
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{.run_type} ERDDAP dataset flag files creation failed'
+        '{.dataset} ERDDAP dataset flag files creation failed'
         .format(parsed_args),
-        extra={'run_type': parsed_args.run_type})
-    msg_type = 'failure {.run_type}'.format(parsed_args)
+        extra={'dataset': parsed_args.dataset})
+    msg_type = 'failure {.dataset}'.format(parsed_args)
     return msg_type
 
 
 def ping_erddap(parsed_args, config, *args):
-    run_type = parsed_args.run_type
+    dataset = parsed_args.dataset
     flag_path = Path(config['erddap']['flag_dir'])
-    checklist = {run_type: []}
+    checklist = {dataset: []}
     try:
-        for dataset_id in config['erddap']['datasetIDs'][run_type]:
+        for dataset_id in config['erddap']['datasetIDs'][dataset]:
             (flag_path/dataset_id).touch()
             logger.debug('{} touched'.format(flag_path/dataset_id))
-            checklist[run_type].append(dataset_id)
+            checklist[dataset].append(dataset_id)
     except KeyError:
         # run type is not in datasetIDs dict
         pass
