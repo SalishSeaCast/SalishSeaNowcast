@@ -93,6 +93,7 @@ class NowcastManager:
             'download_weather': self._after_download_weather,
             'get_NeahBay_ssh': self._after_get_NeahBay_ssh,
             'make_runoff_file': self._after_make_runoff_file,
+            'get_onc_ctd': self._after_get_onc_ctd,
             'grib_to_netcdf': self._after_grib_to_netcdf,
             'upload_forcing': self._after_upload_forcing,
             # 'upload_all_files': self._after_upload_all_files,
@@ -307,6 +308,7 @@ class NowcastManager:
             if msg_type.endswith('06'):
                 actions['success 06'].extend([
                     (self._launch_worker, ['make_runoff_file']),
+                    (self._launch_worker, ['get_onc_ctd', ['SCVIP']]),
                 ])
                 if 'forecast2' in self.config['run_types']:
                     actions['success 06'].extend([
@@ -365,6 +367,22 @@ class NowcastManager:
             'success':
                 [(self._update_checklist,
                     ['make_runoff_file', 'rivers', payload])],
+        }
+        return actions[msg_type]
+
+    def _after_get_onc_ctd(self, msg_type, payload):
+        """Return list of next step action method(s) and args to execute
+        upon receipt of success, failure, or crash message from
+        get_onc_ctd worker.
+        """
+        actions = {
+            'crash': None,
+            'failure': None,
+            'success SCVIP': [
+                (self._update_checklist,
+                    ['get_onc_ctd', 'ONC CTD data', payload]),
+                (self._launch_worker, ['ping_erddap', ['SCVIP-CTD']])
+            ]
         }
         return actions[msg_type]
 
