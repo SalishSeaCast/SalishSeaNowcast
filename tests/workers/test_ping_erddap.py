@@ -46,7 +46,7 @@ class TestMain:
         assert args == ('dataset',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'forecast', 'forecast2',
-            'download_weather'}
+            'download_weather', 'SCVIP-CTD'}
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker, worker_module):
@@ -68,6 +68,7 @@ class TestSuccess:
         'forecast2',
         'nowcast-green',
         'download_weather',
+        'SCVIP-CTD',
     ])
     def test_success_log_info(self, dataset, worker_module):
         parsed_args = Mock(dataset=dataset)
@@ -81,6 +82,7 @@ class TestSuccess:
         ('forecast2', 'success forecast2'),
         ('nowcast-green', 'success nowcast-green'),
         ('download_weather', 'success download_weather'),
+        ('SCVIP-CTD', 'success SCVIP-CTD'),
     ])
     def test_success_msg_type(self, dataset, expected, worker_module):
         parsed_args = Mock(dataset=dataset)
@@ -97,6 +99,7 @@ class TestFailure:
         'forecast2',
         'nowcast-green',
         'download_weather',
+        'SCVIP-CTD',
     ])
     def test_failure_log_error(self, dataset, worker_module):
         parsed_args = Mock(dataset=dataset)
@@ -110,6 +113,7 @@ class TestFailure:
         ('forecast2', 'failure forecast2'),
         ('nowcast-green', 'failure nowcast-green'),
         ('download_weather', 'failure download_weather'),
+        ('SCVIP-CTD', 'failure SCVIP-CTD'),
     ])
     def test_failure_msg_type(self, dataset, expected, worker_module):
         parsed_args = Mock(dataset=dataset)
@@ -126,6 +130,7 @@ class TestPingErddap:
         'forecast2',
         'nowcast-green',
         'download_weather',
+        'SCVIP-CTD',
     ])
     def test_ping_erddap(self, dataset, worker_module, tmpdir):
         parsed_args = Mock(dataset=dataset)
@@ -144,6 +149,7 @@ class TestPingErddap:
                         'ubcSSf23DTracerFields1hV1', 'ubcSSf23DuVelocity1hV1'],
                     'nowcast-green': [
                         'ubcSSng3DTracerFields1hV1', 'ubcSSng3DuVelocity1hV1'],
+                    'SCVIP-CTD': ['ubcONCSCVIPCTD15mV1'],
                 }}}
         with patch.object(worker_module, 'logger') as m_logger:
             checklist = worker_module.ping_erddap(parsed_args, config)

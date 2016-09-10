@@ -48,6 +48,12 @@ weather:
 
 observations:
   ferry data: /ocean/jieliu/research/meopar/ONC_ferries/
+  ctd data:
+    # Destination directory for ONC CTD T&S data netCDF files
+    dest dir: /results/observations/ONC/CTD/
+    # Template for ONC CTD T&S data file path
+    # **Must be quoted to project {} characters**
+    filepath template: '{station}/{station}_CTD_15m_{yyyymmdd}.nc'
 
 run_types:
   # Keys are run types to execute, values are NEMO configuration name,
@@ -230,6 +236,8 @@ erddap:
       - ubcSSnPointAtkinsonSSH15mV1
       - ubcSSnSandHeadsSSH15mV1
       - ubcSSnVictoriaSSH15mV1
+    SCVIP-CTD:
+      - ubcONCSCVIPCTD15mV1
 
 
 logging:
@@ -303,6 +311,10 @@ msg_types:
     success forecast2: atmospheric forecast2 forcing ready
     failure forecast2: atmospheric forecast2 forcing files preparation failed
     crash: grib_to_netcdf worker crashed
+  get_onc_ctd:
+    success SCVIP: ONC SCVIP station CTD T&S data file created
+    failure: ONC CTD T&S data file creation failed
+    crahs: get_onc_ctd worker crashed
   init_cloud:
     success: cloud nodes initialization underway
     failure: cloud nodes initialization failed

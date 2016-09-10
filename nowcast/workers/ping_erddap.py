@@ -34,6 +34,7 @@ def main():
         choices={
             'nowcast', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
+            'SCVIP-CTD',
         },
         help='''
         Type of dataset to notify ERDDAP of:
@@ -41,7 +42,9 @@ def main():
         'nowcast-green' means nowcast green ocean run,
         'forecast' means updated forecast run,
         'forecast2' means preliminary forecast run,
-        'download_weather' means atmospheric forcing downloaded & processed
+        'download_weather' means atmospheric forcing downloaded & processed,
+        'SCVIP-CTD' means ONC SCVIP node CTD T&S observations downloaded &
+        processed
         ''',
     )
     worker.run(ping_erddap, success, failure)

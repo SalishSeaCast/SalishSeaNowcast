@@ -75,6 +75,7 @@ class TestNowcastManagerConstructor:
     'download_weather',
     'get_NeahBay_ssh',
     'make_runoff_file',
+    'get_onc_ctd',
     'grib_to_netcdf',
     'upload_forcing',
     'make_forcing_links',
@@ -445,22 +446,23 @@ class TestAfterDownloadWeather:
         assert actions[1] == expected
 
     @pytest.mark.parametrize('index, worker, worker_args', [
+        (2, 'get_onc_ctd', 'SCVIP'),
+        (3, 'get_NeahBay_ssh', 'forecast2'),
+        (4, 'grib_to_netcdf', 'forecast2'),
+    ])
+    def test_success_06_launch_workers(self, index, worker, worker_args, mgr):
+        mgr.config = {'run_types': {'forecast2': 'SalishSea'}}
+        actions = mgr._after_download_weather('success 06', 'payload')
+        expected = (mgr._launch_worker, [worker, [worker_args]],)
+        assert actions[index] == expected
+
+    @pytest.mark.parametrize('index, worker, worker_args', [
         (1, 'get_NeahBay_ssh', 'nowcast'),
         (2, 'grib_to_netcdf', 'nowcast+'),
     ])
     def test_success_12_launch_workers(self, index, worker, worker_args, mgr):
         mgr.config = {'run_types': {'nowcast': 'SalishSea'}}
         actions = mgr._after_download_weather('success 12', 'payload')
-        expected = (mgr._launch_worker, [worker, [worker_args]],)
-        assert actions[index] == expected
-
-    @pytest.mark.parametrize('index, worker, worker_args', [
-        (2, 'get_NeahBay_ssh', 'forecast2'),
-        (3, 'grib_to_netcdf', 'forecast2'),
-    ])
-    def test_success_06_launch_workers(self, index, worker, worker_args, mgr):
-        mgr.config = {'run_types': {'forecast2': 'SalishSea'}}
-        actions = mgr._after_download_weather('success 06', 'payload')
         expected = (mgr._launch_worker, [worker, [worker_args]],)
         assert actions[index] == expected
 
@@ -528,6 +530,30 @@ class TestAfterMakeRunoffFile:
             mgr._update_checklist, ['make_runoff_file', 'rivers', 'payload'],
         )
         assert actions[0] == expected
+
+
+class TestAfterGetOncCtd:
+    """Unit tests for the NowcastManager._after_get_onc_ctd method.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_action_msg_types(self, msg_type, mgr):
+        actions = mgr._after_get_onc_ctd(msg_type, 'payload')
+        assert actions is None
+
+    def test_update_checklist_on_success(self, mgr):
+        actions = mgr._after_get_onc_ctd('success SCVIP', 'payload')
+        expected = (
+            mgr._update_checklist, ['get_onc_ctd', 'ONC CTD data', 'payload'],
+        )
+        assert actions[0] == expected
+
+    def test_success_launch_ping_erddap_worker(self, mgr):
+        actions = mgr._after_get_onc_ctd('success SCVIP', 'payload')
+        expected = (mgr._launch_worker, ['ping_erddap', ['SCVIP-CTD']])
+        assert actions[1] == expected
 
 
 class TestAfterGRIBtoNetCDF:
