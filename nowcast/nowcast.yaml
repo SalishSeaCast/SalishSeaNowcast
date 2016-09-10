@@ -415,6 +415,8 @@ msg_types:
     failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
     success download_weather: atmospheric forcing ERDDAP dataset flag files created
     failure download_weather: atmospheric forcing ERDDAP dataset flag files creation failed
+    success SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files created
+    failure SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files creation failed
     crash: ping_erddap worker crashed
   make_plots:
     success nowcast publish: nowcast publish plots produced
