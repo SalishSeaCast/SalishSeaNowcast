@@ -160,7 +160,7 @@ def _create_dataset(onc_station, salinity, temperature):
             'ONC_stationDescription':
                 'Pacific, Salish Sea, Strait of Georgia, Central, '
                 'Strait of Georgia VENUS Instrument Platform',
-        }
+        },
         'SEVIP': {
             'place_name': 'East node',
             'ONC_station': 'East',
