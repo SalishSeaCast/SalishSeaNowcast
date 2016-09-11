@@ -238,6 +238,8 @@ erddap:
       - ubcSSnVictoriaSSH15mV1
     SCVIP-CTD:
       - ubcONCSCVIPCTD15mV1
+    SEVIP-CTD:
+      - ubcONCSEVIPCTD15mV1
 
 
 logging:
@@ -313,6 +315,7 @@ msg_types:
     crash: grib_to_netcdf worker crashed
   get_onc_ctd:
     success SCVIP: ONC SCVIP station CTD T&S data file created
+    success SEVIP: ONC SEVIP station CTD T&S data file created
     failure: ONC CTD T&S data file creation failed
     crahs: get_onc_ctd worker crashed
   init_cloud:
@@ -417,6 +420,8 @@ msg_types:
     failure download_weather: atmospheric forcing ERDDAP dataset flag files creation failed
     success SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files created
     failure SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files creation failed
+    success SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files created
+    failure SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files creation failed
     crash: ping_erddap worker crashed
   make_plots:
     success nowcast publish: nowcast publish plots produced

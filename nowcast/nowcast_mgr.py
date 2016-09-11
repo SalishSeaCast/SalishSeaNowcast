@@ -308,7 +308,6 @@ class NowcastManager:
             if msg_type.endswith('06'):
                 actions['success 06'].extend([
                     (self._launch_worker, ['make_runoff_file']),
-                    (self._launch_worker, ['get_onc_ctd', ['SCVIP']]),
                 ])
                 if 'forecast2' in self.config['run_types']:
                     actions['success 06'].extend([
@@ -317,6 +316,10 @@ class NowcastManager:
                         (self._launch_worker,
                             ['grib_to_netcdf', ['forecast2']]),
                     ])
+                actions['success 06'].extend([
+                    (self._launch_worker, ['get_onc_ctd', ['SCVIP']]),
+                    (self._launch_worker, ['get_onc_ctd', ['SEVIP']]),
+                ])
             if all((
                 msg_type.endswith('12'),
                 'nowcast' in self.config['run_types']
@@ -382,7 +385,12 @@ class NowcastManager:
                 (self._update_checklist,
                     ['get_onc_ctd', 'ONC CTD data', payload]),
                 (self._launch_worker, ['ping_erddap', ['SCVIP-CTD']])
-            ]
+            ],
+            'success SEVIP': [
+                (self._update_checklist,
+                    ['get_onc_ctd', 'ONC CTD data', payload]),
+                (self._launch_worker, ['ping_erddap', ['SEVIP-CTD']])
+            ],
         }
         return actions[msg_type]
 
