@@ -54,7 +54,7 @@ def main():
     worker = NowcastWorker(worker_name, description=__doc__)
     salishsea_yesterday = arrow.utcnow().floor('day').replace(days=-1)
     worker.arg_parser.add_argument(
-        'onc_station', choices={'SCVIP'},
+        'onc_station', choices={'SCVIP', 'SEVIP'},
         help='Name of the ONC node station to download data for.',
     )
     worker.arg_parser.add_argument(

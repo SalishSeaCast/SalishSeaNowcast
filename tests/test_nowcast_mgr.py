@@ -446,9 +446,10 @@ class TestAfterDownloadWeather:
         assert actions[1] == expected
 
     @pytest.mark.parametrize('index, worker, worker_args', [
-        (2, 'get_onc_ctd', 'SCVIP'),
-        (3, 'get_NeahBay_ssh', 'forecast2'),
-        (4, 'grib_to_netcdf', 'forecast2'),
+        (2, 'get_NeahBay_ssh', 'forecast2'),
+        (3, 'grib_to_netcdf', 'forecast2'),
+        (4, 'get_onc_ctd', 'SCVIP'),
+        (5, 'get_onc_ctd', 'SEVIP'),
     ])
     def test_success_06_launch_workers(self, index, worker, worker_args, mgr):
         mgr.config = {'run_types': {'forecast2': 'SalishSea'}}
@@ -550,9 +551,13 @@ class TestAfterGetOncCtd:
         )
         assert actions[0] == expected
 
-    def test_success_launch_ping_erddap_worker(self, mgr):
-        actions = mgr._after_get_onc_ctd('success SCVIP', 'payload')
-        expected = (mgr._launch_worker, ['ping_erddap', ['SCVIP-CTD']])
+    @pytest.mark.parametrize('msg_type, arg', [
+        ('success SCVIP', 'SCVIP-CTD'),
+        ('success SEVIP', 'SEVIP-CTD'),
+    ])
+    def test_success_launch_ping_erddap_worker(self, msg_type, arg, mgr):
+        actions = mgr._after_get_onc_ctd(msg_type, 'payload')
+        expected = (mgr._launch_worker, ['ping_erddap', [arg]])
         assert actions[1] == expected
 
 
