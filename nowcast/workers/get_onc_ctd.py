@@ -97,7 +97,8 @@ def get_onc_ctd(parsed_args, config, *args):
     TOKEN = os.environ['ONC_USER_TOKEN']
     onc_data = data_tools.get_onc_data(
         'scalardata', 'getByStation', TOKEN,
-        station='SCVIP', deviceCategory='CTD',
+        station=parsed_args.onc_station,
+        deviceCategory='CTD',
         sensors='salinity,temperature',
         dateFrom=data_tools.onc_datetime('{} 00:00'.format(ymd), 'utc'),
     )
