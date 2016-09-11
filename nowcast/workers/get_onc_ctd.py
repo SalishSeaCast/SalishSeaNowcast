@@ -123,7 +123,7 @@ def get_onc_ctd(parsed_args, config, *args):
         'creating ONC {0.onc_station} CTD T&S dataset for {date}'
         .format(parsed_args, date=ymd),
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
-    ds = _create_dataset(salinity, temperature)
+    ds = _create_dataset(parsed_args.onc_station, salinity, temperature)
     dest_dir = Path(config['observations']['ctd data']['dest dir'])
     filepath_tmpl = config['observations']['ctd data']['filepath template']
     nc_filepath = dest_dir/filepath_tmpl.format(
@@ -150,9 +150,25 @@ def _qaqc_filter(ctd_data, var):
     return filtered_var
 
 
-def _create_dataset(salinity, temperature):
+def _create_dataset(onc_station, salinity, temperature):
     def count(values, axis):
         return values.size
+    metadata = {
+        'SCVIP': {
+            'place_name': 'Central node',
+            'ONC_station': 'Central',
+            'ONC_stationDescription':
+                'Pacific, Salish Sea, Strait of Georgia, Central, '
+                'Strait of Georgia VENUS Instrument Platform',
+        }
+        'SEVIP': {
+            'place_name': 'East node',
+            'ONC_station': 'East',
+            'ONC_stationDescription':
+                'Pacific, Salish Sea, Strait of Georgia, East, '
+                'Strait of Georgia VENUS Instrument Platform',
+        }
+    }
     ds = xarray.Dataset(
         data_vars={
             'salinity': xarray.DataArray(
@@ -233,9 +249,11 @@ def _create_dataset(salinity, temperature):
             ),
         },
         coords={
-            'depth': PLACES['Central node']['depth'],
-            'longitude': PLACES['Central node']['lon lat'][0],
-            'latitude': PLACES['Central node']['lon lat'][1],
+            'depth': PLACES[metadata[onc_station]['place_name']]['depth'],
+            'longitude':
+                PLACES[metadata[onc_station]['place_name']]['lon lat'][0],
+            'latitude':
+                PLACES[metadata[onc_station]['place_name']]['lon lat'][1],
         },
         attrs={
             'history': """
@@ -245,14 +263,13 @@ def _create_dataset(salinity, temperature):
     and count as aggregation functions.
     {0} Store as netCDF4 file.
             """.format(arrow.now().format('YYYY-MM-DD HH:mm:ss')),
-            'ONC_station': 'Central',
-            'ONC_stationCode': PLACES['Central node']['ONC stationCode'],
+            'ONC_station': metadata[onc_station]['ONC_station'],
+            'ONC_stationCode': onc_station,
             'ONC_stationDescription':
-                'Pacific, Salish Sea, Strait of Georgia, Central, Strait of '
-                'Georgia VENUS Instrument Platform',
+                metadata[onc_station]['ONC_stationDescription'],
             'ONC_data_product_url':
-                'http://dmas.uvic.ca/DataSearch?location=SCVIP&deviceCategory'
-                '=CTD',
+                'http://dmas.uvic.ca/DataSearch?location={station}'
+                '&deviceCategory=CTD'.format(station=onc_station),
         },
     )
     return ds
