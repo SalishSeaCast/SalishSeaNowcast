@@ -32,6 +32,7 @@ import os
 from pathlib import Path
 
 import arrow
+import numpy
 import xarray
 
 from salishsea_tools import data_tools
@@ -272,6 +273,11 @@ def _create_dataset(onc_station, salinity, temperature):
                 '&deviceCategory=CTD'.format(station=onc_station),
         },
     )
+    # Replace NaN sample counts with zeros in the case of NaN padded DataArrays
+    ds.salinity_sample_count.values = numpy.nan_to_num(
+        ds.salinity_sample_count.values)
+    ds.temperature_sample_count.values = numpy.nan_to_num(
+        ds.temperature_sample_count.values)
     return ds
 
 
