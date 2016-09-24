@@ -1,0 +1,32 @@
+# File map for 13-Sep-2016 creation of SalishSeaNowcast repo
+# from the SalishSeaNowcast/ directory of the tools repo.
+# Done in preparation for migration of Salish Sea NEMO nowcast
+# system to be based on the NEMO_Nowcast framework package.
+#
+# The following command was used to create the SalishSeaNowcast repo:
+#    cd MEOPAR
+#    hg convert --filemap tools/SalishSeaNowcast_filemap.txt tools SalishSeaNowcast
+
+include .hgtags
+include environment-rtd.yml
+include LICENSE
+include readthedocs.yml
+include SalishSeaNowcast/
+include SalishSeaNowcast_filemap.txt
+
+rename SalishSeaNowcast/docs docs
+rename SalishSeaNowcast/notebooks notebooks
+rename SalishSeaNowcast/nowcast nowcast
+rename SalishSeaNowcast/tests tests
+rename SalishSeaNowcast/tidal_predictions tidal_predictions
+rename SalishSeaNowcast/.coveragerc .coveragerc
+rename SalishSeaNowcast/__pkg_metadata__.py __pkg_metadata__.py
+rename SalishSeaNowcast/environment-dev.yaml environment-dev.yaml
+rename SalishSeaNowcast/environment-prod.yaml environment-prod.yaml
+rename SalishSeaNowcast/README.rst README.rst
+rename SalishSeaNowcast/requirements.pip requirements.pip
+rename SalishSeaNowcast/setup.py setup.py
+
+include docs/conf.py
+include docs/license_description.txt
+include docs/Makefile
