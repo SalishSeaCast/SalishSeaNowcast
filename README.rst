@@ -1,8 +1,8 @@
-************************************
-Salish Sea NEMO Model Nowcast System
-************************************
+*****************************
+Salish Sea NEMO Model Nowcast
+*****************************
 
-The :py:obj:`SalishSeaNowcast` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
+The `SalishSeaNowcast`` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
 The runs use as-recent-as-available
 (typically previous day)
 forcing data for the western boundary sea surface height and the Fraser River flow,
@@ -19,13 +19,15 @@ message-based architecture that:
 * prepares a collection of plots from the run results for monitoring purposes
 * publishes the plots and the processing log to the web
 
-Documentation for the command processor is in the ``docs/`` directory and is rendered at https://salishsea-meopar-tools.readthedocs.org/en/latest/SalishSeaNowcast/.
+Documentation for the package is in the ``docs/`` directory and is rendered at https://salishsea-nowcast.readthedocs.io/en/latest/.
 
 
 License
 =======
 
-The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2016 by the Salish Sea MEOPAR Project Contributors and The University of British Columbia.
+The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2016 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+
+.. _Salish Sea MEOPAR Project Contributors: https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 http://www.apache.org/licenses/LICENSE-2.0
