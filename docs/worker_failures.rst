@@ -100,7 +100,7 @@ That can be accomplished as follows:
 
    .. code-block:: bash
 
-       (/results/nowcast-sys/nowcast-env)skookum$ python -m salishsea_tools.nowcast.workers.download_weather nowcast.yaml 12 --debug
+       (/results/nowcast-sys/nowcast-env)skookum$ python -m nowcast.workers.download_weather nowcast.yaml 12 --debug
 
    The command above downloads the 12 forecast.
    The :kbd:`--debug` flag causes the logging output of the worker to be displayed on the screen (so that you can see what is going on) instead of being written to a file.
@@ -136,11 +136,11 @@ and its option flags:
 
 .. code-block:: bash
 
-    (nowcast)$ python -m salishsea_tools.nowcast.workers.download_weather --help
+    (nowcast)$ python -m nowcast.workers.download_weather --help
 
 .. code-block:: none
 
-    usage: python -m salishsea_tools.nowcast.workers.download_weather
+    usage: python -m nowcast.workers.download_weather
            [-h] [--debug] [--yesterday] config_file {18,00,12,06}
 
     Salish Sea NEMO nowcast weather model dataset download worker. Download the

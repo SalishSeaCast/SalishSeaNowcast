@@ -25,7 +25,7 @@ import __pkg_metadata__
 
 python_classifiers = [
     'Programming Language :: Python :: {0}'.format(py_version)
-    for py_version in ['3', '3.4', '3.5']]
+    for py_version in ['3', '3.5']]
 other_classifiers = [
     'Development Status :: ' + __pkg_metadata__.DEV_STATUS,
     'License :: OSI Approved :: Apache Software License',
@@ -45,7 +45,7 @@ except IOError:
 install_requires = [
     # see environment-prod.yaml for conda environment production installation,
     # see environment-dev.yaml for conda environment dev installation,
-    # see requirements.pip for package versions used during recent development
+    # see requirements.txt for package versions used during recent development
     'driftwood',
     'mako',
     'matplotlib',
@@ -63,9 +63,8 @@ install_requires = [
     'arrow',
     'BeautifulSoup4',
     'sphinx-bootstrap-theme',
-    # 'SalishSeaTools',  # use cd tools; pip install -e SalishSeaTools/
-    # 'SalishSeaCmd',  # use cd tools; pip install -e SalishSeaCmd/
-    # 'SalishSeaNowcast',  # use cd tools; pip install -e SalishSeaNowcast/
+    # 'SalishSeaTools',  # use cd tools; txt install -e SalishSeaTools/
+    # 'SalishSeaCmd',  # use cd tools; txt install -e SalishSeaCmd/
 ]
 
 setup(
@@ -75,9 +74,7 @@ setup(
     long_description=long_description,
     author='Doug Latornell',
     author_email='djl@douglatornell.ca',
-    url=(
-        'https://salishsea-meopar-tools.readthedocs.org/en/latest/'
-        'SalishSeaNowcast/'),
+    url='https://salishsea-nowcast.readthedocs.io/en/latest/',
     license='Apache License, Version 2.0',
     classifiers=python_classifiers + other_classifiers,
     platforms=['MacOS X', 'Linux'],

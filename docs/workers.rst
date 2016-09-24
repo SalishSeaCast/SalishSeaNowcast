@@ -172,11 +172,11 @@ The :py:class:`~SalishSeaNowcast.nowcast.nowcast_worker.NowcastWorker` construct
 
   .. code-block:: bash
 
-      (nowcast)$ python -m salishsea_tools.nowcast.workers.download_weather --help
+      (nowcast)$ python -m nowcast.workers.download_weather --help
 
   .. code-block:: none
 
-      usage: python -m salishsea_tools.nowcast.workers.download_weather
+      usage: python -m nowcast.workers.download_weather
              [-h] [--debug] [--yesterday] config_file {18,00,12,06}
 
       Salish Sea NEMO nowcast weather model dataset download worker. Download the
@@ -326,7 +326,7 @@ Those messages appear in the :file:`nowcast.debug.log` file.
 
 If a worker function encounters an expected error condition
 (a file download failure or timeout, for example)
-it should send a message to the logging system via :py:meth:`logger.critical` and raise a :py:exc:`salishsea_tools.nowcast.lib.WorkerError` exception.
+it should send a message to the logging system via :py:meth:`logger.critical` and raise a :py:exc:`nowcast.lib.WorkerError` exception.
 Here is an example that handles an empty downloaded file in the :py:mod:`download_weather` worker:
 
 .. code-block:: python
@@ -336,7 +336,7 @@ Here is an example that handles an empty downloaded file in the :py:mod:`downloa
         raise lib.WorkerError
 
 This section has only outlined the basic code structure and conventions for writing nowcast workers.
-The best way to learn now to write a new worker is by studying the code in the existing worker modules in :file:`SalishSeaTools/salishsea_tools/nowcast/workers/`.
+The best way to learn now to write a new worker is by studying the code in the existing worker modules in :file:`SalishSeaNowcast/nowcast/workers/`.
 
 
 .. _ExtendingTheCommandLineParser:
