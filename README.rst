@@ -2,7 +2,7 @@
 Salish Sea NEMO Model Nowcast
 *****************************
 
-The `SalishSeaNowcast`` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
+The ``SalishSeaNowcast`` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
 The runs use as-recent-as-available
 (typically previous day)
 forcing data for the western boundary sea surface height and the Fraser River flow,
