@@ -4,11 +4,10 @@
 # Create a conda environment for development, testing, and documentation
 # of the Salish Sea Nowcast system with:
 #
-#    $ cd tools
-#    $ conda env create -f SalishSeaNowcast/environment-dev.yaml
+#    $ conda env create -f SalishSeaNowcast/environment-prod.yaml
 #    $ source activate nowcast
-#    $ pip install --editable SalishSeaTools/
-#    $ pip install --editable SalishSeaCmd/
+#    $ pip install --editable tools/SalishSeaTools/
+#    $ pip install --editable tools/SalishSeaCmd/
 #    $ pip install --editable SalishSeaNowcast/
 
 name: nowcast

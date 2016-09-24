@@ -164,7 +164,7 @@ and the ipdb debugger:
     (nowcast)$ conda install ipython jupyter pytest coverage
     (nowcast)$ pip install ipdb
 
-The complete list of Python packages installed including their version numbers (at time of writing) created by the :command:`pip freeze` command is available in :file:`salishsea_tools/nowcast/requirements.pip`.
+The complete list of Python packages installed including their version numbers (at time of writing) created by the :command:`pip freeze` command is available in :file:`SalishSeaNowcast/requirements.txt`.
 
 To deactivate the :kbd:`nowcast` environment and return to your root Anaconda Python environment use:
 

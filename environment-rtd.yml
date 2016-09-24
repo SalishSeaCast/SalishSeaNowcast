@@ -1,8 +1,5 @@
 # conda environment description file for docs build envioronment
 # on readthedocs.org
-#
-# This file is a union of the environment.yaml files in the
-# SalishSeaCmd, SalishSeaNowcast, SalishSeaTools, and Marlin packages.
 
 name: sphinx-build
 
