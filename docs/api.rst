@@ -18,13 +18,17 @@
 :kbd:`SalishSeaNowcast` Package API
 ***********************************
 
+.. TODO::
+    Clean up headings and auto-doc imports re: transition to NEMO_Nowcast framework
+
+
 .. _nowcast.nowcast_mgr:
 
 :py:mod:`nowcast.nowcast_mgr` Module
 ====================================
 
-.. automodule:: nowcast.nowcast_mgr
-    :members:
+.. .. automodule:: nowcast.nowcast_mgr
+..     :members:
 
 
 .. _nowcast.nowcast_worker:
@@ -32,8 +36,8 @@
 :py:mod:`nowcast.nowcast_worker` Module
 =======================================
 
-.. automodule:: nowcast.nowcast_worker
-    :members:
+.. .. automodule:: nowcast.nowcast_worker
+..     :members:
 
 
 .. _nowcast.lib:
@@ -41,8 +45,8 @@
 :py:mod:`nowcast.lib` Module
 ============================
 
-.. automodule:: nowcast.lib
-    :members:
+.. .. automodule:: nowcast.lib
+..     :members:
 
 
 .. _nowcast.figures:
@@ -55,8 +59,8 @@ Nowcast System Results Figures
 :py:mod:`nowcast.figures.shared` Module
 ---------------------------------------
 
-.. automodule:: nowcast.figures.shared
-    :members:
+.. .. automodule:: nowcast.figures.shared
+..     :members:
 
 
 .. _nowcast.figures.website_theme:
@@ -64,8 +68,8 @@ Nowcast System Results Figures
 :py:mod:`nowcast.figures.website_theme` Module
 ----------------------------------------------
 
-.. automodule:: nowcast.figures.website_theme
-    :members:
+.. .. automodule:: nowcast.figures.website_theme
+..     :members:
 
 
 .. _nowcast.figures.comparison:
@@ -78,8 +82,8 @@ Nowcast System Results Figures
 :py:mod:`nowcast.figures.comparison.salinity_ferry_track` Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: nowcast.figures.comparison.salinity_ferry_track
-    :members:
+.. .. automodule:: nowcast.figures.comparison.salinity_ferry_track
+..     :members:
 
 
 .. _nowcast.figures.publish:
@@ -92,8 +96,8 @@ Nowcast System Results Figures
 :py:mod:`nowcast.figures.publish.compare_tide_prediction_max_ssh`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: nowcast.figures.publish.compare_tide_prediction_max_ssh
-    :members:
+.. .. automodule:: nowcast.figures.publish.compare_tide_prediction_max_ssh
+..     :members:
 
 
 .. _nowcast.figures.publish.pt_atkinson_tide:
@@ -101,8 +105,8 @@ Nowcast System Results Figures
 :py:mod:`nowcast.figures.publish.pt_atkinson_tide` Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: nowcast.figures.publish.pt_atkinson_tide
-    :members:
+.. .. automodule:: nowcast.figures.publish.pt_atkinson_tide
+..     :members:
 
 
 .. _nowcast.figures.publish.storm_surge_alerts:
@@ -110,8 +114,8 @@ Nowcast System Results Figures
 :py:mod:`nowcast.figures.publish.storm_surge_alerts` Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: nowcast.figures.publish.storm_surge_alerts
-    :members:
+.. .. automodule:: nowcast.figures.publish.storm_surge_alerts
+..     :members:
 
 
 .. _nowcast.figures.publish.storm_surge_alerts_thumbnail:
@@ -119,5 +123,5 @@ Nowcast System Results Figures
 :py:mod:`nowcast.figures.publish.storm_surge_alerts_thumbnail` Module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: nowcast.figures.publish.storm_surge_alerts_thumbnail
-    :members:
+.. .. automodule:: nowcast.figures.publish.storm_surge_alerts_thumbnail
+..     :members:
