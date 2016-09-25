@@ -1,0 +1,14 @@
+# conda environment description file for docs build envioronment
+# on readthedocs.org
+
+name: sphinx-build
+
+channels:
+  - gomss-nowcast
+  - conda-forge
+  - defaults
+
+dependencies:
+  - nemo_nowcast
+  - pip
+  - python=3

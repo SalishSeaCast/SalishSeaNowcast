@@ -17,5 +17,5 @@
 """
 PROJECT = 'SalishSeaNowcast'
 DESCRIPTION = 'Salish Sea NEMO model nowcast system'
-VERSION = '2.0'
-DEV_STATUS = '5 - Production'
+VERSION = '3.0.dev0'
+DEV_STATUS = '3 - Alpha'

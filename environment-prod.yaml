@@ -6,34 +6,19 @@
 #
 #    $ conda env create -f SalishSeaNowcast/environment-prod.yaml
 #    $ source activate nowcast
-#    $ pip install --editable tools/SalishSeaTools/
-#    $ pip install --editable tools/SalishSeaCmd/
 #    $ pip install --editable SalishSeaNowcast/
 
 name: nowcast-env
+
+channels:
+  - gomss-nowcast
+  - conda-forge
+  - defaults
+
 dependencies:
-- bottleneck
-- lxml
-- mako
-- matplotlib
-- netCDF4
-- numpy
-- pandas
-- paramiko
-- pillow
-- pyyaml
-- pyzmq
-- pip
-- python=3
-- requests
-- scipy
-- sphinx
-- xarray
-- pip:
-  - angles
-  - arrow
-  - BeautifulSoup4
-  - driftwood
-  - feedgen
-  - retrying
-  - sphinx-bootstrap-theme
+  - nemo_nowcast
+  - pip
+  - python=3
+
+  - pip:
+    - raven
