@@ -4,11 +4,9 @@
 name: sphinx-build
 
 channels:
-  - gomss-nowcast
-  - conda-forge
   - defaults
+  - gomss-nowcast
 
 dependencies:
   - nemo_nowcast
-  - pip
   - python=3
