@@ -5,11 +5,11 @@
 # of the Salish Sea Nowcast system with:
 #
 #    $ conda env create -f SalishSeaNowcast/environment-prod.yaml
-#    $ source activate nowcast
+#    $ source activate salishsea-nowcast
 #    $ pip install --editable NEMO_Nowcast/
 #    $ pip install --editable SalishSeaNowcast/
 
-name: nowcast
+name: salishsea-nowcast
 
 channels:
   - gomss-nowcast
@@ -32,11 +32,16 @@ dependencies:
 #  - pytest
 
   # For documentation
-#  - sphinx
+  - sphinx
 
   # For exploration
 #  - ipython
 #  - jupyter
 
   - pip:
+
+    # For exception monitoring
     - raven
+
+    # For documentation
+    - sphinx-rtd-theme
