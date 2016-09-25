@@ -30,7 +30,6 @@ other_classifiers = [
     'Development Status :: ' + __pkg_metadata__.DEV_STATUS,
     'License :: OSI Approved :: Apache Software License',
     'Programming Language :: Python :: Implementation :: CPython',
-    'Operating System :: MacOS :: MacOS X',
     'Operating System :: POSIX :: Linux',
     'Operating System :: Unix',
     'Environment :: Console',
@@ -43,28 +42,16 @@ try:
 except IOError:
     long_description = ''
 install_requires = [
-    # see environment-prod.yaml for conda environment production installation,
-    # see environment-dev.yaml for conda environment dev installation,
+    # see environment-prod.yaml for conda environment production installation
+    # see environment-dev.yaml for conda environment dev installation
     # see requirements.txt for package versions used during recent development
-    'driftwood',
-    'mako',
-    'matplotlib',
-    'netCDF4',
-    'numpy',
-    'pandas',
-    'paramiko',
-    'pillow',
+    # see environment-rtd.yaml for conda environment used for readthedocs build
+
+    'nemo_nowcast',
     'pyyaml',
     'pyzmq',
-    'requests',
-    'scipy',
-    'sphinx',
-    'angles',
-    'arrow',
-    'BeautifulSoup4',
-    'sphinx-bootstrap-theme',
-    # 'SalishSeaTools',  # use cd tools; txt install -e SalishSeaTools/
-    # 'SalishSeaCmd',  # use cd tools; txt install -e SalishSeaCmd/
+
+    # 'SalishSeaNowcast',  # use pip install -e SalishSeaNowcast/
 ]
 
 setup(
@@ -73,7 +60,7 @@ setup(
     description=__pkg_metadata__.DESCRIPTION,
     long_description=long_description,
     author='Doug Latornell',
-    author_email='djl@douglatornell.ca',
+    author_email='dlatornell@eoas.ubc.ca',
     url='https://salishsea-nowcast.readthedocs.io/en/latest/',
     license='Apache License, Version 2.0',
     classifiers=python_classifiers + other_classifiers,
