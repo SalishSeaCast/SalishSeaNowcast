@@ -1,0 +1,79 @@
+# System configuration file for Salish Sea Nowcast system
+
+# System status checklist file
+checklist file: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast_checklist.yaml
+
+
+# Python interpreter in environment with all dependencies installed
+python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python
+
+
+# Logging system configuration
+logging:
+  version: 1
+  disable_existing_loggers: False
+  formatters:
+    simple:
+      format: '%(asctime)s %(levelname)s [%(name)s] %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      # Level 100 disables console logging.
+      # Use worker --debug flag to enable console logging.
+      level: 100
+      formatter: simple
+      stream: ext://sys.stdout
+    info_text:
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      formatter: simple
+      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.log
+      backupCount: 7
+    debug_text:
+      class: logging.handlers.RotatingFileHandler
+      level: DEBUG
+      formatter: simple
+      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.debug.log
+      backupCount: 7
+    checklist:
+      class: logging.handlers.RotatingFileHandler
+      level: INFO
+      formatter: simple
+      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
+      backupCount: 7
+    sentry:
+      class: raven.handlers.logging.SentryHandler
+      level: ERROR
+      # dsn will be obtained from SENTRY_DSN environment variable
+  root:
+    level: DEBUG
+    handlers:
+     - console
+     - info_text
+     - debug_text
+     - sentry
+
+
+# Message system
+zmq:
+  server: localhost
+  ports:
+    # traffic between manager and message broker
+    manager: 4343
+    # traffic between workers and message broker
+    workers: 4344
+
+message registry:
+  # Message types that the manager process can send and their meanings
+  # Don't change this section without making corresponding changes in
+  # the nemo_nowcast.manager module of the NEMO_Nowcast package.
+  manager:
+    ack: message acknowledged
+    checklist cleared: system checklist cleared
+    unregistered worker: ERROR - message received from unregistered worker
+    unregistered message type: ERROR - unregistered message type received from worker
+    no after_worker function: ERROR - after_worker function not found in next_workers module
+
+  # Module from which to load :py:func:`after_<worker_name>` functions
+  # that provide lists of workers to launch when :kbd:`worker_name` finishes
+  next workers module: nowcast.next_workers
