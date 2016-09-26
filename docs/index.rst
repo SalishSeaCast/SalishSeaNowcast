@@ -57,3 +57,4 @@ Contents:
    config
    worker_failures
    api
+   pkg_development
