@@ -166,7 +166,7 @@ e.g. http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/,
 to see if files for 2 days exist.
 
 Even if the worker cannot be re-run in the nowcast system deployment environment on :kbd:`skookum` due to permission issues the forecast products can be downloaded using a development and testing environment and directory structure as described above
-(see :ref:`SalishSeaNowcastPythnonPackageEnvironmwnt` and :ref:`SalishSeaNowcastDirectoryStructure`).
+(see :ref:`SalishSeaNowcastPythonPackageEnvironmwnt` and :ref:`SalishSeaNowcastDirectoryStructure`).
 That can be accomplished as follows:
 
 #. Activate your nowcast :program:`conda` environment,

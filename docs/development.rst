@@ -20,7 +20,7 @@ Use and Development
 ===================
 
 The primary use for the :kbd:`SalishSeaNowcast` package is development and deployment of the Salish Sea NEMO model nowcast system.
-To work on that you should set up a :ref:`SalishSeaNowcastPythnonPackageEnvironmwnt` as described below.
+To work on that you should set up a :ref:`SalishSeaNowcastPythonPackageEnvironmwnt` as described below.
 
 A secondary use for the package is to import one of the modules from the :kbd:`nowcast` namespace so that you can use functions from it in code outside of the nowcast system.
 To facilitate that use case you can install the package in a Python 3 Anaconda or :program:`conda` environment with:
@@ -48,7 +48,7 @@ or
     xxx = nowcast.analyze.depth_average(...)
 
 
-.. _SalishSeaNowcastPythnonPackageEnvironmwnt:
+.. _SalishSeaNowcastPythonPackageEnvironmwnt:
 
 :kbd:`SalishSeaNowcast` Python Package Environment
 --------------------------------------------------
