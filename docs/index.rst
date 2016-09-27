@@ -14,20 +14,30 @@
 .. limitations under the License.
 
 
-.. _SalishSeaNowcastPackage:
+.. _SalishSeaNowcastSystem:
 
-*******************************
-:kbd:`SalishSeaNowcast` Package
-*******************************
+*************************
+Salish Sea Nowcast System
+*************************
 
-The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
+The Salish Sea Nowcast system is a software automation system that runs the `Salish Sea NEMO ocean model`_ in a daily nowcast/forecast mode.
 The runs use as-recent-as-available
 (typically previous day)
 forcing data for the western boundary sea surface height and the Fraser River flow,
-and atmospheric forcing from the four-times-daily produced forecast results from the Environment Canada High Resolution Deterministic Prediction System (HRDPS) operational GEM 2.5km resolution model.
+and atmospheric forcing from the four-times-daily produced forecast product from the `Environment Canada High Resolution Deterministic Prediction System (HRDPS)`_ operational GEM 2.5km resolution model.
+
+.. _Salish Sea NEMO ocean model: https://salishsea.eos.ubc.ca/nemo/
+.. _Environment Canada High Resolution Deterministic Prediction System (HRDPS): https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html
 
 The runs are automated using an asynchronous,
-message-based architecture that:
+distributed,
+message-based architecture provided by the `NEMO_Nowcast`_ framework package.
+`SalishSeaNowcast`_ is the Python package that uses the `NEMO_Nowcast`_ framework to implement the Salish Sea Nowcast system.
+
+.. _NEMO_Nowcast: http://nemo-nowcast.readthedocs.io/en/latest/
+.. _SalishSeaNowcast: https://bitbucket.org/salishsea/salishseanowcast
+
+The automation system:
 
 * obtains the forcing datasets from web services
 * pre-processes the forcing datasets into the formats expected by NEMO
@@ -37,14 +47,38 @@ message-based architecture that:
 * prepares a collection of plots from the run results for monitoring purposes
 * publishes the plots and the processing log to the web
 
-The automation architecture is presently under development.
-It consists of a long-running manager process and a collection of worker processes which are launched by the manager or by cron to perform specific tasks.
+Results of the model runs can be found on the `Salish Sea NEMO model results site`_ and on the project's `ERDDAP server`_.
 
-The :kbd:`SalishSeaNowcast` package is a Python 3 package.
-It is developed and tested under Python 3.5 and should work with that and later versions of Python.
+.. _Salish Sea NEMO model results site: https://salishsea.eos.ubc.ca/nemo/results/
+.. _ERDDAP server: https://salishsea.eos.ubc.ca/erddap/
+
+.. note::
+    This implementation of the system is presently under development.
+    The `previous implementation`_ has been producing daily results since Oct-2014.
+
+    .. _previous implementation: http://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaNowcast/
+
+The system is deployed on a server maintained by the UBC Dept. of Earth, Ocean and Atmospheric Sciences.
+Computing resources to run the NEMO model are provided by `Ocean Networks Canada`_ (cloud) and `Westgrid`_ (HPC).
+
+.. _Ocean Networks Canada: http://www.oceannetworks.ca/
+.. _Westgrid: https://www.westgrid.ca/
+
+The system consists of long-running message broker,
+scheduler,
+and manager processes.
+A collection of worker processes are launched by the manager or the scheduler to do particular jobs and terminate when that job is finished.
+Please see :ref:`nemonowcast:FrameworkArchitecture` for a description of the system architecture.
+The workers are implemented in Python modules in the :py:obj:`nowcast.workers` and :ref:`nemo_nowcast.workers <nemonowcast:NEMO_NowcastBuiltinWorkers>` namespaces.
+
+.. TODO::
+    Link :py:obj:`nowcast.workers` to a yet-to-be-written workers section containing auto-doc generated content from worker modules.
 
 
-Contents:
+Contents
+========
+
+The deployment and configuration of the system are described in the sections below.
 
 .. toctree::
    :maxdepth: 2
@@ -58,3 +92,22 @@ Contents:
    worker_failures
    api
    pkg_development
+
+
+Indices and Tables
+------------------
+
+* :ref:`genindex`
+* :ref:`modindex`
+
+
+License
+=======
+
+The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2016 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+
+.. _Salish Sea MEOPAR Project Contributors: https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
+
+They are licensed under the Apache License, Version 2.0.
+http://www.apache.org/licenses/LICENSE-2.0
+Please see the LICENSE file for details of the license.

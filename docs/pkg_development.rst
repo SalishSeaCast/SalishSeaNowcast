@@ -20,6 +20,12 @@
 :kbd:`SalishSeaNowcast` Package Development
 *******************************************
 
+The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
+The package uses the `NEMO_Nowcast`_ framework to implement the :ref:`SalishSeaNowcastSystem`.
+
+.. _NEMO_Nowcast: http://nemo-nowcast.readthedocs.io/en/latest/
+
+
 .. _SalishSeaNowcastPythonVersions:
 
 Python Versions
