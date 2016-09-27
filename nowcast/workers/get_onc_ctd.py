@@ -275,9 +275,9 @@ def _create_dataset(onc_station, salinity, temperature):
     )
     # Replace NaN sample counts with zeros in the case of NaN padded DataArrays
     ds.salinity_sample_count.values = numpy.nan_to_num(
-        ds.salinity_sample_count.values)
+        ds.salinity_sample_count.values).astype(int)
     ds.temperature_sample_count.values = numpy.nan_to_num(
-        ds.temperature_sample_count.values)
+        ds.temperature_sample_count.values).astype(int)
     return ds
 
 
