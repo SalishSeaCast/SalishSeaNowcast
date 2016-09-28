@@ -72,7 +72,8 @@ def get_filenames(t_orig, t_final, period, grid, model_path):
     :arg grid: Type of model results (eg. grid_T, grid_U, etc).
     :type grid: string
 
-    :arg model_path: Defines the path used (eg. nowcast)
+    :arg model_path: Defines the full path for model results
+                     (eg. '/results/SalishSea/nowcast/')
     :type model_path: string
 
     :returns: files, a list of filenames
