@@ -48,8 +48,7 @@ install_requires = [
     # see environment-rtd.yaml for conda environment used for readthedocs build
 
     'nemo_nowcast',
-    'pyyaml',
-    'pyzmq',
+    'raven',
 
     # 'SalishSeaNowcast',  # use pip install -e SalishSeaNowcast/
 ]
