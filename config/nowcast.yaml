@@ -10,6 +10,24 @@ python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python
 file group: sallen
 
 
+# Workers scheduled to run at specific times
+scheduled workers:
+  # Worker module name (fully qualified, dotted notation)
+  nowcast.workers.download_weather:
+    # Time period for worker launch repetition
+    every: day
+    # Time at which to launch the worker
+    # (quotes are required to ensure that time is interpreted as a string)
+    at: '11:00'
+    # Optional command-line options for the worker
+    # (quotes are necessary to force interpretation as a string)
+    cmd line opts: '12'
+  nowcast.workers.download_weather:
+    every: day
+    at: '17:00'
+    cmd line opts: '18'
+
+
 weather:
   # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
   GRIB_dir: /results/forcing/atmospheric/GEM2.5/GRIB/
@@ -82,7 +100,8 @@ message registry:
     no after_worker function: ERROR - after_worker function not found in next_workers module
 
   # Module from which to load :py:func:`after_<worker_name>` functions
-  # that provide lists of workers to launch when :kbd:`worker_name` finishes
+  # that provide lists of workers to launch when :kbd:`worker_name` finishes.
+  # Use fully qualified, dotted notation.
   next workers module: nowcast.next_workers
 
   workers:
