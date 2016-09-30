@@ -60,6 +60,12 @@ FORECAST_DURATION = 48  # hours
 
 
 def main():
+    """Set up and run the worker.
+
+    For command-line usage see:
+
+    :command:`python -m nowcast.workers.download_weather --help`
+    """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.parser.add_argument(
