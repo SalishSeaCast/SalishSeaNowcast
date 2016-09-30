@@ -19,3 +19,27 @@ end their work.
 Function names **must** be of the form :py:func:`after_worker_name`.
 """
 from nemo_nowcast import NextWorker
+
+
+def after_download_weather(msg):
+    """Calculate the list of workers to launch after the download_weather worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure 00': [],
+        'failure 06': [],
+        'failure 12': [],
+        'failure 18': [],
+        'success 00': [],
+        'success 06': [],
+        'success 12': [],
+        'success 18': [],
+    }
+    return next_workers[msg.type]

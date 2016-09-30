@@ -14,23 +14,27 @@
 # limitations under the License.
 
 """Salish Sea NEMO nowcast weather model dataset download worker.
-Download the GRIB2 files from today's 00, 06, 12, or 18 EC GEM 2.5km
-HRDPS operational model forecast.
+
+Download the GRIB2 files from today's 00, 06, 12, or 18 Environment Canada
+GEM 2.5km HRDPS operational model forecast.
 """
 import logging
 import os
+from pathlib import Path
 
 import arrow
-
-from nowcast import lib
-from nowcast.nowcast_worker import (
+import requests
+from nemo_nowcast import (
+    get_web_data,
     NowcastWorker,
     WorkerError,
 )
 
+from nowcast import lib
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+
+NAME = 'download_weather'
+logger = logging.getLogger(NAME)
 
 
 GRIB_VARIABLES = (
@@ -56,12 +60,13 @@ FORECAST_DURATION = 48  # hours
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.parser.add_argument(
         'forecast', choices=set(('00', '06', '12', '18')),
         help='Name of forecast to download files from.',
     )
-    worker.arg_parser.add_argument(
+    worker.cli.parser.add_argument(
         '--yesterday', action='store_true',
         help="Download forecast files for previous day's date."
     )
@@ -69,17 +74,27 @@ def main():
 
 
 def success(parsed_args):
+    if parsed_args.yesterday:
+        ymd = arrow.now().floor('day').replace(days=-1).format('YYYY-MM-DD')
+    else:
+        ymd = arrow.now().floor('day').format('YYYY-MM-DD')
     logger.info(
-        'weather forecast {.forecast} downloads complete'
-        .format(parsed_args), extra={'forecast': parsed_args.forecast})
+        '{date} weather forecast {0.forecast} downloads complete'
+        .format(parsed_args, date=ymd),
+        extra={'forecast_date': ymd, 'forecast': parsed_args.forecast})
     msg_type = '{} {}'.format('success', parsed_args.forecast)
     return msg_type
 
 
 def failure(parsed_args):
+    if parsed_args.yesterday:
+        ymd = arrow.now().floor('day').replace(days=-1).format('YYYY-MM-DD')
+    else:
+        ymd = arrow.now().floor('day').format('YYYY-MM-DD')
     logger.critical(
-        'weather forecast {.forecast} downloads failed'
-        .format(parsed_args), extra={'forecast': parsed_args.forecast})
+        '{date} weather forecast {0.forecast} downloads failed'
+        .format(parsed_args, date=ymd),
+        extra={'forecast_date': ymd, 'forecast': parsed_args.forecast})
     msg_type = '{} {}'.format('failure', parsed_args.forecast)
     return msg_type
 
@@ -94,15 +109,19 @@ def get_grib(parsed_args, config, *args):
     dest_dir_root = config['weather']['GRIB_dir']
     grp_name = config['file group']
     _mkdirs(dest_dir_root, date, forecast, grp_name)
-    for forecast_hour in range(1, FORECAST_DURATION+1):
-        hr_str = '{:0=3}'.format(forecast_hour)
-        lib.mkdir(
-            os.path.join(dest_dir_root, date, forecast, hr_str),
-            logger, grp_name=grp_name, exist_ok=False)
-        for var in GRIB_VARIABLES:
-            filepath = _get_file(var, dest_dir_root, date, forecast, hr_str)
-            lib.fix_perms(filepath)
-    checklist = {'{} forecast'.format(forecast): True}
+    with requests.Session() as session:
+        for forecast_hour in range(1, FORECAST_DURATION+1):
+            hr_str = '{:0=3}'.format(forecast_hour)
+            lib.mkdir(
+                os.path.join(dest_dir_root, date, forecast, hr_str),
+                logger, grp_name=grp_name, exist_ok=False)
+            for var in GRIB_VARIABLES:
+                filepath = _get_file(
+                    var, dest_dir_root, date, forecast, hr_str, session)
+                lib.fix_perms(filepath)
+    checklist = {
+        '{date} {forecast} forecast'
+        .format(date=date, forecast=forecast): True}
     return checklist
 
 
@@ -125,16 +144,17 @@ def _mkdirs(dest_dir_root, date, forecast, grp_name):
         logger, grp_name=grp_name, exist_ok=False)
 
 
-def _get_file(var, dest_dir_root, date, forecast, hr_str):
+def _get_file(var, dest_dir_root, date, forecast, hr_str, session):
     filename = FILENAME_TEMPLATE.format(
         variable=var, date=date, forecast=forecast, hour=hr_str)
     filepath = os.path.join(
         dest_dir_root, date, forecast, hr_str, filename)
     fileURL = URL_TEMPLATE.format(
         forecast=forecast, hour=hr_str, filename=filename)
-    headers = lib.get_web_data(
-        fileURL, logger, filepath, retry_time_limit=9000)
-    size = headers['Content-Length']
+    get_web_data(
+        fileURL, Path(filepath), NAME,
+        session=session, wait_exponential_max=9000)
+    size = os.stat(filepath).st_size
     logger.debug(
         'downloaded {bytes} bytes from {fileURL}'
         .format(bytes=size, fileURL=fileURL), extra={'forecast': forecast})
