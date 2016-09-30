@@ -3,9 +3,16 @@
 # System status checklist file
 checklist file: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast_checklist.yaml
 
-
 # Python interpreter in environment with all dependencies installed
 python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python
+
+# Filesystem group name to use for ownership of newly created files
+file group: sallen
+
+
+weather:
+  # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
+  GRIB_dir: /results/forcing/atmospheric/GEM2.5/GRIB/
 
 
 # Logging system configuration
@@ -77,3 +84,20 @@ message registry:
   # Module from which to load :py:func:`after_<worker_name>` functions
   # that provide lists of workers to launch when :kbd:`worker_name` finishes
   next workers module: nowcast.next_workers
+
+  workers:
+    # Worker module name
+    download_weather:
+      # The key in the system checklist that the manager maintains that is to
+      # be used to hold message payload information provided by the worker
+      checklist key: weather forecast
+      # Message types that the worker can send and their meanings
+      success 00: 00 weather forecast ready
+      failure 00: 00 weather forecast download failed
+      success 06: 06 weather forecast ready
+      failure 06: 06 weather forecast download failed
+      success 12: 12 weather forecast ready
+      failure 12: 12 weather forecast download failed
+      success 18: 18 weather forecast ready
+      failure 18: 18 weather forecast download failed
+      crash: download_weather worker crashed
