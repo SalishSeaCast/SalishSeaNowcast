@@ -85,11 +85,12 @@ The deployment and configuration of the system are described in the sections bel
 
    framework
    development
-   workers
+   creating_workers
    figures
    deploy
    config
    worker_failures
+   workers
    api
    pkg_development
 
