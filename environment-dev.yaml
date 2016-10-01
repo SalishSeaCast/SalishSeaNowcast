@@ -28,8 +28,8 @@ dependencies:
   - schedule
 
   # For unit tests
-#  - coverage
-#  - pytest
+  - coverage
+  - pytest
 
   # For documentation
   - sphinx
