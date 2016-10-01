@@ -20,10 +20,12 @@ This page presents output from a research project.
 Results on this page are either 1) not yet evaluated or 2) have been evaluated but do not agree well with observations.  For the latter we are working on model modifications.
 
 
-Reference
-=========
+References
+==========
 
-Soontiens, N., Allen, S., Latornell, D., Le Souef, K., Machuca, I., Paquin, J.-P., Lu, Y., Thompson, K., Korabel, V. (2015). Storm surges in the Strait of Georgia simulated with a regional model. Atmosphere-Ocean volume 54, issue 1. https://dx.doi.org/10.1080/07055900.2015.1108899
+* Soontiens, N., Allen, S., Latornell, D., Le Souef, K., Machuca, I., Paquin, J.-P., Lu, Y., Thompson, K., Korabel, V. (2015). Storm surges in the Strait of Georgia simulated with a regional model. Atmosphere-Ocean volume 54, issue 1. https://dx.doi.org/10.1080/07055900.2015.1108899
+
+* Soontiens, N. and Allen, S. Modelling sensitivities to mixing and advection in a sill-basin estuarine system. *Submitted to Ocean Modelling*.
 
 
 Plots
