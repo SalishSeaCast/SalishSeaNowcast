@@ -291,7 +291,7 @@ The template we're going to test looks like:
 
     Model sea surface height has been evaluated through a series of hindcasts for significant surge events in 2006, 2009, and 2012 [1].
 
-    [1] Soontiens, N., Allen, S., Latornell, D., Le Souef, K., Machuca, I., Paquin, J.-P., Lu, Y., Thompson, K., Korbel, V. (2015).  Storm surges in the Strait of Georgia simulated with a regional model. in prep.
+    [1] Soontiens, N., Allen, S., Latornell, D., Le Souef, K., Machuca, I., Paquin, J.-P., Lu, Y., Thompson, K., Korabel, V. (2015). Storm surges in the Strait of Georgia simulated with a regional model. Atmosphere-Ocean volume 54, issue 1. https://dx.doi.org/10.1080/07055900.2015.1108899
 
 The code below assumes that you are working in your :file:`MEOPAR/nowcast/` directory.
 
