@@ -15,11 +15,13 @@
 
 """Unit tests for Salish Sea NEMO nowcast download_weather worker.
 """
-import arrow
+from pathlib import Path
 from unittest.mock import (
     Mock,
     patch,
 )
+
+import arrow
 import pytest
 
 
@@ -46,23 +48,22 @@ def config():
 class TestMain():
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
+    def test_instantiate_worker(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('download_weather',)
         assert list(kwargs.keys()) == ['description']
 
     def test_add_forecast_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.parser.add_argument.call_args_list[0]
         assert args == ('forecast',)
-        assert kwargs['choices'] == set(('00', '06', '12', '18'))
+        assert kwargs['choices'] == {'00', '06', '12', '18'}
         assert 'help' in kwargs
 
     def test_add_yesterday_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
+        args, kwargs = m_worker().cli.parser.add_argument.call_args_list[1]
         assert args == ('--yesterday',)
         assert kwargs['action'] == 'store_true'
         assert 'help' in kwargs
@@ -126,15 +127,18 @@ class TestGetGrib():
             assert args == ('/tmp/20150619/06/00{}'.format(hr), m_logger)
             assert kwargs == {'grp_name': 'foo', 'exist_ok': False}
 
+    @patch.object(worker_module().requests, 'Session')
     def test_get_grib_variable_file(
-        self, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
+        self, m_session, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
         worker_module, parsed_args, config,
     ):
         worker_module.FORECAST_DURATION = 1
         worker_module.GRIB_VARIABLES = ('UGRD_TGL_10_',)
         worker_module.get_grib(parsed_args, config)
         args, kwargs = m_get_file.call_args
-        assert args == ('UGRD_TGL_10_', '/tmp/', '20150619', '06', '001')
+        assert args == (
+            'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001',
+            m_session().__enter__())
         assert kwargs == {}
 
     def test_fix_perms(
@@ -153,7 +157,7 @@ class TestGetGrib():
         worker_module, parsed_args, config,
     ):
         checklist = worker_module.get_grib(parsed_args, config)
-        assert checklist == {'06 forecast': True}
+        assert checklist == {'20150619 06 forecast': True}
 
 
 @patch.object(
@@ -192,13 +196,17 @@ class TestMkdirs():
 
 
 @patch.object(worker_module(), 'logger')
-@patch.object(worker_module().lib, 'get_web_data')
+@patch.object(worker_module(), 'get_web_data')
+@patch.object(worker_module().os, 'stat')
 class TestGetFile():
     """Unit tests for _get_file() function.
     """
-    def test_get_web_data(self, m_get_web_data, m_logger, worker_module):
+    def test_get_web_data(
+        self, m_stat, m_get_web_data, m_logger, worker_module,
+    ):
+        m_stat().st_size = 123456
         worker_module._get_file(
-            'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001')
+            'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001', None)
         url = (
             'http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/'
             'CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015061906_P001-00.grib2'
@@ -208,13 +216,14 @@ class TestGetFile():
             'CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015061906_P001-00.grib2'
         )
         m_get_web_data.assert_called_once_with(
-            url, m_logger, filepath, retry_time_limit=9000,
+            url, Path(filepath), 'download_weather', session=None,
+            wait_exponential_max=9000,
         )
 
     def test_empty_file_exception(
-        self, m_get_web_data, m_logger, worker_module,
+        self, m_stat, m_get_web_data, m_logger, worker_module,
     ):
-        m_get_web_data.return_value = {'Content-Length': 0}
+        m_stat().st_size = 0
         with pytest.raises(worker_module.WorkerError):
             worker_module._get_file(
-                'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001')
+                'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001', None)
