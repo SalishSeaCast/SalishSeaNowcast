@@ -18,14 +18,22 @@ scheduled workers:
     every: day
     # Time at which to launch the worker
     # (quotes are required to ensure that time is interpreted as a string)
-    at: '11:00'
+    at: '05:00'
     # Optional command-line options for the worker
     # (quotes are necessary to force interpretation as a string)
+    cmd line opts: '06'
+  nowcast.workers.download_weather:
+    every: day
+    at: '11:00'
     cmd line opts: '12'
   nowcast.workers.download_weather:
     every: day
     at: '17:00'
     cmd line opts: '18'
+  nowcast.workers.download_weather:
+    every: day
+    at: '23:00'
+    cmd line opts: '00'
 
 
 weather:
