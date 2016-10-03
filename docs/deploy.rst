@@ -20,7 +20,12 @@
 Nowcast Production Deployment
 *****************************
 
-In November 2015 the production deployment of the nowcast system was moved to the :ref:`SalishSeaModelResultsServer`, :kbd:`skookum`, in the :file:`/results/nowcast-sys/` directory tree.
+In October 2016 the production deployment of the nowcast system was changed to use the `SalishSeaNowcast`_ package that is based on the `NEMO_Nowcast framework`_ framework.
+The deployment remains on the :ref:`SalishSeaModelResultsServer`, :kbd:`skookum`, in the :file:`/results/nowcast-sys/` directory tree.
+
+.. _NEMO_Nowcast framework: http://nemo-nowcast.readthedocs.io/en/latest/
+.. _SalishSeaNowcast: https://bitbucket.org/salishsea/salishseanowcast
+
 This section describes the setup and operation of the nowcast system.
 
 
@@ -29,9 +34,14 @@ Mercurial Repositories
 
 Clone the following repos into :file:`/results/nowcast-sys/`:
 
-* :ref:`tools-repo`.
-* :ref:`NEMO-forcing-repo`
-* :ref:`private-tools-repo`
+* `NEMO_Nowcast`_
+* `SalishSeaNowcast`_
+
+.. * :ref:`tools-repo`
+.. * :ref:`NEMO-forcing-repo`
+.. * :ref:`private-tools-repo`
+
+.. _NEMO_Nowcast: https://bitbucket.org/43ravens/nemo_nowcast
 
 
 Python Packages
@@ -43,16 +53,13 @@ The Python packages that the system depends on are installed in a conda environm
 
     $ cd /results/nowcast-sys/
     $ conda update conda
-    $ conda create --prefix /results/nowcast-sys/nowcast-env \
-        bottleneck lxml mako matplotlib netCDF4 numpy pandas paramiko pillow \
-        pyyaml pyzmq pip python=3 requests scipy sphinx xarray
-    $ source activate /results/nowcast-sys/nowcast-env
-    (/results/nowcast-sys/nowcast-env)$ pip install \
-      angles arrow BeautifulSoup4 driftwood feedgen retrying sphinx-bootstrap-theme
-    (/results/nowcast-sys/nowcast-env)$ cd /results/nowcast-sys/tools
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaTools/
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaCmd/
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaNowcast/
+    $ conda create --channel gomss-nowcast --prefix /results/nowcast-sys/nemo_nowcast-env \
+        arrow attrs circus pyyaml pyzmq pip python=3 requests schedule
+    $ source activate /results/nowcast-sys/nemo_nowcast-env
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install raven
+    (/results/nowcast-sys/nemo_nowcast-env)$ cd /results/nowcast-sys/
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaNowcast/
 
 
 Environment Variables
@@ -62,22 +69,38 @@ Add the following files to the :file:`/results/nowcast-sys/nowcast-env` environm
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/nowcast-env
+    $ cd /results/nowcast-sys/nemo_nowcast-env
     $ mkdir -p etc/conda/activate.d
-    $ echo export ONC_USER_TOKEN=a_valid_ONC_data_API_user_token > envvars.sh
+    $ cat << EOF > etc/conda/activate.d/envvars.sh
+    export NOWCAST_ENV=/results/nowcast-sys/nemo_nowcast-env
+    export NOWCAST_CONFIG=/results/nowcast-sys/SalishSeaNowcast/config
+    export NOWCAST_YAML=/results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+    export NOWCAST_LOGS=/results/nowcast-sys/logs/nowcast
+    export ONC_USER_TOKEN=a_valid_ONC_data_API_user_token
+    export SENTRY_DSN=a_valid_sentry_dsn_url
+    EOF
 
 and :command:`unset` them when it is deactivated.
 
 .. code-block:: bash
 
     $ mkdir -p etc/conda/deactivate.d
-    $ echo unset ONC_USER_TOKEN > envvars.sh
+    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
+    unset NOWCAST_ENV
+    unset NOWCAST_CONFIG
+    unset NOWCAST_YAML
+    unset NOWCAST_LOGS
+    unset ONC_USER_TOKEN
+    unset SENTRY_DSN
+    EOF
 
 
-Nowcast Manager Directory
-=========================
+Static Web Pages Directory
+==========================
 
-The directory from which the nowcast manager runs and in which the log files and checklist file are stored is created with:
+.. TODO::
+    This is fuzzy until the web page builder workers are ported.
+    Progress on the salish sea site Pyramid app also plays a roll in this.
 
 .. code-block:: bash
 
@@ -93,23 +116,56 @@ The directory from which the nowcast manager runs and in which the log files and
 Cold Start
 ==========
 
-Start the nowcast system for the first time on a new platform with:
+The long-running processes in the nowcast system framework,
+the message broker,
+the manager,
+and the scheduler,
+are managed by the `circus`_ process manager tool.
+
+.. _circus: http://circus.readthedocs.io/en/latest/
+
+Start the nowcast system with:
 
 .. code-block:: bash
 
-    $ touch $HOME/public_html/MEOPAR/nowcast/nowcast_checklist.yaml
-    $ source activate /results/nowcast-sys/nowcast-env
-    (/results/nowcast-sys/nowcast-env)$ python -m nowcast.nowcast_broker \
-      $HOME/public_html/MEOPAR/nowcast/nowcast.yaml &
-    (/results/nowcast-sys/nowcast-env)$ python -m nowcast.nowcast_mgr \
-      $HOME/public_html/MEOPAR/nowcast/nowcast.yaml &
+    $ source activate /results/nowcast-sys/nemo_nowcast-env
+    (/results/nowcast-sys/nemo_nowcast-env)$ circusd --daemon $NOWCAST_CONFIG/circus.ini
 
-Exit from the shell session that the above commands were executed in to detach the borker and the manager processes from the tty.
-If the shell session times out,
-the broker and/or manager processes will stop.
-This is,
-essentially,
-a hacky way of daemonizing the broker and manager processes.
+:command:`circusd` monitors the long-running processes and restarts them if they crash or are shutdown accidentally.
+
+
+System Management
+=================
+
+`circusctl`_ is the command-line interface for interacting with the processes that are running under :command:`circusd`.
+Start it with:
+
+.. code-block:: bash
+
+    $ source activate /results/nowcast-sys/nemo_nowcast-env
+    (/results/nowcast-sys/nemo_nowcast-env)$ circusctl --endpoint tcp:127.0.0.1:4444
+
+.. _circusctl: http://circus.readthedocs.io/en/latest/man/circusctl/
+
+See the `circusctl`_ man page,
+or use the :kbd:`help` command within :command:`circusctl` to get information on the available commands.
+A few that are useful:
+
+* :kbd:`list` to get a comma-separated list of the processes that :command:`circusd` is managing
+* :kbd:`status` to see their status
+* :kbd:`stop` to stop a process;
+  e.g. :kbd:`stop scheduler`
+* :kbd:`start` to start a stopped process;
+  e.g. :kbd:`start scheduler`
+* :kbd:`restart` to stop and restart a process;
+  e.g. :kbd:`restart scheduler`
+* :kbd:`signal hup` to send a :kbd:`HUP` signnal to a process,
+  which will cause it to reload its configuration from the :envvar:`NOWCAST_YAML` file that the process was started with;
+  e.g. :kbd:`signal hup manager`.
+  This is the way to communicate nowcast system configuration changes to the long-running processes.
+* :kbd:`quit` to stop all of the processes and shutdown :command:`circusd`
+
+Use :kbd:`ctrl-c` to exit from :command:`circusctl`.
 
 
 Nowcast Run Directories
@@ -125,6 +181,7 @@ On the hosts where the nowcast system NEMO runs will be executed create a :file:
     $ ln -s ../NEMO-forcing/grid/weights-gem2.5-ops.nc
     $ ln -s ../NEMO-forcing/open_boundaries/north
     $ ln -s ../NEMO-forcing/open_boundaries/west/SalishSea2_Masson_corrected.nc
+    $ ln -s ../NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc
     $ ln -s ../NEMO-forcing/open_boundaries/west/tides
     $ ln -s ../NEMO-forcing/rivers/rivers_month.nc
 
