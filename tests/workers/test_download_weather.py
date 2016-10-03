@@ -56,14 +56,14 @@ class TestMain():
 
     def test_add_forecast_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().cli.parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().add_argument.call_args_list[0]
         assert args == ('forecast',)
         assert kwargs['choices'] == {'00', '06', '12', '18'}
         assert 'help' in kwargs
 
     def test_add_yesterday_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().cli.parser.add_argument.call_args_list[1]
+        args, kwargs = m_worker().add_argument.call_args_list[1]
         assert args == ('--yesterday',)
         assert kwargs['action'] == 'store_true'
         assert 'help' in kwargs
@@ -78,31 +78,33 @@ class TestMain():
         )
 
 
+@patch.object(worker_module(), 'logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self, worker_module):
+    def test_success_log_info(self, m_logger, worker_module):
         parsed_args = Mock(forecast='00')
         with patch.object(worker_module.logger, 'info') as m_logger:
             worker_module.success(parsed_args)
         assert m_logger.called
 
-    def test_success_msg_type(self, worker_module):
+    def test_success_msg_type(self, m_logger, worker_module):
         parsed_args = Mock(forecast='06')
         msg_type = worker_module.success(parsed_args)
         assert msg_type == 'success 06'
 
 
+@patch.object(worker_module(), 'logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_critical(self, worker_module):
+    def test_failure_log_critical(self, m_logger, worker_module):
         parsed_args = Mock(forecast='12')
         with patch.object(worker_module.logger, 'critical') as m_logger:
             worker_module.failure(parsed_args)
         assert m_logger.called
 
-    def test_failure_msg_type(self, worker_module):
+    def test_failure_msg_type(self, m_logger, worker_module):
         parsed_args = Mock(forecast='18')
         msg_type = worker_module.failure(parsed_args)
         assert msg_type == 'failure 18'
