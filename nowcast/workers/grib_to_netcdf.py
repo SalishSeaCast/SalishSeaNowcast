@@ -14,6 +14,7 @@
 # limitations under the License.
 
 """Salish Sea NEMO nowcast weather forcing file generation worker.
+
 Collects weather forecast results from hourly GRIB2 files and produces
 day-long NEMO atmospheric forcing netCDF files.
 """
@@ -25,19 +26,19 @@ import subprocess
 
 import arrow
 import matplotlib.figure
+from nemo_nowcast import (
+    NowcastWorker,
+    WorkerError,
+)
 import netCDF4 as nc
 import numpy as np
 
 from nowcast import lib
 from nowcast.figures import figures
-from nowcast.nowcast_worker import (
-    NowcastWorker,
-    WorkerError,
-)
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'grib_to_netcdf'
+logger = logging.getLogger(NAME)
 wgrib2_logger = logging.getLogger('wgrib2')
 
 
@@ -57,39 +58,44 @@ FILENAME_TMPL = 'ops_{:y%Ym%md%d}.nc'
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
-        'run_type', choices=set(('nowcast+', 'forecast2')),
+    """Set up and run the worker.
+
+    For command-line usage see:
+
+    :command:`python -m nowcast.workers.grib_to_netcdf --help`
+    """
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.add_argument(
+        'run_type', choices={'nowcast+', 'forecast2'},
         help='''
         Type of run to produce netCDF files for:
         'nowcast+' means nowcast & 1st forecast runs,
         'forecast2' means 2nd forecast run.
         ''',
     )
-    salishsea_today = arrow.now('Canada/Pacific').floor('day')
-    worker.arg_parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=salishsea_today,
-        help='''
-        Date of the run to produce netCDF files for; use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_today.format('YYYY-MM-DD')),
-    )
+    worker.cli.add_date_option(
+        '--run-date', default=arrow.now().floor('day'),
+        help='Date of the run to produce netCDF files for.')
     worker.run(grib_to_netcdf, success, failure)
 
 
 def success(parsed_args):
+    ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        'NEMO-atmos forcing file for {.run_type} created'
-        .format(parsed_args), extra={'run_type': parsed_args.run_type})
+        '{date} NEMO-atmos forcing file for {0.run_type} created'
+        .format(parsed_args, date=ymd),
+        extra={'run_date': ymd, 'run_type': parsed_args.run_type})
     msg_type = 'success {.run_type}'.format(parsed_args)
     return msg_type
 
 
 def failure(parsed_args):
+    ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.critical(
-        'NEMO-atmos forcing file creation for {.run_type} failed'
-        .format(parsed_args), extra={'run_type': parsed_args.run_type})
+        '{date} NEMO-atmos forcing file creation for {0.run_type} failed'
+        .format(parsed_args, date=ymd),
+        extra={'run_date': ymd, 'run_type': parsed_args.run_type})
     msg_type = 'failure {.run_type}'.format(parsed_args)
     return msg_type
 
