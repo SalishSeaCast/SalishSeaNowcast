@@ -88,7 +88,7 @@ def success(parsed_args):
         '{date} weather forecast {0.forecast} downloads complete'
         .format(parsed_args, date=ymd),
         extra={'forecast_date': ymd, 'forecast': parsed_args.forecast})
-    msg_type = '{} {}'.format('success', parsed_args.forecast)
+    msg_type = 'success {.forecast}'.format(parsed_args)
     return msg_type
 
 
@@ -101,7 +101,7 @@ def failure(parsed_args):
         '{date} weather forecast {0.forecast} downloads failed'
         .format(parsed_args, date=ymd),
         extra={'forecast_date': ymd, 'forecast': parsed_args.forecast})
-    msg_type = '{} {}'.format('failure', parsed_args.forecast)
+    msg_type = 'failure {.forecast}'.format(parsed_args)
     return msg_type
 
 
