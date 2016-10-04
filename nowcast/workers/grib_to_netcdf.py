@@ -25,7 +25,7 @@ import os
 import subprocess
 
 import arrow
-import matplotlib.figure
+from matplotlib.backends import backend_agg as mpl_backend
 from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
@@ -34,7 +34,6 @@ import netCDF4 as nc
 import numpy as np
 
 from nowcast import lib
-from nowcast.figures import figures
 
 
 NAME = 'grib_to_netcdf'
@@ -146,7 +145,8 @@ def grib_to_netcdf(parsed_args, config, *args):
     axs[2, 0].legend(loc='upper left')
     image_file = os.path.join(
         os.path.dirname(config['logging']['log_files']['debug']), 'wg.png')
-    figures.save_image(fig, image_file)
+    canvas = mpl_backend.FigureCanvasAgg(fig)
+    canvas.print_figure(image_file)
     lib.fix_perms(image_file, grp_name=config['file group'])
     return checklist
 
