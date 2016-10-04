@@ -40,6 +40,7 @@ dependencies:
 #  - jupyter
 
   - pip:
+    - driftwood
 
     # For exception monitoring
     - raven
