@@ -20,6 +20,9 @@ dependencies:
   - arrow
   - attrs
   - circus
+  - matplolib
+  - netcdf4
+  - numpy
   - paramiko
   - pyyaml
   - pyzmq
