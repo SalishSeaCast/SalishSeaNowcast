@@ -48,7 +48,10 @@ install_requires = [
     # see environment-rtd.yaml for conda environment used for readthedocs build
 
     'driftwood',
+    'matplolib',
     'nemo_nowcast',
+    'netcdf4',
+    'numpy',
     'paramiko',
     'raven',
 

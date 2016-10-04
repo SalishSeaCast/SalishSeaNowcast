@@ -16,7 +16,10 @@ channels:
   - conda-forge
 
 dependencies:
+  - matplolib
   - nemo_nowcast
+  - netcdf4
+  - numpy
   - paramiko
   - pip
   - python=3
