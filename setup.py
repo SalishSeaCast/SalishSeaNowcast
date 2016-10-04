@@ -47,6 +47,7 @@ install_requires = [
     # see requirements.txt for package versions used during recent development
     # see environment-rtd.yaml for conda environment used for readthedocs build
 
+    'driftwood',
     'nemo_nowcast',
     'paramiko',
     'raven',

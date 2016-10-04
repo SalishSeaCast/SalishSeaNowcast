@@ -11,6 +11,7 @@ contextlib2==0.5.4
 coverage==4.2
 cryptography==1.5.2
 docutils==0.12
+driftwood-1.1.21
 idna==2.1
 imagesize==0.7.1
 iowait==0.2

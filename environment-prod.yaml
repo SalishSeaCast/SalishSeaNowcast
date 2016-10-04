@@ -22,4 +22,5 @@ dependencies:
   - python=3
 
   - pip:
+    - driftwood
     - raven
