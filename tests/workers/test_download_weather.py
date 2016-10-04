@@ -56,14 +56,14 @@ class TestMain():
 
     def test_add_forecast_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('forecast',)
         assert kwargs['choices'] == {'00', '06', '12', '18'}
         assert 'help' in kwargs
 
     def test_add_yesterday_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().add_argument.call_args_list[1]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('--yesterday',)
         assert kwargs['action'] == 'store_true'
         assert 'help' in kwargs

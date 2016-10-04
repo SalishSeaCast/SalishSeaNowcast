@@ -65,7 +65,7 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
-    worker.add_argument(
+    worker.cli.add_argument(
         'run_type', choices={'nowcast+', 'forecast2'},
         help='''
         Type of run to produce netCDF files for:

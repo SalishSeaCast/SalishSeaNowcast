@@ -68,11 +68,11 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
-    worker.add_argument(
+    worker.cli.add_argument(
         'forecast', choices=set(('00', '06', '12', '18')),
         help='Name of forecast to download files from.',
     )
-    worker.add_argument(
+    worker.cli.add_argument(
         '--yesterday', action='store_true',
         help="Download forecast files for previous day's date."
     )
