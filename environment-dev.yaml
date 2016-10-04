@@ -13,13 +13,14 @@ name: salishsea-nowcast
 
 channels:
   - gomss-nowcast
-  - conda-forge
   - defaults
+  - conda-forge
 
 dependencies:
   - arrow
   - attrs
   - circus
+  - paramiko
   - pyyaml
   - pyzmq
   - pip
