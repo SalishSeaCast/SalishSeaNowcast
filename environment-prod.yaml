@@ -12,11 +12,12 @@ name: nowcast-env
 
 channels:
   - gomss-nowcast
-  - conda-forge
   - defaults
+  - conda-forge
 
 dependencies:
   - nemo_nowcast
+  - paramiko
   - pip
   - python=3
 
