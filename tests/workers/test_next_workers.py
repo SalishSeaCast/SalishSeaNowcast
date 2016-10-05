@@ -34,19 +34,39 @@ class TestAfterDownloadWeather:
         'failure 06',
         'failure 12',
         'failure 18',
+        'success 00',
+        'success 18',
     ])
     def test_no_next_worker_msg_types(self, msg_type):
         workers = next_workers.after_download_weather(
             Message('download_weather', msg_type))
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type', [
-        'success 00',
-        'success 06',
-        'success 12',
-        'success 18',
+    @pytest.mark.parametrize('msg_type, args', [
+        ('success 06', ['forecast2']),
+        ('success 12', ['nowcast+']),
     ])
-    def test_success_make_weather_forcing_next(self, msg_type):
+    def test_success_launch_grib_to_netcdf(self, msg_type, args):
         workers = next_workers.after_download_weather(
             Message('download_weather', msg_type))
+        expected = [
+            NextWorker(
+                'nowcast.workers.grib_to_netcdf', args, host='localhost'),
+        ]
+        assert workers == expected
+
+
+class TestAfterGribToNetcdf:
+    """Unit tests for the after_grib_to_netcdf function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast+',
+        'failure forecast2',
+        'success nowcast+',
+        'success forecast2',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type):
+        workers = next_workers.after_grib_to_netcdf(
+            Message('grib_to_netcdf', msg_type))
         assert workers == []

@@ -42,4 +42,30 @@ def after_download_weather(msg):
         'success 12': [],
         'success 18': [],
     }
+    if msg.type.endswith('06'):
+        next_workers['success 06'] = [
+            NextWorker('nowcast.workers.grib_to_netcdf', args=['forecast2'])]
+    if msg.type.endswith('12'):
+        next_workers['success 12'] = [
+            NextWorker('nowcast.workers.grib_to_netcdf', args=['nowcast+'])]
+    return next_workers[msg.type]
+
+
+def after_grib_to_netcdf(msg):
+    """Calculate the list of workers to launch after the grib_to_netcdf worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nowcast+': [],
+        'failure forecast2': [],
+        'success nowcast+': [],
+        'success forecast2': [],
+    }
     return next_workers[msg.type]
