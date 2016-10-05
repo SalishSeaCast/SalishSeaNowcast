@@ -78,6 +78,12 @@ logging:
       class: raven.handlers.logging.SentryHandler
       level: ERROR
       # dsn will be obtained from SENTRY_DSN environment variable
+    wgrib2_text:
+      class: logging.FileHandler
+      level: DEBUG
+      formatter: simple
+      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
+      mode: w
   root:
     level: DEBUG
     handlers:
@@ -85,6 +91,12 @@ logging:
      - info_text
      - debug_text
      - sentry
+  wgrib2:
+#    qualname: wgrib2
+    level: DEBUG
+#    propogate: True
+    handlers:
+      - wgrib2_text
 
 
 # Message system
@@ -128,3 +140,10 @@ message registry:
       success 18: 18 weather forecast ready
       failure 18: 18 weather forecast download failed
       crash: download_weather worker crashed
+    grib_to_netcdf:
+      checklist key: weather forcing
+      success nowcast+: atmospheric nowcast/forecast forcing ready
+      failure nowcast+: atmospheric nowcast forcing files preparation failed
+      success forecast2: atmospheric forecast2 forcing ready
+      failure forecast2: atmospheric forecast2 forcing files preparation failed
+      crash: grib_to_netcdf worker crashed
