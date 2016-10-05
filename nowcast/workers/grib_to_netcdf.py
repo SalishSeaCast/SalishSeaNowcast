@@ -25,7 +25,8 @@ import os
 import subprocess
 
 import arrow
-from matplotlib.backends import backend_agg as mpl_backend
+import matplotlib.backends.backend_agg
+import matplotlib.figure
 from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
@@ -103,7 +104,8 @@ def grib_to_netcdf(parsed_args, config, *args):
     """Collect weather forecast results from hourly GRIB2 files
     and produces day-long NEMO atmospheric forcing netCDF files.
     """
-    _configure_wgrib2_logging(config)
+    wgrib2_logger.debug('wgrib2 logging is alive!')
+    return
     runtype = parsed_args.run_type
     rundate = parsed_args.run_date
 
@@ -145,24 +147,10 @@ def grib_to_netcdf(parsed_args, config, *args):
     axs[2, 0].legend(loc='upper left')
     image_file = os.path.join(
         os.path.dirname(config['logging']['log_files']['debug']), 'wg.png')
-    canvas = mpl_backend.FigureCanvasAgg(fig)
+    canvas = matplotlib.backends.backend_agg.FigureCanvasAgg(fig)
     canvas.print_figure(image_file)
     lib.fix_perms(image_file, grp_name=config['file group'])
     return checklist
-
-
-def _configure_wgrib2_logging(config):
-    wgrib2_logger.setLevel(logging.DEBUG)
-    log_file = os.path.join(
-        os.path.dirname(config['config_file']),
-        config['logging']['wgrib2_log_file'])
-    handler = logging.FileHandler(log_file, mode='w')
-    handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        config['logging']['message_format'],
-        datefmt=config['logging']['datetime_format'])
-    handler.setFormatter(formatter)
-    wgrib2_logger.addHandler(handler)
 
 
 def _define_forecast_segments_nowcast(rundate):
