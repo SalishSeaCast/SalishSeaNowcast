@@ -21,7 +21,7 @@ Function names **must** be of the form :py:func:`after_worker_name`.
 from nemo_nowcast import NextWorker
 
 
-def after_download_weather(msg):
+def after_download_weather(msg, config):
     """Calculate the list of workers to launch after the download_weather worker
     ends.
 
@@ -51,7 +51,7 @@ def after_download_weather(msg):
     return next_workers[msg.type]
 
 
-def after_grib_to_netcdf(msg):
+def after_grib_to_netcdf(msg, config):
     """Calculate the list of workers to launch after the grib_to_netcdf worker
     ends.
 
