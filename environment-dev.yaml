@@ -20,7 +20,7 @@ dependencies:
   - arrow
   - attrs
   - circus
-  - matplolib
+  - matplotlib
   - netcdf4
   - numpy
   - paramiko
