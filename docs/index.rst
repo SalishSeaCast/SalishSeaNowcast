@@ -69,10 +69,7 @@ scheduler,
 and manager processes.
 A collection of worker processes are launched by the manager or the scheduler to do particular jobs and terminate when that job is finished.
 Please see :ref:`nemonowcast:FrameworkArchitecture` for a description of the system architecture.
-The workers are implemented in Python modules in the :py:obj:`nowcast.workers` and :ref:`nemo_nowcast.workers <nemonowcast:NEMO_NowcastBuiltinWorkers>` namespaces.
-
-.. TODO::
-    Link :py:obj:`nowcast.workers` to a yet-to-be-written workers section containing auto-doc generated content from worker modules.
+The workers are implemented in Python modules in the :ref:`nowcast.workers <SalishSeaNowcastSystemWorkers>` and :ref:`nemo_nowcast.workers <nemonowcast:NEMO_NowcastBuiltinWorkers>` namespaces.
 
 
 Process Flow
