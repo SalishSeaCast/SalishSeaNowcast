@@ -36,12 +36,20 @@ Clone the following repos into :file:`/results/nowcast-sys/`:
 
 * `NEMO_Nowcast`_
 * `SalishSeaNowcast`_
+* :ref:`private-tools-repo`
 
 .. * :ref:`tools-repo`
 .. * :ref:`NEMO-forcing-repo`
-.. * :ref:`private-tools-repo`
 
 .. _NEMO_Nowcast: https://bitbucket.org/43ravens/nemo_nowcast
+
+Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
+
+.. code-block:: bash
+
+    $ cp --preserve=timestamps \
+        /ocean/sallen/allen/research/MEOPAR/private-tools/grib2/wgrib2/wgrib2 \
+        /results/nowcast-sys/private-tools/grib2/wgrib2/
 
 
 Python Packages
