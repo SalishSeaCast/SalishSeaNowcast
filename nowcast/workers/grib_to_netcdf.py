@@ -143,8 +143,7 @@ def grib_to_netcdf(parsed_args, config, *args):
             else:
                 checklist.update({subdir: os.path.basename(outnetcdf)})
     axs[2, 0].legend(loc='upper left')
-    image_file = os.path.join(
-        os.path.dirname(config['logging']['log_files']['debug']), 'wg.png')
+    image_file = config['logging']['handlers']['grib_to_netcdf_png']['filename']
     canvas = matplotlib.backends.backend_agg.FigureCanvasAgg(fig)
     canvas.print_figure(image_file)
     lib.fix_perms(image_file, grp_name=config['file group'])
