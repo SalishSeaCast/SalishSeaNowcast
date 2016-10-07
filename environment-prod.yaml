@@ -16,7 +16,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - matplolib
+  - matplotlib
   - nemo_nowcast
   - netcdf4
   - numpy
