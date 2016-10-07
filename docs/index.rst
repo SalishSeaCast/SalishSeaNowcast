@@ -75,6 +75,21 @@ The workers are implemented in Python modules in the :py:obj:`nowcast.workers` a
     Link :py:obj:`nowcast.workers` to a yet-to-be-written workers section containing auto-doc generated content from worker modules.
 
 
+Process Flow
+============
+
+The system workflow looks like:
+
+.. figure:: ProcessFlow.svg
+    :align: center
+
+    Work flow of preparation for and execution of the daily runs.
+
+The green boxes in the figure above are :ref:`SalishSeaNowcastSystemWorkers`.
+
+The :ref:`Scheduler` is a long-running process that periodically checks the system clock and launches workers when their scheduled time to run is reached.
+
+
 Contents
 ========
 

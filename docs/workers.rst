@@ -23,7 +23,14 @@ Salish Sea Nowcast System Workers
 Process Flow
 ============
 
-.. TODO:: Add a process flow diagram and brief description
+.. figure:: ProcessFlow.svg
+    :align: center
+
+    Work flow of preparation for and execution of the daily runs.
+
+The green boxes in the figure above are the workers described below.
+
+The :ref:`Scheduler` is a long-running process that periodically checks the system clock and launches workers when their scheduled time to run is reached.
 
 
 Workers
