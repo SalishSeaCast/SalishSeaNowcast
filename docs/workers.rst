@@ -43,6 +43,13 @@ Workers
     :members: main
 
 
+:kbd:`grib_to_netcdf`
+---------------------
+
+.. automodule:: nowcast.workers.grib_to_netcdf
+    :members: main
+
+
 :kbd:`next_workers` Module
 ==========================
 
