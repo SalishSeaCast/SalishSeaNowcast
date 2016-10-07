@@ -42,10 +42,10 @@ def after_download_weather(msg, config):
         'success 12': [],
         'success 18': [],
     }
-    if msg.type.endswith('06'):
+    if msg.type.endswith('06') and 'forecast2' in config['run types']:
         next_workers['success 06'] = [
             NextWorker('nowcast.workers.grib_to_netcdf', args=['forecast2'])]
-    if msg.type.endswith('12'):
+    if msg.type.endswith('12') and 'nowcast' in config['run types']:
         next_workers['success 12'] = [
             NextWorker('nowcast.workers.grib_to_netcdf', args=['nowcast+'])]
     return next_workers[msg.type]

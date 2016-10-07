@@ -39,8 +39,9 @@ class TestAfterDownloadWeather:
         'success 18',
     ])
     def test_no_next_worker_msg_types(self, msg_type):
+        config = {'run types': {'nowcast': {}, 'forecast2': {}}}
         workers = next_workers.after_download_weather(
-            Message('download_weather', msg_type), Config())
+            Message('download_weather', msg_type), config)
         assert workers == []
 
     @pytest.mark.parametrize('msg_type, args', [
@@ -48,8 +49,9 @@ class TestAfterDownloadWeather:
         ('success 12', ['nowcast+']),
     ])
     def test_success_launch_grib_to_netcdf(self, msg_type, args):
+        config = {'run types': {'nowcast': {}, 'forecast2': {}}}
         workers = next_workers.after_download_weather(
-            Message('download_weather', msg_type), Config())
+            Message('download_weather', msg_type), config)
         expected = [
             NextWorker(
                 'nowcast.workers.grib_to_netcdf', args, host='localhost'),
