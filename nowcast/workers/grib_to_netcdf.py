@@ -104,8 +104,6 @@ def grib_to_netcdf(parsed_args, config, *args):
     """Collect weather forecast results from hourly GRIB2 files
     and produces day-long NEMO atmospheric forcing netCDF files.
     """
-    wgrib2_logger.debug('wgrib2 logging is alive!')
-    return
     runtype = parsed_args.run_type
     rundate = parsed_args.run_date
 
