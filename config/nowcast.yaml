@@ -39,6 +39,12 @@ scheduled workers:
 weather:
   # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
   GRIB_dir: /results/forcing/atmospheric/GEM2.5/GRIB/
+  # Location of wgrib2 executable
+  wgrib2: /results/nowcast-sys/private-tools/grib2/wgrib2/wgrib2
+  # Location of Pramod Thupaki's grid_defn.pl script
+  grid_defn.pl: /results/nowcast-sys/private-tools/PThupaki/grid_defn.pl
+  # Destination directory for NEMO forcing files generated from GRIB2 files
+  ops_dir: /results/forcing/atmospheric/GEM2.5/operational/
 
 
 # Logging system configuration
@@ -84,6 +90,15 @@ logging:
       formatter: simple
       filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
       mode: w
+    grib_to_netcdf_png:
+      # **NOTE:** This isn't a handler for Python logging, rather it is a
+      # convenient and logical place to define the storage location for the
+      # image file that the grib_to_netcdf worker generates
+      class: logging.FileHandler  # irrevelant
+      level: DEBUG  # irrevelant, but accurate
+      formatter: simple  # irrevelant
+      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wg.png  # THE IMPORTANT BIT!!
+      mode: w  # irrevelant, but accurate
   loggers:
     wgrib2:
       qualname: wgrib2
