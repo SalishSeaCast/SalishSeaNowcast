@@ -248,7 +248,7 @@ def _rotate_grib_wind(config, fcst_section_hrs):
     single file and then rotate the wind direction to geographical
     coordinates.
     """
-    GRIBdir = config['weather']['GRIB_dir']
+    GRIBdir = config['weather']['GRIB dir']
     wgrib2 = config['weather']['wgrib2']
     grid_defn = config['weather']['grid_defn.pl']
     # grid_defn.pl expects to find wgrib2 in the pwd,
@@ -309,7 +309,7 @@ def _collect_grib_scalars(config, fcst_section_hrs):
     variables into an single file and then re-grid them to match the
     u and v wind components.
     """
-    GRIBdir = config['weather']['GRIB_dir']
+    GRIBdir = config['weather']['GRIB dir']
     wgrib2 = config['weather']['wgrib2']
     grid_defn = config['weather']['grid_defn.pl']
     # grid_defn.pl expects to find wgrib2 in the pwd,
@@ -358,8 +358,8 @@ def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
     calculation of instantaneous values from the forecast accumulated
     values.
     """
-    GRIBdir = config['weather']['GRIB_dir']
-    OPERdir = config['weather']['ops_dir']
+    GRIBdir = config['weather']['GRIB dir']
+    OPERdir = config['weather']['ops dir']
     wgrib2 = config['weather']['wgrib2']
     outgrib = os.path.join(OPERdir, 'oper_allvar_{ymd}.grib'.format(ymd=ymd))
     outzeros = os.path.join(OPERdir, 'oper_000_{ymd}.grib'.format(ymd=ymd))
@@ -409,7 +409,7 @@ def _crop_to_watersheds(
     grid that encloses the watersheds that are used to calculate river
     flows for runoff forcing files for the Salish Sea NEMO model.
     """
-    OPERdir = config['weather']['ops_dir']
+    OPERdir = config['weather']['ops dir']
     wgrib2 = config['weather']['wgrib2']
     newgrib = os.path.join(
         OPERdir, 'oper_allvar_small_{ymd}.grib'.format(ymd=ymd))
@@ -435,7 +435,7 @@ def _crop_to_watersheds(
 def _make_netCDF_files(config, ymd, subdir, outgrib, outzeros):
     """Convert the GRIB files to netcdf (classic) files.
     """
-    OPERdir = config['weather']['ops_dir']
+    OPERdir = config['weather']['ops dir']
     wgrib2 = config['weather']['wgrib2']
     outnetcdf = os.path.join(OPERdir, subdir, 'ops_{ymd}.nc'.format(ymd=ymd))
     out0netcdf = os.path.join(OPERdir, subdir,
