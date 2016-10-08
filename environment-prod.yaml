@@ -5,7 +5,9 @@
 # of the Salish Sea Nowcast system with:
 #
 #    $ conda env create -f SalishSeaNowcast/environment-prod.yaml
-#    $ source activate nowcast
+#    $ source activate nowcast-env
+#    $ pip install --editable NEMO_Nowcast/
+#    $ pip install --editable SalishSeaTools/
 #    $ pip install --editable SalishSeaNowcast/
 
 name: nowcast-env
@@ -16,14 +18,20 @@ channels:
   - conda-forge
 
 dependencies:
+  - bottleneck
   - matplotlib
   - nemo_nowcast
   - netcdf4
   - numpy
+  - pandas
   - paramiko
   - pip
   - python=3
+  - retrying
+  - scipy
+  - xarray
 
   - pip:
+    - angles
     - driftwood
     - raven

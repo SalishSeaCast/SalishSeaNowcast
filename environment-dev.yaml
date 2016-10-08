@@ -7,6 +7,7 @@
 #    $ conda env create -f SalishSeaNowcast/environment-prod.yaml
 #    $ source activate salishsea-nowcast
 #    $ pip install --editable NEMO_Nowcast/
+#    $ pip install --editable SalishSeaTools/
 #    $ pip install --editable SalishSeaNowcast/
 
 name: salishsea-nowcast
@@ -19,17 +20,22 @@ channels:
 dependencies:
   - arrow
   - attrs
+  - bottleneck
   - circus
   - matplotlib
   - netcdf4
   - numpy
+  - pandas
   - paramiko
   - pyyaml
   - pyzmq
   - pip
   - python=3
   - requests
+  - retrying
   - schedule
+  - scipy
+  - xarray
 
   # For unit tests
   - coverage
@@ -43,6 +49,7 @@ dependencies:
 #  - jupyter
 
   - pip:
+    - angles
     - driftwood
 
     # For exception monitoring
