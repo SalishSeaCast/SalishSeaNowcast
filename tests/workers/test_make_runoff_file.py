@@ -22,7 +22,6 @@ from unittest.mock import (
 
 import arrow
 
-import nowcast.lib
 from nowcast.workers import make_runoff_file
 
 
@@ -30,19 +29,17 @@ from nowcast.workers import make_runoff_file
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch('nowcast.workers.make_runoff_file.worker_name')
-    def test_instantiate_worker(self, m_name, m_worker):
+    def test_instantiate_worker(self, m_worker):
         make_runoff_file.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('make_runoff_file',)
         assert list(kwargs.keys()) == ['description']
 
     def test_add_run_date_arg(self, m_worker):
         make_runoff_file.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--run-date',)
-        assert kwargs['type'] == nowcast.lib.arrow_date
-        assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
+        assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker):
@@ -54,33 +51,32 @@ class TestMain:
             make_runoff_file.failure,
         )
 
+
+@patch('nowcast.workers.make_runoff_file.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self):
+    def test_success_log_info(self, m_logger):
         parsed_args = Mock()
-        with patch('nowcast.workers.make_runoff_file.logger') as m_logger:
-            make_runoff_file.success(parsed_args)
+        make_runoff_file.success(parsed_args)
         assert m_logger.info.called
 
-    def test_success_msg_type(self):
+    def test_success_msg_type(self, m_logger):
         parsed_args = Mock()
-        with patch('nowcast.workers.make_runoff_file.logger') as m_logger:
-            msg_typ = make_runoff_file.success(parsed_args)
+        msg_typ = make_runoff_file.success(parsed_args)
         assert msg_typ == 'success'
 
 
+@patch('nowcast.workers.make_runoff_file.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_critical(self):
+    def test_failure_log_critical(self, m_logger):
         parsed_args = Mock()
-        with patch('nowcast.workers.make_runoff_file.logger') as m_logger:
-            make_runoff_file.failure(parsed_args)
+        make_runoff_file.failure(parsed_args)
         assert m_logger.critical.called
 
-    def test_failure_msg_type(self):
+    def test_failure_msg_type(self, m_logger):
         parsed_args = Mock()
-        with patch('nowcast.workers.make_runoff_file.logger') as m_logger:
-            msg_typ = make_runoff_file.failure(parsed_args)
+        msg_typ = make_runoff_file.failure(parsed_args)
         assert msg_typ == 'failure'
