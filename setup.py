@@ -47,14 +47,22 @@ install_requires = [
     # see requirements.txt for package versions used during recent development
     # see environment-rtd.yaml for conda environment used for readthedocs build
 
+    'angles',
+    'bottleneck',
     'driftwood',
     'matplotlib',
     'nemo_nowcast',
     'netcdf4',
     'numpy',
+    'pandas',
     'paramiko',
     'raven',
+    'retrying',
+    'scipy',
+    'xarray',
 
+    # 'NEMO_Nowcast',  # use pip install --editable NEMO_Nowcast/
+    # 'SalishSeaTools',  # use pip install --editable SalishSeaTools/
     # 'SalishSeaNowcast',  # use pip install -e SalishSeaNowcast/
 ]
 
