@@ -13,26 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Salish Sea NEMO nowcast runoff file worker.
-Blends EC Data for the Fraser River at Hope with climatology
-for all other rivers and generates runoff file.
+"""Salish Sea NEMO nowcast runoff file generation worker.
+
+Blends Environment Canada gauge data for the Fraser River at Hope with
+climatology for all of the other rivers and generates the runoff forcing file.
 """
 import logging
 import os
 
 import arrow
+from nemo_nowcast import NowcastWorker
 import netCDF4 as NC
 import numpy as np
+from salishsea_tools import rivertools
 import yaml
 
-from salishsea_tools import rivertools
 
-from nowcast import lib
-from nowcast.nowcast_worker import NowcastWorker
-
-
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'make_runoff_file'
+logger = logging.getLogger(NAME)
 
 
 #: Rivers runoff forcing file name templates
@@ -43,28 +41,34 @@ FILENAME_TMPLS = {
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    salishsea_today = arrow.now('Canada/Pacific').floor('day')
-    worker.arg_parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=salishsea_today,
-        help='''
-        Date of the run to make runoff file for; use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_today.format('YYYY-MM-DD')),
-    )
+    """Set up and run the worker.
+
+    For command-line usage see:
+
+    :command:`python -m nowcast.workers.make_runoff_file --help`
+    """
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_date_option(
+        '--run-date', default=arrow.now().floor('day'),
+        help='Date of the run to produce runoff file for.')
     worker.run(make_runoff_file, success, failure)
 
 
 def success(parsed_args):
+    ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        'runoff file creation from Fraser at Hope and climatology elsewhere '
-        'complete')
+        '{date} runoff file creation from Fraser at Hope and climatology '
+        'elsewhere complete'.format(date=ymd),
+        extra={'run_date': ymd})
     return 'success'
 
 
 def failure(parsed_args):
-    logger.critical('runoff file creation failed')
+    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    logger.critical(
+        '{date} runoff file creation failed'.format(date=ymd),
+        extra={'run_date': ymd})
     return 'failure'
 
 
@@ -100,7 +104,6 @@ def make_runoff_file(parsed_args, config, *args):
         'long', flow_at_hope, yesterday, afterHope,
         nonFraser, fraserratio, otherratio, driverflow, lat,
         lon, riverdepth, directory, config)
-
     return filepath
 
 
@@ -248,4 +251,4 @@ def _write_file(filepath, yesterday, flow, lat, lon, riverdepth):
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover

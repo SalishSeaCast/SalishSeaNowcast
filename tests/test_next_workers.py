@@ -44,19 +44,37 @@ class TestAfterDownloadWeather:
             Message('download_weather', msg_type), config)
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type, args', [
-        ('success 06', ['forecast2']),
-        ('success 12', ['nowcast+']),
+    def test_success_06_launch_make_runoff_file(self):
+        config = {'run types': {'nowcast': {}, 'forecast2': {}}}
+        workers = next_workers.after_download_weather(
+            Message('download_weather', 'success 06'), config)
+        assert workers[0] == NextWorker(
+            'nowcast.workers.make_runoff_file', [], host='localhost')
+
+    @pytest.mark.parametrize('msg_type, worker_index, args', [
+        ('success 06', 1, ['forecast2']),
+        ('success 12', 0, ['nowcast+']),
     ])
-    def test_success_launch_grib_to_netcdf(self, msg_type, args):
+    def test_success_launch_grib_to_netcdf(self, msg_type, worker_index, args):
         config = {'run types': {'nowcast': {}, 'forecast2': {}}}
         workers = next_workers.after_download_weather(
             Message('download_weather', msg_type), config)
-        expected = [
-            NextWorker(
-                'nowcast.workers.grib_to_netcdf', args, host='localhost'),
-        ]
-        assert workers == expected
+        assert workers[worker_index] == NextWorker(
+            'nowcast.workers.grib_to_netcdf', args, host='localhost')
+
+
+class TestAfterMakeRunoffFile:
+    """Unit tests for the after_make_runoff_file function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type):
+        workers = next_workers.after_make_runoff_file(
+            Message('make_runoff_file', msg_type), Config())
+        assert workers == []
 
 
 class TestAfterGribToNetcdf:
