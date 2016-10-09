@@ -112,7 +112,7 @@ def get_grib(parsed_args, config, *args):
         'downloading {forecast} forecast GRIB2 files for {date}'
         .format(forecast=forecast, date=date),
         extra={'forecast': parsed_args.forecast})
-    dest_dir_root = config['weather']['GRIB_dir']
+    dest_dir_root = config['weather']['GRIB dir']
     grp_name = config['file group']
     _mkdirs(dest_dir_root, date, forecast, grp_name)
     with requests.Session() as session:
