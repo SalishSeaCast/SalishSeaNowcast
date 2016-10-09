@@ -40,7 +40,7 @@ def parsed_args():
 def config():
     return {
         'file group': 'foo',
-        'weather': {'GRIB_dir': '/tmp/'}
+        'weather': {'GRIB dir': '/tmp/'}
     }
 
 
