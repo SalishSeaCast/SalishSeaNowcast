@@ -15,7 +15,7 @@
 
 """Salish Sea NEMO nowcast weather forcing file generation worker.
 
-Collects weather forecast results from hourly GRIB2 files and produces
+Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
 """
 from collections import OrderedDict
