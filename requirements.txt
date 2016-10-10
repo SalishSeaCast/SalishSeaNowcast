@@ -5,6 +5,7 @@ angles==2.0
 arrow==0.8.0
 attrs==16.0.0
 Babel==2.3.4
+beautifulsoup4==4.5.1
 Bottleneck==1.1.0
 cffi==1.8.3
 circus==0.13.0
