@@ -114,7 +114,7 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     # used for the run
     run_date = _utc_now_to_run_date(utc_now, run_type)
     results_dir = os.path.join(
-        config['run']['results archive'][run_type],
+        config['results archive'][run_type],
         run_date.strftime('%d%b%y').lower())
     lib.mkdir(
         results_dir, logger, grp_name=config['file group'], exist_ok=True)
