@@ -16,8 +16,8 @@
 """Salish Sea NEMO nowcast Neah Bay sea surface height download worker.
 
 Scrape the NOAA Neah Bay storm surge site for sea surface height
-observations and forecast values and generate the western open boundary
-ssh files.
+observations and forecast values,
+and generate the western open boundary ssh files.
 """
 import datetime
 import logging

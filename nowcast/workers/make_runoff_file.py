@@ -15,8 +15,10 @@
 
 """Salish Sea NEMO nowcast runoff file generation worker.
 
-Blends Environment Canada gauge data for the Fraser River at Hope with
-climatology for all of the other rivers and generates the runoff forcing file.
+Blend Environment Canada gauge data for the Fraser River at Hope with
+climatology for the Fraser downstream of Hope,
+and climatologies for all of the other modeled rivers to generate the runoff
+forcing file.
 """
 import logging
 import os
