@@ -18,6 +18,7 @@ channels:
   - conda-forge
 
 dependencies:
+  - beautifulsoup4
   - bottleneck
   - matplotlib
   - nemo_nowcast

@@ -20,6 +20,7 @@ channels:
 dependencies:
   - arrow
   - attrs
+  - beautifulsoup4
   - bottleneck
   - circus
   - matplotlib
