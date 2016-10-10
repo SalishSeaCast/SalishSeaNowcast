@@ -92,12 +92,11 @@ run types:
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
 
 
-run:
-  results archive:
-    nowcast: /results/SalishSea/nowcast/
-    forecast: /results/SalishSea/forecast/
-    forecast2: /results/SalishSea/forecast2/
-    nowcast-green: /results/SalishSea/nowcast-green/
+results archive:
+  nowcast: /results/SalishSea/nowcast/
+  forecast: /results/SalishSea/forecast/
+  forecast2: /results/SalishSea/forecast2/
+  nowcast-green: /results/SalishSea/nowcast-green/
 
 
 # Logging system configuration
@@ -239,3 +238,12 @@ message registry:
       success forecast2: atmospheric forecast2 forcing ready
       failure forecast2: atmospheric forecast2 forcing files preparation failed
       crash: grib_to_netcdf worker crashed
+    upload_forcing:
+      checklist key: forcing upload
+      success nowcast+: forcing files for nowcast/forecast uploaded
+      failure nowcast+: forcing files for nowcast/forecast upload failed
+      success forecast2: forcing files for forecast2 uploaded
+      failure forecast2: forcing files for forecast2 upload failed
+      success ssh: sea surface height forcing files for forecast uploaded
+      failure ssh: sea surface height forcing files for forecast upload failed
+      crash: upload_forcing worker crashed
