@@ -158,8 +158,8 @@ def _get_file(var, dest_dir_root, date, forecast, hr_str, session):
     fileURL = URL_TEMPLATE.format(
         forecast=forecast, hour=hr_str, filename=filename)
     get_web_data(
-        fileURL, Path(filepath), NAME,
-        session=session, wait_exponential_max=9000)
+        fileURL, NAME, Path(filepath), session=session,
+        wait_exponential_max=9000)
     size = os.stat(filepath).st_size
     logger.debug(
         'downloaded {bytes} bytes from {fileURL}'

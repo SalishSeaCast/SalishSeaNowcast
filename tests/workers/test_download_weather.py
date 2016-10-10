@@ -218,7 +218,7 @@ class TestGetFile():
             'CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015061906_P001-00.grib2'
         )
         m_get_web_data.assert_called_once_with(
-            url, Path(filepath), 'download_weather', session=None,
+            url, 'download_weather', Path(filepath), session=None,
             wait_exponential_max=9000,
         )
 
