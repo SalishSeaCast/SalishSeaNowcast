@@ -46,12 +46,17 @@ def after_download_weather(msg, config):
         next_workers['success 06'] = [
             NextWorker('nowcast.workers.make_runoff_file')]
         if 'forecast2' in config['run types']:
-            next_workers['success 06'].append(
+            next_workers['success 06'].extend([
                 NextWorker(
-                    'nowcast.workers.grib_to_netcdf', args=['forecast2']))
+                    'nowcast.workers.get_NeahBay_ssh', args=['forecast2']),
+                NextWorker(
+                    'nowcast.workers.grib_to_netcdf', args=['forecast2']),
+                ])
     if msg.type.endswith('12') and 'nowcast' in config['run types']:
         next_workers['success 12'] = [
-            NextWorker('nowcast.workers.grib_to_netcdf', args=['nowcast+'])]
+            NextWorker('nowcast.workers.get_NeahBay_ssh', args=['nowcast']),
+            NextWorker('nowcast.workers.grib_to_netcdf', args=['nowcast+']),
+        ]
     return next_workers[msg.type]
 
 
@@ -69,6 +74,28 @@ def after_make_runoff_file(msg, config):
         'crash': [],
         'failure': [],
         'success': [],
+    }
+    return next_workers[msg.type]
+
+
+def after_get_NeahBay_ssh(msg, config):
+    """Calculate the list of workers to launch after the get_NeahBay_ssh worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nowcast': [],
+        'failure forecast': [],
+        'failure forecast2': [],
+        'success nowcast': [],
+        'success forecast2': [],
+        'success forecast': [],
     }
     return next_workers[msg.type]
 

@@ -31,16 +31,15 @@ from nowcast.workers import get_NeahBay_ssh
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch('nowcast.workers.get_NeahBay_ssh.worker_name')
-    def test_instantiate_worker(self, m_name, m_worker):
+    def test_instantiate_worker(self, m_worker):
         get_NeahBay_ssh.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('get_NeahBay_ssh',)
         assert list(kwargs.keys()) == ['description']
 
     def test_add_run_type_arg(self, m_worker):
         get_NeahBay_ssh.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('run_type',)
         assert kwargs['choices'] == {'nowcast', 'forecast', 'forecast2'}
         assert 'help' in kwargs

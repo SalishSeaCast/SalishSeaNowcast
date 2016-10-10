@@ -43,17 +43,24 @@ Workers
     :members: main
 
 
-:kbd:`grib_to_netcdf`
----------------------
-
-.. automodule:: nowcast.workers.grib_to_netcdf
-    :members: main
-
-
 :kbd:`make_runoff_file`
 -----------------------
 
 .. automodule:: nowcast.workers.make_runoff_file
+    :members: main
+
+
+:kbd:`get_NeahBay_ssh`
+----------------------
+
+.. automodule:: nowcast.workers.get_NeahBay_ssh
+    :members: main
+
+
+:kbd:`grib_to_netcdf`
+---------------------
+
+.. automodule:: nowcast.workers.grib_to_netcdf
     :members: main
 
 

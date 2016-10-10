@@ -62,6 +62,13 @@ rivers:
   rivers_dir: /results/forcing/rivers/
 
 
+ssh:
+  # Directory containing tidal predication file for sea surface height correction
+  tidal_predictions: /results/nowcast-sys/tools/SalishSeaNowcast/tidal_predictions/
+  # Destination directory for Neah Bay sea surface height open boundary files
+  ssh_dir: /results/forcing/sshNeahBay/
+
+
 run types:
   # Keys are run types to execute, values are NEMO configuration name,
   # bathymetry, and mesh mask to use.
@@ -83,6 +90,14 @@ run types:
     config name:  SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
+
+
+run:
+  results archive:
+    nowcast: /results/SalishSea/nowcast/
+    forecast: /results/SalishSea/forecast/
+    forecast2: /results/SalishSea/forecast2/
+    nowcast-green: /results/SalishSea/nowcast-green/
 
 
 # Logging system configuration
@@ -128,6 +143,15 @@ logging:
       formatter: simple
       filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
       mode: w
+    get_NeahBay_ssh_png:
+      # **NOTE:** This isn't a handler for Python logging, rather it is a
+      # convenient and logical place to define the storage location for the
+      # image file that the get_NeahBay_ssh worker generates
+      class: logging.FileHandler  # irrevelant
+      level: DEBUG  # irrevelant, but accurate
+      formatter: simple  # irrevelant
+      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/NBssh.png  # THE IMPORTANT BIT!!
+      mode: w  # irrevelant, but accurate
     grib_to_netcdf_png:
       # **NOTE:** This isn't a handler for Python logging, rather it is a
       # convenient and logical place to define the storage location for the
@@ -199,6 +223,15 @@ message registry:
       success: rivers forcing ready
       failure: rivers forcing files preparation failed
       crash: make_runoff_file worker crashed
+    get_NeahBay_ssh:
+      checklist key: Neah Bay ssh
+      success nowcast: Neah Bay ssh for nowcast ready
+      failure nowcast: Neah Bay sea surface height file prep for nowcast failed
+      success forecast: Neah Bay ssh for forecast ready
+      failure forecast : Neah Bay sea surface height file prep for forecast failed
+      success forecast2: Neah Bay ssh for forecast2 ready
+      failure forecast2: Neah Bay sea surface height file prep for forecast2 failed
+      crash: get_NeahBay_ssh worker crashed
     grib_to_netcdf:
       checklist key: weather forcing
       success nowcast+: atmospheric nowcast/forecast forcing ready
