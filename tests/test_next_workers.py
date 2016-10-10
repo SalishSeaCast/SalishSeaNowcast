@@ -48,19 +48,33 @@ class TestAfterDownloadWeather:
         config = {'run types': {'nowcast': {}, 'forecast2': {}}}
         workers = next_workers.after_download_weather(
             Message('download_weather', 'success 06'), config)
-        assert workers[0] == NextWorker(
+        expected = NextWorker(
             'nowcast.workers.make_runoff_file', [], host='localhost')
+        assert expected in workers
 
-    @pytest.mark.parametrize('msg_type, worker_index, args', [
-        ('success 06', 1, ['forecast2']),
-        ('success 12', 0, ['nowcast+']),
+    @pytest.mark.parametrize('msg_type, args', [
+        ('success 06', ['forecast2']),
+        ('success 12', ['nowcast']),
     ])
-    def test_success_launch_grib_to_netcdf(self, msg_type, worker_index, args):
+    def test_success_launch_get_NeahBay_ssh(self, msg_type, args):
         config = {'run types': {'nowcast': {}, 'forecast2': {}}}
         workers = next_workers.after_download_weather(
             Message('download_weather', msg_type), config)
-        assert workers[worker_index] == NextWorker(
+        expected = NextWorker(
+            'nowcast.workers.get_NeahBay_ssh', args, host='localhost')
+        assert expected in workers
+
+    @pytest.mark.parametrize('msg_type, args', [
+        ('success 06', ['forecast2']),
+        ('success 12', ['nowcast+']),
+    ])
+    def test_success_launch_grib_to_netcdf(self, msg_type, args):
+        config = {'run types': {'nowcast': {}, 'forecast2': {}}}
+        workers = next_workers.after_download_weather(
+            Message('download_weather', msg_type), config)
+        expected = NextWorker(
             'nowcast.workers.grib_to_netcdf', args, host='localhost')
+        assert expected in workers
 
 
 class TestAfterMakeRunoffFile:
@@ -74,6 +88,24 @@ class TestAfterMakeRunoffFile:
     def test_no_next_worker_msg_types(self, msg_type):
         workers = next_workers.after_make_runoff_file(
             Message('make_runoff_file', msg_type), Config())
+        assert workers == []
+
+
+class TestAfterGetNeahBaySsh:
+    """Unit tests for the after_get_NeahBay_ssh function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+        'failure forecast',
+        'failure forecast2',
+        'success nowcast',
+        'success forecast',
+        'success forecast2',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type):
+        workers = next_workers.after_get_NeahBay_ssh(
+            Message('get_NeahBay_ssh', msg_type), Config())
         assert workers == []
 
 
