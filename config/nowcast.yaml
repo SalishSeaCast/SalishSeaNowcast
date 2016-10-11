@@ -108,10 +108,28 @@ run:
   # and forecast2 runs executed on it automatically.
   #
   # Remove or comment out the next line to prevent running in the cloud
-#  cloud host: west.cloud-nowcast
+  cloud host: west.cloud-nowcast
   west.cloud-nowcast:
     ssh key name:
       nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
+    forcing:
+      # Directory on compute host where Neah Bay sea surface height forcing files
+      # are stored
+      ssh dir: /home/ubuntu/MEOPAR/sshNeahBay/
+      # Directory on compute host where rivers runoff forcing files are stored
+      rivers dir: /home/ubuntu/MEOPAR/rivers/
+      # Location on compute host of rivers runoff monthly climatology file
+      rivers_month.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+      # Directory on compute host where atomospheric forcing files are stored
+      weather dir: /home/ubuntu/MEOPAR/GEM2.5/ops/NEMO-atmos/
+      # Location on compute host of no_snow.nc constraint file
+      no_snow.nc: /home/ubuntu/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
+      # Location of NEMO on-the-fly interpolation weights file
+      # for GEM 2.5km operational forecast
+      weights: /home/ubuntu/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
+    # Directory on compute host where run configuration, forcing links, etc.
+    # are stored
+    nowcast dir: /home/ubuntu/MEOPAR/nowcast/
 
   # If the `nowcast-green host` key is present, the forcing files will be
   # symlinked and the nowcast-green run will be executed on it automatically.
@@ -124,6 +142,27 @@ run:
   salish-nowcast:
     ssh key name:
       nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
+    forcing:
+      # Directory on compute host where Neah Bay sea surface height forcing files
+      # are stored
+      ssh dir: /results/forcing/sshNeahBay/
+      # Directory on compute host where rivers runoff forcing files are stored
+      rivers dir: /results/forcing/rivers/
+      # Location on compute host of rivers runoff monthly climatology file
+      rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
+      # Directory on compute host where the rivers runoff daily tracers
+      # climatology files are stored
+      rivers bio dir: /results/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
+      # Directory on compute host where atomospheric forcing files are stored
+      weather dir: /results/forcing/atmospheric/GEM2.5/operational/
+      # Location on compute host of no_snow.nc constraint file
+      no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
+      # Location of NEMO on-the-fly interpolation weights file
+      # for GEM 2.5km operational forecast
+      weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
+    # Directory on compute host where run configuration, forcing links, etc.
+    # are stored
+    nowcast dir: /data/dlatorne/MEOPAR/nowcast-green/
 
   # If the `hpc host` key is present, the forcing files will be uploaded
   # to the HPC cluster and the symlinks created ready for the runs to be
@@ -134,9 +173,24 @@ run:
   orcinus-nowcast:
     ssh key name:
       nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
-    ssh dir: /home/sallen/MEOPAR/sshNeahBay/
-    rivers dir: /home/sallen/MEOPAR/rivers/
-    weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
+    forcing:
+      # Directory on compute host where Neah Bay sea surface height forcing files
+      # are stored
+      ssh dir: /home/sallen/MEOPAR/sshNeahBay/
+      # Directory on compute host where rivers runoff forcing files are stored
+      rivers dir: /home/sallen/MEOPAR/rivers/
+      # Location on compute host of rivers runoff monthly climatology file
+      rivers_month.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+      # Directory on compute host where atomospheric forcing files are stored
+      weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
+      # Location on compute host of no_snow.nc constraint file
+      no_snow.nc: /home/sallen/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
+      # Location of NEMO on-the-fly interpolation weights file
+      # for GEM 2.5km operational forecast
+      weights: /home/sallen/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
+    # Directory on compute host where run configuration, forcing links, etc.
+    # are stored
+    nowcast dir: /home/sallen/MEOPAR/nowcast/
 
 
 # Logging system configuration
@@ -287,3 +341,13 @@ message registry:
       success ssh: sea surface height forcing files for forecast uploaded
       failure ssh: sea surface height forcing files for forecast upload failed
       crash: upload_forcing worker crashed
+    make_forcing_links:
+      success nowcast+: forcing file links for nowcast/forecast created
+      failure nowcast+: forcing file links for nowcast/forecast failed
+      success forecast2: forcing file links for forecast2 created
+      failure forecast2: forcing file links for forecast2 failed
+      success ssh: sea surface height forcing file links for forecast created
+      failure ssh: sea surface height forcing file links for forecast failed
+      success nowcast-green: forcing file links for nowcast-green created
+      failure nowcast-green: forcing file links for nowcast-green failed
+      crash: make_forcing_links worker crashed

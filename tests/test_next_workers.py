@@ -28,7 +28,7 @@ from nowcast import next_workers
 @pytest.fixture
 def config():
     return {
-        'run types': {'nowcast': {}, 'forecast2': {}},
+        'run types': {'nowcast': {}, 'forecast': {}, 'forecast2': {}},
         'run': {
             'remote hosts': ['cloud host'],
             'cloud host': 'west.cloud',
@@ -156,4 +156,45 @@ class TestAfterUploadForcing:
     def test_no_next_worker_msg_types(self, msg_type):
         workers = next_workers.after_upload_forcing(
             Message('upload_forcing', msg_type), config)
+        assert workers == []
+
+    def test_msg_payload_missing_host_name(self):
+        workers = next_workers.after_upload_forcing(
+            Message('upload_forcing', 'crash'), config)
+        assert workers == []
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'ssh',
+        'forecast2',
+    ])
+    def test_success_launch_make_forcing_link(self, run_type, config):
+        workers = next_workers.after_upload_forcing(
+            Message(
+                'upload_forcing', 'success {}'.format(run_type),
+                {'west.cloud': '2016-10-11 ssh'}),
+            config)
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['west.cloud', run_type], host='localhost')
+        assert expected in workers
+
+
+class TestAfterMakeForcingLinks:
+    """Unit tests for the after_make_forcing_links function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast+',
+        'failure nowcast-green',
+        'failure forecast2',
+        'failure ssh',
+        'success nowcast+',
+        'success nowcast-green',
+        'success forecast2',
+        'success ssh',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type):
+        workers = next_workers.after_make_forcing_links(
+            Message('make_forcing_links', msg_type), config)
         assert workers == []

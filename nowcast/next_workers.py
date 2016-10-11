@@ -128,7 +128,7 @@ def after_grib_to_netcdf(msg, config):
                     next_workers['success {}'.format(msg_suffix)] = [
                         NextWorker(
                             'nowcast.workers.upload_forcing',
-                            args=[config['run'][host], msg_suffix])
+                            args=[config['run'][host], msg_suffix]),
                     ]
     return next_workers[msg.type]
 
@@ -149,6 +149,49 @@ def after_upload_forcing(msg, config):
         'failure forecast2': [],
         'failure ssh': [],
         'success nowcast+': [],
+        'success forecast2': [],
+        'success ssh': [],
+    }
+    try:
+        host_name = list(msg.payload.keys())[0]
+    except (AttributeError, IndexError):
+        # Malformed payload - no host name in payload;
+        # upload_forcing worker probably crashed
+        return []
+    run_types = [
+        # (run_type, make_forcing_links)
+        ('nowcast', 'nowcast+'),
+        ('forecast', 'ssh'),
+        ('forecast2', 'forecast2'),
+    ]
+    for run_type, links_run_type in run_types:
+        if run_type in config['run types']:
+            next_workers['success {}'.format(links_run_type)] = [
+                NextWorker(
+                    'nowcast.workers.make_forcing_links',
+                    args=[host_name, links_run_type]),
+            ]
+    return next_workers[msg.type]
+
+
+def after_make_forcing_links(msg, config):
+    """Calculate the list of workers to launch after the make_forcing_links
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nowcast+': [],
+        'failure nowcast-green': [],
+        'failure forecast2': [],
+        'failure ssh': [],
+        'success nowcast+': [],
+        'success nowcast-green': [],
         'success forecast2': [],
         'success ssh': [],
     }
