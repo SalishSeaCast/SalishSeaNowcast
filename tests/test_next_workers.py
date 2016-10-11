@@ -18,12 +18,22 @@
 import pytest
 
 from nemo_nowcast import (
-    Config,
     Message,
     NextWorker,
 )
 
 from nowcast import next_workers
+
+
+@pytest.fixture
+def config():
+    return {
+        'run types': {'nowcast': {}, 'forecast2': {}},
+        'run': {
+            'remote hosts': ['cloud host'],
+            'cloud host': 'west.cloud',
+        }
+    }
 
 
 class TestAfterDownloadWeather:
@@ -38,14 +48,12 @@ class TestAfterDownloadWeather:
         'success 00',
         'success 18',
     ])
-    def test_no_next_worker_msg_types(self, msg_type):
-        config = {'run types': {'nowcast': {}, 'forecast2': {}}}
+    def test_no_next_worker_msg_types(self, msg_type, config):
         workers = next_workers.after_download_weather(
             Message('download_weather', msg_type), config)
         assert workers == []
 
-    def test_success_06_launch_make_runoff_file(self):
-        config = {'run types': {'nowcast': {}, 'forecast2': {}}}
+    def test_success_06_launch_make_runoff_file(self, config):
         workers = next_workers.after_download_weather(
             Message('download_weather', 'success 06'), config)
         expected = NextWorker(
@@ -56,8 +64,7 @@ class TestAfterDownloadWeather:
         ('success 06', ['forecast2']),
         ('success 12', ['nowcast']),
     ])
-    def test_success_launch_get_NeahBay_ssh(self, msg_type, args):
-        config = {'run types': {'nowcast': {}, 'forecast2': {}}}
+    def test_success_launch_get_NeahBay_ssh(self, msg_type, args, config):
         workers = next_workers.after_download_weather(
             Message('download_weather', msg_type), config)
         expected = NextWorker(
@@ -68,8 +75,7 @@ class TestAfterDownloadWeather:
         ('success 06', ['forecast2']),
         ('success 12', ['nowcast+']),
     ])
-    def test_success_launch_grib_to_netcdf(self, msg_type, args):
-        config = {'run types': {'nowcast': {}, 'forecast2': {}}}
+    def test_success_launch_grib_to_netcdf(self, msg_type, args, config):
         workers = next_workers.after_download_weather(
             Message('download_weather', msg_type), config)
         expected = NextWorker(
@@ -87,7 +93,7 @@ class TestAfterMakeRunoffFile:
     ])
     def test_no_next_worker_msg_types(self, msg_type):
         workers = next_workers.after_make_runoff_file(
-            Message('make_runoff_file', msg_type), Config())
+            Message('make_runoff_file', msg_type), config)
         assert workers == []
 
 
@@ -105,7 +111,7 @@ class TestAfterGetNeahBaySsh:
     ])
     def test_no_next_worker_msg_types(self, msg_type):
         workers = next_workers.after_get_NeahBay_ssh(
-            Message('get_NeahBay_ssh', msg_type), Config())
+            Message('get_NeahBay_ssh', msg_type), config)
         assert workers == []
 
 
@@ -116,10 +122,38 @@ class TestAfterGribToNetcdf:
         'crash',
         'failure nowcast+',
         'failure forecast2',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config):
+        workers = next_workers.after_grib_to_netcdf(
+            Message('grib_to_netcdf', msg_type), config)
+        assert workers == []
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+    ])
+    def test_success_launch_upload_forcing(self, run_type, config):
+        workers = next_workers.after_grib_to_netcdf(
+            Message('grib_to_netcdf', 'success {}'.format(run_type)), config)
+        expected = NextWorker(
+            'nowcast.workers.upload_forcing',
+            args=['west.cloud', run_type], host='localhost')
+        assert expected in workers
+
+
+class TestAfterUploadForcing:
+    """Unit tests for the after_upload_forcing function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast+',
+        'failure forecast2',
+        'failure ssh',
         'success nowcast+',
         'success forecast2',
+        'success ssh',
     ])
     def test_no_next_worker_msg_types(self, msg_type):
-        workers = next_workers.after_grib_to_netcdf(
-            Message('grib_to_netcdf', msg_type), Config())
+        workers = next_workers.after_upload_forcing(
+            Message('upload_forcing', msg_type), config)
         assert workers == []

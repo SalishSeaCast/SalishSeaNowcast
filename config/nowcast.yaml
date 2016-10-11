@@ -59,14 +59,14 @@ rivers:
   # flow at Hope
   Fraser climatology: /results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
   # Destination directory for river runoff forcing file
-  rivers_dir: /results/forcing/rivers/
+  rivers dir: /results/forcing/rivers/
 
 
 ssh:
   # Directory containing tidal predication file for sea surface height correction
   tidal_predictions: /results/nowcast-sys/tools/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
-  ssh_dir: /results/forcing/sshNeahBay/
+  ssh dir: /results/forcing/sshNeahBay/
 
 
 run types:
@@ -97,6 +97,46 @@ results archive:
   forecast: /results/SalishSea/forecast/
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
+
+
+run:
+  remote hosts:
+    - cloud host
+    - hpc host
+
+  # If the `cloud host` key is present, the nowcast, forecast,
+  # and forecast2 runs executed on it automatically.
+  #
+  # Remove or comment out the next line to prevent running in the cloud
+#  cloud host: west.cloud-nowcast
+  west.cloud-nowcast:
+    ssh key name:
+      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
+
+  # If the `nowcast-green host` key is present, the forcing files will be
+  # symlinked and the nowcast-green run will be executed on it automatically.
+  # It is assumed that the nowcast-green run shares storage with the machine
+  # that the nowcast manager is running on, so uploading or forcing files,
+  # and downloaded of results files is not necessary.
+  #
+  # Remove or comment out the next line to prevent running nowcast-green
+  nowcast-green host: salish-nowcast
+  salish-nowcast:
+    ssh key name:
+      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
+
+  # If the `hpc host` key is present, the forcing files will be uploaded
+  # to the HPC cluster and the symlinks created ready for the runs to be
+  # prepared and queued at the command-line on the cluster.
+  #
+  # Remove or comment out the next line to prevent running on the HPC cluster
+#  hpc host: orcinus-nowcast
+  orcinus-nowcast:
+    ssh key name:
+      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
+    ssh dir: /home/sallen/MEOPAR/sshNeahBay/
+    rivers dir: /home/sallen/MEOPAR/rivers/
+    weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
 
 
 # Logging system configuration

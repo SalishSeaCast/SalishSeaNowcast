@@ -92,6 +92,13 @@ Workers
     :members: main
 
 
+:kbd:`upload_forcing`
+---------------------
+
+.. automodule:: nowcast.workers.upload_forcing
+    :members: main
+
+
 :kbd:`next_workers` Module
 ==========================
 
