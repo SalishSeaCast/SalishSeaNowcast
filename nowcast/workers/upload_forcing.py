@@ -14,6 +14,7 @@
 # limitations under the License.
 
 """Salish Sea NEMO nowcast upload forcing files worker.
+
 Upload the forcing files for a nowcast or forecast run to the HPC/cloud
 facility where the run will be executed.
 """
@@ -21,9 +22,9 @@ import logging
 import os
 
 import arrow
+from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
-from nowcast.nowcast_worker import NowcastWorker
 from nowcast.workers import (
     get_NeahBay_ssh,
     grib_to_netcdf,
@@ -31,16 +32,17 @@ from nowcast.workers import (
 )
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'upload_forcing'
+logger = logging.getLogger(NAME)
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'host_name', help='Name of the host to upload forcing files to')
-    worker.arg_parser.add_argument(
-        'run_type', choices=set(('nowcast+', 'forecast2', 'ssh')),
+    worker.cli.add_argument(
+        'run_type', choices={'nowcast+', 'forecast2', 'ssh'},
         help='''
         Type of run to upload files for:
         'nowcast+' means nowcast & 1st forecast runs,
@@ -48,22 +50,17 @@ def main():
         'ssh' means Neah Bay sea surface height files only (for forecast run).
         ''',
     )
-    salishsea_today = arrow.now('Canada/Pacific').floor('day')
-    worker.arg_parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=salishsea_today,
-        help='''
-        Date of the run to upload files for; use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_today.format('YYYY-MM-DD')),
-    )
+    worker.cli.add_date_option(
+        '--run-date', default=arrow.now().floor('day'),
+        help='Date of the run to upload files for.')
     worker.run(upload_forcing, success, failure)
 
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} forcing files upload to {0.host_name} completed'
-        .format(parsed_args), extra={
+        '{0.run_type} {date} forcing files upload to {0.host_name} completed'
+        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -74,8 +71,9 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} forcing files upload to {0.host_name} failed'
-        .format(parsed_args), extra={
+        '{0.run_type} {date} forcing files upload to {0.host_name} failed'
+        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -96,8 +94,8 @@ def upload_forcing(parsed_args, config, *args):
         filename = get_NeahBay_ssh.FILENAME_TMPL.format(
             run_date.replace(days=day).date())
         dest_dir = 'obs' if day == -1 else 'fcst'
-        localpath = os.path.join(config['ssh']['ssh_dir'], dest_dir, filename)
-        remotepath = os.path.join(host['ssh_dir'], dest_dir, filename)
+        localpath = os.path.join(config['ssh']['ssh dir'], dest_dir, filename)
+        remotepath = os.path.join(host['ssh dir'], dest_dir, filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
         except OSError:
@@ -105,7 +103,7 @@ def upload_forcing(parsed_args, config, *args):
                 raise
             # obs file does not exist, to create symlink to corresponding
             # forecast file
-            fcst = os.path.join(config['ssh']['ssh_dir'], 'fcst', filename)
+            fcst = os.path.join(config['ssh']['ssh dir'], 'fcst', filename)
             os.symlink(fcst, localpath)
             logger.warning(
                 'ssh obs file not found; created symlink to {}'.format(fcst),
@@ -118,12 +116,17 @@ def upload_forcing(parsed_args, config, *args):
     if run_type == 'ssh':
         sftp_client.close()
         ssh_client.close()
-        return {host_name: True}
+        checklist = {
+            host_name: '{0.run_type} {date} ssh'
+            .format(
+                parsed_args,
+                date=parsed_args.run_date.format('YYYY-MM-DD'))}
+        return checklist
     # Rivers runoff
     for tmpl in make_runoff_file.FILENAME_TMPLS.values():
         filename = tmpl.format(run_date.replace(days=-1).date())
-        localpath = os.path.join(config['rivers']['rivers_dir'], filename)
-        remotepath = os.path.join(host['rivers_dir'], filename)
+        localpath = os.path.join(config['rivers']['rivers dir'], filename)
+        remotepath = os.path.join(host['rivers dir'], filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Weather
     if run_type == 'nowcast+':
@@ -135,12 +138,15 @@ def upload_forcing(parsed_args, config, *args):
             run_date.replace(days=day).date())
         dest_dir = '' if day == 0 else 'fcst'
         localpath = os.path.join(
-            config['weather']['ops_dir'], dest_dir, filename)
-        remotepath = os.path.join(host['weather_dir'], dest_dir, filename)
+            config['weather']['ops dir'], dest_dir, filename)
+        remotepath = os.path.join(host['weather dir'], dest_dir, filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     sftp_client.close()
     ssh_client.close()
-    return {host_name: True}
+    checklist = {
+        host_name: '{0.run_type} {date} ssh rivers weather'
+        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD'))}
+    return checklist
 
 
 def _upload_file(sftp_client, host_name, localpath, remotepath):
@@ -152,4 +158,4 @@ def _upload_file(sftp_client, host_name, localpath, remotepath):
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover

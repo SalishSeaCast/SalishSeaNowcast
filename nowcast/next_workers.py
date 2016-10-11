@@ -117,4 +117,39 @@ def after_grib_to_netcdf(msg, config):
         'success nowcast+': [],
         'success forecast2': [],
     }
+    msg_run_type_mapping = {
+        'nowcast+': 'nowcast',
+        'forecast2': 'forecast2',
+    }
+    for host in config['run']['remote hosts']:
+        if host in config['run']:
+            for msg_suffix, run_type in msg_run_type_mapping.items():
+                if run_type in config['run types']:
+                    next_workers['success {}'.format(msg_suffix)] = [
+                        NextWorker(
+                            'nowcast.workers.upload_forcing',
+                            args=[config['run'][host], msg_suffix])
+                    ]
+    return next_workers[msg.type]
+
+
+def after_upload_forcing(msg, config):
+    """Calculate the list of workers to launch after the upload_forcing worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nowcast+': [],
+        'failure forecast2': [],
+        'failure ssh': [],
+        'success nowcast+': [],
+        'success forecast2': [],
+        'success ssh': [],
+    }
     return next_workers[msg.type]
