@@ -14,18 +14,18 @@
 # limitations under the License.
 
 """Salish Sea NEMO nowcast forcing files symlink creation worker.
-Creates the forcing file symlinks for a nowcast run on the HPC/cloud
-facility where the run will be.
-executed.
+
+Create the forcing file symlinks for a nowcast run on the HPC/cloud
+facility where the run will be executed.
 """
 import logging
 import os
 import shutil
 
 import arrow
+from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
-from nowcast.nowcast_worker import NowcastWorker
 from nowcast.workers import (
     get_NeahBay_ssh,
     grib_to_netcdf,
@@ -33,49 +33,42 @@ from nowcast.workers import (
 )
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'make_forcing_links'
+logger = logging.getLogger(NAME)
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'host_name', help='Name of the host to symlink forcing files on')
-    worker.arg_parser.add_argument(
-        'run_type', choices=set(
-            ('nowcast+', 'forecast2', 'ssh', 'nowcast-green')),
+    worker.cli.add_argument(
+        'run_type', choices={'nowcast+', 'forecast2', 'ssh', 'nowcast-green'},
         help='''
         Type of run to symlink files for:
         'nowcast+' means nowcast & 1st forecast runs,
         'forecast2' means 2nd forecast run,
         'ssh' means Neah Bay sea surface height files only (for forecast run).
         'nowcast-green' means nowcast green ocean run,
-        ''',
-    )
-    salishsea_today = arrow.now('Canada/Pacific').floor('day')
-    worker.arg_parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=salishsea_today,
-        help='''
-        Date of the run to symlink files for; use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_today.format('YYYY-MM-DD')),
-    )
-    worker.arg_parser.add_argument(
+        ''')
+    worker.cli.add_argument(
         '--shared-storage', action='store_true',
         help='''
         If running on a machine (Salish) that directly accesses
         the repo datafiles, copy the ssh files so that the nowcast
         does not change the files while nowcast-green is running
-        ''',
-    )
+        ''')
+    worker.cli.add_date_option(
+        '--run-date', default=(arrow.now().floor('day')),
+        help='Date of the run to symlink files for.')
     worker.run(make_forcing_links, success, failure)
 
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} forcing file links on {0.host_name} created'
-        .format(parsed_args), extra={
+        '{0.run_type} {date} forcing file links on {0.host_name} created'
+        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -86,8 +79,10 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} forcing file links creation on {0.host_name} failed'
-        .format(parsed_args), extra={
+        '{0.run_type} {date} forcing file links creation on {0.host_name} '
+        'failed'
+        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -109,13 +104,21 @@ def make_forcing_links(parsed_args, config, *args):
     if run_type == 'ssh':
         sftp_client.close()
         ssh_client.close()
-        return {host_name: True}
+        checklist = {
+            host_name: '{0.run_type} {date} ssh'
+            .format(
+                parsed_args,
+                date=parsed_args.run_date.format('YYYY-MM-DD'))}
+        return checklist
     _make_runoff_links(sftp_client, host_run_config, run_date, host_name)
     _make_weather_links(
         sftp_client, host_run_config, run_date, host_name, run_type)
     sftp_client.close()
     ssh_client.close()
-    return {host_name: True}
+    checklist = {
+        host_name: '{0.run_type} {date} ssh rivers weather'
+        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD'))}
+    return checklist
 
 
 def _make_NeahBay_ssh_links(
@@ -125,9 +128,9 @@ def _make_NeahBay_ssh_links(
         filename = get_NeahBay_ssh.FILENAME_TMPL.format(
             run_date.replace(days=day).date())
         dir = 'obs' if day == -1 else 'fcst'
-        src = os.path.join(host_run_config['ssh_dir'], dir, filename)
+        src = os.path.join(host_run_config['forcing']['ssh dir'], dir, filename)
         dest = os.path.join(
-            host_run_config['nowcast_dir'],
+            host_run_config['nowcast dir'],
             'open_boundaries/west/ssh/',
             filename)
         if shared_storage:
@@ -138,24 +141,24 @@ def _make_NeahBay_ssh_links(
 
 def _make_runoff_links(sftp_client, host_run_config, run_date, host_name):
     _clear_links(sftp_client, host_run_config, 'rivers/')
-    src = host_run_config['rivers_month.nc']
+    src = host_run_config['forcing']['rivers_month.nc']
     dest = os.path.join(
-        host_run_config['nowcast_dir'], 'rivers', os.path.basename(src))
+        host_run_config['nowcast dir'], 'rivers', os.path.basename(src))
     _create_symlink(sftp_client, host_name, src, dest)
-    if 'rivers_bio_dir' in host_run_config:
-        src = host_run_config['rivers_bio_dir']
+    if 'rivers bio dir' in host_run_config['forcing']:
+        src = host_run_config['forcing']['rivers bio dir']
         dest = os.path.join(
-            host_run_config['nowcast_dir'], 'rivers', 'bio_climatology')
+            host_run_config['nowcast dir'], 'rivers', 'bio_climatology')
         _create_symlink(sftp_client, host_name, src, dest)
     for tmpl in make_runoff_file.FILENAME_TMPLS.values():
         src = os.path.join(
-            host_run_config['rivers_dir'],
+            host_run_config['forcing']['rivers dir'],
             tmpl.format(run_date.replace(days=-1).date())
         )
         for day in range(-1, 3):
             filename = tmpl.format(run_date.replace(days=day).date())
             dest = os.path.join(
-                host_run_config['nowcast_dir'], 'rivers', filename)
+                host_run_config['nowcast dir'], 'rivers', filename)
             _create_symlink(sftp_client, host_name, src, dest)
 
 
@@ -164,9 +167,9 @@ def _make_weather_links(
 ):
     _clear_links(sftp_client, host_run_config, 'NEMO-atmos/')
     NEMO_atmos_dir = os.path.join(
-        host_run_config['nowcast_dir'], 'NEMO-atmos/')
+        host_run_config['nowcast dir'], 'NEMO-atmos/')
     for linkfile in 'no_snow.nc weights'.split():
-        src = host_run_config[linkfile]
+        src = host_run_config['forcing'][linkfile]
         dest = os.path.join(NEMO_atmos_dir, os.path.basename(src))
         _create_symlink(sftp_client, host_name, src, dest)
     nowcast_runs = {'nowcast+', 'nowcast-green'}
@@ -181,13 +184,14 @@ def _make_weather_links(
             dir = '' if day <= 0 else 'fcst'
         else:
             dir = 'fcst'
-        src = os.path.join(host_run_config['weather_dir'], dir, filename)
+        src = os.path.join(
+            host_run_config['forcing']['weather dir'], dir, filename)
         dest = os.path.join(NEMO_atmos_dir, filename)
         _create_symlink(sftp_client, host_name, src, dest)
 
 
 def _clear_links(sftp_client, host_run_config, dir):
-    links_dir = os.path.join(host_run_config['nowcast_dir'], dir)
+    links_dir = os.path.join(host_run_config['nowcast dir'], dir)
     for linkname in sftp_client.listdir(links_dir):
         sftp_client.unlink(os.path.join(links_dir, linkname))
     logger.debug('{} symlinks cleared'.format(links_dir))

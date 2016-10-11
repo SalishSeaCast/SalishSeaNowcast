@@ -24,8 +24,6 @@ from unittest.mock import (
 import arrow
 import pytest
 
-import nowcast.lib
-
 
 @pytest.fixture
 def worker_module():
@@ -37,40 +35,38 @@ def worker_module():
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
+    def test_instantiate_worker(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('make_forcing_links',)
         assert list(kwargs.keys()) == ['description']
 
     def test_add_host_name_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('host_name',)
         assert 'help' in kwargs
 
     def test_add_run_type_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        assert kwargs['choices'] == set(
-            ('nowcast+', 'forecast2', 'ssh', 'nowcast-green'))
-        assert 'help' in kwargs
-
-    def test_add_run_date_arg(self, m_worker, worker_module):
-        worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[2]
-        assert args == ('--run-date',)
-        assert kwargs['type'] == nowcast.lib.arrow_date
-        assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
+        assert kwargs['choices'] == {
+            'nowcast+', 'forecast2', 'ssh', 'nowcast-green'}
         assert 'help' in kwargs
 
     def test_add_shared_storage_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[3]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ('--shared-storage',)
         assert kwargs['action'] == 'store_true'
+        assert 'help' in kwargs
+
+    def test_add_run_date_arg(self, m_worker, worker_module):
+        worker_module.main()
+        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
+        assert args == ('--run-date',)
+        assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker, worker_module):
@@ -94,7 +90,8 @@ class TestSuccess:
 
     def test_success_msg_type(self, worker_module):
         parsed_args = Mock(run_type='forecast2')
-        msg_type = worker_module.success(parsed_args)
+        with patch.object(worker_module.logger, 'info'):
+            msg_type = worker_module.success(parsed_args)
         assert msg_type == 'success forecast2'
 
 
@@ -109,7 +106,8 @@ class TestFailure:
 
     def test_failure_msg_type(self, worker_module):
         parsed_args = Mock(run_type='ssh')
-        msg_type = worker_module.failure(parsed_args)
+        with patch.object(worker_module.logger, 'critical'):
+            msg_type = worker_module.failure(parsed_args)
         assert msg_type == 'failure ssh'
 
 
@@ -122,9 +120,11 @@ class TestMakeRunoffLinks:
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         host_run_config = {
-            'nowcast_dir': 'nowcast-green/',
-            'rivers_dir': '/results/forcing/rivers/',
-            'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+            'forcing': {
+                'rivers dir': '/results/forcing/rivers/',
+                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+            },
+            'nowcast dir': 'nowcast-green/',
         }
         worker_module._make_runoff_links(
             m_sftp_client, host_run_config, run_date, 'salish-nowcast')
@@ -137,9 +137,11 @@ class TestMakeRunoffLinks:
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         host_run_config = {
-            'nowcast_dir': 'nowcast-green/',
-            'rivers_dir': '/results/forcing/rivers/',
-            'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+            'forcing': {
+                'rivers dir': '/results/forcing/rivers/',
+                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+            },
+            'nowcast dir': 'nowcast-green/',
         }
         worker_module._make_runoff_links(
             m_sftp_client, host_run_config, run_date, 'salish-nowcast')
@@ -154,10 +156,12 @@ class TestMakeRunoffLinks:
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         host_run_config = {
-            'nowcast_dir': 'nowcast-green/',
-            'rivers_dir': '/results/forcing/rivers/',
-            'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-            'rivers_bio_dir': 'NEMO-forcing/rivers/bio_climatology/',
+            'forcing': {
+                'rivers dir': '/results/forcing/rivers/',
+                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+                'rivers bio dir': 'NEMO-forcing/rivers/bio_climatology/',
+            },
+            'nowcast dir': 'nowcast-green/',
         }
         worker_module._make_runoff_links(
             m_sftp_client, host_run_config, run_date, 'salish-nowcast')
@@ -172,9 +176,11 @@ class TestMakeRunoffLinks:
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         host_run_config = {
-            'nowcast_dir': 'nowcast-green/',
-            'rivers_dir': '/results/forcing/rivers/',
-            'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+            'forcing': {
+                'rivers dir': '/results/forcing/rivers/',
+                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+            },
+            'nowcast dir': 'nowcast-green/',
         }
         worker_module._make_runoff_links(
             m_sftp_client, host_run_config, run_date, 'salish-nowcast')

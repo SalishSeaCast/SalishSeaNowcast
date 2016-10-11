@@ -99,6 +99,13 @@ Workers
     :members: main
 
 
+:kbd:`make_forcing_links`
+-------------------------
+
+.. automodule:: nowcast.workers.make_forcing_links
+    :members: main
+
+
 :kbd:`next_workers` Module
 ==========================
 
