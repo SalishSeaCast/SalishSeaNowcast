@@ -28,10 +28,13 @@ from nowcast import next_workers
 @pytest.fixture
 def config():
     return {
-        'run types': {'nowcast': {}, 'forecast': {}, 'forecast2': {}},
+        'run types': {
+            'nowcast': {}, 'nowcast-green': {},
+            'forecast': {}, 'forecast2': {}},
         'run': {
             'remote hosts': ['cloud host'],
             'cloud host': 'west.cloud',
+            'nowcast-green host': 'salish-nowcast',
         }
     }
 
@@ -138,6 +141,17 @@ class TestAfterGribToNetcdf:
         expected = NextWorker(
             'nowcast.workers.upload_forcing',
             args=['west.cloud', run_type], host='localhost')
+        assert expected in workers
+
+    def test_success_nowcastp_launch_make_forcing_links_nowcast_green(
+        self, config,
+    ):
+        workers = next_workers.after_grib_to_netcdf(
+            Message('grib_to_netcdf', 'success nowcast+'), config)
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['nowcast-green', '--shared-storage'],
+            host='localhost')
         assert expected in workers
 
 

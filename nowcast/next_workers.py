@@ -125,11 +125,19 @@ def after_grib_to_netcdf(msg, config):
         if host in config['run']:
             for msg_suffix, run_type in msg_run_type_mapping.items():
                 if run_type in config['run types']:
-                    next_workers['success {}'.format(msg_suffix)] = [
+                    next_workers['success {}'.format(msg_suffix)].append(
                         NextWorker(
                             'nowcast.workers.upload_forcing',
                             args=[config['run'][host], msg_suffix]),
-                    ]
+                    )
+    if all(
+        ('nowcast-green host' in config['run'],
+         'nowcast-green' in config['run types'])):
+        next_workers['success nowcast+'].append(
+            NextWorker(
+                'nowcast.workers.make_forcing_links',
+                args=['nowcast-green', '--shared-storage'])
+        )
     return next_workers[msg.type]
 
 
