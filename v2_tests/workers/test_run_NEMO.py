@@ -17,18 +17,18 @@
 """
 from __future__ import division
 
+import os
 from datetime import (
     date,
     timedelta,
 )
-import os
 
 import pytest
 
 
 @pytest.fixture()
 def run_NEMO_module():
-    from nowcast.workers import run_NEMO
+    from v2_nowcast.workers import run_NEMO
     return run_NEMO
 
 
