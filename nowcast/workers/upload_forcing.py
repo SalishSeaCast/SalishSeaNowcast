@@ -37,6 +37,12 @@ logger = logging.getLogger(NAME)
 
 
 def main():
+    """Set up and run the worker.
+
+    For command-line usage see:
+
+    :command:`python -m nowcast.workers.upload_forcing --help`
+    """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
