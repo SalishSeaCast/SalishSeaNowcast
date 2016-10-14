@@ -23,6 +23,7 @@ dependencies:
   - beautifulsoup4
   - bottleneck
   - circus
+  - cliff
   - matplotlib
   - netcdf4
   - numpy
