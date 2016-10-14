@@ -122,8 +122,9 @@ run:
       ssh dir: /home/ubuntu/MEOPAR/sshNeahBay/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /home/ubuntu/MEOPAR/rivers/
-      # Location on compute host of rivers runoff monthly climatology file
+      # Locations on compute host of rivers runoff monthly climatology files
       rivers_month.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+      rivers_temp.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/river_ConsTemp_month.nc
       # Directory on compute host where atomospheric forcing files are stored
       weather dir: /home/ubuntu/MEOPAR/GEM2.5/ops/NEMO-atmos/
       # Location on compute host of no_snow.nc constraint file
@@ -169,8 +170,9 @@ run:
       ssh dir: /results/forcing/sshNeahBay/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /results/forcing/rivers/
-      # Location on compute host of rivers runoff monthly climatology file
+      # Locations on compute host of rivers runoff monthly climatology files
       rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
+      rivers_temp.nc: /results/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
       # Directory on compute host where the rivers runoff daily tracers
       # climatology files are stored
       rivers bio dir: /results/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
@@ -220,8 +222,9 @@ run:
       ssh dir: /home/sallen/MEOPAR/sshNeahBay/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /home/sallen/MEOPAR/rivers/
-      # Location on compute host of rivers runoff monthly climatology file
+      # Locations on compute host of rivers runoff monthly climatology files
       rivers_month.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+      rivers_temp.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/river_ConsTemp_month.nc
       # Directory on compute host where atomospheric forcing files are stored
       weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
       # Location on compute host of no_snow.nc constraint file

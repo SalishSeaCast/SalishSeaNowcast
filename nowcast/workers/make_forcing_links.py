@@ -151,6 +151,11 @@ def _make_runoff_links(sftp_client, host_run_config, run_date, host_name):
     dest = os.path.join(
         host_run_config['nowcast dir'], 'rivers', os.path.basename(src))
     _create_symlink(sftp_client, host_name, src, dest)
+    if 'rivers_temp.nc' in host_run_config['forcing']:
+        src = host_run_config['forcing']['rivers_temp.nc']
+        dest = os.path.join(
+            host_run_config['nowcast dir'], 'rivers', os.path.basename(src))
+        _create_symlink(sftp_client, host_name, src, dest)
     if 'rivers bio dir' in host_run_config['forcing']:
         src = host_run_config['forcing']['rivers bio dir']
         dest = os.path.join(

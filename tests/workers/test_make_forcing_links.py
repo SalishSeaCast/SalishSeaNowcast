@@ -150,6 +150,26 @@ class TestMakeRunoffLinks:
             'NEMO-forcing/rivers/rivers_month.nc',
             'nowcast-green/rivers/rivers_month.nc')
 
+    def test_rivers_temp_link(
+        self, m_clear_links, m_create_symlink, worker_module,
+    ):
+        run_date = arrow.get('2016-10-14')
+        m_sftp_client = Mock(name='sftp_client')
+        host_run_config = {
+            'forcing': {
+                'rivers dir': '/results/forcing/rivers/',
+                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+                'rivers_temp.nc': 'NEMO-forcing/rivers/river_ConsTemp_month.nc',
+            },
+            'nowcast dir': 'nowcast-green/',
+        }
+        worker_module._make_runoff_links(
+            m_sftp_client, host_run_config, run_date, 'salish-nowcast')
+        assert m_create_symlink.call_args_list[1] == call(
+            m_sftp_client, 'salish-nowcast',
+            'NEMO-forcing/rivers/river_ConsTemp_month.nc',
+            'nowcast-green/rivers/river_ConsTemp_month.nc')
+
     def test_bio_climatology_link(
         self, m_clear_links, m_create_symlink, worker_module,
     ):
@@ -159,13 +179,14 @@ class TestMakeRunoffLinks:
             'forcing': {
                 'rivers dir': '/results/forcing/rivers/',
                 'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+                'rivers_temp.nc': 'NEMO-forcing/rivers/river_ConsTemp_month.nc',
                 'rivers bio dir': 'NEMO-forcing/rivers/bio_climatology/',
             },
             'nowcast dir': 'nowcast-green/',
         }
         worker_module._make_runoff_links(
             m_sftp_client, host_run_config, run_date, 'salish-nowcast')
-        assert m_create_symlink.call_args_list[1] == call(
+        assert m_create_symlink.call_args_list[2] == call(
             m_sftp_client, 'salish-nowcast',
             'NEMO-forcing/rivers/bio_climatology/',
             'nowcast-green/rivers/bio_climatology')
