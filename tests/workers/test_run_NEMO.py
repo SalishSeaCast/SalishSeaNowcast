@@ -34,6 +34,7 @@ def worker_module(scope='module'):
 @pytest.fixture
 def config(scope='function'):
     return {
+        'coordinates': 'NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc',
         'bathymetry': 'bathy_meter_SalishSea.nc',
         'run types': {
             'nowcast': {
@@ -506,7 +507,8 @@ class TestRunDescription:
         assert run_desc['paths'][path] == tmp_run_prep
 
     @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast', 'coordinates', 'coordinates_seagrid_SalishSea.nc'),
+        ('nowcast', 'coordinates',
+            'NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
     ])
     def test_grid_coordinates(
         self, run_type, path, expected, worker_module, config, run_date,
