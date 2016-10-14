@@ -310,6 +310,7 @@ def _run_description(
         forcing=forcing,
         namelists=namelists,
     )
+    run_desc['grid']['coordinates'] = config['coordinates']
     run_desc['grid']['bathymetry'] = config['run types'][run_type]['bathymetry']
     run_desc['output']['files'] = str((run_prep_dir/'iodef.xml').resolve())
     run_desc['output']['domain'] = str(
