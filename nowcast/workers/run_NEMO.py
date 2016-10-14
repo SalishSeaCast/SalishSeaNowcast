@@ -62,6 +62,13 @@ def main():
         'forecast2' means preliminary forecast run,
         ''',
     )
+    worker.cli.add_argument(
+        '--shared-storage', action='store_true',
+        help='''
+        If running on a machine (Salish) that directly accesses
+        the repo datafiles, copy the ssh files so that the nowcast
+        does not change the files while nowcast-green is running
+        ''')
     worker.cli.add_date_option(
         '--run-date', default=arrow.now().floor('day'),
         help='Date to execute the run for.')
@@ -121,8 +128,7 @@ def run_NEMO(parsed_args, config, tell_manager):
         pass
     watcher_process_pid = _launch_run_watcher(
         run_type, run_process_pid, host_name, config, tell_manager,
-        ## TODO: add shared-storage command-line arg
-        shared_storage=True)
+        shared_storage=parsed_args.shared_storage)
     return {run_type: {
         'host': host_name,
         'run dir': str(run_dir),

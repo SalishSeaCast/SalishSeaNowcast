@@ -222,7 +222,8 @@ def after_make_forcing_links(msg, config):
             next_workers[msg.type] = [
                 NextWorker(
                     'nowcast.workers.run_NEMO',
-                    args=[host_name, run_type], host=host_name),
+                    args=[host_name, run_type, '--shared-storage'],
+                    host=host_name),
             ]
     return next_workers[msg.type]
 
