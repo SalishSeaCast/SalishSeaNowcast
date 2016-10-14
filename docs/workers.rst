@@ -106,6 +106,13 @@ Workers
     :members: main
 
 
+:kbd:`run_NEMO`
+---------------
+
+.. automodule:: nowcast.workers.run_NEMO
+    :members: main
+
+
 :kbd:`next_workers` Module
 ==========================
 

@@ -78,18 +78,22 @@ run types:
     config name: SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
+    duration: 1  # day
   nowcast-green:
     config name:  SOG
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    duration: 1  # day
   forecast:
     config name:  SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
+    duration: 1.25  # days
   forecast2:
     config name:  SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
+    duration: 1.25  # days
 
 
 results archive:
@@ -163,6 +167,26 @@ run:
     # Directory on compute host where run configuration, forcing links, etc.
     # are stored
     nowcast dir: /data/dlatorne/MEOPAR/nowcast-green/
+    # Directories on compute host where results are stored, keyed by run type
+    results:
+      # Note that salish has shared storage with the nowcast system results
+      # archives
+      nowcast-green: /results/SalishSea/nowcast-green/
+    # Directory on compute host where files (e.g. namelist.time) and symlinks
+    # (e,g. iodef.xml) necessary to prepare the NEMO runs are stored
+    # TODO: Can this and `nowcast dir` be merged; see issue #11
+    run prep dir: /results/nowcast-sys/runs/
+    # How is the domain to be distributed over the processors in the
+    # i (longitude) and j (latitude) directions?
+    mpi decomposition: 1x7
+    # Wall-clock time requested for the run. It limits the time that the job
+    # will run for on all machines, and it also affects queue priority for
+    # runs on Westgrid machines.
+    walltime: 23:30:00
+    # Path to the salishsea command processor executable to use in the run
+    # script
+    salishsea_cmd: /results/nowcast-sys/nemo_nowcast-env/bin/salishsea
+
 
   # If the `hpc host` key is present, the forcing files will be uploaded
   # to the HPC cluster and the symlinks created ready for the runs to be
@@ -351,3 +375,11 @@ message registry:
       success nowcast-green: forcing file links for nowcast-green created
       failure nowcast-green: forcing file links for nowcast-green failed
       crash: make_forcing_links worker crashed
+    run_NEMO:
+      log.debug: debug level logging message
+      log.info: info level logging message
+      log.error: error level logging message
+      need: NEMO run information dict requested
+      success: NEMO run started
+      failure: NEMO run failed
+      crash: run_NEMO worker crashed

@@ -34,7 +34,7 @@ def config():
         'run': {
             'remote hosts': ['cloud host'],
             'cloud host': 'west.cloud',
-            'nowcast-green host': 'salish-nowcast',
+            'nowcast-green host': 'salish',
         }
     }
 
@@ -94,7 +94,7 @@ class TestAfterMakeRunoffFile:
         'failure',
         'success',
     ])
-    def test_no_next_worker_msg_types(self, msg_type):
+    def test_no_next_worker_msg_types(self, msg_type, config):
         workers = next_workers.after_make_runoff_file(
             Message('make_runoff_file', msg_type), config)
         assert workers == []
@@ -112,7 +112,7 @@ class TestAfterGetNeahBaySsh:
         'success forecast',
         'success forecast2',
     ])
-    def test_no_next_worker_msg_types(self, msg_type):
+    def test_no_next_worker_msg_types(self, msg_type, config):
         workers = next_workers.after_get_NeahBay_ssh(
             Message('get_NeahBay_ssh', msg_type), config)
         assert workers == []
@@ -167,12 +167,12 @@ class TestAfterUploadForcing:
         'success forecast2',
         'success ssh',
     ])
-    def test_no_next_worker_msg_types(self, msg_type):
+    def test_no_next_worker_msg_types(self, msg_type, config):
         workers = next_workers.after_upload_forcing(
             Message('upload_forcing', msg_type), config)
         assert workers == []
 
-    def test_msg_payload_missing_host_name(self):
+    def test_msg_payload_missing_host_name(self, config):
         workers = next_workers.after_upload_forcing(
             Message('upload_forcing', 'crash'), config)
         assert workers == []
@@ -203,12 +203,39 @@ class TestAfterMakeForcingLinks:
         'failure nowcast-green',
         'failure forecast2',
         'failure ssh',
-        'success nowcast+',
-        'success nowcast-green',
-        'success forecast2',
-        'success ssh',
     ])
-    def test_no_next_worker_msg_types(self, msg_type):
+    def test_no_next_worker_msg_types(self, msg_type, config):
         workers = next_workers.after_make_forcing_links(
             Message('make_forcing_links', msg_type), config)
+        assert workers == []
+
+    @pytest.mark.parametrize('msg_type, run_type, host_name', [
+        ('success nowcast+', 'nowcast', 'west.cloud'),
+        ('success nowcast-green', 'nowcast-green', 'salish'),
+        ('success ssh', 'forecast', 'west.cloud'),
+        ('success forecast2', 'forecast2', 'west.cloud'),
+    ])
+    def test_success_launch_run_NEMO(
+        self, msg_type, run_type, host_name, config,
+    ):
+        workers = next_workers.after_make_forcing_links(
+            Message('make_forcing_links', msg_type, payload={host_name: ''}),
+            config)
+        expected = NextWorker(
+            'nowcast.workers.run_NEMO',
+            args=[host_name, run_type], host=host_name)
+        assert expected in workers
+
+
+class TestAfterRunNEMO:
+    """Unit tests for the after_run_NEMO function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config):
+        workers = next_workers.after_run_NEMO(
+            Message('run_NEMO', msg_type), config)
         assert workers == []
