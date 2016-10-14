@@ -134,6 +134,23 @@ run:
     # Directory on compute host where run configuration, forcing links, etc.
     # are stored
     nowcast dir: /home/ubuntu/MEOPAR/nowcast/
+    # Directories on compute host where results are stored, keyed by run type
+    results:
+      # Note that salish has shared storage with the nowcast system results
+      # archives
+      nowcast: /home/ubuntu/MEOPAR/SalishSea/nowcast/
+      forecast: /home/ubuntu/MEOPAR/SalishSea/forecast/
+      forecast2: /home/ubuntu/MEOPAR/SalishSea/forecast2/
+    # Directory on compute host where files (e.g. namelist.time) and symlinks
+    # (e,g. iodef.xml) necessary to prepare the NEMO runs are stored
+    # TODO: Can this and `nowcast dir` be merged; see issue #11
+    run prep dir: /home/ubuntu/MEOPAR/nowcast/
+    # How is the domain to be distributed over the processors in the
+    # i (longitude) and j (latitude) directions?
+    mpi decomposition: 8x17
+    # Path to the salishsea command processor executable to use in the run
+    # script
+    salishsea_cmd: /home/ubuntu/.local/bin/salishsea
 
   # If the `nowcast-green host` key is present, the forcing files will be
   # symlinked and the nowcast-green run will be executed on it automatically.
@@ -215,6 +232,14 @@ run:
     # Directory on compute host where run configuration, forcing links, etc.
     # are stored
     nowcast dir: /home/sallen/MEOPAR/nowcast/
+    # Directories on compute host where results are stored, keyed by run type
+    results:
+      # Note that salish has shared storage with the nowcast system results
+      # archives
+      nowcast: /home/sallen/MEOPAR/SalishSea/nowcast/
+      nowcast-green: /home/sallen/MEOPAR/SalishSea/nowcast-green/
+      forecast: /home/dlatorne/MEOPAR/SalishSea/forecast/
+      forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
 
 
 # Logging system configuration
