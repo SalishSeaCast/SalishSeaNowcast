@@ -350,17 +350,18 @@ def _build_script(run_dir, run_desc_filepath, results_dir, host_run_config):
     xios_processors = int(run_desc['output']['XIOS servers'])
     email = host_run_config.get('email', 'nobody@example.com')
     script = u'#!/bin/bash\n'
+    if host_run_config['job exec cmd'] == 'qsub':
+        script = u'\n'.join((script, u'{pbs_common}'.format(
+            pbs_common=salishsea_cmd.api.pbs_common(
+                run_desc, nemo_processors + xios_processors, email,
+                results_dir))))
     script = u'\n'.join((
         script,
-        u'{pbs_common}\n'
         u'{defns}\n'
         u'{execute}\n'
         u'{fix_permissions}\n'
         u'{cleanup}'
         .format(
-            pbs_common=salishsea_cmd.api.pbs_common(
-                run_desc, nemo_processors + xios_processors, email,
-                results_dir),
             defns=_definitions(
                 run_desc, run_desc_filepath, run_dir, results_dir,
                 host_run_config),
