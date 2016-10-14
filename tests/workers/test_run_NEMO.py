@@ -161,7 +161,14 @@ class TestMain:
             'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
-    def test_add_run_date_arg(self, m_worker, worker_module):
+    def test_add_shared_storage_option(self, m_worker, worker_module):
+        worker_module.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
+        assert args == ('--shared-storage',)
+        assert kwargs['action'] == 'store_true'
+        assert 'help' in kwargs
+
+    def test_add_run_date_option(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--run-date',)

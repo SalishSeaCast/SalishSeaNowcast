@@ -209,21 +209,21 @@ class TestAfterMakeForcingLinks:
             Message('make_forcing_links', msg_type), config)
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type, run_type, host_name', [
-        ('success nowcast+', 'nowcast', 'west.cloud'),
-        ('success nowcast-green', 'nowcast-green', 'salish'),
-        ('success ssh', 'forecast', 'west.cloud'),
-        ('success forecast2', 'forecast2', 'west.cloud'),
+    @pytest.mark.parametrize('msg_type, args, host_name', [
+        ('success nowcast+', ['west.cloud', 'nowcast'], 'west.cloud'),
+        ('success nowcast-green',
+            ['salish', 'nowcast-green', '--shared-storage'], 'salish'),
+        ('success ssh', ['west.cloud', 'forecast'], 'west.cloud'),
+        ('success forecast2', ['west.cloud', 'forecast2'], 'west.cloud'),
     ])
     def test_success_launch_run_NEMO(
-        self, msg_type, run_type, host_name, config,
+        self, msg_type, args, host_name, config,
     ):
         workers = next_workers.after_make_forcing_links(
             Message('make_forcing_links', msg_type, payload={host_name: ''}),
             config)
         expected = NextWorker(
-            'nowcast.workers.run_NEMO',
-            args=[host_name, run_type], host=host_name)
+            'nowcast.workers.run_NEMO', args=args, host=host_name)
         assert expected in workers
 
 
