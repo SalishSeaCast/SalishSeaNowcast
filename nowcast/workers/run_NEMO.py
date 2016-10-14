@@ -24,37 +24,34 @@ import shlex
 import subprocess
 
 import arrow
-import yaml
-
-import salishsea_cmd.api
-from salishsea_tools.namelist import namelist2dict
-
-from nowcast import lib
-from nowcast.nowcast_worker import (
+from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
+import salishsea_cmd.api
+from salishsea_tools.namelist import namelist2dict
+import yaml
+
+from nowcast import lib
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
-
-
-RUN_DURATIONS = {
-    # run-type: days
-    'nowcast': 1,
-    'nowcast-green': 1,
-    'forecast': 1.25,
-    'forecast2': 1.25,
-}
+NAME = 'run_NEMO'
+logger = logging.getLogger(NAME)
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
+    """Set up and run the worker.
+
+    For command-line usage see:
+
+    :command:`python -m nowcast.workers.run_NEMO --help`
+    """
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'host_name',
         help='Name of the host to execute the run on')
-    worker.arg_parser.add_argument(
+    worker.cli.add_argument(
         'run_type',
         choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
         help='''
@@ -65,15 +62,9 @@ def main():
         'forecast2' means preliminary forecast run,
         ''',
     )
-    salishsea_today = arrow.now('Canada/Pacific').floor('day')
-    worker.arg_parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=salishsea_today,
-        help='''
-        Date to execute the run for; use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_today.format('YYYY-MM-DD')),
-    )
+    worker.cli.add_date_option(
+        '--run-date', default=arrow.now().floor('day'),
+        help='Date to execute the run for.')
     worker.run(run_NEMO, success, failure)
 
 
@@ -157,13 +148,14 @@ def _create_run_desc_file(run_date, run_type, host_name, config, tell_manager):
         'forecast': run_date.replace(days=1),
         'forecast2': run_date.replace(days=2),
     }
+    run_duration = config['run types'][run_type]['duration']
     host_run_config = config['run'][host_name]
-    run_prep_dir = Path(host_run_config['run_prep_dir'])
     restart_timestep = _update_time_namelist(
-        run_date, run_type, host_run_config)
+        run_date, run_type, run_duration, host_run_config)
     run_desc = _run_description(
         run_days[run_type], run_type, run_id, restart_timestep, host_name,
         config, tell_manager)
+    run_prep_dir = Path(host_run_config['run prep dir'])
     run_desc_filepath = run_prep_dir/'{}.yaml'.format(run_id)
     with run_desc_filepath.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
@@ -173,7 +165,7 @@ def _create_run_desc_file(run_date, run_type, host_name, config, tell_manager):
     return run_desc_filepath
 
 
-def _update_time_namelist(run_date, run_type, host_run_config):
+def _update_time_namelist(run_date, run_type, run_duration, host_run_config):
     prev_runs = {
         # run-type: based-on run-type, date offset
         'nowcast': ('nowcast', -1),
@@ -189,23 +181,23 @@ def _update_time_namelist(run_date, run_type, host_run_config):
     prev_itend = prev_run_namelist['namrun'][0]['nn_itend']
     rdt = prev_run_namelist['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
-    namelist_time = Path(host_run_config['run_prep_dir'], 'namelist.time')
+    namelist_time = Path(host_run_config['run prep dir'], 'namelist.time')
     with namelist_time.open('rt') as f:
         lines = f.readlines()
     new_lines, restart_timestep = _calc_new_namelist_lines(
-        run_date, run_type, prev_it000, prev_itend, timesteps_per_day, lines)
+        run_date, run_type, run_duration, prev_it000, prev_itend,
+        timesteps_per_day, lines)
     with namelist_time.open('wt') as f:
         f.writelines(new_lines)
     return restart_timestep
 
 
 def _calc_new_namelist_lines(
-    run_date, run_type, prev_it000, prev_itend, timesteps_per_day,
+    run_date, run_type, run_duration, prev_it000, prev_itend, timesteps_per_day,
     lines,
 ):
     it000_line, it000 = _get_namelist_value('nn_it000', lines)
     itend_line, itend = _get_namelist_value('nn_itend', lines)
-    run_duration = RUN_DURATIONS[run_type]
     new_it000 = (
         int(prev_it000 + (prev_itend - prev_it000 + 1) / run_duration)
         if run_type == 'forecast2'
@@ -264,17 +256,18 @@ def _run_description(
                     'SalishSea_{:08d}_restart_trc.nc'.format(restart_timestep))
                 .resolve())
             }
-    run_prep_dir = Path(host_run_config['run_prep_dir'])
-    NEMO_config_name = config['run_types'][run_type]['config name']
+    run_prep_dir = Path(host_run_config['run prep dir'])
+    NEMO_config_name = config['run types'][run_type]['config name']
     walltime = host_run_config.get('walltime')
-    nowcast_dir = Path(host_run_config['nowcast_dir'])
+    nowcast_dir = Path(host_run_config['nowcast dir'])
     forcing = {
         'NEMO-atmos': {
             'link to': str((nowcast_dir/'NEMO-atmos').resolve()),
             'check link': {
                 'type': 'atmospheric',
                 'namelist filename': 'namelist_cfg',
-            }},
+            }
+        },
         'open_boundaries': {
             'link to': str((nowcast_dir/'open_boundaries/').resolve())},
         'rivers': {
@@ -311,10 +304,7 @@ def _run_description(
         forcing=forcing,
         namelists=namelists,
     )
-    try:
-        run_desc['grid']['bathymetry'] = host_run_config['bathymetry']
-    except KeyError:
-        run_desc['grid']['bathymetry'] = config['bathymetry']
+    run_desc['grid']['bathymetry'] = config['run types'][run_type]['bathymetry']
     run_desc['output']['files'] = str((run_prep_dir/'iodef.xml').resolve())
     run_desc['output']['domain'] = str(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')

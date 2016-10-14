@@ -203,4 +203,42 @@ def after_make_forcing_links(msg, config):
         'success forecast2': [],
         'success ssh': [],
     }
+    if msg.type.startswith('success'):
+        run_type = {
+            'nowcast+': 'nowcast',
+            'nowcast-green': 'nowcast-green',
+            'ssh': 'forecast',
+            'forecast2': 'forecast2',
+        }[msg.type.split()[1]]
+        host_name = config['run']['cloud host']
+        if 'cloud host' in config['run'] and host_name in msg.payload:
+            next_workers[msg.type] = [
+                NextWorker(
+                    'nowcast.workers.run_NEMO',
+                    args=[host_name, run_type], host=host_name),
+            ]
+        host_name = config['run']['nowcast-green host']
+        if 'nowcast-green host' in config['run'] and host_name in msg.payload:
+            next_workers[msg.type] = [
+                NextWorker(
+                    'nowcast.workers.run_NEMO',
+                    args=[host_name, run_type], host=host_name),
+            ]
+    return next_workers[msg.type]
+
+
+def after_run_NEMO(msg, config):
+    """Calculate the list of workers to launch after the run_NEMO worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure': [],
+        'success': [],
+    }
     return next_workers[msg.type]

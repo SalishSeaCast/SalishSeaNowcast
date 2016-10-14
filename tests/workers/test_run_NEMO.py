@@ -24,50 +24,52 @@ from unittest.mock import (
 import arrow
 import pytest
 
-import nowcast.lib
-
 
 @pytest.fixture
 def worker_module(scope='module'):
-    from nowcast.workers import run_NEMO36
-    return run_NEMO36
+    from nowcast.workers import run_NEMO
+    return run_NEMO
 
 
 @pytest.fixture
 def config(scope='function'):
     return {
         'bathymetry': 'bathy_meter_SalishSea.nc',
-        'run_types': {
+        'run types': {
             'nowcast': {
                 'config name': 'SalishSea',
                 'bathymetry':
                     '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc'},
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc',
+                'duration': 1},
             'nowcast-green': {
                 'config name': 'SOG',
                 'bathymetry':
                     '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc'},
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc',
+                'duration': 1},
             'forecast': {
                 'config name': 'SalishSea',
                 'bathymetry':
                     '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc'},
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc',
+                'duration': 1.25},
             'forecast2': {
                 'config name': 'SalishSea',
                 'bathymetry':
                     '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc'},
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc',
+                'duration': 1.25},
         },
         'run': {
             'salish': {
-                'run_prep_dir': '/results/nowcast-sys/nowcast-prep',
+                'run prep dir': '/results/nowcast-sys/nowcast-prep',
                 'mpi decomposition': '3x5',
-                'nowcast_dir': '/results/nowcast-sys/nowcast',
+                'nowcast dir': '/results/nowcast-sys/nowcast',
                 'results': {
                     'nowcast': 'results/SalishSea/nowcast',
                     'nowcast-green': '/results/SalishSea/nowcast-green/',
@@ -124,8 +126,8 @@ def tmp_results(tmpdir, run_date, scope='function'):
     for dir in ('NEMO-atmos', 'open_boundaries', 'rivers'):
         tmp_nowcast.ensure_dir(dir)
     return {
-        'run_prep_dir': tmp_run_prep,
-        'nowcast_dir': tmp_nowcast,
+        'run prep dir': tmp_run_prep,
+        'nowcast dir': tmp_nowcast,
         'results': {
             'nowcast': tmp_results.ensure_dir('SalishSea', 'nowcast'),
             'nowcast-green':
@@ -139,22 +141,21 @@ def tmp_results(tmpdir, run_date, scope='function'):
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
+    def test_instantiate_worker(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('run_NEMO',)
         assert list(kwargs.keys()) == ['description']
 
     def test_add_host_name_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('host_name',)
         assert 'help' in kwargs
 
     def test_add_run_type_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
@@ -162,10 +163,9 @@ class TestMain:
 
     def test_add_run_date_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[2]
+        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--run-date',)
-        assert kwargs['type'] == nowcast.lib.arrow_date
-        assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
+        assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker, worker_module):
@@ -191,7 +191,8 @@ class TestSuccess:
     def test_success_msg_type(self, worker_module):
         parsed_args = Mock(
             run_type='forecast2', run_date=arrow.get('2015-12-28'))
-        msg_type = worker_module.success(parsed_args)
+        with patch.object(worker_module.logger, 'info'):
+            msg_type = worker_module.success(parsed_args)
         assert msg_type == 'success forecast2'
 
 
@@ -208,7 +209,8 @@ class TestFailure:
     def test_failure_msg_type(self, worker_module):
         parsed_args = Mock(
             run_type='forecast2', run_date=arrow.get('2015-12-28'))
-        msg_type = worker_module.failure(parsed_args)
+        with patch.object(worker_module.logger, 'critical'):
+            msg_type = worker_module.failure(parsed_args)
         assert msg_type == 'failure forecast2'
 
 
@@ -216,20 +218,20 @@ class TestCalcNewNamelistLines:
     """Unit tests for _calc_new_namelist_lines() function.
     """
     @pytest.mark.parametrize(
-        'run_type, run_date, prev_itend, dt_per_day, it000, itend, date0, '
-        'restart', [
-            ('nowcast', arrow.get('2015-12-30'), 2160, 2160, 2161, 4320,
+        'run_type, run_date, run_duration, prev_itend, dt_per_day, it000,'
+        'itend, date0, restart', [
+            ('nowcast', arrow.get('2015-12-30'), 1, 2160, 2160, 2161, 4320,
                 '20151230', 2160),
-            ('nowcast-green', arrow.get('2015-12-30'), 2160, 2160, 2161, 4320,
+            ('nowcast-green', arrow.get('2015-12-30'), 1, 2160, 2160, 2161, 4320,
                 '20151230', 2160),
-            ('forecast', arrow.get('2015-12-30'), 2160, 2160, 2161, 4860,
+            ('forecast', arrow.get('2015-12-30'), 1.25, 2160, 2160, 2161, 4860,
                 '20151230', 2160),
-            ('forecast2', arrow.get('2015-12-30'), 2700, 2160, 2161, 4860,
+            ('forecast2', arrow.get('2015-12-30'), 1.25, 2700, 2160, 2161, 4860,
                 '20151230', 2160),
         ])
     def test_calc_new_namelist_lines(
-        self, run_date, run_type, prev_itend, dt_per_day, it000, itend, date0,
-        restart, worker_module,
+        self, run_date, run_type, run_duration, prev_itend, dt_per_day, it000,
+        itend, date0, restart, worker_module,
     ):
         lines = [
             '  nn_it000 = 1\n',
@@ -237,7 +239,7 @@ class TestCalcNewNamelistLines:
             '  nn_date0 = 20160102\n',
         ]
         new_lines, restart_timestep = worker_module._calc_new_namelist_lines(
-            run_date, run_type, 1, prev_itend, dt_per_day, lines)
+            run_date, run_type, run_duration, 1, prev_itend, dt_per_day, lines)
         assert new_lines == [
             '  nn_it000 = {}\n'.format(it000),
             '  nn_itend = {}\n'.format(itend),
@@ -285,10 +287,11 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type='nowcast')
         with patch.dict(config['run']['salish'], results={}):
-            with pytest.raises(worker_module.WorkerError):
-                worker_module._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+            with patch.object(worker_module.logger, 'log'):
+                with pytest.raises(worker_module.WorkerError):
+                    worker_module._run_description(
+                        run_date, 'nowcast', run_id, 2160, 'salish', config,
+                        Mock(name='tell_manager'))
 
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast', 'SalishSea'),
@@ -307,10 +310,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -338,10 +341,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -366,10 +369,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -394,10 +397,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -423,10 +426,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -453,10 +456,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -481,10 +484,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -509,38 +512,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
-        assert run_desc['grid'][path] == expected
-
-    @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast', 'bathymetry', 'bathy_meter_SalishSea.nc'),
-    ])
-    def test_grid_bathymetry_default(
-        self, run_type, path, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        p_config_results = patch.dict(
-            config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
-        p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -554,7 +529,7 @@ class TestRunDescription:
     @pytest.mark.parametrize('run_type, path, expected', [
         ('nowcast-green', 'bathymetry', 'bathy_meter_SalishSea6.nc'),
     ])
-    def test_grid_bathymetry_run_type(
+    def test_grid_bathymetry(
         self, run_type, path, expected, worker_module, config, run_date,
         tmp_results, tmpdir,
     ):
@@ -565,16 +540,16 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                with patch.dict(config['run']['salish'], bathymetry=expected):
+                with patch.dict(config['run types'][run_type], bathymetry=expected):
                     run_desc = worker_module._run_description(
                         run_date, run_type, run_id, 2160, 'salish', config,
                         Mock(name='tell_manager'))
@@ -596,10 +571,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -608,7 +583,7 @@ class TestRunDescription:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'))
-        tmp_nowcast_dir = tmp_results['nowcast_dir']
+        tmp_nowcast_dir = tmp_results['nowcast dir']
         expected = tmp_nowcast_dir.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
 
@@ -628,10 +603,10 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -658,10 +633,10 @@ class TestRunDescription:
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -684,10 +659,10 @@ class TestRunDescription:
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
@@ -747,10 +722,10 @@ class TestRunDescription:
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            nowcast_dir=str(tmp_results['nowcast_dir']))
-        tmp_run_prep = tmp_results['run_prep_dir']
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish'], run_prep_dir=str(tmp_run_prep))
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch.object(worker_module.Path, 'cwd') as m_cwd:
