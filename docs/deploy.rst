@@ -36,10 +36,13 @@ Clone the following repos into :file:`/results/nowcast-sys/`:
 
 * `NEMO_Nowcast`_
 * `SalishSeaNowcast`_
+* :ref:`tools-repo`
 * :ref:`private-tools-repo`
+* :ref:`NEMO-forcing-repo`
+* :ref:`NEMO-3.6-code-repo`
+* :ref:`XIOS-repo`
+* :ref:`salishsea-site-repo`
 
-.. * :ref:`tools-repo`
-.. * :ref:`NEMO-forcing-repo`
 
 .. _NEMO_Nowcast: https://bitbucket.org/43ravens/nemo_nowcast
 
@@ -52,6 +55,20 @@ Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
         /results/nowcast-sys/private-tools/grib2/wgrib2/
 
 
+Build XIOS
+==========
+
+.. TODO::
+    Write this section.
+
+
+Build NEMO-3.6
+==============
+
+.. TODO::
+    Write this section.
+
+
 Python Packages
 ===============
 
@@ -61,14 +78,18 @@ The Python packages that the system depends on are installed in a conda environm
 
     $ cd /results/nowcast-sys/
     $ conda update conda
-    $ conda create --channel gomss-nowcast --prefix /results/nowcast-sys/nemo_nowcast-env \
-        arrow attrs bottleneck circus matplotlib netcdf4 numpy pandas paramiko \
-        pip python=3 pyyaml pyzmq requests retrying schedule scipy xarray
+    $ conda create \
+        --prefix /results/nowcast-sys/nemo_nowcast-env \
+        --channel gomss-nowcast --channel defaults --channel conda-forge \
+        arrow attrs beautifulsoup4 bottleneck circus cliff matplotlib netcdf4 \
+        numpy pandas paramiko pip python=3 pyyaml pyzmq retrying requests \
+        schedule scipy xarray
     $ source activate /results/nowcast-sys/nemo_nowcast-env
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install angles raven driftwood
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install angles driftwood raven
     (/results/nowcast-sys/nemo_nowcast-env)$ cd /results/nowcast-sys/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaCmd/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaNowcast/
 
 
@@ -105,6 +126,45 @@ and :command:`unset` them when it is deactivated.
     EOF
 
 
+Nowcast Runs Directories
+========================
+
+On the hosts where the nowcast system NEMO runs will be executed create a :file:`runs` directory and populate it with:
+
+.. code-block:: bash
+
+    $ chmod g+ws runs
+    $ cd runs/
+    $ mkdir -p NEMO-atmos open_boundaries/west/ssh rivers
+    $ chmod -R g+s NEMO-atmos open_boundaries rivers
+    $ ln -s ../NEMO-forcing/atmospheric/no_snow.nc NEMO-atmos/
+    $ ln -s ../NEMO-forcing/grid/weights-gem2.5-ops.nc NEMO-atmos/
+    $ ln -s ../NEMO-forcing/open_boundaries/north open_boundaries/
+    $ ln -s ../NEMO-forcing/open_boundaries/west/SalishSea2_Masson_corrected.nc open_boundaries/west/
+    $ ln -s ../NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc open_boundaries/west/
+    $ ln -s ../NEMO-forcing/open_boundaries/west/tides open_boundaries/west/
+    $ ln -s ../NEMO-forcing/rivers/bio_climatology rivers/
+    $ ln -s ../NEMO-forcing/rivers/river_ConsTemp_month.nc rivers/
+    $ ln -s ../NEMO-forcing/rivers/rivers_month.nc rivers/
+    $ cp ../SS-run-sets/SalishSea/nemo3.6/namelist.time ./
+    $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/iodef.xml
+
+The above :command:`ln -s` commands assume that there is a clone of the :ref:`NEMO-forcing-repo` beside the directory where the links are being created.
+If the clone of the :ref:`NEMO-forcing-repo` is elsewhere,
+adjust the link paths accordingly.
+
+The hosts and their :file:`runs` directories presently in use are:
+
+* :kbd:`west.cloud`
+    :file:`/home/ubuntu/MEOPAR/nowcast-sys/runs/`
+
+* :kbd:`orcinus`
+    :file:`/home/sallen/MEOPAR/nowcast/`
+
+* :kbd:`salish`
+    :file:`/results/nowcast-sys/runs/`
+
+
 Static Web Pages Directory
 ==========================
 
@@ -121,6 +181,13 @@ Static Web Pages Directory
     $ cd $HOME/public_html/MEOPAR/nowcast/www/
     $ ln -s /results/nowcast-sys/tools/SalishSeaNowcast/www/templates
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site
+
+
+:command:`ssh` Hosts and Keys Configuration
+===========================================
+
+.. TODO::
+    Write this section.
 
 
 Cold Start
@@ -176,36 +243,3 @@ A few that are useful:
 * :kbd:`quit` to stop all of the processes and shutdown :command:`circusd`
 
 Use :kbd:`ctrl-c` to exit from :command:`circusctl`.
-
-
-Nowcast Run Directories
-=======================
-
-On the hosts where the nowcast system NEMO runs will be executed create a :file:`nowcast` directory and populate it with:
-
-.. code-block:: bash
-
-    $ mkdir -p NEMO-atmos open_boundaries/west/ssh rivers
-    $ chmod -R g+s NEMO-atmos open_boundaries rivers
-    $ ln -s ../NEMO-forcing/atmospheric/no_snow.nc
-    $ ln -s ../NEMO-forcing/grid/weights-gem2.5-ops.nc
-    $ ln -s ../NEMO-forcing/open_boundaries/north
-    $ ln -s ../NEMO-forcing/open_boundaries/west/SalishSea2_Masson_corrected.nc
-    $ ln -s ../NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc
-    $ ln -s ../NEMO-forcing/open_boundaries/west/tides
-    $ ln -s ../NEMO-forcing/rivers/rivers_month.nc
-
-The above :command:`ln -s` commands assume that there is a clone of the :ref:`NEMO-forcing-repo` beside the directory where the links are being created.
-If the clone of the :ref:`NEMO-forcing-repo` is elsewhere,
-adjust the link paths accordingly.
-
-The hosts and their :file:`nowcast` directories presently in use are:
-
-* :kbd:`west.cloud`
-    :file:`/home/ubuntu/MEOPAR/nowcast/`
-
-* :kbd:`ocrinus`
-    :file:`/home/sallen/MEOPAR/nowcast/`
-
-* :kbd:`salish`
-    :file:`/data/dlatorne/MEOPAR/nowcast-green/`
