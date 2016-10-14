@@ -50,6 +50,7 @@ install_requires = [
     'angles',
     'beautifulsoup4',
     'bottleneck',
+    'cliff',
     'driftwood',
     'matplotlib',
     'nemo_nowcast',
@@ -64,6 +65,7 @@ install_requires = [
 
     # 'NEMO_Nowcast',  # use pip install --editable NEMO_Nowcast/
     # 'SalishSeaTools',  # use pip install --editable SalishSeaTools/
+    # 'SalishSeaTools',  # use pip install --editable SalishSeaCmd/
     # 'SalishSeaNowcast',  # use pip install -e SalishSeaNowcast/
 ]
 
