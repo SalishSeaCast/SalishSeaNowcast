@@ -205,6 +205,10 @@ run:
     # Path to the salishsea command processor executable to use in the run
     # script
     salishsea_cmd: /results/nowcast-sys/nemo_nowcast-env/bin/salishsea
+    # Email address to which to send notifications of the beginning and
+    # end of execution of the run, as well as notification of abnormal abort
+    # messages.
+    email: sallen@eos.ubc.ca
 
 
   # If the `hpc host` key is present, the forcing files will be uploaded
