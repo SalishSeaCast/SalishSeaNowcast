@@ -35,7 +35,6 @@ def worker_module(scope='module'):
 def config(scope='function'):
     return {
         'coordinates': 'NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc',
-        'bathymetry': 'bathy_meter_SalishSea.nc',
         'run types': {
             'nowcast': {
                 'config name': 'SalishSea',
