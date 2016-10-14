@@ -152,6 +152,8 @@ run:
     # Path to the salishsea command processor executable to use in the run
     # script
     salishsea_cmd: /home/ubuntu/.local/bin/salishsea
+    # Executable to use to submit the SalishSeaNEMO.sh script to be run
+    job exec cmd: bash
 
   # If the `nowcast-green host` key is present, the forcing files will be
   # symlinked and the nowcast-green run will be executed on it automatically.
@@ -209,6 +211,8 @@ run:
     # end of execution of the run, as well as notification of abnormal abort
     # messages.
     email: sallen@eos.ubc.ca
+    # Executable to use to submit the SalishSeaNEMO.sh script to be run
+    job exec cmd: qsub
 
 
   # If the `hpc host` key is present, the forcing files will be uploaded
