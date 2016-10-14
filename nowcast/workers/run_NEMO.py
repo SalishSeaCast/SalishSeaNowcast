@@ -280,24 +280,26 @@ def _run_description(
             'link to': str((nowcast_dir/'rivers/').resolve())},
     }
     forcing.update(restart_filepaths)
-    run_sets_dir = run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/'
-    namelists = {
-        'namelist_cfg': [
-            str((run_prep_dir/'namelist.time').resolve()),
-            str((run_sets_dir/'nowcast/namelist.domain').resolve()),
-            str((run_sets_dir/'nowcast/namelist.surface').resolve()),
-            str((run_sets_dir/'nowcast/namelist.lateral').resolve()),
-            str((run_sets_dir/'nowcast/namelist.bottom').resolve()),
-            str((run_sets_dir/'nowcast/namelist.tracer').resolve()),
-            str((run_sets_dir/'nowcast/namelist.dynamics').resolve()),
-            str((run_sets_dir/'nowcast/namelist.vertical').resolve()),
-            str((run_sets_dir/'nowcast/namelist.compute').resolve()),
-        ],
-        'namelist_top_cfg': [
-            str((run_sets_dir/'nowcast/namelist_top_cfg').resolve())],
-        'namelist_pisces_cfg': [
-            str((run_sets_dir/'nowcast/namelist_pisces_cfg').resolve())],
-    }
+    run_sets_dir = run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast'
+    namelist_sections = (
+        'namelist.time', 'namelist.domain', 'namelist.surface',
+        'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
+        'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
+    )
+    namelists = {'namelist_cfg': []}
+    for namelist in namelist_sections:
+        if (run_prep_dir/namelist).exists():
+            namelists['namelist_cfg'].append(
+                str((run_prep_dir/namelist).resolve()))
+        else:
+            namelists['namelist_cfg'].append(
+                str((run_sets_dir/namelist).resolve()))
+    if run_type == 'nowcast-green':
+        for namelist in ('namelist_top_cfg', 'namelist_pisces_cfg'):
+            if (run_prep_dir/namelist).exists():
+                namelists[namelist] = [str((run_prep_dir/namelist).resolve())]
+            else:
+                namelists[namelist] = [str((run_sets_dir/namelist).resolve())]
     run_desc = salishsea_cmd.api.run_description(
         run_id=run_id,
         config_name=NEMO_config_name,

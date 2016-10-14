@@ -598,7 +598,7 @@ class TestRunDescription:
     @pytest.mark.parametrize('run_type, link_name, expected', [
         ('nowcast', 'restart.nc', '03jan16/SalishSea_00002160_restart.nc'),
         ('nowcast-green', 'restart_trc.nc',
-         '03jan16/SalishSea_00002160_restart_trc.nc'),
+            '03jan16/SalishSea_00002160_restart_trc.nc'),
     ])
     def test_restart_links(
         self, run_type, link_name, expected, worker_module, config, run_date,
@@ -657,7 +657,7 @@ class TestRunDescription:
         assert check_link_dict['type'] == 'atmospheric'
         assert check_link_dict['namelist filename'] == 'namelist_cfg'
 
-    def test_namelists(
+    def test_namelists_nowacst_blue(
         self, worker_module, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
@@ -678,6 +678,57 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'))
+        expected = [
+            tmp_run_prep.join('namelist.time'),
+            tmp_run_prep.join(
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.domain'
+                .split('/')),
+            tmp_run_prep.join(
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface'
+                .split('/')),
+            tmp_run_prep.join(
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.lateral'
+                .split('/')),
+            tmp_run_prep.join(
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.bottom'
+                .split('/')),
+            tmp_run_prep.join(
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.tracer'
+                .split('/')),
+            tmp_run_prep.join(
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.dynamics'
+                .split('/')),
+            tmp_run_prep.join(
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.vertical'
+                .split('/')),
+            tmp_run_prep.join(
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.compute'
+                .split('/')),
+        ]
+        assert run_desc['namelists']['namelist_cfg'] == expected
+
+    def test_namelists_nowcast_green(
+        self, worker_module, config, run_date, tmp_results, tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}nowcast'.format(dmy=dmy)
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {'nowcast-green': str(tmp_results['results']['nowcast-green'])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = worker_module._run_description(
+                    run_date, 'nowcast-green', run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'))
         expected = [
             tmp_run_prep.join('namelist.time'),
