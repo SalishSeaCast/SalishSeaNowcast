@@ -120,12 +120,8 @@ def run_NEMO(parsed_args, config, tell_manager):
         run_date, run_type, run_dir, run_desc_filepath, host_name, config,
         tell_manager)
     run_desc_filepath.unlink()
-    if host_name.startswith('salish'):
-        run_process_pid = _launch_run_script(
-            run_type, run_script_filepath, host_name, tell_manager)
-    else:
-        ## TODO: Handle run launching on west.cloud
-        pass
+    run_process_pid = _launch_run_script(
+        run_type, run_script_filepath, host_name, config, tell_manager)
     watcher_process_pid = _launch_run_watcher(
         run_type, run_process_pid, host_name, config, tell_manager,
         shared_storage=parsed_args.shared_storage)
@@ -432,36 +428,43 @@ def _cleanup():
     return script
 
 
-def _launch_run_script(run_type, run_script_filepath, host_name, tell_manager):
+def _launch_run_script(
+    run_type, run_script_filepath, host_name, config, tell_manager,
+):
+    host_run_config = config['run'][host_name]
     _log_msg(
         '{}: launching {} on {}'
         .format(run_type, run_script_filepath, host_name),
         'info', tell_manager)
-    if host_name.startswith('salish'):
-        cmd = shlex.split('qsub {}'.format(run_script_filepath))
-        _log_msg(
-            '{}: running command in subprocess: {}'.format(run_type, cmd),
-            'debug', tell_manager)
+    cmd = shlex.split(
+        '{0[job exec cmd]} {1}'.format(host_run_config, run_script_filepath))
+    _log_msg(
+        '{}: running command in subprocess: {}'.format(run_type, cmd),
+        'debug', tell_manager)
+    if host_run_config['job exec cmd'] == 'qsub':
         torque_id = subprocess.check_output(
             cmd, universal_newlines=True).strip()
         _log_msg(
             '{}: TORQUE/PBD job id: {}'.format(run_type, torque_id),
             'debug', tell_manager)
         cmd = shlex.split('pgrep {}'.format(torque_id))
-        run_process_pid = None
-        while not run_process_pid:
-            try:
-                run_process_pid = int(
-                    subprocess.check_output(cmd, universal_newlines=True))
-            except subprocess.CalledProcessError:
-                # TORQUE queue manager has not yet spawned run process
-                pass
-        _log_msg(
-            '{} on {}: run pid: {}'
-            .format(run_type, host_name, run_process_pid),
-            'debug', tell_manager)
-        return run_process_pid
-    ## TODO: Launch runs on west.cloud
+    else:
+        subprocess.Popen(cmd)
+        cmd = shlex.split(
+            'pgrep --newest --exact --full "{}"'.format(' '.join(cmd)))
+    run_process_pid = None
+    while not run_process_pid:
+        try:
+            run_process_pid = int(
+                subprocess.check_output(cmd, universal_newlines=True))
+        except subprocess.CalledProcessError:
+            # Process has not yet been spawned
+            pass
+    _log_msg(
+        '{} on {}: run pid: {}'
+        .format(run_type, host_name, run_process_pid),
+        'debug', tell_manager)
+    return run_process_pid
 
 
 def _launch_run_watcher(
