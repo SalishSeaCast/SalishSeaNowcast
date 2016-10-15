@@ -111,17 +111,19 @@ def run_NEMO(parsed_args, config, tell_manager):
         run_info = tell_manager('need', 'NEMO run')
         run_date = arrow.get(run_info['nowcast']['run date'])
     run_desc_filepath = _create_run_desc_file(
-        run_date, run_type, host_name, config, tell_manager)
+        run_date, run_type, host_name, config, tell_manager,
+        parsed_args.shared_storage)
     run_dir = Path(salishsea_cmd.api.prepare(str(run_desc_filepath)))
     _log_msg(
         '{}: temporary run directory: {}'.format(run_type, run_dir),
-        'debug', tell_manager)
+        'debug', tell_manager, parsed_args.shared_storage)
     run_script_filepath = _create_run_script(
         run_date, run_type, run_dir, run_desc_filepath, host_name, config,
-        tell_manager)
+        tell_manager, parsed_args.shared_storage)
     run_desc_filepath.unlink()
     run_process_pid = _launch_run_script(
-        run_type, run_script_filepath, host_name, config, tell_manager)
+        run_type, run_script_filepath, host_name, config, tell_manager,
+        parsed_args.shared_storage)
     watcher_process_pid = _launch_run_watcher(
         run_type, run_process_pid, host_name, config, tell_manager,
         shared_storage=parsed_args.shared_storage)
@@ -134,14 +136,16 @@ def run_NEMO(parsed_args, config, tell_manager):
     }}
 
 
-def _log_msg(msg, level, tell_manager):
-    logger.log(getattr(logging, level.upper()), msg)
-    ## TODO: Only need to send logging messages to manager when NOT using
-    # shared storage (i.e. on west.cloud)
-    #tell_manager('log.{}'.format(level), msg)
+def _log_msg(msg, level, tell_manager, shared_storage):
+    tell_manager('log.{}'.format(level), msg)
+    if not shared_storage:
+        # Emit message to local logging system
+        logger.log(getattr(logging, level.upper()), msg)
 
 
-def _create_run_desc_file(run_date, run_type, host_name, config, tell_manager):
+def _create_run_desc_file(
+    run_date, run_type, host_name, config, tell_manager, shared_storage,
+):
     dmy = run_date.format('DDMMMYY').lower()
     run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
     run_days = {
@@ -156,14 +160,13 @@ def _create_run_desc_file(run_date, run_type, host_name, config, tell_manager):
         run_date, run_type, run_duration, host_run_config)
     run_desc = _run_description(
         run_days[run_type], run_type, run_id, restart_timestep, host_name,
-        config, tell_manager)
+        config, tell_manager, shared_storage)
     run_prep_dir = Path(host_run_config['run prep dir'])
     run_desc_filepath = run_prep_dir/'{}.yaml'.format(run_id)
     with run_desc_filepath.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
-    _log_msg(
-        '{}: run description file: {}'.format(run_type, run_desc_filepath),
-        'debug', tell_manager)
+    _log_msg('{}: run description file: {}'.format(run_type, run_desc_filepath),
+        'debug', tell_manager, shared_storage)
     return run_desc_filepath
 
 
@@ -224,7 +227,7 @@ def _get_namelist_value(key, lines):
 
 def _run_description(
     run_date, run_type, run_id, restart_timestep, host_name, config,
-    tell_manager,
+    tell_manager, shared_storage,
 ):
     host_run_config = config['run'][host_name]
     try:
@@ -233,7 +236,7 @@ def _run_description(
         _log_msg(
             'no results directory for {run_type} in {host_name} run config'
             .format(run_type=run_type, host_name=host_name),
-            'critical', tell_manager)
+            'critical', tell_manager, shared_storage)
         raise WorkerError
     prev_run_dmys = {
         # run-type: previous run's ddmmmyy results directory name
@@ -322,7 +325,7 @@ def _run_description(
 
 def _create_run_script(
     run_date, run_type, run_dir, run_desc_filepath, host_name, config,
-    tell_manager,
+    tell_manager, shared_storage,
 ):
     host_run_config = config['run'][host_name]
     dmy = run_date.format('DDMMMYY').lower()
@@ -333,9 +336,8 @@ def _create_run_script(
     with run_script_filepath.open('wt') as f:
         f.write(script)
     lib.fix_perms(str(run_script_filepath), mode=lib.PERMS_RWX_RWX_R)
-    _log_msg(
-        '{}: run script: {}'.format(run_type, run_script_filepath),
-        'debug', tell_manager)
+    _log_msg('{}: run script: {}'.format(run_type, run_script_filepath),
+        'debug', tell_manager, shared_storage)
     return run_script_filepath
 
 
@@ -430,23 +432,24 @@ def _cleanup():
 
 def _launch_run_script(
     run_type, run_script_filepath, host_name, config, tell_manager,
+    shared_storage,
 ):
     host_run_config = config['run'][host_name]
-    _log_msg(
-        '{}: launching {} on {}'
-        .format(run_type, run_script_filepath, host_name),
-        'info', tell_manager)
+    _log_msg('{}: launching {} on {}'
+        .format(
+            run_type, run_script_filepath, host_name), 'info', tell_manager,
+            shared_storage)
     cmd = shlex.split(
         '{0[job exec cmd]} {1}'.format(host_run_config, run_script_filepath))
-    _log_msg(
-        '{}: running command in subprocess: {}'.format(run_type, cmd),
-        'debug', tell_manager)
+    _log_msg('{}: running command in subprocess: {}'.format(
+        run_type, cmd),
+        'debug', tell_manager, shared_storage)
     if host_run_config['job exec cmd'] == 'qsub':
         torque_id = subprocess.check_output(
             cmd, universal_newlines=True).strip()
-        _log_msg(
-            '{}: TORQUE/PBD job id: {}'.format(run_type, torque_id),
-            'debug', tell_manager)
+        _log_msg('{}: TORQUE/PBD job id: {}'.format(
+            run_type, torque_id),
+            'debug', tell_manager, shared_storage)
         cmd = shlex.split('pgrep {}'.format(torque_id))
     else:
         subprocess.Popen(cmd)
@@ -460,10 +463,9 @@ def _launch_run_script(
         except subprocess.CalledProcessError:
             # Process has not yet been spawned
             pass
-    _log_msg(
-        '{} on {}: run pid: {}'
-        .format(run_type, host_name, run_process_pid),
-        'debug', tell_manager)
+    _log_msg('{} on {}: run pid: {}'.format(
+        run_type, host_name, run_process_pid), 'debug', tell_manager,
+        shared_storage)
     return run_process_pid
 
 
@@ -471,9 +473,8 @@ def _launch_run_watcher(
     run_type, run_process_pid, host_name, config, tell_manager, shared_storage,
 ):
     host_run_config = config['run'][host_name]
-    _log_msg(
-        'launching {} watch_NEMO worker on {}'.format(run_type, host_name),
-        'info', tell_manager)
+    _log_msg('launching {} watch_NEMO worker on {}'
+        .format(run_type, host_name), 'info', tell_manager, shared_storage)
     cmd = shlex.split(
         '{0[python]} -m nowcast.workers.watch_NEMO {0[config file]} '
         '{host_name} {run_type} {run_process_pid}'
@@ -482,14 +483,12 @@ def _launch_run_watcher(
             run_process_pid=run_process_pid))
     if shared_storage:
         cmd.append('--shared-storage')
-    _log_msg(
-        '{}: running command in subprocess: {}'.format(run_type, cmd),
-        'debug', tell_manager)
+    _log_msg('{}: running command in subprocess: {}'
+        .format(run_type, cmd), 'debug', tell_manager, shared_storage)
     watcher_process = subprocess.Popen(cmd, universal_newlines=True)
-    _log_msg(
-        '{} on {}: watcher pid: {.pid}'
-        .format(run_type, host_name, watcher_process),
-        'debug', tell_manager)
+    _log_msg('{} on {}: watcher pid: {.pid}'.format(
+        run_type, host_name, watcher_process),
+        'debug', tell_manager, shared_storage)
     return watcher_process.pid
 
 
