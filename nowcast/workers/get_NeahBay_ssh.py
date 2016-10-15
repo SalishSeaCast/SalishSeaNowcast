@@ -106,7 +106,7 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     # store the file in the run results directory,
     # and load the data for processing into netCDF4 files
     utc_now = datetime.datetime.now(pytz.timezone('UTC'))
-    textfile = _read_website(config['ssh']['ssh_dir'])
+    textfile = _read_website(config['ssh']['ssh dir'])
     lib.fix_perms(textfile, grp_name=config['file group'])
     checklist = {'txt': os.path.basename(textfile)}
     # Store a copy of the text file in the run results directory so that
@@ -137,7 +137,7 @@ def get_NeahBay_ssh(parsed_args, config, *args):
         ip = ip + 1
         filepath = _save_netcdf(
             d, tc, sshd, forecast_flag, textfile,
-            config['ssh']['ssh_dir'], lats, lons)
+            config['ssh']['ssh dir'], lats, lons)
         filename = os.path.basename(filepath)
         lib.fix_perms(filename, grp_name=config['file group'])
         if forecast_flag:
