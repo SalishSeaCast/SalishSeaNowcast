@@ -245,3 +245,23 @@ class TestAfterRunNEMO:
         workers = next_workers.after_run_NEMO(
             Message('run_NEMO', msg_type), config)
         assert workers == []
+
+
+class TestAfterWatchNEMO:
+    """Unit tests for the after_watch_NEMO function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+        'failure nowcast-green',
+        'failure forecast',
+        'failure forecast2',
+        'success nowcast',
+        'success nowcast-green',
+        'success forecast',
+        'success forecast2',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config):
+        workers = next_workers.after_watch_NEMO(
+            Message('watch_NEMO', msg_type), config)
+        assert workers == []

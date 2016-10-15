@@ -22,29 +22,33 @@ from pathlib import Path
 import time
 
 import arrow
-
-from salishsea_tools.namelist import namelist2dict
-
-from nowcast import lib
-from nowcast.nowcast_worker import (
+from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
+from salishsea_tools.namelist import namelist2dict
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'watch_NEMO'
+logger = logging.getLogger(NAME)
 
 
 POLL_INTERVAL = 5 * 60  # seconds
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
+    """Set up and run the worker.
+
+    For command-line usage see:
+
+    :command:`python -m nowcast.workers.watch_NEMO --help`
+    """
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'host_name',
         help='Name of the host to monitor the run on')
-    worker.arg_parser.add_argument(
+    worker.cli.add_argument(
         'run_type',
         choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
         help='''
@@ -55,11 +59,11 @@ def main():
         'forecast2' means preliminary forecast run,
         ''',
     )
-    worker.arg_parser.add_argument(
+    worker.cli.add_argument(
         'pid', type=int,
         help='PID of the NEMO run bash script to monitor.'
     )
-    worker.arg_parser.add_argument(
+    worker.cli.add_argument(
         '--shared-storage', action='store_true',
         help='''
         Indicates that the NEMO run is on a machine (e.g. salish) that
@@ -107,13 +111,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
     # Get monitored run info from manager and namelist
     run_info = tell_manager('need', 'NEMO run')
     run_dir = Path(run_info[run_type]['run dir'])
-    try:
-        namelist = namelist2dict(str(run_dir/'namelist_cfg'))
-        NEMO36 = True
-    except FileNotFoundError:
-        # NEMO-3.4
-        namelist = namelist2dict(str(run_dir/'namelist'))
-        NEMO36 = False
+    namelist = namelist2dict(str(run_dir/'namelist_cfg'))
     it000 = namelist['namrun'][0]['nn_it000']
     itend = namelist['namrun'][0]['nn_itend']
     date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
@@ -123,9 +121,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
         try:
             with (run_dir/'time.step').open('rt') as f:
                 time_step = int(f.read().strip())
-            model_seconds = (
-                (time_step - it000) * rdt if NEMO36
-                else time_step * rdt)
+            model_seconds = (time_step - it000) * rdt
             model_time = (
                 date0.replace(seconds=model_seconds)
                 .format('YYYY-MM-DD HH:mm:ss UTC'))
@@ -153,9 +149,10 @@ def watch_NEMO(parsed_args, config, tell_manager):
 
 
 def _log_msg(msg, level, tell_manager, shared_storage):
-    logger.log(getattr(logging, level.upper()), msg)
+    tell_manager('log.{}'.format(level), msg)
     if not shared_storage:
-        tell_manager('log.{}'.format(level), msg)
+        # Emit message to local logging system
+        logger.log(getattr(logging, level.upper()), msg)
 
 
 def _pid_exists(pid):
