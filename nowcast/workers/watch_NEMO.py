@@ -109,7 +109,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
             'error', tell_manager, shared_storage)
         raise WorkerError
     # Get monitored run info from manager and namelist
-    run_info = tell_manager('need', 'NEMO run')
+    run_info = tell_manager('need', 'NEMO run').payload
     run_dir = Path(run_info[run_type]['run dir'])
     namelist = namelist2dict(str(run_dir/'namelist_cfg'))
     it000 = namelist['namrun'][0]['nn_it000']
