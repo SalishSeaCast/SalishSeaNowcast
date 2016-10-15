@@ -65,9 +65,9 @@ def main():
     worker.cli.add_argument(
         '--shared-storage', action='store_true',
         help='''
-        If running on a machine (Salish) that directly accesses
-        the repo datafiles, copy the ssh files so that the nowcast
-        does not change the files while nowcast-green is running
+        Indicates that the NEMO run is on a machine (e.g. salish) that
+        shares storage with the machine on which the nowcast manager is
+        running. That affects how log messages are handled.
         ''')
     worker.cli.add_date_option(
         '--run-date', default=arrow.now().floor('day'),
