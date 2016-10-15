@@ -298,7 +298,7 @@ class TestRunDescription:
                 with pytest.raises(worker_module.WorkerError):
                     worker_module._run_description(
                         run_date, 'nowcast', run_id, 2160, 'salish', config,
-                        Mock(name='tell_manager'))
+                        Mock(name='tell_manager'), False)
 
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast', 'SalishSea'),
@@ -328,7 +328,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         assert run_desc['config_name'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -359,7 +359,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         assert run_desc['run_id'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -387,7 +387,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         assert run_desc['MPI decomposition'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -416,7 +416,7 @@ class TestRunDescription:
                 with patch.dict(config['run']['salish'], walltime='16:00:00'):
                     run_desc = worker_module._run_description(
                         run_date, run_type, run_id, 2160, 'salish', config,
-                        Mock(name='tell_manager'))
+                        Mock(name='tell_manager'), False)
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -444,7 +444,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -474,7 +474,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
 
     @pytest.mark.parametrize('run_type, path', [
@@ -502,7 +502,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         assert run_desc['paths'][path] == tmp_run_prep
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -531,7 +531,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         assert run_desc['grid'][path] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -560,7 +560,7 @@ class TestRunDescription:
                 with patch.dict(config['run types'][run_type], bathymetry=expected):
                     run_desc = worker_module._run_description(
                         run_date, run_type, run_id, 2160, 'salish', config,
-                        Mock(name='tell_manager'))
+                        Mock(name='tell_manager'), False)
         assert run_desc['grid'][path] == expected
 
     @pytest.mark.parametrize('run_type, link_name, expected', [
@@ -590,7 +590,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         tmp_nowcast_dir = tmp_results['nowcast dir']
         expected = tmp_nowcast_dir.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
@@ -622,7 +622,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         tmp_results_dir = tmp_results['results'][run_type]
         expected = tmp_results_dir.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
@@ -652,7 +652,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         check_link_dict = run_desc['forcing'][link_name]['check link']
         assert check_link_dict['type'] == 'atmospheric'
         assert check_link_dict['namelist filename'] == 'namelist_cfg'
@@ -678,7 +678,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         expected = [
             tmp_run_prep.join('namelist.time'),
             tmp_run_prep.join(
@@ -729,7 +729,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, 'nowcast-green', run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         expected = [
             tmp_run_prep.join('namelist.time'),
             tmp_run_prep.join(
@@ -792,7 +792,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = worker_module._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'))
+                    Mock(name='tell_manager'), False)
         assert run_desc['output']['files'] == tmp_run_prep.join('iodef.xml')
         expected = tmp_run_prep.join(
             '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
