@@ -105,8 +105,7 @@ def make_feeds(parsed_args, config, *args):
         fg = _generate_feed(feed, web_config)
         max_ssh_info = _calc_max_ssh_risk(feed, run_date, run_type, config)
         if max_ssh_info['risk_level'] is not None:
-            fe = _generate_feed_entry(
-                feed, max_ssh_info, run_date, run_type, config)
+            fe = _generate_feed_entry(feed, max_ssh_info, config)
             fg.add_entry(fe)
         fg.atom_file(os.path.join(feeds_path, feed), pretty=True)
     return checklist
