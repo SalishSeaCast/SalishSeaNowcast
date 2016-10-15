@@ -92,16 +92,17 @@ def upload_forcing(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    host = config['run'][host_name]
+    host_run_config = config['run'][host_name]
     ssh_client, sftp_client = lib.sftp(
-        host_name, host['ssh key name']['nowcast'])
+        host_name, host_run_config['ssh key name']['nowcast'])
     # Neah Bay sea surface height
     for day in range(-1, 3):
         filename = get_NeahBay_ssh.FILENAME_TMPL.format(
             run_date.replace(days=day).date())
         dest_dir = 'obs' if day == -1 else 'fcst'
         localpath = os.path.join(config['ssh']['ssh dir'], dest_dir, filename)
-        remotepath = os.path.join(host['ssh dir'], dest_dir, filename)
+        remotepath = os.path.join(
+            host_run_config['forcing']['ssh dir'], dest_dir, filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
         except OSError:
@@ -132,7 +133,8 @@ def upload_forcing(parsed_args, config, *args):
     for tmpl in make_runoff_file.FILENAME_TMPLS.values():
         filename = tmpl.format(run_date.replace(days=-1).date())
         localpath = os.path.join(config['rivers']['rivers dir'], filename)
-        remotepath = os.path.join(host['rivers dir'], filename)
+        remotepath = os.path.join(
+            host_run_config['forcing']['rivers dir'], filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Weather
     if run_type == 'nowcast+':
@@ -145,7 +147,8 @@ def upload_forcing(parsed_args, config, *args):
         dest_dir = '' if day == 0 else 'fcst'
         localpath = os.path.join(
             config['weather']['ops dir'], dest_dir, filename)
-        remotepath = os.path.join(host['weather dir'], dest_dir, filename)
+        remotepath = os.path.join(
+            host_run_config['forcing']['weather dir'], dest_dir, filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     sftp_client.close()
     ssh_client.close()
