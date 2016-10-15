@@ -249,3 +249,26 @@ def after_run_NEMO(msg, config):
         'success forecast2': [],
     }
     return next_workers[msg.type]
+
+
+def after_watch_NEMO(msg, config):
+    """Calculate the list of workers to launch after the watch_NEMO worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nowcast': [],
+        'failure nowcast-green': [],
+        'failure forecast': [],
+        'failure forecast2': [],
+        'success nowcast': [],
+        'success nowcast-green': [],
+        'success forecast': [],
+        'success forecast2': [],
+    }
+    return next_workers[msg.type]

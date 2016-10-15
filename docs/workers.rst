@@ -113,6 +113,13 @@ Workers
     :members: main
 
 
+:kbd:`watch_NEMO`
+-----------------
+
+.. automodule:: nowcast.workers.watch_NEMO
+    :members: main
+
+
 :kbd:`next_workers` Module
 ==========================
 

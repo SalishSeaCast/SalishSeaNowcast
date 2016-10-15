@@ -33,22 +33,21 @@ def worker_module(scope='module'):
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
+    def test_instantiate_worker(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('watch_NEMO',)
         assert list(kwargs.keys()) == ['description']
 
     def test_add_host_name_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('host_name',)
         assert 'help' in kwargs
 
     def test_add_run_type_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
@@ -56,13 +55,13 @@ class TestMain:
 
     def test_add_pid_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[2]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ('pid',)
         assert 'help' in kwargs
 
-    def test_add_shared_storage_arg(self, m_worker, worker_module):
+    def test_add_shared_storage_option(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[3]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[3]
         assert args == ('--shared-storage',)
         assert kwargs['action'] == 'store_true'
         assert 'help' in kwargs
@@ -114,7 +113,8 @@ class TestSuccess:
             pid=42,
             shared_storage=shared_storage,
         )
-        msg_type = worker_module.success(parsed_args)
+        with patch.object(worker_module, 'logger'):
+            msg_type = worker_module.success(parsed_args)
         assert msg_type == expected
 
 
@@ -155,7 +155,8 @@ class TestFailure:
             pid=42,
             shared_storage=shared_storage,
         )
-        msg_type = worker_module.failure(parsed_args)
+        with patch.object(worker_module, 'logger'):
+            msg_type = worker_module.failure(parsed_args)
         assert msg_type == expected
 
 
@@ -180,8 +181,9 @@ class TestWatchNEMO:
         config = {}
         tell_manager = Mock(name='tell_manager')
         with patch.object(worker_module, '_pid_exists', return_value=False):
-            with pytest.raises(worker_module.WorkerError):
-                worker_module.watch_NEMO(parsed_args, config, tell_manager)
+            with patch.object(worker_module, 'logger'):
+                with pytest.raises(worker_module.WorkerError):
+                    worker_module.watch_NEMO(parsed_args, config, tell_manager)
 
 
 class TestLogMsg:
@@ -192,8 +194,8 @@ class TestLogMsg:
         with patch.object(worker_module, 'logger') as m_logger:
             worker_module._log_msg(
                 'msg', 'info', tell_manager, shared_storage=True)
-        m_logger.log.assert_called_once_with(20, 'msg')
-        assert not tell_manager.called
+        tell_manager.assert_called_once_with('log.info', 'msg')
+        assert not m_logger.log.called
 
     def test_not_shared_storage(self, worker_module):
         tell_manager = Mock(name='tell_manager')

@@ -414,6 +414,7 @@ message registry:
       failure ssh: sea surface height forcing files for forecast upload failed
       crash: upload_forcing worker crashed
     make_forcing_links:
+      checklist key: forcing links
       success nowcast+: forcing file links for nowcast/forecast created
       failure nowcast+: forcing file links for nowcast/forecast failed
       success forecast2: forcing file links for forecast2 created
@@ -424,6 +425,7 @@ message registry:
       failure nowcast-green: forcing file links for nowcast-green failed
       crash: make_forcing_links worker crashed
     run_NEMO:
+      checklist key: NEMO run
       log.debug: debug level logging message
       log.info: info level logging message
       log.error: error level logging message
@@ -437,3 +439,18 @@ message registry:
       success forecast2: forecast2 NEMO run started
       failure forecast2: forecast2 NEMO run failed
       crash: run_NEMO worker crashed
+    watch_NEMO:
+      checklist key: NEMO run
+      log.debug: debug level logging message
+      log.info: info level logging message
+      log.error: error level logging message
+      need: NEMO run information dict requested
+      success nowcast: nowcast NEMO run completed
+      failure nowcast: nowcast NEMO run failed
+      success nowcast-green: nowcast-green NEMO run completed
+      failure nowcast-green: nowcast-green NEMO run failed
+      success forecast: forecast NEMO run completed
+      failure forecast: forecast NEMO run failed
+      success forecast2: forecast2 NEMO run completed
+      failure forecast2: forecast2 NEMO run failed
+      crash: watch_NEMO worker crashed
