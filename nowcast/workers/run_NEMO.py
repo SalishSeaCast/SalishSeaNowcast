@@ -475,7 +475,7 @@ def _launch_run_watcher(
         'launching {} watch_NEMO worker on {}'.format(run_type, host_name),
         'info', tell_manager)
     cmd = shlex.split(
-        '{0[python]} -m nowcast.workers.watch_NEMO {0[config_file]} '
+        '{0[python]} -m nowcast.workers.watch_NEMO {0[config file]} '
         '{host_name} {run_type} {run_process_pid}'
         .format(
             host_run_config, host_name=host_name, run_type=run_type,

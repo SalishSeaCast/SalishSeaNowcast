@@ -129,12 +129,12 @@ run:
       weather dir: /home/ubuntu/MEOPAR/GEM2.5/ops/NEMO-atmos/
       # Location on compute host of no_snow.nc constraint file
       no_snow.nc: /home/ubuntu/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
-      # Location of NEMO on-the-fly interpolation weights file
+      # Location on compute host of NEMO on-the-fly interpolation weights file
       # for GEM 2.5km operational forecast
       weights: /home/ubuntu/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
     # Directory on compute host where run configuration, forcing links, etc.
     # are stored
-    nowcast dir: /home/ubuntu/MEOPAR/nowcast/
+    nowcast dir: /home/ubuntu/MEOPAR/nowcast-sys/runs
     # Directories on compute host where results are stored, keyed by run type
     results:
       # Note that salish has shared storage with the nowcast system results
@@ -145,15 +145,21 @@ run:
     # Directory on compute host where files (e.g. namelist.time) and symlinks
     # (e,g. iodef.xml) necessary to prepare the NEMO runs are stored
     # TODO: Can this and `nowcast dir` be merged; see issue #11
-    run prep dir: /home/ubuntu/MEOPAR/nowcast/
+    run prep dir: /home/ubuntu/MEOPAR/nowcast-sys/runs
     # How is the domain to be distributed over the processors in the
     # i (longitude) and j (latitude) directions?
     mpi decomposition: 8x17
     # Path to the salishsea command processor executable to use in the run
     # script
-    salishsea_cmd: /home/ubuntu/.local/bin/salishsea
+    salishsea_cmd: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/salishsea
     # Executable to use to submit the SalishSeaNEMO.sh script to be run
     job exec cmd: bash
+    # Python interpreter on compute host in an environment with all
+    # dependencies installed. Used to, for exampler, launch run_NEMO and
+    # watch_NEMO workers.
+    python: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/python3
+    # Location on the compute host of the nowcast system config file
+    config file: /home/ubuntu/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
 
   # If the `nowcast-green host` key is present, the forcing files will be
   # symlinked and the nowcast-green run will be executed on it automatically.
@@ -182,7 +188,7 @@ run:
       weather dir: /results/forcing/atmospheric/GEM2.5/operational/
       # Location on compute host of no_snow.nc constraint file
       no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
-      # Location of NEMO on-the-fly interpolation weights file
+      # Location on compute host of NEMO on-the-fly interpolation weights file
       # for GEM 2.5km operational forecast
       weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
     # Directory on compute host where run configuration, forcing links, etc.
@@ -213,6 +219,12 @@ run:
     email: sallen@eos.ubc.ca
     # Executable to use to submit the SalishSeaNEMO.sh script to be run
     job exec cmd: qsub
+    # Python interpreter on compute host in an environment with all
+    # dependencies installed. Used to, for exampler, launch run_NEMO and
+    # watch_NEMO workers.
+    python: /results/nowcast-sys/nemo_nowcast-env/bin/python
+    # Location on the compute host of the nowcast system config file
+    config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
 
 
   # If the `hpc host` key is present, the forcing files will be uploaded
@@ -237,7 +249,7 @@ run:
       weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
       # Location on compute host of no_snow.nc constraint file
       no_snow.nc: /home/sallen/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
-      # Location of NEMO on-the-fly interpolation weights file
+      # Location on compute host of NEMO on-the-fly interpolation weights file
       # for GEM 2.5km operational forecast
       weights: /home/sallen/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
     # Directory on compute host where run configuration, forcing links, etc.
@@ -416,6 +428,12 @@ message registry:
       log.info: info level logging message
       log.error: error level logging message
       need: NEMO run information dict requested
-      success: NEMO run started
-      failure: NEMO run failed
+      success nowcast: nowcast NEMO run started
+      failure nowcast: nowcast NEMO run failed
+      success nowcast-green: nowcast-green NEMO run started
+      failure nowcast-green: nowcast-green NEMO run failed
+      success forecast: forecast NEMO run started
+      failure forecast: forecast NEMO run failed
+      success forecast2: forecast2 NEMO run started
+      failure forecast2: forecast2 NEMO run failed
       crash: run_NEMO worker crashed

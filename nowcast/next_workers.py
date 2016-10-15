@@ -239,7 +239,13 @@ def after_run_NEMO(msg, config):
     """
     next_workers = {
         'crash': [],
-        'failure': [],
-        'success': [],
+        'failure nowcast': [],
+        'failure nowcast-green': [],
+        'failure forecast': [],
+        'failure forecast2': [],
+        'success nowcast': [],
+        'success nowcast-green': [],
+        'success forecast': [],
+        'success forecast2': [],
     }
     return next_workers[msg.type]
