@@ -232,8 +232,14 @@ class TestAfterRunNEMO:
     """
     @pytest.mark.parametrize('msg_type', [
         'crash',
-        'failure',
-        'success',
+        'failure nowcast',
+        'failure nowcast-green',
+        'failure forecast',
+        'failure forecast2',
+        'success nowcast',
+        'success nowcast-green',
+        'success forecast',
+        'success forecast2',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config):
         workers = next_workers.after_run_NEMO(
