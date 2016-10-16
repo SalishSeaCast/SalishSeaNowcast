@@ -154,7 +154,7 @@ class TestAfterGribToNetcdf:
             Message('grib_to_netcdf', 'success nowcast+'), config)
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
-            args=['nowcast-green', '--shared-storage'],
+            args=['salish', '--shared-storage'],
             host='localhost')
         assert expected in workers
 

@@ -136,7 +136,7 @@ def after_grib_to_netcdf(msg, config):
         next_workers['success nowcast+'].append(
             NextWorker(
                 'nowcast.workers.make_forcing_links',
-                args=['nowcast-green', '--shared-storage'])
+                args=[config['run']['nowcast-green host'], '--shared-storage'])
         )
     return next_workers[msg.type]
 
