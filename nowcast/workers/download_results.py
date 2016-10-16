@@ -79,12 +79,11 @@ def download_results(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type
-    host = config['run'][host_name]
+    host_run_config = config['run'][host_name]
     results_dir = run_date.strftime('%d%b%y').lower()
-    src_dir = os.path.join(host['results'][run_type], results_dir)
-    src = (
-        '{host}:{src_dir}'.format(host=host_name, src_dir=src_dir))
-    dest = os.path.join(config['run']['results archive'][run_type])
+    src_dir = os.path.join(host_run_config['results'][run_type], results_dir)
+    src = '{host}:{src_dir}'.format(host=host_name, src_dir=src_dir)
+    dest = os.path.join(config['results archive'][run_type])
     cmd = ['scp', '-Cpr', src, dest]
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     lib.fix_perms(
