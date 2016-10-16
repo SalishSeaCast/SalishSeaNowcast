@@ -137,17 +137,17 @@ On the hosts where the nowcast system NEMO runs will be executed create a :file:
     $ cd runs/
     $ mkdir -p NEMO-atmos open_boundaries/west/ssh rivers
     $ chmod -R g+s NEMO-atmos open_boundaries rivers
-    $ ln -s ../NEMO-forcing/atmospheric/no_snow.nc NEMO-atmos/
-    $ ln -s ../NEMO-forcing/grid/weights-gem2.5-ops.nc NEMO-atmos/
-    $ ln -s ../NEMO-forcing/open_boundaries/north open_boundaries/
-    $ ln -s ../NEMO-forcing/open_boundaries/west/SalishSea2_Masson_corrected.nc open_boundaries/west/
-    $ ln -s ../NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc open_boundaries/west/
-    $ ln -s ../NEMO-forcing/open_boundaries/west/tides open_boundaries/west/
-    $ ln -s ../NEMO-forcing/rivers/bio_climatology rivers/
-    $ ln -s ../NEMO-forcing/rivers/river_ConsTemp_month.nc rivers/
-    $ ln -s ../NEMO-forcing/rivers/rivers_month.nc rivers/
-    $ cp ../SS-run-sets/SalishSea/nemo3.6/namelist.time ./
-    $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/iodef.xml
+    $ ln -s ../../NEMO-forcing/atmospheric/no_snow.nc NEMO-atmos/
+    $ ln -s ../../NEMO-forcing/grid/weights-gem2.5-ops.nc NEMO-atmos/
+    $ ln -s ../../NEMO-forcing/open_boundaries/north open_boundaries/
+    $ ln -s ../../../NEMO-forcing/open_boundaries/west/SalishSea2_Masson_corrected.nc open_boundaries/west/
+    $ ln -s ../../../NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc open_boundaries/west/
+    $ ln -s ../../../NEMO-forcing/open_boundaries/west/tides open_boundaries/west/
+    $ ln -s ../../NEMO-forcing/rivers/bio_climatology rivers/
+    $ ln -s ../../NEMO-forcing/rivers/river_ConsTemp_month.nc rivers/
+    $ ln -s ../../NEMO-forcing/rivers/rivers_month.nc rivers/
+    $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
+    $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/nowcast/iodef_blue_cloud.xml iodef.xml
 
 The above :command:`ln -s` commands assume that there is a clone of the :ref:`NEMO-forcing-repo` beside the directory where the links are being created.
 If the clone of the :ref:`NEMO-forcing-repo` is elsewhere,
