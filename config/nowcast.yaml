@@ -105,10 +105,14 @@ results archive:
 
 run:
   enabled hosts:
+    # Compute host name key below where directories, etc. for that host are
+    # defined
     west.cloud-nowcast:
-      remote: True
+      # Does the host share storage with the machine where the nowcast manager
+      # is running?
+      shared storage: False
     salish-nowcast:
-      remote: False
+      shared storage: True
 
   remote hosts:
     - cloud host

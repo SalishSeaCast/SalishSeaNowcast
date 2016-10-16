@@ -33,8 +33,8 @@ def config():
             'forecast': {}, 'forecast2': {}},
         'run': {
             'enabled hosts': {
-                'west.grid': {'remote': True},
-                'salish': {'remote': False},
+                'west.grid': {'shared storage': False},
+                'salish': {'shared storage': True},
             },
             'remote hosts': ['cloud host'],
             'cloud host': 'west.cloud',
