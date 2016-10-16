@@ -273,7 +273,9 @@ def after_watch_NEMO(msg, config):
     }
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
-        if config['run']['enabled hosts'][msg.payload['host']]['remote']:
+        enabled_host_config = (
+            config['run']['enabled hosts'][msg.payload['host']])
+        if not enabled_host_config['shared storage']:
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.download_results',
