@@ -481,14 +481,14 @@ def _launch_run_script(
 def _launch_run_watcher(
     run_type, run_process_pid, host_name, config, tell_manager, shared_storage,
 ):
-    host_run_config = config['run'][host_name]
+    enabled_host_config = config['run']['enabled hosts'][host_name]
     _log_msg('launching {} watch_NEMO worker on {}'
         .format(run_type, host_name), 'info', tell_manager, shared_storage)
     cmd = shlex.split(
         '{0[python]} -m nowcast.workers.watch_NEMO {0[config file]} '
         '{host_name} {run_type} {run_process_pid}'
         .format(
-            host_run_config, host_name=host_name, run_type=run_type,
+            enabled_host_config, host_name=host_name, run_type=run_type,
             run_process_pid=run_process_pid))
     if shared_storage:
         cmd.append('--shared-storage')
