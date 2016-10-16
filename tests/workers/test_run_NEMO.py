@@ -236,9 +236,9 @@ class TestCalcNewNamelistLines:
             ('nowcast-green', arrow.get('2015-12-30'), 1, 2160, 2160, 2161, 4320,
                 '20151230', 2160),
             ('forecast', arrow.get('2015-12-30'), 1.25, 2160, 2160, 2161, 4860,
-                '20151230', 2160),
-            ('forecast2', arrow.get('2015-12-30'), 1.25, 2700, 2160, 2161, 4860,
-                '20151230', 2160),
+                '20151231', 2160),
+            ('forecast2', arrow.get('2015-12-30'), 1.25, 2700, 2160, 2701, 5400,
+                '20160101', 2700),
         ])
     def test_calc_new_namelist_lines(
         self, run_date, run_type, run_duration, prev_itend, dt_per_day, it000,
