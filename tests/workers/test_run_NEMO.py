@@ -96,6 +96,10 @@ def tmp_results(tmpdir, run_date, scope='function'):
             run_date.replace(days=-1).format('DDMMMYY').lower(),
             'SalishSea_00002160_restart.nc')
     tmp_results.ensure(
+        'SalishSea', 'forecast',
+        run_date.replace(days=-2).format('DDMMMYY').lower(),
+        'SalishSea_00002160_restart.nc')
+    tmp_results.ensure(
         'SalishSea', 'forecast2',
         run_date.replace(days=-2).format('DDMMMYY').lower(),
         'SalishSea_00002160_restart.nc')
@@ -314,7 +318,11 @@ class TestRunDescription:
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
             config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
+            {run_type: str(tmp_results['results'][run_type]),
+             'nowcast': str(tmp_results['results']['nowcast']),
+             'nowcast-green': str(tmp_results['results']['nowcast-green']),
+             'forecast': str(tmp_results['results']['forecast']),
+            })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
             {'nowcast dir': str(tmp_results['nowcast dir'])})
@@ -345,7 +353,11 @@ class TestRunDescription:
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
             config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
+            {run_type: str(tmp_results['results'][run_type]),
+             'nowcast': str(tmp_results['results']['nowcast']),
+             'nowcast-green': str(tmp_results['results']['nowcast-green']),
+             'forecast': str(tmp_results['results']['forecast']),
+            })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
             {'nowcast dir': str(tmp_results['nowcast dir'])})
@@ -460,7 +472,11 @@ class TestRunDescription:
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
             config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
+            {run_type: str(tmp_results['results'][run_type]),
+             'nowcast': str(tmp_results['results']['nowcast']),
+             'nowcast-green': str(tmp_results['results']['nowcast-green']),
+             'forecast': str(tmp_results['results']['forecast']),
+            })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
             {'nowcast dir': str(tmp_results['nowcast dir'])})
@@ -488,7 +504,11 @@ class TestRunDescription:
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
             config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
+            {run_type: str(tmp_results['results'][run_type]),
+             'nowcast': str(tmp_results['results']['nowcast']),
+             'nowcast-green': str(tmp_results['results']['nowcast-green']),
+             'forecast': str(tmp_results['results']['forecast']),
+            })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
             {'nowcast dir': str(tmp_results['nowcast dir'])})
@@ -576,7 +596,11 @@ class TestRunDescription:
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
             config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
+            {run_type: str(tmp_results['results'][run_type]),
+             'nowcast': str(tmp_results['results']['nowcast']),
+             'nowcast-green': str(tmp_results['results']['nowcast-green']),
+             'forecast': str(tmp_results['results']['forecast']),
+            })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
             {'nowcast dir': str(tmp_results['nowcast dir'])})

@@ -231,7 +231,13 @@ def _run_description(
 ):
     host_run_config = config['run'][host_name]
     try:
-        restart_dir = Path(host_run_config['results'][run_type])
+        restart_dirs = {
+            'nowcast': host_run_config['results']['nowcast'],
+            'nowcast-green': host_run_config['results']['nowcast-green'],
+            'forecast': host_run_config['results']['nowcast'],
+            'forecast2': host_run_config['results']['forecast'],
+        }
+        restart_dir = Path(restart_dirs[run_type])
     except KeyError:
         _log_msg(
             'no results directory for {run_type} in {host_name} run config'
@@ -260,7 +266,7 @@ def _run_description(
                     restart_dir/prev_run_dmys[run_type] /
                     'SalishSea_{:08d}_restart_trc.nc'.format(restart_timestep))
                 .resolve())
-            }
+        }
     run_prep_dir = Path(host_run_config['run prep dir'])
     NEMO_config_name = config['run types'][run_type]['config name']
     walltime = host_run_config.get('walltime')
