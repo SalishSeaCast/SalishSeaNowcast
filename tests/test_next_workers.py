@@ -33,8 +33,14 @@ def config():
             'forecast': {}, 'forecast2': {}},
         'run': {
             'enabled hosts': {
-                'cloud': {'shared storage': False},
-                'salish': {'shared storage': True},
+                'cloud': {
+                    'shared storage': False,
+                    'run types': ['nowcast', 'forecast', 'forecast2'],
+                },
+                'salish': {
+                    'shared storage': True,
+                    'run types': ['nowast-green'],
+                },
             },
             'remote hosts': ['cloud host'],
             'cloud host': 'west.cloud',
@@ -113,13 +119,20 @@ class TestAfterGetNeahBaySsh:
         'failure forecast',
         'failure forecast2',
         'success nowcast',
-        'success forecast',
         'success forecast2',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config):
         workers = next_workers.after_get_NeahBay_ssh(
             Message('get_NeahBay_ssh', msg_type), config)
         assert workers == []
+
+    def test_success_forecast_launch_upload_forcing_ssh(self, config):
+        workers = next_workers.after_get_NeahBay_ssh(
+            Message('get_NeahBay_ssh', 'success forecast'), config)
+        expected = NextWorker(
+            'nowcast.workers.upload_forcing',
+            args=['cloud', 'ssh'], host='localhost')
+        assert expected in workers
 
 
 class TestAfterGribToNetcdf:

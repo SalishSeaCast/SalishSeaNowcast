@@ -121,11 +121,18 @@ run:
       python: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/python3
       # Location on the compute host of the nowcast system config file
       config file: /home/ubuntu/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+      # List of run types that are executed on the compute host
+      run types:
+        - nowcast
+        - forecast
+        - forecast2
     salish-nowcast:
       shared storage: True
       envvars: /results/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
       python: /results/nowcast-sys/nemo_nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+      run types:
+        - nowcast-green
 
   remote hosts:
     - cloud host

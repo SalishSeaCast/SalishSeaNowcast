@@ -97,6 +97,17 @@ def after_get_NeahBay_ssh(msg, config):
         'success forecast2': [],
         'success forecast': [],
     }
+    if msg.type == 'success forecast':
+        for host in config['run']['enabled hosts']:
+            enabled_host_config = config['run']['enabled hosts'][host]
+            upload_forcing_ssh = (
+                'forecast' in enabled_host_config['run types']
+                and not enabled_host_config['shared storage'])
+            if upload_forcing_ssh:
+                next_workers['success forecast'].append(
+                    NextWorker(
+                        'nowcast.workers.upload_forcing',
+                        args=[host, 'ssh']))
     return next_workers[msg.type]
 
 
