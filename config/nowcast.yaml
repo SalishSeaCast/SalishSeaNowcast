@@ -111,8 +111,16 @@ run:
       # Does the host share storage with the machine where the nowcast manager
       # is running?
       shared storage: False
+      # Location of bash script that sets nowacst system environment variables.
+      # The script will be sourced as a prefix to worker launch commands on
+      # the host
+      envvars: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
+      # Location on the compute host of the nowcast system config file
+      config file: /home/ubuntu/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
     salish-nowcast:
       shared storage: True
+      envvars: /results/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
+      config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
 
   remote hosts:
     - cloud host
@@ -164,12 +172,6 @@ run:
     salishsea_cmd: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/salishsea
     # Executable to use to submit the SalishSeaNEMO.sh script to be run
     job exec cmd: bash
-    # Python interpreter on compute host in an environment with all
-    # dependencies installed. Used to, for exampler, launch run_NEMO and
-    # watch_NEMO workers.
-    python: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/python3
-    # Location on the compute host of the nowcast system config file
-    config file: /home/ubuntu/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
 
   # If the `nowcast-green host` key is present, the forcing files will be
   # symlinked and the nowcast-green run will be executed on it automatically.
@@ -229,12 +231,6 @@ run:
     email: sallen@eos.ubc.ca
     # Executable to use to submit the SalishSeaNEMO.sh script to be run
     job exec cmd: qsub
-    # Python interpreter on compute host in an environment with all
-    # dependencies installed. Used to, for exampler, launch run_NEMO and
-    # watch_NEMO workers.
-    python: /results/nowcast-sys/nemo_nowcast-env/bin/python
-    # Location on the compute host of the nowcast system config file
-    config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
 
 
   # If the `hpc host` key is present, the forcing files will be uploaded
