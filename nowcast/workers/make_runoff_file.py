@@ -96,7 +96,7 @@ def make_runoff_file(parsed_args, config, *args):
     # Get Fraser Watershed Climatology without Fraser
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
     # Calculate combined runoff for each case and write files
-    directory = config['rivers']['rivers_dir']
+    directory = config['rivers']['rivers dir']
     filepath = {}
     filepath['short'] = _combine_runoff(
         'short', flow_at_hope, yesterday, afterHope,
