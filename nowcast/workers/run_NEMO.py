@@ -108,7 +108,7 @@ def run_NEMO(parsed_args, config, tell_manager):
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     if not run_type.startswith('nowcast'):
-        run_info = tell_manager('need', 'NEMO run')
+        run_info = tell_manager('need', 'NEMO run').payload
         run_date = arrow.get(run_info['nowcast']['run date'])
     run_desc_filepath = _create_run_desc_file(
         run_date, run_type, host_name, config, tell_manager,
