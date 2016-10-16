@@ -203,17 +203,20 @@ def _calc_new_namelist_lines(
 ):
     it000_line, it000 = _get_namelist_value('nn_it000', lines)
     itend_line, itend = _get_namelist_value('nn_itend', lines)
-    new_it000 = (
-        int(prev_it000 + (prev_itend - prev_it000 + 1) / run_duration)
-        if run_type == 'forecast2'
-        else prev_itend + 1)
-    lines[it000_line] = lines[it000_line].replace(it000, str(new_it000))
-    restart_timestep = new_it000 - 1
+    lines[it000_line] = lines[it000_line].replace(it000, str(prev_itend + 1))
+    restart_timestep = prev_itend
     new_itend = int(restart_timestep + (run_duration * timesteps_per_day))
     lines[itend_line] = lines[itend_line].replace(itend, str(new_itend))
     date0_line, date0 = _get_namelist_value('nn_date0', lines)
+    run_date_offset = {
+        'nowcast': 0,
+        'nowcast-green': 0,
+        'forecast': 1,
+        'forecast2': 2,
+    }
+    new_date0 = run_date.replace(days=run_date_offset[run_type])
     lines[date0_line] = lines[date0_line].replace(
-        date0, run_date.format('YYYYMMDD'))
+        date0, new_date0.format('YYYYMMDD'))
     return lines, restart_timestep
 
 
@@ -230,14 +233,14 @@ def _run_description(
     tell_manager, shared_storage,
 ):
     host_run_config = config['run'][host_name]
+    restart_from = {
+        'nowcast': 'nowcast',
+        'nowcast-green': 'nowcast-green',
+        'forecast': 'nowcast',
+        'forecast2': 'forecast',
+    }
     try:
-        restart_dirs = {
-            'nowcast': host_run_config['results']['nowcast'],
-            'nowcast-green': host_run_config['results']['nowcast-green'],
-            'forecast': host_run_config['results']['nowcast'],
-            'forecast2': host_run_config['results']['forecast'],
-        }
-        restart_dir = Path(restart_dirs[run_type])
+        restart_dir = Path(host_run_config['results'][restart_from[run_type]])
     except KeyError:
         _log_msg(
             'no results directory for {run_type} in {host_name} run config'
