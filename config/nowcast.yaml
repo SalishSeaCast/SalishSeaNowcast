@@ -115,11 +115,16 @@ run:
       # The script will be sourced as a prefix to worker launch commands on
       # the host
       envvars: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
+      # Python interpreter on compute host in an environment with all
+      # dependencies installed. Used to, for exampler, launch run_NEMO and
+      # watch_NEMO workers.
+      python: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/python3
       # Location on the compute host of the nowcast system config file
       config file: /home/ubuntu/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
     salish-nowcast:
       shared storage: True
       envvars: /results/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
+      python: /results/nowcast-sys/nemo_nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
 
   remote hosts:
