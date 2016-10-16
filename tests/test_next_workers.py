@@ -33,7 +33,7 @@ def config():
             'forecast': {}, 'forecast2': {}},
         'run': {
             'enabled hosts': {
-                'west.grid': {'shared storage': False},
+                'cloud': {'shared storage': False},
                 'salish': {'shared storage': True},
             },
             'remote hosts': ['cloud host'],
@@ -266,16 +266,27 @@ class TestAfterWatchNEMO:
             Message('watch_NEMO', msg_type), config)
         assert workers == []
 
+    def test_success_nowcast_launch_get_NeahBay_ssh_forecast(self, config):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                'watch_NEMO', 'success nowcast',
+                {'host': 'cloud', 'run date': '2016-10-16', 'completed': True}),
+                config)
+        expected = NextWorker(
+            'nowcast.workers.get_NeahBay_ssh',
+            args=['forecast'], host='localhost')
+        assert workers[0] == expected
+
     @pytest.mark.parametrize('msg', [
         Message(
             'watch_NEMO', 'success nowcast',
-            {'host': 'west.grid', 'run date': '2016-10-15', 'completed': True}),
+            {'host': 'cloud', 'run date': '2016-10-15', 'completed': True}),
         Message(
             'watch_NEMO', 'success forecast',
-            {'host': 'west.grid', 'run date': '2016-10-15', 'completed': True}),
+            {'host': 'cloud', 'run date': '2016-10-15', 'completed': True}),
         Message(
             'watch_NEMO', 'success forecast2',
-            {'host': 'west.grid', 'run date': '2016-10-15', 'completed': True}),
+            {'host': 'cloud', 'run date': '2016-10-15', 'completed': True}),
     ])
     def test_success_launch_download_results(self, msg, config):
         workers = next_workers.after_watch_NEMO(msg, config)

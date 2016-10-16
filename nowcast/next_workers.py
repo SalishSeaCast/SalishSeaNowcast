@@ -275,6 +275,10 @@ def after_watch_NEMO(msg, config):
     }
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
+        if run_type == 'nowcast':
+            next_workers['success nowcast'].append(
+                NextWorker(
+                    'nowcast.workers.get_NeahBay_ssh', args=['forecast']))
         enabled_host_config = (
             config['run']['enabled hosts'][msg.payload['host']])
         if not enabled_host_config['shared storage']:
