@@ -14,50 +14,46 @@
 # limitations under the License.
 
 """Salish Sea NEMO nowcast worker that downloads the results files
-from a nowcast run on the HPC/cloud facility to archival storage.
+from a run on the HPC/cloud facility to archival storage.
 """
 import glob
 import logging
 import os
 
 import arrow
+from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
-from nowcast.nowcast_worker import NowcastWorker
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'download_results'
+logger = logging.getLogger(NAME)
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    salishsea_today = arrow.now('Canada/Pacific').floor('day')
-    worker.arg_parser.add_argument(
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'host_name',
         help='Name of the host to download results files from',
     )
-    worker.arg_parser.add_argument(
+    worker.cli.add_argument(
         'run_type',
         choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
         help='Type of run to download results files from.',
     )
-    worker.arg_parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=salishsea_today,
-        help='''
-        Date of the run to download results files from;
-        use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_today.format('YYYY-MM-DD')),
+    worker.cli.add_date_option(
+        '--run-date', default=arrow.now().floor('day'),
+        help='Date of the run to download results files from.'
     )
     worker.run(download_results, success, failure)
 
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} results files from {0.host_name} downloaded'
-        .format(parsed_args), extra={
+        '{0.run_type} {date} results files from {0.host_name} downloaded'
+        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -68,8 +64,9 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} results files download from {0.host_name} failed'
-        .format(parsed_args), extra={
+        '{0.run_type} {date} results files download from {0.host_name} failed'
+        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -103,4 +100,4 @@ def download_results(parsed_args, config, *args):
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover

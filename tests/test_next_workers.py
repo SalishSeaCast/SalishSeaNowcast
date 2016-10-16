@@ -32,6 +32,10 @@ def config():
             'nowcast': {}, 'nowcast-green': {},
             'forecast': {}, 'forecast2': {}},
         'run': {
+            'enabled hosts': {
+                'west.grid': {'remote': True},
+                'salish': {'remote': False},
+            },
             'remote hosts': ['cloud host'],
             'cloud host': 'west.cloud',
             'nowcast-green host': 'salish',
@@ -256,12 +260,58 @@ class TestAfterWatchNEMO:
         'failure nowcast-green',
         'failure forecast',
         'failure forecast2',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config):
+        workers = next_workers.after_watch_NEMO(
+            Message('watch_NEMO', msg_type), config)
+        assert workers == []
+
+    @pytest.mark.parametrize('msg', [
+        Message(
+            'watch_NEMO', 'success nowcast',
+            {'host': 'west.grid', 'run date': '2016-10-15', 'completed': True}),
+        Message(
+            'watch_NEMO', 'success forecast',
+            {'host': 'west.grid', 'run date': '2016-10-15', 'completed': True}),
+        Message(
+            'watch_NEMO', 'success forecast2',
+            {'host': 'west.grid', 'run date': '2016-10-15', 'completed': True}),
+    ])
+    def test_success_launch_download_results(self, msg, config):
+        workers = next_workers.after_watch_NEMO(msg, config)
+        expected = NextWorker(
+            'nowcast.workers.download_results',
+            args=[
+                msg.payload['host'], msg.type.split()[1],
+                '--run-date', msg.payload['run date']],
+            host='localhost')
+        assert expected in workers
+
+    @pytest.mark.parametrize('msg', [
+        Message(
+            'watch_NEMO', 'success nowcast-green',
+            {'host': 'salish', 'run date': '2016-10-15', 'completed': True}),
+    ])
+    def test_success_nowcast_grn_no_launch_download_results(self, msg, config):
+        workers = next_workers.after_watch_NEMO(msg, config)
+        assert workers == []
+
+
+class TestAfterDownloadResults:
+    """Unit tests for the after_download_results function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+        'failure nowcast-green',
+        'failure forecast',
+        'failure forecast2',
         'success nowcast',
         'success nowcast-green',
         'success forecast',
         'success forecast2',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config):
-        workers = next_workers.after_watch_NEMO(
-            Message('watch_NEMO', msg_type), config)
+        workers = next_workers.after_download_results(
+            Message('download_results', msg_type), config)
         assert workers == []

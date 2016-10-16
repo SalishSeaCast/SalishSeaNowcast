@@ -104,6 +104,12 @@ results archive:
 
 
 run:
+  enabled hosts:
+    west.cloud-nowcast:
+      remote: True
+    salish-nowcast:
+      remote: False
+
   remote hosts:
     - cloud host
     - hpc host
@@ -454,3 +460,14 @@ message registry:
       success forecast2: forecast2 NEMO run completed
       failure forecast2: forecast2 NEMO run failed
       crash: watch_NEMO worker crashed
+    download_results:
+      checklist key: results files
+      success nowcast: nowcast results files downloaded
+      failure nowcast: nowcast results files download failed
+      success nowcast-green: nowcast-green results files downloaded
+      failure nowcast-green: nowcast-green results files download failed
+      success forecast: forecast results files downloaded
+      failure forecast: forecast results files download failed
+      success forecast2: forecast2 results files downloaded
+      failure forecast2: forecast2 results files download failed
+      crash: download_results worker crashed
