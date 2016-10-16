@@ -271,4 +271,37 @@ def after_watch_NEMO(msg, config):
         'success forecast': [],
         'success forecast2': [],
     }
+    if msg.type.startswith('success'):
+        run_type = msg.type.split()[1]
+        if config['run']['enabled hosts'][msg.payload['host']]['remote']:
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.download_results',
+                    args=[
+                        msg.payload['host'], run_type,
+                        '--run-date', msg.payload['run date']]))
+    return next_workers[msg.type]
+
+
+def after_download_results(msg, config):
+    """Calculate the list of workers to launch after the download_results
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nowcast': [],
+        'failure nowcast-green': [],
+        'failure forecast': [],
+        'failure forecast2': [],
+        'success nowcast': [],
+        'success nowcast-green': [],
+        'success forecast': [],
+        'success forecast2': [],
+    }
     return next_workers[msg.type]

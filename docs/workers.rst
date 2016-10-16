@@ -28,7 +28,9 @@ Process Flow
 
     Work flow of preparation for and execution of the daily runs.
 
-The green boxes in the figure above are the workers described below.
+The green,
+pink,
+and blue boxes in the figure above are the workers described below.
 
 The :ref:`nemonowcast:Scheduler` is a long-running process that periodically checks the system clock and launches workers when their scheduled time to run is reached.
 It is,
@@ -117,6 +119,13 @@ Workers
 -----------------
 
 .. automodule:: nowcast.workers.watch_NEMO
+    :members: main
+
+
+:kbd:`download_results`
+-----------------------
+
+.. automodule:: nowcast.workers.download_results
     :members: main
 
 
