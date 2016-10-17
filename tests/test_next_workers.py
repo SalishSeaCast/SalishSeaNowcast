@@ -282,8 +282,10 @@ class TestAfterWatchNEMO:
     def test_success_nowcast_launch_get_NeahBay_ssh_forecast(self, config):
         workers = next_workers.after_watch_NEMO(
             Message(
-                'watch_NEMO', 'success nowcast',
-                {'host': 'cloud', 'run date': '2016-10-16', 'completed': True}),
+                'watch_NEMO', 'success nowcast', {
+                    'nowcast': {
+                        'host': 'cloud', 'run date': '2016-10-16',
+                        'completed': True,}}),
                 config)
         expected = NextWorker(
             'nowcast.workers.get_NeahBay_ssh',
@@ -292,29 +294,38 @@ class TestAfterWatchNEMO:
 
     @pytest.mark.parametrize('msg', [
         Message(
-            'watch_NEMO', 'success nowcast',
-            {'host': 'cloud', 'run date': '2016-10-15', 'completed': True}),
+            'watch_NEMO', 'success nowcast', {
+                'nowcast': {
+                    'host': 'cloud', 'run date': '2016-10-15',
+                    'completed': True}}),
         Message(
-            'watch_NEMO', 'success forecast',
-            {'host': 'cloud', 'run date': '2016-10-15', 'completed': True}),
+            'watch_NEMO', 'success forecast', {
+                'forecast': {
+                    'host': 'cloud', 'run date': '2016-10-15',
+                    'completed': True}}),
         Message(
-            'watch_NEMO', 'success forecast2',
-            {'host': 'cloud', 'run date': '2016-10-15', 'completed': True}),
+            'watch_NEMO', 'success forecast2', {
+                'forecast2': {
+                    'host': 'cloud', 'run date': '2016-10-15',
+                    'completed': True}}),
     ])
     def test_success_launch_download_results(self, msg, config):
         workers = next_workers.after_watch_NEMO(msg, config)
+        run_type = msg.type.split()[1]
         expected = NextWorker(
             'nowcast.workers.download_results',
             args=[
-                msg.payload['host'], msg.type.split()[1],
-                '--run-date', msg.payload['run date']],
+                msg.payload[run_type]['host'], msg.type.split()[1],
+                '--run-date', msg.payload[run_type]['run date']],
             host='localhost')
         assert expected in workers
 
     @pytest.mark.parametrize('msg', [
         Message(
-            'watch_NEMO', 'success nowcast-green',
-            {'host': 'salish', 'run date': '2016-10-15', 'completed': True}),
+            'watch_NEMO', 'success nowcast-green', {
+                'nowcast-green': {
+                    'host': 'salish', 'run date': '2016-10-15',
+                    'completed': True}}),
     ])
     def test_success_nowcast_grn_no_launch_download_results(self, msg, config):
         workers = next_workers.after_watch_NEMO(msg, config)
