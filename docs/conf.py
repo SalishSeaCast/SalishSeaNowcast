@@ -57,7 +57,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'Salish Sea MEOPAR Tools'
+project = 'Salish Sea Nowcast System'
 author = (
     'Salish Sea MEOPAR Project Contributors '
     'and The University of British Columbia')
