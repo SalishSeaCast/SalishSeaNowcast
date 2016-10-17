@@ -204,7 +204,8 @@ def _calc_new_namelist_lines(
     it000_line, it000 = _get_namelist_value('nn_it000', lines)
     itend_line, itend = _get_namelist_value('nn_itend', lines)
     lines[it000_line] = lines[it000_line].replace(it000, str(prev_itend + 1))
-    restart_timestep = prev_itend
+    restart_timestep = int(
+        (prev_it000 - 1) + int(run_duration) * timesteps_per_day)
     new_itend = int(restart_timestep + (run_duration * timesteps_per_day))
     lines[itend_line] = lines[itend_line].replace(itend, str(new_itend))
     date0_line, date0 = _get_namelist_value('nn_date0', lines)
