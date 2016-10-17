@@ -362,12 +362,12 @@ logging:
 
 # Message system
 zmq:
-  server: localhost
+  server: skookum.eos.ubc.ca
   ports:
     # traffic between manager and message broker
-    manager: 4343
+    manager: 5554
     # traffic between workers and message broker
-    workers: 4344
+    workers: 5555
 
 message registry:
   # Message types that the manager process can send and their meanings
