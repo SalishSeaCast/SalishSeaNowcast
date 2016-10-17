@@ -291,14 +291,14 @@ def after_watch_NEMO(msg, config):
                 NextWorker(
                     'nowcast.workers.get_NeahBay_ssh', args=['forecast']))
         enabled_host_config = (
-            config['run']['enabled hosts'][msg.payload['host']])
+            config['run']['enabled hosts'][msg.payload[run_type]['host']])
         if not enabled_host_config['shared storage']:
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.download_results',
                     args=[
-                        msg.payload['host'], run_type,
-                        '--run-date', msg.payload['run date']]))
+                        msg.payload[run_type]['host'], run_type,
+                        '--run-date', msg.payload[run_type]['run date']]))
     return next_workers[msg.type]
 
 
