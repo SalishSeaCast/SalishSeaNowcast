@@ -13,27 +13,27 @@ file group: sallen
 # Workers scheduled to run at specific times
 scheduled workers:
   # Worker module name (fully qualified, dotted notation)
-  nowcast.workers.download_weather:
-    # Time period for worker launch repetition
-    every: day
-    # Time at which to launch the worker
-    # (quotes are required to ensure that time is interpreted as a string)
-    at: '05:00'
-    # Optional command-line options for the worker
-    # (quotes are necessary to force interpretation as a string)
-    cmd line opts: '06'
-  nowcast.workers.download_weather:
-    every: day
-    at: '11:00'
-    cmd line opts: '12'
-  nowcast.workers.download_weather:
-    every: day
-    at: '17:00'
-    cmd line opts: '18'
-  nowcast.workers.download_weather:
-    every: day
-    at: '23:00'
-    cmd line opts: '00'
+  - nowcast.workers.download_weather:
+      # Time period for worker launch repetition
+      every: day
+      # Time at which to launch the worker
+      # (quotes are required to ensure that time is interpreted as a string)
+      at: '05:00'
+      # Optional command-line options for the worker
+      # (quotes are necessary to force interpretation as a string)
+      cmd line opts: '06'
+  - nowcast.workers.download_weather:
+      every: day
+      at: '11:00'
+      cmd line opts: '12'
+  - nowcast.workers.download_weather:
+      every: day
+      at: '17:00'
+      cmd line opts: '18'
+  - nowcast.workers.download_weather:
+      every: day
+      at: '23:00'
+      cmd line opts: '00'
 
 
 coordinates: /results/nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc
