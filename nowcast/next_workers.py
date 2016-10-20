@@ -342,6 +342,20 @@ def after_clear_checklist(msg, config):
     next_workers = {
         'crash': [],
         'failure': [],
-        'success': [],
+        'success': [NextWorker('nemo_nowcast.workers.rotate_logs')],
     }
     return next_workers[msg.type]
+
+
+def after_rotate_logs(msg, config):
+    """Calculate the list of workers to launch after the rotate_logs worker
+    ends, but it is an empty list because rotate_logs is the last worker in
+    the daily automation cycle.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`collections.namedtuple`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    return []

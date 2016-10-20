@@ -366,9 +366,28 @@ class TestAfterClearChecklist:
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure',
-        'success',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config):
         workers = next_workers.after_clear_checklist(
             Message('clear_checklist', msg_type), config)
+        assert workers == []
+
+    def test_success_launch_rotate_logs(self, config):
+        workers = next_workers.after_clear_checklist(
+            Message('rotate_logs', 'success'), config)
+        assert workers[-1] == NextWorker(
+            'nemo_nowcast.workers.rotate_logs', args=[], host='localhost')
+
+
+class TestAfterRotateLogs:
+    """Unit tests for the after_rotate_logs function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config):
+        workers = next_workers.after_rotate_logs(
+            Message('rotate_logs', msg_type), config)
         assert workers == []
