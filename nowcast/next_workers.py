@@ -323,7 +323,7 @@ def after_download_results(msg, config):
         'success forecast': [],
         'success forecast2': [],
     }
-    if msg.type.startswith('success'):
+    if msg.type == 'success forecast2':
         next_workers[msg.type].append(NextWorker(
             'nemo_nowcast.workers.clear_checklist'))
     return next_workers[msg.type]
