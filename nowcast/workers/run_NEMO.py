@@ -358,18 +358,18 @@ def _build_script(run_dir, run_desc_filepath, results_dir, host_run_config):
     nemo_processors = jpni * jpnj
     xios_processors = int(run_desc['output']['XIOS servers'])
     email = host_run_config.get('email', 'nobody@example.com')
-    script = u'#!/bin/bash\n'
+    script = '#!/bin/bash\n'
     if host_run_config['job exec cmd'] == 'qsub':
-        script = u'\n'.join((script, u'{pbs_common}'.format(
+        script = '\n'.join((script, '{pbs_common}'.format(
             pbs_common=salishsea_cmd.api.pbs_common(
                 run_desc, nemo_processors + xios_processors, email,
                 results_dir))))
-    script = u'\n'.join((
+    script = '\n'.join((
         script,
-        u'{defns}\n'
-        u'{execute}\n'
-        u'{fix_permissions}\n'
-        u'{cleanup}'
+        '{defns}\n'
+        '{execute}\n'
+        '{fix_permissions}\n'
+        '{cleanup}'
         .format(
             defns=_definitions(
                 run_desc, run_desc_filepath, run_dir, results_dir,
@@ -386,11 +386,11 @@ def _definitions(
     run_desc, run_desc_filepath, run_dir, results_dir, host_run_config,
 ):
     defns = (
-        u'RUN_ID="{run_id}"\n'
-        u'RUN_DESC="{run_desc_file}"\n'
-        u'WORK_DIR="{run_dir}"\n'
-        u'RESULTS_DIR="{results_dir}"\n'
-        u'GATHER="{salishsea_cmd} gather"\n'
+        'RUN_ID="{run_id}"\n'
+        'RUN_DESC="{run_desc_file}"\n'
+        'WORK_DIR="{run_dir}"\n'
+        'RESULTS_DIR="{results_dir}"\n'
+        'GATHER="{salishsea_cmd} gather"\n'
     ).format(
         run_id=run_desc['run_id'],
         run_desc_file=run_desc_filepath.name,
@@ -402,41 +402,41 @@ def _definitions(
 
 
 def _execute(nemo_processors, xios_processors):
-    mpirun = u'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
+    mpirun = 'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
     if xios_processors:
-        mpirun = u' '.join((
+        mpirun = ' '.join((
             mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
     script = (
-        u'cd ${WORK_DIR}\n'
-        u'echo "working dir: $(pwd)"\n'
-        u'\n'
-        u'echo "Starting run at $(date)"\n'
-        u'mkdir -p ${RESULTS_DIR}\n')
-    script += u'{mpirun}\n'.format(mpirun=mpirun)
+        'cd ${WORK_DIR}\n'
+        'echo "working dir: $(pwd)"\n'
+        '\n'
+        'echo "Starting run at $(date)"\n'
+        'mkdir -p ${RESULTS_DIR}\n')
+    script += '{mpirun}\n'.format(mpirun=mpirun)
     script += (
-        u'echo "Ended run at $(date)"\n'
-        u'\n'
-        u'echo "Results gathering started at $(date)"\n'
-        u'${GATHER} ${RUN_DESC} ${RESULTS_DIR}\n'
-        u'echo "Results gathering ended at $(date)"\n'
+        'echo "Ended run at $(date)"\n'
+        '\n'
+        'echo "Results gathering started at $(date)"\n'
+        '${GATHER} ${RUN_DESC} ${RESULTS_DIR}\n'
+        'echo "Results gathering ended at $(date)"\n'
     )
     return script
 
 
 def _fix_permissions():
     script = (
-        u'chmod g+rwx ${RESULTS_DIR}\n'
-        u'chmod g+rw ${RESULTS_DIR}/*\n'
-        u'chmod o+rx ${RESULTS_DIR}\n'
-        u'chmod o+r ${RESULTS_DIR}/*\n'
+        'chmod g+rwx ${RESULTS_DIR}\n'
+        'chmod g+rw ${RESULTS_DIR}/*\n'
+        'chmod o+rx ${RESULTS_DIR}\n'
+        'chmod o+r ${RESULTS_DIR}/*\n'
     )
     return script
 
 
 def _cleanup():
     script = (
-        u'echo "Deleting run directory"\n'
-        u'rmdir $(pwd)\n'
+        'echo "Deleting run directory"\n'
+        'rmdir $(pwd)\n'
     )
     return script
 
