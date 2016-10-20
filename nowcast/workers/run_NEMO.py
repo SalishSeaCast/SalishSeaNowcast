@@ -390,6 +390,7 @@ def _definitions(
         'RUN_DESC="{run_desc_file}"\n'
         'WORK_DIR="{run_dir}"\n'
         'RESULTS_DIR="{results_dir}"\n'
+        'MPIRUN="mpirun"\n'
         'GATHER="{salishsea_cmd} gather"\n'
     ).format(
         run_id=run_desc['run_id'],
@@ -402,23 +403,28 @@ def _definitions(
 
 
 def _execute(nemo_processors, xios_processors):
-    mpirun = 'mpirun -np {procs} ./nemo.exe'.format(procs=nemo_processors)
+    mpirun = '${{MPIRUN}} -np {procs} ./nemo.exe'.format(procs=nemo_processors)
     if xios_processors:
         mpirun = ' '.join((
             mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
     script = (
+        'mkdir -p ${RESULTS_DIR}\n'
+        '\n'
         'cd ${WORK_DIR}\n'
-        'echo "working dir: $(pwd)"\n'
+        'echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout\n'
         '\n'
-        'echo "Starting run at $(date)"\n'
-        'mkdir -p ${RESULTS_DIR}\n')
-    script += '{mpirun}\n'.format(mpirun=mpirun)
+        'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
+    )
     script += (
-        'echo "Ended run at $(date)"\n'
+        '{mpirun} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr\n'
+        .format(mpirun=mpirun))
+    script += (
+        'echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout\n'
         '\n'
-        'echo "Results gathering started at $(date)"\n'
-        '${GATHER} ${RUN_DESC} ${RESULTS_DIR}\n'
-        'echo "Results gathering ended at $(date)"\n'
+        'echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '${GATHER} ${RUN_DESC} ${RESULTS_DIR} '
+        '>>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr\n'
+        'echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout\n'
     )
     return script
 
@@ -435,8 +441,9 @@ def _fix_permissions():
 
 def _cleanup():
     script = (
-        'echo "Deleting run directory"\n'
+        'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
         'rmdir $(pwd)\n'
+        'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
     )
     return script
 
