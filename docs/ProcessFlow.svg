@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="165.09096mm"
+   width="170.46455mm"
    height="283.52505mm"
-   viewBox="0 0 584.968 1004.6164"
+   viewBox="0 0 604.00829 1004.6164"
    id="svg4938"
    version="1.1"
    inkscape:version="0.91 r13725"
@@ -25,15 +25,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1"
-     inkscape:cx="300.72865"
-     inkscape:cy="572.26097"
+     inkscape:zoom="0.91477705"
+     inkscape:cx="302.00412"
+     inkscape:cy="502.30818"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1056"
-     inkscape:window-x="0"
+     inkscape:window-x="1366"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
      fit-margin-top="0"
@@ -57,7 +57,7 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-20.799374,-62.974211)">
+     transform="translate(-20.799344,-62.974211)">
     <g
        id="g5060"
        transform="translate(0,146.50001)">
@@ -555,6 +555,43 @@
            x="256.56696"
            id="tspan3104"
            sodipodi:role="line">download_results</tspan></text>
+    </g>
+    <g
+       id="g3453">
+      <rect
+         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         id="rect3438"
+         width="172.53827"
+         height="31.859035"
+         x="452.26935"
+         y="633.50604" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         x="466.74731"
+         y="653.72198"
+         id="text3440"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan3442"
+           x="466.74731"
+           y="653.72198"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro'">clear_checklist</tspan></text>
+    </g>
+    <g
+       id="g3444"
+       transform="matrix(0,-1,1,0,316.03263,980.39117)">
+      <path
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 330.51479,127.20539 0,-25.49479"
+         id="path3446"
+         inkscape:connector-curvature="0" />
+      <path
+         sodipodi:nodetypes="ccccc"
+         inkscape:connector-curvature="0"
+         id="path3448"
+         d="m 330.84052,136.05622 7.60791,-23.15845 -7.7493,7.36104 -7.23623,-7.22693 z"
+         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
   </g>
 </svg>

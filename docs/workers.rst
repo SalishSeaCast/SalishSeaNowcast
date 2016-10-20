@@ -129,6 +129,13 @@ Workers
     :members: main
 
 
+:kbd:`clear_checklist`
+-----------------------
+
+.. automodule:: nemo_nowcast.workers.clear_checklist
+    :members: main
+
+
 :kbd:`next_workers` Module
 ==========================
 

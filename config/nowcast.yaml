@@ -483,3 +483,8 @@ message registry:
       success forecast2: forecast2 results files downloaded
       failure forecast2: forecast2 results files download failed
       crash: download_results worker crashed
+  clear_checklist:
+    clear checklist: request that manager clear system state checklist
+    success: system state checklist cleared
+    failure: system state checklist clearance failed
+    crash: clear_checklist worker crashed

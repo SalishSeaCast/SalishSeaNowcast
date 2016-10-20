@@ -341,12 +341,34 @@ class TestAfterDownloadResults:
         'failure nowcast-green',
         'failure forecast',
         'failure forecast2',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config):
+        workers = next_workers.after_download_results(
+            Message('download_results', msg_type), config)
+        assert workers == []
+
+    @pytest.mark.parametrize('msg_type', [
         'success nowcast',
         'success nowcast-green',
         'success forecast',
         'success forecast2',
     ])
-    def test_no_next_worker_msg_types(self, msg_type, config):
+    def test_success_launch_clear_checklist(self, msg_type, config):
         workers = next_workers.after_download_results(
             Message('download_results', msg_type), config)
+        assert workers[-1] == NextWorker(
+            'nemo_nowcast.workers.clear_checklist', args=[], host='localhost')
+
+
+class TestAfterClearChecklist:
+    """Unit tests for the after_clear_checklist function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config):
+        workers = next_workers.after_clear_checklist(
+            Message('clear_checklist', msg_type), config)
         assert workers == []
