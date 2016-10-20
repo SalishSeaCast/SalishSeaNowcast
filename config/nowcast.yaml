@@ -488,3 +488,8 @@ message registry:
     success: system state checklist cleared
     failure: system state checklist clearance failed
     crash: clear_checklist worker crashed
+  rotate_logs:
+    checklist key: log rotation
+    success: log files rotated
+    failure: log file rotation failed
+    crash: rotate_logs worker crashed

@@ -25,9 +25,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.91477705"
-     inkscape:cx="302.00412"
-     inkscape:cy="502.30818"
+     inkscape:zoom="2.5873802"
+     inkscape:cx="425.51366"
+     inkscape:cy="372.21824"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -557,7 +557,7 @@
            sodipodi:role="line">download_results</tspan></text>
     </g>
     <g
-       id="g3453">
+       id="g3493">
       <rect
          style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          id="rect3438"
@@ -568,14 +568,14 @@
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-         x="466.74731"
-         y="653.72198"
+         x="470.94086"
+         y="653.75195"
          id="text3440"
          sodipodi:linespacing="125%"><tspan
            sodipodi:role="line"
            id="tspan3442"
-           x="466.74731"
-           y="653.72198"
+           x="470.94086"
+           y="653.75195"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro'">clear_checklist</tspan></text>
     </g>
     <g
@@ -592,6 +592,43 @@
          id="path3448"
          d="m 330.84052,136.05622 7.60791,-23.15845 -7.7493,7.36104 -7.23623,-7.22693 z"
          style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
+    <g
+       transform="translate(207.58288,563.65448)"
+       id="g3502-3">
+      <path
+         inkscape:connector-curvature="0"
+         id="path3504-6"
+         d="m 330.51479,127.20539 0,-25.49479"
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 330.84052,136.05622 7.60791,-23.15845 -7.7493,7.36104 -7.23623,-7.22693 z"
+         id="path3506-7"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="ccccc" />
+    </g>
+    <g
+       id="g3498">
+      <rect
+         y="699.89124"
+         x="452.26935"
+         height="31.859035"
+         width="172.53827"
+         id="rect3481"
+         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         sodipodi:linespacing="125%"
+         id="text3483"
+         y="719.47772"
+         x="488.56946"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro'"
+           y="719.47772"
+           x="488.56946"
+           id="tspan3485"
+           sodipodi:role="line">rotate_logs</tspan></text>
     </g>
   </g>
 </svg>

@@ -130,9 +130,16 @@ Workers
 
 
 :kbd:`clear_checklist`
------------------------
+----------------------
 
 .. automodule:: nemo_nowcast.workers.clear_checklist
+    :members: main
+
+
+:kbd:`rotate_logs`
+------------------
+
+.. automodule:: nemo_nowcast.workers.rotate_logs
     :members: main
 
 
