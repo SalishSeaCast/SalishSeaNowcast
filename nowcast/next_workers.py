@@ -323,4 +323,25 @@ def after_download_results(msg, config):
         'success forecast': [],
         'success forecast2': [],
     }
+    if msg.type.startswith('success'):
+        next_workers[msg.type].append(NextWorker(
+            'nemo_nowcast.workers.clear_checklist'))
+    return next_workers[msg.type]
+
+
+def after_clear_checklist(msg, config):
+    """Calculate the list of workers to launch after the clear_checklist
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure': [],
+        'success': [],
+    }
     return next_workers[msg.type]
