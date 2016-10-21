@@ -129,6 +129,13 @@ Workers
     :members: main
 
 
+:kbd:`make_plots`
+-----------------
+
+.. automodule:: nowcast.workers.make_plots
+    :members: main
+
+
 :kbd:`clear_checklist`
 ----------------------
 
