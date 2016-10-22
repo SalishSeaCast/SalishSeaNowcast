@@ -99,7 +99,7 @@ def _prep_plot_data(
     temperature_profiles = grid_T_hr.variables['votemper'][..., j, i]
     model_salinity_ts = _calc_results_time_series(
         salinity_profiles, model_time, node_depth, timezone,
-        tracer_depths, tracer_mask, w_depths, psu_to_teos=True)
+        tracer_depths, tracer_mask, w_depths)
     model_temperature_ts = _calc_results_time_series(
         temperature_profiles, model_time, node_depth, timezone,
         tracer_depths, tracer_mask, w_depths)
