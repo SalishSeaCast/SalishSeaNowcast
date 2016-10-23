@@ -58,6 +58,7 @@ install_requires = [
     'numpy',
     'pandas',
     'paramiko',
+    'pillow',
     'raven',
     'retrying',
     'scipy',

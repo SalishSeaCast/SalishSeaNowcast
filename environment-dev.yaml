@@ -29,6 +29,7 @@ dependencies:
   - numpy
   - pandas
   - paramiko
+  - pillow
   - pyyaml
   - pyzmq
   - pip
