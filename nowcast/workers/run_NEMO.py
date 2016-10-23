@@ -322,8 +322,9 @@ def _run_description(
         forcing=forcing,
         namelists=namelists,
     )
-    run_desc['grid']['coordinates'] = config['coordinates']
-    run_desc['grid']['bathymetry'] = config['run types'][run_type]['bathymetry']
+    run_desc['grid']['coordinates'] = Path(config['coordinates']).name
+    run_desc['grid']['bathymetry'] = Path(
+        config['run types'][run_type]['bathymetry']).name
     run_desc['output']['files'] = str((run_prep_dir/'iodef.xml').resolve())
     run_desc['output']['domain'] = str(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')

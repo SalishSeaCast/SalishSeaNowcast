@@ -39,9 +39,9 @@ def config(scope='function'):
             'nowcast': {
                 'config name': 'SalishSea',
                 'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc',
                 'duration': 1},
             'nowcast-green': {
                 'config name': 'SOG',
@@ -53,16 +53,16 @@ def config(scope='function'):
             'forecast': {
                 'config name': 'SalishSea',
                 'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc',
                 'duration': 1.25},
             'forecast2': {
                 'config name': 'SalishSea',
                 'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc',
                 'duration': 1.25},
         },
         'run': {
@@ -526,8 +526,7 @@ class TestRunDescription:
         assert run_desc['paths'][path] == tmp_run_prep
 
     @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast', 'coordinates',
-            'NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+        ('nowcast', 'coordinates', 'coordinates_seagrid_SalishSea.nc'),
     ])
     def test_grid_coordinates(
         self, run_type, path, expected, worker_module, config, run_date,
