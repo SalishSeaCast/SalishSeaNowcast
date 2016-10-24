@@ -302,8 +302,47 @@ def after_watch_NEMO(msg, config):
     return next_workers[msg.type]
 
 
-def after_download_results(msg, config):
+def after_download_results(msg, config, checklist):
     """Calculate the list of workers to launch after the download_results
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nowcast': [],
+        'failure forecast': [],
+        'failure forecast2': [],
+        'success nowcast': [],
+        'success forecast': [],
+        'success forecast2': [],
+    }
+    if msg.type.startswith('success'):
+        run_type = msg.type.split()[1]
+        # plot_type = 'research' if run_type == 'nowcast' else 'publish'
+        plot_type = 'publish'  # temporary; revert to line above ultimately
+        run_date = checklist['NEMO run'][run_type]['run date']
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.make_plots',
+                args=[run_type, plot_type, '--run-date', run_date]))
+    return next_workers[msg.type]
+
+
+def after_make_plots(msg, config):
+    """Calculate the list of workers to launch after the make_plots
     worker ends.
 
     :arg msg: Nowcast system message.
@@ -314,16 +353,18 @@ def after_download_results(msg, config):
     """
     next_workers = {
         'crash': [],
-        'failure nowcast': [],
-        'failure nowcast-green': [],
-        'failure forecast': [],
-        'failure forecast2': [],
-        'success nowcast': [],
-        'success nowcast-green': [],
-        'success forecast': [],
-        'success forecast2': [],
+        'failure nowcast research': [],
+        'failure nowcast comparison': [],
+        'failure nowcast publish': [],
+        'failure forecast publish': [],
+        'failure forecast2 publish': [],
+        'success nowcast research': [],
+        'success nowcast comparison': [],
+        'success nowcast publish': [],
+        'success forecast publish': [],
+        'success forecast2 publish': [],
     }
-    if msg.type == 'success forecast2':
+    if msg.type == 'success forecast2 publish':
         next_workers[msg.type].append(NextWorker(
             'nemo_nowcast.workers.clear_checklist'))
     return next_workers[msg.type]

@@ -24,10 +24,11 @@ import shutil
 
 import arrow
 import matplotlib
+matplotlib.use('Agg')
+from nemo_nowcast import NowcastWorker
 import netCDF4 as nc
 import scipy.io as sio
 
-matplotlib.use('Agg')
 from nowcast import lib
 from nowcast.figures import (
     figures,
@@ -41,16 +42,22 @@ from nowcast.figures.publish import (
     storm_surge_alerts_thumbnail,
     compare_tide_prediction_max_ssh,
 )
-from nowcast.nowcast_worker import NowcastWorker
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'make_plots'
+logger = logging.getLogger(NAME)
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
+    """Set up and run the worker.
+
+    For command-line usage see:
+
+    :command:`python -m nowcast.workers.make_plots --help`
+    """
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'run_type', choices={'nowcast', 'forecast', 'forecast2'},
         help='''
         Type of run to symlink files for:
@@ -59,7 +66,7 @@ def main():
         'ssh' means Neah Bay sea surface height files only (for forecast run).
         ''',
     )
-    worker.arg_parser.add_argument(
+    worker.cli.add_argument(
         'plot_type', choices={'publish', 'research', 'comparison'},
         help='''
         Which type of plots to produce:
@@ -68,14 +75,9 @@ def main():
         "comparison" means ferry salinity plots
         '''
     )
-    salishsea_today = arrow.now('Canada/Pacific').floor('day')
-    worker.arg_parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=salishsea_today,
-        help='''
-        Date of the run to symlink files for; use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_today.format('YYYY-MM-DD')),
+    worker.cli.add_date_option(
+        '--run-date', default=arrow.now().floor('day'),
+        help='Date of the run to symlink files for.'
     )
     worker.run(make_plots, success, failure)
 
@@ -113,8 +115,8 @@ def make_plots(parsed_args, config, *args):
     dmy = run_date.format('DDMMMYY').lower()
     run_type = parsed_args.run_type
     plot_type = parsed_args.plot_type
-    results_home = config['run']['results archive'][run_type]
-    dev_results_home = config['run']['results archive']['nowcast-green']
+    results_home = config['results archive'][run_type]
+    dev_results_home = config['results archive']['nowcast-green']
     plots_dir = os.path.join(results_home, dmy, 'figures')
     lib.mkdir(plots_dir, logger, grp_name=config['file group'])
     _make_plot_files(
@@ -133,22 +135,22 @@ def _make_plot_files(
         'research': _make_research_plots,
         'comparison': _make_comparisons_plots,
     }
-    weather_path = config['weather']['ops_dir']
+    weather_path = config['weather']['ops dir']
     if run_type in ['forecast', 'forecast2']:
         weather_path = os.path.join(weather_path, 'fcst/')
     results_dir = os.path.join(results_home, dmy)
     dev_results_dir = os.path.join(dev_results_home, dmy)
-    bathy = nc.Dataset(config['bathymetry'])
-    coastline = sio.loadmat(config['coastline'])
-    mesh_mask = nc.Dataset(config['run_types'][run_type]['mesh_mask'])
+    bathy = nc.Dataset(config['run types'][run_type]['bathymetry'])
+    coastline = sio.loadmat(config['figures']['coastline'])
+    mesh_mask = nc.Dataset(config['run types'][run_type]['mesh mask'])
     dev_mesh_mask = nc.Dataset(
-        config['run_types']['nowcast-green']['mesh_mask'])
+        config['run types']['nowcast-green']['mesh mask'])
     tidal_predictions = config['ssh']['tidal_predictions']
     ferry_data_dir = config['observations']['ferry data']
     make_plots_funcs[plot_type](
         dmy, weather_path, bathy, results_dir, plots_dir, coastline,
         tidal_predictions=tidal_predictions,
-        timezone=config['timezone'],
+        timezone=config['figures']['timezone'],
         mesh_mask=mesh_mask,
         dev_mesh_mask=dev_mesh_mask,
         ferry_data_dir=ferry_data_dir,
@@ -158,7 +160,7 @@ def _make_plot_files(
 
 def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
     dest_dir = os.path.join(
-        config['web']['figures']['storage_path'], run_type, dmy)
+        config['figures']['storage path'], run_type, dmy)
     lib.mkdir(dest_dir, logger, grp_name=config['file group'])
     for f in glob(os.path.join(plots_dir, '*')):
         lib.fix_perms(f, grp_name=config['file group'])
@@ -182,12 +184,12 @@ def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
                 run_type == 'forecast2' and dmy == yesterday_dmy,
             ))
     )):
-        thumbnail_root = config['web']['figures']['storm_surge_alerts_thumbnail']
+        thumbnail_root = config['figures']['storm surge alerts thumbnail']
         dmy_thumbnail = (
             '{plot_name}_{dmy}.png'.format(plot_name=thumbnail_root, dmy=dmy))
         dest_dir = os.path.join(
-            config['web']['figures']['storage_path'],
-            config['web']['storm_surge_path'])
+            config['figures']['storage path'],
+            config['figures']['storm surge info portal path'])
         undated_thumbnail = os.path.join(
             dest_dir, '{}.png'.format(thumbnail_root))
         shutil.copy2(os.path.join(plots_dir, dmy_thumbnail), undated_thumbnail)
@@ -208,26 +210,29 @@ def _make_publish_plots(
         for name in names
     }
 
+    logger.debug('starting storm_surge_alerts_thumbnail()')
     fig = storm_surge_alerts_thumbnail.storm_surge_alerts_thumbnail(
         grids_15m, weather_path, coastline, tidal_predictions)
     filename = os.path.join(
         plots_dir, 'Website_thumbnail_{date}.png'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
+    logger.debug('starting storm_surge_alerts()')
     fig = storm_surge_alerts.storm_surge_alerts(
         grids_15m, weather_path, coastline, tidal_predictions)
     filename = os.path.join(
         plots_dir, 'Threshold_website_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
+    logger.debug('starting pt_atkinson_tide()')
     fig = pt_atkinson_tide.pt_atkinson_tide(
         grid_T_hr, tidal_predictions, timezone)
     filename = os.path.join(
         plots_dir, 'PA_tidal_predictions_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
     tide_gauge_stns = (
         # stn name, figure filename prefix
@@ -238,6 +243,9 @@ def _make_publish_plots(
         ('Cherry Point', 'CP_maxSSH'),
     )
     for stn_name, fig_file_prefix in tide_gauge_stns:
+        logger.debug(
+            'starting compare_tide_prediction_max_ssh() for {}'
+            .format(stn_name))
         fig = compare_tide_prediction_max_ssh.compare_tide_prediction_max_ssh(
             stn_name, grid_T_hr, grids_15m, bathy, weather_path,
             tidal_predictions, timezone)
@@ -246,43 +254,48 @@ def _make_publish_plots(
             .format(date=dmy, fig_file_prefix=fig_file_prefix))
         fig.savefig(
             filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-        logger.debug('{} saved'.format(filename))
+        logger.info('{} saved'.format(filename))
 
+    logger.debug('starting figures.compare_water_levels()')
     fig = figures.compare_water_levels(grid_T_hr, bathy, grids_15m, coastline)
     filename = os.path.join(
         plots_dir, 'NOAA_ssh_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
+    logger.debug('starting figures.plot_thresholds_all()')
     fig = figures.plot_thresholds_all(
         grid_T_hr, bathy, grids_15m, weather_path, coastline,
         tidal_predictions)
     filename = os.path.join(
         plots_dir, 'WaterLevel_Thresholds_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
+    logger.debug('starting figures.Sandheads_winds()')
     fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
     filename = os.path.join(
         plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
+    logger.debug('starting figures.winds_average_max()')
     fig = figures.winds_average_max(
         grid_T_hr, bathy, weather_path, coastline,
         station='all', wind_type='average')
     filename = os.path.join(
         plots_dir, 'Avg_wind_vectors_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
+    logger.debug('starting figures.winds_average_max()')
     fig = figures.winds_average_max(
         grid_T_hr, bathy, weather_path, coastline,
         station='all', wind_type='max')
     filename = os.path.join(
         plots_dir, 'Wind_vectors_at_max_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
 
 def _make_comparisons_plots(
@@ -299,7 +312,7 @@ def _make_comparisons_plots(
     fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
     filename = os.path.join(plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
     # Ferry routes surface salinity
     for ferry_route in ('HB_DB', 'TW_DP', 'TW_SB'):
@@ -310,7 +323,7 @@ def _make_comparisons_plots(
                 plots_dir, '{route}_ferry_salinity_{date}.svg'
                 .format(route=ferry_route, date=dmy))
             fig.savefig(filename, facecolor=fig.get_facecolor())
-            logger.debug('{} saved'.format(filename))
+            logger.info('{} saved'.format(filename))
         except (KeyError, ValueError, FileNotFoundError):
             # Observations missing salinity data,
             # or ferry data or run results (most likely the former)
@@ -329,7 +342,7 @@ def _make_comparisons_plots(
             plots_dir, 'Compare_VENUS_{node}_{date}.svg'
             .format(node=node_name.rstrip(' node').replace(' ', '_'), date=dmy))
         fig.savefig(filename, facecolor=fig.get_facecolor())
-        logger.debug('{} saved'.format(filename))
+        logger.info('{} saved'.format(filename))
 
 
 def _future_comparison_plots(
@@ -366,7 +379,7 @@ def _future_comparison_plots(
             plots_dir, '{station}_ADCP_{date}.svg'.format(station=name,
                                                           date=dmy))
         fig.savefig(filename, facecolor=fig.get_facecolor())
-        logger.debug('{} saved'.format(filename))
+        logger.info('{} saved'.format(filename))
 
         fig = research_VENUS.plotdepavADCP(
             model, obs, date, name)
@@ -374,7 +387,7 @@ def _future_comparison_plots(
             plots_dir, '{station}_depavADCP_{date}.svg'.format(station=name,
                                                                date=dmy))
         fig.savefig(filename, facecolor=fig.get_facecolor())
-        logger.debug('{} saved'.format(filename))
+        logger.info('{} saved'.format(filename))
 
         fig = research_VENUS.plottimeavADCP(
             model, obs, date, name)
@@ -382,7 +395,7 @@ def _future_comparison_plots(
             plots_dir, '{station}_timeavADCP_{date}.svg'.format(station=name,
                                                                 date=dmy))
         fig.savefig(filename, facecolor=fig.get_facecolor())
-        logger.debug('{} saved'.format(filename))
+        logger.info('{} saved'.format(filename))
 
 
 def _make_research_plots(
@@ -402,31 +415,31 @@ def _make_research_plots(
     filename = os.path.join(
         plots_dir, 'Salinity_on_thalweg_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
     fig = figures.thalweg_temperature(grid_T_dy, mesh_mask, bathy)
     filename = os.path.join(
         plots_dir, 'Temperature_on_thalweg_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
     fig = figures.plot_surface(grid_T_dy, grid_U_dy, grid_V_dy, bathy)
     filename = os.path.join(
         plots_dir, 'T_S_Currents_on_surface_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
     fig = research_VENUS.plot_vel_NE_gridded('Central', grid_c)
     filename = os.path.join(
         plots_dir, 'Currents_at_VENUS_Central_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
     fig = research_VENUS.plot_vel_NE_gridded('East', grid_e)
     filename = os.path.join(
         plots_dir, 'Currents_at_VENUS_East_{date}.svg'.format(date=dmy))
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.debug('{} saved'.format(filename))
+    logger.info('{} saved'.format(filename))
 
 
 def _results_dataset(period, grid, results_dir):
