@@ -111,10 +111,12 @@ def make_forcing_links(parsed_args, config, *args):
         sftp_client.close()
         ssh_client.close()
         checklist = {
-            host_name: '{0.run_type} {date} ssh'
-            .format(
-                parsed_args,
-                date=parsed_args.run_date.format('YYYY-MM-DD'))}
+            host_name: {
+                'links': '{0.run_type} {date} ssh'
+                         .format(
+                            parsed_args,
+                            date=parsed_args.run_date.format('YYYY-MM-DD')),
+                'run date': parsed_args.run_date.format('YYYY-MM-DD')}}
         return checklist
     _make_runoff_links(sftp_client, host_run_config, run_date, host_name)
     _make_weather_links(
@@ -122,8 +124,14 @@ def make_forcing_links(parsed_args, config, *args):
     sftp_client.close()
     ssh_client.close()
     checklist = {
-        host_name: '{0.run_type} {date} ssh rivers weather'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD'))}
+        host_name: {
+            'links': '{0.run_type} {date} ssh rivers weather'
+                     .format(
+                        parsed_args,
+                        date=parsed_args.run_date.format('YYYY-MM-DD')),
+            'run date': parsed_args.run_date.format('YYYY-MM-DD')
+        }
+    }
     return checklist
 
 
