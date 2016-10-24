@@ -69,6 +69,11 @@ ssh:
   ssh dir: /results/forcing/sshNeahBay/
 
 
+observations:
+  # Storage directory for ONC ferry instruments data .mat files
+  ferry data: /ocean/jieliu/research/meopar/ONC_ferries/
+
+
 run types:
   # Keys are run types to execute, values are NEMO configuration name,
   # bathymetry, and mesh mask to use.
@@ -76,8 +81,8 @@ run types:
   # and forecast2 requires a forecast to have been completed.
   nowcast:
     config name: SalishSea
-    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
-    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
+    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1  # day
   nowcast-green:
     config name:  SOG
@@ -86,21 +91,43 @@ run types:
     duration: 1  # day
   forecast:
     config name:  SalishSea
-    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
-    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
+    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1.25  # days
   forecast2:
     config name:  SalishSea
-    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_meter_SalishSea2.nc
-    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_SalishSea2.nc
+    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1.25  # days
 
 
 results archive:
+  # Keys are run types.
+  # Values are directories on results server where run results are stored
+  # in ddmmmyy/ directories.
   nowcast: /results/SalishSea/nowcast/
   forecast: /results/SalishSea/forecast/
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
+
+
+figures:
+  # Pacific Now-West coastline polygons file
+  coastline: /ocean/rich/more/mmapbase/bcgeo/PNW.mat
+  # Timezone to use in model results figures
+  ## TODO: Consider changing figures code to use arrow.to('local') as make_feeds worker does
+  timezone: Canada/Pacific
+  # Directory behind the https://salishsea.eos.ubc.ca/nowcast-sys/figures/
+  # static web server that figure files are to be copied to and requested from
+  storage path: /results/nowcast-sys/figures/
+  # Directory under storage path where most recent storm surge alerts thumbnail
+  # image is stored
+  storm surge info portal path: storm-surge/
+  # Filename root for the storm surge alerts thumbnail image.
+  # _dmy.png is appended for the version stored in the run results figures/ directory
+  # An undated .png version of the most recently generated one is stored in
+  # for use on the Strm Surge Information Portal page.
+  storm surge alerts thumbnail: Website_thumbnail
 
 
 run:
@@ -476,13 +503,24 @@ message registry:
       checklist key: results files
       success nowcast: nowcast results files downloaded
       failure nowcast: nowcast results files download failed
-      success nowcast-green: nowcast-green results files downloaded
-      failure nowcast-green: nowcast-green results files download failed
       success forecast: forecast results files downloaded
       failure forecast: forecast results files download failed
       success forecast2: forecast2 results files downloaded
       failure forecast2: forecast2 results files download failed
       crash: download_results worker crashed
+    make_plots:
+      checklist key: plots
+      success nowcast publish: nowcast publish plots produced
+      success nowcast research: nowcast reseach plots produced
+      success nowcast comparison: nowcast comparison plots produced
+      failure nowcast publish: nowcast publish plots failed
+      failure nowcast research: nowcast research plots failed
+      failure nowcast comparison: nowcast comparison plots failed
+      success forecast publish: forecast publish plots produced
+      failure forecast publish: forecast publish plots failed
+      success forecast2 publish: forecast2 publish plots produced
+      failure forecast2 publish: forecast2 publish plots failed
+      crash: make_plots worker crashed
     clear_checklist:
       clear checklist: request that manager clear system state checklist
       success: system state checklist cleared

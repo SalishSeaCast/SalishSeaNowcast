@@ -23,8 +23,6 @@ from unittest.mock import (
 import arrow
 import pytest
 
-import nowcast.lib
-
 
 @pytest.fixture
 def worker_module():
@@ -36,33 +34,31 @@ def worker_module():
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
+    def test_instantiate_worker(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('make_plots',)
         assert list(kwargs.keys()) == ['description']
 
     def test_add_run_type_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('run_type',)
-        assert kwargs['choices'] == set(('nowcast', 'forecast', 'forecast2'))
+        assert kwargs['choices'] == {'nowcast', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
     def test_add_plot_type_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('plot_type',)
-        assert kwargs['choices'] == set(('publish', 'research', 'comparison'))
+        assert kwargs['choices'] == {'publish', 'research', 'comparison'}
         assert 'help' in kwargs
 
     def test_add_run_date_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[2]
+        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--run-date',)
-        assert kwargs['type'] == nowcast.lib.arrow_date
-        assert kwargs['default'] == arrow.now('Canada/Pacific').floor('day')
+        assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker, worker_module):

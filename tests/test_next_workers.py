@@ -338,21 +338,56 @@ class TestAfterDownloadResults:
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast',
-        'failure nowcast-green',
         'failure forecast',
         'failure forecast2',
-        'success nowcast',
-        'success nowcast-green',
-        'success forecast',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config):
+        checklist = {}
         workers = next_workers.after_download_results(
-            Message('download_results', msg_type), config)
+            Message('download_results', msg_type), config, checklist)
         assert workers == []
 
-    def test_success_forecast2_launch_clear_checklist(self, config):
+    @pytest.mark.parametrize('run_type, plot_type', [
+        ('nowcast', 'publish'),
+        ('forecast', 'publish'),
+        ('forecast2', 'publish'),
+    ])
+    def test_success_launch_make_plots(self, run_type, plot_type, config):
+        checklist = {'NEMO run': {run_type: {'run date': '2016-10-22'}}}
         workers = next_workers.after_download_results(
-            Message('download_results', 'success forecast2'), config)
+            Message(
+                'download results', 'success {}'.format(run_type)),
+            config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_plots',
+            args=[run_type, plot_type, '--run-date', '2016-10-22'],
+            host='localhost')
+        assert expected in workers
+
+
+class TestAfterMakePlots:
+    """Unit tests for the after_make_plots function.
+    """
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast research',
+        'failure nowcast comparison',
+        'failure nowcast publish',
+        'failure forecast publish',
+        'failure forecast2 publish',
+        'success nowcast research',
+        'success nowcast comparison',
+        'success nowcast publish',
+        'success forecast publish',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config):
+        workers = next_workers.after_make_plots(
+            Message('make_plots', msg_type), config)
+        assert workers == []
+
+    def test_success_forecast2_publish_launch_clear_checklist(self, config):
+        workers = next_workers.after_make_plots(
+            Message('make_plots', 'success forecast2 publish'), config)
         assert workers[-1] == NextWorker(
             'nemo_nowcast.workers.clear_checklist', args=[], host='localhost')
 
