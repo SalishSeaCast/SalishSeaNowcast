@@ -21,12 +21,20 @@ Function names **must** be of the form :py:func:`after_worker_name`.
 from nemo_nowcast import NextWorker
 
 
-def after_download_weather(msg, config):
+def after_download_weather(msg, config, checklist):
     """Calculate the list of workers to launch after the download_weather worker
     ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -60,12 +68,20 @@ def after_download_weather(msg, config):
     return next_workers[msg.type]
 
 
-def after_make_runoff_file(msg, config):
+def after_make_runoff_file(msg, config, checklist):
     """Calculate the list of workers to launch after the make_runoff_file
     worker ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -78,12 +94,20 @@ def after_make_runoff_file(msg, config):
     return next_workers[msg.type]
 
 
-def after_get_NeahBay_ssh(msg, config):
+def after_get_NeahBay_ssh(msg, config, checklist):
     """Calculate the list of workers to launch after the get_NeahBay_ssh worker
     ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -111,12 +135,20 @@ def after_get_NeahBay_ssh(msg, config):
     return next_workers[msg.type]
 
 
-def after_grib_to_netcdf(msg, config):
+def after_grib_to_netcdf(msg, config, checklist):
     """Calculate the list of workers to launch after the grib_to_netcdf worker
     ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -154,12 +186,20 @@ def after_grib_to_netcdf(msg, config):
     return next_workers[msg.type]
 
 
-def after_upload_forcing(msg, config):
+def after_upload_forcing(msg, config, checklist):
     """Calculate the list of workers to launch after the upload_forcing worker
     ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -195,12 +235,20 @@ def after_upload_forcing(msg, config):
     return next_workers[msg.type]
 
 
-def after_make_forcing_links(msg, config):
+def after_make_forcing_links(msg, config, checklist):
     """Calculate the list of workers to launch after the make_forcing_links
     worker ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -241,11 +289,19 @@ def after_make_forcing_links(msg, config):
     return next_workers[msg.type]
 
 
-def after_run_NEMO(msg, config):
+def after_run_NEMO(msg, config, checklist):
     """Calculate the list of workers to launch after the run_NEMO worker ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -264,11 +320,19 @@ def after_run_NEMO(msg, config):
     return next_workers[msg.type]
 
 
-def after_watch_NEMO(msg, config):
+def after_watch_NEMO(msg, config, checklist):
     """Calculate the list of workers to launch after the watch_NEMO worker ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -341,12 +405,20 @@ def after_download_results(msg, config, checklist):
     return next_workers[msg.type]
 
 
-def after_make_plots(msg, config):
+def after_make_plots(msg, config, checklist):
     """Calculate the list of workers to launch after the make_plots
     worker ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -370,12 +442,20 @@ def after_make_plots(msg, config):
     return next_workers[msg.type]
 
 
-def after_clear_checklist(msg, config):
+def after_clear_checklist(msg, config, checklist):
     """Calculate the list of workers to launch after the clear_checklist
     worker ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
@@ -388,13 +468,21 @@ def after_clear_checklist(msg, config):
     return next_workers[msg.type]
 
 
-def after_rotate_logs(msg, config):
+def after_rotate_logs(msg, config, checklist):
     """Calculate the list of workers to launch after the rotate_logs worker
     ends, but it is an empty list because rotate_logs is the last worker in
     the daily automation cycle.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`collections.namedtuple`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
 
     :returns: Worker(s) to launch next
     :rtype: list
