@@ -242,18 +242,34 @@ class TestAfterMakeForcingLinks:
         assert workers == []
 
     @pytest.mark.parametrize('msg_type, args, host_name', [
-        ('success nowcast+', ['west.cloud', 'nowcast'], 'west.cloud'),
+        ('success nowcast+',
+            ['west.cloud', 'nowcast', '--run-date', '2016-10-23'],
+            'west.cloud'),
         ('success nowcast-green',
-            ['salish', 'nowcast-green', '--shared-storage'], 'salish'),
-        ('success ssh', ['west.cloud', 'forecast'], 'west.cloud'),
-        ('success forecast2', ['west.cloud', 'forecast2'], 'west.cloud'),
+            [
+                'salish', 'nowcast-green',
+                '--shared-storage',
+                '--run-date', '2016-10-23'],
+            'salish'),
+        ('success ssh',
+            ['west.cloud', 'forecast', '--run-date', '2016-10-23'],
+            'west.cloud'),
+        ('success forecast2',
+            ['west.cloud', 'forecast2', '--run-date', '2016-10-23'],
+            'west.cloud'),
     ])
     def test_success_launch_run_NEMO(
         self, msg_type, args, host_name, config, checklist,
     ):
-        workers = next_workers.after_make_forcing_links(
-            Message('make_forcing_links', msg_type, payload={host_name: ''}),
-            config, checklist)
+        p_checklist = patch.dict(
+            checklist,
+            {'forcing links': {
+                host_name: {'links': '', 'run date': '2016-10-23'}}})
+        with p_checklist:
+            workers = next_workers.after_make_forcing_links(
+                Message(
+                    'make_forcing_links', msg_type, payload={host_name: ''}),
+                config, checklist)
         expected = NextWorker(
             'nowcast.workers.run_NEMO', args=args, host=host_name)
         assert expected in workers
@@ -345,7 +361,7 @@ class TestAfterWatchNEMO:
                     'host': 'salish', 'run date': '2016-10-15',
                     'completed': True}}),
     ])
-    def test_success_nowcast_grn_no_launch_download_results(
+    def test_success_nowcast_green_no_launch_download_results(
         self, msg, config, checklist,
     ):
         workers = next_workers.after_watch_NEMO(msg, config, checklist)

@@ -276,14 +276,21 @@ def after_make_forcing_links(msg, config, checklist):
             next_workers[msg.type] = [
                 NextWorker(
                     'nowcast.workers.run_NEMO',
-                    args=[host_name, run_type], host=host_name),
+                    args=[
+                        host_name, run_type,
+                        '--run-date',
+                        checklist['forcing links'][host_name]['run date']],
+                    host=host_name),
             ]
         host_name = config['run']['nowcast-green host']
         if 'nowcast-green host' in config['run'] and host_name in msg.payload:
             next_workers[msg.type] = [
                 NextWorker(
                     'nowcast.workers.run_NEMO',
-                    args=[host_name, run_type, '--shared-storage'],
+                    args=[
+                        host_name, run_type, '--shared-storage',
+                        '--run-date',
+                        checklist['forcing links'][host_name]['run date']],
                     host=host_name),
             ]
     return next_workers[msg.type]
