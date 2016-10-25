@@ -424,7 +424,7 @@ def _execute(nemo_processors, xios_processors):
         '\n'
         'echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout\n'
         '${GATHER} ${RUN_DESC} ${RESULTS_DIR} '
-        '>>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr\n'
+        '>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
         'echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout\n'
     )
     return script
