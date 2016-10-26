@@ -28,6 +28,9 @@ from nowcast import next_workers
 
 @pytest.fixture
 def config():
+    """Nowcast system config dict data structure;
+    a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
+    """
     return {
         'run types': {
             'nowcast': {}, 'nowcast-green': {},
@@ -52,6 +55,9 @@ def config():
 
 @pytest.fixture
 def checklist():
+    """Nowcast system state checklist dict data structure;
+    a mock for :py:attr:`nemo_nowcast.manager.NowcastManager.checklist`.
+    """
     return {}
 
 
