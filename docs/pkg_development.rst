@@ -77,14 +77,32 @@ and building the documentation with the commands:
 .. _Anaconda Python Distribution: https://www.continuum.io/downloads
 .. _Miniconda3: http://conda.pydata.org/docs/install/quick.html
 
+.. note::
+    The :kbd:`SalishSeaNowcast` is presently under development in the :kbd:`NEMO_Nowcast` branch of the repository.
+    It is *very important* to switch to that branch before creating the development environment.
+
+:kbd:`SalishSeaNowcast` depends on the `NEMO_Nowcast`_,
+:ref:`salishseatools:SalishSeaToolsPackage`,
+and :ref:`salishseatools:SalishSeaCmdProcessor` packages.
+If you have not done so already,
+please clone the `NEMO_Nowcast repo`_ and `Salish Sea MEOPAR tools repo`_.
+The commands below assume that they are cloned beside your :kbd:`SalishSeaNowcast` clone.
+
+.. _NEMO_Nowcast repo: https://bitbucket.org/43ravens/nemo_nowcast
+.. _Salish Sea MEOPAR tools repo: https://bitbucket.org/salishsea/tools
+
 .. code-block:: bash
 
     $ cd SalishSeaNowcast
+    $ hg update NEMO_Nowcast
     $ conda env create -f environment-dev.yaml
     $ source activate salishsea-nowcast
+    (salishsea-nowcast)$ pip install --editable ../NEMO_Nowcast
+    (salishsea-nowcast)$ pip install --editable ../tools/SalishSeaTools
+    (salishsea-nowcast)$ pip install --editable ../tools/SalishSeaCmd
     (salishsea-nowcast)$ pip install --editable .
 
-The :kbd:`--editable` option in the :command:`pip install` command above installs the :kbd:`SalishSeaNowcast` package from the cloned repo via symlinks so that the installed package will be automatically updated as the repo evolves.
+The :kbd:`--editable` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
 
 To deactivate the environment use:
 
