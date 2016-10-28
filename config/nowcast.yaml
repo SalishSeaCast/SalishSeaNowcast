@@ -138,6 +138,10 @@ run:
       # Does the host share storage with the machine where the nowcast manager
       # is running?
       shared storage: False
+      # Passphrase-less deployment key used by automation for authentication
+      # on the host.
+      # The key-pair is assumed to be stored in $USER/.ssh/.
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
       # Location of bash script that sets nowacst system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
@@ -155,6 +159,7 @@ run:
         - forecast2
     salish-nowcast:
       shared storage: True
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
       envvars: /results/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
       python: /results/nowcast-sys/nemo_nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
@@ -171,8 +176,6 @@ run:
   # Remove or comment out the next line to prevent running in the cloud
   cloud host: west.cloud-nowcast
   west.cloud-nowcast:
-    ssh key name:
-      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
     forcing:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
@@ -221,8 +224,6 @@ run:
   # Remove or comment out the next line to prevent running nowcast-green
   nowcast-green host: salish-nowcast
   salish-nowcast:
-    ssh key name:
-      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
     forcing:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
@@ -279,8 +280,6 @@ run:
   # Remove or comment out the next line to prevent running on the HPC cluster
 #  hpc host: orcinus-nowcast
   orcinus-nowcast:
-    ssh key name:
-      nowcast: /home/dlatorne/.ssh/SalishSeaNEMO-nowcast_id_rsa
     forcing:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
