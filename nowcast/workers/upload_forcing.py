@@ -93,7 +93,7 @@ def upload_forcing(parsed_args, config, *args):
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     ssh_key = os.path.join(
-        os.environ['USER'], '.ssh',
+        os.environ['HOME'], '.ssh',
         config['run']['enabled hosts'][host_name]['ssh key'])
     host_run_config = config['run'][host_name]
     ssh_client, sftp_client = lib.sftp(host_name, ssh_key)

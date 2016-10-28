@@ -103,7 +103,7 @@ def make_forcing_links(parsed_args, config, *args):
     run_date = parsed_args.run_date
     shared_storage = parsed_args.shared_storage
     ssh_key = os.path.join(
-        os.environ['USER'], '.ssh',
+        os.environ['HOME'], '.ssh',
         config['run']['enabled hosts'][host_name]['ssh key'])
     host_run_config = config['run'][host_name]
     ssh_client, sftp_client = lib.sftp(host_name, ssh_key)
