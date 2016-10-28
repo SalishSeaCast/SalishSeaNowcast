@@ -130,7 +130,7 @@ def get_tides(stn_name, path='../../tidal_predictions/'):
     :returns: Tidal predictions object with columns time, pred_all, pred_8.
     :rtype: :py:class:`pandas.Dataframe`
     """
-    fname = '{}_tidal_prediction_01-Jan-2015_01-Jan-2020.csv'.format(stn_name)
+    fname = '{}_tidal_prediction_01-Jan-2013_31-Dec-2020.csv'.format(stn_name)
     ttide, _ = stormtools.load_tidal_predictions(os.path.join(path, fname))
     return ttide
 
