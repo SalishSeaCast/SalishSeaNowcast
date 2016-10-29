@@ -105,7 +105,7 @@ results archive:
   # Keys are run types.
   # Values are directories on results server where run results are stored
   # in ddmmmyy/ directories.
-  nowcast: /results/SalishSea/nowcast/
+  nowcast: /results/SalishSea/nowcast-blue/
   forecast: /results/SalishSea/forecast/
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
