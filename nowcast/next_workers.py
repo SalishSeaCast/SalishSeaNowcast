@@ -18,6 +18,7 @@ end their work.
 
 Function names **must** be of the form :py:func:`after_worker_name`.
 """
+import arrow
 from nemo_nowcast import NextWorker
 
 
@@ -412,6 +413,13 @@ def after_download_results(msg, config, checklist):
                 NextWorker(
                     'nowcast.workers.make_plots',
                     args=[run_type, 'research', '--run-date', run_date]))
+            run_date = checklist['NEMO run']['nowcast']['run date']
+            run_date = (
+                arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD'))
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.make_plots',
+                    args=[run_type, 'comparison', '--run-date', run_date]))
     return next_workers[msg.type]
 
 

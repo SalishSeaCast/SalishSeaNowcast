@@ -92,9 +92,21 @@ def _prep_plot_data(
     # Production model results
     model_time = nc_tools.timestamp(
         grid_T_hr, range(grid_T_hr.variables['time_counter'].size))
-    tracer_depths = mesh_mask.variables['gdept'][..., j, i][0]
+    try:
+        # NEMO-3.4 mesh mask
+        gdept = mesh_mask.variables['gdept']
+    except KeyError:
+        # NEMO-3.6 mesh mask
+        gdept = mesh_mask.variables['gdept_0']
+    tracer_depths = gdept[..., j, i][0]
     tracer_mask = mesh_mask.variables['tmask'][..., j, i][0]
-    w_depths = mesh_mask.variables['gdepw'][..., j, i][0]
+    try:
+        # NEMO-3.4 mesh mask
+        gdepw = mesh_mask.variables['gdepw']
+    except KeyError:
+        # NEMO-3.6 mesh mask
+        gdepw = mesh_mask.variables['gdepw_0']
+    w_depths = gdepw[..., j, i][0]
     salinity_profiles = grid_T_hr.variables['vosaline'][..., j, i]
     temperature_profiles = grid_T_hr.variables['votemper'][..., j, i]
     model_salinity_ts = _calc_results_time_series(
