@@ -405,7 +405,6 @@ def _make_research_plots(
     """Make the plots we wish to look at for research purposes.
     """
     grid_T_dy = _results_dataset('1d', 'grid_T', results_dir)
-    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     grid_U_dy = _results_dataset('1d', 'grid_U', results_dir)
     grid_V_dy = _results_dataset('1d', 'grid_V', results_dir)
     grid_c = _results_dataset_gridded('central', results_dir)
