@@ -290,6 +290,10 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     w_w = grid.variables['vovecrtz']
     dep_t = grid.variables['depthv']
     dep_w = grid.variables['depthw']
+    t = grid.variables['time_counter']
+    dt = (t[1]-t[0])/3600.
+    maxt = dt*t.shape[0]
+    t_axis = np.arange(0, maxt, dt)
 
     u_E, v_N = unstag_rot(u_u, v_v)
     u_E = u_E[..., 0, 0]
@@ -311,13 +315,13 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
 
     axu.invert_yaxis()
     mesh = axu.contourf(
-        np.arange(0, 24, 0.25),
+        t_axis,
         dep_t[:],
         u_E.transpose(),
         np.arange(vmin, vmax, step), cmap=cmap)
     cbar = fig.colorbar(mesh, ax=axu)
     axu.set_ylim([dep_s, 0])
-    axu.set_xlim([0, 23])
+    axu.set_xlim([0, maxt])
     axu.set_ylabel('Depth [m]', **axis_font)
     figures.axis_colors(axu, 'white')
     axu.set_title('East/West Velocities at VENUS {node} on {date}'.format(
@@ -327,14 +331,14 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
 
     axv.invert_yaxis()
     mesh = axv.contourf(
-        np.arange(0, 24, 0.25),
+        t_axis,
         dep_t[:],
         v_N.transpose(),
         np.arange(vmin, vmax, step),
         cmap=cmap)
     cbar = fig.colorbar(mesh, ax=axv)
     axv.set_ylim([dep_s, 0])
-    axv.set_xlim([0, 23])
+    axv.set_xlim([0, maxt])
     axv.set_ylabel('Depth [m]', **axis_font)
     figures.axis_colors(axv, 'white')
     axv.set_title('North/South Velocities at VENUS {node} on {date}'.format(
@@ -344,13 +348,13 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
 
     axw.invert_yaxis()
     mesh = axw.contourf(
-        np.arange(0, 24, 0.25), dep_w[:],
+        t_axis, dep_w[:],
         w_w[:, :, 1, 1].transpose(),
         np.arange(vmin/70, vmax/70, step/80),
         cmap=cmap)
     cbar = fig.colorbar(mesh, ax=axw)
     axw.set_ylim([dep_s, 0])
-    axw.set_xlim([0, 23])
+    axw.set_xlim([0, maxt])
     axw.set_xlabel('Time [h]', **axis_font)
     axw.set_ylabel('Depth [m]', **axis_font)
     figures.axis_colors(axw, 'white')
