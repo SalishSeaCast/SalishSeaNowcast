@@ -26,7 +26,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1.0019163"
-     inkscape:cx="342.48403"
+     inkscape:cx="342.484"
      inkscape:cy="461.61538"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
@@ -49,7 +49,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -297,10 +297,10 @@
          sodipodi:nodetypes="ccccc" />
     </g>
     <g
-       id="g5353">
+       id="g4373">
       <path
-         style="display:inline;fill:none;stroke:#000000;stroke-width:2.00000024;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:6.00000029, 6.00000029;stroke-dashoffset:0;stroke-opacity:1"
-         d="M 293.83714,921.19895 216.04661,801.72778"
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2.00000024;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:6.0000003, 6.0000003;stroke-dashoffset:0;stroke-opacity:1"
+         d="M 293.88882,921.15961 240.94711,837.69829"
          id="path4564"
          inkscape:connector-curvature="0" />
       <path
@@ -807,14 +807,15 @@
            sodipodi:role="line">download_results</tspan></text>
     </g>
     <g
-       id="g4339">
+       id="g4353"
+       transform="translate(0,-2.0000001)">
       <rect
-         y="722.79468"
-         x="115.20496"
+         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         id="rect4345"
+         width="194.99524"
          height="31.859035"
-         width="172.53827"
-         id="rect4338"
-         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+         x="103.97647"
+         y="722.79468" />
       <text
          sodipodi:linespacing="125%"
          id="text4340"
@@ -864,47 +865,47 @@
          y="688.86212"
          style="font-size:12.5px">forecast* runs</tspan></text>
     <g
-       id="g4347"
-       transform="translate(0,-26.526157)">
+       id="g4358"
+       transform="translate(0,-2.0000001)">
       <rect
-         y="789.17987"
-         x="115.20496"
+         y="762.65369"
+         x="103.97647"
          height="31.859035"
-         width="172.53827"
-         id="rect4540"
+         width="194.99524"
+         id="rect4337"
          style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       <text
          sodipodi:linespacing="125%"
          id="text4542"
-         y="808.90869"
+         y="782.38251"
          x="201.59856"
          style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
          xml:space="preserve"><tspan
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle"
-           y="808.90869"
+           y="782.38251"
            x="201.59856"
            id="tspan4544"
            sodipodi:role="line">make_plots research</tspan></text>
     </g>
     <g
-       id="g5340">
+       id="g4366">
       <rect
-         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:0.99999994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:3.99999998, 3.99999998;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:4.00000009, 4.00000009;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
          id="rect4296"
-         width="199.67821"
-         height="86.121292"
-         x="101.63499"
+         width="203.67056"
+         height="122.55149"
+         x="99.638817"
          y="715.29468" />
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="100.43309"
+         x="98.436913"
          y="712.61768"
          id="text4298"
          sodipodi:linespacing="125%"><tspan
            sodipodi:role="line"
            id="tspan4300"
-           x="100.43309"
+           x="98.436913"
            y="712.61768"
            style="font-size:12.5px">Concurrent</tspan></text>
     </g>
@@ -993,6 +994,29 @@
          id="path5263"
          d="m -76.65887,949.97568 0,35.22939 40.14532,0"
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.00000024;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+    </g>
+    <g
+       id="g4340"
+       transform="translate(0,-2.0000001)">
+      <rect
+         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         id="rect4320"
+         width="194.99524"
+         height="31.859035"
+         x="103.97647"
+         y="802.50525" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:40px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         x="201.59856"
+         y="822.24158"
+         id="text4322"
+         sodipodi:linespacing="125%"><tspan
+           sodipodi:role="line"
+           id="tspan4324"
+           x="201.59856"
+           y="822.24158"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle">make_plots comparison</tspan></text>
     </g>
   </g>
 </svg>
