@@ -1479,7 +1479,13 @@ def thalweg_salinity(
     """
 
     # Look up depth of tcells and thalweg points.
-    dep_d = mesh_mask.variables['gdept'][0, :, :, :]
+    try:
+        # NEMO-3.4 mesh mask
+        gdept = mesh_mask.variables['gdept']
+    except KeyError:
+        # NEMO-3.6 mesh mask
+        gdept = mesh_mask.variables['gdept_0']
+    dep_d = gdept[0, :, :, :]
     thalweg_pts = np.loadtxt(thalweg_pts_file, delimiter=' ', dtype=int)
 
     # Tracer data
@@ -1600,7 +1606,13 @@ def thalweg_temperature(
     :returns: matplotlib figure object instance (fig).
     """
     # Look up depth of tcells.
-    dep_d = mesh_mask.variables['gdept'][0, :, :, :]
+    try:
+        # NEMO-3.4 mesh mask
+        gdept = mesh_mask.variables['gdept']
+    except KeyError:
+        # NEMO-3.6 mesh mask
+        gdept = mesh_mask.variables['gdept_0']
+    dep_d = gdept[0, :, :, :]
 
     # Tracer data
     temp_d = grid_T_d.variables['votemper'][:]

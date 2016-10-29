@@ -393,7 +393,7 @@ class TestAfterDownloadResults:
         ('forecast', 'publish'),
         ('forecast2', 'publish'),
     ])
-    def test_success_launch_make_plots(
+    def test_success_launch_make_plots_publish(
         self, run_type, plot_type, config, checklist,
     ):
         p_checklist = patch.dict(
@@ -406,6 +406,26 @@ class TestAfterDownloadResults:
         expected = NextWorker(
             'nowcast.workers.make_plots',
             args=[run_type, plot_type, '--run-date', '2016-10-22'],
+            host='localhost')
+        assert expected in workers
+
+
+    @pytest.mark.parametrize('run_type, plot_type', [
+        ('nowcast', 'research'),
+    ])
+    def test_success_nowcast_launch_make_plots_research(
+        self, run_type, plot_type, config, checklist,
+    ):
+        p_checklist = patch.dict(
+            checklist, {'NEMO run': {run_type: {'run date': '2016-10-29'}}})
+        with p_checklist:
+            workers = next_workers.after_download_results(
+                Message(
+                    'download results', 'success {}'.format(run_type)),
+                config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_plots',
+            args=[run_type, plot_type, '--run-date', '2016-10-29'],
             host='localhost')
         assert expected in workers
 

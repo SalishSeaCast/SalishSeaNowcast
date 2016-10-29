@@ -402,13 +402,16 @@ def after_download_results(msg, config, checklist):
     }
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
-        # plot_type = 'research' if run_type == 'nowcast' else 'publish'
-        plot_type = 'publish'  # temporary; revert to line above ultimately
         run_date = checklist['NEMO run'][run_type]['run date']
         next_workers[msg.type].append(
             NextWorker(
                 'nowcast.workers.make_plots',
-                args=[run_type, plot_type, '--run-date', run_date]))
+                args=[run_type, 'publish', '--run-date', run_date]))
+        if run_type == 'nowcast':
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.make_plots',
+                    args=[run_type, 'research', '--run-date', run_date]))
     return next_workers[msg.type]
 
 
