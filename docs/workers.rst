@@ -66,6 +66,8 @@ please read the code in the :py:mod:`nowcast.next_workers` module.
 Workers
 =======
 
+.. _DownloadWeatherWorker:
+
 :kbd:`download_weather`
 -----------------------
 
@@ -79,6 +81,8 @@ Workers
 .. automodule:: nowcast.workers.make_runoff_file
     :members: main
 
+
+.. _GetNeahBaySshWorker:
 
 :kbd:`get_NeahBay_ssh`
 ----------------------
@@ -114,6 +118,8 @@ Workers
 .. automodule:: nowcast.workers.run_NEMO
     :members: main
 
+
+.. _WatchNEMO-Worker:
 
 :kbd:`watch_NEMO`
 -----------------
