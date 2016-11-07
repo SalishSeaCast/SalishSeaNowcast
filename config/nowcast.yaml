@@ -427,11 +427,13 @@ message registry:
       success 18: 18 weather forecast ready
       failure 18: 18 weather forecast download failed
       crash: download_weather worker crashed
+
     make_runoff_file:
       checklist key: rivers forcing
       success: rivers forcing ready
       failure: rivers forcing files preparation failed
       crash: make_runoff_file worker crashed
+
     get_NeahBay_ssh:
       checklist key: Neah Bay ssh
       success nowcast: Neah Bay ssh for nowcast ready
@@ -441,6 +443,7 @@ message registry:
       success forecast2: Neah Bay ssh for forecast2 ready
       failure forecast2: Neah Bay sea surface height file prep for forecast2 failed
       crash: get_NeahBay_ssh worker crashed
+
     grib_to_netcdf:
       checklist key: weather forcing
       success nowcast+: atmospheric nowcast/forecast forcing ready
@@ -448,6 +451,7 @@ message registry:
       success forecast2: atmospheric forecast2 forcing ready
       failure forecast2: atmospheric forecast2 forcing files preparation failed
       crash: grib_to_netcdf worker crashed
+
     upload_forcing:
       checklist key: forcing upload
       success nowcast+: forcing files for nowcast/forecast uploaded
@@ -457,6 +461,7 @@ message registry:
       success ssh: sea surface height forcing files for forecast uploaded
       failure ssh: sea surface height forcing files for forecast upload failed
       crash: upload_forcing worker crashed
+
     make_forcing_links:
       checklist key: forcing links
       success nowcast+: forcing file links for nowcast/forecast created
@@ -468,6 +473,7 @@ message registry:
       success nowcast-green: forcing file links for nowcast-green created
       failure nowcast-green: forcing file links for nowcast-green failed
       crash: make_forcing_links worker crashed
+
     run_NEMO:
       checklist key: NEMO run
       log.debug: debug level logging message
@@ -483,6 +489,7 @@ message registry:
       success forecast2: forecast2 NEMO run started
       failure forecast2: forecast2 NEMO run failed
       crash: run_NEMO worker crashed
+
     watch_NEMO:
       checklist key: NEMO run
       log.debug: debug level logging message
@@ -498,6 +505,7 @@ message registry:
       success forecast2: forecast2 NEMO run completed
       failure forecast2: forecast2 NEMO run failed
       crash: watch_NEMO worker crashed
+
     download_results:
       checklist key: results files
       success nowcast: nowcast results files downloaded
@@ -507,6 +515,7 @@ message registry:
       success forecast2: forecast2 results files downloaded
       failure forecast2: forecast2 results files download failed
       crash: download_results worker crashed
+
     make_plots:
       checklist key: plots
       success nowcast publish: nowcast publish plots produced
@@ -520,11 +529,13 @@ message registry:
       success forecast2 publish: forecast2 publish plots produced
       failure forecast2 publish: forecast2 publish plots failed
       crash: make_plots worker crashed
+
     clear_checklist:
       clear checklist: request that manager clear system state checklist
       success: system state checklist cleared
       failure: system state checklist clearance failed
       crash: clear_checklist worker crashed
+
     rotate_logs:
       checklist key: log rotation
       success: log files rotated
