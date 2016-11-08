@@ -309,6 +309,20 @@ run:
       forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
 
 
+# Notifications to ERDDAP server that datasets have been updated
+erddap:
+  # Directory in which to create flag files to signal ERDDAP server that
+  # datasets have been updated
+  flag dir: /results/erddap/flag/
+  datasetIDs:
+    # Keys are types of datasets that have been updated
+    # Must match dataset command-line argument in ping_erddap worker
+    download_weather:
+      # List of ERDDAP dataset ids to create flag files for to signal updates
+      # to ERDDAP server
+      - ubcSSaSurfaceAtmosphereFieldsV1
+
+
 # Logging system configuration
 logging:
   version: 1
@@ -515,6 +529,24 @@ message registry:
       success forecast2: forecast2 results files downloaded
       failure forecast2: forecast2 results files download failed
       crash: download_results worker crashed
+
+    ping_erddap:
+      checklist key: ERDDAP flag files
+      success nowcast: nowcast ERDDAP dataset flag files created
+      failure nowcast: nowcast ERDDAP dataset flag files creation failed
+      success forecast: forecast ERDDAP dataset flag files created
+      failure forecast: forecast ERDDAP dataset flag files creation failed
+      success forecast2: forecast2 ERDDAP dataset flag files created
+      failure forecast2: forecast2 ERDDAP dataset flag files creation failed
+      success nowcast-green: nowcast-green ERDDAP dataset flag files created
+      failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
+      success download_weather: atmospheric forcing ERDDAP dataset flag files created
+      failure download_weather: atmospheric forcing ERDDAP dataset flag files creation failed
+      success SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files created
+      failure SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files creation failed
+      success SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files created
+      failure SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files creation failed
+      crash: ping_erddap worker crashed
 
     make_plots:
       checklist key: plots

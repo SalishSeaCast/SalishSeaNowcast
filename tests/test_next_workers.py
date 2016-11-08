@@ -15,14 +15,13 @@
 
 """Unit tests for nowcast.next_workers module.
 """
-import pytest
 from unittest.mock import patch
 
+import pytest
 from nemo_nowcast import (
     Message,
     NextWorker,
 )
-
 from nowcast import next_workers
 
 
@@ -64,6 +63,7 @@ def checklist():
 class TestAfterDownloadWeather:
     """Unit tests for the after_download_weather function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure 00',
@@ -115,6 +115,7 @@ class TestAfterDownloadWeather:
 class TestAfterMakeRunoffFile:
     """Unit tests for the after_make_runoff_file function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure',
@@ -129,6 +130,7 @@ class TestAfterMakeRunoffFile:
 class TestAfterGetNeahBaySsh:
     """Unit tests for the after_get_NeahBay_ssh function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast',
@@ -156,6 +158,7 @@ class TestAfterGetNeahBaySsh:
 class TestAfterGribToNetcdf:
     """Unit tests for the after_grib_to_netcdf function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast+',
@@ -190,10 +193,21 @@ class TestAfterGribToNetcdf:
             host='localhost')
         assert expected in workers
 
+    def test_success_nowcastp_launch_ping_erddap_download_weather(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_grib_to_netcdf(
+            Message('grib_to_netcdf', 'success nowcast+'), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.ping_erddap',
+            args=['download_weather'], host='localhost')
+        assert expected in workers
+
 
 class TestAfterUploadForcing:
     """Unit tests for the after_upload_forcing function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast+',
@@ -235,6 +249,7 @@ class TestAfterUploadForcing:
 class TestAfterMakeForcingLinks:
     """Unit tests for the after_make_forcing_links function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast+',
@@ -249,20 +264,20 @@ class TestAfterMakeForcingLinks:
 
     @pytest.mark.parametrize('msg_type, args, host_name', [
         ('success nowcast+',
-            ['west.cloud', 'nowcast', '--run-date', '2016-10-23'],
-            'west.cloud'),
+         ['west.cloud', 'nowcast', '--run-date', '2016-10-23'],
+         'west.cloud'),
         ('success nowcast-green',
-            [
-                'salish', 'nowcast-green',
-                '--shared-storage',
-                '--run-date', '2016-10-23'],
-            'salish'),
+         [
+             'salish', 'nowcast-green',
+             '--shared-storage',
+             '--run-date', '2016-10-23'],
+         'salish'),
         ('success ssh',
-            ['west.cloud', 'forecast', '--run-date', '2016-10-23'],
-            'west.cloud'),
+         ['west.cloud', 'forecast', '--run-date', '2016-10-23'],
+         'west.cloud'),
         ('success forecast2',
-            ['west.cloud', 'forecast2', '--run-date', '2016-10-23'],
-            'west.cloud'),
+         ['west.cloud', 'forecast2', '--run-date', '2016-10-23'],
+         'west.cloud'),
     ])
     def test_success_launch_run_NEMO(
         self, msg_type, args, host_name, config, checklist,
@@ -284,6 +299,7 @@ class TestAfterMakeForcingLinks:
 class TestAfterRunNEMO:
     """Unit tests for the after_run_NEMO function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast',
@@ -304,6 +320,7 @@ class TestAfterRunNEMO:
 class TestAfterWatchNEMO:
     """Unit tests for the after_watch_NEMO function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast',
@@ -377,6 +394,7 @@ class TestAfterWatchNEMO:
 class TestAfterDownloadResults:
     """Unit tests for the after_download_results function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast',
@@ -430,9 +448,37 @@ class TestAfterDownloadResults:
         assert expected in workers
 
 
+class TestAfterPingERDDAP:
+    """Unit tests for the after_ping_erddap function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+        'failure nowcast-green',
+        'failure forecast',
+        'failure forecast2',
+        'failure download_weather',
+        'failure SCVIP-CTD',
+        'failure SEVIP-CTD',
+        'success nowcast',
+        'success nowcast-green',
+        'success forecast',
+        'success forecast2',
+        'success download_weather',
+        'success SCVIP-CTD',
+        'success SEVIP-CTD',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_ping_erddap(
+            Message('ping_erddap', msg_type), config, checklist)
+        assert workers == []
+
+
 class TestAfterMakePlots:
     """Unit tests for the after_make_plots function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast research',
@@ -463,6 +509,7 @@ class TestAfterMakePlots:
 class TestAfterClearChecklist:
     """Unit tests for the after_clear_checklist function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure',
@@ -482,6 +529,7 @@ class TestAfterClearChecklist:
 class TestAfterRotateLogs:
     """Unit tests for the after_rotate_logs function.
     """
+
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure',
