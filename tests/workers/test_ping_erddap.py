@@ -33,16 +33,15 @@ def worker_module(scope='module'):
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch.object(worker_module(), 'worker_name')
-    def test_instantiate_worker(self, m_name, m_worker, worker_module):
+    def test_instantiate_worker(self, m_worker, worker_module):
         worker_module.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('ping_erddap',)
         assert list(kwargs.keys()) == ['description']
 
     def test_add_dataset_arg(self, m_worker, worker_module):
         worker_module.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('dataset',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'forecast', 'forecast2',

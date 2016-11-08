@@ -60,7 +60,7 @@ def after_download_weather(msg, config, checklist):
                     'nowcast.workers.get_NeahBay_ssh', args=['forecast2']),
                 NextWorker(
                     'nowcast.workers.grib_to_netcdf', args=['forecast2']),
-                ])
+            ])
     if msg.type.endswith('12') and 'nowcast' in config['run types']:
         next_workers['success 12'] = [
             NextWorker('nowcast.workers.get_NeahBay_ssh', args=['nowcast']),
@@ -165,6 +165,10 @@ def after_grib_to_netcdf(msg, config, checklist):
         'nowcast+': 'nowcast',
         'forecast2': 'forecast2',
     }
+    if msg.type.startswith('success') and msg.type.endswith('nowcast+'):
+        next_workers['success nowcast+'].append(
+            NextWorker(
+                'nowcast.workers.ping_erddap', args=['download_weather']))
     for host in config['run']['remote hosts']:
         if host in config['run']:
             for msg_suffix, run_type in msg_run_type_mapping.items():
@@ -458,6 +462,27 @@ def after_make_plots(msg, config, checklist):
         next_workers[msg.type].append(NextWorker(
             'nemo_nowcast.workers.clear_checklist'))
     return next_workers[msg.type]
+
+
+def after_ping_erddap(msg, config, checklist):
+    """Calculate the list of workers to launch after the ping_erddap
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    return []
 
 
 def after_clear_checklist(msg, config, checklist):

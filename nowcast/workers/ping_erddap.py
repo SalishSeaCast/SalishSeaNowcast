@@ -19,17 +19,23 @@ server to reload datasets for which new results have been downloaded.
 import logging
 from pathlib import Path
 
-from nowcast import lib
-from nowcast.nowcast_worker import NowcastWorker
+from nemo_nowcast import NowcastWorker
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'ping_erddap'
+logger = logging.getLogger(NAME)
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
+    """Set up and run the worker.
+
+    For command-line usage see:
+
+    :command:`python -m nowcast.workers.ping_erddap --help`
+    """
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'dataset',
         choices={
             'nowcast', 'nowcast-green', 'forecast', 'forecast2',
@@ -71,12 +77,12 @@ def failure(parsed_args):
 
 def ping_erddap(parsed_args, config, *args):
     dataset = parsed_args.dataset
-    flag_path = Path(config['erddap']['flag_dir'])
+    flag_path = Path(config['erddap']['flag dir'])
     checklist = {dataset: []}
     try:
         for dataset_id in config['erddap']['datasetIDs'][dataset]:
-            (flag_path/dataset_id).touch()
-            logger.debug('{} touched'.format(flag_path/dataset_id))
+            (flag_path / dataset_id).touch()
+            logger.debug('{} touched'.format(flag_path / dataset_id))
             checklist[dataset].append(dataset_id)
     except KeyError:
         # run type is not in datasetIDs dict

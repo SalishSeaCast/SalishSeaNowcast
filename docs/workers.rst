@@ -135,6 +135,13 @@ Workers
     :members: main
 
 
+:kbd:`ping_erddap`
+------------------
+
+.. automodule:: nowcast.workers.ping_erddap
+    :members: main
+
+
 :kbd:`make_plots`
 -----------------
 
