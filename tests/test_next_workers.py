@@ -22,6 +22,7 @@ from nemo_nowcast import (
     Message,
     NextWorker,
 )
+
 from nowcast import next_workers
 
 
@@ -33,7 +34,8 @@ def config():
     return {
         'run types': {
             'nowcast': {}, 'nowcast-green': {},
-            'forecast': {}, 'forecast2': {}},
+            'forecast': {}, 'forecast2': {}
+        },
         'run': {
             'enabled hosts': {
                 'cloud': {
@@ -264,28 +266,31 @@ class TestAfterMakeForcingLinks:
 
     @pytest.mark.parametrize('msg_type, args, host_name', [
         ('success nowcast+',
-         ['west.cloud', 'nowcast', '--run-date', '2016-10-23'],
-         'west.cloud'),
+        ['west.cloud', 'nowcast', '--run-date', '2016-10-23'],
+        'west.cloud'),
         ('success nowcast-green',
-         [
-             'salish', 'nowcast-green',
-             '--shared-storage',
-             '--run-date', '2016-10-23'],
-         'salish'),
+        [
+            'salish', 'nowcast-green',
+            '--shared-storage',
+            '--run-date', '2016-10-23'],
+        'salish'),
         ('success ssh',
-         ['west.cloud', 'forecast', '--run-date', '2016-10-23'],
-         'west.cloud'),
+        ['west.cloud', 'forecast', '--run-date', '2016-10-23'],
+        'west.cloud'),
         ('success forecast2',
-         ['west.cloud', 'forecast2', '--run-date', '2016-10-23'],
-         'west.cloud'),
+        ['west.cloud', 'forecast2', '--run-date', '2016-10-23'],
+        'west.cloud'),
     ])
     def test_success_launch_run_NEMO(
         self, msg_type, args, host_name, config, checklist,
     ):
         p_checklist = patch.dict(
             checklist,
-            {'forcing links': {
-                host_name: {'links': '', 'run date': '2016-10-23'}}})
+            {
+                'forcing links': {
+                    host_name: {'links': '', 'run date': '2016-10-23'}
+                }
+            })
         with p_checklist:
             workers = next_workers.after_make_forcing_links(
                 Message(
@@ -342,7 +347,8 @@ class TestAfterWatchNEMO:
                     'nowcast': {
                         'host': 'cloud', 'run date': '2016-10-16',
                         'completed': True,
-                    }}),
+                    }
+                }),
             config, checklist)
         expected = NextWorker(
             'nowcast.workers.get_NeahBay_ssh',
@@ -354,17 +360,23 @@ class TestAfterWatchNEMO:
             'watch_NEMO', 'success nowcast', {
                 'nowcast': {
                     'host': 'cloud', 'run date': '2016-10-15',
-                    'completed': True}}),
+                    'completed': True
+                }
+            }),
         Message(
             'watch_NEMO', 'success forecast', {
                 'forecast': {
                     'host': 'cloud', 'run date': '2016-10-15',
-                    'completed': True}}),
+                    'completed': True
+                }
+            }),
         Message(
             'watch_NEMO', 'success forecast2', {
                 'forecast2': {
                     'host': 'cloud', 'run date': '2016-10-15',
-                    'completed': True}}),
+                    'completed': True
+                }
+            }),
     ])
     def test_success_launch_download_results(self, msg, config, checklist):
         workers = next_workers.after_watch_NEMO(msg, config, checklist)
@@ -382,7 +394,9 @@ class TestAfterWatchNEMO:
             'watch_NEMO', 'success nowcast-green', {
                 'nowcast-green': {
                     'host': 'salish', 'run date': '2016-10-15',
-                    'completed': True}}),
+                    'completed': True
+                }
+            }),
     ])
     def test_success_nowcast_green_no_launch_download_results(
         self, msg, config, checklist,
@@ -489,19 +503,56 @@ class TestAfterMakePlots:
         'success nowcast research',
         'success nowcast comparison',
         'success nowcast publish',
-        'success forecast publish',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_plots(
             Message('make_plots', msg_type), config, checklist)
         assert workers == []
 
+    @pytest.mark.parametrize('msg_type, run_type', [
+        ('success forecast publish', 'forecast'),
+        ('success forecast2 publish', 'forecast2'),
+    ])
+    def test_success_forecast_launch_make_feeds(
+        self, msg_type, run_type, config, checklist,
+    ):
+        p_checklist = patch.dict(
+            checklist,
+            {
+                'NEMO run': {
+                    run_type: {'run date': '2016-11-11'}
+                }
+            })
+        with p_checklist:
+            workers = next_workers.after_make_plots(
+                Message('make_plots', msg_type), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_feeds',
+            args=[run_type, '--run-date', '2016-11-11'], host='localhost')
+        assert expected in workers
+
+
+class TestAfterMakeFeeds:
+    """Unit tests for the after_make_feeds function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure forecast',
+        'failure forecast2',
+        'success forecast',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_feeds(
+            Message('make_feeds', msg_type), config, checklist)
+        assert workers == []
+
     def test_success_forecast2_publish_launch_clear_checklist(
         self, config, checklist,
     ):
-        workers = next_workers.after_make_plots(
+        workers = next_workers.after_make_feeds(
             Message(
-                'make_plots', 'success forecast2 publish'), config, checklist)
+                'make_feeds', 'success forecast2'), config, checklist)
         assert workers[-1] == NextWorker(
             'nemo_nowcast.workers.clear_checklist', args=[], host='localhost')
 
