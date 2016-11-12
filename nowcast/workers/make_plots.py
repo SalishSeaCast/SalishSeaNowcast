@@ -145,7 +145,7 @@ def _make_plot_files(
     mesh_mask = nc.Dataset(config['run types'][run_type]['mesh mask'])
     dev_mesh_mask = nc.Dataset(
         config['run types']['nowcast-green']['mesh mask'])
-    tidal_predictions = config['ssh']['tidal_predictions']
+    tidal_predictions = config['ssh']['tidal predictions']
     ferry_data_dir = config['observations']['ferry data']
     make_plots_funcs[plot_type](
         dmy, weather_path, bathy, results_dir, plots_dir, coastline,
