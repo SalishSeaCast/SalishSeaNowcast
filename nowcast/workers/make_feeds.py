@@ -21,32 +21,31 @@ import os
 
 import arrow
 import docutils.core
-from feedgen.entry import FeedEntry
-from feedgen.feed import FeedGenerator
 import mako.template
 import netCDF4 as nc
 import numpy as np
+import salishsea_tools.unit_conversions as converters
+from feedgen.entry import FeedEntry
+from feedgen.feed import FeedGenerator
+from nemo_nowcast import NowcastWorker
+from salishsea_tools.places import PLACES
 
+import nowcast.figures.shared
 from salishsea_tools import (
     nc_tools,
     stormtools,
     wind_tools,
 )
-from salishsea_tools.places import PLACES
-import salishsea_tools.unit_conversions as converters
-
-from nowcast import lib
-import nowcast.figures.shared
-from nowcast.nowcast_worker import NowcastWorker
 
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'make_feeds'
+logger = logging.getLogger(NAME)
 
 
 def main():
-    worker = NowcastWorker(worker_name, description=__doc__)
-    worker.arg_parser.add_argument(
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'run_type', choices={'forecast', 'forecast2'},
         help='''
         Type of run to create feeds for:
@@ -54,15 +53,9 @@ def main():
         'forecast2' means preliminary forecast run,
         ''',
     )
-    salishsea_today = arrow.now('Canada/Pacific').floor('day')
-    worker.arg_parser.add_argument(
-        '--run-date', type=lib.arrow_date,
-        default=salishsea_today,
-        help='''
-        Date of the run to create feeds for; use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_today.format('YYYY-MM-DD')),
-    )
+    worker.cli.add_date_option(
+        '--run-date', default=arrow.now().floor('day'),
+        help='Date of the run to create feeds for.')
     worker.run(make_feeds, success, failure)
 
 
@@ -95,31 +88,36 @@ def failure(parsed_args):
 def make_feeds(parsed_args, config, *args):
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type
-    web_config = config['web']
-    feeds_path = os.path.join(
-        web_config['www_path'], web_config['site_repo_url'].rsplit('/')[-1],
-        'site', '_build', 'html', web_config['atom_path'],
-    )
-    checklist = {}
-    for feed in web_config['feeds']:
-        fg = _generate_feed(feed, web_config)
+    figs_path = config['figures']['storage path']
+    storm_surge_path = config['figures']['storm surge info portal path']
+    atom_path = config['storm surge feeds']['storage path']
+    feeds_path = os.path.join(figs_path, storm_surge_path, atom_path)
+    checklist_key = (
+        '{run_type} {date}'
+        .format(run_type=run_type, date=run_date.format('YYYY-MM-DD')))
+    checklist = {checklist_key: []}
+    for feed in config['storm surge feeds']['feeds']:
+        fg = _generate_feed(
+            feed, config['storm surge feeds'],
+            os.path.join(storm_surge_path, atom_path))
         max_ssh_info = _calc_max_ssh_risk(feed, run_date, run_type, config)
         if max_ssh_info['risk_level'] is not None:
-            fe = _generate_feed_entry(feed, max_ssh_info, config)
+            fe = _generate_feed_entry(feed, max_ssh_info, config, atom_path)
             fg.add_entry(fe)
         fg.atom_file(os.path.join(feeds_path, feed), pretty=True)
+        checklist[checklist_key].append(os.path.join(feeds_path, feed))
     return checklist
 
 
-def _generate_feed(feed, web_config):
+def _generate_feed(feed, feeds_config, atom_path):
     utcnow = arrow.utcnow()
     fg = FeedGenerator()
-    fg.title(web_config['feeds'][feed]['title'])
-    fg.id(_build_tag_uri('2015-12-12', feed, utcnow, web_config))
+    fg.title(feeds_config['feeds'][feed]['title'])
+    fg.id(_build_tag_uri('2015-12-12', feed, utcnow, feeds_config, atom_path))
     fg.language('en-ca')
     fg.author(
         name='Salish Sea MEOPAR Project',
-        uri='https://{0[domain]}/'.format(web_config))
+        uri='https://{0[domain]}/'.format(feeds_config))
     fg.rights(
         'Copyright 2015-{this_year}, '
         'Salish Sea MEOPAR Project Contributors and '
@@ -127,53 +125,59 @@ def _generate_feed(feed, web_config):
         .format(this_year=utcnow.year))
     fg.link(
         href=(
-            'https://{0[domain]}/{0[atom_path]}/{feed}'
-            .format(web_config, feed=feed)),
+            'https://{0[domain]}/{atom_path}/{feed}'
+            .format(feeds_config, atom_path=atom_path, feed=feed)),
         rel='self', type='application/atom+xml')
     fg.link(
-        href='https://{0[domain]}/storm-surge/forecast.html'.format(web_config),
+        href='https://{0[domain]}/storm-surge/forecast.html'
+             .format(feeds_config),
         rel='related', type='text/html')
     return fg
 
 
-def _generate_feed_entry(feed, max_ssh_info, config):
+def _generate_feed_entry(feed, max_ssh_info, config, atom_path):
     now = arrow.now()
     fe = FeedEntry()
     fe.title(
-        'Storm Surge Alert for {[tide_gauge_stn]}'
-        .format(config['web']['feeds'][feed]))
-    fe.id(_build_tag_uri(now.format('YYYY-MM-DD'), feed, now, config['web']))
+        'Storm Surge Alert for {[tide gauge stn]}'
+        .format(config['storm surge feeds']['feeds'][feed]))
+    fe.id(
+        _build_tag_uri(
+            now.format('YYYY-MM-DD'), feed, now, config['storm surge feeds'],
+            atom_path))
     fe.author(
         name='Salish Sea MEOPAR Project',
-        uri='https://{0[domain]}/'.format(config['web']))
+        uri='https://{0[domain]}/'.format(config['storm surge feeds']))
     fe.content(
         _render_entry_content(feed, max_ssh_info, config),
         type='html')
     fe.link(
         rel='alternate', type='text/html',
         href='https://{[domain]}/storm-surge/forecast.html'
-        .format(config['web'])
+        .format(config['storm surge feeds'])
     )
     return fe
 
 
-def _build_tag_uri(tag_date, feed, now, web_config):
+def _build_tag_uri(tag_date, feed, now, feeds_config, atom_path):
     return (
-        'tag:{0[domain]},{tag_date}:/{0[atom_path]}/{feed}/{now}'
+        'tag:{0[domain]},{tag_date}:/{atom_path}/{feed}/{now}'
         .format(
-            web_config,
+            feeds_config,
             tag_date=tag_date,
+            atom_path=atom_path,
             feed=os.path.splitext(feed)[0],
             now=now.format('YYYYMMDDHHmmss')))
 
 
 def _render_entry_content(feed, max_ssh_info, config):
     max_ssh_time_local = arrow.get(max_ssh_info['max_ssh_time']).to('local')
-    tide_gauge_stn = config['web']['feeds'][feed]['tide_gauge_stn']
+    feed_config = config['storm surge feeds']['feeds'][feed]
+    tide_gauge_stn = feed_config['tide gauge stn']
     max_ssh_info.update(_calc_wind_4h_avg(
         feed, max_ssh_info['max_ssh_time'], config))
     values = {
-        'city': config['web']['feeds'][feed]['city'],
+        'city': feed_config['city'],
         'tide_gauge_stn': tide_gauge_stn,
         'conditions': {
             tide_gauge_stn: {
@@ -198,8 +202,8 @@ def _render_entry_content(feed, max_ssh_info, config):
     }
     template = mako.template.Template(
         filename=os.path.join(
-            config['web']['templates_path'],
-            config['web']['feed_entry_template']),
+            os.path.dirname(__file__),
+            config['storm surge feeds']['feed entry template']),
         input_encoding='utf-8')
     rendered_rst = template.render(**values)
     html = docutils.core.publish_parts(rendered_rst, writer_name='html')
@@ -207,15 +211,15 @@ def _render_entry_content(feed, max_ssh_info, config):
 
 
 def _calc_max_ssh_risk(feed, run_date, run_type, config):
-    feed_config = config['web']['feeds'][feed]
+    feed_config = config['storm surge feeds']['feeds'][feed]
     ttide, _ = stormtools.load_tidal_predictions(
         os.path.join(
-            config['ssh']['tidal_predictions'],
+            config['ssh']['tidal predictions'],
             feed_config['tidal predictions']))
     max_ssh, max_ssh_time = _calc_max_ssh(
         feed, ttide, run_date, run_type, config)
     risk_level = stormtools.storm_surge_risk_level(
-        feed_config['tide_gauge_stn'], max_ssh, ttide)
+        feed_config['tide gauge stn'], max_ssh, ttide)
     return {
         'max_ssh': max_ssh,
         'max_ssh_time': max_ssh_time,
@@ -224,8 +228,9 @@ def _calc_max_ssh_risk(feed, run_date, run_type, config):
 
 
 def _calc_max_ssh(feed, ttide, run_date, run_type, config):
-    results_path = config['run']['results archive'][run_type]
-    tide_gauge_stn = config['web']['feeds'][feed]['tide_gauge_stn']
+    results_path = config['results archive'][run_type]
+    tide_gauge_stn = (
+        config['storm surge feeds']['feeds'][feed]['tide gauge stn'])
     grid_T_15m = nc.Dataset(
         os.path.join(
             results_path,
@@ -242,8 +247,9 @@ def _calc_max_ssh(feed, ttide, run_date, run_type, config):
 
 
 def _calc_wind_4h_avg(feed, max_ssh_time, config):
-    weather_path = config['weather']['ops_dir']
-    tide_gauge_stn = config['web']['feeds'][feed]['tide_gauge_stn']
+    weather_path = config['weather']['ops dir']
+    tide_gauge_stn = (
+        config['storm surge feeds']['feeds'][feed]['tide gauge stn'])
     wind_avg = wind_tools.calc_wind_avg_at_point(
         arrow.get(max_ssh_time), weather_path,
         PLACES[tide_gauge_stn]['wind grid ji'], avg_hrs=-4)

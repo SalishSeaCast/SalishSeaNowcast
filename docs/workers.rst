@@ -149,6 +149,13 @@ Workers
     :members: main
 
 
+:kbd:`make_feeds`
+-----------------
+
+.. automodule:: nowcast.workers.make_feeds
+    :members: main
+
+
 :kbd:`clear_checklist`
 ----------------------
 

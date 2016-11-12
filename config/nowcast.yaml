@@ -64,7 +64,7 @@ rivers:
 
 ssh:
   # Directory containing tidal predication file for sea surface height correction
-  tidal_predictions: /results/nowcast-sys/tools/SalishSeaNowcast/tidal_predictions/
+  tidal predictions: /results/nowcast-sys/tools/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
   ssh dir: /results/forcing/sshNeahBay/
 
@@ -111,6 +111,20 @@ results archive:
   nowcast-green: /results/SalishSea/nowcast-green/
 
 
+# Notifications to ERDDAP server that datasets have been updated
+erddap:
+  # Directory in which to create flag files to signal ERDDAP server that
+  # datasets have been updated
+  flag dir: /results/erddap/flag/
+  datasetIDs:
+    # Keys are types of datasets that have been updated
+    # Must match dataset command-line argument in ping_erddap worker
+    download_weather:
+      # List of ERDDAP dataset ids to create flag files for to signal updates
+      # to ERDDAP server
+      - ubcSSaSurfaceAtmosphereFieldsV1
+
+
 figures:
   # Pacific Now-West coastline polygons file
   coastline: /ocean/rich/more/mmapbase/bcgeo/PNW.mat
@@ -128,6 +142,21 @@ figures:
   # An undated .png version of the most recently generated one is stored in
   # for use on the Strm Surge Information Portal page.
   storm surge alerts thumbnail: Website_thumbnail
+
+
+# Storm surge alerts ATOM feeds
+storm surge feeds:
+  # Directory under figures[storage path][storm surge info portal path] where
+  # feed XML files are stored
+  storage path: atom
+  domain: salishsea.eos.ubc.ca
+  feed entry template: storm_surge_advisory.mako
+  feeds:
+    pmv.xml:
+      title: SalishSeaCast Storm Surge Alert for Port Metro Vancouver
+      city: Vancouver
+      tide gauge stn: Point Atkinson
+      tidal predictions: 'Point Atkinson_tidal_prediction_01-Jan-2013_31-Dec-2020.csv'
 
 
 run:
@@ -307,20 +336,6 @@ run:
       nowcast-green: /home/sallen/MEOPAR/SalishSea/nowcast-green/
       forecast: /home/dlatorne/MEOPAR/SalishSea/forecast/
       forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
-
-
-# Notifications to ERDDAP server that datasets have been updated
-erddap:
-  # Directory in which to create flag files to signal ERDDAP server that
-  # datasets have been updated
-  flag dir: /results/erddap/flag/
-  datasetIDs:
-    # Keys are types of datasets that have been updated
-    # Must match dataset command-line argument in ping_erddap worker
-    download_weather:
-      # List of ERDDAP dataset ids to create flag files for to signal updates
-      # to ERDDAP server
-      - ubcSSaSurfaceAtmosphereFieldsV1
 
 
 # Logging system configuration
@@ -561,6 +576,14 @@ message registry:
       success forecast2 publish: forecast2 publish plots produced
       failure forecast2 publish: forecast2 publish plots failed
       crash: make_plots worker crashed
+
+    make_feeds:
+      checklist key: storm surge alert feeds
+      success forecast: forecast results ATOM feeds produced
+      failure forecast: forecast results ATOM feeds creation failed
+      success forecast2: forecast2 results ATOM feeds produced
+      failure forecast2: forecast2 results ATOM feeds creation failed
+      crash: make_feeds worker crashed
 
     clear_checklist:
       clear checklist: request that manager clear system state checklist
