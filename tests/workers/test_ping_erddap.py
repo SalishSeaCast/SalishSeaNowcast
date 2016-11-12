@@ -141,7 +141,7 @@ class TestPingErddap:
         tmp_flag_dir = tmpdir.ensure_dir('flag')
         config = {
             'erddap': {
-                'flag_dir': str(tmp_flag_dir),
+                'flag dir': str(tmp_flag_dir),
                 'datasetIDs': {
                     'download_weather':
                         ['ubcSSaSurfaceAtmosphereFieldsV1'],
@@ -171,7 +171,7 @@ class TestPingErddap:
         tmp_flag_dir = tmpdir.ensure_dir('flag')
         config = {
             'erddap': {
-                'flag_dir': str(tmp_flag_dir),
+                'flag dir': str(tmp_flag_dir),
                 'datasetIDs': {
                     'nowcast':
                         ['ubcSSn3DTracerFields1hV1', 'ubcSSn3DuVelocity1hV1'],
