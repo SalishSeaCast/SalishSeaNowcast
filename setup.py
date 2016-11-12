@@ -52,6 +52,8 @@ install_requires = [
     'bottleneck',
     'cliff',
     'driftwood',
+    'feedgen',
+    'mako',
     'matplotlib',
     'nemo_nowcast',
     'netcdf4',
