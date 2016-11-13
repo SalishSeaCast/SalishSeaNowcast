@@ -153,7 +153,7 @@ storm surge feeds:
   feed entry template: storm_surge_advisory.mako
   feeds:
     pmv.xml:
-      title: SalishSeaCast Storm Surge Alert for Port Metro Vancouver
+      title: SalishSeaCast Storm Surge Alerts for Port Metro Vancouver
       city: Vancouver
       tide gauge stn: Point Atkinson
       tidal predictions: 'Point Atkinson_tidal_prediction_01-Jan-2013_31-Dec-2020.csv'
