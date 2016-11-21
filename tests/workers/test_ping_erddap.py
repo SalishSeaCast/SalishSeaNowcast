@@ -87,7 +87,8 @@ class TestSuccess:
     ])
     def test_success_msg_type(self, dataset, expected, worker_module):
         parsed_args = Mock(dataset=dataset)
-        msg_type = worker_module.success(parsed_args)
+        with patch.object(worker_module.logger, 'info') as m_logger:
+            msg_type = worker_module.success(parsed_args)
         assert msg_type == expected
 
 
@@ -120,7 +121,8 @@ class TestFailure:
     ])
     def test_failure_msg_type(self, dataset, expected, worker_module):
         parsed_args = Mock(dataset=dataset)
-        msg_type = worker_module.failure(parsed_args)
+        with patch.object(worker_module.logger, 'critical') as m_logger:
+            msg_type = worker_module.failure(parsed_args)
         assert msg_type == expected
 
 
