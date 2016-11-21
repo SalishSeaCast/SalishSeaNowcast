@@ -21,7 +21,6 @@ from unittest.mock import patch
 import arrow
 import pytest
 
-import nowcast.lib
 from nowcast.workers import get_onc_ctd
 
 
@@ -29,25 +28,23 @@ from nowcast.workers import get_onc_ctd
 class TestMain:
     """Unit tests for main() function.
     """
-    @patch('nowcast.workers.get_onc_ctd.worker_name')
-    def test_instantiate_worker(self, m_name, m_worker):
+    def test_instantiate_worker(self, m_worker):
         get_onc_ctd.main()
         args, kwargs = m_worker.call_args
-        assert args == (m_name,)
+        assert args == ('get_onc_ctd',)
         assert 'description' in kwargs
 
     def test_add_onc_station_arg(self, m_worker):
         get_onc_ctd.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[0]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('onc_station',)
         assert kwargs['choices'] == {'SCVIP', 'SEVIP'}
         assert 'help' in kwargs
 
     def test_add_data_date_arg(self, m_worker):
         get_onc_ctd.main()
-        args, kwargs = m_worker().arg_parser.add_argument.call_args_list[1]
+        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--data-date',)
-        assert kwargs['type'] == nowcast.lib.arrow_date
         assert kwargs['default'] == arrow.utcnow().floor('day').replace(days=-1)
         assert 'help' in kwargs
 

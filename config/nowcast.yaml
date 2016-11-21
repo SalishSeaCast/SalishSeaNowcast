@@ -73,6 +73,18 @@ observations:
   # Storage directory for ONC ferry instruments data .mat files
   ferry data: /ocean/jieliu/research/meopar/ONC_ferries/
 
+  # ONC Strait of Georgia nodes real-time CTD data
+  ctd data:
+    # ONC node station names to download data from
+    stations:
+      ##- SCVIP  # offline as of early Oct-2016
+      - SEVIP
+    # Destination directory for ONC CTD T&S data netCDF files
+    dest dir: /results/observations/ONC/CTD/
+    # Template for ONC CTD T&S data file path
+    # **Must be quoted to project {} characters**
+    filepath template: '{station}/{station}_CTD_15m_{yyyymmdd}.nc'
+
 
 run types:
   # Keys are run types to execute, values are NEMO configuration name,
@@ -480,6 +492,13 @@ message registry:
       success forecast2: atmospheric forecast2 forcing ready
       failure forecast2: atmospheric forecast2 forcing files preparation failed
       crash: grib_to_netcdf worker crashed
+
+    get_onc_ctd:
+      checklist key: ONC CTD data
+      success SCVIP: ONC SCVIP station CTD T&S data file created
+      success SEVIP: ONC SEVIP station CTD T&S data file created
+      failure: ONC CTD T&S data file creation failed
+      crash: get_onc_ctd worker crashed
 
     upload_forcing:
       checklist key: forcing upload
