@@ -82,7 +82,8 @@ class TestSuccess:
 
     def test_success_msg_type(self, worker_module):
         parsed_args = Mock(run_type='forecast2', plot_type='publish')
-        msg_type = worker_module.success(parsed_args)
+        with patch.object(worker_module.logger, 'info') as m_logger:
+            msg_type = worker_module.success(parsed_args)
         assert msg_type == 'success forecast2 publish'
 
 
@@ -97,5 +98,6 @@ class TestFailure:
 
     def test_failure_msg_type(self, worker_module):
         parsed_args = Mock(run_type='forecast', plot_type='publish')
-        msg_type = worker_module.failure(parsed_args)
+        with patch.object(worker_module.logger, 'critical') as m_logger:
+            msg_type = worker_module.failure(parsed_args)
         assert msg_type == 'failure forecast publish'
