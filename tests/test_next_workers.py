@@ -32,6 +32,11 @@ def config():
     a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
     """
     return {
+        'observations': {
+            'ctd data': {
+                'stations': ['SCVIP', 'SEVIP'],
+            },
+        },
         'run types': {
             'nowcast': {}, 'nowcast-green': {},
             'forecast': {}, 'forecast2': {}
@@ -111,6 +116,17 @@ class TestAfterDownloadWeather:
             Message('download_weather', msg_type), config, checklist)
         expected = NextWorker(
             'nowcast.workers.grib_to_netcdf', args, host='localhost')
+        assert expected in workers
+
+    @pytest.mark.parametrize('expected', [
+        ['SCVIP'],
+        ['SEVIP'],
+    ])
+    def test_success_06_launch_get_onc_ctd(self, expected, config, checklist):
+        workers = next_workers.after_download_weather(
+            Message('download_weather', 'success 06'), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.get_onc_ctd', args=expected, host='localhost')
         assert expected in workers
 
 
@@ -203,6 +219,32 @@ class TestAfterGribToNetcdf:
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
             args=['download_weather'], host='localhost')
+        assert expected in workers
+
+
+class TestAfterGetONC_CTD:
+    """Unit tests for the after_get_onc_ctd function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_get_onc_ctd(
+            Message('get_onc_ctd', msg_type), config, checklist)
+        assert workers == []
+
+    @pytest.mark.parametrize('ctd_stn', [
+        'SCVIP',
+        'SEVIP',
+    ])
+    def test_success_launch_ping_erddap(self, ctd_stn, config, checklist):
+        workers = next_workers.after_get_onc_ctd(
+            Message(
+                'get_onc_ctd', 'success {}'.format(ctd_stn)), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.ping_erddap', args=[ctd_stn], host='localhost')
         assert expected in workers
 
 

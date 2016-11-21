@@ -51,9 +51,12 @@ def after_download_weather(msg, config, checklist):
         'success 12': [],
         'success 18': [],
     }
-    if msg.type.endswith('06'):
-        next_workers['success 06'] = [
-            NextWorker('nowcast.workers.make_runoff_file')]
+    if msg.type.startswith('success') and msg.type.endswith('06'):
+        next_workers['success 06'].append(
+            NextWorker('nowcast.workers.make_runoff_file'))
+        for stn in config['observations']['ctd data']['stations']:
+            next_workers['success 06'].append(
+                NextWorker('nowcast.workers.get_onc_ctd', args=[stn]))
         if 'forecast2' in config['run types']:
             next_workers['success 06'].extend([
                 NextWorker(
@@ -188,6 +191,37 @@ def after_grib_to_netcdf(msg, config, checklist):
                     config['run']['nowcast-green host'], 'nowcast-green',
                     '--shared-storage'])
         )
+    return next_workers[msg.type]
+
+
+def after_get_onc_ctd(msg, config, checklist):
+    """Calculate the list of workers to launch after the get_onc_ctd
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure': [],
+        'success SCVIP': [],
+        'success SEVIP': [],
+    }
+    if msg.type.startswith('success'):
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.ping_erddap', args=[msg.type.split()[1]]))
     return next_workers[msg.type]
 
 

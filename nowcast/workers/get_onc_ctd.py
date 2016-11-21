@@ -32,17 +32,15 @@ import os
 from pathlib import Path
 
 import arrow
+from nemo_nowcast import NowcastWorker
 import numpy
-import xarray
-
 from salishsea_tools import data_tools
 from salishsea_tools.places import PLACES
+import xarray
 
-from nowcast import lib
-from nowcast.nowcast_worker import NowcastWorker
 
-worker_name = lib.get_module_name()
-logger = logging.getLogger(worker_name)
+NAME = 'get_onc_ctd'
+logger = logging.getLogger(NAME)
 
 
 def main():
@@ -52,20 +50,15 @@ def main():
 
     :command:`python -m nowcast.workers.get_onc_ctd -h`
     """
-    worker = NowcastWorker(worker_name, description=__doc__)
-    salishsea_yesterday = arrow.utcnow().floor('day').replace(days=-1)
-    worker.arg_parser.add_argument(
+    worker = NowcastWorker(NAME, description=__doc__)
+    worker.init_cli()
+    worker.cli.add_argument(
         'onc_station', choices={'SCVIP', 'SEVIP'},
         help='Name of the ONC node station to download data for.',
     )
-    worker.arg_parser.add_argument(
-        '--data-date', type=lib.arrow_date,
-        default=salishsea_yesterday,
-        help='''
-        UTC date to get ONC node CTD data for; use YYYY-MM-DD format.
-        Defaults to {}.
-        '''.format(salishsea_yesterday.format('YYYY-MM-DD')),
-    )
+    worker.cli.add_date_option(
+        '--data-date', default=arrow.utcnow().floor('day').replace(days=-1),
+        help='UTC date to get ONC node CTD data for.')
     worker.run(get_onc_ctd, success, failure)
 
 
