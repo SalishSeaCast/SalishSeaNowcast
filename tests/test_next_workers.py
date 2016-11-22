@@ -34,7 +34,7 @@ def config():
     return {
         'observations': {
             'ctd data': {
-                'stations': ['SCVIP', 'SEVIP', 'LSBBL'],
+                'stations': ['SCVIP', 'SEVIP', 'LSBBL', 'USDDL'],
             },
         },
         'run types': {
@@ -122,6 +122,7 @@ class TestAfterDownloadWeather:
         'SCVIP',
         'SEVIP',
         'LSBBL',
+        'USDDL',
     ])
     def test_success_06_launch_get_onc_ctd(self, ctd_stn, config, checklist):
         workers = next_workers.after_download_weather(
@@ -240,6 +241,7 @@ class TestAfterGetONC_CTD:
         'SCVIP',
         'SEVIP',
         'LSBBL',
+        'USDDL',
     ])
     def test_success_launch_ping_erddap(self, ctd_stn, config, checklist):
         workers = next_workers.after_get_onc_ctd(

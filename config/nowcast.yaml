@@ -80,6 +80,7 @@ observations:
       ##- SCVIP  # offline as of early Oct-2016
       - SEVIP
       - LSBBL
+      - USDDL
     # Destination directory for ONC CTD T&S data netCDF files
     dest dir: /results/observations/ONC/CTD/
     # Template for ONC CTD T&S data file path
@@ -142,6 +143,8 @@ erddap:
       - ubcONCSEVIPCTD15mV1
     LSBBL-CTD:
       - ubcONCLSBBLCTD15mV1
+    USDDL-CTD:
+      - ubcONCUSDDLCTD15mV1
 
 
 figures:
@@ -505,6 +508,7 @@ message registry:
       success SCVIP: ONC SCVIP station CTD T&S data file created
       success SEVIP: ONC SEVIP station CTD T&S data file created
       success LSBBL: ONC LSBBL station CTD T&S data file created
+      success USDDL: ONC USDDL station CTD T&S data file created
       failure: ONC CTD T&S data file creation failed
       crash: get_onc_ctd worker crashed
 
@@ -590,6 +594,8 @@ message registry:
       failure SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files creation failed
       success LSBBL-CTD: ONC LSBBL node CTD ERDDAP dataset flag files created
       failure LSBBL-CTD: ONC LSBBL node CTD ERDDAP dataset flag files creation failed
+      success USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files created
+      failure USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
 
     make_plots:

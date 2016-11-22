@@ -40,7 +40,7 @@ def main():
         choices={
             'nowcast', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
-            'SCVIP-CTD', 'SEVIP-CTD', 'LSBBL-CTD',
+            'SCVIP-CTD', 'SEVIP-CTD', 'LSBBL-CTD', 'USDDL-CTD',
         },
         help='''
         Type of dataset to notify ERDDAP of:
@@ -54,6 +54,8 @@ def main():
         'SEVIP-CTD' means ONC SEVIP node CTD T&S observations downloaded &
         processed
         'LSBBL-CTD' means ONC LSBBL node CTD T&S observations downloaded &
+        processed
+        'USDDL-CTD' means ONC USDDL node CTD T&S observations downloaded &
         processed
         ''',
     )
