@@ -53,7 +53,7 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'onc_station', choices={'SCVIP', 'SEVIP', 'LSBBL'},
+        'onc_station', choices={'SCVIP', 'SEVIP', 'LSBBL', 'USDDL'},
         help='Name of the ONC node station to download data for.',
     )
     worker.cli.add_date_option(
@@ -168,6 +168,13 @@ def _create_dataset(onc_station, salinity, temperature):
             'ONC_stationDescription':
                 'Pacific, Salish Sea, Strait of Georgia, Delta, Lower Slope, '
                 'Bottom Boundary Layer',
+        },
+        'USDDL': {
+            'place_name': 'Delta DDL node',
+            'ONC_station': 'Delta Upper Slope DDL',
+            'ONC_stationDescription':
+                'Pacific, Salish Sea, Strait of Georgia, Delta, Upper Slope, '
+                'Delta Dynamics Laboratory',
         },
     }
     ds = xarray.Dataset(
