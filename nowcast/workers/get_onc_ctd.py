@@ -138,7 +138,7 @@ def _qaqc_filter(ctd_data, var):
     qaqc_mask = ctd_data.data_vars[var].attrs['qaqcFlag'] == 1
     filtered_var = xarray.DataArray(
         name=var,
-        data=ctd_data.salinity[qaqc_mask].values,
+        data=ctd_data.data_vars[var][qaqc_mask].values,
         coords={'time': ctd_data.data_vars[var].sampleTime[qaqc_mask].values},
     )
     return filtered_var
