@@ -164,7 +164,7 @@ class TestPingErddap:
         for i, dataset_id in enumerate(dataset_ids):
             assert tmp_flag_dir.join(dataset_id).exists
             expected = '{} touched'.format(tmp_flag_dir.join(dataset_id))
-            m_logger.debug.calls[i] == expected
+            m_logger.info.call_args_list[i] == expected
         expected = {dataset: config['erddap']['datasetIDs'][dataset]}
         assert checklist == expected
 
@@ -184,5 +184,5 @@ class TestPingErddap:
                 }}}
         with patch.object(worker_module, 'logger') as m_logger:
             checklist = worker_module.ping_erddap(parsed_args, config)
-        assert not m_logger.debug.called
+        assert not m_logger.info.called
         assert checklist == {'nowcast-green': []}
