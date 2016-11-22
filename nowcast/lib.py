@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Salish Sea NEMO nowcast library functions for use by manager and workers.
+"""Salish Sea NEMO nowcast utility functions for use by workers.
 """
 import grp
 import logging

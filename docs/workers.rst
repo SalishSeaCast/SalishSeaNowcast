@@ -177,6 +177,16 @@ Workers
     :members: main
 
 
+Worker Utility Functions
+------------------------
+
+:py:mod:`nowcast.lib` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.lib
+    :members:
+
+
 :kbd:`next_workers` Module
 ==========================
 
