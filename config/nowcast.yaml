@@ -79,6 +79,7 @@ observations:
     stations:
       ##- SCVIP  # offline as of early Oct-2016
       - SEVIP
+      - LSBBL
     # Destination directory for ONC CTD T&S data netCDF files
     dest dir: /results/observations/ONC/CTD/
     # Template for ONC CTD T&S data file path
@@ -497,6 +498,7 @@ message registry:
       checklist key: ONC CTD data
       success SCVIP: ONC SCVIP station CTD T&S data file created
       success SEVIP: ONC SEVIP station CTD T&S data file created
+      success LSBBL: ONC LSBBL station CTD T&S data file created
       failure: ONC CTD T&S data file creation failed
       crash: get_onc_ctd worker crashed
 
