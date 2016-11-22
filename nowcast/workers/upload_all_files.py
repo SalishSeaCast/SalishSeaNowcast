@@ -27,7 +27,7 @@ import arrow
 import zmq
 
 from nowcast import lib
-from nowcast.nowcast_worker import WorkerError
+from nemo_nowcast import WorkerError
 from nowcast.workers import (
     get_NeahBay_ssh,
     grib_to_netcdf,
