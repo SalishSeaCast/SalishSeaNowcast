@@ -34,7 +34,7 @@ def config():
     return {
         'observations': {
             'ctd data': {
-                'stations': ['SCVIP', 'SEVIP'],
+                'stations': ['SCVIP', 'SEVIP', 'LSBBL'],
             },
         },
         'run types': {
@@ -118,15 +118,16 @@ class TestAfterDownloadWeather:
             'nowcast.workers.grib_to_netcdf', args, host='localhost')
         assert expected in workers
 
-    @pytest.mark.parametrize('expected', [
-        ['SCVIP'],
-        ['SEVIP'],
+    @pytest.mark.parametrize('ctd_stn', [
+        'SCVIP',
+        'SEVIP',
+        'LSBBL',
     ])
-    def test_success_06_launch_get_onc_ctd(self, expected, config, checklist):
+    def test_success_06_launch_get_onc_ctd(self, ctd_stn, config, checklist):
         workers = next_workers.after_download_weather(
             Message('download_weather', 'success 06'), config, checklist)
         expected = NextWorker(
-            'nowcast.workers.get_onc_ctd', args=expected, host='localhost')
+            'nowcast.workers.get_onc_ctd', args=[ctd_stn], host='localhost')
         assert expected in workers
 
 
@@ -238,6 +239,7 @@ class TestAfterGetONC_CTD:
     @pytest.mark.parametrize('ctd_stn', [
         'SCVIP',
         'SEVIP',
+        'LSBBL',
     ])
     def test_success_launch_ping_erddap(self, ctd_stn, config, checklist):
         workers = next_workers.after_get_onc_ctd(

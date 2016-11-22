@@ -38,7 +38,7 @@ class TestMain:
         get_onc_ctd.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('onc_station',)
-        assert kwargs['choices'] == {'SCVIP', 'SEVIP'}
+        assert kwargs['choices'] == {'SCVIP', 'SEVIP', 'LSBBL'}
         assert 'help' in kwargs
 
     def test_add_data_date_arg(self, m_worker):
@@ -64,6 +64,7 @@ class TestSuccess:
     @pytest.mark.parametrize('onc_station', [
         'SCVIP',
         'SEVIP',
+        'LSBBL'
     ])
     def test_success_log_info(self, onc_station):
         parsed_args = SimpleNamespace(
@@ -77,6 +78,7 @@ class TestSuccess:
     @pytest.mark.parametrize('onc_station', [
         'SCVIP',
         'SEVIP',
+        'LSBBL'
     ])
     def test_success_msg_type(self, onc_station):
         parsed_args = SimpleNamespace(
@@ -92,6 +94,7 @@ class TestFailure:
     @pytest.mark.parametrize('onc_station', [
         'SCVIP',
         'SEVIP',
+        'LSBBL'
     ])
     def test_failure_log_critical(self, onc_station):
         parsed_args = SimpleNamespace(
@@ -107,6 +110,7 @@ class TestFailure:
     @pytest.mark.parametrize('onc_station', [
         'SCVIP',
         'SEVIP',
+        'LSBBL'
     ])
     def test_failure_msg_type(self, onc_station):
         parsed_args = SimpleNamespace(

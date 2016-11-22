@@ -217,6 +217,7 @@ def after_get_onc_ctd(msg, config, checklist):
         'failure': [],
         'success SCVIP': [],
         'success SEVIP': [],
+        'success LSBBL': [],
     }
     if msg.type.startswith('success'):
         next_workers[msg.type].append(
