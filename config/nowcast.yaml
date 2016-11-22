@@ -136,6 +136,12 @@ erddap:
       # List of ERDDAP dataset ids to create flag files for to signal updates
       # to ERDDAP server
       - ubcSSaSurfaceAtmosphereFieldsV1
+    SCVIP-CTD:
+      - ubcONCSCVIPCTD15mV1
+    SEVIP-CTD:
+      - ubcONCSEVIPCTD15mV1
+    LSBBL-CTD:
+      - ubcONCLSBBLCTD15mV1
 
 
 figures:
