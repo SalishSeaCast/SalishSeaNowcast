@@ -82,7 +82,7 @@ def ping_erddap(parsed_args, config, *args):
     try:
         for dataset_id in config['erddap']['datasetIDs'][dataset]:
             (flag_path / dataset_id).touch()
-            logger.debug('{} touched'.format(flag_path / dataset_id))
+            logger.info('{} touched'.format(flag_path / dataset_id))
             checklist[dataset].append(dataset_id)
     except KeyError:
         # run type is not in datasetIDs dict
