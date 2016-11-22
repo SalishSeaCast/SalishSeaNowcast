@@ -588,6 +588,8 @@ message registry:
       failure SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files creation failed
       success SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files created
       failure SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files creation failed
+      success LSBBL-CTD: ONC LSBBL node CTD ERDDAP dataset flag files created
+      failure LSBBL-CTD: ONC LSBBL node CTD ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
 
     make_plots:
