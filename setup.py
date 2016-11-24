@@ -48,6 +48,7 @@ install_requires = [
     # see environment-rtd.yaml for conda environment used for readthedocs build
 
     'angles',
+    'basemap',
     'beautifulsoup4',
     'bottleneck',
     'cliff',
