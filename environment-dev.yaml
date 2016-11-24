@@ -21,6 +21,7 @@ channels:
 dependencies:
   - arrow
   - attrs
+  - basemap
   - beautifulsoup4
   - bottleneck
   - circus
