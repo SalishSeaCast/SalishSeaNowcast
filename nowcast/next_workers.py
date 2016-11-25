@@ -227,6 +227,32 @@ def after_get_onc_ctd(msg, config, checklist):
     return next_workers[msg.type]
 
 
+def after_download_live_ocean(msg, config, checklist):
+    """Calculate the list of workers to launch after the download_live_ocean
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure': [],
+        'success': [],
+    }
+    return next_workers[msg.type]
+
+
 def after_upload_forcing(msg, config, checklist):
     """Calculate the list of workers to launch after the upload_forcing worker
     ends.
