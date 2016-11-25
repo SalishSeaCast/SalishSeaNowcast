@@ -98,6 +98,13 @@ Workers
     :members: main
 
 
+:kbd:`download_live_ocean`
+--------------------------
+
+.. automodule:: nowcast.workers.download_live_ocean
+:members: main
+
+
 :kbd:`upload_forcing`
 ---------------------
 

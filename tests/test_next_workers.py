@@ -252,6 +252,21 @@ class TestAfterGetONC_CTD:
         assert expected in workers
 
 
+class TestAfterDownloadLiveOcean:
+    """Unit tests for the after_download_live_ocean function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_download_live_ocean(
+            Message('download_live_ocean', msg_type), config, checklist)
+        assert workers == []
+
+
 class TestAfterUploadForcing:
     """Unit tests for the after_upload_forcing function.
     """

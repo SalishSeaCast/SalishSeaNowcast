@@ -26,6 +26,9 @@ scheduled workers:
       every: day
       at: '11:00'
       cmd line opts: '12'
+  - nowcast.workers.download_live_ocean:
+      every: day
+      at: '13:00'
   - nowcast.workers.download_weather:
       every: day
       at: '17:00'
@@ -67,6 +70,9 @@ ssh:
   tidal predictions: /results/nowcast-sys/tools/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
   ssh dir: /results/forcing/sshNeahBay/
+
+
+temperature salinity:
 
 
 observations:
@@ -511,6 +517,13 @@ message registry:
       success USDDL: ONC USDDL station CTD T&S data file created
       failure: ONC CTD T&S data file creation failed
       crash: get_onc_ctd worker crashed
+
+    download_live_ocean:
+      checklist key: Live Ocean products
+      success: Live Ocean Salish Sea boundary files ready
+      success: Live Ocean Salish Sea boundary files download failed
+      failure: Live Ocean Salish Sea boundary files download failed
+      crash: download_live_ocean worker crashed
 
     upload_forcing:
       checklist key: forcing upload
