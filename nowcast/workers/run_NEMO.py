@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Salish Sea NEMO-3.6 nowcast worker that prepares the YAML run
+"""Salish Sea NEMO nowcast worker that prepares the YAML run
 description file and bash run script for a nowcast, nowcast-green,
 forecast or forecast2 run on the ONC cloud or salish,
 and launches the run.
