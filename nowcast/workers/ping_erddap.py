@@ -64,7 +64,7 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{.dataset} ERDDAP dataset flag files created'.format(parsed_args),
+        '{.dataset} ERDDAP dataset flag file(s) created'.format(parsed_args),
         extra={'dataset': parsed_args.dataset})
     msg_type = 'success {.dataset}'.format(parsed_args)
     return msg_type
@@ -72,7 +72,7 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        '{.dataset} ERDDAP dataset flag files creation failed'
+        '{.dataset} ERDDAP dataset flag file(s) creation failed'
         .format(parsed_args),
         extra={'dataset': parsed_args.dataset})
     msg_type = 'failure {.dataset}'.format(parsed_args)
