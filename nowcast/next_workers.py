@@ -221,9 +221,11 @@ def after_get_onc_ctd(msg, config, checklist):
         'success USDDL': [],
     }
     if msg.type.startswith('success'):
+        ctd_stn = msg.type.split()[1]
         next_workers[msg.type].append(
             NextWorker(
-                'nowcast.workers.ping_erddap', args=[msg.type.split()[1]]))
+                'nowcast.workers.ping_erddap',
+                args=['{}-CTD'.format(ctd_stn)]))
     return next_workers[msg.type]
 
 

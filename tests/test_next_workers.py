@@ -248,7 +248,8 @@ class TestAfterGetONC_CTD:
             Message(
                 'get_onc_ctd', 'success {}'.format(ctd_stn)), config, checklist)
         expected = NextWorker(
-            'nowcast.workers.ping_erddap', args=[ctd_stn], host='localhost')
+            'nowcast.workers.ping_erddap',
+            args=['{}-CTD'.format(ctd_stn)], host='localhost')
         assert expected in workers
 
 
