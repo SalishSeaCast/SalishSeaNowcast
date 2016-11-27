@@ -18,7 +18,7 @@ scheduled workers:
       every: day
       # Time at which to launch the worker
       # (quotes are required to ensure that time is interpreted as a string)
-      at: '04:15
+      at: '04:15'
       # Optional command-line options for the worker
       # (quotes are necessary to force interpretation as a string)
       cmd line opts: '06'
