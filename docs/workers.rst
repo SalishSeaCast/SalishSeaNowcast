@@ -102,7 +102,7 @@ Workers
 --------------------------
 
 .. automodule:: nowcast.workers.download_live_ocean
-:members: main
+    :members: main
 
 
 :kbd:`upload_forcing`
@@ -156,6 +156,8 @@ Workers
     :members: main
 
 
+.. _MakePlotsWorker:
+
 :kbd:`make_plots`
 -----------------
 
@@ -198,4 +200,86 @@ Worker Utility Functions
 ==========================
 
 .. automodule:: nowcast.next_workers
+    :members:
+
+
+.. _nowcast.figures:
+
+Results Figures Modules
+=======================
+
+The modules in the :py:obj:`nowcast.figures` namespace are used by the :ref:`MakePlotsWorker` worker to produce the figures that are published to the web from each run.
+The figures are also stored in the :file:`figures/` sub-directory of each run's results directory.
+
+
+.. _nowcast.figures.shared:
+
+:py:mod:`nowcast.figures.shared` Module
+---------------------------------------
+
+.. automodule:: nowcast.figures.shared
+    :members:
+
+
+.. _nowcast.figures.website_theme:
+
+:py:mod:`nowcast.figures.website_theme` Module
+----------------------------------------------
+
+.. automodule:: nowcast.figures.website_theme
+    :members:
+
+
+.. _nowcast.figures.comparison:
+
+:py:obj:`nowcast.figures.comparison`  Figure Modules
+----------------------------------------------------
+
+.. _nowcast.figures.comparison.salinity_ferry_track:
+
+:py:mod:`nowcast.figures.comparison.salinity_ferry_track` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.comparison.salinity_ferry_track
+    :members:
+
+
+.. _nowcast.figures.publish:
+
+:py:obj:`nowcast.figures.publish`  Figure Modules
+-------------------------------------------------
+
+.. _nowcast.figures.publish.compare_tide_prediction_max_ssh:
+
+:py:mod:`nowcast.figures.publish.compare_tide_prediction_max_ssh`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.compare_tide_prediction_max_ssh
+    :members:
+
+
+.. _nowcast.figures.publish.pt_atkinson_tide:
+
+:py:mod:`nowcast.figures.publish.pt_atkinson_tide` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.pt_atkinson_tide
+    :members:
+
+
+.. _nowcast.figures.publish.storm_surge_alerts:
+
+:py:mod:`nowcast.figures.publish.storm_surge_alerts` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.storm_surge_alerts
+    :members:
+
+
+.. _nowcast.figures.publish.storm_surge_alerts_thumbnail:
+
+:py:mod:`nowcast.figures.publish.storm_surge_alerts_thumbnail` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.storm_surge_alerts_thumbnail
     :members:
