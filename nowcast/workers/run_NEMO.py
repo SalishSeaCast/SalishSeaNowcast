@@ -29,6 +29,7 @@ from nemo_nowcast import (
     WorkerError,
 )
 import salishsea_cmd.api
+from salishsea_cmd.lib import get_n_processors
 from salishsea_tools.namelist import namelist2dict
 import yaml
 
@@ -355,8 +356,7 @@ def _create_run_script(
 
 def _build_script(run_dir, run_desc_filepath, results_dir, host_run_config):
     run_desc = salishsea_cmd.lib.load_run_desc(str(run_desc_filepath))
-    jpni, jpnj = map(int, run_desc['MPI decomposition'].split('x'))
-    nemo_processors = jpni * jpnj
+    nemo_processors = get_n_processors(run_desc)
     xios_processors = int(run_desc['output']['XIOS servers'])
     email = host_run_config.get('email', 'nobody@example.com')
     script = '#!/bin/bash\n'
