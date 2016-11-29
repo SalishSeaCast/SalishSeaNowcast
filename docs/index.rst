@@ -90,21 +90,26 @@ The :ref:`Scheduler` is a long-running process that periodically checks the syst
 Contents
 ========
 
-The deployment and configuration of the system are described in the sections below.
+.. toctree::
+   :maxdepth: 2
+
+   workers
+   creating_workers
+   figures
+   deploy
+   config
+   worker_failures
+   pkg_development
+
+
+v2.0 Docs
+---------
 
 .. toctree::
    :maxdepth: 2
 
    framework
    development
-   creating_workers
-   figures
-   deploy
-   config
-   worker_failures
-   workers
-   api
-   pkg_development
 
 
 Indices and Tables
