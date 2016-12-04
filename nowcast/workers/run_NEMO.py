@@ -343,8 +343,9 @@ def _create_run_script(
     host_run_config = config['run'][host_name]
     dmy = run_date.format('DDMMMYY').lower()
     results_dir = Path(host_run_config['results'][run_type])
-    script = _build_script(run_dir, run_type, run_desc_filepath,
-        results_dir / dmy, host_run_config)
+    script = _build_script(
+        run_dir, run_type, run_desc_filepath, results_dir / dmy, host_name,
+        config)
     run_script_filepath = run_dir/'SalishSeaNEMO.sh'
     with run_script_filepath.open('wt') as f:
         f.write(script)
@@ -355,8 +356,10 @@ def _create_run_script(
 
 
 def _build_script(
-    run_dir, run_type, run_desc_filepath, results_dir, host_run_config):
+    run_dir, run_type, run_desc_filepath, results_dir, host_name, config,
+):
     run_desc = salishsea_cmd.lib.load_run_desc(str(run_desc_filepath))
+    host_run_config = config['run'][host_name]
     nemo_processors = get_n_processors(run_desc)
     xios_processors = int(run_desc['output']['XIOS servers'])
     email = host_run_config.get('email', 'nobody@example.com')
@@ -373,8 +376,9 @@ def _build_script(
         '{fix_permissions}\n'
         '{cleanup}'
         .format(
-            defns=_definitions(run_type, run_desc, run_desc_filepath, run_dir,
-                results_dir, host_run_config),
+            defns=_definitions(
+                run_type, run_desc, run_desc_filepath, run_dir, results_dir,
+                host_name, config),
             execute=_execute(nemo_processors, xios_processors),
             fix_permissions=_fix_permissions(),
             cleanup=_cleanup(),
@@ -384,15 +388,20 @@ def _build_script(
 
 
 def _definitions(
-    run_type, run_desc, run_desc_filepath, run_dir, results_dir,
-    host_run_config,
+    run_type, run_desc, run_desc_filepath, run_dir, results_dir, host_name,
+    config,
 ):
+    enabled_host_config = config['run']['enabled hosts'][host_name]
+    mpirun = 'mpirun'
+    if enabled_host_config.get('mpi hosts file') is not None:
+        mpirun = 'mpirun --hostfile {[mpi hosts file]}'.format(
+            enabled_host_config)
     defns = (
         'RUN_ID="{run_id}"\n'
         'RUN_DESC="{run_desc_file}"\n'
         'WORK_DIR="{run_dir}"\n'
         'RESULTS_DIR="{results_dir}"\n'
-        'MPIRUN="mpirun"\n'
+        'MPIRUN="{mpirun}"\n'
         'GATHER="{salishsea_cmd} gather"\n'
         'GATHER_OPTS="{gather_opts}"\n'
     ).format(
@@ -400,7 +409,8 @@ def _definitions(
         run_desc_file=run_desc_filepath.name,
         run_dir=run_dir,
         results_dir=results_dir,
-        salishsea_cmd=host_run_config['salishsea_cmd'],
+        mpirun=mpirun,
+        salishsea_cmd=config['run'][host_name]['salishsea_cmd'],
         gather_opts='--delete-restart' if run_type == 'forecast2' else '',
     )
     return defns

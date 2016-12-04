@@ -66,6 +66,10 @@ def config(scope='function'):
                 'duration': 1.25},
         },
         'run': {
+            'enabled hosts': {
+                'west.cloud': {'mpi hosts file': '${HOME}/mpi_hosts'},
+                'salish': {},
+            },
             'salish': {
                 'run prep dir': '/results/nowcast-sys/nowcast-prep',
                 'mpi decomposition': '3x5',
@@ -76,7 +80,9 @@ def config(scope='function'):
                     'nowcast-green': '/results/SalishSea/nowcast-green/',
                     'forecast': '/results/SalishSea/forecast/',
                     'forecast2': '/results/SalishSea/forecast2/',
-                    }}}}
+                    }},
+            'west.cloud': {'salishsea_cmd': 'bin/salishsea'},
+        }}
 
 
 @pytest.fixture
@@ -860,7 +866,7 @@ class TestDefinitions:
         'forecast',
         'forecast2',
     ])
-    def test_definiitions(self, run_type, worker_module, config):
+    def test_definitions(self, run_type, worker_module, config):
         run_desc = {'run_id': '03dec16nowcast'}
         run_desc_filepath = Mock()
         run_desc_filepath.name = '03dec16.yaml'
@@ -868,7 +874,7 @@ class TestDefinitions:
         results_dir = 'results_dir'
         defns = worker_module._definitions(
             run_type, run_desc, run_desc_filepath, run_dir, results_dir,
-            config['run']['salish'])
+            'salish', config)
         if run_type == 'forecast2':
             expected = '''RUN_ID="03dec16nowcast"
             RUN_DESC="03dec16.yaml"
@@ -884,6 +890,46 @@ class TestDefinitions:
             WORK_DIR="tmp_run_dir"
             RESULTS_DIR="results_dir"
             MPIRUN="mpirun"
+            GATHER="bin/salishsea gather"
+            GATHER_OPTS=""
+            '''
+        expected = expected.splitlines()
+        for i, line in enumerate(defns.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'nowcast-green',
+        'forecast',
+        'forecast2',
+    ])
+    def test_definitions_with_mpi_hosts_file(
+        self, run_type, worker_module, config,
+    ):
+        run_desc = {'run_id': '03dec16nowcast'}
+        run_desc_filepath = Mock()
+        run_desc_filepath.name = '03dec16.yaml'
+        run_dir = 'tmp_run_dir'
+        results_dir = 'results_dir'
+        defns = worker_module._definitions(
+            run_type, run_desc, run_desc_filepath, run_dir, results_dir,
+            'west.cloud', config)
+        if run_type == 'forecast2':
+            expected = '''RUN_ID="03dec16nowcast"
+            RUN_DESC="03dec16.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
+            GATHER="bin/salishsea gather"
+            GATHER_OPTS="--delete-restart"
+            '''
+        else:
+            expected = '''RUN_ID="03dec16nowcast"
+            RUN_DESC="03dec16.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
             GATHER="bin/salishsea gather"
             GATHER_OPTS=""
             '''
