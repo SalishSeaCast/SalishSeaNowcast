@@ -949,7 +949,8 @@ class TestExecute:
         echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 15 ./nemo.exe : -np 1 ./xios_server.exe \
+        ${MPIRUN} -np 15 --bind-to-core ./nemo.exe : \
+-np 1 --bind-to-core ./xios_server.exe \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
