@@ -191,17 +191,14 @@ def _update_time_namelist(run_date, run_type, run_duration, host_run_config):
     with namelist_time.open('rt') as f:
         lines = f.readlines()
     new_lines, restart_timestep = _calc_new_namelist_lines(
-        run_date, run_type, run_duration, prev_it000, prev_itend,
-        timesteps_per_day, lines)
+        run_date, run_type, run_duration, prev_it000, timesteps_per_day, lines)
     with namelist_time.open('wt') as f:
         f.writelines(new_lines)
     return restart_timestep
 
 
-def _calc_new_namelist_lines(
-    run_date, run_type, run_duration, prev_it000, prev_itend, timesteps_per_day,
-    lines,
-):
+def _calc_new_namelist_lines(run_date, run_type, run_duration, prev_it000,
+    timesteps_per_day, lines):
     it000_line, it000 = _get_namelist_value('nn_it000', lines)
     itend_line, itend = _get_namelist_value('nn_itend', lines)
     new_it000 = int(prev_it000 + timesteps_per_day)
