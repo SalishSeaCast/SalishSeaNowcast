@@ -942,7 +942,8 @@ class TestExecute:
     """Unit test for _execute() function.
     """
     def test_execute(self,  worker_module, config):
-        script = worker_module._execute(nemo_processors=15, xios_processors=1)
+        script = worker_module._execute(
+            nemo_processors=15, xios_processors=1, xios_host=None)
         expected = '''mkdir -p ${RESULTS_DIR}
 
         cd ${WORK_DIR}
@@ -951,6 +952,29 @@ class TestExecute:
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
         ${MPIRUN} -np 15 --bind-to-core ./nemo.exe : \
 -np 1 --bind-to-core ./xios_server.exe \
+>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
+
+        echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
+        ${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR} \
+>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(script.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+    def test_execute_with_xios_host(self,  worker_module, config):
+        script = worker_module._execute(
+            nemo_processors=15, xios_processors=1, xios_host='192.168.1.79')
+        expected = '''mkdir -p ${RESULTS_DIR}
+
+        cd ${WORK_DIR}
+        echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
+
+        echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
+        ${MPIRUN} -np 15 --bind-to-core ./nemo.exe : \
+-host 192.168.1.79 -np 1 --bind-to-core ./xios_server.exe \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 

@@ -203,7 +203,10 @@ run:
       # and MPI slots specifications.
       # Only required for runs on ONC west.cloud cluster.
       mpi hosts file: ${HOME}/mpi_hosts
-      # Location of bash script that sets nowacst system environment variables.
+      # IP address of the machineto run XIOS on.
+      # Only required for runs on ONC west.cloud cluster.
+      xios host: 192.168.1.79
+      # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
       envvars: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
