@@ -363,6 +363,7 @@ def _build_script(
     nemo_processors = get_n_processors(run_desc)
     xios_processors = int(run_desc['output']['XIOS servers'])
     email = host_run_config.get('email', 'nobody@example.com')
+    xios_host = config['run']['enabled hosts'][host_name].get('xios host')
     script = '#!/bin/bash\n'
     if host_run_config['job exec cmd'] == 'qsub':
         script = '\n'.join((script, '{pbs_common}'.format(
@@ -379,7 +380,7 @@ def _build_script(
             defns=_definitions(
                 run_type, run_desc, run_desc_filepath, run_dir, results_dir,
                 host_name, config),
-            execute=_execute(nemo_processors, xios_processors),
+            execute=_execute(nemo_processors, xios_processors, xios_host),
             fix_permissions=_fix_permissions(),
             cleanup=_cleanup(),
         )
@@ -416,11 +417,19 @@ def _definitions(
     return defns
 
 
-def _execute(nemo_processors, xios_processors):
+def _execute(nemo_processors, xios_processors, xios_host):
     mpirun = (
         '${{MPIRUN}} -np {nemo_procs} --bind-to-core ./nemo.exe : '
         '-np {xios_procs} --bind-to-core ./xios_server.exe'.format(
             nemo_procs=nemo_processors, xios_procs=xios_processors))
+    if xios_host is not None:
+        mpirun = (
+            '${{MPIRUN}} -np {nemo_procs} --bind-to-core ./nemo.exe : '
+            '-host {xios_host} '
+            '-np {xios_procs} --bind-to-core ./xios_server.exe'.format(
+                nemo_procs=nemo_processors,
+                xios_host=xios_host,
+                xios_procs=xios_processors))
     script = (
         'mkdir -p ${RESULTS_DIR}\n'
         '\n'
