@@ -199,6 +199,10 @@ run:
       # on the host.
       # The key-pair is assumed to be stored in $USER/.ssh/.
       ssh key: SalishSeaNEMO-nowcast_id_rsa
+      # Location on the compute host of the file that contains IP addresses
+      # and MPI slots specifications.
+      # Only required for runs on ONC west.cloud cluster.
+      mpi hosts file: ${HOME}/mpi_hosts
       # Location of bash script that sets nowacst system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
