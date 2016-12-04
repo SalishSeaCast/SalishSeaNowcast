@@ -417,9 +417,10 @@ def _definitions(
 
 
 def _execute(nemo_processors, xios_processors):
-    mpirun = '${{MPIRUN}} -np {procs} ./nemo.exe'.format(procs=nemo_processors)
-    mpirun = ' '.join((
-        mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
+    mpirun = (
+        '${{MPIRUN}} -np {nemo_procs} --bind-to-core ./nemo.exe : '
+        '-np {xios_procs} --bind-to-core ./xios_server.exe'.format(
+            nemo_procs=nemo_processors, xios_procs=xios_processors))
     script = (
         'mkdir -p ${RESULTS_DIR}\n'
         '\n'
