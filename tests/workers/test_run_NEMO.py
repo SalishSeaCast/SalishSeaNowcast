@@ -70,6 +70,7 @@ def config(scope='function'):
                 'run prep dir': '/results/nowcast-sys/nowcast-prep',
                 'mpi decomposition': '3x5',
                 'nowcast dir': '/results/nowcast-sys/nowcast',
+                'salishsea_cmd': 'bin/salishsea',
                 'results': {
                     'nowcast': 'results/SalishSea/nowcast',
                     'nowcast-green': '/results/SalishSea/nowcast-green/',
@@ -826,3 +827,91 @@ class TestRunDescription:
         assert run_desc['output']['fields'] == expected
         assert run_desc['output']['separate XIOS server']
         assert run_desc['output']['XIOS servers'] == 1
+
+
+class TestCreateRunScript:
+    """Unit test for _create_run_script() function.
+    """
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'nowcast-green',
+        'forecast',
+        'forecast2',
+    ])
+    @patch('nowcast.workers.run_NEMO._build_script', return_value='')
+    def test_run_script_filepath(
+        self, m_built_script, run_type, worker_module, config, tmpdir,
+    ):
+        tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
+        run_script_filepath = worker_module._create_run_script(
+            arrow.get('2016-12-03'), run_type, Path(str(tmp_run_dir)),
+            '30nov16.yaml', 'salish', config, Mock(name='tell_manager'),
+            False)
+        expected = Path(str(tmp_run_dir.join('SalishSeaNEMO.sh')))
+        assert run_script_filepath == expected
+
+
+class TestDefinitions:
+    """Unit test for _definitions() function.
+    """
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'nowcast-green',
+        'forecast',
+        'forecast2',
+    ])
+    def test_definiitions(self, run_type, worker_module, config):
+        run_desc = {'run_id': '03dec16nowcast'}
+        run_desc_filepath = Mock()
+        run_desc_filepath.name = '03dec16.yaml'
+        run_dir = 'tmp_run_dir'
+        results_dir = 'results_dir'
+        defns = worker_module._definitions(
+            run_type, run_desc, run_desc_filepath, run_dir, results_dir,
+            config['run']['salish'])
+        if run_type == 'forecast2':
+            expected = '''RUN_ID="03dec16nowcast"
+            RUN_DESC="03dec16.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            MPIRUN="mpirun"
+            GATHER="bin/salishsea gather"
+            GATHER_OPTS="--delete-restart"
+            '''
+        else:
+            expected = '''RUN_ID="03dec16nowcast"
+            RUN_DESC="03dec16.yaml"
+            WORK_DIR="tmp_run_dir"
+            RESULTS_DIR="results_dir"
+            MPIRUN="mpirun"
+            GATHER="bin/salishsea gather"
+            GATHER_OPTS=""
+            '''
+        expected = expected.splitlines()
+        for i, line in enumerate(defns.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+
+class TestExecute:
+    """Unit test for _execute() function.
+    """
+    def test_execute(self,  worker_module, config):
+        script = worker_module._execute(nemo_processors=15, xios_processors=1)
+        expected = '''mkdir -p ${RESULTS_DIR}
+
+        cd ${WORK_DIR}
+        echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
+
+        echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
+        ${MPIRUN} -np 15 ./nemo.exe : -np 1 ./xios_server.exe \
+>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
+
+        echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
+        ${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR} \
+>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(script.splitlines()):
+            assert line.strip() == expected[i].strip()
