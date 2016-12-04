@@ -405,9 +405,8 @@ def _definitions(
 
 def _execute(nemo_processors, xios_processors):
     mpirun = '${{MPIRUN}} -np {procs} ./nemo.exe'.format(procs=nemo_processors)
-    if xios_processors:
-        mpirun = ' '.join((
-            mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
+    mpirun = ' '.join((
+        mpirun, ':', '-np', str(xios_processors), './xios_server.exe'))
     script = (
         'mkdir -p ${RESULTS_DIR}\n'
         '\n'
