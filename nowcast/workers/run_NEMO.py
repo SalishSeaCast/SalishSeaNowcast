@@ -184,7 +184,6 @@ def _update_time_namelist(run_date, run_type, run_duration, host_run_config):
     dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
     prev_run_namelist = namelist2dict(str(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
-    prev_itend = prev_run_namelist['namrun'][0]['nn_itend']
     rdt = prev_run_namelist['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
     namelist_time = Path(host_run_config['run prep dir'], 'namelist.time')
@@ -217,6 +216,11 @@ def _calc_new_namelist_lines(run_date, run_type, run_duration, prev_it000,
     new_date0 = run_date.replace(days=run_date_offset[run_type])
     lines[date0_line] = lines[date0_line].replace(
         date0, new_date0.format('YYYYMMDD'))
+    stocklist_line, stocklist = _get_namelist_value('nn_stocklist', lines)
+    next_restart_timestep = (
+        restart_timestep + int(run_duration) * timesteps_per_day)
+    lines[stocklist_line] = lines[stocklist_line].replace(
+        stocklist, '{},'.format(next_restart_timestep))
     return lines, restart_timestep
 
 
