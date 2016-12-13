@@ -31,6 +31,7 @@ from nemo_nowcast import (
     get_web_data,
     NowcastWorker,
 )
+from nemo_nowcast.fileutils import FilePerms
 import netCDF4 as nc
 import numpy as np
 import pytz
@@ -181,7 +182,7 @@ def _read_website(save_path):
         save_path, 'txt', 'sshNB_{:%Y-%m-%d_%H}.txt'.format(utc_now))
     with open(filepath, 'wt') as f:
         f.writelines(table)
-    lib.fix_perms(filepath)
+    os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
     logger.debug(
         'observations & predictions table saved to {}'.format(filepath))
     return filepath
@@ -306,7 +307,7 @@ def _save_netcdf(
         vobtcrtx[:, 0, ib] = np.zeros(len(surges))
         vobtcrty[:, 0, ib] = np.zeros(len(surges))
     ssh_file.close()
-    lib.fix_perms(filepath)
+    os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
     logger.debug('saved western open boundary file {}'.format(filepath))
     return filepath
 

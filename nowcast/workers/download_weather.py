@@ -29,6 +29,7 @@ from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
+from nemo_nowcast.fileutils import FilePerms
 
 from nowcast import lib
 
@@ -124,7 +125,7 @@ def get_grib(parsed_args, config, *args):
             for var in GRIB_VARIABLES:
                 filepath = _get_file(
                     var, dest_dir_root, date, forecast, hr_str, session)
-                lib.fix_perms(filepath)
+                os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
     checklist = {
         '{date} {forecast} forecast'
         .format(date=date, forecast=forecast): True}

@@ -28,12 +28,11 @@ from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
+from nemo_nowcast.fileutils import FilePerms
 import salishsea_cmd.api
 from salishsea_cmd.lib import get_n_processors
 from salishsea_tools.namelist import namelist2dict
 import yaml
-
-from nowcast import lib
 
 
 NAME = 'run_NEMO'
@@ -350,7 +349,7 @@ def _create_run_script(
     run_script_filepath = run_dir/'SalishSeaNEMO.sh'
     with run_script_filepath.open('wt') as f:
         f.write(script)
-    lib.fix_perms(str(run_script_filepath), mode=lib.PERMS_RWX_RWX_R)
+    run_script_filepath.chmod(FilePerms(user='rwx', group='rwx', other='r'))
     _log_msg('{}: run script: {}'.format(run_type, run_script_filepath),
         'debug', tell_manager, shared_storage)
     return run_script_filepath
