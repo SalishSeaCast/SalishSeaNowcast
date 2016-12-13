@@ -150,9 +150,12 @@ class TestGetGrib():
         worker_module.FORECAST_DURATION = 1
         worker_module.GRIB_VARIABLES = ('UGRD_TGL_10_',)
         m_get_file.return_value = 'filepath'
-        with patch.object(worker_module.lib, 'fix_perms') as m_fix_perms:
+        p_chmod = patch.object(worker_module.os, 'chmod')
+        p_fileperms = patch.object(worker_module, 'FilePerms')
+        with p_chmod as m_chmod, p_fileperms as m_fileperms:
             worker_module.get_grib(parsed_args, config)
-        m_fix_perms.assert_called_once_with('filepath')
+        m_chmod.assert_called_once_with(
+            'filepath', m_fileperms(user='rw', group='rw', other='r'))
 
     def test_checklist(
         self, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
