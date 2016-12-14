@@ -120,7 +120,7 @@ def make_forcing_links(parsed_args, config, *args):
                             date=parsed_args.run_date.format('YYYY-MM-DD')),
                 'run date': parsed_args.run_date.format('YYYY-MM-DD')}}
         return checklist
-    _make_runoff_links(sftp_client, host_run_config, run_date, host_name)
+    _make_runoff_links(sftp_client, run_date, config, host_name)
     _make_weather_links(
         sftp_client, host_run_config, run_date, host_name, run_type)
     sftp_client.close()
@@ -155,7 +155,8 @@ def _make_NeahBay_ssh_links(
             _create_symlink(sftp_client, host_name, src, dest)
 
 
-def _make_runoff_links(sftp_client, host_run_config, run_date, host_name):
+def _make_runoff_links(sftp_client, run_date, config, host_name):
+    host_run_config = config['run'][host_name]
     _clear_links(sftp_client, host_run_config, 'rivers/')
     src = host_run_config['forcing']['rivers_month.nc']
     dest = os.path.join(
@@ -171,7 +172,7 @@ def _make_runoff_links(sftp_client, host_run_config, run_date, host_name):
         dest = os.path.join(
             host_run_config['nowcast dir'], 'rivers', 'bio_climatology')
         _create_symlink(sftp_client, host_name, src, dest)
-    for tmpl in make_runoff_file.FILENAME_TMPLS.values():
+    for tmpl in config['rivers']['file templates'].values():
         src = os.path.join(
             host_run_config['forcing']['rivers dir'],
             tmpl.format(run_date.replace(days=-1).date())

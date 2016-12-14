@@ -35,12 +35,6 @@ NAME = 'make_runoff_file'
 logger = logging.getLogger(NAME)
 
 
-#: Rivers runoff forcing file name templates
-FILENAME_TMPLS = {
-    'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
-    'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
-}
-
 
 def main():
     """Set up and run the worker.
@@ -97,15 +91,16 @@ def make_runoff_file(parsed_args, config, *args):
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
     # Calculate combined runoff for each case and write files
     directory = config['rivers']['rivers dir']
-    filepath = {}
-    filepath['short'] = _combine_runoff(
-        'short', flow_at_hope, yesterday, afterHope,
-        nonFraser, fraserratio, otherratio, driverflow, lat,
-        lon, riverdepth, directory, config)
-    filepath['long'] = _combine_runoff(
-        'long', flow_at_hope, yesterday, afterHope,
-        nonFraser, fraserratio, otherratio, driverflow, lat,
-        lon, riverdepth, directory, config)
+    filename_tmpls = config['rivers']['file templates']
+    filepath = {
+        'short': _combine_runoff(
+            'short', flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
+            otherratio, driverflow, lat, lon, riverdepth, directory,
+            filename_tmpls, config),
+        'long': _combine_runoff(
+            'long', flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
+            otherratio, driverflow, lat, lon, riverdepth, directory,
+            filename_tmpls, config)}
     return filepath
 
 
@@ -197,16 +192,17 @@ def _fraser_correction(
     return runoff
 
 
-def _combine_runoff(length, flow_at_hope, yesterday, afterHope,
-                    nonFraser, fraserratio, otherratio, driverflow, lat,
-                    lon, riverdepth, directory, config):
-
+def _combine_runoff(
+    length, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
+    otherratio, driverflow, lat, lon, riverdepth, directory, filename_tmpls,
+    config,
+):
     pd = rivertools.get_watershed_prop_dict('fraser', Fraser_River=length)
     runoff = _fraser_correction(
         pd, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
         otherratio, driverflow, riverdepth, config)
     # set up filename to follow NEMO conventions
-    filename = FILENAME_TMPLS[length].format(yesterday.date())
+    filename = filename_tmpls[length].format(yesterday.date())
     filepath = os.path.join(directory, filename)
     _write_file(filepath, yesterday, runoff, lat, lon, riverdepth)
     logger.debug(
