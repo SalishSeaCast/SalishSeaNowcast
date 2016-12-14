@@ -63,6 +63,12 @@ rivers:
   Fraser climatology: /results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
+  # Templates for the runoff forcing file names
+  # **Must be quoted to project {} characters**
+  file templates:
+    short: 'RFraserCElse_{:y%Ym%md%d}.nc'
+    long: 'RLonFraCElse_{:y%Ym%md%d}.nc'
+
 
 
 ssh:

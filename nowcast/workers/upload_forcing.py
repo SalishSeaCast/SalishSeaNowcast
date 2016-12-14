@@ -132,7 +132,7 @@ def upload_forcing(parsed_args, config, *args):
                 date=parsed_args.run_date.format('YYYY-MM-DD'))}
         return checklist
     # Rivers runoff
-    for tmpl in make_runoff_file.FILENAME_TMPLS.values():
+    for tmpl in config['rivers']['file templates'].values():
         filename = tmpl.format(run_date.replace(days=-1).date())
         localpath = os.path.join(config['rivers']['rivers dir'], filename)
         remotepath = os.path.join(
