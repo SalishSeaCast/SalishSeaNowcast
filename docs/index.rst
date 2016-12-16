@@ -102,15 +102,6 @@ Contents
    pkg_development
 
 
-v2.0 Docs
----------
-
-.. toctree::
-   :maxdepth: 2
-
-   development
-
-
 Indices and Tables
 ------------------
 
