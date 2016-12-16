@@ -108,7 +108,6 @@ v2.0 Docs
 .. toctree::
    :maxdepth: 2
 
-   framework
    development
 
 
