@@ -47,6 +47,11 @@ intersphinx_mapping = {
 
 todo_include_todos = True
 
+autodoc_mock_imports = [
+    'salishsea_tools',
+    'salishsea_tools.rivertools',
+]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
