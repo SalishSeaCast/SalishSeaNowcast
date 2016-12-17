@@ -8,5 +8,11 @@ channels:
   - gomss-nowcast
 
 dependencies:
+  - beautifulsoup4
+  - mako
+  - matplotlib
   - nemo_nowcast
+  - netcdf4
+  - numpy
+  - paramiko
   - python=3
