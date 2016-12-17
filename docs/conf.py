@@ -49,7 +49,9 @@ todo_include_todos = True
 
 autodoc_mock_imports = [
     'salishsea_tools',
-    'salishsea_tools.rivertools',
+    'salishsea_tools.namelist',
+    'salishsea_tools.places',
+    'salishsea_tools.unit_conversions',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
