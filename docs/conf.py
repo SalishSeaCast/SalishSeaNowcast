@@ -50,11 +50,13 @@ todo_include_todos = True
 autodoc_mock_imports = [
     'feedgen',
     'feedgen.entry',
+    'feedgen.feed',
     'nemo_nowcast.fileutils',
     'nemo_nowcast.workers',
     'nemo_nowcast.workers.clear_checklist',
     'nemo_nowcast.workers.rotate_logs',
     'salishsea_cmd',
+    'salishsea_cmd.api',
     'salishsea_tools',
     'salishsea_tools.namelist',
     'salishsea_tools.places',
