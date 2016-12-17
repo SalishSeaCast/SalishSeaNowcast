@@ -100,7 +100,7 @@ That can be accomplished as follows:
 
    .. code-block:: bash
 
-       (/results/nowcast-sys/nowcast-env)skookum$ python -m nowcast.workers.download_weather nowcast.yaml 12 --debug
+       (/results/nowcast-sys/nowcast-env)skookum$ python -m nowcast.workers.download_weather $NOWCAST_YAML 12 --debug
 
    The command above downloads the 12 forecast.
    The :kbd:`--debug` flag causes the logging output of the worker to be displayed on the screen (so that you can see what is going on) instead of being written to a file.
@@ -165,8 +165,7 @@ To determine if the :kbd:`--yesterday` flag can be used check the contents of a 
 e.g. http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/,
 to see if files for 2 days exist.
 
-Even if the worker cannot be re-run in the nowcast system deployment environment on :kbd:`skookum` due to permission issues the forecast products can be downloaded using a development and testing environment and directory structure as described above
-(see :ref:`SalishSeaNowcastPythonPackageEnvironmwnt` and :ref:`SalishSeaNowcastDirectoryStructure`).
+Even if the worker cannot be re-run in the nowcast system deployment environment on :kbd:`skookum` due to permission issues the forecast products can be downloaded using a :ref:`SalishSeaNowcastDevelopmentEnvironment`.
 That can be accomplished as follows:
 
 #. Activate your nowcast :program:`conda` environment,
@@ -174,17 +173,17 @@ That can be accomplished as follows:
 
    .. code-block:: bash
 
-       $ source activate nowcast
+       $ source activate salishsea-nowcast
        (nowcast)$ cd MEOPAR/nowcast/
 
-#. Edit the :file:`MEOPAR/nowcast/nowcast.yaml` file to set a destination in your filespace for the GRIB2 files that the worker downloads:
+#. Edit the :file:`SalishSeaNowcast/config/nowcast.yaml` file to set a destination in your filespace for the GRIB2 files that the worker downloads:
 
    .. code-block:: yaml
 
        weather:
          # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
-         # GRIB_dir: /ocean/sallen/allen/research/MEOPAR/GRIB/
-         GRIB_dir: /ocean/<your_userid>/MEOPAR/GRIB/
+         # GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
+         GRIB dir: /ocean/<your_userid>/MEOPAR/GRIB/
 
    .. note::
 
@@ -194,5 +193,7 @@ That can be accomplished as follows:
         .. code-block:: bash
 
             $ mkdir -p /ocean/<your_userid>/MEOPAR/GRIB/
+
+#. Set the value of the :envvar:`NOWCAST_YAML` environment variable to the absolute path the :file:`SalishSeaNowcast/config/nowcast.yaml` file that you edited.
 
 #. Continue from step 2 above.
