@@ -1,4 +1,4 @@
-# conda environment description file for docs build envioronment
+# conda environment description file for docs build environment
 # on readthedocs.org
 
 name: sphinx-build
@@ -8,16 +8,5 @@ channels:
   - gomss-nowcast
 
 dependencies:
-  - beautifulsoup4
-  - mako
-  - matplotlib
   - nemo_nowcast
-  - netcdf4
-  - numpy
-  - pandas
-  - paramiko
   - python=3
-  - scipy
-
-  - pip:
-    - driftwood
