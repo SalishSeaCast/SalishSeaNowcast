@@ -18,9 +18,6 @@
 figures for analysis and model evaluation of nowcast, forecast, and
 forecast2 runs.
 """
-
-from __future__ import division
-
 import datetime
 import glob
 import os
