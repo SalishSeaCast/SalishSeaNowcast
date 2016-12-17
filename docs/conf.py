@@ -57,6 +57,7 @@ autodoc_mock_imports = [
     'nemo_nowcast.workers.rotate_logs',
     'salishsea_cmd',
     'salishsea_cmd.api',
+    'salishsea_cmd.lib',
     'salishsea_tools',
     'salishsea_tools.namelist',
     'salishsea_tools.places',
