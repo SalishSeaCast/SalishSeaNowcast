@@ -48,10 +48,14 @@ intersphinx_mapping = {
 todo_include_todos = True
 
 autodoc_mock_imports = [
+    'feedgen',
+    'nemo_nowcast.fileutils',
+    'nemo_nowcast.workers',
     'salishsea_tools',
     'salishsea_tools.namelist',
     'salishsea_tools.places',
     'salishsea_tools.unit_conversions',
+    'xarray',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
