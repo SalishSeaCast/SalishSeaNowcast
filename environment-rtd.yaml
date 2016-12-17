@@ -16,3 +16,7 @@ dependencies:
   - numpy
   - paramiko
   - python=3
+  - scipy
+
+  - pip:
+    - driftwood
