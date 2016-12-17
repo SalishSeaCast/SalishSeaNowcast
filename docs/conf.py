@@ -48,13 +48,22 @@ intersphinx_mapping = {
 todo_include_todos = True
 
 autodoc_mock_imports = [
+    'beautifulsoup4',
+    'driftwood',
     'feedgen',
     'feedgen.entry',
     'feedgen.feed',
+    'mako',
+    'matplotlib',
     'nemo_nowcast.fileutils',
     'nemo_nowcast.workers',
     'nemo_nowcast.workers.clear_checklist',
     'nemo_nowcast.workers.rotate_logs',
+    'netcdf4',
+    'numpy',
+    'pandas',
+    'paramiko',
+    'scipy',
     'salishsea_cmd',
     'salishsea_cmd.api',
     'salishsea_cmd.lib',
