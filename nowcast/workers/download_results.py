@@ -18,7 +18,7 @@ from a run on the HPC/cloud facility to archival storage.
 """
 import glob
 import logging
-import os
+from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
@@ -81,20 +81,22 @@ def download_results(parsed_args, config, *args):
     run_type = parsed_args.run_type
     host_run_config = config['run'][host_name]
     results_dir = run_date.strftime('%d%b%y').lower()
-    src_dir = os.path.join(host_run_config['results'][run_type], results_dir)
+    run_type_results = Path(host_run_config['results'][run_type])
+    src_dir = run_type_results/results_dir
     src = '{host}:{src_dir}'.format(host=host_name, src_dir=src_dir)
-    dest = os.path.join(config['results archive'][run_type])
-    cmd = ['scp', '-Cpr', src, dest]
+    dest = Path(config['results archive'][run_type])
+    cmd = ['scp ', '-Cpr', src, str(dest)]
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     lib.fix_perms(
-        os.path.join(dest, results_dir),
+        str(dest/results_dir),
         mode=lib.PERMS_RWX_RWX_R_X, grp_name='sallen')
-    for filepath in glob.glob(os.path.join(dest, results_dir, '*')):
+    results_archive_dir = dest/results_dir
+    for filepath in glob.glob(str(results_archive_dir/'*')):
         lib.fix_perms(filepath, grp_name='sallen')
     checklist = {run_type: {}}
     for freq in '1h 1d'.split():
         checklist[run_type][freq] = glob.glob(
-            os.path.join(dest, results_dir, 'SalishSea_{}_*.nc'.format(freq)))
+            str(results_archive_dir/'SalishSea_{}_*.nc'.format(freq)))
     return checklist
 
 
