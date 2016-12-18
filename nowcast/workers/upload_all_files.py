@@ -28,7 +28,6 @@ import zmq
 
 from nowcast import lib
 from nemo_nowcast import WorkerError
-from nowcast.workers import grib_to_netcdf
 
 
 worker_name = lib.get_module_name()

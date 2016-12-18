@@ -26,7 +26,6 @@ import arrow
 from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
-from nowcast.workers import grib_to_netcdf
 
 
 NAME = 'make_forcing_links'
