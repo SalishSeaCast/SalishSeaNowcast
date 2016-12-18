@@ -53,9 +53,6 @@ JST, JEN = 20, 285
 # Position of Sandheads
 SandI, SandJ = 151, 136
 
-#: Weather forcing file name template
-FILENAME_TMPL = 'ops_{:y%Ym%md%d}.nc'
-
 
 def main():
     """Set up and run the worker.

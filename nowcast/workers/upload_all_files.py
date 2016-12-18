@@ -142,7 +142,7 @@ def upload_all_files(host_name, run_date, config):
         upload_file(sftp_client, host_name, localpath, remotepath)
     # Weather
     for day in range(-1, 2):
-        filename = grib_to_netcdf.FILENAME_TMPL.format(
+        filename = config['weather']['file template'].format(
             run_date.replace(days=day).date())
         dest_dir = '' if day <= 0 else 'fcst'
         localpath = os.path.join(
