@@ -140,7 +140,7 @@ def upload_forcing(parsed_args, config, *args):
     else:
         weather_start = 1
     for day in range(weather_start, 3):
-        filename = grib_to_netcdf.FILENAME_TMPL.format(
+        filename = config['weather']['file template'].format(
             run_date.replace(days=day).date())
         dest_dir = '' if day == 0 else 'fcst'
         localpath = os.path.join(

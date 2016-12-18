@@ -117,8 +117,7 @@ def make_forcing_links(parsed_args, config, *args):
                 'run date': parsed_args.run_date.format('YYYY-MM-DD')}}
         return checklist
     _make_runoff_links(sftp_client, run_date, config, host_name)
-    _make_weather_links(
-        sftp_client, host_run_config, run_date, host_name, run_type)
+    _make_weather_links(sftp_client, run_date, config, host_name, run_type)
     sftp_client.close()
     ssh_client.close()
     checklist = {
@@ -182,9 +181,8 @@ def _make_runoff_links(sftp_client, run_date, config, host_name):
             _create_symlink(sftp_client, host_name, src, dest)
 
 
-def _make_weather_links(
-    sftp_client, host_run_config, run_date, host_name, run_type,
-):
+def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
+    host_run_config = config['run'][host_name]
     _clear_links(sftp_client, host_run_config, 'NEMO-atmos/')
     NEMO_atmos_dir = os.path.join(
         host_run_config['nowcast dir'], 'NEMO-atmos/')
@@ -198,7 +196,7 @@ def _make_weather_links(
     else:
         weather_start = 0
     for day in range(weather_start, 3):
-        filename = grib_to_netcdf.FILENAME_TMPL.format(
+        filename = config['weather']['file template'].format(
             run_date.replace(days=day).date())
         if run_type in nowcast_runs:
             dir = '' if day <= 0 else 'fcst'
