@@ -294,7 +294,7 @@ run:
     run prep dir: /home/ubuntu/MEOPAR/nowcast-sys/runs
     # How is the domain to be distributed over the processors in the
     # i (longitude) and j (latitude) directions?
-    mpi decomposition: 8x17
+    mpi decomposition: 9x19
     # Path to the salishsea command processor executable to use in the run
     # script
     salishsea_cmd: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/salishsea
