@@ -28,11 +28,7 @@ import zmq
 
 from nowcast import lib
 from nemo_nowcast import WorkerError
-from nowcast.workers import (
-    get_NeahBay_ssh,
-    grib_to_netcdf,
-    make_runoff_file,
-)
+from nowcast.workers import grib_to_netcdf
 
 
 worker_name = lib.get_module_name()
@@ -117,7 +113,7 @@ def upload_all_files(host_name, run_date, config):
         host_name, host['ssh key name']['nowcast'])
     # Neah Bay sea surface height
     for day in range(-1, 2):
-        filename = get_NeahBay_ssh.FILENAME_TMPL.format(
+        filename = config['ssh']['file template'].format(
             run_date.replace(days=day).date())
         dest_dir = 'obs' if day == -1 else 'fcst'
         localpath = os.path.join(config['ssh']['ssh_dir'], dest_dir, filename)

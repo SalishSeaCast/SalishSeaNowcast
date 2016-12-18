@@ -47,9 +47,6 @@ NAME = 'get_NeahBay_ssh'
 logger = logging.getLogger(NAME)
 
 
-#: Neah Bay sea surface height forcing file name template
-FILENAME_TMPL = 'ssh_{:y%Ym%md%d}.nc'
-
 #: NOAA Neah Bay sea surface height observations & forecast site URL
 URL = (
     'http://www.nws.noaa.gov/mdl/etsurge/index.php'
@@ -137,8 +134,7 @@ def get_NeahBay_ssh(parsed_args, config, *args):
             ax.plot(sshd, '-o', lw=2, label=d.strftime('%d-%b-%Y'))
         ip = ip + 1
         filepath = _save_netcdf(
-            d, tc, sshd, forecast_flag, textfile,
-            config['ssh']['ssh dir'], lats, lons)
+            d, tc, sshd, forecast_flag, textfile, config, lats, lons)
         filename = os.path.basename(filepath)
         lib.fix_perms(filename, grp_name=config['file group'])
         if forecast_flag:
@@ -204,7 +200,7 @@ def _utc_now_to_run_date(utc_now, run_type):
 
 
 def _save_netcdf(
-    day, tc, surges, forecast_flag, textfile, save_path, lats, lons,
+    day, tc, surges, forecast_flag, textfile, config, lats, lons,
 ):
     """Save the surge for a given day in a netCDF4 file.
     """
@@ -213,7 +209,8 @@ def _save_netcdf(
     lengthj = endj-startj
 
     # netCDF4 file setup
-    filename = FILENAME_TMPL.format(day)
+    save_path = config['ssh']['ssh dir']
+    filename = config['ssh']['file template'].format(day)
     if forecast_flag:
         filepath = os.path.join(save_path, 'fcst', filename)
         comment = 'Prediction from Neah Bay storm surge website'

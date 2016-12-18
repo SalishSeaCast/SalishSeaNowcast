@@ -25,11 +25,7 @@ import arrow
 from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
-from nowcast.workers import (
-    get_NeahBay_ssh,
-    grib_to_netcdf,
-    make_runoff_file,
-)
+from nowcast.workers import grib_to_netcdf
 
 
 NAME = 'upload_forcing'
@@ -99,7 +95,7 @@ def upload_forcing(parsed_args, config, *args):
     ssh_client, sftp_client = lib.sftp(host_name, ssh_key)
     # Neah Bay sea surface height
     for day in range(-1, 3):
-        filename = get_NeahBay_ssh.FILENAME_TMPL.format(
+        filename = config['ssh']['file template'].format(
             run_date.replace(days=day).date())
         dest_dir = 'obs' if day == -1 else 'fcst'
         localpath = os.path.join(config['ssh']['ssh dir'], dest_dir, filename)
