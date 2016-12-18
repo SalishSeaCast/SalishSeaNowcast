@@ -109,8 +109,8 @@ run types:
   # and forecast2 requires a forecast to have been completed.
   nowcast:
     config name: SalishSea
-    bathymetry: /home/ubuntu/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
-    mesh mask: /home/ubuntu/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1  # day
   nowcast-green:
     config name:  SOG
@@ -119,13 +119,13 @@ run types:
     duration: 1  # day
   forecast:
     config name:  SalishSea
-    bathymetry: /home/ubuntu/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
-    mesh mask: /home/ubuntu/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1.25  # days
   forecast2:
     config name:  SalishSea
-    bathymetry: /home/ubuntu/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
-    mesh mask: /home/ubuntu/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1.25  # days
 
 
