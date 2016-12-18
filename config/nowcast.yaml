@@ -227,7 +227,7 @@ run:
       mpi hosts file: ${HOME}/mpi_hosts
       # IP address of the machineto run XIOS on.
       # Only required for runs on ONC west.cloud cluster.
-      xios host: 192.168.1.79
+      xios host: 192.168.1.53
       # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
