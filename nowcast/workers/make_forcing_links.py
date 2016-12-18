@@ -26,11 +26,7 @@ import arrow
 from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
-from nowcast.workers import (
-    get_NeahBay_ssh,
-    grib_to_netcdf,
-    make_runoff_file,
-)
+from nowcast.workers import grib_to_netcdf
 
 
 NAME = 'make_forcing_links'
@@ -138,10 +134,12 @@ def make_forcing_links(parsed_args, config, *args):
 
 
 def _make_NeahBay_ssh_links(
-        sftp_client, host_run_config, run_date, host_name, shared_storage):
+        sftp_client, run_date, config, host_name, shared_storage,
+):
+    host_run_config = config['run'][host_name]
     _clear_links(sftp_client, host_run_config, 'open_boundaries/west/ssh/')
     for day in range(-1, 3):
-        filename = get_NeahBay_ssh.FILENAME_TMPL.format(
+        filename = config['ssh']['file template'].format(
             run_date.replace(days=day).date())
         dir = 'obs' if day == -1 else 'fcst'
         src = os.path.join(host_run_config['forcing']['ssh dir'], dir, filename)

@@ -76,7 +76,9 @@ ssh:
   tidal predictions: /results/nowcast-sys/tools/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
   ssh dir: /results/forcing/sshNeahBay/
-
+  # Template for the sea surface heightforcing file name
+  # **Must be quoted to project {} characters**
+  file template: 'ssh_{:y%Ym%md%d}.nc'
 
 temperature salinity:
 
