@@ -35,7 +35,6 @@ NAME = 'make_runoff_file'
 logger = logging.getLogger(NAME)
 
 
-
 def main():
     """Set up and run the worker.
 
@@ -89,14 +88,10 @@ def make_runoff_file(parsed_args, config, *args):
         .format(yesterday=yesterday.format('YYYY-MM-DD')))
     # Get Fraser Watershed Climatology without Fraser
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
-    # Calculate combined runoff for each case and write files
+    # Calculate combined runoff for long case only and write file
     directory = config['rivers']['rivers dir']
     filename_tmpls = config['rivers']['file templates']
     filepath = {
-        'short': _combine_runoff(
-            'short', flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-            otherratio, driverflow, lat, lon, riverdepth, directory,
-            filename_tmpls, config),
         'long': _combine_runoff(
             'long', flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
             otherratio, driverflow, lat, lon, riverdepth, directory,

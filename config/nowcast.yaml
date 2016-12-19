@@ -60,7 +60,7 @@ rivers:
   # File containing daily average Fraser river flow at Hope
   ECget Fraser flow: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
   # Monthly climatology
-  monthly climatology: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
+  monthly climatology: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
   # File that describes Fraser River climatology separation from measured
   # flow at Hope
   Fraser climatology: /results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
@@ -69,7 +69,6 @@ rivers:
   # Templates for the runoff forcing file names
   # **Must be quoted to project {} characters**
   file templates:
-    short: 'RFraserCElse_{:y%Ym%md%d}.nc'
     long: 'RLonFraCElse_{:y%Ym%md%d}.nc'
 
 
@@ -272,7 +271,7 @@ run:
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /home/ubuntu/MEOPAR/rivers/
       # Locations on compute host of rivers runoff monthly climatology files
-      rivers_month.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+      rivers_month.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/rivers_month_extended.nc
       rivers_temp.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/river_ConsTemp_month.nc
       # Directory on compute host where atomospheric forcing files are stored
       weather dir: /home/ubuntu/MEOPAR/GEM2.5/ops/NEMO-atmos/
@@ -320,7 +319,7 @@ run:
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /results/forcing/rivers/
       # Locations on compute host of rivers runoff monthly climatology files
-      rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month.nc
+      rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
       rivers_temp.nc: /results/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
       # Directory on compute host where the rivers runoff daily tracers
       # climatology files are stored
@@ -376,7 +375,7 @@ run:
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /home/sallen/MEOPAR/rivers/
       # Locations on compute host of rivers runoff monthly climatology files
-      rivers_month.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/rivers_month.nc
+      rivers_month.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/rivers_month_extended.nc
       rivers_temp.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/river_ConsTemp_month.nc
       # Directory on compute host where atomospheric forcing files are stored
       weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
