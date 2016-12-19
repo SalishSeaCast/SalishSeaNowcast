@@ -15,7 +15,10 @@
    id="svg4938"
    version="1.1"
    inkscape:version="0.91 r13725"
-   sodipodi:docname="ProcessFlow.svg">
+   sodipodi:docname="ProcessFlow.svg"
+   inkscape:export-filename="/home/doug/Documents/MEOPAR/SalishSeaNowcast/docs/ProcessFlow.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs4940" />
   <sodipodi:namedview
@@ -26,14 +29,14 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.90287745"
-     inkscape:cx="385.484"
+     inkscape:cx="436.43222"
      inkscape:cy="508.92843"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1056"
-     inkscape:window-x="1366"
+     inkscape:window-width="1366"
+     inkscape:window-height="744"
+     inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
      fit-margin-top="0"
