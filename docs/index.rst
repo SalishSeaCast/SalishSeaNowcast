@@ -77,7 +77,7 @@ Process Flow
 
 The system workflow looks like:
 
-.. figure:: ProcessFlow.svg
+.. figure:: ProcessFlow.png
     :align: center
 
     Work flow of preparation for and execution of the daily runs.

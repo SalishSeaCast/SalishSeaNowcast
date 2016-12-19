@@ -23,7 +23,7 @@ Salish Sea Nowcast System Workers
 Process Flow
 ============
 
-.. figure:: ProcessFlow.svg
+.. figure:: ProcessFlow.png
     :align: center
 
     Work flow of preparation for and execution of the daily runs.
