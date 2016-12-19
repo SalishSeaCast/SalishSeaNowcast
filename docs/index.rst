@@ -52,12 +52,6 @@ Results of the model runs can be found on the `Salish Sea NEMO model results sit
 .. _Salish Sea NEMO model results site: https://salishsea.eos.ubc.ca/nemo/results/
 .. _ERDDAP server: https://salishsea.eos.ubc.ca/erddap/
 
-.. note::
-    This implementation of the system is presently under development.
-    The `previous implementation`_ has been producing daily results since Oct-2014.
-
-    .. _previous implementation: http://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaNowcast/
-
 The system is deployed on a server maintained by the UBC Dept. of Earth, Ocean and Atmospheric Sciences.
 Computing resources to run the NEMO model are provided by `Ocean Networks Canada`_ (cloud) and `Westgrid`_ (HPC).
 
