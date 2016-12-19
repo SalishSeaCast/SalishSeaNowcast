@@ -85,7 +85,7 @@ def download_results(parsed_args, config, *args):
     src_dir = run_type_results/results_dir
     src = '{host}:{src_dir}'.format(host=host_name, src_dir=src_dir)
     dest = Path(config['results archive'][run_type])
-    cmd = ['scp ', '-Cpr', src, str(dest)]
+    cmd = ['scp', '-Cpr', src, str(dest)]
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     lib.fix_perms(
         str(dest/results_dir),
