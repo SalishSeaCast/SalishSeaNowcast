@@ -41,6 +41,7 @@ Clone the following repos into :file:`/results/nowcast-sys/`:
 * :ref:`NEMO-forcing-repo`
 * :ref:`NEMO-3.6-code-repo`
 * :ref:`XIOS-repo`
+* :ref:`XIOS-ARCH-repo`
 * :ref:`salishsea-site-repo`
 
 
@@ -58,8 +59,20 @@ Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
 Build XIOS
 ==========
 
-.. TODO::
-    Write this section.
+Symlink the XIOS build configuration files for :kbd:`salish` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS/arch/` directory:
+
+.. code-block:: bash
+
+    $ cd /results/nowcast-sys/XIOS/arch
+    $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_SALISH.fcm
+    $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_SALISH.path
+
+:command:`ssh` to :kbd:`salish` and build XIOS with:
+
+.. code-block:: bash
+
+    $ cd /results/nowcast-sys/XIOS
+    $ ./make_xios --arch GCC_SALISH --netcdf_lib netcdf4_seq --job 8
 
 
 Build NEMO-3.6
