@@ -94,11 +94,11 @@ The Python packages that the system depends on are installed in a conda environm
     $ conda create \
         --prefix /results/nowcast-sys/nemo_nowcast-env \
         --channel gomss-nowcast --channel defaults --channel conda-forge \
-        arrow attrs beautifulsoup4 bottleneck circus cliff matplotlib netcdf4 \
-        numpy pandas paramiko pip python=3 pyyaml pyzmq retrying requests \
-        schedule scipy xarray
+        arrow attrs basemap beautifulsoup4 bottleneck circus cliff docutils \
+        lxml mako matplotlib netcdf4 numpy pandas paramiko pillow pip python=3 \
+        pyyaml pyzmq retrying requests schedule scipy xarray
     $ source activate /results/nowcast-sys/nemo_nowcast-env
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install angles driftwood raven
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install angles driftwood feedgen raven
     (/results/nowcast-sys/nemo_nowcast-env)$ cd /results/nowcast-sys/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
