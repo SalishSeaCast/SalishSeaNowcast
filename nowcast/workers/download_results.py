@@ -92,12 +92,12 @@ def download_results(parsed_args, config, *args):
         str(dest/results_dir),
         mode=lib.PERMS_RWX_RWX_R_X, grp_name='sallen')
     results_archive_dir = dest/results_dir
-    for filepath in glob.glob(str(results_archive_dir/'*')):
+    for filepath in results_archive_dir.glob('*'):
         lib.fix_perms(filepath, grp_name='sallen')
     checklist = {run_type: {}}
     for freq in '1h 1d'.split():
-        checklist[run_type][freq] = glob.glob(
-            str(results_archive_dir/'SalishSea_{}_*.nc'.format(freq)))
+        checklist[run_type][freq] = results_archive_dir.glob(
+            'SalishSea_{}_*.nc'.format(freq))
     return checklist
 
 
