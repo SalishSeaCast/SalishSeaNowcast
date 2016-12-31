@@ -39,7 +39,8 @@ def main():
     )
     worker.cli.add_argument(
         'run_type',
-        choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
+        choices={
+            'nowcast', 'nowcast-green', 'forecast', 'forecast2', 'hindcast'},
         help='Type of run to download results files from.',
     )
     worker.cli.add_date_option(

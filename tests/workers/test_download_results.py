@@ -47,7 +47,8 @@ class TestMain:
         download_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        expected = {'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
+        expected = {
+            'nowcast', 'nowcast-green', 'forecast', 'forecast2', 'hindcast'}
         assert kwargs['choices'] == expected
         assert 'help' in kwargs
 
