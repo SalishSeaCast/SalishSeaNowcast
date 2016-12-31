@@ -23,7 +23,6 @@ from unittest.mock import (
 import arrow
 import pytest
 
-import nowcast.lib
 from nowcast.workers import download_results
 
 
