@@ -139,6 +139,7 @@ results archive:
   forecast: /results/SalishSea/forecast/
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
+  hindcast: /results/SalishSea/hindcast/
 
 
 # Notifications to ERDDAP server that datasets have been updated
@@ -359,6 +360,12 @@ run:
     email: sallen@eos.ubc.ca
     # Executable to use to submit the SalishSeaNEMO.sh script to be run
     job exec cmd: qsub
+
+
+  hindcast host: jasper-nowcast
+  jasper-nowcast:
+    results:
+      hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
 
 
   # If the `hpc host` key is present, the forcing files will be uploaded
