@@ -465,11 +465,15 @@ def after_download_results(msg, config, checklist):
         'failure nowcast': [],
         'failure forecast': [],
         'failure forecast2': [],
+        'failure hindcast': [],
         'success nowcast': [],
         'success forecast': [],
         'success forecast2': [],
+        'success hindcast': [],
     }
     if msg.type.startswith('success'):
+        if msg.type.endswith('hindcast'):
+            return next_workers[msg.type]
         run_type = msg.type.split()[1]
         run_date = checklist['NEMO run'][run_type]['run date']
         next_workers[msg.type].append(

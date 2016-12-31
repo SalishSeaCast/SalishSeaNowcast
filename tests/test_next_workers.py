@@ -476,6 +476,8 @@ class TestAfterDownloadResults:
         'failure nowcast',
         'failure forecast',
         'failure forecast2',
+        'failure hindcast',
+        'success hindcast',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_download_results(
