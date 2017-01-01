@@ -8,6 +8,7 @@
 #    $ source activate nowcast-env
 #    $ pip install --editable NEMO_Nowcast/
 #    $ pip install --editable SalishSeaTools/
+#    $ pip install --editable NEMO-Cmd/
 #    $ pip install --editable SalishSeaCmd/
 #    $ pip install --editable SalishSeaNowcast/
 

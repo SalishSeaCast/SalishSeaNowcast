@@ -70,6 +70,7 @@ install_requires = [
 
     # 'NEMO_Nowcast',  # use pip install --editable NEMO_Nowcast/
     # 'SalishSeaTools',  # use pip install --editable SalishSeaTools/
+    # 'NEMO-Cmd',  # use pip install --editable NEMO-Cmd/
     # 'SalishSeaTools',  # use pip install --editable SalishSeaCmd/
     # 'SalishSeaNowcast',  # use pip install -e SalishSeaNowcast/
 ]
