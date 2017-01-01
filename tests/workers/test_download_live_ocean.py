@@ -85,3 +85,27 @@ class TestFailure:
             msg_type = download_live_ocean.failure(parsed_args)
         assert msg_type == 'failure'
 
+
+class TestDownloadLiveOCean:
+    """Unit test for download_live_ocean() function.
+    """
+    @patch('nowcast.workers.download_live_ocean.lib.mkdir')
+    @patch('nowcast.workers.download_live_ocean._get_file')
+    @patch('nowcast.workers.download_live_ocean.salishsea_tools.UBC_subdomain.get_UBC_subdomain')
+    def test_checklist(self, m_gUBCs, m_get_file, m_mkdir):
+        parsed_args = SimpleNamespace(run_date=arrow.get('2016-12-28'))
+        config = {
+            'file group': 'foo',
+            'temperature salinity': {
+                'download': {
+                    'url': 'https://pm2.blob.core.windows.net/',
+                    'directory prefix': 'f',
+                    'file template': 'ocean_his_{hh:04d}.nc',
+                    'hours range': [2, 73],
+                    'dest dir': '/results/forcing/LiveOcean/downloaded',
+                }
+            }
+        }
+        checklist = download_live_ocean.download_live_ocean(parsed_args, config)
+        expected = {'2016-12-28': [str(m_get_file())]*72}
+        assert checklist == expected
