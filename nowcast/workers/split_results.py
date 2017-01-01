@@ -89,17 +89,16 @@ def split_results(parsed_args, config, *args):
             'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
     results_dir = run_date.format('DDMMMYY').lower()
-    last_day_dir = results_dir
     run_type_results = Path(config['results archive'][run_type])
     src_dir = run_type_results/results_dir
+    last_date = run_date
     checklist = set()
     for fp in src_dir.glob('*.nc'):
         if 'restart' in str(fp):
             continue
         date = arrow.get(fp.stem[-8:], 'YYYYMMDD')
         checklist.add(date.format('YYYY-MM-DD'))
-        if date > run_date:
-            last_day_dir = date.format('DDMMMYY').lower()
+        last_date = max(date, last_date)
         dest_dir = run_type_results/date.format('DDMMMYY').lower()
         dest_dir.mkdir(exist_ok=True)
         if fp.stem.startswith('SalishSea_1'):
@@ -114,11 +113,10 @@ def split_results(parsed_args, config, *args):
         shutil.move(str(fp), str(dest))
         logger.debug('moved {fp} to {dest}'.format(fp=fp, dest=dest))
     for fp in src_dir.glob('SalishSea_*_restart*.nc'):
-        dest_dir = run_type_results / last_day_dir
+        dest_dir = run_type_results/last_date.format('DDMMMYY').lower()
         shutil.move(str(fp), str(dest_dir))
         logger.debug(
             'moved {fp} to {dest_dir}'.format(fp=fp, dest_dir=dest_dir))
-    logger.debug(checklist)
     return checklist
 
 
