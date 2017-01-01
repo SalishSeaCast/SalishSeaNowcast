@@ -206,11 +206,11 @@ def run_in_subprocess(cmd, output_logger, error_logger):
 
     :arg output_logger: Logger object to send command output to when
                         command is successful.
-    :type output_logger: :class:`logging.Logger`
+    :type output_logger: :meth:`logging.Logger` method
 
     :arg error_logger: Logger object to send error message(s) to when
-                        command returns non-zero status cdoe.
-    :type error_logger: :class:`logging.Logger`
+                       command returns non-zero status code.
+    :type error_logger: :meth:`logging.Logger` method
 
     :raises: :py:exc:`nowcast.lib.WorkerError`
     """
