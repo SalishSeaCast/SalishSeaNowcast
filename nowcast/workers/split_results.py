@@ -111,11 +111,11 @@ def split_results(parsed_args, config, *args):
         else:
             fn = Path(fp.stem[:-18]).with_suffix('.nc')
         dest = dest_dir/fn
-        shutil.move(fp, dest)
+        shutil.move(str(fp), str(dest))
         logger.debug('moved {fp} to {dest}'.format(fp=fp, dest=dest))
     for fp in src_dir.glob('SalishSea_*_restart*.nc'):
         dest_dir = run_type_results / last_day_dir
-        shutil.move(fp, dest_dir)
+        shutil.move(str(fp), str(dest_dir))
         logger.debug(
             'moved {fp} to {dest_dir}'.format(fp=fp, dest_dir=dest_dir))
     logger.debug(checklist)
