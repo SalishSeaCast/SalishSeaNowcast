@@ -20,7 +20,7 @@
 Nowcast Production Deployment
 *****************************
 
-In October 2016 the production deployment of the nowcast system was changed to use the `SalishSeaNowcast`_ package that is based on the `NEMO_Nowcast framework`_ framework.
+In October 2016 the production deployment of the nowcast system was changed to use the :ref:`SalishSeaNowcast-repo` package that is based on the `NEMO_Nowcast framework`_ framework.
 The deployment remains on the :ref:`SalishSeaModelResultsServer`, :kbd:`skookum`, in the :file:`/results/nowcast-sys/` directory tree.
 
 .. _NEMO_Nowcast framework: http://nemo-nowcast.readthedocs.io/en/latest/
@@ -35,7 +35,9 @@ Mercurial Repositories
 Clone the following repos into :file:`/results/nowcast-sys/`:
 
 * `NEMO_Nowcast`_
-* `SalishSeaNowcast`_
+* :ref:`SalishSeaNowcast-repo`
+* :ref:`SalishSeaCmd-repo`
+* :ref:`NEMO-Cmd-repo`
 * :ref:`tools-repo`
 * :ref:`private-tools-repo`
 * :ref:`NEMO-forcing-repo`
@@ -102,7 +104,8 @@ The Python packages that the system depends on are installed in a conda environm
     (/results/nowcast-sys/nemo_nowcast-env)$ cd /results/nowcast-sys/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaCmd/
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO-Cmd/
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaCmd/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaNowcast/
 
 
