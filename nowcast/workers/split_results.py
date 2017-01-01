@@ -48,7 +48,9 @@ def main():
     )
     worker.cli.add_argument(
         'run_date', type=worker.cli._arrow_date,
-        help='Date of the 1st day of the run to split results files from.'
+        help=(
+            'Date of the 1st day of the run to split results files from.'
+            'Use YYYY-MM-DD format.')
     )
     worker.run(split_results, success, failure)
 

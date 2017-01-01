@@ -47,7 +47,7 @@ class TestMain:
     def test_add_run_date_arg(self, m_worker):
         split_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ('run-date',)
+        assert args == ('run_date',)
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker):
