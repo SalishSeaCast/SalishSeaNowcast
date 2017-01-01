@@ -82,7 +82,20 @@ ssh:
   # **Must be quoted to project {} characters**
   file template: 'ssh_{:y%Ym%md%d}.nc'
 
+
 temperature salinity:
+  download:
+    # URL from which to download UW Live Ocean forecast fields files
+    url: https://pm2.blob.core.windows.net/
+    # Directory name prefix for UW Live Ocean forecast fields files
+    directory prefix: f
+    # Template for hourly UW Live Ocean fields file name
+    # **Must be quoted to project {} characters**
+    file template: 'ocean_his_{hh:04d}.nc'
+    # Range of forecast hours for which to download UW Live Ocean files
+    hours range: [2, 73]
+    # Destination directory for downloaded UW Live Ocean files
+    dest dir: /results/forcing/LiveOcean/downloaded
 
 
 observations:
@@ -559,7 +572,6 @@ message registry:
     download_live_ocean:
       checklist key: Live Ocean products
       success: Live Ocean Salish Sea boundary files ready
-      success: Live Ocean Salish Sea boundary files download failed
       failure: Live Ocean Salish Sea boundary files download failed
       crash: download_live_ocean worker crashed
 

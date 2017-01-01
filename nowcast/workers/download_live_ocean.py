@@ -22,8 +22,16 @@ import logging
 from pathlib import Path
 
 import arrow
-from nemo_nowcast import NowcastWorker
+import requests
+import salishsea_tools
+import nemo_cmd.api
+from nemo_nowcast import (
+    get_web_data,
+    NowcastWorker,
+)
 from salishsea_tools import UBC_subdomain
+
+from nowcast import lib
 
 
 NAME = 'download_live_ocean'
@@ -64,6 +72,54 @@ def failure(parsed_args):
 
 
 def download_live_ocean(parsed_args, config, *args):
+    yyyymmdd = parsed_args.run_date.format('YYYYMMDD')
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
-    checklist = {}
+    logger.info(
+        'downloading hourly Live Ocean forecast starting on {date}'
+        .format(date=ymd, extra={'run_date': ymd}))
+    base_url = config['temperature salinity']['download']['url']
+    dir_prefix = config['temperature salinity']['download']['directory prefix']
+    filename_tmpl = config['temperature salinity']['download']['file template']
+    url = (
+        '{base_url}{dir_prefix}{yyyymmdd}/{filename_tmpl}'.format(
+            base_url=base_url,
+            dir_prefix=dir_prefix,
+            yyyymmdd=yyyymmdd,
+            filename_tmpl=filename_tmpl))
+    hours = config['temperature salinity']['download']['hours range']
+    dest_dir = Path(
+        config['temperature salinity']['download']['dest dir'], yyyymmdd)
+    grp_name = config['file group']
+    lib.mkdir(str(dest_dir), logger, grp_name=grp_name)
+    checklist = {ymd: []}
+    with requests.Session() as session:
+        for hr in range(hours[0], hours[1]+1):
+            filepath = _get_file(
+                url.format(hh=hr), filename_tmpl.format(hh=hr), dest_dir,
+                session)
+            salishsea_tools.UBC_subdomain.get_UBC_subdomain([str(filepath)])
+            subdomain_filepath = str(filepath).replace('.nc', '_UBC.nc')
+            logger.debug(
+                'extracted UBC sub-domain: {}'.format(subdomain_filepath),
+                extra={'subdomain_filepath': subdomain_filepath})
+            checklist[ymd].append(subdomain_filepath)
+            filepath.unlink()
+    nemo_cmd.api.deflate(dest_dir.glob('*.nc'))
     return checklist
+
+
+def _get_file(url, filename, dest_dir, session):
+    """
+    :type dest_dir: :class:`pathlib.Path`
+    """
+    filepath = dest_dir/filename
+    get_web_data(url, NAME, filepath, session)
+    size = filepath.stat().st_size
+    logger.debug(
+        'downloaded {} bytes from {}'.format(size, url),
+        extra={'url': url, 'dest_dir': dest_dir})
+    return filepath
+
+
+if __name__ == '__main__':
+    main()  # pragma: no cover
