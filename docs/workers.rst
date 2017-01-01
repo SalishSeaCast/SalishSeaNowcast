@@ -145,7 +145,7 @@ Workers
 :kbd:`split_results`
 --------------------
 
-.. automodule:: nowcast.workers.download_results
+.. automodule:: nowcast.workers.split_results
     :members: main
 
 
