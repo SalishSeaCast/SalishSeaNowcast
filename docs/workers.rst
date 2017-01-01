@@ -142,6 +142,13 @@ Workers
     :members: main
 
 
+:kbd:`split_results`
+--------------------
+
+.. automodule:: nowcast.workers.download_results
+    :members: main
+
+
 :kbd:`get_onc_ctd`
 ------------------
 
