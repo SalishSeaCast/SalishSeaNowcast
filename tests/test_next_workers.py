@@ -539,6 +539,21 @@ class TestAfterDownloadResults:
         assert expected in workers
 
 
+class TestAfterSplitResults:
+    """Unit tests for after_split_results function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure hindcast',
+        'success hindcast',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_split_results(
+            Message('split_results', msg_type), config, checklist)
+        assert workers == []
+
+
 class TestAfterPingERDDAP:
     """Unit tests for the after_ping_erddap function.
     """

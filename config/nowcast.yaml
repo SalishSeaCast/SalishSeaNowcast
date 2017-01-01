@@ -629,6 +629,12 @@ message registry:
       failure hindcast: hindcast results files download failed
       crash: download_results worker crashed
 
+    split_results:
+      checklist key: results splitting
+      success hindcast: hindcast results files split into daily directories
+      failure hindcast: hindcast results files splitting into daily directories failed
+      crash: split_results worker crashed
+
     ping_erddap:
       checklist key: ERDDAP flag files
       success nowcast: nowcast ERDDAP dataset flag files created
