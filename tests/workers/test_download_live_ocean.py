@@ -19,7 +19,6 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import arrow
-import pytest
 
 from nowcast.workers import download_live_ocean
 
@@ -51,38 +50,36 @@ class TestMain:
         assert args == expected
 
 
+@patch('nowcast.workers.download_live_ocean.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self):
+    def test_success_log_info(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2016-11-24'))
-        with patch('nowcast.workers.download_live_ocean.logger') as m_logger:
-            download_live_ocean.success(parsed_args)
+        download_live_ocean.success(parsed_args)
         assert m_logger.info.called
         assert m_logger.info.call_args[1]['extra']['run_date'] == '2016-11-24'
 
-    def test_success_msg_type(self):
+    def test_success_msg_type(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2016-11-24'))
-        with patch('nowcast.workers.download_live_ocean.logger') as m_logger:
-            msg_type = download_live_ocean.success(parsed_args)
+        msg_type = download_live_ocean.success(parsed_args)
         assert msg_type == 'success'
         
         
+@patch('nowcast.workers.download_live_ocean.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_critical(self):
+    def test_failure_log_critical(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2016-11-24'))
-        with patch('nowcast.workers.download_live_ocean.logger') as m_logger:
-            download_live_ocean.failure(parsed_args)
+        download_live_ocean.failure(parsed_args)
         assert m_logger.critical.called
         expected = '2016-11-24'
         assert m_logger.critical.call_args[1]['extra']['run_date'] == expected
 
-    def test_failure_msg_type(self):
+    def test_failure_msg_type(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2016-11-24'))
-        with patch('nowcast.workers.download_live_ocean.logger') as m_logger:
-            msg_type = download_live_ocean.failure(parsed_args)
+        msg_type = download_live_ocean.failure(parsed_args)
         assert msg_type == 'failure'
 
 
