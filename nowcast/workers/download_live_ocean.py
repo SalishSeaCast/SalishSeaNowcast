@@ -19,20 +19,17 @@ a hyperslab that covers the Salish Sea NEMO model western (Juan de Fuca)
 open boundary.
 """
 import logging
+import math
+import multiprocessing
 from pathlib import Path
 
 import arrow
-import requests
-import salishsea_tools
 import nemo_cmd.api
-from nemo_nowcast import (
-    get_web_data,
-    NowcastWorker,
-)
-from salishsea_tools import UBC_subdomain
+import requests
+import salishsea_tools.UBC_subdomain
+from nemo_nowcast import get_web_data, NowcastWorker
 
 from nowcast import lib
-
 
 NAME = 'download_live_ocean'
 logger = logging.getLogger(NAME)
@@ -56,8 +53,8 @@ def main():
 def success(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        '{date} Live Ocean western boundary sub-domain files created'
-        .format(date=ymd), extra={'run_date': ymd})
+        '{date} Live Ocean western boundary sub-domain files created'.format(
+            date=ymd), extra={'run_date': ymd})
     msg_type = 'success'.format(parsed_args)
     return msg_type
 
@@ -65,8 +62,8 @@ def success(parsed_args):
 def failure(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.critical(
-        '{date} Live Ocean western boundary sub-domain files creation failed'
-        .format(date=ymd), extra={'run_date': ymd})
+        '{date} Live Ocean western boundary sub-domain files '
+        'creation failed'.format(date=ymd), extra={'run_date': ymd})
     msg_type = 'failure'
     return msg_type
 
@@ -75,8 +72,8 @@ def download_live_ocean(parsed_args, config, *args):
     yyyymmdd = parsed_args.run_date.format('YYYYMMDD')
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        'downloading hourly Live Ocean forecast starting on {date}'
-        .format(date=ymd, extra={'run_date': ymd}))
+        'downloading hourly Live Ocean forecast starting on {date}'.format(
+            date=ymd, extra={'run_date': ymd}))
     base_url = config['temperature salinity']['download']['url']
     dir_prefix = config['temperature salinity']['download']['directory prefix']
     filename_tmpl = config['temperature salinity']['download']['file template']
@@ -93,7 +90,7 @@ def download_live_ocean(parsed_args, config, *args):
     lib.mkdir(str(dest_dir), logger, grp_name=grp_name)
     checklist = {ymd: []}
     with requests.Session() as session:
-        for hr in range(hours[0], hours[1]+1):
+        for hr in range(hours[0], hours[1] + 1):
             filepath = _get_file(
                 url.format(hh=hr), filename_tmpl.format(hh=hr), dest_dir,
                 session)
@@ -104,7 +101,8 @@ def download_live_ocean(parsed_args, config, *args):
                 extra={'subdomain_filepath': subdomain_filepath})
             checklist[ymd].append(subdomain_filepath)
             filepath.unlink()
-    nemo_cmd.api.deflate(dest_dir.glob('*.nc'))
+    nemo_cmd.api.deflate(
+        dest_dir.glob('*.nc'), math.floor(multiprocessing.cpu_count() / 2))
     return checklist
 
 
@@ -112,7 +110,7 @@ def _get_file(url, filename, dest_dir, session):
     """
     :type dest_dir: :class:`pathlib.Path`
     """
-    filepath = dest_dir/filename
+    filepath = dest_dir / filename
     get_web_data(url, NAME, filepath, session)
     size = filepath.stat().st_size
     logger.debug(
