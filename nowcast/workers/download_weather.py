@@ -70,7 +70,7 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'forecast', choices=set(('00', '06', '12', '18')),
+        'forecast', choices={'00', '06', '12', '18'},
         help='Name of forecast to download files from.',
     )
     worker.cli.add_argument(
