@@ -16,6 +16,7 @@
 """Unit tests for Salish Sea NEMO nowcast run_NEMO worker.
 """
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import (
     patch,
     Mock,
@@ -24,11 +25,7 @@ from unittest.mock import (
 import arrow
 import pytest
 
-
-@pytest.fixture
-def worker_module(scope='module'):
-    from nowcast.workers import run_NEMO
-    return run_NEMO
+from nowcast.workers import run_NEMO
 
 
 @pytest.fixture
@@ -148,88 +145,114 @@ def tmp_results(tmpdir, run_date, scope='function'):
         }}
 
 
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.run_NEMO.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    def test_instantiate_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_instantiate_worker(self, m_worker):
+        run_NEMO.main()
         args, kwargs = m_worker.call_args
         assert args == ('run_NEMO',)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_host_name_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_host_name_arg(self, m_worker):
+        run_NEMO.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('host_name',)
         assert 'help' in kwargs
 
-    def test_add_run_type_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_type_arg(self, m_worker):
+        run_NEMO.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
-    def test_add_shared_storage_option(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_shared_storage_option(self, m_worker):
+        run_NEMO.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ('--shared-storage',)
         assert kwargs['action'] == 'store_true'
         assert 'help' in kwargs
 
-    def test_add_run_date_option(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_date_option(self, m_worker):
+        run_NEMO.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--run-date',)
         assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        run_NEMO.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.run_NEMO,
-            worker_module.success,
-            worker_module.failure,
+            run_NEMO.run_NEMO,
+            run_NEMO.success,
+            run_NEMO.failure,
         )
 
 
+@patch('nowcast.workers.run_NEMO.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self, worker_module):
-        parsed_args = Mock(
-            run_type='forecast', run_date=arrow.get('2015-12-28'))
-        with patch.object(worker_module.logger, 'info') as m_logger:
-            worker_module.success(parsed_args)
-        assert m_logger.called
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'nowcast-green',
+        'forecast',
+        'forecast2',
+    ])
+    def test_success_log_info(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type, shared_storage=False,
+            run_date=arrow.get('2015-12-28'))
+        run_NEMO.success(parsed_args)
+        assert m_logger.info.called
 
-    def test_success_msg_type(self, worker_module):
-        parsed_args = Mock(
-            run_type='forecast2', run_date=arrow.get('2015-12-28'))
-        with patch.object(worker_module.logger, 'info'):
-            msg_type = worker_module.success(parsed_args)
-        assert msg_type == 'success forecast2'
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'nowcast-green',
+        'forecast',
+        'forecast2',
+    ])
+    def test_success_msg_type(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type, shared_storage=False,
+            run_date=arrow.get('2015-12-28'))
+        msg_type = run_NEMO.success(parsed_args)
+        assert msg_type == 'success {run_type}'.format(run_type=run_type)
 
 
+@patch('nowcast.workers.run_NEMO.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_error(self, worker_module):
-        parsed_args = Mock(
-            run_type='forecast', run_date=arrow.get('2015-12-28'))
-        with patch.object(worker_module.logger, 'critical') as m_logger:
-            worker_module.failure(parsed_args)
-        assert m_logger.called
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'nowcast-green',
+        'forecast',
+        'forecast2',
+    ])
+    def test_failure_log_error(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type, shared_storage=False,
+            run_date=arrow.get('2015-12-28'))
+        run_NEMO.failure(parsed_args)
+        assert m_logger.critical.called
 
-    def test_failure_msg_type(self, worker_module):
-        parsed_args = Mock(
-            run_type='forecast2', run_date=arrow.get('2015-12-28'))
-        with patch.object(worker_module.logger, 'critical'):
-            msg_type = worker_module.failure(parsed_args)
-        assert msg_type == 'failure forecast2'
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'nowcast-green',
+        'forecast',
+        'forecast2',
+    ])
+    def test_failure_msg_type(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type, shared_storage=False,
+            run_date=arrow.get('2015-12-28'))
+        msg_type = run_NEMO.failure(parsed_args)
+        assert msg_type == 'failure {run_type}'.format(run_type=run_type)
 
 
 class TestCalcNewNamelistLines:
@@ -249,7 +272,7 @@ class TestCalcNewNamelistLines:
         ])
     def test_calc_new_namelist_lines(
         self, run_date, run_type, run_duration, prev_it000, dt_per_day, it000,
-        itend, date0, restart, next_restart, worker_module,
+        itend, date0, restart, next_restart,
     ):
         lines = [
             '  nn_it000 = 1\n',
@@ -257,7 +280,7 @@ class TestCalcNewNamelistLines:
             '  nn_date0 = 20160102\n',
             '  nn_stocklist = 2160, 0, 0, 0, 0, 0, 0, 0, 0, 0\n'
         ]
-        new_lines, restart_timestep = worker_module._calc_new_namelist_lines(
+        new_lines, restart_timestep = run_NEMO._calc_new_namelist_lines(
             run_date, run_type, run_duration, prev_it000, dt_per_day, lines)
         assert new_lines == [
             '  nn_it000 = {}\n'.format(it000),
@@ -272,29 +295,29 @@ class TestCalcNewNamelistLines:
 class TestGetNamelistValue:
     """Unit tests for _get_namelist_value() function.
     """
-    def test_get_value(self, worker_module):
+    def test_get_value(self):
         lines = ['  nn_it000 = 8641  ! first time step\n']
-        line_index, value = worker_module._get_namelist_value(
+        line_index, value = run_NEMO._get_namelist_value(
             'nn_it000', lines)
         assert line_index == 0
         assert value == str(8641)
 
-    def test_get_last_occurrence(self, worker_module):
+    def test_get_last_occurrence(self):
         lines = [
             '  nn_it000 = 8641  ! first time step\n',
             '  nn_it000 = 8642  ! last time step\n',
         ]
-        line_index, value = worker_module._get_namelist_value(
+        line_index, value = run_NEMO._get_namelist_value(
             'nn_it000', lines)
         assert line_index == 1
         assert value == str(8642)
 
-    def test_handle_empty_line(self, worker_module):
+    def test_handle_empty_line(self):
         lines = [
             '\n',
             '  nn_it000 = 8641  ! first time step\n',
             ]
-        line_index, value = worker_module._get_namelist_value(
+        line_index, value = run_NEMO._get_namelist_value(
             'nn_it000', lines)
         assert line_index == 1
         assert value == str(8641)
@@ -303,14 +326,14 @@ class TestGetNamelistValue:
 class TestRunDescription:
     """Unit tests for _run_description() function.
     """
-    def test_config_missing_results_dir(self, worker_module, config):
+    def test_config_missing_results_dir(self, config):
         run_date = arrow.get('2015-12-30')
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type='nowcast')
         with patch.dict(config['run']['salish'], results={}):
-            with patch.object(worker_module.logger, 'log'):
-                with pytest.raises(worker_module.WorkerError):
-                    worker_module._run_description(
+            with patch('nowcast.workers.run_NEMO.logger.log'):
+                with pytest.raises(run_NEMO.WorkerError):
+                    run_NEMO._run_description(
                         run_date, 'nowcast', run_id, 2160, 'salish', config,
                         Mock(name='tell_manager'), False)
 
@@ -321,8 +344,7 @@ class TestRunDescription:
         ('forecast2', 'SalishSea'),
     ])
     def test_config_name(
-        self, run_type, expected, worker_module, config, run_date,
-        tmp_results, tmpdir
+        self, run_type, expected, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -341,10 +363,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         assert run_desc['config_name'] == expected
@@ -356,8 +378,7 @@ class TestRunDescription:
         ('forecast2', '04jan16forecast2'),
     ])
     def test_run_id(
-        self, run_type, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
+        self, run_type, expected, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -376,10 +397,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         assert run_desc['run_id'] == expected
@@ -388,8 +409,7 @@ class TestRunDescription:
         ('nowcast', '3x5'),
     ])
     def test_mpi_decomposition(
-        self, run_type, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
+        self, run_type, expected, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -404,10 +424,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         assert run_desc['MPI decomposition'] == expected
@@ -416,8 +436,7 @@ class TestRunDescription:
         ('nowcast-green', '16:00:00'),
     ])
     def test_walltime(
-        self, run_type, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
+        self, run_type, expected, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -432,11 +451,11 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 with patch.dict(config['run']['salish'], walltime='16:00:00'):
-                    run_desc = worker_module._run_description(
+                    run_desc = run_NEMO._run_description(
                         run_date, run_type, run_id, 2160, 'salish', config,
                         Mock(name='tell_manager'), False)
         assert run_desc['walltime'] == expected
@@ -445,8 +464,7 @@ class TestRunDescription:
         ('nowcast', None),
     ])
     def test_no_walltime(
-        self, run_type, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
+        self, run_type, expected, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -461,10 +479,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         assert run_desc['walltime'] == expected
@@ -475,8 +493,7 @@ class TestRunDescription:
         ('forecast', 'forcing', 'NEMO-forcing'),
     ])
     def test_paths(
-        self, run_type, path, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
+        self, run_type, path, expected, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -495,10 +512,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
@@ -507,7 +524,95 @@ class TestRunDescription:
         ('forecast2', 'runs directory'),
     ])
     def test_runs_dir_path(
-        self, run_type, path, worker_module, config, run_date, tmp_results,
+        self, run_type, path, config, run_date, tmp_results, tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type]),
+             'nowcast': str(tmp_results['results']['nowcast']),
+             'nowcast-green': str(tmp_results['results']['nowcast-green']),
+             'forecast': str(tmp_results['results']['forecast']),
+            })
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'), False)
+        assert run_desc['paths'][path] == tmp_run_prep
+
+    @pytest.mark.parametrize('run_type, path, expected', [
+        ('nowcast', 'coordinates', 'coordinates_seagrid_SalishSea.nc'),
+    ])
+    def test_grid_coordinates(
+        self, run_type, path, expected, config, run_date, tmp_results, tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'), False)
+        assert run_desc['grid'][path] == expected
+
+    @pytest.mark.parametrize('run_type, path, expected', [
+        ('nowcast-green', 'bathymetry', 'bathy_meter_SalishSea6.nc'),
+    ])
+    def test_grid_bathymetry(
+        self, run_type, path, expected, config, run_date, tmp_results, tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                with patch.dict(config['run types'][run_type], bathymetry=expected):
+                    run_desc = run_NEMO._run_description(
+                        run_date, run_type, run_id, 2160, 'salish', config,
+                        Mock(name='tell_manager'), False)
+        assert run_desc['grid'][path] == expected
+
+    @pytest.mark.parametrize('run_type, link_name, expected', [
+        ('nowcast', 'NEMO-atmos', 'NEMO-atmos'),
+        ('forecast', 'open_boundaries', 'open_boundaries'),
+        ('forecast2', 'rivers', 'rivers'),
+    ])
+    def test_forcing_links(
+        self, run_type, link_name, expected, config, run_date, tmp_results,
         tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
@@ -527,101 +632,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
-        assert run_desc['paths'][path] == tmp_run_prep
-
-    @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast', 'coordinates', 'coordinates_seagrid_SalishSea.nc'),
-    ])
-    def test_grid_coordinates(
-        self, run_type, path, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        p_config_results = patch.dict(
-            config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
-        assert run_desc['grid'][path] == expected
-
-    @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast-green', 'bathymetry', 'bathy_meter_SalishSea6.nc'),
-    ])
-    def test_grid_bathymetry(
-        self, run_type, path, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        p_config_results = patch.dict(
-            config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                with patch.dict(config['run types'][run_type], bathymetry=expected):
-                    run_desc = worker_module._run_description(
-                        run_date, run_type, run_id, 2160, 'salish', config,
-                        Mock(name='tell_manager'), False)
-        assert run_desc['grid'][path] == expected
-
-    @pytest.mark.parametrize('run_type, link_name, expected', [
-        ('nowcast', 'NEMO-atmos', 'NEMO-atmos'),
-        ('forecast', 'open_boundaries', 'open_boundaries'),
-        ('forecast2', 'rivers', 'rivers'),
-    ])
-    def test_forcing_links(
-        self, run_type, link_name, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        p_config_results = patch.dict(
-            config['run']['salish']['results'],
-            {run_type: str(tmp_results['results'][run_type]),
-             'nowcast': str(tmp_results['results']['nowcast']),
-             'nowcast-green': str(tmp_results['results']['nowcast-green']),
-             'forecast': str(tmp_results['results']['forecast']),
-            })
-        p_config_nowcast = patch.dict(
-            config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         tmp_nowcast_dir = tmp_results['nowcast dir']
@@ -634,8 +648,8 @@ class TestRunDescription:
             '03jan16/SalishSea_00002160_restart_trc.nc'),
     ])
     def test_restart_links(
-        self, run_type, link_name, expected, worker_module, config, run_date,
-        tmp_results, tmpdir,
+        self, run_type, link_name, expected, config, run_date, tmp_results,
+        tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -650,10 +664,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         tmp_results_dir = tmp_results['results'][run_type]
@@ -664,8 +678,8 @@ class TestRunDescription:
         ('nowcast', 'NEMO-atmos', '/nowcast-sys/nowcast/NEMO-atmos'),
     ])
     def test_forcing_atmospheric_link_check(
-        self, run_type, link_name, expected, worker_module, config,
-        run_date, tmp_results, tmpdir,
+        self, run_type, link_name, expected, config, run_date, tmp_results,
+        tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -680,10 +694,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         check_link_dict = run_desc['forcing'][link_name]['check link']
@@ -691,7 +705,7 @@ class TestRunDescription:
         assert check_link_dict['namelist filename'] == 'namelist_cfg'
 
     def test_namelists_nowacst_blue(
-        self, worker_module, config, run_date, tmp_results, tmpdir,
+        self, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
@@ -706,10 +720,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         expected = [
@@ -742,7 +756,7 @@ class TestRunDescription:
         assert run_desc['namelists']['namelist_cfg'] == expected
 
     def test_namelists_nowcast_green(
-        self, worker_module, config, run_date, tmp_results, tmpdir,
+        self, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
@@ -757,10 +771,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, 'nowcast-green', run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         expected = [
@@ -805,7 +819,7 @@ class TestRunDescription:
         assert run_desc['namelists']['namelist_pisces_cfg'] == expected
 
     def test_output(
-        self, worker_module, config, run_date, tmpdir, tmp_results,
+        self, config, run_date, tmpdir, tmp_results,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
@@ -820,10 +834,10 @@ class TestRunDescription:
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
-        with patch.object(worker_module.Path, 'cwd') as m_cwd:
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = worker_module._run_description(
+                run_desc = run_NEMO._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
         assert run_desc['output']['files'] == tmp_run_prep.join('iodef.xml')
@@ -849,10 +863,10 @@ class TestCreateRunScript:
     ])
     @patch('nowcast.workers.run_NEMO._build_script', return_value='')
     def test_run_script_filepath(
-        self, m_built_script, run_type, worker_module, config, tmpdir,
+        self, m_built_script, run_type, config, tmpdir,
     ):
         tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
-        run_script_filepath = worker_module._create_run_script(
+        run_script_filepath = run_NEMO._create_run_script(
             arrow.get('2016-12-03'), run_type, Path(str(tmp_run_dir)),
             '30nov16.yaml', 'salish', config, Mock(name='tell_manager'),
             False)
@@ -869,13 +883,13 @@ class TestDefinitions:
         'forecast',
         'forecast2',
     ])
-    def test_definitions(self, run_type, worker_module, config):
+    def test_definitions(self, run_type, config):
         run_desc = {'run_id': '03dec16nowcast'}
         run_desc_filepath = Mock()
         run_desc_filepath.name = '03dec16.yaml'
         run_dir = 'tmp_run_dir'
         results_dir = 'results_dir'
-        defns = worker_module._definitions(
+        defns = run_NEMO._definitions(
             run_type, run_desc, run_desc_filepath, run_dir, results_dir,
             'salish', config)
         if run_type == 'forecast2':
@@ -907,15 +921,13 @@ class TestDefinitions:
         'forecast',
         'forecast2',
     ])
-    def test_definitions_with_mpi_hosts_file(
-        self, run_type, worker_module, config,
-    ):
+    def test_definitions_with_mpi_hosts_file(self, run_type, config):
         run_desc = {'run_id': '03dec16nowcast'}
         run_desc_filepath = Mock()
         run_desc_filepath.name = '03dec16.yaml'
         run_dir = 'tmp_run_dir'
         results_dir = 'results_dir'
-        defns = worker_module._definitions(
+        defns = run_NEMO._definitions(
             run_type, run_desc, run_desc_filepath, run_dir, results_dir,
             'west.cloud', config)
         if run_type == 'forecast2':
@@ -944,8 +956,8 @@ class TestDefinitions:
 class TestExecute:
     """Unit test for _execute() function.
     """
-    def test_execute(self,  worker_module, config):
-        script = worker_module._execute(
+    def test_execute(self, config):
+        script = run_NEMO._execute(
             nemo_processors=15, xios_processors=1, xios_host=None)
         expected = '''mkdir -p ${RESULTS_DIR}
 
@@ -967,8 +979,8 @@ class TestExecute:
         for i, line in enumerate(script.splitlines()):
             assert line.strip() == expected[i].strip()
 
-    def test_execute_with_xios_host(self,  worker_module, config):
-        script = worker_module._execute(
+    def test_execute_with_xios_host(self, config):
+        script = run_NEMO._execute(
             nemo_processors=15, xios_processors=1, xios_host='192.168.1.79')
         expected = '''mkdir -p ${RESULTS_DIR}
 

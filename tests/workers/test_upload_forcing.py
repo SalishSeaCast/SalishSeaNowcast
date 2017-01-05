@@ -15,90 +15,108 @@
 
 """Unit tests for Salish Sea NEMO nowcast upload_forcing worker.
 """
-from unittest.mock import (
-    Mock,
-    patch,
-)
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import arrow
 import pytest
 
-import nowcast.lib
+from nowcast.workers import upload_forcing
 
 
-@pytest.fixture
-def worker_module():
-    from nowcast.workers import upload_forcing
-    return upload_forcing
-
-
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.upload_forcing.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    def test_instantiate_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_instantiate_worker(self, m_worker):
+        upload_forcing.main()
         args, kwargs = m_worker.call_args
         assert args == ('upload_forcing',)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_host_name_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_host_name_arg(self, m_worker):
+        upload_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('host_name',)
         assert 'help' in kwargs
 
-    def test_add_run_type_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_type_arg(self, m_worker):
+        upload_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {'nowcast+', 'forecast2', 'ssh'}
         assert 'help' in kwargs
 
-    def test_add_run_date_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_date_arg(self, m_worker):
+        upload_forcing.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--run-date',)
         assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        upload_forcing.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.upload_forcing,
-            worker_module.success,
-            worker_module.failure,
+            upload_forcing.upload_forcing,
+            upload_forcing.success,
+            upload_forcing.failure,
         )
 
 
+@patch('nowcast.workers.upload_forcing.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self, worker_module):
-        parsed_args = Mock(run_type='nowcast+')
-        with patch.object(worker_module.logger, 'info') as m_logger:
-            worker_module.success(parsed_args)
-        assert m_logger.called
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+    ])
+    def test_success_log_info(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type,
+            run_date=arrow.get('2017-01-02'))
+        upload_forcing.success(parsed_args)
+        assert m_logger.info.called
 
-    def test_success_msg_type(self, worker_module):
-        parsed_args = Mock(run_type='forecast2')
-        with patch.object(worker_module.logger, 'info'):
-            msg_type = worker_module.success(parsed_args)
-        assert msg_type == 'success forecast2'
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+    ])
+    def test_success_msg_type(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type,
+            run_date=arrow.get('2017-01-02'))
+        msg_type = upload_forcing.success(parsed_args)
+        assert msg_type == 'success {run_type}'.format(run_type=run_type)
 
 
+@patch('nowcast.workers.upload_forcing.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_critical(self, worker_module):
-        parsed_args = Mock(run_type='nowcast+')
-        with patch.object(worker_module.logger, 'critical') as m_logger:
-            worker_module.failure(parsed_args)
-        assert m_logger.called
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+    ])
+    def test_failure_log_critical(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type,
+            run_date=arrow.get('2017-01-02'))
+        upload_forcing.failure(parsed_args)
+        assert m_logger.critical.called
 
-    def test_failure_msg_type(self, worker_module):
-        parsed_args = Mock(run_type='ssh')
-        with patch.object(worker_module.logger, 'critical'):
-            msg_type = worker_module.failure(parsed_args)
-        assert msg_type == 'failure ssh'
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+    ])
+    def test_failure_msg_type(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type,
+            run_date=arrow.get('2017-01-02'))
+        msg_type = upload_forcing.failure(parsed_args)
+        assert msg_type == 'failure {run_type}'.format(run_type=run_type)
