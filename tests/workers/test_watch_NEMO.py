@@ -15,6 +15,7 @@
 
 """Unit tests for Salish Sea NEMO nowcast watch_NEMO worker.
 """
+from types import SimpleNamespace
 from unittest.mock import (
     patch,
     Mock,
@@ -22,60 +23,57 @@ from unittest.mock import (
 
 import pytest
 
-
-@pytest.fixture
-def worker_module(scope='module'):
-    from nowcast.workers import watch_NEMO
-    return watch_NEMO
+from nowcast.workers import watch_NEMO
 
 
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.watch_NEMO.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    def test_instantiate_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_instantiate_worker(self, m_worker):
+        watch_NEMO.main()
         args, kwargs = m_worker.call_args
         assert args == ('watch_NEMO',)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_host_name_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_host_name_arg(self, m_worker):
+        watch_NEMO.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('host_name',)
         assert 'help' in kwargs
 
-    def test_add_run_type_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_type_arg(self, m_worker):
+        watch_NEMO.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
-    def test_add_pid_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_pid_arg(self, m_worker):
+        watch_NEMO.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ('pid',)
         assert 'help' in kwargs
 
-    def test_add_shared_storage_option(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_shared_storage_option(self, m_worker):
+        watch_NEMO.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[3]
         assert args == ('--shared-storage',)
         assert kwargs['action'] == 'store_true'
         assert 'help' in kwargs
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        watch_NEMO.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.watch_NEMO,
-            worker_module.success,
-            worker_module.failure,
+            watch_NEMO.watch_NEMO,
+            watch_NEMO.success,
+            watch_NEMO.failure,
         )
 
 
+@patch('nowcast.workers.watch_NEMO.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -86,16 +84,15 @@ class TestSuccess:
         ('forecast2', 'west.cloud-nowcast', True),
     ])
     def test_success_log_info(
-        self, run_type, host_name, worker_module, shared_storage,
+        self, m_logger, run_type, host_name, shared_storage,
     ):
-        parsed_args = Mock(
+        parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
             shared_storage=shared_storage,
         )
-        with patch.object(worker_module, 'logger') as m_logger:
-            worker_module.success(parsed_args)
+        watch_NEMO.success(parsed_args)
         assert m_logger.info.called
 
     @pytest.mark.parametrize('run_type, host_name, shared_storage, expected', [
@@ -105,19 +102,19 @@ class TestSuccess:
         ('forecast2', 'west.cloud-nowcast', True, 'success forecast2'),
     ])
     def test_success_msg_type(
-        self, run_type, host_name, worker_module, shared_storage, expected,
+        self, m_logger, run_type, host_name, shared_storage, expected,
     ):
-        parsed_args = Mock(
+        parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
             shared_storage=shared_storage,
         )
-        with patch.object(worker_module, 'logger'):
-            msg_type = worker_module.success(parsed_args)
+        msg_type = watch_NEMO.success(parsed_args)
         assert msg_type == expected
 
 
+@patch('nowcast.workers.watch_NEMO.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -128,16 +125,15 @@ class TestFailure:
         ('forecast2', 'west.cloud-nowcast', True),
     ])
     def test_failure_log_critical(
-        self, run_type, host_name, worker_module, shared_storage,
+        self, m_logger, run_type, host_name, shared_storage,
     ):
-        parsed_args = Mock(
+        parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
             shared_storage=shared_storage,
         )
-        with patch.object(worker_module, 'logger') as m_logger:
-            worker_module.failure(parsed_args)
+        watch_NEMO.failure(parsed_args)
         assert m_logger.critical.called
 
     @pytest.mark.parametrize('run_type, host_name, shared_storage, expected', [
@@ -147,21 +143,21 @@ class TestFailure:
         ('forecast2', 'west.cloud-nowcast', True, 'failure forecast2'),
     ])
     def test_failure_msg_type(
-        self, run_type, host_name, worker_module, shared_storage, expected,
+        self, m_logger, run_type, host_name, shared_storage, expected,
     ):
-        parsed_args = Mock(
+        parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
             shared_storage=shared_storage,
         )
-        with patch.object(worker_module, 'logger'):
-            msg_type = worker_module.failure(parsed_args)
+        msg_type = watch_NEMO.failure(parsed_args)
         assert msg_type == expected
 
 
+@patch('nowcast.workers.watch_NEMO.logger')
 class TestWatchNEMO:
-    """Unit tests for watch_NEMO() function.
+    """Unit test for watch_NEMO() function.
     """
     @pytest.mark.parametrize('run_type, host_name, shared_storage', [
         ('nowcast', 'west.cloud-nowcast', True),
@@ -169,10 +165,8 @@ class TestWatchNEMO:
         ('forecast', 'west.cloud-nowcast', True),
         ('forecast2', 'west.cloud-nowcast', True),
     ])
-    def test_no_run_pid(
-        self, run_type, host_name, shared_storage, worker_module,
-    ):
-        parsed_args = Mock(
+    def test_no_run_pid(self, m_logger, run_type, host_name, shared_storage):
+        parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
@@ -180,28 +174,28 @@ class TestWatchNEMO:
         )
         config = {}
         tell_manager = Mock(name='tell_manager')
-        with patch.object(worker_module, '_pid_exists', return_value=False):
-            with patch.object(worker_module, 'logger'):
-                with pytest.raises(worker_module.WorkerError):
-                    worker_module.watch_NEMO(parsed_args, config, tell_manager)
+        p_pid_exists = patch(
+            'nowcast.workers.watch_NEMO._pid_exists', return_value=False)
+        with p_pid_exists:
+            with pytest.raises(watch_NEMO.WorkerError):
+                watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
 
 
+@patch('nowcast.workers.watch_NEMO.logger')
 class TestLogMsg:
     """Unit tests for _log_msg() function.
     """
-    def test_shared_storage(self, worker_module):
+    def test_shared_storage(self, m_logger):
         tell_manager = Mock(name='tell_manager')
-        with patch.object(worker_module, 'logger') as m_logger:
-            worker_module._log_msg(
-                'msg', 'info', tell_manager, shared_storage=True)
+        watch_NEMO._log_msg(
+            'msg', 'info', tell_manager, shared_storage=True)
         tell_manager.assert_called_once_with('log.info', 'msg')
         assert not m_logger.log.called
 
-    def test_not_shared_storage(self, worker_module):
+    def test_not_shared_storage(self, m_logger):
         tell_manager = Mock(name='tell_manager')
-        with patch.object(worker_module, 'logger') as m_logger:
-            worker_module._log_msg(
-                'msg', 'info', tell_manager, shared_storage=False)
+        watch_NEMO._log_msg(
+            'msg', 'info', tell_manager, shared_storage=False)
         m_logger.log.assert_called_once_with(20, 'msg')
         tell_manager.assert_called_once_with('log.info', 'msg')
 
@@ -209,30 +203,30 @@ class TestLogMsg:
 class TestPidExists:
     """Unit tests for _pid_exists() function.
     """
-    def test_negative_pid(self, worker_module):
-        pid_exists = worker_module._pid_exists(-1)
+    def test_negative_pid(self):
+        pid_exists = watch_NEMO._pid_exists(-1)
         assert not pid_exists
 
-    def test_zero_pid(self, worker_module):
+    def test_zero_pid(self):
         with pytest.raises(ValueError):
-            worker_module._pid_exists(0)
+            watch_NEMO._pid_exists(0)
 
-    @patch.object(worker_module().os, 'kill', return_value=None)
-    def test_pid_exists(self, m_kill, worker_module):
-        pid_exists = worker_module._pid_exists(42)
+    @patch('nowcast.workers.watch_NEMO.os.kill', return_value=None)
+    def test_pid_exists(self, m_kill):
+        pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch.object(worker_module().os, 'kill', side_effect=ProcessLookupError)
-    def test_no_such_pid(self, m_kill, worker_module):
-        pid_exists = worker_module._pid_exists(42)
+    @patch('nowcast.workers.watch_NEMO.os.kill', side_effect=ProcessLookupError)
+    def test_no_such_pid(self, m_kill):
+        pid_exists = watch_NEMO._pid_exists(42)
         assert not pid_exists
 
-    @patch.object(worker_module().os, 'kill', side_effect=PermissionError)
-    def test_pid_permission_error(self, m_kill, worker_module):
-        pid_exists = worker_module._pid_exists(42)
+    @patch('nowcast.workers.watch_NEMO.os.kill', side_effect=PermissionError)
+    def test_pid_permission_error(self, m_kill):
+        pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch.object(worker_module().os, 'kill', side_effect=OSError)
-    def test_oserror(self, m_kill, worker_module):
+    @patch('nowcast.workers.watch_NEMO.os.kill', side_effect=OSError)
+    def test_oserror(self, m_kill):
         with pytest.raises(OSError):
-            worker_module._pid_exists(42)
+            watch_NEMO._pid_exists(42)

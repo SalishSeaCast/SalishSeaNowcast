@@ -15,32 +15,26 @@
 
 """Unit tests for Salish Sea NEMO nowcast ping_erddap worker.
 """
-from unittest.mock import (
-    Mock,
-    patch,
-)
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import pytest
 
-
-@pytest.fixture
-def worker_module(scope='module'):
-    from nowcast.workers import ping_erddap
-    return ping_erddap
+from nowcast.workers import ping_erddap
 
 
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.ping_erddap.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    def test_instantiate_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_instantiate_worker(self, m_worker):
+        ping_erddap.main()
         args, kwargs = m_worker.call_args
         assert args == ('ping_erddap',)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_dataset_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_dataset_arg(self, m_worker):
+        ping_erddap.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('dataset',)
         assert kwargs['choices'] == {
@@ -50,16 +44,17 @@ class TestMain:
         }
         assert 'help' in kwargs
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        ping_erddap.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.ping_erddap,
-            worker_module.success,
-            worker_module.failure,
+            ping_erddap.ping_erddap,
+            ping_erddap.success,
+            ping_erddap.failure,
         )
 
 
+@patch('nowcast.workers.ping_erddap.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -74,11 +69,10 @@ class TestSuccess:
         'LSBBL-CTD',
         'USDDL-CTD',
     ])
-    def test_success_log_info(self, dataset, worker_module):
-        parsed_args = Mock(dataset=dataset)
-        with patch.object(worker_module.logger, 'info') as m_logger:
-            worker_module.success(parsed_args)
-        assert m_logger.called
+    def test_success_log_info(self, m_logger, dataset):
+        parsed_args = SimpleNamespace(dataset=dataset)
+        ping_erddap.success(parsed_args)
+        assert m_logger.info.called
 
     @pytest.mark.parametrize('dataset, expected', [
         ('nowcast', 'success nowcast'),
@@ -91,13 +85,13 @@ class TestSuccess:
         ('LSBBL-CTD', 'success LSBBL-CTD'),
         ('USDDL-CTD', 'success USDDL-CTD'),
     ])
-    def test_success_msg_type(self, dataset, expected, worker_module):
-        parsed_args = Mock(dataset=dataset)
-        with patch.object(worker_module.logger, 'info') as m_logger:
-            msg_type = worker_module.success(parsed_args)
+    def test_success_msg_type(self, m_logger, dataset, expected):
+        parsed_args = SimpleNamespace(dataset=dataset)
+        msg_type = ping_erddap.success(parsed_args)
         assert msg_type == expected
 
 
+@patch('nowcast.workers.ping_erddap.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -112,11 +106,10 @@ class TestFailure:
         'LSBBL-CTD',
         'USDDL-CTD',
     ])
-    def test_failure_log_error(self, dataset, worker_module):
-        parsed_args = Mock(dataset=dataset)
-        with patch.object(worker_module.logger, 'critical') as m_logger:
-            worker_module.failure(parsed_args)
-        assert m_logger.called
+    def test_failure_log_error(self, m_logger, dataset):
+        parsed_args = SimpleNamespace(dataset=dataset)
+        ping_erddap.failure(parsed_args)
+        assert m_logger.critical.called
 
     @pytest.mark.parametrize('dataset, expected', [
         ('nowcast', 'failure nowcast'),
@@ -129,13 +122,13 @@ class TestFailure:
         ('LSBBL-CTD', 'failure LSBBL-CTD'),
         ('USDDL-CTD', 'failure USDDL-CTD'),
     ])
-    def test_failure_msg_type(self, dataset, expected, worker_module):
-        parsed_args = Mock(dataset=dataset)
-        with patch.object(worker_module.logger, 'critical') as m_logger:
-            msg_type = worker_module.failure(parsed_args)
+    def test_failure_msg_type(self, m_logger, dataset, expected):
+        parsed_args = SimpleNamespace(dataset=dataset)
+        msg_type = ping_erddap.failure(parsed_args)
         assert msg_type == expected
 
 
+@patch('nowcast.workers.ping_erddap.logger')
 class TestPingErddap:
     """Unit tests for ping_erddap() function.
     """
@@ -150,8 +143,8 @@ class TestPingErddap:
         'LSBBL-CTD',
         'USDDL-CTD',
     ])
-    def test_ping_erddap(self, dataset, worker_module, tmpdir):
-        parsed_args = Mock(dataset=dataset)
+    def test_ping_erddap(self, m_logger, dataset, tmpdir):
+        parsed_args = SimpleNamespace(dataset=dataset)
         tmp_flag_dir = tmpdir.ensure_dir('flag')
         config = {
             'erddap': {
@@ -172,9 +165,8 @@ class TestPingErddap:
                     'LSBBL-CTD': ['ubcONCLSBBLCTD15mV1'],
                     'USDDL-CTD': ['ubcONCUSDDLCTD15mV1'],
                 }}}
-        with patch.object(worker_module, 'logger') as m_logger:
-            checklist = worker_module.ping_erddap(parsed_args, config)
-            dataset_ids = config['erddap']['datasetIDs'][dataset]
+        checklist = ping_erddap.ping_erddap(parsed_args, config)
+        dataset_ids = config['erddap']['datasetIDs'][dataset]
         for i, dataset_id in enumerate(dataset_ids):
             assert tmp_flag_dir.join(dataset_id).exists
             expected = '{} touched'.format(tmp_flag_dir.join(dataset_id))
@@ -182,8 +174,8 @@ class TestPingErddap:
         expected = {dataset: config['erddap']['datasetIDs'][dataset]}
         assert checklist == expected
 
-    def test_no_datasetID(self, worker_module, tmpdir):
-        parsed_args = Mock(dataset='nowcast-green')
+    def test_no_datasetID(self, m_logger, tmpdir):
+        parsed_args = SimpleNamespace(dataset='nowcast-green')
         tmp_flag_dir = tmpdir.ensure_dir('flag')
         config = {
             'erddap': {
@@ -196,7 +188,6 @@ class TestPingErddap:
                     'forecast2': [
                         'ubcSSf23DTracerFields1hV1', 'ubcSSf23DuVelocity1hV1'],
                 }}}
-        with patch.object(worker_module, 'logger') as m_logger:
-            checklist = worker_module.ping_erddap(parsed_args, config)
+        checklist = ping_erddap.ping_erddap(parsed_args, config)
         assert not m_logger.debug.called
         assert checklist == {'nowcast-green': []}

@@ -15,6 +15,7 @@
 
 """Unit tests for Salish Sea NEMO nowcast make_forcing_links worker.
 """
+from types import SimpleNamespace
 from unittest.mock import (
     call,
     Mock,
@@ -24,99 +25,125 @@ from unittest.mock import (
 import arrow
 import pytest
 
-
-@pytest.fixture
-def worker_module():
-    from nowcast.workers import make_forcing_links
-    return make_forcing_links
+from nowcast.workers import make_forcing_links
 
 
-@patch.object(worker_module(), 'NowcastWorker')
+@patch('nowcast.workers.make_forcing_links.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
     """
-    def test_instantiate_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_instantiate_worker(self, m_worker):
+        make_forcing_links.main()
         args, kwargs = m_worker.call_args
         assert args == ('make_forcing_links',)
         assert list(kwargs.keys()) == ['description']
 
-    def test_add_host_name_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_host_name_arg(self, m_worker):
+        make_forcing_links.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('host_name',)
         assert 'help' in kwargs
 
-    def test_add_run_type_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_type_arg(self, m_worker):
+        make_forcing_links.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
             'nowcast+', 'forecast2', 'ssh', 'nowcast-green'}
         assert 'help' in kwargs
 
-    def test_add_shared_storage_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_shared_storage_arg(self, m_worker):
+        make_forcing_links.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ('--shared-storage',)
         assert kwargs['action'] == 'store_true'
         assert 'help' in kwargs
 
-    def test_add_run_date_arg(self, m_worker, worker_module):
-        worker_module.main()
+    def test_add_run_date_arg(self, m_worker):
+        make_forcing_links.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--run-date',)
         assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
-    def test_run_worker(self, m_worker, worker_module):
-        worker_module.main()
+    def test_run_worker(self, m_worker):
+        make_forcing_links.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
-            worker_module.make_forcing_links,
-            worker_module.success,
-            worker_module.failure,
+            make_forcing_links.make_forcing_links,
+            make_forcing_links.success,
+            make_forcing_links.failure,
         )
 
 
+@patch('nowcast.workers.make_forcing_links.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
-    def test_success_log_info(self, worker_module):
-        parsed_args = Mock(run_type='nowcast+')
-        with patch.object(worker_module.logger, 'info') as m_logger:
-            worker_module.success(parsed_args)
-        assert m_logger.called
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+        'nowcast-green',
+    ])
+    def test_success_log_info(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type, shared_storaage=False,
+            run_date=arrow.get('2017-01-04'))
+        make_forcing_links.success(parsed_args)
+        assert m_logger.info.called
 
-    def test_success_msg_type(self, worker_module):
-        parsed_args = Mock(run_type='forecast2')
-        with patch.object(worker_module.logger, 'info'):
-            msg_type = worker_module.success(parsed_args)
-        assert msg_type == 'success forecast2'
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+        'nowcast-green',
+    ])
+    def test_success_msg_type(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type, shared_storaage=False,
+            run_date=arrow.get('2017-01-04'))
+        msg_type = make_forcing_links.success(parsed_args)
+        assert msg_type == 'success {run_type}'.format(run_type=run_type)
 
 
+@patch('nowcast.workers.make_forcing_links.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
-    def test_failure_log_critical(self, worker_module):
-        parsed_args = Mock(run_type='nowcast+')
-        with patch.object(worker_module.logger, 'critical') as m_logger:
-            worker_module.failure(parsed_args)
-        assert m_logger.called
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+        'nowcast-green',
+    ])
+    def test_failure_log_critical(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type, shared_storaage=False,
+            run_date=arrow.get('2017-01-04'))
+        make_forcing_links.failure(parsed_args)
+        assert m_logger.critical.called
 
-    def test_failure_msg_type(self, worker_module):
-        parsed_args = Mock(run_type='ssh')
-        with patch.object(worker_module.logger, 'critical'):
-            msg_type = worker_module.failure(parsed_args)
-        assert msg_type == 'failure ssh'
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+        'nowcast-green',
+    ])
+    def test_failure_msg_type(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type, shared_storaage=False,
+            run_date=arrow.get('2017-01-04'))
+        msg_type = make_forcing_links.failure(parsed_args)
+        assert msg_type == 'failure {run_type}'.format(run_type=run_type)
 
 
-@patch.object(worker_module(), '_create_symlink')
-@patch.object(worker_module(), '_clear_links')
+@patch('nowcast.workers.make_forcing_links._create_symlink')
+@patch('nowcast.workers.make_forcing_links._clear_links')
 class TestMakeRunoffLinks:
     """Unit tests for _make_runoff_links() function.
     """
-    def test_clear_links(self, m_clear_links, m_create_symlink, worker_module):
+    def test_clear_links(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         config = {
@@ -133,14 +160,12 @@ class TestMakeRunoffLinks:
                     },
                     'nowcast dir': 'nowcast-green/',
                 }}}
-        worker_module._make_runoff_links(
+        make_forcing_links._make_runoff_links(
             m_sftp_client, run_date, config, 'salish-nowcast')
         m_clear_links.assert_called_once_with(
             m_sftp_client, config['run']['salish-nowcast'], 'rivers/')
 
-    def test_rivers_month_link(
-        self, m_clear_links, m_create_symlink, worker_module,
-    ):
+    def test_rivers_month_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         config = {
@@ -157,16 +182,14 @@ class TestMakeRunoffLinks:
                     },
                     'nowcast dir': 'nowcast-green/',
                 }}}
-        worker_module._make_runoff_links(
+        make_forcing_links._make_runoff_links(
             m_sftp_client, run_date, config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[0] == call(
             m_sftp_client, 'salish-nowcast',
             'NEMO-forcing/rivers/rivers_month.nc',
             'nowcast-green/rivers/rivers_month.nc')
 
-    def test_rivers_temp_link(
-        self, m_clear_links, m_create_symlink, worker_module,
-    ):
+    def test_rivers_temp_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-10-14')
         m_sftp_client = Mock(name='sftp_client')
         config = {
@@ -185,16 +208,14 @@ class TestMakeRunoffLinks:
                     },
                     'nowcast dir': 'nowcast-green/',
                 }}}
-        worker_module._make_runoff_links(
+        make_forcing_links._make_runoff_links(
             m_sftp_client, run_date, config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[1] == call(
             m_sftp_client, 'salish-nowcast',
             'NEMO-forcing/rivers/river_ConsTemp_month.nc',
             'nowcast-green/rivers/river_ConsTemp_month.nc')
 
-    def test_bio_climatology_link(
-        self, m_clear_links, m_create_symlink, worker_module,
-    ):
+    def test_bio_climatology_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         config = {
@@ -215,16 +236,14 @@ class TestMakeRunoffLinks:
                     },
                     'nowcast dir': 'nowcast-green/',
                 }}}
-        worker_module._make_runoff_links(
+        make_forcing_links._make_runoff_links(
             m_sftp_client, run_date, config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[2] == call(
             m_sftp_client, 'salish-nowcast',
             'NEMO-forcing/rivers/bio_climatology/',
             'nowcast-green/rivers/bio_climatology')
 
-    def test_runoff_files_links(
-        self, m_clear_links, m_create_symlink, worker_module,
-    ):
+    def test_runoff_files_links(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         config = {
@@ -241,7 +260,7 @@ class TestMakeRunoffLinks:
                     },
                     'nowcast dir': 'nowcast-green/',
                 }}}
-        worker_module._make_runoff_links(
+        make_forcing_links._make_runoff_links(
             m_sftp_client, run_date, config, 'salish-nowcast')
         start = run_date.replace(days=-1)
         end = run_date.replace(days=+2)
