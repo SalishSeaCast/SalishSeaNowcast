@@ -40,6 +40,8 @@ scheduled workers:
 
 
 coordinates: /results/nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc
+## TODO: Different values are necessary on skookum and west.cloud; see issue #31
+#coordinates: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc
 
 
 weather:
@@ -126,6 +128,9 @@ run types:
     config name: SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+## TODO: Different values are necessary on skookum and west.cloud; see issue #32
+#    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+#    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1  # day
   nowcast-green:
     config name:  SOG
@@ -136,11 +141,17 @@ run types:
     config name:  SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+## TODO: Different values are necessary on skookum and west.cloud; see issue #32
+#    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+#    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1.25  # days
   forecast2:
     config name:  SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+## TODO: Different values are necessary on skookum and west.cloud; see issue #32
+#    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+#    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1.25  # days
 
 
@@ -247,13 +258,13 @@ run:
       # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
-      envvars: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
+      envvars: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
       # Python interpreter on compute host in an environment with all
-      # dependencies installed. Used to, for exampler, launch run_NEMO and
+      # dependencies installed. Used to, for example, launch run_NEMO and
       # watch_NEMO workers.
-      python: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/python3
+      python: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/python3
       # Location on the compute host of the nowcast system config file
-      config file: /home/ubuntu/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+      config file: /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       # List of run types that are executed on the compute host
       run types:
         - nowcast
@@ -281,39 +292,39 @@ run:
     forcing:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
-      ssh dir: /home/ubuntu/MEOPAR/sshNeahBay/
+      ssh dir: /nemoShare/MEOPAR/sshNeahBay/
       # Directory on compute host where rivers runoff forcing files are stored
-      rivers dir: /home/ubuntu/MEOPAR/rivers/
+      rivers dir: /nemoShare/MEOPAR/rivers/
       # Locations on compute host of rivers runoff monthly climatology files
-      rivers_month.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/rivers_month_extended.nc
-      rivers_temp.nc: /home/ubuntu/MEOPAR/NEMO-forcing/rivers/river_ConsTemp_month.nc
+      rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
+      rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
       # Directory on compute host where atomospheric forcing files are stored
-      weather dir: /home/ubuntu/MEOPAR/GEM2.5/ops/NEMO-atmos/
+      weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
       # Location on compute host of no_snow.nc constraint file
-      no_snow.nc: /home/ubuntu/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
+      no_snow.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
       # Location on compute host of NEMO on-the-fly interpolation weights file
       # for GEM 2.5km operational forecast
-      weights: /home/ubuntu/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
+      weights: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
     # Directory on compute host where run configuration, forcing links, etc.
     # are stored
-    nowcast dir: /home/ubuntu/MEOPAR/nowcast-sys/runs
+    nowcast dir: /nemoShare/MEOPAR/nowcast-sys/runs
     # Directories on compute host where results are stored, keyed by run type
     results:
       # Note that salish has shared storage with the nowcast system results
       # archives
-      nowcast: /home/ubuntu/MEOPAR/SalishSea/nowcast/
-      forecast: /home/ubuntu/MEOPAR/SalishSea/forecast/
-      forecast2: /home/ubuntu/MEOPAR/SalishSea/forecast2/
+      nowcast: /nemoShare/MEOPAR/SalishSea/nowcast/
+      forecast: /nemoShare/MEOPAR/SalishSea/forecast/
+      forecast2: /nemoShare/MEOPAR/SalishSea/forecast2/
     # Directory on compute host where files (e.g. namelist.time) and symlinks
     # (e,g. iodef.xml) necessary to prepare the NEMO runs are stored
     # TODO: Can this and `nowcast dir` be merged; see issue #11
-    run prep dir: /home/ubuntu/MEOPAR/nowcast-sys/runs
+    run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
     # How is the domain to be distributed over the processors in the
     # i (longitude) and j (latitude) directions?
     mpi decomposition: 9x19
     # Path to the salishsea command processor executable to use in the run
     # script
-    salishsea_cmd: /home/ubuntu/miniconda3/envs/nemo_nowcast-env/bin/salishsea
+    salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
     # Executable to use to submit the SalishSeaNEMO.sh script to be run
     job exec cmd: bash
 
