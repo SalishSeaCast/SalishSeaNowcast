@@ -26,7 +26,7 @@ from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
-from salishsea_tools.namelist import namelist2dict
+from nemo_cmd.namelist import namelist2dict
 
 
 NAME = 'watch_NEMO'

@@ -28,10 +28,10 @@ from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
+from nemo_cmd.namelist import namelist2dict
 from nemo_nowcast.fileutils import FilePerms
 import salishsea_cmd.api
 from salishsea_cmd.lib import get_n_processors
-from salishsea_tools.namelist import namelist2dict
 import yaml
 
 
