@@ -323,6 +323,8 @@ def _run_description(
         forcing=forcing,
         namelists=namelists,
     )
+    run_desc['paths']['NEMO code config'] = str(
+        (run_prep_dir/'../NEMO-3.6-code'/'NEMOGCM'/'CONFIG').resolve())
     run_desc['grid']['coordinates'] = Path(config['coordinates']).name
     run_desc['grid']['bathymetry'] = Path(
         config['run types'][run_type]['bathymetry']).name
@@ -403,8 +405,9 @@ def _definitions(
         'WORK_DIR="{run_dir}"\n'
         'RESULTS_DIR="{results_dir}"\n'
         'MPIRUN="{mpirun}"\n'
-        'GATHER="{salishsea_cmd} gather"\n'
-        'GATHER_OPTS="{gather_opts}"\n'
+        u'COMBINE="{salishsea_cmd} combine"\n'
+        u'DEFLATE="{salishsea_cmd} deflate"\n'
+        u'GATHER="{salishsea_cmd} gather"\n'
     ).format(
         run_id=run_desc['run_id'],
         run_desc_file=run_desc_filepath.name,
@@ -444,9 +447,17 @@ def _execute(nemo_processors, xios_processors, xios_host):
     script += (
         'echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout\n'
         '\n'
+        'echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout\n'
+        'echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '\n'
+        'echo "Results deflation started at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug '
+        '>>${RESULTS_DIR}/stdout\n'
+        'echo "Results deflation ended at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '\n'
         'echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout\n'
-        '${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR} '
-        '>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
+        '${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout\n'
         'echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout\n'
     )
     return script
