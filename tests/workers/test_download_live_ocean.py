@@ -37,7 +37,7 @@ class TestMain:
         download_live_ocean.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--run-date',)
-        assert kwargs['default'] == arrow.utcnow().floor('day')
+        assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker):
