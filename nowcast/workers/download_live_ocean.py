@@ -45,7 +45,7 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_date_option(
-        '--run-date', default=arrow.utcnow().floor('day'),
+        '--run-date', default=arrow.now().floor('day'),
         help='Date to download the Live Ocean forecast product for.')
     worker.run(download_live_ocean, success, failure)
 
