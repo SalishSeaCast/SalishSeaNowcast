@@ -51,7 +51,7 @@ pyzmq==15.4.0
 raven==5.27.1
 requests==2.11.1
 retrying==1.3.3
--e SalishSeaCmd==2.2.dev0
+-e SalishSeaCmd==3.0.dev0
 -e SalishSeaNowcast==3.0.dev0
 -e SalishSeaTools==2.0
 schedule==0.3.2
