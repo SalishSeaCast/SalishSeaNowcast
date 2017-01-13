@@ -83,7 +83,7 @@ class TestFailure:
         assert msg_type == 'failure'
 
 
-class TestDownloadLiveOCean:
+class TestDownloadLiveOcean:
     """Unit test for download_live_ocean() function.
     """
     @patch('nowcast.workers.download_live_ocean.lib.mkdir')
