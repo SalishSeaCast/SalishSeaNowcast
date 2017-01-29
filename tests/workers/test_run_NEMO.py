@@ -122,8 +122,11 @@ def tmp_results(tmpdir, run_date, scope='function'):
         tmp_namelists.ensure('namelist.{}'.format(s))
     tmp_namelists.ensure('namelist_top_cfg')
     tmp_namelists.ensure('namelist_pisces_cfg')
-    for dir in ('NEMO-3.6-code', 'XIOS', 'NEMO-forcing'):
+    for dir in ('XIOS', 'NEMO-forcing'):
         tmp_run_prep.ensure_dir('..', dir)
+    tmp_nemo36_code = tmp_run_prep.ensure_dir('..', 'NEMO-3.6-code')
+    tmp_nemogcm = tmp_nemo36_code.ensure_dir('NEMOGCM')
+    tmp_nemogcm.ensure_dir('CONFIG')
     tmp_run_prep.ensure('iodef.xml')
     tmp_run_prep.ensure(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
@@ -892,24 +895,15 @@ class TestDefinitions:
         defns = run_NEMO._definitions(
             run_type, run_desc, run_desc_filepath, run_dir, results_dir,
             'salish', config)
-        if run_type == 'forecast2':
-            expected = '''RUN_ID="03dec16nowcast"
-            RUN_DESC="03dec16.yaml"
-            WORK_DIR="tmp_run_dir"
-            RESULTS_DIR="results_dir"
-            MPIRUN="mpirun"
-            GATHER="bin/salishsea gather"
-            GATHER_OPTS="--delete-restart"
-            '''
-        else:
-            expected = '''RUN_ID="03dec16nowcast"
-            RUN_DESC="03dec16.yaml"
-            WORK_DIR="tmp_run_dir"
-            RESULTS_DIR="results_dir"
-            MPIRUN="mpirun"
-            GATHER="bin/salishsea gather"
-            GATHER_OPTS=""
-            '''
+        expected = '''RUN_ID="03dec16nowcast"
+        RUN_DESC="03dec16.yaml"
+        WORK_DIR="tmp_run_dir"
+        RESULTS_DIR="results_dir"
+        MPIRUN="mpirun"
+        COMBINE="bin/salishsea combine"
+        DEFLATE="bin/salishsea deflate"
+        GATHER="bin/salishsea gather"
+        '''
         expected = expected.splitlines()
         for i, line in enumerate(defns.splitlines()):
             assert line.strip() == expected[i].strip()
@@ -930,24 +924,15 @@ class TestDefinitions:
         defns = run_NEMO._definitions(
             run_type, run_desc, run_desc_filepath, run_dir, results_dir,
             'west.cloud', config)
-        if run_type == 'forecast2':
-            expected = '''RUN_ID="03dec16nowcast"
-            RUN_DESC="03dec16.yaml"
-            WORK_DIR="tmp_run_dir"
-            RESULTS_DIR="results_dir"
-            MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
-            GATHER="bin/salishsea gather"
-            GATHER_OPTS="--delete-restart"
-            '''
-        else:
-            expected = '''RUN_ID="03dec16nowcast"
-            RUN_DESC="03dec16.yaml"
-            WORK_DIR="tmp_run_dir"
-            RESULTS_DIR="results_dir"
-            MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
-            GATHER="bin/salishsea gather"
-            GATHER_OPTS=""
-            '''
+        expected = '''RUN_ID="03dec16nowcast"
+        RUN_DESC="03dec16.yaml"
+        WORK_DIR="tmp_run_dir"
+        RESULTS_DIR="results_dir"
+        MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
+        COMBINE="bin/salishsea combine"
+        DEFLATE="bin/salishsea deflate"
+        GATHER="bin/salishsea gather"
+        '''
         expected = expected.splitlines()
         for i, line in enumerate(defns.splitlines()):
             assert line.strip() == expected[i].strip()
@@ -970,9 +955,17 @@ class TestExecute:
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
+        echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout
+        ${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout
+        echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
+
+        echo "Results deflation started at $(date)" >>${RESULTS_DIR}/stdout
+        ${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug \
+>>${RESULTS_DIR}/stdout
+        echo "Results deflation ended at $(date)" >>${RESULTS_DIR}/stdout
+
         echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
-        ${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR} \
->>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
         echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
         '''
         expected = expected.splitlines()
@@ -993,9 +986,17 @@ class TestExecute:
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
+        echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout
+        ${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout
+        echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
+
+        echo "Results deflation started at $(date)" >>${RESULTS_DIR}/stdout
+        ${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug \
+>>${RESULTS_DIR}/stdout
+        echo "Results deflation ended at $(date)" >>${RESULTS_DIR}/stdout
+
         echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
-        ${GATHER} ${GATHER_OPTS} ${RUN_DESC} ${RESULTS_DIR} \
->>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
         echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
         '''
         expected = expected.splitlines()
