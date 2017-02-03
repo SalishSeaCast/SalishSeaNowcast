@@ -667,6 +667,8 @@ message registry:
       checklist key: results files
       success nowcast: nowcast results files downloaded
       failure nowcast: nowcast results files download failed
+      success nowcast-green: nowcast-green results files downloaded
+      failure nowcast-green: nowcast-green results files download failed
       success forecast: forecast results files downloaded
       failure forecast: forecast results files download failed
       success forecast2: forecast2 results files downloaded
