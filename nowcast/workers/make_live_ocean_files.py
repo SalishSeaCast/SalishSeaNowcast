@@ -72,9 +72,7 @@ def make_live_ocean_files(parsed_args, config, tell_mgr):
     tell_mgr(
         'log.info',
         'Creating T&S western boundary conditions files from {ymd} '
-        'Live Ocean run'.format(ymd=ymd),
-        extra={'run_date': ymd}
-    )
+        'Live Ocean run'.format(ymd=ymd))
     download_dir = Path(config['temperature salinity']['download']['dest dir'])
     bc_dir = Path(config['temperature salinity']['bc dir'])
     boundary_info = Path(config['temperature salinity']['boundary info'])
