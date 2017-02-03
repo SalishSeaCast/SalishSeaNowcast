@@ -98,6 +98,13 @@ temperature salinity:
     hours range: [2, 73]
     # Destination directory for downloaded UW Live Ocean files
     dest dir: /results/forcing/LiveOcean/downloaded
+  # File containing western boundary tracer grid points information
+  boundary info: /results/nowcast-sys/NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc
+  # Destination directory for hourly temperature and salinity boundary conditions
+  # files generated from UW Live Ocean forecast
+  bc dir: /results/forcing/LiveOcean/boundary_conditions
+  # Host on which to run make_live_ocean_files worker that requires matlab
+  matlab host: salish-nowcast
 
 
 observations:
@@ -585,6 +592,15 @@ message registry:
       success: Live Ocean Salish Sea boundary files ready
       failure: Live Ocean Salish Sea boundary files download failed
       crash: download_live_ocean worker crashed
+
+    make_live_ocean_files:
+      checklist key: Live Ocean T&S boundary conditions
+      log.debug: debug level logging message
+      log.info: info level logging message
+      log.error: error level logging message
+      success: Live Ocean T&S boundary conditions files ready
+      failure: Live Ocean T&S boundary conditions files preparation failed
+      crash: make_live_ocean_files worker crashed
 
     upload_forcing:
       checklist key: forcing upload

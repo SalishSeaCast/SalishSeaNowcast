@@ -105,6 +105,13 @@ Workers
     :members: main
 
 
+:kbd:`make_live_ocean_files`
+----------------------------
+
+.. automodule:: nowcast.workers.make_live_ocean_files
+    :members: main
+
+
 :kbd:`upload_forcing`
 ---------------------
 
