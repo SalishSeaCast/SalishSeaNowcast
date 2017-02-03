@@ -32,6 +32,7 @@ def config():
     a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
     """
     return {
+        'temperature salinity': {'matlab host': 'salish'},
         'observations': {
             'ctd data': {
                 'stations': ['SCVIP', 'SEVIP', 'LSBBL', 'USDDL'],
@@ -249,11 +250,32 @@ class TestAfterDownloadLiveOcean:
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure',
-        'success',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_download_live_ocean(
             Message('download_live_ocean', msg_type), config, checklist)
+        assert workers == []
+
+    def test_success_launch_make_live_ocean_files(self, config, checklist):
+        workers = next_workers.after_download_live_ocean(
+            Message('download_live_ocean', 'success'), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_live_ocean_files', args=[], host='salish')
+        assert expected in workers
+
+
+class TestAfterMakeLiveOceanFiles:
+    """Unit tests for the after_make_live_ocean_files function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_live_ocean_files(
+            Message('make_live_ocean_files', msg_type), config, checklist)
         assert workers == []
 
 
@@ -266,7 +288,6 @@ class TestAfterUploadForcing:
         'failure nowcast+',
         'failure forecast2',
         'failure ssh',
-        'success nowcast+',
         'success forecast2',
         'success ssh',
     ])
