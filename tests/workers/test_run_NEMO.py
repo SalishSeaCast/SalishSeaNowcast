@@ -36,30 +36,38 @@ def config(scope='function'):
             'nowcast': {
                 'config name': 'SalishSea',
                 'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'mesh_mask_downbyone2.nc',
                 'duration': 1},
             'nowcast-green': {
                 'config name': 'SOG',
                 'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'mesh_mask_downbyone2.nc',
                 'duration': 1},
             'forecast': {
                 'config name': 'SalishSea',
                 'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'mesh_mask_downbyone2.nc',
                 'duration': 1.25},
             'forecast2': {
                 'config name': 'SalishSea',
                 'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.nc',
                 'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc',
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'mesh_mask_downbyone2.nc',
                 'duration': 1.25},
         },
         'run': {
@@ -116,18 +124,17 @@ def tmp_results(tmpdir, run_date, scope='function'):
     tmp_namelists = tmp_run_prep.ensure_dir(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast')
     namelist_sections = (
-        'domain', 'surface', 'lateral', 'bottom', 'tracer', 'dynamics',
-        'vertical', 'compute')
+        'domain', 'surface.blue', 'surface.green', 'lateral', 'bottom',
+        'tracer', 'dynamics', 'vertical', 'compute')
     for s in namelist_sections:
         tmp_namelists.ensure('namelist.{}'.format(s))
     tmp_namelists.ensure('namelist_top_cfg')
     tmp_namelists.ensure('namelist_pisces_cfg')
     for dir in ('XIOS', 'NEMO-forcing'):
         tmp_run_prep.ensure_dir('..', dir)
-    tmp_nemo36_code = tmp_run_prep.ensure_dir('..', 'NEMO-3.6-code')
-    tmp_nemogcm = tmp_nemo36_code.ensure_dir('NEMOGCM')
-    tmp_nemogcm.ensure_dir('CONFIG')
-    tmp_run_prep.ensure('iodef.xml')
+    tmp_run_prep.ensure_dir('..', 'NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
+    tmp_run_prep.ensure('iodef-blue.xml')
+    tmp_run_prep.ensure('iodef-green.xml')
     tmp_run_prep.ensure(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
     tmp_run_prep.ensure(
@@ -735,7 +742,8 @@ class TestRunDescription:
                 *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.domain'
                 .split('/')),
             tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface'
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/'
+                 'namelist.surface.blue'
                 .split('/')),
             tmp_run_prep.join(
                 *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.lateral'
@@ -786,7 +794,8 @@ class TestRunDescription:
                 *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.domain'
                 .split('/')),
             tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface'
+                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/'
+                 'namelist.surface.green'
                 .split('/')),
             tmp_run_prep.join(
                 *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.lateral'
@@ -821,7 +830,7 @@ class TestRunDescription:
         ]
         assert run_desc['namelists']['namelist_pisces_cfg'] == expected
 
-    def test_output(
+    def test_output_nowcast_blue(
         self, config, run_date, tmpdir, tmp_results,
     ):
         dmy = run_date.format('DDMMMYY').lower()
@@ -843,7 +852,42 @@ class TestRunDescription:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
-        assert run_desc['output']['files'] == tmp_run_prep.join('iodef.xml')
+        assert run_desc['output']['files'] == tmp_run_prep.join(
+            'iodef-blue.xml')
+        expected = tmp_run_prep.join(
+            '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
+        assert run_desc['output']['domain'] == expected
+        expected = tmp_run_prep.ensure(
+            '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast',
+            'field_def.xml')
+        assert run_desc['output']['fields'] == expected
+        assert run_desc['output']['separate XIOS server']
+        assert run_desc['output']['XIOS servers'] == 1
+
+    def test_output_nowcast_green(
+        self, config, run_date, tmpdir, tmp_results,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}nowcast'.format(dmy=dmy)
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {'nowcast-green': str(tmp_results['results']['nowcast-green'])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            {'nowcast dir': str(tmp_results['nowcast dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, 'nowcast-green', run_id, 2160, 'salish', config,
+                    Mock(name='tell_manager'), False)
+        assert run_desc['output']['files'] == tmp_run_prep.join(
+            'iodef-green.xml')
         expected = tmp_run_prep.join(
             '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
         assert run_desc['output']['domain'] == expected

@@ -292,11 +292,18 @@ def _run_description(
     }
     forcing.update(restart_filepaths)
     run_sets_dir = run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast'
-    namelist_sections = (
-        'namelist.time', 'namelist.domain', 'namelist.surface',
-        'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
-        'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
-    )
+    if run_type == 'nowcast-green':
+        namelist_sections = (
+            'namelist.time', 'namelist.domain', 'namelist.surface.green',
+            'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
+            'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
+        )
+    else:
+        namelist_sections = (
+            'namelist.time', 'namelist.domain', 'namelist.surface.blue',
+            'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
+            'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
+        )
     namelists = {'namelist_cfg': []}
     for namelist in namelist_sections:
         if (run_prep_dir/namelist).exists():
@@ -328,7 +335,12 @@ def _run_description(
     run_desc['grid']['coordinates'] = Path(config['coordinates']).name
     run_desc['grid']['bathymetry'] = Path(
         config['run types'][run_type]['bathymetry']).name
-    run_desc['output']['files'] = str((run_prep_dir/'iodef.xml').resolve())
+    if run_type == 'nowcast-green':
+        run_desc['output']['files'] = str(
+            (run_prep_dir/'iodef-green.xml').resolve())
+    else:
+        run_desc['output']['files'] = str(
+            (run_prep_dir/'iodef-blue.xml').resolve())
     run_desc['output']['domain'] = str(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')
         .resolve())
