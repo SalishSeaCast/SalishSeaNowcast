@@ -282,6 +282,13 @@ run:
         - forecast2
         - nowcast-green
 
+    salish-nowcast:
+      shared storage: True
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      envvars: /results/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
+      python: /results/nowcast-sys/nemo_nowcast-env/bin/python
+      config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+
   remote hosts:
     - cloud host
     - hpc host
