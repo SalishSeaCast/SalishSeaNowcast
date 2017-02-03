@@ -181,16 +181,6 @@ def after_grib_to_netcdf(msg, config, checklist):
                             'nowcast.workers.upload_forcing',
                             args=[config['run'][host], msg_suffix]),
                     )
-    if all(
-        ('nowcast-green host' in config['run'],
-         'nowcast-green' in config['run types'])):
-        next_workers['success nowcast+'].append(
-            NextWorker(
-                'nowcast.workers.make_forcing_links',
-                args=[
-                    config['run']['nowcast-green host'], 'nowcast-green',
-                    '--shared-storage'])
-        )
     return next_workers[msg.type]
 
 
@@ -351,17 +341,6 @@ def after_make_forcing_links(msg, config, checklist):
                         checklist['forcing links'][host_name]['run date']],
                     host=host_name),
             ]
-        host_name = config['run']['nowcast-green host']
-        if 'nowcast-green host' in config['run'] and host_name in msg.payload:
-            next_workers[msg.type] = [
-                NextWorker(
-                    'nowcast.workers.run_NEMO',
-                    args=[
-                        host_name, run_type, '--shared-storage',
-                        '--run-date',
-                        checklist['forcing links'][host_name]['run date']],
-                    host=host_name),
-            ]
     return next_workers[msg.type]
 
 
@@ -430,6 +409,11 @@ def after_watch_NEMO(msg, config, checklist):
             next_workers['success nowcast'].append(
                 NextWorker(
                     'nowcast.workers.get_NeahBay_ssh', args=['forecast']))
+        if run_type == 'forecast':
+            next_workers['success forecast'].append(
+                NextWorker(
+                    'nowcast.workers.make_forcing_links',
+                    args=[msg.payload[run_type]['host'], 'nowcast-green']))
         enabled_host_config = (
             config['run']['enabled hosts'][msg.payload[run_type]['host']])
         if not enabled_host_config['shared storage']:

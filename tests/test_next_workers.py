@@ -202,17 +202,6 @@ class TestAfterGribToNetcdf:
             args=['west.cloud', run_type], host='localhost')
         assert expected in workers
 
-    def test_success_nowcastp_launch_make_forcing_links_nowcast_green(
-        self, config, checklist,
-    ):
-        workers = next_workers.after_grib_to_netcdf(
-            Message('grib_to_netcdf', 'success nowcast+'), config, checklist)
-        expected = NextWorker(
-            'nowcast.workers.make_forcing_links',
-            args=['salish', 'nowcast-green', '--shared-storage'],
-            host='localhost')
-        assert expected in workers
-
     def test_success_nowcastp_launch_ping_erddap_download_weather(
         self, config, checklist,
     ):
@@ -331,11 +320,8 @@ class TestAfterMakeForcingLinks:
         ['west.cloud', 'nowcast', '--run-date', '2016-10-23'],
         'west.cloud'),
         ('success nowcast-green',
-        [
-            'salish', 'nowcast-green',
-            '--shared-storage',
-            '--run-date', '2016-10-23'],
-        'salish'),
+        ['west.cloud', 'nowcast-green', '--run-date', '2016-10-23'],
+        'west.cloud'),
         ('success ssh',
         ['west.cloud', 'forecast', '--run-date', '2016-10-23'],
         'west.cloud'),
@@ -415,6 +401,23 @@ class TestAfterWatchNEMO:
         expected = NextWorker(
             'nowcast.workers.get_NeahBay_ssh',
             args=['forecast'], host='localhost')
+        assert workers[0] == expected
+
+    def test_success_forecast_launch_make_forcing_links_nowcast_green(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                'watch_NEMO', 'success forecast', {
+                    'forecast': {
+                        'host': 'cloud', 'run date': '2017-01-29',
+                        'completed': True,
+                    }
+                }),
+            config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['cloud', 'nowcast-green'], host='localhost')
         assert workers[0] == expected
 
     @pytest.mark.parametrize('msg', [
