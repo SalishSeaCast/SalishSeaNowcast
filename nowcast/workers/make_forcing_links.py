@@ -117,6 +117,8 @@ def make_forcing_links(parsed_args, config, *args):
         return checklist
     _make_runoff_links(sftp_client, run_date, config, host_name)
     _make_weather_links(sftp_client, run_date, config, host_name, run_type)
+    _make_live_ocean_links(
+        sftp_client, run_date, config, host_name, shared_storage)
     sftp_client.close()
     ssh_client.close()
     checklist = {
@@ -205,6 +207,28 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
             host_run_config['forcing']['weather dir'], dir, filename)
         dest = os.path.join(NEMO_atmos_dir, filename)
         _create_symlink(sftp_client, host_name, src, dest)
+
+
+def _make_live_ocean_links(
+        sftp_client, run_date, config, host_name, shared_storage,
+):
+    host_run_config = config['run'][host_name]
+    _clear_links(
+        sftp_client, host_run_config, 'open_boundaryies/west/LiveOcean/')
+    for day in range(-1, 3):
+        filename = config['LiveOcean']['file template'].format(  # need to write
+            run_date.replace(days=day).date())
+        dir = '' if day <= 0 else 'fcst'
+        if day != 2:  # if day=2, we use the previous day as source
+            src = os.path.join(host_run_config['forcing']['LO dir'], dir, filename) # need to write
+        dest = os.path.join(
+            host_run_config['nowcast dir'],
+            'open_boundaries/west/LiveOcean/',
+            filename)
+        if shared_storage:
+            shutil.copy2(src, dest)
+        else:
+            _create_symlink(sftp_client, host_name, src, dest)
 
 
 def _clear_links(sftp_client, host_run_config, dir):
