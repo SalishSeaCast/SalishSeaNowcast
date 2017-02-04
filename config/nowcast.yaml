@@ -105,6 +105,9 @@ temperature salinity:
   bc dir: /results/forcing/LiveOcean/boundary_conditions
   # Host on which to run make_live_ocean_files worker that requires matlab
   matlab host: salish-nowcast
+  # Template for the Live Ocean boundary condition file name
+  # **Must be quoted to project {} characters**
+  file template: 'LO_{:y%Ym%md%d}.nc'
 
 
 observations:
@@ -353,19 +356,20 @@ run:
     # Executable to use to submit the SalishSeaNEMO.sh script to be run
     job exec cmd: bash
 
-  # If the `nowcast-green host` key is present, the forcing files will be
-  # symlinked and the nowcast-green run will be executed on it automatically.
-  # It is assumed that the nowcast-green run shares storage with the machine
-  # that the nowcast manager is running on, so uploading or forcing files,
+  # If the `nowcast-dev host` key is present, the forcing files will be
+  # symlinked and the nowcast-dev run will be executed on it automatically.
+  # It is assumed that the nowcast-dev run shares storage with the machine
+  # that the nowcast manager is running on, so uploading of forcing files,
   # and downloaded of results files is not necessary.
   #
-  # Remove or comment out the next line to prevent running nowcast-green
-#  nowcast-green host: salish-nowcast
+  # Remove or comment out the next line to prevent running nowcast-dev
+  nowcast-dev host: salish-nowcast
   salish-nowcast:
     forcing:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
       ssh dir: /results/forcing/sshNeahBay/
+      bc dir: /results/forcing/LiveOcean/boundary_conditions/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /results/forcing/rivers/
       # Locations on compute host of rivers runoff monthly climatology files
