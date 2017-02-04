@@ -139,6 +139,14 @@ run types:
 #    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
 #    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
     duration: 1  # day
+  nowcast-dev:
+    config name: SalishSea
+    bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+    mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+## TODO: Different values are necessary on skookum and west.cloud; see issue #32
+#    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
+#    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    duration: 1  # day
   nowcast-green:
     config name:  SOG
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
@@ -170,6 +178,7 @@ results archive:
   # Values are directories on results server where run results are stored
   # in ddmmmyy/ directories.
   nowcast: /results/SalishSea/nowcast-blue/
+  nowcast-dev: /results/SalishSea/nowcast-dev/
   forecast: /results/SalishSea/forecast/
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
@@ -288,6 +297,8 @@ run:
       envvars: /results/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
       python: /results/nowcast-sys/nemo_nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+      run types:
+        - nowcast-dev
 
   remote hosts:
     - cloud host
@@ -372,12 +383,14 @@ run:
       weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
     # Directory on compute host where run configuration, forcing links, etc.
     # are stored
-    nowcast dir: /data/dlatorne/MEOPAR/nowcast-green/
+    # TODO: Can this and `run prep dir` be merged; see issue #11
+    nowcast dir: /results/nowcast-sys/runs/
+#    nowcast dir: /data/dlatorne/MEOPAR/nowcast-green/
     # Directories on compute host where results are stored, keyed by run type
     results:
       # Note that salish has shared storage with the nowcast system results
       # archives
-      nowcast-green: /results/SalishSea/nowcast-green/
+      nowcast-dev: /results/SalishSea/nowcast-dev/
     # Directory on compute host where files (e.g. namelist.time) and symlinks
     # (e,g. iodef.xml) necessary to prepare the NEMO runs are stored
     # TODO: Can this and `nowcast dir` be merged; see issue #11
@@ -641,6 +654,8 @@ message registry:
       failure nowcast: nowcast NEMO run failed
       success nowcast-green: nowcast-green NEMO run started
       failure nowcast-green: nowcast-green NEMO run failed
+      success nowcast-dev: nowcast-dev NEMO run started
+      failure nowcast-dev: nowcast-dev NEMO run failed
       success forecast: forecast NEMO run started
       failure forecast: forecast NEMO run failed
       success forecast2: forecast2 NEMO run started
@@ -657,6 +672,8 @@ message registry:
       failure nowcast: nowcast NEMO run failed
       success nowcast-green: nowcast-green NEMO run completed
       failure nowcast-green: nowcast-green NEMO run failed
+      success nowcast-dev: nowcast-dev NEMO run completed
+      failure nowcast-dev: nowcast-dev NEMO run failed
       success forecast: forecast NEMO run completed
       failure forecast: forecast NEMO run failed
       success forecast2: forecast2 NEMO run completed
