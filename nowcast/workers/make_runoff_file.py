@@ -95,7 +95,13 @@ def make_runoff_file(parsed_args, config, *args):
         'long': _combine_runoff(
             'long', flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
             otherratio, driverflow, lat, lon, riverdepth, directory,
+            filename_tmpls, config),
+        'allArms': _combine_runoff(
+            'allArms', flow_at_hope, yesterday, afterHope, nonFraser,
+            fraserratio,
+            otherratio, driverflow, lat, lon, riverdepth, directory,
             filename_tmpls, config)}
+
     return filepath
 
 
