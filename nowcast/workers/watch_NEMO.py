@@ -50,7 +50,8 @@ def main():
         help='Name of the host to monitor the run on')
     worker.cli.add_argument(
         'run_type',
-        choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
+        choices={
+            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'},
         help='''
         Type of run to monitor:
         'nowcast' means nowcast physics run,
