@@ -148,6 +148,17 @@ def upload_all_files(host_name, run_date, config):
             config['weather']['ops_dir'], dest_dir, filename)
         remotepath = os.path.join(host['weather_dir'], dest_dir, filename)
         upload_file(sftp_client, host_name, localpath, remotepath)
+    # Live Ocean Boundary Conditions
+    for day in range(-1, 3):
+        filename = config['temperature salinity']['file template'].format(
+            run_date.replace(days=day).date())
+        dest_dir = '' if day <= 0 else 'fcst'
+        localpath = os.path.join(
+            config['temperature salinity']['bc dir'], dest_dir, filename)
+        remotepath = os.path.join(
+            host['forcing']['bc dir'], dest_dir, filename)
+        upload_file(sftp_client, host_name, localpath, remotepath)
+
     # Restart File
     prev_run_id = run_date.replace(days=-1).date()
     prev_run_dir = prev_run_id.strftime('%d%b%y').lower()
