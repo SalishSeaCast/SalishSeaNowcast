@@ -181,6 +181,16 @@ def after_grib_to_netcdf(msg, config, checklist):
                             'nowcast.workers.upload_forcing',
                             args=[config['run'][host], msg_suffix]),
                     )
+    if all(
+        ('nowcast-dev host' in config['run'],
+         'nowcast-dev' in config['run types'])):
+        next_workers['success nowcast+'].append(
+            NextWorker(
+                'nowcast.workers.make_forcing_links',
+                args=[
+                    config['run']['nowcast-dev host'], 'nowcast-dev',
+                    '--shared-storage'])
+        )
     return next_workers[msg.type]
 
 
@@ -345,10 +355,12 @@ def after_make_forcing_links(msg, config, checklist):
         'crash': [],
         'failure nowcast+': [],
         'failure nowcast-green': [],
+        'failure nowcast-dev': [],
         'failure forecast2': [],
         'failure ssh': [],
         'success nowcast+': [],
         'success nowcast-green': [],
+        'success nowcast-dev': [],
         'success forecast2': [],
         'success ssh': [],
     }
@@ -356,6 +368,7 @@ def after_make_forcing_links(msg, config, checklist):
         run_type = {
             'nowcast+': 'nowcast',
             'nowcast-green': 'nowcast-green',
+            'nowcast-dev': 'nowcast-dev',
             'ssh': 'forecast',
             'forecast2': 'forecast2',
         }[msg.type.split()[1]]
@@ -366,6 +379,17 @@ def after_make_forcing_links(msg, config, checklist):
                     'nowcast.workers.run_NEMO',
                     args=[
                         host_name, run_type,
+                        '--run-date',
+                        checklist['forcing links'][host_name]['run date']],
+                    host=host_name),
+            ]
+        host_name = config['run']['nowcast-dev host']
+        if 'nowcast-dev host' in config['run'] and host_name in msg.payload:
+            next_workers[msg.type] = [
+                NextWorker(
+                    'nowcast.workers.run_NEMO',
+                    args=[
+                        host_name, run_type, '--shared-storage',
                         '--run-date',
                         checklist['forcing links'][host_name]['run date']],
                     host=host_name),
@@ -394,10 +418,12 @@ def after_run_NEMO(msg, config, checklist):
         'crash': [],
         'failure nowcast': [],
         'failure nowcast-green': [],
+        'failure nowcast-dev': [],
         'failure forecast': [],
         'failure forecast2': [],
         'success nowcast': [],
         'success nowcast-green': [],
+        'success nowcast-dev': [],
         'success forecast': [],
         'success forecast2': [],
     }
@@ -425,10 +451,12 @@ def after_watch_NEMO(msg, config, checklist):
         'crash': [],
         'failure nowcast': [],
         'failure nowcast-green': [],
+        'failure nowcast-dev': [],
         'failure forecast': [],
         'failure forecast2': [],
         'success nowcast': [],
         'success nowcast-green': [],
+        'success nowcast-dev': [],
         'success forecast': [],
         'success forecast2': [],
     }
