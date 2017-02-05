@@ -47,7 +47,7 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
+            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
     def test_add_pid_arg(self, m_worker):
@@ -79,7 +79,8 @@ class TestSuccess:
     """
     @pytest.mark.parametrize('run_type, host_name, shared_storage', [
         ('nowcast', 'west.cloud-nowcast', True),
-        ('nowcast-green', 'salish-nowcast', False),
+        ('nowcast-green', 'west.cloug-nowcast', False),
+        ('nowcast-dev', 'salish-nowcast', False),
         ('forecast', 'west.cloud-nowcast', True),
         ('forecast2', 'west.cloud-nowcast', True),
     ])
@@ -97,7 +98,8 @@ class TestSuccess:
 
     @pytest.mark.parametrize('run_type, host_name, shared_storage, expected', [
         ('nowcast', 'west.cloud-nowcast', True, 'success nowcast'),
-        ('nowcast-green', 'salish-nowcast', False, 'success nowcast-green'),
+        ('nowcast-green', 'west.cloud-nowcast', False, 'success nowcast-green'),
+        ('nowcast-dev', 'salish-nowcast', False, 'success nowcast-dev'),
         ('forecast', 'west.cloud-nowcast', True, 'success forecast'),
         ('forecast2', 'west.cloud-nowcast', True, 'success forecast2'),
     ])
@@ -120,7 +122,8 @@ class TestFailure:
     """
     @pytest.mark.parametrize('run_type, host_name, shared_storage', [
         ('nowcast', 'west.cloud-nowcast', True),
-        ('nowcast-green', 'salish-nowcast', False),
+        ('nowcast-green', 'west.cloud-nowcast', False),
+        ('nowcast-dev', 'salish-nowcast', False),
         ('forecast', 'west.cloud-nowcast', True),
         ('forecast2', 'west.cloud-nowcast', True),
     ])
@@ -138,7 +141,8 @@ class TestFailure:
 
     @pytest.mark.parametrize('run_type, host_name, shared_storage, expected', [
         ('nowcast', 'west.cloud-nowcast', True, 'failure nowcast'),
-        ('nowcast-green', 'salish-nowcast', False, 'failure nowcast-green'),
+        ('nowcast-green', 'west.cloud-nowcast', False, 'failure nowcast-green'),
+        ('nowcast-dev', 'salish-nowcast', False, 'failure nowcast-dev'),
         ('forecast', 'west.cloud-nowcast', True, 'failure forecast'),
         ('forecast2', 'west.cloud-nowcast', True, 'failure forecast2'),
     ])
@@ -161,7 +165,8 @@ class TestWatchNEMO:
     """
     @pytest.mark.parametrize('run_type, host_name, shared_storage', [
         ('nowcast', 'west.cloud-nowcast', True),
-        ('nowcast-green', 'salish-nowcast', False),
+        ('nowcast-green', 'west.cloud-nowcast', False),
+        ('nowcast-dev', 'salish-nowcast', False),
         ('forecast', 'west.cloud-nowcast', True),
         ('forecast2', 'west.cloud-nowcast', True),
     ])
