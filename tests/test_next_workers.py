@@ -204,14 +204,14 @@ class TestAfterGribToNetcdf:
             args=['west.cloud', run_type], host='localhost')
         assert expected in workers
 
-    def test_success_nowcastp_launch_make_forcing_links_nowcast_dev(
+    def test_success_nowcastp_launch_make_forcing_links_nowcastp_sharedstorage(
         self, config, checklist,
     ):
         workers = next_workers.after_grib_to_netcdf(
             Message('grib_to_netcdf', 'success nowcast+'), config, checklist)
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
-            args=['salish', 'nowcast-dev', '--shared-storage'],
+            args=['salish', 'nowcast+', '--shared-storage'],
             host='localhost')
         assert expected in workers
 

@@ -188,7 +188,7 @@ def after_grib_to_netcdf(msg, config, checklist):
             NextWorker(
                 'nowcast.workers.make_forcing_links',
                 args=[
-                    config['run']['nowcast-dev host'], 'nowcast-dev',
+                    config['run']['nowcast-dev host'], 'nowcast+',
                     '--shared-storage'])
         )
     return next_workers[msg.type]
