@@ -39,23 +39,24 @@ def config():
             },
         },
         'run types': {
-            'nowcast': {}, 'nowcast-green': {},
+            'nowcast': {}, 'nowcast-green': {}, 'nowcast-dev': {},
             'forecast': {}, 'forecast2': {}
         },
         'run': {
             'enabled hosts': {
                 'cloud': {
                     'shared storage': False,
-                    'run types': ['nowcast', 'forecast', 'forecast2'],
+                    'run types': [
+                        'nowcast', 'forecast', 'forecast2', 'nowcasst-green'],
                 },
                 'salish': {
                     'shared storage': True,
-                    'run types': ['nowast-green'],
+                    'run types': ['nowast-dev'],
                 },
             },
-            'remote hosts': ['cloud host'],
+            'remote hosts': ['cloud host', 'nowcast-dev host'],
             'cloud host': 'west.cloud',
-            'nowcast-green host': 'salish',
+            'nowcast-dev host': 'salish',
         }
     }
 
@@ -203,6 +204,17 @@ class TestAfterGribToNetcdf:
             args=['west.cloud', run_type], host='localhost')
         assert expected in workers
 
+    def test_success_nowcastp_launch_make_forcing_links_nowcast_dev(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_grib_to_netcdf(
+            Message('grib_to_netcdf', 'success nowcast+'), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['salish', 'nowcast-dev', '--shared-storage'],
+            host='localhost')
+        assert expected in workers
+
     def test_success_nowcastp_launch_ping_erddap_download_weather(
         self, config, checklist,
     ):
@@ -328,6 +340,7 @@ class TestAfterMakeForcingLinks:
         'crash',
         'failure nowcast+',
         'failure nowcast-green',
+        'failure nowcast-dev',
         'failure forecast2',
         'failure ssh',
     ])
@@ -343,6 +356,10 @@ class TestAfterMakeForcingLinks:
         ('success nowcast-green',
         ['west.cloud', 'nowcast-green', '--run-date', '2016-10-23'],
         'west.cloud'),
+        ('success nowcast-dev',
+        ['salish', 'nowcast-dev', '--shared-storage',
+         '--run-date', '2016-10-23'],
+        'salish'),
         ('success ssh',
         ['west.cloud', 'forecast', '--run-date', '2016-10-23'],
         'west.cloud'),
@@ -378,10 +395,12 @@ class TestAfterRunNEMO:
         'crash',
         'failure nowcast',
         'failure nowcast-green',
+        'failure nowcast-dev',
         'failure forecast',
         'failure forecast2',
         'success nowcast',
         'success nowcast-green',
+        'success nowcast-dev',
         'success forecast',
         'success forecast2',
     ])
@@ -399,6 +418,7 @@ class TestAfterWatchNEMO:
         'crash',
         'failure nowcast',
         'failure nowcast-green',
+        'failure nowcast-dev',
         'failure forecast',
         'failure forecast2',
     ])
@@ -457,6 +477,13 @@ class TestAfterWatchNEMO:
                 }
             }),
         Message(
+            'watch_NEMO', 'success nowcast-green', {
+                'nowcast-green': {
+                    'host': 'cloud', 'run date': '2016-10-15',
+                    'completed': True
+                }
+            }),
+        Message(
             'watch_NEMO', 'success forecast2', {
                 'forecast2': {
                     'host': 'cloud', 'run date': '2016-10-15',
@@ -477,14 +504,14 @@ class TestAfterWatchNEMO:
 
     @pytest.mark.parametrize('msg', [
         Message(
-            'watch_NEMO', 'success nowcast-green', {
-                'nowcast-green': {
+            'watch_NEMO', 'success nowcast-dev', {
+                'nowcast-dev': {
                     'host': 'salish', 'run date': '2016-10-15',
                     'completed': True
                 }
             }),
     ])
-    def test_success_nowcast_green_no_launch_download_results(
+    def test_success_nowcast_dev_no_launch_download_results(
         self, msg, config, checklist,
     ):
         workers = next_workers.after_watch_NEMO(msg, config, checklist)

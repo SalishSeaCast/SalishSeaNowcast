@@ -42,6 +42,15 @@ def config(scope='function'):
                     '/results/nowcast-sys/NEMO-forcing/grid/'
                     'mesh_mask_downbyone2.nc',
                 'duration': 1},
+            'nowcast-dev': {
+                'config name': 'SalishSea',
+                'bathymetry':
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.nc',
+                'mesh_mask':
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'mesh_mask_downbyone2.nc',
+                'duration': 1},
             'nowcast-green': {
                 'config name': 'SOG',
                 'bathymetry':
@@ -82,6 +91,7 @@ def config(scope='function'):
                 'salishsea_cmd': 'bin/salishsea',
                 'results': {
                     'nowcast': 'results/SalishSea/nowcast',
+                    'nowcast-dev': 'results/SalishSea/nowcast-dev',
                     'nowcast-green': '/results/SalishSea/nowcast-green/',
                     'forecast': '/results/SalishSea/forecast/',
                     'forecast2': '/results/SalishSea/forecast2/',
@@ -102,7 +112,7 @@ def tmp_results(tmpdir, run_date, scope='function'):
     Created anew for each test function/method.
     """
     tmp_results = tmpdir.ensure_dir('results')
-    for run_type in ('nowcast', 'nowcast-green', 'forecast'):
+    for run_type in ('nowcast', 'nowcast-green', 'nowcast-dev', 'forecast'):
         tmp_results.ensure(
             'SalishSea', run_type,
             run_date.replace(days=-1).format('DDMMMYY').lower(),
@@ -148,6 +158,7 @@ def tmp_results(tmpdir, run_date, scope='function'):
         'nowcast dir': tmp_nowcast,
         'results': {
             'nowcast': tmp_results.ensure_dir('SalishSea', 'nowcast'),
+            'nowcast-dev': tmp_results.ensure_dir('SalishSea', 'nowcast-dev'),
             'nowcast-green':
                 tmp_results.ensure_dir('SalishSea', 'nowcast-green'),
             'forecast': tmp_results.ensure_dir('SalishSea', 'forecast'),
@@ -176,7 +187,7 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
+            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
     def test_add_shared_storage_option(self, m_worker):
@@ -210,6 +221,7 @@ class TestSuccess:
     @pytest.mark.parametrize('run_type', [
         'nowcast',
         'nowcast-green',
+        'nowcast-dev',
         'forecast',
         'forecast2',
     ])
@@ -223,6 +235,7 @@ class TestSuccess:
     @pytest.mark.parametrize('run_type', [
         'nowcast',
         'nowcast-green',
+        'nowcast-dev',
         'forecast',
         'forecast2',
     ])
@@ -241,6 +254,7 @@ class TestFailure:
     @pytest.mark.parametrize('run_type', [
         'nowcast',
         'nowcast-green',
+        'nowcast-dev',
         'forecast',
         'forecast2',
     ])
@@ -254,6 +268,7 @@ class TestFailure:
     @pytest.mark.parametrize('run_type', [
         'nowcast',
         'nowcast-green',
+        'nowcast-dev',
         'forecast',
         'forecast2',
     ])
@@ -350,6 +365,7 @@ class TestRunDescription:
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast', 'SalishSea'),
         ('nowcast-green', 'SOG'),
+        ('nowcast-dev', 'SalishSea'),
         ('forecast', 'SalishSea'),
         ('forecast2', 'SalishSea'),
     ])
@@ -363,6 +379,7 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type]),
              'nowcast': str(tmp_results['results']['nowcast']),
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
+             'nowcast-dev': str(tmp_results['results']['nowcast-dev']),
              'forecast': str(tmp_results['results']['forecast']),
             })
         p_config_nowcast = patch.dict(
@@ -384,6 +401,7 @@ class TestRunDescription:
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast', '04jan16nowcast'),
         ('nowcast-green', '04jan16nowcast-green'),
+        ('nowcast-dev', '04jan16nowcast-dev'),
         ('forecast', '04jan16forecast'),
         ('forecast2', '04jan16forecast2'),
     ])
