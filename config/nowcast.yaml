@@ -72,7 +72,7 @@ rivers:
   # **Must be quoted to project {} characters**
   file templates:
     long: 'RLonFraCElse_{:y%Ym%md%d}.nc'
-
+    allArms: 'RallFraCElse_{:y%Ym%md%d}.nc'
 
 
 ssh:
