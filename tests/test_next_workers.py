@@ -54,7 +54,7 @@ def config():
                     'run types': ['nowast-dev'],
                 },
             },
-            'remote hosts': ['cloud host', 'nowcast-dev host'],
+            'remote hosts': ['cloud host'],
             'cloud host': 'west.cloud',
             'nowcast-dev host': 'salish',
         }
@@ -203,6 +203,16 @@ class TestAfterGribToNetcdf:
             'nowcast.workers.upload_forcing',
             args=['west.cloud', run_type], host='localhost')
         assert expected in workers
+
+    def test_success_forecast2_no_launch_upload_forcing_nowcastp(
+        self, config, checklist):
+        workers = next_workers.after_grib_to_netcdf(
+            Message('grib_to_netcdf', 'success forecast2'), config,
+            checklist)
+        not_expected = NextWorker(
+            'nowcast.workers.upload_forcing',
+            args=['salish', 'nowcast+'], host='localhost')
+        assert not_expected not in workers
 
     def test_success_nowcastp_launch_make_forcing_links_nowcastp_sharedstorage(
         self, config, checklist,

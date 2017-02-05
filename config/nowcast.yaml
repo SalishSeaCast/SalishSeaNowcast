@@ -105,7 +105,8 @@ temperature salinity:
   bc dir: /results/forcing/LiveOcean/boundary_conditions
   # Host on which to run make_live_ocean_files worker that requires matlab
   matlab host: salish-nowcast
-  # Template for the Live Ocean boundary condition file name
+  # File name template for the hourly temperature and salinity boundary
+  # conditions files generated from UW Live Ocean forecast
   # **Must be quoted to project {} characters**
   file template: 'LO_{:y%Ym%md%d}.nc'
 
@@ -305,7 +306,6 @@ run:
 
   remote hosts:
     - cloud host
-    - nowcast-dev host
     - hpc host
 
   # If the `cloud host` key is present, the nowcast, forecast,
@@ -318,6 +318,8 @@ run:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
       ssh dir: /nemoShare/MEOPAR/sshNeahBay/
+      # Directory on compute host where hourly temperature and salinity boundary
+      # conditions files generated from UW Live Ocean forecast are stored
       bc dir: /nemoShare/MEOPAR/LiveOcean/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /nemoShare/MEOPAR/rivers/
@@ -327,7 +329,7 @@ run:
       # Directory on compute host where the rivers runoff daily tracers
       # climatology files are stored
       rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
-      # Directory on compute host where atomospheric forcing files are stored
+      # Directory on compute host where atmospheric forcing files are stored
       weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
       # Location on compute host of no_snow.nc constraint file
       no_snow.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
@@ -371,6 +373,8 @@ run:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
       ssh dir: /results/forcing/sshNeahBay/
+      # Directory on compute host where hourly temperature and salinity boundary
+      # conditions files generated from UW Live Ocean forecast are stored
       bc dir: /results/forcing/LiveOcean/boundary_conditions/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /results/forcing/rivers/
@@ -380,7 +384,7 @@ run:
       # Directory on compute host where the rivers runoff daily tracers
       # climatology files are stored
       rivers bio dir: /results/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
-      # Directory on compute host where atomospheric forcing files are stored
+      # Directory on compute host where atmospheric forcing files are stored
       weather dir: /results/forcing/atmospheric/GEM2.5/operational/
       # Location on compute host of no_snow.nc constraint file
       no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
@@ -391,7 +395,6 @@ run:
     # are stored
     # TODO: Can this and `run prep dir` be merged; see issue #11
     nowcast dir: /results/nowcast-sys/runs/
-#    nowcast dir: /data/dlatorne/MEOPAR/nowcast-green/
     # Directories on compute host where results are stored, keyed by run type
     results:
       # Note that salish has shared storage with the nowcast system results
