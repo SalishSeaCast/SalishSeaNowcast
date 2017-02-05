@@ -318,6 +318,7 @@ run:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
       ssh dir: /nemoShare/MEOPAR/sshNeahBay/
+      bc dir: /nemoShare/MEOPAR/LiveOcean/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /nemoShare/MEOPAR/rivers/
       # Locations on compute host of rivers runoff monthly climatology files
@@ -435,6 +436,7 @@ run:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
       ssh dir: /home/sallen/MEOPAR/sshNeahBay/
+      bc dir: /home/sallen/MEOPAR/LiveOcean/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /home/sallen/MEOPAR/rivers/
       # Locations on compute host of rivers runoff monthly climatology files
