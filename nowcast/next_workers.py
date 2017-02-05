@@ -389,7 +389,7 @@ def after_make_forcing_links(msg, config, checklist):
                 NextWorker(
                     'nowcast.workers.run_NEMO',
                     args=[
-                        host_name, run_type, '--shared-storage',
+                        host_name, 'nowcast-dev', '--shared-storage',
                         '--run-date',
                         checklist['forcing links'][host_name]['run date']],
                     host=host_name),

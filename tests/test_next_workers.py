@@ -340,7 +340,6 @@ class TestAfterMakeForcingLinks:
         'crash',
         'failure nowcast+',
         'failure nowcast-green',
-        'failure nowcast-dev',
         'failure forecast2',
         'failure ssh',
     ])
@@ -356,7 +355,7 @@ class TestAfterMakeForcingLinks:
         ('success nowcast-green',
         ['west.cloud', 'nowcast-green', '--run-date', '2016-10-23'],
         'west.cloud'),
-        ('success nowcast-dev',
+        ('success nowcast+',
         ['salish', 'nowcast-dev', '--shared-storage',
          '--run-date', '2016-10-23'],
         'salish'),

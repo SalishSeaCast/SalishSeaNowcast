@@ -647,8 +647,6 @@ message registry:
       failure ssh: sea surface height forcing file links for forecast failed
       success nowcast-green: forcing file links for nowcast-green created
       failure nowcast-green: forcing file links for nowcast-green failed
-      success nowcast-dev: forcing file links for nowcast-dev created
-      failure nowcast-dev: forcing file links for nowcast-dev failed
       crash: make_forcing_links worker crashed
 
     run_NEMO:
