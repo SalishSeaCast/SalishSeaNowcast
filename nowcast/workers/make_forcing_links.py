@@ -122,7 +122,7 @@ def make_forcing_links(parsed_args, config, *args):
     ssh_client.close()
     checklist = {
         host_name: {
-            'links': '{0.run_type} {date} ssh rivers weather '
+            'links': '{0.run_type} {date} ssh rivers weather LiveOcean '
                      .format(
                         parsed_args,
                         date=parsed_args.run_date.format('YYYY-MM-DD')),
