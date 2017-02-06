@@ -534,14 +534,20 @@ class TestAfterDownloadResults:
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure nowcast',
+        'failure nowcast-green',
         'failure forecast',
         'failure forecast2',
         'failure hindcast',
         'success hindcast',
+        'success nowcast-green',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_download_results(
-            Message('download_results', msg_type), config, checklist)
+        p_checklist = patch.dict(
+            checklist,
+            {'NEMO run': {'nowcast-green': {'run date': '2016-10-22'}}})
+        with p_checklist:
+            workers = next_workers.after_download_results(
+                Message('download_results', msg_type), config, checklist)
         assert workers == []
 
     @pytest.mark.parametrize('run_type, plot_type', [
