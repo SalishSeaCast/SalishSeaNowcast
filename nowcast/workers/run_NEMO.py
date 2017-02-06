@@ -187,7 +187,13 @@ def _update_time_namelist(run_date, run_type, run_duration, host_run_config):
     dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
     prev_run_namelist = namelist2dict(str(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
-    rdt = prev_run_namelist['namdom'][0]['rn_rdt']
+    try:
+        namelist_domain_path = Path(
+            host_run_config['run prep dir'], 'namelist.domain')
+        namelist_domain = namelist2dict(str(namelist_domain_path))
+        rdt = namelist_domain['namdom'][0]['rn_rdt']
+    except FileNotFoundError:
+        rdt = prev_run_namelist['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
     namelist_time = Path(host_run_config['run prep dir'], 'namelist.time')
     with namelist_time.open('rt') as f:
