@@ -85,9 +85,8 @@ def config(scope='function'):
                 'salish': {},
             },
             'salish': {
-                'run prep dir': '/results/nowcast-sys/nowcast-prep',
+                'run prep dir': '/results/nowcast-sys/runs',
                 'mpi decomposition': '3x5',
-                'nowcast dir': '/results/nowcast-sys/nowcast',
                 'salishsea_cmd': 'bin/salishsea',
                 'results': {
                     'nowcast': 'results/SalishSea/nowcast',
@@ -129,7 +128,7 @@ def tmp_results(tmpdir, run_date, scope='function'):
         'SalishSea', 'nowcast-green',
         run_date.replace(days=-1).format('DDMMMYY').lower(),
         'SalishSea_00002160_restart_trc.nc')
-    tmp_run_prep = tmp_results.ensure_dir('nowcast-sys', 'nowcast-prep')
+    tmp_run_prep = tmp_results.ensure_dir('nowcast-sys', 'runs')
     tmp_run_prep.ensure('namelist.time')
     tmp_namelists = tmp_run_prep.ensure_dir(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast')
@@ -150,12 +149,10 @@ def tmp_results(tmpdir, run_date, scope='function'):
     tmp_run_prep.ensure(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast',
         'field_def.xml')
-    tmp_nowcast = tmp_results.ensure_dir('nowcast-sys', 'nowcast')
     for dir in ('NEMO-atmos', 'open_boundaries', 'rivers'):
-        tmp_nowcast.ensure_dir(dir)
+        tmp_run_prep.ensure_dir(dir)
     return {
         'run prep dir': tmp_run_prep,
-        'nowcast dir': tmp_nowcast,
         'results': {
             'nowcast': tmp_results.ensure_dir('SalishSea', 'nowcast'),
             'nowcast-dev': tmp_results.ensure_dir('SalishSea', 'nowcast-dev'),
@@ -384,7 +381,7 @@ class TestRunDescription:
             })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -419,7 +416,7 @@ class TestRunDescription:
             })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -446,7 +443,7 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -473,7 +470,7 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -501,7 +498,7 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -534,7 +531,7 @@ class TestRunDescription:
             })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -565,7 +562,7 @@ class TestRunDescription:
             })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -592,7 +589,7 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -619,7 +616,7 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -654,7 +651,7 @@ class TestRunDescription:
             })
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -666,8 +663,7 @@ class TestRunDescription:
                 run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
-        tmp_nowcast_dir = tmp_results['nowcast dir']
-        expected = tmp_nowcast_dir.join(expected)
+        expected = tmp_run_prep.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
 
     @pytest.mark.parametrize('run_type, link_name, expected', [
@@ -686,7 +682,7 @@ class TestRunDescription:
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -716,7 +712,7 @@ class TestRunDescription:
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -742,7 +738,7 @@ class TestRunDescription:
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -794,7 +790,7 @@ class TestRunDescription:
             {'nowcast-green': str(tmp_results['results']['nowcast-green'])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -858,7 +854,7 @@ class TestRunDescription:
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
@@ -892,7 +888,7 @@ class TestRunDescription:
             {'nowcast-green': str(tmp_results['results']['nowcast-green'])})
         p_config_nowcast = patch.dict(
             config['run']['salish'],
-            {'nowcast dir': str(tmp_results['nowcast dir'])})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             config['run']['salish'], {'run prep dir': str(tmp_run_prep)})

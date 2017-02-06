@@ -283,19 +283,18 @@ def _run_description(
     run_prep_dir = Path(host_run_config['run prep dir'])
     NEMO_config_name = config['run types'][run_type]['config name']
     walltime = host_run_config.get('walltime')
-    nowcast_dir = Path(host_run_config['nowcast dir'])
     forcing = {
         'NEMO-atmos': {
-            'link to': str((nowcast_dir/'NEMO-atmos').resolve()),
+            'link to': str((run_prep_dir/'NEMO-atmos').resolve()),
             'check link': {
                 'type': 'atmospheric',
                 'namelist filename': 'namelist_cfg',
             }
         },
         'open_boundaries': {
-            'link to': str((nowcast_dir/'open_boundaries/').resolve())},
+            'link to': str((run_prep_dir/'open_boundaries/').resolve())},
         'rivers': {
-            'link to': str((nowcast_dir/'rivers/').resolve())},
+            'link to': str((run_prep_dir/'rivers/').resolve())},
     }
     forcing.update(restart_filepaths)
     run_sets_dir = run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast'

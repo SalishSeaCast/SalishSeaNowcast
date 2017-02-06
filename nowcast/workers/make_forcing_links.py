@@ -143,7 +143,7 @@ def _make_NeahBay_ssh_links(
         dir = 'obs' if day == -1 else 'fcst'
         src = os.path.join(host_run_config['forcing']['ssh dir'], dir, filename)
         dest = os.path.join(
-            host_run_config['nowcast dir'],
+            host_run_config['run prep dir'],
             'open_boundaries/west/ssh/',
             filename)
         if shared_storage:
@@ -157,17 +157,17 @@ def _make_runoff_links(sftp_client, run_date, config, host_name):
     _clear_links(sftp_client, host_run_config, 'rivers/')
     src = host_run_config['forcing']['rivers_month.nc']
     dest = os.path.join(
-        host_run_config['nowcast dir'], 'rivers', os.path.basename(src))
+        host_run_config['run prep dir'], 'rivers', os.path.basename(src))
     _create_symlink(sftp_client, host_name, src, dest)
     if 'rivers_temp.nc' in host_run_config['forcing']:
         src = host_run_config['forcing']['rivers_temp.nc']
         dest = os.path.join(
-            host_run_config['nowcast dir'], 'rivers', os.path.basename(src))
+            host_run_config['run prep dir'], 'rivers', os.path.basename(src))
         _create_symlink(sftp_client, host_name, src, dest)
     if 'rivers bio dir' in host_run_config['forcing']:
         src = host_run_config['forcing']['rivers bio dir']
         dest = os.path.join(
-            host_run_config['nowcast dir'], 'rivers', 'bio_climatology')
+            host_run_config['run prep dir'], 'rivers', 'bio_climatology')
         _create_symlink(sftp_client, host_name, src, dest)
     for tmpl in config['rivers']['file templates'].values():
         src = os.path.join(
@@ -177,7 +177,7 @@ def _make_runoff_links(sftp_client, run_date, config, host_name):
         for day in range(-1, 3):
             filename = tmpl.format(run_date.replace(days=day).date())
             dest = os.path.join(
-                host_run_config['nowcast dir'], 'rivers', filename)
+                host_run_config['run prep dir'], 'rivers', filename)
             _create_symlink(sftp_client, host_name, src, dest)
 
 
@@ -185,7 +185,7 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
     host_run_config = config['run'][host_name]
     _clear_links(sftp_client, host_run_config, 'NEMO-atmos/')
     NEMO_atmos_dir = os.path.join(
-        host_run_config['nowcast dir'], 'NEMO-atmos/')
+        host_run_config['run prep dir'], 'NEMO-atmos/')
     for linkfile in 'no_snow.nc weights'.split():
         src = host_run_config['forcing'][linkfile]
         dest = os.path.join(NEMO_atmos_dir, os.path.basename(src))
@@ -223,7 +223,7 @@ def _make_live_ocean_links(
             src = os.path.join(
                 host_run_config['forcing']['bc dir'], dir, filename)
         dest = os.path.join(
-            host_run_config['nowcast dir'],
+            host_run_config['run prep dir'],
             'open_boundaries/west/LiveOcean/',
             filename)
         if shared_storage:
@@ -233,7 +233,7 @@ def _make_live_ocean_links(
 
 
 def _clear_links(sftp_client, host_run_config, dir):
-    links_dir = os.path.join(host_run_config['nowcast dir'], dir)
+    links_dir = os.path.join(host_run_config['run prep dir'], dir)
     logger.debug(links_dir)
     for linkname in sftp_client.listdir(links_dir):
         sftp_client.unlink(os.path.join(links_dir, linkname))

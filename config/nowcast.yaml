@@ -336,9 +336,6 @@ run:
       # Location on compute host of NEMO on-the-fly interpolation weights file
       # for GEM 2.5km operational forecast
       weights: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
-    # Directory on compute host where run configuration, forcing links, etc.
-    # are stored
-    nowcast dir: /nemoShare/MEOPAR/nowcast-sys/runs
     # Directories on compute host where results are stored, keyed by run type
     results:
       # Note that salish has shared storage with the nowcast system results
@@ -348,8 +345,7 @@ run:
       nowcast-green: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forecast2: /nemoShare/MEOPAR/SalishSea/forecast2/
     # Directory on compute host where files (e.g. namelist.time) and symlinks
-    # (e,g. iodef.xml) necessary to prepare the NEMO runs are stored
-    # TODO: Can this and `nowcast dir` be merged; see issue #11
+    # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
     run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
     # How is the domain to be distributed over the processors in the
     # i (longitude) and j (latitude) directions?
@@ -391,18 +387,13 @@ run:
       # Location on compute host of NEMO on-the-fly interpolation weights file
       # for GEM 2.5km operational forecast
       weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
-    # Directory on compute host where run configuration, forcing links, etc.
-    # are stored
-    # TODO: Can this and `run prep dir` be merged; see issue #11
-    nowcast dir: /results/nowcast-sys/runs/
     # Directories on compute host where results are stored, keyed by run type
     results:
       # Note that salish has shared storage with the nowcast system results
       # archives
       nowcast-dev: /results/SalishSea/nowcast-dev/
     # Directory on compute host where files (e.g. namelist.time) and symlinks
-    # (e,g. iodef.xml) necessary to prepare the NEMO runs are stored
-    # TODO: Can this and `nowcast dir` be merged; see issue #11
+    # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
     run prep dir: /results/nowcast-sys/runs/
     # How is the domain to be distributed over the processors in the
     # i (longitude) and j (latitude) directions?
@@ -439,6 +430,8 @@ run:
       # Directory on compute host where Neah Bay sea surface height forcing files
       # are stored
       ssh dir: /home/sallen/MEOPAR/sshNeahBay/
+      # Directory on compute host where hourly temperature and salinity boundary
+      # conditions files generated from UW Live Ocean forecast are stored
       bc dir: /home/sallen/MEOPAR/LiveOcean/
       # Directory on compute host where rivers runoff forcing files are stored
       rivers dir: /home/sallen/MEOPAR/rivers/
@@ -452,9 +445,6 @@ run:
       # Location on compute host of NEMO on-the-fly interpolation weights file
       # for GEM 2.5km operational forecast
       weights: /home/sallen/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
-    # Directory on compute host where run configuration, forcing links, etc.
-    # are stored
-    nowcast dir: /home/sallen/MEOPAR/nowcast/
     # Directories on compute host where results are stored, keyed by run type
     results:
       # Note that salish has shared storage with the nowcast system results
@@ -463,6 +453,9 @@ run:
       nowcast-green: /home/sallen/MEOPAR/SalishSea/nowcast-green/
       forecast: /home/dlatorne/MEOPAR/SalishSea/forecast/
       forecast2: /home/dlatorne/MEOPAR/SalishSea/forecast2/
+    # Directory on compute host where files (e.g. namelist.time) and symlinks
+    # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
+    run prep dir: /home/sallen/MEOPAR/nowcast/
 
 
 # Logging system configuration
