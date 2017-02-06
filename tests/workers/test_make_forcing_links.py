@@ -143,47 +143,34 @@ class TestFailure:
 class TestMakeRunoffLinks:
     """Unit tests for _make_runoff_links() function.
     """
+    config = {
+        'rivers': {
+            'file templates': {
+                'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
+                'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
+            }},
+        'run': {
+            'salish-nowcast': {
+                'forcing': {
+                    'rivers dir': '/results/forcing/rivers/',
+                    'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+                },
+                'nowcast dir': 'nowcast-green/',
+            }}}
+
     def test_clear_links(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
-        config = {
-            'rivers': {
-                'file templates': {
-                    'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
-                    'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
-            }},
-            'run': {
-                'salish-nowcast': {
-                    'forcing': {
-                        'rivers dir': '/results/forcing/rivers/',
-                        'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-                    },
-                    'nowcast dir': 'nowcast-green/',
-                }}}
         make_forcing_links._make_runoff_links(
-            m_sftp_client, run_date, config, 'salish-nowcast')
+            m_sftp_client, run_date, self.config, 'salish-nowcast')
         m_clear_links.assert_called_once_with(
-            m_sftp_client, config['run']['salish-nowcast'], 'rivers/')
+            m_sftp_client, self.config['run']['salish-nowcast'], 'rivers/')
 
     def test_rivers_month_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
-        config = {
-            'rivers': {
-                'file templates': {
-                    'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
-                    'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
-            }},
-            'run': {
-                'salish-nowcast': {
-                    'forcing': {
-                        'rivers dir': '/results/forcing/rivers/',
-                        'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-                    },
-                    'nowcast dir': 'nowcast-green/',
-                }}}
         make_forcing_links._make_runoff_links(
-            m_sftp_client, run_date, config, 'salish-nowcast')
+            m_sftp_client, run_date, self.config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[0] == call(
             m_sftp_client, 'salish-nowcast',
             'NEMO-forcing/rivers/rivers_month.nc',
@@ -192,24 +179,16 @@ class TestMakeRunoffLinks:
     def test_rivers_temp_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-10-14')
         m_sftp_client = Mock(name='sftp_client')
-        config = {
-            'rivers': {
-                'file templates': {
-                    'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
-                    'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
-            }},
-            'run': {
-                'salish-nowcast': {
-                    'forcing': {
-                        'rivers dir': '/results/forcing/rivers/',
-                        'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-                        'rivers_temp.nc':
-                            'NEMO-forcing/rivers/river_ConsTemp_month.nc',
-                    },
-                    'nowcast dir': 'nowcast-green/',
-                }}}
-        make_forcing_links._make_runoff_links(
-            m_sftp_client, run_date, config, 'salish-nowcast')
+        p_config = patch.dict(
+            self.config['run']['salish-nowcast']['forcing'],
+            {
+                'rivers dir': '/results/forcing/rivers/',
+                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+                'rivers_temp.nc': 'NEMO-forcing/rivers/river_ConsTemp_month.nc',
+            })
+        with p_config:
+            make_forcing_links._make_runoff_links(
+                m_sftp_client, run_date, self.config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[1] == call(
             m_sftp_client, 'salish-nowcast',
             'NEMO-forcing/rivers/river_ConsTemp_month.nc',
@@ -218,26 +197,17 @@ class TestMakeRunoffLinks:
     def test_bio_climatology_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
-        config = {
-            'rivers': {
-                'file templates': {
-                    'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
-                    'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
-            }},
-            'run': {
-                'salish-nowcast': {
-                    'forcing': {
-                        'rivers dir': '/results/forcing/rivers/',
-                        'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-                        'rivers_temp.nc':
-                            'NEMO-forcing/rivers/river_ConsTemp_month.nc',
-                        'rivers bio dir':
-                            'NEMO-forcing/rivers/bio_climatology/',
-                    },
-                    'nowcast dir': 'nowcast-green/',
-                }}}
-        make_forcing_links._make_runoff_links(
-            m_sftp_client, run_date, config, 'salish-nowcast')
+        p_config = patch.dict(
+            self.config['run']['salish-nowcast']['forcing'],
+            {
+                'rivers dir': '/results/forcing/rivers/',
+                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
+                'rivers_temp.nc': 'NEMO-forcing/rivers/river_ConsTemp_month.nc',
+                'rivers bio dir': 'NEMO-forcing/rivers/bio_climatology/',
+            })
+        with p_config:
+            make_forcing_links._make_runoff_links(
+                m_sftp_client, run_date, self.config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[2] == call(
             m_sftp_client, 'salish-nowcast',
             'NEMO-forcing/rivers/bio_climatology/',
@@ -246,22 +216,8 @@ class TestMakeRunoffLinks:
     def test_runoff_files_links(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
-        config = {
-            'rivers': {
-                'file templates': {
-                    'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
-                    'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
-            }},
-            'run': {
-                'salish-nowcast': {
-                    'forcing': {
-                        'rivers dir': '/results/forcing/rivers/',
-                        'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-                    },
-                    'nowcast dir': 'nowcast-green/',
-                }}}
         make_forcing_links._make_runoff_links(
-            m_sftp_client, run_date, config, 'salish-nowcast')
+            m_sftp_client, run_date, self.config, 'salish-nowcast')
         start = run_date.replace(days=-1)
         end = run_date.replace(days=+2)
         for date in arrow.Arrow.range('day', start, end):
