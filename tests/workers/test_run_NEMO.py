@@ -142,8 +142,7 @@ def tmp_results(tmpdir, run_date, scope='function'):
     for dir in ('XIOS', 'NEMO-forcing'):
         tmp_run_prep.ensure_dir('..', dir)
     tmp_run_prep.ensure_dir('..', 'NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
-    tmp_run_prep.ensure('iodef-blue.xml')
-    tmp_run_prep.ensure('iodef-green.xml')
+    tmp_run_prep.ensure('iodef.xml')
     tmp_run_prep.ensure(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
     tmp_run_prep.ensure(
@@ -844,9 +843,7 @@ class TestRunDescription:
         ]
         assert run_desc['namelists']['namelist_pisces_cfg'] == expected
 
-    def test_output_nowcast_blue(
-        self, config, run_date, tmpdir, tmp_results,
-    ):
+    def test_output_nowcast(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         p_config_results = patch.dict(
@@ -866,42 +863,7 @@ class TestRunDescription:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish', config,
                     Mock(name='tell_manager'), False)
-        assert run_desc['output']['files'] == tmp_run_prep.join(
-            'iodef-blue.xml')
-        expected = tmp_run_prep.join(
-            '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
-        assert run_desc['output']['domain'] == expected
-        expected = tmp_run_prep.ensure(
-            '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast',
-            'field_def.xml')
-        assert run_desc['output']['fields'] == expected
-        assert run_desc['output']['separate XIOS server']
-        assert run_desc['output']['XIOS servers'] == 1
-
-    def test_output_nowcast_green(
-        self, config, run_date, tmpdir, tmp_results,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}nowcast'.format(dmy=dmy)
-        p_config_results = patch.dict(
-            config['run']['salish']['results'],
-            {'nowcast-green': str(tmp_results['results']['nowcast-green'])})
-        p_config_nowcast = patch.dict(
-            config['run']['salish'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast-green', run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
-        assert run_desc['output']['files'] == tmp_run_prep.join(
-            'iodef-green.xml')
+        assert run_desc['output']['files'] == tmp_run_prep.join('iodef.xml')
         expected = tmp_run_prep.join(
             '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
         assert run_desc['output']['domain'] == expected
