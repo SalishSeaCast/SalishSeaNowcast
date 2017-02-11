@@ -347,12 +347,7 @@ def _run_description(
     run_desc['grid']['coordinates'] = Path(config['coordinates']).name
     run_desc['grid']['bathymetry'] = Path(
         config['run types'][run_type]['bathymetry']).name
-    if run_type == 'nowcast-green':
-        run_desc['output']['files'] = str(
-            (run_prep_dir/'iodef-green.xml').resolve())
-    else:
-        run_desc['output']['files'] = str(
-            (run_prep_dir/'iodef-blue.xml').resolve())
+    run_desc['output']['files'] = str((run_prep_dir/'iodef.xml').resolve())
     run_desc['output']['domain'] = str(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')
         .resolve())
