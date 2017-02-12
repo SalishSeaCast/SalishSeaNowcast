@@ -145,7 +145,7 @@ def grib_to_netcdf(parsed_args, config, *args):
             config['logging']['handlers']['grib_to_netcdf_png']['filename'])
     except KeyError:
         image_file = (
-            config['logging']['handlers']['aggregator']['grib_to_netcdf_png']
+            config['logging']['aggregator']['handlers']['grib_to_netcdf_png']
             ['filename'])
     canvas = matplotlib.backends.backend_agg.FigureCanvasAgg(fig)
     canvas.print_figure(image_file)
