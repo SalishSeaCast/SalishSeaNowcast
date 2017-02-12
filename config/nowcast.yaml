@@ -489,6 +489,35 @@ logging:
         class: raven.handlers.logging.SentryHandler
         level: ERROR
         # dsn will be obtained from SENTRY_DSN environment variable
+    root:
+      level: DEBUG
+      handlers:
+       - info_text
+       - debug_text
+       - sentry
+
+  publisher:
+    version: 1
+    disable_existing_loggers: False
+    formatters:
+      simple:
+        format: '%(asctime)s %(levelname)s [%(name)s] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        # Level 100 disables console logging.
+        # Use worker --debug flag to enable console logging.
+        level: 100
+        formatter: simple
+        stream: ext://sys.stdout
+      zmq_pub:
+        class: zmq.log.handlers.PUBHandler
+        level: DEBUG
+        formatter: simple
+      sentry:
+        class: raven.handlers.logging.SentryHandler
+        level: ERROR
+        # dsn will be obtained from SENTRY_DSN environment variable
       wgrib2_text:
         class: logging.FileHandler
         level: DEBUG
@@ -520,35 +549,6 @@ logging:
         propagate: False
         handlers:
           - wgrib2_text
-    root:
-      level: DEBUG
-      handlers:
-       - info_text
-       - debug_text
-       - sentry
-
-  publisher:
-    version: 1
-    disable_existing_loggers: False
-    formatters:
-      simple:
-        format: '%(asctime)s %(levelname)s [%(name)s] %(message)s'
-    handlers:
-      console:
-        class: logging.StreamHandler
-        # Level 100 disables console logging.
-        # Use worker --debug flag to enable console logging.
-        level: 100
-        formatter: simple
-        stream: ext://sys.stdout
-      zmq_pub:
-        class: zmq.log.handlers.PUBHandler
-        level: DEBUG
-        formatter: simple
-      sentry:
-        class: raven.handlers.logging.SentryHandler
-        level: ERROR
-        # dsn will be obtained from SENTRY_DSN environment variable
     root:
       level: DEBUG
       handlers:
