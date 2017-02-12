@@ -275,7 +275,7 @@ run:
       # and MPI slots specifications.
       # Only required for runs on ONC west.cloud cluster.
       mpi hosts file: ${HOME}/mpi_hosts
-      # IP address of the machineto run XIOS on.
+      # IP address of the machine to run XIOS on.
       # Only required for runs on ONC west.cloud cluster.
       xios host: 192.168.1.53
       # Location of bash script that sets nowcast system environment variables.
@@ -571,9 +571,10 @@ zmq:
       manager: 5561
       scheduler: 5562
       workers: [5563, 5564, 5565, 5566, 5567, 5568, 5569]
-      run_NEMO: [salish.eos.ubc.ca:5556, 206.12.48.112:5552]
-      watch_NEMO: [salish.eos.ubc.ca:5557, 206.12.48.112:5553]
-      make_live_ocean_files: salish.eos.ubc.ca:5558
+    # **host:port pairs in lists must be quoted to project : characters**
+      run_NEMO: ['salish.eos.ubc.ca:5556', '206.12.48.112:5552']
+      watch_NEMO: ['salish.eos.ubc.ca:5557', '206.12.48.112:5553']
+      make_live_ocean_files: 'salish.eos.ubc.ca:5558'
 
 
 message registry:
