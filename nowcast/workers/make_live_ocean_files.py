@@ -67,10 +67,9 @@ def failure(parsed_args):
     return msg_type
 
 
-def make_live_ocean_files(parsed_args, config, tell_mgr):
+def make_live_ocean_files(parsed_args, config, *args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
-    tell_mgr(
-        'log.info',
+    logger.info(
         'Creating T&S western boundary conditions files from {ymd} '
         'Live Ocean run'.format(ymd=ymd))
     download_dir = Path(config['temperature salinity']['download']['dest dir'])

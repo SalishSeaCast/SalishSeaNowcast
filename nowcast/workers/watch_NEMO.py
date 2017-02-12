@@ -104,10 +104,9 @@ def watch_NEMO(parsed_args, config, tell_manager):
     shared_storage = parsed_args.shared_storage
     # Ensure that the run is in progress
     if not _pid_exists(pid):
-        _log_msg(
+        logger.error(
             '{}: NEMO run pid {} on {} does not exist'
-            .format(run_type, pid, host_name),
-            'error', tell_manager, shared_storage)
+            .format(run_type, pid, host_name))
         raise WorkerError
     # Get monitored run info from manager and namelist
     run_info = tell_manager('need', 'NEMO run').payload
@@ -128,8 +127,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
                 .format('YYYY-MM-DD HH:mm:ss UTC'))
             fraction_done = (time_step - it000) / (itend - it000)
             msg = (
-                '{} on {}: timestep: {} = {}, {:.1%} complete'
-                .format(
+                '{} on {}: timestep: {} = {}, {:.1%} complete'.format(
                     run_type, host_name, time_step, model_time, fraction_done))
         except FileNotFoundError:
             # time.step file not found; assume that run is young and it
@@ -138,7 +136,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
             msg = (
                 '{} on {}: time.step not found; continuing to watch...'
                 .format(run_type, host_name))
-        _log_msg(msg, 'info', tell_manager, shared_storage)
+        logger.info(msg)
         time.sleep(POLL_INTERVAL)
     ## TODO: confirm that the run and subsequent results gathering
     ## completed successfully
@@ -147,13 +145,6 @@ def watch_NEMO(parsed_args, config, tell_manager):
         'run date': run_info[run_type]['run date'],
         'completed': True,
     }}
-
-
-def _log_msg(msg, level, tell_manager, shared_storage):
-    tell_manager('log.{}'.format(level), msg)
-    if not shared_storage:
-        # Emit message to local logging system
-        logger.log(getattr(logging, level.upper()), msg)
 
 
 def _pid_exists(pid):

@@ -186,25 +186,6 @@ class TestWatchNEMO:
                 watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
 
 
-@patch('nowcast.workers.watch_NEMO.logger')
-class TestLogMsg:
-    """Unit tests for _log_msg() function.
-    """
-    def test_shared_storage(self, m_logger):
-        tell_manager = Mock(name='tell_manager')
-        watch_NEMO._log_msg(
-            'msg', 'info', tell_manager, shared_storage=True)
-        tell_manager.assert_called_once_with('log.info', 'msg')
-        assert not m_logger.log.called
-
-    def test_not_shared_storage(self, m_logger):
-        tell_manager = Mock(name='tell_manager')
-        watch_NEMO._log_msg(
-            'msg', 'info', tell_manager, shared_storage=False)
-        m_logger.log.assert_called_once_with(20, 'msg')
-        tell_manager.assert_called_once_with('log.info', 'msg')
-
-
 class TestPidExists:
     """Unit tests for _pid_exists() function.
     """

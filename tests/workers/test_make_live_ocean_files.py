@@ -98,6 +98,6 @@ class TestMakeLiveOceanFiles:
         }
         m_create.return_value = ['LO_y2017m01d30.nc', 'fcst/LO_y2017m01d31.nc']
         checklist = make_live_ocean_files.make_live_ocean_files(
-            parsed_args, config, Mock(name='tell_manager'))
+            parsed_args, config)
         expected = ['LO_y2017m01d30.nc', 'fcst/LO_y2017m01d31.nc']
         assert checklist == expected
