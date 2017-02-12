@@ -352,11 +352,10 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type='nowcast')
         with patch.dict(config['run']['salish'], results={}):
-            with patch('nowcast.workers.run_NEMO.logger.log'):
+            with patch('nowcast.workers.run_NEMO.logger'):
                 with pytest.raises(run_NEMO.WorkerError):
                     run_NEMO._run_description(
-                        run_date, 'nowcast', run_id, 2160, 'salish', config,
-                        Mock(name='tell_manager'), False)
+                        run_date, 'nowcast', run_id, 2160, 'salish', config)
 
     @pytest.mark.parametrize('run_type, expected', [
         ('nowcast', 'SalishSea'),
@@ -390,8 +389,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['config_name'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -425,8 +423,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['run_id'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -452,8 +449,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['MPI decomposition'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -480,8 +476,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 with patch.dict(config['run']['salish'], walltime='16:00:00'):
                     run_desc = run_NEMO._run_description(
-                        run_date, run_type, run_id, 2160, 'salish', config,
-                        Mock(name='tell_manager'), False)
+                        run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, expected', [
@@ -507,8 +502,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -540,8 +534,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
 
     @pytest.mark.parametrize('run_type, path', [
@@ -571,8 +564,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['paths'][path] == tmp_run_prep
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -598,8 +590,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['grid'][path] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -626,8 +617,7 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 with patch.dict(config['run types'][run_type], bathymetry=expected):
                     run_desc = run_NEMO._run_description(
-                        run_date, run_type, run_id, 2160, 'salish', config,
-                        Mock(name='tell_manager'), False)
+                        run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['grid'][path] == expected
 
     @pytest.mark.parametrize('run_type, link_name, expected', [
@@ -660,8 +650,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         expected = tmp_run_prep.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
 
@@ -691,8 +680,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         tmp_results_dir = tmp_results['results'][run_type]
         expected = tmp_results_dir.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
@@ -721,8 +709,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, run_type, run_id, 2160, 'salish', config)
         check_link_dict = run_desc['forcing'][link_name]['check link']
         assert check_link_dict['type'] == 'atmospheric'
         assert check_link_dict['namelist filename'] == 'namelist_cfg'
@@ -747,8 +734,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, 'nowcast', run_id, 2160, 'salish', config)
         expected = [
             tmp_run_prep.join('namelist.time'),
             tmp_run_prep.join(
@@ -799,8 +785,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast-green', run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, 'nowcast-green', run_id, 2160, 'salish', config)
         expected = [
             tmp_run_prep.join('namelist.time'),
             tmp_run_prep.join(
@@ -861,8 +846,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'salish', config,
-                    Mock(name='tell_manager'), False)
+                    run_date, 'nowcast', run_id, 2160, 'salish', config)
         assert run_desc['output']['files'] == tmp_run_prep.join('iodef.xml')
         expected = tmp_run_prep.join(
             '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
@@ -891,8 +875,7 @@ class TestCreateRunScript:
         tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
         run_script_filepath = run_NEMO._create_run_script(
             arrow.get('2016-12-03'), run_type, Path(str(tmp_run_dir)),
-            '30nov16.yaml', 'salish', config, Mock(name='tell_manager'),
-            False)
+            '30nov16.yaml', 'salish', config)
         expected = Path(str(tmp_run_dir.join('SalishSeaNEMO.sh')))
         assert run_script_filepath == expected
 

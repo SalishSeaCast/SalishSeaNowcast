@@ -458,91 +458,123 @@ run:
     run prep dir: /home/sallen/MEOPAR/nowcast/
 
 
-# Logging system configuration
+# Distributed logging system configuration
 logging:
-  version: 1
-  disable_existing_loggers: False
-  formatters:
-    simple:
-      format: '%(asctime)s %(levelname)s [%(name)s] %(message)s'
-  handlers:
-    console:
-      class: logging.StreamHandler
-      # Level 100 disables console logging.
-      # Use worker --debug flag to enable console logging.
-      level: 100
-      formatter: simple
-      stream: ext://sys.stdout
-    info_text:
-      class: logging.handlers.RotatingFileHandler
-      level: INFO
-      formatter: simple
-      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.log
-      backupCount: 7
-    debug_text:
-      class: logging.handlers.RotatingFileHandler
-      level: DEBUG
-      formatter: simple
-      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.debug.log
-      backupCount: 7
-    checklist:
-      class: logging.handlers.RotatingFileHandler
-      level: INFO
-      formatter: simple
-      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
-      backupCount: 7
-    sentry:
-      class: raven.handlers.logging.SentryHandler
-      level: ERROR
-      # dsn will be obtained from SENTRY_DSN environment variable
-    wgrib2_text:
-      class: logging.FileHandler
-      level: DEBUG
-      formatter: simple
-      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
-      mode: w
-    get_NeahBay_ssh_png:
-      # **NOTE:** This isn't a handler for Python logging, rather it is a
-      # convenient and logical place to define the storage location for the
-      # image file that the get_NeahBay_ssh worker generates
-      class: logging.FileHandler  # irrevelant
-      level: DEBUG  # irrevelant, but accurate
-      formatter: simple  # irrevelant
-      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/NBssh.png  # THE IMPORTANT BIT!!
-      mode: w  # irrevelant, but accurate
-    grib_to_netcdf_png:
-      # **NOTE:** This isn't a handler for Python logging, rather it is a
-      # convenient and logical place to define the storage location for the
-      # image file that the grib_to_netcdf worker generates
-      class: logging.FileHandler  # irrevelant
-      level: DEBUG  # irrevelant, but accurate
-      formatter: simple  # irrevelant
-      filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wg.png  # THE IMPORTANT BIT!!
-      mode: w  # irrevelant, but accurate
-  loggers:
-    wgrib2:
-      qualname: wgrib2
-      level: DEBUG
-      propagate: False
-      handlers:
-        - wgrib2_text
-  root:
-    level: DEBUG
+  aggregator:
+    version: 1
+    disable_existing_loggers: False
+    formatters:
+      simple:
+        format: '%(asctime)s %(levelname)s [%(logger_name)s] %(message)s'
     handlers:
-     - console
-     - info_text
-     - debug_text
-     - sentry
+      info_text:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.log
+        backupCount: 7
+      debug_text:
+        class: logging.handlers.RotatingFileHandler
+        level: DEBUG
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.debug.log
+        backupCount: 7
+      checklist:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
+        backupCount: 7
+      sentry:
+        class: raven.handlers.logging.SentryHandler
+        level: ERROR
+        # dsn will be obtained from SENTRY_DSN environment variable
+      wgrib2_text:
+        class: logging.FileHandler
+        level: DEBUG
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
+        mode: w
+      get_NeahBay_ssh_png:
+        # **NOTE:** This isn't a handler for Python logging, rather it is a
+        # convenient and logical place to define the storage location for the
+        # image file that the get_NeahBay_ssh worker generates
+        class: logging.FileHandler  # irrevelant
+        level: DEBUG  # irrevelant, but accurate
+        formatter: simple  # irrevelant
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/NBssh.png  # THE IMPORTANT BIT!!
+        mode: w  # irrevelant, but accurate
+      grib_to_netcdf_png:
+        # **NOTE:** This isn't a handler for Python logging, rather it is a
+        # convenient and logical place to define the storage location for the
+        # image file that the grib_to_netcdf worker generates
+        class: logging.FileHandler  # irrevelant
+        level: DEBUG  # irrevelant, but accurate
+        formatter: simple  # irrevelant
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wg.png  # THE IMPORTANT BIT!!
+        mode: w  # irrevelant, but accurate
+    loggers:
+      wgrib2:
+        qualname: wgrib2
+        level: DEBUG
+        propagate: False
+        handlers:
+          - wgrib2_text
+    root:
+      level: DEBUG
+      handlers:
+       - info_text
+       - debug_text
+       - sentry
+
+  publisher:
+    version: 1
+    disable_existing_loggers: False
+    formatters:
+      simple:
+        format: '%(asctime)s %(levelname)s [%(name)s] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        # Level 100 disables console logging.
+        # Use worker --debug flag to enable console logging.
+        level: 100
+        formatter: simple
+        stream: ext://sys.stdout
+      zmq_pub:
+        class: zmq.log.handlers.PUBHandler
+        level: DEBUG
+        formatter: simple
+      sentry:
+        class: raven.handlers.logging.SentryHandler
+        level: ERROR
+        # dsn will be obtained from SENTRY_DSN environment variable
+    root:
+      level: DEBUG
+      handlers:
+       - console
+       - zmq_pub
+       - sentry
 
 
 # Message system
 zmq:
-  server: skookum.eos.ubc.ca
+  host: skookum.eos.ubc.ca
   ports:
     # traffic between manager and message broker
     manager: 5554
     # traffic between workers and message broker
     workers: 5555
+    # pub/sub logging traffic for log aggregator
+    logging:
+      message_broker: 5560
+      manager: 5561
+      scheduler: 5562
+      workers: [5563, 5564, 5565, 5566, 5567, 5568, 5569]
+      run_NEMO: [salish.eos.ubc.ca:5556, 206.12.48.112:5552]
+      watch_NEMO: [salish.eos.ubc.ca:5557, 206.12.48.112:5553]
+      make_live_ocean_files: salish.eos.ubc.ca:5558
+
 
 message registry:
   # Message types that the manager process can send and their meanings
@@ -618,9 +650,6 @@ message registry:
 
     make_live_ocean_files:
       checklist key: Live Ocean T&S boundary conditions
-      log.debug: debug level logging message
-      log.info: info level logging message
-      log.error: error level logging message
       success: Live Ocean T&S boundary conditions files ready
       failure: Live Ocean T&S boundary conditions files preparation failed
       crash: make_live_ocean_files worker crashed
@@ -649,9 +678,6 @@ message registry:
 
     run_NEMO:
       checklist key: NEMO run
-      log.debug: debug level logging message
-      log.info: info level logging message
-      log.error: error level logging message
       need: NEMO run information dict requested
       success nowcast: nowcast NEMO run started
       failure nowcast: nowcast NEMO run failed
@@ -667,9 +693,6 @@ message registry:
 
     watch_NEMO:
       checklist key: NEMO run
-      log.debug: debug level logging message
-      log.info: info level logging message
-      log.error: error level logging message
       need: NEMO run information dict requested
       success nowcast: nowcast NEMO run completed
       failure nowcast: nowcast NEMO run failed
