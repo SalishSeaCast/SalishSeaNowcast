@@ -489,6 +489,15 @@ logging:
         class: raven.handlers.logging.SentryHandler
         level: ERROR
         # dsn will be obtained from SENTRY_DSN environment variable
+      email:
+        class: logging.handlers.SMTPHandler
+        level: CRITICAL
+        formatter: simple
+        subject: '{level} Message from Salish Sea Nowcast System'
+        mailhost: localhost
+        fromaddr: salishsea_nowcast@eoas.ubc.ca
+        toaddrs:
+          - dlatornell@eoas.ubc.ca
       wgrib2_text:
         class: logging.FileHandler
         level: DEBUG
@@ -499,20 +508,20 @@ logging:
         # **NOTE:** This isn't a handler for Python logging, rather it is a
         # convenient and logical place to define the storage location for the
         # image file that the get_NeahBay_ssh worker generates
-        class: logging.FileHandler  # irrevelant
-        level: DEBUG  # irrevelant, but accurate
-        formatter: simple  # irrevelant
+        class: logging.FileHandler  # irrelevant
+        level: DEBUG  # irrelevant, but accurate
+        formatter: simple  # irrelevant
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/NBssh.png  # THE IMPORTANT BIT!!
-        mode: w  # irrevelant, but accurate
+        mode: w  # irrelevant, but accurate
       grib_to_netcdf_png:
         # **NOTE:** This isn't a handler for Python logging, rather it is a
         # convenient and logical place to define the storage location for the
         # image file that the grib_to_netcdf worker generates
-        class: logging.FileHandler  # irrevelant
-        level: DEBUG  # irrevelant, but accurate
-        formatter: simple  # irrevelant
+        class: logging.FileHandler  # irrelevant
+        level: DEBUG  # irrelevant, but accurate
+        formatter: simple  # irrelevant
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wg.png  # THE IMPORTANT BIT!!
-        mode: w  # irrevelant, but accurate
+        mode: w  # irrelevant, but accurate
     loggers:
       wgrib2:
         qualname: wgrib2
@@ -526,6 +535,7 @@ logging:
        - info_text
        - debug_text
        - sentry
+       - email
 
   publisher:
     version: 1
