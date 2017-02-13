@@ -150,7 +150,7 @@ def get_NeahBay_ssh(parsed_args, config, *args):
             config['logging']['handlers']['get_NeahBay_ssh_png']['filename'])
     except KeyError:
         image_file = (
-            config['logging']['publisher']['handlers']['get_NeahBay_ssh_png']
+            config['logging']['aggregator']['handlers']['get_NeahBay_ssh_png']
             ['filename'])
     canvas = matplotlib.backends.backend_agg.FigureCanvasAgg(fig)
     canvas.print_figure(image_file)
