@@ -493,7 +493,7 @@ logging:
         class: logging.handlers.SMTPHandler
         level: CRITICAL
         formatter: simple
-        subject: '{level} Message from Salish Sea Nowcast System'
+        subject: 'CRITICAL Message from Salish Sea Nowcast System'
         mailhost: localhost
         fromaddr: salishsea_nowcast@eoas.ubc.ca
         toaddrs:
