@@ -250,11 +250,14 @@ def after_download_live_ocean(msg, config, checklist):
     next_workers = {
         'crash': [],
         'failure': [],
-        'success': [
+        'success': [],
+    }
+    if msg.type == 'success':
+        next_workers['success'].append(
             NextWorker(
                 'nowcast.workers.make_live_ocean_files',
-                host=config['temperature salinity']['matlab host'])]
-    }
+                args=['--run-date', list(checklist.keys())[0]],
+                host=config['temperature salinity']['matlab host']))
     return next_workers[msg.type]
 
 
