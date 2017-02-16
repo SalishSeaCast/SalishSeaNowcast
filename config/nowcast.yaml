@@ -56,6 +56,9 @@ weather:
   # Template for the atmospheric forcing file name
   # **Must be quoted to project {} characters**
   file template: 'ops_{:y%Ym%md%d}.nc'
+  # Location to store image that grib_to_netcdf worker creates to facilitate
+  # monitoring of its operation
+  monitoring image: /results/nowcast-sys/figures/monitoring/wg.png
 
 
 rivers:
@@ -512,15 +515,6 @@ logging:
         level: DEBUG  # irrelevant, but accurate
         formatter: simple  # irrelevant
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/NBssh.png  # THE IMPORTANT BIT!!
-        mode: w  # irrelevant, but accurate
-      grib_to_netcdf_png:
-        # **NOTE:** This isn't a handler for Python logging, rather it is a
-        # convenient and logical place to define the storage location for the
-        # image file that the grib_to_netcdf worker generates
-        class: logging.FileHandler  # irrelevant
-        level: DEBUG  # irrelevant, but accurate
-        formatter: simple  # irrelevant
-        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wg.png  # THE IMPORTANT BIT!!
         mode: w  # irrelevant, but accurate
     loggers:
       wgrib2:
