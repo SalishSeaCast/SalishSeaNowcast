@@ -86,6 +86,9 @@ ssh:
   # Template for the sea surface height forcing file name
   # **Must be quoted to project {} characters**
   file template: 'ssh_{:y%Ym%md%d}.nc'
+  # Location to store image that grib_to_netcdf worker creates to facilitate
+  # monitoring of its operation
+  monitoring image: /results/nowcast-sys/figures/monitoring/NBssh.png
 
 
 temperature salinity:
@@ -507,15 +510,6 @@ logging:
         formatter: simple
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
         mode: w
-      get_NeahBay_ssh_png:
-        # **NOTE:** This isn't a handler for Python logging, rather it is a
-        # convenient and logical place to define the storage location for the
-        # image file that the get_NeahBay_ssh worker generates
-        class: logging.FileHandler  # irrelevant
-        level: DEBUG  # irrelevant, but accurate
-        formatter: simple  # irrelevant
-        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/NBssh.png  # THE IMPORTANT BIT!!
-        mode: w  # irrelevant, but accurate
     loggers:
       wgrib2:
         qualname: wgrib2
