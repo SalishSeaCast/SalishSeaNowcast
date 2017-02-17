@@ -279,7 +279,7 @@ class TestAfterDownloadLiveOcean:
         assert workers == []
 
     def test_success_launch_make_live_ocean_files(self, config, checklist):
-        with patch.dict(checklist, {'2017-02-15': []}):
+        with patch.dict(checklist, {'Live Ocean products': {'2017-02-15': []}}):
             workers = next_workers.after_download_live_ocean(
                 Message('download_live_ocean', 'success'), config, checklist)
         expected = NextWorker(
