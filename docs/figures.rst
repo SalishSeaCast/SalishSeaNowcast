@@ -1,4 +1,4 @@
-.. Copyright 2013-2016 The Salish Sea MEOPAR contributors
+.. Copyright 2013-2017 The Salish Sea MEOPAR contributors
 .. and The University of British Columbia
 ..
 .. Licensed under the Apache License, Version 2.0 (the "License");
@@ -59,7 +59,7 @@ and then we'll look at each section in detail.
 .. code-block:: python
     :linenos:
 
-    # Copyright 2013-2016 The Salish Sea MEOPAR contributors
+    # Copyright 2013-2017 The Salish Sea MEOPAR contributors
     # and The University of British Columbia
 
     # Licensed under the Apache License, Version 2.0 (the "License");
@@ -347,7 +347,7 @@ Lines 1-14 are our :ref:`LibraryCodeStandardCopyrightHeaderBlock`:
     :linenos:
     :lineno-start: 1
 
-    # Copyright 2013-2016 The Salish Sea MEOPAR contributors
+    # Copyright 2013-2017 The Salish Sea MEOPAR contributors
     # and The University of British Columbia
 
     # Licensed under the Apache License, Version 2.0 (the "License");
