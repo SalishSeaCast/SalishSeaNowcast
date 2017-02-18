@@ -68,8 +68,10 @@ autodoc_mock_imports = [
     'salishsea_cmd.api',
     'salishsea_cmd.lib',
     'salishsea_tools',
+    'salishsea_tools.LiveOcean_BCs',
     'salishsea_tools.namelist',
     'salishsea_tools.places',
+    'salishsea_tools.UBC_subdomain',
     'salishsea_tools.unit_conversions',
     'xarray',
 ]
