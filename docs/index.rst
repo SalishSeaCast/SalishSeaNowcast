@@ -90,7 +90,7 @@ Contents
    workers
    creating_workers
    figures
-   deploy
+   deployment/index
    config
    worker_failures
    pkg_development
