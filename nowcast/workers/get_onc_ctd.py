@@ -32,7 +32,7 @@ import os
 from pathlib import Path
 
 import arrow
-from nemo_nowcast import NowcastWorker
+from nemo_nowcast import NowcastWorker, WorkerError
 import numpy
 from salishsea_tools import data_tools
 from salishsea_tools.places import PLACES
@@ -102,22 +102,22 @@ def get_onc_ctd(parsed_args, config, *args):
         .format(parsed_args, date=ymd),
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     logger.debug(
-        'filtering ONC {0.onc_station} salinity data for {date} '
-        'to exlude qaqcFlag!=1'
-        .format(parsed_args, date=ymd),
-        extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
-    salinity = _qaqc_filter(ctd_data, 'salinity')
-    logger.debug(
         'filtering ONC {0.onc_station} temperature data for {date} '
         'to exlude qaqcFlag!=1'
         .format(parsed_args, date=ymd),
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     temperature = _qaqc_filter(ctd_data, 'temperature')
     logger.debug(
+        'filtering ONC {0.onc_station} salinity data for {date} '
+        'to exlude qaqcFlag!=1'
+        .format(parsed_args, date=ymd),
+        extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
+    salinity = _qaqc_filter(ctd_data, 'salinity')
+    logger.debug(
         'creating ONC {0.onc_station} CTD T&S dataset for {date}'
         .format(parsed_args, date=ymd),
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
-    ds = _create_dataset(parsed_args.onc_station, salinity, temperature)
+    ds = _create_dataset(parsed_args.onc_station, temperature, salinity)
     dest_dir = Path(config['observations']['ctd data']['dest dir'])
     filepath_tmpl = config['observations']['ctd data']['filepath template']
     nc_filepath = dest_dir/filepath_tmpl.format(
@@ -144,7 +144,7 @@ def _qaqc_filter(ctd_data, var):
     return filtered_var
 
 
-def _create_dataset(onc_station, salinity, temperature):
+def _create_dataset(onc_station, temperature, salinity):
     def count(values, axis):
         return values.size
     metadata = {
@@ -177,11 +177,66 @@ def _create_dataset(onc_station, salinity, temperature):
                 'Delta Dynamics Laboratory',
         },
     }
+    try:
+        temperature_mean = temperature.resample('15Min', 'time', how='mean')
+        temperature_std_dev = temperature.resample('15Min', 'time', how='std')
+        temperature_sample_count = temperature.resample(
+            '15Min', 'time', how=count)
+    except IndexError:
+        # If the temperature data is messing no dataset can be created
+        raise WorkerError(
+            'no {} temperate data; no dataset created'.format(onc_station))
+    try:
+        salinity_mean = salinity.resample('15Min', 'time', how='mean')
+        salinity_std_dev = salinity.resample('15Min', 'time', how='std')
+        salinity_sample_count = salinity.resample('15Min', 'time', how=count)
+    except IndexError:
+        logger.warning('no {} salinity data'.format(onc_station))
+        salinity_mean = numpy.full_like(temperature_mean, numpy.nan)
+        salinity_std_dev = numpy.full_like(temperature_std_dev, numpy.nan)
+        salinity_sample_count = numpy.zeros_like(temperature_sample_count)
     ds = xarray.Dataset(
         data_vars={
+            'temperature': xarray.DataArray(
+                name='temperature',
+                data=temperature_mean,
+                attrs={
+                    'ioos_category': 'Temperature',
+                    'standard_name': 'sea_water_temperature',
+                    'long_name': 'temperature',
+                    'units': 'degrees_Celcius',
+                    'aggregation_operation': 'mean',
+                    'aggregation_interval': 15 * 60,
+                    'aggregation_interval_units': 'seconds',
+                },
+            ),
+            'temperature_std_dev': xarray.DataArray(
+                name='temperature_std_dev',
+                data=temperature_std_dev,
+                attrs={
+                    'ioos_category': 'Temperature',
+                    'standard_name': 'sea_water_temperature_standard_deviation',
+                    'long_name': 'temperature standard deviation',
+                    'units': 'degrees_Celcius',
+                    'aggregation_operation': 'standard deviation',
+                    'aggregation_interval': 15 * 60,
+                    'aggregation_interval_units': 'seconds',
+                },
+            ),
+            'temperature_sample_count': xarray.DataArray(
+                name='temperature_sample_count',
+                data=temperature_sample_count,
+                attrs={
+                    'standard_name': 'sea_water_temperature_sample_count',
+                    'long_name': 'temperature sample count',
+                    'aggregation_operation': 'count',
+                    'aggregation_interval': 15 * 60,
+                    'aggregation_interval_units': 'seconds',
+                },
+            ),
             'salinity': xarray.DataArray(
                 name='salinity',
-                data=salinity.resample('15Min', 'time', how='mean'),
+                data=salinity_mean,
                 attrs={
                     'ioos_category': 'Salinity',
                     'standard_name': 'sea_water_reference_salinity',
@@ -194,7 +249,7 @@ def _create_dataset(onc_station, salinity, temperature):
             ),
             'salinity_std_dev': xarray.DataArray(
                 name='salinity_std_dev',
-                data=salinity.resample('15Min', 'time', how='std'),
+                data=salinity_std_dev,
                 attrs={
                     'ioos_category': 'Salinity',
                     'standard_name':
@@ -208,48 +263,11 @@ def _create_dataset(onc_station, salinity, temperature):
             ),
             'salinity_sample_count': xarray.DataArray(
                 name='salinity_sample_count',
-                data=salinity.resample('15Min', 'time', how=count),
+                data=salinity_sample_count,
                 attrs={
                     'standard_name':
                         'sea_water_reference_salinity_sample_count',
                     'long_name': 'reference salinity sample count',
-                    'aggregation_operation': 'count',
-                    'aggregation_interval': 15 * 60,
-                    'aggregation_interval_units': 'seconds',
-                },
-            ),
-            'temperature': xarray.DataArray(
-                name='temperature',
-                data=temperature.resample('15Min', 'time', how='mean'),
-                attrs={
-                    'ioos_category': 'Temperature',
-                    'standard_name': 'sea_water_temperature',
-                    'long_name': 'temperature',
-                    'units': 'degrees_Celcius',
-                    'aggregation_operation': 'mean',
-                    'aggregation_interval': 15 * 60,
-                    'aggregation_interval_units': 'seconds',
-                },
-            ),
-            'temperature_std_dev': xarray.DataArray(
-                name='temperature_std_dev',
-                data=temperature.resample('15Min', 'time', how='std'),
-                attrs={
-                    'ioos_category': 'Temperature',
-                    'standard_name': 'sea_water_temperature_standard_deviation',
-                    'long_name': 'temperature standard deviation',
-                    'units': 'degrees_Celcius',
-                    'aggregation_operation': 'standard deviation',
-                    'aggregation_interval': 15 * 60,
-                    'aggregation_interval_units': 'seconds',
-                },
-            ),
-            'temperature_sample_count': xarray.DataArray(
-                name='temperature_sample_count',
-                data=temperature.resample('15Min', 'time', how=count),
-                attrs={
-                    'standard_name': 'sea_water_temperature_sample_count',
-                    'long_name': 'temperature sample count',
                     'aggregation_operation': 'count',
                     'aggregation_interval': 15 * 60,
                     'aggregation_interval_units': 'seconds',
@@ -281,10 +299,10 @@ def _create_dataset(onc_station, salinity, temperature):
         },
     )
     # Replace NaN sample counts with zeros in the case of NaN padded DataArrays
-    ds.salinity_sample_count.values = numpy.nan_to_num(
-        ds.salinity_sample_count.values).astype(int)
     ds.temperature_sample_count.values = numpy.nan_to_num(
         ds.temperature_sample_count.values).astype(int)
+    ds.salinity_sample_count.values = numpy.nan_to_num(
+        ds.salinity_sample_count.values).astype(int)
     return ds
 
 
