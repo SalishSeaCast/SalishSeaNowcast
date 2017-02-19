@@ -51,6 +51,7 @@ dependencies:
 
   # For documentation
   - sphinx
+  - sphinx_rtd_theme
 
   # For exploration
 #  - ipython
@@ -64,6 +65,3 @@ dependencies:
 
     # For exception monitoring
     - raven
-
-    # For documentation
-    - sphinx-rtd-theme
