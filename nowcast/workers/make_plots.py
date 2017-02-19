@@ -116,7 +116,7 @@ def make_plots(parsed_args, config, *args):
     run_type = parsed_args.run_type
     plot_type = parsed_args.plot_type
     results_home = config['results archive'][run_type]
-    dev_results_home = config['results archive']['nowcast-green']
+    dev_results_home = config['results archive']['nowcast-dev']
     plots_dir = os.path.join(results_home, dmy, 'figures')
     lib.mkdir(plots_dir, logger, grp_name=config['file group'])
     _make_plot_files(
