@@ -192,9 +192,15 @@ def _create_dataset(onc_station, temperature, salinity):
         salinity_sample_count = salinity.resample('15Min', 'time', how=count)
     except IndexError:
         logger.warning('no {} salinity data'.format(onc_station))
-        salinity_mean = numpy.full_like(temperature_mean, numpy.nan)
-        salinity_std_dev = numpy.full_like(temperature_std_dev, numpy.nan)
-        salinity_sample_count = numpy.zeros_like(temperature_sample_count)
+        salinity_mean = temperature_mean.copy()
+        salinity_mean.name = 'salinity'
+        salinity_mean.data = numpy.full_like(temperature_mean, numpy.nan)
+        salinity_std_dev = temperature_std_dev.copy()
+        salinity_std_dev.name = 'salinity_std_dev'
+        salinity_std_dev.data = numpy.full_like(temperature_std_dev, numpy.nan)
+        salinity_sample_count = temperature_sample_count.copy()
+        salinity_sample_count.name = 'salinity_sample_count'
+        salinity_sample_count.data = numpy.zeros_like(temperature_sample_count)
     ds = xarray.Dataset(
         data_vars={
             'temperature': xarray.DataArray(
