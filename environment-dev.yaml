@@ -60,6 +60,7 @@ dependencies:
     - angles
     - driftwood
     - feedgen
+    - python-hglib
 
     # For exception monitoring
     - raven
