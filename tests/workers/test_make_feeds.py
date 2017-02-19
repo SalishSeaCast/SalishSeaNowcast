@@ -182,13 +182,14 @@ class TestGenerateFeed:
         expected = [
             '  <author>',
             '    <name>Salish Sea MEOPAR Project</name>',
-            '    <url>https://salishsea.eos.ubc.ca/</url>',
+            '    <uri>https://salishsea.eos.ubc.ca/</uri>',
             '  </author>',
             '  <link href="https://salishsea.eos.ubc.ca/storm-surge/atom/'
             'pmv.xml" rel="self" type="application/atom+xml"/>',
             '  <link href="https://salishsea.eos.ubc.ca/storm-surge/'
             'forecast.html" rel="related" type="text/html"/>',
-            '  <generator version="0.4.0">python-feedgen</generator>',
+            '  <generator uri="http://lkiesow.github.io/python-feedgen" '
+            'version="0.5.1">python-feedgen</generator>',
             '  <rights>Copyright 2015-2016, Salish Sea MEOPAR Project Contributors '
             'and The University of British Columbia</rights>',
             '</feed>',
