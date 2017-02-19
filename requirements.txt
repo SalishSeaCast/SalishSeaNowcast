@@ -19,7 +19,7 @@ cryptography==1.7.1
 cycler==0.10.0
 docutils==0.13.1
 driftwood==1.1.21
-feedgen==0.4.0
+feedgen==0.5.1
 idna==2.2
 imagesize==0.7.1
 iowait==0.2
