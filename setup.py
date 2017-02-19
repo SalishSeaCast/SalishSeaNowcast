@@ -63,6 +63,7 @@ install_requires = [
     'pandas',
     'paramiko',
     'pillow',
+    'python-hglib',
     'raven',
     'retrying',
     'scipy',

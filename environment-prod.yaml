@@ -43,4 +43,5 @@ dependencies:
     - angles
     - driftwood
     - feedgen
+    - python-hglib
     - raven
