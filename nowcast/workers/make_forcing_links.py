@@ -56,8 +56,9 @@ def main():
         '--shared-storage', action='store_true',
         help='''
         If running on a machine (Salish) that directly accesses
-        the repo datafiles, copy the ssh files so that the nowcast
-        does not change the files while nowcast-green is running
+        the repo datafiles, copy the forcing files instead of symlinking them
+        so that they do not get changed as a result of preparations for faster
+        runs on remote hosts
         ''')
     worker.cli.add_date_option(
         '--run-date', default=(arrow.now().floor('day')),

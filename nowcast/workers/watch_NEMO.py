@@ -64,14 +64,6 @@ def main():
         'pid', type=int,
         help='PID of the NEMO run bash script to monitor.'
     )
-    worker.cli.add_argument(
-        '--shared-storage', action='store_true',
-        help='''
-        Indicates that the NEMO run is on a machine (e.g. salish) that
-        shares storage with the machine on which the nowcast manager is
-        running. That affects how log messages are handled.
-        ''',
-    )
     worker.run(watch_NEMO, success, failure)
 
 

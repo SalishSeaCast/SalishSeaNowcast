@@ -64,13 +64,6 @@ def main():
         'forecast2' means preliminary forecast run,
         ''',
     )
-    worker.cli.add_argument(
-        '--shared-storage', action='store_true',
-        help='''
-        Indicates that the NEMO run is on a machine (e.g. salish) that
-        shares storage with the machine on which the nowcast manager is
-        running. That affects how log messages are handled.
-        ''')
     worker.cli.add_date_option(
         '--run-date', default=arrow.now().floor('day'),
         help='Date to execute the run for.')
@@ -123,8 +116,7 @@ def run_NEMO(parsed_args, config, tell_manager):
     run_process_pid = _launch_run_script(
         run_type, run_script_filepath, host_name, config)
     watcher_process_pid = _launch_run_watcher(
-        run_type, run_process_pid, host_name, config,
-        shared_storage=parsed_args.shared_storage)
+        run_type, run_process_pid, host_name, config)
     return {run_type: {
         'host': host_name,
         'run dir': str(run_dir),
@@ -513,9 +505,7 @@ def _launch_run_script(run_type, run_script_filepath, host_name, config):
     return run_process_pid
 
 
-def _launch_run_watcher(
-    run_type, run_process_pid, host_name, config, shared_storage,
-):
+def _launch_run_watcher(run_type, run_process_pid, host_name, config):
     enabled_host_config = config['run']['enabled hosts'][host_name]
     logger.info('launching {} watch_NEMO worker on {}'.format(
         run_type, host_name))
@@ -525,8 +515,6 @@ def _launch_run_watcher(
         .format(
             enabled_host_config, host_name=host_name, run_type=run_type,
             run_process_pid=run_process_pid))
-    if shared_storage:
-        cmd.append('--shared-storage')
     logger.debug('{}: running command in subprocess: {}'.format(run_type, cmd))
     watcher_process = subprocess.Popen(cmd, universal_newlines=True)
     logger.debug('{} on {}: watcher pid: {.pid}'.format(
