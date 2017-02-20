@@ -186,13 +186,6 @@ class TestMain:
             'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
-    def test_add_shared_storage_option(self, m_worker):
-        run_NEMO.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
-        assert args == ('--shared-storage',)
-        assert kwargs['action'] == 'store_true'
-        assert 'help' in kwargs
-
     def test_add_run_date_option(self, m_worker):
         run_NEMO.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
