@@ -19,3 +19,291 @@
 ****************************
 :kbd:`west.cloud` Deployment
 ****************************
+
+The `Ocean Networks Canada`_ private cloud computing facility that is part of `west.cloud`_ runs on `OpenStack`_.
+
+.. _Ocean Networks Canada: http://www.oceannetworks.ca/
+.. _west.cloud: https://www.westgrid.ca/support/systems/cc-cloud
+.. _OpenStack: http://www.openstack.org/
+
+The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
+The :kbd:`west.cloud` dashboard is at https://west.cloud.computecanada.ca/dashboard/.
+
+.. _OpenStack dashboard: http://docs.openstack.org/user-guide/content/ch_dashboard.html
+
+Authentication and authorization for :kbd:`west.cloud` is managed by `computecanada`_,
+so those are the userid/password that are required to log in to the dashboard.
+
+.. _computecanada: https://www.computecanada.ca/
+
+
+Web Interface
+=============
+
+Initial setup was done via the https://west.cloud.computecanada.ca/dashboard/ web interface with guidance from the
+(unpublished at time of writing)
+`CC-Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
+
+.. _CC-Cloud Quickstart Guide: https://docs.computecanada.ca/wiki/Cloud_Quick_Start
+.. _OpenStack End User Guide: http://docs.openstack.org/user-guide/content/openstack_user_guide.html
+
+The project (aka tenant) name for the the Salish Sea NEMO model is :kbd:`NEMO`.
+
+
+Network
+-------
+
+The network configuration was done for us by ONC.
+The configuration from the :guilabel:`Network` section of the web interface is recorded here for reference.
+
+Network:
+
+* Network Name: NEMO-network
+* Shared: No
+* Admin State: Up
+
+Subnet:
+
+* Subnet Name: NEMO-subnet
+* Network Address: 192.168.0.0/23
+* IP Version: IPv4
+* Gateway IP: 192.168.0.1
+
+Subnet Details:
+
+* Enable DHCP: Yes
+* IP Allocation Pool: 192.168.0.2 - 192.168.1.254
+* DNS Servers: 142.104.6.1 142.104.80.2
+
+Router:
+
+* Router Name: NEMO-gw
+* External Network: VLAN3337
+
+Interface:
+
+* Subnet: NEMO-network (NEMO-subnet)
+* IP Address: 192.168.0.1
+* Router: NEMO-gw
+
+
+Images
+------
+
+An Ubuntu Server 14.04 image was loaded via the :guilabel:`Compute > Images > Create Image` button with the following parameters:
+
+* Name: ubuntu-server-14.04-amd64
+* Description: Ubuntu 14.04 64-bit for Salish Sea NEMO project
+* Image Source: Image Location
+* Image Location: http://cloud-images.ubuntu.com/trusty/current/trusty-server-cloudimg-amd64-disk1.img
+* Format: QCOW2 - QEMU Emulator
+* Architecture: x86_64
+* Minimum Disk (GB): blank
+* Minimum RAM (MB): blank
+* Public: Yes
+* Protected: Yes
+
+
+Access & Security
+-----------------
+
+Generate an ssh key pair on a Linux or OS/X system using the command:
+
+.. code-block:: bash
+
+    $ cd $HOME/.ssh/
+    $ ssh -t rsa -f west.cloud_id_rsa -c <yourname>-west.cloud
+
+Assign a strong passphrase to the key pair when prompted.
+Passphraseless keys have their place,
+but they are a bad idea for general use.
+
+List the public key with the command:
+
+.. code-block:: bash
+
+    $ cat west.cloud_id_rsa.pub
+
+and use copy-paste to import it into the web interface via the :guilabel:`Compute > Access & Security > Key Pairs > Import Key Pair` button.
+
+Use the :guilabel:`Compute > Access & Security > Security Groups > Manage Rules` button associated with the :guilabel:`default` security group to add security rules to allow:
+
+* :command:`ssh`
+* :command:`ping`
+* ZeroMQ distributed logging subscription
+
+access to the image instances.
+
+:command:`ssh` Rule:
+
+* Rule: SSH
+* Remote: CIDR
+* CIDR: 0.0.0.0/0
+
+:command:`ping` Rule:
+
+* Rule: ALL ICMP
+* Direction: Ingress
+* Remote: CIDR
+* CIDR: 0.0.0.0/0
+
+ZeroMQ distributed logging subscription Rule:
+
+* Rule: Custom TCP
+* Direction: Ingress
+* Port range: 5556 - 5557
+* Remote: CIDR
+* CIDR: 142.103.36.0/24
+
+
+Instances
+---------
+
+Use the :guilabel:`Compute > Instances` section of the web interface to manage instances.
+
+To launch an instance to use as the head node use the :guilabel:`Launch Instance` button.
+On the :guilabel:`Details` tab set the following parameters:
+
+* Availability Zone: nova
+* Instance Name: nowcast-head-node
+* Flavor: nemo-c8-15gb-90
+* Instance Count: 1
+* Instance Boot Soure: Boot from image
+* Image Name: ubuntu-server-14.04-amd64
+
+On the :guilabel:`Access & Security` tab set the following parameters:
+
+* Key Pair: the name of the key pair that you imported
+* Security Groups: default enabled
+
+.. note::
+
+    If only 1 key pair has been imported it will be used by default.
+    If there is more than 1 key pair available,
+    one must be selected.
+    Only 1 key can be loaded automatically into an instance on launch.
+    Additional public keys can be loaded once an instance is running.
+
+On the :guilabel:`Networking` tab ensure that :guilabel:`NEMO-network` is selected.
+
+Click the :guilabel:`Launch` button to launch the instance.
+
+Once the instance is running use the :guilabel:`More > Associate Floating IP` menu item to associate a public IP address with the instance.
+
+
+:command:`ssh` Access
+=====================
+
+Log in to the publicly accessible instance with the command:
+
+.. code-block:: bash
+
+    $ ssh -i $HOME/.ssh/west.cloud_id_rsa ubuntu@<ip-address>
+
+The first time you connect to an instance you will be prompted to accept its RSA host key fingerprint.
+You can verify the fingerprint by looking for the :kbd:`SSH HOST KEY FINGERPRINT` section in the instance log in the :guilabel:`Instances > Instance Details > Log` tab.
+If you have previously associated a different instance with th IP address you may receive a message about host key verification failure and potential man-in-the-middle attacks.
+To resolve the issue delete the prior host key from your :file:`$HOME/.ssh/known_hosts` file.
+The message will tell you what line it is on.
+
+You will also be prompted for the pasphrase that you assigned to the ssh key pair when you created it.
+On Linux and OS/X authenticating the ssh key with your pasphrase has the side-effect of adding it to the :command:`ssh-agent` instance that was started when you logged into the system.
+You can add the key to the agent yourself with the command:
+
+.. code-block:: bash
+
+    $ ssh-add $HOME/.ssh/west.cloud_id_rsa
+
+You can list the keys that the agent is managing for you with:
+
+.. code-block:: bash
+
+    $ ssh-add -l
+
+You can simplify logins to the instance by adding the following lines to your :file:`$HOME/.ssh/config` file::
+
+  Host west.cloud
+      Hostname        <ip-address>
+      User            ubuntu
+      IdentityFile    ~/.ssh/west.cloud_id_rsa
+      ForwardAgent    yes
+
+With that in place you should be able to connect to the instance with:
+
+.. code-block:: bash
+
+    $ ssh west.cloud
+
+
+Provisioning and Configuration
+==============================
+
+Launch an :kbd:`nemo-c8-15gb-90` flavour instance from the :kbd:`ubuntu-server-14.04-amd64` image,
+associate a floating IP address with it,
+and provision it with the following packages:
+
+.. code-block:: bash
+
+    $ sudo add-apt-repository -y ppa:mercurial-ppa/releases
+    $ sudo apt-get update
+    $ sudo apt-get install -y mercurial
+    $ sudo apt-get install -y gfortran
+    $ sudo apt-get install -y libopenmpi1.6 libopenmpi-dev
+    $ sudo apt-get install -y openmpi-bin
+    $ sudo apt-get install -y libnetcdf-dev netcdf-bin
+    $ sudo apt-get install -y libhdf5-dev
+    $ sudo apt-get install -y nco
+    $ sudo apt-get install -y liburi-perl
+    $ sudo apt-get install -y make ksh emacs24
+    $ sudo apt-get install -y python-pip python-dev
+
+Use:
+
+.. code-block:: bash
+
+    $ TIMEZONE=Canada/Pacific
+    $ sudo timedatectl set-timezone ${TIMEZONE}
+
+to set the timezone.
+
+Set the network interface MTU
+(Maximum Transmission Unit)
+to 1500 with:
+
+.. code-block:: bash
+
+    $ sudo ip link set dev eth0 mtu 1500
+
+Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/` and append it to the :file:`authorized_keys` file:
+
+.. code-block:: bash
+
+    # on a system where they key pair is stored
+    $ ssh-copy-id -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa.pub west.cloud
+
+The nowcast operations key pair could have been used as the default key pair in the OpenStack web interface,
+but using a key pair with a passphrase there allows for more flexibility:
+in particular,
+the possibliity of revoking the passphrase-less key pair without loosing access to the instances.
+
+Edit :file:`$HOME/.profile` to add code that puts :file:`$HOME/.local/bin` at the front of :envvar:`PATH`:
+
+.. code-block:: bash
+
+    # set PATH so it includes user's private and local bins
+    # if they exists
+    if [ -d "$HOME/bin" ] ; then
+        PATH="$HOME/bin:$PATH"
+    fi
+    if [ -d "$HOME/.local/bin" ] ; then
+        PATH="$HOME/.local/bin:$PATH"
+    fi
+
+Create :file:`$HOME/.bash_aliases` containing a command to set the command-line prompt to show the host name and the final directory of the :kbd:`pwd` path,
+and to make :command:`rm` default to prompting for confirmation:
+
+.. code-block:: bash
+
+    PS1="\h:\W\$ "
+
+    alias rm="rm -i"
