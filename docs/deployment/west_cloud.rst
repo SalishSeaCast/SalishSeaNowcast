@@ -307,3 +307,82 @@ and to make :command:`rm` default to prompting for confirmation:
     PS1="\h:\W\$ "
 
     alias rm="rm -i"
+
+
+.. _BuildWaveWatch3:
+
+Build WAVEWATCH III :sup:`®`
+============================
+
+Access to download WAVEWATCH III :sup:`®`
+(ww3 hereafter)
+code tarballs is obtained by sending an email request from the http://polar.ncep.noaa.gov/waves/wavewatch/license.shtml.
+The eventual reply will provide a username and password that can be used to access http://polar.ncep.noaa.gov/waves/wavewatch/distribution/ from which the :file:`wwatch3.v5.16.tar.gz` files can be downloaded with:
+
+.. code-block:: bash
+
+    $ curl -u username:password -LO download_url
+
+where :kbd:`username`,
+:kbd:`password`,
+and :kbd:`download_url` are those provided in the reply to the email request.
+
+.. note::
+    The `west.cloud-vm`_ repo provides a `Vagrant`_ virtual machine configuration that emulates the Salish Sea Nowcast system compute deployment on ONC west.cloud VMs.
+    The VM can be used for small scale testing of ww3.
+
+    .. _west.cloud-vm: https://bitbucket.org/salishsea/west.cloud-vm
+    .. _Vagrant: https://www.vagrantup.com/
+
+Follow the instructions in the Installing Files section of the `ww3 manual`_ to unpack the tarball to create a local installation in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/`
+that will use the :program:`gfortran` and :program:`gcc` compilers:
+
+.. _ww3 manual: http://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
+
+.. code-block:: bash
+
+    $ mkdir /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16
+    $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16
+    $ tar -xvzf wwatch3.v5.16.tar.gz
+    $ ./install_ww3_tar
+
+:program:`install_ww3_tar` is an interactive shell script.
+Accept the defaults that it offers other than to choose:
+
+* local installation in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/`
+* :program:`gfortran` as the Fortran compiler
+* :program:`gcc` as the C compiler
+
+Add code to :file:`$HOME/.profile` to add :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` and :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe` to :envvar:`PATH`:
+
+.. code-block:: bash
+
+    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
+        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin:$PATH"
+    fi
+    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe" ] ; then
+        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe:$PATH"
+    fi
+
+Change the :file:`comp` and :file:`link` scripts in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` to point to :file:`comp.gfortran` and :file:`link.gfortran`,
+and make :file:`comp.gfortran` executable:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin
+    $ ln -sf comp.gfortran comp && chmod +x comp.gfortran
+    $ ln -sf link.gfortran link
+
+Add code to :file:`$HOME/.bash_aliases` to set the :envvar:`WWATCH3_NETCDF` and :envvar:`NETCDF_CONFIG` environment variables:
+
+.. code-block:: bash
+
+    $ export WWATCH3_NETCDF=NC4
+    $ export NETCDF_CONFIG=$(which nc-config)
+
+Build the suite of ww3 programs with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/work
+    $ w3_make
