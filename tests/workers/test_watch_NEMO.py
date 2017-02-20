@@ -70,40 +70,34 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    @pytest.mark.parametrize('run_type, host_name, shared_storage', [
-        ('nowcast', 'west.cloud-nowcast', True),
-        ('nowcast-green', 'west.cloug-nowcast', False),
-        ('nowcast-dev', 'salish-nowcast', False),
-        ('forecast', 'west.cloud-nowcast', True),
-        ('forecast2', 'west.cloud-nowcast', True),
+    @pytest.mark.parametrize('run_type, host_name', [
+        ('nowcast', 'west.cloud-nowcast'),
+        ('nowcast-green', 'west.cloug-nowcast',),
+        ('nowcast-dev', 'salish-nowcast',),
+        ('forecast', 'west.cloud-nowcast'),
+        ('forecast2', 'west.cloud-nowcast'),
     ])
-    def test_success_log_info(
-        self, m_logger, run_type, host_name, shared_storage,
-    ):
+    def test_success_log_info(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
-            shared_storage=shared_storage,
         )
         watch_NEMO.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize('run_type, host_name, shared_storage, expected', [
-        ('nowcast', 'west.cloud-nowcast', True, 'success nowcast'),
-        ('nowcast-green', 'west.cloud-nowcast', False, 'success nowcast-green'),
-        ('nowcast-dev', 'salish-nowcast', False, 'success nowcast-dev'),
-        ('forecast', 'west.cloud-nowcast', True, 'success forecast'),
-        ('forecast2', 'west.cloud-nowcast', True, 'success forecast2'),
+    @pytest.mark.parametrize('run_type, host_name, expected', [
+        ('nowcast', 'west.cloud-nowcast', 'success nowcast'),
+        ('nowcast-green', 'west.cloud-nowcast', 'success nowcast-green'),
+        ('nowcast-dev', 'salish-nowcast', 'success nowcast-dev'),
+        ('forecast', 'west.cloud-nowcast', 'success forecast'),
+        ('forecast2', 'west.cloud-nowcast', 'success forecast2'),
     ])
-    def test_success_msg_type(
-        self, m_logger, run_type, host_name, shared_storage, expected,
-    ):
+    def test_success_msg_type(self, m_logger, run_type, host_name, expected):
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
-            shared_storage=shared_storage,
         )
         msg_type = watch_NEMO.success(parsed_args)
         assert msg_type == expected
@@ -113,40 +107,34 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
-    @pytest.mark.parametrize('run_type, host_name, shared_storage', [
-        ('nowcast', 'west.cloud-nowcast', True),
-        ('nowcast-green', 'west.cloud-nowcast', False),
-        ('nowcast-dev', 'salish-nowcast', False),
-        ('forecast', 'west.cloud-nowcast', True),
-        ('forecast2', 'west.cloud-nowcast', True),
+    @pytest.mark.parametrize('run_type, host_name', [
+        ('nowcast', 'west.cloud-nowcast'),
+        ('nowcast-green', 'west.cloud-nowcast'),
+        ('nowcast-dev', 'salish-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
+        ('forecast2', 'west.cloud-nowcast'),
     ])
-    def test_failure_log_critical(
-        self, m_logger, run_type, host_name, shared_storage,
-    ):
+    def test_failure_log_critical(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
-            shared_storage=shared_storage,
         )
         watch_NEMO.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize('run_type, host_name, shared_storage, expected', [
-        ('nowcast', 'west.cloud-nowcast', True, 'failure nowcast'),
-        ('nowcast-green', 'west.cloud-nowcast', False, 'failure nowcast-green'),
-        ('nowcast-dev', 'salish-nowcast', False, 'failure nowcast-dev'),
-        ('forecast', 'west.cloud-nowcast', True, 'failure forecast'),
-        ('forecast2', 'west.cloud-nowcast', True, 'failure forecast2'),
+    @pytest.mark.parametrize('run_type, host_name, expected', [
+        ('nowcast', 'west.cloud-nowcast', 'failure nowcast'),
+        ('nowcast-green', 'west.cloud-nowcast', 'failure nowcast-green'),
+        ('nowcast-dev', 'salish-nowcast', 'failure nowcast-dev'),
+        ('forecast', 'west.cloud-nowcast', 'failure forecast'),
+        ('forecast2', 'west.cloud-nowcast', 'failure forecast2'),
     ])
-    def test_failure_msg_type(
-        self, m_logger, run_type, host_name, shared_storage, expected,
-    ):
+    def test_failure_msg_type(self, m_logger, run_type, host_name, expected):
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
-            shared_storage=shared_storage,
         )
         msg_type = watch_NEMO.failure(parsed_args)
         assert msg_type == expected
@@ -156,19 +144,18 @@ class TestFailure:
 class TestWatchNEMO:
     """Unit test for watch_NEMO() function.
     """
-    @pytest.mark.parametrize('run_type, host_name, shared_storage', [
-        ('nowcast', 'west.cloud-nowcast', True),
-        ('nowcast-green', 'west.cloud-nowcast', False),
-        ('nowcast-dev', 'salish-nowcast', False),
-        ('forecast', 'west.cloud-nowcast', True),
-        ('forecast2', 'west.cloud-nowcast', True),
+    @pytest.mark.parametrize('run_type, host_name', [
+        ('nowcast', 'west.cloud-nowcast'),
+        ('nowcast-green', 'west.cloud-nowcast'),
+        ('nowcast-dev', 'salish-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
+        ('forecast2', 'west.cloud-nowcast'),
     ])
-    def test_no_run_pid(self, m_logger, run_type, host_name, shared_storage):
+    def test_no_run_pid(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             pid=42,
-            shared_storage=shared_storage,
         )
         config = {}
         tell_manager = Mock(name='tell_manager')

@@ -216,7 +216,7 @@ class TestSuccess:
     ])
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type, shared_storage=False,
+            host_name='west.cloud', run_type=run_type,
             run_date=arrow.get('2015-12-28'))
         run_NEMO.success(parsed_args)
         assert m_logger.info.called
@@ -230,7 +230,7 @@ class TestSuccess:
     ])
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type, shared_storage=False,
+            host_name='west.cloud', run_type=run_type,
             run_date=arrow.get('2015-12-28'))
         msg_type = run_NEMO.success(parsed_args)
         assert msg_type == 'success {run_type}'.format(run_type=run_type)
@@ -249,7 +249,7 @@ class TestFailure:
     ])
     def test_failure_log_error(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type, shared_storage=False,
+            host_name='west.cloud', run_type=run_type,
             run_date=arrow.get('2015-12-28'))
         run_NEMO.failure(parsed_args)
         assert m_logger.critical.called
@@ -263,7 +263,7 @@ class TestFailure:
     ])
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type, shared_storage=False,
+            host_name='west.cloud', run_type=run_type,
             run_date=arrow.get('2015-12-28'))
         msg_type = run_NEMO.failure(parsed_args)
         assert msg_type == 'failure {run_type}'.format(run_type=run_type)

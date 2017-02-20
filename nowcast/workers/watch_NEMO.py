@@ -93,7 +93,6 @@ def watch_NEMO(parsed_args, config, tell_manager):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     pid = parsed_args.pid
-    shared_storage = parsed_args.shared_storage
     # Ensure that the run is in progress
     if not _pid_exists(pid):
         logger.error(
