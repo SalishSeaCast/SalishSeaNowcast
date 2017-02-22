@@ -309,6 +309,36 @@ and to make :command:`rm` default to prompting for confirmation:
     alias rm="rm -i"
 
 
+
+
+.. _ShareStorageViaNFS:
+
+Shared Storage via NFS
+======================
+
+**incomplete**
+
+
+Mounting Shared Storage on Compute Nodes
+----------------------------------------
+
+.. code-block:: bash
+
+    $ sudo mkdir -p /nemoShare/MEOPAR
+    $ sudo chown ubuntu:ubuntu /nemoShare/MEOPAR
+    $ sudo mount HeadNodeIP:/MEOPAR /nemoShare/MEOPAR
+
+where :kbd:`HeadNodeIP` is the internal cloud network IP address of the head node where the NFS server is running;
+e.g.
+
+.. code-block:: bash
+
+    $ sudo mount 192.168.1.53:/MEOPAR /nemoShare/MEOPAR
+
+.. note::
+    The :file:`/nemoShare/MEOPAR` shared storage must be remounted any time a compute node is rebooted or if the :kbd:`west.cloud` system administrators move it from one hypervisor to another.
+
+
 .. _BuildWaveWatch3:
 
 Build WAVEWATCH III :sup:`®`
