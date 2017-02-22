@@ -350,13 +350,14 @@ that will use the :program:`gfortran` and :program:`gcc` compilers:
 Accept the defaults that it offers other than to choose:
 
 * local installation in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/`
-* :program:`gfortran` as the Fortran compiler
+* :program:`gfortran` as the Fortran 77 compiler
 * :program:`gcc` as the C compiler
 
 Add code to :file:`$HOME/.profile` to add :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` and :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe` to :envvar:`PATH`:
 
 .. code-block:: bash
 
+    # Add wwatch3 bin/ and exe/ paths to PATH if they exist
     if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
         PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin:$PATH"
     fi
@@ -364,21 +365,29 @@ Add code to :file:`$HOME/.profile` to add :file:`/nemoShare/MEOPAR/nowcast-sys/w
         PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe:$PATH"
     fi
 
-Change the :file:`comp` and :file:`link` scripts in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` to point to :file:`comp.gfortran` and :file:`link.gfortran`,
-and make :file:`comp.gfortran` executable:
+Change the :file:`comp` and :file:`link` scripts in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` to point to :file:`comp.gnu` and :file:`link.gnu`,
+and make :file:`comp.gnu` executable:
 
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin
-    $ ln -sf comp.gfortran comp && chmod +x comp.gfortran
-    $ ln -sf link.gfortran link
+    $ ln -sf comp.gnu comp && chmod +x comp.gnu
+    $ ln -sf link.gnu link
 
-Add code to :file:`$HOME/.bash_aliases` to set the :envvar:`WWATCH3_NETCDF` and :envvar:`NETCDF_CONFIG` environment variables:
+Symlink the :file:`SalishSeaWaves/switch` file in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin`:
 
 .. code-block:: bash
 
-    $ export WWATCH3_NETCDF=NC4
-    $ export NETCDF_CONFIG=$(which nc-config)
+    $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin
+    $ ln -sf /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/switch switch
+
+Add code to :file:`$HOME/.profile` to set the :envvar:`WWATCH3_NETCDF` and :envvar:`NETCDF_CONFIG` environment variables:
+
+.. code-block:: bash
+
+# Enable wwatch3 to use netCDF4
+export WWATCH3_NETCDF=NC4
+export NETCDF_CONFIG=$(which nc-config)
 
 Build the suite of ww3 programs with:
 
