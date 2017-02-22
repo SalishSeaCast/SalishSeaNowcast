@@ -91,7 +91,8 @@ The Python packages that the system depends on are installed in a conda environm
         lxml mako matplotlib netcdf4 numpy pandas paramiko pillow pip python=3 \
         pyyaml pyzmq retrying requests schedule scipy xarray
     $ source activate /results/nowcast-sys/nemo_nowcast-env
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install angles driftwood feedgen raven
+    (/results/nowcast-sys/nemo_nowcast-env)$ pip install angles driftwood feedgen \
+        python-hglib raven
     (/results/nowcast-sys/nemo_nowcast-env)$ cd /results/nowcast-sys/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
