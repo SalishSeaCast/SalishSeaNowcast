@@ -485,12 +485,6 @@ logging:
         formatter: simple
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.debug.log
         backupCount: 7
-      checklist:
-        class: logging.handlers.RotatingFileHandler
-        level: INFO
-        formatter: simple
-        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
-        backupCount: 7
       sentry:
         class: raven.handlers.logging.SentryHandler
         level: ERROR
@@ -540,6 +534,12 @@ logging:
         formatter: simple
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
         mode: w
+      checklist:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
+        backupCount: 7
     loggers:
       wgrib2:
         qualname: wgrib2
@@ -547,6 +547,12 @@ logging:
         propagate: False
         handlers:
           - wgrib2_text
+      checklist:
+        qualname: checklist
+        level: INFO
+        propagate: False
+        handlers:
+          - checklist
     root:
       level: DEBUG
       handlers:
