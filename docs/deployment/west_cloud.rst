@@ -339,6 +339,17 @@ e.g.
     The :file:`/nemoShare/MEOPAR` shared storage must be remounted any time a compute node is rebooted or if the :kbd:`west.cloud` system administrators move it from one hypervisor to another.
 
 
+Mercurial Repositories
+======================
+
+Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ hg clone --ssh "ssh -i ~/.ssh/salishsea-nowcast-deployment_id_rsa.pub" ssh://hg@bitbucket.org/salishsea/salishseawaves SalishSeaWaves
+
+
 .. _BuildWaveWatch3:
 
 Build WAVEWATCH III :sup:`®`
@@ -425,3 +436,61 @@ Build the suite of ww3 programs with:
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/work
     $ w3_make
+
+
+WaveWatch Runs Directories
+==========================
+
+Create a :file:`wwatch3-runs` directory tree and populate it with:
+
+* The wwatch3 grid:
+
+  .. code-block:: bash
+
+      $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/grid
+      $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
+      $ ln -s /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/ww3_grid_SoG.inp ww3_grid.inp
+      $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/grid
+      $ ln -sf /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/SoG_BCgrid_00500m.bot
+      $ ln -sf /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/SoG_BCgrid_00500m.msk
+      $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
+      $ ww3_grid | tee ww3_grid.out
+
+* Directory and wwatch3 :file:`.inp` file for wind forcing:
+
+  .. code-block:: bash
+
+      $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/wind
+      $ cp /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/ww3_prnc_wind.inp /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
+
+  The :program:`run_wwatch3` worker will:
+
+  * edit the wind forcing file path(s) for each run into :file:`ww3_prnc_wind.inp`
+  * symlink :file:`ww3_prnc_wind.inp` as :file:`ww3_prnc.inp`
+  * run :program:`ww3_prnc` to produce the wwatch3 wind forcing files for the run,
+    storing its output in :file:`ww3_prnc_wind.out`
+
+* Directory and wwatch3 :file:`.inp` file for current forcing:
+
+  .. code-block:: bash
+
+      $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current
+      $ cp  /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/ww3_prnc_current.inp /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
+
+  The :program:`run_wwatch3` worker will:
+
+  * edit the current forcing file path(s) for each run into :file:`ww3_prnc_current.inp`
+  * symlink :file:`ww3_prnc_current.inp` as :file:`ww3_prnc.inp`
+  * run :program:`ww3_prnc` to produce the wwatch3 current forcing files for the run,
+    storing its output in :file:`ww3_prnc_current.out`
+
+* The wwatch3 shell :file:`.inp` file:
+
+  .. code-block:: bash
+
+      $ cp  /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/ww3_shel.inp /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
+
+  The :program:`run_wwatch3` worker will:
+
+  * edit the start and end dates/times for each run into :file:`ww3_shel.inp`
+  * run :program:`ww3_shel` to execute the wwatch3 run
