@@ -1156,7 +1156,7 @@ def plot_thresholds_all(
     # Citation
     ax0.text(0.03, -0.45,
              'Tidal predictions calculated with t_tide: '
-             'http://www.eos.ubc.ca/~rich/#T_Tide \n'
+             'https://www.eoas.ubc.ca/~rich/#T_Tide \n'
              'using CHS tidal constituents \n'
              'Observed water levels from Fisheries and Oceans, Canada \n'
              'via Scott Tinis at stormsurgebc.ca',
