@@ -16,7 +16,7 @@
 """Produce a figure that shows the tidal cycle at Point Atkinson during
 a 4 week period centred around a model results period.
 The tidal cycle is based on predictions calculated by :program:`ttide`
-(http://www.eos.ubc.ca/~rich/#T_Tide).
+(https://www.eoas.ubc.ca/~rich/#T_Tide).
 Those predictions use Canadian Hydrographic Service (CHS) tidal constituents
 and include all tide constituents.
 The figure also shows the time period of the model results around which it
@@ -130,7 +130,7 @@ def _attribution_text(ax, theme):
     ax.text(
         1., -0.35,
         'Tidal predictions calculated with t_tide: '
-        'http://www.eos.ubc.ca/~rich/#T_Tide\n'
+        'https://www.eoas.ubc.ca/~rich/#T_Tide\n'
         'using CHS tidal constituents',
         horizontalalignment='right', verticalalignment='top',
         transform=ax.transAxes,
