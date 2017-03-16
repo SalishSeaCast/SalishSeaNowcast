@@ -498,6 +498,7 @@ logging:
         fromaddr: salishsea_nowcast@eoas.ubc.ca
         toaddrs:
           - dlatornell@eoas.ubc.ca
+          - sallen@eoas.ubc.ca
     root:
       level: DEBUG
       handlers:
