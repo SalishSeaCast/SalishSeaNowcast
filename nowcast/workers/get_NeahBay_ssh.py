@@ -303,7 +303,12 @@ def _save_netcdf(
         vobtcrtx[:, 0, ib] = np.zeros(len(surges))
         vobtcrty[:, 0, ib] = np.zeros(len(surges))
     ssh_file.close()
-    os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
+    try:
+        os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
+    except PermissionError:
+        # Can't change permissions/group because we don't own the file
+        # but that's okay because we were able to write it above
+        pass
     logger.debug('saved western open boundary file {}'.format(filepath))
     return filepath
 
