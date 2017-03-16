@@ -42,8 +42,8 @@ Start the nowcast system with:
 
 .. code-block:: bash
 
-    $ source activate /results/nowcast-sys/nemo_nowcast-env
-    (/results/nowcast-sys/nemo_nowcast-env)$ circusd --daemon $NOWCAST_CONFIG/circus.ini
+    $ source activate /results/nowcast-sys/nowcast-env
+    (/results/nowcast-sys/nowcast-env)$ circusd --daemon $NOWCAST_CONFIG/circus.ini
 
 :command:`circusd` monitors the long-running processes and restarts them if they crash or are shutdown accidentally.
 
@@ -56,8 +56,8 @@ Start it with:
 
 .. code-block:: bash
 
-    $ source activate /results/nowcast-sys/nemo_nowcast-env
-    (/results/nowcast-sys/nemo_nowcast-env)$ circusctl --endpoint tcp:127.0.0.1:4444
+    $ source activate /results/nowcast-sys/nowcast-env
+    (/results/nowcast-sys/nowcast-env)$ circusctl --endpoint tcp:127.0.0.1:4444
 
 .. _circusctl: http://circus.readthedocs.io/en/latest/man/circusctl/
 

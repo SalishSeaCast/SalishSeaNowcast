@@ -304,8 +304,8 @@ run:
     salish-nowcast:
       shared storage: True
       ssh key: SalishSeaNEMO-nowcast_id_rsa
-      envvars: /results/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
-      python: /results/nowcast-sys/nemo_nowcast-env/bin/python
+      envvars: /results/nowcast-sys/nowcast-env/etc/conda/activate.d/envvars.sh
+      python: /results/nowcast-sys/nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       run types:
         - nowcast-dev
@@ -410,7 +410,7 @@ run:
     walltime: 23:30:00
     # Path to the salishsea command processor executable to use in the run
     # script
-    salishsea_cmd: /results/nowcast-sys/nemo_nowcast-env/bin/salishsea
+    salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
     # Email address to which to send notifications of the beginning and
     # end of execution of the run, as well as notification of abnormal abort
     # messages.
