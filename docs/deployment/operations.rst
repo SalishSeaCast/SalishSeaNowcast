@@ -57,7 +57,7 @@ Start it with:
 .. code-block:: bash
 
     $ source activate /results/nowcast-sys/nowcast-env
-    (/results/nowcast-sys/nowcast-env)$ circusctl --endpoint tcp:127.0.0.1:4444
+    (/results/nowcast-sys/nowcast-env)$ circusctl --endpoint tcp://127.0.0.1:4444
 
 .. _circusctl: http://circus.readthedocs.io/en/latest/man/circusctl/
 
