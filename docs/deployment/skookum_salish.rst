@@ -85,20 +85,20 @@ The Python packages that the system depends on are installed in a conda environm
     $ cd /results/nowcast-sys/
     $ conda update conda
     $ conda create \
-        --prefix /results/nowcast-sys/nemo_nowcast-env \
+        --prefix /results/nowcast-sys/nowcast-env \
         --channel gomss-nowcast --channel defaults --channel conda-forge \
         arrow attrs basemap beautifulsoup4 bottleneck circus cliff docutils \
-        lxml mako matplotlib netcdf4 numpy pandas paramiko pillow pip python=3 \
-        pyyaml pyzmq retrying requests schedule scipy xarray
-    $ source activate /results/nowcast-sys/nemo_nowcast-env
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install angles driftwood feedgen \
-        python-hglib raven
-    (/results/nowcast-sys/nemo_nowcast-env)$ cd /results/nowcast-sys/
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO-Cmd/
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaCmd/
-    (/results/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaNowcast/
+        hdf4=4.2.12 lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
+        pillow pip python=3 pyyaml pyzmq requests schedule scipy xarray
+    $ source activate /results/nowcast-sys/nowcast-env
+    (/results/nowcast-sys/nowcast-env)$ pip install angles driftwood feedgen \
+        python-hglib raven retrying
+    (/results/nowcast-sys/nowcast-env)$ cd /results/nowcast-sys/
+    (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO_Nowcast/
+    (/results/nowcast-sys/nowcast-env)$ pip install --editable tools/SalishSeaTools/
+    (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO-Cmd/
+    (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaCmd/
+    (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaNowcast/
 
 
 Environment Variables
@@ -108,10 +108,10 @@ Add the following files to the :file:`/results/nowcast-sys/nowcast-env` environm
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/nemo_nowcast-env
+    $ cd /results/nowcast-sys/nowcast-env
     $ mkdir -p etc/conda/activate.d
     $ cat << EOF > etc/conda/activate.d/envvars.sh
-    export NOWCAST_ENV=/results/nowcast-sys/nemo_nowcast-env
+    export NOWCAST_ENV=/results/nowcast-sys/nowcast-env
     export NOWCAST_CONFIG=/results/nowcast-sys/SalishSeaNowcast/config
     export NOWCAST_YAML=/results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
     export NOWCAST_LOGS=/results/nowcast-sys/logs/nowcast
