@@ -99,7 +99,7 @@ The commands below assume that they are cloned beside your :kbd:`SalishSeaNowcas
     $ source activate salishsea-nowcast
     (salishsea-nowcast)$ pip install --editable ../NEMO_Nowcast
     (salishsea-nowcast)$ pip install --editable ../tools/SalishSeaTools
-    (salishsea-nowcast)$ pip install --editable ../tools/SalishSeaCmd
+    (salishsea-nowcast)$ pip install --editable ../SalishSeaCmd
     (salishsea-nowcast)$ pip install --editable .
 
 The :kbd:`--editable` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
