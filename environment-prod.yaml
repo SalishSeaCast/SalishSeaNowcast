@@ -34,7 +34,7 @@ dependencies:
   - paramiko
   - pillow
   - pip
-  - python=3
+  - python=3.6
   - retrying
   - scipy
   - xarray

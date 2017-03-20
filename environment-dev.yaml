@@ -38,7 +38,7 @@ dependencies:
   - pyyaml
   - pyzmq
   - pip
-  - python=3
+  - python=3.6
   - requests
   - retrying
   - schedule

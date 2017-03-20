@@ -24,8 +24,8 @@ import __pkg_metadata__
 
 
 python_classifiers = [
-    'Programming Language :: Python :: {0}'.format(py_version)
-    for py_version in ['3', '3.5']]
+    f'Programming Language :: Python :: {py_version}'
+    for py_version in ['3', '3.6']]
 other_classifiers = [
     'Development Status :: ' + __pkg_metadata__.DEV_STATUS,
     'License :: OSI Approved :: Apache Software License',
