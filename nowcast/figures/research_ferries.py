@@ -156,12 +156,10 @@ def salinity_ferry_route(
     # Set up model part of salinity comparison plot
     axs[0].plot(
         sal_obs[1], nemo_a, 'DodgerBlue', linewidth=2,
-        label='{} am [UTC]'
-        .format(FERRY_ROUTES[route_name]['start']['hour']))
+        label=f'{FERRY_ROUTES[route_name]["start"]["hour"]} am [UTC]')
     axs[0].plot(
         sal_obs[1], nemo_b, 'MediumBlue', linewidth=2,
-        label='{} am [UTC]'
-        .format(FERRY_ROUTES[route_name]['start']['hour']+1))
+        label=f'{FERRY_ROUTES[route_name]["start"]["hour"]+1} am [UTC]')
 
     # Observational component of salinity comparisons plot
     axs[0].plot(sal_obs[1], sal_obs[3],
@@ -352,9 +350,9 @@ def _get_sal_data(ferry_data_dir, route_name, dmy):
     date = date.strftime('%Y%m%d')
     saline = sio.loadmat(
         os.path.join(
-            ferry_data_dir, route, '{}_TSG{}.mat'.format(route, date)))
+            ferry_data_dir, route, f'{route}_TSG{date}.mat'))
     struct = (
-        ((saline['{}_TSG'.format(route)])
+        ((saline[f'{route}_TSG'])
             ['output'])[0, 0])['Practical_Salinity'][0, 0]
     sal_obs = struct['data'][0, 0]
     time_obs = struct['matlabTime'][0, 0]

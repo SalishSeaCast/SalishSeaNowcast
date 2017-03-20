@@ -41,19 +41,19 @@ Descriptions under the links below are from the first cell of the notebooks
 
 """
     for fn in glob.glob('*.ipynb'):
-        readme += '* ##[{fn}]({url}/{fn})  \n    \n'.format(fn=fn, url=url)
+        readme += f'* ##[{fn}]({url}/{fn})  \n    \n'
         readme += notebook_description(fn)
-    license = """
+    license = f"""
 ##License
 
-These notebooks and files are copyright 2013-{this_year}
+These notebooks and files are copyright 2013-{datetime.date.today().year}
 by the Salish Sea MEOPAR Project Contributors
 and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
 http://www.apache.org/licenses/LICENSE-2.0
 Please see the LICENSE file for details of the license.
-""".format(this_year=datetime.date.today().year)
+"""
     with open('README.md', 'wt') as f:
         f.writelines(readme)
         f.writelines(license)
@@ -77,12 +77,9 @@ def notebook_description(fn):
             line = TITLE_PATTERN.sub('**', line)
             suffix = '**'
         if line.endswith('\n'):
-            description += (
-                '    {line}{suffix}  \n'
-                .format(line=line[:-1], suffix=suffix))
+            description += f'    {line[:-1]}{suffix}  \n'
         else:
-            description += (
-                '    {line}{suffix}  '.format(line=line, suffix=suffix))
+            description += f'    {line}{suffix}  '
     description += '\n' * 2
     return description
 

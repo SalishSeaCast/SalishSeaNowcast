@@ -116,8 +116,8 @@ def load_VENUS(station):
     """
 
     # Define location
-    filename = ('SG-{0}/VSG-Strait_of_Georgia_{0}'
-                '-VIP-State_of_Ocean.txt'.format(station))
+    filename = (
+        f'SG-{station}/VSG-Strait_of_Georgia_{station}-VIP-State_of_Ocean.txt')
 
     # Access website
     url = 'ftp://ftp.neptunecanada.ca/pub/DataProducts/SOO/'
@@ -219,8 +219,7 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
     ax_temp.plot(t, tempc, '-b', label='Model')
 
     # Axis
-    ax_sal.set_title('VENUS {} - {}'.format(station, t[0].strftime('%d-%b-%Y'),
-                                            **title_font))
+    ax_sal.set_title(f'VENUS {station} - {t[0].strftime("%d-%b-%Y")}')
     ax_sal.set_ylim([29, 32])
     ax_sal.set_ylabel('Practical Salinity [psu]', **axis_font)
     ax_sal.legend(loc=0)
@@ -324,8 +323,9 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     axu.set_xlim([0, maxt])
     axu.set_ylabel('Depth [m]', **axis_font)
     figures.axis_colors(axu, 'white')
-    axu.set_title('East/West Velocities at VENUS {node} on {date}'.format(
-        node=station, date=timestamp.format('DD-MMM-YYYY')), **title_font)
+    axu.set_title(
+        f'East/West Velocities at VENUS {station} on '
+        f'{timestamp.format("DD-MMM-YYYY")}', **title_font)
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
     cbar.set_label('[m/s]', **axis_font)
 
@@ -341,8 +341,9 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     axv.set_xlim([0, maxt])
     axv.set_ylabel('Depth [m]', **axis_font)
     figures.axis_colors(axv, 'white')
-    axv.set_title('North/South Velocities at VENUS {node} on {date}'.format(
-        node=station, date=timestamp.format('DD-MMM-YYYY')), **title_font)
+    axv.set_title(
+        f'North/South Velocities at VENUS {station} on '
+        f'{timestamp.format("DD-MMM-YYYY")}', **title_font)
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
     cbar.set_label('[m/s]', **axis_font)
 
@@ -358,8 +359,9 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     axw.set_xlabel('Time [h]', **axis_font)
     axw.set_ylabel('Depth [m]', **axis_font)
     figures.axis_colors(axw, 'white')
-    axw.set_title('Vertical Velocities at VENUS {node} on {date}'.format(
-        node=station, date=timestamp.format('DD-MMM-YYYY')), **title_font)
+    axw.set_title(
+        f'Vertical Velocities at VENUS {station} on '
+        f'{timestamp.format("DD-MMM-YYYY")}', **title_font)
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
     cbar.set_label('[m/s]', **axis_font)
 
@@ -633,8 +635,8 @@ def plotADCP(grid_m, grid_o, day, station, profile):
 
         figures.axis_colors(ax, 'gray')
         ax.set_title(
-            '{dire} {name} Velocities at VENUS {node} - {date}'.format(
-                dire=direc, name=name, node=station, date=date), **title_font)
+            f'{direc} {name} Velocities at VENUS {station} - {date}',
+            **title_font)
 
     cbar_ax = fig.add_axes([0.95, 0.2, 0.03, 0.6])
     cbar = fig.colorbar(mesh, cax=cbar_ax)
@@ -698,8 +700,7 @@ def plottimeavADCP(grid_m, grid_o, day, station):
         ax.set_xlabel('Daily averaged velocity [m/s]', **axis_font)
         ax.set_ylabel('Depth [m]', **axis_font)
         figures.axis_colors(ax, 'gray')
-        ax.set_title('{dire} velocities at VENUS {node}'.format(
-            dire=direc, node=station, date=date), **title_font)
+        ax.set_title(f'{direc} velocities at VENUS {station}', **title_font)
         ax.grid()
         ax.set_ylim(profile)
         ax.set_xlim([-0.5, 0.5])
@@ -765,13 +766,8 @@ def plotdepavADCP(grid_m, grid_o, day, station):
         ax.set_ylabel('Velocity [m/s]', **axis_font)
         figures.axis_colors(ax, 'gray')
         ax.set_title(
-            'Depth Averaged ({}-{}m) {dire} velocities at VENUS {node} -{date}'
-            .format(
-                profile[0],
-                profile[1],
-                dire=direc,
-                node=station,
-                date=date),
+            f'Depth Averaged ({profile[0]}-{profile[1]}m) {direc} velocities '
+            f'at VENUS {station} -{date}',
             **title_font)
         ax.grid()
         ax.set_ylim([-0.6, 0.6])

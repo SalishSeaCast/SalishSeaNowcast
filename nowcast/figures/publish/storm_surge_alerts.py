@@ -138,8 +138,7 @@ def _plot_alerts_map(ax, coastline, plot_data, theme):
 
 def _alerts_map_axis_labels(ax, date_time, theme):
     ax.set_title(
-        'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
-        .format(date_time),
+        f'Marine and Atmospheric Conditions\n {date_time:%A, %B %d, %Y}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
     ax.set_xlabel(
@@ -226,7 +225,7 @@ def _alerts_map_geo_labels(ax, theme):
         ax.text(
             lon + dx, lat + dy, place, rotation=rotation,
             horizontalalignment=justify,
-            fontproperties=theme.FONTS['location label {}'.format(label_size)])
+            fontproperties=theme.FONTS[f'location label {label_size}'])
 
 
 def _plot_info_box(ax, place, plot_data, theme):
@@ -237,24 +236,22 @@ def _plot_info_box(ax, place, plot_data, theme):
         color=theme.COLOURS['text']['info box title'])
     ax.text(
         0.05, 0.7,
-        'Maximum Water Level: {:.1f} m'.format(plot_data.max_ssh[place]),
+        f'Maximum Water Level: {plot_data.max_ssh[place]:.1f} m',
         horizontalalignment='left', verticalalignment='top',
         fontproperties=theme.FONTS['info box content'],
         color=theme.COLOURS['text']['info box content'])
     ax.text(
         0.05, 0.5,
-        'Wind Speed: {:.0f} km/hr'
-        .format(unit_conversions.mps_kph(plot_data.max_wind_avg[place])),
+        f'Wind Speed: '
+        f'{unit_conversions.mps_kph(plot_data.max_wind_avg[place]):.0f} km/hr',
         horizontalalignment='left', verticalalignment='top',
         fontproperties=theme.FONTS['info box content'],
         color=theme.COLOURS['text']['info box content'])
     display_time = arrow.get(plot_data.max_ssh_time[place]).to('local')
     ax.text(
         0.05, 0.3,
-        'Time: {time} {tzone}'
-        .format(
-            time=display_time.format('YYYY-MM-DD HH:mm'),
-            tzone=display_time.tzinfo.tzname(display_time.datetime)),
+        f'Time: {display_time.format("YYYY-MM-DD HH:mm")} '
+        f'{display_time.tzinfo.tzname(display_time.datetime)}',
         horizontalalignment='left', verticalalignment='top',
         fontproperties=theme.FONTS['info box content'],
         color=theme.COLOURS['text']['info box content'])

@@ -118,8 +118,8 @@ def _prep_plot_data(
         j, i = places.PLACES[place]['NEMO grid ji']
     except KeyError as e:
         raise KeyError(
-            'place name or info key not found in '
-            'salishsea_tools.places.PLACES: {}'.format(e))
+            f'place name or info key not found in '
+            f'salishsea_tools.places.PLACES: {e}')
     itime_max_ssh = np.argmax(ssh_hr[:, j, i])
     time_max_ssh_hr = time_ssh_hr[itime_max_ssh]
     ssh_15m_ts = nc_tools.ssh_timeseries_at_point(
@@ -181,8 +181,7 @@ def _plot_info_box(ax, place, plot_data, theme):
         color=theme.COLOURS['text']['info box title'])
     ax.text(
         0.05, 0.75,
-        'Max SSH: {max_ssh_15m:.2f} metres above mean sea level'
-        .format(max_ssh_15m=plot_data.max_ssh_15m),
+        f'Max SSH: {plot_data.max_ssh_15m:.2f} metres above mean sea level',
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['info box content'],
@@ -190,30 +189,25 @@ def _plot_info_box(ax, place, plot_data, theme):
     time_max_ssh_15m = plot_data.time_max_ssh_15m
     ax.text(
         0.05, 0.6,
-        'Time of max: {datetime} {tzone}'
-        .format(
-            datetime=time_max_ssh_15m.format('YYYY-MM-DD HH:mm'),
-            tzone=time_max_ssh_15m.datetime.tzname()),
+        f'Time of max: {time_max_ssh_15m.format("YYYY-MM-DD HH:mm")} '
+        f'{time_max_ssh_15m.datetime.tzname()}',
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['info box content'],
         color=theme.COLOURS['text']['info box content'])
     ax.text(
         0.05, 0.45,
-        'Residual: {max_ssh_residual:.2f} metres'
-        .format(max_ssh_residual=plot_data.max_ssh_residual),
+        f'Residual: {plot_data.max_ssh_residual:.2f} metres',
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['info box content'],
         color=theme.COLOURS['text']['info box content'])
+    heading = wind_tools.bearing_heading(
+        wind_tools.wind_to_from(plot_data.wind_4h_avg.dir))
     ax.text(
         0.05, 0.3,
-        'Wind: {.speed:.0f} m/s from the {} '
-        '(averaged over four hours prior to maximum water level)'
-        .format(
-            plot_data.wind_4h_avg,
-            wind_tools.bearing_heading(
-                wind_tools.wind_to_from(plot_data.wind_4h_avg.dir))),
+        f'Wind: {plot_data.wind_4h_avg.speed:.0f} m/s from the {heading} '
+        f'(averaged over four hours prior to maximum water level)',
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['info box content'],
@@ -258,7 +252,7 @@ def _plot_ssh_time_series(ax, place, plot_data, timezone, theme, ylims=(-3, 3)):
 
 def _ssh_time_series_labels(ax, place, ylims, theme):
     ax.set_title(
-        'Sea Surface Height at {place}'.format(place=place),
+        f'Sea Surface Height at {place}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
     ax.set_ylabel(
@@ -288,7 +282,7 @@ def _plot_residual_time_series(
 
 def _residual_time_series_labels(ax, ylims, yticks, timezone, tzname, theme):
     ax.set_xlabel(
-        'Date and Time [{tzone}]'.format(tzone=tzname),
+        f'Date and Time [{tzname}]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis'])
     ax.xaxis.set_major_formatter(
@@ -322,11 +316,9 @@ def _plot_ssh_map(ax, plot_data, place, theme):
 def _ssh_map_axis_labels(ax, place, plot_data, theme):
     time_max_ssh_hr = plot_data.time_max_ssh_hr
     ax.set_title(
-        'Sea Surface Height at {time} {tzone} {date}'
-        .format(
-            time=time_max_ssh_hr.format('HH:mm'),
-            tzone=time_max_ssh_hr.datetime.tzname(),
-            date=time_max_ssh_hr.format('DD-MMM-YYYY')),
+        f'Sea Surface Height at {time_max_ssh_hr.format("HH:mm")} '
+        f'{time_max_ssh_hr.datetime.tzname()} '
+        f'{time_max_ssh_hr.format("DD-MMM-YYYY")}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
     j, i = places.PLACES[place]['NEMO grid ji']

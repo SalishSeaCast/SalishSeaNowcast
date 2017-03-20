@@ -65,18 +65,16 @@ def main():
 def success(parsed_args):
     ymd = parsed_args.data_date.format('YYYY-MM-DD')
     logger.info(
-        '{date} ONC {station} CTD T&S file created'
-        .format(date=ymd, station=parsed_args.onc_station),
+        f'{ymd} ONC {parsed_args.onc_station} CTD T&S file created',
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
-    msg_type = 'success {.onc_station}'.format(parsed_args)
+    msg_type = f'success {parsed_args.onc_station}'
     return msg_type
 
 
 def failure(parsed_args):
     ymd = parsed_args.data_date.format('YYYY-MM-DD')
     logger.critical(
-        '{date} ONC {station} CTD T&S file creation failed'
-        .format(date=ymd, station=parsed_args.onc_station),
+        f'{ymd} ONC {parsed_args.onc_station} CTD T&S file creation failed',
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     msg_type = 'failure'
     return msg_type
@@ -85,8 +83,7 @@ def failure(parsed_args):
 def get_onc_ctd(parsed_args, config, *args):
     ymd = parsed_args.data_date.format('YYYY-MM-DD')
     logger.info(
-        'requesting ONC {0.onc_station} CTD T&S data for {date}'
-        .format(parsed_args, date=ymd),
+        f'requesting ONC {parsed_args.onc_station} CTD T&S data for {ymd}',
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     TOKEN = os.environ['ONC_USER_TOKEN']
     onc_data = data_tools.get_onc_data(
@@ -94,28 +91,25 @@ def get_onc_ctd(parsed_args, config, *args):
         station=parsed_args.onc_station,
         deviceCategory='CTD',
         sensors='salinity,temperature',
-        dateFrom=data_tools.onc_datetime('{} 00:00'.format(ymd), 'utc'),
+        dateFrom=data_tools.onc_datetime(f'{ymd} 00:00', 'utc'),
     )
     ctd_data = data_tools.onc_json_to_dataset(onc_data)
     logger.debug(
-        'ONC {0.onc_station} CTD T&S data for {date} received and parsed'
-        .format(parsed_args, date=ymd),
+        f'ONC {parsed_args.onc_station} CTD T&S data for {ymd} received and '
+        f'parsed',
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     logger.debug(
-        'filtering ONC {0.onc_station} temperature data for {date} '
-        'to exlude qaqcFlag!=1'
-        .format(parsed_args, date=ymd),
+        f'filtering ONC {parsed_args.onc_station} temperature data for {ymd} '
+        f'to exlude qaqcFlag!=1',
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     temperature = _qaqc_filter(ctd_data, 'temperature')
     logger.debug(
-        'filtering ONC {0.onc_station} salinity data for {date} '
-        'to exlude qaqcFlag!=1'
-        .format(parsed_args, date=ymd),
+        f'filtering ONC {parsed_args.onc_station} salinity data for {ymd} '
+        f'to exlude qaqcFlag!=1',
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     salinity = _qaqc_filter(ctd_data, 'salinity')
     logger.debug(
-        'creating ONC {0.onc_station} CTD T&S dataset for {date}'
-        .format(parsed_args, date=ymd),
+        f'creating ONC {parsed_args.onc_station} CTD T&S dataset for {ymd}',
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     ds = _create_dataset(parsed_args.onc_station, temperature, salinity)
     dest_dir = Path(config['observations']['ctd data']['dest dir'])
@@ -124,8 +118,8 @@ def get_onc_ctd(parsed_args, config, *args):
         station=parsed_args.onc_station,
         yyyymmdd=parsed_args.data_date.format('YYYYMMDD'))
     logger.debug(
-        'storing ONC {0.onc_station} CTD T&S dataset for {date} as {file}'
-        .format(parsed_args, date=ymd, file=nc_filepath),
+        f'storing ONC {parsed_args.onc_station} CTD T&S dataset '
+        f'for {ymd} as {nc_filepath}',
         extra={'data_date': ymd, 'onc_station': parsed_args.onc_station})
     ds.to_netcdf(
         nc_filepath.as_posix(),
@@ -185,13 +179,13 @@ def _create_dataset(onc_station, temperature, salinity):
     except IndexError:
         # If the temperature data is messing no dataset can be created
         raise WorkerError(
-            'no {} temperate data; no dataset created'.format(onc_station))
+            f'no {onc_station} temperate data; no dataset created')
     try:
         salinity_mean = salinity.resample('15Min', 'time', how='mean')
         salinity_std_dev = salinity.resample('15Min', 'time', how='std')
         salinity_sample_count = salinity.resample('15Min', 'time', how=count)
     except IndexError:
-        logger.warning('no {} salinity data'.format(onc_station))
+        logger.warning(f'no {onc_station} salinity data')
         salinity_mean = temperature_mean.copy()
         salinity_mean.name = 'salinity'
         salinity_mean.data = numpy.full_like(temperature_mean, numpy.nan)
@@ -288,20 +282,22 @@ def _create_dataset(onc_station, temperature, salinity):
                 PLACES[metadata[onc_station]['place_name']]['lon lat'][1],
         },
         attrs={
-            'history': """
-    {0} Download raw data from ONC scalardata API.
-    {0} Filter to exclude data with qaqcFlag != 1.
-    {0} Resample data to 15 minute intervals using mean, standard deviation
-    and count as aggregation functions.
-    {0} Store as netCDF4 file.
-            """.format(arrow.now().format('YYYY-MM-DD HH:mm:ss')),
+            'history': f"""
+    [arrow.now().format('YYYY-MM-DD HH:mm:ss')] Download raw data from ONC
+    scalardata API.
+    [arrow.now().format('YYYY-MM-DD HH:mm:ss')] Filter to exclude data with
+    qaqcFlag != 1.
+    [arrow.now().format('YYYY-MM-DD HH:mm:ss')] Resample data to 15 minute
+    intervals using mean, standard deviation and count as aggregation functions.
+    [arrow.now().format('YYYY-MM-DD HH:mm:ss')] Store as netCDF4 file.
+            """,
             'ONC_station': metadata[onc_station]['ONC_station'],
             'ONC_stationCode': onc_station,
             'ONC_stationDescription':
                 metadata[onc_station]['ONC_stationDescription'],
             'ONC_data_product_url':
-                'http://dmas.uvic.ca/DataSearch?location={station}'
-                '&deviceCategory=CTD'.format(station=onc_station),
+                f'http://dmas.uvic.ca/DataSearch?location={onc_station}'
+                f'&deviceCategory=CTD',
         },
     )
     # Replace NaN sample counts with zeros in the case of NaN padded DataArrays

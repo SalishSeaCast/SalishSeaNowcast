@@ -108,12 +108,11 @@ def _plot_tide_cycle(ax, plot_data, theme, ylims=(-3, 3)):
 def _ax_labels(ax, plot_data, ylims, theme):
     t_end = plot_data.results_t_end
     ax.set_title(
-        'Tidal Predictions at Point Atkinson: {date}'
-        .format(date=t_end.format('DD-MMM-YYYY')),
+        f'Tidal Predictions at Point Atkinson: {t_end.format("DD-MMM-YYYY")}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
     ax.set_xlabel(
-        'Date [{tzone}]'.format(tzone=t_end.tzinfo.tzname(t_end.datetime)),
+        f'Date [{t_end.tzinfo.tzname(t_end.datetime)}]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis'])
     ax.xaxis.set_major_formatter(DateFormatter('%d-%b-%Y'))

@@ -98,7 +98,7 @@ def configure_logging(config, logger, debug, email=True):
         logger.addHandler(handler)
         if not debug:
             # JSON log files
-            log_file = '{}.json'.format(log_file)
+            log_file = f'{log_file}.json'
             handler = logging.handlers.TimedRotatingFileHandler(
                 log_file, when='d', interval=30, backupCount=120)
             handler.setLevel(getattr(logging, level.upper()))
@@ -190,7 +190,7 @@ def mkdir(path, logger, mode=PERMS_RWX_RWX_R_X, grp_name=None, exist_ok=True):
         os.mkdir(path)
     except OSError:
         if not exist_ok:
-            msg = '{} directory already exists; not overwriting'.format(path)
+            msg = f'{path} directory already exists; not overwriting'
             logger.error(msg)
             raise WorkerError
     fix_perms(path, mode, grp_name)
@@ -215,16 +215,14 @@ def run_in_subprocess(cmd, output_logger, error_logger):
     :raises: :py:exc:`nowcast.lib.WorkerError`
     """
     output_logger(
-        'running command in subprocess: {}'.format(cmd))
+        f'running command in subprocess: {cmd}')
     try:
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         for line in output.splitlines():
             if line:
                 output_logger(line)
     except subprocess.CalledProcessError as e:
-        error_logger(
-            'subprocess {cmd} failed with return code {status}'
-            .format(cmd=cmd, status=e.returncode))
+        error_logger(f'subprocess {cmd} failed with return code {e.returncode}')
         for line in e.output.splitlines():
             if line:
                 error_logger(line)

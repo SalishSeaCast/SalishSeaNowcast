@@ -71,24 +71,20 @@ def make_research_plots(
 
     # do the plots
     fig = figures.thalweg_salinity(grid_T_dy)
-    filename = os.path.join(
-        plots_dir, 'Salinity_on_thalweg_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Salinity_on_thalweg_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.plot_surface(grid_T_dy, grid_U_dy, grid_V_dy, bathy,
                                'default', 'default')
-    filename = os.path.join(
-        plots_dir, 'T_S_Currents_on_surface_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'T_S_Currents_on_surface_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_VENUS('East', grid_T_hr, bathy)
-    filename = os.path.join(
-        plots_dir, 'Compare_VENUS_East_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Compare_VENUS_East_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_VENUS('Central', grid_T_hr, bathy)
-    filename = os.path.join(
-        plots_dir, 'Compare_VENUS_Central_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Compare_VENUS_Central_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
 
@@ -104,62 +100,52 @@ def make_publish_plots(
     # do the plots
     fig = figures.website_thumbnail(
         bathy, grid_T_hr, model_path, coastline)
-    filename = os.path.join(
-        plots_dir, 'Website_thumbnail_{date}.png'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Website_thumbnail_{dmy}.png')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.plot_threshold_website(bathy, grid_T_hr, model_path, coastline)
-    filename = os.path.join(
-        plots_dir, 'Threshold_website_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Threshold_website_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.PA_tidal_predictions(grid_T_hr)
-    filename = os.path.join(
-        plots_dir, 'PA_tidal_predictions_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'PA_tidal_predictions_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
         grid_T_hr, bathy, model_path, name='Victoria')
-    filename = os.path.join(
-        plots_dir, 'Vic_maxSSH_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Vic_maxSSH_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
         grid_T_hr, bathy, model_path)
-    filename = os.path.join(
-        plots_dir, 'PA_maxSSH_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'PA_maxSSH_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
         grid_T_hr, bathy, model_path, name='Campbell River')
-    filename = os.path.join(
-        plots_dir, 'CR_maxSSH_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'CR_maxSSH_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_water_levels(grid_T_hr, bathy, coastline)
-    filename = os.path.join(
-        plots_dir, 'NOAA_ssh_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'NOAA_ssh_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.plot_thresholds_all(grid_T_hr, bathy, model_path, coastline)
-    filename = os.path.join(
-        plots_dir, 'WaterLevel_Thresholds_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'WaterLevel_Thresholds_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.Sandheads_winds(grid_T_hr, bathy, model_path, coastline)
-    filename = os.path.join(
-        plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'SH_wind_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.average_winds_at_station(
         grid_T_hr, bathy, model_path, coastline, station='all')
-    filename = os.path.join(
-        plots_dir, 'Avg_wind_vectors_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Avg_wind_vectors_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
-    fig = figures.winds_at_max_ssh(grid_T_hr, bathy, model_path, coastline, station='all')
-    filename = os.path.join(
-        plots_dir, 'Wind_vectors_at_max_{date}.svg'.format(date=dmy))
+    fig = figures.winds_at_max_ssh(
+        grid_T_hr, bathy, model_path, coastline, station='all')
+    filename = os.path.join(plots_dir, f'Wind_vectors_at_max_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
 
@@ -169,7 +155,9 @@ def results_dataset(period, grid, results_dir):
     """
     filename_pattern = 'SalishSea_{period}_*_{grid}.nc'
     print(results_dir)
-    filepaths = glob(os.path.join(results_dir, filename_pattern.format(period=period, grid=grid)))
+    filepaths = glob(
+        os.path.join(results_dir, filename_pattern.format(
+            period=period, grid=grid)))
     return nc.Dataset(filepaths[0])
 
 main()

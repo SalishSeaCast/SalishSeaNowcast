@@ -86,10 +86,9 @@ def success(parsed_args):
     else:
         ymd = arrow.now().floor('day').format('YYYY-MM-DD')
     logger.info(
-        '{date} weather forecast {0.forecast} downloads complete'
-        .format(parsed_args, date=ymd),
+        f'{ymd} weather forecast {parsed_args.forecast} downloads complete',
         extra={'forecast_date': ymd, 'forecast': parsed_args.forecast})
-    msg_type = 'success {.forecast}'.format(parsed_args)
+    msg_type = f'success {parsed_args.forecast}'
     return msg_type
 
 
@@ -99,10 +98,9 @@ def failure(parsed_args):
     else:
         ymd = arrow.now().floor('day').format('YYYY-MM-DD')
     logger.critical(
-        '{date} weather forecast {0.forecast} downloads failed'
-        .format(parsed_args, date=ymd),
+        f'{ymd} weather forecast {parsed_args.forecast} downloads failed',
         extra={'forecast_date': ymd, 'forecast': parsed_args.forecast})
-    msg_type = 'failure {.forecast}'.format(parsed_args)
+    msg_type = f'failure {parsed_args.forecast}'
     return msg_type
 
 
@@ -110,15 +108,14 @@ def get_grib(parsed_args, config, *args):
     forecast = parsed_args.forecast
     date = _calc_date(parsed_args, forecast)
     logger.info(
-        'downloading {forecast} forecast GRIB2 files for {date}'
-        .format(forecast=forecast, date=date),
+        f'downloading {forecast} forecast GRIB2 files for {date}',
         extra={'forecast': parsed_args.forecast})
     dest_dir_root = config['weather']['GRIB dir']
     grp_name = config['file group']
     _mkdirs(dest_dir_root, date, forecast, grp_name)
     with requests.Session() as session:
         for forecast_hour in range(1, FORECAST_DURATION+1):
-            hr_str = '{:0=3}'.format(forecast_hour)
+            hr_str = f'{forecast_hour:0=3}'
             lib.mkdir(
                 os.path.join(dest_dir_root, date, forecast, hr_str),
                 logger, grp_name=grp_name, exist_ok=False)
@@ -126,9 +123,7 @@ def get_grib(parsed_args, config, *args):
                 filepath = _get_file(
                     var, dest_dir_root, date, forecast, hr_str, session)
                 os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
-    checklist = {
-        '{date} {forecast} forecast'
-        .format(date=date, forecast=forecast): True}
+    checklist = {f'{date} {forecast} forecast': True}
     return checklist
 
 
@@ -163,12 +158,10 @@ def _get_file(var, dest_dir_root, date, forecast, hr_str, session):
         wait_exponential_max=9000)
     size = os.stat(filepath).st_size
     logger.debug(
-        'downloaded {bytes} bytes from {fileURL}'
-        .format(bytes=size, fileURL=fileURL), extra={'forecast': forecast})
+        f'downloaded {size} bytes from {fileURL}', extra={'forecast': forecast})
     if size == 0:
         logger.critical(
-            'Problem, 0 size file {}'.format(fileURL),
-            extra={'forecast': forecast})
+            f'Problem, 0 size file {fileURL}', extra={'forecast': forecast})
         raise WorkerError
     return filepath
 

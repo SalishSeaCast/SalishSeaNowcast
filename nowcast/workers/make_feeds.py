@@ -61,27 +61,25 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        'ATOM feeds for {run_date} {0.run_type} run completed'
-        .format(
-            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'ATOM feeds for {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'{parsed_args.run_type} run completed',
         extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'success {.run_type}'.format(parsed_args)
+    msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        'ATOM feeds for {run_date} {0.run_type} run failed'
-        .format(
-            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'ATOM feeds for {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'{parsed_args.run_type} run failed',
         extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'failure {.run_type}'.format(parsed_args)
+    msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
 
@@ -92,9 +90,7 @@ def make_feeds(parsed_args, config, *args):
     storm_surge_path = config['figures']['storm surge info portal path']
     atom_path = config['storm surge feeds']['storage path']
     feeds_path = os.path.join(figs_path, storm_surge_path, atom_path)
-    checklist_key = (
-        '{run_type} {date}'
-        .format(run_type=run_type, date=run_date.format('YYYY-MM-DD')))
+    checklist_key = f'{run_type} {run_date.format("YYYY-MM-DD")}'
     checklist = {checklist_key: []}
     for feed in config['storm surge feeds']['feeds']:
         fg = _generate_feed(
@@ -117,20 +113,16 @@ def _generate_feed(feed, feeds_config, atom_path):
     fg.language('en-ca')
     fg.author(
         name='Salish Sea MEOPAR Project',
-        uri='https://{0[domain]}/'.format(feeds_config))
+        uri=f'https://{feeds_config["domain"]}/')
     fg.rights(
-        'Copyright 2015-{this_year}, '
-        'Salish Sea MEOPAR Project Contributors and '
-        'The University of British Columbia'
-        .format(this_year=utcnow.year))
+        f'Copyright 2015-{utcnow.year}, Salish Sea MEOPAR Project '
+        f'Contributors and The University of British Columbia')
     fg.link(
         href=(
-            'https://{0[domain]}/{atom_path}/{feed}'
-            .format(feeds_config, atom_path=atom_path, feed=feed)),
+            f'https://{feeds_config["domain"]}/{atom_path}/{feed}'),
         rel='self', type='application/atom+xml')
     fg.link(
-        href='https://{0[domain]}/storm-surge/forecast.html'
-             .format(feeds_config),
+        href=f'https://{feeds_config["domain"]}/storm-surge/forecast.html',
         rel='related', type='text/html')
     return fg
 
@@ -147,27 +139,22 @@ def _generate_feed_entry(feed, max_ssh_info, config, atom_path):
             atom_path))
     fe.author(
         name='Salish Sea MEOPAR Project',
-        uri='https://{0[domain]}/'.format(config['storm surge feeds']))
+        uri=f'https://{config["storm surge feeds"]["domain"]}/')
     fe.content(
         _render_entry_content(feed, max_ssh_info, config),
         type='html')
     fe.link(
         rel='alternate', type='text/html',
-        href='https://{[domain]}/storm-surge/forecast.html'
-        .format(config['storm surge feeds'])
+        href=f'https://{config["storm surge feeds"]["domain"]}/'
+             f'storm-surge/forecast.html'
     )
     return fe
 
 
 def _build_tag_uri(tag_date, feed, now, feeds_config, atom_path):
     return (
-        'tag:{0[domain]},{tag_date}:/{atom_path}/{feed}/{now}'
-        .format(
-            feeds_config,
-            tag_date=tag_date,
-            atom_path=atom_path,
-            feed=os.path.splitext(feed)[0],
-            now=now.format('YYYYMMDDHHmmss')))
+        f'tag:{feeds_config["domain"]},{tag_date}:/{atom_path}/'
+        f'{os.path.splitext(feed)[0]}/{now.format("YYYYMMDDHHmmss")}')
 
 
 def _render_entry_content(feed, max_ssh_info, config):
@@ -235,9 +222,7 @@ def _calc_max_ssh(feed, ttide, run_date, run_type, config):
         os.path.join(
             results_path,
             run_date.format('DDMMMYY').lower(),
-            '{tide_gauge_stn}.nc'
-            .format(
-                tide_gauge_stn=tide_gauge_stn.replace(' ', ''))))
+            f'{tide_gauge_stn.replace(" ", "")}.nc'))
     ssh_ts = nc_tools.ssh_timeseries_at_point(grid_T_15m, 0, 0, datetimes=True)
     ssh_corr = nowcast.figures.shared.correct_model_ssh(
         ssh_ts.ssh, ssh_ts.time, ttide)

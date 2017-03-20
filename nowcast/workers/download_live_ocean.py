@@ -53,17 +53,17 @@ def main():
 def success(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        '{date} Live Ocean western boundary sub-domain files created'.format(
-            date=ymd), extra={'run_date': ymd})
-    msg_type = 'success'.format(parsed_args)
+        f'{ymd} Live Ocean western boundary sub-domain files created',
+        extra={'run_date': ymd})
+    msg_type = 'success'
     return msg_type
 
 
 def failure(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.critical(
-        '{date} Live Ocean western boundary sub-domain files '
-        'creation failed'.format(date=ymd), extra={'run_date': ymd})
+        f'{ymd} Live Ocean western boundary sub-domain files creation failed',
+        extra={'run_date': ymd})
     msg_type = 'failure'
     return msg_type
 
@@ -72,17 +72,11 @@ def download_live_ocean(parsed_args, config, *args):
     yyyymmdd = parsed_args.run_date.format('YYYYMMDD')
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        'downloading hourly Live Ocean forecast starting on {date}'.format(
-            date=ymd, extra={'run_date': ymd}))
+        f'downloading hourly Live Ocean forecast starting on {ymd}')
     base_url = config['temperature salinity']['download']['url']
     dir_prefix = config['temperature salinity']['download']['directory prefix']
     filename_tmpl = config['temperature salinity']['download']['file template']
-    url = (
-        '{base_url}{dir_prefix}{yyyymmdd}/{filename_tmpl}'.format(
-            base_url=base_url,
-            dir_prefix=dir_prefix,
-            yyyymmdd=yyyymmdd,
-            filename_tmpl=filename_tmpl))
+    url = f'{base_url}{dir_prefix}{yyyymmdd}/{filename_tmpl}'
     hours = config['temperature salinity']['download']['hours range']
     dest_dir = Path(
         config['temperature salinity']['download']['dest dir'], yyyymmdd)
@@ -97,7 +91,7 @@ def download_live_ocean(parsed_args, config, *args):
             salishsea_tools.UBC_subdomain.get_UBC_subdomain([str(filepath)])
             subdomain_filepath = str(filepath).replace('.nc', '_UBC.nc')
             logger.debug(
-                'extracted UBC sub-domain: {}'.format(subdomain_filepath),
+                f'extracted UBC sub-domain: {subdomain_filepath}',
                 extra={'subdomain_filepath': subdomain_filepath})
             checklist[ymd].append(subdomain_filepath)
             filepath.unlink()
@@ -114,7 +108,7 @@ def _get_file(url, filename, dest_dir, session):
     get_web_data(url, NAME, filepath, session)
     size = filepath.stat().st_size
     logger.debug(
-        'downloaded {} bytes from {}'.format(size, url),
+        f'downloaded {size} bytes from {url}',
         extra={'url': url, 'dest_dir': dest_dir})
     return filepath
 

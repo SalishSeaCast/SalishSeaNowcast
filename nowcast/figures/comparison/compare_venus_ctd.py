@@ -86,7 +86,7 @@ def _prep_plot_data(
     except KeyError as e:
         raise KeyError(
             'place name or info key not found in '
-            'salishsea_tools.places.PLACES: {}'.format(e))
+            'salishsea_tools.places.PLACES: {e}')
     node_depth = places.PLACES[place]['depth']
     station_code = places.PLACES[place]['ONC stationCode']
     # Production model results
@@ -207,9 +207,7 @@ def _salinity_axis_labels(ax, place, plot_data, theme):
         title_dates = ' and '.join(
             (title_dates, last_model_day.format('DD-MMM-YYYY')))
     ax.set_title(
-        'VENUS {place} {depth}m {dates}'
-        .format(place=place.title(), depth=places.PLACES[place]['depth'],
-                dates=title_dates),
+        f'VENUS {place.title()} {places.PLACES[place]["depth"]}m {title_dates}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
     ax.set_ylabel(
@@ -249,7 +247,7 @@ def _plot_temperature_time_series(ax, plot_data, timezone, theme):
 
 def _temperature_axis_labels(ax, timezone, tzname, theme):
     ax.set_xlabel(
-        'Date and Time [{tzone}]'.format(tzone=tzname),
+        f'Date and Time [{tzname}]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis'])
     ax.xaxis.set_major_formatter(

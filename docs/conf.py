@@ -92,11 +92,8 @@ author = (
     'and The University of British Columbia')
 copyright_years = (
     '2013' if datetime.date.today().year == 2013
-    else '2016-{:%Y}'.format(datetime.date.today()))
-copyright = (
-    '{copyright_years}, {author}'
-    .format(copyright_years=copyright_years, author=author)
-)
+    else f'2016-{datetime.date.today():%Y}')
+copyright = f'{copyright_years}, {author}'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

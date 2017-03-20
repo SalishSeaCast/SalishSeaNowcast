@@ -52,27 +52,27 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} {date} results files from {0.host_name} downloaded'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'results files from {parsed_args.host_name} downloaded',
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = '{} {}'.format('success', parsed_args.run_type)
+    msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} {date} results files download from {0.host_name} failed'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'results files download from {parsed_args.host_name} failed',
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = '{} {}'.format('failure', parsed_args.run_type)
+    msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
 
@@ -84,7 +84,7 @@ def download_results(parsed_args, config, *args):
     results_dir = run_date.strftime('%d%b%y').lower()
     run_type_results = Path(host_run_config['results'][run_type])
     src_dir = run_type_results/results_dir
-    src = '{host}:{src_dir}'.format(host=host_name, src_dir=src_dir)
+    src = f'{host_name}:{src_dir}'
     dest = Path(config['results archive'][run_type])
     cmd = ['scp', '-Cpr', src, str(dest)]
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
@@ -97,7 +97,7 @@ def download_results(parsed_args, config, *args):
     checklist = {run_type: {}}
     for freq in '1h 1d'.split():
         checklist[run_type][freq] = list(map(str, results_archive_dir.glob(
-            'SalishSea_{}_*.nc'.format(freq))))
+            f'SalishSea_{freq}_*.nc')))
     return checklist
 
 

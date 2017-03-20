@@ -176,7 +176,7 @@ def after_grib_to_netcdf(msg, config, checklist):
         if host in config['run']:
             for msg_suffix, run_type in msg_run_type_mapping.items():
                 if run_type in config['run types']:
-                    next_workers['success {}'.format(msg_suffix)].append(
+                    next_workers[f'success {msg_suffix}'].append(
                         NextWorker(
                             'nowcast.workers.upload_forcing',
                             args=[config['run'][host], msg_suffix]),
@@ -225,7 +225,7 @@ def after_get_onc_ctd(msg, config, checklist):
         next_workers[msg.type].append(
             NextWorker(
                 'nowcast.workers.ping_erddap',
-                args=['{}-CTD'.format(ctd_stn)]))
+                args=[f'{ctd_stn}-CTD']))
     return next_workers[msg.type]
 
 
@@ -330,7 +330,7 @@ def after_upload_forcing(msg, config, checklist):
     ]
     for run_type, links_run_type in run_types:
         if run_type in config['run types']:
-            next_workers['success {}'.format(links_run_type)] = [
+            next_workers[f'success {links_run_type}'] = [
                 NextWorker(
                     'nowcast.workers.make_forcing_links',
                     args=[host_name, links_run_type]),

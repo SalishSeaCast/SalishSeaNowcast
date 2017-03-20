@@ -80,20 +80,19 @@ def main():
 def success(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        '{date} NEMO-atmos forcing file for {0.run_type} created'
-        .format(parsed_args, date=ymd),
+        f'{ymd} NEMO-atmos forcing file for {parsed_args.run_type} created',
         extra={'run_date': ymd, 'run_type': parsed_args.run_type})
-    msg_type = 'success {.run_type}'.format(parsed_args)
+    msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
 
 def failure(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.critical(
-        '{date} NEMO-atmos forcing file creation for {0.run_type} failed'
-        .format(parsed_args, date=ymd),
+        f'{ymd} NEMO-atmos forcing file creation for {parsed_args.run_type} '
+        f'failed',
         extra={'run_date': ymd, 'run_type': parsed_args.run_type})
-    msg_type = 'failure {.run_type}'.format(parsed_args)
+    msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
 
@@ -162,7 +161,7 @@ def _define_forecast_segments_nowcast(rundate):
     p1 = os.path.join(yesterday.format('YYYYMMDD'), '18')
     p2 = os.path.join(today.format('YYYYMMDD'), '00')
     p3 = os.path.join(today.format('YYYYMMDD'), '12')
-    logger.debug('forecast sections: {} {} {}'.format(p1, p2, p3))
+    logger.debug(f'forecast sections: {p1} {p2} {p3}')
     fcst_section_hrs_arr[0] = OrderedDict([
         # (part, (dir, real start hr, forecast start hr, end hr))
         ('section 1', (p1, -1, 24-18-1, 24-18+0)),
@@ -176,7 +175,7 @@ def _define_forecast_segments_nowcast(rundate):
 
     # tomorrow (forecast)
     p1 = os.path.join(today.format('YYYYMMDD'), '12')
-    logger.debug('tomorrow forecast section: {}'.format(p1))
+    logger.debug(f'tomorrow forecast section: {p1}')
     fcst_section_hrs_arr[1] = OrderedDict([
         # (part, (dir, start hr, end hr))
         ('section 1', (p1, -1, 24-12-1, 24+23-12)),
@@ -188,7 +187,7 @@ def _define_forecast_segments_nowcast(rundate):
 
     # next day (forecast)
     p1 = os.path.join(today.format('YYYYMMDD'), '12')
-    logger.debug('next day forecast section: {}'.format(p1))
+    logger.debug(f'next day forecast section: {p1}')
     fcst_section_hrs_arr[2] = OrderedDict([
         # (part, (dir, start hr, end hr))
         ('section 1', (p1, -1, 24+24-12-1, 24+24+12-12)),
@@ -215,7 +214,7 @@ def _define_forecast_segments_forecast2(rundate):
 
     # tomorrow
     p1 = os.path.join(today.format('YYYYMMDD'), '06')
-    logger.info('forecast section: {}'.format(p1))
+    logger.info(f'forecast section: {p1}')
     fcst_section_hrs_arr[0] = OrderedDict([
         ('section 1', (p1, -1, 24-6-1, 24+23-6)),
     ])
@@ -226,7 +225,7 @@ def _define_forecast_segments_forecast2(rundate):
 
     # nextday
     p1 = os.path.join(today.format('YYYYMMDD'), '06')
-    logger.info('next day forecast section: {}'.format(p1))
+    logger.info(f'next day forecast section: {p1}')
     fcst_section_hrs_arr[1] = OrderedDict([
         # (part, (dir, start hr, end hr))
         ('section 1', (p1, -1, 24+24-6-1, 24+24+6-6)),
@@ -257,7 +256,7 @@ def _rotate_grib_wind(config, fcst_section_hrs):
     for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
-            sfhour = '{:03d}'.format(fhour)
+            sfhour = f'{fhour:03d}'
             outuv = os.path.join(GRIBdir, day_fcst, sfhour, 'UV.grib')
             outuvrot = os.path.join(GRIBdir, day_fcst, sfhour, 'UVrot.grib')
             # Delete residual instances of files that are created so that
@@ -277,14 +276,12 @@ def _rotate_grib_wind(config, fcst_section_hrs):
                 try:
                     if os.stat(fn[0]).st_size == 0:
                         logger.critical(
-                            'Problem: 0 size file {}'.format(fn[0]))
+                            f'Problem: 0 size file {fn[0]}')
                         raise WorkerError
                 except IndexError:
                     logger.critical(
-                        'No GRIB files match pattern; '
-                        'a previous download may have failed: {}'
-                        .format(pattern)
-                    )
+                        f'No GRIB files match pattern; a previous download;'
+                        f' may have failed: {pattern}')
                     raise WorkerError
                 cmd = [wgrib2, fn[0], '-append', '-grib', outuv]
                 lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
@@ -315,7 +312,7 @@ def _collect_grib_scalars(config, fcst_section_hrs):
     for day_fcst,  realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
-            sfhour = '{:03d}'.format(fhour)
+            sfhour = f'{fhour:03d}'
             outscalar = os.path.join(GRIBdir, day_fcst, sfhour, 'scalar.grib')
             outscalargrid = os.path.join(
                 GRIBdir, day_fcst, sfhour, 'gscalar.grib')
@@ -358,8 +355,8 @@ def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
     GRIBdir = config['weather']['GRIB dir']
     OPERdir = config['weather']['ops dir']
     wgrib2 = config['weather']['wgrib2']
-    outgrib = os.path.join(OPERdir, 'oper_allvar_{ymd}.grib'.format(ymd=ymd))
-    outzeros = os.path.join(OPERdir, 'oper_000_{ymd}.grib'.format(ymd=ymd))
+    outgrib = os.path.join(OPERdir, f'oper_allvar_{ymd}.grib')
+    outzeros = os.path.join(OPERdir, f'oper_000_{ymd}.grib')
 
     # Delete residual instances of files that are created so that
     # function can be re-run cleanly
@@ -374,7 +371,7 @@ def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
     for day_fcst,  realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
-            sfhour = '{:03d}'.format(fhour)
+            sfhour = f'{fhour:03d}'
             outuvrot = os.path.join(GRIBdir, day_fcst, sfhour, 'UVrot.grib')
             outscalargrid = os.path.join(
                 GRIBdir, day_fcst, sfhour, 'gscalar.grib')
@@ -391,11 +388,11 @@ def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
             os.remove(outuvrot)
             os.remove(outscalargrid)
     logger.debug(
-        'concatenated variables in hour order from hourly files '
-        'to daily file {}'.format(outgrib))
+        f'concatenated variables in hour order from hourly files to daily '
+        f'file {outgrib}')
     logger.debug(
-        'created zero-hour file for initialization of accumulated -> '
-        'instantaneous values calculations: {}'.format(outzeros))
+        f'created zero-hour file for initialization of accumulated -> '
+        f'instantaneous values calculations: {outzeros}')
     return outgrib, outzeros
 
 
@@ -408,22 +405,16 @@ def _crop_to_watersheds(
     """
     OPERdir = config['weather']['ops dir']
     wgrib2 = config['weather']['wgrib2']
-    newgrib = os.path.join(
-        OPERdir, 'oper_allvar_small_{ymd}.grib'.format(ymd=ymd))
-    newzeros = os.path.join(
-        OPERdir, 'oper_000_small_{ymd}.grib'.format(ymd=ymd))
-    istr = '{ist}:{ien}'.format(ist=ist, ien=ien)
-    jstr = '{jst}:{jen}'.format(jst=jst, jen=jen)
+    newgrib = os.path.join(OPERdir, f'oper_allvar_small_{ymd}.grib')
+    newzeros = os.path.join(OPERdir, f'oper_000_small_{ymd}.grib')
+    istr = f'{ist}:{ien}'
+    jstr = f'{jst}:{jen}'
     cmd = [wgrib2, outgrib, '-ijsmall_grib', istr, jstr, newgrib]
     lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(
-        'cropped hourly file to watersheds sub-region: {}'
-        .format(newgrib))
+    logger.debug(f'cropped hourly file to watersheds sub-region: {newgrib}')
     cmd = [wgrib2, outzeros, '-ijsmall_grib', istr, jstr, newzeros]
     lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(
-        'cropped zero-hour file to watersheds sub-region: {}'
-        .format(newgrib))
+    logger.debug(f'cropped zero-hour file to watersheds sub-region: {newgrib}')
     os.remove(outgrib)
     os.remove(outzeros)
     return newgrib, newzeros
@@ -434,20 +425,15 @@ def _make_netCDF_files(config, ymd, subdir, outgrib, outzeros):
     """
     OPERdir = config['weather']['ops dir']
     wgrib2 = config['weather']['wgrib2']
-    outnetcdf = os.path.join(OPERdir, subdir, 'ops_{ymd}.nc'.format(ymd=ymd))
-    out0netcdf = os.path.join(OPERdir, subdir,
-                              'oper_000_{ymd}.nc'.format(ymd=ymd))
+    outnetcdf = os.path.join(OPERdir, subdir, f'ops_{ymd}.nc')
+    out0netcdf = os.path.join(OPERdir, subdir, f'oper_000_{ymd}.nc')
     cmd = [wgrib2, outgrib, '-netcdf', outnetcdf]
     lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(
-        'created hourly netCDF classic file: {}'
-        .format(outnetcdf))
+    logger.debug(f'created hourly netCDF classic file: {outnetcdf}')
     lib.fix_perms(outnetcdf, grp_name=config['file group'])
     cmd = [wgrib2, outzeros, '-netcdf', out0netcdf]
     lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(
-        'created zero-hour netCDF classic file: {}'
-        .format(out0netcdf))
+    logger.debug(f'created zero-hour netCDF classic file: {out0netcdf}')
     os.remove(outgrib)
     os.remove(outzeros)
     return outnetcdf, out0netcdf
@@ -556,7 +542,7 @@ def _netCDF4_deflate(outnetcdf):
     cmd = ['ncks', '-4', '-L4', '-O', outnetcdf, outnetcdf]
     try:
         lib.run_in_subprocess(cmd, logger.debug, logger.error)
-        logger.debug('netCDF4 deflated {}'.format(outnetcdf))
+        logger.debug(f'netCDF4 deflated {outnetcdf}')
     except WorkerError:
         raise
 

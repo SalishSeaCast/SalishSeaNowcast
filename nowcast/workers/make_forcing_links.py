@@ -68,28 +68,27 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} {date} forcing file links on {0.host_name} created'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'forcing file links on {parsed_args.host_name} created',
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'success {.run_type}'.format(parsed_args)
+    msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} {date} forcing file links creation on {0.host_name} '
-        'failed'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'forcing file links creation on {parsed_args.host_name} failed',
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'failure {.run_type}'.format(parsed_args)
+    msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
 
@@ -109,10 +108,9 @@ def make_forcing_links(parsed_args, config, *args):
         ssh_client.close()
         checklist = {
             host_name: {
-                'links': '{0.run_type} {date} ssh'
-                         .format(
-                            parsed_args,
-                            date=parsed_args.run_date.format('YYYY-MM-DD')),
+                'links':
+                    f'{parsed_args.run_type} '
+                    f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh',
                 'run date': parsed_args.run_date.format('YYYY-MM-DD')}}
         return checklist
     _make_runoff_links(sftp_client, run_date, config, host_name)
@@ -123,10 +121,10 @@ def make_forcing_links(parsed_args, config, *args):
     ssh_client.close()
     checklist = {
         host_name: {
-            'links': '{0.run_type} {date} ssh rivers weather LiveOcean '
-                     .format(
-                        parsed_args,
-                        date=parsed_args.run_date.format('YYYY-MM-DD')),
+            'links':
+                f'{parsed_args.run_type} '
+                f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+                f'ssh rivers weather LiveOcean ',
             'run date': parsed_args.run_date.format('YYYY-MM-DD')
         }
     }
@@ -238,14 +236,12 @@ def _clear_links(sftp_client, host_run_config, dir):
     logger.debug(links_dir)
     for linkname in sftp_client.listdir(links_dir):
         sftp_client.unlink(os.path.join(links_dir, linkname))
-    logger.debug('{} symlinks cleared'.format(links_dir))
+    logger.debug(f'{links_dir} symlinks cleared')
 
 
 def _create_symlink(sftp_client, host_name, src, dest):
     sftp_client.symlink(src, dest)
-    logger.debug(
-        '{src} symlinked as {dest} on {host}'
-        .format(src=src, dest=dest, host=host_name))
+    logger.debug(f'{src} symlinked as {dest} on {host_name}')
 
 
 if __name__ == '__main__':
