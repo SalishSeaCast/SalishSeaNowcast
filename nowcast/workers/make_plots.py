@@ -84,29 +84,29 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.plot_type} plots for {run_date} {0.run_type} completed'
-        .format(
-            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.plot_type} plots for '
+        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'{parsed_args.run_type} completed',
         extra={
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'success {0.run_type} {0.plot_type}'.format(parsed_args)
+    msg_type = f'success {parsed_args.run_type} {parsed_args.plot_type}'
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{0.plot_type} plots failed for {run_date} {0.run_type} failed'
-        .format(
-            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.plot_type} plots failed for '
+        f'{parsed_args.run_date.format("YYYY-MM-DD")} {parsed_args.run_type} '
+        f'failed',
         extra={
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'failure {0.run_type} {0.plot_type}'.format(parsed_args)
+    msg_type = f'failure {parsed_args.run_type} {parsed_args.plot_type}'
     return msg_type
 
 
@@ -185,13 +185,12 @@ def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
             ))
     )):
         thumbnail_root = config['figures']['storm surge alerts thumbnail']
-        dmy_thumbnail = (
-            '{plot_name}_{dmy}.png'.format(plot_name=thumbnail_root, dmy=dmy))
+        dmy_thumbnail = f'{thumbnail_root}_{dmy}.png'
         dest_dir = os.path.join(
             config['figures']['storage path'],
             config['figures']['storm surge info portal path'])
         undated_thumbnail = os.path.join(
-            dest_dir, '{}.png'.format(thumbnail_root))
+            dest_dir, f'{thumbnail_root}.png')
         shutil.copy2(os.path.join(plots_dir, dmy_thumbnail), undated_thumbnail)
         checklist['storm surge alerts thumbnail'] = undated_thumbnail
     return checklist
@@ -214,25 +213,24 @@ def _make_publish_plots(
     fig = storm_surge_alerts_thumbnail.storm_surge_alerts_thumbnail(
         grids_15m, weather_path, coastline, tidal_predictions)
     filename = os.path.join(
-        plots_dir, 'Website_thumbnail_{date}.png'.format(date=dmy))
+        plots_dir, f'Website_thumbnail_{dmy}.png')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     logger.debug('starting storm_surge_alerts()')
     fig = storm_surge_alerts.storm_surge_alerts(
         grids_15m, weather_path, coastline, tidal_predictions)
     filename = os.path.join(
-        plots_dir, 'Threshold_website_{date}.svg'.format(date=dmy))
+        plots_dir, f'Threshold_website_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     logger.debug('starting pt_atkinson_tide()')
     fig = pt_atkinson_tide.pt_atkinson_tide(
         grid_T_hr, tidal_predictions, timezone)
-    filename = os.path.join(
-        plots_dir, 'PA_tidal_predictions_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'PA_tidal_predictions_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     tide_gauge_stns = (
         # stn name, figure filename prefix
@@ -244,58 +242,50 @@ def _make_publish_plots(
     )
     for stn_name, fig_file_prefix in tide_gauge_stns:
         logger.debug(
-            'starting compare_tide_prediction_max_ssh() for {}'
-            .format(stn_name))
+            f'starting compare_tide_prediction_max_ssh() for {stn_name}')
         fig = compare_tide_prediction_max_ssh.compare_tide_prediction_max_ssh(
             stn_name, grid_T_hr, grids_15m, bathy, weather_path,
             tidal_predictions, timezone)
-        filename = os.path.join(
-            plots_dir, '{fig_file_prefix}_{date}.svg'
-            .format(date=dmy, fig_file_prefix=fig_file_prefix))
+        filename = os.path.join(plots_dir, f'{fig_file_prefix}_{dmy}.svg')
         fig.savefig(
             filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-        logger.info('{} saved'.format(filename))
+        logger.info(f'{filename} saved')
 
     logger.debug('starting figures.compare_water_levels()')
     fig = figures.compare_water_levels(grid_T_hr, bathy, grids_15m, coastline)
-    filename = os.path.join(
-        plots_dir, 'NOAA_ssh_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'NOAA_ssh_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     logger.debug('starting figures.plot_thresholds_all()')
     fig = figures.plot_thresholds_all(
         grid_T_hr, bathy, grids_15m, weather_path, coastline,
         tidal_predictions)
-    filename = os.path.join(
-        plots_dir, 'WaterLevel_Thresholds_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'WaterLevel_Thresholds_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     logger.debug('starting figures.Sandheads_winds()')
     fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
-    filename = os.path.join(
-        plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'SH_wind_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     logger.debug('starting figures.winds_average_max()')
     fig = figures.winds_average_max(
         grid_T_hr, bathy, weather_path, coastline,
         station='all', wind_type='average')
-    filename = os.path.join(
-        plots_dir, 'Avg_wind_vectors_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Avg_wind_vectors_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     logger.debug('starting figures.winds_average_max()')
     fig = figures.winds_average_max(
         grid_T_hr, bathy, weather_path, coastline,
         station='all', wind_type='max')
-    filename = os.path.join(
-        plots_dir, 'Wind_vectors_at_max_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Wind_vectors_at_max_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
 
 def _make_comparisons_plots(
@@ -310,9 +300,9 @@ def _make_comparisons_plots(
 
     # Wind speed and direction at Sandheads
     fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
-    filename = os.path.join(plots_dir, 'SH_wind_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'SH_wind_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     # Ferry routes surface salinity
     for ferry_route in ('HB_DB', 'TW_DP', 'TW_SB'):
@@ -320,18 +310,17 @@ def _make_comparisons_plots(
             fig = research_ferries.salinity_ferry_route(
                 ferry_data_dir, grid_T_hr, bathy, ferry_route, dmy)
             filename = os.path.join(
-                plots_dir, '{route}_ferry_salinity_{date}.svg'
-                .format(route=ferry_route, date=dmy))
+                plots_dir, f'{ferry_route}_ferry_salinity_{dmy}.svg')
             fig.savefig(filename, facecolor=fig.get_facecolor())
-            logger.info('{} saved'.format(filename))
+            logger.info(f'{filename} saved')
         except (KeyError, ValueError, FileNotFoundError) as e:
             # Observations missing salinity data,
             # or ferry data or run results (most likely the former)
             # file not found,
             # so abort plot creation
             logger.debug(
-                'ferry salinity comparison figure for {} failed: {}'
-                .format(ferry_route, e))
+                f'ferry salinity comparison figure for {ferry_route} '
+                f'failed: {e}')
 
     # VENUS bottom temperature and salinity
     node_names = (
@@ -342,15 +331,16 @@ def _make_comparisons_plots(
                 node_name, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
                 dev_mesh_mask)
             filename = os.path.join(
-                plots_dir, 'Compare_VENUS_{node}_{date}.svg'
-                .format(node=node_name.rstrip(' node').replace(' ', '_'), date=dmy))
+                plots_dir,
+                f'Compare_VENUS_'
+                f'{node_name.rstrip(" node").replace(" ", "_")}_{dmy}.svg')
             fig.savefig(filename, facecolor=fig.get_facecolor())
-            logger.info('{} saved'.format(filename))
+            logger.info(f'{filename} saved')
         except TypeError:
             # Observations missing, so about figure creation
             logger.debug(
-                'VENUS {} CTD comparison figure failed: '
-                'No observations available'.format(node_name))
+                f'VENUS {node_name} CTD comparison figure failed: No '
+                f'observations available')
 
 
 def _future_comparison_plots(
@@ -383,27 +373,21 @@ def _future_comparison_plots(
     for model, obs, name, drange in zip(models, obs, names, dranges):
         fig = research_VENUS.plotADCP(
             model, obs, date, name, drange)
-        filename = os.path.join(
-            plots_dir, '{station}_ADCP_{date}.svg'.format(station=name,
-                                                          date=dmy))
+        filename = os.path.join(plots_dir, f'{name}_ADCP_{dmy}.svg')
         fig.savefig(filename, facecolor=fig.get_facecolor())
-        logger.info('{} saved'.format(filename))
+        logger.info(f'{filename} saved')
 
         fig = research_VENUS.plotdepavADCP(
             model, obs, date, name)
-        filename = os.path.join(
-            plots_dir, '{station}_depavADCP_{date}.svg'.format(station=name,
-                                                               date=dmy))
+        filename = os.path.join(plots_dir, f'{name}_depavADCP_{dmy}.svg')
         fig.savefig(filename, facecolor=fig.get_facecolor())
-        logger.info('{} saved'.format(filename))
+        logger.info(f'{filename} saved')
 
         fig = research_VENUS.plottimeavADCP(
             model, obs, date, name)
-        filename = os.path.join(
-            plots_dir, '{station}_timeavADCP_{date}.svg'.format(station=name,
-                                                                date=dmy))
+        filename = os.path.join(plots_dir, f'{name}_timeavADCP_{dmy}.svg')
         fig.savefig(filename, facecolor=fig.get_facecolor())
-        logger.info('{} saved'.format(filename))
+        logger.info(f'{filename} saved')
 
 
 def _make_research_plots(
@@ -419,34 +403,29 @@ def _make_research_plots(
     grid_e = _results_dataset_gridded('east', results_dir)
 
     fig = figures.thalweg_salinity(grid_T_dy, mesh_mask, bathy)
-    filename = os.path.join(
-        plots_dir, 'Salinity_on_thalweg_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Salinity_on_thalweg_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     fig = figures.thalweg_temperature(grid_T_dy, mesh_mask, bathy)
-    filename = os.path.join(
-        plots_dir, 'Temperature_on_thalweg_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Temperature_on_thalweg_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     fig = figures.plot_surface(grid_T_dy, grid_U_dy, grid_V_dy, bathy)
-    filename = os.path.join(
-        plots_dir, 'T_S_Currents_on_surface_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'T_S_Currents_on_surface_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     fig = research_VENUS.plot_vel_NE_gridded('Central', grid_c)
-    filename = os.path.join(
-        plots_dir, 'Currents_at_VENUS_Central_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Currents_at_VENUS_Central_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
     fig = research_VENUS.plot_vel_NE_gridded('East', grid_e)
-    filename = os.path.join(
-        plots_dir, 'Currents_at_VENUS_East_{date}.svg'.format(date=dmy))
+    filename = os.path.join(plots_dir, f'Currents_at_VENUS_East_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info('{} saved'.format(filename))
+    logger.info(f'{filename} saved')
 
 
 def _results_dataset(period, grid, results_dir):

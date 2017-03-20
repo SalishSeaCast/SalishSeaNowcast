@@ -142,8 +142,7 @@ def _plot_alerts_map(ax, coastline, plot_data, theme):
 
 def _alerts_map_axis_labels(ax, date_time, theme):
     ax.set_title(
-        'Marine and Atmospheric Conditions\n {:%A, %B %d, %Y}'
-        .format(date_time),
+        f'Marine and Atmospheric Conditions\n {date_time:%A, %B %d, %Y}',
         fontproperties=theme.FONTS['axes title large'],
         color=theme.COLOURS['text']['axes title'])
     ax.set_xlabel(
@@ -201,7 +200,7 @@ def _alerts_map_geo_labels(ax, theme):
         ax.text(
             lon + dx, lat + dy, place, rotation=rotation,
             horizontalalignment=justify,
-            fontproperties=theme.FONTS['location label {}'.format(label_size)])
+            fontproperties=theme.FONTS[f'location label {label_size}'])
 
 
 def _plot_legend(ax, risk_level, text, theme):
@@ -214,8 +213,7 @@ def _plot_legend(ax, risk_level, text, theme):
     colour_name = 'yellow' if colour.lower() == 'gold' else colour
     ax.text(
         0.4, 0.2,
-        '{colour_name}:\n{label}'.format(
-            colour_name=colour_name.title(), label=text),
+        f'{colour_name.title()}:\n{text}',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['legend label large'],
         color=theme.COLOURS['text']['risk level label'])

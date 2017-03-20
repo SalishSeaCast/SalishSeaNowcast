@@ -84,8 +84,8 @@ def get_filenames(t_orig, t_final, period, grid, model_path):
     allfiles = glob.glob(model_path+'*/SalishSea_'+period+'*_'+grid+'.nc')
     sdt = dates[0].strftime('%Y%m%d')
     edt = dates[-1].strftime('%Y%m%d')
-    sstr = 'SalishSea_{}_{}_{}_{}.nc'.format(period, sdt, sdt, grid)
-    estr = 'SalishSea_{}_{}_{}_{}.nc'.format(period, edt, edt, grid)
+    sstr = f'SalishSea_{period}_{sdt}_{sdt}_{grid}.nc'
+    estr = f'SalishSea_{period}_{edt}_{edt}_{grid}.nc'
 
     files = []
     for filename in allfiles:
@@ -127,7 +127,7 @@ def get_filenames_15(t_orig, t_final, station, model_path):
     files = []
     for i in dates:
         sdt = i.strftime('%d%b%y').lower()
-        filename = (model_path+'{}/VENUS_{}_gridded.nc'.format(sdt, station))
+        filename = f'{model_path}{sdt}/VENUS_{station}_gridded.nc'
         files.append(filename)
 
     return files
@@ -296,7 +296,9 @@ def compare_ssh_tides(grid_B, files, t_orig, t_final, name, PST=0, MSL=0,
     figures.plot_tides(ax, name, PST, MSL, color=colours['predicted'])
 
     # Figure format
-    ax.set_title('Modelled Sea Surface Height versus Predicted Tides at {station}: {t_start:%d-%b-%Y} to {t_end:%d-%b-%Y}'.format(station=name, t_start=t_orig, t_end=t_final))
+    ax.set_title(
+        f'Modelled Sea Surface Height versus Predicted Tides at {name}: '
+        f'{t_orig:%d-%b-%Y} to {t_final:%d-%b-%Y}')
     ax.set_ylim([-3.0, 3.0])
     ax.set_xlabel('[hrs]')
     ax.legend(loc=2, ncol=2)

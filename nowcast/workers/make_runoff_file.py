@@ -53,8 +53,8 @@ def main():
 def success(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        '{date} runoff file creation from Fraser at Hope and climatology '
-        'elsewhere complete'.format(date=ymd),
+        f'{ymd} runoff file creation from Fraser at Hope and climatology '
+        f'elsewhere complete',
         extra={'run_date': ymd})
     return 'success'
 
@@ -62,7 +62,7 @@ def success(parsed_args):
 def failure(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.critical(
-        '{date} runoff file creation failed'.format(date=ymd),
+        f'{ymd} runoff file creation failed',
         extra={'run_date': ymd})
     return 'failure'
 
@@ -83,9 +83,7 @@ def make_runoff_file(parsed_args, config, *args):
     criverflow, lat, lon, riverdepth = _get_river_climatology(config)
     # Interpolate to today
     driverflow = _calculate_daily_flow(yesterday, criverflow)
-    logger.debug(
-        'Getting file for {yesterday}'
-        .format(yesterday=yesterday.format('YYYY-MM-DD')))
+    logger.debug(f'Getting file for {yesterday.format("YYYY-MM-DD")}')
     # Get Fraser Watershed Climatology without Fraser
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
     # Calculate combined runoff for long case only and write file
@@ -206,9 +204,7 @@ def _combine_runoff(
     filename = filename_tmpls[length].format(yesterday.date())
     filepath = os.path.join(directory, filename)
     _write_file(filepath, yesterday, runoff, lat, lon, riverdepth)
-    logger.debug(
-        'File written to {directory}/{filename}'
-        .format(directory=directory, filename=filename))
+    logger.debug(f'File written to {directory}/{filename}')
     return filepath
 
 

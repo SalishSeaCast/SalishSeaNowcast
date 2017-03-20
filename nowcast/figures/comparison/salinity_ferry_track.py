@@ -102,10 +102,8 @@ def _salinity_map_place_markers(ax, theme):
 def _salinity_map_axis_labels(ax, sal_model, theme):
     sal_time = sal_model.timestamp.to('local')
     ax.set_title(
-        '1.5m Model Salinity at {time} {tzone} and Ferry Track'
-        .format(
-            time=sal_time.format('HH:mm'),
-            tzone=sal_time.tzinfo.tzname(sal_time.datetime)),
+        f'1.5m Model Salinity at {sal_time.format("HH:mm")} '
+        f'{sal_time.tzinfo.tzname(sal_time.datetime)} and Ferry Track',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis'])
     ax.set_xlabel(
