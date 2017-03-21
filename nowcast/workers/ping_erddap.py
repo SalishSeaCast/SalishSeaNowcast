@@ -64,18 +64,17 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{.dataset} ERDDAP dataset flag file(s) created'.format(parsed_args),
+        f'{parsed_args.dataset} ERDDAP dataset flag file(s) created',
         extra={'dataset': parsed_args.dataset})
-    msg_type = 'success {.dataset}'.format(parsed_args)
+    msg_type = f'success {parsed_args.dataset}'
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{.dataset} ERDDAP dataset flag file(s) creation failed'
-        .format(parsed_args),
+        f'{parsed_args.dataset} ERDDAP dataset flag file(s) creation failed',
         extra={'dataset': parsed_args.dataset})
-    msg_type = 'failure {.dataset}'.format(parsed_args)
+    msg_type = f'failure {parsed_args.dataset}'
     return msg_type
 
 
@@ -86,7 +85,7 @@ def ping_erddap(parsed_args, config, *args):
     try:
         for dataset_id in config['erddap']['datasetIDs'][dataset]:
             (flag_path / dataset_id).touch()
-            logger.debug('{} touched'.format(flag_path / dataset_id))
+            logger.debug(f'{flag_path / dataset_id} touched')
             checklist[dataset].append(dataset_id)
     except KeyError:
         # run type is not in datasetIDs dict

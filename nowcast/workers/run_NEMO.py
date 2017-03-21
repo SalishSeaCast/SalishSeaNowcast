@@ -72,29 +72,29 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} NEMO run for {run_date} on {0.host_name} started'
-        .format(
-            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} NEMO run for '
+        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'on {parsed_args.host_name} started',
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'success {.run_type}'.format(parsed_args)
+    msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} NEMO run for {run_date} on {0.host_name} failed'
-        .format(
-            parsed_args, run_date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} NEMO run for '
+        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'on {parsed_args.host_name} failed',
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'failure {.run_type}'.format(parsed_args)
+    msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
 
@@ -108,8 +108,7 @@ def run_NEMO(parsed_args, config, tell_manager):
     run_desc_filepath = _create_run_desc_file(
         run_date, run_type, host_name, config)
     run_dir = Path(salishsea_cmd.api.prepare(str(run_desc_filepath)))
-    logger.debug(
-        '{}: temporary run directory: {}'.format(run_type, run_dir))
+    logger.debug(f'{run_type}: temporary run directory: {run_dir}')
     run_script_filepath = _create_run_script(
         run_date, run_type, run_dir, run_desc_filepath, host_name, config)
     run_desc_filepath.unlink()
@@ -128,7 +127,7 @@ def run_NEMO(parsed_args, config, tell_manager):
 
 def _create_run_desc_file(run_date, run_type, host_name, config):
     dmy = run_date.format('DDMMMYY').lower()
-    run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+    run_id = f'{dmy}{run_type}'
     run_days = {
         'nowcast': run_date,
         'nowcast-green': run_date,
@@ -144,11 +143,10 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
         run_days[run_type], run_type, run_id, restart_timestep, host_name,
         config)
     run_prep_dir = Path(host_run_config['run prep dir'])
-    run_desc_filepath = run_prep_dir/'{}.yaml'.format(run_id)
+    run_desc_filepath = run_prep_dir / f'{run_id}.yaml'
     with run_desc_filepath.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
-    logger.debug(
-        '{}: run description file: {}'.format(run_type, run_desc_filepath))
+    logger.debug(f'{run_type}: run description file: {run_desc_filepath}')
     return run_desc_filepath
 
 
@@ -210,7 +208,7 @@ def _calc_new_namelist_lines(
     next_restart_timestep = int(
         restart_timestep + int(run_duration) * timesteps_per_day)
     lines[stocklist_line] = lines[stocklist_line].replace(
-        stocklist, '{},'.format(next_restart_timestep))
+        stocklist, f'{next_restart_timestep},')
     return lines, restart_timestep
 
 
@@ -237,8 +235,7 @@ def _run_description(
         restart_dir = Path(host_run_config['results'][restart_from[run_type]])
     except KeyError:
         logger.critical(
-            'no results directory for {run_type} in {host_name} run config'
-            .format(run_type=run_type, host_name=host_name))
+            f'no results directory for {run_type} in {host_name} run config')
         raise WorkerError
     prev_run_dmys = {
         # run-type: previous run's ddmmmyy results directory name
@@ -253,7 +250,7 @@ def _run_description(
             'link to': str(
                 Path(
                     restart_dir/prev_run_dmys[run_type] /
-                    'SalishSea_{:08d}_restart.nc'.format(restart_timestep))
+                    f'SalishSea_{restart_timestep:08d}_restart.nc')
                 .resolve())
         }}
     if run_type == 'nowcast-green':
@@ -261,7 +258,7 @@ def _run_description(
             'link to': str(
                 Path(
                     restart_dir/prev_run_dmys[run_type] /
-                    'SalishSea_{:08d}_restart_trc.nc'.format(restart_timestep))
+                    f'SalishSea_{restart_timestep:08d}_restart_trc.nc')
                 .resolve())
         }
     run_prep_dir = Path(host_run_config['run prep dir'])
@@ -347,7 +344,7 @@ def _create_run_script(run_date, run_type, run_dir, run_desc_filepath,
     with run_script_filepath.open('wt') as f:
         f.write(script)
     run_script_filepath.chmod(FilePerms(user='rwx', group='rwx', other='r'))
-    logger.debug('{}: run script: {}'.format(run_type, run_script_filepath))
+    logger.debug(f'{run_type}: run script: {run_script_filepath}')
     return run_script_filepath
 
 
@@ -391,8 +388,7 @@ def _definitions(
     enabled_host_config = config['run']['enabled hosts'][host_name]
     mpirun = 'mpirun'
     if enabled_host_config.get('mpi hosts file') is not None:
-        mpirun = 'mpirun --hostfile {[mpi hosts file]}'.format(
-            enabled_host_config)
+        mpirun = f'mpirun --hostfile {enabled_host_config["mpi hosts file"]}'
     defns = (
         'RUN_ID="{run_id}"\n'
         'RUN_DESC="{run_desc_file}"\n'
@@ -416,17 +412,13 @@ def _definitions(
 
 def _execute(nemo_processors, xios_processors, xios_host):
     mpirun = (
-        '${{MPIRUN}} -np {nemo_procs} --bind-to-core ./nemo.exe : '
-        '-np {xios_procs} --bind-to-core ./xios_server.exe'.format(
-            nemo_procs=nemo_processors, xios_procs=xios_processors))
+        f'${{MPIRUN}} -np {nemo_processors} --bind-to-core ./nemo.exe : '
+        f'-np {xios_processors} --bind-to-core ./xios_server.exe')
     if xios_host is not None:
         mpirun = (
-            '${{MPIRUN}} -np {nemo_procs} --bind-to-core ./nemo.exe : '
-            '-host {xios_host} '
-            '-np {xios_procs} --bind-to-core ./xios_server.exe'.format(
-                nemo_procs=nemo_processors,
-                xios_host=xios_host,
-                xios_procs=xios_processors))
+            f'${{MPIRUN}} -np {nemo_processors} --bind-to-core ./nemo.exe : '
+            f'-host {xios_host} -np {xios_processors} --bind-to-core '
+            f'./xios_server.exe')
     script = (
         'mkdir -p ${RESULTS_DIR}\n'
         '\n'
@@ -436,8 +428,7 @@ def _execute(nemo_processors, xios_processors, xios_host):
         'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
     )
     script += (
-        '{mpirun} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr\n'
-        .format(mpirun=mpirun))
+        f'{mpirun} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr\n')
     script += (
         'echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout\n'
         '\n'
@@ -478,20 +469,18 @@ def _cleanup():
 
 def _launch_run_script(run_type, run_script_filepath, host_name, config):
     host_run_config = config['run'][host_name]
-    logger.info('{}: launching {} on {}'.format(
-        run_type, run_script_filepath, host_name))
+    logger.info(f'{run_type}: launching {run_script_filepath} on {host_name}')
     cmd = shlex.split(
-        '{0[job exec cmd]} {1}'.format(host_run_config, run_script_filepath))
-    logger.debug('{}: running command in subprocess: {}'.format(run_type, cmd))
+        f'{host_run_config["job exec cmd"]} {run_script_filepath}')
+    logger.debug(f'{run_type}: running command in subprocess: {cmd}')
     if host_run_config['job exec cmd'] == 'qsub':
         torque_id = subprocess.check_output(
             cmd, universal_newlines=True).strip()
-        logger.debug('{}: TORQUE/PBD job id: {}'.format(run_type, torque_id))
-        cmd = shlex.split('pgrep {}'.format(torque_id))
+        logger.debug(f'{run_type}: TORQUE/PBD job id: {torque_id}')
+        cmd = shlex.split(f'pgrep {torque_id}')
     else:
         subprocess.Popen(cmd)
-        cmd = shlex.split(
-            'pgrep --newest --exact --full "{}"'.format(' '.join(cmd)))
+        cmd = shlex.split(f'pgrep --newest --exact --full "{" ".join(cmd)}"')
     run_process_pid = None
     while not run_process_pid:
         try:
@@ -500,25 +489,21 @@ def _launch_run_script(run_type, run_script_filepath, host_name, config):
         except subprocess.CalledProcessError:
             # Process has not yet been spawned
             pass
-    logger.debug('{} on {}: run pid: {}'.format(
-        run_type, host_name, run_process_pid))
+    logger.debug(f'{run_type} on {host_name}: run pid: {run_process_pid}')
     return run_process_pid
 
 
 def _launch_run_watcher(run_type, run_process_pid, host_name, config):
     enabled_host_config = config['run']['enabled hosts'][host_name]
-    logger.info('launching {} watch_NEMO worker on {}'.format(
-        run_type, host_name))
+    logger.info(f'launching {run_type} watch_NEMO worker on {host_name}')
     cmd = shlex.split(
-        '{0[python]} -m nowcast.workers.watch_NEMO {0[config file]} '
-        '{host_name} {run_type} {run_process_pid}'
-        .format(
-            enabled_host_config, host_name=host_name, run_type=run_type,
-            run_process_pid=run_process_pid))
-    logger.debug('{}: running command in subprocess: {}'.format(run_type, cmd))
+        f'{enabled_host_config["python"]} -m nowcast.workers.watch_NEMO '
+        f'{enabled_host_config["config file"]} {host_name} {run_type} '
+        f'{run_process_pid}')
+    logger.debug(f'{run_type}: running command in subprocess: {cmd}')
     watcher_process = subprocess.Popen(cmd, universal_newlines=True)
-    logger.debug('{} on {}: watcher pid: {.pid}'.format(
-        run_type, host_name, watcher_process))
+    logger.debug(
+        f'{run_type} on {host_name}: watcher pid: {watcher_process.pid}')
     return watcher_process.pid
 
 
