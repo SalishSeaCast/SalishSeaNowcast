@@ -344,8 +344,6 @@ run:
       weights: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
     # Directories on compute host where results are stored, keyed by run type
     results:
-      # Note that salish has shared storage with the nowcast system results
-      # archives
       nowcast: /nemoShare/MEOPAR/SalishSea/nowcast/
       forecast: /nemoShare/MEOPAR/SalishSea/forecast/
       nowcast-green: /nemoShare/MEOPAR/SalishSea/nowcast-green/
@@ -462,6 +460,17 @@ run:
     # Directory on compute host where files (e.g. namelist.time) and symlinks
     # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
     run prep dir: /home/sallen/MEOPAR/nowcast/
+
+
+wave forecasts:
+  # Directory on compute host where files (e.g. ww3_*.inp,  mod_def.ww3) and
+  # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
+  # are stored
+  run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
+  # Directories on compute host where results are stored, keyed by run type
+  results:
+    forecast: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast/
+    forecast2: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/
 
 
 # Distributed logging system configuration
@@ -711,6 +720,15 @@ message registry:
       success forecast2: forecast2 NEMO run completed
       failure forecast2: forecast2 NEMO run failed
       crash: watch_NEMO worker crashed
+
+    run_ww3:
+      checklist key: WW3 run
+      need: WW3 run information dict requested
+      success forecast2: forecast2 WW3 run started
+      failure forecast2: forecast2 WW3 run failed
+      success forecast: forecast WW3 run started
+      failure forecast: forecast WW3 run failed
+      crash: run_ww3 worker crashed
 
     download_results:
       checklist key: results files
