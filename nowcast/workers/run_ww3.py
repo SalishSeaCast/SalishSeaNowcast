@@ -300,7 +300,7 @@ $ File prefix
 $ number of characters in date
 $ IX, IY range
 $
-  SoG_ww3_
+  SoG_ww3_fields_
   8
   1 1000000 1 1000000
 '''
@@ -311,6 +311,7 @@ def _ww3_ounp_contents(run_date):
     """
     :type run_date: :py:class:`arrow.Arrow`
     """
+    start_date = run_date.format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III NETCDF Point output post-processing
 $
 $ First output time (YYYYMMDD HHmmss), output increment (s), number of output times
@@ -326,7 +327,7 @@ $ tables of mean parameters
 $ WW3 global attributes
 $ time,station dimension order
 $ WMO standard output
-  SoG_ww3_
+  SoG_ww3_points_
   8
   4 
   T 100

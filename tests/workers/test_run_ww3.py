@@ -263,6 +263,23 @@ class TestWW3OunfContents:
         assert '4' in contents
         assert '0 1 2' in contents
         assert 'T' in contents
-        assert 'SoG_ww3_' in contents
+        assert 'SoG_ww3_fields_' in contents
         assert '8' in contents
         assert '1 1000000 1 1000000' in contents
+
+
+class TestWW3OunpContents:
+    """Unit test for _ww3_ounp_contents() function.
+    """
+    def test_ww3_ounp_contents(self):
+        contents = run_ww3._ww3_ounp_contents(arrow.get('2017-03-26'))
+        assert '20170326 000000 1800 144' in contents
+        assert '-1' in contents
+        assert 'SoG_ww3_points_' in contents
+        assert '8' in contents
+        assert '4' in contents
+        assert 'T 100' in contents
+        assert '2' in contents
+        assert '0' in contents
+        assert '6' in contents
+        assert 'T' in contents
