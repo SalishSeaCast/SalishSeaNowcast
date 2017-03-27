@@ -29,6 +29,7 @@ from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
+from nemo_nowcast.fileutils import FilePerms
 
 
 NAME = 'run_ww3'
@@ -91,12 +92,22 @@ def failure(parsed_args):
 
 
 def run_ww3(parsed_args, config, *args):
+    """
+    :type parsed_args: :py:class:`argparse.Namespace` 
+    :type config: :py:class:`nemo_nowcast.Config`
+    :return: Nowcast system checklist items
+    :rtype: dict
+    """
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     run_dir_path = _build_tmp_run_dir(run_date, run_type, config)
     logger.info(f'Created run directory {run_dir_path}')
-    run_pid = _launch_run()
+    results_path = Path(config['wave forecasts']['results'][run_type])
+    script = _build_run_script(run_date, run_type, run_dir_path, results_path,
+                               config)
+    run_script_path = _write_run_script(run_type, script, run_dir_path)
+    run_pid = _launch_run(run_script_path)
     checklist = {
         run_type: {
             'host': host_name,
@@ -163,6 +174,7 @@ def _write_ww3_input_files(run_date, run_dir_path):
         contents = contents_func(run_date)
         with (run_dir_path / filename).open('wt') as f:
             f.write(contents)
+        logger.debug(f'created {run_dir_path/filename}')
 
 
 def _ww3_prnc_wind_contents(run_date):
@@ -340,7 +352,106 @@ $ WMO standard output
     return contents
 
 
-def _launch_run():
+def _build_run_script(run_date, run_type, run_dir_path, results_path, config):
+    script = '#!/bin/bash\n'
+    script = '\n'.join((
+        script,
+        '{defns}\n'
+        '{prepare}\n'
+        '{execute}\n'
+        .format(
+            defns=_definitions(
+                run_date, run_type, run_dir_path, results_path, config),
+            prepare=_prepare(),
+            execute=_execute(),
+        )
+    ))
+    return script
+
+
+def _definitions(run_date, run_type, run_dir_path, results_path, config):
+    ddmmmyy = run_date.format('DDMMMYY').lower()
+    wwatch3_exe_path = config['waves forecast']['wwatch3 exe path']
+    defns = (
+        f'RUN_ID="{ddmmmyy}ww3-{run_type}"\n'
+        f'WORK_DIR="{run_dir_path}"\n'
+        f'RESULTS_DIR="{results_path}"\n'
+        f'WW3_EXE="{wwatch3_exe_path}"\n'
+        f'MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"\n'
+    )
+    return defns
+
+
+def _prepare():
+    preparations = (
+        'mkdir -p ${RESULTS_DIR}\n'
+        '\n'
+        'cd ${WORK_DIR}\n'
+        'echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout\n'
+        '\n'
+        'echo "Starting wind.nc file creation at $(date)" '
+        '>>${RESULTS_DIR}/stdout\n'
+        'ln -sf ww3_prnc_wind.inp ww3_prnc.inp\n'
+        '${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
+        'echo "Ending wind.nc file creation at $(date)" '
+        '>>${RESULTS_DIR}/stdout\n'
+        '\n'
+        'echo "Starting current.nc file creation at $(date)" '
+        '>>${RESULTS_DIR}/stdout\n'
+        'ln -sf ww3_prnc_current.inp ww3_prnc.inp\n'
+        '${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
+        'echo "Ending current.nc file creation at $(date)" '
+        '>>${RESULTS_DIR}/stdout\n'
+        '\n'
+        'rm -f ww3_prnc.inp\n'
+        '\n'
+    )
+    return preparations
+
+
+def _execute():
+    execution = (
+        'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel '
+        '>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
+        'echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '\n'
+    )
+    return execution
+"""
+echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
+${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel >ww3_shel.out 2>>${RESULTS_DIR}/stderr
+echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
+
+echo "Starting netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
+${WW3_EXE}/ww3_ounf > ww3_ounf.out 2>>${RESULTS_DIR}/stderr
+echo "Ending netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
+
+chmod g+rwx ${RESULTS_DIR}
+chmod g+rw ${RESULTS_DIR}/*
+chmod o+rx ${RESULTS_DIR}
+chmod o+r ${RESULTS_DIR}/*
+
+echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+"""
+
+
+def _write_run_script(run_type, script, run_dir_path):
+    """
+    :param str run_type: 
+    :param str script: 
+    :param :py:class:`pathlib.Path` run_dir_path: 
+    :rtype: :py:class:`pathlib.Path`
+    """
+    run_script_path = run_dir_path/'SoGWW3.sh'
+    with run_script_path.open('wt') as f:
+        f.write(script)
+    run_script_path.chmod(FilePerms(user='rwx', group='rwx', other='r'))
+    logger.debug(f'wwatch3-{run_type}: run script: {run_script_path}')
+    return run_script_path
+
+
+def _launch_run(run_script_path):
     run_pid = ''
     return run_pid
 
