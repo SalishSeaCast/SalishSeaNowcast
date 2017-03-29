@@ -32,6 +32,7 @@ from nowcast.workers import run_ww3
 def config(scope='function'):
     return {'wave forecasts': {
         'run prep dir': 'wwatch3-runs',
+        'wwatch3 exe path': 'wwatch3-5.16/exe',
         'results': {
             'forecast2': 'wwatch3-forecast2',
             'forecast': 'wwatch3-forecast',
@@ -142,9 +143,11 @@ class TestRunWW3:
         'forecast',
     ])
     @patch('nowcast.workers.run_ww3._build_tmp_run_dir')
+    @patch('nowcast.workers.run_ww3._write_run_script')
     @patch('nowcast.workers.run_ww3._launch_run', return_value=4343)
     def test_checklist(
-        self, m_launch_run, m_create_tmp_run_dir, m_logger, run_type, config
+        self, m_launch_run, m_write_run_script, m_create_tmp_run_dir, m_logger,
+        run_type, config
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud', run_type=run_type,
@@ -283,3 +286,74 @@ class TestWW3OunpContents:
         assert '0' in contents
         assert '6' in contents
         assert 'T' in contents
+
+
+class TestBuildRunScript:
+    """Unit test for _build_run_script() function.
+    """
+    pass
+
+
+class TestDefinitions:
+    """Unit test for _definitions() function.
+    """
+    @pytest.mark.parametrize('run_type', [
+        'forecast2',
+        'forecast',
+    ])
+    def test_definitions(self, run_type, config):
+        defns = run_ww3._definitions(
+            arrow.get('2017-03-29'), run_type, Path('wwatch3-runs/tmp_run_dir'),
+            Path(f'wwatch3-{run_type}'), config)
+        expected = f'''RUN_ID="29mar17ww3-{run_type}"
+        WORK_DIR="wwatch3-runs/tmp_run_dir"
+        RESULTS_DIR="wwatch3-{run_type}/29mar17"
+        WW3_EXE="wwatch3-5.16/exe"
+        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(defns.splitlines()):
+            pass
+        assert line.strip() == expected[i].strip()
+
+
+class TestPrepare:
+    """Unit test for _prepare() function.
+    """
+    def test_prepare(self):
+        preparations = run_ww3._prepare()
+        expected = '''mkdir -p ${RESULTS_DIR}
+
+        cd ${WORK_DIR}
+        echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
+
+        echo "Starting wind.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
+        ln -sf ww3_prnc_wind.inp ww3_prnc.inp
+        ${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        echo "Ending wind.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
+
+        echo "Starting current.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
+        ln -sf ww3_prnc_current.inp ww3_prnc.inp
+        ${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        echo "Ending current.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
+
+        rm -f ww3_prnc.inp
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(preparations.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+
+class TestExecute:
+    """Unit test for _execute() function.
+    """
+    def test_execute(self):
+        preparations = run_ww3._execute()
+        expected = '''echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
+        ${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
+
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(preparations.splitlines()):
+            assert line.strip() == expected[i].strip()

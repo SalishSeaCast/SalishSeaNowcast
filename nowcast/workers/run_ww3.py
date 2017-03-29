@@ -353,6 +353,16 @@ $ WMO standard output
 
 
 def _build_run_script(run_date, run_type, run_dir_path, results_path, config):
+    """
+    :param :py:class:`arrow.Arrow` run_date: 
+    :param str run_type: 
+    :param :py:class:`pathlib.Path` run_dir_path: 
+    :param :py:class:`pathlib.Path` results_path: 
+    :param :py:class:`nemo_nowcast.Config` config: 
+    
+    :return: wwatch3 run set-up and execution script
+    :rtype: str 
+    """
     script = '#!/bin/bash\n'
     script = '\n'.join((
         script,
@@ -370,12 +380,22 @@ def _build_run_script(run_date, run_type, run_dir_path, results_path, config):
 
 
 def _definitions(run_date, run_type, run_dir_path, results_path, config):
+    """
+    :param :py:class:`arrow.Arrow` run_date: 
+    :param str run_type: 
+    :param :py:class:`pathlib.Path` run_dir_path: 
+    :param :py:class:`pathlib.Path` results_path: 
+    :param :py:class:`nemo_nowcast.Config` config: 
+    
+    :return: Definitions section of wwatch3 run set-up and execution script
+    :rtype: str 
+    """
     ddmmmyy = run_date.format('DDMMMYY').lower()
-    wwatch3_exe_path = config['waves forecast']['wwatch3 exe path']
+    wwatch3_exe_path = config['wave forecasts']['wwatch3 exe path']
     defns = (
         f'RUN_ID="{ddmmmyy}ww3-{run_type}"\n'
         f'WORK_DIR="{run_dir_path}"\n'
-        f'RESULTS_DIR="{results_path}"\n'
+        f'RESULTS_DIR="{results_path/ddmmmyy}"\n'
         f'WW3_EXE="{wwatch3_exe_path}"\n'
         f'MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"\n'
     )
@@ -404,7 +424,6 @@ def _prepare():
         '>>${RESULTS_DIR}/stdout\n'
         '\n'
         'rm -f ww3_prnc.inp\n'
-        '\n'
     )
     return preparations
 
@@ -419,10 +438,6 @@ def _execute():
     )
     return execution
 """
-echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel >ww3_shel.out 2>>${RESULTS_DIR}/stderr
-echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
-
 echo "Starting netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
 ${WW3_EXE}/ww3_ounf > ww3_ounf.out 2>>${RESULTS_DIR}/stderr
 echo "Ending netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
