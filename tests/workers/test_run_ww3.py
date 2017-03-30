@@ -16,11 +16,9 @@
 """Unit tests for Salish Sea WaveWatch3 forecast worker run_ww3 worker.
 """
 from pathlib import Path
+import subprocess
 from types import SimpleNamespace
-from unittest.mock import (
-    patch,
-    Mock,
-    call, create_autospec)
+from unittest.mock import patch
 
 import arrow
 import pytest
@@ -33,6 +31,7 @@ def config(scope='function'):
     return {'wave forecasts': {
         'run prep dir': 'wwatch3-runs',
         'wwatch3 exe path': 'wwatch3-5.16/exe',
+        'salishsea cmd': 'salishsea',
         'results': {
             'forecast2': 'wwatch3-forecast2',
             'forecast': 'wwatch3-forecast',
@@ -228,7 +227,8 @@ class TestWW3ShelContents:
     """Unit test for _ww3_shel_contents() function.
     """
     def test_ww3_shel_contents(self):
-        contents = run_ww3._ww3_shel_contents(arrow.get('2017-03-26'))
+        contents = run_ww3._ww3_shel_contents(arrow.get('2017-03-29'))
+        # Forcing/inputs to use
         assert 'F F  Water levels w/ homogeneous field data' in contents
         assert 'T F  Currents w/ homogeneous field data' in contents
         assert 'T F  Winds w/ homogeneous field data' in contents
@@ -236,21 +236,30 @@ class TestWW3ShelContents:
         assert 'F    Assimilation data : Mean parameters' in contents
         assert 'F    Assimilation data : 1-D spectra' in contents
         assert 'F    Assimilation data : 2-D spectra.' in contents
-        assert '20170326 000000  Start time (YYYYMMDD HHmmss)' in contents
-        assert '20170328 233000  End time (YYYYMMDD HHmmss)' in contents
+        # Start/end time
+        assert '20170329 000000  Start time (YYYYMMDD HHmmss)' in contents
+        assert '20170331 120000  End time (YYYYMMDD HHmmss)' in contents
+        # Output server mode
         assert '2  dedicated process' in contents
-        assert '20170326 000000 1800 20170328 233000' in contents
+        # Field outputs
+        assert '20170329 000000 1800 20170331 120000' in contents
         assert 'N  by name' in contents
-        assert 'HS LM WND CUR FP T02 DIR DP WCH WCC TWO FCO USS' in contents
-        assert '20170326 000000 1800 20170328 233000' in contents
+        assert 'HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS' in contents
+        # Point outputs
+        assert '20170329 000000 600 20170331 120000' in contents
         assert "236.52 48.66 'C46134PatB'" in contents
         assert "236.27 49.34 'C46146HalB'" in contents
         assert "235.01 49.91 'C46131SenS'" in contents
         assert "0.0 0.0 'STOPSTRING'" in contents
-        assert '20170326 000000 0 20170328 233000' in contents
-        assert '20170328 233000 3600 20170328 233000' in contents
-        assert '20170326 000000 0 20170328 233000' in contents
-        assert '20170326 000000 0 20170328 233000' in contents
+        # Along-track output (required placeholder for unused feature)
+        assert '20170329 000000 0 20170331 120000' in contents
+        # Restart files
+        assert '20170330 000000 3600 20170330 000000' in contents
+        # Boundary data (required placeholder for unused feature)
+        assert '20170329 000000 0 20170331 120000' in contents
+        # Separated wave field data (required placeholder for unused feature)
+        assert '20170329 000000 0 20170331 120000' in contents
+        # Homogeneous field data (required placeholder for unused feature)
         assert "STP" in contents
 
 
@@ -259,9 +268,9 @@ class TestWW3OunfContents:
     """
     def test_ww3_ounf_contents(self):
         contents = run_ww3._ww3_ounf_contents(arrow.get('2017-03-26'))
-        assert '20170326 000000 1800 144' in contents
+        assert '20170326 000000 1800 120' in contents
         assert 'N  by name' in contents
-        assert 'HS LM WND CUR FP T02 DIR DP WCH WCC TWO FCO USS' in contents
+        assert 'HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS' in contents
         assert '4' in contents
         assert '4' in contents
         assert '0 1 2' in contents
@@ -276,7 +285,7 @@ class TestWW3OunpContents:
     """
     def test_ww3_ounp_contents(self):
         contents = run_ww3._ww3_ounp_contents(arrow.get('2017-03-26'))
-        assert '20170326 000000 1800 144' in contents
+        assert '20170326 000000 600 360' in contents
         assert '-1' in contents
         assert 'SoG_ww3_points_' in contents
         assert '8' in contents
@@ -291,7 +300,19 @@ class TestWW3OunpContents:
 class TestBuildRunScript:
     """Unit test for _build_run_script() function.
     """
-    pass
+    @pytest.mark.parametrize('run_type', [
+        'forecast2',
+        'forecast',
+    ])
+    def test_top_of_script(self, run_type, config):
+        script = run_ww3._build_run_script(
+            arrow.get('2017-03-29'), run_type, Path('wwatch3-runs/tmp_run_dir'),
+            Path(f'wwatch3-{run_type}'), config)
+        assert script.startswith(
+            '#!/bin/bash\n'
+            'set -e  # abort on first error\n'
+            'set -u  # abort if undefinded variable is encountered\n'
+        )
 
 
 class TestDefinitions:
@@ -310,6 +331,7 @@ class TestDefinitions:
         RESULTS_DIR="wwatch3-{run_type}/29mar17"
         WW3_EXE="wwatch3-5.16/exe"
         MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"
+        GATHER="salishsea gather"
         '''
         expected = expected.splitlines()
         for i, line in enumerate(defns.splitlines()):
@@ -328,16 +350,16 @@ class TestPrepare:
         echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
         echo "Starting wind.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
-        ln -sf ww3_prnc_wind.inp ww3_prnc.inp
-        ${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
-        echo "Ending wind.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
+        ln -s ww3_prnc_wind.inp ww3_prnc.inp && \\
+          ${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+          rm -f ww3_prnc.inp
+      echo "Ending wind.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
 
         echo "Starting current.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
-        ln -sf ww3_prnc_current.inp ww3_prnc.inp
-        ${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        ln -s ww3_prnc_current.inp ww3_prnc.inp && \\
+          ${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+          rm -f ww3_prnc.inp
         echo "Ending current.nc file creation at $(date)" >>${RESULTS_DIR}/stdout
-
-        rm -f ww3_prnc.inp
         '''
         expected = expected.splitlines()
         for i, line in enumerate(preparations.splitlines()):
@@ -348,12 +370,86 @@ class TestExecute:
     """Unit test for _execute() function.
     """
     def test_execute(self):
-        preparations = run_ww3._execute()
+        execution = run_ww3._execute()
         expected = '''echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
+        ${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\
+          >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        mv log.ww3 ww3_shel.log && \\
+        rm current.ww3 wind.ww3
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
-
         '''
         expected = expected.splitlines()
-        for i, line in enumerate(preparations.splitlines()):
+        for i, line in enumerate(execution.splitlines()):
             assert line.strip() == expected[i].strip()
+
+
+class TestNetcdfOutput:
+    """Unit test for _netcdf_output() function.
+    """
+    def test_netcdf_output(self):
+        output_to_netcdf = run_ww3._netcdf_output(arrow.get('2017-03-30'))
+        expected = '''echo "Starting netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
+        ${WW3_EXE}/ww3_ounf >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        ncrcat -4 -L4 -o SoG_ww3_fields_20170330_20170401.nc \\
+          SoG_ww3_fields_20170330.nc SoG_ww3_fields_20170331.nc SoG_ww3_fields_20170401.nc \\
+          >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        rm SoG_ww3_fields_20170330.nc SoG_ww3_fields_20170331.nc SoG_ww3_fields_20170401.nc && \\
+        rm out_grd.ww3
+        echo "Ending netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
+        
+        echo "Starting netCDF4 points output at $(date)" >>${RESULTS_DIR}/stdout
+        ${WW3_EXE}/ww3_ounp >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        ncrcat -4 -L4 -o SoG_ww3_points_20170330_20170401.nc \\
+          SoG_ww3_points_20170330_tab.nc SoG_ww3_points_20170331_tab.nc SoG_ww3_points_20170401_tab.nc \\
+          >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        rm SoG_ww3_points_20170330_tab.nc SoG_ww3_points_20170331_tab.nc SoG_ww3_points_20170401_tab.nc && \\
+        rm out_pnt.ww3
+        echo "Ending netCDF4 points output at $(date)" >>${RESULTS_DIR}/stdout
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(output_to_netcdf.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+
+class TestCleanup:
+    """Unit test for _cleanup() function.
+    """
+    def test_cleanup(self):
+        cleanup = run_ww3._cleanup()
+        expected = '''echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
+        ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
+        echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
+        
+        echo "Deleting run directory" >>${RESULTS_DIR}/stdout
+        rmdir $(pwd)
+        echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(cleanup.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+
+@pytest.mark.parametrize('run_type', [
+    'forecast2',
+    'forecast',
+])
+@patch('nowcast.workers.run_ww3.subprocess.Popen')
+@patch('nowcast.workers.run_ww3.subprocess.run')
+class TestLaunchRun:
+    """Unit tests for _launch_run() function.
+    """
+
+    def test_launch_run(self, m_run, m_popen, run_type):
+        run_ww3._launch_run(run_type, Path('SoGWW3.sh'), 'west.cloud')
+        m_popen.assert_called_once_with(['bash', 'SoGWW3.sh'])
+
+    def test_find_run_process_pid(self, m_run, m_popen, run_type):
+        run_ww3._launch_run(run_type, Path('SoGWW3.sh'), 'west.cloud')
+        m_run.assert_called_once_with(
+            ['pgrep', '--full', 'bash SoGWW3.sh'], stdout=subprocess.PIPE,
+            check=True, universal_newlines=True)
+
+    def test_run_process_pid(self, m_run, m_popen, run_type):
+        m_run.return_value=SimpleNamespace(stdout=43)
+        run_pid = run_ww3._launch_run(run_type, Path('SoGWW3.sh'), 'west.cloud')
+        assert run_pid == 43

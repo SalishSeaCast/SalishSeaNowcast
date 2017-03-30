@@ -469,6 +469,8 @@ wave forecasts:
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
   # Path to the wwatch3 executables directory
   wwatch3 exe path: /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe
+  # Path to the salishsea command processor executable to use in the run script
+  salishsea cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
   # Directories on compute host where results are stored, keyed by run type
   results:
     forecast: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast/
