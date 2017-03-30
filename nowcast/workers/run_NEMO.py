@@ -395,9 +395,9 @@ def _definitions(
         'WORK_DIR="{run_dir}"\n'
         'RESULTS_DIR="{results_dir}"\n'
         'MPIRUN="{mpirun}"\n'
-        u'COMBINE="{salishsea_cmd} combine"\n'
-        u'DEFLATE="{salishsea_cmd} deflate"\n'
-        u'GATHER="{salishsea_cmd} gather"\n'
+        'COMBINE="{salishsea_cmd} combine"\n'
+        'DEFLATE="{salishsea_cmd} deflate"\n'
+        'GATHER="{salishsea_cmd} gather"\n'
     ).format(
         run_id=run_desc['run_id'],
         run_desc_file=run_desc_filepath.name,
