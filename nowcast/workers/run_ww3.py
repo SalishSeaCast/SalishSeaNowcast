@@ -19,16 +19,13 @@ ONC cloud, and launches the run.
 """
 import logging
 import os
-import uuid
 from pathlib import Path
 import shlex
 import subprocess
+import uuid
 
 import arrow
-from nemo_nowcast import (
-    NowcastWorker,
-    WorkerError,
-)
+from nemo_nowcast import NowcastWorker
 from nemo_nowcast.fileutils import FilePerms
 
 
@@ -107,7 +104,7 @@ def run_ww3(parsed_args, config, *args):
     script = _build_run_script(run_date, run_type, run_dir_path, results_path,
                                config)
     run_script_path = _write_run_script(run_type, script, run_dir_path)
-    run_pid = _launch_run(run_script_path)
+    run_pid = _launch_run(run_type, run_script_path, host_name)
     checklist = {
         run_type: {
             'host': host_name,
@@ -182,8 +179,8 @@ def _ww3_prnc_wind_contents(run_date):
     :type run_date: :py:class:`arrow.Arrow`
     """
     start_date = run_date.format('YYYYMMDD')
-    contents = f'''$ WAVEWATCH III NETCDF Field preprocessor input 
-    ww3_prnc_wind.inp
+    contents = f'''$ WAVEWATCH III NETCDF Field preprocessor input \
+ww3_prnc_wind.inp
 $
 $ Forcing type, grid type, time in file, header 
    'WND' 'LL' T T
@@ -206,7 +203,8 @@ def _ww3_prnc_current_contents(run_date):
     :type run_date: :py:class:`arrow.Arrow`
     """
     start_date = run_date.format('YYYYMMDD')
-    contents = f'''$ WAVEWATCH III NETCDF Field preprocessor input ww3_prnc_current.inp
+    contents = f'''$ WAVEWATCH III NETCDF Field preprocessor input \
+ww3_prnc_current.inp
 $
 $ Forcing type, grid type, time in file, header 
   'CUR' 'LL' T T
@@ -229,6 +227,7 @@ def _ww3_shel_contents(run_date):
     :type run_date: :py:class:`arrow.Arrow`
     """
     start_date = run_date.format('YYYYMMDD')
+    restart_date = run_date.replace(days=+1).format('YYYYMMDD')
     end_date = run_date.replace(days=+2).format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III shell input file
 $
@@ -242,21 +241,21 @@ $ Forcing/inputs to use
   F    Assimilation data : 2-D spectra.
 $
    {start_date} 000000  Start time (YYYYMMDD HHmmss)
-   {end_date} 233000  End time (YYYYMMDD HHmmss)
+   {end_date} 120000  End time (YYYYMMDD HHmmss)
 $
 $ Output server mode
   2  dedicated process
 $
 $ Field outputs
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 1800 {end_date} 233000
+  {start_date} 000000 1800 {end_date} 120000
 $ Fields
   N  by name
-  HS LM WND CUR FP T02 DIR DP WCH WCC TWO FCO USS
+  HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS
 $
 $ Point outputs
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 1800 {end_date} 233000
+  {start_date} 000000 600 {end_date} 120000
 $ longitude, latitude, 10-char name
    236.52 48.66 'C46134PatB'
    236.27 49.34 'C46146HalB'
@@ -265,19 +264,19 @@ $ longitude, latitude, 10-char name
 $
 $ Along-track output (required placeholder for unused feature)
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 0 {end_date} 233000
+  {start_date} 000000 0 {end_date} 120000
 $
 $ Restart files
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {end_date} 233000 3600 {end_date} 233000
+  {restart_date} 000000 3600 {restart_date} 000000
 $
 $ Boundary data (required placeholder for unused feature)
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 0 {end_date} 233000
+  {start_date} 000000 0 {end_date} 120000
 $
-$ Separated wave field data (required placeholder for unused feature).
+$ Separated wave field data (required placeholder for unused feature)
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 0 {end_date} 233000
+  {start_date} 000000 0 {end_date} 120000
 $
 $ Homogeneous field data (required placeholder for unused feature)
   ’STP’
@@ -293,11 +292,11 @@ def _ww3_ounf_contents(run_date):
     contents = f'''$ WAVEWATCH III NETCDF Grid output post-processing
 $
 $ First output time (YYYYMMDD HHmmss), output increment (s), number of output times
-  {start_date} 000000 1800 144
+  {start_date} 000000 1800 120
 $
 $ Fields
   N  by name
-  HS LM WND CUR FP T02 DIR DP WCH WCC TWO FCO USS
+  HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS
 $
 $ netCDF4 output
 $ real numbers
@@ -327,7 +326,7 @@ def _ww3_ounp_contents(run_date):
     contents = f'''$ WAVEWATCH III NETCDF Point output post-processing
 $
 $ First output time (YYYYMMDD HHmmss), output increment (s), number of output times
-  {start_date} 000000 1800 144
+  {start_date} 000000 600 360
 $
 $ All points defined in ww3_shel.inp
   -1
@@ -363,17 +362,24 @@ def _build_run_script(run_date, run_type, run_dir_path, results_path, config):
     :return: wwatch3 run set-up and execution script
     :rtype: str 
     """
-    script = '#!/bin/bash\n'
+    script = (
+        '#!/bin/bash\n'
+        'set -e  # abort on first error\n'
+        'set -u  # abort if undefinded variable is encountered\n')
     script = '\n'.join((
         script,
         '{defns}\n'
         '{prepare}\n'
         '{execute}\n'
+        '{netcdf_output}\n'
+        '{cleanup}'
         .format(
             defns=_definitions(
                 run_date, run_type, run_dir_path, results_path, config),
             prepare=_prepare(),
             execute=_execute(),
+            netcdf_output=_netcdf_output(run_date),
+            cleanup=_cleanup(),
         )
     ))
     return script
@@ -392,12 +398,14 @@ def _definitions(run_date, run_type, run_dir_path, results_path, config):
     """
     ddmmmyy = run_date.format('DDMMMYY').lower()
     wwatch3_exe_path = config['wave forecasts']['wwatch3 exe path']
+    salishsea_cmd = config['wave forecasts']['salishsea cmd']
     defns = (
         f'RUN_ID="{ddmmmyy}ww3-{run_type}"\n'
         f'WORK_DIR="{run_dir_path}"\n'
         f'RESULTS_DIR="{results_path/ddmmmyy}"\n'
         f'WW3_EXE="{wwatch3_exe_path}"\n'
         f'MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"\n'
+        f'GATHER="{salishsea_cmd} gather"\n'
     )
     return defns
 
@@ -411,19 +419,21 @@ def _prepare():
         '\n'
         'echo "Starting wind.nc file creation at $(date)" '
         '>>${RESULTS_DIR}/stdout\n'
-        'ln -sf ww3_prnc_wind.inp ww3_prnc.inp\n'
-        '${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
+        'ln -s ww3_prnc_wind.inp ww3_prnc.inp && \\\n'
+        '${WW3_EXE}/ww3_prnc '
+        '>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n'
+        'rm -f ww3_prnc.inp\n'
         'echo "Ending wind.nc file creation at $(date)" '
         '>>${RESULTS_DIR}/stdout\n'
         '\n'
         'echo "Starting current.nc file creation at $(date)" '
         '>>${RESULTS_DIR}/stdout\n'
-        'ln -sf ww3_prnc_current.inp ww3_prnc.inp\n'
-        '${WW3_EXE}/ww3_prnc >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
+        'ln -s ww3_prnc_current.inp ww3_prnc.inp && \\\n'
+        '${WW3_EXE}/ww3_prnc '
+        '>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n'
+        'rm -f ww3_prnc.inp\n'
         'echo "Ending current.nc file creation at $(date)" '
         '>>${RESULTS_DIR}/stdout\n'
-        '\n'
-        'rm -f ww3_prnc.inp\n'
     )
     return preparations
 
@@ -431,24 +441,74 @@ def _prepare():
 def _execute():
     execution = (
         'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
-        '${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel '
-        '>>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr\n'
+        '${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\\n'
+        '  >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n'
+        'mv log.ww3 ww3_shel.log && \\\n'
+        'rm current.ww3 wind.ww3\n'
         'echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout\n'
-        '\n'
     )
     return execution
-"""
-echo "Starting netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
-${WW3_EXE}/ww3_ounf > ww3_ounf.out 2>>${RESULTS_DIR}/stderr
-echo "Ending netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
 
-chmod g+rwx ${RESULTS_DIR}
-chmod g+rw ${RESULTS_DIR}/*
-chmod o+rx ${RESULTS_DIR}
-chmod o+r ${RESULTS_DIR}/*
 
-echo "Finished at $(date)" >>${RESULTS_DIR}/stdout
-"""
+def _netcdf_output(run_date):
+    """
+    :param :py:class:`arrow.Arrow` run_date: 
+    
+    :return: netCDF output files section of wwatch3 run set-up and execution 
+             script
+    :rtype: str 
+    """
+    start_yyyymmdd = run_date.format('YYYYMMDD')
+    end_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
+    fields_files = ' '.join(
+        f'SoG_ww3_fields_{day.format("YYYYMMDD")}.nc'
+        for day in arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
+    )
+    points_files = ' '.join(
+        f'SoG_ww3_points_{day.format("YYYYMMDD")}_tab.nc'
+        for day in arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
+    )
+    output_to_netcdf = (
+        'echo "Starting netCDF4 fields output at $(date)" '
+        '>>${RESULTS_DIR}/stdout\n'
+        '${WW3_EXE}/ww3_ounf >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n'
+        f'ncrcat -4 -L4 -o SoG_ww3_fields_{start_yyyymmdd}_{end_yyyymmdd}.nc \\\n'
+        f'  {fields_files} \\\n'
+        '  >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n'
+        f'rm {fields_files} && \\\n'
+        'rm out_grd.ww3\n'
+        'echo "Ending netCDF4 fields output at $(date)" '
+        '>>${RESULTS_DIR}/stdout\n'
+        '\n'
+        'echo "Starting netCDF4 points output at $(date)" '
+        '>>${RESULTS_DIR}/stdout\n'
+        '${WW3_EXE}/ww3_ounp >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n'
+        f'ncrcat -4 -L4 -o SoG_ww3_points_{start_yyyymmdd}_{end_yyyymmdd}.nc \\\n'
+        f'  {points_files} \\\n'
+        '  >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n'
+        f'rm {points_files} && \\\n'
+        'rm out_pnt.ww3\n'
+        'echo "Ending netCDF4 points output at $(date)" '
+        '>>${RESULTS_DIR}/stdout\n'
+    )
+    return output_to_netcdf
+
+
+def _cleanup():
+    """
+    :return: clean-up section of wwatch3 run set-up and execution script
+    :rtype: str 
+    """
+    cleanup = (
+        'echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout\n'
+        'echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout\n'
+        '\n'
+        'echo "Deleting run directory" >>${RESULTS_DIR}/stdout\n'
+        'rmdir $(pwd)\n'
+        'echo "Finished at $(date)" >>${RESULTS_DIR}/stdout\n'
+    )
+    return cleanup
 
 
 def _write_run_script(run_type, script, run_dir_path):
@@ -466,8 +526,23 @@ def _write_run_script(run_type, script, run_dir_path):
     return run_script_path
 
 
-def _launch_run(run_script_path):
-    run_pid = ''
+def _launch_run(run_type, run_script_path, host_name):
+    logger.info(f'{run_type}: launching {run_script_path} on {host_name}')
+    cmd = f'bash {run_script_path}'
+    logger.debug(
+        f'{run_type}: running command in subprocess: {shlex.split(cmd)}')
+    subprocess.Popen(shlex.split(cmd))
+    run_pid = None
+    while not run_pid:
+        try:
+            proc = subprocess.run(
+                shlex.split(f'pgrep --full "{cmd}"'), stdout=subprocess.PIPE,
+                check=True, universal_newlines=True)
+            run_pid = int(proc.stdout)
+        except subprocess.CalledProcessError:
+            # Process has not yet been spawned
+            pass
+    logger.debug(f'{run_type} on {host_name}: run pid: {run_pid}')
     return run_pid
 
 
