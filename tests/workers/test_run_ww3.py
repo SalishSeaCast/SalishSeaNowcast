@@ -223,11 +223,15 @@ class TestWW3PrncCurrentContents:
         assert "'current/SoG_current_20170326.nc'" in contents
 
 
+@pytest.mark.parametrize('run_type, end_time', [
+    ('forecast2', '060000'),
+    ('forecast', '120000'),
+])
 class TestWW3ShelContents:
     """Unit test for _ww3_shel_contents() function.
     """
-    def test_ww3_shel_contents(self):
-        contents = run_ww3._ww3_shel_contents(arrow.get('2017-03-29'))
+    def test_ww3_shel_contents(self, run_type, end_time):
+        contents = run_ww3._ww3_shel_contents(arrow.get('2017-03-29'), run_type)
         # Forcing/inputs to use
         assert 'F F  Water levels w/ homogeneous field data' in contents
         assert 'T F  Currents w/ homogeneous field data' in contents
@@ -238,27 +242,27 @@ class TestWW3ShelContents:
         assert 'F    Assimilation data : 2-D spectra.' in contents
         # Start/end time
         assert '20170329 000000  Start time (YYYYMMDD HHmmss)' in contents
-        assert '20170331 120000  End time (YYYYMMDD HHmmss)' in contents
+        assert f'20170331 {end_time}  End time (YYYYMMDD HHmmss)' in contents
         # Output server mode
         assert '2  dedicated process' in contents
         # Field outputs
-        assert '20170329 000000 1800 20170331 120000' in contents
+        assert f'20170329 000000 1800 20170331 {end_time}' in contents
         assert 'N  by name' in contents
         assert 'HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS' in contents
         # Point outputs
-        assert '20170329 000000 600 20170331 120000' in contents
+        assert f'20170329 000000 600 20170331 {end_time}' in contents
         assert "236.52 48.66 'C46134PatB'" in contents
         assert "236.27 49.34 'C46146HalB'" in contents
         assert "235.01 49.91 'C46131SenS'" in contents
         assert "0.0 0.0 'STOPSTRING'" in contents
         # Along-track output (required placeholder for unused feature)
-        assert '20170329 000000 0 20170331 120000' in contents
+        assert f'20170329 000000 0 20170331 {end_time}' in contents
         # Restart files
         assert '20170330 000000 3600 20170330 000000' in contents
         # Boundary data (required placeholder for unused feature)
-        assert '20170329 000000 0 20170331 120000' in contents
+        assert f'20170329 000000 0 20170331 {end_time}' in contents
         # Separated wave field data (required placeholder for unused feature)
-        assert '20170329 000000 0 20170331 120000' in contents
+        assert f'20170329 000000 0 20170331 {end_time}' in contents
         # Homogeneous field data (required placeholder for unused feature)
         assert "STP" in contents
 
