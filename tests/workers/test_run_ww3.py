@@ -453,7 +453,7 @@ class TestLaunchRun:
             ['pgrep', '--full', 'bash SoGWW3.sh'], stdout=subprocess.PIPE,
             check=True, universal_newlines=True)
 
-    def test_run_process_pid(self, m_run, m_popen, run_type):
-        m_run.return_value=SimpleNamespace(stdout=43)
+    def test_run_pid(self, m_run, m_popen, run_type):
+        m_run.return_value = SimpleNamespace(stdout=43)
         run_pid = run_ww3._launch_run(run_type, Path('SoGWW3.sh'), 'west.cloud')
         assert run_pid == 43
