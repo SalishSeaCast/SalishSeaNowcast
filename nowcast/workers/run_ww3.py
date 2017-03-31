@@ -222,13 +222,15 @@ $ File is produced by make_ww3_current_file worker
     return contents
 
 
-def _ww3_shel_contents(run_date):
+def _ww3_shel_contents(run_date, run_type):
     """
     :type run_date: :py:class:`arrow.Arrow`
+    :type run_type: str
     """
     start_date = run_date.format('YYYYMMDD')
     restart_date = run_date.replace(days=+1).format('YYYYMMDD')
     end_date = run_date.replace(days=+2).format('YYYYMMDD')
+    end_time = '120000' if run_type == 'forecast' else '060000'
     contents = f'''$ WAVEWATCH III shell input file
 $
 $ Forcing/inputs to use
@@ -241,21 +243,21 @@ $ Forcing/inputs to use
   F    Assimilation data : 2-D spectra.
 $
    {start_date} 000000  Start time (YYYYMMDD HHmmss)
-   {end_date} 120000  End time (YYYYMMDD HHmmss)
+   {end_date} {end_time}  End time (YYYYMMDD HHmmss)
 $
 $ Output server mode
   2  dedicated process
 $
 $ Field outputs
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 1800 {end_date} 120000
+  {start_date} 000000 1800 {end_date} {end_time}
 $ Fields
   N  by name
   HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS
 $
 $ Point outputs
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 600 {end_date} 120000
+  {start_date} 000000 600 {end_date} {end_time}
 $ longitude, latitude, 10-char name
    236.52 48.66 'C46134PatB'
    236.27 49.34 'C46146HalB'
@@ -264,7 +266,7 @@ $ longitude, latitude, 10-char name
 $
 $ Along-track output (required placeholder for unused feature)
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 0 {end_date} 120000
+  {start_date} 000000 0 {end_date} {end_time}
 $
 $ Restart files
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
@@ -272,11 +274,11 @@ $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
 $
 $ Boundary data (required placeholder for unused feature)
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 0 {end_date} 120000
+  {start_date} 000000 0 {end_date} {end_time}
 $
 $ Separated wave field data (required placeholder for unused feature)
 $ Start time (YYYYMMDD HHmmss), Interval (s), End time (YYYYMMDD HHmmss)
-  {start_date} 000000 0 {end_date} 120000
+  {start_date} 000000 0 {end_date} {end_time}
 $
 $ Homogeneous field data (required placeholder for unused feature)
   ’STP’
