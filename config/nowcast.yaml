@@ -172,7 +172,7 @@ run types:
 ## TODO: Different values are necessary on skookum and west.cloud; see issue #32
 #    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
 #    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
-    duration: 1.25  # days
+    duration: 1.5  # days
   forecast2:
     config name:  SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
