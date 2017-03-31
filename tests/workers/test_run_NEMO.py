@@ -16,8 +16,10 @@
 """Unit tests for Salish Sea NEMO nowcast run_NEMO worker.
 """
 from pathlib import Path
+import subprocess
 from types import SimpleNamespace
 from unittest.mock import (
+    call,
     patch,
     Mock,
 )
@@ -68,7 +70,7 @@ def config(scope='function'):
                 'mesh_mask':
                     '/results/nowcast-sys/NEMO-forcing/grid/'
                     'mesh_mask_downbyone2.nc',
-                'duration': 1.25},
+                'duration': 1.5},
             'forecast2': {
                 'config name': 'SalishSea',
                 'bathymetry':
@@ -88,6 +90,7 @@ def config(scope='function'):
                 'run prep dir': '/results/nowcast-sys/runs',
                 'mpi decomposition': '3x5',
                 'salishsea_cmd': 'bin/salishsea',
+                'job exec cmd': 'qsub',
                 'results': {
                     'nowcast': 'results/SalishSea/nowcast',
                     'nowcast-dev': 'results/SalishSea/nowcast-dev',
@@ -95,7 +98,10 @@ def config(scope='function'):
                     'forecast': '/results/SalishSea/forecast/',
                     'forecast2': '/results/SalishSea/forecast2/',
                     }},
-            'west.cloud': {'salishsea_cmd': 'bin/salishsea'},
+            'west.cloud': {
+                'salishsea_cmd': 'bin/salishsea',
+                'job exec cmd': 'bash',
+            },
         }}
 
 
@@ -998,3 +1004,91 @@ class TestExecute:
         expected = expected.splitlines()
         for i, line in enumerate(script.splitlines()):
             assert line.strip() == expected[i].strip()
+
+
+@patch('nowcast.workers.run_NEMO.subprocess.Popen')
+@patch('nowcast.workers.run_NEMO.subprocess.run')
+class TestLaunchRun:
+    """Unit tests for _launch_run() function.
+    """
+    @pytest.mark.parametrize('run_type, host', [
+        ('nowcast', 'west.cloud'),
+        ('nowcast-green', 'west.cloud'),
+        ('forecast', 'west.cloud'),
+        ('forecast2', 'west.cloud'),
+    ])
+    def test_bash_launch_run_script(
+        self, m_run, m_popen, run_type, host, config
+    ):
+        run_NEMO._launch_run_script(
+            run_type, 'SalishSeaNEMO.sh', host, config)
+        m_popen.assert_called_once_with(['bash', 'SalishSeaNEMO.sh'])
+
+    @pytest.mark.parametrize('run_type, host', [
+        ('nowcast-dev', 'salish'),
+    ])
+    def test_qsub_launch_run_script(
+        self, m_run, m_popen, run_type, host, config
+    ):
+        run_NEMO._launch_run_script(
+            run_type, 'SalishSeaNEMO.sh', host, config)
+        assert m_run.call_args_list[0] == call(
+            ['qsub', 'SalishSeaNEMO.sh'], stdout=subprocess.PIPE, check=True,
+            universal_newlines=True)
+
+    @pytest.mark.parametrize('run_type, host', [
+        ('nowcast', 'west.cloud'),
+        ('nowcast-green', 'west.cloud'),
+        ('forecast', 'west.cloud'),
+        ('forecast2', 'west.cloud'),
+    ])
+    def test_find_bash_run_process_pid(
+        self, m_run, m_popen, run_type, host, config
+    ):
+        run_NEMO._launch_run_script(
+            run_type, 'SalishSeaNEMO.sh', host, config)
+        m_run.assert_called_once_with(
+            ['pgrep', '--newest', '--exact', '--full', 'bash SalishSeaNEMO.sh'],
+            stdout=subprocess.PIPE, check=True, universal_newlines=True)
+
+    @pytest.mark.parametrize('run_type, host', [
+        ('nowcast-dev', 'salish'),
+    ])
+    def test_find_qsub_run_process_pid(
+        self, m_run, m_popen, run_type, host, config
+    ):
+        m_run.side_effect = [
+            SimpleNamespace(stdout='4343'),
+            SimpleNamespace(stdout='4444')]
+        run_NEMO._launch_run_script(
+            run_type, 'SalishSeaNEMO.sh', host, config)
+        assert m_run.call_args_list[1] == call(
+            ['pgrep', '4343'], stdout=subprocess.PIPE, check=True,
+            universal_newlines=True)
+
+    @pytest.mark.parametrize('run_type, host', [
+        ('nowcast', 'west.cloud'),
+        ('nowcast-green', 'west.cloud'),
+        ('forecast', 'west.cloud'),
+        ('forecast2', 'west.cloud'),
+    ])
+    def test_bash_run_process_pid(
+        self, m_run, m_popen, run_type, host, config
+    ):
+        m_run.return_value = SimpleNamespace(stdout='4444')
+        run_process_pid = run_NEMO._launch_run_script(
+            run_type, 'SalishSeaNEMO.sh', host, config)
+        assert run_process_pid == 4444
+
+    @pytest.mark.parametrize('run_type, host', [
+        ('nowcast-dev', 'salish'),
+    ])
+    def test_qsub_run_process_pid(
+        self, m_run, m_popen, run_type, host, config
+    ):
+        m_run.side_effect = [
+            SimpleNamespace(stdout='4343'),
+            SimpleNamespace(stdout='4444')]
+        run_process_pid = run_NEMO._launch_run_script(
+            run_type, 'SalishSeaNEMO.sh', host, config)
+        assert run_process_pid == 4444

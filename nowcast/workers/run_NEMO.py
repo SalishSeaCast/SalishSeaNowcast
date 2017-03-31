@@ -470,22 +470,26 @@ def _cleanup():
 def _launch_run_script(run_type, run_script_filepath, host_name, config):
     host_run_config = config['run'][host_name]
     logger.info(f'{run_type}: launching {run_script_filepath} on {host_name}')
-    cmd = shlex.split(
-        f'{host_run_config["job exec cmd"]} {run_script_filepath}')
-    logger.debug(f'{run_type}: running command in subprocess: {cmd}')
+    cmd = f'{host_run_config["job exec cmd"]} {run_script_filepath}'
+    logger.debug(
+        f'{run_type}: running command in subprocess: {shlex.split(cmd)}')
     if host_run_config['job exec cmd'] == 'qsub':
-        torque_id = subprocess.check_output(
-            cmd, universal_newlines=True).strip()
+        proc = subprocess.run(
+            shlex.split(cmd), stdout=subprocess.PIPE,
+            check=True, universal_newlines=True)
+        torque_id = proc.stdout.strip()
         logger.debug(f'{run_type}: TORQUE/PBD job id: {torque_id}')
         cmd = shlex.split(f'pgrep {torque_id}')
     else:
-        subprocess.Popen(cmd)
-        cmd = shlex.split(f'pgrep --newest --exact --full "{" ".join(cmd)}"')
+        subprocess.Popen(shlex.split(cmd))
+        cmd = shlex.split(f'pgrep --newest --exact --full "{cmd}"')
     run_process_pid = None
     while not run_process_pid:
         try:
-            run_process_pid = int(
-                subprocess.check_output(cmd, universal_newlines=True))
+            proc = subprocess.run(
+                cmd, stdout=subprocess.PIPE, check=True,
+                universal_newlines=True)
+            run_process_pid = int(proc.stdout)
         except subprocess.CalledProcessError:
             # Process has not yet been spawned
             pass
