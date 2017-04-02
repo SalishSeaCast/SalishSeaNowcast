@@ -126,7 +126,7 @@ def _build_tmp_run_dir(run_date, run_type, config):
     run_prep_path = Path(config['wave forecasts']['run prep dir'])
     run_dir_path = _make_run_dir(run_prep_path)
     _create_symlinks(run_date, run_type, run_prep_path, run_dir_path, config)
-    _write_ww3_input_files(run_date, run_dir_path)
+    _write_ww3_input_files(run_date, run_type, run_dir_path)
     return run_dir_path
 
 
@@ -155,9 +155,10 @@ def _create_symlinks(run_date, run_type, run_prep_path, run_dir_path, config):
     (run_dir_path / 'restart.ww3').symlink_to(prev_run_path / 'restart001.ww3')
 
 
-def _write_ww3_input_files(run_date, run_dir_path):
+def _write_ww3_input_files(run_date, run_type, run_dir_path):
     """
     :type run_date: :py:class:`arrow.Arrow`
+    :param str run_type: 
     :type run_dir_path: :py:class:`pathlib.Path`
     """
     ww3_input_files = {
@@ -168,15 +169,16 @@ def _write_ww3_input_files(run_date, run_dir_path):
         'ww3_ounp.inp': _ww3_ounp_contents,
     }
     for filename, contents_func in ww3_input_files.items():
-        contents = contents_func(run_date)
+        contents = contents_func(run_date, run_type)
         with (run_dir_path / filename).open('wt') as f:
             f.write(contents)
         logger.debug(f'created {run_dir_path/filename}')
 
 
-def _ww3_prnc_wind_contents(run_date):
+def _ww3_prnc_wind_contents(run_date, run_type):
     """
     :type run_date: :py:class:`arrow.Arrow`
+    :param str run_type: 
     """
     start_date = run_date.format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III NETCDF Field preprocessor input \
@@ -198,9 +200,10 @@ $ File is produced by make_ww3_wind_file worker
     return contents
 
 
-def _ww3_prnc_current_contents(run_date):
+def _ww3_prnc_current_contents(run_date, run_type):
     """
     :type run_date: :py:class:`arrow.Arrow`
+    :param str run_type: 
     """
     start_date = run_date.format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III NETCDF Field preprocessor input \
@@ -286,9 +289,10 @@ $ Homogeneous field data (required placeholder for unused feature)
     return contents
 
 
-def _ww3_ounf_contents(run_date):
+def _ww3_ounf_contents(run_date, run_type):
     """
     :type run_date: :py:class:`arrow.Arrow`
+    :param str run_type: 
     """
     start_date = run_date.format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III NETCDF Grid output post-processing
@@ -320,8 +324,9 @@ $
     return contents
 
 
-def _ww3_ounp_contents(run_date):
+def _ww3_ounp_contents(run_date, run_type):
     """
+    :param str run_type: 
     :type run_date: :py:class:`arrow.Arrow`
     """
     start_date = run_date.format('YYYYMMDD')
