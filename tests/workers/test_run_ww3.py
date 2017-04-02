@@ -201,22 +201,32 @@ class TestMakeRunDir:
             '/wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6')
 
 
+@pytest.mark.parametrize('run_type', [
+    'forecast2',
+    'forecast',
+])
 class TestWW3PrncWindContents:
     """Unit test for _ww3_prnc_wind_contents() function.
     """
-    def test_ww3_prnc_wind_contents(self):
-        contents = run_ww3._ww3_prnc_wind_contents(arrow.get('2017-03-25'))
+    def test_ww3_prnc_wind_contents(self, run_type):
+        contents = run_ww3._ww3_prnc_wind_contents(
+            arrow.get('2017-03-25'), run_type)
         assert "'WND' 'LL' T T" in contents
         assert 'longitude latitude' in contents
         assert 'u_wind v_wind' in contents
         assert "'wind/SoG_wind_20170325.nc'" in contents
 
 
+@pytest.mark.parametrize('run_type', [
+    'forecast2',
+    'forecast',
+])
 class TestWW3PrncCurrentContents:
     """Unit test for _ww3_prnc_current_contents() function.
     """
-    def test_ww3_prnc_current_contents(self):
-        contents = run_ww3._ww3_prnc_current_contents(arrow.get('2017-03-26'))
+    def test_ww3_prnc_current_contents(self, run_type):
+        contents = run_ww3._ww3_prnc_current_contents(
+            arrow.get('2017-03-26'), run_type)
         assert "'CUR' 'LL' T T" in contents
         assert 'longitude latitude' in contents
         assert 'UCUR VCUR' in contents
@@ -267,11 +277,15 @@ class TestWW3ShelContents:
         assert "STP" in contents
 
 
+@pytest.mark.parametrize('run_type', [
+    'forecast2',
+    'forecast',
+])
 class TestWW3OunfContents:
     """Unit test for _ww3_ounf_contents() function.
     """
-    def test_ww3_ounf_contents(self):
-        contents = run_ww3._ww3_ounf_contents(arrow.get('2017-03-26'))
+    def test_ww3_ounf_contents(self, run_type):
+        contents = run_ww3._ww3_ounf_contents(arrow.get('2017-03-26'), run_type)
         assert '20170326 000000 1800 120' in contents
         assert 'N  by name' in contents
         assert 'HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS' in contents
@@ -284,11 +298,15 @@ class TestWW3OunfContents:
         assert '1 1000000 1 1000000' in contents
 
 
+@pytest.mark.parametrize('run_type', [
+    'forecast2',
+    'forecast',
+])
 class TestWW3OunpContents:
     """Unit test for _ww3_ounp_contents() function.
     """
-    def test_ww3_ounp_contents(self):
-        contents = run_ww3._ww3_ounp_contents(arrow.get('2017-03-26'))
+    def test_ww3_ounp_contents(self, run_type):
+        contents = run_ww3._ww3_ounp_contents(arrow.get('2017-03-26'), run_type)
         assert '20170326 000000 600 360' in contents
         assert '-1' in contents
         assert 'SoG_ww3_points_' in contents
