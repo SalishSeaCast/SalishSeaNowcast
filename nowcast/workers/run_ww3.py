@@ -90,8 +90,9 @@ def failure(parsed_args):
 
 def run_ww3(parsed_args, config, *args):
     """
-    :type parsed_args: :py:class:`argparse.Namespace` 
-    :type config: :py:class:`nemo_nowcast.Config`
+    :param :py:class:`argparse.Namespace` parsed_args: 
+    :param :py:class:`nemo_nowcast.Config` config:
+    
     :return: Nowcast system checklist items
     :rtype: dict
     """
@@ -118,9 +119,11 @@ def run_ww3(parsed_args, config, *args):
 
 def _build_tmp_run_dir(run_date, run_type, config):
     """
-    :type run_date: :py:class:`arrow.Arrow`
-    :type run_type: str
-    :type config: :py:class:`nemo_nowcast.Config`
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
+    :param :py:class:`nemo_nowcast.Config` config:
+    
+    :return: Temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
     run_prep_path = Path(config['wave forecasts']['run prep dir'])
@@ -132,7 +135,10 @@ def _build_tmp_run_dir(run_date, run_type, config):
 
 def _make_run_dir(run_prep_dir):
     """
-    :type run_prep_dir: :py:class:`pathlib.Path`
+    :param :py:class:`pathlib.Path` run_prep_dir:
+    
+    :return: Temporary run directory
+    :rtype: :py:class:`pathlib.Path`
     """
     run_dir_path = run_prep_dir/str(uuid.uuid1())
     run_dir_path.mkdir(mode=0o775)
@@ -141,11 +147,11 @@ def _make_run_dir(run_prep_dir):
 
 def _create_symlinks(run_date, run_type, run_prep_path, run_dir_path, config):
     """
-    :type run_date: :py:class:`arrow.Arrow`
-    :type run_type: str
-    :type run_prep_path: :py:class:`pathlib.Path`
-    :type run_dir_path: :py:class:`pathlib.Path`
-    :type config: :py:class:`nemo_nowcast.Config`
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
+    :param :py:class:`pathlib.Path` run_prep_path:
+    :param :py:class:`pathlib.Path` run_dir_path:
+    :param :py:class:`nemo_nowcast.Config` config:
     """
     for target in ('mod_def.ww3', 'wind', 'current'):
         (run_dir_path / target).symlink_to(run_prep_path / target)
@@ -157,9 +163,9 @@ def _create_symlinks(run_date, run_type, run_prep_path, run_dir_path, config):
 
 def _write_ww3_input_files(run_date, run_type, run_dir_path):
     """
-    :type run_date: :py:class:`arrow.Arrow`
+    :param :py:class:`arrow.Arrow` run_date:
     :param str run_type: 
-    :type run_dir_path: :py:class:`pathlib.Path`
+    :param :py:class:`pathlib.Path` run_dir_path:
     """
     ww3_input_files = {
         'ww3_prnc_wind.inp': _ww3_prnc_wind_contents,
@@ -177,8 +183,11 @@ def _write_ww3_input_files(run_date, run_type, run_dir_path):
 
 def _ww3_prnc_wind_contents(run_date, run_type):
     """
-    :type run_date: :py:class:`arrow.Arrow`
+    :param :py:class:`arrow.Arrow` run_date:
     :param str run_type: 
+    
+    :return: ww3_prnc_wind.inp file contents
+    :rtype: str 
     """
     start_date = run_date.format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III NETCDF Field preprocessor input \
@@ -202,8 +211,11 @@ $ File is produced by make_ww3_wind_file worker
 
 def _ww3_prnc_current_contents(run_date, run_type):
     """
-    :type run_date: :py:class:`arrow.Arrow`
+    :param :py:class:`arrow.Arrow` run_date:
     :param str run_type: 
+    
+    :return: ww3_prnc_current.inp file contents
+    :rtype: str 
     """
     start_date = run_date.format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III NETCDF Field preprocessor input \
@@ -227,8 +239,11 @@ $ File is produced by make_ww3_current_file worker
 
 def _ww3_shel_contents(run_date, run_type):
     """
-    :type run_date: :py:class:`arrow.Arrow`
-    :type run_type: str
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
+    
+    :return: ww3_shel.inp file contents
+    :rtype: str 
     """
     start_date = run_date.format('YYYYMMDD')
     restart_date = run_date.replace(days=+1).format('YYYYMMDD')
@@ -291,8 +306,11 @@ $ Homogeneous field data (required placeholder for unused feature)
 
 def _ww3_ounf_contents(run_date, run_type):
     """
-    :type run_date: :py:class:`arrow.Arrow`
+    :param run_date: :py:class:`arrow.Arrow`
     :param str run_type: 
+    
+    :return: ww3_ounf.inp file contents
+    :rtype: str 
     """
     start_date = run_date.format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III NETCDF Grid output post-processing
@@ -327,7 +345,10 @@ $
 def _ww3_ounp_contents(run_date, run_type):
     """
     :param str run_type: 
-    :type run_date: :py:class:`arrow.Arrow`
+    :param run_date: :py:class:`arrow.Arrow`
+    
+    :return: ww3_ounp.inp file contents
+    :rtype: str 
     """
     start_date = run_date.format('YYYYMMDD')
     contents = f'''$ WAVEWATCH III NETCDF Point output post-processing
@@ -418,6 +439,10 @@ def _definitions(run_date, run_type, run_dir_path, results_path, config):
 
 
 def _prepare():
+    """
+    :return: Preparations section of wwatch3 run set-up and execution script
+    :rtype: str 
+    """
     preparations = (
         'mkdir -p ${RESULTS_DIR}\n'
         '\n'
@@ -446,6 +471,10 @@ def _prepare():
 
 
 def _execute():
+    """
+    :return: Execution section of wwatch3 run set-up and execution script
+    :rtype: str 
+    """
     execution = (
         'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
         '${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\\n'
@@ -523,6 +552,8 @@ def _write_run_script(run_type, script, run_dir_path):
     :param str run_type: 
     :param str script: 
     :param :py:class:`pathlib.Path` run_dir_path: 
+    
+    :return: wwatch3 run set-up and execution script path
     :rtype: :py:class:`pathlib.Path`
     """
     run_script_path = run_dir_path/'SoGWW3.sh'
@@ -534,6 +565,14 @@ def _write_run_script(run_type, script, run_dir_path):
 
 
 def _launch_run(run_type, run_script_path, host_name):
+    """
+    :param str run_type: 
+    :param :py:class:`pathlib.Path` run_script_path: 
+    :param str host_name:
+     
+    :return: wwatch3 run set-up and execution script pid
+    :rtype: int
+    """
     logger.info(f'{run_type}: launching {run_script_path} on {host_name}')
     cmd = f'bash {run_script_path}'
     logger.debug(
