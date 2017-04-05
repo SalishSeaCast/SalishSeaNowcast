@@ -423,6 +423,12 @@ run:
       hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
 
 
+  hindcast host: orcinus-nowcast
+  orcinus-nowcast:
+    results:
+      hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
+
+
   # If the `hpc host` key is present, the forcing files will be uploaded
   # to the HPC cluster and the symlinks created ready for the runs to be
   # prepared and queued at the command-line on the cluster.
