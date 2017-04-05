@@ -40,7 +40,6 @@ dependencies:
   - pip
   - python=3.6
   - requests
-  - retrying
   - schedule
   - scipy
   - xarray
@@ -62,6 +61,7 @@ dependencies:
     - driftwood
     - feedgen
     - python-hglib
+    - retrying
 
     # For exception monitoring
     - raven
