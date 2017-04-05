@@ -23,7 +23,7 @@
 The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
 The package uses the `NEMO_Nowcast`_ framework to implement the :ref:`SalishSeaNowcastSystem`.
 
-.. _NEMO_Nowcast: http://nemo-nowcast.readthedocs.io/en/latest/
+.. _NEMO_Nowcast: https://nemo-nowcast.readthedocs.io/en/latest/
 
 
 .. _SalishSeaNowcastPythonVersions:
@@ -91,11 +91,16 @@ and building the documentation with the commands:
 
 :kbd:`SalishSeaNowcast` depends on the `NEMO_Nowcast`_,
 :ref:`salishseatools:SalishSeaToolsPackage`,
+`NEMO-Cmd`_,
 and :ref:`salishseatools:SalishSeaCmdProcessor` packages.
 If you have not done so already,
-please clone the `NEMO_Nowcast repo`_ and `Salish Sea MEOPAR tools repo`_.
+please clone the `NEMO-Cmd repo`_,
+`NEMO_Nowcast repo`_,
+and `Salish Sea MEOPAR tools repo`_.
 The commands below assume that they are cloned beside your :kbd:`SalishSeaNowcast` clone.
 
+.. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
+.. _NEMO-Cmd repo: https://bitbucket.org/salishsea/nemo-cmd
 .. _NEMO_Nowcast repo: https://bitbucket.org/43ravens/nemo_nowcast
 .. _Salish Sea MEOPAR tools repo: https://bitbucket.org/salishsea/tools
 
@@ -107,6 +112,7 @@ The commands below assume that they are cloned beside your :kbd:`SalishSeaNowcas
     $ source activate salishsea-nowcast
     (salishsea-nowcast)$ pip install --editable ../NEMO_Nowcast
     (salishsea-nowcast)$ pip install --editable ../tools/SalishSeaTools
+    (salishsea-nowcast)$ pip install --editable ../NEMO-Cmd
     (salishsea-nowcast)$ pip install --editable ../SalishSeaCmd
     (salishsea-nowcast)$ pip install --editable .
 
