@@ -35,7 +35,6 @@ dependencies:
   - pillow
   - pip
   - python=3.6
-  - retrying
   - scipy
   - xarray
 
@@ -45,3 +44,4 @@ dependencies:
     - feedgen
     - python-hglib
     - raven
+    - retrying
