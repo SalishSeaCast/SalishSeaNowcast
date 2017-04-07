@@ -24,6 +24,7 @@ dependencies:
   - beautifulsoup4
   - bottleneck
   - cliff
+  - dask
   - docutils
   - mako
   - matplotlib
