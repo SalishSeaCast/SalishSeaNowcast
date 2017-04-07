@@ -27,6 +27,7 @@ dependencies:
   - bottleneck
   - circus
   - cliff
+  - dask
   - docutils
   - mako
   - matplotlib

@@ -52,6 +52,7 @@ install_requires = [
     'beautifulsoup4',
     'bottleneck',
     'cliff',
+    'dask',
     'docutils',
     'driftwood',
     'feedgen',
