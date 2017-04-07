@@ -284,7 +284,7 @@ Copy the public key of the passphrase-less ssh key pair that will be used for no
 The nowcast operations key pair could have been used as the default key pair in the OpenStack web interface,
 but using a key pair with a passphrase there allows for more flexibility:
 in particular,
-the possibliity of revoking the passphrase-less key pair without loosing access to the instances.
+the possibility of revoking the passphrase-less key pair without loosing access to the instances.
 
 Edit :file:`$HOME/.profile` to add code that puts :file:`$HOME/.local/bin` at the front of :envvar:`PATH`:
 
