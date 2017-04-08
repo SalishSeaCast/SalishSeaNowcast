@@ -133,19 +133,26 @@ Workers
     :members: main
 
 
-:kbd:`run_ww3`
----------------
-
-.. automodule:: nowcast.workers.run_ww3
-    :members: main
-
-
 .. _WatchNEMO-Worker:
 
 :kbd:`watch_NEMO`
 -----------------
 
 .. automodule:: nowcast.workers.watch_NEMO
+    :members: main
+
+
+:kbd:`make_ww3_wind_file`
+-------------------------
+
+.. automodule:: nowcast.workers.make_ww3_wind_file
+    :members: main
+
+
+:kbd:`run_ww3`
+---------------
+
+.. automodule:: nowcast.workers.run_ww3
     :members: main
 
 

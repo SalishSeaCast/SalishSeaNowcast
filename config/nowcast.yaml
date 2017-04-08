@@ -473,6 +473,9 @@ wave forecasts:
   # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
   # are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
+  # Template for the wind forcing file name
+  # **Must be quoted to project {} characters**
+  wind file template: 'SoG_wind_{yyyymmdd}.nc'
   # Path to the wwatch3 executables directory
   wwatch3 exe path: /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe
   # Path to the salishsea command processor executable to use in the run script
@@ -781,6 +784,23 @@ message registry:
       success USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files created
       failure USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
+
+    make_ww3_wind_file:
+      checklist key: WW3 wind forcing
+      success forecast2: WW3 wind forcing file for forecast2 run ready
+      failure forecast2: WW3 wind forcing file creation for forecast2 run failed
+      success forecast: WW3 wind forcing file for forecast run ready
+      failure forecast: WW3 wind forcing file creation for forecast run failed
+      crash: make_ww3_wind_files worker crashed
+
+    run_ww3:
+      checklist key: WW3 run
+      need: WW3 run information dict requested
+      success forecast2: forecast2 WW3 run started
+      failure forecast2: forecast2 WW3 run failed
+      success forecast: forecast WW3 run started
+      failure forecast: forecast WW3 run failed
+      crash: run_ww3 worker crashed
 
     make_plots:
       checklist key: plots
