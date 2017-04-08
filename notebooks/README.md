@@ -19,62 +19,13 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[ExamineResiduals.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/ExamineResiduals.ipynb)  
-    
-    Notebook for examinng residuals and error in residuals  
-
 * ##[TofinoWaterLevels.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/TofinoWaterLevels.ipynb)  
     
     Notebook to compare Tofino water levels to previous years.  
 
-* ##[DailyNowcastFigures.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DailyNowcastFigures.ipynb)  
-    
-    Template for daily nowcast figure generation.  
-
-* ##[DevelopingNowcastFigureFunctions.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DevelopingNowcastFigureFunctions.ipynb)  
-    
-    This notebook describes the recommended process for development of  
-    functions for the `salishsea_tools.nowcast.figures` module,  
-    and provides an example of development of such a function.  
-
-* ##[SSH_NeahBay.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/SSH_NeahBay.ipynb)  
-    
-    This notebook creates daily forcing files for the sea surface height (hourly frequency) at Neah Bay. This can be used to create "obs" forcing files for nowcasts in the event of a automation system error.  
-
-* ##[TestResearchFerriesModule.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/TestResearchFerriesModule.ipynb)  
-    
-    **Test New `research_ferries` Module**  
-      
-    Render figure objects returned by `nowcast.research_ferries.salinity_ferry_route()` function.  
-    Provides data for visual testing to confirm that refactoring has not adversely changed figures for web pages.  
-      
-    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
-
-* ##[FCST_Template.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/FCST_Template.ipynb)  
-    
-    Forecast template  
-
-* ##[Testing research_VENUS.py module.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/Testing research_VENUS.py module.ipynb)  
-    
-    This notebook is used to test the research_VENUS.py module.  
-
-* ##[DevelopingSalinityTemplate.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DevelopingSalinityTemplate.ipynb)  
-    
-* ##[Salininty_Template.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/Salininty_Template.ipynb)  
-    
-    Salinity ferry data template  
-
 * ##[In_Template.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/In_Template.ipynb)  
     
     Reasearch figures template  
-
-* ##[DevelopingAnalyzeModule.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DevelopingAnalyzeModule.ipynb)  
-    
-    Notebook for developing functions in analyze.py  
-
-* ##[Out_Template.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/Out_Template.ipynb)  
-    
-    Production template  
 
 * ##[ERDDAP_datasets.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/ERDDAP_datasets.ipynb)  
     
@@ -95,6 +46,35 @@ Descriptions under the links below are from the first cell of the notebooks
     * code and metadata to transform the output of `GenerateDatasetsXml.sh`  
     into XML fragments that are ready for inclusion in `/opt/tomcat/content/erddap/datasets.xml`  
 
+* ##[DevelopingNowcastFigureFunctions.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DevelopingNowcastFigureFunctions.ipynb)  
+    
+    This notebook describes the recommended process for development of  
+    functions for the `salishsea_tools.nowcast.figures` module,  
+    and provides an example of development of such a function.  
+
+* ##[DailyNowcastFigures.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DailyNowcastFigures.ipynb)  
+    
+    Template for daily nowcast figure generation.  
+
+* ##[ExamineResiduals.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/ExamineResiduals.ipynb)  
+    
+    Notebook for examinng residuals and error in residuals  
+
+* ##[MakeOldRunoffFiles.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/MakeOldRunoffFiles.ipynb)  
+    
+    **Code to make old runoff files ****  
+    note: make_old_runoffs.yaml is identical to nowcast.yaml but puts the river output files somewhere other that /results to avoid accidental overwriting  
+
+* ##[Out_Template.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/Out_Template.ipynb)  
+    
+    Production template  
+
+* ##[Developing-make_ww3_wind_file-worker.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/Developing-make_ww3_wind_file-worker.ipynb)  
+    
+    **Developing `make_ww3_wind_file` Worker**  
+      
+    Code experiments and verification for the `make_ww3_wind_file` worker.  
+
 * ##[Original_DailyNowcastFigures.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/Original_DailyNowcastFigures.ipynb)  
     
     Template notebook for creation of notebooks that show daily figures  
@@ -103,16 +83,47 @@ Descriptions under the links below are from the first cell of the notebooks
     This is an interim step toward fully automated web publication of  
     analysis and monitoring figures from nowcast runs.  
 
+* ##[DevelopingSalinityTemplate.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DevelopingSalinityTemplate.ipynb)  
+    
+* ##[Testing research_VENUS.py module.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/Testing research_VENUS.py module.ipynb)  
+    
+    This notebook is used to test the research_VENUS.py module.  
+
+* ##[SSH_NeahBay.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/SSH_NeahBay.ipynb)  
+    
+    This notebook creates daily forcing files for the sea surface height (hourly frequency) at Neah Bay. This can be used to create "obs" forcing files for nowcasts in the event of a automation system error.  
+
 * ##[surge_warning.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/surge_warning.ipynb)  
     
+* ##[TestResearchFerriesModule.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/TestResearchFerriesModule.ipynb)  
+    
+    **Test New `research_ferries` Module**  
+      
+    Render figure objects returned by `nowcast.research_ferries.salinity_ferry_route()` function.  
+    Provides data for visual testing to confirm that refactoring has not adversely changed figures for web pages.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
+
+* ##[Salininty_Template.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/Salininty_Template.ipynb)  
+    
+    Salinity ferry data template  
+
 * ##[TestingAnalyzeModule.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/TestingAnalyzeModule.ipynb)  
     
     Noteboook to test analyze.py functions  
 
+* ##[DevelopingAnalyzeModule.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DevelopingAnalyzeModule.ipynb)  
+    
+    Notebook for developing functions in analyze.py  
+
+* ##[FCST_Template.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/FCST_Template.ipynb)  
+    
+    Forecast template  
+
 
 ##License
 
-These notebooks and files are copyright 2013-2016
+These notebooks and files are copyright 2013-2017
 by the Salish Sea MEOPAR Project Contributors
 and The University of British Columbia.
 
