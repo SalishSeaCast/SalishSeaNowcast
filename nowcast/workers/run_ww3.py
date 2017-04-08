@@ -197,7 +197,7 @@ $ Forcing type, grid type, time in file, header
    'WND' 'LL' T T
 $
 $ Dimension variable names
-  longitude latitude
+  x y
 $
 $ Wind component variable names
   u_wind v_wind

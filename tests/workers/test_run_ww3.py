@@ -79,14 +79,14 @@ class TestMain:
         )
 
 
+@pytest.mark.parametrize('run_type', [
+    'forecast2',
+    'forecast',
+])
 @patch('nowcast.workers.run_ww3.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
-    @pytest.mark.parametrize('run_type', [
-        'forecast2',
-        'forecast',
-    ])
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud', run_type=run_type,
@@ -94,26 +94,22 @@ class TestSuccess:
         run_ww3.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize('run_type', [
-        'forecast2',
-        'forecast',
-    ])
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud', run_type=run_type,
             run_date=arrow.get('2017-03-25'))
         msg_type = run_ww3.success(parsed_args)
-        assert msg_type == 'success {run_type}'.format(run_type=run_type)
+        assert msg_type == f'success {run_type}'
 
 
+@pytest.mark.parametrize('run_type', [
+    'forecast2',
+    'forecast',
+])
 @patch('nowcast.workers.run_ww3.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
-    @pytest.mark.parametrize('run_type', [
-        'forecast2',
-        'forecast',
-    ])
     def test_failure_log_error(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud', run_type=run_type,
@@ -121,16 +117,12 @@ class TestFailure:
         run_ww3.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize('run_type', [
-        'forecast2',
-        'forecast',
-    ])
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud', run_type=run_type,
             run_date=arrow.get('2017-03-25'))
         msg_type = run_ww3.failure(parsed_args)
-        assert msg_type == 'failure {run_type}'.format(run_type=run_type)
+        assert msg_type == f'failure {run_type}'
 
 
 @patch('nowcast.workers.run_ww3.logger')
@@ -212,7 +204,7 @@ class TestWW3PrncWindContents:
         contents = run_ww3._ww3_prnc_wind_contents(
             arrow.get('2017-03-25'), run_type)
         assert "'WND' 'LL' T T" in contents
-        assert 'longitude latitude' in contents
+        assert 'x y' in contents
         assert 'u_wind v_wind' in contents
         assert "'wind/SoG_wind_20170325.nc'" in contents
 
