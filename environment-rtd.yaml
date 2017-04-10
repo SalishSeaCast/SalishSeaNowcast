@@ -10,4 +10,4 @@ channels:
 dependencies:
   - matplotlib
   - nemo_nowcast
-  - python=3
+  - python=3.6

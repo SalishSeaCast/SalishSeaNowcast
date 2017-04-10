@@ -1,2 +1,5 @@
 conda:
   file: environment-rtd.yaml
+
+python:
+  version: 3.6
