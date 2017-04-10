@@ -6,7 +6,7 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[TestPtAtkinsonTideModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb)  
+* ##[TestPtAtkinsonTideModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb)  
     
     **Test `pt_atkinson_tide` Module**  
       
@@ -15,7 +15,7 @@ Descriptions under the links below are from the first cell of the notebooks
       
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
 
-* ##[TestCompareTidePredictionMaxSSH.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb)  
+* ##[TestCompareTidePredictionMaxSSH.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb)  
     
     **Test `compare_tide_prediction_max_ssh` Module**  
       
@@ -24,7 +24,7 @@ Descriptions under the links below are from the first cell of the notebooks
       
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
 
-* ##[TestStormSurgeAlertsModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb)  
+* ##[TestStormSurgeAlertsModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb)  
     
     **Test `storm_surge_alerts` Module**  
       
@@ -33,7 +33,7 @@ Descriptions under the links below are from the first cell of the notebooks
       
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
 
-* ##[TestStormSurgeAlertsThumbnailModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb)  
+* ##[TestStormSurgeAlertsThumbnailModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb)  
     
     **Test `storm_surge_alerts_thumbnail` Module**  
       
@@ -45,7 +45,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
 ##License
 
-These notebooks and files are copyright 2013-2016
+These notebooks and files are copyright 2013-2017
 by the Salish Sea MEOPAR Project Contributors
 and The University of British Columbia.
 
