@@ -1,6 +1,5 @@
 """Salish Sea NEMO Jupyter Notebook collection README generator
 
-
 Copyright 2013-2017 The Salish Sea MEOPAR Contributors
 and The University of British Columbia
 
@@ -24,8 +23,8 @@ import re
 
 
 NBVIEWER = 'http://nbviewer.ipython.org/urls'
-REPO = 'bitbucket.org/salishsea/tools/raw/tip'
-REPO_DIR = 'SalishSeaNowcast/notebooks'
+REPO = 'bitbucket.org/salishsea/salishseanowcast/raw/tip'
+REPO_DIR = 'notebooks'
 TITLE_PATTERN = re.compile('#{1,6} ?')
 
 

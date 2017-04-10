@@ -6,12 +6,12 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[TestTracerThalwegAndSurfaceModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/research/TestTracerThalwegAndSurfaceModule.ipynb)  
+* ##[TestTracerThalwegAndSurfaceModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurfaceModule.ipynb)  
     
 
 ##License
 
-These notebooks and files are copyright 2013-2016
+These notebooks and files are copyright 2013-2017
 by the Salish Sea MEOPAR Project Contributors
 and The University of British Columbia.
 

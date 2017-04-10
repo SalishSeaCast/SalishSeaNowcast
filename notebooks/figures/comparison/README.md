@@ -6,7 +6,7 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[TestCompareVENUS_CTD.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/comparison/TestCompareVENUS_CTD.ipynb)  
+* ##[TestCompareVENUS_CTD.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/comparison/TestCompareVENUS_CTD.ipynb)  
     
     **Test `compare_venus_ctd` Module**  
       
@@ -15,7 +15,7 @@ Descriptions under the links below are from the first cell of the notebooks
       
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
 
-* ##[TestSalinityFerryTrackModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb)  
+* ##[TestSalinityFerryTrackModule.ipynb](http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb)  
     
     **Test `salinity_ferry_track` Module**  
       
@@ -27,7 +27,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
 ##License
 
-These notebooks and files are copyright 2013-2016
+These notebooks and files are copyright 2013-2017
 by the Salish Sea MEOPAR Project Contributors
 and The University of British Columbia.
 
