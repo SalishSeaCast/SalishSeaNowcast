@@ -225,10 +225,10 @@ $ Forcing type, grid type, time in file, header
   'CUR' 'LL' T T
 $ Name of dimensions
 $
-  longitude latitude
+  x y
 $
 $ Sea water current component variable names
-  UCUR VCUR
+  u_current v_current
 $
 $ Forcing source file path/name
 $ File is produced by make_ww3_current_file worker
@@ -346,7 +346,7 @@ def _ww3_ounp_contents(run_date, run_type):
     """
     :param str run_type: 
     :param run_date: :py:class:`arrow.Arrow`
-    
+    read
     :return: ww3_ounp.inp file contents
     :rtype: str 
     """

@@ -220,8 +220,8 @@ class TestWW3PrncCurrentContents:
         contents = run_ww3._ww3_prnc_current_contents(
             arrow.get('2017-03-26'), run_type)
         assert "'CUR' 'LL' T T" in contents
-        assert 'longitude latitude' in contents
-        assert 'UCUR VCUR' in contents
+        assert 'x y' in contents
+        assert 'u_current v_current' in contents
         assert "'current/SoG_current_20170326.nc'" in contents
 
 
