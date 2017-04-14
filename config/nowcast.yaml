@@ -469,6 +469,12 @@ run:
 
 
 wave forecasts:
+  # Compute host to run wave forecast on
+  host: west.cloud-nowcast
+  # NEMO run to run wwatch3 forecast run after
+  # User 'after forecast' during storm surge season and 'after nowcast-green`
+  # the rest of the year
+  run when: after nowcast-green
   # Directory on compute host where files (e.g. ww3_*.inp,  mod_def.ww3) and
   # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
   # are stored
@@ -740,6 +746,22 @@ message registry:
       failure forecast2: forecast2 NEMO run failed
       crash: watch_NEMO worker crashed
 
+    make_ww3_wind_file:
+      checklist key: WW3 wind forcing
+      success forecast2: WW3 wind forcing file for forecast2 run ready
+      failure forecast2: WW3 wind forcing file creation for forecast2 run failed
+      success forecast: WW3 wind forcing file for forecast run ready
+      failure forecast: WW3 wind forcing file creation for forecast run failed
+      crash: make_ww3_wind_files worker crashed
+
+    make_ww3_current_file:
+      checklist key: WW3 currents forcing
+      success forecast2: WW3 currents forcing file for forecast2 run ready
+      failure forecast2: WW3 currents forcing file creation for forecast2 run failed
+      success forecast: WW3 currents forcing file for forecast run ready
+      failure forecast: WW3 currents forcing file creation for forecast run failed
+      crash: make_ww3_current_files worker crashed
+
     run_ww3:
       checklist key: WW3 run
       need: WW3 run information dict requested
@@ -790,31 +812,6 @@ message registry:
       success USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files created
       failure USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
-
-    make_ww3_wind_file:
-      checklist key: WW3 wind forcing
-      success forecast2: WW3 wind forcing file for forecast2 run ready
-      failure forecast2: WW3 wind forcing file creation for forecast2 run failed
-      success forecast: WW3 wind forcing file for forecast run ready
-      failure forecast: WW3 wind forcing file creation for forecast run failed
-      crash: make_ww3_wind_files worker crashed
-
-    make_ww3_current_file:
-      checklist key: WW3 currents forcing
-      success forecast2: WW3 currents forcing file for forecast2 run ready
-      failure forecast2: WW3 currents forcing file creation for forecast2 run failed
-      success forecast: WW3 currents forcing file for forecast run ready
-      failure forecast: WW3 currents forcing file creation for forecast run failed
-      crash: make_ww3_current_files worker crashed
-
-    run_ww3:
-      checklist key: WW3 run
-      need: WW3 run information dict requested
-      success forecast2: forecast2 WW3 run started
-      failure forecast2: forecast2 WW3 run failed
-      success forecast: forecast WW3 run started
-      failure forecast: forecast WW3 run failed
-      crash: run_ww3 worker crashed
 
     make_plots:
       checklist key: plots
