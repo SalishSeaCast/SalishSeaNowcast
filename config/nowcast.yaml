@@ -473,9 +473,15 @@ wave forecasts:
   # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
   # are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
-  # Template for the wind forcing file name
+  # Template for wind forcing file names
   # **Must be quoted to project {} characters**
   wind file template: 'SoG_wind_{yyyymmdd}.nc'
+  # Template for ocean current forcing file names
+  # **Must be quoted to project {} characters**
+  current file template: 'SoG_current_{yyyymmdd}.nc'
+  # Template for NEMO hourly results file name
+  # **Must be quoted to project {} characters**
+  NEMO file template: 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
   # Path to the wwatch3 executables directory
   wwatch3 exe path: /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe
   # Path to the salishsea command processor executable to use in the run script
@@ -792,6 +798,14 @@ message registry:
       success forecast: WW3 wind forcing file for forecast run ready
       failure forecast: WW3 wind forcing file creation for forecast run failed
       crash: make_ww3_wind_files worker crashed
+
+    make_ww3_current_file:
+      checklist key: WW3 currents forcing
+      success forecast2: WW3 currents forcing file for forecast2 run ready
+      failure forecast2: WW3 currents forcing file creation for forecast2 run failed
+      success forecast: WW3 currents forcing file for forecast run ready
+      failure forecast: WW3 currents forcing file creation for forecast run failed
+      crash: make_ww3_current_files worker crashed
 
     run_ww3:
       checklist key: WW3 run

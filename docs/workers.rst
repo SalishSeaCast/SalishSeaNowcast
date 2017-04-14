@@ -149,6 +149,13 @@ Workers
     :members: main
 
 
+:kbd:`make_ww3_current_file`
+-------------------------
+
+.. automodule:: nowcast.workers.make_ww3_current_file
+    :members: main
+
+
 :kbd:`run_ww3`
 ---------------
 
