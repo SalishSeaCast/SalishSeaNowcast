@@ -16,7 +16,7 @@
    version="1.1"
    inkscape:version="0.91 r13725"
    sodipodi:docname="ProcessFlow.svg"
-   inkscape:export-filename="/home/doug/Documents/MEOPAR/SalishSeaNowcast/docs/ProcessFlow.png"
+   inkscape:export-filename="/media/doug/warehouse/MEOPAR/SalishSeaNowcast/docs/ProcessFlow.png"
    inkscape:export-xdpi="90"
    inkscape:export-ydpi="90">
   <defs
@@ -28,15 +28,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.5537231"
-     inkscape:cx="674.63929"
-     inkscape:cy="742.76692"
+     inkscape:zoom="0.97989367"
+     inkscape:cx="454.00656"
+     inkscape:cy="468.92845"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1056"
-     inkscape:window-x="1366"
+     inkscape:window-x="1920"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
      fit-margin-top="0"
@@ -52,7 +52,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1018,7 +1018,7 @@
            y="771.78949"
            x="417.46167"
            id="tspan4420"
-           sodipodi:role="line">forecast2 run</tspan></text>
+           sodipodi:role="line">forecast2 runs</tspan></text>
     </g>
     <g
        id="g3493"
@@ -1284,6 +1284,40 @@
              x="326.88116"
              y="165.883"
              id="tspan13324">make_live_ocean_files</tspan></text>
+      </g>
+    </g>
+    <g
+       id="g4688">
+      <text
+         sodipodi:linespacing="125%"
+         id="text4642"
+         y="235.79674"
+         x="593.03748"
+         style="font-style:normal;font-weight:normal;font-size:15px;line-height:125%;font-family:Sans;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           style="font-size:12.5px"
+           y="235.79674"
+           x="593.03748"
+           id="tspan4644"
+           sodipodi:role="line">nowcast-dev runs</tspan></text>
+      <g
+         id="g4683">
+        <path
+           style="display:inline;fill:none;stroke:#000000;stroke-width:1.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="M 665.83093,223.28179 776.52905,180.44791"
+           id="path4648"
+           inkscape:connector-curvature="0" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4652"
+           d="M 477.09857,292.3092 616.94721,240.30467"
+           style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        <path
+           sodipodi:nodetypes="ccccc"
+           inkscape:connector-curvature="0"
+           id="path4650"
+           d="m 471.64273,294.0859 24.37021,-0.53538 -9.52089,-4.85685 4.4058,-9.22932 z"
+           style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
       </g>
     </g>
   </g>
