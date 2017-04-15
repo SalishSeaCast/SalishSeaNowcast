@@ -475,10 +475,14 @@ def after_watch_NEMO(msg, config, checklist):
         if run_type == 'forecast':
             if wave_forecast_after == 'forecast':
                 host_name = config['wave forecasts']['host']
-                next_workers['success forecast'].append(
-                    NextWorker(
+                next_workers['success forecast'].extend(
+                    [NextWorker(
                         'nowcast.workers.make_ww3_wind_file',
                         args=[host_name, 'forecast'], host=host_name),
+                        NextWorker(
+                            'nowcast.workers.make_ww3_current_file',
+                            args=[host_name, 'forecast'], host=host_name)
+                    ],
                 )
             else:
                 next_workers['success forecast'].append(
@@ -488,10 +492,14 @@ def after_watch_NEMO(msg, config, checklist):
         if run_type == 'nowcast-green':
             if wave_forecast_after == 'nowcast-green':
                 host_name = config['wave forecasts']['host']
-                next_workers['success nowcast-green'].append(
-                    NextWorker(
+                next_workers['success nowcast-green'].extend(
+                    [NextWorker(
                         'nowcast.workers.make_ww3_wind_file',
                         args=[host_name, 'forecast'], host=host_name),
+                        NextWorker(
+                            'nowcast.workers.make_ww3_current_file',
+                            args=[host_name, 'forecast'], host=host_name)
+                    ],
                 )
         enabled_host_config = (
             config['run']['enabled hosts'][msg.payload[run_type]['host']])
@@ -508,6 +516,27 @@ def after_watch_NEMO(msg, config, checklist):
 def after_make_ww3_wind_file(msg, config, checklist):
     """Calculate the list of workers to launch after the 
     after_make_ww3_wind_file worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    return []
+
+
+def after_make_ww3_current_file(msg, config, checklist):
+    """Calculate the list of workers to launch after the 
+    after_make_ww3_current_file worker ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`

@@ -495,6 +495,26 @@ class TestAfterWatchNEMO:
             args=['cloud', 'forecast'], host='cloud')
         assert workers[0] == expected
 
+    def test_success_forecast_launch_make_ww3_current_file_forecast(
+        self, config, checklist,
+    ):
+        p_config = patch.dict(
+            config['wave forecasts'], {'run when': 'after forecast'})
+        with p_config:
+            workers = next_workers.after_watch_NEMO(
+                Message(
+                    'watch_NEMO', 'success forecast', {
+                        'forecast': {
+                            'host': 'cloud', 'run date': '2017-04-14',
+                            'completed': True,
+                        }
+                    }),
+                config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_ww3_current_file',
+            args=['cloud', 'forecast'], host='cloud')
+        assert workers[1] == expected
+
     def test_success_nowcast_green_launch_make_ww3_wind_file_forecast(
         self, config, checklist,
     ):
@@ -514,6 +534,26 @@ class TestAfterWatchNEMO:
             'nowcast.workers.make_ww3_wind_file',
             args=['cloud', 'forecast'], host='cloud')
         assert workers[0] == expected
+
+    def test_success_nowcast_green_launch_make_ww3_current_file_forecast(
+        self, config, checklist,
+    ):
+        p_config = patch.dict(
+            config['wave forecasts'], {'run when': 'after nowcast-green'})
+        with p_config:
+            workers = next_workers.after_watch_NEMO(
+                Message(
+                    'watch_NEMO', 'success nowcast-green', {
+                        'nowcast-green': {
+                            'host': 'cloud', 'run date': '2017-04-14',
+                            'completed': True,
+                        }
+                    }),
+                config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_ww3_current_file',
+            args=['cloud', 'forecast'], host='cloud')
+        assert workers[1] == expected
 
     @pytest.mark.parametrize('msg', [
         Message(
@@ -586,6 +626,23 @@ class TestAfterMakeWW3WindFile:
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_ww3_wind_file(
             Message('make_ww3_wind_file', msg_type), config, checklist)
+        assert workers == []
+
+
+class TestAfterMakeWW3currentFile:
+    """Unit tests for the after_make_ww3_current_file function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure forecast2',
+        'failure forecast',
+        'success forecast2',
+        'success forecast2',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_ww3_current_file(
+            Message('make_ww3_current_file', msg_type), config, checklist)
         assert workers == []
 
 
