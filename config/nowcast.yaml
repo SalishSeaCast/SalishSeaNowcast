@@ -417,14 +417,8 @@ run:
     job exec cmd: qsub
 
 
-  hindcast host: jasper-nowcast
-  jasper-nowcast:
-    results:
-      hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
-
-
-  hindcast host: orcinus-nowcast
-  orcinus-nowcast:
+  hindcast host: orcinus-hindcast
+  orcinus-hindcast:
     results:
       hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
 
