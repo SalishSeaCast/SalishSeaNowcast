@@ -346,7 +346,7 @@ def _ww3_ounp_contents(run_date, run_type):
     """
     :param str run_type: 
     :param run_date: :py:class:`arrow.Arrow`
-    read
+
     :return: ww3_ounp.inp file contents
     :rtype: str 
     """
