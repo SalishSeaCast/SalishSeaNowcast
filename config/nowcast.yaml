@@ -610,6 +610,7 @@ zmq:
       make_live_ocean_files: 'salish.eos.ubc.ca:5558'
       make_ww3_wind_file: '206.12.48.112:5570'
       make_ww3_current_file: '206.12.48.112:5571'
+      run_ww3: '206.12.48.112:5572'
 
 
 message registry:
