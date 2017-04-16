@@ -552,7 +552,23 @@ def after_make_ww3_current_file(msg, config, checklist):
     :returns: Worker(s) to launch next
     :rtype: list
     """
-    return []
+    next_workers = {
+        'crash': [],
+        'failure forecast2': [],
+        'failure forecast': [],
+        'success forecast2': [],
+        'success forecast': [],
+    }
+    if msg.type.startswith('success'):
+        host_name = config['wave forecasts']['host']
+        run_type = msg.type.split()[1]
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.run_ww3',
+                args=[host_name, run_type], host=host_name
+            )
+        )
+    return next_workers[msg.type]
 
 
 def after_download_results(msg, config, checklist):

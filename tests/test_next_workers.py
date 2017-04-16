@@ -621,7 +621,7 @@ class TestAfterMakeWW3WindFile:
         'failure forecast2',
         'failure forecast',
         'success forecast2',
-        'success forecast2',
+        'success forecast',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_ww3_wind_file(
@@ -637,13 +637,26 @@ class TestAfterMakeWW3currentFile:
         'crash',
         'failure forecast2',
         'failure forecast',
-        'success forecast2',
-        'success forecast2',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_ww3_current_file(
             Message('make_ww3_current_file', msg_type), config, checklist)
         assert workers == []
+
+    @pytest.mark.parametrize('run_type', [
+        'forecast',
+        'forecast2',
+    ])
+    def test_success_launch_run_ww3(self, run_type, config, checklist):
+        workers = next_workers.after_make_ww3_current_file(
+            Message(
+                'make_ww3_current_file', f'success {run_type}', {
+                    run_type: 'current/SoG_current_20170415.nc'
+                }),
+            config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.run_ww3', args=['cloud', run_type], host='cloud')
+        assert workers[0] == expected
 
 
 class TestAfterDownloadResults:
