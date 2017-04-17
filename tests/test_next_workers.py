@@ -659,6 +659,23 @@ class TestAfterMakeWW3currentFile:
         assert workers[0] == expected
 
 
+class TestAfterRunWW3:
+    """Unit tests for the after_run_ww3 function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure forecast2',
+        'failure forecast',
+        'success forecast2',
+        'success forecast',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_run_ww3(
+            Message('run_ww3', msg_type), config, checklist)
+        assert workers == []
+
+
 class TestAfterDownloadResults:
     """Unit tests for the after_download_results function.
     """

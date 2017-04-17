@@ -761,7 +761,6 @@ message registry:
 
     run_ww3:
       checklist key: WW3 run
-      need: WW3 run information dict requested
       success forecast2: forecast2 WW3 run started
       failure forecast2: forecast2 WW3 run failed
       success forecast: forecast WW3 run started
