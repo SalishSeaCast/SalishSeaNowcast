@@ -571,6 +571,27 @@ def after_make_ww3_current_file(msg, config, checklist):
     return next_workers[msg.type]
 
 
+def after_run_ww3(msg, config, checklist):
+    """Calculate the list of workers to launch after the after_run_ww3 worker 
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    return []
+
+
 def after_download_results(msg, config, checklist):
     """Calculate the list of workers to launch after the download_results
     worker ends.
