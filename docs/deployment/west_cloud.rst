@@ -316,6 +316,9 @@ and to make :command:`rm` default to prompting for confirmation:
 Shared Storage via NFS
 ======================
 
+Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
+
+
 NFS Server for Shared Storage on Head Node
 ------------------------------------------
 
