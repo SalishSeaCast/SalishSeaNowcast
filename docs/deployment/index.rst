@@ -34,7 +34,7 @@ The production deployment uses 3 systems:
 #. The development compute server,
    :kbd:`salish`,
    is used to run the daily development model run,
-   :kbd:`nowcast-dev`,
+   :kbd:`nowcast-dev` NEMO-3.6 model run,
    and the :py:mod:`nowcast.workers.make_live_ocean_files` worker that relies on Matlab.
    :kbd:`salish` and :kbd:`skookum` share storage via NFS mounts,
    so,
@@ -45,9 +45,15 @@ The production deployment uses 3 systems:
    (preliminary forecast),
    :kbd:`nowcast`,
    :kbd:`forecast`,
-   and :kbd:`nowcast-green` model runs are computed on a cluster of virtual machines on the `Ocean Networks Canada`_ private cloud computing facility that is part of `west.cloud`_.
+   and :kbd:`nowcast-green` NEMO-3.6 model runs are computed on a cluster of virtual machines on the `Ocean Networks Canada`_ private cloud computing facility that is part of `west.cloud`_.
    The shared storage for those VMs is provided by an NFS-mounted volume of west.cloud `Ceph object storage`_.
    The nowcast deployment is in the :file:`/nemoShare/MEOPAR/nowcast-sys/` directory tree.
+
+   In April 2017,
+   daily :kbd:`wwatch3-forecast2`
+   (preliminary wave forecast),
+   and :kbd:`wwatch3-forecast` WaveWatch III® v5.16 wave model runs were added to the computations on the ONC cloud.
+   They are executed after the :kbd:`forecast2` and :kbd:`forecast` NEMO-3.6 runs.
 
    .. _Ocean Networks Canada: http://www.oceannetworks.ca/
    .. _west.cloud: https://www.westgrid.ca/support/systems/cc-cloud
