@@ -316,7 +316,30 @@ and to make :command:`rm` default to prompting for confirmation:
 Shared Storage via NFS
 ======================
 
-**incomplete**
+NFS Server for Shared Storage on Head Node
+------------------------------------------
+
+.. code-block:: bash
+
+    $ sudo apt-get install nfs-kernel-server
+    $ sudo mkdir -p /export/MEOPAR
+    $ sudo chmod 777 /export/ /export/MEOPAR/
+    $ sudo mount --bind /nemoShare/MEOPAR /export/MEOPAR
+
+Add the following line to :file:`/etc/fstab`::
+
+  /nemoShare/MEOPAR   /export/MEOPAR  none  bind  0  0
+
+Add the following 2 line2 to :file:`/etc/exports`::
+
+  /export        192.168.1.0/24(rw,fsid=0,insecure,no_subtree_check,async)
+  /export/MEOPAR 192.168.1.0/24(rw,nohide,insecure,no_subtree_check,async)
+
+Restart the NFS service:
+
+  .. code-block:: bash
+
+    $ sudo service nfs-kernel-server restart
 
 
 Mounting Shared Storage on Compute Nodes
@@ -324,6 +347,7 @@ Mounting Shared Storage on Compute Nodes
 
 .. code-block:: bash
 
+    $ sudo apt-get install nfs-common
     $ sudo mkdir -p /nemoShare/MEOPAR
     $ sudo chown ubuntu:ubuntu /nemoShare/MEOPAR
     $ sudo mount HeadNodeIP:/MEOPAR /nemoShare/MEOPAR
