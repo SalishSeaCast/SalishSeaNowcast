@@ -501,6 +501,17 @@ def after_watch_NEMO(msg, config, checklist):
                             args=[host_name, 'forecast'], host=host_name)
                     ],
                 )
+        if run_type == 'forecast2':
+            host_name = config['wave forecasts']['host']
+            next_workers['success forecast2'].extend(
+                [NextWorker(
+                    'nowcast.workers.make_ww3_wind_file',
+                    args=[host_name, 'forecast2'], host=host_name),
+                    NextWorker(
+                        'nowcast.workers.make_ww3_current_file',
+                        args=[host_name, 'forecast2'], host=host_name)
+                ],
+            )
         enabled_host_config = (
             config['run']['enabled hosts'][msg.payload[run_type]['host']])
         if not enabled_host_config['shared storage']:
