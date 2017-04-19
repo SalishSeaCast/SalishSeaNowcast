@@ -89,7 +89,7 @@ Contents
 
    workers
    creating_workers
-   figures
+   figures/index
    deployment/index
    config
    worker_failures
