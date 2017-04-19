@@ -515,6 +515,40 @@ class TestAfterWatchNEMO:
             args=['cloud', 'forecast'], host='cloud')
         assert workers[1] == expected
 
+    def test_success_forecast2_launch_make_ww3_wind_file_forecast2(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                'watch_NEMO', 'success forecast2', {
+                    'forecast2': {
+                        'host': 'cloud', 'run date': '2017-04-14',
+                        'completed': True,
+                    }
+                }),
+            config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_ww3_wind_file',
+            args=['cloud', 'forecast2'], host='cloud')
+        assert workers[0] == expected
+
+    def test_success_forecast2_launch_make_ww3_current_file_forecast2(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                'watch_NEMO', 'success forecast2', {
+                    'forecast2': {
+                        'host': 'cloud', 'run date': '2017-04-14',
+                        'completed': True,
+                    }
+                }),
+            config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_ww3_current_file',
+            args=['cloud', 'forecast2'], host='cloud')
+        assert workers[1] == expected
+
     def test_success_nowcast_green_launch_make_ww3_wind_file_forecast(
         self, config, checklist,
     ):
