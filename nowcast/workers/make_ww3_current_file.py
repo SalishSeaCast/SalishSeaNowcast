@@ -99,38 +99,9 @@ def make_ww3_current_file(parsed_args, config, *args):
     nc_filepath = dest_dir / filepath_tmpl.format(
         yyyymmdd=run_date.format('YYYYMMDD'))
     if run_type == 'forecast':
-        _calc_forecast_currents(
-            run_date, mesh_mask, nemo_dir, nemo_file_tmpl, nc_filepath)
+        datasets = _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl)
     else:
-        _calc_forecast2_currents(
-            run_date, mesh_mask, nemo_dir, nemo_file_tmpl, nc_filepath)
-    logger.debug(f'stored currents forcing file: {nc_filepath}')
-    checklist = {run_type: os.fspath(nc_filepath)}
-    return checklist
-
-
-def _calc_forecast_currents(
-    run_date, mesh_mask, nemo_dir, nemo_file_tmpl, nc_filepath
-):
-    datasets = {'u': [], 'v': []}
-    dmy = run_date.format('DDMMMYY').lower()
-    s_yyyymmdd = e_yyyymmdd = run_date.format('YYYYMMDD')
-    for grid in datasets:
-        nowcast_file = (nemo_dir / f'nowcast/{dmy}') / nemo_file_tmpl.format(
-            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd,
-            grid=grid.upper()
-        )
-        datasets[grid].append(os.fspath(nowcast_file))
-        logger.debug(f'{grid} dataset: {nowcast_file}')
-    s_yyyymmdd = run_date.replace(days=+1).format('YYYYMMDD')
-    e_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
-    for grid in datasets:
-        forecast_file = (nemo_dir / f'forecast/{dmy}') / nemo_file_tmpl.format(
-            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd,
-            grid=grid.upper()
-        )
-        datasets[grid].append(os.fspath(forecast_file))
-        logger.debug(f'{grid} dataset: {forecast_file}')
+        datasets = _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl)
     with xarray.open_dataset(mesh_mask) as grid:
         lats = grid.nav_lat[1:, 1:]
         lons = grid.nav_lon[1:, 1:] + 360
@@ -156,11 +127,35 @@ def _calc_forecast_currents(
                     u_current.time_counter, lats, lons, u_current, v_current,
                     datasets)
                 ds.to_netcdf(os.fspath(nc_filepath))
+    logger.debug(f'stored currents forcing file: {nc_filepath}')
+    checklist = {run_type: os.fspath(nc_filepath)}
+    return checklist
 
 
-def _calc_forecast2_currents(
-    run_date, mesh_mask, nemo_dir, nemo_file_tmpl, nc_filepath
-):
+def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
+    datasets = {'u': [], 'v': []}
+    dmy = run_date.format('DDMMMYY').lower()
+    s_yyyymmdd = e_yyyymmdd = run_date.format('YYYYMMDD')
+    for grid in datasets:
+        nowcast_file = (nemo_dir / f'nowcast/{dmy}') / nemo_file_tmpl.format(
+            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd,
+            grid=grid.upper()
+        )
+        datasets[grid].append(os.fspath(nowcast_file))
+        logger.debug(f'{grid} dataset: {nowcast_file}')
+    s_yyyymmdd = run_date.replace(days=+1).format('YYYYMMDD')
+    e_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
+    for grid in datasets:
+        forecast_file = (nemo_dir / f'forecast/{dmy}') / nemo_file_tmpl.format(
+            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd,
+            grid=grid.upper()
+        )
+        datasets[grid].append(os.fspath(forecast_file))
+        logger.debug(f'{grid} dataset: {forecast_file}')
+    return datasets
+
+
+def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl):
     datasets = {'u': [], 'v': []}
     dmy = run_date.replace(days=-1).format('DDMMMYY').lower()
     s_yyyymmdd = run_date.format('YYYYMMDD')
@@ -185,6 +180,7 @@ def _calc_forecast2_currents(
         )
         datasets[grid].append(os.fspath(forecast2_file))
         logger.debug(f'{grid} dataset: {forecast2_file}')
+    return datasets
 
 
 def _create_dataset(time, lats, lons, u_current, v_current, datasets):

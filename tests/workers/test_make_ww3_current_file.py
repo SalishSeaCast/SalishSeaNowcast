@@ -140,9 +140,12 @@ class TestFailure:
         assert msg_type == f'failure {run_type}'
 
 
+@patch('nowcast.workers.make_ww3_current_file._create_dataset')
+@patch('nowcast.workers.make_ww3_current_file.viz_tools.unstagger')
+@patch('nowcast.workers.make_ww3_current_file.viz_tools.rotate_vel')
+@patch('nowcast.workers.make_ww3_current_file.xarray.open_mfdataset')
+@patch('nowcast.workers.make_ww3_current_file.xarray.open_dataset')
 @patch('nowcast.workers.make_ww3_current_file.logger')
-@patch('nowcast.workers.make_ww3_current_file._calc_forecast_currents')
-@patch('nowcast.workers.make_ww3_current_file._calc_forecast2_currents')
 class TestMakeWW3CurrentFile:
     """Unit tests for make_ww3_current_file() function.
     """
@@ -151,107 +154,158 @@ class TestMakeWW3CurrentFile:
         'forecast2',
         'forecast',
     ])
+    @patch('nowcast.workers.make_ww3_current_file._calc_forecast_datasets')
+    @patch('nowcast.workers.make_ww3_current_file._calc_forecast2_datasets')
     def test_checklist(
-        self, m_calc_fcst2_currents, m_calc_fcst_currents, m_logger,  run_type,
-        config
+        self, m_calc_fcst2_datasets, m_calc_fcst_datasets, m_logger,
+        m_open_dataset, m_open_mfdataset, m_rotate_vel, m_unstagger,
+        m_create_dataset,  run_type, config
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud', run_type=run_type,
             run_date=arrow.get('2017-04-12'))
+        m_unstagger.return_value = (MagicMock(), MagicMock())
+        m_rotate_vel.return_value = (MagicMock(), MagicMock())
         checklist = make_ww3_current_file.make_ww3_current_file(
             parsed_args, config)
         if run_type == 'forecast2':
-            m_calc_fcst2_currents.assert_called_once_with(
+            m_calc_fcst2_datasets.assert_called_once_with(
                 arrow.get('2017-04-12'),
-                'NEMO-forcing/grid/mesh_mask_downbyone2.nc',
                 Path('/nemoShare/MEOPAR/SalishSea/'),
                 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
-                Path(
-                    '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/'
-                    'SoG_current_20170412.nc')
             )
         else:
-            m_calc_fcst_currents.assert_called_once_with(
+            m_calc_fcst_datasets.assert_called_once_with(
                 arrow.get('2017-04-12'),
-                'NEMO-forcing/grid/mesh_mask_downbyone2.nc',
                 Path('/nemoShare/MEOPAR/SalishSea/'),
                 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
-                Path(
-                    '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/'
-                    'SoG_current_20170412.nc'),
             )
         assert checklist == {
             run_type:
                 '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/'
                 'SoG_current_20170412.nc'}
 
-
-@patch('nowcast.workers.make_ww3_current_file.viz_tools.unstagger')
-@patch('nowcast.workers.make_ww3_current_file.viz_tools.rotate_vel')
-@patch('nowcast.workers.make_ww3_current_file.xarray.open_mfdataset')
-@patch('nowcast.workers.make_ww3_current_file.xarray.open_dataset')
-@patch('nowcast.workers.make_ww3_current_file.logger')
-@patch('nowcast.workers.make_ww3_current_file._create_dataset')
-class TestCalcForecastCurrents:
-    """Unit tests for _calc_forecast_currents() function.
-    """
-
-    def test_forecast_datasets(
-        self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset,
-        m_rotate_vel, m_unstagger
+    @pytest.mark.parametrize('run_type', [
+        'forecast2',
+        'forecast',
+    ])
+    def test_mesh_mask_dataset(
+        self, m_logger, m_open_dataset, m_open_mfdataset, m_rotate_vel,
+        m_unstagger, m_create_dataset, run_type, config
     ):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type,
+            run_date=arrow.get('2017-04-18'))
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
-        make_ww3_current_file._calc_forecast_currents(
-            arrow.get('2017-04-12'),
-            'NEMO-forcing/grid/mesh_mask_downbyone2.nc',
-            Path('/nemoShare/MEOPAR/SalishSea/'),
-            'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
-            Path(
-                '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/'
-                'SoG_current_20170412.nc'),
-        )
+        make_ww3_current_file.make_ww3_current_file(parsed_args, config)
         m_open_dataset.assert_called_once_with(
             'NEMO-forcing/grid/mesh_mask_downbyone2.nc')
-        assert m_open_mfdataset.call_args_list == [
-            call([
+
+    @pytest.mark.parametrize('run_type', [
+        'forecast2',
+        'forecast',
+    ])
+    def test_u_datasets(
+        self, m_logger, m_open_dataset, m_open_mfdataset, m_rotate_vel,
+        m_unstagger, m_create_dataset, run_type, config
+    ):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type,
+            run_date=arrow.get('2017-04-18'))
+        m_unstagger.return_value = (MagicMock(), MagicMock())
+        m_rotate_vel.return_value = (MagicMock(), MagicMock())
+        make_ww3_current_file.make_ww3_current_file(parsed_args, config)
+        if run_type == 'forecast2':
+            m_open_mfdataset.call_args_list[0] = call([
+                '/nemoShare/MEOPAR/SalishSea/forecast/18apr17/'
+                'SalishSea_1h_20170419_20170420_grid_U.nc',
+                '/nemoShare/MEOPAR/SalishSea/forecast2/18apr17/'
+                'SalishSea_1h_20170420_20170421_grid_U.nc',
+            ])
+        else:
+            m_open_mfdataset.call_args_list[0] = call([
+                '/nemoShare/MEOPAR/SalishSea/nowcast/18apr17/'
+                'SalishSea_1h_20170418_20170418_grid_U.nc',
+                '/nemoShare/MEOPAR/SalishSea/forecast/18apr17/'
+                'SalishSea_1h_20170419_20170420_grid_U.nc',
+            ])
+
+    @pytest.mark.parametrize('run_type', [
+        'forecast2',
+        'forecast',
+    ])
+    def test_v_datasets(
+        self, m_logger, m_open_dataset, m_open_mfdataset, m_rotate_vel,
+        m_unstagger, m_create_dataset, run_type, config
+    ):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud', run_type=run_type,
+            run_date=arrow.get('2017-04-18'))
+        m_unstagger.return_value = (MagicMock(), MagicMock())
+        m_rotate_vel.return_value = (MagicMock(), MagicMock())
+        make_ww3_current_file.make_ww3_current_file(parsed_args, config)
+        if run_type == 'forecast2':
+            m_open_mfdataset.call_args_list[1] = call([
+                '/nemoShare/MEOPAR/SalishSea/forecast/18apr17/'
+                'SalishSea_1h_20170419_20170420_grid_V.nc',
+                '/nemoShare/MEOPAR/SalishSea/forecast2/18apr17/'
+                'SalishSea_1h_20170420_20170421_grid_V.nc',
+            ])
+        else:
+            m_open_mfdataset.call_args_list[1] = call([
+                '/nemoShare/MEOPAR/SalishSea/nowcast/18apr17/'
+                'SalishSea_1h_20170418_20170418_grid_V.nc',
+                '/nemoShare/MEOPAR/SalishSea/forecast/18apr17/'
+                'SalishSea_1h_20170419_20170420_grid_V.nc',
+            ])
+
+
+@patch('nowcast.workers.make_ww3_current_file.logger')
+class TestCalcForecastDatasets:
+    """Unit tests for _calc_forecast_datasets() function.
+    """
+
+    def test_forecast_datasets(self, m_logger):
+        datasets = make_ww3_current_file._calc_forecast_datasets(
+            arrow.get('2017-04-12'), Path('/nemoShare/MEOPAR/SalishSea/'),
+            'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc')
+        assert datasets == {
+            'u': [
                 '/nemoShare/MEOPAR/SalishSea/nowcast/12apr17/'
                 'SalishSea_1h_20170412_20170412_grid_U.nc',
                 '/nemoShare/MEOPAR/SalishSea/forecast/12apr17/'
                 'SalishSea_1h_20170413_20170414_grid_U.nc',
-            ]),
-            call([
+            ],
+            'v': [
                 '/nemoShare/MEOPAR/SalishSea/nowcast/12apr17/'
                 'SalishSea_1h_20170412_20170412_grid_V.nc',
                 '/nemoShare/MEOPAR/SalishSea/forecast/12apr17/'
                 'SalishSea_1h_20170413_20170414_grid_V.nc',
-            ]),
-        ]
+            ],
+        }
 
-    #
-    # def test_forecast2_datasets(
-    #     self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset,
-    #     m_rotate_vel, m_unstagger
-    # ):
-    #     parsed_args = SimpleNamespace(
-    #         host_name='west.cloud', run_type='forecast2',
-    #         run_date=arrow.get('2017-04-13'))
-    #     m_unstagger.return_value = (MagicMock(), MagicMock())
-    #     m_rotate_vel.return_value = (MagicMock(), MagicMock())
-    #     make_ww3_current_file.make_ww3_current_file(parsed_args, self.config)
-    #     m_open_dataset.assert_called_once_with(
-    #         'NEMO-forcing/grid/mesh_mask_downbyone2.nc')
-    #     assert m_open_mfdataset.call_args_list == [
-    #         call([
-    #             '/nemoShare/MEOPAR/SalishSea/forecast/12apr17/'
-    #             'SalishSea_1h_20170413_20170414_grid_U.nc',
-    #             '/nemoShare/MEOPAR/SalishSea/forecast2/12apr17/'
-    #             'SalishSea_1h_20170414_20170415_grid_U.nc',
-    #         ]),
-    #         call([
-    #             '/nemoShare/MEOPAR/SalishSea/forecast/12apr17/'
-    #             'SalishSea_1h_20170413_20170414_grid_V.nc',
-    #             '/nemoShare/MEOPAR/SalishSea/forecast2/12apr17/'
-    #             'SalishSea_1h_20170414_20170415_grid_V.nc',
-    #         ]),
-    #     ]
+
+@patch('nowcast.workers.make_ww3_current_file.logger')
+class TestCalcForecast2Datasets:
+    """Unit tests for _calc_forecast2_datasets() function.
+    """
+
+    def test_forecast2_datasets(self, m_logger):
+        datasets = make_ww3_current_file._calc_forecast2_datasets(
+            arrow.get('2017-04-13'), Path('/nemoShare/MEOPAR/SalishSea/'),
+            'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc')
+        assert datasets == {
+            'u': [
+                '/nemoShare/MEOPAR/SalishSea/forecast/12apr17/'
+                'SalishSea_1h_20170413_20170414_grid_U.nc',
+                '/nemoShare/MEOPAR/SalishSea/forecast2/12apr17/'
+                'SalishSea_1h_20170414_20170415_grid_U.nc',
+            ],
+            'v': [
+                '/nemoShare/MEOPAR/SalishSea/forecast/12apr17/'
+                'SalishSea_1h_20170413_20170414_grid_V.nc',
+                '/nemoShare/MEOPAR/SalishSea/forecast2/12apr17/'
+                'SalishSea_1h_20170414_20170415_grid_V.nc',
+            ],
+        }
