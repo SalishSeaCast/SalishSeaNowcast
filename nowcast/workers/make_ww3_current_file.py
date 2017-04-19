@@ -18,7 +18,9 @@ ocean currents forcing file for a prelim-forecast or forecast run
 """
 import logging
 import os
+import shlex
 from pathlib import Path
+import subprocess
 
 import arrow
 import xarray
@@ -101,7 +103,8 @@ def make_ww3_current_file(parsed_args, config, *args):
     if run_type == 'forecast':
         datasets = _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl)
     else:
-        datasets = _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl)
+        datasets = _calc_forecast2_datasets(
+            run_date, nemo_dir, nemo_file_tmpl, dest_dir)
     with xarray.open_dataset(mesh_mask) as grid:
         lats = grid.nav_lat[1:, 1:]
         lons = grid.nav_lon[1:, 1:] + 360
@@ -137,44 +140,51 @@ def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
     dmy = run_date.format('DDMMMYY').lower()
     s_yyyymmdd = e_yyyymmdd = run_date.format('YYYYMMDD')
     for grid in datasets:
-        nowcast_file = (nemo_dir / f'nowcast/{dmy}') / nemo_file_tmpl.format(
+        nowcast_file = ((nemo_dir / f'nowcast/{dmy}') / nemo_file_tmpl.format(
             s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd,
             grid=grid.upper()
-        )
+        ))
         datasets[grid].append(os.fspath(nowcast_file))
         logger.debug(f'{grid} dataset: {nowcast_file}')
     s_yyyymmdd = run_date.replace(days=+1).format('YYYYMMDD')
     e_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
     for grid in datasets:
-        forecast_file = (nemo_dir / f'forecast/{dmy}') / nemo_file_tmpl.format(
+        forecast_file = ((nemo_dir / f'forecast/{dmy}') / nemo_file_tmpl.format(
             s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd,
             grid=grid.upper()
-        )
+        ))
         datasets[grid].append(os.fspath(forecast_file))
         logger.debug(f'{grid} dataset: {forecast_file}')
     return datasets
 
 
-def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl):
+def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl, dest_dir):
     datasets = {'u': [], 'v': []}
     dmy = run_date.replace(days=-1).format('DDMMMYY').lower()
     s_yyyymmdd = run_date.format('YYYYMMDD')
     e_yyyymmdd = run_date.replace(days=+1).format('YYYYMMDD')
     for grid in datasets:
-        forecast_file = (
-                            nemo_dir / f'forecast/{dmy}') / \
-                        nemo_file_tmpl.format(
+        forecast_file = ((nemo_dir / f'forecast/{dmy}') / nemo_file_tmpl.format(
             s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd,
             grid=grid.upper()
-        )
-        datasets[grid].append(os.fspath(forecast_file))
-        logger.debug(f'{grid} dataset: {forecast_file}')
+        ))
+        forecast_file_24h = (dest_dir / nemo_file_tmpl.format(
+            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=s_yyyymmdd,
+            grid=grid.upper()
+        ))
+        cmd = (
+            f'/usr/bin/ncks -d time_counter,0,23 '
+            f'{forecast_file} {forecast_file_24h}')
+        logger.debug(f'running {cmd} in subprocess')
+        subprocess.run(shlex.split(cmd))
+        logger.debug(
+            f'extracted 1st 24h of {forecast_file} to {forecast_file_24h}')
+        datasets[grid].append(os.fspath(forecast_file_24h))
+        logger.debug(f'{grid} dataset: {forecast_file_24h}')
     s_yyyymmdd = run_date.replace(days=+1).format('YYYYMMDD')
     e_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
     for grid in datasets:
-        forecast2_file = (
-                             nemo_dir / f'forecast2/{dmy}') / \
-                         nemo_file_tmpl.format(
+        forecast2_file = (nemo_dir / f'forecast2/{dmy}') / nemo_file_tmpl.format(
             s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd,
             grid=grid.upper()
         )

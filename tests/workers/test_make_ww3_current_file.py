@@ -173,6 +173,7 @@ class TestMakeWW3CurrentFile:
                 arrow.get('2017-04-12'),
                 Path('/nemoShare/MEOPAR/SalishSea/'),
                 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
+                Path('/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current')
             )
         else:
             m_calc_fcst_datasets.assert_called_once_with(
@@ -287,24 +288,26 @@ class TestCalcForecastDatasets:
 
 
 @patch('nowcast.workers.make_ww3_current_file.logger')
+@patch('nowcast.workers.make_ww3_current_file.subprocess.run')
 class TestCalcForecast2Datasets:
     """Unit tests for _calc_forecast2_datasets() function.
     """
 
-    def test_forecast2_datasets(self, m_logger):
+    def test_forecast2_datasets(self, m_run, m_logger):
         datasets = make_ww3_current_file._calc_forecast2_datasets(
             arrow.get('2017-04-13'), Path('/nemoShare/MEOPAR/SalishSea/'),
-            'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc')
+            'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
+            Path('/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current'))
         assert datasets == {
             'u': [
-                '/nemoShare/MEOPAR/SalishSea/forecast/12apr17/'
-                'SalishSea_1h_20170413_20170414_grid_U.nc',
+                '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/'
+                'SalishSea_1h_20170413_20170413_grid_U.nc',
                 '/nemoShare/MEOPAR/SalishSea/forecast2/12apr17/'
                 'SalishSea_1h_20170414_20170415_grid_U.nc',
             ],
             'v': [
-                '/nemoShare/MEOPAR/SalishSea/forecast/12apr17/'
-                'SalishSea_1h_20170413_20170414_grid_V.nc',
+                '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/'
+                'SalishSea_1h_20170413_20170413_grid_V.nc',
                 '/nemoShare/MEOPAR/SalishSea/forecast2/12apr17/'
                 'SalishSea_1h_20170414_20170415_grid_V.nc',
             ],
