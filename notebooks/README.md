@@ -52,6 +52,12 @@ Descriptions under the links below are from the first cell of the notebooks
     functions for the `salishsea_tools.nowcast.figures` module,  
     and provides an example of development of such a function.  
 
+* ##[Developing-make_ww3_current_file-worker.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/Developing-make_ww3_current_file-worker.ipynb)  
+    
+    **Developing `make_ww3_current_file` Worker**  
+      
+    Code experiments and verification for the `make_ww3_current_file` worker.  
+
 * ##[DailyNowcastFigures.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/DailyNowcastFigures.ipynb)  
     
     Template for daily nowcast figure generation.  
