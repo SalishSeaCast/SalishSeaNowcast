@@ -133,7 +133,7 @@ def _calc_forecast_currents(
         logger.debug(f'{grid} dataset: {forecast_file}')
     with xarray.open_dataset(mesh_mask) as grid:
         lats = grid.nav_lat[1:, 1:]
-        lons = grid.nav_lon[1:, 1:]
+        lons = grid.nav_lon[1:, 1:] + 360
         logger.debug(f'lats and lons from: {mesh_mask}')
         with xarray.open_mfdataset(datasets['u']) as u_nemo:
             logger.debug(f'u velocities from {datasets["u"]}')
