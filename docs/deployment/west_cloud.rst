@@ -380,17 +380,21 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 Build XIOS
 ----------
 
-ln -s ../../XIOS-ARCH/WEST.CLOUD/arch-GCC_NOWCAST.fcm
-ln -s ../../XIOS-ARCH/WEST.CLOUD/arch-GCC_NOWCAST.path
-./make_xios --arch GCC_NOWCAST --netcdf_lib netcdf4_seq --job 8
+.. code-block:: bash
+
+    $ ln -s ../../XIOS-ARCH/WEST.CLOUD/arch-GCC_NOWCAST.fcm
+    $ ln -s ../../XIOS-ARCH/WEST.CLOUD/arch-GCC_NOWCAST.path
+    $ ./make_xios --arch GCC_NOWCAST --netcdf_lib netcdf4_seq --job 8
 
 
 Build NEMO-3.6
 --------------
 
-XIOS_HOME=$(cd ../../../XIOS/; pwd) ./makenemo -m GCC_NOWCAST -n SalishSea -j8
-cd ../TOOLS/
-./maketools -m GCC_NOWCAST_REBUILD_NEMO -n REBUILD_NEMO
+.. code-block:: bash
+
+    $ XIOS_HOME=$(cd ../../../XIOS/; pwd) ./makenemo -m GCC_NOWCAST -n SalishSea -j8
+    $ cd ../TOOLS/
+    $ ./maketools -m GCC_NOWCAST_REBUILD_NEMO -n REBUILD_NEMO
 
 
 .. _BuildWaveWatch3:
