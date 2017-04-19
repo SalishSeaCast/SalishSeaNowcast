@@ -30,7 +30,7 @@ The :file:`comparison` directory contains modules for figures that compare model
 for example temperature and salinity comparisions at the deep ONC nodes,
 and comparision of surface quantities to data from the ONC ferry instrument packages.
 
-The :file:`publish` directory contains modules for figures at are considered to be "official" SalishSeaCast model product - results we have evaluated and believe to be of the best quality and accuracy.
+The :file:`publish` directory contains modules for figures that are considered to be "official" SalishSeaCast model product - results we have evaluated and believe to be of the best quality and accuracy.
 
 The :file:`research` directory contains modules for figures that we're interested in looking at on a daily basis to gain insight into the model's performance.
 
@@ -43,10 +43,10 @@ those directories are namespaces from which figure modules can be imported:
 * :py:obj:`nowcast.figures.publish`
 * :py:obj:`nowcast.figures.research`
 
-Within each of those namespaces the figure producing functions are organized into a module for each figure.
+Within each of those namespaces the figure-producing functions are organized into a module for each figure.
 So,
 for example,
-the :py:mod:`nowcast.figures.publish.compare_tide_prediction_max_ssh` module contains the code to produce a figure shows a map of the Salish Sea with coloured contours
+the :py:mod:`nowcast.figures.publish.compare_tide_prediction_max_ssh` module contains the code to produce a figure showing a map of the Salish Sea with coloured contours
 showing the sea surface height when it is at its maximum at a specified tide
 gauge station.
 The figure also shows 24 hour time series graphs of raw and corrected model water levels compared to the tidal prediction for the gauge location,
