@@ -256,6 +256,7 @@ and provision it with the following packages:
     $ sudo apt-get install -y liburi-perl
     $ sudo apt-get install -y make ksh emacs24
     $ sudo apt-get install -y python-pip python-dev
+    $ sudo apt-get install -y nfs-common
 
 Use:
 
@@ -299,6 +300,23 @@ Edit :file:`$HOME/.profile` to add code that puts :file:`$HOME/.local/bin` at th
         PATH="$HOME/.local/bin:$PATH"
     fi
 
+Also add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
+and export environment variables to enable wwatch3 to use netCDF4:
+
+.. code-block:: bash
+
+    # Add wwatch3 bin/ and exe/ paths to PATH if they exist
+    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
+        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin:$PATH"
+    fi
+    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe" ] ; then
+        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe:$PATH"
+    fi
+
+    # Enable wwatch3 to use netCDF4
+    export WWATCH3_NETCDF=NC4
+    export NETCDF_CONFIG=$(which nc-config)
+
 Create :file:`$HOME/.bash_aliases` containing a command to set the command-line prompt to show the host name and the final directory of the :kbd:`pwd` path,
 and to make :command:`rm` default to prompting for confirmation:
 
@@ -309,6 +327,37 @@ and to make :command:`rm` default to prompting for confirmation:
     alias rm="rm -i"
 
 
+.. _HeadNodeSanpshotImage:
+
+Head Node Snapshot Image
+------------------------
+
+Use the OpenStack web interface to create a snapshot of the instance for use as the "head" node for running the nowcast system.
+The head node is the one that will have the public IP address associated with it and it will be used for commands,
+uploads,
+and downloads.
+It is also used as to run the XIOS server process for NEMO runs.
+
+
+.. _ComputeNodeSanpshotImage:
+
+Compute Node Snapshot Image
+---------------------------
+
+On an instance launched from the :ref:`HeadNodeSanpshotImage` remove the :file:`$HOME/.local/bin/` directory:
+
+.. code-block:: bash
+
+    $ rm -rf $HOME/.local
+
+Remove :file:`$HOME/.local/` from :envvar:`PATH`:
+
+.. code-block:: bash
+
+    export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games
+
+Use the OpenStack web interface to create a snapshot of the instance for use as compute nodes for running the nowcast system NEMO and WAVEWATCH  III :sup:`®` runs.
+Compute nodes provide cores and RAM for the runs.
 
 
 .. _ShareStorageViaNFS:
@@ -316,11 +365,19 @@ and to make :command:`rm` default to prompting for confirmation:
 Shared Storage via NFS
 ======================
 
-Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
+Shared storage for the nodes is provided from the `Westgrid Arbutus`_ cluster `Ceph`_ object storage system.
+A 1 Tb block of storage is mounted on the :kbd:`nowcast0` head node at :file:`/nemoShare/MEOPAR/`.
+As described in the sections below,
+the head node is configured as an NFS server to provide access to this storage via NFS mounts on the compute nodes.
+
+.. _Westgrid Arbutus: https://docs.computecanada.ca/wiki/CC-Cloud_Resources
+.. _Ceph: https://en.wikipedia.org/wiki/Ceph_(software)
 
 
 NFS Server for Shared Storage on Head Node
 ------------------------------------------
+
+Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
 
 .. code-block:: bash
 
@@ -348,9 +405,10 @@ Restart the NFS service:
 Mounting Shared Storage on Compute Nodes
 ----------------------------------------
 
+Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
+
 .. code-block:: bash
 
-    $ sudo apt-get install nfs-common
     $ sudo mkdir -p /nemoShare/MEOPAR
     $ sudo chown ubuntu:ubuntu /nemoShare/MEOPAR
     $ sudo mount HeadNodeIP:/MEOPAR /nemoShare/MEOPAR
@@ -374,26 +432,48 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ hg clone --ssh "ssh -i ~/.ssh/salishsea-nowcast-deployment_id_rsa.pub" ssh://hg@bitbucket.org/salishsea/salishseawaves SalishSeaWaves
+    $ hg clone --ssh "ssh -i ~/.ssh/salishsea-nowcast-deployment_id_rsa.pub" ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
+    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-cmd NEMO-Cmd
+    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-forcing NEMO-forcing
+    $ hg clone ssh://hg@bitbucket.org/43ravens/nemo_nowcast NEMO_Nowcast
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseanowcast SalishSeaNowcast
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseawaves SalishSeaWaves
+    $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
+    $ hg clone --ssh "ssh -i ~/.ssh/salishsea-nowcast-deployment_id_rsa.pub" ssh://hg@bitbucket.org/salishsea/xios XIOS
+    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-arch XIOS-ARCH
 
 
 Build XIOS
-----------
+==========
+
+Symlink the XIOS build configuration files for :kbd:`west.cloud` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS/arch/` directory:
 
 .. code-block:: bash
 
+    $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS/arch
     $ ln -s ../../XIOS-ARCH/WEST.CLOUD/arch-GCC_NOWCAST.fcm
     $ ln -s ../../XIOS-ARCH/WEST.CLOUD/arch-GCC_NOWCAST.path
+
+Build XIOS with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS
     $ ./make_xios --arch GCC_NOWCAST --netcdf_lib netcdf4_seq --job 8
 
 
 Build NEMO-3.6
---------------
+==============
+
+Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
 
 .. code-block:: bash
 
-    $ XIOS_HOME=$(cd ../../../XIOS/; pwd) ./makenemo -m GCC_NOWCAST -n SalishSea -j8
-    $ cd ../TOOLS/
+    $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
+    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS ./makenemo -m GCC_NOWCAST -n SalishSea -j8
+    $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/TOOLS/
     $ ./maketools -m GCC_NOWCAST_REBUILD_NEMO -n REBUILD_NEMO
 
 
@@ -403,7 +483,7 @@ Build WAVEWATCH III :sup:`®`
 ============================
 
 Access to download WAVEWATCH III :sup:`®`
-(ww3 hereafter)
+(wwatch3 hereafter)
 code tarballs is obtained by sending an email request from the http://polar.ncep.noaa.gov/waves/wavewatch/license.shtml.
 The eventual reply will provide a username and password that can be used to access http://polar.ncep.noaa.gov/waves/wavewatch/distribution/ from which the :file:`wwatch3.v5.16.tar.gz` files can be downloaded with:
 
@@ -417,15 +497,15 @@ and :kbd:`download_url` are those provided in the reply to the email request.
 
 .. note::
     The `west.cloud-vm`_ repo provides a `Vagrant`_ virtual machine configuration that emulates the Salish Sea Nowcast system compute deployment on ONC west.cloud VMs.
-    The VM can be used for small scale testing of ww3.
+    The VM can be used for small scale testing of wwatch3.
 
     .. _west.cloud-vm: https://bitbucket.org/salishsea/west.cloud-vm
     .. _Vagrant: https://www.vagrantup.com/
 
-Follow the instructions in the Installing Files section of the `ww3 manual`_ to unpack the tarball to create a local installation in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/`
+Follow the instructions in the Installing Files section of the `wwatch3 manual`_ to unpack the tarball to create a local installation in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/`
 that will use the :program:`gfortran` and :program:`gcc` compilers:
 
-.. _ww3 manual: http://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
+.. _wwatch3 manual: http://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
 
 .. code-block:: bash
 
@@ -441,17 +521,7 @@ Accept the defaults that it offers other than to choose:
 * :program:`gfortran` as the Fortran 77 compiler
 * :program:`gcc` as the C compiler
 
-Add code to :file:`$HOME/.profile` to add :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` and :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe` to :envvar:`PATH`:
-
-.. code-block:: bash
-
-    # Add wwatch3 bin/ and exe/ paths to PATH if they exist
-    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
-        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin:$PATH"
-    fi
-    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe" ] ; then
-        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe:$PATH"
-    fi
+Ensure that :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` and :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe` are in :envvar:`PATH`.
 
 Change the :file:`comp` and :file:`link` scripts in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin` to point to :file:`comp.gnu` and :file:`link.gnu`,
 and make :file:`comp.gnu` executable:
@@ -469,15 +539,14 @@ Symlink the :file:`SalishSeaWaves/switch` file in :file:`/nemoShare/MEOPAR/nowca
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin
     $ ln -sf /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/switch switch
 
-Add code to :file:`$HOME/.profile` to set the :envvar:`WWATCH3_NETCDF` and :envvar:`NETCDF_CONFIG` environment variables:
+Export the :envvar:`WWATCH3_NETCDF` and :envvar:`NETCDF_CONFIG` environment variables:
 
 .. code-block:: bash
 
-# Enable wwatch3 to use netCDF4
-export WWATCH3_NETCDF=NC4
-export NETCDF_CONFIG=$(which nc-config)
+    export WWATCH3_NETCDF=NC4
+    export NETCDF_CONFIG=$(which nc-config)
 
-Build the suite of ww3 programs with:
+Build the suite of wwatch3 programs with:
 
 .. code-block:: bash
 
@@ -485,10 +554,96 @@ Build the suite of ww3 programs with:
     $ w3_make
 
 
+Python Packages
+===============
+
+The Python packages that the system depends on are installed in a conda environment with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ conda update conda
+    $ conda create \
+        --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
+        --channel gomss-nowcast --channel defaults --channel conda-forge \
+        arrow attrs basemap beautifulsoup4 bottleneck circus cliff dask docutils \
+        hdf4=4.2.12 lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
+        pillow pip python=3 pyyaml pyzmq requests schedule scipy xarray
+    $ source /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install angles driftwood feedgen \
+        python-hglib raven retrying
+    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
+    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
+    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO-Cmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaCmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaNowcast/
+
+
+Environment Variables
+=====================
+
+Add the following files to the :file:`/nemoShare/MEOPAR/nowcast-sys/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/nowcast-env
+    $ mkdir -p etc/conda/activate.d
+    $ cat << EOF > etc/conda/activate.d/envvars.sh
+    export NOWCAST_ENV=/nemoShare/MEOPAR/nowcast-sys/nowcast-env
+    export NOWCAST_CONFIG=/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config
+    export NOWCAST_YAML=/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+    export NOWCAST_LOGS=/nemoShare/MEOPAR/nowcast-sys/logs/nowcast
+    export SENTRY_DSN=a_valid_sentry_dsn_url
+    EOF
+
+and :command:`unset` them when it is deactivated.
+
+.. code-block:: bash
+
+    $ mkdir -p etc/conda/deactivate.d
+    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
+    unset NOWCAST_ENV
+    unset NOWCAST_CONFIG
+    unset NOWCAST_YAML
+    unset NOWCAST_LOGS
+    unset SENTRY_DSN
+    EOF
+
+
+.. _WestCloudNowcastRunsDirectory:
+
+Nowcast Runs Directory
+======================
+
+Create a :file:`runs/` directory for the NEMO runs and populate it with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ mkdir runs
+    $ chmod g+ws runs
+    $ cd runs/
+    $ mkdir -p NEMO-atmos open_boundaries/west/ssh rivers
+    $ chmod -R g+s NEMO-atmos open_boundaries rivers
+    $ ln -s ../../NEMO-forcing/atmospheric/no_snow.nc NEMO-atmos/
+    $ ln -s ../../NEMO-forcing/grid/weights-gem2.5-ops.nc NEMO-atmos/
+    $ ln -s ../../NEMO-forcing/open_boundaries/north open_boundaries/
+    $ ln -s ../../../NEMO-forcing/open_boundaries/west/SalishSea2_Masson_corrected.nc open_boundaries/west/
+    $ ln -s ../../../NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc open_boundaries/west/
+    $ ln -s ../../../NEMO-forcing/open_boundaries/west/tides open_boundaries/west/
+    $ ln -s ../../NEMO-forcing/rivers/bio_climatology rivers/
+    $ ln -s ../../NEMO-forcing/rivers/river_ConsTemp_month.nc rivers/
+    $ ln -s ../../NEMO-forcing/rivers/rivers_month.nc rivers/
+    $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
+    $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface.blue namelist.surface.blue
+    $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface.green namelist.surface.green
+    $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/nowcast/iodef_cloud.xml iodef.xml
+
+
 WaveWatch Runs Directories
 ==========================
 
-Create a :file:`wwatch3-runs` directory tree and populate it with:
+Create a :file:`wwatch3-runs/` directory tree and populate it with:
 
 * The wwatch3 grid:
 
@@ -503,41 +658,36 @@ Create a :file:`wwatch3-runs` directory tree and populate it with:
       $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
       $ ww3_grid | tee ww3_grid.out
 
-* Directory and wwatch3 :file:`.inp` file for wind forcing:
+* Directory for wind forcing:
 
   .. code-block:: bash
 
       $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/wind
-      $ cp /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/ww3_prnc_wind.inp /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
 
-  The :program:`run_wwatch3` worker will:
+  The :program:`make_ww3_wind_file` worker:
 
-  * edit the wind forcing file path(s) for each run into :file:`ww3_prnc_wind.inp`
-  * symlink :file:`ww3_prnc_wind.inp` as :file:`ww3_prnc.inp`
-  * run :program:`ww3_prnc` to produce the wwatch3 wind forcing files for the run,
-    storing its output in :file:`ww3_prnc_wind.out`
+  * Uses files from :file:`/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/` appropriate for the wwatch3 run date and type to produce a :file:`SoG_wind_yyyymmdd.nc` file in the :file:`wind/` directory
 
-* Directory and wwatch3 :file:`.inp` file for current forcing:
+  The :program:`run_ww3` worker:
+
+  * Generates in the temporary run directory a :file:`ww3_prnc_wind.inp` file containing the path to the file produced by the :program:`make_ww3_wind_file` worker
+  * Symlinks :file:`ww3_prnc_wind.inp` as :file:`ww3_prnc.inp`
+  * Runs :program:`ww3_prnc` to produce the wwatch3 wind forcing files for the run.
+    The output of :program:`ww3_prnc` is stored in the run's :file:`stdout` file.
+
+* Directory for current forcing:
 
   .. code-block:: bash
 
       $ mkdir -p /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current
-      $ cp  /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/ww3_prnc_current.inp /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
 
-  The :program:`run_wwatch3` worker will:
+  The :program:`make_ww3_wind_file` worker:
 
-  * edit the current forcing file path(s) for each run into :file:`ww3_prnc_current.inp`
-  * symlink :file:`ww3_prnc_current.inp` as :file:`ww3_prnc.inp`
-  * run :program:`ww3_prnc` to produce the wwatch3 current forcing files for the run,
-    storing its output in :file:`ww3_prnc_current.out`
+  * Uses files from the :file:`/nemoShare/MEOPAR/SalishSea/` NEMO results storage tree appropriate for the wwatch3 run date and type to produce a :file:`SoG_current_yyyymmdd.nc` file in the :file:`current/` directory
 
-* The wwatch3 shell :file:`.inp` file:
+  The :program:`run_ww3` worker:
 
-  .. code-block:: bash
-
-      $ cp  /nemoShare/MEOPAR/nowcast-sys/SalishSeaWaves/ww3_shel.inp /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
-
-  The :program:`run_wwatch3` worker will:
-
-  * edit the start and end dates/times for each run into :file:`ww3_shel.inp`
-  * run :program:`ww3_shel` to execute the wwatch3 run
+  * Generates in the temporary run directory a :file:`ww3_prnc_current.inp` file containing the path to the file produced by the :program:`make_ww3_current_file` worker
+  * Symlinks :file:`ww3_prnc_current.inp` as :file:`ww3_prnc.inp`
+  * Runs :program:`ww3_prnc` to produce the wwatch3 current forcing files for the run.
+    The output of :program:`ww3_prnc` is stored in the run's :file:`stdout` file.

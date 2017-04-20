@@ -25,20 +25,21 @@ Mercurial Repositories
 
 Clone the following repos into :file:`/results/nowcast-sys/`:
 
-* `NEMO_Nowcast`_
-* :ref:`SalishSeaNowcast-repo`
-* :ref:`SalishSeaCmd-repo`
-* :ref:`NEMO-Cmd-repo`
-* :ref:`tools-repo`
-* :ref:`private-tools-repo`
-* :ref:`NEMO-forcing-repo`
-* :ref:`NEMO-3.6-code-repo`
-* :ref:`XIOS-repo`
-* :ref:`XIOS-ARCH-repo`
-* :ref:`salishsea-site-repo`
+.. code-block:: bash
 
-
-.. _NEMO_Nowcast: https://bitbucket.org/43ravens/nemo_nowcast
+    $ cd /results/nowcast-sys/
+    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
+    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-cmd NEMO-Cmd
+    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-forcing NEMO-forcing
+    $ hg clone ssh://hg@bitbucket.org/43ravens/nemo_nowcast NEMO_Nowcast
+    $ hg clone ssh://hg@bitbucket.org/salishsea/private-tools private-tools
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseanowcast SalishSeaNowcast
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site salishsea-site
+    $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
+    $ hg clone ssh://hg@bitbucket.org/salishsea/xios XIOS
+    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-arch XIOS-ARCH
 
 Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
 
@@ -71,8 +72,14 @@ Symlink the XIOS build configuration files for :kbd:`salish` from the :file:`XIO
 Build NEMO-3.6
 ==============
 
-.. TODO::
-    Write this section.
+Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
+
+.. code-block:: bash
+
+    $ cd /results/nowcast-sys/nowcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
+    $ ./makenemo -m GCC_SALISH -n SalishSea -j8
+    $ cd /results/nowcast-sys/nowcast-sys/NEMO-3.6-code/NEMOGCM/TOOLS/
+    $ ./maketools -m GCC_SALISH -n REBUILD_NEMO
 
 
 Python Packages
@@ -93,7 +100,6 @@ The Python packages that the system depends on are installed in a conda environm
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ pip install angles driftwood feedgen \
         python-hglib raven retrying
-    (/results/nowcast-sys/nowcast-env)$ cd /results/nowcast-sys/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable tools/SalishSeaTools/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO-Cmd/
@@ -137,7 +143,7 @@ and :command:`unset` them when it is deactivated.
 Nowcast Runs Directories
 ========================
 
-On the hosts where the nowcast system NEMO runs will be executed create a :file:`runs` directory and populate it with:
+On the hosts where the nowcast system NEMO runs will be executed create a :file:`runs/` directory and populate it with:
 
 .. code-block:: bash
 
@@ -155,8 +161,9 @@ On the hosts where the nowcast system NEMO runs will be executed create a :file:
     $ ln -s ../../NEMO-forcing/rivers/river_ConsTemp_month.nc rivers/
     $ ln -s ../../NEMO-forcing/rivers/rivers_month.nc rivers/
     $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
-    $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface.blue namelist.surface
-    $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/nowcast/iodef_blue_cloud.xml iodef.xml
+    $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface.blue namelist.surface.blue
+    $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.lateral.liveocean namelist.lateral
+    $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/nowcast/iodef.xml iodef.xml
 
 The above :command:`ln -s` commands assume that there is a clone of the :ref:`NEMO-forcing-repo` beside the directory where the links are being created.
 If the clone of the :ref:`NEMO-forcing-repo` is elsewhere,
@@ -164,14 +171,14 @@ adjust the link paths accordingly.
 
 The hosts and their :file:`runs` directories presently in use are:
 
+* :kbd:`salish`
+    :file:`/results/nowcast-sys/runs/`
+
 * :kbd:`west.cloud`
-    :file:`/home/ubuntu/MEOPAR/nowcast-sys/runs/`
+    See :ref:`WestCloudNowcastRunsDirectory`
 
 * :kbd:`orcinus`
     :file:`/home/sallen/MEOPAR/nowcast/`
-
-* :kbd:`salish`
-    :file:`/results/nowcast-sys/runs/`
 
 
 Static Web Pages Directory
