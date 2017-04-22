@@ -35,12 +35,12 @@ The :kbd:`SalishSeaNowcast` package is developed and tested using `Python`_ 3.6 
 The package uses some Python language features that are not available in versions prior to 3.6,
 in particular:
 
-* `Formatted string literals`_
+* `formatted string literals`_
   (aka *f-strings*)
 * the `file system path protocol`_
 
 .. _Python: https://www.python.org/
-.. _Formatted string literals: https://docs.python.org/3/reference/lexical_analysis.html#f-strings
+.. _formatted string literals: https://docs.python.org/3/reference/lexical_analysis.html#f-strings
 .. _file system path protocol: https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
 
 
@@ -76,7 +76,7 @@ Development Environment
 =======================
 
 Setting up an isolated development environment using `Conda`_ is recommended.
-Assuming that you have `Anaconda Python Distribution`_ or `Miniconda3`_ installed,
+Assuming that you have the `Anaconda Python Distribution`_ or `Miniconda3`_ installed,
 you can create and activate an environment called :kbd:`salishsea-nowcast` that will have all of the Python packages necessary for development,
 testing,
 and building the documentation with the commands:
@@ -84,10 +84,6 @@ and building the documentation with the commands:
 .. _Conda: http://conda.pydata.org/docs/
 .. _Anaconda Python Distribution: https://www.continuum.io/downloads
 .. _Miniconda3: http://conda.pydata.org/docs/install/quick.html
-
-.. note::
-    The :kbd:`SalishSeaNowcast` is presently under development in the :kbd:`NEMO_Nowcast` branch of the repository.
-    It is *very important* to switch to that branch before creating the development environment.
 
 :kbd:`SalishSeaNowcast` depends on the `NEMO_Nowcast`_,
 :ref:`salishseatools:SalishSeaToolsPackage`,
