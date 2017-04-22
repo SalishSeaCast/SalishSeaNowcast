@@ -405,7 +405,7 @@ def _build_run_script(run_date, run_type, run_dir_path, results_path, config):
             defns=_definitions(
                 run_date, run_type, run_dir_path, results_path, config),
             prepare=_prepare(),
-            execute=_execute(),
+            execute=_execute(run_date),
             netcdf_output=_netcdf_output(run_date),
             cleanup=_cleanup(),
         )
@@ -470,17 +470,23 @@ def _prepare():
     return preparations
 
 
-def _execute():
+def _execute(run_date):
     """
+    :param :py:class:`arrow.Arrow` run_date:
+
     :return: Execution section of wwatch3 run set-up and execution script
     :rtype: str 
     """
+    start_date = run_date.format('YYYYMMDD')
     execution = (
         'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
         '${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\\n'
         '  >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n'
         'mv log.ww3 ww3_shel.log && \\\n'
-        'rm current.ww3 wind.ww3\n'
+        'rm current.ww3 wind.ww3 && \\\n'
+        f'rm current/SalishSea_1h_{start_date}_{start_date}_grid_[UV].nc && \\\n'
+        f'rm current/SoG_current_{start_date}.nc && \\\n'
+        f'rm wind/SoG_wind_{start_date}.nc\n'
         'echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout\n'
     )
     return execution

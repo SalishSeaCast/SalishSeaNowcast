@@ -384,12 +384,15 @@ class TestExecute:
     """Unit test for _execute() function.
     """
     def test_execute(self):
-        execution = run_ww3._execute()
+        execution = run_ww3._execute(arrow.get('2017-04-20'))
         expected = '''echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
         ${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\
           >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
         mv log.ww3 ww3_shel.log && \\
-        rm current.ww3 wind.ww3
+        rm current.ww3 wind.ww3 && \\
+        rm current/SalishSea_1h_20170420_20170420_grid_[UV].nc && \\
+        rm current/SoG_current_20170420.nc && \\
+        rm wind/SoG_wind_20170420.nc
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
         '''
         expected = expected.splitlines()
