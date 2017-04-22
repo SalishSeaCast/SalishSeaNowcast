@@ -19,7 +19,7 @@
 Nowcast Figures Development Environment
 ***************************************
 
-This section explains how to set up an isolated `Conda`_ environment for nowcast web site figures development and testing.
+This section explains how to set up an isolated `Conda`_ environment for nowcast web site figure development and testing.
 The environment will have both the :kbd:`SalishSeaNowcast` nowcast system package,
 and the :kbd:`salishsea-site` web site app package installed in it,
 along with all of their dependencies.
@@ -55,10 +55,10 @@ You will also need up-to-date clones of the following repositories from Bitbucke
 * SalishSeaNowcast: https://bitbucket.org/salishsea/salishseanowcast
 * salishsea-site: https://bitbucket.org/salishsea/salishsea-site
 
-Assuming that all of those repositories are clone,
+Assuming that all of those repositories are cloned,
 one beside the other,
 in a directory like :file:`MEOPAR/`,
-and with the capitalization shown above,
+and with the capitalization shown on the left above,
 you can create and activate a figures development environment with these commands:
 
 .. code-block:: bash
