@@ -1,0 +1,65 @@
+# conda environment description file for SalishSeaNowcast wed site figures
+# development environment
+#
+# Create a conda environment for web site figures development and testing with:
+#
+#    $ conda env create -f SalishSeaNowcast/environment-fig-dev.yaml
+#    $ source activate nowcast-fig-dev
+#    $ pip install --editable NEMO_Nowcast/
+#    $ pip install --editable tools/SalishSeaTools/
+#    $ pip install --editable NEMO-Cmd/
+#    $ pip install --editable SalishSeaCmd/
+#    $ pip install --editable SalishSeaNowcast/
+#    $ pip install --editable salishsea-site/
+
+name: nowcast-fig-dev
+
+channels:
+  - defaults
+
+dependencies:
+  - basemap
+  - beautifulsoup4
+  - bottleneck
+  - dask
+  - docutils
+  - hdf4=4.2.12
+  - mako
+  - matplotlib=1.5.3
+  - netcdf4
+  - numpy
+  - pandas
+  - paramiko
+  - pillow
+  - pyyaml
+  - pyzmq
+  - pip
+  - python=3.6
+  - requests
+  - scipy
+  - xarray
+
+  # For figures development
+  - notebook
+
+  # For documentation
+  - sphinx
+  - sphinx_rtd_theme
+
+  - pip:
+    - angles
+    - arrow
+    - attrs
+    - chaussette
+    - circus
+    - cliff
+    - driftwood
+    - feedgen
+    - pyramid
+    - pyramid_crow
+    - pyramid_debugtoolbar
+    - pyramid_mako
+    - python-hglib
+    - retrying
+    - schedule
+    - waitress==0.9.0
