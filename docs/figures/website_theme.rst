@@ -12,11 +12,10 @@
 .. WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 .. See the License for the specific language governing permissions and
 .. limitations under the License.
+.. _WebsiteTheme:
 
-.. _SalishSeaCastWebPageViewFigureMetadata:
+*************
+Website Theme
+*************
 
-*******************************************
-SalishSeaCast Web Page View Figure Metadata
-*******************************************
-
-**To be written**
+TODO
