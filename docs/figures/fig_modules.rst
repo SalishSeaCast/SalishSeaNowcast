@@ -46,14 +46,28 @@ those directories are namespaces from which figure modules can be imported:
 Within each of those namespaces the figure-producing functions are organized into a module for each figure.
 So,
 for example,
-the :py:mod:`nowcast.figures.publish.compare_tide_prediction_max_ssh` module contains the code to produce a figure showing a map of the Salish Sea with coloured contours
-showing the sea surface height when it is at its maximum at a specified tide
-gauge station.
-The figure also shows 24 hour time series graphs of raw and corrected model water levels compared to the tidal prediction for the gauge location,
-and water level residuals (the difference between the corrected model results and the tidal predictions).
+the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module contains the code to produce a figure showing colour contours of a tracer on a vertical slice along a section of the domain thalweg,
+and on the surface for a section of the domain that excludes Puget Sound in the south and Johnstone Strait in the north.
 
 The code in the figure modules is just the code that is specific to creating that one figure.
 Generic functions that are useful in the creation of more than one figure are collected in the :py:obj:`nowcast.figures.shared` module.
 Figure modules also often import modules from the :ref:`SalishSeaToolsPackage`.
 For example,
 :py:func:`salishsea_tools.viz_tools.set_aspect` is used to set the aspect ratio of a figure axes object appropriately for the Salish Sea NEMO model grid.
+
+The :ref:`CreatingAFigureModule` docs contain a detailed element-by-element discussion of how to create and structure a web site figure module.
+They use the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module as an example.
+
+The `DevelopTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` is an example of developing figure module functions in a Jupyter notebook.
+You can take that approach if you wish,
+or you can develop directly in a module.
+
+.. _DevelopTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
+
+Of course,
+the ultimate goal is to produce a module.
+Once you've got a code module,
+you should create a notebook that tests it in the nowcast context.
+The `TestTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` is an example for the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module.
+
+.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurfaceModule.ipynb
