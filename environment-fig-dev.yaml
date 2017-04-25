@@ -53,6 +53,7 @@ dependencies:
     - chaussette
     - circus
     - cliff
+    - cmocean
     - driftwood
     - feedgen
     - pyramid
