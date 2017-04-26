@@ -32,8 +32,8 @@ import nowcast.figures.website_theme
 
 
 def make_figure(
-    tracer_grid, bathy, lons, lats, mesh_mask, coastline, cmap,
-    depth_integrated=True, figsize=(20, 12),
+    tracer_var, bathy, lons, lats, mesh_mask, coastline, cmap,
+    depth_integrated, figsize=(20, 12),
     theme=nowcast.figures.website_theme
 ):
     """Plot colour contours of tracer on a vertical slice along a section of 
@@ -41,107 +41,85 @@ def make_figure(
     and on the surface for the Strait of Georgia and Juan de Fuca Strait
     regions of the domain.
     
-    :arg 2-tuple figsize: Figure size (width, height) in inches.
+    :param tracer_var: Hourly average tracer results from NEMO run. 
+    :type tracer_var: :py:class:`netCDF4.Variable`
+    
+    :param bathy: Salish Sea NEMO model bathymetry data.
+    :type bathy: :py:class:`numpy.ndarray`
 
-    :arg theme: Module-like object that defines the style elements for the
+    :param lons: Salish Sea NEMO model longitude grid data.
+    :type lons: :py:class:`numpy.ndarray`
+
+    :param lats: Salish Sea NEMO model latitude grid data.
+    :type lats: :py:class:`numpy.ndarray`
+
+    :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
+    :type mesh_mask: :class:`netCDF4.Dataset`
+    
+    :param coastline: Coastline dataset.
+    :type coastline: :class:`mat.Dataset`
+    
+    :param cmap: Colour map to use for tracer_var contour plots.
+    :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
+    
+    :param boolean depth_integrated: Integrate the tracer over the water column
+                                     depth when :py:obj:`True`.
+    
+    :param 2-tuple figsize: Figure size (width, height) in inches.
+
+    :param theme: Module-like object that defines the style elements for the
                 figure. See :py:mod:`nowcast.figures.website_theme` for an
                 example.
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
-    plot_data = _prep_plot_data(
-        tracer_grid, bathy, lons, lats, mesh_mask, coastline, depth_integrated
-    )
+    plot_data = _prep_plot_data(tracer_var, mesh_mask, depth_integrated)
     fig, (ax_thalweg, ax_surface) = _prep_fig_axes(figsize, theme)
-    _plot_thalweg(ax_thalweg, plot_data, cmap, theme)
-    _plot_surface(ax_surface, plot_data, cmap, theme)
+
+    clevels_thalweg, clevels_surface, show_thalweg_cbar = _calc_clevels(
+        plot_data)
+
+    cbar_thalweg = _plot_tracer_thalweg(
+        ax_thalweg, plot_data, bathy, lons, lats, mesh_mask, cmap,
+        clevels_thalweg)
+    _thalweg_axes_labels(
+        ax_thalweg, tracer_var, show_thalweg_cbar, clevels_thalweg,
+        cbar_thalweg, theme)
+
+    cbar_surface = _plot_tracer_surface(
+        ax_surface, plot_data, cmap, clevels_surface)
+    _surface_axes_labels(
+        ax_surface, tracer_var, depth_integrated, clevels_surface, cbar_surface,
+        theme)
     return fig
 
 
-def _prep_plot_data(
-    tracer_grid, bathy, lons, lats, mesh_mask, coastline, depth_integrated
-):
-    lon_range = (-124.4, -122.4)
-    lat_range = (48, 51)
-    si, ei = 150, 610
-    sj, ej = 20, 370
-
-    lons_subset = lons[si:ei, sj:ej]
-    lats_subset = lats[si:ei, sj:ej]
+def _prep_plot_data(tracer_var, mesh_mask, depth_integrated):
+    hr = 19
+    sj, ej = 200, 770
+    si, ei = 20, 370
+    tracer_hr = tracer_var[hr]
     if depth_integrated:
-        grid_heights = mesh_mask.variables['e3t_0'][:][0].reshape(40, 1, 1)
-        height_weighted = tracer_grid[0, :, si:ei, sj:ej] * grid_heights
-        surface_var = height_weighted.sum(axis=0)
+        grid_heights = mesh_mask.variables['e3t_0'][:][0].reshape(
+            tracer_hr.shape[0], 1, 1)
+        height_weighted = tracer_hr[:, sj:ej, si:ei] * grid_heights
+        surface_hr = height_weighted.sum(axis=0)
     else:
-        surface_var = tracer_grid[0, 0, si:ei, sj:ej]
-    surface_var = np.ma.masked_array(
-        surface_var, 1 - mesh_mask['tmask'][0, 0, si:ei, sj:ej])
-
-    thal_clevels, surf_clevels, show_thalweg_cbar = surf_thalweg_clevels(
-        tracer_grid, surface_var)
-
-    if 'standard_name' in tracer_grid.ncattrs():
-        tracer_name = tracer_grid.standard_name
-    elif 'long_name' in tracer_grid.ncattrs():
-        tracer_name = tracer_grid.long_name
-    else:
-        tracer_name = "Var"
+        surface_hr = tracer_hr[0, sj:ej, si:ei]
+    surface_hr = np.ma.masked_where(
+        mesh_mask["tmask"][0, 0, sj:ej, si:ei] == 0, surface_hr)
 
     return SimpleNamespace(
-        tracer_grid=tracer_grid[0, ...],
-        var_ma=surface_var,
-        bathy=bathy,
-        lons=lons,
-        lats=lats,
-        lons_subset=lons_subset,
-        lats_subset=lats_subset,
-        mesh_mask=mesh_mask,
-        coastline=coastline,
-        lon_range=lon_range,
-        lat_range=lat_range,
-        thal_clevels=thal_clevels,
-        surf_clevels=surf_clevels,
-        show_thalweg_cbar=show_thalweg_cbar,
-        tracer_name=tracer_name,
-        units=tracer_grid.units,
-        depth_integrated=depth_integrated,
+        tracer_hr=tracer_hr,
+        surface_hr=surface_hr,
     )
-
-
-def surf_thalweg_clevels(tracer_grid, surface_var):
-    percent_98_surf = np.percentile(surface_var, 98)
-    percent_2_surf = np.percentile(surface_var, 2)
-
-    percent_98_grid = np.percentile(np.ma.masked_values(tracer_grid, 0), 98)
-    percent_2_grid = np.percentile(np.ma.masked_values(tracer_grid, 0), 2)
-
-    overlap = (
-        max(0, min(percent_98_surf, percent_98_grid)
-            - max(percent_2_surf, percent_2_grid)))
-    magnitude = (
-        (percent_98_surf - percent_2_surf)
-        + (percent_98_grid - percent_2_grid))
-    if 2 * overlap / magnitude > 0.5:
-        max_clevel = max(percent_98_surf, percent_98_grid)
-        min_clevel = min(percent_2_surf, percent_2_grid)
-        thal_clevels = np.arange(min_clevel, max_clevel,
-                                 (max_clevel - min_clevel) / 20.0)
-        surf_clevels = thal_clevels
-        show_thalweg_cbar = False
-    else:
-        thal_clevels = np.arange(percent_2_grid, percent_98_grid,
-                                 (percent_98_grid - percent_2_grid) / 20.0)
-        surf_clevels = np.arange(percent_2_surf, percent_98_surf,
-                                 (percent_98_surf - percent_2_surf) / 20.0)
-        show_thalweg_cbar = True
-    return thal_clevels, surf_clevels, show_thalweg_cbar
 
 
 def _prep_fig_axes(figsize, theme):
     fig = plt.figure(
         figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
 
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1.14, 1])
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1.3, 1])
 
     ax_thalweg = fig.add_subplot(gs[0])
     ax_thalweg.set_axis_bgcolor(theme.COLOURS['axes']['background'])
@@ -152,30 +130,75 @@ def _prep_fig_axes(figsize, theme):
     return fig, (ax_thalweg, ax_surface)
 
 
-def _plot_thalweg(ax, plot_data, cmap, theme):
-    cbar = vis.contour_thalweg(
-        ax, plot_data.tracer_grid, plot_data.bathy, plot_data.lons,
-        plot_data.lats, plot_data.mesh_mask,
-        'gdept', clevels=plot_data.thal_clevels, cmap=cmap,
-        thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working.txt',
-        cbar_args={'fraction': 0.030, 'pad': 0.04})
-    viz_tools.set_aspect(ax)
-    ax.set_ylim([450, 0])
-    if not plot_data.show_thalweg_cbar:
-        cbar.remove()
+def _calc_clevels(plot_data):
+    """Calculates contour levels for the two axes and decides whether whether
+    the levels are similar enough that one colour bar is sufficient for the 
+    figure, or if each axes requires one.
+    """
+    percent_98_surf = np.percentile(plot_data.surface_hr, 98)
+    percent_2_surf = np.percentile(plot_data.surface_hr, 2)
+
+    percent_98_grid = np.percentile(
+        np.ma.masked_values(plot_data.tracer_hr, 0), 98)
+    percent_2_grid = np.percentile(
+        np.ma.masked_values(plot_data.tracer_hr, 0), 2)
+
+    overlap = (
+        max(0, min(percent_98_surf, percent_98_grid)
+            - max(percent_2_surf, percent_2_grid)))
+    magnitude = (
+        (percent_98_surf - percent_2_surf) + (percent_98_grid - percent_2_grid))
+    if 2 * overlap / magnitude > 0.5:
+        max_clevel = max(percent_98_surf, percent_98_grid)
+        min_clevel = min(percent_2_surf, percent_2_grid)
+        clevels_thalweg = np.arange(
+            min_clevel, max_clevel, (max_clevel - min_clevel) / 20.0)
+        clevels_surface = clevels_thalweg
+        show_thalweg_cbar = False
     else:
-        contour_intervals = plot_data.thal_clevels
-        label = plot_data.tracer_name + " [" + plot_data.units + "]"
-        _map_cbar_labels(cbar, contour_intervals[::2], theme, label)
-    ax.set_xlabel("Distance along thalweg [km]",
-                  color=theme.COLOURS['text']['axis'],
-                  fontproperties=theme.FONTS['axis'])
-    ax.set_ylabel("Depth [m]", color=theme.COLOURS['text']['axis'],
-                  fontproperties=theme.FONTS['axis'])
+        clevels_thalweg = np.arange(
+            percent_2_grid, percent_98_grid,
+            (percent_98_grid - percent_2_grid) / 20.0)
+        clevels_surface = np.arange(
+            percent_2_surf, percent_98_surf,
+            (percent_98_surf - percent_2_surf) / 20.0)
+        show_thalweg_cbar = True
+    return clevels_thalweg, clevels_surface, show_thalweg_cbar
+
+
+def _plot_tracer_thalweg(
+    ax, plot_data, bathy, lons, lats, mesh_mask, cmap, clevels
+):
+    cbar = vis.contour_thalweg(
+        ax, plot_data.tracer_hr, bathy, lons, lats, mesh_mask,
+        'gdept', clevels=clevels, cmap=cmap,
+        thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working'
+                     '.txt',
+        cbar_args={'fraction': 0.030, 'pad': 0.04, 'aspect': 45}
+    )
+    return cbar
+
+
+def _thalweg_axes_labels(
+    ax, tracer_var, show_thalweg_cbar, clevels, cbar, theme
+):
+    ax.set_xlim(0, 590)
+    ax.set_ylim(450, 0)
+    if show_thalweg_cbar:
+        label = f'{tracer_var.long_name} [{tracer_var.units}]'
+        _cbar_labels(cbar, clevels[::2], theme, label)
+    else:
+        cbar.remove()
+    ax.set_xlabel(
+        'Distance along thalweg [km]', color=theme.COLOURS['text']['axis'],
+        fontproperties=theme.FONTS['axis'])
+    ax.set_ylabel(
+        'Depth [m]', color=theme.COLOURS['text']['axis'],
+        fontproperties=theme.FONTS['axis'])
     theme.set_axis_colors(ax)
 
 
-def _map_cbar_labels(cbar, contour_intervals, theme, label):
+def _cbar_labels(cbar, contour_intervals, theme, label):
     cbar.set_ticks(contour_intervals)
     cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
     cbar.set_label(
@@ -184,24 +207,29 @@ def _map_cbar_labels(cbar, contour_intervals, theme, label):
         color=theme.COLOURS['text']['axis'])
 
 
-def _plot_surface(ax, plot_data, cmap, theme):
-    nowcast.figures.shared.plot_map(ax, plot_data.coastline,
-                                    lon_range=plot_data.lon_range,
-                                    lat_range=plot_data.lat_range)
-    mesh = ax.contourf(plot_data.lons_subset, plot_data.lats_subset,
-                       plot_data.var_ma, levels=plot_data.surf_clevels,
-                       cmap=cmap, extend='both')
+def _plot_tracer_surface(ax, plot_data, cmap, clevels):
+    x, y = np.meshgrid(
+        np.arange(20, 370, dtype=int), np.arange(200, 770, dtype=int))
+    mesh = ax.contourf(
+        x, y, plot_data.surface_hr, levels=clevels, cmap=cmap, extend='both')
+    cbar = plt.colorbar(mesh, ax=ax, fraction=0.034, pad=0.04, aspect=45)
+    return cbar
 
-    ax.set_xlabel('Longitude', color=theme.COLOURS['text']['axis'],
-                  fontproperties=theme.FONTS['axis'])
-    ax.set_ylabel('Latitude', color=theme.COLOURS['text']['axis'],
-                  fontproperties=theme.FONTS['axis'])
+
+def _surface_axes_labels(
+    ax, tracer_var, depth_integrated, clevels, cbar, theme
+):
+    cbar_units = (
+        f'{tracer_var.units}*m' if depth_integrated
+        else f'{tracer_var.units}')
+    cbar_label = f'{tracer_var.long_name} [{cbar_units}]'
+    _cbar_labels(cbar, clevels[::2], theme, cbar_label)
+    ax.set_xlabel(
+        'Grid x', color=theme.COLOURS['text']['axis'],
+        fontproperties=theme.FONTS['axis'])
+    ax.set_ylabel(
+        'Grid y', color=theme.COLOURS['text']['axis'],
+        fontproperties=theme.FONTS['axis'])
+    ax.set_axis_bgcolor('burlywood')
+    viz_tools.set_aspect(ax)
     theme.set_axis_colors(ax)
-
-    cbar = plt.colorbar(mesh, ax=ax, fraction=0.034, pad=0.04)
-    contour_intervals = plot_data.surf_clevels
-    if plot_data.depth_integrated:
-        label = plot_data.tracer_name + " [" + plot_data.units + "*m]"
-    else:
-        label = plot_data.tracer_name + " [" + plot_data.units + "]"
-    _map_cbar_labels(cbar, contour_intervals[::2], theme, label)
