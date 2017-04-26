@@ -322,3 +322,17 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 
 .. automodule:: nowcast.figures.publish.storm_surge_alerts_thumbnail
     :members:
+
+
+.. _nowcast.figures.research:
+
+:py:obj:`nowcast.figures.research`  Figure Modules
+--------------------------------------------------
+
+.. _nowcast.figures.research.tracer_thalweg_and_surface:
+
+:py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.research.tracer_thalweg_and_surface
+    :members:
