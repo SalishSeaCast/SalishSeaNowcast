@@ -12,5 +12,5 @@ dependencies:
   - nemo_nowcast
   - python=3.5
   - pip:
-    - sphinx==1.5.6
+    - sphinx==1.5.4
     - sphinx_rtd_theme==0.2.5b1
