@@ -40,7 +40,6 @@ and then we'll look at each section in detail.
 
 .. literalinclude:: ../../nowcast/figures/research/tracer_thalweg_and_surface.py
     :language: python
-    :linenos:
 
 .. note::
 
@@ -94,7 +93,6 @@ Copyright Notice
 At the top of the file is our :ref:`LibraryCodeStandardCopyrightHeaderBlock`:
 
 .. code-block:: python
-    :linenos:
 
     # Copyright 2013-2017 The Salish Sea MEOPAR contributors
     # and The University of British Columbia
@@ -119,8 +117,6 @@ The module docstring will appear at top of the :ref:`automatically generated mod
 (:py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` in this case).
 
 .. code-block:: python
-    :linenos:
-    :lineno-start: 16
 
     """Produce a figure that shows colour contours of a tracer on a vertical slice
     along a section of the domain thalweg,
