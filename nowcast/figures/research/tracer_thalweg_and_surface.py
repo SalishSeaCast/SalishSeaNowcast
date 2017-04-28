@@ -27,14 +27,12 @@ import numpy as np
 from salishsea_tools import visualisations as vis
 from salishsea_tools import viz_tools
 
-import nowcast.figures.shared
 import nowcast.figures.website_theme
 
 
 def make_figure(
-    tracer_var, bathy, lons, lats, mesh_mask, coastline, cmap,
-    depth_integrated, figsize=(20, 12),
-    theme=nowcast.figures.website_theme
+    tracer_var, bathy, lons, lats, mesh_mask, cmap,  depth_integrated,
+    figsize=(20, 12), theme=nowcast.figures.website_theme
 ):
     """Plot colour contours of tracer on a vertical slice along a section of 
     the domain thalweg,
@@ -55,9 +53,6 @@ def make_figure(
 
     :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
     :type mesh_mask: :class:`netCDF4.Dataset`
-    
-    :param coastline: Coastline dataset.
-    :type coastline: :class:`mat.Dataset`
     
     :param cmap: Colour map to use for tracer_var contour plots.
     :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
