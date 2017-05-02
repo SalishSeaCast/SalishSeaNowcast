@@ -55,3 +55,4 @@ The :ref:`NowcastFiguresDevEnv` section below explains how to set up a conda env
    website_theme
    make_figure_calls
    site_view_fig_metadata
+   fig_module_tips
