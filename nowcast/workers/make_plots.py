@@ -211,7 +211,7 @@ def _make_publish_plots(
     }
 
     logger.debug('starting storm_surge_alerts_thumbnail()')
-    fig = storm_surge_alerts_thumbnail.storm_surge_alerts_thumbnail(
+    fig = storm_surge_alerts_thumbnail.make_figure(
         grids_15m, weather_path, coastline, tidal_predictions)
     filename = plots_dir / f'Website_thumbnail_{dmy}.png'
     fig.savefig(
@@ -219,15 +219,14 @@ def _make_publish_plots(
     logger.info(f'{filename} saved')
 
     logger.debug('starting storm_surge_alerts()')
-    fig = storm_surge_alerts.storm_surge_alerts(
+    fig = storm_surge_alerts.make_figure(
         grids_15m, weather_path, coastline, tidal_predictions)
     filename = plots_dir / f'Threshold_website_{dmy}.svg'
     fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
     logger.info(f'{filename} saved')
 
     logger.debug('starting pt_atkinson_tide()')
-    fig = pt_atkinson_tide.pt_atkinson_tide(
-        grid_T_hr, tidal_predictions, timezone)
+    fig = pt_atkinson_tide.make_figure(grid_T_hr, tidal_predictions, timezone)
     filename = plots_dir / f'PA_tidal_predictions_{dmy}.svg'
     fig.savefig(
         os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches='tight')
@@ -244,9 +243,10 @@ def _make_publish_plots(
     for stn_name, fig_file_prefix in tide_gauge_stns:
         logger.debug(
             f'starting compare_tide_prediction_max_ssh() for {stn_name}')
-        fig = compare_tide_prediction_max_ssh.compare_tide_prediction_max_ssh(
+        fig = compare_tide_prediction_max_ssh.make_figure(
             stn_name, grid_T_hr, grids_15m, bathy, weather_path,
-            tidal_predictions, timezone)
+            tidal_predictions, timezone
+        )
         filename = plots_dir / f'{fig_file_prefix}_{dmy}.svg'
         fig.savefig(
             os.fspath(filename), facecolor=fig.get_facecolor(),
@@ -329,9 +329,10 @@ def _make_comparisons_plots(
         'East node', 'Central node', 'Delta BBL node', 'Delta DDL node')
     for node_name in node_names:
         try:
-            fig = compare_venus_ctd.compare_venus_ctd(
+            fig = compare_venus_ctd.make_figure(
                 node_name, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
-                dev_mesh_mask)
+                dev_mesh_mask
+            )
             filename = os.path.join(
                 plots_dir,
                 f'Compare_VENUS_'

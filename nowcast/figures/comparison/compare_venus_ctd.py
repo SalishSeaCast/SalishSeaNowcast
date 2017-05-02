@@ -35,7 +35,7 @@ from nowcast.figures import shared
 import nowcast.figures.website_theme
 
 
-def compare_venus_ctd(
+def make_figure(
     node_name, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask, dev_mesh_mask,
     figsize=(8, 10),
     theme=nowcast.figures.website_theme,
