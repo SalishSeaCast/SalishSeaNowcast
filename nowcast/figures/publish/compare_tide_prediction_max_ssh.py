@@ -56,7 +56,7 @@ from nowcast.figures import shared
 import nowcast.figures.website_theme
 
 
-def compare_tide_prediction_max_ssh(
+def make_figure(
     place, grid_T_hr, grids_15m, bathy, weather_path, tidal_predictions,
     timezone,
     figsize=(20, 12), theme=nowcast.figures.website_theme,

@@ -41,7 +41,7 @@ from nowcast.figures import shared
 import nowcast.figures.website_theme
 
 
-def storm_surge_alerts(
+def make_figure(
     grids_15m, weather_path, coastline, tidal_predictions,
     figsize=(18, 20),
     theme=nowcast.figures.website_theme,

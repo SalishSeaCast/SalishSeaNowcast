@@ -35,7 +35,7 @@ from nowcast.figures import shared
 import nowcast.figures.website_theme
 
 
-def pt_atkinson_tide(
+def make_figure(
     grid_T_hr, tidal_predictions, timezone,
     figsize=(20, 5),
     theme=nowcast.figures.website_theme,

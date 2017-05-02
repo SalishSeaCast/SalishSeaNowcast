@@ -30,7 +30,7 @@ from salishsea_tools import (
 )
 
 
-def salinity_ferry_track(
+def make_figure(
     grid_T_hr,
     figsize=(20, 7.5),
     theme=nowcast.figures.website_theme,
