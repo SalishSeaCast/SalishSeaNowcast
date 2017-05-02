@@ -788,6 +788,20 @@ It finishes with a call to the :py:func:`theme.set_axis_colors` convenience func
 ticks,
 and spines so that they are consistent with the web site theme.
 
+The code format the colour bar labels is in separate :py:func:`_cbar_labels` function so that it can be used by both :py:func:`_thalweg_axes_labels` and :py:func:`_surface_axes_labels`.
+
+.. code-block:: python
+
+    def _cbar_labels(cbar, contour_intervals, theme, label):
+        cbar.set_ticks(contour_intervals)
+        cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
+        cbar.set_label(
+            label,
+            fontproperties=theme.FONTS['axis'],
+            color=theme.COLOURS['text']['axis'])
+
+The colour of the tick labels on the colorbar is set by calling the :py:meth:`axes.tick_params` method on the axes object with a colour provided by :kbd:`theme`.
+
 
 .. _PlotTracerSurface:
 
@@ -809,80 +823,6 @@ The :py:func:`_plot_tracer_surface` function is an example of horizontal layer c
 This function constructs a mesh grid of x-y grid points and uses it and to plot colour contours.
 It illustrates how to access the surface tracer field that we returned in the :py:obj:`plot_data` namespace from the :ref:`PrepPlotDataFunction`.
 
-The need to plot colour contours of horizontal data surfaces is general enough that code like this should be refactored into a :py:func:`salishsea_tools.visualisations.contour_layer` function so that :py:func:`_plot_tracer_surface` can become a wrapper like the :ref:`PlotTracerThalweg`.
-
-Similar to the :ref:`PlotTracerThalweg`,
-this function returns the :py:obj:`cbar` colour bar object for a separate :py:func:`_surface_axes_labels` function to operate on to handle "making the axes pretty".
-
-
-.. _PlotResidualTimeSeriesFunction:
-
-:py:func:`_plot_residual_time_series` Function
-----------------------------------------------
-
-The :py:func:`_plot_residual_time_series` function is conceptually similar to the :ref:`PlotTracerSurface`.
-It just operates on a different axes object.
-
-.. code-block:: python
-    :linenos:
-    :lineno-start: 232
-
-    def _plot_residual_time_series(
-        ax, plot_data, timezone, theme,
-        ylims=(-1, 1), yticks=np.arange(-1, 1.25, 0.25),
-    ):
-
-        ...
-
-        ax.legend()
-        _residual_time_series_labels(
-            ax, ylims, yticks, timezone, time[0].tzname(), theme)
-
-It too has its own "make it pretty" function:
-
-.. code-block:: python
-    :linenos:
-    :lineno-start: 244
-
-    def _residual_time_series_labels(ax, ylims, yticks, timezone, tzname, theme):
-        ...
-        ax.xaxis.set_major_formatter(
-            DateFormatter('%d-%b %H:%M', tz=pytz.timezone(timezone)))
-        ...
-
-Here we see how to use a :py:class:`matplotlib.dates.DateFormatter` object to format date/time tick labels on an axes,
-and how to ensure that those label are correct when the time series data being plotted is timezone-aware.
-
-
-.. _PlotSshMapFunction:
-
-:py:func:`_plot_ssh_map` Function
----------------------------------
-
-The :py:func:`_plot_ssh_map` function is an example of a plotting function that displays a contour map of a field variable,
-contour lines,
-and land regions of the model domain:
-
-.. code-block:: python
-    :linenos:
-    :lineno-start: 251
-
-    def _plot_ssh_map(ax, plot_data, place, theme):
-        contour_intervals = [
-            -1, -0.5, 0.5, 1, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.4, 2.6]
-        mesh = ax.contourf(
-            plot_data.ssh_max_field, contour_intervals,
-            cmap='nipy_spectral', extend='both', alpha=0.6)
-        ax.contour(
-            plot_data.ssh_max_field, contour_intervals,
-            colors='black', linestyles='--')
-        cbar = plt.colorbar(mesh, ax=ax)
-        viz_tools.plot_coastline(ax, plot_data.bathy)
-        viz_tools.plot_land_mask(
-            ax, plot_data.bathy, color=theme.COLOURS['land'])
-        _ssh_map_axis_labels(ax, place, plot_data, theme)
-        _ssh_map_cbar_labels(cbar, contour_intervals, theme)
-
 An important consideration when plotting model results as maps for the web site is that the resulting images size must be kept as small as possible so that the page loading time does not become so large that the site is unusable,
 especially on slower or mobile networks.
 Using the :py:meth:`contourf` method rather than :py:meth:`pcolormesh` is one very effective way of limit the resulting figure image size.
@@ -892,30 +832,10 @@ The method to add a colorbar to a axes that shows contoured data is not availabl
 Here we use the :py:meth:`colorbar` convenience method provided by :py:obj:`matplotlib.pyplot`
 (which we aliases to :py:obj:`plt` on import).
 
-The :py:func:`salishsea_tools.viz_tools.plot_coastline` and :py:func:`salishsea_tools.viz_tools.plot_land_mask` functions provide space-efficient ways of adding the coastline and land regions to the axes.
+The need to plot colour contours of horizontal data surfaces is general enough that code like this should be refactored into a :py:func:`salishsea_tools.visualisations.contour_layer` function so that :py:func:`_plot_tracer_surface` can become a wrapper like the :ref:`PlotTracerThalweg`.
 
-Finally we have a function,
-:py:func:`_ssh_map_axis_labels`,
-to label the contour map part of the axes,
-and the :py:func:`_ssh_map_cbar_labels` to label the colorbar part:
-
-.. code-block:: python
-    :linenos:
-    :lineno-start: 267
-
-    def _ssh_map_axis_labels(ax, place, plot_data, theme):
-        ...
-
-
-    def _ssh_map_cbar_labels(cbar, contour_intervals, theme):
-        cbar.set_ticks(contour_intervals)
-        cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
-        cbar.set_label(
-            'Sea Surface Height [m]',
-            fontproperties=theme.FONTS['axis'],
-            color=theme.COLOURS['text']['axis'])
-
-The colour of the tick labels on the colorbar is set by calling the :py:meth:`axes.tick_params` method on the axes object with a colour provided by :kbd:`theme`.
+Similar to the :ref:`PlotTracerThalweg`,
+this function returns the :py:obj:`cbar` colour bar object for a separate :py:func:`_surface_axes_labels` function to operate on to handle "making the axes pretty".
 
 
 .. _AutomaticModuleDocumentationGeneration:
