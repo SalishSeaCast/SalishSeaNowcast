@@ -38,8 +38,239 @@ Example Module
 First we'll show the :py:mod:`~nowcast.figures.research.tracer_thalweg_and_surface` module structure as a whole,
 and then we'll look at each section in detail.
 
-.. literalinclude:: ../../nowcast/figures/research/tracer_thalweg_and_surface.py
-    :language: python
+.. code-block:: python
+
+    # Copyright 2013-2017 The Salish Sea MEOPAR contributors
+    # and The University of British Columbia
+
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+
+    #    http://www.apache.org/licenses/LICENSE-2.0
+
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+
+    """Produce a figure that shows colour contours of a tracer on a vertical slice
+    along a section of the domain thalweg,
+    and on the surface for a section of the domain that excludes Puget Sound
+    in the south and Johnstone Strait in the north.
+    """
+    from types import SimpleNamespace
+
+    import matplotlib.pyplot as plt
+    from matplotlib import gridspec
+    import numpy as np
+
+    from salishsea_tools import visualisations as vis
+    from salishsea_tools import viz_tools
+
+    import nowcast.figures.website_theme
+
+
+    def make_figure(
+        tracer_var, bathy, lons, lats, mesh_mask, cmap,  depth_integrated,
+        figsize=(20, 12), theme=nowcast.figures.website_theme
+    ):
+        """Plot colour contours of tracer on a vertical slice along a section of
+        the domain thalweg,
+        and on the surface for the Strait of Georgia and Juan de Fuca Strait
+        regions of the domain.
+
+        :param tracer_var: Hourly average tracer results from NEMO run.
+        :type tracer_var: :py:class:`netCDF4.Variable`
+
+        :param bathy: Salish Sea NEMO model bathymetry data.
+        :type bathy: :py:class:`numpy.ndarray`
+
+        :param lons: Salish Sea NEMO model longitude grid data.
+        :type lons: :py:class:`numpy.ndarray`
+
+        :param lats: Salish Sea NEMO model latitude grid data.
+        :type lats: :py:class:`numpy.ndarray`
+
+        :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
+        :type mesh_mask: :class:`netCDF4.Dataset`
+
+        :param cmap: Colour map to use for tracer_var contour plots.
+        :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
+
+        :param boolean depth_integrated: Integrate the tracer over the water column
+                                         depth when :py:obj:`True`.
+
+        :param 2-tuple figsize: Figure size (width, height) in inches.
+
+        :param theme: Module-like object that defines the style elements for the
+                    figure. See :py:mod:`nowcast.figures.website_theme` for an
+                    example.
+
+        :returns: :py:class:`matplotlib.figure.Figure`
+        """
+        plot_data = _prep_plot_data(tracer_var, mesh_mask, depth_integrated)
+        fig, (ax_thalweg, ax_surface) = _prep_fig_axes(figsize, theme)
+
+        clevels_thalweg, clevels_surface, show_thalweg_cbar = _calc_clevels(
+            plot_data)
+
+        cbar_thalweg = _plot_tracer_thalweg(
+            ax_thalweg, plot_data, bathy, lons, lats, mesh_mask, cmap,
+            clevels_thalweg)
+        _thalweg_axes_labels(
+            ax_thalweg, tracer_var, show_thalweg_cbar, clevels_thalweg,
+            cbar_thalweg, theme)
+
+        cbar_surface = _plot_tracer_surface(
+            ax_surface, plot_data, cmap, clevels_surface)
+        _surface_axes_labels(
+            ax_surface, tracer_var, depth_integrated, clevels_surface, cbar_surface,
+            theme)
+        return fig
+
+
+    def _prep_plot_data(tracer_var, mesh_mask, depth_integrated):
+        hr = 19
+        sj, ej = 200, 770
+        si, ei = 20, 370
+        tracer_hr = tracer_var[hr]
+        if depth_integrated:
+            grid_heights = mesh_mask.variables['e3t_0'][:][0].reshape(
+                tracer_hr.shape[0], 1, 1)
+            height_weighted = tracer_hr[:, sj:ej, si:ei] * grid_heights
+            surface_hr = height_weighted.sum(axis=0)
+        else:
+            surface_hr = tracer_hr[0, sj:ej, si:ei]
+        surface_hr = np.ma.masked_where(
+            mesh_mask["tmask"][0, 0, sj:ej, si:ei] == 0, surface_hr)
+
+        return SimpleNamespace(
+            tracer_hr=tracer_hr,
+            surface_hr=surface_hr,
+        )
+
+
+    def _prep_fig_axes(figsize, theme):
+        fig = plt.figure(
+            figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
+
+        gs = gridspec.GridSpec(1, 2, width_ratios=[1.3, 1])
+
+        ax_thalweg = fig.add_subplot(gs[0])
+        ax_thalweg.set_axis_bgcolor(theme.COLOURS['axes']['background'])
+
+        ax_surface = fig.add_subplot(gs[1])
+        ax_surface.set_axis_bgcolor(theme.COLOURS['axes']['background'])
+
+        return fig, (ax_thalweg, ax_surface)
+
+
+    def _calc_clevels(plot_data):
+        """Calculates contour levels for the two axes and decides whether whether
+        the levels are similar enough that one colour bar is sufficient for the
+        figure, or if each axes requires one.
+        """
+        percent_98_surf = np.percentile(plot_data.surface_hr, 98)
+        percent_2_surf = np.percentile(plot_data.surface_hr, 2)
+
+        percent_98_grid = np.percentile(
+            np.ma.masked_values(plot_data.tracer_hr, 0), 98)
+        percent_2_grid = np.percentile(
+            np.ma.masked_values(plot_data.tracer_hr, 0), 2)
+
+        overlap = (
+            max(0, min(percent_98_surf, percent_98_grid)
+                - max(percent_2_surf, percent_2_grid)))
+        magnitude = (
+            (percent_98_surf - percent_2_surf) + (percent_98_grid - percent_2_grid))
+        if 2 * overlap / magnitude > 0.5:
+            max_clevel = max(percent_98_surf, percent_98_grid)
+            min_clevel = min(percent_2_surf, percent_2_grid)
+            clevels_thalweg = np.arange(
+                min_clevel, max_clevel, (max_clevel - min_clevel) / 20.0)
+            clevels_surface = clevels_thalweg
+            show_thalweg_cbar = False
+        else:
+            clevels_thalweg = np.arange(
+                percent_2_grid, percent_98_grid,
+                (percent_98_grid - percent_2_grid) / 20.0)
+            clevels_surface = np.arange(
+                percent_2_surf, percent_98_surf,
+                (percent_98_surf - percent_2_surf) / 20.0)
+            show_thalweg_cbar = True
+        return clevels_thalweg, clevels_surface, show_thalweg_cbar
+
+
+    def _plot_tracer_thalweg(
+        ax, plot_data, bathy, lons, lats, mesh_mask, cmap, clevels
+    ):
+        cbar = vis.contour_thalweg(
+            ax, plot_data.tracer_hr, bathy, lons, lats, mesh_mask,
+            'gdept', clevels=clevels, cmap=cmap,
+            thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working'
+                         '.txt',
+            cbar_args={'fraction': 0.030, 'pad': 0.04, 'aspect': 45}
+        )
+        return cbar
+
+
+    def _thalweg_axes_labels(
+        ax, tracer_var, show_thalweg_cbar, clevels, cbar, theme
+    ):
+        ax.set_xlim(0, 590)
+        ax.set_ylim(450, 0)
+        if show_thalweg_cbar:
+            label = f'{tracer_var.long_name} [{tracer_var.units}]'
+            _cbar_labels(cbar, clevels[::2], theme, label)
+        else:
+            cbar.remove()
+        ax.set_xlabel(
+            'Distance along thalweg [km]', color=theme.COLOURS['text']['axis'],
+            fontproperties=theme.FONTS['axis'])
+        ax.set_ylabel(
+            'Depth [m]', color=theme.COLOURS['text']['axis'],
+            fontproperties=theme.FONTS['axis'])
+        theme.set_axis_colors(ax)
+
+
+    def _cbar_labels(cbar, contour_intervals, theme, label):
+        cbar.set_ticks(contour_intervals)
+        cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
+        cbar.set_label(
+            label,
+            fontproperties=theme.FONTS['axis'],
+            color=theme.COLOURS['text']['axis'])
+
+
+    def _plot_tracer_surface(ax, plot_data, cmap, clevels):
+        x, y = np.meshgrid(
+            np.arange(20, 370, dtype=int), np.arange(200, 770, dtype=int))
+        mesh = ax.contourf(
+            x, y, plot_data.surface_hr, levels=clevels, cmap=cmap, extend='both')
+        cbar = plt.colorbar(mesh, ax=ax, fraction=0.034, pad=0.04, aspect=45)
+        return cbar
+
+
+    def _surface_axes_labels(
+        ax, tracer_var, depth_integrated, clevels, cbar, theme
+    ):
+        cbar_units = (
+            f'{tracer_var.units}*m' if depth_integrated
+            else f'{tracer_var.units}')
+        cbar_label = f'{tracer_var.long_name} [{cbar_units}]'
+        _cbar_labels(cbar, clevels[::2], theme, cbar_label)
+        ax.set_xlabel(
+            'Grid x', color=theme.COLOURS['text']['axis'],
+            fontproperties=theme.FONTS['axis'])
+        ax.set_ylabel(
+            'Grid y', color=theme.COLOURS['text']['axis'],
+            fontproperties=theme.FONTS['axis'])
+        ax.set_axis_bgcolor('burlywood')
+        viz_tools.set_aspect(ax)
+        theme.set_axis_colors(ax)
+
 
 .. note::
 
@@ -436,7 +667,7 @@ and any calculations that are required should be done in :py:func:`_prep_plot_da
 :py:func:`_prep_plot_data` should return a :py:obj:`types.SimpleNamespace`
 so that the various data objects to be plotted can be easily accessed using dotted notation;
 e.g. :py:obj:`plot_data.tracer_hr`.
-Please see :ref:`LibraryCodeReturnNamedtuplesFromFunctions` for more details.
+Please see :ref:`LibraryCodeReturnSimpleNamespacesFromFunctions` for more details.
 
 In figure modules that use the :py:mod:`salishsea_tools.places` module,
 :py:func:`_prep_plot_data` is probably the best place to catch undefined place key errors
@@ -485,12 +716,10 @@ Axes Plotting Functions
 
 After preparing the plot data,
 and setting up the figure and axes objects,
-our example :ref:`MakeFigureFunction` calls 4 axes plotting functions:
+our example :ref:`MakeFigureFunction` calls 2 axes plotting functions:
 
-1. :ref:`PlotInfoBoxFunction`
-2. :ref:`PlotSshTimeSeriesFunction`
-3. :ref:`PlotResidualTimeSeriesFunction`
-4. :ref:`PlotSshMapFunction`
+1. :ref:`PlotTracerThalweg`
+2. :ref:`PlotTracerSurface`
 
 one for each :py:obj:`matplotlib.axes.Axes` object returned by :py:func:`_prep_fig_axes`.
 
@@ -498,7 +727,7 @@ Those functions generally accept:
 
 * a :py:obj:`matplotlib.axes.Axes` object as their 1st argument,
   called :kbd:`ax` by convention
-* the :py:obj:`namedtuple` object that was returned by the :py:func:`_prep_plot_data` function,
+* the :py:obj:`~types.SimpleNamespace` object that was returned by the :py:func:`_prep_plot_data` function,
   called :kbd:`plot_data` by convention
 * the :py:mod:`nowcast.figures.website_theme` module as their last argument,
   called :kbd:`theme` by convention
@@ -510,124 +739,80 @@ The job of the :py:func:`_plot_*` functions is to act on the :py:obj:`matplotlib
 so they do not return anything.
 
 
-.. _PlotInfoBoxFunction:
+.. _PlotTracerThalweg:
 
-:py:func:`_plot_info_box` Function
-----------------------------------
+:py:func:`_plot_tracer_thalweg` Function
+----------------------------------------
 
-The :py:func:`_plot_info_box` function in our example plots text on the figure using an axes object whose spines,
-labels,
-etc.
-are hidden.
+The :py:func:`_plot_tracer_thalweg` function in our example plots colour contours of a tracer on a vertical slice along a section of the domain thalweg.
 
 .. code-block:: python
-    :linenos:
-    :lineno-start: 175
 
-      def _plot_info_box(ax, place, plot_data, theme):
+      def _plot_tracer_thalweg(
+          ax, plot_data, bathy, lons, lats, mesh_mask, cmap, clevels
+      ):
+          cbar = vis.contour_thalweg(
+              ax, plot_data.tracer_hr, bathy, lons, lats, mesh_mask,
+              'gdept', clevels=clevels, cmap=cmap,
+              thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working'
+                           '.txt',
+              cbar_args={'fraction': 0.030, 'pad': 0.04, 'aspect': 45}
+          )
+          return cbar
 
-          ...
-
-          ax.text(
-              0.05, 0.6,
-              'Time of max: {datetime} {tzone}'
-              .format(
-                  datetime=time_max_ssh_15m.format('YYYY-MM-DD HH:mm'),
-                  tzone=time_max_ssh_15m.datetime.tzname()),
-              horizontalalignment='left', verticalalignment='top',
-              transform=ax.transAxes,
-              fontproperties=theme.FONTS['info box content'],
-              color=theme.COLOURS['text']['info box content'])
-
-          ...
-
-          _info_box_hide_frame(ax, theme)
-
-The abbreviated version above shows how text is placed and aligned,
-and how font properties and the text colour are set from :kbd:`theme`.
-
-Also shown is how an `arrow`_ datetime object is formatted for display,
-and how its abbreviated timezone name
-(e.g. :kbd:`PDT`)
-is obtained.
-
-.. _arrow: http://crsmithdev.com/arrow/
-
-A separate function,
-:py:func:`_info_box_hide_frame`,
-is called to hide most of the axes elements and set its background colour so that the text appears to be plotted on the figure canvas:
+This function is a thin wrapper around the :py:func:`salishsea_tools.visualisations.contour_thalweg` function.
+It returns the :py:obj:`cbar` colour bar object for a separate :py:func:`_thalweg_axes_labels` function to operate on to handle "making the axes pretty":
 
 .. code-block:: python
-    :linenos:
-    :lineno-start: 195
 
-    def _info_box_hide_frame(ax, theme):
-        ax.set_axis_bgcolor(theme.COLOURS['figure']['facecolor'])
-        ax.xaxis.set_visible(False)
-        ax.yaxis.set_visible(False)
-        for spine in ax.spines:
-            ax.spines[spine].set_visible(False)
-
-
-.. _PlotSshTimeSeriesFunction:
-
-:py:func:`_plot_ssh_time_series` Function
------------------------------------------
-
-The :py:func:`_plot_ssh_time_series` function is an example of a line plotting function with a legend on the axes.
-
-.. code-block:: python
-    :linenos:
-    :lineno-start: 203
-
-    def _plot_ssh_time_series(ax, place, plot_data, theme, ylims=(-3, 3)):
-
-        ...
-
-        ax.plot(
-            plot_data.ttide.time, plot_data.ttide.pred_all,
-            linewidth=2, label='Tide Prediction',
-            color=theme.COLOURS['time series']['tidal prediction vs model'])
-
-        ...
-        ax.legend(numpoints=1)
-
-        _ssh_time_series_labels(ax, place, ylims, theme)
-
-The abbreviated version above shows how elements from the :kbd:`plot_data` object are access,
-how the line width,
-and legend label are set,
-and how the line colour is obtained from :kbd:`theme`.
-The axes object :py:meth:`legend` method is called to render the labels assigned in the :py:meth:`plot` method calls with the corresponding line and marker samples.
-
-A separate function,
-:py:func:`_ssh_time_series_labels`,
-is called to handle "making the axes pretty":
-
-.. code-block:: python
-    :linenos:
-    :lineno-start: 218
-
-    def _ssh_time_series_labels(ax, place, ylims, theme):
-        ax.set_title(
-            'Sea Surface Height at {place}'.format(place=place),
-            fontproperties=theme.FONTS['axes title'],
-            color=theme.COLOURS['text']['axes title'])
+    def _thalweg_axes_labels(
+        ax, tracer_var, show_thalweg_cbar, clevels, cbar, theme
+    ):
+        ax.set_xlim(0, 590)
+        ax.set_ylim(450, 0)
+        if show_thalweg_cbar:
+            label = f'{tracer_var.long_name} [{tracer_var.units}]'
+            _cbar_labels(cbar, clevels[::2], theme, label)
+        else:
+            cbar.remove()
+        ax.set_xlabel(
+            'Distance along thalweg [km]', color=theme.COLOURS['text']['axis'],
+            fontproperties=theme.FONTS['axis'])
         ax.set_ylabel(
-            'Water Level wrt MSL [m]',
-            fontproperties=theme.FONTS['axis'],
-            color=theme.COLOURS['text']['axis'])
-        ax.set_ylim(ylims)
-        ax.grid(axis='both')
+            'Depth [m]', color=theme.COLOURS['text']['axis'],
+            fontproperties=theme.FONTS['axis'])
         theme.set_axis_colors(ax)
 
-Apart from more text plotting with the :py:meth:`set_title` and :py:meth:`set_ylabel` methods,
-this function also handles setting axis limits,
-and grid visibility.
-Finally,
-it calls the :py:func:`theme.set_axis_colors` convenience function to set the colours of axis labels,
+This function shows how text colours and fonts are obtained from :kbd:`theme`.
+It finishes with a call to the :py:func:`theme.set_axis_colors` convenience function to set the colours of axis labels,
 ticks,
 and spines so that they are consistent with the web site theme.
+
+
+.. _PlotTracerSurface:
+
+:py:func:`_plot_tracer_surface` Function
+----------------------------------------
+
+The :py:func:`_plot_tracer_surface` function is an example of horizontal layer contour plotting on an axes object.
+
+.. code-block:: python
+
+    def _plot_tracer_surface(ax, plot_data, cmap, clevels):
+        x, y = np.meshgrid(
+            np.arange(20, 370, dtype=int), np.arange(200, 770, dtype=int))
+        mesh = ax.contourf(
+            x, y, plot_data.surface_hr, levels=clevels, cmap=cmap, extend='both')
+        cbar = plt.colorbar(mesh, ax=ax, fraction=0.034, pad=0.04, aspect=45)
+        return cbar
+
+This function constructs a mesh grid of x-y grid points and uses it and to plot colour contours.
+It illustrates how to access the surface tracer field that we returned in the :py:obj:`plot_data` namespace from the :ref:`PrepPlotDataFunction`.
+
+The need to plot colour contours of horizontal data surfaces is general enough that code like this should be refactored into a :py:func:`salishsea_tools.visualisations.contour_layer` function so that :py:func:`_plot_tracer_surface` can become a wrapper like the :ref:`PlotTracerThalweg`.
+
+Similar to the :ref:`PlotTracerThalweg`,
+this function returns the :py:obj:`cbar` colour bar object for a separate :py:func:`_surface_axes_labels` function to operate on to handle "making the axes pretty".
 
 
 .. _PlotResidualTimeSeriesFunction:
@@ -635,7 +820,7 @@ and spines so that they are consistent with the web site theme.
 :py:func:`_plot_residual_time_series` Function
 ----------------------------------------------
 
-The :py:func:`_plot_residual_time_series` function is conceptually similar to the :ref:`PlotSshTimeSeriesFunction`.
+The :py:func:`_plot_residual_time_series` function is conceptually similar to the :ref:`PlotTracerSurface`.
 It just operates on a different axes object.
 
 .. code-block:: python
