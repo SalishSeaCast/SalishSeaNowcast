@@ -131,11 +131,7 @@ def make_plots(parsed_args, config, *args):
 def _make_plot_files(
     config, run_type, plot_type, dmy, results_home, dev_results_home, plots_dir,
 ):
-    make_plots_funcs = {
-        'publish': _make_publish_plots,
-        'research': _make_research_plots,
-        'comparison': _make_comparisons_plots,
-    }
+    timezone = config['figures']['timezone']
     weather_path = config['weather']['ops dir']
     if run_type in ['forecast', 'forecast2']:
         weather_path = os.path.join(weather_path, 'fcst/')
@@ -148,15 +144,279 @@ def _make_plot_files(
         config['run types']['nowcast-green']['mesh mask'])
     tidal_predictions = config['ssh']['tidal predictions']
     ferry_data_dir = config['observations']['ferry data']
-    make_plots_funcs[plot_type](
-        dmy, weather_path, bathy, results_dir, plots_dir, coastline,
-        tidal_predictions=tidal_predictions,
-        timezone=config['figures']['timezone'],
-        mesh_mask=mesh_mask,
-        dev_mesh_mask=dev_mesh_mask,
-        ferry_data_dir=ferry_data_dir,
-        dev_results_dir=dev_results_dir,
-    )
+
+    if run_type == 'nowcast' and plot_type == 'research':
+        grid_T_day = _results_dataset('1d', 'grid_T', results_dir)
+        grid_U_day = _results_dataset('1d', 'grid_U', results_dir)
+        grid_V_day = _results_dataset('1d', 'grid_V', results_dir)
+        grid_central = _results_dataset_gridded('central', results_dir)
+        grid_east = _results_dataset_gridded('east', results_dir)
+
+        figs_info = {
+                # svg_name
+                'Salinity_on_thalweg': {
+                    'function': figures.thalweg_salinity,
+                    'args': (grid_T_day, mesh_mask, bathy),
+                    'kwargs': {'thalweg_pts_file':
+                               '/results/nowcast-sys/tools/bathymetry/'
+                               'thalweg_working.txt'}
+                },
+                'Temperature_on_thalweg': {
+                    'function': figures.thalweg_temperature,
+                    'args': (grid_T_day, mesh_mask, bathy),
+                    'kwargs': {'thalweg_pts_file':
+                               '/results/nowcast-sys/tools/bathymetry/'
+                               'thalweg_working.txt'}
+                },
+                'T_S_Currents_on_surface': {
+                    'function': figures.plot_surface,
+                    'args': (grid_T_day, grid_U_day, grid_V_day, bathy),
+                },
+                'Currents_at_VENUS_Central': {
+                    'function': research_VENUS.plot_vel_NE_gridded,
+                    'args': ('Central', grid_central),
+                },
+                'Currents_at_VENUS_East': {
+                    'function': research_VENUS.plot_vel_NE_gridded,
+                    'args': ('East', grid_east),
+                }
+            }
+
+    if run_type == 'nowcast' and plot_type == 'comparison':
+        grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
+        dev_grid_T_hr = _results_dataset('1h', 'grid_T', dev_results_dir)
+        grid_central = _results_dataset_gridded('central', results_dir)
+        grid_obs_central = sio.loadmat(
+            '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat')
+        grid_east = _results_dataset_gridded('east', results_dir)
+        grid_obs_east = sio.loadmat(
+            '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPeast.mat')
+        grid_ddl = _results_dataset_gridded('ddl', results_dir)
+        grid_obs_ddl = sio.loadmat(
+            '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPddl.mat')
+        adcp_datetime = (
+            datetime.datetime.strptime(dmy, '%d%b%y').replace(minute=45))
+
+        figs_info = {
+            'SH_wind': {
+                'function': figures.Sandheads_winds,
+                'args': (grid_T_hr, bathy, weather_path, coastline),
+            },
+            'Compare_VENUS_East': {
+                'function': compare_venus_ctd.make_figure,
+                'args': (
+                    'East node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
+                    dev_mesh_mask
+                ),
+            },
+            'HB_DB_ferry_salinity': {
+                'function': research_ferries.salinity_ferry_route,
+                'args': (ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy),
+            },
+            'TW_DP_ferry_salinity': {
+                'function': research_ferries.salinity_ferry_route,
+                'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_DP', dmy),
+            },
+            'TW_SB_ferry_salinity': {
+                'function': research_ferries.salinity_ferry_route,
+                'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_SB', dmy),
+            },
+            'Compare_VENUS_Central': {
+                'function': compare_venus_ctd.make_figure,
+                'args': (
+                    'Central node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
+                    dev_mesh_mask
+                ),
+            },
+            'Compare_VENUS_Delta_BBL': {
+                'function': compare_venus_ctd.make_figure,
+                'args': (
+                    'Delta BBL node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
+                    dev_mesh_mask
+                ),
+            },
+            'Compare_VENUS_Delta_DDL': {
+                'function': compare_venus_ctd.make_figure,
+                'args': (
+                    'Delta DDL node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
+                    dev_mesh_mask
+                ),
+            },
+            'Central_ADCP': {
+                'function': research_VENUS.plotADCP,
+                'args': (
+                    grid_central, grid_obs_central, adcp_datetime, 'Central',
+                    [0, 285])
+            },
+            'Central_depavADCP': {
+                'function': research_VENUS.plotdepavADCP,
+                'args': (
+                    grid_central, grid_obs_central, adcp_datetime, 'Central')
+            },
+            'Central_timeavADCP': {
+                'function': research_VENUS.plottimeavADCP,
+                'args': (
+                    grid_central, grid_obs_central, adcp_datetime, 'Central')
+            },
+            'East_ADCP': {
+                'function': research_VENUS.plotADCP,
+                'args': (
+                    grid_east, grid_obs_east, adcp_datetime, 'East', [0, 150])
+            },
+            'East_depavADCP': {
+                'function': research_VENUS.plotdepavADCP,
+                'args': (grid_east, grid_obs_east, adcp_datetime, 'East')
+            },
+            'East_timeavADCP': {
+                'function': research_VENUS.plottimeavADCP,
+                'args': (grid_east, grid_obs_east, adcp_datetime, 'East')
+            },
+            'ddl_ADCP': {
+                'function': research_VENUS.plotADCP,
+                'args': (grid_ddl, grid_obs_ddl, adcp_datetime, 'ddl', [0, 148])
+            },
+            'ddl_depavADCP': {
+                'function': research_VENUS.plotdepavADCP,
+                'args': (grid_ddl, grid_obs_ddl, adcp_datetime, 'ddl')
+            },
+            'ddl_timeavADCP': {
+                'function': research_VENUS.plottimeavADCP,
+                'args': (grid_ddl, grid_obs_ddl, adcp_datetime, 'ddl')
+            }
+        }
+
+    if plot_type == 'publish':
+        grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
+        names = [
+            'Point Atkinson', 'Victoria', 'Campbell River', 'Cherry Point',
+            'Friday Harbor', 'Neah Bay', 'Nanaimo', 'Sandheads'
+        ]
+        filepath_tmpl = os.path.join(results_dir, '{}.nc')
+        grids_15m = {
+            name: nc.Dataset(filepath_tmpl.format(name.replace(' ', '')))
+            for name in names
+        }
+
+        figs_info = {
+            # svg_name
+            'Website_thumbnail': {
+                'function': storm_surge_alerts_thumbnail.make_figure,
+                'args': (grids_15m, weather_path, coastline, tidal_predictions)
+            },
+            'Threshold_website': {
+                'function': storm_surge_alerts.make_figure,
+                'args': (grids_15m, weather_path, coastline, tidal_predictions)
+            },
+            'PA_tidal_predictions': {
+                'function': pt_atkinson_tide.make_figure,
+                'args': (grid_T_hr, tidal_predictions, timezone)
+            },
+            'Vic_maxSSH': {
+                'function': compare_tide_prediction_max_ssh.make_figure,
+                'args': (
+                    'Victoria', grid_T_hr, grids_15m, bathy, weather_path,
+                    tidal_predictions, timezone)
+            },
+            'PA_maxSSH': {
+                'function': compare_tide_prediction_max_ssh.make_figure,
+                'args': (
+                    'Point Atkinson', grid_T_hr, grids_15m, bathy, weather_path,
+                    tidal_predictions, timezone)
+            },
+            'CR_maxSSH': {
+                'function': compare_tide_prediction_max_ssh.make_figure,
+                'args': (
+                    'Campbell River', grid_T_hr, grids_15m, bathy, weather_path,
+                    tidal_predictions, timezone)
+            },
+            'Nan_maxSSH': {
+                'function': compare_tide_prediction_max_ssh.make_figure,
+                'args': (
+                    'Nanaimo', grid_T_hr, grids_15m, bathy, weather_path,
+                    tidal_predictions, timezone)
+            },
+            'CP_maxSSH': {
+                'function': compare_tide_prediction_max_ssh.make_figure,
+                'args': (
+                    'Cherry Point', grid_T_hr, grids_15m, bathy, weather_path,
+                    tidal_predictions, timezone)
+            },
+            'NOAA_ssh': {
+                'function': figures.compare_water_levels,
+                'args': (grid_T_hr, bathy, grids_15m, coastline)
+            },
+            'WaterLevel_Thresholds': {
+                ## TODO: Fix hardcoded path in figure function:
+                ## '/data/nsoontie/MEOPAR/analysis/Nancy/tides/PA_observations/ptatkin_rt.dat'
+                'function': figures.plot_thresholds_all,
+                'args': (
+                    grid_T_hr, bathy, grids_15m, weather_path, coastline,
+                    tidal_predictions)
+            },
+            'SH_wind': {
+                'function': figures.Sandheads_winds,
+                'args': (grid_T_hr, bathy, weather_path, coastline)
+            },
+            'Avg_wind_vectors': {
+                'function': figures.winds_average_max,
+                'args': (grid_T_hr, bathy, weather_path, coastline),
+                'kwargs': {'station': 'all', 'wind_type': 'average'}
+            },
+            'Wind_vectors_at_max': {
+                ## TODO: Fix figures.py:840: FutureWarning:
+                ## elementwise comparison failed; returning scalar instead,
+                ## but in the future will perform elementwise comparison
+                'function': figures.winds_average_max,
+                'args': (grid_T_hr, bathy, weather_path, coastline),
+                'kwargs': {'station': 'all', 'wind_type': 'max'}
+            },
+        }
+
+    for svg_name, func in figs_info.items():
+        fig_func = func['function']
+        args = func.get('args', [])
+        kwargs = func.get('kwargs', {})
+        logger.debug(f'starting {fig_func.__module__}.{fig_func.__name__}')
+        try:
+            fig = fig_func(*args, **kwargs)
+        except FileNotFoundError as e:
+            if fig_func.__name__.endswith('salinity_ferry_route'):
+                logger.info(
+                    f'{args[3]} ferry route salinity comparison figure '
+                    f'failed: {e}')
+            else:
+                logger.info(exc_info=True)
+            continue
+        except IndexError:
+            adcp_plot_funcs = ('plotADCP', 'plotdepavADCP', 'plottimeavADCP')
+            if fig_func.__name__.endswith(adcp_plot_funcs):
+                logger.info(
+                    f'VENUS {args[3]} ADCP comparison figure failed: '
+                    f'No observations available')
+            else:
+                logger.info(exc_info=True)
+            continue
+        except KeyError:
+            if fig_func.__name__.endswith('salinity_ferry_route'):
+                logger.info(
+                    f'{args[3]} ferry route salinity comparison figure '
+                    f'failed: No observations found in .mat file')
+            else:
+                logger.info(exc_info=True)
+            continue
+        except TypeError:
+            if fig_func.__module__.endswith('compare_venus_ctd'):
+                logger.info(
+                    f'VENUS {args[0]} CTD comparison figure failed: '
+                    f'No observations available')
+            else:
+                logger.info(exc_info=True)
+            continue
+        filename = plots_dir/f'{svg_name}_{dmy}.svg'
+        fig.savefig(
+            os.fspath(filename), facecolor=fig.get_facecolor(),
+            bbox_inches='tight')
+        logger.info(f'{filename} saved')
 
 
 def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
@@ -195,245 +455,6 @@ def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
         shutil.copy2(os.fspath(plots_dir / dmy_thumbnail), undated_thumbnail)
         checklist['storm surge alerts thumbnail'] = undated_thumbnail
     return checklist
-
-
-def _make_publish_plots(
-    dmy, weather_path, bathy, results_dir, plots_dir, coastline,
-    tidal_predictions, timezone, **kwargs
-):
-    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
-    names = ['Point Atkinson', 'Victoria', 'Campbell River', 'Cherry Point',
-             'Friday Harbor', 'Neah Bay', 'Nanaimo', 'Sandheads']
-    filepath_tmpl = os.path.join(results_dir, '{}.nc')
-    grids_15m = {
-        name: nc.Dataset(filepath_tmpl.format(name.replace(' ', '')))
-        for name in names
-    }
-
-    logger.debug('starting storm_surge_alerts_thumbnail()')
-    fig = storm_surge_alerts_thumbnail.make_figure(
-        grids_15m, weather_path, coastline, tidal_predictions)
-    filename = plots_dir / f'Website_thumbnail_{dmy}.png'
-    fig.savefig(
-        os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info(f'{filename} saved')
-
-    logger.debug('starting storm_surge_alerts()')
-    fig = storm_surge_alerts.make_figure(
-        grids_15m, weather_path, coastline, tidal_predictions)
-    filename = plots_dir / f'Threshold_website_{dmy}.svg'
-    fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-    logger.info(f'{filename} saved')
-
-    logger.debug('starting pt_atkinson_tide()')
-    fig = pt_atkinson_tide.make_figure(grid_T_hr, tidal_predictions, timezone)
-    filename = plots_dir / f'PA_tidal_predictions_{dmy}.svg'
-    fig.savefig(
-        os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info(f'{filename} saved')
-
-    tide_gauge_stns = (
-        # stn name, figure filename prefix
-        ('Victoria', 'Vic_maxSSH'),
-        ('Point Atkinson', 'PA_maxSSH'),
-        ('Campbell River', 'CR_maxSSH'),
-        ('Nanaimo', 'Nan_maxSSH'),
-        ('Cherry Point', 'CP_maxSSH'),
-    )
-    for stn_name, fig_file_prefix in tide_gauge_stns:
-        logger.debug(
-            f'starting compare_tide_prediction_max_ssh() for {stn_name}')
-        fig = compare_tide_prediction_max_ssh.make_figure(
-            stn_name, grid_T_hr, grids_15m, bathy, weather_path,
-            tidal_predictions, timezone
-        )
-        filename = plots_dir / f'{fig_file_prefix}_{dmy}.svg'
-        fig.savefig(
-            os.fspath(filename), facecolor=fig.get_facecolor(),
-            bbox_inches='tight')
-        logger.info(f'{filename} saved')
-
-    logger.debug('starting figures.compare_water_levels()')
-    fig = figures.compare_water_levels(grid_T_hr, bathy, grids_15m, coastline)
-    filename = plots_dir / f'NOAA_ssh_{dmy}.svg'
-    fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-    logger.info(f'{filename} saved')
-
-    logger.debug('starting figures.plot_thresholds_all()')
-    fig = figures.plot_thresholds_all(
-        grid_T_hr, bathy, grids_15m, weather_path, coastline,
-        tidal_predictions)
-    filename = plots_dir / f'WaterLevel_Thresholds_{dmy}.svg'
-    fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-    logger.info(f'{filename} saved')
-
-    logger.debug('starting figures.Sandheads_winds()')
-    fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
-    filename = plots_dir / f'SH_wind_{dmy}.svg'
-    fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-    logger.info(f'{filename} saved')
-
-    logger.debug('starting figures.winds_average_max()')
-    fig = figures.winds_average_max(
-        grid_T_hr, bathy, weather_path, coastline,
-        station='all', wind_type='average')
-    filename = plots_dir / f'Avg_wind_vectors_{dmy}.svg'
-    fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-    logger.info(f'{filename} saved')
-
-    logger.debug('starting figures.winds_average_max()')
-    fig = figures.winds_average_max(
-        grid_T_hr, bathy, weather_path, coastline,
-        station='all', wind_type='max')
-    filename = plots_dir / f'Wind_vectors_at_max_{dmy}.svg'
-    fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-    logger.info(f'{filename} saved')
-
-
-def _make_comparisons_plots(
-    dmy, weather_path, bathy, results_dir, plots_dir, coastline,
-    timezone, mesh_mask, dev_mesh_mask, ferry_data_dir, dev_results_dir,
-    **kwargs
-):
-    """Make the plots we wish to look at for comparisons purposes.
-    """
-    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
-    dev_grid_T_hr = _results_dataset('1h', 'grid_T', dev_results_dir)
-
-    # Wind speed and direction at Sandheads
-    fig = figures.Sandheads_winds(grid_T_hr, bathy, weather_path, coastline)
-    filename = plots_dir / f'SH_wind_{dmy}.svg'
-    fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-    logger.info(f'{filename} saved')
-
-    # Ferry routes surface salinity
-    for ferry_route in ('HB_DB', 'TW_DP', 'TW_SB'):
-        try:
-            fig = research_ferries.salinity_ferry_route(
-                ferry_data_dir, grid_T_hr, bathy, ferry_route, dmy)
-            filename = os.path.join(
-                plots_dir, f'{ferry_route}_ferry_salinity_{dmy}.svg')
-            fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-            logger.info(f'{filename} saved')
-        except (KeyError, ValueError, FileNotFoundError) as e:
-            # Observations missing salinity data,
-            # or ferry data or run results (most likely the former)
-            # file not found,
-            # so abort plot creation
-            logger.debug(
-                f'ferry salinity comparison figure for {ferry_route} '
-                f'failed: {e}')
-
-    # VENUS bottom temperature and salinity
-    node_names = (
-        'East node', 'Central node', 'Delta BBL node', 'Delta DDL node')
-    for node_name in node_names:
-        try:
-            fig = compare_venus_ctd.make_figure(
-                node_name, grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
-                dev_mesh_mask
-            )
-            filename = os.path.join(
-                plots_dir,
-                f'Compare_VENUS_'
-                f'{node_name.rstrip(" node").replace(" ", "_")}_{dmy}.svg')
-            fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-            logger.info(f'{filename} saved')
-        except TypeError:
-            # Observations missing, so about figure creation
-            logger.debug(
-                f'VENUS {node_name} CTD comparison figure failed: No '
-                f'observations available')
-
-
-def _future_comparison_plots(
-    dmy, weather_path, bathy, results_dir, plots_dir, coastline, adcp_dir,
-    **kwargs
-):
-    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
-
-    venus_nodes = {
-        'Central': {
-            'grid_15m': nc.Dataset(
-                os.path.join(results_dir, 'VENUS_central_gridded.nc')),
-            'grid_obs': sio.loadmat(os.path.join(adcp_dir, 'ADCPcentral.mat')),
-        }
-    }
-    grid_c = _results_dataset_gridded('central', results_dir)
-    grid_e = _results_dataset_gridded('east', results_dir)
-    grid_d = _results_dataset_gridded('delta', results_dir)
-    grid_oc = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat')
-    grid_oe = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPeast.mat')
-    grid_od = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPddl.mat')
-
-    # ADCP plots
-    date = datetime.datetime.strptime(dmy, '%d%b%y')
-    date = date.replace(minute=45)
-    models = [grid_c, grid_e, grid_d]
-    obs = [grid_oc, grid_oe, grid_od]
-    names = ['Central', 'East', 'ddl']
-    dranges = [[0, 285], [0, 150], [0, 148]]
-    for model, obs, name, drange in zip(models, obs, names, dranges):
-        fig = research_VENUS.plotADCP(
-            model, obs, date, name, drange)
-        filename = plots_dir / f'{name}_ADCP_{dmy}.svg'
-        fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-        logger.info(f'{filename} saved')
-
-        fig = research_VENUS.plotdepavADCP(
-            model, obs, date, name)
-        filename = plots_dir / f'{name}_depavADCP_{dmy}.svg'
-        fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-        logger.info(f'{filename} saved')
-
-        fig = research_VENUS.plottimeavADCP(
-            model, obs, date, name)
-        filename = plots_dir / f'{name}_timeavADCP_{dmy}.svg'
-        fig.savefig(os.fspath(filename), facecolor=fig.get_facecolor())
-        logger.info(f'{filename} saved')
-
-
-def _make_research_plots(
-    dmy, weather_path, bathy, results_dir, plots_dir, coastline, mesh_mask,
-    **kwargs
-):
-    """Make the plots we wish to look at for research purposes.
-    """
-    grid_T_dy = _results_dataset('1d', 'grid_T', results_dir)
-    grid_U_dy = _results_dataset('1d', 'grid_U', results_dir)
-    grid_V_dy = _results_dataset('1d', 'grid_V', results_dir)
-    grid_c = _results_dataset_gridded('central', results_dir)
-    grid_e = _results_dataset_gridded('east', results_dir)
-
-    fig = figures.thalweg_salinity(grid_T_dy, mesh_mask, bathy)
-    filename = plots_dir / f'Salinity_on_thalweg_{dmy}.svg'
-    fig.savefig(
-        os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info(f'{filename} saved')
-
-    fig = figures.thalweg_temperature(grid_T_dy, mesh_mask, bathy)
-    filename = plots_dir / f'Temperature_on_thalweg_{dmy}.svg'
-    fig.savefig(
-        os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info(f'{filename} saved')
-
-    fig = figures.plot_surface(grid_T_dy, grid_U_dy, grid_V_dy, bathy)
-    filename = plots_dir / f'T_S_Currents_on_surface_{dmy}.svg'
-    fig.savefig(
-        os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info(f'{filename} saved')
-
-    fig = research_VENUS.plot_vel_NE_gridded('Central', grid_c)
-    filename = plots_dir / f'Currents_at_VENUS_Central_{dmy}.svg'
-    fig.savefig(
-        os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info(f'{filename} saved')
-
-    fig = research_VENUS.plot_vel_NE_gridded('East', grid_e)
-    filename = plots_dir / f'Currents_at_VENUS_East_{dmy}.svg'
-    fig.savefig(
-        os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches='tight')
-    logger.info(f'{filename} saved')
 
 
 def _results_dataset(period, grid, results_dir):
