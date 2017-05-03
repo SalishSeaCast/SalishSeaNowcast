@@ -80,7 +80,7 @@ rivers:
 
 ssh:
   # Directory containing tidal predication file for sea surface height correction
-  tidal predictions: /results/nowcast-sys/tools/SalishSeaNowcast/tidal_predictions/
+  tidal predictions: /results/nowcast-sys/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
   ssh dir: /results/forcing/sshNeahBay/
   # Template for the sea surface height forcing file name
