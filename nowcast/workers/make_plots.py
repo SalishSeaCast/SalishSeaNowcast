@@ -411,39 +411,10 @@ def _render_figures(
                 continue
         logger.debug(f'starting {fig_func.__module__}.{fig_func.__name__}')
         try:
-            fig = fig_func(*args, **kwargs)
-        except FileNotFoundError as e:
-            if fig_func.__name__.endswith('salinity_ferry_route'):
-                logger.info(
-                    f'{args[3]} ferry route salinity comparison figure '
-                    f'failed: {e}')
-            else:
-                logger.info(exc_info=True)
-            continue
-        except IndexError:
-            adcp_plot_funcs = ('plotADCP', 'plotdepavADCP', 'plottimeavADCP')
-            if fig_func.__name__.endswith(adcp_plot_funcs):
-                logger.info(
-                    f'VENUS {args[3]} ADCP comparison figure failed: '
-                    f'No observations available')
-            else:
-                logger.info(exc_info=True)
-            continue
-        except KeyError:
-            if fig_func.__name__.endswith('salinity_ferry_route'):
-                logger.info(
-                    f'{args[3]} ferry route salinity comparison figure '
-                    f'failed: No observations found in .mat file')
-            else:
-                logger.info(exc_info=True)
-            continue
-        except TypeError:
-            if fig_func.__module__.endswith('compare_venus_ctd'):
-                logger.info(
-                    f'VENUS {args[0]} CTD comparison figure failed: '
-                    f'No observations available')
-            else:
-                logger.info(exc_info=True)
+            fig = _calc_figure(fig_func, args, kwargs)
+        except (FileNotFoundError, IndexError, KeyError, TypeError):
+            # **IMPORTANT**: the collection of exception above must match those
+            # handled in the _calc_figure() function
             continue
         if test_figure:
             fig_files_dir = Path(config['figures']['test path'], run_type, dmy)
@@ -468,6 +439,45 @@ def _render_figures(
             checklist['storm surge alerts thumbnail'] = fig_path
     checklist[f'{run_type} {plot_type}'] = fig_files
     return checklist
+
+
+def _calc_figure(fig_func, args, kwargs):
+    try:
+        fig = fig_func(*args, **kwargs)
+    except FileNotFoundError as e:
+        if fig_func.__name__.endswith('salinity_ferry_route'):
+            logger.info(
+                f'{args[3]} ferry route salinity comparison figure '
+                f'failed: {e}')
+        else:
+            logger.info(exc_info=True)
+        raise
+    except IndexError:
+        adcp_plot_funcs = ('plotADCP', 'plotdepavADCP', 'plottimeavADCP')
+        if fig_func.__name__.endswith(adcp_plot_funcs):
+            logger.info(
+                f'VENUS {args[3]} ADCP comparison figure failed: '
+                f'No observations available')
+        else:
+            logger.info(exc_info=True)
+        raise
+    except KeyError:
+        if fig_func.__name__.endswith('salinity_ferry_route'):
+            logger.info(
+                f'{args[3]} ferry route salinity comparison figure '
+                f'failed: No observations found in .mat file')
+        else:
+            logger.info(exc_info=True)
+        raise
+    except TypeError:
+        if fig_func.__module__.endswith('compare_venus_ctd'):
+            logger.info(
+                f'VENUS {args[0]} CTD comparison figure failed: '
+                f'No observations available')
+        else:
+            logger.info(exc_info=True)
+        raise
+    return fig
 
 
 def _render_storm_surge_alerts_thumbnail(
