@@ -311,7 +311,8 @@ def _make_plot_files(
         fig_functions = {
             'Website_thumbnail': {
                 'function': storm_surge_alerts_thumbnail.make_figure,
-                'args': (grids_15m, weather_path, coastline, tidal_predictions)
+                'args': (grids_15m, weather_path, coastline, tidal_predictions),
+                'format': 'png'
             },
             'Threshold_website': {
                 'function': storm_surge_alerts.make_figure,
@@ -397,6 +398,7 @@ def _render_figures(
         fig_func = func['function']
         args = func.get('args', [])
         kwargs = func.get('kwargs', {})
+        fig_save_format = func.get('format', 'svg')
         if test_figure_id:
             test_figure = any((
                 svg_name == test_figure_id,
@@ -445,13 +447,12 @@ def _render_figures(
         if test_figure:
             fig_files_dir = Path(config['figures']['test path'], run_type, dmy)
             fig_files_dir.mkdir(parents=True, exist_ok=True)
-            filename = fig_files_dir / f'{svg_name}_{dmy}.svg'
         else:
             fig_files_dir = Path(
                 config['figures']['storage path'], run_type, dmy)
             lib.mkdir(
                 os.fspath(fig_files_dir), logger, grp_name=config['file group'])
-            filename = fig_files_dir / f'{svg_name}_{dmy}.svg'
+        filename = fig_files_dir / f'{svg_name}_{dmy}.{fig_save_format}'
         fig.savefig(
             os.fspath(filename), facecolor=fig.get_facecolor(),
             bbox_inches='tight')
@@ -462,19 +463,25 @@ def _render_figures(
         now = arrow.now()
         today_dmy = now.format('DDMMMYY').lower()
         yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
+        thumbnail_root = config['figures']['storm surge alerts thumbnail']
         if all((
                 plot_type == 'publish',
+                svg_name == thumbnail_root,
                 any((
                         run_type == 'forecast' and dmy == today_dmy,
                         run_type == 'forecast2' and dmy == yesterday_dmy,
                 ))
         )):
-            thumbnail_root = config['figures']['storm surge alerts thumbnail']
-            dmy_thumbnail = f'{thumbnail_root}_{dmy}.png'
-            dest_dir = Path(
-                config['figures']['storage path'],
-                config['figures']['storm surge info portal path'])
-            undated_thumbnail = dest_dir / f'{thumbnail_root}.png'
+            if test_figure:
+                dest_dir = Path(
+                    config['figures']['test path'],
+                    config['figures']['storm surge info portal path'])
+                dest_dir.mkdir(parents=True, exist_ok=True)
+            else:
+                dest_dir = Path(
+                    config['figures']['storage path'],
+                    config['figures']['storm surge info portal path'])
+            undated_thumbnail = dest_dir / f'{thumbnail_root}.{fig_save_format}'
             fig.savefig(
                 os.fspath(undated_thumbnail), facecolor=fig.get_facecolor(),
                 bbox_inches='tight')
