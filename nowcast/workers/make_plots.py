@@ -136,14 +136,10 @@ def _make_plot_files(
     if run_type in ['forecast', 'forecast2']:
         weather_path = os.path.join(weather_path, 'fcst/')
     results_dir = os.path.join(results_home, dmy)
-    dev_results_dir = os.path.join(dev_results_home, dmy)
     bathy = nc.Dataset(config['run types'][run_type]['bathymetry'])
-    coastline = sio.loadmat(config['figures']['coastline'])
     mesh_mask = nc.Dataset(config['run types'][run_type]['mesh mask'])
-    dev_mesh_mask = nc.Dataset(
-        config['run types']['nowcast-green']['mesh mask'])
-    tidal_predictions = config['ssh']['tidal predictions']
-    ferry_data_dir = config['observations']['ferry data']
+    dev_mesh_mask = nc.Dataset(config['run types']['nowcast-dev']['mesh mask'])
+    coastline = sio.loadmat(config['figures']['coastline'])
 
     if run_type == 'nowcast' and plot_type == 'research':
         grid_T_day = _results_dataset('1d', 'grid_T', results_dir)
@@ -152,7 +148,7 @@ def _make_plot_files(
         grid_central = _results_dataset_gridded('central', results_dir)
         grid_east = _results_dataset_gridded('east', results_dir)
 
-        figs_info = {
+        fig_functions = {
                 # svg_name
                 'Salinity_on_thalweg': {
                     'function': figures.thalweg_salinity,
@@ -183,6 +179,8 @@ def _make_plot_files(
             }
 
     if run_type == 'nowcast' and plot_type == 'comparison':
+        ferry_data_dir = config['observations']['ferry data']
+        dev_results_dir = os.path.join(dev_results_home, dmy)
         grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
         dev_grid_T_hr = _results_dataset('1h', 'grid_T', dev_results_dir)
         grid_central = _results_dataset_gridded('central', results_dir)
@@ -197,50 +195,46 @@ def _make_plot_files(
         adcp_datetime = (
             datetime.datetime.strptime(dmy, '%d%b%y').replace(minute=45))
 
-        figs_info = {
+        fig_functions = {
             'SH_wind': {
                 'function': figures.Sandheads_winds,
-                'args': (grid_T_hr, bathy, weather_path, coastline),
+                'args': (grid_T_hr, bathy, weather_path, coastline)
             },
             'Compare_VENUS_East': {
                 'function': compare_venus_ctd.make_figure,
                 'args': (
                     'East node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
-                    dev_mesh_mask
-                ),
+                    dev_mesh_mask)
             },
             'HB_DB_ferry_salinity': {
                 'function': research_ferries.salinity_ferry_route,
-                'args': (ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy),
+                'args': (ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy)
             },
             'TW_DP_ferry_salinity': {
                 'function': research_ferries.salinity_ferry_route,
-                'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_DP', dmy),
+                'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_DP', dmy)
             },
             'TW_SB_ferry_salinity': {
                 'function': research_ferries.salinity_ferry_route,
-                'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_SB', dmy),
+                'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_SB', dmy)
             },
             'Compare_VENUS_Central': {
                 'function': compare_venus_ctd.make_figure,
                 'args': (
-                    'Central node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
-                    dev_mesh_mask
-                ),
+                    'Central node', grid_T_hr, dev_grid_T_hr, timezone,
+                    mesh_mask, dev_mesh_mask)
             },
             'Compare_VENUS_Delta_BBL': {
                 'function': compare_venus_ctd.make_figure,
                 'args': (
-                    'Delta BBL node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
-                    dev_mesh_mask
-                ),
+                    'Delta BBL node', grid_T_hr, dev_grid_T_hr, timezone,
+                    mesh_mask, dev_mesh_mask)
             },
             'Compare_VENUS_Delta_DDL': {
                 'function': compare_venus_ctd.make_figure,
                 'args': (
-                    'Delta DDL node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
-                    dev_mesh_mask
-                ),
+                    'Delta DDL node', grid_T_hr, dev_grid_T_hr, timezone,
+                    mesh_mask, dev_mesh_mask)
             },
             'Central_ADCP': {
                 'function': research_VENUS.plotADCP,
@@ -286,6 +280,7 @@ def _make_plot_files(
         }
 
     if plot_type == 'publish':
+        tidal_predictions = config['ssh']['tidal predictions']
         grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
         names = [
             'Point Atkinson', 'Victoria', 'Campbell River', 'Cherry Point',
@@ -297,7 +292,7 @@ def _make_plot_files(
             for name in names
         }
 
-        figs_info = {
+        fig_functions = {
             # svg_name
             'Website_thumbnail': {
                 'function': storm_surge_alerts_thumbnail.make_figure,
@@ -372,7 +367,7 @@ def _make_plot_files(
             },
         }
 
-    for svg_name, func in figs_info.items():
+    for svg_name, func in fig_functions.items():
         fig_func = func['function']
         args = func.get('args', [])
         kwargs = func.get('kwargs', {})
