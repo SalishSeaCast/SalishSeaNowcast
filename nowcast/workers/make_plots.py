@@ -118,18 +118,18 @@ def make_plots(parsed_args, config, *args):
     plot_type = parsed_args.plot_type
     results_home = config['results archive'][run_type]
     dev_results_home = config['results archive']['nowcast-dev']
-    plots_dir = Path(results_home, dmy, 'figures')
-    lib.mkdir(os.fspath(plots_dir), logger, grp_name=config['file group'])
-    _make_plot_files(
+    fig_files_dir = Path(config['figures']['storage path'], run_type, dmy)
+    lib.mkdir(os.fspath(fig_files_dir), logger, grp_name=config['file group'])
+    checklist = _make_plot_files(
         config, run_type, plot_type, dmy, results_home, dev_results_home,
-        plots_dir)
-    checklist = _copy_plots_to_figures_server(
-        config, run_type, plot_type, dmy, plots_dir)
+        fig_files_dir
+    )
     return checklist
 
 
 def _make_plot_files(
-    config, run_type, plot_type, dmy, results_home, dev_results_home, plots_dir,
+    config, run_type, plot_type, dmy, results_home, dev_results_home,
+    fig_files_dir
 ):
     timezone = config['figures']['timezone']
     weather_path = config['weather']['ops dir']
@@ -149,34 +149,33 @@ def _make_plot_files(
         grid_east = _results_dataset_gridded('east', results_dir)
 
         fig_functions = {
-                # svg_name
-                'Salinity_on_thalweg': {
-                    'function': figures.thalweg_salinity,
-                    'args': (grid_T_day, mesh_mask, bathy),
-                    'kwargs': {'thalweg_pts_file':
-                               '/results/nowcast-sys/tools/bathymetry/'
-                               'thalweg_working.txt'}
-                },
-                'Temperature_on_thalweg': {
-                    'function': figures.thalweg_temperature,
-                    'args': (grid_T_day, mesh_mask, bathy),
-                    'kwargs': {'thalweg_pts_file':
-                               '/results/nowcast-sys/tools/bathymetry/'
-                               'thalweg_working.txt'}
-                },
-                'T_S_Currents_on_surface': {
-                    'function': figures.plot_surface,
-                    'args': (grid_T_day, grid_U_day, grid_V_day, bathy),
-                },
-                'Currents_at_VENUS_Central': {
-                    'function': research_VENUS.plot_vel_NE_gridded,
-                    'args': ('Central', grid_central),
-                },
-                'Currents_at_VENUS_East': {
-                    'function': research_VENUS.plot_vel_NE_gridded,
-                    'args': ('East', grid_east),
-                }
+            'Salinity_on_thalweg': {
+                'function': figures.thalweg_salinity,
+                'args': (grid_T_day, mesh_mask, bathy),
+                'kwargs': {'thalweg_pts_file':
+                           '/results/nowcast-sys/tools/bathymetry/'
+                           'thalweg_working.txt'}
+            },
+            'Temperature_on_thalweg': {
+                'function': figures.thalweg_temperature,
+                'args': (grid_T_day, mesh_mask, bathy),
+                'kwargs': {'thalweg_pts_file':
+                           '/results/nowcast-sys/tools/bathymetry/'
+                           'thalweg_working.txt'}
+            },
+            'T_S_Currents_on_surface': {
+                'function': figures.plot_surface,
+                'args': (grid_T_day, grid_U_day, grid_V_day, bathy),
+            },
+            'Currents_at_VENUS_Central': {
+                'function': research_VENUS.plot_vel_NE_gridded,
+                'args': ('Central', grid_central),
+            },
+            'Currents_at_VENUS_East': {
+                'function': research_VENUS.plot_vel_NE_gridded,
+                'args': ('East', grid_east),
             }
+        }
 
     if run_type == 'nowcast' and plot_type == 'comparison':
         ferry_data_dir = config['observations']['ferry data']
@@ -293,7 +292,6 @@ def _make_plot_files(
         }
 
         fig_functions = {
-            # svg_name
             'Website_thumbnail': {
                 'function': storm_surge_alerts_thumbnail.make_figure,
                 'args': (grids_15m, weather_path, coastline, tidal_predictions)
@@ -367,10 +365,16 @@ def _make_plot_files(
             },
         }
 
-    _render_figures(fig_functions, dmy, plots_dir)
+    checklist = _render_figures(config, run_type, plot_type, dmy, fig_functions,
+        fig_files_dir)
+    return checklist
 
 
-def _render_figures(fig_functions, dmy, plots_dir):
+def _render_figures(
+    config, run_type, plot_type, dmy, fig_functions, fig_files_dir
+):
+    checklist = {}
+    fig_files = []
     for svg_name, func in fig_functions.items():
         fig_func = func['function']
         args = func.get('args', [])
@@ -411,48 +415,38 @@ def _render_figures(fig_functions, dmy, plots_dir):
             else:
                 logger.info(exc_info=True)
             continue
-        filename = plots_dir / f'{svg_name}_{dmy}.svg'
+        filename = fig_files_dir / f'{svg_name}_{dmy}.svg'
         fig.savefig(
             os.fspath(filename), facecolor=fig.get_facecolor(),
             bbox_inches='tight')
+        lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
         logger.info(f'{filename} saved')
-
-
-def _copy_plots_to_figures_server(config, run_type, plot_type, dmy, plots_dir):
-    dest_dir = os.path.join(
-        config['figures']['storage path'], run_type, dmy)
-    lib.mkdir(dest_dir, logger, grp_name=config['file group'])
-    for f in plots_dir.glob('*'):
-        lib.fix_perms(os.fspath(f), grp_name=config['file group'])
-        try:
-            shutil.copy2(f, dest_dir)
-        except shutil.SameFileError:
-            # File was probably copied into destination directory
-            # by a prior run of the make_plots worker;
-            # e.g. nowcast research before publish
-            pass
-    checklist = {
-        ' '.join((run_type, plot_type)): glob(os.path.join(dest_dir, '*'))}
-    # Undated storm surge alerts thumbnail for storm-surge/index.html page
-    now = arrow.now()
-    today_dmy = now.format('DDMMMYY').lower()
-    yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
-    if all((
-            plot_type == 'publish',
-            any((
-                run_type == 'forecast' and dmy == today_dmy,
-                run_type == 'forecast2' and dmy == yesterday_dmy,
-            ))
-    )):
-        thumbnail_root = config['figures']['storm surge alerts thumbnail']
-        dmy_thumbnail = f'{thumbnail_root}_{dmy}.png'
-        dest_dir = os.path.join(
-            config['figures']['storage path'],
-            config['figures']['storm surge info portal path'])
-        undated_thumbnail = os.path.join(
-            dest_dir, f'{thumbnail_root}.png')
-        shutil.copy2(os.fspath(plots_dir / dmy_thumbnail), undated_thumbnail)
-        checklist['storm surge alerts thumbnail'] = undated_thumbnail
+        fig_files.append(filename)
+        # Undated storm surge alerts thumbnail for storm-surge/index.html page
+        now = arrow.now()
+        today_dmy = now.format('DDMMMYY').lower()
+        yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
+        if all((
+                plot_type == 'publish',
+                any((
+                        run_type == 'forecast' and dmy == today_dmy,
+                        run_type == 'forecast2' and dmy == yesterday_dmy,
+                ))
+        )):
+            thumbnail_root = config['figures']['storm surge alerts thumbnail']
+            dmy_thumbnail = f'{thumbnail_root}_{dmy}.png'
+            dest_dir = Path(
+                config['figures']['storage path'],
+                config['figures']['storm surge info portal path'])
+            undated_thumbnail = dest_dir / f'{thumbnail_root}.png'
+            fig.savefig(
+                os.fspath(undated_thumbnail), facecolor=fig.get_facecolor(),
+                bbox_inches='tight')
+            lib.fix_perms(
+                os.fspath(undated_thumbnail), grp_name=config['file group'])
+            logger.info(f'{undated_thumbnail} saved')
+            checklist['storm surge alerts thumbnail'] = undated_thumbnail
+    checklist[f'{run_type} {plot_type}'] = fig_files
     return checklist
 
 
