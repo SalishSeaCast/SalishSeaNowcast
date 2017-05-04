@@ -246,6 +246,9 @@ def _prep_comparison_fig_functions(config, bathy, coastline, weather_path,
         datetime.datetime.strptime(dmy, '%d%b%y').replace(minute=45))
     fig_functions = {
         'SH_wind': {
+            ## TODO: Fix stormtools.py:403: RuntimeWarning:
+            ##  invalid value encountered in less
+            ##  wind_dir = wind_dir + 360 * (wind_dir < 0)
             'function': figures.Sandheads_winds,
             'args': (grid_T_hr, bathy, weather_path, coastline)
         },
