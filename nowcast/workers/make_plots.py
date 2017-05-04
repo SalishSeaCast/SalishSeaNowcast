@@ -399,6 +399,7 @@ def _render_figures(
         args = func.get('args', [])
         kwargs = func.get('kwargs', {})
         fig_save_format = func.get('format', 'svg')
+        test_figure = False
         if test_figure_id:
             test_figure = any((
                 svg_name == test_figure_id,
