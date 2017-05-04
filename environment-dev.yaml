@@ -27,6 +27,7 @@ dependencies:
   - bottleneck
   - circus
   - cliff
+  - cmocean
   - dask
   - docutils
   - mako
