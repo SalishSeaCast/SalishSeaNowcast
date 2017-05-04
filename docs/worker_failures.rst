@@ -68,8 +68,8 @@ If a failure does occur the `info log file`_ will contain a :kbd:`CRITICAL` mess
 followed by the traceback from the error that caused the failure.
 The `debug log file`_ will show more details about the specific file downloads and will also include the :kbd:`CRITICAL` log message.
 
-.. _info log file: https://www.eoas.ubc.ca/~dlatorne/MEOPAR/nowcast/nowcast.log
-.. _debug log file: https://www.eoas.ubc.ca/~dlatorne/MEOPAR/nowcast/nowcast.debug.log
+.. _info log file: http://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
+.. _debug log file: http://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.debug.log
 
 In the rare event that the nowcast automation system fails to download the HRDPS products every 6 hours via the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker,
 it is critical that someone re-run that worker.
