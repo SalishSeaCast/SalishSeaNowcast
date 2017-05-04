@@ -367,6 +367,10 @@ def _make_plot_files(
             },
         }
 
+    _render_figures(fig_functions, dmy, plots_dir)
+
+
+def _render_figures(fig_functions, dmy, plots_dir):
     for svg_name, func in fig_functions.items():
         fig_func = func['function']
         args = func.get('args', [])
@@ -407,7 +411,7 @@ def _make_plot_files(
             else:
                 logger.info(exc_info=True)
             continue
-        filename = plots_dir/f'{svg_name}_{dmy}.svg'
+        filename = plots_dir / f'{svg_name}_{dmy}.svg'
         fig.savefig(
             os.fspath(filename), facecolor=fig.get_facecolor(),
             bbox_inches='tight')
