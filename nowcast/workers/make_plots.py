@@ -239,7 +239,7 @@ def _prep_comparison_fig_functions(config, bathy, coastline, weather_path,
     grid_east = _results_dataset_gridded('east', results_dir)
     grid_obs_east = sio.loadmat(
         '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPeast.mat')
-    grid_ddl = _results_dataset_gridded('ddl', results_dir)
+    grid_ddl = _results_dataset_gridded('delta', results_dir)
     grid_obs_ddl = sio.loadmat(
         '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPddl.mat')
     adcp_datetime = (
