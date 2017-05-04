@@ -13,6 +13,7 @@ cffi==1.9.1
 circus==0.14.0
 cliff==2.4.0
 cmd2==0.7.0
+cmocean==1.1
 contextlib2==0.5.5
 coverage==4.3.4
 cryptography==1.7.1
