@@ -460,39 +460,53 @@ def _render_figures(
         lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
         logger.info(f'{filename} saved')
         fig_files.append(os.fspath(filename))
-        # Undated storm surge alerts thumbnail for storm-surge/index.html page
-        now = arrow.now()
-        today_dmy = now.format('DDMMMYY').lower()
-        yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
-        thumbnail_root = config['figures']['storm surge alerts thumbnail']
-        if all((
-                plot_type == 'publish',
-                svg_name == thumbnail_root,
-                any((
-                        run_type == 'forecast' and dmy == today_dmy,
-                        run_type == 'forecast2' and dmy == yesterday_dmy,
-                ))
-        )):
-            if test_figure:
-                dest_dir = Path(
-                    config['figures']['test path'],
-                    config['figures']['storm surge info portal path'])
-                dest_dir.mkdir(parents=True, exist_ok=True)
-            else:
-                dest_dir = Path(
-                    config['figures']['storage path'],
-                    config['figures']['storm surge info portal path'])
-            undated_thumbnail = dest_dir / f'{thumbnail_root}.{fig_save_format}'
-            fig.savefig(
-                os.fspath(undated_thumbnail), facecolor=fig.get_facecolor(),
-                bbox_inches='tight')
-            lib.fix_perms(
-                os.fspath(undated_thumbnail), grp_name=config['file group'])
-            logger.info(f'{undated_thumbnail} saved')
-            checklist['storm surge alerts thumbnail'] = os.fspath(
-                undated_thumbnail)
+        fig_path = _render_storm_surge_alerts_thumbnail(
+            config, run_type, plot_type, dmy, fig, svg_name, fig_save_format,
+            test_figure
+        )
+        if checklist is not None:
+            checklist['storm surge alerts thumbnail'] = fig_path
     checklist[f'{run_type} {plot_type}'] = fig_files
     return checklist
+
+
+def _render_storm_surge_alerts_thumbnail(
+    config, run_type, plot_type, dmy, fig, svg_name, fig_save_format,
+    test_figure
+):
+    """Undated storm surge alerts thumbnail for storm-surge/index.html page
+    :param fig_save_format: 
+    """
+    now = arrow.now()
+    today_dmy = now.format('DDMMMYY').lower()
+    yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
+    thumbnail_root = config['figures']['storm surge alerts thumbnail']
+    if not all((
+            plot_type == 'publish',
+            svg_name == thumbnail_root,
+            any((
+                        run_type == 'forecast' and dmy == today_dmy,
+                        run_type == 'forecast2' and dmy == yesterday_dmy,
+            ))
+    )):
+        return
+    if test_figure:
+        dest_dir = Path(
+            config['figures']['test path'],
+            config['figures']['storm surge info portal path'])
+        dest_dir.mkdir(parents=True, exist_ok=True)
+    else:
+        dest_dir = Path(
+            config['figures']['storage path'],
+            config['figures']['storm surge info portal path'])
+    undated_thumbnail = dest_dir / f'{thumbnail_root}.{fig_save_format}'
+    fig.savefig(
+        os.fspath(undated_thumbnail), facecolor=fig.get_facecolor(),
+        bbox_inches='tight')
+    lib.fix_perms(
+        os.fspath(undated_thumbnail), grp_name=config['file group'])
+    logger.info(f'{undated_thumbnail} saved')
+    return os.fspath(undated_thumbnail)
 
 
 def _results_dataset(period, grid, results_dir):
