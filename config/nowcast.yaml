@@ -237,9 +237,13 @@ figures:
   # Timezone to use in model results figures
   ## TODO: Consider changing figures code to use arrow.to('local') as make_feeds worker does
   timezone: Canada/Pacific
-  # Directory behind the https://salishsea.eos.ubc.ca/nowcast-sys/figures/
-  # static web server that figure files are to be copied to and requested from
+  # Directory tree behind the https://salishsea.eos.ubc.ca/nowcast-sys/figures/
+  # static web server that figure files are to be stored in and requested from
   storage path: /results/nowcast-sys/figures/
+  # Directory tree behind the https://salishsea.eos.ubc.ca/nowcast-sys/figures/
+  # static web server that test figure files from `make_plots --test-figure`
+  # are to be stored in
+  test path: /results/nowcast-sys/figures/test/
   # Directory under storage path where most recent storm surge alerts thumbnail
   # image is stored
   storm surge info portal path: storm-surge/
