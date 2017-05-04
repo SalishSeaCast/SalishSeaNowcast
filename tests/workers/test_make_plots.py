@@ -55,6 +55,12 @@ class TestMain:
         assert kwargs['default'] == arrow.now().floor('day')
         assert 'help' in kwargs
 
+    def test_add_test_figure_arg(self, m_worker):
+        make_plots.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
+        assert args == ('--test-figure',)
+        assert 'help' in kwargs
+
     def test_run_worker(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker().run.call_args

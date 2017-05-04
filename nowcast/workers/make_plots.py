@@ -80,6 +80,24 @@ def main():
         '--run-date', default=arrow.now().floor('day'),
         help='Date of the run to symlink files for.'
     )
+    worker.cli.add_argument(
+        '--test-figure',
+        help='''Identifier for a single figure to do a test on.
+        The identifier may be the svg_name of the figure used in make_plots
+        (e.g. SH_wind is the svg_name of figures stored as SH_wind_{ddmmmyy}.svg),
+        the name of the website figure module
+        (e.g. storm_surge_alerts is the module name of 
+        nowcast.figures.publish.storm_surge_alerts),
+        or name of the figure function for legacy nowcast.figures.figures
+        functions
+        (e.g. Sandheads_winds is the function name of
+        nowcast.figures.figures.Sandheads_winds).
+        The figure will be rendered in
+        /results/nowcast-sys/figures/test/{run_type}/{ddmmmyy}/ so that it is
+        accessible in a browser at 
+        https://salishsea.eos.ubc.ca/{run_type}/{ddmmmyy}/{svg_name}_{ddmmyy}.svg
+        '''
+    )
     worker.run(make_plots, success, failure)
 
 
@@ -116,20 +134,19 @@ def make_plots(parsed_args, config, *args):
     dmy = run_date.format('DDMMMYY').lower()
     run_type = parsed_args.run_type
     plot_type = parsed_args.plot_type
+    test_figure_id = parsed_args.test_figure
     results_home = config['results archive'][run_type]
     dev_results_home = config['results archive']['nowcast-dev']
-    fig_files_dir = Path(config['figures']['storage path'], run_type, dmy)
-    lib.mkdir(os.fspath(fig_files_dir), logger, grp_name=config['file group'])
     checklist = _make_plot_files(
         config, run_type, plot_type, dmy, results_home, dev_results_home,
-        fig_files_dir
+        test_figure_id
     )
     return checklist
 
 
 def _make_plot_files(
     config, run_type, plot_type, dmy, results_home, dev_results_home,
-    fig_files_dir
+    test_figure_id
 ):
     timezone = config['figures']['timezone']
     weather_path = config['weather']['ops dir']
@@ -365,13 +382,14 @@ def _make_plot_files(
             },
         }
 
-    checklist = _render_figures(config, run_type, plot_type, dmy, fig_functions,
-        fig_files_dir)
+    checklist = _render_figures(
+        config, run_type, plot_type, dmy, fig_functions, test_figure_id
+    )
     return checklist
 
 
 def _render_figures(
-    config, run_type, plot_type, dmy, fig_functions, fig_files_dir
+    config, run_type, plot_type, dmy, fig_functions, test_figure_id
 ):
     checklist = {}
     fig_files = []
@@ -379,6 +397,15 @@ def _render_figures(
         fig_func = func['function']
         args = func.get('args', [])
         kwargs = func.get('kwargs', {})
+        if test_figure_id:
+            test_figure = any((
+                svg_name == test_figure_id,
+                fig_func.__module__.endswith(f'{plot_type}.{test_figure_id}'),
+                # legacy: for figures.figures module functions
+                fig_func.__name__ == test_figure_id,
+            ))
+            if not test_figure:
+                continue
         logger.debug(f'starting {fig_func.__module__}.{fig_func.__name__}')
         try:
             fig = fig_func(*args, **kwargs)
@@ -415,7 +442,16 @@ def _render_figures(
             else:
                 logger.info(exc_info=True)
             continue
-        filename = fig_files_dir / f'{svg_name}_{dmy}.svg'
+        if test_figure:
+            fig_files_dir = Path(config['figures']['test path'], run_type, dmy)
+            fig_files_dir.mkdir(parents=True, exist_ok=True)
+            filename = fig_files_dir / f'{svg_name}_{dmy}.svg'
+        else:
+            fig_files_dir = Path(
+                config['figures']['storage path'], run_type, dmy)
+            lib.mkdir(
+                os.fspath(fig_files_dir), logger, grp_name=config['file group'])
+            filename = fig_files_dir / f'{svg_name}_{dmy}.svg'
         fig.savefig(
             os.fspath(filename), facecolor=fig.get_facecolor(),
             bbox_inches='tight')
