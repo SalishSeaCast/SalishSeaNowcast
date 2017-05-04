@@ -459,7 +459,7 @@ def _render_figures(
             bbox_inches='tight')
         lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
         logger.info(f'{filename} saved')
-        fig_files.append(filename)
+        fig_files.append(os.fspath(filename))
         # Undated storm surge alerts thumbnail for storm-surge/index.html page
         now = arrow.now()
         today_dmy = now.format('DDMMMYY').lower()
@@ -489,7 +489,8 @@ def _render_figures(
             lib.fix_perms(
                 os.fspath(undated_thumbnail), grp_name=config['file group'])
             logger.info(f'{undated_thumbnail} saved')
-            checklist['storm surge alerts thumbnail'] = undated_thumbnail
+            checklist['storm surge alerts thumbnail'] = os.fspath(
+                undated_thumbnail)
     checklist[f'{run_type} {plot_type}'] = fig_files
     return checklist
 
