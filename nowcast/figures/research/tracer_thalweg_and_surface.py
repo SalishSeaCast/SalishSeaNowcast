@@ -31,7 +31,7 @@ import nowcast.figures.website_theme
 
 
 def make_figure(
-    tracer_var, bathy, lons, lats, mesh_mask, cmap,  depth_integrated,
+    tracer_var, bathy, mesh_mask, cmap, depth_integrated,
     figsize=(20, 12), theme=nowcast.figures.website_theme
 ):
     """Plot colour contours of tracer on a vertical slice along a section of 
@@ -43,13 +43,7 @@ def make_figure(
     :type tracer_var: :py:class:`netCDF4.Variable`
     
     :param bathy: Salish Sea NEMO model bathymetry data.
-    :type bathy: :py:class:`numpy.ndarray`
-
-    :param lons: Salish Sea NEMO model longitude grid data.
-    :type lons: :py:class:`numpy.ndarray`
-
-    :param lats: Salish Sea NEMO model latitude grid data.
-    :type lats: :py:class:`numpy.ndarray`
+    :type bathy: :class:`netCDF4.Dataset`
 
     :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
     :type mesh_mask: :class:`netCDF4.Dataset`
@@ -75,10 +69,9 @@ def make_figure(
         plot_data)
 
     cbar_thalweg = _plot_tracer_thalweg(
-        ax_thalweg, plot_data, bathy, lons, lats, mesh_mask, cmap,
-        clevels_thalweg)
+        ax_thalweg, plot_data, bathy, mesh_mask, cmap, clevels_thalweg)
     _thalweg_axes_labels(
-        ax_thalweg, tracer_var, show_thalweg_cbar, clevels_thalweg,
+        ax_thalweg, plot_data, show_thalweg_cbar, clevels_thalweg,
         cbar_thalweg, theme)
 
     cbar_surface = _plot_tracer_surface(
@@ -95,7 +88,7 @@ def _prep_plot_data(tracer_var, mesh_mask, depth_integrated):
     si, ei = 20, 370
     tracer_hr = tracer_var[hr]
     if depth_integrated:
-        grid_heights = mesh_mask.variables['e3t_0'][:][0].reshape(
+        grid_heights = mesh_mask.variables['e3t_1d'][:][0].reshape(
             tracer_hr.shape[0], 1, 1)
         height_weighted = tracer_hr[:, sj:ej, si:ei] * grid_heights
         surface_hr = height_weighted.sum(axis=0)
@@ -105,8 +98,13 @@ def _prep_plot_data(tracer_var, mesh_mask, depth_integrated):
         mesh_mask["tmask"][0, 0, sj:ej, si:ei] == 0, surface_hr)
 
     return SimpleNamespace(
+        tracer_var=tracer_var,
         tracer_hr=tracer_hr,
         surface_hr=surface_hr,
+        surface_j_limits=(sj, ej),
+        surface_i_limits=(si, ei),
+        thalweg_depth_limits=(0, 450),
+        thalweg_length_limits=(0, 590),
     )
 
 
@@ -161,12 +159,9 @@ def _calc_clevels(plot_data):
     return clevels_thalweg, clevels_surface, show_thalweg_cbar
 
 
-def _plot_tracer_thalweg(
-    ax, plot_data, bathy, lons, lats, mesh_mask, cmap, clevels
-):
+def _plot_tracer_thalweg(ax, plot_data, bathy, mesh_mask, cmap, clevels):
     cbar = vis.contour_thalweg(
-        ax, plot_data.tracer_hr, bathy, lons, lats, mesh_mask,
-        'gdept', clevels=clevels, cmap=cmap,
+        ax, plot_data.tracer_hr, bathy, mesh_mask, clevels=clevels, cmap=cmap,
         thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working'
                      '.txt',
         cbar_args={'fraction': 0.030, 'pad': 0.04, 'aspect': 45}
@@ -175,12 +170,14 @@ def _plot_tracer_thalweg(
 
 
 def _thalweg_axes_labels(
-    ax, tracer_var, show_thalweg_cbar, clevels, cbar, theme
+    ax, plot_data, show_thalweg_cbar, clevels, cbar, theme
 ):
-    ax.set_xlim(0, 590)
-    ax.set_ylim(450, 0)
+    ax.set_xlim(plot_data.thalweg_length_limits)
+    ax.set_ylim(
+        plot_data.thalweg_depth_limits[1], plot_data.thalweg_depth_limits[0])
     if show_thalweg_cbar:
-        label = f'{tracer_var.long_name} [{tracer_var.units}]'
+        label = (
+            f'{plot_data.tracer_var.long_name} [{plot_data.tracer_var.units}]')
         _cbar_labels(cbar, clevels[::2], theme, label)
     else:
         cbar.remove()
@@ -204,7 +201,8 @@ def _cbar_labels(cbar, contour_intervals, theme, label):
 
 def _plot_tracer_surface(ax, plot_data, cmap, clevels):
     x, y = np.meshgrid(
-        np.arange(20, 370, dtype=int), np.arange(200, 770, dtype=int))
+        np.arange(*plot_data.surface_i_limits, dtype=int),
+        np.arange(*plot_data.surface_j_limits, dtype=int))
     mesh = ax.contourf(
         x, y, plot_data.surface_hr, levels=clevels, cmap=cmap, extend='both')
     cbar = plt.colorbar(mesh, ax=ax, fraction=0.034, pad=0.04, aspect=45)
