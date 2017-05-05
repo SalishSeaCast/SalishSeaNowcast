@@ -31,6 +31,20 @@ They are here because we have learned the hard way that figure generation code q
 Please follow the methodology in this section,
 but do feel free to discuss it with the group so that we can try to improve.
 
+The `DevelopTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` was used to develop our example figure module's functions.
+You can take that approach if you wish,
+or you can develop directly in a module.
+
+.. _DevelopTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
+
+Of course,
+the ultimate goal is to produce a module.
+Once you've got a code module,
+you should create a notebook that tests it in the nowcast context.
+The `TestTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` is an example for the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module.
+
+.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurfaceModule.ipynb
+
 
 Example Module
 ==============
@@ -73,7 +87,7 @@ and then we'll look at each section in detail.
 
 
     def make_figure(
-        tracer_var, bathy, lons, lats, mesh_mask, cmap,  depth_integrated,
+        tracer_var, bathy, mesh_mask, cmap, depth_integrated,
         figsize=(20, 12), theme=nowcast.figures.website_theme
     ):
         """Plot colour contours of tracer on a vertical slice along a section of
@@ -85,13 +99,7 @@ and then we'll look at each section in detail.
         :type tracer_var: :py:class:`netCDF4.Variable`
 
         :param bathy: Salish Sea NEMO model bathymetry data.
-        :type bathy: :py:class:`numpy.ndarray`
-
-        :param lons: Salish Sea NEMO model longitude grid data.
-        :type lons: :py:class:`numpy.ndarray`
-
-        :param lats: Salish Sea NEMO model latitude grid data.
-        :type lats: :py:class:`numpy.ndarray`
+        :type bathy: :class:`netCDF4.Dataset`
 
         :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
         :type mesh_mask: :class:`netCDF4.Dataset`
@@ -117,10 +125,9 @@ and then we'll look at each section in detail.
             plot_data)
 
         cbar_thalweg = _plot_tracer_thalweg(
-            ax_thalweg, plot_data, bathy, lons, lats, mesh_mask, cmap,
-            clevels_thalweg)
+            ax_thalweg, plot_data, bathy, mesh_mask, cmap, clevels_thalweg)
         _thalweg_axes_labels(
-            ax_thalweg, tracer_var, show_thalweg_cbar, clevels_thalweg,
+            ax_thalweg, plot_data, show_thalweg_cbar, clevels_thalweg,
             cbar_thalweg, theme)
 
         cbar_surface = _plot_tracer_surface(
@@ -137,7 +144,7 @@ and then we'll look at each section in detail.
         si, ei = 20, 370
         tracer_hr = tracer_var[hr]
         if depth_integrated:
-            grid_heights = mesh_mask.variables['e3t_0'][:][0].reshape(
+            grid_heights = mesh_mask.variables['e3t_1d'][:][0].reshape(
                 tracer_hr.shape[0], 1, 1)
             height_weighted = tracer_hr[:, sj:ej, si:ei] * grid_heights
             surface_hr = height_weighted.sum(axis=0)
@@ -147,8 +154,13 @@ and then we'll look at each section in detail.
             mesh_mask["tmask"][0, 0, sj:ej, si:ei] == 0, surface_hr)
 
         return SimpleNamespace(
+            tracer_var=tracer_var,
             tracer_hr=tracer_hr,
             surface_hr=surface_hr,
+            surface_j_limits=(sj, ej),
+            surface_i_limits=(si, ei),
+            thalweg_depth_limits=(0, 450),
+            thalweg_length_limits=(0, 590),
         )
 
 
@@ -203,12 +215,9 @@ and then we'll look at each section in detail.
         return clevels_thalweg, clevels_surface, show_thalweg_cbar
 
 
-    def _plot_tracer_thalweg(
-        ax, plot_data, bathy, lons, lats, mesh_mask, cmap, clevels
-    ):
+    def _plot_tracer_thalweg(ax, plot_data, bathy, mesh_mask, cmap, clevels):
         cbar = vis.contour_thalweg(
-            ax, plot_data.tracer_hr, bathy, lons, lats, mesh_mask,
-            'gdept', clevels=clevels, cmap=cmap,
+            ax, plot_data.tracer_hr, bathy, mesh_mask, clevels=clevels, cmap=cmap,
             thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working'
                          '.txt',
             cbar_args={'fraction': 0.030, 'pad': 0.04, 'aspect': 45}
@@ -217,12 +226,14 @@ and then we'll look at each section in detail.
 
 
     def _thalweg_axes_labels(
-        ax, tracer_var, show_thalweg_cbar, clevels, cbar, theme
+        ax, plot_data, show_thalweg_cbar, clevels, cbar, theme
     ):
-        ax.set_xlim(0, 590)
-        ax.set_ylim(450, 0)
+        ax.set_xlim(plot_data.thalweg_length_limits)
+        ax.set_ylim(
+            plot_data.thalweg_depth_limits[1], plot_data.thalweg_depth_limits[0])
         if show_thalweg_cbar:
-            label = f'{tracer_var.long_name} [{tracer_var.units}]'
+            label = (
+                f'{plot_data.tracer_var.long_name} [{plot_data.tracer_var.units}]')
             _cbar_labels(cbar, clevels[::2], theme, label)
         else:
             cbar.remove()
@@ -246,7 +257,8 @@ and then we'll look at each section in detail.
 
     def _plot_tracer_surface(ax, plot_data, cmap, clevels):
         x, y = np.meshgrid(
-            np.arange(20, 370, dtype=int), np.arange(200, 770, dtype=int))
+            np.arange(*plot_data.surface_i_limits, dtype=int),
+            np.arange(*plot_data.surface_j_limits, dtype=int))
         mesh = ax.contourf(
             x, y, plot_data.surface_hr, levels=clevels, cmap=cmap, extend='both')
         cbar = plt.colorbar(mesh, ax=ax, fraction=0.034, pad=0.04, aspect=45)
@@ -270,7 +282,6 @@ and then we'll look at each section in detail.
         ax.set_axis_bgcolor('burlywood')
         viz_tools.set_aspect(ax)
         theme.set_axis_colors(ax)
-
 
 .. note::
 
@@ -372,7 +383,6 @@ Next come the imports:
     from salishsea_tools import visualisations as vis
     from salishsea_tools import viz_tools
 
-    import nowcast.figures.shared
     import nowcast.figures.website_theme
 
 The Python standard library imports,
@@ -410,9 +420,8 @@ It is also the module's only :ref:`public function <LibraryCodePublicAndPrivate>
 .. code-block:: python
 
     def make_figure(
-        tracer_var, bathy, lons, lats, mesh_mask, coastline, cmap,
-        depth_integrated, figsize=(20, 12),
-        theme=nowcast.figures.website_theme
+        tracer_var, bathy, mesh_mask, cmap, depth_integrated,
+        figsize=(20, 12), theme=nowcast.figures.website_theme
     ):
         """Plot colour contours of tracer on a vertical slice along a section of
         the domain thalweg,
@@ -423,19 +432,10 @@ It is also the module's only :ref:`public function <LibraryCodePublicAndPrivate>
         :type tracer_var: :py:class:`netCDF4.Variable`
 
         :param bathy: Salish Sea NEMO model bathymetry data.
-        :type bathy: :py:class:`numpy.ndarray`
-
-        :param lons: Salish Sea NEMO model longitude grid data.
-        :type lons: :py:class:`numpy.ndarray`
-
-        :param lats: Salish Sea NEMO model latitude grid data.
-        :type lats: :py:class:`numpy.ndarray`
+        :type bathy: :class:`netCDF4.Dataset`
 
         :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
         :type mesh_mask: :class:`netCDF4.Dataset`
-
-        :param coastline: Coastline dataset.
-        :type coastline: :class:`mat.Dataset`
 
         :param cmap: Colour map to use for tracer_var contour plots.
         :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
@@ -458,10 +458,9 @@ It is also the module's only :ref:`public function <LibraryCodePublicAndPrivate>
             plot_data)
 
         cbar_thalweg = _plot_tracer_thalweg(
-            ax_thalweg, plot_data, bathy, lons, lats, mesh_mask, cmap,
-            clevels_thalweg)
+            ax_thalweg, plot_data, bathy, mesh_mask, cmap, clevels_thalweg)
         _thalweg_axes_labels(
-            ax_thalweg, tracer_var, show_thalweg_cbar, clevels_thalweg,
+            ax_thalweg, plot_data, show_thalweg_cbar, clevels_thalweg,
             cbar_thalweg, theme)
 
         cbar_surface = _plot_tracer_surface(
@@ -480,10 +479,10 @@ The function signature
 .. code-block:: python
 
     def make_figure(
-        tracer_grid, bathy, lons, lats, mesh_mask, coastline, cmap,
-        depth_integrated=True, figsize=(20, 12),
-        theme=nowcast.figures.website_theme
+        tracer_var, bathy, mesh_mask, cmap, depth_integrated,
+        figsize=(20, 12), theme=nowcast.figures.website_theme
     ):
+
 
 should use model results dataset objects rather than file names so that the datasets are loaded once by the :py:mod:`nowcast.workers.make_plots` worker and references to them passed into the figure creation functions.
 
@@ -514,19 +513,10 @@ The function docstring
     :type tracer_var: :py:class:`netCDF4.Variable`
 
     :param bathy: Salish Sea NEMO model bathymetry data.
-    :type bathy: :py:class:`numpy.ndarray`
-
-    :param lons: Salish Sea NEMO model longitude grid data.
-    :type lons: :py:class:`numpy.ndarray`
-
-    :param lats: Salish Sea NEMO model latitude grid data.
-    :type lats: :py:class:`numpy.ndarray`
+    :type bathy: :class:`netCDF4.Dataset`
 
     :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
     :type mesh_mask: :class:`netCDF4.Dataset`
-
-    :param coastline: Coastline dataset.
-    :type coastline: :class:`mat.Dataset`
 
     :param cmap: Colour map to use for tracer_var contour plots.
     :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
@@ -542,6 +532,7 @@ The function docstring
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
+
 
 includes description and type information for each of the function arguments.
 Those are written using `Sphinx Info Field List markup`_ so that they render nicely in the :ref:`automatically generated module documentation <AutomaticModuleDocumentationGeneration>`.
@@ -607,10 +598,9 @@ The function code does 4 things:
             plot_data)
 
         cbar_thalweg = _plot_tracer_thalweg(
-            ax_thalweg, plot_data, bathy, lons, lats, mesh_mask, cmap,
-            clevels_thalweg)
+            ax_thalweg, plot_data, bathy, mesh_mask, cmap, clevels_thalweg)
         _thalweg_axes_labels(
-            ax_thalweg, tracer_var, show_thalweg_cbar, clevels_thalweg,
+            ax_thalweg, plot_data, show_thalweg_cbar, clevels_thalweg,
             cbar_thalweg, theme)
 
         cbar_surface = _plot_tracer_surface(
@@ -618,6 +608,7 @@ The function code does 4 things:
         _surface_axes_labels(
             ax_surface, tracer_var, depth_integrated, clevels_surface, cbar_surface,
             theme)
+
 
    In :py:mod:`~nowcast.figures.research.tracer_thalweg_and_surface` we have an extra :py:func:`_calc_clevels` function that calculates contour levels for the two axes and decides whether whether the levels are similar enough that one colour bar is sufficient for the figure,
    or if each axes requires one.
@@ -650,7 +641,7 @@ and any calculations that are required should be done in :py:func:`_prep_plot_da
         si, ei = 20, 370
         tracer_hr = tracer_var[hr]
         if depth_integrated:
-            grid_heights = mesh_mask.variables['e3t_0'][:][0].reshape(
+            grid_heights = mesh_mask.variables['e3t_1d'][:][0].reshape(
                 tracer_hr.shape[0], 1, 1)
             height_weighted = tracer_hr[:, sj:ej, si:ei] * grid_heights
             surface_hr = height_weighted.sum(axis=0)
@@ -660,8 +651,13 @@ and any calculations that are required should be done in :py:func:`_prep_plot_da
             mesh_mask["tmask"][0, 0, sj:ej, si:ei] == 0, surface_hr)
 
         return SimpleNamespace(
+            tracer_var=tracer_var,
             tracer_hr=tracer_hr,
             surface_hr=surface_hr,
+            surface_j_limits=(sj, ej),
+            surface_i_limits=(si, ei),
+            thalweg_depth_limits=(0, 450),
+            thalweg_length_limits=(0, 590),
         )
 
 :py:func:`_prep_plot_data` should return a :py:obj:`types.SimpleNamespace`
@@ -748,12 +744,9 @@ The :py:func:`_plot_tracer_thalweg` function in our example plots colour contour
 
 .. code-block:: python
 
-      def _plot_tracer_thalweg(
-          ax, plot_data, bathy, lons, lats, mesh_mask, cmap, clevels
-      ):
+      def _plot_tracer_thalweg(ax, plot_data, bathy, mesh_mask, cmap, clevels):
           cbar = vis.contour_thalweg(
-              ax, plot_data.tracer_hr, bathy, lons, lats, mesh_mask,
-              'gdept', clevels=clevels, cmap=cmap,
+              ax, plot_data.tracer_hr, bathy, mesh_mask, clevels=clevels, cmap=cmap,
               thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working'
                            '.txt',
               cbar_args={'fraction': 0.030, 'pad': 0.04, 'aspect': 45}
@@ -766,12 +759,14 @@ It returns the :py:obj:`cbar` colour bar object for a separate :py:func:`_thalwe
 .. code-block:: python
 
     def _thalweg_axes_labels(
-        ax, tracer_var, show_thalweg_cbar, clevels, cbar, theme
+        ax, plot_data, show_thalweg_cbar, clevels, cbar, theme
     ):
-        ax.set_xlim(0, 590)
-        ax.set_ylim(450, 0)
+        ax.set_xlim(plot_data.thalweg_length_limits)
+        ax.set_ylim(
+            plot_data.thalweg_depth_limits[1], plot_data.thalweg_depth_limits[0])
         if show_thalweg_cbar:
-            label = f'{tracer_var.long_name} [{tracer_var.units}]'
+            label = (
+                f'{plot_data.tracer_var.long_name} [{plot_data.tracer_var.units}]')
             _cbar_labels(cbar, clevels[::2], theme, label)
         else:
             cbar.remove()
@@ -814,7 +809,8 @@ The :py:func:`_plot_tracer_surface` function is an example of horizontal layer c
 
     def _plot_tracer_surface(ax, plot_data, cmap, clevels):
         x, y = np.meshgrid(
-            np.arange(20, 370, dtype=int), np.arange(200, 770, dtype=int))
+            np.arange(*plot_data.surface_i_limits, dtype=int),
+            np.arange(*plot_data.surface_j_limits, dtype=int))
         mesh = ax.contourf(
             x, y, plot_data.surface_hr, levels=clevels, cmap=cmap, extend='both')
         cbar = plt.colorbar(mesh, ax=ax, fraction=0.034, pad=0.04, aspect=45)
