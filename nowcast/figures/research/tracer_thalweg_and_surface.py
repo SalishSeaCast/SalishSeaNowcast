@@ -86,16 +86,17 @@ def _prep_plot_data(tracer_var, mesh_mask, depth_integrated):
     hr = 19
     sj, ej = 200, 770
     si, ei = 20, 370
+
     tracer_hr = tracer_var[hr]
+    masked_tracer_hr = np.ma.masked_where(
+        mesh_mask['tmask'][0, ...] == 0, tracer_hr)
+    surface_hr = masked_tracer_hr[0, sj:ej, si:ei]
+
     if depth_integrated:
         grid_heights = mesh_mask.variables['e3t_1d'][:][0].reshape(
             tracer_hr.shape[0], 1, 1)
-        height_weighted = tracer_hr[:, sj:ej, si:ei] * grid_heights
+        height_weighted = masked_tracer_hr[:, sj:ej, si:ei] * grid_heights
         surface_hr = height_weighted.sum(axis=0)
-    else:
-        surface_hr = tracer_hr[0, sj:ej, si:ei]
-    surface_hr = np.ma.masked_where(
-        mesh_mask["tmask"][0, 0, sj:ej, si:ei] == 0, surface_hr)
 
     return SimpleNamespace(
         tracer_var=tracer_var,
