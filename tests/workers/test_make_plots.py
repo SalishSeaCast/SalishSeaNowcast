@@ -38,7 +38,8 @@ class TestMain:
         make_plots.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('run_type',)
-        assert kwargs['choices'] == {'nowcast', 'forecast', 'forecast2'}
+        assert kwargs['choices'] == {
+            'nowcast', 'nowcast-green', 'forecast', 'forecast2'}
         assert 'help' in kwargs
 
     def test_add_plot_type_arg(self, m_worker):

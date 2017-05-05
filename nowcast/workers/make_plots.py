@@ -21,27 +21,33 @@ from glob import glob
 import logging
 import os
 from pathlib import Path
-import shutil
+
+# **IMPORTANT**: matplotlib must be imported before anything else that uses it
+# because of the matplotlib.use() call below
+import matplotlib
+## TODO: Get rid of matplotlib.use() call; see issue #19
+matplotlib.use('Agg')
 
 import arrow
-import matplotlib
-matplotlib.use('Agg')
+import cmocean
 from nemo_nowcast import NowcastWorker
 import netCDF4 as nc
 import scipy.io as sio
 
 from nowcast import lib
-from nowcast.figures import (
-    figures,
-    research_VENUS,
-    research_ferries,
-)
+from nowcast.figures.research import tracer_thalweg_and_surface
 from nowcast.figures.comparison import compare_venus_ctd
 from nowcast.figures.publish import (
     pt_atkinson_tide,
     storm_surge_alerts,
     storm_surge_alerts_thumbnail,
     compare_tide_prediction_max_ssh,
+)
+# Legacy figures code
+from nowcast.figures import (
+    figures,
+    research_VENUS,
+    research_ferries,
 )
 
 
@@ -59,12 +65,14 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'run_type', choices={'nowcast', 'forecast', 'forecast2'},
+        'run_type',
+        choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
         help='''
-        Type of run to symlink files for:
-        'nowcast+' means nowcast & 1st forecast runs,
-        'forecast2' means 2nd forecast run,
-        'ssh' means Neah Bay sea surface height files only (for forecast run).
+        Type of run to produce plots for:
+        'nowcast' means nowcast physics-only runs,
+        'nowcast-green' means nowcast-green physics/biology runs
+        'forecast' means forecast physics-only runs,
+        'forecast2' means forecast2 preliminary forecast physics-only runs.
         ''',
     )
     worker.cli.add_argument(
@@ -147,9 +155,11 @@ def make_plots(parsed_args, config, *args):
     coastline = sio.loadmat(config['figures']['coastline'])
 
     if run_type == 'nowcast' and plot_type == 'research':
-        fig_functions = _prep_research_fig_functions(
-            bathy, mesh_mask, results_dir
-        )
+        fig_functions = _prep_nowcast_research_fig_functions(
+            bathy, mesh_mask, results_dir)
+    if run_type == 'nowcast-green' and plot_type == 'research':
+        fig_functions = _prep_nowcast_green_research_fig_functions(
+            bathy, mesh_mask, results_dir)
     if run_type == 'nowcast' and plot_type == 'comparison':
         fig_functions = _prep_comparison_fig_functions(
             config, bathy, coastline, weather_path, mesh_mask, dev_mesh_mask,
@@ -186,7 +196,7 @@ def _results_dataset_gridded(station, results_dir):
     return nc.Dataset(filepaths[0])
 
 
-def _prep_research_fig_functions(bathy, mesh_mask, results_dir):
+def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir):
     grid_T_day = _results_dataset('1d', 'grid_T', results_dir)
     grid_U_day = _results_dataset('1d', 'grid_U', results_dir)
     grid_V_day = _results_dataset('1d', 'grid_V', results_dir)
@@ -223,6 +233,18 @@ def _prep_research_fig_functions(bathy, mesh_mask, results_dir):
             'function': research_VENUS.plot_vel_NE_gridded,
             'args': ('East', grid_east),
         }
+    }
+    return fig_functions
+
+
+def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
+    ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
+    fig_functions = {
+        'nitrate_thalweg_and_surface': {
+            'function': tracer_thalweg_and_surface.make_figure,
+            'args': (ptrc_T_hr.variables['NO3'], bathy, mesh_mask),
+            'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False}
+        },
     }
     return fig_functions
 

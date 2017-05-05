@@ -821,6 +821,8 @@ message registry:
       failure nowcast publish: nowcast publish plots failed
       failure nowcast research: nowcast research plots failed
       failure nowcast comparison: nowcast comparison plots failed
+      success nowcast-green research: nowcast-green reseach plots produced
+      failure nowcast-green research: nowcast-green research plots failed
       success forecast publish: forecast publish plots produced
       failure forecast publish: forecast publish plots failed
       success forecast2 publish: forecast2 publish plots produced
