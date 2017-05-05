@@ -64,5 +64,5 @@ snowballstemmer==1.2.1
 Sphinx==1.5.4
 sphinx-rtd-theme==0.2.4
 stevedore==1.17.1
-tornado==4.4.2
+tornado==4.5.1
 xarray==0.9.3
