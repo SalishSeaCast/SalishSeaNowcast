@@ -20,6 +20,7 @@ facility where the run will be executed.
 """
 import logging
 import os
+from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
@@ -87,18 +88,18 @@ def upload_forcing(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    ssh_key = os.path.join(
+    ssh_key = Path(
         os.environ['HOME'], '.ssh',
         config['run']['enabled hosts'][host_name]['ssh key'])
     host_run_config = config['run'][host_name]
-    ssh_client, sftp_client = lib.sftp(host_name, ssh_key)
+    ssh_client, sftp_client = lib.sftp(host_name, os.fspath(ssh_key))
     # Neah Bay sea surface height
     for day in range(-1, 3):
         filename = config['ssh']['file template'].format(
             run_date.replace(days=day).date())
         dest_dir = 'obs' if day == -1 else 'fcst'
-        localpath = os.path.join(config['ssh']['ssh dir'], dest_dir, filename)
-        remotepath = os.path.join(
+        localpath = Path(config['ssh']['ssh dir'], dest_dir, filename)
+        remotepath = Path(
             host_run_config['forcing']['ssh dir'], dest_dir, filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
@@ -107,8 +108,8 @@ def upload_forcing(parsed_args, config, *args):
                 raise
             # obs file does not exist, to create symlink to corresponding
             # forecast file
-            fcst = os.path.join(config['ssh']['ssh dir'], 'fcst', filename)
-            os.symlink(fcst, localpath)
+            fcst = Path(config['ssh']['ssh dir'], 'fcst', filename)
+            fcst.symlink_to(localpath)
             logger.warning(
                 f'ssh obs file not found; created symlink to {fcst}',
                 extra={
@@ -128,9 +129,8 @@ def upload_forcing(parsed_args, config, *args):
     # Rivers runoff
     for tmpl in config['rivers']['file templates'].values():
         filename = tmpl.format(run_date.replace(days=-1).date())
-        localpath = os.path.join(config['rivers']['rivers dir'], filename)
-        remotepath = os.path.join(
-            host_run_config['forcing']['rivers dir'], filename)
+        localpath = Path(config['rivers']['rivers dir'], filename)
+        remotepath = Path(host_run_config['forcing']['rivers dir'], filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Weather
     if run_type == 'nowcast+':
@@ -141,9 +141,9 @@ def upload_forcing(parsed_args, config, *args):
         filename = config['weather']['file template'].format(
             run_date.replace(days=day).date())
         dest_dir = '' if day == 0 else 'fcst'
-        localpath = os.path.join(
+        localpath = Path(
             config['weather']['ops dir'], dest_dir, filename)
-        remotepath = os.path.join(
+        remotepath = Path(
             host_run_config['forcing']['weather dir'], dest_dir, filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Live Ocean Boundary Conditions
@@ -151,9 +151,9 @@ def upload_forcing(parsed_args, config, *args):
         filename = config['temperature salinity']['file template'].format(
             run_date.replace(days=day).date())
         dest_dir = '' if day == 0 else 'fcst'
-        localpath = os.path.join(
+        localpath = Path(
             config['temperature salinity']['bc dir'], dest_dir, filename)
-        remotepath = os.path.join(
+        remotepath = Path(
             host_run_config['forcing']['bc dir'], dest_dir, filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     sftp_client.close()
@@ -166,8 +166,8 @@ def upload_forcing(parsed_args, config, *args):
 
 
 def _upload_file(sftp_client, host_name, localpath, remotepath):
-    sftp_client.put(localpath, remotepath)
-    sftp_client.chmod(remotepath, lib.PERMS_RW_RW_R)
+    sftp_client.put(os.fspath(localpath), os.fspath(remotepath))
+    sftp_client.chmod(os.fspath(remotepath), lib.PERMS_RW_RW_R)
     logger.debug(
         f'{localpath} uploaded to {host_name} at {remotepath}')
 
