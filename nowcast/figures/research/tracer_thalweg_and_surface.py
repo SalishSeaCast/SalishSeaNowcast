@@ -129,13 +129,13 @@ def _calc_clevels(plot_data):
     the levels are similar enough that one colour bar is sufficient for the 
     figure, or if each axes requires one.
     """
-    percent_98_surf = np.percentile(plot_data.surface_hr.compress(), 98)
-    percent_2_surf = np.percentile(plot_data.surface_hr.compress(), 2)
+    percent_98_surf = np.percentile(plot_data.surface_hr.compressed(), 98)
+    percent_2_surf = np.percentile(plot_data.surface_hr.compressed(), 2)
 
     percent_98_grid = np.percentile(
-        np.ma.masked_values(plot_data.tracer_hr, 0).compress(), 98)
+        np.ma.masked_values(plot_data.tracer_hr, 0).compressed(), 98)
     percent_2_grid = np.percentile(
-        np.ma.masked_values(plot_data.tracer_hr, 0).compress(), 2)
+        np.ma.masked_values(plot_data.tracer_hr, 0).compressed(), 2)
 
     overlap = (
         max(0, min(percent_98_surf, percent_98_grid)
