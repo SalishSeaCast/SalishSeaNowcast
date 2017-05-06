@@ -59,27 +59,27 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} {date} forcing files upload to {0.host_name} completed'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'forcing files upload to {parsed_args.host_name} completed',
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'success {.run_type}'.format(parsed_args)
+    msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} {date} forcing files upload to {0.host_name} failed'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'forcing files upload to {parsed_args.host_name} failed',
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         })
-    msg_type = 'failure {.run_type}'.format(parsed_args)
+    msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
 
@@ -110,7 +110,7 @@ def upload_forcing(parsed_args, config, *args):
             fcst = os.path.join(config['ssh']['ssh dir'], 'fcst', filename)
             os.symlink(fcst, localpath)
             logger.warning(
-                'ssh obs file not found; created symlink to {}'.format(fcst),
+                f'ssh obs file not found; created symlink to {fcst}',
                 extra={
                     'run_type': run_type,
                     'host_name': host_name,
@@ -121,10 +121,9 @@ def upload_forcing(parsed_args, config, *args):
         sftp_client.close()
         ssh_client.close()
         checklist = {
-            host_name: '{0.run_type} {date} ssh'
-            .format(
-                parsed_args,
-                date=parsed_args.run_date.format('YYYY-MM-DD'))}
+            host_name:
+                f'{parsed_args.run_type} '
+                f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh'}
         return checklist
     # Rivers runoff
     for tmpl in config['rivers']['file templates'].values():
@@ -160,8 +159,9 @@ def upload_forcing(parsed_args, config, *args):
     sftp_client.close()
     ssh_client.close()
     checklist = {
-        host_name: '{0.run_type} {date} ssh rivers weather'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD'))}
+        host_name:
+            f'{parsed_args.run_type} '
+            f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh rivers weather'}
     return checklist
 
 
@@ -169,8 +169,7 @@ def _upload_file(sftp_client, host_name, localpath, remotepath):
     sftp_client.put(localpath, remotepath)
     sftp_client.chmod(remotepath, lib.PERMS_RW_RW_R)
     logger.debug(
-        '{local} uploaded to {host} at {remote}'
-        .format(local=localpath, host=host_name, remote=remotepath))
+        f'{localpath} uploaded to {host_name} at {remotepath}')
 
 
 if __name__ == '__main__':
