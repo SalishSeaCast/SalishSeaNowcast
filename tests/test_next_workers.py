@@ -722,7 +722,6 @@ class TestAfterDownloadResults:
         'failure forecast2',
         'failure hindcast',
         'success hindcast',
-        'success nowcast-green',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         p_checklist = patch.dict(
@@ -757,6 +756,7 @@ class TestAfterDownloadResults:
     @pytest.mark.parametrize('run_type, plot_type, run_date', [
         ('nowcast', 'research', '2016-10-29'),
         ('nowcast', 'comparison', '2016-10-28'),
+        ('nowcast-green', 'research', '2016-10-29'),
     ])
     def test_success_nowcast_launch_make_plots_specials(
         self, run_type, plot_type, run_date, config, checklist,
@@ -839,11 +839,13 @@ class TestAfterMakePlots:
         'failure nowcast research',
         'failure nowcast comparison',
         'failure nowcast publish',
+        'failure nowcast-green research',
         'failure forecast publish',
         'failure forecast2 publish',
         'success nowcast research',
         'success nowcast comparison',
         'success nowcast publish',
+        'success nowcast-green research',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_plots(
