@@ -15,6 +15,7 @@
 
 """Unit tests for Salish Sea NEMO nowcast make_forcing_links worker.
 """
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import (
     call,
@@ -173,8 +174,8 @@ class TestMakeRunoffLinks:
             m_sftp_client, run_date, self.config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[0] == call(
             m_sftp_client, 'salish-nowcast',
-            'NEMO-forcing/rivers/rivers_month.nc',
-            'runs/rivers/rivers_month.nc')
+            Path('NEMO-forcing/rivers/rivers_month.nc'),
+            Path('runs/rivers/rivers_month.nc'))
 
     def test_rivers_temp_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-10-14')
@@ -191,8 +192,8 @@ class TestMakeRunoffLinks:
                 m_sftp_client, run_date, self.config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[1] == call(
             m_sftp_client, 'salish-nowcast',
-            'NEMO-forcing/rivers/river_ConsTemp_month.nc',
-            'runs/rivers/river_ConsTemp_month.nc')
+            Path('NEMO-forcing/rivers/river_ConsTemp_month.nc'),
+            Path('runs/rivers/river_ConsTemp_month.nc'))
 
     def test_bio_climatology_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
@@ -210,8 +211,8 @@ class TestMakeRunoffLinks:
                 m_sftp_client, run_date, self.config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[2] == call(
             m_sftp_client, 'salish-nowcast',
-            'NEMO-forcing/rivers/bio_climatology/',
-            'runs/rivers/bio_climatology')
+            Path('NEMO-forcing/rivers/bio_climatology/'),
+            Path('runs/rivers/bio_climatology'))
 
     def test_runoff_files_links(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
@@ -223,15 +224,19 @@ class TestMakeRunoffLinks:
         for date in arrow.Arrow.range('day', start, end):
             expected = call(
                 m_sftp_client, 'salish-nowcast',
-                '/results/forcing/rivers/RFraserCElse_{:y%Ym%md%d}.nc'
-                .format(start.date()),
-                'runs/rivers/RFraserCElse_{:y%Ym%md%d}.nc'
-                .format(date.date()))
+                Path(
+                    '/results/forcing/rivers/RFraserCElse_{:y%Ym%md%d}.nc'
+                    .format(start.date())),
+                Path(
+                    'runs/rivers/RFraserCElse_{:y%Ym%md%d}.nc'
+                    .format(date.date())))
             assert expected in m_create_symlink.call_args_list
             expected = call(
                 m_sftp_client, 'salish-nowcast',
-                '/results/forcing/rivers/RLonFraCElse_{:y%Ym%md%d}.nc'
-                .format(start.date()),
-                'runs/rivers/RLonFraCElse_{:y%Ym%md%d}.nc'
-                .format(date.date()))
+                Path(
+                    '/results/forcing/rivers/RLonFraCElse_{:y%Ym%md%d}.nc'
+                    .format( start.date())),
+                Path(
+                    'runs/rivers/RLonFraCElse_{:y%Ym%md%d}.nc'
+                    .format(date.date())))
             assert expected in m_create_symlink.call_args_list
