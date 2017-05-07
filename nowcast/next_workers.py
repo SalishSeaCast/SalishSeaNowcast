@@ -640,6 +640,10 @@ def after_download_results(msg, config, checklist):
         run_type = msg.type.split()[1]
         run_date = checklist['NEMO run'][run_type]['run date']
         if run_type == 'nowcast-green':
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.make_plots',
+                    args=[run_type, 'research', '--run-date', run_date]))
             return next_workers[msg.type]
         next_workers[msg.type].append(
             NextWorker(
@@ -685,11 +689,13 @@ def after_make_plots(msg, config, checklist):
         'failure nowcast research': [],
         'failure nowcast comparison': [],
         'failure nowcast publish': [],
+        'failure nowcast-green research': [],
         'failure forecast publish': [],
         'failure forecast2 publish': [],
         'success nowcast research': [],
         'success nowcast comparison': [],
         'success nowcast publish': [],
+        'success nowcast-green research': [],
         'success forecast publish': [],
         'success forecast2 publish': [],
     }
