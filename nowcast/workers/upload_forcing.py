@@ -103,10 +103,10 @@ def upload_forcing(parsed_args, config, *args):
             host_run_config['forcing']['ssh dir'], dest_dir, filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
-        except OSError:
+        except IOError:
             if dest_dir != 'obs':
                 raise
-            # obs file does not exist, to create symlink to corresponding
+            # obs file does not exist, so create symlink to corresponding
             # forecast file
             fcst = Path(config['ssh']['ssh dir'], 'fcst', filename)
             fcst.symlink_to(localpath)
@@ -155,7 +155,24 @@ def upload_forcing(parsed_args, config, *args):
             config['temperature salinity']['bc dir'], dest_dir, filename)
         remotepath = Path(
             host_run_config['forcing']['bc dir'], dest_dir, filename)
-        _upload_file(sftp_client, host_name, localpath, remotepath)
+        try:
+            _upload_file(sftp_client, host_name, localpath, remotepath)
+        except IOError:
+            # boundary condition file does not exist, so create symlink to
+            # persist previous day's file
+            prev_day_fn = (
+                config['temperature salinity']['file template'].format(
+                    run_date.replace(days=day-1)))
+            localpath.with_name(prev_day_fn).symlink_to(localpath)
+            logger.warning(
+                f'LiveOcean boundary condition file not found; '
+                f'created symlink to {localpath.with_name(prev_day_fn)}',
+                extra={
+                    'run_type': run_type,
+                    'host_name': host_name,
+                    'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
+                })
+            _upload_file(sftp_client, host_name, localpath, remotepath)
     sftp_client.close()
     ssh_client.close()
     checklist = {
