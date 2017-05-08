@@ -40,9 +40,11 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'nemonowcast': ('https://nemo-nowcast.readthedocs.io/en/latest/', None),
     'salishseadocs': (
-        'http://salishsea-meopar-docs.readthedocs.io/en/latest/', None),
+        'https://salishsea-meopar-docs.readthedocs.io/en/latest/', None),
     'salishseatools': (
-        'http://salishsea-meopar-tools.readthedocs.io/en/latest/', None),
+        'https://salishsea-meopar-tools.readthedocs.io/en/latest/', None),
+    'salishseasite': (
+        'https://salishsea-site.readthedocs.io/en/latest/', None),
 }
 
 todo_include_todos = True

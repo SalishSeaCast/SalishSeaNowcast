@@ -25,6 +25,8 @@ This section discusses:
 * how to add calls to a figure module's :py:func:`make_figure()` function to the :py:mod:`make_plots` nowcast system worker
 * how to run the :py:mod:`make_plots` worker in debugging mode to test that it renders a figure correctly
 
+We'll use the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` figure module as an example to create a nitrate thalweg and surface figure.
+
 You should run your test notebooks and :py:mod:`make_plots` worker tests in a :ref:`NowcastFiguresDevEnv`.
 You can activate it with:
 
@@ -65,12 +67,14 @@ As a final test we'll run the :py:mod:`make_plots` worker in debug mode to test 
        $ source activate nowcast-fig-dev
        (nowcast-fig-dev)$ cd SalishSeaNowcast/
 
-#. Set up 2 environment variables that the nowcast system expectes to find:
+#. Set up 2 environment variables that the nowcast system expects to find,
+   and create a temporary logging directory for it to use:
 
    .. code-block:: bash
 
-       (nowcast-fig-dev)$ export NOWCAST_LOGS=/tmp/
+       (nowcast-fig-dev)$ export NOWCAST_LOGS=/tmp/$USER
        (nowcast-fig-dev)$ export NOWCAST_ENV=$CONDA_PREFIX
+       (nowcast-fig-dev)$ mkdir -p $NOWCAST_LOGS
 
 
 #. Run the :py:mod:`make_plots` worker:
