@@ -103,7 +103,7 @@ def upload_forcing(parsed_args, config, *args):
             host_run_config['forcing']['ssh dir'], dest_dir, filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
-        except IOError:
+        except FileNotFoundError:
             if dest_dir != 'obs':
                 raise
             # obs file does not exist, so create symlink to corresponding
@@ -157,7 +157,7 @@ def upload_forcing(parsed_args, config, *args):
             host_run_config['forcing']['bc dir'], dest_dir, filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
-        except IOError:
+        except FileNotFoundError:
             # boundary condition file does not exist, so create symlink to
             # persist previous day's file
             prev_day_fn = (
