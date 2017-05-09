@@ -162,8 +162,8 @@ def upload_forcing(parsed_args, config, *args):
             # persist previous day's file
             prev_day_fn = (
                 config['temperature salinity']['file template'].format(
-                    run_date.replace(days=day-1)))
-            localpath.with_name(prev_day_fn).symlink_to(localpath)
+                    run_date.replace(days=day-1).date()))
+            localpath.symlink_to(localpath.with_name(prev_day_fn))
             logger.warning(
                 f'LiveOcean boundary condition file not found; '
                 f'created symlink to {localpath.with_name(prev_day_fn)}',
