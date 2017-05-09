@@ -228,8 +228,8 @@ def _make_live_ocean_links(
 def _clear_links(sftp_client, host_run_config, dir):
     links_dir = Path(host_run_config['run prep dir'], dir)
     logger.debug(links_dir)
-    for linkname in sftp_client.listdir(links_dir):
-        sftp_client.unlink(os.fspath(Path(links_dir, linkname)))
+    for linkname in sftp_client.listdir(os.fspath(links_dir)):
+        sftp_client.unlink(os.fspath(links_dir / linkname))
     logger.debug(f'{links_dir} symlinks cleared')
 
 
