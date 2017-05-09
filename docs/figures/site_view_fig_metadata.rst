@@ -39,7 +39,37 @@ You can activate it with:
 :py:mod:`salishsea_site.views.salishseacast` Figure Metadata
 ============================================================
 
-**To be written**
+The `salishsea.eos.ubc.ca site web app`_ gathers figures that have been rendered by the nowcast system :py:mod:`make_plots` worker and presents them on web pages that are linked by date from the https://salishsea.eos.ubc.ca/nemo/results/ page.
+
+.. _salishsea.eos.ubc.ca site web app: https://salishsea-site.readthedocs.io/en/latest/
+
+Each row on the https://salishsea.eos.ubc.ca/nemo/results/ page contains links to pages that are generated from a page template by a view function in the :py:mod:`salishsea_site.views.salishseacast` module.
+Each view function uses a list of :py:class:`salishsea_site.views.salishseacast.FigureMetadata` objects that is also defined in the :py:mod:`salishsea_site.views.salishseacast` module.
+The :py:class:`~salishsea_site.views.salishseacast.FigureMetadata` objects set the title for the figure that will appear on the web page,
+and the :kbd:`svg_name` of the figure files rendered by the :py:mod:`make_plots` worker.
+
+So,
+to add a figure rendered from our :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` figure module to the :guilabel:`Biology` page,
+we add a :py:class:`~salishsea_site.views.salishseacast.FigureMetadata` object to the :py:obj:`~salishsea_site.views.salishseacast.biology_figures` list in the :py:mod:`salishsea_site.views.salishseacast` module:
+
+.. code-block:: python
+
+    FigureMetadata(
+        title='Nitrate Fields Along Thalweg and on Surface',
+        svg_name='nitrate_thalweg_and_surface',
+    )
+
+The value of the :kbd:`title` attribute appears in :guilabel:`Plots` list on the page as a link to the figure lower down on the page,
+and it appears as a heading above the figure image.
+
+The value of the :kbd:`svg_name` attribute is key that we used to register our figure function module in the :py:mod:`make_plots` worker.
+Recall that the key is also used as the root part of the file name into which the figure is rendered.
+That is:
+
+* We registered a call to the :py:func:`nowcast.figures.research.tracer_thalweg_and_surface.make_figure` function in the :py:func:`nowcast.workers.make_plots._prep_nowcast_green_research_fig_functions` function using the key :kbd:`nitrate_thalweg_and_surface` to produce a nitrate thalweg and surface figure
+* When the :py:mod:`make_plots` was run with the :kbd:`nowcast-green research --run-date 2017-04-29` it stored the rendered figure with the file name :file:`nitrate_thalweg_and_surface_29apr17.svg`
+
+The order of :py:class:`~salishsea_site.views.salishseacast.FigureMetadata` objects in the :py:obj:`~salishsea_site.views.salishseacast.biology_figures` list determines the order in which the figures appear on the web page.
 
 
 .. _TestingTheWebsiteView:
