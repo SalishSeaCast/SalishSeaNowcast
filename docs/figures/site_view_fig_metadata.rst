@@ -66,8 +66,8 @@ The value of the :kbd:`svg_name` attribute is key that we used to register our f
 Recall that the key is also used as the root part of the file name into which the figure is rendered.
 That is:
 
-* We registered a call to the :py:func:`nowcast.figures.research.tracer_thalweg_and_surface.make_figure` function in the :py:func:`nowcast.workers.make_plots._prep_nowcast_green_research_fig_functions` function using the key :kbd:`nitrate_thalweg_and_surface` to produce a nitrate thalweg and surface figure
-* When the :py:mod:`make_plots` was run with the :kbd:`nowcast-green research --run-date 2017-04-29` it stored the rendered figure with the file name :file:`nitrate_thalweg_and_surface_29apr17.svg`
+* We :ref:`registered a call <RegisteringMakeFigureCallsInTheMakePlotsWorker>` to the :py:func:`nowcast.figures.research.tracer_thalweg_and_surface.make_figure` function in the :py:func:`nowcast.workers.make_plots._prep_nowcast_green_research_fig_functions` function using the key :kbd:`nitrate_thalweg_and_surface` to produce a nitrate thalweg and surface figure
+* When the :py:mod:`make_plots` was run with the command-line options :kbd:`nowcast-green research --run-date 2017-04-29` it stored the rendered figure with the file name :file:`nitrate_thalweg_and_surface_29apr17.svg`
 
 The order of :py:class:`~salishsea_site.views.salishseacast.FigureMetadata` objects in the :py:obj:`~salishsea_site.views.salishseacast.biology_figures` list determines the order in which the figures appear on the web page.
 
