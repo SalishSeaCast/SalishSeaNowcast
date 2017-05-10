@@ -122,7 +122,7 @@ FONTS = {
 
 
 def set_axis_colors(ax):
-    """Set the colours of axis labels, ticks and spines.
+    """Set the colours of axis labels, ticks, and spines.
 
     :arg ax: Axes object to be formatted.
     :type ax: :py:class:`matplotlib.axes.Axes`
