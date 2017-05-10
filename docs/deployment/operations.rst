@@ -73,7 +73,7 @@ A few that are useful:
   e.g. :kbd:`start scheduler`
 * :kbd:`restart` to stop and restart a process;
   e.g. :kbd:`restart scheduler`
-* :kbd:`signal hup` to send a :kbd:`HUP` signnal to a process,
+* :kbd:`signal hup` to send a :kbd:`HUP` signal to a process,
   which will cause it to reload its configuration from the :envvar:`NOWCAST_YAML` file that the process was started with;
   e.g. :kbd:`signal hup manager`.
   This is the way to communicate nowcast system configuration changes to the long-running processes.

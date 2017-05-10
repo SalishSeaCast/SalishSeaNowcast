@@ -27,8 +27,8 @@ There are 3 sub-directories in that tree:
 * :file:`research/`
 
 The :file:`comparison/` directory contains modules for figures that compare model results to observations;
-for example temperature and salinity comparisions at the deep ONC nodes,
-and comparision of surface quantities to data from the ONC ferry instrument packages.
+for example temperature and salinity comparisons at the deep ONC nodes,
+and comparison of surface quantities to data from the ONC ferry instrument packages.
 
 The :file:`publish/` directory contains modules for figures that are considered to be "official" SalishSeaCast model product - results we have evaluated and believe to be of the best quality and accuracy.
 
@@ -70,4 +70,4 @@ Once you've got a code module,
 you should create a notebook that tests it in the nowcast context.
 The `TestTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` is an example for the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module.
 
-.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurfaceModule.ipynb
+.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb

@@ -175,7 +175,7 @@ The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
 You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build.
 
 If you have write access to the `repository`_ on Bitbucket,
-whenever you push changes to Bitbucket the documentation is automatically re-built and rendered at http://salishsea-nowcast.readthedocs.io/en/nemo_nowcast/.
+whenever you push changes to Bitbucket the documentation is automatically re-built and rendered at http://salishsea-nowcast.readthedocs.io/en/latest/.
 
 
 .. _SalishSeaNowcastRunningTheUnitTests:
@@ -186,7 +186,7 @@ Running the Unit Tests
 The test suite for the :kbd:`SalishSeaNowcast` package is in :file:`SalishSeaNowcast/tests/`.
 The `pytest`_ tool is used for test parametrization and as the test runner for the suite.
 
-.. _pytest: http://pytest.org/latest/
+.. _pytest: https://docs.pytest.org/en/latest/
 
 With your :kbd:`salishsea-nowcast` development environment activated,
 use:
