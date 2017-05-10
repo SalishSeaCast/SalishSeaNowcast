@@ -40,7 +40,11 @@ You can activate it with:
 Figure Module Test Notebook
 ===========================
 
-**To be written**
+Once you've created a website figure module,
+you should create a notebook that tests it in the nowcast context.
+The `TestTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` is an example for the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module.
+
+.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurfaceModule.ipynb
 
 
 .. _RegisteringMakeFigureCallsInTheMakePlotsWorker:
