@@ -181,16 +181,12 @@ def after_grib_to_netcdf(msg, config, checklist):
                             'nowcast.workers.upload_forcing',
                             args=[host, msg_suffix]),
                     )
-    if all(
-        ('nowcast-dev host' in config['run'],
-         'nowcast-dev' in config['run types'])):
-        next_workers['success nowcast+'].append(
-            NextWorker(
-                'nowcast.workers.make_forcing_links',
-                args=[
-                    config['run']['nowcast-dev host'], 'nowcast+',
-                    '--shared-storage'])
-        )
+        if 'nowcast-dev' in config['run']['enabled hosts'][host]['run types']:
+            next_workers['success nowcast+'].append(
+                NextWorker(
+                    'nowcast.workers.make_forcing_links',
+                    args=[host, 'nowcast+', '--shared-storage'])
+            )
     return next_workers[msg.type]
 
 
@@ -370,34 +366,24 @@ def after_make_forcing_links(msg, config, checklist):
         'success ssh': [],
     }
     if msg.type.startswith('success'):
-        run_type = {
-            'nowcast+': 'nowcast',
-            'nowcast-green': 'nowcast-green',
-            'nowcast-dev': 'nowcast-dev',
-            'ssh': 'forecast',
-            'forecast2': 'forecast2',
+        run_types = {
+            'nowcast+': ('nowcast', 'nowcast-dev'),
+            'nowcast-green': ('nowcast-green',),
+            'ssh': ('forecast',),
+            'forecast2': ('forecast2',),
         }[msg.type.split()[1]]
-        host_name = config['run']['cloud host']
-        if 'cloud host' in config['run'] and host_name in msg.payload:
-            next_workers[msg.type] = [
-                NextWorker(
-                    'nowcast.workers.run_NEMO',
-                    args=[
-                        host_name, run_type,
-                        '--run-date',
-                        checklist['forcing links'][host_name]['run date']],
-                    host=host_name),
-            ]
-        host_name = config['run']['nowcast-dev host']
-        if 'nowcast-dev host' in config['run'] and host_name in msg.payload:
-            next_workers[msg.type] = [
-                NextWorker(
-                    'nowcast.workers.run_NEMO',
-                    args=[
-                        host_name, 'nowcast-dev', '--run-date',
-                        checklist['forcing links'][host_name]['run date']],
-                    host=host_name),
-            ]
+        for host in msg.payload:
+            host_run_types = config['run']['enabled hosts'][host]['run types']
+            for run_type in run_types:
+                if run_type in host_run_types:
+                    next_workers[msg.type] = [
+                        NextWorker(
+                            'nowcast.workers.run_NEMO',
+                            args=[
+                                host, run_type, '--run-date',
+                                checklist['forcing links'][host]['run date']],
+                            host=host),
+                    ]
     return next_workers[msg.type]
 
 
