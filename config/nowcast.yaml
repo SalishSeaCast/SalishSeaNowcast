@@ -314,10 +314,6 @@ run:
       run types:
         - nowcast-dev
 
-  remote hosts:
-    - cloud host
-    - hpc host
-
   # If the `cloud host` key is present, the nowcast, forecast,
   # and forecast2 runs executed on it automatically.
   #

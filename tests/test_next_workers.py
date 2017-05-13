@@ -54,7 +54,6 @@ def config():
                     'run types': ['nowcast-dev'],
                 },
             },
-            'remote hosts': ['cloud host'],
             'cloud host': 'west.cloud',
             'nowcast-dev host': 'salish',
         },
@@ -205,7 +204,7 @@ class TestAfterGribToNetcdf:
             checklist)
         expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['west.cloud', run_type], host='localhost')
+            args=['cloud', run_type], host='localhost')
         assert expected in workers
 
     def test_success_forecast2_no_launch_upload_forcing_nowcastp(

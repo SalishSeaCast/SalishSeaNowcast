@@ -172,14 +172,14 @@ def after_grib_to_netcdf(msg, config, checklist):
         next_workers['success nowcast+'].append(
             NextWorker(
                 'nowcast.workers.ping_erddap', args=['download_weather']))
-    for host in config['run']['remote hosts']:
-        if host in config['run']:
+    for host in config['run']['enabled hosts']:
+        if not config['run']['enabled hosts'][host]['shared storage']:
             for msg_suffix, run_type in msg_run_type_mapping.items():
                 if run_type in config['run types']:
                     next_workers[f'success {msg_suffix}'].append(
                         NextWorker(
                             'nowcast.workers.upload_forcing',
-                            args=[config['run'][host], msg_suffix]),
+                            args=[host, msg_suffix]),
                     )
     if all(
         ('nowcast-dev host' in config['run'],
