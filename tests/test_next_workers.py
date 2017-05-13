@@ -44,10 +44,10 @@ def config():
         },
         'run': {
             'enabled hosts': {
-                'cloud': {
+                'west.cloud': {
                     'shared storage': False,
                     'run types': [
-                        'nowcast', 'forecast', 'forecast2', 'nowcasst-green'],
+                        'nowcast', 'forecast', 'forecast2', 'nowcast-green'],
                 },
                 'salish': {
                     'shared storage': True,
@@ -55,7 +55,6 @@ def config():
                 },
             },
             'cloud host': 'west.cloud',
-            'nowcast-dev host': 'salish',
         },
         'wave forecasts': {
             'host': 'cloud',
