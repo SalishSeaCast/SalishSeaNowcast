@@ -249,8 +249,10 @@ def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
     return fig_functions
 
 
-def _prep_comparison_fig_functions(config, bathy, coastline, weather_path,
-    mesh_mask, dev_mesh_mask, results_dir, dev_results_home, dmy, timezone):
+def _prep_comparison_fig_functions(
+    config, bathy, coastline, weather_path,
+    mesh_mask, dev_mesh_mask, results_dir, dev_results_home, dmy, timezone
+):
     ferry_data_dir = config['observations']['ferry data']
     dev_results_dir = os.path.join(dev_results_home, dmy)
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
