@@ -57,7 +57,7 @@ def config():
             'cloud host': 'west.cloud',
         },
         'wave forecasts': {
-            'host': 'cloud',
+            'host': 'west.cloud',
             'run when': 'after nowcast-green',
         }
     }
@@ -175,7 +175,7 @@ class TestAfterGetNeahBaySsh:
             Message('get_NeahBay_ssh', 'success forecast'), config, checklist)
         expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['cloud', 'ssh'], host='localhost')
+            args=['west.cloud', 'ssh'], host='localhost')
         assert expected in workers
 
 
@@ -203,11 +203,12 @@ class TestAfterGribToNetcdf:
             checklist)
         expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['cloud', run_type], host='localhost')
+            args=['west.cloud', run_type], host='localhost')
         assert expected in workers
 
     def test_success_forecast2_no_launch_upload_forcing_nowcastp(
-        self, config, checklist):
+        self, config, checklist
+    ):
         workers = next_workers.after_grib_to_netcdf(
             Message('grib_to_netcdf', 'success forecast2'), config,
             checklist)
@@ -446,7 +447,7 @@ class TestAfterWatchNEMO:
             Message(
                 'watch_NEMO', 'success nowcast', {
                     'nowcast': {
-                        'host': 'cloud', 'run date': '2016-10-16',
+                        'host': 'west.cloud', 'run date': '2016-10-16',
                         'completed': True,
                     }
                 }),
@@ -463,14 +464,14 @@ class TestAfterWatchNEMO:
             Message(
                 'watch_NEMO', 'success forecast', {
                     'forecast': {
-                        'host': 'cloud', 'run date': '2017-01-29',
+                        'host': 'west.cloud', 'run date': '2017-01-29',
                         'completed': True,
                     }
                 }),
             config, checklist)
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
-            args=['cloud', 'nowcast-green'], host='localhost')
+            args=['west.cloud', 'nowcast-green'], host='localhost')
         assert workers[0] == expected
 
     def test_success_forecast_launch_make_ww3_wind_file_forecast(
@@ -483,14 +484,14 @@ class TestAfterWatchNEMO:
                 Message(
                     'watch_NEMO', 'success forecast', {
                         'forecast': {
-                            'host': 'cloud', 'run date': '2017-04-14',
+                            'host': 'west.cloud', 'run date': '2017-04-14',
                             'completed': True,
                         }
                     }),
                 config, checklist)
         expected = NextWorker(
             'nowcast.workers.make_ww3_wind_file',
-            args=['cloud', 'forecast'], host='cloud')
+            args=['west.cloud', 'forecast'], host='west.cloud')
         assert workers[0] == expected
 
     def test_success_forecast_launch_make_ww3_current_file_forecast(
@@ -503,14 +504,14 @@ class TestAfterWatchNEMO:
                 Message(
                     'watch_NEMO', 'success forecast', {
                         'forecast': {
-                            'host': 'cloud', 'run date': '2017-04-14',
+                            'host': 'west.cloud', 'run date': '2017-04-14',
                             'completed': True,
                         }
                     }),
                 config, checklist)
         expected = NextWorker(
             'nowcast.workers.make_ww3_current_file',
-            args=['cloud', 'forecast'], host='cloud')
+            args=['west.cloud', 'forecast'], host='west.cloud')
         assert workers[1] == expected
 
     def test_success_forecast2_launch_make_ww3_wind_file_forecast2(
@@ -520,14 +521,14 @@ class TestAfterWatchNEMO:
             Message(
                 'watch_NEMO', 'success forecast2', {
                     'forecast2': {
-                        'host': 'cloud', 'run date': '2017-04-14',
+                        'host': 'west.cloud', 'run date': '2017-04-14',
                         'completed': True,
                     }
                 }),
             config, checklist)
         expected = NextWorker(
             'nowcast.workers.make_ww3_wind_file',
-            args=['cloud', 'forecast2'], host='cloud')
+            args=['west.cloud', 'forecast2'], host='west.cloud')
         assert workers[0] == expected
 
     def test_success_forecast2_launch_make_ww3_current_file_forecast2(
@@ -537,14 +538,14 @@ class TestAfterWatchNEMO:
             Message(
                 'watch_NEMO', 'success forecast2', {
                     'forecast2': {
-                        'host': 'cloud', 'run date': '2017-04-14',
+                        'host': 'west.cloud', 'run date': '2017-04-14',
                         'completed': True,
                     }
                 }),
             config, checklist)
         expected = NextWorker(
             'nowcast.workers.make_ww3_current_file',
-            args=['cloud', 'forecast2'], host='cloud')
+            args=['west.cloud', 'forecast2'], host='west.cloud')
         assert workers[1] == expected
 
     def test_success_nowcast_green_launch_make_ww3_wind_file_forecast(
@@ -557,14 +558,14 @@ class TestAfterWatchNEMO:
                 Message(
                     'watch_NEMO', 'success nowcast-green', {
                         'nowcast-green': {
-                            'host': 'cloud', 'run date': '2017-04-14',
+                            'host': 'west.cloud', 'run date': '2017-04-14',
                             'completed': True,
                         }
                     }),
                 config, checklist)
         expected = NextWorker(
             'nowcast.workers.make_ww3_wind_file',
-            args=['cloud', 'forecast'], host='cloud')
+            args=['west.cloud', 'forecast'], host='west.cloud')
         assert workers[0] == expected
 
     def test_success_nowcast_green_launch_make_ww3_current_file_forecast(
@@ -577,42 +578,42 @@ class TestAfterWatchNEMO:
                 Message(
                     'watch_NEMO', 'success nowcast-green', {
                         'nowcast-green': {
-                            'host': 'cloud', 'run date': '2017-04-14',
+                            'host': 'west.cloud', 'run date': '2017-04-14',
                             'completed': True,
                         }
                     }),
                 config, checklist)
         expected = NextWorker(
             'nowcast.workers.make_ww3_current_file',
-            args=['cloud', 'forecast'], host='cloud')
+            args=['west.cloud', 'forecast'], host='west.cloud')
         assert workers[1] == expected
 
     @pytest.mark.parametrize('msg', [
         Message(
             'watch_NEMO', 'success nowcast', {
                 'nowcast': {
-                    'host': 'cloud', 'run date': '2016-10-15',
+                    'host': 'west.cloud', 'run date': '2016-10-15',
                     'completed': True
                 }
             }),
         Message(
             'watch_NEMO', 'success forecast', {
                 'forecast': {
-                    'host': 'cloud', 'run date': '2016-10-15',
+                    'host': 'west.cloud', 'run date': '2016-10-15',
                     'completed': True
                 }
             }),
         Message(
             'watch_NEMO', 'success nowcast-green', {
                 'nowcast-green': {
-                    'host': 'cloud', 'run date': '2016-10-15',
+                    'host': 'west.cloud', 'run date': '2016-10-15',
                     'completed': True
                 }
             }),
         Message(
             'watch_NEMO', 'success forecast2', {
                 'forecast2': {
-                    'host': 'cloud', 'run date': '2016-10-15',
+                    'host': 'west.cloud', 'run date': '2016-10-15',
                     'completed': True
                 }
             }),
@@ -687,7 +688,8 @@ class TestAfterMakeWW3currentFile:
                 }),
             config, checklist)
         expected = NextWorker(
-            'nowcast.workers.run_ww3', args=['cloud', run_type], host='cloud')
+            'nowcast.workers.run_ww3', args=['west.cloud', run_type],
+            host='west.cloud')
         assert workers[0] == expected
 
 
