@@ -64,18 +64,23 @@ weather:
 rivers:
   # File containing daily average Fraser river flow at Hope
   ECget Fraser flow: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
-  # Monthly climatology
-  monthly climatology: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
   # File that describes Fraser River climatology separation from measured
   # flow at Hope
   Fraser climatology: /results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
+  # Monthly climatology
+  monthly climatology:
+    long: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
+    b201702: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_201702.nc
   # Templates for the runoff forcing file names
   # **Must be quoted to project {} characters**
   file templates:
     long: 'RLonFraCElse_{:y%Ym%md%d}.nc'
-    allArms: 'RallFraCElse_{:y%Ym%md%d}.nc'
+    b201702: 'R201702DFraCElse_{:y%Ym%md%d}.nc'
+  prop_dict modules:
+    long: salishsea_tools.river_downbyone2
+    b201702: salishsea_tools.river_201702
 
 
 ssh:
@@ -417,8 +422,13 @@ run:
     job exec cmd: qsub
 
 
-  hindcast host: orcinus-hindcast
+#  hindcast host: orcinus-hindcast
   orcinus-hindcast:
+    results:
+      hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
+
+  hindcast host: jasper-hindcast
+  jasper-hindcast:
     results:
       hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
 
