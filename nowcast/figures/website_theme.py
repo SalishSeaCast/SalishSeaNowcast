@@ -80,6 +80,8 @@ COLOURS = {
         'VENUS node model temperature': 'blue',
         'VENUS node dev model temperature': 'magenta',
         'VENUS CTD temperature': 'green',
+        'nitrate': 'darkgreen',
+        'silicon': 'brown',
     },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
