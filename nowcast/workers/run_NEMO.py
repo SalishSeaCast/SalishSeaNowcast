@@ -19,6 +19,7 @@ forecast or forecast2 run on the ONC cloud or salish,
 and launches the run.
 """
 import logging
+import os
 from pathlib import Path
 import shlex
 import subprocess
@@ -31,7 +32,8 @@ from nemo_nowcast import (
 from nemo_cmd.namelist import namelist2dict
 from nemo_nowcast.fileutils import FilePerms
 import salishsea_cmd.api
-from salishsea_cmd.lib import get_n_processors
+import salishsea_cmd.lib
+import salishsea_cmd.run
 import yaml
 
 
@@ -107,7 +109,7 @@ def run_NEMO(parsed_args, config, tell_manager):
         run_date = arrow.get(run_info['nowcast']['run date'])
     run_desc_filepath = _create_run_desc_file(
         run_date, run_type, host_name, config)
-    run_dir = Path(salishsea_cmd.api.prepare(str(run_desc_filepath)))
+    run_dir = Path(salishsea_cmd.api.prepare(run_desc_filepath))
     logger.debug(f'{run_type}: temporary run directory: {run_dir}')
     run_script_filepath = _create_run_script(
         run_date, run_type, run_dir, run_desc_filepath, host_name, config)
@@ -118,7 +120,7 @@ def run_NEMO(parsed_args, config, tell_manager):
         run_type, run_process_pid, host_name, config)
     return {run_type: {
         'host': host_name,
-        'run dir': str(run_dir),
+        'run dir': os.fspath(run_dir),
         'pid': run_process_pid,
         'watcher pid': watcher_process_pid,
         'run date': run_date.format('YYYY-MM-DD'),
@@ -162,12 +164,12 @@ def _update_time_namelist(run_date, run_type, run_duration, host_run_config):
     prev_run_type, date_offset = prev_runs[run_type]
     results_dir = Path(host_run_config['results'][prev_run_type])
     dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
-    prev_run_namelist = namelist2dict(str(results_dir/dmy/'namelist_cfg'))
+    prev_run_namelist = namelist2dict(os.fspath(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
     try:
         namelist_domain_path = Path(
             host_run_config['run prep dir'], 'namelist.domain')
-        namelist_domain = namelist2dict(str(namelist_domain_path))
+        namelist_domain = namelist2dict(os.fspath(namelist_domain_path))
         rdt = namelist_domain['namdom'][0]['rn_rdt']
     except FileNotFoundError:
         rdt = prev_run_namelist['namdom'][0]['rn_rdt']
@@ -246,38 +248,36 @@ def _run_description(
         'forecast2': run_date.replace(days=-2).format('DDMMMYY').lower(),
     }
     restart_filepaths = {
-        'restart.nc': {
-            'link to': str(
-                Path(
-                    restart_dir/prev_run_dmys[run_type] /
-                    f'SalishSea_{restart_timestep:08d}_restart.nc')
-                .resolve())
-        }}
+        'restart.nc':
+            os.fspath(
+                Path(restart_dir/prev_run_dmys[run_type] /
+                     f'SalishSea_{restart_timestep:08d}_restart.nc'
+                     ).resolve())
+    }
     if run_type == 'nowcast-green':
-        restart_filepaths['restart_trc.nc'] = {
-            'link to': str(
+        restart_filepaths['restart_trc.nc'] = (
+            os.fspath(
                 Path(
                     restart_dir/prev_run_dmys[run_type] /
                     f'SalishSea_{restart_timestep:08d}_restart_trc.nc')
                 .resolve())
-        }
+        )
     run_prep_dir = Path(host_run_config['run prep dir'])
     NEMO_config_name = config['run types'][run_type]['config name']
     walltime = host_run_config.get('walltime')
     forcing = {
         'NEMO-atmos': {
-            'link to': str((run_prep_dir/'NEMO-atmos').resolve()),
+            'link to': os.fspath((run_prep_dir/'NEMO-atmos').resolve()),
             'check link': {
                 'type': 'atmospheric',
                 'namelist filename': 'namelist_cfg',
             }
         },
         'open_boundaries': {
-            'link to': str((run_prep_dir/'open_boundaries/').resolve())},
+            'link to': os.fspath((run_prep_dir/'open_boundaries/').resolve())},
         'rivers': {
-            'link to': str((run_prep_dir/'rivers/').resolve())},
+            'link to': os.fspath((run_prep_dir/'rivers/').resolve())},
     }
-    forcing.update(restart_filepaths)
     run_sets_dir = run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast'
     if run_type == 'nowcast-green':
         namelist_sections = (
@@ -295,45 +295,51 @@ def _run_description(
     for namelist in namelist_sections:
         if (run_prep_dir/namelist).exists():
             namelists['namelist_cfg'].append(
-                str((run_prep_dir/namelist).resolve()))
+                os.fspath((run_prep_dir/namelist).resolve()))
         else:
             namelists['namelist_cfg'].append(
-                str((run_sets_dir/namelist).resolve()))
+                os.fspath((run_sets_dir/namelist).resolve()))
     if run_type == 'nowcast-green':
         for namelist in ('namelist_top_cfg', 'namelist_pisces_cfg'):
             if (run_prep_dir/namelist).exists():
-                namelists[namelist] = [str((run_prep_dir/namelist).resolve())]
+                namelists[namelist] = [
+                    os.fspath((run_prep_dir/namelist).resolve())]
             else:
-                namelists[namelist] = [str((run_sets_dir/namelist).resolve())]
+                namelists[namelist] = [
+                    os.fspath((run_sets_dir/namelist).resolve())]
     run_desc = salishsea_cmd.api.run_description(
         run_id=run_id,
         config_name=NEMO_config_name,
         mpi_decomposition=host_run_config['mpi decomposition'],
         walltime=walltime,
-        NEMO_code=str((run_prep_dir/'../NEMO-3.6-code/').resolve()),
-        XIOS_code=str((run_prep_dir/'../XIOS/').resolve()),
-        forcing_path=str((run_prep_dir/'../NEMO-forcing/').resolve()),
-        runs_dir=str(run_prep_dir.resolve()),
+        NEMO_code_config=os.fspath(
+            (run_prep_dir/'../NEMO-3.6-code'/'NEMOGCM'/'CONFIG').resolve()),
+        XIOS_code=os.fspath((run_prep_dir/'../XIOS/').resolve()),
+        forcing_path=os.fspath((run_prep_dir/'../NEMO-forcing/').resolve()),
+        runs_dir=os.fspath(run_prep_dir.resolve()),
         forcing=forcing,
         namelists=namelists,
     )
-    run_desc['paths']['NEMO code config'] = str(
-        (run_prep_dir/'../NEMO-3.6-code'/'NEMOGCM'/'CONFIG').resolve())
     run_desc['grid']['coordinates'] = Path(config['coordinates']).name
     run_desc['grid']['bathymetry'] = Path(
         config['run types'][run_type]['bathymetry']).name
-    run_desc['output']['files'] = str((run_prep_dir/'iodef.xml').resolve())
-    run_desc['output']['domain'] = str(
+    run_desc['grid']['land processor elimination'] = Path(
+        config['run types'][run_type]['land processor elimination']).name
+    run_desc['restart'] = restart_filepaths
+    run_desc['output']['files'] = os.fspath(
+        (run_prep_dir/'iodef.xml').resolve())
+    run_desc['output']['domain'] = os.fspath(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')
         .resolve())
-    run_desc['output']['fields'] = str(
+    run_desc['output']['fields'] = os.fspath(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast/field_def.xml')
         .resolve())
     return run_desc
 
 
-def _create_run_script(run_date, run_type, run_dir, run_desc_filepath,
-    host_name, config):
+def _create_run_script(
+    run_date, run_type, run_dir, run_desc_filepath, host_name, config
+):
     host_run_config = config['run'][host_name]
     dmy = run_date.format('DDMMMYY').lower()
     results_dir = Path(host_run_config['results'][run_type])
@@ -351,16 +357,16 @@ def _create_run_script(run_date, run_type, run_dir, run_desc_filepath,
 def _build_script(
     run_dir, run_type, run_desc_filepath, results_dir, host_name, config,
 ):
-    run_desc = salishsea_cmd.lib.load_run_desc(str(run_desc_filepath))
+    run_desc = salishsea_cmd.lib.load_run_desc(run_desc_filepath)
     host_run_config = config['run'][host_name]
-    nemo_processors = get_n_processors(run_desc)
+    nemo_processors = salishsea_cmd.lib.get_n_processors(run_desc, run_dir)
     xios_processors = int(run_desc['output']['XIOS servers'])
     email = host_run_config.get('email', 'nobody@example.com')
     xios_host = config['run']['enabled hosts'][host_name].get('xios host')
     script = '#!/bin/bash\n'
     if host_run_config['job exec cmd'] == 'qsub':
         script = '\n'.join((script, '{pbs_common}'.format(
-            pbs_common=salishsea_cmd.api.pbs_common(
+            pbs_common=salishsea_cmd.run._pbs_common(
                 run_desc, nemo_processors + xios_processors, email,
                 results_dir))))
     script = '\n'.join((
