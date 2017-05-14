@@ -20,6 +20,7 @@ climatology for the Fraser downstream of Hope,
 and climatologies for all of the other modeled rivers to generate the runoff
 forcing file.
 """
+import importlib
 import logging
 import os
 
@@ -79,26 +80,27 @@ def make_runoff_file(parsed_args, config, *args):
     step2 = step1[step1[:, 1] == yesterday.month]
     step3 = step2[step2[:, 2] == yesterday.day]
     flow_at_hope = step3[0, 3]
-    # Get climatology
-    criverflow, lat, lon, riverdepth = _get_river_climatology(config)
-    # Interpolate to today
-    driverflow = _calculate_daily_flow(yesterday, criverflow)
-    logger.debug(f'Getting file for {yesterday.format("YYYY-MM-DD")}')
     # Get Fraser Watershed Climatology without Fraser
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
-    # Calculate combined runoff for long case only and write file
-    directory = config['rivers']['rivers dir']
-    filename_tmpls = config['rivers']['file templates']
-    filepath = {
-        'long': _combine_runoff(
-            'long', flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-            otherratio, driverflow, lat, lon, riverdepth, directory,
-            filename_tmpls, config),
-        'allArms': _combine_runoff(
-            'allArms', flow_at_hope, yesterday, afterHope, nonFraser,
-            fraserratio,
-            otherratio, driverflow, lat, lon, riverdepth, directory,
-            filename_tmpls, config)}
+    filepath = {}
+
+    for bathy_type in config['rivers']['file templates']:
+        print(bathy_type)
+        # Get climatology
+        criverflow, lat, lon, area = (
+            _get_river_climatology(config['rivers']['monthly climatology'][bathy_type]))
+        print(area[200,200])
+        # Interpolate to today
+        driverflow = _calculate_daily_flow(yesterday, criverflow)
+        logger.debug(f'Getting file for {yesterday.format("YYYY-MM-DD")}')
+        # Calculate combined runoff and write file
+        directory = config['rivers']['rivers dir']
+        filename_tmpls = config['rivers']['file templates'][bathy_type]
+        prop_dict = importlib.import_module(
+            config['rivers']['prop_dict modules'][bathy_type]).prop_dict
+        filepath[bathy_type] = _combine_runoff(
+            prop_dict, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
+            otherratio, driverflow, lat, lon, area, directory, filename_tmpls)
 
     return filepath
 
@@ -111,18 +113,18 @@ def _get_fraser_at_hope(config):
     return fraserflow
 
 
-def _get_river_climatology(config):
+def _get_river_climatology(filename):
     """Read the monthly climatology that we will use for all the other rivers.
     """
     # Open monthly climatology
-    filename = config['rivers']['monthly climatology']
     clim_rivers = NC.Dataset(filename)
     criverflow = clim_rivers.variables['rorunoff']
     # Get other variables so we can put them in new files
     lat = clim_rivers.variables['nav_lat']
     lon = clim_rivers.variables['nav_lon']
-    riverdepth = clim_rivers.variables['rodepth']
-    return criverflow, lat, lon, riverdepth
+    area = clim_rivers.variables['area']
+    print('clim', area[200,200])
+    return criverflow, lat, lon, area
 
 
 def _calculate_daily_flow(yesterday, criverflow):
@@ -164,7 +166,7 @@ def _fraser_climatology(config):
 
 def _fraser_correction(
     pd, fraserflux, yesterday, afterHope, NonFraser, fraserratio, otherratio,
-    runoff, riverdepth, config
+    runoff, area,
 ):
     """For the Fraser Basin only, replace basic values with the new
     climatology after Hope and the observed values for Hope.
@@ -174,8 +176,6 @@ def _fraser_correction(
         if "Fraser" in key:
             flux = _calculate_daily_flow(yesterday, afterHope) + fraserflux
             subarea = fraserratio
-            if river['depth'] == 0:
-                river['depth'] = 3
         elif "Zero" in key:
             flux = 0.
             subarea = 1.  # to avoid division by zero
@@ -187,28 +187,29 @@ def _fraser_correction(
             river['i'], river['di'],
             river['j'], river['dj'],
             river['depth'], runoff, np.empty_like(runoff),
-            grid=config['coordinates'])[0]
+            area)[0]
     return runoff
 
 
 def _combine_runoff(
-    length, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-    otherratio, driverflow, lat, lon, riverdepth, directory, filename_tmpls,
-    config,
+    prop_dict, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
+    otherratio, driverflow, lat, lon, area, directory, filename_tmpls,
 ):
-    pd = rivertools.get_watershed_prop_dict('fraser', Fraser_River=length)
+
+    pd = prop_dict['fraser']
+
     runoff = _fraser_correction(
         pd, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-        otherratio, driverflow, riverdepth, config)
+        otherratio, driverflow, area)
     # set up filename to follow NEMO conventions
-    filename = filename_tmpls[length].format(yesterday.date())
+    filename = filename_tmpls.format(yesterday.date())
     filepath = os.path.join(directory, filename)
-    _write_file(filepath, yesterday, runoff, lat, lon, riverdepth)
+    _write_file(filepath, yesterday, runoff, lat, lon)
     logger.debug(f'File written to {directory}/{filename}')
     return filepath
 
 
-def _write_file(filepath, yesterday, flow, lat, lon, riverdepth):
+def _write_file(filepath, yesterday, flow, lat, lon):
     """Create the rivers runoff netCDF4 file.
     """
     nemo = NC.Dataset(filepath, 'w')
@@ -236,12 +237,6 @@ def _write_file(filepath, yesterday, flow, lat, lon, riverdepth):
     rorunoff._missing_value = 0.
     rorunoff._units = 'kg m-2 s-1'
     rorunoff[0, :] = flow
-    # Depth
-    rodepth = nemo.createVariable('rodepth', 'float32', ('y', 'x'), zlib=True)
-    rodepth._Fillvalue = -1.
-    rodepth.missing_value = -1.
-    rodepth.units = 'm'
-    rodepth = riverdepth
     nemo.close()
 
 
