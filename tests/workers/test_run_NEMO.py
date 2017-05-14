@@ -43,6 +43,9 @@ def config(scope='function'):
                 'mesh_mask':
                     '/results/nowcast-sys/NEMO-forcing/grid/'
                     'mesh_mask_downbyone2.nc',
+                'land processor elimination':
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.csv',
                 'duration': 1},
             'nowcast-dev': {
                 'config name': 'SalishSea',
@@ -52,6 +55,9 @@ def config(scope='function'):
                 'mesh_mask':
                     '/results/nowcast-sys/NEMO-forcing/grid/'
                     'mesh_mask_downbyone2.nc',
+                'land processor elimination':
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.csv',
                 'duration': 1},
             'nowcast-green': {
                 'config name': 'SOG',
@@ -61,6 +67,9 @@ def config(scope='function'):
                 'mesh_mask':
                     '/results/nowcast-sys/NEMO-forcing/grid/'
                     'mesh_mask_downbyone2.nc',
+                'land processor elimination':
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.csv',
                 'duration': 1},
             'forecast': {
                 'config name': 'SalishSea',
@@ -70,6 +79,9 @@ def config(scope='function'):
                 'mesh_mask':
                     '/results/nowcast-sys/NEMO-forcing/grid/'
                     'mesh_mask_downbyone2.nc',
+                'land processor elimination':
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.csv',
                 'duration': 1.5},
             'forecast2': {
                 'config name': 'SalishSea',
@@ -79,6 +91,9 @@ def config(scope='function'):
                 'mesh_mask':
                     '/results/nowcast-sys/NEMO-forcing/grid/'
                     'mesh_mask_downbyone2.nc',
+                'land processor elimination':
+                    '/results/nowcast-sys/NEMO-forcing/grid/'
+                    'bathy_downonegrid2.csv',
                 'duration': 1.25},
         },
         'run': {
@@ -90,19 +105,22 @@ def config(scope='function'):
                 'run prep dir': '/results/nowcast-sys/runs',
                 'mpi decomposition': '3x5',
                 'salishsea_cmd': 'bin/salishsea',
+                'email': 'somebody@example.com',
                 'job exec cmd': 'qsub',
                 'results': {
-                    'nowcast': 'results/SalishSea/nowcast',
                     'nowcast-dev': 'results/SalishSea/nowcast-dev',
-                    'nowcast-green': '/results/SalishSea/nowcast-green/',
-                    'forecast': '/results/SalishSea/forecast/',
-                    'forecast2': '/results/SalishSea/forecast2/',
                     }},
             'west.cloud': {
                 'salishsea_cmd': 'bin/salishsea',
                 'job exec cmd': 'bash',
-            },
-        }}
+                'results': {
+                    'nowcast': 'results/SalishSea/nowcast',
+                    'nowcast-green': 'results/SalishSea/nowcast-green/',
+                    'forecast': 'results/SalishSea/forecast/',
+                    'forecast2': 'results/SalishSea/forecast2/',
+                }
+            }},
+        }
 
 
 @pytest.fixture
@@ -505,7 +523,7 @@ class TestRunDescription:
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast', 'NEMO-code', 'NEMO-3.6-code'),
+        ('nowcast', 'NEMO code config', 'NEMO-3.6-code/NEMOGCM/CONFIG'),
         ('nowcast-green', 'XIOS', 'XIOS'),
         ('forecast', 'forcing', 'NEMO-forcing'),
     ])
@@ -566,11 +584,11 @@ class TestRunDescription:
                     run_date, run_type, run_id, 2160, 'salish', config)
         assert run_desc['paths'][path] == tmp_run_prep
 
-    @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast', 'coordinates', 'coordinates_seagrid_SalishSea.nc'),
+    @pytest.mark.parametrize('run_type, expected', [
+        ('nowcast', 'coordinates_seagrid_SalishSea.nc'),
     ])
     def test_grid_coordinates(
-        self, run_type, path, expected, config, run_date, tmp_results, tmpdir,
+        self, run_type, expected, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -590,13 +608,14 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, 'salish', config)
-        assert run_desc['grid'][path] == expected
+        assert run_desc['grid']['coordinates'] == expected
 
-    @pytest.mark.parametrize('run_type, path, expected', [
-        ('nowcast-green', 'bathymetry', 'bathy_meter_SalishSea6.nc'),
+    @pytest.mark.parametrize('run_type, expected', [
+        ('nowcast', 'bathy_downonegrid2.nc'),
+        ('nowcast-green', 'bathy_downonegrid2.nc'),
     ])
     def test_grid_bathymetry(
-        self, run_type, path, expected, config, run_date, tmp_results, tmpdir,
+        self, run_type, expected, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -614,10 +633,36 @@ class TestRunDescription:
         with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
-                with patch.dict(config['run types'][run_type], bathymetry=expected):
-                    run_desc = run_NEMO._run_description(
-                        run_date, run_type, run_id, 2160, 'salish', config)
-        assert run_desc['grid'][path] == expected
+                run_desc = run_NEMO._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['grid']['bathymetry'] == expected
+
+    @pytest.mark.parametrize('run_type, expected', [
+        ('nowcast', 'bathy_downonegrid2.csv'),
+        ('nowcast-green', 'bathy_downonegrid2.csv'),
+    ])
+    def test_grid_land_processor_elimination(
+        self, run_type, expected, config, run_date, tmp_results, tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run']['salish']['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run']['salish'],
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish'], {'run prep dir': str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, run_type, run_id, 2160, 'salish', config)
+        assert run_desc['grid']['land processor elimination'] == expected
 
     @pytest.mark.parametrize('run_type, link_name, expected', [
         ('nowcast', 'NEMO-atmos', 'NEMO-atmos'),
@@ -682,7 +727,7 @@ class TestRunDescription:
                     run_date, run_type, run_id, 2160, 'salish', config)
         tmp_results_dir = tmp_results['results'][run_type]
         expected = tmp_results_dir.join(expected)
-        assert run_desc['forcing'][link_name]['link to'] == expected
+        assert run_desc['restart'][link_name] == expected
 
     @pytest.mark.parametrize('run_type, link_name, expected', [
         ('nowcast', 'NEMO-atmos', '/nowcast-sys/nowcast/NEMO-atmos'),
@@ -874,9 +919,181 @@ class TestCreateRunScript:
         tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
         run_script_filepath = run_NEMO._create_run_script(
             arrow.get('2016-12-03'), run_type, Path(str(tmp_run_dir)),
-            '30nov16.yaml', 'salish', config)
+            '30nov16.yaml', 'west.cloud', config)
         expected = Path(str(tmp_run_dir.join('SalishSeaNEMO.sh')))
         assert run_script_filepath == expected
+
+
+class TestBuildScript:
+    """Unit test for _build_script function.
+    """
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'nowcast-green',
+        'forecast',
+        'forecast2',
+    ])
+    @patch('nowcast.workers.run_NEMO.salishsea_cmd.lib.load_run_desc')
+    @patch(
+        'nowcast.workers.run_NEMO.salishsea_cmd.lib.get_n_processors',
+        return_value=112
+    )
+    def test_script_west_cloud(self, m_gnp, m_lrd, run_type, config, tmpdir):
+        tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
+        run_desc_file = tmpdir.ensure('13may17.yaml')
+        results_dir = tmpdir.ensure_dir(
+            config['run']['west.cloud']['results'][run_type])
+        p_config = patch.dict(config, [
+            ('results archive', str(results_dir))])
+        m_lrd.return_value = {
+            'run_id': '13may17nowcast',
+            'MPI decomposition': '9x19',
+            'output': {'XIOS servers': 1}
+        }
+        with p_config:
+            script = run_NEMO._build_script(
+                Path(str(tmp_run_dir)), run_type, Path(str(run_desc_file)),
+                Path(str(results_dir)) / '13may17', 'west.cloud', config)
+        expected = '''#!/bin/bash
+
+        RUN_ID="13may17nowcast"
+        RUN_DESC="13may17.yaml"
+        WORK_DIR="{tmp_run_dir}"
+        RESULTS_DIR="{results_dir}"
+        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"
+        COMBINE="bin/salishsea combine"
+        DEFLATE="bin/salishsea deflate"
+        GATHER="bin/salishsea gather"
+
+        mkdir -p ${{RESULTS_DIR}}
+
+        cd ${{WORK_DIR}}
+        echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
+
+        echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{MPIRUN}} -np 112 --bind-to-core ./nemo.exe : \
+-np 1 --bind-to-core ./xios_server.exe \
+>>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+        echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
+
+        echo "Results combining started at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{COMBINE}} ${{RUN_DESC}} --debug \
+>>${{RESULTS_DIR}}/stdout
+        echo "Results combining ended at $(date)" >>${{RESULTS_DIR}}/stdout
+
+        echo "Results deflation started at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug \
+>>${{RESULTS_DIR}}/stdout
+        echo "Results deflation ended at $(date)" >>${{RESULTS_DIR}}/stdout
+
+        echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{GATHER}} ${{RESULTS_DIR}} --debug \
+>>${{RESULTS_DIR}}/stdout
+        echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
+        
+        chmod g+rwx ${{RESULTS_DIR}}
+        chmod g+rw ${{RESULTS_DIR}}/*
+        chmod o+rx ${{RESULTS_DIR}}
+        chmod o+r ${{RESULTS_DIR}}/*
+
+        echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
+        rmdir $(pwd)
+        echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
+        '''.format(
+            tmp_run_dir=tmp_run_dir,
+            results_dir=Path(str(results_dir)) / '13may17',
+        )
+        expected = expected.splitlines()
+        for i, line in enumerate(script.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast-dev',
+    ])
+    @patch('nowcast.workers.run_NEMO.salishsea_cmd.lib.load_run_desc')
+    @patch(
+        'nowcast.workers.run_NEMO.salishsea_cmd.lib.get_n_processors',
+        return_value=7
+    )
+    def test_script_salish(self, m_gnp, m_lrd, run_type, config, tmpdir):
+        tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
+        run_desc_file = tmpdir.ensure('13may17.yaml')
+        results_dir = tmpdir.ensure_dir(
+            config['run']['salish']['results'][run_type])
+        p_config = patch.dict(config, [
+            ('results archive', str(results_dir))])
+        m_lrd.return_value = {
+            'run_id': '13may17nowcast',
+            'MPI decomposition': '1x7',
+            'walltime': '23:30:00',
+            'output': {'XIOS servers': 1},
+        }
+        with p_config:
+            script = run_NEMO._build_script(
+                Path(str(tmp_run_dir)), run_type, Path(str(run_desc_file)),
+                Path(str(results_dir)) / '13may17', 'salish', config)
+        expected = f'''#!/bin/bash
+        
+        #PBS -N 13may17nowcast
+        #PBS -S /bin/bash
+        #PBS -l procs=8
+        # memory per processor
+        #PBS -l pmem=2000mb
+        #PBS -l walltime=23:30:00
+        # email when the job [b]egins and [e]nds, or is [a]borted
+        #PBS -m bea
+        #PBS -M somebody@example.com
+        # stdout and stderr file paths/names
+        #PBS -o {results_dir}/13may17/stdout
+        #PBS -e {results_dir}/13may17/stderr
+
+        RUN_ID="13may17nowcast"
+        RUN_DESC="13may17.yaml"
+        WORK_DIR="{tmp_run_dir}"
+        RESULTS_DIR="{results_dir}/13may17"
+        MPIRUN="mpirun"
+        COMBINE="bin/salishsea combine"
+        DEFLATE="bin/salishsea deflate"
+        GATHER="bin/salishsea gather"
+
+        mkdir -p ${{RESULTS_DIR}}
+
+        cd ${{WORK_DIR}}
+        echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
+
+        echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{MPIRUN}} -np 7 --bind-to-core ./nemo.exe : \
+-np 1 --bind-to-core ./xios_server.exe \
+>>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+        echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
+
+        echo "Results combining started at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{COMBINE}} ${{RUN_DESC}} --debug \
+>>${{RESULTS_DIR}}/stdout
+        echo "Results combining ended at $(date)" >>${{RESULTS_DIR}}/stdout
+
+        echo "Results deflation started at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug \
+>>${{RESULTS_DIR}}/stdout
+        echo "Results deflation ended at $(date)" >>${{RESULTS_DIR}}/stdout
+
+        echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{GATHER}} ${{RESULTS_DIR}} --debug \
+>>${{RESULTS_DIR}}/stdout
+        echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
+        
+        chmod g+rwx ${{RESULTS_DIR}}
+        chmod g+rw ${{RESULTS_DIR}}/*
+        chmod o+rx ${{RESULTS_DIR}}
+        chmod o+r ${{RESULTS_DIR}}/*
+
+        echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
+        rmdir $(pwd)
+        echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
+        '''
+        expected = expected.splitlines()
+        for i, line in enumerate(script.splitlines()):
+            assert line.strip() == expected[i].strip()
 
 
 class TestDefinitions:

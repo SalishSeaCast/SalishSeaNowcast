@@ -150,41 +150,51 @@ run types:
     config name: SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    land processor elimination: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
 ## TODO: Different values are necessary on skookum and west.cloud; see issue #32
 #    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
 #    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+#    land processor elimination: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
     duration: 1  # day
   nowcast-dev:
     config name: SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    land processor elimination: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
 ## TODO: Different values are necessary on skookum and west.cloud; see issue #32
 #    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
 #    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+#    land processor elimination: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
     duration: 1  # day
   nowcast-green:
     config name:  SOG
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    land processor elimination: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
 ## TODO: Different values are necessary on skookum and west.cloud; see issue #32
 #    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
 #    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+#    land processor elimination: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
     duration: 1  # day
   forecast:
     config name:  SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    land processor elimination: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
 ## TODO: Different values are necessary on skookum and west.cloud; see issue #32
 #    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
 #    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+#    land processor elimination: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
     duration: 1.5  # days
   forecast2:
     config name:  SalishSea
     bathymetry: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
     mesh mask: /results/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+    land processor elimination: /results/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
 ## TODO: Different values are necessary on skookum and west.cloud; see issue #32
 #    bathymetry: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc
 #    mesh mask: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/mesh_mask_downbyone2.nc
+#    land processor elimination: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv
     duration: 1.25  # days
 
 
