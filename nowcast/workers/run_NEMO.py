@@ -323,8 +323,11 @@ def _run_description(
     run_desc['grid']['coordinates'] = Path(config['coordinates']).name
     run_desc['grid']['bathymetry'] = Path(
         config['run types'][run_type]['bathymetry']).name
-    run_desc['grid']['land processor elimination'] = Path(
-        config['run types'][run_type]['land processor elimination']).name
+    lpe = (
+        False if host_name == 'salish-nowcast'
+        else Path(
+            config['run types'][run_type]['land processor elimination']).name)
+    run_desc['grid']['land processor elimination'] = lpe
     run_desc['restart'] = restart_filepaths
     run_desc['output']['files'] = os.fspath(
         (run_prep_dir/'iodef.xml').resolve())
