@@ -86,7 +86,7 @@ def make_runoff_file(parsed_args, config, *args):
 
     for bathy_type in config['rivers']['file templates']:
         # Get climatology
-        criverflow, lat, lon, area = (
+        criverflow, area = (
             _get_river_climatology(config['rivers']['monthly climatology'][bathy_type]))
         # Interpolate to today
         driverflow = _calculate_daily_flow(yesterday, criverflow)
@@ -98,7 +98,7 @@ def make_runoff_file(parsed_args, config, *args):
             config['rivers']['prop_dict modules'][bathy_type]).prop_dict
         filepath[bathy_type] = _combine_runoff(
             prop_dict, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-            otherratio, driverflow, lat, lon, area, directory, filename_tmpls)
+            otherratio, driverflow, area, directory, filename_tmpls)
 
     return filepath
 
@@ -117,11 +117,8 @@ def _get_river_climatology(filename):
     # Open monthly climatology
     clim_rivers = NC.Dataset(filename)
     criverflow = clim_rivers.variables['rorunoff']
-    # Get other variables so we can put them in new files
-    lat = clim_rivers.variables['nav_lat']
-    lon = clim_rivers.variables['nav_lon']
     area = clim_rivers.variables['area']
-    return criverflow, lat, lon, area
+    return criverflow, area
 
 
 def _calculate_daily_flow(yesterday, criverflow):
@@ -190,7 +187,7 @@ def _fraser_correction(
 
 def _combine_runoff(
     prop_dict, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-    otherratio, driverflow, lat, lon, area, directory, filename_tmpls,
+    otherratio, driverflow, area, directory, filename_tmpls,
 ):
 
     pd = prop_dict['fraser']
@@ -201,27 +198,21 @@ def _combine_runoff(
     # set up filename to follow NEMO conventions
     filename = filename_tmpls.format(yesterday.date())
     filepath = os.path.join(directory, filename)
-    _write_file(filepath, yesterday, runoff, lat, lon)
+    _write_file(filepath, yesterday, runoff)
     logger.debug(f'File written to {directory}/{filename}')
     return filepath
 
 
-def _write_file(filepath, yesterday, flow, lat, lon):
+def _write_file(filepath, yesterday, flow):
     """Create the rivers runoff netCDF4 file.
     """
     nemo = NC.Dataset(filepath, 'w')
     nemo.description = 'Real Fraser Values, Daily Climatology for Other Rivers'
     # Dimensions
-    ymax, xmax = lat.shape
+    ymax, xmax = flow.shape
     nemo.createDimension('x', xmax)
     nemo.createDimension('y', ymax)
     nemo.createDimension('time_counter', None)
-    # Variables
-    # Latitude and longitude
-    nav_lat = nemo.createVariable('nav_lat', 'float32', ('y', 'x'), zlib=True)
-    nav_lat[:] = lat[:]
-    nav_lon = nemo.createVariable('nav_lon', 'float32', ('y', 'x'), zlib=True)
-    nav_lon[:] = lon[:]
     # Time
     time_counter = nemo.createVariable(
         'time_counter', 'float32', ('time_counter'), zlib=True)
