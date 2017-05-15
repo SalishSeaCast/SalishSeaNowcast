@@ -85,11 +85,9 @@ def make_runoff_file(parsed_args, config, *args):
     filepath = {}
 
     for bathy_type in config['rivers']['file templates']:
-        print(bathy_type)
         # Get climatology
         criverflow, lat, lon, area = (
             _get_river_climatology(config['rivers']['monthly climatology'][bathy_type]))
-        print(area[200,200])
         # Interpolate to today
         driverflow = _calculate_daily_flow(yesterday, criverflow)
         logger.debug(f'Getting file for {yesterday.format("YYYY-MM-DD")}')
@@ -123,7 +121,6 @@ def _get_river_climatology(filename):
     lat = clim_rivers.variables['nav_lat']
     lon = clim_rivers.variables['nav_lon']
     area = clim_rivers.variables['area']
-    print('clim', area[200,200])
     return criverflow, lat, lon, area
 
 
