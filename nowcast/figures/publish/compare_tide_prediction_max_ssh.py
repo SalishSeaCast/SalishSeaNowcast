@@ -55,6 +55,81 @@ from salishsea_tools import (
 from nowcast.figures import shared
 import nowcast.figures.website_theme
 
+# Constant with station information: mean sea level, latitude,
+# longitude, station number, historical extreme ssh, etc.
+# Extreme ssh from DFO website
+# Mean sea level from CHS tidal constiuents.
+# VENUS coordinates from the VENUS website. Depth is in meters.
+
+SITES = {
+    'Nanaimo': {
+        'lat': 49.16,
+        'lon': -123.93,
+        'msl': 3.08,
+        'extreme_ssh': 5.47},
+    'Halibut Bank': {
+        'lat': 49.34,
+        'lon': -123.72},
+    'Dungeness': {
+        'lat': 48.15,
+        'lon': -123.117},
+    'La Perouse Bank': {
+        'lat': 48.83,
+        'lon': -126.0},
+    'Point Atkinson': {
+        'lat': 49.33,
+        'lon': -123.25,
+        'msl': 3.09,
+        'stn_no': 7795,
+        'extreme_ssh': 5.61},
+    'Victoria': {
+        'lat': 48.41,
+        'lon': -123.36,
+        'msl': 1.8810,
+        'stn_no': 7120,
+        'extreme_ssh': 3.76},
+    'Campbell River': {
+        'lat': 50.04,
+        'lon': -125.24,
+        'msl': 2.916,
+        'stn_no': 8074,
+        'extreme_ssh': 5.35},
+    'Neah Bay': {
+        'lat': 48.4,
+        'lon': -124.6,
+        'stn_no':  9443090},
+    'Friday Harbor': {
+        'lat': 48.55,
+        'lon': -123.016667,
+        'stn_no': 9449880},
+    'Cherry Point': {
+        'lat': 48.866667,
+        'lon': -122.766667,
+        'stn_no': 9449424,
+        'msl': 3.543,
+        'extreme_ssh': 5.846},
+    'Sandheads': {
+        'lat': 49.10,
+        'lon': -123.30},
+    'Tofino': {
+        'lat': 49.15,
+        'lon': -125.91,
+        'stn_no': 8615},
+    'Bamfield': {
+        'lat': 48.84,
+        'lon': -125.14,
+        'stn_no': 8545},
+    'VENUS': {
+        'East': {
+            'lat': 49.0419,
+            'lon': -123.3176,
+            'depth': 170},
+        'Central': {
+            'lat': 49.0401,
+            'lon': -123.4261,
+            'depth': 300}
+        }
+    }
 
 def make_figure(
     place, grid_T_hr, grids_15m, bathy, weather_path, tidal_predictions,
@@ -126,6 +201,18 @@ def _prep_plot_data(
         grids_15m[place], 0, 0, datetimes=True)
     ttide = shared.get_tides(place, tidal_predictions)
     ssh_corr = shared.correct_model_ssh(ssh_15m_ts.ssh, ssh_15m_ts.time, ttide)
+
+    # drobb start
+    # 
+    msl = SITES[place]['msl']
+    extreme_ssh = SITES[place]['extreme_ssh'] 
+    max_tides = max(ttide.pred_all) + msl 
+    mid_tides = 0.5 * (extreme_ssh - max_tides) + max_tides 
+    max_ssh = np.max(ssh_corr) + msl 
+    thresholds = (max_tides, mid_tides, extreme_ssh)
+
+    # drobb end
+
     max_ssh_15m, time_max_ssh_15m = shared.find_ssh_max(
         place, ssh_15m_ts, ttide)
     tides_15m = shared.interp_to_model_time(
@@ -141,7 +228,7 @@ def _prep_plot_data(
         'ssh_max_field, time_max_ssh_hr, ssh_15m_ts, ssh_corr, '
         'max_ssh_15m, time_max_ssh_15m, residual, max_ssh_residual, '
         'wind_4h_avg, '
-        'ttide, bathy')
+        'ttide, bathy, thresholds')
     return plot_data(
         ssh_max_field=ssh_hr[itime_max_ssh],
         time_max_ssh_hr=time_max_ssh_hr.to(timezone),
@@ -154,6 +241,7 @@ def _prep_plot_data(
         wind_4h_avg=wind_4h_avg,
         ttide=ttide,
         bathy=bathy,
+        thresholds=thresholds,
     )
 
 
@@ -163,13 +251,15 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(3, 2, width_ratios=[2, 1])
     gs.update(wspace=0.13, hspace=0.2)
     ax_info = fig.add_subplot(gs[0, 0])
-    ax_ssh = fig.add_subplot(gs[1, 0])
-    ax_ssh.set_axis_bgcolor(theme.COLOURS['axes']['background'])
+    ax_ssh = [0, 0]
+    ax_ssh[0] = fig.add_subplot(gs[1, 0])
+    #ax_ssh[1] = ax_ssh.twinx()
+    ax_ssh[0].set_axis_bgcolor(theme.COLOURS['axes']['background'])
     ax_res = fig.add_subplot(gs[2, 0])
     ax_res.set_axis_bgcolor(theme.COLOURS['axes']['background'])
     ax_map = fig.add_subplot(gs[:, 1])
     fig.autofmt_xdate()
-    return fig, (ax_info, ax_ssh, ax_map, ax_res)
+    return fig, (ax_info, ax_ssh[0], ax_map, ax_res)
 
 
 def _plot_info_box(ax, place, plot_data, theme):
@@ -206,7 +296,7 @@ def _plot_info_box(ax, place, plot_data, theme):
         wind_tools.wind_to_from(plot_data.wind_4h_avg.dir))
     ax.text(
         0.05, 0.3,
-        f'Wind: {plot_data.wind_4h_avg.speed:.0f} m/s from the {heading} '
+        f'Wind: {plot_data.wind_4h_avg.speed:.0f} m/s from the {heading} \n'
         f'(averaged over four hours prior to maximum water level)',
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes,
@@ -223,28 +313,46 @@ def _info_box_hide_frame(ax, theme):
         ax.spines[spine].set_visible(False)
 
 
-def _plot_ssh_time_series(ax, place, plot_data, timezone, theme, ylims=(-3, 3)):
+def _plot_ssh_time_series(ax, place, plot_data, timezone, theme, ylims=(-1, 6)):
     time = [
         t.astimezone(pytz.timezone(timezone))
         for t in plot_data.ssh_15m_ts.time]
+
+    # Added + msl to the following four ax.plot calls to convert from msl to chart datum
+    msl = SITES[place]['msl'] 
+
     ax.plot(
-        plot_data.ttide.time, plot_data.ttide.pred_all,
+        plot_data.ttide.time, plot_data.ttide.pred_all + msl,
         linewidth=2, label='Tide Prediction',
-        color=theme.COLOURS['time series']['tidal prediction vs model'])
+        #color=theme.COLOURS['time series']['tidal prediction vs model']
+        color='purple'
+    )
     ax.plot(
-        time, plot_data.ssh_corr,
+        time, plot_data.ssh_corr + msl,
         linewidth=2, linestyle='-', label='Corrected model',
         color=theme.COLOURS['time series']['tide gauge ssh'])
     ax.plot(
-        time, plot_data.ssh_15m_ts.ssh,
+        time, plot_data.ssh_15m_ts.ssh + msl,
         linewidth=1, linestyle='--', label='Model',
         color=theme.COLOURS['time series']['tide gauge ssh'])
     ax.plot(
-        plot_data.time_max_ssh_15m.datetime, plot_data.max_ssh_15m,
+        plot_data.time_max_ssh_15m.datetime, plot_data.max_ssh_15m + msl,
         marker='o', markersize=10, markeredgewidth=3,
         label='Maximum SSH',
         color=theme.COLOURS['marker']['max ssh'])
-    ax.legend(numpoints=1)
+
+    # drobb start
+    colors = ['Gold', 'Red', 'DarkRed']
+    labels = ['Maximum tides', 'Extreme water', 'Historical maximum']
+    for wlev, color, label in zip(plot_data.thresholds, colors, labels):
+        ax.axhline(y=wlev, color=color, lw=2, ls='solid', label=label)
+    
+    legend = ax.legend(numpoints=1,
+                       bbox_to_anchor=(0.75, 1.2), loc='lower left', borderaxespad=0.,
+                       prop={'size': 12}, title=r'Legend')
+    legend.get_title().set_fontsize('16')
+    # drobb end
+    
     ax.set_xlim(
         plot_data.ssh_15m_ts.time[0], plot_data.ssh_15m_ts.time[-1])
     _ssh_time_series_labels(ax, place, ylims, theme)
@@ -256,7 +364,7 @@ def _ssh_time_series_labels(ax, place, ylims, theme):
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
     ax.set_ylabel(
-        'Water Level wrt MSL [m]',
+        'Water Level above Chart Datum [m]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis'])
     ax.set_ylim(ylims)
