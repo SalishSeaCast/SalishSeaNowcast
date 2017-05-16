@@ -63,4 +63,5 @@ dependencies:
     - python-hglib
     - retrying
     - schedule
+    - scour
     - waitress==0.9.0

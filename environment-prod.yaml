@@ -47,3 +47,4 @@ dependencies:
     - python-hglib
     - raven
     - retrying
+    - scour
