@@ -40,6 +40,7 @@ import shlex
 
 from nowcast import lib
 from nowcast.figures.research import tracer_thalweg_and_surface, time_series_plots
+from nowcast.figures.research import tracer_thalweg_and_surface_hourly
 from nowcast.figures.comparison import compare_venus_ctd
 from nowcast.figures.publish import (
     pt_atkinson_tide,
@@ -269,6 +270,17 @@ def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
             'args':(phys_dataset,'temperature','salinity',place)
             },
     }
+
+    clevels_thalweg, clevels_surface = tracer_thalweg_and_surface_hourly.clevels(ptrc_T_hr.variables['NO3'], mesh_mask, depth_integrated=False)
+
+    for k in range(24):
+       key = 'nitrate_thalweg_and_surface_hourly_h{:02d}'.format(k)
+       fig_functions[key] = {
+            'function': tracer_thalweg_and_surface_hourly.make_figure,
+            'args': (k, ptrc_T_hr.variables['NO3'], bathy, mesh_mask, clevels_thalweg, clevels_surface),
+            'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False},
+            'format': 'png'
+        } 
     return fig_functions
 
 
