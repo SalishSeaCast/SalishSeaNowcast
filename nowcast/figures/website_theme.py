@@ -82,6 +82,13 @@ COLOURS = {
         'VENUS CTD temperature': 'green',
         'nitrate': 'darkgreen',
         'silicon': 'brown',
+        'diatoms': 'brown',
+        'mesozooplankton' : 'brown',
+        'microzooplankton' : 'darkgreen',
+        'ciliates' : 'brown',
+        'flagellates' : 'darkgreen',
+        'temperature' : 'red',
+        'salinity' : 'blue',
     },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
