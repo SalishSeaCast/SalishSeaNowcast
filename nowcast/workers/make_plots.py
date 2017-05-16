@@ -21,6 +21,8 @@ from glob import glob
 import logging
 import os
 from pathlib import Path
+import xarray as xr
+
 
 # **IMPORTANT**: matplotlib must be imported before anything else that uses it
 # because of the matplotlib.use() call below
@@ -37,7 +39,7 @@ import subprocess
 import shlex
 
 from nowcast import lib
-from nowcast.figures.research import tracer_thalweg_and_surface
+from nowcast.figures.research import tracer_thalweg_and_surface, time_series_plots
 from nowcast.figures.comparison import compare_venus_ctd
 from nowcast.figures.publish import (
     pt_atkinson_tide,
@@ -241,12 +243,31 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir):
 
 def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
     ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
+    place = 'Sandheads' 
+    phys_dataset = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV17-02')
+    bio_dataset =  xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV17-02')
     fig_functions = {
         'nitrate_thalweg_and_surface': {
             'function': tracer_thalweg_and_surface.make_figure,
             'args': (ptrc_T_hr.variables['NO3'], bathy, mesh_mask),
             'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False}
         },
+        'nitrate_diatoms_timeseries':{
+            'function':time_series_plots.make_figure,
+            'args':(bio_dataset,'nitrate','diatoms',place)
+            },
+        'mesozoo_microzoo_timeseries':{
+            'function':time_series_plots.make_figure,
+            'args':(bio_dataset,'mesozooplankton','microzooplankton',place)
+            },
+        'mesodinium_flagellates_timeseries':{
+            'function':time_series_plots.make_figure,
+            'args':(bio_dataset,'ciliates','flagellates',place)
+            },
+        'temperature_salinity_timeseries':{
+            'function':time_series_plots.make_figure,
+            'args':(phys_dataset,'temperature','salinity',place)
+            },
     }
     return fig_functions
 
