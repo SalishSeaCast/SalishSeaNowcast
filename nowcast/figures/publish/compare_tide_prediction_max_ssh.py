@@ -55,12 +55,9 @@ from salishsea_tools import (
 from nowcast.figures import shared
 import nowcast.figures.website_theme
 
-# Constant with station information: mean sea level, latitude,
-# longitude, station number, historical extreme ssh, etc.
-# Extreme ssh from DFO website
-# Mean sea level from CHS tidal constiuents.
-# VENUS coordinates from the VENUS website. Depth is in meters.
-
+# drobb start
+# Copied from figures.py
+# Maybe this information can be acessed from somehwere else? in places? or config?
 SITES = {
     'Nanaimo': {
         'lat': 49.16,
@@ -130,6 +127,7 @@ SITES = {
             'depth': 300}
         }
     }
+# drobb end
 
 def make_figure(
     place, grid_T_hr, grids_15m, bathy, weather_path, tidal_predictions,
@@ -203,14 +201,15 @@ def _prep_plot_data(
     ssh_corr = shared.correct_model_ssh(ssh_15m_ts.ssh, ssh_15m_ts.time, ttide)
 
     # drobb start
-    # 
+    # maybe something like
+    # thresholds = shared.get_thresholds(place, ttide, ssh_corr)
+    # instead of below
     msl = SITES[place]['msl']
     extreme_ssh = SITES[place]['extreme_ssh'] 
     max_tides = max(ttide.pred_all) + msl 
     mid_tides = 0.5 * (extreme_ssh - max_tides) + max_tides 
     max_ssh = np.max(ssh_corr) + msl 
     thresholds = (max_tides, mid_tides, extreme_ssh)
-
     # drobb end
 
     max_ssh_15m, time_max_ssh_15m = shared.find_ssh_max(
@@ -223,12 +222,14 @@ def _prep_plot_data(
         arrow.get(time_max_ssh_15m), weather_path,
         places.PLACES[place]['wind grid ji'], avg_hrs=-4)
     wind_4h_avg = wind_tools.wind_speed_dir(*wind_4h_avg)
+    # drobb
+    # Add thresholds and msl to plot_data
     plot_data = namedtuple(
         'PlotData',
         'ssh_max_field, time_max_ssh_hr, ssh_15m_ts, ssh_corr, '
         'max_ssh_15m, time_max_ssh_15m, residual, max_ssh_residual, '
         'wind_4h_avg, '
-        'ttide, bathy, thresholds')
+        'ttide, bathy, thresholds, msl')
     return plot_data(
         ssh_max_field=ssh_hr[itime_max_ssh],
         time_max_ssh_hr=time_max_ssh_hr.to(timezone),
@@ -242,6 +243,7 @@ def _prep_plot_data(
         ttide=ttide,
         bathy=bathy,
         thresholds=thresholds,
+        msl=msl,
     )
 
 
@@ -251,15 +253,21 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(3, 2, width_ratios=[2, 1])
     gs.update(wspace=0.13, hspace=0.2)
     ax_info = fig.add_subplot(gs[0, 0])
+    # drobb start
+    # Make left axis ax[0] in chart datum and right axis ax[1] in meters above mean sea level
+    # Currently, all data belongs to the left axis ax[0]
+    # It might be cleaner to have data belong to the right axis and not do as many conversions from meters above sea level to chart datum
     ax_ssh = [0, 0]
     ax_ssh[0] = fig.add_subplot(gs[1, 0])
-    #ax_ssh[1] = ax_ssh.twinx()
-    ax_ssh[0].set_axis_bgcolor(theme.COLOURS['axes']['background'])
+    ax_ssh[1] = ax_ssh[0].twinx()
+    for axis in ax_ssh:
+        axis.set_axis_bgcolor(theme.COLOURS['axes']['background'])
+    # drobb end
     ax_res = fig.add_subplot(gs[2, 0])
     ax_res.set_axis_bgcolor(theme.COLOURS['axes']['background'])
     ax_map = fig.add_subplot(gs[:, 1])
     fig.autofmt_xdate()
-    return fig, (ax_info, ax_ssh[0], ax_map, ax_res)
+    return fig, (ax_info, ax_ssh, ax_map, ax_res)
 
 
 def _plot_info_box(ax, place, plot_data, theme):
@@ -271,7 +279,11 @@ def _plot_info_box(ax, place, plot_data, theme):
         color=theme.COLOURS['text']['info box title'])
     ax.text(
         0.05, 0.75,
-        f'Max SSH: {plot_data.max_ssh_15m:.2f} metres above mean sea level',
+        # drobb start
+        # Should this be wrt mean sea level or chart datum?
+        #f'Max SSH: {plot_data.max_ssh_15m:.2f} metres above mean sea level',
+        f'Max SSH: {plot_data.max_ssh_15m+plot_data.msl:.2f} metres above chart datum',
+        # drobb end
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['info box content'],
@@ -318,59 +330,67 @@ def _plot_ssh_time_series(ax, place, plot_data, timezone, theme, ylims=(-1, 6)):
         t.astimezone(pytz.timezone(timezone))
         for t in plot_data.ssh_15m_ts.time]
 
-    # Added + msl to the following four ax.plot calls to convert from msl to chart datum
-    msl = SITES[place]['msl'] 
+    # drobb 
+    # Added + plot_data.msl to the following four ax[0].plot calls to convert from metres above msl to chart datum
+    # Left axis ax[0] is in chart datum
 
-    ax.plot(
-        plot_data.ttide.time, plot_data.ttide.pred_all + msl,
+    ax[0].plot(
+        plot_data.ttide.time, plot_data.ttide.pred_all + plot_data.msl,
         linewidth=2, label='Tide Prediction',
-        #color=theme.COLOURS['time series']['tidal prediction vs model']
+        # drobb
+        # theme color conflict with theme
+        # color=theme.COLOURS['time series']['tidal prediction vs model']
         color='purple'
     )
-    ax.plot(
-        time, plot_data.ssh_corr + msl,
+    ax[0].plot(
+        time, plot_data.ssh_corr + plot_data.msl,
         linewidth=2, linestyle='-', label='Corrected model',
         color=theme.COLOURS['time series']['tide gauge ssh'])
-    ax.plot(
-        time, plot_data.ssh_15m_ts.ssh + msl,
+    ax[0].plot(
+        time, plot_data.ssh_15m_ts.ssh + plot_data.msl,
         linewidth=1, linestyle='--', label='Model',
         color=theme.COLOURS['time series']['tide gauge ssh'])
-    ax.plot(
-        plot_data.time_max_ssh_15m.datetime, plot_data.max_ssh_15m + msl,
+    ax[0].plot(
+        plot_data.time_max_ssh_15m.datetime, plot_data.max_ssh_15m + plot_data.msl,
         marker='o', markersize=10, markeredgewidth=3,
         label='Maximum SSH',
         color=theme.COLOURS['marker']['max ssh'])
 
     # drobb start
+    # Add extreme water levels
     colors = ['Gold', 'Red', 'DarkRed']
     labels = ['Maximum tides', 'Extreme water', 'Historical maximum']
     for wlev, color, label in zip(plot_data.thresholds, colors, labels):
-        ax.axhline(y=wlev, color=color, lw=2, ls='solid', label=label)
+        ax[0].axhline(y=wlev, color=color, lw=2, ls='solid', label=label)
     
-    legend = ax.legend(numpoints=1,
-                       bbox_to_anchor=(0.75, 1.2), loc='lower left', borderaxespad=0.,
-                       prop={'size': 12}, title=r'Legend')
+    legend = ax[0].legend(numpoints=1, bbox_to_anchor=(0.75, 1.2), loc='lower left', 
+                       borderaxespad=0., prop={'size': 12}, title=r'Legend')
     legend.get_title().set_fontsize('16')
     # drobb end
     
-    ax.set_xlim(
+    ax[0].set_xlim(
         plot_data.ssh_15m_ts.time[0], plot_data.ssh_15m_ts.time[-1])
-    _ssh_time_series_labels(ax, place, ylims, theme)
+    _ssh_time_series_labels(ax, place, plot_data, ylims, theme)
 
 
-def _ssh_time_series_labels(ax, place, ylims, theme):
-    ax.set_title(
+def _ssh_time_series_labels(ax, place, plot_data, ylims, theme):
+    ax[0].set_title(
         f'Sea Surface Height at {place}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
-    ax.set_ylabel(
-        'Water Level above Chart Datum [m]',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
-    ax.set_ylim(ylims)
-    ax.grid(axis='both')
-    theme.set_axis_colors(ax)
-
+    ax[0].grid(axis='both')
+    ax[0].set_ylim(ylims)
+    # drobb start
+    # Make right axis ax[1] in metres above mean sea level
+    ax[1].set_ylim((ylims[0] - plot_data.msl, ylims[1] - plot_data.msl))
+    ylabels = ['Water Level above \n Chart Datum [m]', 'Water Level wrt MSL [m]']
+    for axis, ylabel in zip(ax, ylabels):
+        axis.set_ylabel(
+            ylabel,
+            fontproperties=theme.FONTS['axis'],
+            color=theme.COLOURS['text']['axis'])
+        theme.set_axis_colors(axis)
+    # drobb end
 
 def _plot_residual_time_series(
     ax, plot_data, timezone, theme,
