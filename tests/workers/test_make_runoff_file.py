@@ -15,10 +15,8 @@
 
 """Unit tests for Salish Sea NEMO nowcast make_runoff_file worker.
 """
-from unittest.mock import (
-    Mock,
-    patch,
-)
+from types import SimpleNamespace
+from unittest.mock import patch
 
 import arrow
 
@@ -57,12 +55,12 @@ class TestSuccess:
     """Unit tests for success() function.
     """
     def test_success_log_info(self, m_logger):
-        parsed_args = Mock()
+        parsed_args = SimpleNamespace(run_date=arrow.get('2017-05-17'))
         make_runoff_file.success(parsed_args)
         assert m_logger.info.called
 
     def test_success_msg_type(self, m_logger):
-        parsed_args = Mock()
+        parsed_args = SimpleNamespace(run_date=arrow.get('2017-05-17'))
         msg_typ = make_runoff_file.success(parsed_args)
         assert msg_typ == 'success'
 
@@ -72,11 +70,11 @@ class TestFailure:
     """Unit tests for failure() function.
     """
     def test_failure_log_critical(self, m_logger):
-        parsed_args = Mock()
+        parsed_args = SimpleNamespace(run_date=arrow.get('2017-05-17'))
         make_runoff_file.failure(parsed_args)
         assert m_logger.critical.called
 
     def test_failure_msg_type(self, m_logger):
-        parsed_args = Mock()
+        parsed_args = SimpleNamespace(run_date=arrow.get('2017-05-17'))
         msg_typ = make_runoff_file.failure(parsed_args)
         assert msg_typ == 'failure'

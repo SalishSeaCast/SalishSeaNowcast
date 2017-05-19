@@ -23,6 +23,7 @@ forcing file.
 import importlib
 import logging
 import os
+from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
@@ -76,38 +77,43 @@ def make_runoff_file(parsed_args, config, *args):
     # Find history of fraser flow
     fraserflow = _get_fraser_at_hope(config)
     # Select yesterday's value
-    step1 = fraserflow[fraserflow[:, 0] == yesterday.year]
-    step2 = step1[step1[:, 1] == yesterday.month]
-    step3 = step2[step2[:, 2] == yesterday.day]
-    flow_at_hope = step3[0, 3]
+    year_data = fraserflow[fraserflow[:, 0] == yesterday.year]
+    month_data = year_data[year_data[:, 1] == yesterday.month]
+    day_data = month_data[month_data[:, 2] == yesterday.day]
+    flow_at_hope = day_data[0, 3]
     # Get Fraser Watershed Climatology without Fraser
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
-    filepath = {}
 
+    checklist = {}
     for bathy_type in config['rivers']['file templates']:
+        logger.info(
+            f'calculating runoff forcing for bathymetry type: {bathy_type}')
         # Get climatology
-        criverflow, area = (
-            _get_river_climatology(config['rivers']['monthly climatology'][bathy_type]))
+        climatology_file = Path(
+            config['rivers']['monthly climatology'][bathy_type])
+        criverflow, area = _get_river_climatology(climatology_file)
         # Interpolate to today
         driverflow = _calculate_daily_flow(yesterday, criverflow)
-        logger.debug(f'Getting file for {yesterday.format("YYYY-MM-DD")}')
+        logger.debug(f'calculated flow for {yesterday.format("YYYY-MM-DD")}')
         # Calculate combined runoff and write file
-        directory = config['rivers']['rivers dir']
+        directory = Path(config['rivers']['rivers dir'])
         filename_tmpls = config['rivers']['file templates'][bathy_type]
         prop_dict = importlib.import_module(
             config['rivers']['prop_dict modules'][bathy_type]).prop_dict
-        filepath[bathy_type] = _combine_runoff(
-            prop_dict, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
-            otherratio, driverflow, area, directory, filename_tmpls)
-
-    return filepath
+        filepath = _combine_runoff(
+            prop_dict, flow_at_hope, yesterday, afterHope, nonFraser,
+            fraserratio, otherratio, driverflow, area, directory,
+            filename_tmpls)
+        checklist[bathy_type] = os.fspath(filepath)
+    return checklist
 
 
 def _get_fraser_at_hope(config):
-    """Read Fraser Flow data at Hope from ECget file
+    """Read daily average discharge data for Fraser at Hope from ECget file.
     """
-    filename = config['rivers']['ECget Fraser flow']
-    fraserflow = np.loadtxt(filename)
+    filename = Path(config['rivers']['ECget Fraser flow'])
+    fraserflow = np.loadtxt(os.fspath(filename))
+    logger.debug(f'read Fraser at Hope data from {filename}')
     return fraserflow
 
 
@@ -118,6 +124,8 @@ def _get_river_climatology(filename):
     clim_rivers = NC.Dataset(filename)
     criverflow = clim_rivers.variables['rorunoff']
     area = clim_rivers.variables['area']
+    logger.debug(
+        f'read monthly climatology for all other rivers from {filename}')
     return criverflow, area
 
 
@@ -149,12 +157,14 @@ def _calculate_daily_flow(yesterday, criverflow):
 def _fraser_climatology(config):
     """Read in the Fraser climatology separated from Hope flow.
     """
-    with open(config['rivers']['Fraser climatology']) as f:
-        fraser_climatology_separation = yaml.safe_load(f)
-    otherratio = fraser_climatology_separation['Ratio that is not Fraser']
-    fraserratio = fraser_climatology_separation['Ratio that is Fraser']
-    nonFraser = np.array(fraser_climatology_separation['non Fraser by Month'])
-    afterHope = np.array(fraser_climatology_separation['after Hope by Month'])
+    fraser_climatology_file = config['rivers']['Fraser climatology']
+    with fraser_climatology_file.open('rt') as f:
+        fraser_climatology = yaml.safe_load(f)
+    logger.debug(f'read Fraser climatology from {fraser_climatology_file}')
+    otherratio = fraser_climatology['Ratio that is not Fraser']
+    fraserratio = fraser_climatology['Ratio that is Fraser']
+    nonFraser = np.array(fraser_climatology['non Fraser by Month'])
+    afterHope = np.array(fraser_climatology['after Hope by Month'])
     return otherratio, fraserratio, nonFraser, afterHope
 
 
@@ -189,43 +199,44 @@ def _combine_runoff(
     prop_dict, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
     otherratio, driverflow, area, directory, filename_tmpls,
 ):
-
+    """
+    :param :py:class:`pathlib.Path` directory:
+    """
     pd = prop_dict['fraser']
 
     runoff = _fraser_correction(
         pd, flow_at_hope, yesterday, afterHope, nonFraser, fraserratio,
         otherratio, driverflow, area)
     # set up filename to follow NEMO conventions
-    filename = filename_tmpls.format(yesterday.date())
-    filepath = os.path.join(directory, filename)
+    filepath = directory / filename_tmpls.format(yesterday.date())
     _write_file(filepath, yesterday, runoff)
-    logger.debug(f'File written to {directory}/{filename}')
+    logger.debug(f'wrote file to {filepath}')
     return filepath
 
 
 def _write_file(filepath, yesterday, flow):
     """Create the rivers runoff netCDF4 file.
     """
-    nemo = NC.Dataset(filepath, 'w')
-    nemo.description = 'Real Fraser Values, Daily Climatology for Other Rivers'
-    # Dimensions
-    ymax, xmax = flow.shape
-    nemo.createDimension('x', xmax)
-    nemo.createDimension('y', ymax)
-    nemo.createDimension('time_counter', None)
-    # Time
-    time_counter = nemo.createVariable(
-        'time_counter', 'float32', ('time_counter'), zlib=True)
-    time_counter.units = 'non-dim'
-    time_counter = [1]
-    # Runoff
-    rorunoff = nemo.createVariable(
-        'rorunoff', 'float32', ('time_counter', 'y', 'x'), zlib=True)
-    rorunoff._Fillvalue = 0.
-    rorunoff._missing_value = 0.
-    rorunoff._units = 'kg m-2 s-1'
-    rorunoff[0, :] = flow
-    nemo.close()
+    with NC.Dataset(os.fspath(filepath), 'w') as nemo:
+        nemo.description = (
+            'Real Fraser Values, Daily Climatology for Other Rivers')
+        # Dimensions
+        ymax, xmax = flow.shape
+        nemo.createDimension('x', xmax)
+        nemo.createDimension('y', ymax)
+        nemo.createDimension('time_counter', None)
+        # Time
+        time_counter = nemo.createVariable(
+            'time_counter', 'float32', 'time_counter', zlib=True)
+        time_counter.units = 'non-dim'
+        time_counter = [1]
+        # Runoff
+        rorunoff = nemo.createVariable(
+            'rorunoff', 'float32', ('time_counter', 'y', 'x'), zlib=True)
+        rorunoff._Fillvalue = 0.
+        rorunoff._missing_value = 0.
+        rorunoff._units = 'kg m-2 s-1'
+        rorunoff[0, :] = flow
 
 
 if __name__ == '__main__':
