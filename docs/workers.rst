@@ -336,3 +336,12 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 
 .. automodule:: nowcast.figures.research.tracer_thalweg_and_surface
     :members:
+
+.. _nowcast.figures.research.time_series_plots:
+
+:py:mod:`nowcast.figures.research.time_series_plots` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.research.time_series_plots
+    :members:
+
