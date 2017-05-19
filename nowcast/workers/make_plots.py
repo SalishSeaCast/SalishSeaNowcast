@@ -21,6 +21,8 @@ from glob import glob
 import logging
 import os
 from pathlib import Path
+import xarray as xr
+
 
 # **IMPORTANT**: matplotlib must be imported before anything else that uses it
 # because of the matplotlib.use() call below
@@ -33,9 +35,12 @@ import cmocean
 from nemo_nowcast import NowcastWorker
 import netCDF4 as nc
 import scipy.io as sio
+import subprocess
+import shlex
 
 from nowcast import lib
-from nowcast.figures.research import tracer_thalweg_and_surface
+from nowcast.figures.research import tracer_thalweg_and_surface, time_series_plots
+from nowcast.figures.research import tracer_thalweg_and_surface_hourly
 from nowcast.figures.comparison import compare_venus_ctd
 from nowcast.figures.publish import (
     pt_atkinson_tide,
@@ -239,13 +244,43 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir):
 
 def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
     ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
+    place = 'Sandheads' 
+    phys_dataset = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV17-02')
+    bio_dataset =  xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV17-02')
     fig_functions = {
         'nitrate_thalweg_and_surface': {
             'function': tracer_thalweg_and_surface.make_figure,
             'args': (ptrc_T_hr.variables['NO3'], bathy, mesh_mask),
             'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False}
         },
+        'nitrate_diatoms_timeseries':{
+            'function':time_series_plots.make_figure,
+            'args':(bio_dataset,'nitrate','diatoms',place)
+            },
+        'mesozoo_microzoo_timeseries':{
+            'function':time_series_plots.make_figure,
+            'args':(bio_dataset,'mesozooplankton','microzooplankton',place)
+            },
+        'mesodinium_flagellates_timeseries':{
+            'function':time_series_plots.make_figure,
+            'args':(bio_dataset,'ciliates','flagellates',place)
+            },
+        'temperature_salinity_timeseries':{
+            'function':time_series_plots.make_figure,
+            'args':(phys_dataset,'temperature','salinity',place)
+            },
     }
+
+    clevels_thalweg, clevels_surface = tracer_thalweg_and_surface_hourly.clevels(ptrc_T_hr.variables['NO3'], mesh_mask, depth_integrated=False)
+
+    for k in range(24):
+       key = 'nitrate_thalweg_and_surface_hourly_h{:02d}'.format(k)
+       fig_functions[key] = {
+            'function': tracer_thalweg_and_surface_hourly.make_figure,
+            'args': (k, ptrc_T_hr.variables['NO3'], bathy, mesh_mask, clevels_thalweg, clevels_surface),
+            'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False},
+            'format': 'png'
+        } 
     return fig_functions
 
 
@@ -490,6 +525,17 @@ def _render_figures(
             bbox_inches='tight')
         lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
         logger.info(f'{filename} saved')
+        try:
+            cmd = "scour "+str(filename) + " " +str(filename) + ".scour.svg"
+            r = subprocess.run(shlex.split(cmd))
+            if r.returncode == 0:
+                os.rename(str(filename)+ ".scour.svg",str(filename))
+                lib.fix_perms(os.fspath(filename),grp_name=config['file group'])
+                logger.info(f'scoured {filename} saved')
+            else:
+                logger.warning(f'Scouring failed, proceeded with unscoured image')
+        except (FileNotFoundError, TypeError):
+            logger.warning('Scouring failed,proceeded with unscoured image.')
         fig_files.append(os.fspath(filename))
         fig_path = _render_storm_surge_alerts_thumbnail(
             config, run_type, plot_type, dmy, fig, svg_name, fig_save_format,
