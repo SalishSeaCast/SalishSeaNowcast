@@ -157,7 +157,7 @@ def _calculate_daily_flow(yesterday, criverflow):
 def _fraser_climatology(config):
     """Read in the Fraser climatology separated from Hope flow.
     """
-    fraser_climatology_file = config['rivers']['Fraser climatology']
+    fraser_climatology_file = Path(config['rivers']['Fraser climatology'])
     with fraser_climatology_file.open('rt') as f:
         fraser_climatology = yaml.safe_load(f)
     logger.debug(f'read Fraser climatology from {fraser_climatology_file}')
