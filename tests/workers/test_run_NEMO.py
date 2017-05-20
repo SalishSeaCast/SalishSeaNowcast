@@ -915,14 +915,14 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
-        assert run_desc['output']['files'] == tmp_run_prep.join('iodef.xml')
+        assert run_desc['output']['iodefs'] == tmp_run_prep.join('iodef.xml')
         expected = tmp_run_prep.join(
             '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
-        assert run_desc['output']['domain'] == expected
+        assert run_desc['output']['domaindefs'] == expected
         expected = tmp_run_prep.ensure(
             '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast',
             'field_def.xml')
-        assert run_desc['output']['fields'] == expected
+        assert run_desc['output']['fielddefs'] == expected
         assert run_desc['output']['separate XIOS server']
         assert run_desc['output']['XIOS servers'] == 1
 

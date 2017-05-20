@@ -329,12 +329,12 @@ def _run_description(
             config['run types'][run_type]['land processor elimination']).name)
     run_desc['grid']['land processor elimination'] = lpe
     run_desc['restart'] = restart_filepaths
-    run_desc['output']['files'] = os.fspath(
+    run_desc['output']['iodefs'] = os.fspath(
         (run_prep_dir/'iodef.xml').resolve())
-    run_desc['output']['domain'] = os.fspath(
+    run_desc['output']['domaindefs'] = os.fspath(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')
         .resolve())
-    run_desc['output']['fields'] = os.fspath(
+    run_desc['output']['fielddefs'] = os.fspath(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast/field_def.xml')
         .resolve())
     run_desc['vcs revisions'] = {
