@@ -337,6 +337,17 @@ def _run_description(
     run_desc['output']['fields'] = os.fspath(
         (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast/field_def.xml')
         .resolve())
+    run_desc['vcs revisions'] = {
+        'hg': [
+            os.fspath((run_prep_dir/'../NEMO-Cmd').resolve()),
+            os.fspath((run_prep_dir/'../NEMO_Nowcast').resolve()),
+            os.fspath((run_prep_dir/'../private_tools').resolve()),
+            os.fspath((run_prep_dir/'../SalishSeaCmd').resolve()),
+            os.fspath((run_prep_dir/'../SS-run-sets').resolve()),
+            os.fspath((run_prep_dir/'../tools').resolve()),
+            os.fspath((run_prep_dir/'../XIOS-ARCH').resolve()),
+        ]
+    }
     return run_desc
 
 
