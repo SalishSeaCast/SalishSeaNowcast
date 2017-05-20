@@ -638,6 +638,8 @@ Create a :file:`runs/` directory for the NEMO runs and populate it with:
     $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface.blue namelist.surface.blue
     $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface.green namelist.surface.green
     $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/nowcast/iodef_cloud.xml iodef.xml
+    $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/nowcast/field_def.xml field_def.xml
+    $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/domain_def.xml domain_def.xml
 
 
 WaveWatch Runs Directories

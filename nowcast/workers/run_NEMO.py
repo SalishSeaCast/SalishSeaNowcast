@@ -329,14 +329,14 @@ def _run_description(
             config['run types'][run_type]['land processor elimination']).name)
     run_desc['grid']['land processor elimination'] = lpe
     run_desc['restart'] = restart_filepaths
-    run_desc['output']['iodefs'] = os.fspath(
-        (run_prep_dir/'iodef.xml').resolve())
-    run_desc['output']['domaindefs'] = os.fspath(
-        (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/domain_def.xml')
-        .resolve())
-    run_desc['output']['fielddefs'] = os.fspath(
-        (run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast/field_def.xml')
-        .resolve())
+    run_desc['output'].update({
+        'iodefs': os.fspath((run_prep_dir/'iodef.xml').resolve()),
+        'domaindefs': os.fspath((run_prep_dir/'domain_def.xml').resolve()),
+        'fielddefs': os.fspath((run_prep_dir/'field_def.xml').resolve()),
+    })
+    if (run_prep_dir/'file_def.xml').exists():
+        run_desc['output']['filedefs'] = os.fspath(
+            (run_prep_dir/'file_def.xml').resolve())
     run_desc['vcs revisions'] = {
         'hg': [
             os.fspath((run_prep_dir/'../NEMO-Cmd').resolve()),

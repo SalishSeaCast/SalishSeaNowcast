@@ -916,15 +916,36 @@ class TestRunDescription:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
         assert run_desc['output']['iodefs'] == tmp_run_prep.join('iodef.xml')
-        expected = tmp_run_prep.join(
-            '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'domain_def.xml')
-        assert run_desc['output']['domaindefs'] == expected
-        expected = tmp_run_prep.ensure(
-            '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast',
+        assert run_desc['output']['domaindefs'] == tmp_run_prep.join(
+            'domain_def.xml')
+        assert run_desc['output']['fielddefs'] == tmp_run_prep.join(
             'field_def.xml')
-        assert run_desc['output']['fielddefs'] == expected
         assert run_desc['output']['separate XIOS server']
         assert run_desc['output']['XIOS servers'] == 1
+
+    def test_output_nowcast_xios2(self, config, run_date, tmpdir, tmp_results):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}nowcast'.format(dmy=dmy)
+        p_config_results = patch.dict(
+            config['run']['salish-nowcast']['results'],
+            nowcast=str(tmp_results['results']['nowcast']))
+        p_config_nowcast = patch.dict(
+            config['run']['salish-nowcast'],
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        tmp_run_prep.ensure('file_def.xml')
+        p_config_run_prep = patch.dict(
+            config['run']['salish-nowcast'], {'run prep dir':
+                str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
+        assert run_desc['output']['filedefs'] == str(
+            tmp_run_prep.join('file_def.xml'))
 
     def test_vc_revisions(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format('DDMMMYY').lower()
@@ -947,13 +968,13 @@ class TestRunDescription:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
         assert run_desc['vcs revisions']['hg'] == [
-            str(tmp_run_prep.join('../NEMO-Cmd')),
-            str(tmp_run_prep.join('../NEMO_Nowcast')),
-            str(tmp_run_prep.join('../private_tools')),
-            str(tmp_run_prep.join('../SalishSeaCmd')),
-            str(tmp_run_prep.join('../SS-run-sets')),
-            str(tmp_run_prep.join('../tools')),
-            str(tmp_run_prep.join('../XIOS-ARCH')),
+            str(tmp_run_prep.join('..', 'NEMO-Cmd')),
+            str(tmp_run_prep.join('..', 'NEMO_Nowcast')),
+            str(tmp_run_prep.join('..', 'private_tools')),
+            str(tmp_run_prep.join('..', 'SalishSeaCmd')),
+            str(tmp_run_prep.join('..', 'SS-run-sets')),
+            str(tmp_run_prep.join('..', 'tools')),
+            str(tmp_run_prep.join('..', 'XIOS-ARCH')),
         ]
 
 
