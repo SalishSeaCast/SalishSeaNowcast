@@ -244,7 +244,7 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir):
 
 def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
     ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
-    place = 'Sandheads' 
+    place = 'S3'
     phys_dataset = xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV17-02')
     bio_dataset =  xr.open_dataset('https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV17-02')
     fig_functions = {
