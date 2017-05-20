@@ -437,11 +437,15 @@ run:
     results:
       hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
 
-  hindcast host: jasper-hindcast
+#  hindcast host: jasper-hindcast
   jasper-hindcast:
     results:
       hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
 
+  hindcast host: bugaboo-hindcast
+  bugaboo-hindcast:
+    results:
+      hindcast: /global/scratch/sallen/SalishSea/hindcast/
 
   # If the `hpc host` key is present, the forcing files will be uploaded
   # to the HPC cluster and the symlinks created ready for the runs to be
