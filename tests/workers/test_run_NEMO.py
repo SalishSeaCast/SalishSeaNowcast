@@ -926,6 +926,36 @@ class TestRunDescription:
         assert run_desc['output']['separate XIOS server']
         assert run_desc['output']['XIOS servers'] == 1
 
+    def test_vc_revisions(self, config, run_date, tmpdir, tmp_results):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}nowcast'.format(dmy=dmy)
+        p_config_results = patch.dict(
+            config['run']['salish-nowcast']['results'],
+            nowcast=str(tmp_results['results']['nowcast']))
+        p_config_nowcast = patch.dict(
+            config['run']['salish-nowcast'],
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run']['salish-nowcast'], {'run prep dir':
+                str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
+        assert run_desc['vcs revisions']['hg'] == [
+            str(tmp_run_prep.join('../NEMO-Cmd')),
+            str(tmp_run_prep.join('../NEMO_Nowcast')),
+            str(tmp_run_prep.join('../private_tools')),
+            str(tmp_run_prep.join('../SalishSeaCmd')),
+            str(tmp_run_prep.join('../SS-run-sets')),
+            str(tmp_run_prep.join('../tools')),
+            str(tmp_run_prep.join('../XIOS-ARCH')),
+        ]
+
 
 class TestCreateRunScript:
     """Unit test for _create_run_script() function.
