@@ -42,19 +42,19 @@ def make_figure(
     figsize=(20, 8),
     theme=nowcast.figures.website_theme
 ):
-    """    
-    :param xr_dataset: Hourly average 3d biological fields (ubcSSg3DBiologyFields1hV17-02) and tracer fields (ubcSSg3DTracerFields1hV17-02) from the gridapp datasets of the data server ERDAPP (https://salishsea.eos.ubc.ca/erddap/griddap/index.html?page=1&itemsPerPage=1000). 
+    """
+    :param xr_dataset: Hourly average 3d biological fields (ubcSSg3DBiologyFields1hV17-02) and tracer fields (ubcSSg3DTracerFields1hV17-02) from the gridapp datasets of the data server ERDAPP (https://salishsea.eos.ubc.ca/erddap/griddap/index.html?page=1&itemsPerPage=1000).
     :type xr_dataset: :class:`xarray.core.dataset.Dataset`
-    
-    :param left_variable: One of the data variables among 'nitrate', 'mesozooplankton', 'ciliates', 'temperature'. 
+
+    :param left_variable: One of the data variables among 'nitrate', 'mesozooplankton', 'ciliates', 'temperature'.
     :type left_variable: :class:`xarray.Variable`
 
-    :param right_variable: One of the data variables among 'diatoms', 'microzooplankton', 'flagellates', 'salinity'. 
+    :param right_variable: One of the data variables among 'diatoms', 'microzooplankton', 'flagellates', 'salinity'.
     :type right_variable: :class:`xarray.Variable`
 
     :param place: time series site.
     :type place: :class:`str`
-    
+
     :param 2-tuple figsize: Figure size (width, height) in inches.
 
     :param theme: Module-like object that defines the style elements for the
@@ -68,7 +68,7 @@ def make_figure(
     fig, axl, axr = _prep_fig_axes(figsize, theme)
     _plot_timeseries(axl, plot_data.left, left_variable, theme)
     _plot_timeseries(axr, plot_data.right, right_variable, theme)
-    _timeseries_axes_labels(axl, axr, left_variable, plot_data.left_long_name, plot_data.left_units, 
+    _timeseries_axes_labels(axl, axr, left_variable, plot_data.left_long_name, plot_data.left_units,
                             right_variable, plot_data.right_long_name, plot_data.right_units, theme)
 
     return fig
@@ -80,29 +80,29 @@ def _prep_plot_data(xr_dataset, left_variable, right_variable, place):
     Dday=xr_dataset.time_coverage_end
     EndDay = arw.get(Dday)
     StartDay = EndDay.replace(months=-2)
-    time_slice = slice(StartDay.date(),EndDay.date(),6)
+    time_slice = slice(StartDay.date(),EndDay.date(), 1)
 
     gridY = places.PLACES[place]['NEMO grid ji'][0]
     gridX = places.PLACES[place]['NEMO grid ji'][1]
 
     left = xr_dataset[left_variable].sel(time=time_slice).isel(depth=0).isel(
         gridX=gridX).isel(gridY=gridY)
-    
+
     right = xr_dataset[right_variable].sel(time=time_slice).isel(depth=0).isel(
         gridX=gridX).isel(gridY=gridY)
-    
+
     left_long_name = xr_dataset[left_variable].long_name
     left_units = xr_dataset[left_variable].units
-    
+
     right_long_name = xr_dataset[right_variable].long_name
     right_units = xr_dataset[right_variable].units
-    
 
-    return SimpleNamespace(left=left, 
-                           right=right, 
-                           left_long_name=left_long_name, 
+
+    return SimpleNamespace(left=left,
+                           right=right,
+                           left_long_name=left_long_name,
                            left_units=left_units,
-                           right_long_name=right_long_name, 
+                           right_long_name=right_long_name,
                            right_units=right_units
                           )
 
@@ -114,7 +114,7 @@ def _prep_fig_axes(figsize, theme):
     axl.set_axis_bgcolor(theme.COLOURS['axes']['background'])
     axr = axl.twinx()
     axr.set_axis_bgcolor(theme.COLOURS['axes']['background'])
-    
+
     return fig, axl, axr
 
 
@@ -122,7 +122,7 @@ def _plot_timeseries(ax, plot_data, variable, theme):
     ax.plot(plot_data.time, plot_data, color=theme.COLOURS['time series'][variable])
     return
 
-def _timeseries_axes_labels(axl, axr, left_variable, left_long_name, left_units, 
+def _timeseries_axes_labels(axl, axr, left_variable, left_long_name, left_units,
                             right_variable, right_long_name, right_units, theme):
     axl.set_xlabel(
         'Date',
@@ -150,6 +150,5 @@ def _timeseries_axes_labels(axl, axr, left_variable, left_long_name, left_units,
         color=theme.COLOURS['time series'][right_variable],
         fontproperties=theme.FONTS['legend label large'],
         transform=axl.transAxes)
-    
+
     axl.grid(axis='x')
-    
