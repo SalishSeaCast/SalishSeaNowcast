@@ -165,6 +165,8 @@ On the hosts where the nowcast system NEMO runs will be executed create a :file:
     $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.surface.blue namelist.surface.blue
     $ ln -s ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.lateral.liveocean namelist.lateral
     $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/nowcast/iodef.xml iodef.xml
+    $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/nowcast/field_def.xml field_def.xml
+    $ ln -sf ../SS-run-sets/SalishSea/nemo3.6/domain_def.xml domain_def.xml
 
 The above :command:`ln -s` commands assume that there is a clone of the :ref:`NEMO-forcing-repo` beside the directory where the links are being created.
 If the clone of the :ref:`NEMO-forcing-repo` is elsewhere,
