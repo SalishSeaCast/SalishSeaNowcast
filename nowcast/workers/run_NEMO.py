@@ -334,6 +334,8 @@ def _run_description(
         'domaindefs': os.fspath((run_prep_dir/'domain_def.xml').resolve()),
         'fielddefs': os.fspath((run_prep_dir/'field_def.xml').resolve()),
     })
+    del run_desc['output']['domain']
+    del run_desc['output']['fields']
     if (run_prep_dir/'file_def.xml').exists():
         run_desc['output']['filedefs'] = os.fspath(
             (run_prep_dir/'file_def.xml').resolve())
