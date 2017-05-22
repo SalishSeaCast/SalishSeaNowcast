@@ -314,7 +314,7 @@ def _run_description(
         walltime=walltime,
         NEMO_code_config=os.fspath(
             (run_prep_dir/'../NEMO-3.6-code'/'NEMOGCM'/'CONFIG').resolve()),
-        XIOS_code=os.fspath((run_prep_dir/'../XIOS/').resolve()),
+        XIOS_code=os.fspath((run_prep_dir/'../XIOS-2/').resolve()),
         forcing_path=os.fspath((run_prep_dir/'../NEMO-forcing/').resolve()),
         runs_dir=os.fspath(run_prep_dir.resolve()),
         forcing=forcing,

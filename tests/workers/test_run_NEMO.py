@@ -535,7 +535,7 @@ class TestRunDescription:
 
     @pytest.mark.parametrize('run_type, path, expected', [
         ('nowcast', 'NEMO code config', 'NEMO-3.6-code/NEMOGCM/CONFIG'),
-        ('nowcast-green', 'XIOS', 'XIOS'),
+        ('nowcast-green', 'XIOS', 'XIOS-2'),
         ('forecast', 'forcing', 'NEMO-forcing'),
     ])
     def test_paths(
