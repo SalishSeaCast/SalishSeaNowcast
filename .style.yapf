@@ -1,0 +1,44 @@
+# Project-specific code style settings for yapf
+
+[style]
+based_on_style = pep8
+
+# Do not split consecutive brackets. Only relevant when
+# dedent_closing_brackets is set. For example:
+# 
+#    call_func_that_takes_a_dict(
+#        {
+#            'key1': 'value1',
+#            'key2': 'value2',
+#        }
+#    )
+# 
+# would reformat to:
+# 
+#    call_func_that_takes_a_dict({
+#        'key1': 'value1',
+#        'key2': 'value2',
+#    })
+coalesce_brackets=True
+
+# Put closing brackets on a separate line, dedented, if the bracketed
+# expression can't fit in a single line. Applies to all kinds of brackets,
+# including function definitions and calls. For example:
+# 
+#   config = {
+#       'key1': 'value1',
+#       'key2': 'value2',
+#   }        # <--- this bracket is dedented and on a separate line
+# 
+#   time_series = self.remote_client.query_entity_counters(
+#       entity='dev3246.region1',
+#       key='dns.query_latency_tcp',
+#       transform=Transformation.AVERAGE(window=timedelta(seconds=60)),
+#       start_ts=now()-timedelta(days=3),
+#       end_ts=now(),
+#   )        # <--- this bracket is dedented and on a separate line
+dedent_closing_brackets=True
+
+# Insert a space between the ending comma and closing bracket of a list,
+# etc.
+space_between_ending_comma_and_closing_bracket=False

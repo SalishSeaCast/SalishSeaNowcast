@@ -67,3 +67,6 @@ dependencies:
 
     # For exception monitoring
     - raven
+
+    # For coding style
+    - yapf
