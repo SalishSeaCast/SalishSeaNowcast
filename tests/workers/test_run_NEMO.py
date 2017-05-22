@@ -922,6 +922,8 @@ class TestRunDescription:
             'field_def.xml')
         assert run_desc['output']['separate XIOS server']
         assert run_desc['output']['XIOS servers'] == 1
+        assert 'domain' not in run_desc['output']
+        assert 'fields' not in run_desc['output']
 
     def test_output_nowcast_xios2(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format('DDMMMYY').lower()
