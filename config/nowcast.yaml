@@ -437,12 +437,12 @@ run:
     results:
       hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
 
-#  hindcast host: jasper-hindcast
+  hindcast host: jasper-hindcast
   jasper-hindcast:
     results:
       hindcast: /home/sallen/MEOPAR/SalishSea/hindcast/
 
-  hindcast host: bugaboo-hindcast
+#  hindcast host: bugaboo-hindcast
   bugaboo-hindcast:
     results:
       hindcast: /global/scratch/sallen/SalishSea/hindcast/
