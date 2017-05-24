@@ -23,7 +23,6 @@ import os
 from pathlib import Path
 import xarray as xr
 
-
 # **IMPORTANT**: matplotlib must be imported before anything else that uses it
 # because of the matplotlib.use() call below
 import matplotlib
@@ -36,7 +35,6 @@ from nemo_nowcast import NowcastWorker
 import netCDF4 as nc
 import scipy.io as sio
 import subprocess
-import shlex
 
 from nowcast import lib
 from nowcast.figures.research import tracer_thalweg_and_surface, time_series_plots
@@ -525,17 +523,16 @@ def _render_figures(
             bbox_inches='tight')
         lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
         logger.info(f'{filename} saved')
-        try:
-            cmd = "scour "+str(filename) + " " +str(filename) + ".scour.svg"
-            r = subprocess.run(shlex.split(cmd))
-            if r.returncode == 0:
-                os.rename(str(filename)+ ".scour.svg",str(filename))
+        if fig_save_format is 'svg':
+            logger.info(f'Attempting to scour svg: {filename}')
+            tmpfilename = str(filename)+".scour.svg"
+            proc = subprocess.run(['scour',filename,tmpfilename])
+            if proc.returncode == 0:
+                os.rename(tmpfilename,filename)
                 lib.fix_perms(os.fspath(filename),grp_name=config['file group'])
-                logger.info(f'scoured {filename} saved')
+                logger.info(f'Scouring succeeded for file {filename}')
             else:
-                logger.warning(f'Scouring failed, proceeded with unscoured image')
-        except (FileNotFoundError, TypeError):
-            logger.warning('Scouring failed,proceeded with unscoured image.')
+                logger.warning(f'Scouring failed, proceeding with unscoured image')
         fig_files.append(os.fspath(filename))
         fig_path = _render_storm_surge_alerts_thumbnail(
             config, run_type, plot_type, dmy, fig, svg_name, fig_save_format,
