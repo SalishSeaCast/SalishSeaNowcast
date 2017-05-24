@@ -64,6 +64,7 @@ dependencies:
     - feedgen
     - python-hglib
     - retrying
+    - scour
 
     # For exception monitoring
     - raven
