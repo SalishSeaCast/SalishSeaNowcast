@@ -570,8 +570,8 @@ The Python packages that the system depends on are installed in a conda environm
         hdf4=4.2.12 lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
         pillow pip python=3 pyyaml pyzmq requests schedule scipy xarray
     $ source /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install angles driftwood feedgen \
-        python-hglib raven retrying
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install angles cmocean \
+        driftwood feedgen python-hglib raven retrying scour
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO-Cmd/

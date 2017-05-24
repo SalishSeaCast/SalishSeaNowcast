@@ -69,6 +69,7 @@ install_requires = [
     'raven',
     'retrying',
     'scipy',
+    'scour',
     'xarray',
 
     # 'NEMO_Nowcast',  # use pip install --editable NEMO_Nowcast/
