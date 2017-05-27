@@ -1331,12 +1331,12 @@ class TestLaunchRun:
         self, m_run, m_popen, run_type, host, config
     ):
         m_run.side_effect = [
-            SimpleNamespace(stdout='4343'),
+            SimpleNamespace(stdout='4343.master'),
             SimpleNamespace(stdout='4444')]
         run_NEMO._launch_run_script(
             run_type, 'SalishSeaNEMO.sh', host, config)
         assert m_run.call_args_list[1] == call(
-            ['pgrep', '4343'], stdout=subprocess.PIPE, check=True,
+            ['pgrep', '4343.master'], stdout=subprocess.PIPE, check=True,
             universal_newlines=True)
 
     @pytest.mark.parametrize('run_type, host', [
@@ -1345,23 +1345,25 @@ class TestLaunchRun:
         ('forecast', 'west.cloud'),
         ('forecast2', 'west.cloud'),
     ])
-    def test_bash_run_process_pid(
+    def test_bash_run(
         self, m_run, m_popen, run_type, host, config
     ):
         m_run.return_value = SimpleNamespace(stdout='4444')
-        run_process_pid = run_NEMO._launch_run_script(
+        run_exec_cmd, run_id = run_NEMO._launch_run_script(
             run_type, 'SalishSeaNEMO.sh', host, config)
-        assert run_process_pid == 4444
+        assert run_exec_cmd == 'bash SalishSeaNEMO.sh'
+        assert run_id is None
 
     @pytest.mark.parametrize('run_type, host', [
         ('nowcast-dev', 'salish-nowcast'),
     ])
-    def test_qsub_run_process_pid(
+    def test_qsub_run(
         self, m_run, m_popen, run_type, host, config
     ):
         m_run.side_effect = [
-            SimpleNamespace(stdout='4343'),
+            SimpleNamespace(stdout='4343.master'),
             SimpleNamespace(stdout='4444')]
-        run_process_pid = run_NEMO._launch_run_script(
+        run_exec_cmd, run_id = run_NEMO._launch_run_script(
             run_type, 'SalishSeaNEMO.sh', host, config)
-        assert run_process_pid == 4444
+        assert run_exec_cmd == 'qsub SalishSeaNEMO.sh'
+        assert run_id == '4343.master'
