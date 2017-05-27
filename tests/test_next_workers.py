@@ -411,16 +411,28 @@ class TestAfterRunNEMO:
         'failure nowcast-dev',
         'failure forecast',
         'failure forecast2',
-        'success nowcast',
-        'success nowcast-green',
-        'success nowcast-dev',
-        'success forecast',
-        'success forecast2',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_run_NEMO(
             Message('run_NEMO', msg_type), config, checklist)
         assert workers == []
+
+    @pytest.mark.parametrize('msg_type, host', [
+        ('success nowcast', 'west.cloud'),
+        ('success nowcast-green', 'west.cloud'),
+        ('success nowcast-dev', 'salish'),
+        ('success forecast', 'west.cloud'),
+        ('success forecast2', 'west.cloud'),
+    ])
+    def test_success_launch_watch_NEMO(self, msg_type, host, config, checklist):
+        run_type = msg_type.split()[1]
+        workers = next_workers.after_run_NEMO(
+            Message(
+                'run_NEMO', msg_type, {run_type: {'host': host}}),
+            config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.watch_NEMO', args=[host, run_type], host=host)
+        assert workers[0] == expected
 
 
 class TestAfterWatchNEMO:

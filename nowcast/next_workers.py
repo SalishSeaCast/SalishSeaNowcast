@@ -417,6 +417,12 @@ def after_run_NEMO(msg, config, checklist):
         'success forecast': [],
         'success forecast2': [],
     }
+    if msg.type.startswith('success'):
+        run_type = msg.type.split()[1]
+        host = msg.payload[run_type]['host']
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.watch_NEMO', args=[host, run_type], host=host))
     return next_workers[msg.type]
 
 

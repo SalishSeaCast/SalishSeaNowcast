@@ -114,15 +114,13 @@ def run_NEMO(parsed_args, config, tell_manager):
     run_script_filepath = _create_run_script(
         run_date, run_type, run_dir, run_desc_filepath, host_name, config)
     run_desc_filepath.unlink()
-    run_process_pid = _launch_run_script(
+    run_exec_cmd, run_id = _launch_run_script(
         run_type, run_script_filepath, host_name, config)
-    watcher_process_pid = _launch_run_watcher(
-        run_type, run_process_pid, host_name, config)
     return {run_type: {
         'host': host_name,
         'run dir': os.fspath(run_dir),
-        'pid': run_process_pid,
-        'watcher pid': watcher_process_pid,
+        'run exec cmd': run_exec_cmd,
+        'run id': run_id,
         'run date': run_date.format('YYYY-MM-DD'),
     }}
 
@@ -487,6 +485,7 @@ def _launch_run_script(run_type, run_script_filepath, host_name, config):
     host_run_config = config['run'][host_name]
     logger.info(f'{run_type}: launching {run_script_filepath} on {host_name}')
     cmd = f'{host_run_config["job exec cmd"]} {run_script_filepath}'
+    run_exec_cmd = cmd
     logger.debug(
         f'{run_type}: running command in subprocess: {shlex.split(cmd)}')
     if host_run_config['job exec cmd'] == 'qsub':
@@ -496,7 +495,9 @@ def _launch_run_script(run_type, run_script_filepath, host_name, config):
         torque_id = proc.stdout.strip()
         logger.debug(f'{run_type}: TORQUE/PBD job id: {torque_id}')
         cmd = shlex.split(f'pgrep {torque_id}')
+        run_id = torque_id
     else:
+        run_id = None
         subprocess.Popen(shlex.split(cmd))
         cmd = shlex.split(f'pgrep --newest --exact --full "{cmd}"')
     run_process_pid = None
@@ -510,21 +511,7 @@ def _launch_run_script(run_type, run_script_filepath, host_name, config):
             # Process has not yet been spawned
             pass
     logger.debug(f'{run_type} on {host_name}: run pid: {run_process_pid}')
-    return run_process_pid
-
-
-def _launch_run_watcher(run_type, run_process_pid, host_name, config):
-    enabled_host_config = config['run']['enabled hosts'][host_name]
-    logger.info(f'launching {run_type} watch_NEMO worker on {host_name}')
-    cmd = shlex.split(
-        f'{enabled_host_config["python"]} -m nowcast.workers.watch_NEMO '
-        f'{enabled_host_config["config file"]} {host_name} {run_type} '
-        f'{run_process_pid}')
-    logger.debug(f'{run_type}: running command in subprocess: {cmd}')
-    watcher_process = subprocess.Popen(cmd, universal_newlines=True)
-    logger.debug(
-        f'{run_type} on {host_name}: watcher pid: {watcher_process.pid}')
-    return watcher_process.pid
+    return run_exec_cmd, run_id
 
 
 if __name__ == '__main__':
