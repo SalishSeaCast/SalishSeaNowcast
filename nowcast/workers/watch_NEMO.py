@@ -19,13 +19,12 @@ progress of a run on the ONC cloud computing facility or salish.
 import logging
 import os
 from pathlib import Path
+import shlex
+import subprocess
 import time
 
 import arrow
-from nemo_nowcast import (
-    NowcastWorker,
-    WorkerError,
-)
+from nemo_nowcast import NowcastWorker
 from nemo_cmd.namelist import namelist2dict
 
 
@@ -60,10 +59,6 @@ def main():
         'forecast2' means preliminary forecast run,
         ''',
     )
-    worker.cli.add_argument(
-        'pid', type=int,
-        help='PID of the NEMO run bash script to monitor.'
-    )
     worker.run(watch_NEMO, success, failure)
 
 
@@ -92,22 +87,17 @@ def failure(parsed_args):
 def watch_NEMO(parsed_args, config, tell_manager):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
-    pid = parsed_args.pid
-    # Ensure that the run is in progress
-    if not _pid_exists(pid):
-        logger.error(
-            '{}: NEMO run pid {} on {} does not exist'
-            .format(run_type, pid, host_name))
-        raise WorkerError
-    # Get monitored run info from manager and namelist
     run_info = tell_manager('need', 'NEMO run').payload
+    pid = _find_run_pid(run_info[run_type])
+    logger.debug(f'{run_type} on {host_name}: run pid: {pid}')
+    # Get run time steps and date info from namelist
     run_dir = Path(run_info[run_type]['run dir'])
     namelist = namelist2dict(str(run_dir/'namelist_cfg'))
     it000 = namelist['namrun'][0]['nn_it000']
     itend = namelist['namrun'][0]['nn_itend']
     date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
     rdt = namelist['namdom'][0]['rn_rdt']
-    # Watch for the run bash script process to end
+    # Watch for the run process to end
     while _pid_exists(pid):
         try:
             with (run_dir/'time.step').open('rt') as f:
@@ -136,6 +126,28 @@ def watch_NEMO(parsed_args, config, tell_manager):
         'run date': run_info[run_type]['run date'],
         'completed': True,
     }}
+
+
+def _find_run_pid(run_info):
+    if run_info['run exec cmd'].startswith('qsub'):
+        torque_id = run_info['run id']
+        cmd = shlex.split(f'pgrep {torque_id}')
+        logger.debug(f'searching processes for {torque_id}')
+    else:
+        run_exec_cmd = run_info['run exec cmd']
+        cmd = shlex.split(f'pgrep --newest --exact --full "{run_exec_cmd}"')
+        logger.debug(f'searching processes for "{run_exec_cmd}"')
+    pid = None
+    while pid is None:
+        try:
+            proc = subprocess.run(
+                cmd, stdout=subprocess.PIPE, check=True,
+                universal_newlines=True)
+            pid = int(proc.stdout)
+        except subprocess.CalledProcessError:
+            # Process has not yet been spawned
+            pass
+    return pid
 
 
 def _pid_exists(pid):

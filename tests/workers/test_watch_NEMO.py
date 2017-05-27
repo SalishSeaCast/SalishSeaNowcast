@@ -15,8 +15,10 @@
 
 """Unit tests for Salish Sea NEMO nowcast watch_NEMO worker.
 """
+import subprocess
 from types import SimpleNamespace
 from unittest.mock import (
+    call,
     patch,
     Mock,
 )
@@ -48,12 +50,6 @@ class TestMain:
         assert args == ('run_type',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'}
-        assert 'help' in kwargs
-
-    def test_add_pid_arg(self, m_worker):
-        watch_NEMO.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
-        assert args == ('pid',)
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker):
@@ -141,29 +137,31 @@ class TestFailure:
 
 
 @patch('nowcast.workers.watch_NEMO.logger')
-class TestWatchNEMO:
-    """Unit test for watch_NEMO() function.
+@patch('nowcast.workers.watch_NEMO.subprocess.run')
+class TestFindRunPid:
+    """Unit tests for _find_run_pid() function.
     """
-    @pytest.mark.parametrize('run_type, host_name', [
-        ('nowcast', 'west.cloud-nowcast'),
-        ('nowcast-green', 'west.cloud-nowcast'),
-        ('nowcast-dev', 'salish-nowcast'),
-        ('forecast', 'west.cloud-nowcast'),
-        ('forecast2', 'west.cloud-nowcast'),
-    ])
-    def test_no_run_pid(self, m_logger, run_type, host_name):
-        parsed_args = SimpleNamespace(
-            host_name=host_name,
-            run_type=run_type,
-            pid=42,
-        )
-        config = {}
-        tell_manager = Mock(name='tell_manager')
-        p_pid_exists = patch(
-            'nowcast.workers.watch_NEMO._pid_exists', return_value=False)
-        with p_pid_exists:
-            with pytest.raises(watch_NEMO.WorkerError):
-                watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+    def test_find_qsub_run_pid(self, m_run, m_logger):
+        run_info = {
+            'run exec cmd': 'qsub SalishSeaNEMO.sh',
+            'run id': '4446.master',
+        }
+        m_run.return_value = Mock(stdout='4343')
+        watch_NEMO._find_run_pid(run_info)
+        assert m_run.call_args_list == [call(
+            ['pgrep', '4446.master'], stdout=subprocess.PIPE, check=True,
+            universal_newlines=True)]
+
+    def test_find_bash_run_pid(self, m_run, m_logger):
+        run_info = {
+            'run exec cmd': 'bash SalishSeaNEMO.sh',
+            'run id': None,
+        }
+        m_run.return_value = Mock(stdout='4343')
+        watch_NEMO._find_run_pid(run_info)
+        assert m_run.call_args_list == [call(
+            ['pgrep', '--newest', '--exact', '--full', 'bash SalishSeaNEMO.sh'],
+            stdout=subprocess.PIPE, check=True, universal_newlines=True)]
 
 
 class TestPidExists:
