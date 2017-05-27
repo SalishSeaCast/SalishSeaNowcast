@@ -1058,11 +1058,6 @@ class TestBuildScript:
 >>${{RESULTS_DIR}}/stdout
         echo "Results combining ended at $(date)" >>${{RESULTS_DIR}}/stdout
 
-        echo "Results deflation started at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug \
->>${{RESULTS_DIR}}/stdout
-        echo "Results deflation ended at $(date)" >>${{RESULTS_DIR}}/stdout
-
         echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
         ${{GATHER}} ${{RESULTS_DIR}} --debug \
 >>${{RESULTS_DIR}}/stdout
@@ -1148,11 +1143,6 @@ class TestBuildScript:
         ${{COMBINE}} ${{RUN_DESC}} --debug \
 >>${{RESULTS_DIR}}/stdout
         echo "Results combining ended at $(date)" >>${{RESULTS_DIR}}/stdout
-
-        echo "Results deflation started at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{DEFLATE}} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug \
->>${{RESULTS_DIR}}/stdout
-        echo "Results deflation ended at $(date)" >>${{RESULTS_DIR}}/stdout
 
         echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
         ${{GATHER}} ${{RESULTS_DIR}} --debug \
@@ -1255,11 +1245,6 @@ class TestExecute:
         ${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout
         echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
 
-        echo "Results deflation started at $(date)" >>${RESULTS_DIR}/stdout
-        ${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug \
->>${RESULTS_DIR}/stdout
-        echo "Results deflation ended at $(date)" >>${RESULTS_DIR}/stdout
-
         echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
         ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
         echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
@@ -1285,11 +1270,6 @@ class TestExecute:
         echo "Results combining started at $(date)" >>${RESULTS_DIR}/stdout
         ${COMBINE} ${RUN_DESC} --debug >>${RESULTS_DIR}/stdout
         echo "Results combining ended at $(date)" >>${RESULTS_DIR}/stdout
-
-        echo "Results deflation started at $(date)" >>${RESULTS_DIR}/stdout
-        ${DEFLATE} *_grid_[TUVW]*.nc *_ptrc_T*.nc --debug \
->>${RESULTS_DIR}/stdout
-        echo "Results deflation ended at $(date)" >>${RESULTS_DIR}/stdout
 
         echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
         ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
