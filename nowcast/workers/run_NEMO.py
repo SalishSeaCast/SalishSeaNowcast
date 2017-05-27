@@ -343,7 +343,6 @@ def _run_description(
         'hg': [
             os.fspath((run_prep_dir/'../NEMO-Cmd').resolve()),
             os.fspath((run_prep_dir/'../NEMO_Nowcast').resolve()),
-            os.fspath((run_prep_dir/'../private-tools').resolve()),
             os.fspath((run_prep_dir/'../SalishSeaCmd').resolve()),
             os.fspath((run_prep_dir/'../SS-run-sets').resolve()),
             os.fspath((run_prep_dir/'../tools').resolve()),
