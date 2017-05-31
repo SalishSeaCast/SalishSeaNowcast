@@ -86,9 +86,9 @@ and building the documentation with the commands:
 .. _Miniconda3: http://conda.pydata.org/docs/install/quick.html
 
 :kbd:`SalishSeaNowcast` depends on the `NEMO_Nowcast`_,
-:ref:`salishseatools:SalishSeaToolsPackage`,
+:ref:`SalishSeaToolsPackage`,
 `NEMO-Cmd`_,
-and :ref:`salishseatools:SalishSeaCmdProcessor` packages.
+and :ref:`SalishSeaCmdProcessor` packages.
 If you have not done so already,
 please clone the `NEMO-Cmd repo`_,
 `NEMO_Nowcast repo`_,
