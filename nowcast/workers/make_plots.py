@@ -21,7 +21,8 @@ from glob import glob
 import logging
 import os
 from pathlib import Path
-import xarray as xr
+import shlex
+import subprocess
 
 # **IMPORTANT**: matplotlib must be imported before anything else that uses it
 # because of the matplotlib.use() call below
@@ -34,7 +35,7 @@ import cmocean
 from nemo_nowcast import NowcastWorker
 import netCDF4 as nc
 import scipy.io as sio
-import subprocess
+import xarray as xr
 
 from nowcast import lib
 from nowcast.figures.research import tracer_thalweg_and_surface, time_series_plots
@@ -521,18 +522,27 @@ def _render_figures(
         fig.savefig(
             os.fspath(filename), facecolor=fig.get_facecolor(),
             bbox_inches='tight')
-        lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
         logger.info(f'{filename} saved')
         if fig_save_format is 'svg':
             logger.info(f'Attempting to scour svg: {filename}')
-            tmpfilename = str(filename)+".scour.svg"
-            proc = subprocess.run(['scour',filename,tmpfilename])
-            if proc.returncode == 0:
-                os.rename(tmpfilename,filename)
-                lib.fix_perms(os.fspath(filename),grp_name=config['file group'])
-                logger.info(f'Scouring succeeded for file {filename}')
-            else:
-                logger.warning(f'Scouring failed, proceeding with unscoured image')
+            tmpfilename = filename.with_suffix('scour')
+            cmd = f'scour {filename} {tmpfilename}'
+            logger.debug(f'running subprocess: {cmd}')
+            try:
+                proc = subprocess.run(
+                    shlex.split(cmd), check=True,
+                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                    universal_newlines=True)
+            except subprocess.CalledProcessError as e:
+                logger.warning(
+                    'Scouring failed, proceeding with unscoured image')
+                logger.debug(f'scour return code: {e.returncode}')
+                logger.debug(e.stdout)
+                continue
+            logger.debug(proc.stdout)
+            tmpfilename.rename(filename)
+            logger.info(f'Scouring succeeded for file {filename}')
+        lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
         fig_files.append(os.fspath(filename))
         fig_path = _render_storm_surge_alerts_thumbnail(
             config, run_type, plot_type, dmy, fig, svg_name, fig_save_format,
