@@ -529,8 +529,8 @@ def _render_figures(
             bbox_inches='tight')
         logger.info(f'{filename} saved')
         if fig_save_format is 'svg':
-            logger.info(f'Attempting to scour svg: {filename}')
-            tmpfilename = filename.with_suffix('scour')
+            logger.debug(f'starting SVG scouring of {filename}')
+            tmpfilename = filename.with_suffix('.scour')
             cmd = f'scour {filename} {tmpfilename}'
             logger.debug(f'running subprocess: {cmd}')
             try:
@@ -540,13 +540,14 @@ def _render_figures(
                     universal_newlines=True)
             except subprocess.CalledProcessError as e:
                 logger.warning(
-                    'Scouring failed, proceeding with unscoured image')
+                    'SVG scouring failed, proceeding with unscoured figure')
                 logger.debug(f'scour return code: {e.returncode}')
-                logger.debug(e.stdout)
+                if e.output:
+                    logger.debug(e.output)
                 continue
             logger.debug(proc.stdout)
             tmpfilename.rename(filename)
-            logger.info(f'Scouring succeeded for file {filename}')
+            logger.info(f'{filename} scoured')
         lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
         fig_files.append(os.fspath(filename))
         fig_path = _render_storm_surge_alerts_thumbnail(
