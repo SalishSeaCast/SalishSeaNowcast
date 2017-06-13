@@ -55,79 +55,6 @@ from salishsea_tools import (
 from nowcast.figures import shared
 import nowcast.figures.website_theme
 
-# drobb start
-# Copied from figures.py
-# Maybe this information can be acessed from somehwere else? in places? or config?
-SITES = {
-    'Nanaimo': {
-        'lat': 49.16,
-        'lon': -123.93,
-        'msl': 3.08,
-        'extreme_ssh': 5.47},
-    'Halibut Bank': {
-        'lat': 49.34,
-        'lon': -123.72},
-    'Dungeness': {
-        'lat': 48.15,
-        'lon': -123.117},
-    'La Perouse Bank': {
-        'lat': 48.83,
-        'lon': -126.0},
-    'Point Atkinson': {
-        'lat': 49.33,
-        'lon': -123.25,
-        'msl': 3.09,
-        'stn_no': 7795,
-        'extreme_ssh': 5.61},
-    'Victoria': {
-        'lat': 48.41,
-        'lon': -123.36,
-        'msl': 1.8810,
-        'stn_no': 7120,
-        'extreme_ssh': 3.76},
-    'Campbell River': {
-        'lat': 50.04,
-        'lon': -125.24,
-        'msl': 2.916,
-        'stn_no': 8074,
-        'extreme_ssh': 5.35},
-    'Neah Bay': {
-        'lat': 48.4,
-        'lon': -124.6,
-        'stn_no':  9443090},
-    'Friday Harbor': {
-        'lat': 48.55,
-        'lon': -123.016667,
-        'stn_no': 9449880},
-    'Cherry Point': {
-        'lat': 48.866667,
-        'lon': -122.766667,
-        'stn_no': 9449424,
-        'msl': 3.543,
-        'extreme_ssh': 5.846},
-    'Sandheads': {
-        'lat': 49.10,
-        'lon': -123.30},
-    'Tofino': {
-        'lat': 49.15,
-        'lon': -125.91,
-        'stn_no': 8615},
-    'Bamfield': {
-        'lat': 48.84,
-        'lon': -125.14,
-        'stn_no': 8545},
-    'VENUS': {
-        'East': {
-            'lat': 49.0419,
-            'lon': -123.3176,
-            'depth': 170},
-        'Central': {
-            'lat': 49.0401,
-            'lon': -123.4261,
-            'depth': 300}
-        }
-    }
-# drobb end
 
 def make_figure(
     place, grid_T_hr, grids_15m, bathy, weather_path, tidal_predictions,
@@ -200,17 +127,12 @@ def _prep_plot_data(
     ttide = shared.get_tides(place, tidal_predictions)
     ssh_corr = shared.correct_model_ssh(ssh_15m_ts.ssh, ssh_15m_ts.time, ttide)
 
-    # drobb start
-    # maybe something like
-    # thresholds = shared.get_thresholds(place, ttide, ssh_corr)
-    # instead of below
-    msl = SITES[place]['msl']
-    extreme_ssh = SITES[place]['extreme_ssh'] 
-    max_tides = max(ttide.pred_all) + msl 
-    mid_tides = 0.5 * (extreme_ssh - max_tides) + max_tides 
-    max_ssh = np.max(ssh_corr) + msl 
+    msl = PLACES[place]['msl']
+    extreme_ssh = PLACES[place]['hist max sea lvl']
+    max_tides = max(ttide.pred_all) + msl
+    mid_tides = 0.5 * (extreme_ssh - max_tides) + max_tides
+    max_ssh = np.max(ssh_corr) + msl
     thresholds = (max_tides, mid_tides, extreme_ssh)
-    # drobb end
 
     max_ssh_15m, time_max_ssh_15m = shared.find_ssh_max(
         place, ssh_15m_ts, ttide)
