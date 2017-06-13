@@ -144,7 +144,7 @@ def _prep_plot_data(
         arrow.get(time_max_ssh_15m), weather_path,
         places.PLACES[place]['wind grid ji'], avg_hrs=-4)
     wind_4h_avg = wind_tools.wind_speed_dir(*wind_4h_avg)
-    # drobb
+
     # Add thresholds and msl to plot_data
     plot_data = namedtuple(
         'PlotData',
@@ -175,7 +175,7 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(3, 2, width_ratios=[2, 1])
     gs.update(wspace=0.13, hspace=0.2)
     ax_info = fig.add_subplot(gs[0, 0])
-    # drobb start
+
     # Make left axis ax[0] in chart datum and right axis ax[1] in meters above mean sea level
     # Currently, all data belongs to the left axis ax[0]
     # It might be cleaner to have data belong to the right axis and not do as many conversions from meters above sea level to chart datum
@@ -184,7 +184,6 @@ def _prep_fig_axes(figsize, theme):
     ax_ssh[1] = ax_ssh[0].twinx()
     for axis in ax_ssh:
         axis.set_axis_bgcolor(theme.COLOURS['axes']['background'])
-    # drobb end
     ax_res = fig.add_subplot(gs[2, 0])
     ax_res.set_axis_bgcolor(theme.COLOURS['axes']['background'])
     ax_map = fig.add_subplot(gs[:, 1])
@@ -201,11 +200,7 @@ def _plot_info_box(ax, place, plot_data, theme):
         color=theme.COLOURS['text']['info box title'])
     ax.text(
         0.05, 0.75,
-        # drobb start
-        # Should this be wrt mean sea level or chart datum?
-        #f'Max SSH: {plot_data.max_ssh_15m:.2f} metres above mean sea level',
         f'Max SSH: {plot_data.max_ssh_15m+plot_data.msl:.2f} metres above chart datum',
-        # drobb end
         horizontalalignment='left', verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['info box content'],
@@ -252,14 +247,9 @@ def _plot_ssh_time_series(ax, place, plot_data, timezone, theme, ylims=(-1, 6)):
         t.astimezone(pytz.timezone(timezone))
         for t in plot_data.ssh_15m_ts.time]
 
-    # drobb 
-    # Added + plot_data.msl to the following four ax[0].plot calls to convert from metres above msl to chart datum
-    # Left axis ax[0] is in chart datum
-
     ax[0].plot(
         plot_data.ttide.time, plot_data.ttide.pred_all + plot_data.msl,
         linewidth=2, label='Tide Prediction',
-        # drobb
         # theme color conflict with theme
         # color=theme.COLOURS['time series']['tidal prediction vs model']
         color='purple'
@@ -278,18 +268,16 @@ def _plot_ssh_time_series(ax, place, plot_data, timezone, theme, ylims=(-1, 6)):
         label='Maximum SSH',
         color=theme.COLOURS['marker']['max ssh'])
 
-    # drobb start
     # Add extreme water levels
     colors = ['Gold', 'Red', 'DarkRed']
     labels = ['Maximum tides', 'Extreme water', 'Historical maximum']
     for wlev, color, label in zip(plot_data.thresholds, colors, labels):
         ax[0].axhline(y=wlev, color=color, lw=2, ls='solid', label=label)
-    
-    legend = ax[0].legend(numpoints=1, bbox_to_anchor=(0.75, 1.2), loc='lower left', 
+
+    legend = ax[0].legend(numpoints=1, bbox_to_anchor=(0.75, 1.2), loc='lower left',
                        borderaxespad=0., prop={'size': 12}, title=r'Legend')
     legend.get_title().set_fontsize('16')
-    # drobb end
-    
+
     ax[0].set_xlim(
         plot_data.ssh_15m_ts.time[0], plot_data.ssh_15m_ts.time[-1])
     _ssh_time_series_labels(ax, place, plot_data, ylims, theme)
@@ -302,7 +290,7 @@ def _ssh_time_series_labels(ax, place, plot_data, ylims, theme):
         color=theme.COLOURS['text']['axes title'])
     ax[0].grid(axis='both')
     ax[0].set_ylim(ylims)
-    # drobb start
+
     # Make right axis ax[1] in metres above mean sea level
     ax[1].set_ylim((ylims[0] - plot_data.msl, ylims[1] - plot_data.msl))
     ylabels = ['Water Level above \n Chart Datum [m]', 'Water Level wrt MSL [m]']
@@ -312,7 +300,6 @@ def _ssh_time_series_labels(ax, place, plot_data, ylims, theme):
             fontproperties=theme.FONTS['axis'],
             color=theme.COLOURS['text']['axis'])
         theme.set_axis_colors(axis)
-    # drobb end
 
 def _plot_residual_time_series(
     ax, plot_data, timezone, theme,
