@@ -30,9 +30,9 @@ from salishsea_tools import viz_tools
 import nowcast.figures.website_theme
 
 
-def make_figure(hr,
-    tracer_var, bathy, mesh_mask, clevels_thalweg, clevels_surface, cmap, depth_integrated,
-    figsize=(20, 12), theme=nowcast.figures.website_theme
+def make_figure(
+    hr, tracer_var, bathy, mesh_mask, clevels_thalweg, clevels_surface, cmap,
+    depth_integrated, figsize=(20, 12), theme=nowcast.figures.website_theme
 ):
     """Plot colour contours of tracer on a vertical slice along a section of 
     the domain thalweg,
@@ -89,12 +89,14 @@ def make_figure(hr,
         theme)
     return fig
 
+
 def clevels(tracer_var, mesh_mask, depth_integrated):
 
     plot_data = _prep_plot_data(0, tracer_var, mesh_mask, depth_integrated)
     clevels_thalweg, clevels_surface = _calc_clevels(plot_data)[0:2]
 
     return clevels_thalweg, clevels_surface
+
 
 def _prep_plot_data(hr, tracer_var, mesh_mask, depth_integrated):
     sj, ej = 200, 770
