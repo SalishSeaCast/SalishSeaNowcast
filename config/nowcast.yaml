@@ -207,7 +207,7 @@ results archive:
   forecast: /results/SalishSea/forecast/
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
-  hindcast: /results/SalishSea/hindcast/
+  hindcast: /ocean/sallen/allen/research/MEOPAR/myResults/hindcast/
 
 
 # Notifications to ERDDAP server that datasets have been updated
