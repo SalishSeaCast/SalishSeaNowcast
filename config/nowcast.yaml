@@ -323,6 +323,9 @@ run:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
         nowcast-green:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+      # Directory on compute host where files (e.g. namelist.time) and symlinks
+      # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
+      run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
 
     salish-nowcast:
       shared storage: True
@@ -333,6 +336,7 @@ run:
       run types:
         nowcast-dev:
           run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+      run prep dir: /results/nowcast-sys/runs/
 
   # If the `cloud host` key is present, the nowcast, forecast,
   # and forecast2 runs executed on it automatically.
@@ -368,9 +372,6 @@ run:
       forecast: /nemoShare/MEOPAR/SalishSea/forecast/
       nowcast-green: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forecast2: /nemoShare/MEOPAR/SalishSea/forecast2/
-    # Directory on compute host where files (e.g. namelist.time) and symlinks
-    # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
-    run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
     # How is the domain to be distributed over the processors in the
     # i (longitude) and j (latitude) directions?
     mpi decomposition: 9x19
@@ -416,9 +417,6 @@ run:
       # Note that salish has shared storage with the nowcast system results
       # archives
       nowcast-dev: /results/SalishSea/nowcast-dev/
-    # Directory on compute host where files (e.g. namelist.time) and symlinks
-    # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
-    run prep dir: /results/nowcast-sys/runs/
     # How is the domain to be distributed over the processors in the
     # i (longitude) and j (latitude) directions?
     mpi decomposition: 1x7

@@ -261,7 +261,7 @@ def _run_description(
                     f'SalishSea_{restart_timestep:08d}_restart_trc.nc')
                 .resolve())
         )
-    run_prep_dir = Path(host_run_config['run prep dir'])
+    run_prep_dir = Path(enabled_host_config['run prep dir'])
     NEMO_config_name = config['run types'][run_type]['config name']
     walltime = host_run_config.get('walltime')
     forcing = {

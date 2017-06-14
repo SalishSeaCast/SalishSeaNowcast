@@ -118,6 +118,7 @@ def config(scope='function'):
                                 'SS-run-sets/SalishSea/nemo3.6/nowcast/',
                         },
                     },
+                    'run prep dir': 'nowcast-sys/runs/',
                 },
                 'salish-nowcast': {
                     'run types': {
@@ -127,6 +128,7 @@ def config(scope='function'):
                         },
                     },
                 },
+                'run prep dir': 'nowcast-sys/runs/',
             },
             'salish-nowcast': {
                 'run prep dir': '/results/nowcast-sys/runs',
@@ -425,13 +427,11 @@ class TestRunDescription:
              'nowcast-dev': str(tmp_results['results']['nowcast-dev']),
              'forecast': str(tmp_results['results']['forecast']),
             })
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['config_name'] == expected
@@ -456,13 +456,11 @@ class TestRunDescription:
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
              'forecast': str(tmp_results['results']['forecast']),
             })
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['run_id'] == expected
@@ -483,13 +481,11 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['MPI decomposition'] == expected
@@ -506,17 +502,13 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run']['salish-nowcast']['results'],
             {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'],
-            {'run prep dir': str(tmp_run_prep)})
+            enabled_host_config,
+            {'run prep dir': str(tmp_results['run prep dir'])})
         p_config_host = patch.dict(
             config['run']['salish-nowcast'], walltime='23:30:00')
-        with p_config_results, p_config_nowcast, p_config_run_prep:
-            with p_config_host:
+        with p_config_results, p_config_run_prep, p_config_host:
                 run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['walltime'] == expected
@@ -536,13 +528,11 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['walltime'] == expected
@@ -564,13 +554,12 @@ class TestRunDescription:
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
              'nowcast-dev': str(tmp_results['results']['nowcast-dev']),
             })
-        p_config_nowcast = patch.dict(
-            config['run']['west.cloud'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, 'west.cloud', config)
         assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
@@ -594,13 +583,12 @@ class TestRunDescription:
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
              'forecast': str(tmp_results['results']['forecast']),
             })
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['paths'][path] == tmp_run_prep
@@ -621,13 +609,11 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['grid']['coordinates'] == expected
@@ -648,13 +634,11 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['grid']['bathymetry'] == expected
@@ -673,13 +657,11 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['grid']['land processor elimination'] == expected
@@ -702,13 +684,12 @@ class TestRunDescription:
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
              'forecast': str(tmp_results['results']['forecast']),
             })
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         expected = tmp_run_prep.join(expected)
@@ -729,13 +710,12 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         tmp_results_dir = tmp_results['results'][run_type]
@@ -755,13 +735,12 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run'][host_name]['results'],
             nowcast=str(tmp_results['results']['nowcast']))
-        p_config_nowcast = patch.dict(
-            config['run'][host_name],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         check_link_dict = run_desc['forcing'][link_name]['check link']
@@ -776,21 +755,18 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
-        p_config_nowcast = patch.dict(
-            config['run']['west.cloud'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir':
-                str(tmp_run_prep)})
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
         run_type_config = (
             config['run']['enabled hosts']['west.cloud']['run types']
             ['nowcast'])
         tmp_run_sets = tmpdir.ensure_dir(run_type_config['run sets dir'])
         p_config_run_sets_dir = patch.dict(
             run_type_config, {'run sets dir': str(tmp_run_sets)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
-            with p_config_run_sets_dir:
+        with p_config_results, p_config_run_prep, p_config_run_sets_dir:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         expected = [
@@ -814,21 +790,18 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run']['west.cloud']['results'],
             {'nowcast-green': str(tmp_results['results']['nowcast-green'])})
-        p_config_nowcast = patch.dict(
-            config['run']['west.cloud'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir':
-                str(tmp_run_prep)})
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
         run_type_config = (
             config['run']['enabled hosts']['west.cloud']['run types']
             ['nowcast-green'])
         tmp_run_sets = tmpdir.ensure_dir(run_type_config['run sets dir'])
         p_config_run_sets_dir = patch.dict(
             run_type_config, {'run sets dir': str(tmp_run_sets)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
-            with p_config_run_sets_dir:
+        with p_config_results, p_config_run_prep, p_config_run_sets_dir:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast-green', run_id, 2160, 'west.cloud',
                     config)
@@ -855,13 +828,12 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
-        p_config_nowcast = patch.dict(
-            config['run']['west.cloud'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['output']['iodefs'] == tmp_run_prep.join('iodef.xml')
@@ -880,14 +852,13 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
-        p_config_nowcast = patch.dict(
-            config['run']['west.cloud'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
         tmp_run_prep = tmp_results['run prep dir']
         tmp_run_prep.ensure('file_def.xml')
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['output']['filedefs'] == str(
@@ -899,13 +870,12 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
-        p_config_nowcast = patch.dict(
-            config['run']['west.cloud'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
+        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_nowcast, p_config_run_prep:
+            enabled_host_config,
+            {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['vcs revisions']['hg'] == [
