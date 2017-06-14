@@ -105,8 +105,8 @@ def main():
         nowcast.figures.publish.storm_surge_alerts),
         or name of the figure function for legacy nowcast.figures.figures
         functions
-        (e.g. Sandheads_winds is the function name of
-        nowcast.figures.figures.Sandheads_winds).
+        (e.g. SandHeads_winds is the function name of
+        nowcast.figures.figures.SandHeads_winds).
         The figure will be rendered in
         /results/nowcast-sys/figures/test/{run_type}/{ddmmmyy}/ so that it is
         accessible in a browser at 
@@ -312,7 +312,7 @@ def _prep_comparison_fig_functions(
             ## TODO: Fix stormtools.py:403: RuntimeWarning:
             ##  invalid value encountered in less
             ##  wind_dir = wind_dir + 360 * (wind_dir < 0)
-            'function': figures.Sandheads_winds,
+            'function': figures.SandHeads_winds,
             'args': (grid_T_hr, bathy, weather_path, coastline)
         },
         'Compare_VENUS_East': {
@@ -403,7 +403,7 @@ def _prep_publish_fig_functions(
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     names = [
         'Point Atkinson', 'Victoria', 'Campbell River', 'Cherry Point',
-        'Friday Harbor', 'Neah Bay', 'Nanaimo', 'Sandheads'
+        'Friday Harbor', 'Neah Bay', 'Nanaimo', 'SandHeads'
     ]
     filepath_tmpl = os.path.join(results_dir, '{}.nc')
     grids_15m = {
@@ -468,7 +468,7 @@ def _prep_publish_fig_functions(
                 tidal_predictions)
         },
         'SH_wind': {
-            'function': figures.Sandheads_winds,
+            'function': figures.SandHeads_winds,
             'args': (grid_T_hr, bathy, weather_path, coastline)
         },
         'Avg_wind_vectors': {

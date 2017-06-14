@@ -134,7 +134,7 @@ def make_publish_plots(
     filename = os.path.join(plots_dir, f'WaterLevel_Thresholds_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
-    fig = figures.Sandheads_winds(grid_T_hr, bathy, model_path, coastline)
+    fig = figures.SandHeads_winds(grid_T_hr, bathy, model_path, coastline)
     filename = os.path.join(plots_dir, f'SH_wind_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 

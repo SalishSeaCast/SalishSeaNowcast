@@ -50,7 +50,7 @@ wgrib2_logger = logging.getLogger('wgrib2')
 # available for it.
 IST, IEN = 110, 365
 JST, JEN = 20, 285
-# Position of Sandheads
+# Position of Sand Heads
 SandI, SandJ = 151, 136
 
 
