@@ -46,11 +46,11 @@ import numpy as np
 import pytz
 
 from salishsea_tools import (
-    places,
     nc_tools,
     viz_tools,
     wind_tools,
 )
+from salishsea_tools.places import PLACES
 
 from nowcast.figures import shared
 import nowcast.figures.website_theme
@@ -115,7 +115,7 @@ def _prep_plot_data(
     time_ssh_hr = nc_tools.timestamp(
         grid_T_hr, range(grid_T_hr.variables['time_counter'].size))
     try:
-        j, i = places.PLACES[place]['NEMO grid ji']
+        j, i = PLACES[place]['NEMO grid ji']
     except KeyError as e:
         raise KeyError(
             f'place name or info key not found in '
@@ -142,7 +142,7 @@ def _prep_plot_data(
     max_ssh_residual = residual[ssh_15m_ts.time == time_max_ssh_15m][0]
     wind_4h_avg = wind_tools.calc_wind_avg_at_point(
         arrow.get(time_max_ssh_15m), weather_path,
-        places.PLACES[place]['wind grid ji'], avg_hrs=-4)
+        PLACES[place]['wind grid ji'], avg_hrs=-4)
     wind_4h_avg = wind_tools.wind_speed_dir(*wind_4h_avg)
 
     # Add thresholds and msl to plot_data
@@ -157,7 +157,7 @@ def _prep_plot_data(
         time_max_ssh_hr=time_max_ssh_hr.to(timezone),
         ssh_15m_ts=ssh_15m_ts,
         ssh_corr=ssh_corr,
-        max_ssh_15m=max_ssh_15m - places.PLACES[place]['mean sea lvl'],
+        max_ssh_15m=max_ssh_15m - PLACES[place]['mean sea lvl'],
         time_max_ssh_15m=arrow.get(time_max_ssh_15m).to(timezone),
         residual=residual,
         max_ssh_residual=max_ssh_residual,
@@ -358,7 +358,7 @@ def _ssh_map_axis_labels(ax, place, plot_data, theme):
         f'{time_max_ssh_hr.format("DD-MMM-YYYY")}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title'])
-    j, i = places.PLACES[place]['NEMO grid ji']
+    j, i = PLACES[place]['NEMO grid ji']
     ax.plot(
         i, j, marker='o', markersize=10, markeredgewidth=3,
         color=theme.COLOURS['marker']['place'])
