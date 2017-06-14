@@ -430,15 +430,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['config_name'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
@@ -466,15 +461,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['run_id'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
@@ -498,15 +488,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['MPI decomposition'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
@@ -526,18 +511,14 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
-                str(tmp_run_prep)})
-        p_config_host = patch.dict(config['run']['salish-nowcast'],
-            walltime='23:30:00')
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                with p_config_host:
-                    run_desc = run_NEMO._run_description(
-                        run_date, run_type, run_id, 2160, host_name, config)
+            config['run']['salish-nowcast'],
+            {'run prep dir': str(tmp_run_prep)})
+        p_config_host = patch.dict(
+            config['run']['salish-nowcast'], walltime='23:30:00')
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            with p_config_host:
+                run_desc = run_NEMO._run_description(
+                    run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
@@ -560,15 +541,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -593,15 +569,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'west.cloud', config)
+            config['run']['west.cloud'], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, 'west.cloud', config)
         assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
 
     @pytest.mark.parametrize('host_name, run_type, path', [
@@ -628,15 +599,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['paths'][path] == tmp_run_prep
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
@@ -660,15 +626,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['grid']['coordinates'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
@@ -692,15 +653,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['grid']['bathymetry'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
@@ -722,15 +678,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['grid']['land processor elimination'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, link_name, expected', [
@@ -756,15 +707,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         expected = tmp_run_prep.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
 
@@ -788,15 +734,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         tmp_results_dir = tmp_results['results'][run_type]
         expected = tmp_results_dir.join(expected)
         assert run_desc['restart'][link_name] == expected
@@ -819,15 +760,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run'][host_name], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host_name, config)
+            config['run'][host_name], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
         check_link_dict = run_desc['forcing'][link_name]['check link']
         assert check_link_dict['type'] == 'atmospheric'
         assert check_link_dict['namelist filename'] == 'namelist_cfg'
@@ -924,15 +860,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
+            config['run']['west.cloud'], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['output']['iodefs'] == tmp_run_prep.join('iodef.xml')
         assert run_desc['output']['domaindefs'] == tmp_run_prep.join(
             'domain_def.xml')
@@ -955,15 +886,10 @@ class TestRunDescription:
         tmp_run_prep = tmp_results['run prep dir']
         tmp_run_prep.ensure('file_def.xml')
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
+            config['run']['west.cloud'], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['output']['filedefs'] == str(
             tmp_run_prep.join('file_def.xml'))
 
@@ -978,15 +904,10 @@ class TestRunDescription:
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['west.cloud'], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
+            config['run']['west.cloud'], {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['vcs revisions']['hg'] == [
             str(tmp_run_prep.join('..', 'NEMO-Cmd')),
             str(tmp_run_prep.join('..', 'NEMO_Nowcast')),
