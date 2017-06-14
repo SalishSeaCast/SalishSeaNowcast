@@ -252,7 +252,7 @@ def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
     fig_functions = {
         'nitrate_thalweg_and_surface': {
             'function': tracer_thalweg_and_surface.make_figure,
-            'args': (ptrc_T_hr.variables['NO3'], bathy, mesh_mask),
+            'args': (ptrc_T_hr.variables['nitrate'], bathy, mesh_mask),
             'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False}
         },
         'nitrate_diatoms_timeseries':{
@@ -274,13 +274,13 @@ def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
     }
     clevels_thalweg, clevels_surface = (
         tracer_thalweg_and_surface_hourly.clevels(
-            ptrc_T_hr.variables['NO3'], mesh_mask, depth_integrated=False))
+            ptrc_T_hr.variables['nitrate'], mesh_mask, depth_integrated=False))
     for hr in range(24):
         key = f'nitrate_thalweg_and_surface_hourly_h{hr:02d}'
         fig_functions[key] = {
             'function': tracer_thalweg_and_surface_hourly.make_figure,
             'args': (
-                hr, ptrc_T_hr.variables['NO3'], bathy, mesh_mask,
+                hr, ptrc_T_hr.variables['nitrate'], bathy, mesh_mask,
                 clevels_thalweg, clevels_surface),
             'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False},
             'format': 'png'
