@@ -125,6 +125,7 @@ def config(scope='function'):
                         'nowcast-dev': {
                             'run sets dir':
                                 'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                            'walltime': '23:30:00',
                         },
                     },
                 },
@@ -491,7 +492,11 @@ class TestRunDescription:
         assert run_desc['MPI decomposition'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('west.cloud', 'nowcast', None),
+        ('west.cloud', 'nowcast-green', None),
         ('salish-nowcast', 'nowcast-dev', '23:30:00'),
+        ('west.cloud', 'forecast', None),
+        ('west.cloud', 'forecast2', None),
     ])
     def test_walltime(
         self, host_name, run_type, expected, config, run_date, tmp_results,
@@ -506,35 +511,9 @@ class TestRunDescription:
         p_config_run_prep = patch.dict(
             enabled_host_config,
             {'run prep dir': str(tmp_results['run prep dir'])})
-        p_config_host = patch.dict(
-            config['run']['salish-nowcast'], walltime='23:30:00')
-        with p_config_results, p_config_run_prep, p_config_host:
+        with p_config_results, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
                     run_date, run_type, run_id, 2160, host_name, config)
-        assert run_desc['walltime'] == expected
-
-    @pytest.mark.parametrize('host_name, run_type, expected', [
-        ('west.cloud', 'nowcast', None),
-        ('west.cloud', 'nowcast-green', None),
-        ('west.cloud', 'forecast', None),
-        ('west.cloud', 'forecast2', None),
-    ])
-    def test_no_walltime(
-        self, host_name, run_type, expected, config, run_date, tmp_results,
-        tmpdir,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        p_config_results = patch.dict(
-            config['run'][host_name]['results'],
-            {run_type: str(tmp_results['results'][run_type])})
-        enabled_host_config = (config['run']['enabled hosts'][host_name])
-        p_config_run_prep = patch.dict(
-            enabled_host_config,
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        with p_config_results, p_config_run_prep:
-            run_desc = run_NEMO._run_description(
-                run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [

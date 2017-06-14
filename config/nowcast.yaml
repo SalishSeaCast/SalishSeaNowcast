@@ -336,6 +336,7 @@ run:
       run types:
         nowcast-dev:
           run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+          walltime: 23:30:00
       run prep dir: /results/nowcast-sys/runs/
 
   # If the `cloud host` key is present, the nowcast, forecast,
@@ -420,10 +421,6 @@ run:
     # How is the domain to be distributed over the processors in the
     # i (longitude) and j (latitude) directions?
     mpi decomposition: 1x7
-    # Wall-clock time requested for the run. It limits the time that the job
-    # will run for on all machines, and it also affects queue priority for
-    # runs on Westgrid machines.
-    walltime: 23:30:00
     # Path to the salishsea command processor executable to use in the run
     # script
     salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
