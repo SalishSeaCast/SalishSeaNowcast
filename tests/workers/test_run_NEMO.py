@@ -98,8 +98,35 @@ def config(scope='function'):
         },
         'run': {
             'enabled hosts': {
-                'west.cloud': {'mpi hosts file': '${HOME}/mpi_hosts'},
-                'salish-nowcast': {},
+                'west.cloud': {
+                    'mpi hosts file': '${HOME}/mpi_hosts',
+                    'run types': {
+                        'nowcast': {
+                            'run sets dir':
+                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                        },
+                        'forecast': {
+                            'run sets dir':
+                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                        },
+                        'forecast2': {
+                            'run sets dir':
+                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                        },
+                        'nowcast-green': {
+                            'run sets dir':
+                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                        },
+                    },
+                },
+                'salish-nowcast': {
+                    'run types': {
+                        'nowcast-dev': {
+                            'run sets dir':
+                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                        },
+                    },
+                },
             },
             'salish-nowcast': {
                 'run prep dir': '/results/nowcast-sys/runs',
@@ -377,20 +404,21 @@ class TestRunDescription:
                         run_date, 'nowcast', run_id, 2160, 'salish-nowcast',
                         config)
 
-    @pytest.mark.parametrize('run_type, expected', [
-        ('nowcast', 'SalishSea'),
-        ('nowcast-green', 'SOG'),
-        ('nowcast-dev', 'SalishSea'),
-        ('forecast', 'SalishSea'),
-        ('forecast2', 'SalishSea'),
+    @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('west.cloud', 'nowcast', 'SalishSea'),
+        ('west.cloud', 'nowcast-green', 'SOG'),
+        ('salish-nowcast', 'nowcast-dev', 'SalishSea'),
+        ('west.cloud', 'forecast', 'SalishSea'),
+        ('west.cloud', 'forecast2', 'SalishSea'),
     ])
     def test_config_name(
-        self, run_type, expected, config, run_date, tmp_results, tmpdir,
+        self, host_name, run_type, expected, config, run_date, tmp_results,
+        tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type]),
              'nowcast': str(tmp_results['results']['nowcast']),
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
@@ -398,11 +426,11 @@ class TestRunDescription:
              'forecast': str(tmp_results['results']['forecast']),
             })
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run'][host_name],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run'][host_name], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -410,34 +438,35 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['config_name'] == expected
 
-    @pytest.mark.parametrize('run_type, expected', [
-        ('nowcast', '04jan16nowcast'),
-        ('nowcast-green', '04jan16nowcast-green'),
-        ('nowcast-dev', '04jan16nowcast-dev'),
-        ('forecast', '04jan16forecast'),
-        ('forecast2', '04jan16forecast2'),
+    @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('west.cloud', 'nowcast', '04jan16nowcast'),
+        ('west.cloud', 'nowcast-green', '04jan16nowcast-green'),
+        ('salish-nowcast', 'nowcast-dev', '04jan16nowcast-dev'),
+        ('west.cloud', 'forecast', '04jan16forecast'),
+        ('west.cloud', 'forecast2', '04jan16forecast2'),
     ])
     def test_run_id(
-        self, run_type, expected, config, run_date, tmp_results, tmpdir,
+        self, host_name, run_type, expected, config, run_date, tmp_results,
+        tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type]),
              'nowcast': str(tmp_results['results']['nowcast']),
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
              'forecast': str(tmp_results['results']['forecast']),
             })
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run'][host_name],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run'][host_name], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -445,26 +474,31 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['run_id'] == expected
 
-    @pytest.mark.parametrize('run_type, expected', [
-        ('nowcast', '1x7'),
+    @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('west.cloud', 'nowcast', '9x19'),
+        ('west.cloud', 'nowcast-green', '9x19'),
+        ('salish-nowcast', 'nowcast-dev', '1x7'),
+        ('west.cloud', 'forecast', '9x19'),
+        ('west.cloud', 'forecast2', '9x19'),
     ])
     def test_mpi_decomposition(
-        self, run_type, expected, config, run_date, tmp_results, tmpdir,
+        self, host_name, run_type, expected, config, run_date, tmp_results,
+        tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run'][host_name],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run'][host_name], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -472,14 +506,15 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['MPI decomposition'] == expected
 
-    @pytest.mark.parametrize('run_type, expected', [
-        ('nowcast-green', '16:00:00'),
+    @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('salish-nowcast', 'nowcast-dev', '23:30:00'),
     ])
     def test_walltime(
-        self, run_type, expected, config, run_date, tmp_results, tmpdir,
+        self, host_name, run_type, expected, config, run_date, tmp_results,
+        tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
@@ -494,7 +529,7 @@ class TestRunDescription:
             config['run']['salish-nowcast'], {'run prep dir':
                 str(tmp_run_prep)})
         p_config_host = patch.dict(config['run']['salish-nowcast'],
-            walltime='16:00:00')
+            walltime='23:30:00')
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
         with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
@@ -502,27 +537,30 @@ class TestRunDescription:
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 with p_config_host:
                     run_desc = run_NEMO._run_description(
-                        run_date, run_type, run_id, 2160, 'salish-nowcast',
-                        config)
+                        run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['walltime'] == expected
 
-    @pytest.mark.parametrize('run_type, expected', [
-        ('nowcast', None),
+    @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('west.cloud', 'nowcast', None),
+        ('west.cloud', 'nowcast-green', None),
+        ('west.cloud', 'forecast', None),
+        ('west.cloud', 'forecast2', None),
     ])
     def test_no_walltime(
-        self, run_type, expected, config, run_date, tmp_results, tmpdir,
+        self, host_name, run_type, expected, config, run_date, tmp_results,
+        tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run'][host_name],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run'][host_name], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -530,7 +568,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['walltime'] == expected
 
     @pytest.mark.parametrize('run_type, path, expected', [
@@ -544,18 +582,18 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run']['west.cloud']['results'],
             {run_type: str(tmp_results['results'][run_type]),
              'nowcast': str(tmp_results['results']['nowcast']),
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
-             'forecast': str(tmp_results['results']['forecast']),
+             'nowcast-dev': str(tmp_results['results']['nowcast-dev']),
             })
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run']['west.cloud'],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run']['west.cloud'], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -563,30 +601,34 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, 'west.cloud', config)
         assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
 
-    @pytest.mark.parametrize('run_type, path', [
-        ('forecast2', 'runs directory'),
+    @pytest.mark.parametrize('host_name, run_type, path', [
+        ('west.cloud', 'nowcast', 'runs directory'),
+        ('west.cloud', 'nowcast-green', 'runs directory'),
+        ('salish-nowcast', 'nowcast-dev', 'runs directory'),
+        ('west.cloud', 'forecast', 'runs directory'),
+        ('west.cloud', 'forecast2', 'runs directory'),
     ])
     def test_runs_dir_path(
-        self, run_type, path, config, run_date, tmp_results, tmpdir,
+        self, host_name, run_type, path, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type]),
              'nowcast': str(tmp_results['results']['nowcast']),
              'nowcast-green': str(tmp_results['results']['nowcast-green']),
              'forecast': str(tmp_results['results']['forecast']),
             })
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run'][host_name],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run'][host_name], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -594,117 +636,31 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
         assert run_desc['paths'][path] == tmp_run_prep
 
-    @pytest.mark.parametrize('run_type, expected', [
-        ('nowcast', 'coordinates_seagrid_SalishSea.nc'),
+    @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('west.cloud', 'nowcast', 'coordinates_seagrid_SalishSea.nc'),
+        ('west.cloud', 'nowcast-green', 'coordinates_seagrid_SalishSea.nc'),
+        ('salish-nowcast', 'nowcast-dev', 'coordinates_seagrid_SalishSea.nc'),
+        ('west.cloud', 'forecast', 'coordinates_seagrid_SalishSea.nc'),
+        ('west.cloud', 'forecast2', 'coordinates_seagrid_SalishSea.nc'),
     ])
     def test_grid_coordinates(
-        self, run_type, expected, config, run_date, tmp_results, tmpdir,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
-        assert run_desc['grid']['coordinates'] == expected
-
-    @pytest.mark.parametrize('run_type, expected', [
-        ('nowcast', 'bathy_downonegrid2.nc'),
-        ('nowcast-green', 'bathy_downonegrid2.nc'),
-    ])
-    def test_grid_bathymetry(
-        self, run_type, expected, config, run_date, tmp_results, tmpdir,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
-        assert run_desc['grid']['bathymetry'] == expected
-
-    @pytest.mark.parametrize('run_type, host, expected', [
-        ('nowcast', 'west.cloud', 'bathy_downonegrid2.csv'),
-        ('nowcast-green', 'west.cloud', 'bathy_downonegrid2.csv'),
-        ('nowcast-dev', 'salish-nowcast', False),
-    ])
-    def test_grid_land_processor_elimination(
-        self, run_type, host, expected, config, run_date, tmp_results, tmpdir,
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
-            {run_type: str(tmp_results['results'][run_type])})
-        p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
-            {'run prep dir': str(tmp_results['run prep dir'])})
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
-                str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
-                run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, host, config)
-        assert run_desc['grid']['land processor elimination'] == expected
-
-    @pytest.mark.parametrize('run_type, link_name, expected', [
-        ('nowcast', 'NEMO-atmos', 'NEMO-atmos'),
-        ('forecast', 'open_boundaries', 'open_boundaries'),
-        ('forecast2', 'rivers', 'rivers'),
-    ])
-    def test_forcing_links(
-        self, run_type, link_name, expected, config, run_date, tmp_results,
+        self, host_name, run_type, expected, config, run_date, tmp_results,
         tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
-            {run_type: str(tmp_results['results'][run_type]),
-             'nowcast': str(tmp_results['results']['nowcast']),
-             'nowcast-green': str(tmp_results['results']['nowcast-green']),
-             'forecast': str(tmp_results['results']['forecast']),
-            })
+            config['run'][host_name]['results'],
+            {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run'][host_name],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run'][host_name], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -712,30 +668,127 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
+        assert run_desc['grid']['coordinates'] == expected
+
+    @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('west.cloud', 'nowcast', 'bathy_downonegrid2.nc'),
+        ('west.cloud', 'nowcast-green', 'bathy_downonegrid2.nc'),
+        ('salish-nowcast', 'nowcast-dev', 'bathy_downonegrid2.nc'),
+        ('west.cloud', 'forecast', 'bathy_downonegrid2.nc'),
+        ('west.cloud', 'forecast2', 'bathy_downonegrid2.nc'),
+    ])
+    def test_grid_bathymetry(
+        self, host_name, run_type, expected, config, run_date, tmp_results,
+        tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run'][host_name]['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run'][host_name],
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run'][host_name], {'run prep dir':
+                str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, run_type, run_id, 2160, host_name, config)
+        assert run_desc['grid']['bathymetry'] == expected
+
+    @pytest.mark.parametrize('host_name, run_type, expected', [
+        ('west.cloud', 'nowcast', 'bathy_downonegrid2.csv'),
+        ('west.cloud', 'nowcast-green', 'bathy_downonegrid2.csv'),
+        ('salish-nowcast', 'nowcast-dev', False),
+    ])
+    def test_grid_land_processor_elimination(
+        self, host_name, run_type, expected, config, run_date, tmp_results,
+        tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run'][host_name]['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        p_config_nowcast = patch.dict(
+            config['run'][host_name],
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run'][host_name], {'run prep dir':
+                str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, run_type, run_id, 2160, host_name, config)
+        assert run_desc['grid']['land processor elimination'] == expected
+
+    @pytest.mark.parametrize('host_name, run_type, link_name, expected', [
+        ('west.cloud', 'nowcast', 'NEMO-atmos', 'NEMO-atmos'),
+        ('west.cloud', 'forecast', 'open_boundaries', 'open_boundaries'),
+        ('west.cloud', 'forecast2', 'rivers', 'rivers'),
+    ])
+    def test_forcing_links(
+        self, host_name, run_type, link_name, expected, config, run_date,
+        tmp_results, tmpdir,
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        p_config_results = patch.dict(
+            config['run'][host_name]['results'],
+            {run_type: str(tmp_results['results'][run_type]),
+             'nowcast': str(tmp_results['results']['nowcast']),
+             'nowcast-green': str(tmp_results['results']['nowcast-green']),
+             'forecast': str(tmp_results['results']['forecast']),
+            })
+        p_config_nowcast = patch.dict(
+            config['run'][host_name],
+            {'run prep dir': str(tmp_results['run prep dir'])})
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            config['run'][host_name], {'run prep dir':
+                str(tmp_run_prep)})
+        tmp_cwd = tmpdir.ensure_dir('cwd')
+        tmp_cwd.ensure('namelist.time')
+        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
+            m_cwd.return_value = Path(str(tmp_cwd))
+            with p_config_results, p_config_nowcast, p_config_run_prep:
+                run_desc = run_NEMO._run_description(
+                    run_date, run_type, run_id, 2160, host_name, config)
         expected = tmp_run_prep.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
 
-    @pytest.mark.parametrize('run_type, link_name, expected', [
-        ('nowcast', 'restart.nc', '03jan16/SalishSea_00002160_restart.nc'),
-        ('nowcast-green', 'restart_trc.nc',
+    @pytest.mark.parametrize('host_name, run_type, link_name, expected', [
+        ('west.cloud', 'nowcast', 'restart.nc',
+            '03jan16/SalishSea_00002160_restart.nc'),
+        ('west.cloud', 'nowcast-green', 'restart_trc.nc',
             '03jan16/SalishSea_00002160_restart_trc.nc'),
     ])
     def test_restart_links(
-        self, run_type, link_name, expected, config, run_date, tmp_results,
-        tmpdir,
+        self, host_name, run_type, link_name, expected, config, run_date,
+        tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run'][host_name],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run'][host_name], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -743,29 +796,30 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
         tmp_results_dir = tmp_results['results'][run_type]
         expected = tmp_results_dir.join(expected)
         assert run_desc['restart'][link_name] == expected
 
-    @pytest.mark.parametrize('run_type, link_name, expected', [
-        ('nowcast', 'NEMO-atmos', '/nowcast-sys/nowcast/NEMO-atmos'),
+    @pytest.mark.parametrize('host_name, run_type, link_name, expected', [
+        ('west.cloud', 'nowcast', 'NEMO-atmos',
+            '/nowcast-sys/nowcast/NEMO-atmos'),
     ])
     def test_forcing_atmospheric_link_check(
-        self, run_type, link_name, expected, config, run_date, tmp_results,
-        tmpdir,
+        self, host_name, run_type, link_name, expected, config, run_date,
+        tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run'][host_name]['results'],
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run'][host_name],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run'][host_name], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -773,7 +827,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, run_type, run_id, 2160, 'salish-nowcast', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
         check_link_dict = run_desc['forcing'][link_name]['check link']
         assert check_link_dict['type'] == 'atmospheric'
         assert check_link_dict['namelist filename'] == 'namelist_cfg'
@@ -784,49 +838,35 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run']['west.cloud'],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run']['west.cloud'], {'run prep dir':
                 str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
+        run_type_config = (
+            config['run']['enabled hosts']['west.cloud']['run types']
+            ['nowcast'])
+        tmp_run_sets = tmpdir.ensure_dir(run_type_config['run sets dir'])
+        p_config_run_sets_dir = patch.dict(
+            run_type_config, {'run sets dir': str(tmp_run_sets)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            with p_config_run_sets_dir:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
+                    run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         expected = [
             tmp_run_prep.join('namelist.time'),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.domain'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/'
-                 'namelist.surface.blue'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.lateral'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.bottom'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.tracer'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.dynamics'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.vertical'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.compute'
-                .split('/')),
+            tmp_run_sets.join('namelist.domain'),
+            tmp_run_sets.join('namelist.surface.blue'),
+            tmp_run_sets.join('namelist.lateral'),
+            tmp_run_sets.join('namelist.bottom'),
+            tmp_run_sets.join('namelist.tracer'),
+            tmp_run_sets.join('namelist.dynamics'),
+            tmp_run_sets.join('namelist.vertical'),
+            tmp_run_sets.join('namelist.compute'),
         ]
         assert run_desc['namelists']['namelist_cfg'] == expected
 
@@ -836,77 +876,55 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run']['west.cloud']['results'],
             {'nowcast-green': str(tmp_results['results']['nowcast-green'])})
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run']['west.cloud'],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run']['west.cloud'], {'run prep dir':
                 str(tmp_run_prep)})
-        tmp_cwd = tmpdir.ensure_dir('cwd')
-        tmp_cwd.ensure('namelist.time')
-        with patch('nowcast.workers.run_NEMO.Path.cwd') as m_cwd:
-            m_cwd.return_value = Path(str(tmp_cwd))
-            with p_config_results, p_config_nowcast, p_config_run_prep:
+        run_type_config = (
+            config['run']['enabled hosts']['west.cloud']['run types']
+            ['nowcast-green'])
+        tmp_run_sets = tmpdir.ensure_dir(run_type_config['run sets dir'])
+        p_config_run_sets_dir = patch.dict(
+            run_type_config, {'run sets dir': str(tmp_run_sets)})
+        with p_config_results, p_config_nowcast, p_config_run_prep:
+            with p_config_run_sets_dir:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast-green', run_id, 2160, 'salish-nowcast',
+                    run_date, 'nowcast-green', run_id, 2160, 'west.cloud',
                     config)
         expected = [
             tmp_run_prep.join('namelist.time'),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.domain'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/'
-                 'namelist.surface.green'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.lateral'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.bottom'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.tracer'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.dynamics'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.vertical'
-                .split('/')),
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.compute'
-                .split('/')),
+            tmp_run_sets.join('namelist.domain'),
+            tmp_run_sets.join('namelist.surface.green'),
+            tmp_run_sets.join('namelist.lateral'),
+            tmp_run_sets.join('namelist.bottom'),
+            tmp_run_sets.join('namelist.tracer'),
+            tmp_run_sets.join('namelist.dynamics'),
+            tmp_run_sets.join('namelist.vertical'),
+            tmp_run_sets.join('namelist.compute'),
         ]
         assert run_desc['namelists']['namelist_cfg'] == expected
-        expected = [
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist_top_cfg'
-                .split('/'))
-        ]
+        expected = [tmp_run_sets.join('namelist_top_cfg')]
         assert run_desc['namelists']['namelist_top_cfg'] == expected
-        expected = [
-            tmp_run_prep.join(
-                *'../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist_pisces_cfg'
-                .split('/'))
-        ]
+        expected = [tmp_run_sets.join('namelist_pisces_cfg')]
         assert run_desc['namelists']['namelist_pisces_cfg'] == expected
 
     def test_output_nowcast(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run']['west.cloud'],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run']['west.cloud'], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -914,7 +932,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
+                    run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['output']['iodefs'] == tmp_run_prep.join('iodef.xml')
         assert run_desc['output']['domaindefs'] == tmp_run_prep.join(
             'domain_def.xml')
@@ -929,15 +947,15 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run']['west.cloud'],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         tmp_run_prep.ensure('file_def.xml')
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run']['west.cloud'], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -945,7 +963,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
+                    run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['output']['filedefs'] == str(
             tmp_run_prep.join('file_def.xml'))
 
@@ -953,14 +971,14 @@ class TestRunDescription:
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         p_config_results = patch.dict(
-            config['run']['salish-nowcast']['results'],
+            config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
         p_config_nowcast = patch.dict(
-            config['run']['salish-nowcast'],
+            config['run']['west.cloud'],
             {'run prep dir': str(tmp_results['run prep dir'])})
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
-            config['run']['salish-nowcast'], {'run prep dir':
+            config['run']['west.cloud'], {'run prep dir':
                 str(tmp_run_prep)})
         tmp_cwd = tmpdir.ensure_dir('cwd')
         tmp_cwd.ensure('namelist.time')
@@ -968,7 +986,7 @@ class TestRunDescription:
             m_cwd.return_value = Path(str(tmp_cwd))
             with p_config_results, p_config_nowcast, p_config_run_prep:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'salish-nowcast', config)
+                    run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['vcs revisions']['hg'] == [
             str(tmp_run_prep.join('..', 'NEMO-Cmd')),
             str(tmp_run_prep.join('..', 'NEMO_Nowcast')),

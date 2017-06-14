@@ -315,10 +315,14 @@ run:
       config file: /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       # List of run types that are executed on the compute host
       run types:
-        - nowcast
-        - forecast
-        - forecast2
-        - nowcast-green
+        nowcast:
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+        forecast:
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+        forecast2:
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+        nowcast-green:
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
 
     salish-nowcast:
       shared storage: True
@@ -327,7 +331,8 @@ run:
       python: /results/nowcast-sys/nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       run types:
-        - nowcast-dev
+        nowcast-dev:
+          run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
 
   # If the `cloud host` key is present, the nowcast, forecast,
   # and forecast2 runs executed on it automatically.
