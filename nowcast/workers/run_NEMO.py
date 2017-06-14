@@ -263,7 +263,7 @@ def _run_description(
         )
     run_prep_dir = Path(enabled_host_config['run prep dir'])
     NEMO_config_name = config['run types'][run_type]['config name']
-    walltime = host_run_config.get('walltime')
+    walltime = enabled_host_config['run types'][run_type].get('walltime')
     forcing = {
         'NEMO-atmos': {
             'link to': os.fspath((run_prep_dir/'NEMO-atmos').resolve()),
