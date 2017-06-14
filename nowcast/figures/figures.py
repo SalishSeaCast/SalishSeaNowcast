@@ -164,7 +164,7 @@ SITES = {
         'stn_no': 9449424,
         'msl': 3.543,
         'extreme_ssh': 5.846},
-    'Sandheads': {
+    'SandHeads': {
         'lat': 49.10,
         'lon': -123.30},
     'Tofino': {
@@ -192,7 +192,7 @@ TIDAL_SITES = ['Point Atkinson', 'Victoria', 'Campbell River', 'Nanaimo',
                'Cherry Point']
 # Sites for adding wind vectors to map
 WIND_SITES = ['La Perouse Bank', 'Neah Bay', 'Dungeness', 'Victoria',
-              'Friday Harbor', 'Cherry Point', 'Sandheads',
+              'Friday Harbor', 'Cherry Point', 'SandHeads',
               'Point Atkinson', 'Halibut Bank', 'Nanaimo', 'Campbell River']
 # Colors for wind stations
 stations_c = cm.rainbow(np.linspace(0, 1, len(WIND_SITES)))
@@ -811,7 +811,7 @@ def plot_wind_vector(ax, name, t_orig, t_final, weather_path, inds, scale):
 
     :arg str name: The name of the station, can be Neah Bay, Point Atkinson,
                    Campbell River, Victoria, Friday Harbor, Cherry Point,
-                   Sandheads.
+                   Sand Heads.
 
     :arg datetime t_orig: start time of the simulation.
 
@@ -1169,9 +1169,9 @@ def plot_thresholds_all(
 
 ## Called by make_plots (publish)
 ## TODO: Move/rename to figures.publish as sandheads_winds
-def Sandheads_winds(
+def SandHeads_winds(
         grid_T, grid_B, weather_path, coastline, PST=1, figsize=(20, 12)):
-    """Plots the observed and modelled winds at Sandheads during the
+    """Plots the observed and modelled winds at Sand Heads during the
     simulation.
 
     Observations are from Environment Canada data:
@@ -1231,7 +1231,7 @@ def Sandheads_winds(
     ax1.plot(t + PST * time_shift, wind, lw=2, color=model_c, label='Model')
     ax1.set_xlim([t_orig + PST * time_shift, t_end + PST * time_shift])
     ax1.set_ylim(wind_ax)
-    ax1.set_title('Winds at Sandheads:  ' + start, **title_font)
+    ax1.set_title('Winds at Sand Heads:  ' + start, **title_font)
     ax1.set_ylabel('Wind Speed (m/s)', **axis_font)
     ax1.set_xlabel('Time {}'.format(timezone), **axis_font)
     ax1.legend(loc=0)
@@ -1273,7 +1273,7 @@ def Sandheads_winds(
         color='DarkMagenta')
     bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.8)
     ax0.annotate(
-        'Sandheads', (lon - 0.05, lat - 0.15),
+        'Sand Heads', (lon - 0.05, lat - 0.15),
         fontsize=15, color='black', bbox=bbox_args)
 
     # Citation
