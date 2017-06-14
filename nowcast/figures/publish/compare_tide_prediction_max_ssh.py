@@ -127,7 +127,7 @@ def _prep_plot_data(
     ttide = shared.get_tides(place, tidal_predictions)
     ssh_corr = shared.correct_model_ssh(ssh_15m_ts.ssh, ssh_15m_ts.time, ttide)
 
-    msl = PLACES[place]['msl']
+    msl = PLACES[place]['mean sea lvl']
     extreme_ssh = PLACES[place]['hist max sea lvl']
     max_tides = max(ttide.pred_all) + msl
     mid_tides = 0.5 * (extreme_ssh - max_tides) + max_tides
