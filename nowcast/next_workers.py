@@ -181,12 +181,6 @@ def after_grib_to_netcdf(msg, config, checklist):
                             'nowcast.workers.upload_forcing',
                             args=[host, msg_suffix]),
                     )
-        if 'nowcast-dev' in config['run']['enabled hosts'][host]['run types']:
-            next_workers['success nowcast+'].append(
-                NextWorker(
-                    'nowcast.workers.make_forcing_links',
-                    args=[host, 'nowcast+', '--shared-storage'])
-            )
     return next_workers[msg.type]
 
 
@@ -484,15 +478,23 @@ def after_watch_NEMO(msg, config, checklist):
         if run_type == 'nowcast-green':
             if wave_forecast_after == 'nowcast-green':
                 host_name = config['wave forecasts']['host']
-                next_workers['success nowcast-green'].extend(
-                    [NextWorker(
+                next_workers['success nowcast-green'].extend([
+                    NextWorker(
                         'nowcast.workers.make_ww3_wind_file',
                         args=[host_name, 'forecast'], host=host_name),
-                        NextWorker(
-                            'nowcast.workers.make_ww3_current_file',
-                            args=[host_name, 'forecast'], host=host_name)
+                    NextWorker(
+                        'nowcast.workers.make_ww3_current_file',
+                        args=[host_name, 'forecast'], host=host_name),
                     ],
                 )
+            for host in config['run']['enabled hosts']:
+                run_types = config['run']['enabled hosts'][host]['run types']
+                if 'nowcast-dev' in run_types:
+                    next_workers['success nowcast-green'].append(
+                        NextWorker(
+                            'nowcast.workers.make_forcing_links',
+                            args=[host, 'nowcast+', '--shared-storage'])
+                    )
         if run_type == 'forecast2':
             host_name = config['wave forecasts']['host']
             next_workers['success forecast2'].extend(

@@ -217,17 +217,6 @@ class TestAfterGribToNetcdf:
             args=['salish', 'nowcast+'], host='localhost')
         assert not_expected not in workers
 
-    def test_success_nowcastp_launch_make_forcing_links_nowcastp_sharedstorage(
-        self, config, checklist,
-    ):
-        workers = next_workers.after_grib_to_netcdf(
-            Message('grib_to_netcdf', 'success nowcast+'), config, checklist)
-        expected = NextWorker(
-            'nowcast.workers.make_forcing_links',
-            args=['salish', 'nowcast+', '--shared-storage'],
-            host='localhost')
-        assert expected in workers
-
     def test_success_nowcastp_launch_ping_erddap_download_weather(
         self, config, checklist,
     ):
@@ -599,6 +588,24 @@ class TestAfterWatchNEMO:
             'nowcast.workers.make_ww3_current_file',
             args=['west.cloud', 'forecast'], host='west.cloud')
         assert workers[1] == expected
+
+    def test_success_nowcast_green_launch_mk_forcing_links_nowcastp_shrdstrg(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                'watch_NEMO', 'success nowcast-green', {
+                    'nowcast-green': {
+                        'host': 'west.cloud', 'run date': '2017-05-31',
+                        'completed': True,
+                    }
+                }),
+                config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['salish', 'nowcast+', '--shared-storage'],
+            host='localhost')
+        assert expected in workers
 
     @pytest.mark.parametrize('msg', [
         Message(
