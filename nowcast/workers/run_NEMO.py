@@ -224,6 +224,7 @@ def _run_description(
     run_date, run_type, run_id, restart_timestep, host_name, config,
 ):
     host_run_config = config['run'][host_name]
+    enabled_host_config = config['run']['enabled hosts'][host_name]
     restart_from = {
         'nowcast': 'nowcast',
         'nowcast-green': 'nowcast-green',
@@ -276,7 +277,8 @@ def _run_description(
         'rivers': {
             'link to': os.fspath((run_prep_dir/'rivers/').resolve())},
     }
-    run_sets_dir = run_prep_dir/'../SS-run-sets/SalishSea/nemo3.6/nowcast'
+    run_sets_dir = Path(
+        enabled_host_config['run types'][run_type]['run sets dir'])
     if run_type == 'nowcast-green':
         namelist_sections = (
             'namelist.time', 'namelist.domain', 'namelist.surface.green',
