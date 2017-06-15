@@ -22,6 +22,7 @@ and generate the western open boundary ssh files.
 import datetime
 import logging
 import os
+from pathlib import Path
 import shutil
 
 from bs4 import BeautifulSoup
@@ -94,7 +95,8 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     storm surge website.
     """
     run_type = parsed_args.run_type
-    with nc.Dataset(config['coordinates']) as coordinates:
+    grid_dir = Path(config['ssh']['grid dir'])
+    with nc.Dataset(os.fspath(grid_dir / config['coordinates'])) as coordinates:
         lats = coordinates.variables['nav_lat'][:]
         lons = coordinates.variables['nav_lon'][:]
     logger.debug(
