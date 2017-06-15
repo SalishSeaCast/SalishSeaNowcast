@@ -136,11 +136,10 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
         'forecast2': run_date.replace(days=2),
     }
     run_duration = config['run types'][run_type]['duration']
-    host_run_config = config['run'][host_name]
-    run_prep_dir = Path(
-        config['run']['enabled hosts'][host_name]['run prep dir'])
+    host_config = config['run']['enabled hosts'][host_name]
+    run_prep_dir = Path(host_config['run prep dir'])
     restart_timestep = _update_time_namelist(
-        run_date, run_type, run_duration, host_run_config, run_prep_dir)
+        run_date, run_type, run_duration, host_config, run_prep_dir)
     run_desc = _run_description(
         run_days[run_type], run_type, run_id, restart_timestep, host_name,
         config)
@@ -152,7 +151,8 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
 
 
 def _update_time_namelist(
-    run_date, run_type, run_duration, host_run_config, run_prep_dir):
+    run_date, run_type, run_duration, host_config, run_prep_dir
+):
     prev_runs = {
         # run-type: based-on run-type, date offset
         'nowcast': ('nowcast', -1),
@@ -162,7 +162,7 @@ def _update_time_namelist(
         'forecast2': ('forecast', 0),
     }
     prev_run_type, date_offset = prev_runs[run_type]
-    results_dir = Path(host_run_config['results'][prev_run_type])
+    results_dir = Path(host_config['run types'][prev_run_type]['results'])
     dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
     prev_run_namelist = namelist2dict(os.fspath(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
@@ -219,8 +219,7 @@ def _get_namelist_value(key, lines):
 def _run_description(
     run_date, run_type, run_id, restart_timestep, host_name, config,
 ):
-    host_run_config = config['run'][host_name]
-    enabled_host_config = config['run']['enabled hosts'][host_name]
+    host_config = config['run']['enabled hosts'][host_name]
     restart_from = {
         'nowcast': 'nowcast',
         'nowcast-green': 'nowcast-green',
@@ -229,7 +228,8 @@ def _run_description(
         'forecast2': 'forecast',
     }
     try:
-        restart_dir = Path(host_run_config['results'][restart_from[run_type]])
+        restart_dir = Path(
+            host_config['run types'][restart_from[run_type]]['results'])
     except KeyError:
         logger.critical(
             f'no results directory for {run_type} in {host_name} run config')
@@ -257,9 +257,8 @@ def _run_description(
                     f'SalishSea_{restart_timestep:08d}_restart_trc.nc')
                 .resolve())
         )
-    run_prep_dir = Path(enabled_host_config['run prep dir'])
+    run_prep_dir = Path(host_config['run prep dir'])
     NEMO_config_name = config['run types'][run_type]['config name']
-    walltime = enabled_host_config['run types'][run_type].get('walltime')
     forcing = {
         'NEMO-atmos': {
             'link to': os.fspath((run_prep_dir/'NEMO-atmos').resolve()),
@@ -273,8 +272,7 @@ def _run_description(
         'rivers': {
             'link to': os.fspath((run_prep_dir/'rivers/').resolve())},
     }
-    run_sets_dir = Path(
-        enabled_host_config['run types'][run_type]['run sets dir'])
+    run_sets_dir = Path(host_config['run types'][run_type]['run sets dir'])
     namelists = {
         'namelist_cfg': [os.fspath((run_prep_dir/'namelist.time').resolve())]
     }
@@ -294,12 +292,13 @@ def _run_description(
         run_id=run_id,
         config_name=NEMO_config_name,
         mpi_decomposition=(
-            enabled_host_config['run types'][run_type]['mpi decomposition']),
-        walltime=walltime,
+            host_config['run types'][run_type]['mpi decomposition']),
+        walltime=(host_config['run types'][run_type].get('walltime')),
         NEMO_code_config=os.fspath(
-            (run_prep_dir/'../NEMO-3.6-code'/'NEMOGCM'/'CONFIG').resolve()),
-        XIOS_code=os.fspath((run_prep_dir/'../XIOS-2/').resolve()),
-        forcing_path=os.fspath((run_prep_dir/'../NEMO-forcing/').resolve()),
+            (run_prep_dir / '../NEMO-3.6-code' / 'NEMOGCM' / 'CONFIG')
+            .resolve()),
+        XIOS_code=os.fspath((run_prep_dir / '../XIOS-2/').resolve()),
+        forcing_path=os.fspath((run_prep_dir / '../NEMO-forcing/').resolve()),
         runs_dir=os.fspath(run_prep_dir.resolve()),
         forcing=forcing,
         namelists=namelists,
@@ -339,9 +338,9 @@ def _run_description(
 def _create_run_script(
     run_date, run_type, run_dir, run_desc_filepath, host_name, config
 ):
-    host_run_config = config['run'][host_name]
+    host_config = config['run']['enabled hosts'][host_name]
     dmy = run_date.format('DDMMMYY').lower()
-    results_dir = Path(host_run_config['results'][run_type])
+    results_dir = Path(host_config['run types'][run_type]['results'])
     script = _build_script(
         run_dir, run_type, run_desc_filepath, results_dir / dmy, host_name,
         config)
@@ -357,13 +356,13 @@ def _build_script(
     run_dir, run_type, run_desc_filepath, results_dir, host_name, config,
 ):
     run_desc = salishsea_cmd.lib.load_run_desc(run_desc_filepath)
-    enabled_host_config = config['run']['enabled hosts'][host_name]
+    host_config = config['run']['enabled hosts'][host_name]
     nemo_processors = salishsea_cmd.lib.get_n_processors(run_desc, run_dir)
     xios_processors = int(run_desc['output']['XIOS servers'])
-    email = enabled_host_config.get('email', 'nobody@example.com')
-    xios_host = enabled_host_config.get('xios host')
+    email = host_config.get('email', 'nobody@example.com')
+    xios_host = host_config.get('xios host')
     script = '#!/bin/bash\n'
-    if enabled_host_config['job exec cmd'] == 'qsub':
+    if host_config['job exec cmd'] == 'qsub':
         script = '\n'.join((script, '{pbs_common}'.format(
             pbs_common=salishsea_cmd.run._pbs_common(
                 run_desc, nemo_processors + xios_processors, email,
@@ -390,10 +389,10 @@ def _definitions(
     run_type, run_desc, run_desc_filepath, run_dir, results_dir, host_name,
     config,
 ):
-    enabled_host_config = config['run']['enabled hosts'][host_name]
+    host_config = config['run']['enabled hosts'][host_name]
     mpirun = 'mpirun'
-    if enabled_host_config.get('mpi hosts file') is not None:
-        mpirun = f'mpirun --hostfile {enabled_host_config["mpi hosts file"]}'
+    if host_config.get('mpi hosts file') is not None:
+        mpirun = f'mpirun --hostfile {host_config["mpi hosts file"]}'
     defns = (
         'RUN_ID="{run_id}"\n'
         'RUN_DESC="{run_desc_file}"\n'
@@ -409,7 +408,7 @@ def _definitions(
         run_dir=run_dir,
         results_dir=results_dir,
         mpirun=mpirun,
-        salishsea_cmd=enabled_host_config['salishsea_cmd'],
+        salishsea_cmd=host_config['salishsea_cmd'],
         gather_opts='--delete-restart' if run_type == 'forecast2' else '',
     )
     return defns
@@ -468,13 +467,13 @@ def _cleanup():
 
 
 def _launch_run_script(run_type, run_script_filepath, host_name, config):
-    enabled_host_config = config['run']['enabled hosts'][host_name]
+    host_config = config['run']['enabled hosts'][host_name]
     logger.info(f'{run_type}: launching {run_script_filepath} on {host_name}')
-    cmd = f'{enabled_host_config["job exec cmd"]} {run_script_filepath}'
+    cmd = f'{host_config["job exec cmd"]} {run_script_filepath}'
     run_exec_cmd = cmd
     logger.debug(
         f'{run_type}: running command in subprocess: {shlex.split(cmd)}')
-    if enabled_host_config['job exec cmd'] == 'qsub':
+    if host_config['job exec cmd'] == 'qsub':
         proc = subprocess.run(
             shlex.split(cmd), stdout=subprocess.PIPE,
             check=True, universal_newlines=True)
