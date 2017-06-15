@@ -295,20 +295,12 @@ def _run_description(
             'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
         )
     for namelist in namelist_sections:
-        if (run_prep_dir/namelist).exists():
-            namelists['namelist_cfg'].append(
-                os.fspath((run_prep_dir/namelist).resolve()))
-        else:
-            namelists['namelist_cfg'].append(
-                os.fspath((run_sets_dir/namelist).resolve()))
+        namelists['namelist_cfg'].append(
+            os.fspath((run_sets_dir/namelist).resolve()))
     if run_type == 'nowcast-green':
         for namelist in ('namelist_top_cfg', 'namelist_pisces_cfg'):
-            if (run_prep_dir/namelist).exists():
-                namelists[namelist] = [
-                    os.fspath((run_prep_dir/namelist).resolve())]
-            else:
-                namelists[namelist] = [
-                    os.fspath((run_sets_dir/namelist).resolve())]
+            namelists[namelist] = [
+                os.fspath((run_sets_dir/namelist).resolve())]
     run_desc = salishsea_cmd.api.run_description(
         run_id=run_id,
         config_name=NEMO_config_name,
