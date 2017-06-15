@@ -39,9 +39,7 @@ scheduled workers:
       cmd line opts: '00'
 
 
-coordinates: /results/nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc
-## TODO: Different values are necessary on skookum and west.cloud; see issue #31
-#coordinates: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc
+coordinates: coordinates_seagrid_SalishSea.nc
 
 
 weather:
@@ -84,6 +82,8 @@ rivers:
 
 
 ssh:
+  # Directory in which to find coordinates file
+  grid dir: /results/nowcast-sys/NEMO-forcing/grid/
   # Directory containing tidal predication file for sea surface height correction
   tidal predictions: /results/nowcast-sys/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
@@ -297,7 +297,8 @@ run:
       # Directory on compute host where files (e.g. namelist.time) and symlinks
       # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
       run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
-      # Directory in which to find bathymetry and mesh mask files
+      # Directory in which to find coordinates, bathymetry, mesh mask,
+      # and land processor elimination files
       grid dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/
       # Path to the salishsea command processor executable to use in the run
       # script

@@ -33,7 +33,7 @@ from nowcast.workers import run_NEMO
 @pytest.fixture
 def config(scope='function'):
     return {
-        'coordinates': 'NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc',
+        'coordinates': 'coordinates_seagrid_SalishSea.nc',
         'run types': {
             'nowcast': {
                 'config name': 'SalishSea',
@@ -519,11 +519,16 @@ class TestRunDescription:
         assert run_desc['paths'][path] == tmp_run_prep
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
-        ('west.cloud', 'nowcast', 'coordinates_seagrid_SalishSea.nc'),
-        ('west.cloud', 'nowcast-green', 'coordinates_seagrid_SalishSea.nc'),
-        ('salish-nowcast', 'nowcast-dev', 'coordinates_seagrid_SalishSea.nc'),
-        ('west.cloud', 'forecast', 'coordinates_seagrid_SalishSea.nc'),
-        ('west.cloud', 'forecast2', 'coordinates_seagrid_SalishSea.nc'),
+        ('west.cloud', 'nowcast',
+            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+        ('west.cloud', 'nowcast-green',
+            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+        ('salish-nowcast', 'nowcast-dev',
+            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+        ('west.cloud', 'forecast',
+            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+        ('west.cloud', 'forecast2',
+            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
     ])
     def test_grid_coordinates(
         self, host_name, run_type, expected, config, run_date, tmp_results,
