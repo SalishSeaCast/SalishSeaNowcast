@@ -282,18 +282,11 @@ def _run_description(
     namelists = {
         'namelist_cfg': [os.fspath((run_prep_dir/'namelist.time').resolve())]
     }
-    if run_type == 'nowcast-green':
-        namelist_sections = (
-            'namelist.domain', 'namelist.surface.green',
-            'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
-            'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
-        )
-    else:
-        namelist_sections = (
-            'namelist.domain', 'namelist.surface.blue',
-            'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
-            'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
-        )
+    namelist_sections = (
+        'namelist.domain', 'namelist.surface',
+        'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
+        'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
+    )
     for namelist in namelist_sections:
         namelists['namelist_cfg'].append(
             os.fspath((run_sets_dir/namelist).resolve()))
