@@ -165,14 +165,7 @@ def _update_time_namelist(
     dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
     prev_run_namelist = namelist2dict(os.fspath(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
-    try:
-        ## TODO: Remove reading from namelist.domain; it's obsoleted by
-        ## vertical advection sub-stepping
-        namelist_domain_path = run_prep_dir / 'namelist.domain'
-        namelist_domain = namelist2dict(os.fspath(namelist_domain_path))
-        rdt = namelist_domain['namdom'][0]['rn_rdt']
-    except FileNotFoundError:
-        rdt = prev_run_namelist['namdom'][0]['rn_rdt']
+    rdt = prev_run_namelist['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
     namelist_time = run_prep_dir / 'namelist.time'
     with namelist_time.open('rt') as f:
