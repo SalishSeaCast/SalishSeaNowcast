@@ -292,7 +292,8 @@ def _run_description(
     run_desc = salishsea_cmd.api.run_description(
         run_id=run_id,
         config_name=NEMO_config_name,
-        mpi_decomposition=host_run_config['mpi decomposition'],
+        mpi_decomposition=(
+            enabled_host_config['run types'][run_type]['mpi decomposition']),
         walltime=walltime,
         NEMO_code_config=os.fspath(
             (run_prep_dir/'../NEMO-3.6-code'/'NEMOGCM'/'CONFIG').resolve()),
