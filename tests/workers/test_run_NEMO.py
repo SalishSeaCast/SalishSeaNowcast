@@ -37,63 +37,33 @@ def config(scope='function'):
         'run types': {
             'nowcast': {
                 'config name': 'SalishSea',
-                'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.nc',
-                'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'mesh_mask_downbyone2.nc',
-                'land processor elimination':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.csv',
+                'bathymetry': 'bathy_downonegrid2.nc',
+                'mesh_mask': 'mesh_mask_downbyone2.nc',
+                'land processor elimination': 'bathy_downonegrid2.csv',
                 'duration': 1},
             'nowcast-dev': {
                 'config name': 'SalishSea',
-                'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.nc',
-                'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'mesh_mask_downbyone2.nc',
-                'land processor elimination':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.csv',
+                'bathymetry': 'bathy_downonegrid2.nc',
+                'mesh_mask': 'mesh_mask_downbyone2.nc',
+                'land processor elimination': 'bathy_downonegrid2.csv',
                 'duration': 1},
             'nowcast-green': {
                 'config name': 'SOG',
-                'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.nc',
-                'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'mesh_mask_downbyone2.nc',
-                'land processor elimination':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.csv',
+                'bathymetry': 'bathy_downonegrid2.nc',
+                'mesh_mask': 'mesh_mask_downbyone2.nc',
+                'land processor elimination': 'bathy_downonegrid2.csv',
                 'duration': 1},
             'forecast': {
                 'config name': 'SalishSea',
-                'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.nc',
-                'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'mesh_mask_downbyone2.nc',
-                'land processor elimination':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.csv',
+                'bathymetry': 'bathy_downonegrid2.nc',
+                'mesh_mask': 'mesh_mask_downbyone2.nc',
+                'land processor elimination': 'bathy_downonegrid2.csv',
                 'duration': 1.5},
             'forecast2': {
                 'config name': 'SalishSea',
-                'bathymetry':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.nc',
-                'mesh_mask':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'mesh_mask_downbyone2.nc',
-                'land processor elimination':
-                    '/results/nowcast-sys/NEMO-forcing/grid/'
-                    'bathy_downonegrid2.csv',
+                'bathymetry': 'bathy_downonegrid2.nc',
+                'mesh_mask': 'mesh_mask_downbyone2.nc',
+                'land processor elimination': 'bathy_downonegrid2.csv',
                 'duration': 1.25},
         },
         'run': {
@@ -101,6 +71,7 @@ def config(scope='function'):
                 'west.cloud': {
                     'mpi hosts file': '${HOME}/mpi_hosts',
                     'run prep dir': 'nowcast-sys/runs/',
+                    'grid dir': 'nowcast-sys/NEMO-forcing/grid/',
                     'salishsea_cmd': 'bin/salishsea',
                     'job exec cmd': 'bash',
                     'run types': {
@@ -132,6 +103,7 @@ def config(scope='function'):
                 },
                 'salish-nowcast': {
                     'run prep dir': 'nowcast-sys/runs/',
+                    'grid dir': 'nowcast-sys/NEMO-forcing/grid/',
                     'salishsea_cmd': 'bin/salishsea',
                     'job exec cmd': 'qsub',
                     'email': 'somebody@example.com',
@@ -571,11 +543,16 @@ class TestRunDescription:
         assert run_desc['grid']['coordinates'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
-        ('west.cloud', 'nowcast', 'bathy_downonegrid2.nc'),
-        ('west.cloud', 'nowcast-green', 'bathy_downonegrid2.nc'),
-        ('salish-nowcast', 'nowcast-dev', 'bathy_downonegrid2.nc'),
-        ('west.cloud', 'forecast', 'bathy_downonegrid2.nc'),
-        ('west.cloud', 'forecast2', 'bathy_downonegrid2.nc'),
+        ('west.cloud', 'nowcast',
+            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
+        ('west.cloud', 'nowcast-green',
+            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
+        ('salish-nowcast', 'nowcast-dev',
+            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
+        ('west.cloud', 'forecast',
+            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
+        ('west.cloud', 'forecast2',
+            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
     ])
     def test_grid_bathymetry(
         self, host_name, run_type, expected, config, run_date, tmp_results,
@@ -595,8 +572,10 @@ class TestRunDescription:
         assert run_desc['grid']['bathymetry'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
-        ('west.cloud', 'nowcast', 'bathy_downonegrid2.csv'),
-        ('west.cloud', 'nowcast-green', 'bathy_downonegrid2.csv'),
+        ('west.cloud', 'nowcast',
+            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv'),
+        ('west.cloud', 'nowcast-green',
+            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv'),
         ('salish-nowcast', 'nowcast-dev', False),
     ])
     def test_grid_land_processor_elimination(
