@@ -137,12 +137,12 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
     }
     run_duration = config['run types'][run_type]['duration']
     host_run_config = config['run'][host_name]
+    run_prep_dir = Path(config['run']['enabled hosts'][host_name]['run prep dir'])
     restart_timestep = _update_time_namelist(
-        run_date, run_type, run_duration, host_run_config)
+        run_date, run_type, run_duration, host_run_config, run_prep_dir)
     run_desc = _run_description(
         run_days[run_type], run_type, run_id, restart_timestep, host_name,
         config)
-    run_prep_dir = Path(host_run_config['run prep dir'])
     run_desc_filepath = run_prep_dir / f'{run_id}.yaml'
     with run_desc_filepath.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
@@ -150,7 +150,8 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
     return run_desc_filepath
 
 
-def _update_time_namelist(run_date, run_type, run_duration, host_run_config):
+def _update_time_namelist(
+    run_date, run_type, run_duration, host_run_config, run_prep_dir):
     prev_runs = {
         # run-type: based-on run-type, date offset
         'nowcast': ('nowcast', -1),
@@ -165,14 +166,15 @@ def _update_time_namelist(run_date, run_type, run_duration, host_run_config):
     prev_run_namelist = namelist2dict(os.fspath(results_dir/dmy/'namelist_cfg'))
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
     try:
-        namelist_domain_path = Path(
-            host_run_config['run prep dir'], 'namelist.domain')
+        ## TODO: Remove reading from namelist.domain; it's obsoleted by
+        ## vertical advection sub-stepping
+        namelist_domain_path = run_prep_dir / 'namelist.domain'
         namelist_domain = namelist2dict(os.fspath(namelist_domain_path))
         rdt = namelist_domain['namdom'][0]['rn_rdt']
     except FileNotFoundError:
         rdt = prev_run_namelist['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
-    namelist_time = Path(host_run_config['run prep dir'], 'namelist.time')
+    namelist_time = run_prep_dir / 'namelist.time'
     with namelist_time.open('rt') as f:
         lines = f.readlines()
     new_lines, restart_timestep = _calc_new_namelist_lines(

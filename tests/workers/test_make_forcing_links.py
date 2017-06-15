@@ -149,23 +149,35 @@ class TestMakeRunoffLinks:
             'file templates': {
                 'short': 'RFraserCElse_{:y%Ym%md%d}.nc',
                 'long': 'RLonFraCElse_{:y%Ym%md%d}.nc',
-        }},
+            }
+        },
         'run': {
+            'enabled hosts': {
+                'salish-nowcast': {
+                    'run prep dir': 'runs/',
+                },
+            },
             'salish-nowcast': {
                 'forcing': {
                     'rivers dir': '/results/forcing/rivers/',
                     'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
                 },
-                'run prep dir': 'runs/',
-            }}}
+            }
+        }
+    }
 
     def test_clear_links(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         make_forcing_links._make_runoff_links(
             m_sftp_client, run_date, self.config, 'salish-nowcast')
+        run_prep_dir = Path(
+            self.config['run']['enabled hosts']['salish-nowcast']
+            ['run prep dir'])
         m_clear_links.assert_called_once_with(
-            m_sftp_client, self.config['run']['salish-nowcast'], 'rivers/')
+            m_sftp_client,
+            Path(self.config['run']['enabled hosts']['salish-nowcast']
+            ['run prep dir']), 'rivers/')
 
     def test_rivers_month_link(self, m_clear_links, m_create_symlink):
         run_date = arrow.get('2016-03-11')

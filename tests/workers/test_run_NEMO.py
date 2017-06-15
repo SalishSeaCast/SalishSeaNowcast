@@ -128,8 +128,8 @@ def config(scope='function'):
                             'walltime': '23:30:00',
                         },
                     },
+                    'run prep dir': 'nowcast-sys/runs/',
                 },
-                'run prep dir': 'nowcast-sys/runs/',
             },
             'salish-nowcast': {
                 'mpi decomposition': '1x7',

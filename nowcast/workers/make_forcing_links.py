@@ -136,15 +136,15 @@ def _make_NeahBay_ssh_links(
     sftp_client, run_date, config, host_name, shared_storage,
 ):
     host_run_config = config['run'][host_name]
-    _clear_links(sftp_client, host_run_config, 'open_boundaries/west/ssh/')
+    run_prep_dir = Path(
+        config['run']['enabled hosts'][host_name]['run prep dir'])
+    _clear_links(sftp_client, run_prep_dir, 'open_boundaries/west/ssh/')
     for day in range(-1, 3):
         filename = config['ssh']['file template'].format(
             run_date.replace(days=day).date())
         dir = 'obs' if day == -1 else 'fcst'
         src = Path(host_run_config['forcing']['ssh dir'], dir, filename)
-        dest = Path(
-            host_run_config['run prep dir'],
-            'open_boundaries', 'west', 'ssh', filename)
+        dest = run_prep_dir / 'open_boundaries' / 'west' / 'ssh' / filename
         if shared_storage:
             shutil.copy2(os.fspath(src), os.fspath(dest))
         else:
@@ -153,18 +153,19 @@ def _make_NeahBay_ssh_links(
 
 def _make_runoff_links(sftp_client, run_date, config, host_name):
     host_run_config = config['run'][host_name]
-    _clear_links(sftp_client, host_run_config, 'rivers/')
+    run_prep_dir = Path(
+        config['run']['enabled hosts'][host_name]['run prep dir'])
+    _clear_links(sftp_client, run_prep_dir, 'rivers/')
     src = Path(host_run_config['forcing']['rivers_month.nc'])
-    dest = Path(host_run_config['run prep dir'], 'rivers', src.name)
+    dest = run_prep_dir / 'rivers' / src.name
     _create_symlink(sftp_client, host_name, src, dest)
     if 'rivers_temp.nc' in host_run_config['forcing']:
         src = Path(host_run_config['forcing']['rivers_temp.nc'])
-        dest = Path(host_run_config['run prep dir'], 'rivers', src.name)
+        dest = run_prep_dir / 'rivers' / src.name
         _create_symlink(sftp_client, host_name, src, dest)
     if 'rivers bio dir' in host_run_config['forcing']:
         src = Path(host_run_config['forcing']['rivers bio dir'])
-        dest = Path(
-            host_run_config['run prep dir'], 'rivers', 'bio_climatology')
+        dest = run_prep_dir / 'rivers' / 'bio_climatology'
         _create_symlink(sftp_client, host_name, src, dest)
     for tmpl in config['rivers']['file templates'].values():
         src = Path(
@@ -173,24 +174,22 @@ def _make_runoff_links(sftp_client, run_date, config, host_name):
         )
         for day in range(-1, 3):
             filename = tmpl.format(run_date.replace(days=day).date())
-            dest = Path(
-                host_run_config['run prep dir'], 'rivers', filename)
+            dest = run_prep_dir / 'rivers' / filename
             _create_symlink(sftp_client, host_name, src, dest)
 
 
 def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
     host_run_config = config['run'][host_name]
-    _clear_links(sftp_client, host_run_config, 'NEMO-atmos/')
-    NEMO_atmos_dir = Path(host_run_config['run prep dir'], 'NEMO-atmos/')
+    run_prep_dir = Path(
+        config['run']['enabled hosts'][host_name]['run prep dir'])
+    _clear_links(sftp_client, run_prep_dir, 'NEMO-atmos/')
+    NEMO_atmos_dir = run_prep_dir / 'NEMO-atmos'
     for linkfile in 'no_snow.nc weights'.split():
         src = Path(host_run_config['forcing'][linkfile])
-        dest = Path(NEMO_atmos_dir, os.path.basename(src))
+        dest = NEMO_atmos_dir / src.name
         _create_symlink(sftp_client, host_name, src, dest)
     nowcast_runs = {'nowcast+', 'nowcast-green'}
-    if run_type in nowcast_runs:
-        weather_start = -1
-    else:
-        weather_start = 0
+    weather_start = -1 if run_type in nowcast_runs else 0
     for day in range(weather_start, 3):
         filename = config['weather']['file template'].format(
             run_date.replace(days=day).date())
@@ -199,7 +198,7 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
         else:
             dir = 'fcst'
         src = Path(host_run_config['forcing']['weather dir'], dir, filename)
-        dest = Path(NEMO_atmos_dir, filename)
+        dest = NEMO_atmos_dir / filename
         _create_symlink(sftp_client, host_name, src, dest)
 
 
@@ -207,8 +206,9 @@ def _make_live_ocean_links(
     sftp_client, run_date, config, host_name, shared_storage,
 ):
     host_run_config = config['run'][host_name]
-    _clear_links(
-        sftp_client, host_run_config, 'open_boundaries/west/LiveOcean/')
+    run_prep_dir = Path(
+        config['run']['enabled hosts'][host_name]['run prep dir'])
+    _clear_links(sftp_client, run_prep_dir, 'open_boundaries/west/LiveOcean/')
     for day in range(-1, 3):
         filename = config['temperature salinity']['file template'].format(
             run_date.replace(days=day).date())
@@ -216,18 +216,15 @@ def _make_live_ocean_links(
         if day != 2:
             # if day=2, we use the previous day as source
             src = Path(host_run_config['forcing']['bc dir'], dir, filename)
-        dest = Path(
-            host_run_config['run prep dir'],
-            'open_boundaries', 'west', 'LiveOcean', filename)
+        dest = run_prep_dir/'open_boundaries'/'west'/'LiveOcean'/filename
         if shared_storage:
             shutil.copy2(os.fspath(src), os.fspath(dest))
         else:
             _create_symlink(sftp_client, host_name, src, dest)
 
 
-def _clear_links(sftp_client, host_run_config, dir):
-    links_dir = Path(host_run_config['run prep dir'], dir)
-    logger.debug(links_dir)
+def _clear_links(sftp_client, run_prep_dir, dir):
+    links_dir = run_prep_dir/dir
     for linkname in sftp_client.listdir(os.fspath(links_dir)):
         sftp_client.unlink(os.fspath(links_dir / linkname))
     logger.debug(f'{links_dir} symlinks cleared')
