@@ -324,15 +324,15 @@ def _run_description(
     run_desc['grid']['land processor elimination'] = lpe
     run_desc['restart'] = restart_filepaths
     run_desc['output'].update({
-        'iodefs': os.fspath((run_prep_dir/'iodef.xml').resolve()),
-        'domaindefs': os.fspath((run_prep_dir/'domain_def.xml').resolve()),
-        'fielddefs': os.fspath((run_prep_dir/'field_def.xml').resolve()),
+        'iodefs': os.fspath((run_sets_dir/'iodef.xml').resolve()),
+        'domaindefs': os.fspath((run_sets_dir/'domain_def.xml').resolve()),
+        'fielddefs': os.fspath((run_sets_dir/'field_def.xml').resolve()),
     })
     del run_desc['output']['domain']
     del run_desc['output']['fields']
-    if (run_prep_dir/'file_def.xml').exists():
+    if (run_sets_dir/'file_def.xml').exists():
         run_desc['output']['filedefs'] = os.fspath(
-            (run_prep_dir/'file_def.xml').resolve())
+            (run_sets_dir/'file_def.xml').resolve())
     run_desc['vcs revisions'] = {
         'hg': [
             os.fspath((run_prep_dir/'../NEMO-Cmd').resolve()),
