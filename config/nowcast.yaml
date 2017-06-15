@@ -319,6 +319,8 @@ run:
       # Path to the salishsea command processor executable to use in the run
       # script
       salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
+      # Executable to use to submit the SalishSeaNEMO.sh script to be run
+      job exec cmd: bash
       # List of run types that are executed on the compute host
       run types:
         nowcast:
@@ -344,6 +346,7 @@ run:
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       run prep dir: /results/nowcast-sys/runs/
       salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
+      job exec cmd: qsub
       run types:
         nowcast-dev:
           run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-dev/
@@ -384,8 +387,6 @@ run:
       forecast: /nemoShare/MEOPAR/SalishSea/forecast/
       nowcast-green: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forecast2: /nemoShare/MEOPAR/SalishSea/forecast2/
-    # Executable to use to submit the SalishSeaNEMO.sh script to be run
-    job exec cmd: bash
 
   # If the `nowcast-dev host` key is present, the forcing files will be
   # symlinked and the nowcast-dev run will be executed on it automatically.
@@ -427,8 +428,6 @@ run:
     # end of execution of the run, as well as notification of abnormal abort
     # messages.
     email: sallen@eos.ubc.ca
-    # Executable to use to submit the SalishSeaNEMO.sh script to be run
-    job exec cmd: qsub
 
 
 #  hindcast host: orcinus-hindcast

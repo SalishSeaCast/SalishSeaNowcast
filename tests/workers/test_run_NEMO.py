@@ -102,6 +102,7 @@ def config(scope='function'):
                     'mpi hosts file': '${HOME}/mpi_hosts',
                     'run prep dir': 'nowcast-sys/runs/',
                     'salishsea_cmd': 'bin/salishsea',
+                    'job exec cmd': 'bash',
                     'run types': {
                         'nowcast': {
                             'run sets dir':
@@ -128,6 +129,7 @@ def config(scope='function'):
                 'salish-nowcast': {
                     'run prep dir': 'nowcast-sys/runs/',
                     'salishsea_cmd': 'bin/salishsea',
+                    'job exec cmd': 'qsub',
                     'run types': {
                         'nowcast-dev': {
                             'run sets dir':
@@ -140,12 +142,10 @@ def config(scope='function'):
             },
             'salish-nowcast': {
                 'email': 'somebody@example.com',
-                'job exec cmd': 'qsub',
                 'results': {
                     'nowcast-dev': 'results/SalishSea/nowcast-dev',
                     }},
             'west.cloud': {
-                'job exec cmd': 'bash',
                 'results': {
                     'nowcast': 'results/SalishSea/nowcast',
                     'nowcast-green': 'results/SalishSea/nowcast-green/',

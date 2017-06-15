@@ -357,12 +357,13 @@ def _build_script(
 ):
     run_desc = salishsea_cmd.lib.load_run_desc(run_desc_filepath)
     host_run_config = config['run'][host_name]
+    enabled_host_config = config['run']['enabled hosts'][host_name]
     nemo_processors = salishsea_cmd.lib.get_n_processors(run_desc, run_dir)
     xios_processors = int(run_desc['output']['XIOS servers'])
     email = host_run_config.get('email', 'nobody@example.com')
     xios_host = config['run']['enabled hosts'][host_name].get('xios host')
     script = '#!/bin/bash\n'
-    if host_run_config['job exec cmd'] == 'qsub':
+    if enabled_host_config['job exec cmd'] == 'qsub':
         script = '\n'.join((script, '{pbs_common}'.format(
             pbs_common=salishsea_cmd.run._pbs_common(
                 run_desc, nemo_processors + xios_processors, email,
@@ -467,13 +468,13 @@ def _cleanup():
 
 
 def _launch_run_script(run_type, run_script_filepath, host_name, config):
-    host_run_config = config['run'][host_name]
+    enabled_host_config = config['run']['enabled hosts'][host_name]
     logger.info(f'{run_type}: launching {run_script_filepath} on {host_name}')
-    cmd = f'{host_run_config["job exec cmd"]} {run_script_filepath}'
+    cmd = f'{enabled_host_config["job exec cmd"]} {run_script_filepath}'
     run_exec_cmd = cmd
     logger.debug(
         f'{run_type}: running command in subprocess: {shlex.split(cmd)}')
-    if host_run_config['job exec cmd'] == 'qsub':
+    if enabled_host_config['job exec cmd'] == 'qsub':
         proc = subprocess.run(
             shlex.split(cmd), stdout=subprocess.PIPE,
             check=True, universal_newlines=True)
