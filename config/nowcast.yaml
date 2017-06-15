@@ -347,6 +347,10 @@ run:
       run prep dir: /results/nowcast-sys/runs/
       salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
       job exec cmd: qsub
+      # Optional email address to which to send notifications of the beginning
+      # and end of execution of the run, as well as notification of abnormal
+      # abort messages.
+      email: sallen@eos.ubc.ca
       run types:
         nowcast-dev:
           run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-dev/
@@ -424,10 +428,6 @@ run:
       # Note that salish has shared storage with the nowcast system results
       # archives
       nowcast-dev: /results/SalishSea/nowcast-dev/
-    # Email address to which to send notifications of the beginning and
-    # end of execution of the run, as well as notification of abnormal abort
-    # messages.
-    email: sallen@eos.ubc.ca
 
 
 #  hindcast host: orcinus-hindcast
