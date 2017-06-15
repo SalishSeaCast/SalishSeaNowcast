@@ -342,6 +342,28 @@ run:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-green/
           mpi decomposition: 9x19
           results: /nemoShare/MEOPAR/SalishSea/nowcast-green/
+      forcing:
+        # Directory on compute host where Neah Bay sea surface height forcing files
+        # are stored
+        ssh dir: /nemoShare/MEOPAR/sshNeahBay/
+        # Directory on compute host where hourly temperature and salinity boundary
+        # conditions files generated from UW Live Ocean forecast are stored
+        bc dir: /nemoShare/MEOPAR/LiveOcean/
+        # Directory on compute host where rivers runoff forcing files are stored
+        rivers dir: /nemoShare/MEOPAR/rivers/
+        # Locations on compute host of rivers runoff monthly climatology files
+        rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
+        rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
+        # Directory on compute host where the rivers runoff daily tracers
+        # climatology files are stored
+        rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
+        # Directory on compute host where atmospheric forcing files are stored
+        weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
+        # Location on compute host of no_snow.nc constraint file
+        no_snow.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
+        # Location on compute host of NEMO on-the-fly interpolation weights file
+        # for GEM 2.5km operational forecast
+        weights: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
 
     salish-nowcast:
       shared storage: True
@@ -362,6 +384,16 @@ run:
           mpi decomposition: 1x7
           walltime: 23:30:00
           results: /results/SalishSea/nowcast-dev/
+      forcing:
+        ssh dir: /results/forcing/sshNeahBay/
+        bc dir: /results/forcing/LiveOcean/boundary_conditions/
+        rivers dir: /results/forcing/rivers/
+        rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
+        rivers_temp.nc: /results/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
+        rivers bio dir: /results/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
+        weather dir: /results/forcing/atmospheric/GEM2.5/operational/
+        no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
+        weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
 
 #    orcinus-nowcast:
 #      shared storage: False
@@ -376,6 +408,15 @@ run:
 #          results: /home/dlatorne/MEOPAR/SalishSea/forecast/
 #        forecast2:
 #          results: /home/dlatorne/MEOPAR/SalishSea/forecast2/
+#      forcing:
+#        ssh dir: /home/sallen/MEOPAR/sshNeahBay/
+#        bc dir: /home/sallen/MEOPAR/LiveOcean/
+#        rivers dir: /home/sallen/MEOPAR/rivers/
+#        rivers_month.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/rivers_month_extended.nc
+#        rivers_temp.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/river_ConsTemp_month.nc
+#        weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
+#        no_snow.nc: /home/sallen/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
+#        weights: /home/sallen/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
 
   download hosts:
     # HPC Compute host name where runs are executed manually but download_results
@@ -397,94 +438,6 @@ run:
       run types:
         hindcast:
           results: /global/scratch/sallen/SalishSea/hindcast/
-
-  # If the `cloud host` key is present, the nowcast, forecast,
-  # and forecast2 runs executed on it automatically.
-  #
-  # Remove or comment out the next line to prevent running in the cloud
-  cloud host: west.cloud-nowcast
-  west.cloud-nowcast:
-    forcing:
-      # Directory on compute host where Neah Bay sea surface height forcing files
-      # are stored
-      ssh dir: /nemoShare/MEOPAR/sshNeahBay/
-      # Directory on compute host where hourly temperature and salinity boundary
-      # conditions files generated from UW Live Ocean forecast are stored
-      bc dir: /nemoShare/MEOPAR/LiveOcean/
-      # Directory on compute host where rivers runoff forcing files are stored
-      rivers dir: /nemoShare/MEOPAR/rivers/
-      # Locations on compute host of rivers runoff monthly climatology files
-      rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
-      rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
-      # Directory on compute host where the rivers runoff daily tracers
-      # climatology files are stored
-      rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
-      # Directory on compute host where atmospheric forcing files are stored
-      weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
-      # Location on compute host of no_snow.nc constraint file
-      no_snow.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
-      # Location on compute host of NEMO on-the-fly interpolation weights file
-      # for GEM 2.5km operational forecast
-      weights: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
-
-  # If the `nowcast-dev host` key is present, the forcing files will be
-  # symlinked and the nowcast-dev run will be executed on it automatically.
-  # It is assumed that the nowcast-dev run shares storage with the machine
-  # that the nowcast manager is running on, so uploading of forcing files,
-  # and downloaded of results files is not necessary.
-  #
-  # Remove or comment out the next line to prevent running nowcast-dev
-  nowcast-dev host: salish-nowcast
-  salish-nowcast:
-    forcing:
-      # Directory on compute host where Neah Bay sea surface height forcing files
-      # are stored
-      ssh dir: /results/forcing/sshNeahBay/
-      # Directory on compute host where hourly temperature and salinity boundary
-      # conditions files generated from UW Live Ocean forecast are stored
-      bc dir: /results/forcing/LiveOcean/boundary_conditions/
-      # Directory on compute host where rivers runoff forcing files are stored
-      rivers dir: /results/forcing/rivers/
-      # Locations on compute host of rivers runoff monthly climatology files
-      rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
-      rivers_temp.nc: /results/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
-      # Directory on compute host where the rivers runoff daily tracers
-      # climatology files are stored
-      rivers bio dir: /results/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
-      # Directory on compute host where atmospheric forcing files are stored
-      weather dir: /results/forcing/atmospheric/GEM2.5/operational/
-      # Location on compute host of no_snow.nc constraint file
-      no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
-      # Location on compute host of NEMO on-the-fly interpolation weights file
-      # for GEM 2.5km operational forecast
-      weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
-
-  # If the `hpc host` key is present, the forcing files will be uploaded
-  # to the HPC cluster and the symlinks created ready for the runs to be
-  # prepared and queued at the command-line on the cluster.
-  #
-  # Remove or comment out the next line to prevent running on the HPC cluster
-#  hpc host: orcinus-nowcast
-  orcinus-nowcast:
-    forcing:
-      # Directory on compute host where Neah Bay sea surface height forcing files
-      # are stored
-      ssh dir: /home/sallen/MEOPAR/sshNeahBay/
-      # Directory on compute host where hourly temperature and salinity boundary
-      # conditions files generated from UW Live Ocean forecast are stored
-      bc dir: /home/sallen/MEOPAR/LiveOcean/
-      # Directory on compute host where rivers runoff forcing files are stored
-      rivers dir: /home/sallen/MEOPAR/rivers/
-      # Locations on compute host of rivers runoff monthly climatology files
-      rivers_month.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/rivers_month_extended.nc
-      rivers_temp.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/river_ConsTemp_month.nc
-      # Directory on compute host where atomospheric forcing files are stored
-      weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
-      # Location on compute host of no_snow.nc constraint file
-      no_snow.nc: /home/sallen/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
-      # Location on compute host of NEMO on-the-fly interpolation weights file
-      # for GEM 2.5km operational forecast
-      weights: /home/sallen/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
 
 
 wave forecasts:
