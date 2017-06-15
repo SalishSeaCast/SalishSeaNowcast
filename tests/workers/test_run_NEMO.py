@@ -130,6 +130,7 @@ def config(scope='function'):
                     'run prep dir': 'nowcast-sys/runs/',
                     'salishsea_cmd': 'bin/salishsea',
                     'job exec cmd': 'qsub',
+                    'email': 'somebody@example.com',
                     'run types': {
                         'nowcast-dev': {
                             'run sets dir':
@@ -141,7 +142,6 @@ def config(scope='function'):
                 },
             },
             'salish-nowcast': {
-                'email': 'somebody@example.com',
                 'results': {
                     'nowcast-dev': 'results/SalishSea/nowcast-dev',
                     }},

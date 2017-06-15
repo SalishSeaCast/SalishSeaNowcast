@@ -137,7 +137,8 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
     }
     run_duration = config['run types'][run_type]['duration']
     host_run_config = config['run'][host_name]
-    run_prep_dir = Path(config['run']['enabled hosts'][host_name]['run prep dir'])
+    run_prep_dir = Path(
+        config['run']['enabled hosts'][host_name]['run prep dir'])
     restart_timestep = _update_time_namelist(
         run_date, run_type, run_duration, host_run_config, run_prep_dir)
     run_desc = _run_description(
@@ -356,12 +357,11 @@ def _build_script(
     run_dir, run_type, run_desc_filepath, results_dir, host_name, config,
 ):
     run_desc = salishsea_cmd.lib.load_run_desc(run_desc_filepath)
-    host_run_config = config['run'][host_name]
     enabled_host_config = config['run']['enabled hosts'][host_name]
     nemo_processors = salishsea_cmd.lib.get_n_processors(run_desc, run_dir)
     xios_processors = int(run_desc['output']['XIOS servers'])
-    email = host_run_config.get('email', 'nobody@example.com')
-    xios_host = config['run']['enabled hosts'][host_name].get('xios host')
+    email = enabled_host_config.get('email', 'nobody@example.com')
+    xios_host = enabled_host_config.get('xios host')
     script = '#!/bin/bash\n'
     if enabled_host_config['job exec cmd'] == 'qsub':
         script = '\n'.join((script, '{pbs_common}'.format(
