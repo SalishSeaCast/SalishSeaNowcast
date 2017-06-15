@@ -16,12 +16,12 @@
 """Salish Sea NEMO nowcast worker that downloads the results files
 from a run on the HPC/cloud facility to archival storage.
 """
-import glob
 import logging
+import os
 from pathlib import Path
 
 import arrow
-from nemo_nowcast import NowcastWorker
+from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import lib
 
@@ -80,9 +80,16 @@ def download_results(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type
-    host_run_config = config['run'][host_name]
+    try:
+        try:
+            host_config = config['run']['enabled hosts'][host_name]
+        except KeyError:
+            host_config = config['run']['download hosts'][host_name]
+    except KeyError:
+        logger.critical(f'unrecognized host: {host_name}')
+        raise WorkerError
     results_dir = run_date.strftime('%d%b%y').lower()
-    run_type_results = Path(host_run_config['results'][run_type])
+    run_type_results = Path(host_config['run types'][run_type]['results'])
     src_dir = run_type_results/results_dir
     src = f'{host_name}:{src_dir}'
     dest = Path(config['results archive'][run_type])
@@ -90,10 +97,10 @@ def download_results(parsed_args, config, *args):
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     lib.fix_perms(
         str(dest/results_dir),
-        mode=lib.PERMS_RWX_RWX_R_X, grp_name='sallen')
+        mode=lib.PERMS_RWX_RWX_R_X, grp_name=config['file group'])
     results_archive_dir = dest/results_dir
     for filepath in results_archive_dir.glob('*'):
-        lib.fix_perms(str(filepath), grp_name='sallen')
+        lib.fix_perms(os.fspath(filepath), grp_name=config['file group'])
     checklist = {run_type: {}}
     for freq in '1h 1d'.split():
         checklist[run_type][freq] = list(map(str, results_archive_dir.glob(
