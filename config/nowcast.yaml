@@ -313,6 +313,12 @@ run:
       python: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/python3
       # Location on the compute host of the nowcast system config file
       config file: /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+      # Directory on compute host where files (e.g. namelist.time) and symlinks
+      # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
+      run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
+      # Path to the salishsea command processor executable to use in the run
+      # script
+      salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
       # List of run types that are executed on the compute host
       run types:
         nowcast:
@@ -329,9 +335,6 @@ run:
         nowcast-green:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-green/
           mpi decomposition: 9x19
-      # Directory on compute host where files (e.g. namelist.time) and symlinks
-      # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
-      run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
 
     salish-nowcast:
       shared storage: True
@@ -339,12 +342,13 @@ run:
       envvars: /results/nowcast-sys/nowcast-env/etc/conda/activate.d/envvars.sh
       python: /results/nowcast-sys/nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+      run prep dir: /results/nowcast-sys/runs/
+      salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
       run types:
         nowcast-dev:
           run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-dev/
           mpi decomposition: 1x7
           walltime: 23:30:00
-      run prep dir: /results/nowcast-sys/runs/
 
   # If the `cloud host` key is present, the nowcast, forecast,
   # and forecast2 runs executed on it automatically.
@@ -380,9 +384,6 @@ run:
       forecast: /nemoShare/MEOPAR/SalishSea/forecast/
       nowcast-green: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forecast2: /nemoShare/MEOPAR/SalishSea/forecast2/
-    # Path to the salishsea command processor executable to use in the run
-    # script
-    salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
     # Executable to use to submit the SalishSeaNEMO.sh script to be run
     job exec cmd: bash
 
@@ -422,9 +423,6 @@ run:
       # Note that salish has shared storage with the nowcast system results
       # archives
       nowcast-dev: /results/SalishSea/nowcast-dev/
-    # Path to the salishsea command processor executable to use in the run
-    # script
-    salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
     # Email address to which to send notifications of the beginning and
     # end of execution of the run, as well as notification of abnormal abort
     # messages.

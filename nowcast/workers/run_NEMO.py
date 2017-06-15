@@ -408,7 +408,7 @@ def _definitions(
         run_dir=run_dir,
         results_dir=results_dir,
         mpirun=mpirun,
-        salishsea_cmd=config['run'][host_name]['salishsea_cmd'],
+        salishsea_cmd=enabled_host_config['salishsea_cmd'],
         gather_opts='--delete-restart' if run_type == 'forecast2' else '',
     )
     return defns

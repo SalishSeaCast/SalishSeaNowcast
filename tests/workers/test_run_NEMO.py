@@ -100,6 +100,8 @@ def config(scope='function'):
             'enabled hosts': {
                 'west.cloud': {
                     'mpi hosts file': '${HOME}/mpi_hosts',
+                    'run prep dir': 'nowcast-sys/runs/',
+                    'salishsea_cmd': 'bin/salishsea',
                     'run types': {
                         'nowcast': {
                             'run sets dir':
@@ -122,9 +124,10 @@ def config(scope='function'):
                             'mpi decomposition': '9x19',
                         },
                     },
-                    'run prep dir': 'nowcast-sys/runs/',
                 },
                 'salish-nowcast': {
+                    'run prep dir': 'nowcast-sys/runs/',
+                    'salishsea_cmd': 'bin/salishsea',
                     'run types': {
                         'nowcast-dev': {
                             'run sets dir':
@@ -133,20 +136,15 @@ def config(scope='function'):
                             'walltime': '23:30:00',
                         },
                     },
-                    'run prep dir': 'nowcast-sys/runs/',
                 },
             },
             'salish-nowcast': {
-                'mpi decomposition': '1x7',
-                'salishsea_cmd': 'bin/salishsea',
                 'email': 'somebody@example.com',
                 'job exec cmd': 'qsub',
                 'results': {
                     'nowcast-dev': 'results/SalishSea/nowcast-dev',
                     }},
             'west.cloud': {
-                'mpi decomposition': '9x19',
-                'salishsea_cmd': 'bin/salishsea',
                 'job exec cmd': 'bash',
                 'results': {
                     'nowcast': 'results/SalishSea/nowcast',
