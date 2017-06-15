@@ -103,19 +103,19 @@ def config(scope='function'):
                     'run types': {
                         'nowcast': {
                             'run sets dir':
-                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                                'SS-run-sets/SalishSea/nemo3.6/nowcast-blue/',
                         },
                         'forecast': {
                             'run sets dir':
-                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                                'SS-run-sets/SalishSea/nemo3.6/forecast/',
                         },
                         'forecast2': {
                             'run sets dir':
-                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                                'SS-run-sets/SalishSea/nemo3.6/forecast2/',
                         },
                         'nowcast-green': {
                             'run sets dir':
-                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                                'SS-run-sets/SalishSea/nemo3.6/nowcast-green/',
                         },
                     },
                     'run prep dir': 'nowcast-sys/runs/',
@@ -124,7 +124,7 @@ def config(scope='function'):
                     'run types': {
                         'nowcast-dev': {
                             'run sets dir':
-                                'SS-run-sets/SalishSea/nemo3.6/nowcast/',
+                                'SS-run-sets/SalishSea/nemo3.6/nowcast-dev/',
                             'walltime': '23:30:00',
                         },
                     },
@@ -132,7 +132,6 @@ def config(scope='function'):
                 'run prep dir': 'nowcast-sys/runs/',
             },
             'salish-nowcast': {
-                'run prep dir': '/results/nowcast-sys/runs',
                 'mpi decomposition': '1x7',
                 'salishsea_cmd': 'bin/salishsea',
                 'email': 'somebody@example.com',
@@ -141,7 +140,6 @@ def config(scope='function'):
                     'nowcast-dev': 'results/SalishSea/nowcast-dev',
                     }},
             'west.cloud': {
-                'run prep dir': 'results/nowcast-sys/runs',
                 'mpi decomposition': '9x19',
                 'salishsea_cmd': 'bin/salishsea',
                 'job exec cmd': 'bash',
@@ -721,38 +719,44 @@ class TestRunDescription:
         assert check_link_dict['type'] == 'atmospheric'
         assert check_link_dict['namelist filename'] == 'namelist_cfg'
 
-    def test_namelists_nowcast_blue(
-        self, config, run_date, tmp_results, tmpdir,
+    @pytest.mark.parametrize('host_name, run_type', [
+        ('west.cloud', 'nowcast'),
+        ('west.cloud', 'nowcast-green'),
+        ('salish-nowcast', 'nowcast-dev'),
+        ('west.cloud', 'forecast'),
+        ('west.cloud', 'forecast2'),
+    ])
+    def test_namelists(
+        self, host_name, run_type, config, run_date, tmp_results, tmpdir,
     ):
         dmy = run_date.format('DDMMMYY').lower()
         run_id = '{dmy}nowcast'.format(dmy=dmy)
         p_config_results = patch.dict(
-            config['run']['west.cloud']['results'],
-            nowcast=str(tmp_results['results']['nowcast']))
-        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
+            config['run'][host_name]['results'],
+            {run_type: str(tmp_results['results'][run_type])})
+        enabled_host_config = (config['run']['enabled hosts'][host_name])
         tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             enabled_host_config,
             {'run prep dir': str(tmp_run_prep)})
         run_type_config = (
-            config['run']['enabled hosts']['west.cloud']['run types']
-            ['nowcast'])
+            config['run']['enabled hosts'][host_name]['run types'][run_type])
         tmp_run_sets = tmpdir.ensure_dir(run_type_config['run sets dir'])
         p_config_run_sets_dir = patch.dict(
             run_type_config, {'run sets dir': str(tmp_run_sets)})
         with p_config_results, p_config_run_prep, p_config_run_sets_dir:
                 run_desc = run_NEMO._run_description(
-                    run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
+                    run_date, run_type, run_id, 2160, host_name, config)
         expected = [
-            tmp_run_prep.join('namelist.time'),
-            tmp_run_sets.join('namelist.domain'),
-            tmp_run_sets.join('namelist.surface.blue'),
-            tmp_run_sets.join('namelist.lateral'),
-            tmp_run_sets.join('namelist.bottom'),
-            tmp_run_sets.join('namelist.tracer'),
-            tmp_run_sets.join('namelist.dynamics'),
-            tmp_run_sets.join('namelist.vertical'),
-            tmp_run_sets.join('namelist.compute'),
+            str(tmp_run_prep.join('namelist.time')),
+            str(tmp_run_sets.join('namelist.domain')),
+            str(tmp_run_sets.join('namelist.surface')),
+            str(tmp_run_sets.join('namelist.lateral')),
+            str(tmp_run_sets.join('namelist.bottom')),
+            str(tmp_run_sets.join('namelist.tracer')),
+            str(tmp_run_sets.join('namelist.dynamics')),
+            str(tmp_run_sets.join('namelist.vertical')),
+            str(tmp_run_sets.join('namelist.compute')),
         ]
         assert run_desc['namelists']['namelist_cfg'] == expected
 
@@ -779,21 +783,9 @@ class TestRunDescription:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast-green', run_id, 2160, 'west.cloud',
                     config)
-        expected = [
-            tmp_run_prep.join('namelist.time'),
-            tmp_run_sets.join('namelist.domain'),
-            tmp_run_sets.join('namelist.surface.green'),
-            tmp_run_sets.join('namelist.lateral'),
-            tmp_run_sets.join('namelist.bottom'),
-            tmp_run_sets.join('namelist.tracer'),
-            tmp_run_sets.join('namelist.dynamics'),
-            tmp_run_sets.join('namelist.vertical'),
-            tmp_run_sets.join('namelist.compute'),
-        ]
-        assert run_desc['namelists']['namelist_cfg'] == expected
-        expected = [tmp_run_sets.join('namelist_top_cfg')]
+        expected = [str(tmp_run_sets.join('namelist_top_cfg'))]
         assert run_desc['namelists']['namelist_top_cfg'] == expected
-        expected = [tmp_run_sets.join('namelist_pisces_cfg')]
+        expected = [str(tmp_run_sets.join('namelist_pisces_cfg'))]
         assert run_desc['namelists']['namelist_pisces_cfg'] == expected
 
     def test_output_nowcast(self, config, run_date, tmpdir, tmp_results):

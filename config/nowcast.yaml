@@ -316,13 +316,13 @@ run:
       # List of run types that are executed on the compute host
       run types:
         nowcast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-blue/
         forecast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/forecast/
         forecast2:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/forecast2/
         nowcast-green:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-green/
       # Directory on compute host where files (e.g. namelist.time) and symlinks
       # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
       run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
@@ -335,7 +335,7 @@ run:
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       run types:
         nowcast-dev:
-          run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/
+          run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-dev/
           walltime: 23:30:00
       run prep dir: /results/nowcast-sys/runs/
 
