@@ -317,12 +317,18 @@ run:
       run types:
         nowcast:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-blue/
+          # How is the domain to be distributed over the processors in the
+          # i (longitude) and j (latitude) directions?
+          mpi decomposition: 9x19
         forecast:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/forecast/
+          mpi decomposition: 9x19
         forecast2:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/forecast2/
+          mpi decomposition: 9x19
         nowcast-green:
           run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-green/
+          mpi decomposition: 9x19
       # Directory on compute host where files (e.g. namelist.time) and symlinks
       # (e,g. iodef.xml, forcing links) necessary to prepare the NEMO runs are stored
       run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
@@ -336,6 +342,7 @@ run:
       run types:
         nowcast-dev:
           run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-dev/
+          mpi decomposition: 1x7
           walltime: 23:30:00
       run prep dir: /results/nowcast-sys/runs/
 
@@ -373,9 +380,6 @@ run:
       forecast: /nemoShare/MEOPAR/SalishSea/forecast/
       nowcast-green: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forecast2: /nemoShare/MEOPAR/SalishSea/forecast2/
-    # How is the domain to be distributed over the processors in the
-    # i (longitude) and j (latitude) directions?
-    mpi decomposition: 9x19
     # Path to the salishsea command processor executable to use in the run
     # script
     salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
@@ -418,9 +422,6 @@ run:
       # Note that salish has shared storage with the nowcast system results
       # archives
       nowcast-dev: /results/SalishSea/nowcast-dev/
-    # How is the domain to be distributed over the processors in the
-    # i (longitude) and j (latitude) directions?
-    mpi decomposition: 1x7
     # Path to the salishsea command processor executable to use in the run
     # script
     salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea

@@ -104,18 +104,22 @@ def config(scope='function'):
                         'nowcast': {
                             'run sets dir':
                                 'SS-run-sets/SalishSea/nemo3.6/nowcast-blue/',
+                            'mpi decomposition': '9x19',
                         },
                         'forecast': {
                             'run sets dir':
                                 'SS-run-sets/SalishSea/nemo3.6/forecast/',
+                            'mpi decomposition': '9x19',
                         },
                         'forecast2': {
                             'run sets dir':
                                 'SS-run-sets/SalishSea/nemo3.6/forecast2/',
+                            'mpi decomposition': '9x19',
                         },
                         'nowcast-green': {
                             'run sets dir':
                                 'SS-run-sets/SalishSea/nemo3.6/nowcast-green/',
+                            'mpi decomposition': '9x19',
                         },
                     },
                     'run prep dir': 'nowcast-sys/runs/',
@@ -125,6 +129,7 @@ def config(scope='function'):
                         'nowcast-dev': {
                             'run sets dir':
                                 'SS-run-sets/SalishSea/nemo3.6/nowcast-dev/',
+                            'mpi decomposition': '1x7',
                             'walltime': '23:30:00',
                         },
                     },
