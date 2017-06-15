@@ -155,14 +155,12 @@ class TestMakeRunoffLinks:
             'enabled hosts': {
                 'salish-nowcast': {
                     'run prep dir': 'runs/',
+                    'forcing': {
+                        'rivers dir': '/results/forcing/rivers/',
+                        'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc'
+                    },
                 },
             },
-            'salish-nowcast': {
-                'forcing': {
-                    'rivers dir': '/results/forcing/rivers/',
-                    'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-                },
-            }
         }
     }
 
@@ -193,7 +191,7 @@ class TestMakeRunoffLinks:
         run_date = arrow.get('2016-10-14')
         m_sftp_client = Mock(name='sftp_client')
         p_config = patch.dict(
-            self.config['run']['salish-nowcast']['forcing'],
+            self.config['run']['enabled hosts']['salish-nowcast']['forcing'],
             {
                 'rivers dir': '/results/forcing/rivers/',
                 'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
@@ -211,7 +209,7 @@ class TestMakeRunoffLinks:
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         p_config = patch.dict(
-            self.config['run']['salish-nowcast']['forcing'],
+            self.config['run']['enabled hosts']['salish-nowcast']['forcing'],
             {
                 'rivers dir': '/results/forcing/rivers/',
                 'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',

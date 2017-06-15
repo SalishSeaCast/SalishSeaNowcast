@@ -91,7 +91,7 @@ def upload_forcing(parsed_args, config, *args):
     ssh_key = Path(
         os.environ['HOME'], '.ssh',
         config['run']['enabled hosts'][host_name]['ssh key'])
-    host_run_config = config['run'][host_name]
+    host_config = config['run']['enabled hosts'][host_name]
     ssh_client, sftp_client = lib.sftp(host_name, os.fspath(ssh_key))
     # Neah Bay sea surface height
     for day in range(-1, 3):
@@ -99,8 +99,7 @@ def upload_forcing(parsed_args, config, *args):
             run_date.replace(days=day).date())
         dest_dir = 'obs' if day == -1 else 'fcst'
         localpath = Path(config['ssh']['ssh dir'], dest_dir, filename)
-        remotepath = Path(
-            host_run_config['forcing']['ssh dir'], dest_dir, filename)
+        remotepath = Path(host_config['forcing']['ssh dir'], dest_dir, filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
         except FileNotFoundError:
@@ -130,7 +129,7 @@ def upload_forcing(parsed_args, config, *args):
     for tmpl in config['rivers']['file templates'].values():
         filename = tmpl.format(run_date.replace(days=-1).date())
         localpath = Path(config['rivers']['rivers dir'], filename)
-        remotepath = Path(host_run_config['forcing']['rivers dir'], filename)
+        remotepath = Path(host_config['forcing']['rivers dir'], filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Weather
     if run_type == 'nowcast+':
@@ -144,7 +143,7 @@ def upload_forcing(parsed_args, config, *args):
         localpath = Path(
             config['weather']['ops dir'], dest_dir, filename)
         remotepath = Path(
-            host_run_config['forcing']['weather dir'], dest_dir, filename)
+            host_config['forcing']['weather dir'], dest_dir, filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Live Ocean Boundary Conditions
     for day in range(0, 2):
@@ -153,8 +152,7 @@ def upload_forcing(parsed_args, config, *args):
         dest_dir = '' if day == 0 else 'fcst'
         localpath = Path(
             config['temperature salinity']['bc dir'], dest_dir, filename)
-        remotepath = Path(
-            host_run_config['forcing']['bc dir'], dest_dir, filename)
+        remotepath = Path(host_config['forcing']['bc dir'], dest_dir, filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
         except FileNotFoundError:
