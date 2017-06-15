@@ -156,9 +156,13 @@ def make_plots(parsed_args, config, *args):
     if run_type in ['forecast', 'forecast2']:
         weather_path = os.path.join(weather_path, 'fcst/')
     results_dir = os.path.join(config['results archive'][run_type], dmy)
-    bathy = nc.Dataset(config['run types'][run_type]['bathymetry'])
-    mesh_mask = nc.Dataset(config['run types'][run_type]['mesh mask'])
-    dev_mesh_mask = nc.Dataset(config['run types']['nowcast-dev']['mesh mask'])
+    grid_dir = Path(config['figures']['grid dir'])
+    bathy = nc.Dataset(
+        os.fspath(grid_dir / config['run types'][run_type]['bathymetry']))
+    mesh_mask = nc.Dataset(
+        os.fspath(grid_dir / config['run types'][run_type]['mesh mask']))
+    dev_mesh_mask = nc.Dataset(
+        os.fspath(grid_dir / config['run types']['nowcast-dev']['mesh mask']))
     coastline = sio.loadmat(config['figures']['coastline'])
 
     if run_type == 'nowcast' and plot_type == 'research':
