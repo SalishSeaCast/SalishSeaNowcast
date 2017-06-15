@@ -690,10 +690,9 @@ class TestRunDescription:
             config['run'][host_name]['results'],
             {run_type: str(tmp_results['results'][run_type])})
         enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
-        tmp_run_prep = tmp_results['run prep dir']
         p_config_run_prep = patch.dict(
             enabled_host_config,
-            {'run prep dir': str(tmp_run_prep)})
+            {'run prep dir': str(tmp_results['run prep dir'])})
         with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
@@ -715,11 +714,7 @@ class TestRunDescription:
             config['run'][host_name]['results'],
             nowcast=str(tmp_results['results']['nowcast']))
         enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            enabled_host_config,
-            {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_run_prep:
+        with p_config_results:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config)
         check_link_dict = run_desc['forcing'][link_name]['check link']
@@ -807,18 +802,19 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
-        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
-        tmp_run_prep = tmp_results['run prep dir']
-        p_config_run_prep = patch.dict(
-            enabled_host_config,
-            {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_run_prep:
+        run_type_config = (
+            config['run']['enabled hosts']['west.cloud']['run types']
+            ['nowcast'])
+        tmp_run_sets = tmpdir.ensure_dir(run_type_config['run sets dir'])
+        p_config_run_sets_dir = patch.dict(
+            run_type_config, {'run sets dir': str(tmp_run_sets)})
+        with p_config_results, p_config_run_sets_dir:
             run_desc = run_NEMO._run_description(
                 run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
-        assert run_desc['output']['iodefs'] == tmp_run_prep.join('iodef.xml')
-        assert run_desc['output']['domaindefs'] == tmp_run_prep.join(
+        assert run_desc['output']['iodefs'] == tmp_run_sets.join('iodef.xml')
+        assert run_desc['output']['domaindefs'] == tmp_run_sets.join(
             'domain_def.xml')
-        assert run_desc['output']['fielddefs'] == tmp_run_prep.join(
+        assert run_desc['output']['fielddefs'] == tmp_run_sets.join(
             'field_def.xml')
         assert run_desc['output']['separate XIOS server']
         assert run_desc['output']['XIOS servers'] == 1
@@ -831,17 +827,18 @@ class TestRunDescription:
         p_config_results = patch.dict(
             config['run']['west.cloud']['results'],
             nowcast=str(tmp_results['results']['nowcast']))
-        enabled_host_config = (config['run']['enabled hosts']['west.cloud'])
-        tmp_run_prep = tmp_results['run prep dir']
-        tmp_run_prep.ensure('file_def.xml')
-        p_config_run_prep = patch.dict(
-            enabled_host_config,
-            {'run prep dir': str(tmp_run_prep)})
-        with p_config_results, p_config_run_prep:
+        run_type_config = (
+            config['run']['enabled hosts']['west.cloud']['run types']
+            ['nowcast'])
+        tmp_run_sets = tmpdir.ensure_dir(run_type_config['run sets dir'])
+        tmp_run_sets.ensure('file_def.xml')
+        p_config_run_sets_dir = patch.dict(
+            run_type_config, {'run sets dir': str(tmp_run_sets)})
+        with p_config_results, p_config_run_sets_dir:
             run_desc = run_NEMO._run_description(
                 run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['output']['filedefs'] == str(
-            tmp_run_prep.join('file_def.xml'))
+            tmp_run_sets.join('file_def.xml'))
 
     def test_vc_revisions(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format('DDMMMYY').lower()
