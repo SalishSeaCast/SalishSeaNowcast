@@ -29,6 +29,7 @@ import subprocess
 import matplotlib
 ## TODO: Get rid of matplotlib.use() call; see issue #19
 matplotlib.use('Agg')
+import matplotlib.pyplot
 
 import arrow
 import cmocean
@@ -532,6 +533,7 @@ def _render_figures(
             os.fspath(filename), facecolor=fig.get_facecolor(),
             bbox_inches='tight')
         logger.info(f'{filename} saved')
+        matplotlib.pyplot.close(fig)
         if fig_save_format is 'svg':
             logger.debug(f'starting SVG scouring of {filename}')
             tmpfilename = filename.with_suffix('.scour')
