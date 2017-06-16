@@ -357,7 +357,7 @@ run:
       python: /results/nowcast-sys/nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       run prep dir: /results/nowcast-sys/runs/
-      grid path: /results/nowcast-sys/NEMO-forcing/grid/
+      grid dir: /results/nowcast-sys/NEMO-forcing/grid/
       salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
       job exec cmd: qsub
       # Optional email address to which to send notifications of the beginning
