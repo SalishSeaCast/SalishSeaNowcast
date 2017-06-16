@@ -137,10 +137,12 @@ class TestMakeWW3WindFile:
         config = {
             'weather': {'file template': 'ops_{:y%Ym%md%d}.nc'},
             'run': {
-                'west.cloud': {
-                    'forcing': {
-                        'weather dir':
-                            '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/',
+                'enabled hosts': {
+                    'west.cloud': {
+                        'forcing': {
+                            'weather dir':
+                                '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/',
+                        }
                     }
                 }
             },
@@ -164,10 +166,12 @@ class TestMakeWW3WindFile:
         config = {
             'weather': {'file template': 'ops_{:y%Ym%md%d}.nc'},
             'run': {
-                'west.cloud': {
-                    'forcing': {
-                        'weather dir':
-                            '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/',
+                'enabled hosts': {
+                    'west.cloud': {
+                        'forcing': {
+                            'weather dir':
+                                '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/',
+                        }
                     }
                 }
             },
@@ -194,10 +198,12 @@ class TestMakeWW3WindFile:
         config = {
             'weather': {'file template': 'ops_{:y%Ym%md%d}.nc'},
             'run': {
-                'west.cloud': {
-                    'forcing': {
-                        'weather dir':
-                            '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/',
+                'enabled hosts': {
+                    'west.cloud': {
+                        'forcing': {
+                            'weather dir':
+                                '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/',
+                        }
                     }
                 }
             },

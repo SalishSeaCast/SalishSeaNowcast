@@ -91,7 +91,8 @@ def make_ww3_wind_file(parsed_args, config, *args):
     ymd = run_date.format('YYYY-MM-DD')
     logger.info(
         f'Creating wwatch3 wind forcing file for {ymd} {run_type} run')
-    hrdps_dir = Path(config['run'][host_name]['forcing']['weather dir'])
+    host_config = config['run']['enabled hosts'][host_name]
+    hrdps_dir = Path(host_config['forcing']['weather dir'])
     hrdps_file_tmpl = config['weather']['file template']
     datasets = []
     if run_type == 'forecast':

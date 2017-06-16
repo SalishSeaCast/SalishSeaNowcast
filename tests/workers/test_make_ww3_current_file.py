@@ -31,18 +31,23 @@ def config():
     return {
         'run types': {
             'nowcast': {
-                'mesh mask': 'NEMO-forcing/grid/mesh_mask_downbyone2.nc'
+                'mesh mask': 'mesh_mask_downbyone2.nc'
             }
         },
         'run': {
-            'west.cloud': {
-                'results': {
-                    'nowcast': '/nemoShare/MEOPAR/SalishSea/nowcast/',
+            'enabled hosts': {
+                'west.cloud': {
+                    'run types': {
+                        'nowcast': {
+                            'results': '/nemoShare/MEOPAR/SalishSea/nowcast/',
+                        }
+                    }
                 }
             }
         },
         'wave forecasts': {
             'run prep dir': '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs',
+            'grid dir': 'NEMO-forcing/grid/',
             'current file template': 'SoG_current_{yyyymmdd}.nc',
             'NEMO file template':
                 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
