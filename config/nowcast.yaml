@@ -437,6 +437,8 @@ wave forecasts:
   # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
   # are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
+  # Directory in which to find mesh mask file
+  grid dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/
   # Template for wind forcing file names
   # **Must be quoted to project {} characters**
   wind file template: 'SoG_wind_{yyyymmdd}.nc'

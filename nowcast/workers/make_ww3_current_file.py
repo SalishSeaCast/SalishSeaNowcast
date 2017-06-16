@@ -93,8 +93,11 @@ def make_ww3_current_file(parsed_args, config, *args):
     ymd = run_date.format('YYYY-MM-DD')
     logger.info(
         f'Creating wwatch3 currents forcing file for {ymd} {run_type} run')
-    mesh_mask = config['run types']['nowcast']['mesh mask']
-    nemo_dir = Path(config['run'][host_name]['results']['nowcast']).parent
+    host_config = config['run']['enabled hosts'][host_name]
+    grid_dir = Path(config['wave forecasts']['grid dir'])
+    mesh_mask = os.fspath(
+        grid_dir / config['run types']['nowcast']['mesh mask'])
+    nemo_dir = Path(host_config['run types']['nowcast']['results']).parent
     nemo_file_tmpl = config['wave forecasts']['NEMO file template']
     dest_dir = Path(config['wave forecasts']['run prep dir'], 'current')
     filepath_tmpl = config['wave forecasts']['current file template']
