@@ -571,40 +571,40 @@ def _calc_figure(fig_func, args, kwargs):
         fig = fig_func(*args, **kwargs)
     except FileNotFoundError as e:
         if fig_func.__name__.endswith('salinity_ferry_route'):
-            logger.info(
+            logger.warning(
                 f'{args[3]} ferry route salinity comparison figure '
                 f'failed: {e}')
         else:
-            logger.warning(
+            logger.error(
                 f'unexpected FileNotFoundError in {fig_func.__name__}:',
                 exc_info=True)
         raise
     except IndexError:
         adcp_plot_funcs = ('plotADCP', 'plotdepavADCP', 'plottimeavADCP')
         if fig_func.__name__.endswith(adcp_plot_funcs):
-            logger.info(
+            logger.warning(
                 f'VENUS {args[3]} ADCP comparison figure failed: '
                 f'No observations available')
         else:
-            logger.warning(
+            logger.error(
                 f'unexpected IndexError in {fig_func.__name__}:', exc_info=True)
         raise
     except KeyError:
         if fig_func.__name__.endswith('salinity_ferry_route'):
-            logger.info(
+            logger.warning(
                 f'{args[3]} ferry route salinity comparison figure '
                 f'failed: No observations found in .mat file')
         else:
-            logger.warning(
+            logger.error(
                 f'unexpected KeyError in {fig_func.__name__}:', exc_info=True)
         raise
     except TypeError:
         if fig_func.__module__.endswith('compare_venus_ctd'):
-            logger.info(
+            logger.warning(
                 f'VENUS {args[0]} CTD comparison figure failed: '
                 f'No observations available')
         else:
-            logger.warning(
+            logger.error(
                 f'unexpected TypeError in {fig_func.__name__}:', exc_info=True)
         raise
     return fig
