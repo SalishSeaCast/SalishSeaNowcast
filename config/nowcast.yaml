@@ -224,6 +224,14 @@ erddap:
       - ubcSSnPointAtkinsonSSH15mV16-10
       - ubcSSnSandheadsSSH15mV16-10
       - ubcSSnVictoriaSSH15mV16-10
+    nowcast-green:
+      - ubcSSgPointAtkinsonSSH15mV17-02
+      - ubcSSg3DBiologyFields1hV17-02
+      - ubcSSg3DTracerFields1hV17-02
+      - ubcSSg3DuGridFields1hV17-02
+      - ubcSSg3DvGridFields1hV17-02
+      - ubcSSg3DwGridFields1hV17-02
+      - ubcSSgSurfaceTracerFields1hV17-02
 
 
 figures:

@@ -806,6 +806,22 @@ class TestAfterDownloadResults:
             'nowcast.workers.ping_erddap', args=['nowcast'], host='localhost')
         assert expected in workers
 
+    def test_success_nowcast_green_launch_ping_erddap_nowcast(
+        self, config, checklist,
+    ):
+        p_checklist = patch.dict(
+            checklist,
+            {'NEMO run': {'nowcast-green': {'run date': '2017-06-22'}}})
+        with p_checklist:
+            workers = next_workers.after_download_results(
+                Message(
+                    'download_results',
+                    'success nowcast-green'), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.ping_erddap',
+            args=['nowcast-green'], host='localhost')
+        assert expected in workers
+
 
 class TestAfterSplitResults:
     """Unit tests for after_split_results function.
