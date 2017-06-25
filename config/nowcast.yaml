@@ -130,7 +130,7 @@ observations:
   ctd data:
     # ONC node station names to download data from
     stations:
-      ##- SCVIP  # offline as of early Oct-2016
+      - SCVIP
       - SEVIP
       - LSBBL
       - USDDL
