@@ -638,6 +638,9 @@ def after_download_results(msg, config, checklist):
                 NextWorker(
                     'nowcast.workers.make_plots',
                     args=[run_type, 'research', '--run-date', run_date]))
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.ping_erddap', args=['nowcast-green']))
             return next_workers[msg.type]
         next_workers[msg.type].append(
             NextWorker(
