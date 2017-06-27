@@ -101,6 +101,17 @@ def download_results(parsed_args, config, *args):
     results_archive_dir = dest/results_dir
     for filepath in results_archive_dir.glob('*'):
         lib.fix_perms(os.fspath(filepath), grp_name=config['file group'])
+    if run_type == 'nowcast-green':
+        # TEMPORARY: Hard link nowcast-green files for ERDDAP datasets into
+        # hindcast results archive
+        dest = Path(config['results archive']['hindcast'])/results_dir
+        dest.mkdir()
+        for filepath in results_archive_dir.glob('SalishSea_1h_*.nc'):
+            os.link(filepath, dest/filepath.name)
+            logger.debug(f'{filepath} hard linked as {dest}')
+        filepath = results_archive_dir/'PointAtkinson.nc'
+        os.link(filepath, dest/filepath.name)
+        logger.debug(f'{filepath} hard linked as {dest}')
     checklist = {run_type: {}}
     for freq in '1h 1d'.split():
         checklist[run_type][freq] = list(map(str, results_archive_dir.glob(

@@ -130,7 +130,7 @@ observations:
   ctd data:
     # ONC node station names to download data from
     stations:
-      ##- SCVIP  # offline as of early Oct-2016
+      - SCVIP
       - SEVIP
       - LSBBL
       - USDDL
@@ -187,7 +187,7 @@ results archive:
   forecast: /results/SalishSea/forecast/
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
-  hindcast: /ocean/sallen/allen/research/MEOPAR/myResults/hindcast/
+  hindcast: /results/SalishSea/hindcast/
 
 
 # Notifications to ERDDAP server that datasets have been updated
@@ -224,6 +224,14 @@ erddap:
       - ubcSSnPointAtkinsonSSH15mV16-10
       - ubcSSnSandheadsSSH15mV16-10
       - ubcSSnVictoriaSSH15mV16-10
+    nowcast-green:
+      - ubcSSgPointAtkinsonSSH15mV17-02
+      - ubcSSg3DBiologyFields1hV17-02
+      - ubcSSg3DTracerFields1hV17-02
+      - ubcSSg3DuGridFields1hV17-02
+      - ubcSSg3DvGridFields1hV17-02
+      - ubcSSg3DwGridFields1hV17-02
+      - ubcSSgSurfaceTracerFields1hV17-02
 
 
 figures:
