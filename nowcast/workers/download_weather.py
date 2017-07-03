@@ -38,28 +38,6 @@ NAME = 'download_weather'
 logger = logging.getLogger(NAME)
 
 
-GRIB_VARIABLES = (
-    'UGRD_TGL_10_',  # u component of wind velocity at 10m elevation
-    'VGRD_TGL_10_',  # v component of wind velocity at 10m elevation
-    'DSWRF_SFC_0_',  # accumulated downward shortwave (solar) radiation
-                     # at ground level
-    'DLWRF_SFC_0_',  # accumulated downward longwave (thermal) radiation
-                     # at ground level
-    'TMP_TGL_2_',    # air temperature at 2m elevation
-    'SPFH_TGL_2_',   # specific humidity at 2m elevation
-    'APCP_SFC_0_',   # accumulated precipitation at ground level
-    'PRMSL_MSL_0_',  # atmospheric pressure at mean sea level
-)
-URL_TEMPLATE = (
-    'http://dd.weather.gc.ca/model_hrdps/west/grib2/'
-    '{forecast}/{hour}/{filename}'
-)
-FILENAME_TEMPLATE = (
-    'CMC_hrdps_west_{variable}ps2.5km_{date}{forecast}_P{hour}-00.grib2'
-)
-FORECAST_DURATION = 48  # hours
-
-
 def main():
     """Set up and run the worker.
 
@@ -110,18 +88,23 @@ def get_grib(parsed_args, config, *args):
     logger.info(
         f'downloading {forecast} forecast GRIB2 files for {date}',
         extra={'forecast': parsed_args.forecast})
-    dest_dir_root = config['weather']['GRIB dir']
+    dest_dir_root = config['weather']['download']['GRIB dir']
     grp_name = config['file group']
     _mkdirs(dest_dir_root, date, forecast, grp_name)
+    url_tmpl = config['weather']['download']['url template']
+    filename_tmpl = config['weather']['download']['file template']
+    forecast_duration = config['weather']['download']['forecast duration']
     with requests.Session() as session:
-        for forecast_hour in range(1, FORECAST_DURATION+1):
+        for forecast_hour in range(1, forecast_duration+1):
             hr_str = f'{forecast_hour:0=3}'
             lib.mkdir(
                 os.path.join(dest_dir_root, date, forecast, hr_str),
                 logger, grp_name=grp_name, exist_ok=False)
-            for var in GRIB_VARIABLES:
+            for var in config['weather']['download']['grib variables']:
                 filepath = _get_file(
-                    var, dest_dir_root, date, forecast, hr_str, session)
+                    url_tmpl, filename_tmpl, var, dest_dir_root, date, forecast,
+                    hr_str, session
+                )
                 os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
     checklist = {f'{date} {forecast} forecast': True}
     return checklist
@@ -146,22 +129,27 @@ def _mkdirs(dest_dir_root, date, forecast, grp_name):
         logger, grp_name=grp_name, exist_ok=False)
 
 
-def _get_file(var, dest_dir_root, date, forecast, hr_str, session):
-    filename = FILENAME_TEMPLATE.format(
+def _get_file(
+    url_tmpl, filename_tmpl, var, dest_dir_root, date, forecast, hr_str,
+    session
+):
+    filename = filename_tmpl.format(
         variable=var, date=date, forecast=forecast, hour=hr_str)
     filepath = os.path.join(
         dest_dir_root, date, forecast, hr_str, filename)
-    fileURL = URL_TEMPLATE.format(
+    file_url = url_tmpl.format(
         forecast=forecast, hour=hr_str, filename=filename)
     get_web_data(
-        fileURL, NAME, Path(filepath), session=session,
+        file_url, NAME, Path(filepath), session=session,
         wait_exponential_max=9000)
     size = os.stat(filepath).st_size
     logger.debug(
-        f'downloaded {size} bytes from {fileURL}', extra={'forecast': forecast})
+        f'downloaded {size} bytes from {file_url}',
+        extra={'forecast': forecast})
     if size == 0:
         logger.critical(
-            f'Problem, 0 size file {fileURL}', extra={'forecast': forecast})
+            f'Problem, 0 size file {file_url}',
+            extra={'forecast': forecast})
         raise WorkerError
     return filepath
 

@@ -181,9 +181,10 @@ That can be accomplished as follows:
    .. code-block:: yaml
 
        weather:
-         # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
-         # GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
-         GRIB dir: /ocean/<your_userid>/MEOPAR/GRIB/
+         download:
+           # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
+           # GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
+           GRIB dir: /ocean/<your_userid>/MEOPAR/GRIB/
 
    .. note::
 
