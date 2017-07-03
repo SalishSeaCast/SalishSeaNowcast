@@ -34,7 +34,28 @@ def parsed_args():
 def config():
     return {
         'file group': 'foo',
-        'weather': {'GRIB dir': '/tmp/'}
+        'weather': {
+            'download': {
+                'url template':
+                    'http://dd.beta.weather.gc.ca/model_hrdps/west/grib2/'
+                    '{forecast}/{hour}/{filename}',
+                'file template':
+                    'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_'
+                    'P{hour}-00.grib2',
+                'grib variables': [
+                    'UGRD_TGL_10',
+                    'VGRD_TGL_10',
+                    'DSWRF_SFC_0',
+                    'DLWRF_SFC_0',
+                    'TMP_TGL_2',
+                    'SPFH_TGL_2',
+                    'APCP_SFC_0',
+                    'PRMSL_MSL_0',
+                ],
+                'forecast duration': 48,
+                'GRIB dir': '/tmp/',
+            }
+        }
     }
 
 
@@ -138,8 +159,10 @@ class TestGetGrib:
         self, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
         parsed_args, config,
     ):
-        download_weather.FORECAST_DURATION = 6
-        download_weather.get_grib(parsed_args, config)
+        p_config = patch.dict(
+            config['weather']['download'], {'forecast duration': 6})
+        with p_config:
+            download_weather.get_grib(parsed_args, config)
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr+1]
             assert args == ('/tmp/20150619/06/00{}'.format(hr), m_logger)
@@ -150,12 +173,16 @@ class TestGetGrib:
         self, m_session, m_get_file, m_fix_perms, m_mkdir, m_calc_date,
         m_logger, parsed_args, config,
     ):
-        download_weather.FORECAST_DURATION = 1
-        download_weather.GRIB_VARIABLES = ('UGRD_TGL_10_',)
-        download_weather.get_grib(parsed_args, config)
+        p_config = patch.dict(
+            config['weather']['download'],
+            {'grib variables': ['UGRD_TGL_10'], 'forecast duration': 1})
+        with p_config:
+            download_weather.get_grib(parsed_args, config)
         args, kwargs = m_get_file.call_args
         assert args == (
-            'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001',
+            config['weather']['download']['url template'],
+            config['weather']['download']['file template'],
+            'UGRD_TGL_10', '/tmp/', '20150619', '06', '001',
             m_session().__enter__())
         assert kwargs == {}
 
@@ -163,12 +190,13 @@ class TestGetGrib:
         self, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
         parsed_args, config,
     ):
-        download_weather.FORECAST_DURATION = 1
-        download_weather.GRIB_VARIABLES = ('UGRD_TGL_10_',)
+        p_config = patch.dict(
+            config['weather']['download'],
+            {'grib variables': ['UGRD_TGL_10'], 'forecast duration': 1})
         m_get_file.return_value = 'filepath'
         p_chmod = patch('nowcast.workers.download_weather.os.chmod')
         p_fileperms = patch('nowcast.workers.download_weather.FilePerms')
-        with p_chmod as m_chmod, p_fileperms as m_fileperms:
+        with p_config, p_chmod as m_chmod, p_fileperms as m_fileperms:
             download_weather.get_grib(parsed_args, config)
         m_chmod.assert_called_once_with(
             'filepath', m_fileperms(user='rw', group='rw', other='r'))
@@ -222,12 +250,15 @@ class TestMkdirs:
 class TestGetFile:
     """Unit tests for _get_file() function.
     """
-    def test_get_web_data(self, m_stat, m_get_web_data, m_logger):
+    def test_get_web_data(self, m_stat, m_get_web_data, m_logger, config):
         m_stat().st_size = 123456
         download_weather._get_file(
-            'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001', None)
+            config['weather']['download']['url template'],
+            config['weather']['download']['file template'],
+            'UGRD_TGL_10', '/tmp/', '20150619', '06', '001', None
+        )
         url = (
-            'http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/'
+            'http://dd.beta.weather.gc.ca/model_hrdps/west/grib2/06/001/'
             'CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015061906_P001-00.grib2'
         )
         filepath = (
@@ -239,8 +270,12 @@ class TestGetFile:
             wait_exponential_max=9000,
         )
 
-    def test_empty_file_exception(self, m_stat, m_get_web_data, m_logger):
+    def test_empty_file_exception(
+        self, m_stat, m_get_web_data, m_logger, config
+    ):
         m_stat().st_size = 0
         with pytest.raises(download_weather.WorkerError):
             download_weather._get_file(
-                'UGRD_TGL_10_', '/tmp/', '20150619', '06', '001', None)
+                config['weather']['download']['url template'],
+                config['weather']['download']['file template'],
+                'UGRD_TGL_10', '/tmp/', '20150619', '06', '001', None)

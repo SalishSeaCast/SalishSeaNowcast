@@ -43,8 +43,27 @@ coordinates: coordinates_seagrid_SalishSea.nc
 
 
 weather:
-  # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
-  GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
+  download:
+    # URL from which to download ECCC HRDPS west domain forecast fields files
+    # **Must be quoted to project {} characters**
+    url template: 'http://dd.beta.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+    # Template for hourly ECCC HRDPS west domain fields file name
+    # **Must be quoted to project {} characters**
+    file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+    # ECCC HRDPS GRIB forecast file field variable names
+    grib variables:
+      - UGRD_TGL_10  # u component of wind velocity at 10m elevation
+      - VGRD_TGL_10  # v component of wind velocity at 10m elevation
+      - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
+      - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+      - TMP_TGL_2    # air temperature at 2m elevation
+      - SPFH_TGL_2   # specific humidity at 2m elevation
+      - APCP_SFC_0   # accumulated precipitation at ground level
+      - PRMSL_MSL_0  # atmospheric pressure at mean sea level
+    # ECCC HRDPS west domain forecast duration
+    forecast duration: 48  # hours
+    # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
+    GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
   # Location of wgrib2 executable
   wgrib2: /results/nowcast-sys/private-tools/grib2/wgrib2/wgrib2
   # Location of Pramod Thupaki's grid_defn.pl script
