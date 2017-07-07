@@ -260,12 +260,25 @@ def _prep_nowcast_green_research_fig_functions(
     bio_dataset = xr.open_dataset(
         'https://salishsea.eos.ubc.ca/erddap/griddap'
         '/ubcSSg3DBiologyFields1hV17-02')
+    clevels_thalweg, clevels_surface = (
+        tracer_thalweg_and_surface_hourly.clevels(
+            ptrc_T_hr.variables['nitrate'], mesh_mask, depth_integrated=False))
+    yyyymmdd = run_date.format('YYYYMMDD')
     fig_functions = {
-        'nitrate_thalweg_and_surface': {
-            'function': tracer_thalweg_and_surface.make_figure,
-            'args': (ptrc_T_hr.variables['nitrate'], bathy, mesh_mask),
-            'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False}
-        },
+        f'nitrate_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
+            {
+                'function': tracer_thalweg_and_surface_hourly.make_figure,
+                'args': (
+                    hr, ptrc_T_hr.variables['nitrate'], bathy, mesh_mask,
+                    clevels_thalweg, clevels_surface),
+                'kwargs':
+                    {'cmap': cmocean.cm.matter, 'depth_integrated': False},
+                'format': 'png',
+                'image loop': True,
+            }
+        for hr in range(24)
+    }
+    fig_functions.update({
         'nitrate_diatoms_timeseries': {
             'function': time_series_plots.make_figure,
             'args': (bio_dataset, 'nitrate', 'diatoms', place)
@@ -282,22 +295,7 @@ def _prep_nowcast_green_research_fig_functions(
             'function': time_series_plots.make_figure,
             'args': (phys_dataset, 'temperature', 'salinity', place)
         },
-    }
-    clevels_thalweg, clevels_surface = (
-        tracer_thalweg_and_surface_hourly.clevels(
-            ptrc_T_hr.variables['nitrate'], mesh_mask, depth_integrated=False))
-    yyyymmdd = run_date.format('YYYYMMDD')
-    for hr in range(24):
-        key = f'nitrate_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC'
-        fig_functions[key] = {
-            'function': tracer_thalweg_and_surface_hourly.make_figure,
-            'args': (
-                hr, ptrc_T_hr.variables['nitrate'], bathy, mesh_mask,
-                clevels_thalweg, clevels_surface),
-            'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False},
-            'format': 'png',
-            'image loop': True,
-        } 
+    })
     return fig_functions
 
 
