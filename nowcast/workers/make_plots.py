@@ -171,7 +171,7 @@ def make_plots(parsed_args, config, *args):
             bathy, mesh_mask, results_dir)
     if run_type == 'nowcast-green' and plot_type == 'research':
         fig_functions = _prep_nowcast_green_research_fig_functions(
-            bathy, mesh_mask, results_dir)
+            bathy, mesh_mask, results_dir, run_date)
     if run_type == 'nowcast' and plot_type == 'comparison':
         fig_functions = _prep_comparison_fig_functions(
             config, bathy, coastline, weather_path, mesh_mask, dev_mesh_mask,
@@ -249,7 +249,9 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir):
     return fig_functions
 
 
-def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
+def _prep_nowcast_green_research_fig_functions(
+    bathy, mesh_mask, results_dir, run_date
+):
     ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
     place = 'S3'
     phys_dataset = xr.open_dataset(
@@ -284,15 +286,17 @@ def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir):
     clevels_thalweg, clevels_surface = (
         tracer_thalweg_and_surface_hourly.clevels(
             ptrc_T_hr.variables['nitrate'], mesh_mask, depth_integrated=False))
+    yyyymmdd = run_date.format('YYYYMMDD')
     for hr in range(24):
-        key = f'nitrate_thalweg_and_surface_hourly_h{hr:02d}'
+        key = f'nitrate_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC'
         fig_functions[key] = {
             'function': tracer_thalweg_and_surface_hourly.make_figure,
             'args': (
                 hr, ptrc_T_hr.variables['nitrate'], bathy, mesh_mask,
                 clevels_thalweg, clevels_surface),
             'kwargs': {'cmap': cmocean.cm.matter, 'depth_integrated': False},
-            'format': 'png'
+            'format': 'png',
+            'image loop': True,
         } 
     return fig_functions
 
@@ -507,6 +511,7 @@ def _render_figures(
         args = func.get('args', [])
         kwargs = func.get('kwargs', {})
         fig_save_format = func.get('format', 'svg')
+        image_loop_figure = func.get('image loop', False)
         test_figure = False
         if test_figure_id:
             test_figure = any((
@@ -533,6 +538,8 @@ def _render_figures(
             lib.mkdir(
                 os.fspath(fig_files_dir), logger, grp_name=config['file group'])
         filename = fig_files_dir / f'{svg_name}_{dmy}.{fig_save_format}'
+        if image_loop_figure:
+            filename = fig_files_dir / f'{svg_name}.{fig_save_format}'
         fig.savefig(
             os.fspath(filename), facecolor=fig.get_facecolor(),
             bbox_inches='tight')
