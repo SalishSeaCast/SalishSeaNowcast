@@ -105,13 +105,13 @@ def run_ww3(parsed_args, config, *args):
     script = _build_run_script(run_date, run_type, run_dir_path, results_path,
                                config)
     run_script_path = _write_run_script(run_type, script, run_dir_path)
-    run_pid = _launch_run(run_type, run_script_path, host_name)
+    run_exec_cmd = _launch_run(run_type, run_script_path, host_name)
     checklist = {
         run_type: {
             'host': host_name,
-            'run date': run_date.format('YYYY-MM-DD'),
             'run dir': os.fspath(run_dir_path),
-            'pid': run_pid,
+            'run exec cmd': run_exec_cmd,
+            'run date': run_date.format('YYYY-MM-DD'),
         }
     }
     return checklist
@@ -576,26 +576,27 @@ def _launch_run(run_type, run_script_path, host_name):
     :param :py:class:`pathlib.Path` run_script_path: 
     :param str host_name:
      
-    :return: wwatch3 run set-up and execution script pid
-    :rtype: int
+    :return: wwatch3 run set-up and execution command
+    :rtype: str
     """
     logger.info(f'{run_type}: launching {run_script_path} on {host_name}')
-    cmd = f'bash {run_script_path}'
+    run_exec_cmd = f'bash {run_script_path}'
     logger.debug(
-        f'{run_type}: running command in subprocess: {shlex.split(cmd)}')
-    subprocess.Popen(shlex.split(cmd))
-    run_pid = None
-    while not run_pid:
+        f'{run_type}: running command in subprocess: '
+        f'{shlex.split(run_exec_cmd)}')
+    subprocess.Popen(shlex.split(run_exec_cmd))
+    run_process_pid = None
+    while not run_process_pid:
         try:
             proc = subprocess.run(
-                shlex.split(f'pgrep --full "{cmd}"'), stdout=subprocess.PIPE,
-                check=True, universal_newlines=True)
-            run_pid = int(proc.stdout)
+                shlex.split(f'pgrep --full "{run_exec_cmd}"'),
+                stdout=subprocess.PIPE, check=True, universal_newlines=True)
+            run_process_pid = int(proc.stdout)
         except subprocess.CalledProcessError:
             # Process has not yet been spawned
             pass
-    logger.debug(f'{run_type} on {host_name}: run pid: {run_pid}')
-    return run_pid
+    logger.debug(f'{run_type} on {host_name}: run pid: {run_process_pid}')
+    return run_exec_cmd
 
 
 if __name__ == '__main__':

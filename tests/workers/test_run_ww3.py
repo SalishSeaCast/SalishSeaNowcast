@@ -135,7 +135,7 @@ class TestRunWW3:
     ])
     @patch('nowcast.workers.run_ww3._build_tmp_run_dir')
     @patch('nowcast.workers.run_ww3._write_run_script')
-    @patch('nowcast.workers.run_ww3._launch_run', return_value=4343)
+    @patch('nowcast.workers.run_ww3._launch_run', return_value='bash SoGWW3.sh')
     def test_checklist(
         self, m_launch_run, m_write_run_script, m_create_tmp_run_dir, m_logger,
         run_type, config
@@ -150,9 +150,9 @@ class TestRunWW3:
         expected = {
             run_type: {
                 'host': 'west.cloud',
-                'run date': '2017-03-25',
                 'run dir': '/wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6',
-                'pid': 4343,
+                'run exec cmd': 'bash SoGWW3.sh',
+                'run date': '2017-03-25',
             }
         }
         assert checklist == expected
@@ -466,7 +466,7 @@ class TestLaunchRun:
             ['pgrep', '--full', 'bash SoGWW3.sh'], stdout=subprocess.PIPE,
             check=True, universal_newlines=True)
 
-    def test_run_pid(self, m_run, m_popen, run_type):
+    def test_run_exec_cmd(self, m_run, m_popen, run_type):
         m_run.return_value = SimpleNamespace(stdout=43)
-        run_pid = run_ww3._launch_run(run_type, Path('SoGWW3.sh'), 'west.cloud')
-        assert run_pid == 43
+        run_exec_cmd = run_ww3._launch_run(run_type, Path('SoGWW3.sh'), 'west.cloud')
+        assert run_exec_cmd == 'bash SoGWW3.sh'
