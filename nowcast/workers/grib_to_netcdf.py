@@ -503,6 +503,7 @@ def _change_to_NEMO_variable_names(outnetcdf, axs, ip):
     data.renameVariable('TMP_2maboveground', 'tair')
     data.renameVariable('PRMSL_meansealevel', 'atmpres')
     data.renameVariable('APCP_surface', 'precip')
+    data.renameVariable('TCDC_surface', 'percentcloud')
     logger.debug('changed variable names to their NEMO names')
 
     Temp = data.variables['tair'][:]
