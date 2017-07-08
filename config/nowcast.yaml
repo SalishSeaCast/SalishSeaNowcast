@@ -60,6 +60,7 @@ weather:
       - SPFH_TGL_2   # specific humidity at 2m elevation
       - APCP_SFC_0   # accumulated precipitation at ground level
       - PRMSL_MSL_0  # atmospheric pressure at mean sea level
+      - TCDC_SFC_0   # total cloud in percent
     # ECCC HRDPS west domain forecast duration
     forecast duration: 48  # hours
     # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
