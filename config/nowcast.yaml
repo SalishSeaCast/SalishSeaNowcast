@@ -252,6 +252,9 @@ erddap:
       - ubcSSg3DvGridFields1hV17-02
       - ubcSSg3DwGridFields1hV17-02
       - ubcSSgSurfaceTracerFields1hV17-02
+    nowcast-dev:
+      - ubcSSnNearSurfaceUVelocity20mV17-02
+      - ubcSSnNearSurfaceVVelocity20mV17-02
 
 
 figures:
@@ -785,12 +788,14 @@ message registry:
       checklist key: ERDDAP flag files
       success nowcast: nowcast ERDDAP dataset flag files created
       failure nowcast: nowcast ERDDAP dataset flag files creation failed
+      success nowcast-dev: nowcast-dev ERDDAP dataset flag files created
+      failure nowcast-dev: nowcast-dev ERDDAP dataset flag files creation failed
+      success nowcast-green: nowcast-green ERDDAP dataset flag files created
+      failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
       success forecast: forecast ERDDAP dataset flag files created
       failure forecast: forecast ERDDAP dataset flag files creation failed
       success forecast2: forecast2 ERDDAP dataset flag files created
       failure forecast2: forecast2 ERDDAP dataset flag files creation failed
-      success nowcast-green: nowcast-green ERDDAP dataset flag files created
-      failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
       success download_weather: atmospheric forcing ERDDAP dataset flag files created
       failure download_weather: atmospheric forcing ERDDAP dataset flag files creation failed
       success SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files created

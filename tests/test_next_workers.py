@@ -661,7 +661,33 @@ class TestAfterWatchNEMO:
         self, msg, config, checklist,
     ):
         workers = next_workers.after_watch_NEMO(msg, config, checklist)
-        assert workers == []
+        download_results = NextWorker(
+            'nowcast.workers.download_results',
+            args=[
+                msg.payload['nowcast-dev']['host'], msg.type.split()[1],
+                '--run-date', msg.payload['nowcast-dev']['run date']],
+            host='localhost')
+        assert download_results not in workers
+
+    def test_success_nowcast_dev_launch_ping_erddap_nowcast_dev(
+        self, config, checklist,
+    ):
+        p_checklist = patch.dict(
+            checklist,
+            {'NEMO run': {'nowcast-dev': {'run date': '2017-07-07'}}})
+        with p_checklist:
+            workers = next_workers.after_watch_NEMO(
+                Message(
+                    'watch_NEMO', 'success nowcast-dev', {
+                        'nowcast-dev': {
+                            'host': 'salish', 'run date': '2016-10-15',
+                            'completed': True
+                        }
+                    }), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.ping_erddap',
+            args=['nowcast-dev'], host='localhost')
+        assert expected in workers
 
 
 class TestAfterMakeWW3WindFile:
@@ -806,7 +832,7 @@ class TestAfterDownloadResults:
             'nowcast.workers.ping_erddap', args=['nowcast'], host='localhost')
         assert expected in workers
 
-    def test_success_nowcast_green_launch_ping_erddap_nowcast(
+    def test_success_nowcast_green_launch_ping_erddap_nowcast_green(
         self, config, checklist,
     ):
         p_checklist = patch.dict(
