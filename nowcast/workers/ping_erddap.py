@@ -38,13 +38,14 @@ def main():
     worker.cli.add_argument(
         'dataset',
         choices={
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2',
+            'nowcast', 'nowcast-dev', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
             'SCVIP-CTD', 'SEVIP-CTD', 'LSBBL-CTD', 'USDDL-CTD',
         },
         help='''
         Type of dataset to notify ERDDAP of:
         'nowcast' means nowcast physics run,
+        'nowcast-dev' means nowcast physics development run,
         'nowcast-green' means nowcast green ocean run,
         'forecast' means updated forecast run,
         'forecast2' means preliminary forecast run,

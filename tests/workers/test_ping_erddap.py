@@ -38,7 +38,7 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('dataset',)
         assert kwargs['choices'] == {
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2',
+            'nowcast', 'nowcast-dev', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
             'SCVIP-CTD', 'SEVIP-CTD', 'LSBBL-CTD', 'USDDL-CTD',
         }
@@ -60,9 +60,10 @@ class TestSuccess:
     """
     @pytest.mark.parametrize('dataset', [
         'nowcast',
+        'nowcast-dev',
+        'nowcast-green',
         'forecast',
         'forecast2',
-        'nowcast-green',
         'download_weather',
         'SCVIP-CTD',
         'SEVIP-CTD',
@@ -76,9 +77,10 @@ class TestSuccess:
 
     @pytest.mark.parametrize('dataset, expected', [
         ('nowcast', 'success nowcast'),
+        ('nowcast-dev', 'success nowcast-dev'),
+        ('nowcast-green', 'success nowcast-green'),
         ('forecast', 'success forecast'),
         ('forecast2', 'success forecast2'),
-        ('nowcast-green', 'success nowcast-green'),
         ('download_weather', 'success download_weather'),
         ('SCVIP-CTD', 'success SCVIP-CTD'),
         ('SEVIP-CTD', 'success SEVIP-CTD'),
@@ -97,9 +99,10 @@ class TestFailure:
     """
     @pytest.mark.parametrize('dataset', [
         'nowcast',
+        'nowcast-dev',
+        'nowcast-green',
         'forecast',
         'forecast2',
-        'nowcast-green',
         'download_weather',
         'SCVIP-CTD',
         'SEVIP-CTD',
@@ -113,9 +116,10 @@ class TestFailure:
 
     @pytest.mark.parametrize('dataset, expected', [
         ('nowcast', 'failure nowcast'),
+        ('nowcast-dev', 'failure nowcast-dev'),
+        ('nowcast-green', 'failure nowcast-green'),
         ('forecast', 'failure forecast'),
         ('forecast2', 'failure forecast2'),
-        ('nowcast-green', 'failure nowcast-green'),
         ('download_weather', 'failure download_weather'),
         ('SCVIP-CTD', 'failure SCVIP-CTD'),
         ('SEVIP-CTD', 'failure SEVIP-CTD'),
@@ -134,9 +138,10 @@ class TestPingErddap:
     """
     @pytest.mark.parametrize('dataset', [
         'nowcast',
+        'nowcast-dev',
+        'nowcast-green',
         'forecast',
         'forecast2',
-        'nowcast-green',
         'download_weather',
         'SCVIP-CTD',
         'SEVIP-CTD',
@@ -150,16 +155,20 @@ class TestPingErddap:
             'erddap': {
                 'flag dir': str(tmp_flag_dir),
                 'datasetIDs': {
-                    'download_weather':
-                        ['ubcSSaSurfaceAtmosphereFieldsV1'],
                     'nowcast':
                         ['ubcSSn3DTracerFields1hV1', 'ubcSSn3DuVelocity1hV1'],
+                    'nowcast-dev': [
+                        'ubcSSnNearSurfaceUVelocity20mV17-02',
+                        'ubcSSnNearSurfaceUVelocity20mV17-02',
+                    ],
+                    'nowcast-green': [
+                        'ubcSSg3DTracerFields1hV1', 'ubcSSg3DuVelocity1hV1'],
                     'forecast':
                         ['ubcSSf3DTracerFields1hV1', 'ubcSSf3DuVelocity1hV1'],
                     'forecast2': [
                         'ubcSSf23DTracerFields1hV1', 'ubcSSf23DuVelocity1hV1'],
-                    'nowcast-green': [
-                        'ubcSSng3DTracerFields1hV1', 'ubcSSng3DuVelocity1hV1'],
+                    'download_weather':
+                        ['ubcSSaSurfaceAtmosphereFieldsV1'],
                     'SCVIP-CTD': ['ubcONCSCVIPCTD15mV1'],
                     'SEVIP-CTD': ['ubcONCSEVIPCTD15mV1'],
                     'LSBBL-CTD': ['ubcONCLSBBLCTD15mV1'],

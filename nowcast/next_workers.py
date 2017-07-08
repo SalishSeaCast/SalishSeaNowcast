@@ -458,6 +458,10 @@ def after_watch_NEMO(msg, config, checklist):
             next_workers['success nowcast'].append(
                 NextWorker(
                     'nowcast.workers.get_NeahBay_ssh', args=['forecast']))
+        if run_type == 'nowcast-dev':
+            next_workers['success nowcast-dev'].append(
+                NextWorker(
+                    'nowcast.workers.ping_erddap', args=['nowcast-dev']))
         if run_type == 'forecast':
             if wave_forecast_after == 'forecast':
                 host_name = config['wave forecasts']['host']
