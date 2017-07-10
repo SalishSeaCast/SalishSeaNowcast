@@ -217,7 +217,6 @@ def _create_dataset(time, lats, lons, u_current, v_current, datasets):
                       f'{datasets}'
         }
     )
-    # del ds.coords['time_centered']
     return ds
 
 if __name__ == '__main__':
