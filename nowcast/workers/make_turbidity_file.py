@@ -86,8 +86,7 @@ def make_turbidity_file(parsed_args, config, *args):
     run_date = parsed_args.run_date
     ymd = run_date.format("YYYY-MM-DD")
     logger.info(f'Creating Fraser River turbidity forcing file for {ymd}')
-    turbidity_csv = Path(
-        config['rivers']['turbidity']['ECget Fraser turbidity:'])
+    turbidity_csv = config['rivers']['turbidity']['ECget Fraser turbidity']
 
     # Read most recent 24 hours data from turbidity_csv,
     # or 24 hours for run_date
