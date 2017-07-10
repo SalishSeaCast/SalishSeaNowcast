@@ -53,7 +53,7 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f'{parsed_args.run_date.format("YYYY-MM-DD")}'
+        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f'Fraser River turbidity file creation complete',
         extra={'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ')})
     return 'success'
@@ -67,7 +67,7 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'{parsed_args.run_date.format("YYYY-MM-DD")}'
+        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f'Fraser River turbidity file creation failed',
         extra={'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ')})
     return 'failure'
@@ -100,7 +100,7 @@ def make_turbidity_file(parsed_args, config, *args):
 
     dest_dir = Path(config['rivers']['turbidity']['forcing dir'])
     file_tmpl = config['rivers']['turbidity']['file template']
-    nc_filepath = os.fspath(dest_dir / file_tmpl.format(run_date.date))
+    nc_filepath = os.fspath(dest_dir / file_tmpl.format(run_date.date()))
 
     # Average data and write netcdf file to nc_filepath
 
