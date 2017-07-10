@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Unit tests for Salish Sea WaveWatch3 forecast worker run_ww3 worker.
+"""Unit tests for Salish Sea WaveWatch3 forecast run_ww3 worker.
 """
 from pathlib import Path
 import subprocess
