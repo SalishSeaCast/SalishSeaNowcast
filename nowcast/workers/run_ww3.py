@@ -61,6 +61,12 @@ def main():
 
 
 def success(parsed_args):
+    """
+    :param :py:class:`argparse.Namespace` parsed_args:
+
+    :return: Nowcast system message type
+    :rtype: str
+    """
     logger.info(
         f'{parsed_args.run_type} NEMO run for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
@@ -75,6 +81,12 @@ def success(parsed_args):
 
 
 def failure(parsed_args):
+    """
+    :param :py:class:`argparse.Namespace` parsed_args:
+
+    :return: Nowcast system message type
+    :rtype: str
+    """
     logger.critical(
         f'{parsed_args.run_type} NEMO run for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
