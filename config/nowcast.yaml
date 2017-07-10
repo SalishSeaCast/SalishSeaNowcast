@@ -46,7 +46,7 @@ weather:
   download:
     # URL from which to download ECCC HRDPS west domain forecast fields files
     # **Must be quoted to project {} characters**
-    url template: 'http://dd.beta.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+    url template: 'http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
     # Template for hourly ECCC HRDPS west domain fields file name
     # **Must be quoted to project {} characters**
     file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
