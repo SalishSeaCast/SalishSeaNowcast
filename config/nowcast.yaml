@@ -99,6 +99,14 @@ rivers:
   prop_dict modules:
     long: salishsea_tools.river_downbyone2
     b201702: salishsea_tools.river_201702
+  turbidity:
+    # File containing hourly real-time Fraser River water quality buoy turbidity data
+    ECget Fraser turbidity: /results/observations/ECCC/fraser_buoy.csv
+    # Destination directory for Fraser River turbidity forcing file
+    forcing dir: /results/forcing/rivers/river_turb/test/
+    # Template for the turbidity forcing file names
+    # **Must be quoted to project {} characters**
+    file template: 'riverTurbDaily2_{:y%Ym%md%d}.nc'
 
 
 ssh:
@@ -739,6 +747,12 @@ message registry:
       success forecast2: forecast2 NEMO run completed
       failure forecast2: forecast2 NEMO run failed
       crash: watch_NEMO worker crashed
+
+    make_turbidity_file:
+      checklist key: Fraser River turbidity
+      success: Fraser River turbidity file created
+      failure: Fraser River turbidity file creation failed
+      crash: make_turbidity_file worker crashed
 
     make_ww3_wind_file:
       checklist key: WW3 wind forcing
