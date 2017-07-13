@@ -254,12 +254,6 @@ def _prep_nowcast_green_research_fig_functions(
 ):
     ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
     place = 'S3'
-    phys_dataset = xr.open_dataset(
-        'https://salishsea.eos.ubc.ca/erddap/griddap'
-        '/ubcSSg3DTracerFields1hV17-02')
-    bio_dataset = xr.open_dataset(
-        'https://salishsea.eos.ubc.ca/erddap/griddap'
-        '/ubcSSg3DBiologyFields1hV17-02')
     clevels_thalweg, clevels_surface = (
         tracer_thalweg_and_surface_hourly.clevels(
             ptrc_T_hr.variables['nitrate'], mesh_mask, depth_integrated=False))
@@ -278,6 +272,12 @@ def _prep_nowcast_green_research_fig_functions(
             }
         for hr in range(24)
     }
+    phys_dataset = xr.open_dataset(
+        'https://salishsea.eos.ubc.ca/erddap/griddap'
+        '/ubcSSg3DTracerFields1hV17-02')
+    bio_dataset = xr.open_dataset(
+        'https://salishsea.eos.ubc.ca/erddap/griddap'
+        '/ubcSSg3DBiologyFields1hV17-02')
     fig_functions.update({
         'nitrate_diatoms_timeseries': {
             'function': time_series_plots.make_figure,
