@@ -24,6 +24,11 @@ from pathlib import Path
 import arrow
 import xarray
 
+import pandas as pd
+import datetime as dt
+import numpy as np
+import pytz
+
 from nemo_nowcast import NowcastWorker, WorkerError
 
 NAME = 'make_turbidity_file'
@@ -90,7 +95,10 @@ def make_turbidity_file(parsed_args, config, *args):
 
     # Read most recent 24 hours data from turbidity_csv,
     # or 24 hours for run_date
-
+    _loadturb24(run_date,turbidity_csv)
+    print('turbidity_csv ',turbidity_csv)
+    print('run_date ',run_date.date)
+    print('type(run_date) ',type(run_date.date))
     # If data read doesn't satisfy coverage criteria
     #     msg = (
     #         f'Insufficient data to create Fraser River turbidity file '
@@ -110,6 +118,44 @@ def make_turbidity_file(parsed_args, config, *args):
 
 
 # Add private functions called by make_turbidity_file() here
+
+def _loadturb24(run_date,turbidity_csv):
+    tdf=pd.read_csv(turbidity_csv,header=0)
+    tdf['dtdate']=pd.to_datetime(tdf['# date']+' '+tdf['time'],format='%Y-%m-%d %H:%M:%S')
+    print("type(tdf['dtdate'][0]    ",type(tdf['dtdate'].values[0]))
+    print(str(tdf['dtdate'].values[0]))
+    tdf['DD']=_dateTimeToDecDay(_pacToUTC(tdf['dtdate'].values[0]))
+    print(tdf[['# date','dtdate','time','DD','turbidity']].head())
+    #idate=run_date.date
+    #idd=dateTimeToDecDay(idate)
+    #print('idd       ', idd)
+    return
+
+def _dateTimeToDecDay(dtin):
+    tdif=dtin-dt.datetime(1900,1,1)
+    dd=tdif.days+tdif.seconds/(3600*24)
+    return dd
+
+def _pacToUTC(pactime0):
+    # input datetime object without tzinfo in Pacific Time and 
+    # output datetime object (or np array of them) without tzinfo in UTC
+    print('type(pactime0)    ',type(pactime0))
+    pactime=np.array(pactime0,ndmin=1)
+    if pactime.ndim>1:
+        raise Exception('Error: ndim>1')
+    # handle case where array of numpy.datetime64 is input:
+    if isinstance(pactime[0],np.datetime64):
+        pactime2=[dt.datetime.strptime(str(d)[:19],"%Y-%m-%dT%H:%M:%S") for d in pactime]
+        pactime=np.array(pactime2)
+    out=np.empty(pactime.shape,dtype=object)
+    pac=pytz.timezone('Canada/Pacific')
+    utc=pytz.utc
+    for ii in range(0,len(pactime)):
+        itime=pactime[ii]
+        loc_t=pac.localize(itime)
+        utc_t=loc_t.astimezone(utc)
+        out[ii]=utc_t.replace(tzinfo=None)
+    return (out[0] if np.isscalar(pactime0) else out)
 
 
 if __name__ == '__main__':
