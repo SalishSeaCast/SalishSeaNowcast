@@ -28,6 +28,7 @@ import pandas as pd
 import datetime as dt
 import numpy as np
 import pytz
+import netCDF4 as nc
 
 from nemo_nowcast import NowcastWorker, WorkerError
 
@@ -93,12 +94,29 @@ def make_turbidity_file(parsed_args, config, *args):
     logger.info(f'Creating Fraser River turbidity forcing file for {ymd}')
     turbidity_csv = config['rivers']['turbidity']['ECget Fraser turbidity']
 
+    # * date handling
+    # * pick time as 19:00, which means selected times will begin with 19:10 on prev day and go to 18:10
+    idatedt=dt.datetime(run_date.year, run_date.month, run_date.day,19,0,0)
+    idateDD=_dateTimeToDecDay(idatedt)
+
     # Read most recent 24 hours data from turbidity_csv,
-    # or 24 hours for run_date
-    _loadturb24(run_date,turbidity_csv)
-    print('turbidity_csv ',turbidity_csv)
-    print('run_date ',run_date.date)
-    print('type(run_date) ',type(run_date.date))
+    # or 24 hours for run_datep
+    # mthresh is max # of missing data points to interpolate over (# of hours) + 1.5
+    # to account for difference between last and next hour (1) and rounding errors (.01):
+    mthresh=5.01
+    tdf=_loadturb(idateDD,turbidity_csv,mthresh)
+    print('type(tdf) ',type(tdf))
+    itdf=_interpTurb(tdf,idateDD,mthresh)
+    iTurb=_calcAvgT(itdf,mthresh)
+    print('iTurb=',iTurb)
+    # temporary: using wrong file name:
+    fnamebase='/ocean/eolson/MEOPAR/NEMO-forcing/rivers/riverTurbDaily1900_'
+    fname=fnamebase+idatedt.strftime('y%Ym%md%d')+'.nc'
+    _writeTFile(fname,iTurb)
+    
+    #print('turbidity_csv ',turbidity_csv)
+    #print('run_date ',run_date.date)
+    #print('type(run_date) ',type(run_date.date))
     # If data read doesn't satisfy coverage criteria
     #     msg = (
     #         f'Insufficient data to create Fraser River turbidity file '
@@ -119,16 +137,116 @@ def make_turbidity_file(parsed_args, config, *args):
 
 # Add private functions called by make_turbidity_file() here
 
-def _loadturb24(run_date,turbidity_csv):
+def _loadturb(idate,turbidity_csv,mthresh):
+    # * read file into pandas dataframe
     tdf=pd.read_csv(turbidity_csv,header=0)
     tdf['dtdate']=pd.to_datetime(tdf['# date']+' '+tdf['time'],format='%Y-%m-%d %H:%M:%S')
-    print("type(tdf['dtdate'][0]    ",type(tdf['dtdate'].values[0]))
-    print(str(tdf['dtdate'].values[0]))
-    tdf['DD']=_dateTimeToDecDay(_pacToUTC(tdf['dtdate'].values[0]))
-    print(tdf[['# date','dtdate','time','DD','turbidity']].head())
-    #idate=run_date.date
-    #idd=dateTimeToDecDay(idate)
-    #print('idd       ', idd)
+    tdf['DD']=[_dateTimeToDecDay(jj) for jj in _pacToUTC(tdf['dtdate'].values)]
+    #print(tdf[['# date','dtdate','time','DD','turbidity']].head())
+    # * select current 24 hr period + extra for interpolation
+    # this will break if np.datetime64 string format changes,type(idate))&tdf['turbidity']>0
+    tdf2=tdf.loc[(tdf['DD']>(idate-1.0-mthresh/24))&(tdf['DD']<=(idate+mthresh/24))].copy()
+    tdf2.index=range(len(tdf2))
+    #tdf2=tdf2.drop(tdf2.index[:6])
+    #tdf2.index=range(len(tdf2))
+    print("tdf2[['# date','time','DD','turbidity','turbidity_units']]  ",
+          tdf2[['# date','time','DD','turbidity','turbidity_units']])
+    return tdf2
+
+def _interpTurb(tdf2,idate,mthresh):
+    dfout=pd.DataFrame(index=range(int(mthresh)*2+24),columns=('hDD','turbidity'))
+    dfout['hDD']=[idate-1+(ind-int(mthresh))/24.0 for ind in range(len(dfout))]
+    pd.set_option('precision',9)
+    iout=0
+    for ind, row in tdf2.iterrows():
+        if ind==0:
+            ddlast=row['DD']
+        if ((dfout.loc[iout]['hDD']-ddlast)<0):
+        # insert NaNs if no data at beginning of cycle
+            nint=int(np.round((ddlast-dfout.loc[iout]['hDD'])*24))
+            for ii in range(0,nint):
+                #dfout.loc[iout,'turbidity']=np.nan
+                iout+=1
+        if (((row['DD']-ddlast)<mthresh/24.0)&((row['DD']-ddlast)>1.5/24.0)):
+        # if a break consists of 4 missing data points or less, linearly interpolate through
+            print('at interp')
+            tlast=tdf2.loc[ind-1]['turbidity']
+            tnext=row['turbidity']
+            ddnext=row['DD']
+            nint=int(np.round((ddnext-ddlast)*24)-1)
+            for ii in range(1,nint+1):
+                dd0=ddlast+ii/24.0
+                tur0=tlast+(dd0-ddlast)/(ddnext-ddlast)*(tnext-tlast)
+                if ((dfout.loc[iout]['hDD']-dd0)<.5/24.0):
+                    dfout.loc[iout,'turbidity']=tur0
+                    iout+=1
+                else:
+                    print('ERROR 2:')
+                    print(dfout.loc[iout]['hDD'],
+                        dd0,dfout.loc[iout]['hDD']-dd0,.5/24.0)
+                    break # how to throw error here?
+        elif ((row['DD']-ddlast)>=mthresh/24.0):
+        # insert NaNs in larger holes
+            nint=int(np.round((row['DD']-ddlast)*24)-1)
+            for ii in range(1,nint+1):
+                dd0=ddlast+ii/24.0
+                if ((dfout.loc[iout]['hDD']-dd0)<.5/24.0):
+                    #dfout.loc[iout,'turbidity']=np.nan
+                    iout+=1
+                else:
+                    print('ERROR 4:')
+                    break
+        # always append current tdf2 row's value
+        if (np.abs(dfout.loc[iout]['hDD']-row['DD'])<.5/24.0):
+            dfout.loc[iout,'turbidity']=row['turbidity']
+            #print('added! iout=',iout,", row['turbidity']=",row['turbidity'])
+        else:
+            print('ERROR 1:')
+            print('iout=',iout,'ind=',ind)
+            print(dfout.loc[iout]['hDD'],row['DD'])
+            break
+        iout+=1
+        ddlast=row['DD']
+    print('dfout',dfout)
+    return dfout
+
+def _calcAvgT(dfout,mthresh):
+    i0=int(mthresh)
+    i1=i0+23
+    dfdata=dfout.loc[i0:i1]
+    if len(dfdata.loc[dfdata['turbidity']>0].values)>19:
+        dfdata2=dfdata.loc[dfdata['turbidity']>0]
+        iTurb=np.mean(dfdata2['turbidity'].values)
+        print(iTurb)
+        print(dfdata2)
+    else:
+        print('Final error!')
+        print(dfout)
+        print('len=', len(dfdata.loc[dfdata['turbidity']>0].values))
+        raise
+    return iTurb
+
+
+def _writeTFile(fname,iTurb,dimTemplate='/results/forcing/rivers/RLonFraCElse_y2016m01d23.nc'):
+    f=nc.Dataset(dimTemplate) # example for dims
+    new=nc.Dataset(fname,'w')
+
+    #Copy dimensions
+    for dname, the_dim in f.dimensions.items():
+        #print (dname, len(the_dim) if not the_dim.isunlimited() else None)
+        new.createDimension(dname, len(the_dim) if not the_dim.isunlimited() else None)
+    # create dimension variables:
+    new_x=new.createVariable('nav_lat',np.float32,('y','x'),zlib=True)
+    new_x[:]=f.variables['nav_lat'][:,:]
+    new_y=new.createVariable('nav_lon',np.float32,('y','x'),zlib=True)
+    new_y[:]=f.variables['nav_lon'][:,:]
+    new_tc=new.createVariable('time_counter',np.float32,('time_counter'),zlib=True)
+    new_tc[:]=f.variables['time_counter']
+    new_run=new.createVariable('turb',float,('time_counter', 'y', 'x'),zlib=True)
+    new_run[:,:,:]=-999.99 # most cells are masked with negative numbers
+    new_run[:,400:448, 338:380]=iTurb # set turbidity to daily average
+
+    new.close()
     return
 
 def _dateTimeToDecDay(dtin):
@@ -139,11 +257,11 @@ def _dateTimeToDecDay(dtin):
 def _pacToUTC(pactime0):
     # input datetime object without tzinfo in Pacific Time and 
     # output datetime object (or np array of them) without tzinfo in UTC
-    print('type(pactime0)    ',type(pactime0))
     pactime=np.array(pactime0,ndmin=1)
     if pactime.ndim>1:
         raise Exception('Error: ndim>1')
     # handle case where array of numpy.datetime64 is input:
+    # this will break if np.datetime64 string format changes
     if isinstance(pactime[0],np.datetime64):
         pactime2=[dt.datetime.strptime(str(d)[:19],"%Y-%m-%dT%H:%M:%S") for d in pactime]
         pactime=np.array(pactime2)
