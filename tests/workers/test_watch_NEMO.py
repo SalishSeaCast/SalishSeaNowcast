@@ -77,7 +77,6 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
-            pid=42,
         )
         watch_NEMO.success(parsed_args)
         assert m_logger.info.called
@@ -93,7 +92,6 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
-            pid=42,
         )
         msg_type = watch_NEMO.success(parsed_args)
         assert msg_type == expected
@@ -114,7 +112,6 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
-            pid=42,
         )
         watch_NEMO.failure(parsed_args)
         assert m_logger.critical.called
@@ -130,7 +127,6 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
-            pid=42,
         )
         msg_type = watch_NEMO.failure(parsed_args)
         assert msg_type == expected
