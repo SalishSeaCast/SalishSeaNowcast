@@ -149,10 +149,9 @@ def upload_forcing(parsed_args, config, *args):
     for day in range(0, 2):
         filename = config['temperature salinity']['file template'].format(
             run_date.replace(days=day).date())
-        dest_dir = '' if day == 0 else 'fcst'
         localpath = Path(
-            config['temperature salinity']['bc dir'], dest_dir, filename)
-        remotepath = Path(host_config['forcing']['bc dir'], dest_dir, filename)
+            config['temperature salinity']['bc dir'], filename)
+        remotepath = Path(host_config['forcing']['bc dir'], filename)
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
         except FileNotFoundError:
