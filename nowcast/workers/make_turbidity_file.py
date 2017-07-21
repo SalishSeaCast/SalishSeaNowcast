@@ -99,24 +99,30 @@ def make_turbidity_file(parsed_args, config, *args):
     idatedt=dt.datetime(run_date.year, run_date.month, run_date.day,19,0,0)
     idateDD=_dateTimeToDecDay(idatedt)
 
-    # Read most recent 24 hours data from turbidity_csv,
-    # or 24 hours for run_datep
-    # mthresh is max # of missing data points to interpolate over (# of hours) + 1.5
+    # Read most recent 24 hours data + extra for itnerpolation from turbidity_csv,
+    # mthresh is max # of missing data points to interpolate over (# of hours) + 1.01
     # to account for difference between last and next hour (1) and rounding errors (.01):
     mthresh=5.01
-    tdf=_loadturb(idateDD,turbidity_csv,mthresh)
-    print('type(tdf) ',type(tdf))
-    itdf=_interpTurb(tdf,idateDD,mthresh)
-    iTurb=_calcAvgT(itdf,mthresh)
-    print('iTurb=',iTurb)
-    # temporary: using wrong file name:
-    fnamebase='/ocean/eolson/MEOPAR/NEMO-forcing/rivers/riverTurbDaily1900_'
-    fname=fnamebase+idatedt.strftime('y%Ym%md%d')+'.nc'
-    _writeTFile(fname,iTurb)
+    try:
+        tdf=_loadturb(idateDD,turbidity_csv,mthresh,ymd)
     
-    #print('turbidity_csv ',turbidity_csv)
-    #print('run_date ',run_date.date)
-    #print('type(run_date) ',type(run_date.date))
+        itdf=_interpTurb(tdf,idateDD,mthresh)
+        iTurb=_calcAvgT(itdf,mthresh,ymd)
+        print('iTurb=',iTurb)
+        # temporary: using wrong file name:
+        fnamebase='/ocean/eolson/MEOPAR/NEMO-forcing/rivers/riverTurbDaily1900_'
+        fname=fnamebase+idatedt.strftime('y%Ym%md%d')+'.nc'
+        _writeTFile(fname,iTurb)
+        # replace with:
+        #dest_dir = Path(config['rivers']['turbidity']['forcing dir'])
+        #file_tmpl = config['rivers']['turbidity']['file template']
+        #nc_filepath = os.fspath(dest_dir / file_tmpl.format(run_date.date()))
+        #_writeTFile(nc_filepath,iTurb)
+    except WorkerError:
+        raise
+    except:
+        logger.warning('unhandled error in make_turbidity_file.py')
+        raise
     # If data read doesn't satisfy coverage criteria
     #     msg = (
     #         f'Insufficient data to create Fraser River turbidity file '
@@ -124,9 +130,6 @@ def make_turbidity_file(parsed_args, config, *args):
     #     logger.warning(msg)
     #     raise WorkerError(msg)
 
-    dest_dir = Path(config['rivers']['turbidity']['forcing dir'])
-    file_tmpl = config['rivers']['turbidity']['file template']
-    nc_filepath = os.fspath(dest_dir / file_tmpl.format(run_date.date()))
 
     # Average data and write netcdf file to nc_filepath
 
@@ -137,7 +140,7 @@ def make_turbidity_file(parsed_args, config, *args):
 
 # Add private functions called by make_turbidity_file() here
 
-def _loadturb(idate,turbidity_csv,mthresh):
+def _loadturb(idate,turbidity_csv,mthresh,ymd):
     # * read file into pandas dataframe
     tdf=pd.read_csv(turbidity_csv,header=0)
     tdf['dtdate']=pd.to_datetime(tdf['# date']+' '+tdf['time'],format='%Y-%m-%d %H:%M:%S')
@@ -150,8 +153,17 @@ def _loadturb(idate,turbidity_csv,mthresh):
     tdf2.index=range(len(tdf2))
     #tdf2=tdf2.drop(tdf2.index[:6])
     #tdf2.index=range(len(tdf2))
-    print("tdf2[['# date','time','DD','turbidity','turbidity_units']]  ",
-          tdf2[['# date','time','DD','turbidity','turbidity_units']])
+    #print("tdf2[['# date','time','DD','turbidity','turbidity_units']]  ",
+    #      tdf2[['# date','time','DD','turbidity','turbidity_units']])
+    if len(tdf2)<5:
+        # data read can't satisfy coverage criteria
+        msg = (
+            f'Insufficient data to proceed to turbidity interpolation; '
+            f'cannot create Fraser River turbidity file '
+            f'for {ymd}')
+        logger.warning(msg)
+        raise WorkerError(msg)
+    logger.debug(f'read turbidity data from {turbidity_csv}')
     return tdf2
 
 def _interpTurb(tdf2,idate,mthresh):
@@ -209,22 +221,23 @@ def _interpTurb(tdf2,idate,mthresh):
         iout+=1
         ddlast=row['DD']
     #print('dfout',dfout)
+    logger.debug(f'interpolated turbidity data')
     return dfout
 
-def _calcAvgT(dfout,mthresh):
+def _calcAvgT(dfout,mthresh,ymd):
     i0=int(mthresh)
     i1=i0+23
     dfdata=dfout.loc[i0:i1]
     if len(dfdata.loc[dfdata['turbidity']>0].values)>19:
         dfdata2=dfdata.loc[dfdata['turbidity']>0]
         iTurb=np.mean(dfdata2['turbidity'].values)
-        print(iTurb)
-        print(dfdata2)
     else:
-        print('Final error!')
-        print(dfout)
-        print('len=', len(dfdata.loc[dfdata['turbidity']>0].values))
-        return None
+        # data read doesn't satisfy coverage criteria
+        msg = (
+            f'Insufficient data after interpolation to create Fraser River turbidity file '
+            f'for {ymd}')
+        logger.warning(msg)
+        raise WorkerError(msg)
     return iTurb
 
 
@@ -248,6 +261,7 @@ def _writeTFile(fname,iTurb,dimTemplate='/results/forcing/rivers/RLonFraCElse_y2
     new_run[:,400:448, 338:380]=iTurb # set turbidity to daily average
 
     new.close()
+    logger.debug(f'wrote file to {fname}')
     return
 
 def _dateTimeToDecDay(dtin):
