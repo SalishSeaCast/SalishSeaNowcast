@@ -411,7 +411,7 @@ run:
           results: /results/SalishSea/nowcast-dev/
       forcing:
         ssh dir: /results/forcing/sshNeahBay/
-        bc dir: /results/forcing/LiveOcean/boundary_conditions/
+        bc dir: /results/forcing/LiveOcean/modified/
         rivers dir: /results/forcing/rivers/
         rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
         rivers_temp.nc: /results/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
