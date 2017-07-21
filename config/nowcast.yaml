@@ -143,6 +143,17 @@ temperature salinity:
   # **Must be quoted to project {} characters**
   file template: 'single_LO_{:y%Ym%md%d}.nc'
 
+n and si:
+  # Files containing fits to T and S
+  n fit: /results/forcing/LiveOcean/boundary_conditions/bio/fits/bioOBCfit_NTS.csv
+  si fit: /results/forcing/LiveOcean/boundary_conditions/bio/fits/bioOBCfit_SiTS.csv
+  # upper ocean climatology files
+  n clim: /results/forcing/LiveOcean/boundary_conditions/bio/fits/nmat.csv
+  si clim: /results/forcing/LiveOcean/boundary_conditions/bio/fits/simat.csv
+  # output directory
+  bc bio dir: /results/forcing/LiveOcean/boundary_conditions/bio
+  # output file name template
+  file template: 'bioLOTS_{:y%Ym%md%d}.nc'
 
 observations:
   # Storage directory for ONC ferry instruments data .mat files
