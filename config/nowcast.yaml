@@ -459,7 +459,7 @@ run:
         hindcast:
           results: /home/sallen/MEOPAR/SalishSea/hindcast/
 
-    bugaboo-hindcast:
+    bugaboo-fs:
       run types:
         hindcast:
           results: /global/scratch/sallen/SalishSea/hindcast/
