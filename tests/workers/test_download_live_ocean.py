@@ -104,5 +104,5 @@ class TestDownloadLiveOcean:
             }
         }
         checklist = download_live_ocean.download_live_ocean(parsed_args, config)
-        expected = {'2016-12-28': [str(m_get_file())]*72}
+        expected = {'2016-12-28': [str(m_get_file())]*73}
         assert checklist == expected

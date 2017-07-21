@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+##TODO: Update docstring when we switch to low_passed_UBC.nc
 """Salish Sea nowcast worker that downloads the University of Washington
 Live Ocean model forecast product for a specified date and extracts from it
 a hyperslab that covers the Salish Sea NEMO model western (Juan de Fuca)
@@ -71,8 +72,7 @@ def failure(parsed_args):
 def download_live_ocean(parsed_args, config, *args):
     yyyymmdd = parsed_args.run_date.format('YYYYMMDD')
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
-    logger.info(
-        f'downloading hourly Live Ocean forecast starting on {ymd}')
+    logger.info(f'downloading hourly Live Ocean forecast starting on {ymd}')
     base_url = config['temperature salinity']['download']['url']
     dir_prefix = config['temperature salinity']['download']['directory prefix']
     filename_tmpl = config['temperature salinity']['download']['file template']
@@ -95,6 +95,14 @@ def download_live_ocean(parsed_args, config, *args):
                 extra={'subdomain_filepath': subdomain_filepath})
             checklist[ymd].append(subdomain_filepath)
             filepath.unlink()
+
+        # Code for transition from hourly to daily files
+        logger.info(f'downloading daily averaged Live Ocean file for {ymd}')
+        ##TODO: Move low_passed_UBC.nc to config file when hourly template goes
+        url = f'{base_url}{dir_prefix}{yyyymmdd}/low_passed_UBC.nc'
+        filepath = _get_file(url, 'low_passed_UBC.nc', dest_dir, session)
+        checklist[ymd].append(str(filepath))
+
     nemo_cmd.api.deflate(
         dest_dir.glob('*.nc'), math.floor(multiprocessing.cpu_count() / 2))
     return checklist
