@@ -208,10 +208,9 @@ def _make_live_ocean_links(
     for day in range(-1, 3):
         filename = config['temperature salinity']['file template'].format(
             run_date.replace(days=day).date())
-        dir = '' if day <= 0 else 'fcst'
-        if day != 2:
-            # if day=2, we use the previous day as source
-            src = Path(host_config['forcing']['bc dir'], dir, filename)
+        if day <= 0:
+            # if day=1 or 2, we use the current day as source
+            src = Path(host_config['forcing']['bc dir'], filename)
         dest = run_prep_dir/'open_boundaries'/'west'/'LiveOcean'/filename
         if shared_storage:
             shutil.copy2(os.fspath(src), os.fspath(dest))

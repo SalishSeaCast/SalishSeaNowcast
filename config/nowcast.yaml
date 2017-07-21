@@ -141,13 +141,13 @@ temperature salinity:
   boundary info: /results/nowcast-sys/NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc
   # Destination directory for hourly temperature and salinity boundary conditions
   # files generated from UW Live Ocean forecast
-  bc dir: /results/forcing/LiveOcean/boundary_conditions
+  bc dir: /results/forcing/LiveOcean/modified
   # Host on which to run make_live_ocean_files worker that requires matlab
   matlab host: salish-nowcast
   # File name template for the hourly temperature and salinity boundary
   # conditions files generated from UW Live Ocean forecast
   # **Must be quoted to project {} characters**
-  file template: 'LO_{:y%Ym%md%d}.nc'
+  file template: 'single_LO_{:y%Ym%md%d}.nc'
 
 
 observations:
