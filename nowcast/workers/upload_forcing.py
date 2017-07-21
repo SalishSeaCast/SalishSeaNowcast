@@ -146,7 +146,7 @@ def upload_forcing(parsed_args, config, *args):
             host_config['forcing']['weather dir'], dest_dir, filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Live Ocean Boundary Conditions
-    for day in range(0, 2):
+    for day in range(0, 1):
         filename = config['temperature salinity']['file template'].format(
             run_date.replace(days=day).date())
         localpath = Path(
