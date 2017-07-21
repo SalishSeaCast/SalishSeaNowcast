@@ -146,6 +146,7 @@ def _loadturb(idate,turbidity_csv,mthresh):
     # * select current 24 hr period + extra for interpolation
     # this will break if np.datetime64 string format changes,type(idate))&tdf['turbidity']>0
     tdf2=tdf.loc[(tdf['DD']>(idate-1.0-mthresh/24))&(tdf['DD']<=(idate+mthresh/24))].copy()
+    tdf2.drop_duplicates(inplace=True)
     tdf2.index=range(len(tdf2))
     #tdf2=tdf2.drop(tdf2.index[:6])
     #tdf2.index=range(len(tdf2))
@@ -207,7 +208,7 @@ def _interpTurb(tdf2,idate,mthresh):
             break
         iout+=1
         ddlast=row['DD']
-    print('dfout',dfout)
+    #print('dfout',dfout)
     return dfout
 
 def _calcAvgT(dfout,mthresh):
@@ -223,7 +224,7 @@ def _calcAvgT(dfout,mthresh):
         print('Final error!')
         print(dfout)
         print('len=', len(dfdata.loc[dfdata['turbidity']>0].values))
-        raise
+        return None
     return iTurb
 
 
