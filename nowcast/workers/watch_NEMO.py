@@ -108,8 +108,8 @@ def watch_NEMO(parsed_args, config, tell_manager):
                 .format('YYYY-MM-DD HH:mm:ss UTC'))
             fraction_done = (time_step - it000) / (itend - it000)
             msg = (
-                '{run_type} on {host_name}: timestep: '
-                '{time_step} = {model_time}, {fraction_done:.1%} complete')
+                f'{run_type} on {host_name}: timestep: '
+                f'{time_step} = {model_time}, {fraction_done:.1%} complete')
         except FileNotFoundError:
             # time.step file not found; assume that run is young and it
             # hasn't been created yet, or has finished and it has been
