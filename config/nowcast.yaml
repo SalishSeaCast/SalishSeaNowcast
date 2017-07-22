@@ -126,25 +126,22 @@ ssh:
 
 temperature salinity:
   download:
-    # URL from which to download UW Live Ocean forecast fields files
+    # URL from which to download UW Live Ocean daily averaged forecast fields file
     url: https://pm2.blob.core.windows.net/
-    # Directory name prefix for UW Live Ocean forecast fields files
+    # Directory name prefix for UW Live Ocean daily averaged forecast fields file
     directory prefix: f
-    # Template for hourly UW Live Ocean fields file name
-    # **Must be quoted to project {} characters**
-    file template: 'ocean_his_{hh:04d}.nc'
-    # Range of forecast hours for which to download UW Live Ocean files
-    hours range: [2, 73]
+    # Template for hourly UW Live Ocean daily averaged forecast file name
+    file name: 'low_passed_UBC.nc'
     # Destination directory for downloaded UW Live Ocean files
     dest dir: /results/forcing/LiveOcean/downloaded
   # File containing western boundary tracer grid points information
   boundary info: /results/nowcast-sys/NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc
-  # Destination directory for hourly temperature and salinity boundary conditions
+  # Destination directory for daily temperature and salinity boundary conditions
   # files generated from UW Live Ocean forecast
   bc dir: /results/forcing/LiveOcean/modified
   # Host on which to run make_live_ocean_files worker that requires matlab
   matlab host: salish-nowcast
-  # File name template for the hourly temperature and salinity boundary
+  # File name template for the daily temperature and salinity boundary
   # conditions files generated from UW Live Ocean forecast
   # **Must be quoted to project {} characters**
   file template: 'single_LO_{:y%Ym%md%d}.nc'
