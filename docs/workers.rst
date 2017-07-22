@@ -167,6 +167,13 @@ Workers
     :members: main
 
 
+:kbd:`watch_ww3`
+-----------------
+
+.. automodule:: nowcast.workers.watch_ww3
+    :members: main
+
+
 :kbd:`download_results`
 -----------------------
 
