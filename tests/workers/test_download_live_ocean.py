@@ -15,6 +15,8 @@
 
 """Unit tests for Salish Sea NEMO nowcast download_live_ocean worker.
 """
+import os
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -88,8 +90,8 @@ class TestDownloadLiveOcean:
     """
     @patch('nowcast.workers.download_live_ocean.lib.mkdir')
     @patch('nowcast.workers.download_live_ocean._get_file')
-    @patch('nowcast.workers.download_live_ocean.salishsea_tools.UBC_subdomain.get_UBC_subdomain')
-    def test_checklist(self, m_gUBCs, m_get_file, m_mkdir):
+    @patch('nowcast.workers.download_live_ocean.nemo_cmd.api.deflate')
+    def test_checklist(self, m_deflate, m_get_file, m_mkdir):
         parsed_args = SimpleNamespace(run_date=arrow.get('2016-12-28'))
         config = {
             'file group': 'foo',
@@ -97,12 +99,14 @@ class TestDownloadLiveOcean:
                 'download': {
                     'url': 'https://pm2.blob.core.windows.net/',
                     'directory prefix': 'f',
-                    'file template': 'ocean_his_{hh:04d}.nc',
-                    'hours range': [2, 73],
+                    'file name': 'low_passed_UBC.nc',
                     'dest dir': '/results/forcing/LiveOcean/downloaded',
                 }
             }
         }
+        m_get_file.return_value = Path(
+            '/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc')
         checklist = download_live_ocean.download_live_ocean(parsed_args, config)
-        expected = {'2016-12-28': [str(m_get_file())]*73}
+        expected = {'2016-12-28':
+            '/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc'}
         assert checklist == expected
