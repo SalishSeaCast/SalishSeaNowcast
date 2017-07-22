@@ -151,7 +151,7 @@ n and si:
   n clim: /results/forcing/LiveOcean/boundary_conditions/bio/fits/nmat.csv
   si clim: /results/forcing/LiveOcean/boundary_conditions/bio/fits/simat.csv
   # output directory
-  bc bio dir: /results/forcing/LiveOcean/boundary_conditions/bio
+  bc bio dir: /results/forcing/LiveOcean/modified/bio
   # output file name template
   file template: 'bioLOTS_{:y%Ym%md%d}.nc'
 

@@ -81,6 +81,19 @@ def make_live_ocean_files(parsed_args, config, *args):
         basename='single_LO',
         bc_dir=str(bc_dir), LO_dir=str(download_dir),
         NEMO_BC=str(boundary_info))
+    
+    # make bio files
+    TSfile = config['temperature and salinity']['file template'].format(parsed_args.run_date.date())
+    checklist = create_LiveOcean_bio_BCs_fromTS(TSfile,strdate=None,
+                    TSdir = bc_dir,
+                    outFile = config['n and si']['file template'],
+                    outDir = config['n and si']['bc bio dir'],
+                    nFitFilePath = config['n and si']['n fit'],
+                    siFitFilePath = config['n and si']['si fit'],
+                    nClimFilePath = config['n and si']['n clim'],
+                    siClimFilePath = config['n and si']['si cli'],
+                    recalcFits=False)
+
     return checklist
 
 
