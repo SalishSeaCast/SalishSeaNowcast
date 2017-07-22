@@ -64,11 +64,12 @@ def after_download_weather(msg, config, checklist):
                 NextWorker(
                     'nowcast.workers.grib_to_netcdf', args=['forecast2']),
             ])
-    if msg.type.endswith('12') and 'nowcast' in config['run types']:
-        next_workers['success 12'] = [
+    if msg.type.endswith('12'):
+        next_workers['success 12'].extend([
             NextWorker('nowcast.workers.get_NeahBay_ssh', args=['nowcast']),
             NextWorker('nowcast.workers.grib_to_netcdf', args=['nowcast+']),
-        ]
+            NextWorker('nowcast.workers.download_live_ocean'),
+        ])
     return next_workers[msg.type]
 
 
