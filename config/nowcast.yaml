@@ -26,9 +26,6 @@ scheduled workers:
       every: day
       at: '10:30'
       cmd line opts: '12'
-  - nowcast.workers.download_live_ocean:
-      every: day
-      at: '13:00'
   - nowcast.workers.download_weather:
       every: day
       at: '17:00'

@@ -135,6 +135,13 @@ class TestAfterDownloadWeather:
             'nowcast.workers.get_onc_ctd', args=[ctd_stn], host='localhost')
         assert expected in workers
 
+    def test_success_12_launch_download_live_ocean(self, config, checklist):
+        workers = next_workers.after_download_weather(
+            Message('download_weather', 'success 12'), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.download_live_ocean', [], host='localhost')
+        assert expected in workers
+
 
 class TestAfterMakeRunoffFile:
     """Unit tests for the after_make_runoff_file function.
