@@ -153,7 +153,7 @@ n and si:
   # output directory
   bc bio dir: /results/forcing/LiveOcean/modified/bio
   # output file name template
-  file template: 'bioLOTS_{:y%Ym%md%d}.nc'
+  file template: 'single_bio_LO_{:y%Ym%md%d}.nc'
 
 observations:
   # Storage directory for ONC ferry instruments data .mat files
