@@ -746,12 +746,41 @@ class TestAfterRunWW3:
         'crash',
         'failure forecast2',
         'failure forecast',
-        'success forecast2',
-        'success forecast',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_run_ww3(
             Message('run_ww3', msg_type), config, checklist)
+        assert workers == []
+
+    @pytest.mark.parametrize('msg_type, host', [
+        ('success forecast2', 'west.cloud'),
+        ('success forecast', 'west.cloud'),
+    ])
+    def test_success_launch_watch_ww3(self, msg_type, host, config, checklist):
+        run_type = msg_type.split()[1]
+        workers = next_workers.after_run_ww3(
+            Message(
+                'run_ww3', msg_type, {run_type: {'host': host}}),
+            config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.watch_ww3', args=[host, run_type], host=host)
+        assert workers[0] == expected
+
+
+class TestAfterWatchWW3:
+    """Unit tests for the after_watch_ww3 function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure forecast2',
+        'failure forecast',
+        'success forecast2',
+        'success forecast',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_watch_ww3(
+            Message('watch_ww3', msg_type), config, checklist)
         assert workers == []
 
 
