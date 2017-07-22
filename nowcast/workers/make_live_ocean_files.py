@@ -77,7 +77,8 @@ def make_live_ocean_files(parsed_args, config, *args):
     bc_dir = Path(config['temperature salinity']['bc dir'])
     boundary_info = Path(config['temperature salinity']['boundary info'])
     checklist = create_LiveOcean_TS_BCs(
-        ymd, ymd, '1H', 'daily', nowcast=True, teos_10=True,
+        ymd, ymd, '1D', 'daily', single_nowcast=True, teos_10=True,
+        basename='single_LO',
         bc_dir=str(bc_dir), LO_dir=str(download_dir),
         NEMO_BC=str(boundary_info))
     return checklist
