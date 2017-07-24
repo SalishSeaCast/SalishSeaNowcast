@@ -103,32 +103,19 @@ def make_turbidity_file(parsed_args, config, *args):
     # mthresh is max # of missing data points to interpolate over (# of hours) + 1.01
     # to account for difference between last and next hour (1) and rounding errors (.01):
     mthresh=5.01
-    try:
-        tdf=_loadturb(idateDD,turbidity_csv,mthresh,ymd)
-    
-        itdf=_interpTurb(tdf,idateDD,mthresh)
-        iTurb=_calcAvgT(itdf,mthresh,ymd)
-        print('iTurb=',iTurb)
-        # temporary: using wrong file name:
-        fnamebase='/ocean/eolson/MEOPAR/NEMO-forcing/rivers/riverTurbDaily1900_'
-        fname=fnamebase+idatedt.strftime('y%Ym%md%d')+'.nc'
-        _writeTFile(fname,iTurb)
-        # replace with:
-        #dest_dir = Path(config['rivers']['turbidity']['forcing dir'])
-        #file_tmpl = config['rivers']['turbidity']['file template']
-        #nc_filepath = os.fspath(dest_dir / file_tmpl.format(run_date.date()))
-        #_writeTFile(nc_filepath,iTurb)
-    except WorkerError:
-        raise
-    except:
-        logger.warning('unhandled error in make_turbidity_file.py')
-        raise
-    # If data read doesn't satisfy coverage criteria
-    #     msg = (
-    #         f'Insufficient data to create Fraser River turbidity file '
-    #         f'for {ymd}')
-    #     logger.warning(msg)
-    #     raise WorkerError(msg)
+    tdf=_loadturb(idateDD,turbidity_csv,mthresh,ymd)
+
+    itdf=_interpTurb(tdf,idateDD,mthresh)
+    iTurb=_calcAvgT(itdf,mthresh,ymd)
+    print('iTurb=',iTurb)
+    # temporary: using wrong file name:
+    #fnamebase='/ocean/eolson/MEOPAR/NEMO-forcing/rivers/riverTurbDaily1900_'
+    #fname=fnamebase+idatedt.strftime('y%Ym%md%d')+'.nc'
+    #_writeTFile(fname,iTurb)
+    dest_dir = Path(config['rivers']['turbidity']['forcing dir'])
+    file_tmpl = config['rivers']['turbidity']['file template']
+    nc_filepath = os.fspath(dest_dir / file_tmpl.format(run_date.date()))
+    _writeTFile(nc_filepath,iTurb)
 
 
     # Average data and write netcdf file to nc_filepath

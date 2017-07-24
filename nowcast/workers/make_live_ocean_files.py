@@ -84,7 +84,7 @@ def make_live_ocean_files(parsed_args, config, *args):
     
     # make bio files
     TSfile = config['temperature and salinity']['file template'].format(parsed_args.run_date.date())
-    checklist = create_LiveOcean_bio_BCs_fromTS(TSfile,strdate=None,
+    checklist2 = create_LiveOcean_bio_BCs_fromTS(TSfile,strdate=None,
                     TSdir = bc_dir,
                     outFile = config['n and si']['file template'],
                     outDir = config['n and si']['bc bio dir'],
@@ -93,7 +93,7 @@ def make_live_ocean_files(parsed_args, config, *args):
                     nClimFilePath = config['n and si']['n clim'],
                     siClimFilePath = config['n and si']['si cli'],
                     recalcFits=False)
-
+    checklist.append(checklist2)
     return checklist
 
 
