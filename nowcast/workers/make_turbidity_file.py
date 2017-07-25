@@ -107,7 +107,6 @@ def make_turbidity_file(parsed_args, config, *args):
 
     itdf=_interpTurb(tdf,idateDD,mthresh)
     iTurb=_calcAvgT(itdf,mthresh,ymd)
-    print('iTurb=',iTurb)
     # temporary: using wrong file name:
     #fnamebase='/ocean/eolson/MEOPAR/NEMO-forcing/rivers/riverTurbDaily1900_'
     #fname=fnamebase+idatedt.strftime('y%Ym%md%d')+'.nc'
@@ -135,7 +134,7 @@ def _loadturb(idate,turbidity_csv,mthresh,ymd):
     #print(tdf[['# date','dtdate','time','DD','turbidity']].head())
     # * select current 24 hr period + extra for interpolation
     # this will break if np.datetime64 string format changes,type(idate))&tdf['turbidity']>0
-    tdf2=tdf.loc[(tdf['DD']>(idate-1.0-mthresh/24))&(tdf['DD']<=(idate+mthresh/24))].copy()
+    tdf2=tdf.loc[(tdf['DD']>(idate-1.0-mthresh/24))&(tdf['DD']<=(idate+mthresh/24))].sort_values('DD').copy()
     tdf2.drop_duplicates(inplace=True)
     tdf2.index=range(len(tdf2))
     #tdf2=tdf2.drop(tdf2.index[:6])
@@ -169,7 +168,6 @@ def _interpTurb(tdf2,idate,mthresh):
                 iout+=1
         if (((row['DD']-ddlast)<mthresh/24.0)&((row['DD']-ddlast)>1.5/24.0)):
         # if a break consists of 4 missing data points or less, linearly interpolate through
-            print('at interp')
             tlast=tdf2.loc[ind-1]['turbidity']
             tnext=row['turbidity']
             ddnext=row['DD']
@@ -207,7 +205,6 @@ def _interpTurb(tdf2,idate,mthresh):
             break
         iout+=1
         ddlast=row['DD']
-    #print('dfout',dfout)
     logger.debug(f'interpolated turbidity data')
     return dfout
 
