@@ -83,7 +83,8 @@ def make_live_ocean_files(parsed_args, config, *args):
         NEMO_BC=str(boundary_info))
 
     # make bio files
-    TSfile = config['temperature salinity']['file template'].format(parsed_args.run_date.date())
+    TSfile = config['temperature salinity']['file template'].\
+                    format(parsed_args.run_date.date())
     checklist2 = create_LiveOcean_bio_BCs_fromTS(TSfile,strdate=None,
                     TSdir = bc_dir,
                     outFile = config['n and si']['file template'],
