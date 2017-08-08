@@ -87,10 +87,9 @@ def make_live_ocean_files(parsed_args, config, *args):
         NEMO_BC=str(boundary_info))
     logger.info(
         'Creating nutrient western boundary conditions file from T&S file')
-    TSfile = config['temperature salinity']['file template'].format(
-        parsed_args.run_date.date())
+    ts_filepath = checklist[0]
     checklist2 = create_LiveOcean_bio_BCs_fromTS(
-        TSfile, TSdir=os.fspath(bc_dir),
+        ts_filepath.name, TSdir=os.fspath(ts_filepath.parent),
         outFile=config['n and si']['file template'],
         outDir=config['n and si']['bc bio dir'],
         nFitFilePath=config['n and si']['n fit'],
