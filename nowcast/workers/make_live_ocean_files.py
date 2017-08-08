@@ -23,7 +23,10 @@ from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
-from salishsea_tools.LiveOcean_BCs import create_LiveOcean_TS_BCs, create_LiveOcean_bio_BCs_fromTS
+from salishsea_tools.LiveOcean_BCs import (
+    create_LiveOcean_TS_BCs,
+    create_LiveOcean_bio_BCs_fromTS,
+)
 
 
 NAME = 'make_live_ocean_files'
@@ -83,17 +86,18 @@ def make_live_ocean_files(parsed_args, config, *args):
         NEMO_BC=str(boundary_info))
 
     # make bio files
-    TSfile = config['temperature salinity']['file template'].\
-                    format(parsed_args.run_date.date())
-    checklist2 = create_LiveOcean_bio_BCs_fromTS(TSfile,strdate=None,
-                    TSdir = bc_dir,
-                    outFile = config['n and si']['file template'],
-                    outDir = config['n and si']['bc bio dir'],
-                    nFitFilePath = config['n and si']['n fit'],
-                    siFitFilePath = config['n and si']['si fit'],
-                    nClimFilePath = config['n and si']['n clim'],
-                    siClimFilePath = config['n and si']['si clim'],
-                    recalcFits=False)
+    TSfile = config['temperature salinity']['file template'].format(
+        parsed_args.run_date.date())
+    checklist2 = create_LiveOcean_bio_BCs_fromTS(
+        TSfile, strdate=None, TSdir=bc_dir,
+        outFile=config['n and si']['file template'],
+        outDir=config['n and si']['bc bio dir'],
+        nFitFilePath=config['n and si']['n fit'],
+        siFitFilePath=config['n and si']['si fit'],
+        nClimFilePath=config['n and si']['n clim'],
+        siClimFilePath=config['n and si']['si clim'],
+        recalcFits=False
+    )
     checklist.append(checklist2)
     return checklist
 
