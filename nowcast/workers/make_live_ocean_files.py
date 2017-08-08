@@ -19,6 +19,7 @@ open boundary from the University of Washington Live Ocean model forecast
 product.
 """
 import logging
+import os
 from pathlib import Path
 
 import arrow
@@ -89,7 +90,7 @@ def make_live_ocean_files(parsed_args, config, *args):
     TSfile = config['temperature salinity']['file template'].format(
         parsed_args.run_date.date())
     checklist2 = create_LiveOcean_bio_BCs_fromTS(
-        TSfile, TSdir=bc_dir,
+        TSfile, TSdir=os.fspath(bc_dir),
         outFile=config['n and si']['file template'],
         outDir=config['n and si']['bc bio dir'],
         nFitFilePath=config['n and si']['n fit'],
