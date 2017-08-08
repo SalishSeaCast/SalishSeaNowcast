@@ -75,7 +75,7 @@ def failure(parsed_args):
 def make_live_ocean_files(parsed_args, config, *args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
-        f'Creating T&S western boundary conditions files from {ymd} Live '
+        f'Creating T&S western boundary conditions file from {ymd} Live '
         f'Ocean run')
     download_dir = Path(config['temperature salinity']['download']['dest dir'])
     bc_dir = Path(config['temperature salinity']['bc dir'])
@@ -85,8 +85,8 @@ def make_live_ocean_files(parsed_args, config, *args):
         basename='single_LO',
         bc_dir=str(bc_dir), LO_dir=str(download_dir),
         NEMO_BC=str(boundary_info))
-
-    # make bio files
+    logger.info(
+        'Creating nutrient western boundary conditions file from T&S file')
     TSfile = config['temperature salinity']['file template'].format(
         parsed_args.run_date.date())
     checklist2 = create_LiveOcean_bio_BCs_fromTS(
