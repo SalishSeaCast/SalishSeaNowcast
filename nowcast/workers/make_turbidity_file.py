@@ -121,7 +121,7 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
     # Read file into pandas dataframe
     tdf = pd.read_csv(turbidity_csv, header=0)
     tdf['dtdate'] = pd.to_datetime(
-        tdf['# date'] + ' ' + tdf['time'], format='%Y-%m-%d %H:%M:%S')
+        f"{tdf['# date']} {tdf['time']}", format='%Y-%m-%d %H:%M:%S')
     tdf['DD'] = [
         _dateTimeToDecDay(jj) for jj in _pacToUTC(tdf['dtdate'].values)]
     # Select current 24 hr period + extra for interpolation
@@ -146,10 +146,10 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
 
 
 def _interpTurb(tdf2, idate, mthresh):
-    dfout = pd.DataFrame(index=range(int(mthresh) * 2 + 24),
-                         columns=('hDD', 'turbidity'))
-    dfout['hDD'] = [idate - 1 + (ind - int(mthresh)) / 24.0 for ind in
-                    range(len(dfout))]
+    dfout = pd.DataFrame(
+        index=range(int(mthresh) * 2 + 24), columns=('hDD', 'turbidity'))
+    dfout['hDD'] = [
+        idate - 1 + (ind - int(mthresh)) / 24.0 for ind in range(len(dfout))]
     pd.set_option('precision', 9)
     iout = 0
     for ind, row in tdf2.iterrows():
@@ -159,7 +159,6 @@ def _interpTurb(tdf2, idate, mthresh):
             # insert NaNs if no data at beginning of cycle
             nint = int(np.round((ddlast - dfout.loc[iout]['hDD']) * 24))
             for ii in range(0, nint):
-                # dfout.loc[iout,'turbidity']=np.nan
                 iout += 1
         if ((row['DD'] - ddlast) < mthresh / 24.0) & ((row['DD'] - ddlast) > 1.5 / 24.0):
             # if a break consists of 4 missing data points or less, linearly
@@ -200,7 +199,7 @@ def _interpTurb(tdf2, idate, mthresh):
             break
         iout += 1
         ddlast = row['DD']
-    logger.debug(f'interpolated turbidity data')
+    logger.debug('interpolated turbidity data')
     return dfout
 
 
