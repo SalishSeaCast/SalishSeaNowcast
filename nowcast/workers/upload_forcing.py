@@ -146,30 +146,29 @@ def upload_forcing(parsed_args, config, *args):
             host_config['forcing']['weather dir'], dest_dir, filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Live Ocean Boundary Conditions
-    for day in range(0, 1):
-        filename = config['temperature salinity']['file template'].format(
-            run_date.replace(days=day).date())
-        localpath = Path(
-            config['temperature salinity']['bc dir'], filename)
-        remotepath = Path(host_config['forcing']['bc dir'], filename)
-        try:
-            _upload_file(sftp_client, host_name, localpath, remotepath)
-        except FileNotFoundError:
-            # boundary condition file does not exist, so create symlink to
-            # persist previous day's file
-            prev_day_fn = (
-                config['temperature salinity']['file template'].format(
-                    run_date.replace(days=day-1).date()))
-            localpath.symlink_to(localpath.with_name(prev_day_fn))
-            logger.warning(
-                f'LiveOcean boundary condition file not found; '
-                f'created symlink to {localpath.with_name(prev_day_fn)}',
-                extra={
-                    'run_type': run_type,
-                    'host_name': host_name,
-                    'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
-                })
-            _upload_file(sftp_client, host_name, localpath, remotepath)
+    filename = config['temperature salinity']['file template'].format(
+        run_date.date())
+    localpath = Path(
+        config['temperature salinity']['bc dir'], filename)
+    remotepath = Path(host_config['forcing']['bc dir'], filename)
+    try:
+        _upload_file(sftp_client, host_name, localpath, remotepath)
+    except FileNotFoundError:
+        # boundary condition file does not exist, so create symlink to
+        # persist previous day's file
+        prev_day_fn = (
+            config['temperature salinity']['file template'].format(
+                run_date.replace(days=-1).date()))
+        localpath.symlink_to(localpath.with_name(prev_day_fn))
+        logger.warning(
+            f'LiveOcean boundary condition file not found; '
+            f'created symlink to {localpath.with_name(prev_day_fn)}',
+            extra={
+                'run_type': run_type,
+                'host_name': host_name,
+                'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
+            })
+        _upload_file(sftp_client, host_name, localpath, remotepath)
     sftp_client.close()
     ssh_client.close()
     checklist = {
