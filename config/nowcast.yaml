@@ -153,7 +153,7 @@ n and si:
   n clim: /results/forcing/LiveOcean/boundary_conditions/bio/fits/nmat.csv
   si clim: /results/forcing/LiveOcean/boundary_conditions/bio/fits/simat.csv
   # output directory
-  bc bio dir: /results/forcing/LiveOcean/modified/bio
+  bc dir: /results/forcing/LiveOcean/modified/bio
   # output file name template
   file template: 'single_bio_LO_{:y%Ym%md%d}.nc'
 
@@ -377,9 +377,12 @@ run:
         # Directory on compute host where Neah Bay sea surface height forcing files
         # are stored
         ssh dir: /nemoShare/MEOPAR/sshNeahBay/
-        # Directory on compute host where hourly temperature and salinity boundary
+        # Directory on compute host where temperature and salinity boundary
         # conditions files generated from UW Live Ocean forecast are stored
         bc dir: /nemoShare/MEOPAR/LiveOcean/
+        # Directory on compute host where nitrate and silicon boundary
+        # conditions files generated from UW Live Ocean forecast are stored
+        bio bc dir: /nemoShare/MEOPAR/LiveOcean/bio/
         # Directory on compute host where rivers runoff forcing files are stored
         rivers dir: /nemoShare/MEOPAR/rivers/
         # Locations on compute host of rivers runoff monthly climatology files
@@ -419,6 +422,7 @@ run:
       forcing:
         ssh dir: /results/forcing/sshNeahBay/
         bc dir: /results/forcing/LiveOcean/modified/
+        bio bc dir: /results/forcing/LiveOcean/modified/bio/
         rivers dir: /results/forcing/rivers/
         rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
         rivers_temp.nc: /results/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc

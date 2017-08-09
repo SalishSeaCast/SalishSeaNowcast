@@ -93,7 +93,7 @@ def make_live_ocean_files(parsed_args, config, *args):
     filepath = create_LiveOcean_bio_BCs_fromTS(
         ts_filepath.name, TSdir=os.fspath(ts_filepath.parent),
         outFile=config['n and si']['file template'],
-        outDir=config['n and si']['bc bio dir'],
+        outDir=config['n and si']['bc dir'],
         nFitFilePath=config['n and si']['n fit'],
         siFitFilePath=config['n and si']['si fit'],
         nClimFilePath=config['n and si']['n clim'],
