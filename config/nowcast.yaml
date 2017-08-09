@@ -699,9 +699,9 @@ message registry:
       crash: download_live_ocean worker crashed
 
     make_live_ocean_files:
-      checklist key: Live Ocean T&S boundary conditions
-      success: Live Ocean T&S boundary conditions files ready
-      failure: Live Ocean T&S boundary conditions files preparation failed
+      checklist key: Live Ocean boundary conditions
+      success: Live Ocean boundary conditions files ready
+      failure: Live Ocean boundary conditions files preparation failed
       crash: make_live_ocean_files worker crashed
 
     upload_forcing:
