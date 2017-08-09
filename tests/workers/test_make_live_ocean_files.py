@@ -98,7 +98,7 @@ class TestMakeLiveOceanFiles:
             },
             'n and si': {
                 'file template': 'LO_bio_{:y%Ym%md%d}.nc',
-                'bc bio dir': 'forcing/LiveOcean/boundary_conditions/bio',
+                'bc dir': 'forcing/LiveOcean/boundary_conditions/bio',
                 'n fit':
                     'forcing/LiveOcean/boundary_conditions/bio/fits/'
                     'bioOBCfit_NTS.csv',
