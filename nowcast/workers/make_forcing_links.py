@@ -202,15 +202,11 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
 def _make_live_ocean_links(
     sftp_client, run_date, config, host_name, shared_storage,
 ):
+    host_config = config['run']['enabled hosts'][host_name]
+    run_prep_dir = Path(host_config['run prep dir'])
+    dest_path = Path('open_boundaries/west/LiveOcean/')
+    _clear_links(sftp_client, run_prep_dir, dest_path)
     for bcs in ('temperature salinity', 'n and si'):
-        host_config = config['run']['enabled hosts'][host_name]
-        run_prep_dir = Path(host_config['run prep dir'])
-        dest_path = (
-            Path('open_boundaries/west/LiveOcean/')
-            if bcs == 'temperature salinity' else
-            Path('open_boundaries/west/LiveOcean/bio/')
-        )
-        _clear_links(sftp_client, run_prep_dir, dest_path)
         for day in range(-1, 3):
             filename = config[bcs]['file template'].format(
                 run_date.replace(days=day).date())
