@@ -146,6 +146,21 @@ def upload_forcing(parsed_args, config, *args):
             host_config['forcing']['weather dir'], dest_dir, filename)
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Live Ocean Boundary Conditions
+    _upload_live_ocean_files(
+        sftp_client, run_type, run_date, config, host_name, host_config)
+    sftp_client.close()
+    ssh_client.close()
+    checklist = {
+        host_name:
+            f'{parsed_args.run_type} '
+            f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+            f'ssh  rivers  weather  boundary conditions'}
+    return checklist
+
+
+def _upload_live_ocean_files(
+    sftp_client, run_type, run_date, config, host_name, host_config
+):
     filename = config['temperature salinity']['file template'].format(
         run_date.date())
     localpath = Path(
@@ -169,13 +184,6 @@ def upload_forcing(parsed_args, config, *args):
                 'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
             })
         _upload_file(sftp_client, host_name, localpath, remotepath)
-    sftp_client.close()
-    ssh_client.close()
-    checklist = {
-        host_name:
-            f'{parsed_args.run_type} '
-            f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh rivers weather'}
-    return checklist
 
 
 def _upload_file(sftp_client, host_name, localpath, remotepath):
