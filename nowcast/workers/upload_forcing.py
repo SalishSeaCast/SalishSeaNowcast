@@ -44,12 +44,14 @@ def main():
     worker.cli.add_argument(
         'host_name', help='Name of the host to upload forcing files to')
     worker.cli.add_argument(
-        'run_type', choices={'nowcast+', 'forecast2', 'ssh'},
+        'run_type', choices={'nowcast+', 'forecast2', 'ssh', 'turbidity'},
         help='''
         Type of run to upload files for:
         'nowcast+' means nowcast & 1st forecast runs,
         'forecast2' means 2nd forecast run,
-        'ssh' means Neah Bay sea surface height files only (for forecast run).
+        'ssh' means Neah Bay sea surface height files only (for forecast run),
+        'turbidity' means Fraser River turbidity file only 
+        (for nowcast-green run).
         ''',
     )
     worker.cli.add_date_option(
@@ -125,8 +127,19 @@ def upload_forcing(parsed_args, config, *args):
                 f'{parsed_args.run_type} '
                 f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh'}
         return checklist
-    # Rivers runoff
-    _upload_river_files(sftp_client, run_date, config, host_name, host_config)
+    # Rivers turbidity and runoff
+    if run_type == 'turbidity':
+        _upload_fraser_turbidity_file(
+            sftp_client, run_date, config, host_name, host_config)
+        sftp_client.close()
+        ssh_client.close()
+        checklist = {
+            host_name:
+                f'{parsed_args.run_type} '
+                f'{parsed_args.run_date.format("YYYY-MM-DD")} turbidity'}
+        return checklist
+    _upload_river_runoff_files(
+        sftp_client, run_date, config, host_name, host_config)
     # Weather
     if run_type == 'nowcast+':
         weather_start = 0
@@ -154,7 +167,19 @@ def upload_forcing(parsed_args, config, *args):
     return checklist
 
 
-def _upload_river_files(sftp_client, run_date, config, host_name, host_config):
+def _upload_fraser_turbidity_file(
+    sftp_client, run_date, config, host_name, host_config
+):
+    filename_tmpl = config['rivers']['turbidity']['file template']
+    filename = filename_tmpl.format(run_date.date())
+    localpath = Path(config['rivers']['turbidity']['forcing dir'], filename)
+    remotepath = Path(host_config['forcing']['Fraser turbidity dir'], filename)
+    _upload_file(sftp_client, host_name, localpath, remotepath)
+
+
+def _upload_river_runoff_files(
+    sftp_client, run_date, config, host_name, host_config
+):
     for tmpl in config['rivers']['file templates'].values():
         filename = tmpl.format(run_date.replace(days=-1).date())
         localpath = Path(config['rivers']['rivers dir'], filename)

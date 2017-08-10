@@ -44,7 +44,8 @@ class TestMain:
         upload_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        assert kwargs['choices'] == {'nowcast+', 'forecast2', 'ssh'}
+        assert kwargs['choices'] == {
+            'nowcast+', 'forecast2', 'ssh', 'turbidity'}
         assert 'help' in kwargs
 
     def test_add_run_date_arg(self, m_worker):
@@ -72,6 +73,7 @@ class TestSuccess:
         'nowcast+',
         'forecast2',
         'ssh',
+        'turbidity',
     ])
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -84,6 +86,7 @@ class TestSuccess:
         'nowcast+',
         'forecast2',
         'ssh',
+        'turbidity',
     ])
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -101,6 +104,7 @@ class TestFailure:
         'nowcast+',
         'forecast2',
         'ssh',
+        'turbidity',
     ])
     def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -113,6 +117,7 @@ class TestFailure:
         'nowcast+',
         'forecast2',
         'ssh',
+        'turbidity',
     ])
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
