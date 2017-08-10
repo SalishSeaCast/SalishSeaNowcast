@@ -302,6 +302,30 @@ class TestAfterMakeLiveOceanFiles:
         assert workers == []
 
 
+class TestAfterMakeTurbidityFile:
+    """Unit tests for the after_make_turbidity_file function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_turbidity_file(
+            Message('make_turbidity_file', msg_type), config, checklist)
+        assert workers == []
+
+    def test_success_launch_make_forcing_links(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_make_turbidity_file(
+            Message('make_turbidity_file', 'success'), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['west.cloud', 'nowcast-green'], host='localhost')
+        assert expected in workers
+
+
 class TestAfterUploadForcing:
     """Unit tests for the after_upload_forcing function.
     """
@@ -465,21 +489,21 @@ class TestAfterWatchNEMO:
             args=['forecast'], host='localhost')
         assert workers[0] == expected
 
-    def test_success_forecast_launch_make_forcing_links_nowcast_green(
+    def test_success_forecast_launch_make_turbidity_file(
         self, config, checklist,
     ):
         workers = next_workers.after_watch_NEMO(
             Message(
                 'watch_NEMO', 'success forecast', {
                     'forecast': {
-                        'host': 'west.cloud', 'run date': '2017-01-29',
+                        'host': 'west.cloud', 'run date': '2017-08-10',
                         'completed': True,
                     }
                 }),
             config, checklist)
         expected = NextWorker(
-            'nowcast.workers.make_forcing_links',
-            args=['west.cloud', 'nowcast-green'], host='localhost')
+            'nowcast.workers.make_turbidity_file',
+            args=['--run-date', '2017-08-10'], host='localhost')
         assert workers[0] == expected
 
     def test_success_forecast_launch_make_ww3_wind_file_forecast(

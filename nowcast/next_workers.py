@@ -279,6 +279,40 @@ def after_make_live_ocean_files(msg, config, checklist):
     }
     return next_workers[msg.type]
 
+def after_make_turbidity_file(msg, config, checklist):
+    """Calculate the list of workers to launch after the make_turbidity_file
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure': [],
+        'success': [],
+    }
+    if msg.type == 'success':
+        for host in config['run']['enabled hosts']:
+            host_run_types = config['run']['enabled hosts'][host]['run types']
+            if 'nowcast-green' in host_run_types:
+                next_workers['success'].append(
+                    NextWorker(
+                        'nowcast.workers.make_forcing_links',
+                        args=[host, 'nowcast-green'])
+                )
+    return next_workers[msg.type]
+
 
 def after_upload_forcing(msg, config, checklist):
     """Calculate the list of workers to launch after the upload_forcing worker
@@ -478,8 +512,8 @@ def after_watch_NEMO(msg, config, checklist):
             else:
                 next_workers['success forecast'].append(
                     NextWorker(
-                        'nowcast.workers.make_forcing_links',
-                        args=[msg.payload[run_type]['host'], 'nowcast-green']))
+                        'nowcast.workers.make_turbidity_file',
+                        args=['--run-date', msg.payload[run_type]['run date']]))
         if run_type == 'nowcast-green':
             if wave_forecast_after == 'nowcast-green':
                 host_name = config['wave forecasts']['host']

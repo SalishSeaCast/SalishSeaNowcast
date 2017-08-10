@@ -99,10 +99,8 @@ rivers:
   turbidity:
     # File containing hourly real-time Fraser River water quality buoy turbidity data
     ECget Fraser turbidity: /results/observations/ECCC/fraser_buoy.csv
-    #fraser_buoy.csv
-    #replacement_data.csv
     # Destination directory for Fraser River turbidity forcing file
-    forcing dir: /results/forcing/rivers/river_turb/test/
+    forcing dir: /results/forcing/rivers/river_turb/
     # Template for the turbidity forcing file names
     # **Must be quoted to project {} characters**
     file template: 'riverTurbDaily2_{:y%Ym%md%d}.nc'
