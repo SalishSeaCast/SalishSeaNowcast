@@ -28,15 +28,15 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.7922914"
+     inkscape:zoom="0.52183744"
      inkscape:cx="498.33086"
      inkscape:cy="576.80792"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="1920"
-     inkscape:window-height="1056"
-     inkscape:window-x="1920"
+     inkscape:window-width="1366"
+     inkscape:window-height="744"
+     inkscape:window-x="0"
      inkscape:window-y="24"
      inkscape:window-maximized="1"
      fit-margin-top="0"
@@ -52,7 +52,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -149,6 +149,39 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(139.20066,-62.974215)">
+    <g
+       id="g4836">
+      <g
+         id="g4828">
+        <path
+           style="display:inline;fill:none;stroke:#000000;stroke-width:1.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           d="m 238.63304,439.89532 82.60713,84.0812"
+           id="path4802"
+           inkscape:connector-curvature="0" />
+        <path
+           sodipodi:nodetypes="ccccc"
+           inkscape:connector-curvature="0"
+           id="path4804"
+           d="m 134.21058,332.97208 9.89902,22.27563 0.80622,-10.6577 10.21464,0.50265 z"
+           style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+        <path
+           inkscape:connector-curvature="0"
+           id="path4806"
+           d="m 144.91534,344.59045 83.38786,85.42374"
+           style="display:inline;fill:none;stroke:#000000;stroke-width:1.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      </g>
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="197.97377"
+         y="438.60132"
+         id="text4812"><tspan
+           sodipodi:role="line"
+           id="tspan4810"
+           x="197.97377"
+           y="438.60132"
+           style="font-size:12.5px;line-height:1.25;font-family:sans-serif">forecast run</tspan></text>
+    </g>
     <g
        id="g3659"
        transform="translate(-188.53336)">
@@ -380,31 +413,31 @@
            sodipodi:role="line">Concurrent</tspan></text>
     </g>
     <g
-       id="g5147">
+       id="g4863">
       <text
          xml:space="preserve"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans';letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          x="-138.39906"
-         y="289.02454"
+         y="255.27454"
          id="text8678"><tspan
            sodipodi:role="line"
            x="-138.39906"
-           y="289.02454"
+           y="255.27454"
            id="tspan8682"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;line-height:1.25;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans';fill:#000000;fill-opacity:1;stroke:none;stroke-opacity:1">Preparation</tspan><tspan
            id="tspan7954"
            sodipodi:role="line"
            x="-138.39906"
-           y="314.02454"
+           y="280.27454"
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:20px;line-height:1.25;font-family:'DejaVu Sans';-inkscape-font-specification:'DejaVu Sans';fill:#000000;fill-opacity:1;stroke:none;stroke-opacity:1">  (Linux server)</tspan></text>
       <path
          inkscape:connector-curvature="0"
          id="path9276"
-         d="m -135.93617,296.35358 v 127.6572 h 40.305077"
+         d="m -135.93617,286.3946 v 137.61616 h 40.305077"
          style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <path
-         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:1.99999988;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         d="M -135.93617,265.89731 V 64.097331 h 40.305077"
+         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M -135.93617,234.90705 V 64.097331 h 40.305077"
          id="path6040"
          inkscape:connector-curvature="0" />
     </g>
@@ -760,21 +793,20 @@
            sodipodi:role="line">salishsea.eos.ubc.ca/nemo/results</tspan></text>
     </g>
     <g
-       id="g4312"
-       transform="translate(-71.624997,86.293601)">
+       id="g4799">
       <text
          xml:space="preserve"
          style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="227.03746"
-         y="696.86212"
+         x="155.41246"
+         y="783.1557"
          id="text4413"><tspan
            sodipodi:role="line"
            id="tspan4415"
-           x="227.03746"
-           y="696.86212"
+           x="155.41246"
+           y="783.1557"
            style="font-size:12.5px;line-height:1.25;font-family:sans-serif">nowcast* runs</tspan></text>
       <g
-         transform="translate(0,8.0000004)"
+         transform="translate(-71.624997,94.293601)"
          id="g4475">
         <path
            inkscape:connector-curvature="0"
@@ -1483,6 +1515,63 @@
              id="tspan13324"
              style="font-size:15px;line-height:1.25">make_live_ocean_files</tspan></text>
       </g>
+    </g>
+    <g
+       id="g4779"
+       transform="translate(-43.125002)">
+      <rect
+         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#41c300;fill-opacity:1;fill-rule:nonzero;stroke:#2a80b8;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.47843137;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
+         id="rect4757"
+         width="189.03337"
+         height="38.775974"
+         x="38.688919"
+         y="294.06183" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="133.00766"
+         y="317.19983"
+         id="text4761"><tspan
+           style="font-size:15px;line-height:1.25"
+           sodipodi:role="line"
+           x="133.00766"
+           y="317.19983"
+           id="tspan4759">make_turbidity_file</tspan></text>
+    </g>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="234.27356"
+       y="309.93726"
+       id="text4789"><tspan
+         sodipodi:role="line"
+         id="tspan4787"
+         x="234.27356"
+         y="309.93726"
+         style="font-size:12.5px;line-height:1.25;font-family:sans-serif;text-align:center;text-anchor:middle">nowcast-green</tspan><tspan
+         sodipodi:role="line"
+         x="234.27356"
+         y="325.56226"
+         style="font-size:12.5px;line-height:1.25;font-family:sans-serif;text-align:center;text-anchor:middle"
+         id="tspan4791">run</tspan></text>
+    <g
+       id="g4851">
+      <path
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 273.40759,319.44177 H 247.9128"
+         id="path4838"
+         inkscape:connector-curvature="0" />
+      <path
+         sodipodi:nodetypes="ccccc"
+         inkscape:connector-curvature="0"
+         id="path4840"
+         d="m 282.25842,319.11604 -23.15845,-7.60791 7.36104,7.7493 -7.22693,7.23623 z"
+         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         inkscape:connector-curvature="0"
+         id="path4846"
+         d="M 220.25483,319.44177 H 184.59729"
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
   </g>
 </svg>
