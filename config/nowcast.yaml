@@ -389,6 +389,9 @@ run:
         # Directory on compute host where the rivers runoff daily tracers
         # climatology files are stored
         rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
+        # Directory on compute host where the Fraser River turbidity forcing
+        # files are stored
+        Fraser turbidity dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/river_turb/
         # Directory on compute host where atmospheric forcing files are stored
         weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
         # Location on compute host of no_snow.nc constraint file
@@ -714,6 +717,8 @@ message registry:
       failure forecast2: forcing files for forecast2 upload failed
       success ssh: sea surface height forcing files for forecast uploaded
       failure ssh: sea surface height forcing files for forecast upload failed
+      success turbidity: Fraser River turbidity forcing files for nowcast-green uploaded
+      failure turbidity: Fraser River turbidity forcing files for nowcast-green upload failed
       crash: upload_forcing worker crashed
 
     make_forcing_links:
