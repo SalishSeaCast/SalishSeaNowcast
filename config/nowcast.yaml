@@ -391,7 +391,7 @@ run:
         rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
         # Directory on compute host where the Fraser River turbidity forcing
         # files are stored
-        Fraser turbidity dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/river_turb/
+        Fraser turbidity dir: /nemoShare/MEOPAR/rivers/river_turb/
         # Directory on compute host where atmospheric forcing files are stored
         weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
         # Location on compute host of no_snow.nc constraint file
