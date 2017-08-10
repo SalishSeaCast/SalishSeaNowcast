@@ -126,11 +126,7 @@ def upload_forcing(parsed_args, config, *args):
                 f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh'}
         return checklist
     # Rivers runoff
-    for tmpl in config['rivers']['file templates'].values():
-        filename = tmpl.format(run_date.replace(days=-1).date())
-        localpath = Path(config['rivers']['rivers dir'], filename)
-        remotepath = Path(host_config['forcing']['rivers dir'], filename)
-        _upload_file(sftp_client, host_name, localpath, remotepath)
+    _upload_river_files(sftp_client, run_date, config, host_name, host_config)
     # Weather
     if run_type == 'nowcast+':
         weather_start = 0
@@ -156,6 +152,14 @@ def upload_forcing(parsed_args, config, *args):
             f'{parsed_args.run_date.format("YYYY-MM-DD")} '
             f'ssh  rivers  weather  boundary conditions'}
     return checklist
+
+
+def _upload_river_files(sftp_client, run_date, config, host_name, host_config):
+    for tmpl in config['rivers']['file templates'].values():
+        filename = tmpl.format(run_date.replace(days=-1).date())
+        localpath = Path(config['rivers']['rivers dir'], filename)
+        remotepath = Path(host_config['forcing']['rivers dir'], filename)
+        _upload_file(sftp_client, host_name, localpath, remotepath)
 
 
 def _upload_live_ocean_files(
