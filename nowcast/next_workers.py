@@ -308,8 +308,8 @@ def after_make_turbidity_file(msg, config, checklist):
             if 'nowcast-green' in host_run_types:
                 next_workers['success'].append(
                     NextWorker(
-                        'nowcast.workers.make_forcing_links',
-                        args=[host, 'nowcast-green'])
+                        'nowcast.workers.upload_forcing',
+                        args=[host, 'turbidity'])
                 )
     return next_workers[msg.type]
 
@@ -337,9 +337,11 @@ def after_upload_forcing(msg, config, checklist):
         'failure nowcast+': [],
         'failure forecast2': [],
         'failure ssh': [],
+        'failure turbidity': [],
         'success nowcast+': [],
         'success forecast2': [],
         'success ssh': [],
+        'success turbidity': [],
     }
     try:
         host_name = list(msg.payload.keys())[0]
@@ -352,6 +354,7 @@ def after_upload_forcing(msg, config, checklist):
         ('nowcast', 'nowcast+'),
         ('forecast', 'ssh'),
         ('forecast2', 'forecast2'),
+        ('nowcast-green', 'turbidity'),
     ]
     for run_type, links_run_type in run_types:
         if run_type in config['run types']:
@@ -360,6 +363,12 @@ def after_upload_forcing(msg, config, checklist):
                     'nowcast.workers.make_forcing_links',
                     args=[host_name, links_run_type]),
             ]
+            if links_run_type == 'turbidity':
+                next_workers[f'success {links_run_type}'] = [
+                    NextWorker(
+                        'nowcast.workers.make_forcing_links',
+                        args=[host_name, 'nowcast-green']),
+                ]
     return next_workers[msg.type]
 
 

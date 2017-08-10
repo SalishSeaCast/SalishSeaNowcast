@@ -321,8 +321,8 @@ class TestAfterMakeTurbidityFile:
         workers = next_workers.after_make_turbidity_file(
             Message('make_turbidity_file', 'success'), config, checklist)
         expected = NextWorker(
-            'nowcast.workers.make_forcing_links',
-            args=['west.cloud', 'nowcast-green'], host='localhost')
+            'nowcast.workers.upload_forcing',
+            args=['west.cloud', 'turbidity'], host='localhost')
         assert expected in workers
 
 
@@ -335,8 +335,7 @@ class TestAfterUploadForcing:
         'failure nowcast+',
         'failure forecast2',
         'failure ssh',
-        'success forecast2',
-        'success ssh',
+        'failure turbidity',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_upload_forcing(
@@ -353,7 +352,7 @@ class TestAfterUploadForcing:
         'ssh',
         'forecast2',
     ])
-    def test_success_launch_make_forcing_link(
+    def test_success_launch_make_forcing_links(
         self, run_type, config, checklist,
     ):
         workers = next_workers.after_upload_forcing(
@@ -364,6 +363,19 @@ class TestAfterUploadForcing:
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
             args=['west.cloud', run_type], host='localhost')
+        assert expected in workers
+
+    def test_success_turbidity_launch_make_forcing_links_nowcast_green(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_upload_forcing(
+            Message(
+                'upload_forcing', 'success turbidity',
+                {'west.cloud': '2017-08-10 turbidity'}),
+            config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['west.cloud', 'nowcast-green'], host='localhost')
         assert expected in workers
 
 
