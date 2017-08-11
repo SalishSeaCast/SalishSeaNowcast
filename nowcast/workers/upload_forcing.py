@@ -174,7 +174,22 @@ def _upload_fraser_turbidity_file(
     filename = filename_tmpl.format(run_date.date())
     localpath = Path(config['rivers']['turbidity']['forcing dir'], filename)
     remotepath = Path(host_config['forcing']['Fraser turbidity dir'], filename)
-    _upload_file(sftp_client, host_name, localpath, remotepath)
+    try:
+        _upload_file(sftp_client, host_name, localpath, remotepath)
+    except FileNotFoundError:
+        # turbidity file does not exist, so create symlink to persist
+        # previous day's file
+        prev_day_fn = filename_tmpl.format(run_date.replace(days=-1).date())
+        localpath.symlink_to(localpath.with_name(prev_day_fn))
+        logger.critical(
+            f'Fraser River turbidity forcing file not found; '
+            f'created symlink to {localpath.with_name(prev_day_fn)}',
+            extra={
+                'run_type': 'turbidity',
+                'host_name': host_name,
+                'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
+            })
+        _upload_file(sftp_client, host_name, localpath, remotepath)
 
 
 def _upload_river_runoff_files(
