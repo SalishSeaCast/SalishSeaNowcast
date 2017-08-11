@@ -121,7 +121,7 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
     # Read file into pandas dataframe
     tdf = pd.read_csv(turbidity_csv, header=0)
     tdf['dtdate'] = pd.to_datetime(
-        f"{tdf['# date']} {tdf['time']}", format='%Y-%m-%d %H:%M:%S')
+        tdf['# date'] + ' ' + tdf['time'], format='%Y-%m-%d %H:%M:%S')
     tdf['DD'] = [
         _dateTimeToDecDay(jj) for jj in _pacToUTC(tdf['dtdate'].values)]
     # Select current 24 hr period + extra for interpolation
