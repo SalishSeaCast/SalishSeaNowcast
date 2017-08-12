@@ -114,7 +114,7 @@ def make_forcing_links(parsed_args, config, *args):
                     f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh',
                 'run date': parsed_args.run_date.format('YYYY-MM-DD')}}
         return checklist
-    _make_runoff_links(sftp_client, run_date, config, host_name)
+    _make_runoff_links(sftp_client, run_type, run_date, config, host_name)
     _make_weather_links(sftp_client, run_date, config, host_name, run_type)
     _make_live_ocean_links(
         sftp_client, run_date, config, host_name, shared_storage)
@@ -150,7 +150,7 @@ def _make_NeahBay_ssh_links(
             _create_symlink(sftp_client, host_name, src, dest)
 
 
-def _make_runoff_links(sftp_client, run_date, config, host_name):
+def _make_runoff_links(sftp_client, run_type, run_date, config, host_name):
     host_config = config['run']['enabled hosts'][host_name]
     run_prep_dir = Path(host_config['run prep dir'])
     _clear_links(sftp_client, run_prep_dir, 'rivers/')
@@ -174,6 +174,14 @@ def _make_runoff_links(sftp_client, run_date, config, host_name):
             filename = tmpl.format(run_date.replace(days=day).date())
             dest = run_prep_dir / 'rivers' / filename
             _create_symlink(sftp_client, host_name, src, dest)
+    if run_type == 'nowcast-green':
+        src = Path(
+            host_config['forcing']['Fraser turbidity dir'],
+            config['rivers']['turbidity']['file template'].format(
+                run_date.date())
+        )
+        dest = run_prep_dir / 'rivers' / src.name
+        _create_symlink(sftp_client, host_name, src, dest)
 
 
 def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
