@@ -267,8 +267,12 @@ def _run_description(
                 'namelist filename': 'namelist_cfg',
             }
         },
-        'open_boundaries': {
-            'link to': os.fspath((run_prep_dir/'open_boundaries/').resolve())},
+        'ssh': {
+            'link to': os.fspath((run_prep_dir/'ssh/').resolve())},
+        'tides': {
+            'link to': os.fspath((run_prep_dir/'tides/').resolve())},
+        'tracers': {
+            'link to': os.fspath((run_prep_dir/'tracers/').resolve())},
         'rivers': {
             'link to': os.fspath((run_prep_dir/'rivers/').resolve())},
     }
