@@ -861,7 +861,6 @@ class TestBuildScript:
         RESULTS_DIR="{results_dir}"
         MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"
         COMBINE="bin/salishsea combine"
-        DEFLATE="bin/salishsea deflate"
         GATHER="bin/salishsea gather"
 
         mkdir -p ${{RESULTS_DIR}}
@@ -944,7 +943,6 @@ class TestBuildScript:
         RESULTS_DIR="{results_dir}/13may17"
         MPIRUN="mpirun"
         COMBINE="bin/salishsea combine"
-        DEFLATE="bin/salishsea deflate"
         GATHER="bin/salishsea gather"
 
         mkdir -p ${{RESULTS_DIR}}
@@ -1006,7 +1004,6 @@ class TestDefinitions:
         RESULTS_DIR="results_dir"
         MPIRUN="mpirun"
         COMBINE="bin/salishsea combine"
-        DEFLATE="bin/salishsea deflate"
         GATHER="bin/salishsea gather"
         '''
         expected = expected.splitlines()
@@ -1035,7 +1032,6 @@ class TestDefinitions:
         RESULTS_DIR="results_dir"
         MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
         COMBINE="bin/salishsea combine"
-        DEFLATE="bin/salishsea deflate"
         GATHER="bin/salishsea gather"
         '''
         expected = expected.splitlines()
