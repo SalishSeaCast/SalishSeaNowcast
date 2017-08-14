@@ -401,7 +401,6 @@ def _definitions(
         'RESULTS_DIR="{results_dir}"\n'
         'MPIRUN="{mpirun}"\n'
         'COMBINE="{salishsea_cmd} combine"\n'
-        'DEFLATE="{salishsea_cmd} deflate"\n'
         'GATHER="{salishsea_cmd} gather"\n'
     ).format(
         run_id=run_desc['run_id'],
@@ -410,7 +409,6 @@ def _definitions(
         results_dir=results_dir,
         mpirun=mpirun,
         salishsea_cmd=host_config['salishsea_cmd'],
-        gather_opts='--delete-restart' if run_type == 'forecast2' else '',
     )
     return defns
 
