@@ -137,13 +137,13 @@ def _make_NeahBay_ssh_links(
 ):
     host_config = config['run']['enabled hosts'][host_name]
     run_prep_dir = Path(host_config['run prep dir'])
-    _clear_links(sftp_client, run_prep_dir, 'open_boundaries/west/ssh/')
+    _clear_links(sftp_client, run_prep_dir, 'ssh')
     for day in range(-1, 3):
         filename = config['ssh']['file template'].format(
             run_date.replace(days=day).date())
         dir = 'obs' if day == -1 else 'fcst'
         src = Path(host_config['forcing']['ssh dir'], dir, filename)
-        dest = run_prep_dir / 'open_boundaries' / 'west' / 'ssh' / filename
+        dest = run_prep_dir / 'ssh' / filename
         if shared_storage:
             shutil.copy2(os.fspath(src), os.fspath(dest))
         else:

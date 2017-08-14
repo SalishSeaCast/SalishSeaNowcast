@@ -602,7 +602,13 @@ class TestRunDescription:
 
     @pytest.mark.parametrize('host_name, run_type, link_name, expected', [
         ('west.cloud', 'nowcast', 'NEMO-atmos', 'NEMO-atmos'),
-        ('west.cloud', 'forecast', 'open_boundaries', 'open_boundaries'),
+        ('west.cloud', 'nowcast', 'ssh', 'ssh'),
+        ('west.cloud', 'nowcast', 'tides', 'tides'),
+        ('west.cloud', 'nowcast', 'tracers', 'tracers'),
+        ('west.cloud', 'nowcast', 'rivers', 'rivers'),
+        ('west.cloud', 'forecast', 'NEMO-atmos', 'NEMO-atmos'),
+        ('west.cloud', 'nowcast-green', 'tracers', 'tracers'),
+        ('salish-nowcast', 'nowcast-dev', 'tides', 'tides'),
         ('west.cloud', 'forecast2', 'rivers', 'rivers'),
     ])
     def test_forcing_links(

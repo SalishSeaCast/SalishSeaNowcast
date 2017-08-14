@@ -86,8 +86,8 @@ rivers:
   rivers dir: /results/forcing/rivers/
   # Monthly climatology
   monthly climatology:
-    long: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
-    b201702: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_201702.nc
+    long: /results/nowcast-sys/rivers/rivers_month_extended.nc
+    b201702: /results/nowcast-sys/rivers/rivers_month_201702.nc
   # Templates for the runoff forcing file names
   # **Must be quoted to project {} characters**
   file templates:
@@ -132,7 +132,7 @@ temperature salinity:
     # Destination directory for downloaded UW Live Ocean files
     dest dir: /results/forcing/LiveOcean/downloaded
   # File containing western boundary tracer grid points information
-  boundary info: /results/nowcast-sys/NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc
+  boundary info: /results/nowcast-sys/tracers/west/SalishSea_west_TEOS10.nc
   # Destination directory for daily temperature and salinity boundary conditions
   # files generated from UW Live Ocean forecast
   bc dir: /results/forcing/LiveOcean/modified
@@ -384,11 +384,11 @@ run:
         # Directory on compute host where rivers runoff forcing files are stored
         rivers dir: /nemoShare/MEOPAR/rivers/
         # Locations on compute host of rivers runoff monthly climatology files
-        rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
-        rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
+        rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_month_extended.nc
+        rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/river_ConsTemp_month.nc
         # Directory on compute host where the rivers runoff daily tracers
         # climatology files are stored
-        rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
+        rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/rivers/bio_climatology/
         # Directory on compute host where the Fraser River turbidity forcing
         # files are stored
         Fraser turbidity dir: /nemoShare/MEOPAR/rivers/river_turb/
@@ -425,9 +425,9 @@ run:
         bc dir: /results/forcing/LiveOcean/modified/
         bio bc dir: /results/forcing/LiveOcean/modified/bio/
         rivers dir: /results/forcing/rivers/
-        rivers_month.nc: /results/nowcast-sys/NEMO-forcing/rivers/rivers_month_extended.nc
-        rivers_temp.nc: /results/nowcast-sys/NEMO-forcing/rivers/river_ConsTemp_month.nc
-        rivers bio dir: /results/nowcast-sys/NEMO-forcing/rivers/bio_climatology/
+        rivers_month.nc: /results/nowcast-sys/rivers/rivers_month_extended.nc
+        rivers_temp.nc: /results/nowcast-sys/rivers/river_ConsTemp_month.nc
+        rivers bio dir: /results/nowcast-sys/rivers/bio_climatology/
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
         no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
         weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
@@ -449,8 +449,8 @@ run:
 #        ssh dir: /home/sallen/MEOPAR/sshNeahBay/
 #        bc dir: /home/sallen/MEOPAR/LiveOcean/
 #        rivers dir: /home/sallen/MEOPAR/rivers/
-#        rivers_month.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/rivers_month_extended.nc
-#        rivers_temp.nc: /home/sallen/MEOPAR/NEMO-forcing/rivers/river_ConsTemp_month.nc
+#        rivers_month.nc: /home/sallen/MEOPAR/rivers/rivers_month_extended.nc
+#        rivers_temp.nc: /home/sallen/MEOPAR/rivers/river_ConsTemp_month.nc
 #        weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
 #        no_snow.nc: /home/sallen/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
 #        weights: /home/sallen/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc

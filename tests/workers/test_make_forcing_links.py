@@ -160,8 +160,7 @@ class TestMakeRunoffLinks:
                     'run prep dir': 'runs/',
                     'forcing': {
                         'rivers dir': '/results/forcing/rivers/',
-                        'rivers_month.nc':
-                            'NEMO-forcing/rivers/rivers_month.nc',
+                        'rivers_month.nc': 'rivers/rivers_month.nc',
                         'Fraser turbidity dir':
                             '/results/forcing/rivers/river_turb/',
     },
@@ -200,7 +199,7 @@ class TestMakeRunoffLinks:
             m_sftp_client, run_type, run_date, self.config, 'salish-nowcast')
         assert m_create_symlink.call_args_list[0] == call(
             m_sftp_client, 'salish-nowcast',
-            Path('NEMO-forcing/rivers/rivers_month.nc'),
+            Path('rivers/rivers_month.nc'),
             Path('runs/rivers/rivers_month.nc'))
 
     @pytest.mark.parametrize('run_type', [
@@ -215,8 +214,8 @@ class TestMakeRunoffLinks:
             self.config['run']['enabled hosts']['salish-nowcast']['forcing'],
             {
                 'rivers dir': '/results/forcing/rivers/',
-                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-                'rivers_temp.nc': 'NEMO-forcing/rivers/river_ConsTemp_month.nc',
+                'rivers_month.nc': 'rivers/rivers_month.nc',
+                'rivers_temp.nc': 'rivers/river_ConsTemp_month.nc',
             })
         with p_config:
             make_forcing_links._make_runoff_links(
@@ -224,7 +223,7 @@ class TestMakeRunoffLinks:
                 'salish-nowcast')
         assert m_create_symlink.call_args_list[1] == call(
             m_sftp_client, 'salish-nowcast',
-            Path('NEMO-forcing/rivers/river_ConsTemp_month.nc'),
+            Path('rivers/river_ConsTemp_month.nc'),
             Path('runs/rivers/river_ConsTemp_month.nc'))
 
     @pytest.mark.parametrize('run_type', [
@@ -239,9 +238,9 @@ class TestMakeRunoffLinks:
             self.config['run']['enabled hosts']['salish-nowcast']['forcing'],
             {
                 'rivers dir': '/results/forcing/rivers/',
-                'rivers_month.nc': 'NEMO-forcing/rivers/rivers_month.nc',
-                'rivers_temp.nc': 'NEMO-forcing/rivers/river_ConsTemp_month.nc',
-                'rivers bio dir': 'NEMO-forcing/rivers/bio_climatology/',
+                'rivers_month.nc': 'rivers/rivers_month.nc',
+                'rivers_temp.nc': 'rivers/river_ConsTemp_month.nc',
+                'rivers bio dir': 'rivers/bio_climatology/',
             })
         with p_config:
             make_forcing_links._make_runoff_links(
@@ -249,7 +248,7 @@ class TestMakeRunoffLinks:
                 'salish-nowcast')
         assert m_create_symlink.call_args_list[2] == call(
             m_sftp_client, 'salish-nowcast',
-            Path('NEMO-forcing/rivers/bio_climatology/'),
+            Path('rivers/bio_climatology/'),
             Path('runs/rivers/bio_climatology'))
 
     @pytest.mark.parametrize('run_type', [
