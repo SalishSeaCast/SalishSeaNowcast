@@ -609,6 +609,7 @@ class TestRunDescription:
         ('west.cloud', 'forecast', 'NEMO-atmos', 'NEMO-atmos'),
         ('west.cloud', 'nowcast-green', 'tracers', 'tracers'),
         ('salish-nowcast', 'nowcast-dev', 'tides', 'tides'),
+        ('salish-nowcast', 'nowcast-dev', 'LiveOcean', 'LiveOcean'),
         ('west.cloud', 'forecast2', 'rivers', 'rivers'),
     ])
     def test_forcing_links(

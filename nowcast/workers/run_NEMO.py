@@ -273,6 +273,8 @@ def _run_description(
             'link to': os.fspath((run_prep_dir/'tides/').resolve())},
         'tracers': {
             'link to': os.fspath((run_prep_dir/'tracers/').resolve())},
+        'LiveOcean': {
+            'link to': os.fspath((run_prep_dir/'LiveOcean/').resolve())},
         'rivers': {
             'link to': os.fspath((run_prep_dir/'rivers/').resolve())},
     }
