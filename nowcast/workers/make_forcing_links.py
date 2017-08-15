@@ -212,7 +212,7 @@ def _make_live_ocean_links(
 ):
     host_config = config['run']['enabled hosts'][host_name]
     run_prep_dir = Path(host_config['run prep dir'])
-    dest_path = Path('open_boundaries/west/LiveOcean/')
+    dest_path = Path('LiveOcean')
     _clear_links(sftp_client, run_prep_dir, dest_path)
     for bcs in ('temperature salinity', 'n and si'):
         for day in range(-1, 3):
