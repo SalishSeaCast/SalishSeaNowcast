@@ -333,8 +333,11 @@ def _run_description(
         'hg': [
             os.fspath((run_prep_dir/'../NEMO-Cmd').resolve()),
             os.fspath((run_prep_dir/'../NEMO_Nowcast').resolve()),
+            os.fspath((run_prep_dir/'../rivers').resolve()),
             os.fspath((run_prep_dir/'../SalishSeaCmd').resolve()),
             os.fspath((run_prep_dir/'../SS-run-sets').resolve()),
+            os.fspath((run_prep_dir/'../tides').resolve()),
+            os.fspath((run_prep_dir/'../tracers').resolve()),
             os.fspath((run_prep_dir/'../tools').resolve()),
             os.fspath((run_prep_dir/'../XIOS-ARCH').resolve()),
         ]
