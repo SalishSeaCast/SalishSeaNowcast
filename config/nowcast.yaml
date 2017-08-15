@@ -388,7 +388,7 @@ run:
         rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_ConsTemp_month.nc
         # Directory on compute host where the rivers runoff daily tracers
         # climatology files are stored
-        rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/rivers/bio_climatology/
+        rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/rivers/bio/
         # Directory on compute host where the Fraser River turbidity forcing
         # files are stored
         Fraser turbidity dir: /nemoShare/MEOPAR/rivers/river_turb/
@@ -427,7 +427,7 @@ run:
         rivers dir: /results/forcing/rivers/
         rivers_month.nc: /results/nowcast-sys/rivers/rivers_month_extended.nc
         rivers_temp.nc: /results/nowcast-sys/rivers/rivers_ConsTemp_month.nc
-        rivers bio dir: /results/nowcast-sys/rivers/bio_climatology/
+        rivers bio dir: /results/nowcast-sys/rivers/bio/
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
         no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
         weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
