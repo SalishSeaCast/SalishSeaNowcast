@@ -385,7 +385,7 @@ run:
         rivers dir: /nemoShare/MEOPAR/rivers/
         # Locations on compute host of rivers runoff monthly climatology files
         rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_month_extended.nc
-        rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/river_ConsTemp_month.nc
+        rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_ConsTemp_month.nc
         # Directory on compute host where the rivers runoff daily tracers
         # climatology files are stored
         rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/rivers/bio_climatology/
@@ -426,7 +426,7 @@ run:
         bio bc dir: /results/forcing/LiveOcean/modified/bio/
         rivers dir: /results/forcing/rivers/
         rivers_month.nc: /results/nowcast-sys/rivers/rivers_month_extended.nc
-        rivers_temp.nc: /results/nowcast-sys/rivers/river_ConsTemp_month.nc
+        rivers_temp.nc: /results/nowcast-sys/rivers/rivers_ConsTemp_month.nc
         rivers bio dir: /results/nowcast-sys/rivers/bio_climatology/
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
         no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
@@ -450,7 +450,7 @@ run:
 #        bc dir: /home/sallen/MEOPAR/LiveOcean/
 #        rivers dir: /home/sallen/MEOPAR/rivers/
 #        rivers_month.nc: /home/sallen/MEOPAR/rivers/rivers_month_extended.nc
-#        rivers_temp.nc: /home/sallen/MEOPAR/rivers/river_ConsTemp_month.nc
+#        rivers_temp.nc: /home/sallen/MEOPAR/rivers/rivers_ConsTemp_month.nc
 #        weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
 #        no_snow.nc: /home/sallen/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
 #        weights: /home/sallen/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
