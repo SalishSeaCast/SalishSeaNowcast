@@ -240,7 +240,7 @@ class TestMakeRunoffLinks:
                 'rivers dir': '/results/forcing/rivers/',
                 'rivers_month.nc': 'rivers/rivers_month.nc',
                 'rivers_temp.nc': 'rivers/river_ConsTemp_month.nc',
-                'rivers bio dir': 'rivers/bio_climatology/',
+                'rivers bio dir': 'rivers/bio/',
             })
         with p_config:
             make_forcing_links._make_runoff_links(
@@ -248,8 +248,7 @@ class TestMakeRunoffLinks:
                 'salish-nowcast')
         assert m_create_symlink.call_args_list[2] == call(
             m_sftp_client, 'salish-nowcast',
-            Path('rivers/bio_climatology/'),
-            Path('runs/rivers/bio_climatology'))
+            Path('rivers/bio/'), Path('runs/rivers/bio'))
 
     @pytest.mark.parametrize('run_type', [
         'nowcast+',

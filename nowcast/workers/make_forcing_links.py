@@ -163,7 +163,7 @@ def _make_runoff_links(sftp_client, run_type, run_date, config, host_name):
         _create_symlink(sftp_client, host_name, src, dest)
     if 'rivers bio dir' in host_config['forcing']:
         src = Path(host_config['forcing']['rivers bio dir'])
-        dest = run_prep_dir / 'rivers' / 'bio_climatology'
+        dest = run_prep_dir / 'rivers' / 'bio'
         _create_symlink(sftp_client, host_name, src, dest)
     for tmpl in config['rivers']['file templates'].values():
         src = Path(
