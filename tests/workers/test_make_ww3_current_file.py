@@ -47,7 +47,7 @@ def config():
         },
         'wave forecasts': {
             'run prep dir': '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs',
-            'grid dir': 'NEMO-forcing/grid/',
+            'grid dir': 'grid/',
             'current file template': 'SoG_current_{yyyymmdd}.nc',
             'NEMO file template':
                 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
@@ -205,8 +205,7 @@ class TestMakeWW3CurrentFile:
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
         make_ww3_current_file.make_ww3_current_file(parsed_args, config)
-        m_open_dataset.assert_called_once_with(
-            'NEMO-forcing/grid/mesh_mask_downbyone2.nc')
+        m_open_dataset.assert_called_once_with('grid/mesh_mask_downbyone2.nc')
 
     @pytest.mark.parametrize('run_type', [
         'forecast2',

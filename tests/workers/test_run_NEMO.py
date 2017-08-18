@@ -162,8 +162,7 @@ def tmp_results(tmpdir, run_date, scope='function'):
         tmp_namelists.ensure('namelist.{}'.format(s))
     tmp_namelists.ensure('namelist_top_cfg')
     tmp_namelists.ensure('namelist_pisces_cfg')
-    for dir in ('XIOS', 'NEMO-forcing'):
-        tmp_run_prep.ensure_dir('..', dir)
+    tmp_run_prep.ensure_dir('..', 'XIOS-2')
     tmp_run_prep.ensure_dir('..', 'NEMO-3.6-code', 'NEMOGCM', 'CONFIG')
     tmp_run_prep.ensure('iodef.xml')
     tmp_run_prep.ensure(
@@ -475,7 +474,6 @@ class TestRunDescription:
     @pytest.mark.parametrize('run_type, path, expected', [
         ('nowcast', 'NEMO code config', 'NEMO-3.6-code/NEMOGCM/CONFIG'),
         ('nowcast-green', 'XIOS', 'XIOS-2'),
-        ('forecast', 'forcing', 'NEMO-forcing'),
     ])
     def test_paths(
         self, run_type, path, expected, config, run_date, tmp_results, tmpdir,
@@ -493,6 +491,7 @@ class TestRunDescription:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, 'west.cloud', config)
         assert run_desc['paths'][path] == tmp_run_prep.join('..', expected)
+        assert run_desc['paths']['forcing'] == tmp_run_prep
 
     @pytest.mark.parametrize('host_name, run_type, path', [
         ('west.cloud', 'nowcast', 'runs directory'),

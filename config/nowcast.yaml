@@ -108,7 +108,7 @@ rivers:
 
 ssh:
   # Directory in which to find coordinates file
-  grid dir: /results/nowcast-sys/NEMO-forcing/grid/
+  grid dir: /results/nowcast-sys/grid/
   # Directory containing tidal predication file for sea surface height correction
   tidal predictions: /results/nowcast-sys/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
@@ -272,7 +272,7 @@ erddap:
 
 figures:
   # Directory in which to find bathymetry and mesh mask files
-  grid dir: /results/nowcast-sys/NEMO-forcing/grid/
+  grid dir: /results/nowcast-sys/grid/
   # Pacific Now-West coastline polygons file
   coastline: /ocean/rich/more/mmapbase/bcgeo/PNW.mat
   # Timezone to use in model results figures
@@ -343,7 +343,7 @@ run:
       run prep dir: /nemoShare/MEOPAR/nowcast-sys/runs
       # Directory in which to find coordinates, bathymetry, mesh mask,
       # and land processor elimination files
-      grid dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/
+      grid dir: /nemoShare/MEOPAR/nowcast-sys/grid/
       # Path to the salishsea command processor executable to use in the run
       # script
       salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
@@ -395,10 +395,10 @@ run:
         # Directory on compute host where atmospheric forcing files are stored
         weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
         # Location on compute host of no_snow.nc constraint file
-        no_snow.nc: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
+        no_snow.nc: /nemoShare/MEOPAR/nowcast-sys/grid/no_snow.nc
         # Location on compute host of NEMO on-the-fly interpolation weights file
         # for GEM 2.5km operational forecast
-        weights: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
+        weights: /nemoShare/MEOPAR/nowcast-sys/grid/weights-gem2.5-ops.nc
 
     salish-nowcast:
       shared storage: True
@@ -489,7 +489,7 @@ wave forecasts:
   # are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
   # Directory in which to find mesh mask file
-  grid dir: /nemoShare/MEOPAR/nowcast-sys/NEMO-forcing/grid/
+  grid dir: /nemoShare/MEOPAR/nowcast-sys/grid/
   # Template for wind forcing file names
   # **Must be quoted to project {} characters**
   wind file template: 'SoG_wind_{yyyymmdd}.nc'
