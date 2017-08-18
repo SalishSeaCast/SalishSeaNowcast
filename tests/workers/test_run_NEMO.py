@@ -71,7 +71,7 @@ def config(scope='function'):
                 'west.cloud': {
                     'mpi hosts file': '${HOME}/mpi_hosts',
                     'run prep dir': 'nowcast-sys/runs/',
-                    'grid dir': 'nowcast-sys/NEMO-forcing/grid/',
+                    'grid dir': 'nowcast-sys/grid/',
                     'salishsea_cmd': 'bin/salishsea',
                     'job exec cmd': 'bash',
                     'run types': {
@@ -103,7 +103,7 @@ def config(scope='function'):
                 },
                 'salish-nowcast': {
                     'run prep dir': 'nowcast-sys/runs/',
-                    'grid dir': 'nowcast-sys/NEMO-forcing/grid/',
+                    'grid dir': 'nowcast-sys/grid/',
                     'salishsea_cmd': 'bin/salishsea',
                     'job exec cmd': 'qsub',
                     'email': 'somebody@example.com',
@@ -520,15 +520,15 @@ class TestRunDescription:
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
         ('west.cloud', 'nowcast',
-            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
         ('west.cloud', 'nowcast-green',
-            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
         ('salish-nowcast', 'nowcast-dev',
-            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
         ('west.cloud', 'forecast',
-            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
         ('west.cloud', 'forecast2',
-            'nowcast-sys/NEMO-forcing/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
     ])
     def test_grid_coordinates(
         self, host_name, run_type, expected, config, run_date, tmp_results,
@@ -548,16 +548,13 @@ class TestRunDescription:
         assert run_desc['grid']['coordinates'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
-        ('west.cloud', 'nowcast',
-            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
+        ('west.cloud', 'nowcast', 'nowcast-sys/grid/bathy_downonegrid2.nc'),
         ('west.cloud', 'nowcast-green',
-            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
+            'nowcast-sys/grid/bathy_downonegrid2.nc'),
         ('salish-nowcast', 'nowcast-dev',
-            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
-        ('west.cloud', 'forecast',
-            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
-        ('west.cloud', 'forecast2',
-            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.nc'),
+            'nowcast-sys/grid/bathy_downonegrid2.nc'),
+        ('west.cloud', 'forecast', 'nowcast-sys/grid/bathy_downonegrid2.nc'),
+        ('west.cloud', 'forecast2', 'nowcast-sys/grid/bathy_downonegrid2.nc'),
     ])
     def test_grid_bathymetry(
         self, host_name, run_type, expected, config, run_date, tmp_results,
@@ -577,10 +574,9 @@ class TestRunDescription:
         assert run_desc['grid']['bathymetry'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
-        ('west.cloud', 'nowcast',
-            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv'),
+        ('west.cloud', 'nowcast', 'nowcast-sys/grid/bathy_downonegrid2.csv'),
         ('west.cloud', 'nowcast-green',
-            'nowcast-sys/NEMO-forcing/grid/bathy_downonegrid2.csv'),
+            'nowcast-sys/grid/bathy_downonegrid2.csv'),
         ('salish-nowcast', 'nowcast-dev', False),
     ])
     def test_grid_land_processor_elimination(
@@ -800,6 +796,7 @@ class TestRunDescription:
             run_desc = run_NEMO._run_description(
                 run_date, 'nowcast', run_id, 2160, 'west.cloud', config)
         assert run_desc['vcs revisions']['hg'] == [
+            str(tmp_run_prep.join('..', 'grid')),
             str(tmp_run_prep.join('..', 'NEMO-Cmd')),
             str(tmp_run_prep.join('..', 'NEMO_Nowcast')),
             str(tmp_run_prep.join('..', 'rivers')),

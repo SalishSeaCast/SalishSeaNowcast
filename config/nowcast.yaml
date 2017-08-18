@@ -407,7 +407,7 @@ run:
       python: /results/nowcast-sys/nowcast-env/bin/python
       config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       run prep dir: /results/nowcast-sys/runs/
-      grid dir: /results/nowcast-sys/NEMO-forcing/grid/
+      grid dir: /results/nowcast-sys/grid/
       salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
       job exec cmd: qsub
       # Optional email address to which to send notifications of the beginning
@@ -429,8 +429,8 @@ run:
         rivers_temp.nc: /results/nowcast-sys/rivers/rivers_ConsTemp_month.nc
         rivers bio dir: /results/nowcast-sys/rivers/bio/
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
-        no_snow.nc: /results/nowcast-sys/NEMO-forcing/atmospheric/no_snow.nc
-        weights: /results/nowcast-sys/NEMO-forcing/grid/weights-gem2.5-ops.nc
+        no_snow.nc: /results/nowcast-sys/grid/no_snow.nc
+        weights: /results/nowcast-sys/grid/weights-gem2.5-ops.nc
 
 #    orcinus-nowcast:
 #      shared storage: False
@@ -452,8 +452,8 @@ run:
 #        rivers_month.nc: /home/sallen/MEOPAR/rivers/rivers_month_extended.nc
 #        rivers_temp.nc: /home/sallen/MEOPAR/rivers/rivers_ConsTemp_month.nc
 #        weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
-#        no_snow.nc: /home/sallen/MEOPAR/NEMO-forcing/atmospheric/no_snow.nc
-#        weights: /home/sallen/MEOPAR/NEMO-forcing/grid/weights-gem2.5-ops.nc
+#        no_snow.nc: /home/sallen/MEOPAR/grid/no_snow.nc
+#        weights: /home/sallen/MEOPAR/grid/weights-gem2.5-ops.nc
 
   download hosts:
     # HPC Compute host name where runs are executed manually but download_results
