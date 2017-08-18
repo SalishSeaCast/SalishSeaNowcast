@@ -36,7 +36,7 @@ scheduled workers:
       cmd line opts: '00'
 
 
-coordinates: coordinates_seagrid_SalishSea.nc
+coordinates: coordinates_seagrid_SalishSea2.nc
 
 
 weather:
