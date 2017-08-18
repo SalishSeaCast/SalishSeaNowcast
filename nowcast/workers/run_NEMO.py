@@ -333,6 +333,7 @@ def _run_description(
             (run_sets_dir/'file_def.xml').resolve())
     run_desc['vcs revisions'] = {
         'hg': [
+            os.fspath((run_prep_dir/'../grid').resolve()),
             os.fspath((run_prep_dir/'../NEMO-Cmd').resolve()),
             os.fspath((run_prep_dir/'../NEMO_Nowcast').resolve()),
             os.fspath((run_prep_dir/'../rivers').resolve()),
