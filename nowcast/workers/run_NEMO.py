@@ -313,7 +313,7 @@ def _run_description(
     )
     grid_dir = Path(host_config['grid dir'])
     run_desc['grid']['coordinates'] = os.fspath(
-        grid_dir / config['coordinates'])
+        grid_dir / config['run types'][run_type]['coordinates'])
     run_desc['grid']['bathymetry'] = os.fspath(
         grid_dir / config['run types'][run_type]['bathymetry'])
     lpe_filename = config['run types'][run_type]['land processor elimination']
