@@ -105,6 +105,10 @@ def config(scope='function'):
                             'results': 'results/SalishSea/nowcast-green/',
                         },
                     },
+                    'forcing': {
+                        'bottom friction mask':
+                            '/grid/jetty_mask_bathy201702.nc',
+                    },
                 },
                 'salish-nowcast': {
                     'run prep dir': 'nowcast-sys/runs/',
@@ -120,6 +124,10 @@ def config(scope='function'):
                             'walltime': '23:30:00',
                             'results': 'results/SalishSea/nowcast-dev',
                         },
+                    },
+                    'forcing': {
+                        'bottom friction mask':
+                            '/grid/jetty_mask_bathy201702.nc',
                     },
                 },
             },
@@ -630,6 +638,31 @@ class TestRunDescription:
                 run_date, run_type, run_id, 2160, host_name, config)
         expected = tmp_run_prep.join(expected)
         assert run_desc['forcing'][link_name]['link to'] == expected
+
+    @pytest.mark.parametrize('host_name, run_type', [
+        ('west.cloud', 'nowcast'),
+        ('west.cloud', 'forecast'),
+        ('west.cloud', 'nowcast-green'),
+        ('salish-nowcast', 'nowcast-dev'),
+        ('west.cloud', 'forecast2'),
+    ])
+    def test_bottom_friction_mask_link(
+        self, host_name, run_type, config, run_date, tmp_results, tmpdir
+    ):
+        dmy = run_date.format('DDMMMYY').lower()
+        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
+        host_config = config['run']['enabled hosts'][host_name]
+        p_config_results = patch.dict(
+            host_config['run types'][run_type],
+            results=str(tmp_results['results'][run_type]))
+        tmp_run_prep = tmp_results['run prep dir']
+        p_config_run_prep = patch.dict(
+            host_config, {'run prep dir': str(tmp_run_prep)})
+        with p_config_results, p_config_run_prep:
+            run_desc = run_NEMO._run_description(
+                run_date, run_type, run_id, 2160, host_name, config)
+        expected = '/grid/jetty_mask_bathy201702.nc'
+        assert run_desc['forcing']['bfr_coef.nc']['link to'] == expected
 
     @pytest.mark.parametrize('host_name, run_type, link_name, expected', [
         ('west.cloud', 'nowcast', 'restart.nc',
