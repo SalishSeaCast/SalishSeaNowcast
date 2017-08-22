@@ -37,30 +37,35 @@ def config(scope='function'):
         'run types': {
             'nowcast': {
                 'config name': 'SalishSea',
+                'coordinates': 'coordinates_seagrid_SalishSea2.nc',
                 'bathymetry': 'bathy_downonegrid2.nc',
                 'mesh_mask': 'mesh_mask_downbyone2.nc',
                 'land processor elimination': 'bathy_downonegrid2.csv',
                 'duration': 1},
             'nowcast-dev': {
                 'config name': 'SalishSea',
-                'bathymetry': 'bathy_downonegrid2.nc',
-                'mesh_mask': 'mesh_mask_downbyone2.nc',
-                'land processor elimination': 'bathy_downonegrid2.csv',
+                'coordinates': 'coordinates_seagrid_SalishSea201702.nc',
+                'bathymetry': 'bathymetry_201702.nc',
+                'mesh_mask': 'mesh_mask201702.nc',
+                'land processor elimination': 'bathymetry_201702.csv',
                 'duration': 1},
             'nowcast-green': {
                 'config name': 'SOG',
+                'coordinates': 'coordinates_seagrid_SalishSea2.nc',
                 'bathymetry': 'bathy_downonegrid2.nc',
                 'mesh_mask': 'mesh_mask_downbyone2.nc',
                 'land processor elimination': 'bathy_downonegrid2.csv',
                 'duration': 1},
             'forecast': {
                 'config name': 'SalishSea',
+                'coordinates': 'coordinates_seagrid_SalishSea2.nc',
                 'bathymetry': 'bathy_downonegrid2.nc',
                 'mesh_mask': 'mesh_mask_downbyone2.nc',
                 'land processor elimination': 'bathy_downonegrid2.csv',
                 'duration': 1.5},
             'forecast2': {
                 'config name': 'SalishSea',
+                'coordinates': 'coordinates_seagrid_SalishSea2.nc',
                 'bathymetry': 'bathy_downonegrid2.nc',
                 'mesh_mask': 'mesh_mask_downbyone2.nc',
                 'land processor elimination': 'bathy_downonegrid2.csv',
@@ -519,15 +524,15 @@ class TestRunDescription:
 
     @pytest.mark.parametrize('host_name, run_type, expected', [
         ('west.cloud', 'nowcast',
-            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc'),
         ('west.cloud', 'nowcast-green',
-            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc'),
         ('salish-nowcast', 'nowcast-dev',
-            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc'),
         ('west.cloud', 'forecast',
-            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc'),
         ('west.cloud', 'forecast2',
-            'nowcast-sys/grid/coordinates_seagrid_SalishSea.nc'),
+            'nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc'),
     ])
     def test_grid_coordinates(
         self, host_name, run_type, expected, config, run_date, tmp_results,
@@ -551,7 +556,7 @@ class TestRunDescription:
         ('west.cloud', 'nowcast-green',
             'nowcast-sys/grid/bathy_downonegrid2.nc'),
         ('salish-nowcast', 'nowcast-dev',
-            'nowcast-sys/grid/bathy_downonegrid2.nc'),
+            'nowcast-sys/grid/bathymetry_201702.nc'),
         ('west.cloud', 'forecast', 'nowcast-sys/grid/bathy_downonegrid2.nc'),
         ('west.cloud', 'forecast2', 'nowcast-sys/grid/bathy_downonegrid2.nc'),
     ])

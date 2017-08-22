@@ -181,30 +181,35 @@ run types:
   # and forecast2 requires a forecast to have been completed.
   nowcast:
     config name: SalishSea
+    coordinates: coordinates_seagrid_SalishSea2.nc
     bathymetry: bathy_downonegrid2.nc
     mesh mask: mesh_mask_downbyone2.nc
     land processor elimination: bathy_downonegrid2.csv
     duration: 1  # day
   nowcast-dev:
     config name: SalishSea
+    coordinates: coordinates_seagrid_SalishSea2.nc
     bathymetry: bathy_downonegrid2.nc
     mesh mask: mesh_mask_downbyone2.nc
     land processor elimination: bathy_downonegrid2.csv
     duration: 1  # day
   nowcast-green:
     config name:  SOG
+    coordinates: coordinates_seagrid_SalishSea2.nc
     bathymetry: bathy_downonegrid2.nc
     mesh mask: mesh_mask_downbyone2.nc
     land processor elimination: bathy_downonegrid2.csv
     duration: 1  # day
   forecast:
     config name:  SalishSea
+    coordinates: coordinates_seagrid_SalishSea2.nc
     bathymetry: bathy_downonegrid2.nc
     mesh mask: mesh_mask_downbyone2.nc
     land processor elimination: bathy_downonegrid2.csv
     duration: 1.5  # days
   forecast2:
     config name:  SalishSea
+    coordinates: coordinates_seagrid_SalishSea2.nc
     bathymetry: bathy_downonegrid2.nc
     mesh mask: mesh_mask_downbyone2.nc
     land processor elimination: bathy_downonegrid2.csv
