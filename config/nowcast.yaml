@@ -184,10 +184,10 @@ run types:
     duration: 1  # day
   nowcast-dev:
     config name: SalishSea
-    coordinates: coordinates_seagrid_SalishSea2.nc
-    bathymetry: bathy_downonegrid2.nc
-    mesh mask: mesh_mask_downbyone2.nc
-    land processor elimination: bathy_downonegrid2.csv
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
+    land processor elimination: bathymetry_201702.csv
     duration: 1  # day
   nowcast-green:
     config name:  SOG
@@ -417,7 +417,7 @@ run:
       email: sallen@eos.ubc.ca
       run types:
         nowcast-dev:
-          run sets dir: /results/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-dev/
+          run sets dir: /results/nowcast-sys/SS-run-sets/v201702/nowcast-dev/
           mpi decomposition: 1x7
           walltime: 23:30:00
           results: /results/SalishSea/nowcast-dev/
@@ -426,12 +426,12 @@ run:
         bc dir: /results/forcing/LiveOcean/modified/
         bio bc dir: /results/forcing/LiveOcean/modified/bio/
         rivers dir: /results/forcing/rivers/
-        rivers_month.nc: /results/nowcast-sys/rivers/rivers_month_extended.nc
+        rivers_month.nc: /results/nowcast-sys/rivers/rivers_month_201702.nc
         rivers_temp.nc: /results/nowcast-sys/rivers/rivers_ConsTemp_month.nc
         rivers bio dir: /results/nowcast-sys/rivers/bio/
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
         no_snow.nc: /results/nowcast-sys/grid/no_snow.nc
-        weights: /results/nowcast-sys/grid/weights-gem2.5-ops.nc
+        weights: /results/nowcast-sys/grid/weights-gem2.5-ops_201702.nc
 
 #    orcinus-nowcast:
 #      shared storage: False
