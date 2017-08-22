@@ -95,8 +95,8 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     storm surge website.
     """
     run_type = parsed_args.run_type
-    grid_dir = Path(config['ssh']['grid dir'])
-    with nc.Dataset(os.fspath(grid_dir / config['coordinates'])) as coordinates:
+    coords = Path(config['ssh']['coordinates'])
+    with nc.Dataset(os.fspath(coords)) as coordinates:
         lats = coordinates.variables['nav_lat'][:]
         lons = coordinates.variables['nav_lon'][:]
     logger.debug(

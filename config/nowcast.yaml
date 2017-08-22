@@ -35,10 +35,6 @@ scheduled workers:
       at: '23:00'
       cmd line opts: '00'
 
-
-coordinates: coordinates_seagrid_SalishSea2.nc
-
-
 weather:
   download:
     # URL from which to download ECCC HRDPS west domain forecast fields files
@@ -107,8 +103,8 @@ rivers:
 
 
 ssh:
-  # Directory in which to find coordinates file
-  grid dir: /results/nowcast-sys/grid/
+  # Coordinates file to get lats/lons from
+  coordinates: /results/nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc
   # Directory containing tidal predication file for sea surface height correction
   tidal predictions: /results/nowcast-sys/SalishSeaNowcast/tidal_predictions/
   # Destination directory for Neah Bay sea surface height open boundary files
