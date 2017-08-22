@@ -100,7 +100,7 @@ def get_NeahBay_ssh(parsed_args, config, *args):
         lats = coordinates.variables['nav_lat'][:]
         lons = coordinates.variables['nav_lon'][:]
     logger.debug(
-        f'loaded lats & lons from {config["coordinates"]}',
+        f'loaded lats & lons from {coords}',
         extra={'run_type': run_type})
     # Scrape the surge data from the website into a text file,
     # store the file in the run results directory,
