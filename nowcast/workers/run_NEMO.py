@@ -258,7 +258,7 @@ def _run_description(
                 .resolve())
         )
     run_prep_dir = Path(host_config['run prep dir'])
-    NEMO_config_name = config['run types'][run_type]['config name']
+    bottom_friction_mask = Path(host_config['forcing']['bottom friction mask'])
     forcing = {
         'NEMO-atmos': {
             'link to': os.fspath((run_prep_dir/'NEMO-atmos').resolve()),
@@ -279,6 +279,8 @@ def _run_description(
             'link to': os.fspath((run_prep_dir/'open_boundaries/').resolve())},
         'rivers': {
             'link to': os.fspath((run_prep_dir/'rivers/').resolve())},
+        'bfr_coef.nc': {
+            'link to': os.fspath(bottom_friction_mask)},
     }
     run_sets_dir = Path(host_config['run types'][run_type]['run sets dir'])
     namelists = {
@@ -296,9 +298,10 @@ def _run_description(
         for namelist in ('namelist_top_cfg', 'namelist_pisces_cfg'):
             namelists[namelist] = [
                 os.fspath((run_sets_dir/namelist).resolve())]
+    nemo_config_name = config['run types'][run_type]['config name']
     run_desc = salishsea_cmd.api.run_description(
         run_id=run_id,
-        config_name=NEMO_config_name,
+        config_name=nemo_config_name,
         mpi_decomposition=(
             host_config['run types'][run_type]['mpi decomposition']),
         walltime=(host_config['run types'][run_type].get('walltime')),
