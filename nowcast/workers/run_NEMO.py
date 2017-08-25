@@ -295,7 +295,7 @@ def _run_description(
         namelists['namelist_cfg'].append(
             os.fspath((run_sets_dir/namelist).resolve()))
     if run_type == 'nowcast-green':
-        for namelist in ('namelist_top_cfg', 'namelist_pisces_cfg'):
+        for namelist in ('namelist_top_cfg_smelt', 'namelist_smelt_cfg'):
             namelists[namelist] = [
                 os.fspath((run_sets_dir/namelist).resolve())]
     nemo_config_name = config['run types'][run_type]['config name']
