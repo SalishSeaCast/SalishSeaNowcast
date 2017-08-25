@@ -394,7 +394,7 @@ run:
         # files are stored
         Fraser turbidity dir: /nemoShare/MEOPAR/rivers/river_turb/
         # Location on compute host of bottom friction mask file
-        bottom friction mask: /results/nowcast-sys/grid/jetty_mask_bathy201702.nc
+        bottom friction mask: /nemoShare/MEOPAR/nowcast-sys/grid/jetty_mask_bathy201702.nc
         # Directory on compute host where atmospheric forcing files are stored
         weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
         # Location on compute host of no_snow.nc constraint file
