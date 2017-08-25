@@ -190,11 +190,11 @@ run types:
     land processor elimination: bathymetry_201702.csv
     duration: 1  # day
   nowcast-green:
-    config name:  SOG
-    coordinates: coordinates_seagrid_SalishSea2.nc
-    bathymetry: bathy_downonegrid2.nc
-    mesh mask: mesh_mask_downbyone2.nc
-    land processor elimination: bathy_downonegrid2.csv
+    config name:  SMELT
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
+    land processor elimination: bathymetry_201702.csv
     duration: 1  # day
   forecast:
     config name:  SalishSea
@@ -369,7 +369,7 @@ run:
           mpi decomposition: 9x19
           results: /nemoShare/MEOPAR/SalishSea/forecast2/
         nowcast-green:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-green/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201702/nowcast-green/
           mpi decomposition: 9x19
           results: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forcing:
@@ -385,7 +385,7 @@ run:
         # Directory on compute host where rivers runoff forcing files are stored
         rivers dir: /nemoShare/MEOPAR/rivers/
         # Locations on compute host of rivers runoff monthly climatology files
-        rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_month_extended.nc
+        rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_month_201702.nc
         rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_ConsTemp_month.nc
         # Directory on compute host where the rivers runoff daily tracers
         # climatology files are stored
@@ -401,7 +401,7 @@ run:
         no_snow.nc: /nemoShare/MEOPAR/nowcast-sys/grid/no_snow.nc
         # Location on compute host of NEMO on-the-fly interpolation weights file
         # for GEM 2.5km operational forecast
-        weights: /nemoShare/MEOPAR/nowcast-sys/grid/weights-gem2.5-ops.nc
+        weights: /nemoShare/MEOPAR/nowcast-sys/grid/weights-gem2.5-ops_201702.nc
 
     salish-nowcast:
       shared storage: True
