@@ -772,10 +772,10 @@ class TestRunDescription:
                 run_desc = run_NEMO._run_description(
                     run_date, 'nowcast-green', run_id, 2160, 'west.cloud',
                     config)
-        expected = [str(tmp_run_sets.join('namelist_top_cfg'))]
-        assert run_desc['namelists']['namelist_top_cfg'] == expected
-        expected = [str(tmp_run_sets.join('namelist_pisces_cfg'))]
-        assert run_desc['namelists']['namelist_pisces_cfg'] == expected
+        expected = [str(tmp_run_sets.join('namelist_top_cfg_smelt'))]
+        assert run_desc['namelists']['namelist_top_cfg_smelt'] == expected
+        expected = [str(tmp_run_sets.join('namelist_smelt_cfg'))]
+        assert run_desc['namelists']['namelist_smelt_cfg'] == expected
 
     def test_output_nowcast(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format('DDMMMYY').lower()
