@@ -28,7 +28,7 @@ import numpy as np
 import pandas as pd
 import pytz
 
-from nemo_nowcast import NowcastWorker, WorkerError
+from nemo_nowcast import NowcastWorker
 
 
 NAME = 'make_turbidity_file'
@@ -140,7 +140,6 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
             f'cannot create Fraser River turbidity file '
             f'for {ymd}')
         logger.warning(msg)
-        raise WorkerError(msg)
     logger.debug(f'read turbidity data from {turbidity_csv}')
     return tdf2
 
@@ -217,7 +216,6 @@ def _calcAvgT(dfout, mthresh, ymd):
             f'turbidity file '
             f'for {ymd}')
         logger.warning(msg)
-        raise WorkerError(msg)
     return iTurb
 
 
