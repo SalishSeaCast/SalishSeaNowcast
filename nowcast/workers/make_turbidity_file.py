@@ -174,10 +174,9 @@ def _interpTurb(tdf2, idate, mthresh):
                     dfout.loc[iout, 'turbidity'] = tur0
                     iout += 1
                 else:
-                    print('ERROR 2:')
-                    print(dfout.loc[iout]['hDD'],
-                          dd0, dfout.loc[iout]['hDD'] - dd0, .5 / 24.0)
-                    break  # how to throw error here?
+                    logger.error(
+                        f'ERROR 2: {dfout.loc[iout]["hDD"]} {dd0} '
+                        f'{dfout.loc[iout]["hDD"] - dd0}')
         elif (row['DD'] - ddlast) >= mthresh / 24.0:
             # insert NaNs in larger holes
             nint = int(np.round((row['DD'] - ddlast) * 24) - 1)
@@ -186,15 +185,15 @@ def _interpTurb(tdf2, idate, mthresh):
                 if (dfout.loc[iout]['hDD'] - dd0) < .5 / 24.0:
                     iout += 1
                 else:
-                    print('ERROR 4:')
+                    logger.error('ERROR 4:')
                     break
         # always append current tdf2 row's value
         if np.abs(dfout.loc[iout]['hDD'] - row['DD']) < .5 / 24.0:
             dfout.loc[iout, 'turbidity'] = row['turbidity']
         else:
-            print('ERROR 1:')
-            print('iout=', iout, 'ind=', ind)
-            print(dfout.loc[iout]['hDD'], row['DD'])
+            logger.error(
+                f'ERROR 1: iout={iout} ind={ind} {dfout.loc[iout]["hDD"]} '
+                f'{row["DD"]}')
             break
         iout += 1
         ddlast = row['DD']
