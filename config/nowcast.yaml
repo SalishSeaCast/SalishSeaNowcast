@@ -257,7 +257,6 @@ erddap:
       - ubcSSg3DvGridFields1hV17-02
       - ubcSSg3DwGridFields1hV17-02
       - ubcSSgSurfaceTracerFields1hV17-02
-    nowcast-dev:
       - ubcSSnNearSurfaceUVelocity20mV17-02
       - ubcSSnNearSurfaceVVelocity20mV17-02
 

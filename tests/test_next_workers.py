@@ -712,26 +712,6 @@ class TestAfterWatchNEMO:
             host='localhost')
         assert download_results not in workers
 
-    def test_success_nowcast_dev_launch_ping_erddap_nowcast_dev(
-        self, config, checklist,
-    ):
-        p_checklist = patch.dict(
-            checklist,
-            {'NEMO run': {'nowcast-dev': {'run date': '2017-07-07'}}})
-        with p_checklist:
-            workers = next_workers.after_watch_NEMO(
-                Message(
-                    'watch_NEMO', 'success nowcast-dev', {
-                        'nowcast-dev': {
-                            'host': 'salish', 'run date': '2016-10-15',
-                            'completed': True
-                        }
-                    }), config, checklist)
-        expected = NextWorker(
-            'nowcast.workers.ping_erddap',
-            args=['nowcast-dev'], host='localhost')
-        assert expected in workers
-
 
 class TestAfterMakeWW3WindFile:
     """Unit tests for the after_make_ww3_wind_file function.
