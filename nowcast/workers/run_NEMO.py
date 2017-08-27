@@ -220,19 +220,13 @@ def _run_description(
     run_date, run_type, run_id, restart_timestep, host_name, config,
 ):
     host_config = config['run']['enabled hosts'][host_name]
-    restart_from = {
-        'nowcast': 'nowcast',
-        'nowcast-green': 'nowcast-green',
-        'nowcast-dev': 'nowcast-dev',
-        'forecast': 'nowcast',
-        'forecast2': 'forecast',
-    }
+    restart_from = config['run types'][run_type]['restart from']
     try:
-        restart_dir = Path(
-            host_config['run types'][restart_from[run_type]]['results'])
+        restart_dir = Path(host_config['run types'][restart_from]['results'])
     except KeyError:
         logger.critical(
-            f'no results directory for {run_type} in {host_name} run config')
+            f'no results directory to get {restart_from} restart file from '
+            f'in {host_name} run config')
         raise WorkerError
     prev_run_dmys = {
         # run-type: previous run's ddmmmyy results directory name
