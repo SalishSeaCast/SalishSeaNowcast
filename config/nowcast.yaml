@@ -177,10 +177,10 @@ run types:
   # and forecast2 requires a forecast to have been completed.
   nowcast:
     config name: SalishSea
-    coordinates: coordinates_seagrid_SalishSea2.nc
-    bathymetry: bathy_downonegrid2.nc
-    mesh mask: mesh_mask_downbyone2.nc
-    land processor elimination: bathy_downonegrid2.csv
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
+    land processor elimination: bathymetry_201702.csv
     duration: 1  # day
     restart from: nowcast
   nowcast-dev:
@@ -201,18 +201,18 @@ run types:
     restart from: nowcast-green
   forecast:
     config name:  SalishSea
-    coordinates: coordinates_seagrid_SalishSea2.nc
-    bathymetry: bathy_downonegrid2.nc
-    mesh mask: mesh_mask_downbyone2.nc
-    land processor elimination: bathy_downonegrid2.csv
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
+    land processor elimination: bathymetry_201702.csv
     duration: 1.5  # days
     restart from: nowcast
   forecast2:
     config name:  SalishSea
-    coordinates: coordinates_seagrid_SalishSea2.nc
-    bathymetry: bathy_downonegrid2.nc
-    mesh mask: mesh_mask_downbyone2.nc
-    land processor elimination: bathy_downonegrid2.csv
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
+    land processor elimination: bathymetry_201702.csv
     duration: 1.25  # days
     restart from: forecast
 
@@ -359,18 +359,18 @@ run:
       # compute host; keyed by run type
       run types:
         nowcast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/nowcast-blue/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201702/nowcast-blue/
           # How is the domain to be distributed over the processors in the
           # i (longitude) and j (latitude) directions?
           mpi decomposition: 9x19
           # Directory on compute host where results are stored
           results: /nemoShare/MEOPAR/SalishSea/nowcast/
         forecast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/forecast/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201702/forecast/
           mpi decomposition: 9x19
           results: /nemoShare/MEOPAR/SalishSea/forecast/
         forecast2:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/SalishSea/nemo3.6/nowcast/forecast2/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201702/forecast2/
           mpi decomposition: 9x19
           results: /nemoShare/MEOPAR/SalishSea/forecast2/
         nowcast-green:
