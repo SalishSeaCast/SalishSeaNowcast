@@ -249,20 +249,6 @@ erddap:
       - ubcONCLSBBLCTD15mV1
     USDDL-CTD:
       - ubcONCUSDDLCTD15mV1
-    nowcast:
-      - ubcSSn3DTracerFields1hV16-10
-      - ubcSSnSurfaceTracerFields1hV16-10
-      - ubcSSn3DuVelocity1hV16-10
-      - ubcSSn3DvVelocity1hV16-10
-      - ubcSSn3DwVelocity1hV16-10
-      - ubcSSnCampbellRiverSSH15mV16-10
-      - ubcSSnCherryPointSSH15mV16-10
-      - ubcSSnFridayHarborSSH15mV16-10
-      - ubcSSnNanaimoSSH15mV16-10
-      - ubcSSnNeahBaySSH15mV16-10
-      - ubcSSnPointAtkinsonSSH15mV16-10
-      - ubcSSnSandheadsSSH15mV16-10
-      - ubcSSnVictoriaSSH15mV16-10
     nowcast-green:
       - ubcSSgPointAtkinsonSSH15mV17-02
       - ubcSSg3DBiologyFields1hV17-02
