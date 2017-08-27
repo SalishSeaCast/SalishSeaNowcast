@@ -206,7 +206,7 @@ run types:
     mesh mask: mesh_mask201702.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1.5  # days
-    restart from: nowcast-green
+    restart from: nowcast
   forecast2:
     config name:  SalishSea
     coordinates: coordinates_seagrid_SalishSea201702.nc
