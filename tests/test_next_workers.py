@@ -891,19 +891,6 @@ class TestAfterDownloadResults:
             host='localhost')
         assert expected in workers
 
-    def test_success_nowcast_launch_ping_erddap_nowcast(
-        self, config, checklist,
-    ):
-        p_checklist = patch.dict(
-            checklist, {'NEMO run': {'nowcast': {'run date': '2016-12-10'}}})
-        with p_checklist:
-            workers = next_workers.after_download_results(
-                Message(
-                    'download_results', 'success nowcast'), config, checklist)
-        expected = NextWorker(
-            'nowcast.workers.ping_erddap', args=['nowcast'], host='localhost')
-        assert expected in workers
-
     def test_success_nowcast_green_launch_ping_erddap_nowcast_green(
         self, config, checklist,
     ):

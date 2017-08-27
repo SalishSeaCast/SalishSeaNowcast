@@ -746,8 +746,6 @@ def after_download_results(msg, config, checklist):
                 NextWorker(
                     'nowcast.workers.make_plots',
                     args=[run_type, 'comparison', '--run-date', run_date]))
-            next_workers[msg.type].append(
-                NextWorker('nowcast.workers.ping_erddap', args=['nowcast']))
     return next_workers[msg.type]
 
 
