@@ -190,7 +190,7 @@ run types:
     mesh mask: mesh_mask201702.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1  # day
-    restart from: nowcast
+    restart from: nowcast-green
   nowcast-green:
     config name:  SMELT
     coordinates: coordinates_seagrid_SalishSea201702.nc
@@ -428,6 +428,8 @@ run:
           mpi decomposition: 1x7
           walltime: 23:30:00
           results: /results/SalishSea/nowcast-dev/
+        nowcast-green:
+          results: /results/SalishSea/nowcast-green/
       forcing:
         ssh dir: /results/forcing/sshNeahBay/
         bc dir: /results/forcing/LiveOcean/modified/

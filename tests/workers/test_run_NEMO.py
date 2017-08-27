@@ -51,7 +51,7 @@ def config(scope='function'):
                 'mesh_mask': 'mesh_mask201702.nc',
                 'land processor elimination': 'bathymetry_201702.csv',
                 'duration': 1,
-                'restart from': 'nowcast',
+                'restart from': 'nowcast-green',
             },
             'nowcast-green': {
                 'config name': 'SOG',
@@ -132,6 +132,9 @@ def config(scope='function'):
                                 'SS-run-sets/SalishSea/nemo3.6/nowcast-dev/',
                             'mpi decomposition': '1x7',
                             'walltime': '23:30:00',
+                            'results': 'results/SalishSea/nowcast-dev',
+                        },
+                        'nowcast-green': {
                             'results': 'results/SalishSea/nowcast-dev',
                         },
                     },
