@@ -103,11 +103,20 @@ def make_turbidity_file(parsed_args, config, *args):
     # interpolate over (number of hours) + 1.01 to account for difference
     # between last and next hour (1) and rounding errors (.01)
     mthresh = 5.01
-    tdf = _loadturb(idateDD, turbidity_csv, mthresh, ymd)
+    try:
+        tdf = _loadturb(idateDD, turbidity_csv, mthresh, ymd)
+    except ValueError:
+        return None
 
     # Interpolate and average data and write netcdf file to nc_filepath
-    itdf = _interpTurb(tdf, idateDD, mthresh)
-    iTurb = _calcAvgT(itdf, mthresh, ymd)
+    try:
+        itdf = _interpTurb(tdf, idateDD, mthresh)
+    except ValueError:
+        return None
+    try:
+        iTurb = _calcAvgT(itdf, mthresh, ymd)
+    except ValueError:
+        return None
     dest_dir = Path(config['rivers']['turbidity']['forcing dir'])
     file_tmpl = config['rivers']['turbidity']['file template']
     nc_filepath = os.fspath(dest_dir / file_tmpl.format(run_date.date()))
@@ -140,6 +149,7 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
             f'cannot create Fraser River turbidity file '
             f'for {ymd}')
         logger.warning(msg)
+        raise ValueError(msg)
     logger.debug(f'read turbidity data from {turbidity_csv}')
     return tdf2
 
@@ -177,6 +187,7 @@ def _interpTurb(tdf2, idate, mthresh):
                     logger.error(
                         f'ERROR 2: {dfout.loc[iout]["hDD"]} {dd0} '
                         f'{dfout.loc[iout]["hDD"] - dd0}')
+                    raise ValueError
         elif (row['DD'] - ddlast) >= mthresh / 24.0:
             # insert NaNs in larger holes
             nint = int(np.round((row['DD'] - ddlast) * 24) - 1)
@@ -186,7 +197,7 @@ def _interpTurb(tdf2, idate, mthresh):
                     iout += 1
                 else:
                     logger.error('ERROR 4:')
-                    break
+                    raise ValueError
         # always append current tdf2 row's value
         if np.abs(dfout.loc[iout]['hDD'] - row['DD']) < .5 / 24.0:
             dfout.loc[iout, 'turbidity'] = row['turbidity']
@@ -194,7 +205,7 @@ def _interpTurb(tdf2, idate, mthresh):
             logger.error(
                 f'ERROR 1: iout={iout} ind={ind} {dfout.loc[iout]["hDD"]} '
                 f'{row["DD"]}')
-            break
+            raise ValueError
         iout += 1
         ddlast = row['DD']
     logger.debug('interpolated turbidity data')
@@ -215,6 +226,7 @@ def _calcAvgT(dfout, mthresh, ymd):
             f'turbidity file '
             f'for {ymd}')
         logger.warning(msg)
+        raise ValueError(msg)
     return iTurb
 
 
