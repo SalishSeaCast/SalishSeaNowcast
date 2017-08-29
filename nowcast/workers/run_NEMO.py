@@ -269,8 +269,6 @@ def _run_description(
             'link to': os.fspath((run_prep_dir/'tracers/').resolve())},
         'LiveOcean': {
             'link to': os.fspath((run_prep_dir/'LiveOcean/').resolve())},
-        'open_boundaries': {
-            'link to': os.fspath((run_prep_dir/'open_boundaries/').resolve())},
         'rivers': {
             'link to': os.fspath((run_prep_dir/'rivers/').resolve())},
         'bfr_coef.nc': {

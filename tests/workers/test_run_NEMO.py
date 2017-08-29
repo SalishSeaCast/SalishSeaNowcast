@@ -196,7 +196,7 @@ def tmp_results(tmpdir, run_date, scope='function'):
     tmp_run_prep.ensure(
         '..', 'SS-run-sets', 'SalishSea', 'nemo3.6', 'nowcast',
         'field_def.xml')
-    for dir in ('NEMO-atmos', 'open_boundaries', 'rivers'):
+    for dir in ('NEMO-atmos', 'rivers'):
         tmp_run_prep.ensure_dir(dir)
     return {
         'run prep dir': tmp_run_prep,
