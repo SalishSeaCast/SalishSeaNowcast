@@ -15,13 +15,44 @@
 
 """Unit tests for Salish Sea NEMO nowcast upload_forcing worker.
 """
+import logging
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import (
+    Mock,
+    patch,
+)
 
 import arrow
 import pytest
 
 from nowcast.workers import upload_forcing
+
+
+@pytest.fixture
+def config():
+    """Nowcast system config dict data structure;
+    a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
+    """
+    return {
+        'temperature salinity': {
+            'bc dir': '/results/forcing/LiveOcean/modified',
+            'file template': 'single_LO_{:y%Ym%md%d}.nc',
+        },
+        'n and si': {
+            'bc dir': '/results/forcing/LiveOcean/modified/bio',
+            'file template': 'single_bio_LO_{:y%Ym%md%d}.nc',
+        },
+        'run': {
+            'enabled hosts': {
+                'west.cloud': {
+                    'forcing': {
+                        'bc dir': '/nemoShare/MEOPAR/LiveOcean/',
+                        'bio bc dir': '/nemoShare/MEOPAR/LiveOcean/bio',
+                    }
+                },
+            },
+        },
+    }
 
 
 @patch('nowcast.workers.upload_forcing.NowcastWorker')
@@ -125,3 +156,30 @@ class TestFailure:
             run_date=arrow.get('2017-01-02'))
         msg_type = upload_forcing.failure(parsed_args)
         assert msg_type == 'failure {run_type}'.format(run_type=run_type)
+
+
+@patch(
+    'nowcast.workers.upload_forcing._upload_file',
+    side_effect=[FileNotFoundError, None, FileNotFoundError, None])
+@patch('nowcast.workers.upload_forcing.logger')
+class TestUploadLiveOceanFiles:
+    """Unit tests for _upload_live_ocean_files() function.
+    """
+    @pytest.mark.parametrize('run_type, logging_level', [
+        ('nowcast+', logging.CRITICAL),
+        ('forecast2', logging.INFO),
+    ])
+    def test_live_ocean_persistence_symlink_logging_level(
+        self, m_logger, m_upload_file, run_type, logging_level, config
+    ):
+        sftp_client = Mock(namd='sftp_client')
+        run_date = arrow.get('2017-09-03')
+        host_config = config['run']['enabled hosts']['west.cloud']
+        with patch('nowcast.workers.upload_forcing.Path.symlink_to'):
+            upload_forcing._upload_live_ocean_files(
+                sftp_client, run_type, run_date, config, 'west.cloud',
+                host_config)
+        if logging_level is None:
+            assert not m_logger.log.called
+        else:
+            assert m_logger.log.call_args[0][0] == logging_level

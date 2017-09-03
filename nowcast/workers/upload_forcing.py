@@ -216,13 +216,20 @@ def _upload_live_ocean_files(
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
         except FileNotFoundError:
-            # boundary condition file does not exist, so create symlink to
-            # persist previous day's file
+            # Boundary condition file does not exist, so create symlink to
+            # persist previous day's file.
+            # This happens as a matter of course for forecast2 runs because
+            # they run before the day's LiveOcean product is available,
+            # but for other run types it is a cause for concern.
             prev_day_fn = (
                 config[bcs]['file template'].format(
                     run_date.replace(days=-1).date()))
             localpath.symlink_to(localpath.with_name(prev_day_fn))
-            logger.warning(
+            logging_level = (
+                logging.INFO if run_type == 'forecast2' else logging.CRITICAL
+            )
+            logger.log(
+                logging_level,
                 f'LiveOcean boundary conditions file not found; '
                 f'created symlink to {localpath.with_name(prev_day_fn)}',
                 extra={
