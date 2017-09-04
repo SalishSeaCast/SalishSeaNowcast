@@ -272,31 +272,30 @@ def _prep_nowcast_green_research_fig_functions(
             }
         for hr in range(24)
     }
-    ## Temporarily disable time series figures due to ERDDAP issues
-    # phys_dataset = xr.open_dataset(
-    #     'https://salishsea.eos.ubc.ca/erddap/griddap'
-    #     '/ubcSSg3DTracerFields1hV17-02')
-    # bio_dataset = xr.open_dataset(
-    #     'https://salishsea.eos.ubc.ca/erddap/griddap'
-    #     '/ubcSSg3DBiologyFields1hV17-02')
-    # fig_functions.update({
-    #     'nitrate_diatoms_timeseries': {
-    #         'function': time_series_plots.make_figure,
-    #         'args': (bio_dataset, 'nitrate', 'diatoms', place)
-    #     },
-    #     'mesozoo_microzoo_timeseries': {
-    #         'function': time_series_plots.make_figure,
-    #         'args': (bio_dataset, 'mesozooplankton', 'microzooplankton', place)
-    #     },
-    #     'mesodinium_flagellates_timeseries': {
-    #         'function': time_series_plots.make_figure,
-    #         'args': (bio_dataset, 'ciliates', 'flagellates', place)
-    #     },
-    #     'temperature_salinity_timeseries': {
-    #         'function': time_series_plots.make_figure,
-    #         'args': (phys_dataset, 'temperature', 'salinity', place)
-    #     },
-    # })
+    phys_dataset = xr.open_dataset(
+        'https://salishsea.eos.ubc.ca/erddap/griddap'
+        '/ubcSSg3DTracerFields1hV17-02')
+    bio_dataset = xr.open_dataset(
+        'https://salishsea.eos.ubc.ca/erddap/griddap'
+        '/ubcSSg3DBiologyFields1hV17-02')
+    fig_functions.update({
+        'nitrate_diatoms_timeseries': {
+            'function': time_series_plots.make_figure,
+            'args': (bio_dataset, 'nitrate', 'diatoms', place)
+        },
+        'mesozoo_microzoo_timeseries': {
+            'function': time_series_plots.make_figure,
+            'args': (bio_dataset, 'mesozooplankton', 'microzooplankton', place)
+        },
+        'mesodinium_flagellates_timeseries': {
+            'function': time_series_plots.make_figure,
+            'args': (bio_dataset, 'ciliates', 'flagellates', place)
+        },
+        'temperature_salinity_timeseries': {
+            'function': time_series_plots.make_figure,
+            'args': (phys_dataset, 'temperature', 'salinity', place)
+        },
+    })
     return fig_functions
 
 
