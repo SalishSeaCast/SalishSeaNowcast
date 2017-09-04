@@ -753,7 +753,8 @@ class TestRunDescription:
         expected = [
             str(tmp_run_prep.join('namelist.time')),
             str(tmp_run_sets.join('namelist.domain')),
-            str(tmp_run_sets.join('namelist.surface')),
+            str(tmp_run_sets.join('namelist.atmos_rivers')),
+            str(tmp_run_sets.join('namelist.light')),
             str(tmp_run_sets.join('namelist.lateral')),
             str(tmp_run_sets.join('namelist.bottom')),
             str(tmp_run_sets.join('namelist.tracer')),

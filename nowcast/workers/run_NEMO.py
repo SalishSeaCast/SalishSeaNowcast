@@ -279,7 +279,7 @@ def _run_description(
         'namelist_cfg': [os.fspath((run_prep_dir/'namelist.time').resolve())]
     }
     namelist_sections = (
-        'namelist.domain', 'namelist.surface',
+        'namelist.domain', 'namelist.atmos_rivers', 'namelist.light',
         'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
         'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
     )
