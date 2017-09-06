@@ -152,8 +152,39 @@ n and si:
   file template: 'single_bio_LO_{:y%Ym%md%d}.nc'
 
 observations:
-  # Storage directory for ONC ferry instruments data .mat files
-  ferry data: /ocean/jieliu/research/meopar/ONC_ferries/
+  # ONC Strait of Georgia ferry platforms real-time data
+  ferry data:
+    ferries:
+      # Tsawwassen - Duke Point route
+      TWDP:
+        route name: Tsawwassen - Duke Point
+        ONC station description: Mobile Platforms, British Columbia Ferries, Tsawwassen - Duke Point
+        location:
+          # ONC scalardata.getByStation API query parameters:
+          station: TWDP.N1
+          device category: NAV
+          sensors:
+            - longitude
+            - latitude
+          terminals:
+            # Terminal names from salishsea_tools.places.PLACES
+            - Tsawwassen
+            - Duke Pt.
+        devices:
+          # ONC device category
+          TSG:
+            # device sensor names
+            sensors:
+              # ERDDAP sensor name: ONC sensor name
+              temperature: temperature
+              conductivity: Conductivity
+              salinity: salinity
+          OXYSENSOR:
+            sensors:
+              o2_saturation: oxygen_saturation
+              o2_concentration_corrected: oxygen_corrected
+    # Destination directory for ONC CTD T&S data netCDF files
+    dest dir: /results/observations/ONC/CTD/
 
   # ONC Strait of Georgia nodes real-time CTD data
   ctd data:
@@ -692,6 +723,12 @@ message registry:
       success USDDL: ONC USDDL station CTD T&S data file created
       failure: ONC CTD T&S data file creation failed
       crash: get_onc_ctd worker crashed
+
+    get_onc_ferry:
+      checklist key: ONC ferry data
+      success TWDP: ONC TWDP ferry route data file created
+      failure: ONC ferry route data file creation failed
+      crash: get_onc_ferry worker crashed
 
     download_live_ocean:
       checklist key: Live Ocean products
