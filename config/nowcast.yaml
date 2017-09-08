@@ -183,8 +183,20 @@ observations:
             sensors:
               o2_saturation: oxygen_saturation
               o2_concentration_corrected: oxygen_corrected
+          TURBCHLFL:
+            sensors:
+              cdom_fluorescence: cdom_fluorescence
+              chlorophyll: chlorophyll
+              turbidity: turbidity
+          CO2SENSOR:
+            sensors:
+              co2_partial_pressure: partial_pressure
+              co2_concentration_linearized: co2
+        # Template for ONC ferry data data file path
+        # **Must be quoted to project {} characters**
+        filepath template: '{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_1m_{yyyymmdd}.nc'
     # Destination directory for ONC CTD T&S data netCDF files
-    dest dir: /results/observations/ONC/CTD/
+    dest dir: /results/observations/ONC/ferries/
 
   # ONC Strait of Georgia nodes real-time CTD data
   ctd data:
