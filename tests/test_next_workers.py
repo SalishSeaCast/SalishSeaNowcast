@@ -315,7 +315,7 @@ class TestAfterMakeTurbidityFile:
             Message('make_turbidity_file', msg_type), config, checklist)
         assert workers == []
 
-    def test_success_launch_make_forcing_links(
+    def test_success_launch_upload_forcing_west_cloud(
         self, config, checklist,
     ):
         workers = next_workers.after_make_turbidity_file(
@@ -324,6 +324,16 @@ class TestAfterMakeTurbidityFile:
             'nowcast.workers.upload_forcing',
             args=['west.cloud', 'turbidity'], host='localhost')
         assert expected in workers
+
+    def test_success_no_launch_upload_forcing_salish(
+        self, config, checklist,
+    ):
+        workers = next_workers.after_make_turbidity_file(
+            Message('make_turbidity_file', 'success'), config, checklist)
+        not_expected = NextWorker(
+            'nowcast.workers.upload_forcing',
+            args=['salish-nowcast', 'turbidity'], host='localhost')
+        assert not_expected not in workers
 
 
 class TestAfterUploadForcing:
