@@ -28,17 +28,20 @@ Clone the following repos into :file:`/results/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /results/nowcast-sys/
+    $ hg clone ssh://hg@bitbucket.org/salishsea/grid grid
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-cmd NEMO-Cmd
-    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-forcing NEMO-forcing
     $ hg clone ssh://hg@bitbucket.org/43ravens/nemo_nowcast NEMO_Nowcast
     $ hg clone ssh://hg@bitbucket.org/salishsea/private-tools private-tools
+    $ hg clone ssh://hg@bitbucket.org/salishsea/rivers-climatology rivers-climatology
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishseanowcast SalishSeaNowcast
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site salishsea-site
     $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tides tides
     $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
-    $ hg clone ssh://hg@bitbucket.org/salishsea/xios XIOS
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tracers tracers
+    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-arch XIOS-ARCH
 
 Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
@@ -50,22 +53,22 @@ Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
         /results/nowcast-sys/private-tools/grib2/wgrib2/
 
 
-Build XIOS
-==========
+Build XIOS-2
+============
 
-Symlink the XIOS build configuration files for :kbd:`salish` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS/arch/` directory:
+Symlink the XIOS-2 build configuration files for :kbd:`salish` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/XIOS/arch
+    $ cd /results/nowcast-sys/XIOS-2/arch
     $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_SALISH.fcm
     $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_SALISH.path
 
-:command:`ssh` to :kbd:`salish` and build XIOS with:
+:command:`ssh` to :kbd:`salish` and build XIOS-2 with:
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/XIOS
+    $ cd /results/nowcast-sys/XIOS-2
     $ ./make_xios --arch GCC_SALISH --netcdf_lib netcdf4_seq --job 8
 
 
@@ -150,21 +153,12 @@ On the hosts where the nowcast system NEMO runs will be executed create a :file:
 
     $ chmod g+ws runs
     $ cd runs/
-    $ mkdir -p NEMO-atmos open_boundaries/west/ssh rivers
-    $ chmod -R g+s NEMO-atmos open_boundaries rivers
-    $ ln -s ../../NEMO-forcing/atmospheric/no_snow.nc NEMO-atmos/
-    $ ln -s ../../NEMO-forcing/grid/weights-gem2.5-ops.nc NEMO-atmos/
-    $ ln -s ../../NEMO-forcing/open_boundaries/north open_boundaries/
-    $ ln -s ../../../NEMO-forcing/open_boundaries/west/SalishSea2_Masson_corrected.nc open_boundaries/west/
-    $ ln -s ../../../NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc open_boundaries/west/
-    $ ln -s ../../../NEMO-forcing/open_boundaries/west/tides open_boundaries/west/
-    $ ln -s ../../NEMO-forcing/rivers/bio_climatology rivers/
-    $ ln -s ../../NEMO-forcing/rivers/river_ConsTemp_month.nc rivers/
-    $ ln -s ../../NEMO-forcing/rivers/rivers_month.nc rivers/
-    $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
+    $ mkdir -p LiveOcean NEMO-atmos rivers ssh
+    $ chmod -R g+s LiveOcean NEMO-atmos rivers ssh
+    $ cp ../SS-run-sets/v201702/nowcast-green/namelist.time_nowcast_template namelist.time
 
-The above :command:`ln -s` commands assume that there is a clone of the :ref:`NEMO-forcing-repo` beside the directory where the links are being created.
-If the clone of the :ref:`NEMO-forcing-repo` is elsewhere,
+The above :command:`ln -s` commands assume that there is a clone of the :ref:`SS-run-sets-repo` beside the directory where the links are being created.
+If the clone of the :ref:`SS-run-sets-repo` is elsewhere,
 adjust the link paths accordingly.
 
 The hosts and their :file:`runs` directories presently in use are:
