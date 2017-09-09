@@ -432,35 +432,38 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ hg clone ssh://hg@bitbucket.org/salishsea/grid grid
     $ hg clone --ssh "ssh -i ~/.ssh/salishsea-nowcast-deployment_id_rsa.pub" ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-cmd NEMO-Cmd
-    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-forcing NEMO-forcing
     $ hg clone ssh://hg@bitbucket.org/43ravens/nemo_nowcast NEMO_Nowcast
+    $ hg clone ssh://hg@bitbucket.org/salishsea/rivers-climatology rivers-climatology
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishseanowcast SalishSeaNowcast
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishseawaves SalishSeaWaves
     $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tides tides
     $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
-    $ hg clone --ssh "ssh -i ~/.ssh/salishsea-nowcast-deployment_id_rsa.pub" ssh://hg@bitbucket.org/salishsea/xios XIOS
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tracers tracers
+    $ hg clone --ssh "ssh -i ~/.ssh/salishsea-nowcast-deployment_id_rsa.pub" ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-arch XIOS-ARCH
 
 
-Build XIOS
-==========
+Build XIOS-2
+============
 
-Symlink the XIOS build configuration files for :kbd:`west.cloud` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS/arch/` directory:
+Symlink the XIOS-2 build configuration files for :kbd:`west.cloud` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
 .. code-block:: bash
 
-    $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS/arch
+    $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS-2/arch
     $ ln -s ../../XIOS-ARCH/WEST.CLOUD/arch-GCC_NOWCAST.fcm
     $ ln -s ../../XIOS-ARCH/WEST.CLOUD/arch-GCC_NOWCAST.path
 
-Build XIOS with:
+Build XIOS-2 with:
 
 .. code-block:: bash
 
-    $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS
+    $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS-2
     $ ./make_xios --arch GCC_NOWCAST --netcdf_lib netcdf4_seq --job 8
 
 
@@ -472,7 +475,7 @@ Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
-    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS ./makenemo -m GCC_NOWCAST -n SalishSea -j8
+    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./makenemo -m GCC_NOWCAST -n SalishSea -j8
     $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/TOOLS/
     $ ./maketools -m GCC_NOWCAST_REBUILD_NEMO -n REBUILD_NEMO
 
@@ -623,18 +626,9 @@ Create a :file:`runs/` directory for the NEMO runs and populate it with:
     $ mkdir runs
     $ chmod g+ws runs
     $ cd runs/
-    $ mkdir -p NEMO-atmos open_boundaries/west/ssh rivers
-    $ chmod -R g+s NEMO-atmos open_boundaries rivers
-    $ ln -s ../../NEMO-forcing/atmospheric/no_snow.nc NEMO-atmos/
-    $ ln -s ../../NEMO-forcing/grid/weights-gem2.5-ops.nc NEMO-atmos/
-    $ ln -s ../../NEMO-forcing/open_boundaries/north open_boundaries/
-    $ ln -s ../../../NEMO-forcing/open_boundaries/west/SalishSea2_Masson_corrected.nc open_boundaries/west/
-    $ ln -s ../../../NEMO-forcing/open_boundaries/west/SalishSea_west_TEOS10.nc open_boundaries/west/
-    $ ln -s ../../../NEMO-forcing/open_boundaries/west/tides open_boundaries/west/
-    $ ln -s ../../NEMO-forcing/rivers/bio_climatology rivers/
-    $ ln -s ../../NEMO-forcing/rivers/river_ConsTemp_month.nc rivers/
-    $ ln -s ../../NEMO-forcing/rivers/rivers_month.nc rivers/
-    $ cp ../SS-run-sets/SalishSea/nemo3.6/nowcast/namelist.time_nowcast_template namelist.time
+    $ mkdir -p LiveOcean NEMO-atmos rivers ssh
+    $ chmod -R g+s LiveOcean NEMO-atmos rivers ssh
+    $ cp ../SS-run-sets/v201702/nowcast-green/namelist.time_nowcast_template namelist.time
 
 
 WaveWatch Runs Directories
