@@ -91,7 +91,8 @@ def make_live_ocean_files(parsed_args, config, *args):
         'Creating nutrient western boundary conditions file from T&S file')
     ts_filepath = Path(filepaths[0])
     filepath = create_LiveOcean_bio_BCs_fromTS(
-        ts_filepath.name, TSdir=os.fspath(ts_filepath.parent),
+        ts_filepath.name, strdate=ymd,
+        TSdir=os.fspath(ts_filepath.parent),
         outFile=config['n and si']['file template'],
         outDir=config['n and si']['bc dir'],
         nFitFilePath=config['n and si']['n fit'],
