@@ -418,11 +418,11 @@ run:
         # Directory on compute host where rivers runoff forcing files are stored
         rivers dir: /nemoShare/MEOPAR/rivers/
         # Locations on compute host of rivers runoff monthly climatology files
-        rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_month_201702.nc
-        rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/rivers/rivers_ConsTemp_month.nc
+        rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_month_201702.nc
+        rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc
         # Directory on compute host where the rivers runoff daily tracers
         # climatology files are stored
-        rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/rivers/bio/
+        rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/bio/
         # Directory on compute host where the Fraser River turbidity forcing
         # files are stored
         Fraser turbidity dir: /nemoShare/MEOPAR/rivers/river_turb/
