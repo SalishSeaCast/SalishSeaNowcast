@@ -850,7 +850,7 @@ class TestRunDescription:
             str(tmp_run_prep.join('..', 'grid')),
             str(tmp_run_prep.join('..', 'NEMO-Cmd')),
             str(tmp_run_prep.join('..', 'NEMO_Nowcast')),
-            str(tmp_run_prep.join('..', 'rivers')),
+            str(tmp_run_prep.join('..', 'rivers-climatology')),
             str(tmp_run_prep.join('..', 'SalishSeaCmd')),
             str(tmp_run_prep.join('..', 'SS-run-sets')),
             str(tmp_run_prep.join('..', 'tides')),
