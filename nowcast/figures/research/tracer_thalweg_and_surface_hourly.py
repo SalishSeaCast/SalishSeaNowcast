@@ -32,7 +32,7 @@ import nowcast.figures.website_theme
 
 def make_figure(
     hr, tracer_var, bathy, mesh_mask, clevels_thalweg, clevels_surface, cmap,
-    depth_integrated, figsize=(20, 12), theme=nowcast.figures.website_theme
+    depth_integrated, figsize=(16, 9), theme=nowcast.figures.website_theme
 ):
     """Plot colour contours of tracer on a vertical slice along a section of 
     the domain thalweg,
@@ -99,8 +99,8 @@ def clevels(tracer_var, mesh_mask, depth_integrated):
 
 
 def _prep_plot_data(hr, tracer_var, mesh_mask, depth_integrated):
-    sj, ej = 200, 770
-    si, ei = 20, 370
+    sj, ej = 200, 800
+    si, ei = 20, 395
 
     tracer_hr = tracer_var[hr]
     masked_tracer_hr = np.ma.masked_where(
@@ -120,7 +120,7 @@ def _prep_plot_data(hr, tracer_var, mesh_mask, depth_integrated):
         surface_j_limits=(sj, ej),
         surface_i_limits=(si, ei),
         thalweg_depth_limits=(0, 450),
-        thalweg_length_limits=(0, 590),
+        thalweg_length_limits=(0, 632),
     )
 
 
@@ -128,7 +128,7 @@ def _prep_fig_axes(figsize, theme):
     fig = plt.figure(
         figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
 
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1.3, 1])
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1.618, 1])
 
     ax_thalweg = fig.add_subplot(gs[0])
     ax_thalweg.set_axis_bgcolor(theme.COLOURS['axes']['background'])
