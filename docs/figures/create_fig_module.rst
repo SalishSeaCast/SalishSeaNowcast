@@ -88,7 +88,7 @@ and then we'll look at each section in detail.
 
     def make_figure(
         tracer_var, bathy, mesh_mask, cmap, depth_integrated,
-        figsize=(20, 12), theme=nowcast.figures.website_theme
+        figsize=(16, 9), theme=nowcast.figures.website_theme
     ):
         """Plot colour contours of tracer on a vertical slice along a section of
         the domain thalweg,
@@ -140,8 +140,8 @@ and then we'll look at each section in detail.
 
     def _prep_plot_data(tracer_var, mesh_mask, depth_integrated):
         hr = 19
-        sj, ej = 200, 770
-        si, ei = 20, 370
+        sj, ej = 200, 800
+        si, ei = 20, 395
 
         tracer_hr = tracer_var[hr]
         masked_tracer_hr = np.ma.masked_where(
@@ -161,7 +161,7 @@ and then we'll look at each section in detail.
             surface_j_limits=(sj, ej),
             surface_i_limits=(si, ei),
             thalweg_depth_limits=(0, 450),
-            thalweg_length_limits=(0, 590),
+            thalweg_length_limits=(0, 632),
         )
 
 
@@ -169,7 +169,7 @@ and then we'll look at each section in detail.
         fig = plt.figure(
             figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
 
-        gs = gridspec.GridSpec(1, 2, width_ratios=[1.3, 1])
+        gs = gridspec.GridSpec(1, 2, width_ratios=[1.618, 1])
 
         ax_thalweg = fig.add_subplot(gs[0])
         ax_thalweg.set_axis_bgcolor(theme.COLOURS['axes']['background'])
@@ -422,7 +422,7 @@ It is also the module's only :ref:`public function <LibraryCodePublicAndPrivate>
 
     def make_figure(
         tracer_var, bathy, mesh_mask, cmap, depth_integrated,
-        figsize=(20, 12), theme=nowcast.figures.website_theme
+        figsize=(16, 9), theme=nowcast.figures.website_theme
     ):
         """Plot colour contours of tracer on a vertical slice along a section of
         the domain thalweg,
@@ -481,7 +481,7 @@ The function signature
 
     def make_figure(
         tracer_var, bathy, mesh_mask, cmap, depth_integrated,
-        figsize=(20, 12), theme=nowcast.figures.website_theme
+        figsize=(16, 9), theme=nowcast.figures.website_theme
     ):
 
 
@@ -492,6 +492,9 @@ The signature ends with the default-values keyword arguments :kbd:`figsize` and 
 The :kbd:`figsize` 2-tuple give the width and height of the figure,
 but more importantly its aspect ratio.
 Choose values that are appropriate to the information presented in the figure.
+If you don't have a good reason to choose something else,
+use :kbd:`figsize=(16, 9)` because that matches the aspect ration of wide displays that most people use to view web sites
+(even phones in landscape orientation).
 
 The :kbd:`theme` should be defaulted to :py:mod:`nowcast.figures.wehsite_theme`, a module that provides colours and font specifications that fit with the `salishsea site`_ colour scheme and provide consistency among the figures.
 
@@ -638,8 +641,8 @@ and any calculations that are required should be done in :py:func:`_prep_plot_da
 
     def _prep_plot_data(tracer_var, mesh_mask, depth_integrated):
         hr = 19
-        sj, ej = 200, 770
-        si, ei = 20, 370
+        sj, ej = 200, 800
+        si, ei = 20, 395
 
         tracer_hr = tracer_var[hr]
         masked_tracer_hr = np.ma.masked_where(
@@ -659,7 +662,7 @@ and any calculations that are required should be done in :py:func:`_prep_plot_da
             surface_j_limits=(sj, ej),
             surface_i_limits=(si, ei),
             thalweg_depth_limits=(0, 450),
-            thalweg_length_limits=(0, 590),
+            thalweg_length_limits=(0, 632),
         )
 
 :py:func:`_prep_plot_data` should return a :py:obj:`types.SimpleNamespace`
@@ -687,7 +690,7 @@ The :py:func:`_prep_fig_axes` function accepts arguments named :kbd:`figsize` an
         fig = plt.figure(
             figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
 
-        gs = gridspec.GridSpec(1, 2, width_ratios=[1.3, 1])
+        gs = gridspec.GridSpec(1, 2, width_ratios=[1.618, 1])
 
         ax_thalweg = fig.add_subplot(gs[0])
         ax_thalweg.set_axis_bgcolor(theme.COLOURS['axes']['background'])
