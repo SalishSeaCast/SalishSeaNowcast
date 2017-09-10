@@ -223,20 +223,20 @@ def _prep_nowcast_research_fig_functions(
         'temperature': {'nemo var': 'votemper', 'cmap': cmocean.cm.thermal},
     }
     fig_functions = {}
-    for tracer in image_loops:
+    for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = (
             tracer_thalweg_and_surface_hourly.clevels(
-                grid_T_hr.variables[tracer['nemo var']], mesh_mask,
+                grid_T_hr.variables[params['nemo var']], mesh_mask,
                 depth_integrated=False))
         fig_functions.update({
             f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
                 {
                     'function': tracer_thalweg_and_surface_hourly.make_figure,
                     'args': (
-                        hr, grid_T_hr.variables[tracer['nemo var']], bathy,
+                        hr, grid_T_hr.variables[params['nemo var']], bathy,
                         mesh_mask, clevels_thalweg, clevels_surface),
                     'kwargs':
-                        {'cmap': tracer['cmap'], 'depth_integrated': False},
+                        {'cmap': params['cmap'], 'depth_integrated': False},
                     'format': 'png',
                     'image loop': True,
                 }
@@ -349,20 +349,23 @@ def _prep_nowcast_green_research_fig_functions(
         },
     }
     fig_functions = {}
-    for tracer in image_loops:
+    for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = (
             tracer_thalweg_and_surface_hourly.clevels(
-                ptrc_T_hr.variables[tracer['nemo var']], mesh_mask,
-                depth_integrated=False))
+                ptrc_T_hr.variables[params['nemo var']], mesh_mask,
+                depth_integrated=params['depth integrated']))
         fig_functions.update({
             f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
                 {
                     'function': tracer_thalweg_and_surface_hourly.make_figure,
                     'args': (
-                        hr, ptrc_T_hr.variables[tracer['nemo var']], bathy,
+                        hr, ptrc_T_hr.variables[params['nemo var']], bathy,
                         mesh_mask, clevels_thalweg, clevels_surface),
                     'kwargs':
-                        {'cmap': tracer['cmap'], 'depth_integrated': False},
+                        {
+                            'cmap': params['cmap'],
+                            'depth_integrated': params['depth integrated'],
+                        },
                     'format': 'png',
                     'image loop': True,
                 }
