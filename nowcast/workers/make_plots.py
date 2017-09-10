@@ -168,7 +168,7 @@ def make_plots(parsed_args, config, *args):
 
     if run_type == 'nowcast' and plot_type == 'research':
         fig_functions = _prep_nowcast_research_fig_functions(
-            bathy, mesh_mask, results_dir)
+            bathy, mesh_mask, results_dir, run_date)
     if run_type == 'nowcast-green' and plot_type == 'research':
         fig_functions = _prep_nowcast_green_research_fig_functions(
             bathy, mesh_mask, results_dir, run_date)
@@ -208,13 +208,41 @@ def _results_dataset_gridded(station, results_dir):
     return nc.Dataset(filepaths[0])
 
 
-def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir):
+def _prep_nowcast_research_fig_functions(
+    bathy, mesh_mask, results_dir, run_date
+):
+    yyyymmdd = run_date.format('YYYYMMDD')
+    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     grid_T_day = _results_dataset('1d', 'grid_T', results_dir)
     grid_U_day = _results_dataset('1d', 'grid_U', results_dir)
     grid_V_day = _results_dataset('1d', 'grid_V', results_dir)
     grid_central = _results_dataset_gridded('central', results_dir)
     grid_east = _results_dataset_gridded('east', results_dir)
-    fig_functions = {
+    image_loops = {
+        'salinity': {'nemo var': 'vosaline', 'cmap': cmocean.haline},
+        'temperature': {'nemo var': 'votemper', 'cmap': cmocean.thermal},
+    }
+    fig_functions = {}
+    for tracer in image_loops:
+        clevels_thalweg, clevels_surface = (
+            tracer_thalweg_and_surface_hourly.clevels(
+                grid_T_hr.variables[tracer['nemo var']], mesh_mask,
+                depth_integrated=False))
+        fig_functions.update({
+            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
+                {
+                    'function': tracer_thalweg_and_surface_hourly.make_figure,
+                    'args': (
+                        hr, grid_T_hr.variables[tracer['nemo var']], bathy,
+                        mesh_mask, clevels_thalweg, clevels_surface),
+                    'kwargs':
+                        {'cmap': tracer['cmap'], 'depth_integrated': False},
+                    'format': 'png',
+                    'image loop': True,
+                }
+            for hr in range(24)
+        })
+    fig_functions.update({
         'Salinity_on_thalweg': {
             'function': figures.thalweg_salinity,
             'args': (grid_T_day, mesh_mask, bathy),
@@ -245,7 +273,7 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir):
             'function': research_VENUS.plot_vel_NE_gridded,
             'args': ('East', grid_east),
         }
-    }
+    })
     return fig_functions
 
 
