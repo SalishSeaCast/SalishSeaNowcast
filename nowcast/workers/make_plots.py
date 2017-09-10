@@ -280,26 +280,94 @@ def _prep_nowcast_research_fig_functions(
 def _prep_nowcast_green_research_fig_functions(
     bathy, mesh_mask, results_dir, run_date
 ):
+    yyyymmdd = run_date.format('YYYYMMDD')
     ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
     place = 'S3'
     clevels_thalweg, clevels_surface = (
         tracer_thalweg_and_surface_hourly.clevels(
             ptrc_T_hr.variables['nitrate'], mesh_mask, depth_integrated=False))
-    yyyymmdd = run_date.format('YYYYMMDD')
-    fig_functions = {
-        f'nitrate_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
-            {
-                'function': tracer_thalweg_and_surface_hourly.make_figure,
-                'args': (
-                    hr, ptrc_T_hr.variables['nitrate'], bathy, mesh_mask,
-                    clevels_thalweg, clevels_surface),
-                'kwargs':
-                    {'cmap': cmocean.cm.matter, 'depth_integrated': False},
-                'format': 'png',
-                'image loop': True,
-            }
-        for hr in range(24)
+    image_loops = {
+        'nitrate': {
+            'nemo var': 'nitrate',
+            'cmap': cmocean.tempo,
+            'depth integrated': False,
+        },
+        'ammonium': {
+            'nemo var': 'ammonium',
+            'cmap': cmocean.matter,
+            'depth integrated': False,
+        },
+        'silicon': {
+            'nemo var': 'silicon',
+            'cmap': cmocean.turbid,
+            'depth integrated': False,
+        },
+        'dissolved_organic_nitrogen': {
+            'nemo var': 'dissolved_organic_nitrogen',
+            'cmap': cmocean.amp,
+            'depth integrated': False,
+        },
+        'particulate_organic_nitrogen': {
+            'nemo var': 'particulate_organic_nitrogen',
+            'cmap': cmocean.amp,
+            'depth integrated': False,
+        },
+        'biogenic_silicon': {
+            'nemo var': 'biogenic_silicon',
+            'cmap': cmocean.turbid,
+            'depth integrated': False,
+        },
+        'diatoms': {
+            'nemo var': 'diatoms',
+            'cmap': cmocean.algae,
+            'depth integrated': True,
+        },
+        'ciliates': {
+            'nemo var': 'ciliates',
+            'cmap': cmocean.algae,
+            'depth integrated': True,
+        },
+        'flagellates': {
+            'nemo var': 'flagellates',
+            'cmap': cmocean.algae,
+            'depth integrated': True,
+        },
+        'microzooplankton': {
+            'nemo var': 'microzooplankton',
+            'cmap': cmocean.algae,
+            'depth integrated': True,
+        },
+        'mesozooplankton': {
+            'nemo var': 'mesozooplankton',
+            'cmap': cmocean.algae,
+            'depth integrated': True,
+        },
+        'Fraser_tracer': {
+            'nemo var': 'Fraser_tracer',
+            'cmap': cmocean.turbid,
+            'depth integrated': False,
+        },
     }
+    fig_functions = {}
+    for tracer in image_loops:
+        clevels_thalweg, clevels_surface = (
+            tracer_thalweg_and_surface_hourly.clevels(
+                ptrc_T_hr.variables[tracer['nemo var']], mesh_mask,
+                depth_integrated=False))
+        fig_functions.update({
+            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
+                {
+                    'function': tracer_thalweg_and_surface_hourly.make_figure,
+                    'args': (
+                        hr, ptrc_T_hr.variables[tracer['nemo var']], bathy,
+                        mesh_mask, clevels_thalweg, clevels_surface),
+                    'kwargs':
+                        {'cmap': tracer['cmap'], 'depth_integrated': False},
+                    'format': 'png',
+                    'image loop': True,
+                }
+            for hr in range(24)
+        })
     phys_dataset = xr.open_dataset(
         'https://salishsea.eos.ubc.ca/erddap/griddap'
         '/ubcSSg3DTracerFields1hV17-02')
