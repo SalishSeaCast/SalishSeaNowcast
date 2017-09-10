@@ -219,8 +219,8 @@ def _prep_nowcast_research_fig_functions(
     grid_central = _results_dataset_gridded('central', results_dir)
     grid_east = _results_dataset_gridded('east', results_dir)
     image_loops = {
-        'salinity': {'nemo var': 'vosaline', 'cmap': cmocean.haline},
-        'temperature': {'nemo var': 'votemper', 'cmap': cmocean.thermal},
+        'salinity': {'nemo var': 'vosaline', 'cmap': cmocean.cm.haline},
+        'temperature': {'nemo var': 'votemper', 'cmap': cmocean.cm.thermal},
     }
     fig_functions = {}
     for tracer in image_loops:
@@ -289,62 +289,62 @@ def _prep_nowcast_green_research_fig_functions(
     image_loops = {
         'nitrate': {
             'nemo var': 'nitrate',
-            'cmap': cmocean.tempo,
+            'cmap': cmocean.cm.tempo,
             'depth integrated': False,
         },
         'ammonium': {
             'nemo var': 'ammonium',
-            'cmap': cmocean.matter,
+            'cmap': cmocean.cm.matter,
             'depth integrated': False,
         },
         'silicon': {
             'nemo var': 'silicon',
-            'cmap': cmocean.turbid,
+            'cmap': cmocean.cm.turbid,
             'depth integrated': False,
         },
         'dissolved_organic_nitrogen': {
             'nemo var': 'dissolved_organic_nitrogen',
-            'cmap': cmocean.amp,
+            'cmap': cmocean.cm.amp,
             'depth integrated': False,
         },
         'particulate_organic_nitrogen': {
             'nemo var': 'particulate_organic_nitrogen',
-            'cmap': cmocean.amp,
+            'cmap': cmocean.cm.amp,
             'depth integrated': False,
         },
         'biogenic_silicon': {
             'nemo var': 'biogenic_silicon',
-            'cmap': cmocean.turbid,
+            'cmap': cmocean.cm.turbid,
             'depth integrated': False,
         },
         'diatoms': {
             'nemo var': 'diatoms',
-            'cmap': cmocean.algae,
+            'cmap': cmocean.cm.algae,
             'depth integrated': True,
         },
         'ciliates': {
             'nemo var': 'ciliates',
-            'cmap': cmocean.algae,
+            'cmap': cmocean.cm.algae,
             'depth integrated': True,
         },
         'flagellates': {
             'nemo var': 'flagellates',
-            'cmap': cmocean.algae,
+            'cmap': cmocean.cm.algae,
             'depth integrated': True,
         },
         'microzooplankton': {
             'nemo var': 'microzooplankton',
-            'cmap': cmocean.algae,
+            'cmap': cmocean.cm.algae,
             'depth integrated': True,
         },
         'mesozooplankton': {
             'nemo var': 'mesozooplankton',
-            'cmap': cmocean.algae,
+            'cmap': cmocean.cm.algae,
             'depth integrated': True,
         },
         'Fraser_tracer': {
             'nemo var': 'Fraser_tracer',
-            'cmap': cmocean.turbid,
+            'cmap': cmocean.cm.turbid,
             'depth integrated': False,
         },
     }
