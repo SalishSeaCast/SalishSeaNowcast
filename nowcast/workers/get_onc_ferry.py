@@ -352,7 +352,7 @@ def _create_dataset(
     location_vars = {'lons', 'lats', 'on_crossing_mask', 'crossing_numbers'}
 
     def count(values, axis):
-        return int(values.size)
+        return 0 if numpy.all(numpy.isnan(values)) else int(values.size)
 
     data_vars = {}
     for var, array in data_arrays.__dict__.items():
@@ -361,7 +361,21 @@ def _create_dataset(
                 var, array, ferry_platform, location_config
             )
         else:
-            data_array = array.resample('1Min', 'time', how='mean')
+            try:
+                data_array = array.resample('1Min', 'time', how='mean')
+            except IndexError:
+                # array is empty, meaning there are no observations with
+                # qaqcFlag!=1, so substitute a DataArray full of NaNs
+                nan_values = numpy.empty(data_vars['lons'].time.shape)
+                nan_values[:] = numpy.nan
+                array = xarray.DataArray(
+                    name=array.name,
+                    data=nan_values,
+                    coords={'time': data_vars['lons'].time},
+                    dims=('time',),
+                    attrs=array.attrs,
+                )
+                data_array = array.resample('1Min', 'time', how='mean')
             data_array.attrs = array.attrs
             data_vars[var] = _create_dataarray(
                 var, data_array, ferry_platform, location_config
