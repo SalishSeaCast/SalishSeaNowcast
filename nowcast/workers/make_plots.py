@@ -281,11 +281,32 @@ def _prep_nowcast_green_research_fig_functions(
     bathy, mesh_mask, results_dir, run_date
 ):
     yyyymmdd = run_date.format('YYYYMMDD')
+    grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
-    place = 'S3'
-    clevels_thalweg, clevels_surface = (
-        tracer_thalweg_and_surface_hourly.clevels(
-            ptrc_T_hr.variables['nitrate'], mesh_mask, depth_integrated=False))
+    fig_functions = {}
+    image_loops = {
+        'salinity': {'nemo var': 'vosaline', 'cmap': cmocean.cm.haline},
+        'temperature': {'nemo var': 'votemper', 'cmap': cmocean.cm.thermal},
+    }
+    for tracer, params in image_loops.items():
+        clevels_thalweg, clevels_surface = (
+            tracer_thalweg_and_surface_hourly.clevels(
+                grid_T_hr.variables[params['nemo var']], mesh_mask,
+                depth_integrated=False))
+        fig_functions.update({
+            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
+                {
+                    'function': tracer_thalweg_and_surface_hourly.make_figure,
+                    'args': (
+                        hr, grid_T_hr.variables[params['nemo var']], bathy,
+                        mesh_mask, clevels_thalweg, clevels_surface),
+                    'kwargs':
+                        {'cmap': params['cmap'], 'depth_integrated': False},
+                    'format': 'png',
+                    'image loop': True,
+                }
+            for hr in range(24)
+        })
     image_loops = {
         'nitrate': {
             'nemo var': 'nitrate',
@@ -348,7 +369,6 @@ def _prep_nowcast_green_research_fig_functions(
             'depth integrated': False,
         },
     }
-    fig_functions = {}
     for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = (
             tracer_thalweg_and_surface_hourly.clevels(
@@ -371,6 +391,7 @@ def _prep_nowcast_green_research_fig_functions(
                 }
             for hr in range(24)
         })
+    place = 'S3'
     phys_dataset = xr.open_dataset(
         'https://salishsea.eos.ubc.ca/erddap/griddap'
         '/ubcSSg3DTracerFields1hV17-02')
@@ -378,6 +399,10 @@ def _prep_nowcast_green_research_fig_functions(
         'https://salishsea.eos.ubc.ca/erddap/griddap'
         '/ubcSSg3DBiologyFields1hV17-02')
     fig_functions.update({
+        'temperature_salinity_timeseries': {
+            'function': time_series_plots.make_figure,
+            'args': (phys_dataset, 'temperature', 'salinity', place)
+        },
         'nitrate_diatoms_timeseries': {
             'function': time_series_plots.make_figure,
             'args': (bio_dataset, 'nitrate', 'diatoms', place)
@@ -389,10 +414,6 @@ def _prep_nowcast_green_research_fig_functions(
         'mesodinium_flagellates_timeseries': {
             'function': time_series_plots.make_figure,
             'args': (bio_dataset, 'ciliates', 'flagellates', place)
-        },
-        'temperature_salinity_timeseries': {
-            'function': time_series_plots.make_figure,
-            'args': (phys_dataset, 'temperature', 'salinity', place)
         },
     })
     return fig_functions
