@@ -52,10 +52,10 @@ def make_figure(
     :type mesh_mask: :class:`netCDF4.Dataset`
 
     :param clevels_thalweg: Colour bar contour intervals for thalweg plot.
-    :type clevels_thalweg: :class:`np.arange`
+    :type clevels_thalweg: :class:`numpy.ndarray`
 
     :param clevels_surface: Colour bar contour intervals for surface plot.
-    :type clevels_surface: :class:`np.arange`
+    :type clevels_surface: :class:`numpy.ndarray`
     
     :param cmap: Colour map to use for tracer_var contour plots.
     :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
@@ -73,14 +73,10 @@ def make_figure(
     """
     plot_data = _prep_plot_data(hr, tracer_var, mesh_mask, depth_integrated)
     fig, (ax_thalweg, ax_surface) = _prep_fig_axes(figsize, theme)
-
-    show_thalweg_cbar = True
-
     cbar_thalweg = _plot_tracer_thalweg(
         ax_thalweg, plot_data, bathy, mesh_mask, cmap, clevels_thalweg)
     _thalweg_axes_labels(
-        ax_thalweg, plot_data, show_thalweg_cbar, clevels_thalweg,
-        cbar_thalweg, theme)
+        ax_thalweg, plot_data, clevels_thalweg, cbar_thalweg, theme)
 
     cbar_surface = _plot_tracer_surface(
         ax_surface, plot_data, cmap, clevels_surface)
@@ -91,10 +87,22 @@ def make_figure(
 
 
 def clevels(tracer_var, mesh_mask, depth_integrated):
+    """Calculate the colour bar contour intervals for the thalweg and surface
+    plot axes based on the tracer variable values at hr=0.
 
+    :param tracer_var: Hourly average tracer results from NEMO run.
+    :type tracer_var: :py:class:`netCDF4.Variable`
+
+    :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
+    :type mesh_mask: :class:`netCDF4.Dataset`
+
+    :param depth_integrated:
+
+    :returns: Colour bar contour intervals for thalweg and surface plot axes.
+    :rtype: 2-tuple of :class:`numpy.ndarray` objects
+    """
     plot_data = _prep_plot_data(0, tracer_var, mesh_mask, depth_integrated)
-    clevels_thalweg, clevels_surface = _calc_clevels(plot_data)[0:2]
-
+    clevels_thalweg, clevels_surface = _calc_clevels(plot_data)
     return clevels_thalweg, clevels_surface
 
 
@@ -128,7 +136,7 @@ def _prep_fig_axes(figsize, theme):
     fig = plt.figure(
         figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
 
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1.618, 1])
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1.525, 1])
 
     ax_thalweg = fig.add_subplot(gs[0])
     ax_thalweg.set_axis_bgcolor(theme.COLOURS['axes']['background'])
@@ -140,39 +148,21 @@ def _prep_fig_axes(figsize, theme):
 
 
 def _calc_clevels(plot_data):
-    """Calculates contour levels for the two axes and decides whether whether
-    the levels are similar enough that one colour bar is sufficient for the 
-    figure, or if each axes requires one.
+    """Calculate contour levels for the thalweg and surface plot axes.
     """
+    percent_98_thalweg = np.percentile(
+        np.ma.masked_values(plot_data.tracer_hr, 0).compressed(), 98)
+    percent_2_thalweg = np.percentile(
+        np.ma.masked_values(plot_data.tracer_hr, 0).compressed(), 2)
     percent_98_surf = np.percentile(plot_data.surface_hr.compressed(), 98)
     percent_2_surf = np.percentile(plot_data.surface_hr.compressed(), 2)
-
-    percent_98_grid = np.percentile(
-        np.ma.masked_values(plot_data.tracer_hr, 0).compressed(), 98)
-    percent_2_grid = np.percentile(
-        np.ma.masked_values(plot_data.tracer_hr, 0).compressed(), 2)
-
-    overlap = (
-        max(0, min(percent_98_surf, percent_98_grid)
-            - max(percent_2_surf, percent_2_grid)))
-    magnitude = (
-        (percent_98_surf - percent_2_surf) + (percent_98_grid - percent_2_grid))
-    if 2 * overlap / magnitude > 0.5:
-        max_clevel = max(percent_98_surf, percent_98_grid)
-        min_clevel = min(percent_2_surf, percent_2_grid)
-        clevels_thalweg = np.arange(
-            min_clevel, max_clevel, (max_clevel - min_clevel) / 20.0)
-        clevels_surface = clevels_thalweg
-        show_thalweg_cbar = False
-    else:
-        clevels_thalweg = np.arange(
-            percent_2_grid, percent_98_grid,
-            (percent_98_grid - percent_2_grid) / 20.0)
-        clevels_surface = np.arange(
-            percent_2_surf, percent_98_surf,
-            (percent_98_surf - percent_2_surf) / 20.0)
-        show_thalweg_cbar = True
-    return clevels_thalweg, clevels_surface, show_thalweg_cbar
+    clevels_thalweg = np.arange(
+        percent_2_thalweg, percent_98_thalweg,
+        (percent_98_thalweg - percent_2_thalweg) / 20.0)
+    clevels_surface = np.arange(
+        percent_2_surf, percent_98_surf,
+        (percent_98_surf - percent_2_surf) / 20.0)
+    return clevels_thalweg, clevels_surface
 
 
 def _plot_tracer_thalweg(ax, plot_data, bathy, mesh_mask, cmap, clevels):
@@ -185,18 +175,13 @@ def _plot_tracer_thalweg(ax, plot_data, bathy, mesh_mask, cmap, clevels):
     return cbar
 
 
-def _thalweg_axes_labels(
-    ax, plot_data, show_thalweg_cbar, clevels, cbar, theme
-):
+def _thalweg_axes_labels(ax, plot_data, clevels, cbar, theme):
     ax.set_xlim(plot_data.thalweg_length_limits)
     ax.set_ylim(
         plot_data.thalweg_depth_limits[1], plot_data.thalweg_depth_limits[0])
-    if show_thalweg_cbar:
-        label = (
-            f'{plot_data.tracer_var.long_name} [{plot_data.tracer_var.units}]')
-        _cbar_labels(cbar, clevels[::2], theme, label)
-    else:
-        cbar.remove()
+    label = (
+        f'{plot_data.tracer_var.long_name} [{plot_data.tracer_var.units}]')
+    _cbar_labels(cbar, clevels[::2], theme, label)
     ax.set_xlabel(
         'Distance along thalweg [km]', color=theme.COLOURS['text']['axis'],
         fontproperties=theme.FONTS['axis'])
