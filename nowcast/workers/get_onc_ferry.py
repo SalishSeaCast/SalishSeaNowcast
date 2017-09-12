@@ -104,8 +104,8 @@ def get_onc_ferry(parsed_args, config, *args):
     data_arrays = SimpleNamespace()
     nav_data = _get_nav_data(ferry_platform, ymd, location_config)
     (
-        data_arrays.lons, data_arrays.lats, data_arrays.on_crossing_mask,
-        data_arrays.crossing_numbers,
+        data_arrays.longitude, data_arrays.latitude,
+        data_arrays.on_crossing_mask, data_arrays.crossing_number,
     ) = _calc_location_arrays(nav_data, location_config)
     for device in devices_config:
         device_data = _get_water_data(
@@ -349,7 +349,9 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
 def _create_dataset(
     data_arrays, ferry_platform, ferry_config, location_config
 ):
-    location_vars = {'lons', 'lats', 'on_crossing_mask', 'crossing_numbers'}
+    location_vars = {
+        'longitude', 'latitude', 'on_crossing_mask', 'crossing_number'
+    }
 
     def count(values, axis):
         return 0 if numpy.all(numpy.isnan(values)) else int(values.size)
@@ -366,12 +368,12 @@ def _create_dataset(
             except IndexError:
                 # array is empty, meaning there are no observations with
                 # qaqcFlag!=1, so substitute a DataArray full of NaNs
-                nan_values = numpy.empty(data_vars['lons'].time.shape)
+                nan_values = numpy.empty(data_vars['longitude'].time.shape)
                 nan_values[:] = numpy.nan
                 array = xarray.DataArray(
                     name=array.name,
                     data=nan_values,
-                    coords={'time': data_vars['lons'].time},
+                    coords={'time': data_vars['longitude'].time},
                     dims=('time',),
                     attrs=array.attrs,
                 )
@@ -398,7 +400,7 @@ def _create_dataset(
     dataset = xarray.Dataset(
         data_vars=data_vars,
         coords={
-            'time': data_arrays.lons.time.values,
+            'time': data_arrays.longitude.time.values,
         },
         attrs={
             'history':
@@ -419,7 +421,7 @@ count as aggregation functions.
 
 def _create_dataarray(var, array, ferry_platform, location_config):
     metadata = {
-        'lons': {
+        'longitude': {
             'name': 'longitude',
             'ioos category': 'location',
             'standard name': 'longitude',
@@ -429,7 +431,7 @@ def _create_dataarray(var, array, ferry_platform, location_config):
                 f'?location={location_config["station"]}'
                 f'&deviceCategory={location_config["device category"]}'
         },
-        'lats': {
+        'latitude': {
             'name': 'latitude',
             'ioos category': 'location',
             'standard name': 'latitude',
@@ -455,7 +457,7 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             'ONC_data_product_url':
                 f'http://dmas.uvic.ca/DataSearch?location={ferry_platform}'
         },
-        'crossing_numbers': {
+        'crossing_number': {
             'name':
                 'crossing_number',
             'ioos category':
