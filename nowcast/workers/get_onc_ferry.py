@@ -117,7 +117,7 @@ def get_onc_ferry(parsed_args, config, *args):
         for i, sensor in enumerate(devices_config[device]['sensors']):
             setattr(data_arrays, sensor, sensor_data_arrays[i])
     dataset = _create_dataset(
-        data_arrays, ferry_platform, ferry_config, location_config
+        data_arrays, ferry_platform, ferry_config, location_config, ymd
     )
     dest_dir = Path(config['observations']['ferry data']['dest dir'])
     filepath_tmpl = ferry_config['filepath template']
@@ -347,7 +347,7 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
 
 
 def _create_dataset(
-    data_arrays, ferry_platform, ferry_config, location_config
+    data_arrays, ferry_platform, ferry_config, location_config, ymd
 ):
     location_vars = {
         'longitude', 'latitude', 'on_crossing_mask', 'crossing_number'
@@ -368,7 +368,18 @@ def _create_dataset(
             except IndexError:
                 # array is empty, meaning there are no observations with
                 # qaqcFlag!=1, so substitute a DataArray full of NaNs
-                nan_values = numpy.empty(data_vars['longitude'].time.shape)
+                logger.warning(
+                    f'ONC {ferry_platform} {array.device_category} '
+                    f'{array.name} data for {ymd} contains no qaqcFlag!=0 '
+                    f'values; substituting NaNs',
+                    extra={
+                        'data_date': ymd,
+                        'ferry_platform': ferry_platform,
+                        'device_category': array.device_category,
+                        'sensor': array.name,
+                    }
+                )
+                nan_values = numpy.empty_like(data_vars['longitude'].values)
                 nan_values[:] = numpy.nan
                 array = xarray.DataArray(
                     name=array.name,
