@@ -151,7 +151,7 @@ def _prep_fig_axes(figsize, theme):
         figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
     )
 
-    gs = gridspec.GridSpec(1, 2, width_ratios=[1.525, 1])
+    gs = gridspec.GridSpec(1, 2, width_ratios=[1.4, 1])
 
     ax_thalweg = fig.add_subplot(gs[0])
     ax_thalweg.set_axis_bgcolor(theme.COLOURS['axes']['background'])
