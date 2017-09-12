@@ -589,15 +589,6 @@ def _prep_publish_fig_functions(
             'function': figures.compare_water_levels,
             'args': (grid_T_hr, bathy, grids_15m, coastline)
         },
-        'WaterLevel_Thresholds': {
-            ## TODO: Fix hardcoded path in figure function:
-            ## '/data/nsoontie/MEOPAR/analysis/Nancy/tides/PA_observations
-            # /ptatkin_rt.dat'
-            'function': figures.plot_thresholds_all,
-            'args': (
-                grid_T_hr, bathy, grids_15m, weather_path, coastline,
-                tidal_predictions)
-        },
         'SH_wind': {
             'function': figures.SandHeads_winds,
             'args': (grid_T_hr, bathy, weather_path, coastline)
