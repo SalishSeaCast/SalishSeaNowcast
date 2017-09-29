@@ -75,7 +75,7 @@ def make_figure(
 
 def _prep_plot_data(xr_dataset, left_variable, right_variable, place):
     end_day = arw.get(xr_dataset.time_coverage_end)
-    start_day = end_day.replace(months=-2)
+    start_day = end_day.replace(days=-49)
     time_slice = slice(start_day.date(), end_day.replace(days=+1).date())
     grid_y, grid_x = places.PLACES[place]['NEMO grid ji']
     left_var = (
