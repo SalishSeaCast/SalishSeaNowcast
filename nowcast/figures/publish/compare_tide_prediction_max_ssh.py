@@ -339,7 +339,7 @@ def _plot_ssh_map(ax, plot_data, place, theme):
         -1, -0.5, 0.5, 1, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.4, 2.6]
     mesh = ax.contourf(
         plot_data.ssh_max_field, contour_intervals,
-        cmap='nipy_spectral', extend='both', alpha=0.6)
+        cmap='YlOrRd', extend='both', alpha=0.6)
     ax.contour(
         plot_data.ssh_max_field, contour_intervals,
         colors='black', linestyles='--')
