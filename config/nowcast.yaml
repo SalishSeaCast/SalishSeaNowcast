@@ -519,7 +519,7 @@ run:
     bugaboo-fs:
       run types:
         hindcast:
-          results: /home/sallen/SalishSea/hindcast/
+          results: /global/scratch/sallen/SalishSea/hindcast/
 
 
 wave forecasts:
