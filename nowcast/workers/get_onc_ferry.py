@@ -407,6 +407,9 @@ def _create_dataset(
                 sample_count_var, sample_count_array, ferry_platform,
                 location_config
             )
+            data_vars[sample_count_var].values = numpy.nan_to_num(
+                data_vars[sample_count_var].values
+            )
     now = arrow.now().format('YYYY-MM-DD HH:mm:ss')
     dataset = xarray.Dataset(
         data_vars=data_vars,
