@@ -608,6 +608,32 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             'long name':
                 'corrected O2 concentration sample count',
         },
+        'o2_temperature': {
+            'name': 'o2_temperature',
+            'ioos category': 'dissolved_o2',
+            'standard name': 'temperature_of_sensor_for_oxygen_in_sea_water',
+            'long name': 'O2 sensor temperature',
+        },
+        'o2_temperature_std_dev': {
+            'name':
+                'o2_temperature_std_dev',
+            'ioos category':
+                'dissolved_o2',
+            'standard name':
+                'temperature_of_sensor_for_oxygen_in_sea_water_standard_deviation',
+            'long name':
+                'O2 sensor temperature standard deviation',
+        },
+        'o2_temperature_sample_count': {
+            'name':
+                'o2_temperature_sample_count',
+            'ioos category':
+                'dissolved_o2',
+            'standard name':
+                'temperature_of_sensor_for_oxygen_in_sea_water_sample_count',
+            'long name':
+                'O2 sensor temperature sample count',
+        },
         'cdom_fluorescence': {
             'name':
                 'cdom_fluorescence',

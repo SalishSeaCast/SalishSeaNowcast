@@ -183,6 +183,7 @@ observations:
             sensors:
               o2_saturation: oxygen_saturation
               o2_concentration_corrected: oxygen_corrected
+              o2_temperature: temperature
           TURBCHLFL:
             sensors:
               cdom_fluorescence: cdom_fluorescence
