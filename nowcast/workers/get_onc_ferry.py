@@ -562,7 +562,7 @@ def _create_dataarray(var, array, ferry_platform, location_config):
         'o2_saturation': {
             'name': 'o2_saturation',
             'ioos category': 'dissolved_o2',
-            'standard name': 'fractional_saturation_of_oxygen_in_sea_water',
+            'standard name': 'percent_saturation_of_oxygen_in_sea_water',
             'long name': 'O2 saturation',
         },
         'o2_saturation_std_dev': {
@@ -571,7 +571,7 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             'ioos category':
                 'dissolved_o2',
             'standard name':
-                'fractional_saturation_of_oxygen_in_sea_water_standard_deviation',
+                'percent_saturation_of_oxygen_in_sea_water_standard_deviation',
             'long name':
                 'O2 saturation standard deviation',
         },
@@ -581,7 +581,7 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             'ioos category':
                 'dissolved_o2',
             'standard name':
-                'fractional_saturation_of_oxygen_in_sea_water_sample_count',
+                'percent_saturation_of_oxygen_in_sea_water_sample_count',
             'long name':
                 'O2 saturation sample count',
         },
