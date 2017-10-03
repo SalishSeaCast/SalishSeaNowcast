@@ -407,9 +407,18 @@ def _create_dataset(
                 sample_count_var, sample_count_array, ferry_platform,
                 location_config
             )
+            # If any of the DataArrays are short compared to the others the
+            # missing values are filled with NaNs. That makes sense for
+            # observation values, and their standard deviations, but not their
+            # sample counts. So, we change NaNs to zeros in the sample count
+            # DataArrays, and explicitly set the data type to int32 to keep
+            # netcdf3 happy.
             data_vars[sample_count_var].values = numpy.nan_to_num(
                 data_vars[sample_count_var].values
             )
+            tmp_array = data_vars[sample_count_var].astype(numpy.int32)
+            tmp_array.attrs = data_vars[sample_count_var].attrs
+            data_vars[sample_count_var] = tmp_array
     now = arrow.now().format('YYYY-MM-DD HH:mm:ss')
     dataset = xarray.Dataset(
         data_vars=data_vars,
