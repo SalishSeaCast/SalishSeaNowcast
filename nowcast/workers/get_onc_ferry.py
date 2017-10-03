@@ -788,7 +788,14 @@ def _create_dataarray(var, array, ferry_platform, location_config):
         if attr in metadata[var]:
             dataset_array.attrs[attr] = metadata[var][attr]
     dataset_array.attrs.update(aggregation_attrs)
-    dataset_array.attrs['ONC_stationCode'] = f'{location_config["station"]}'
+    location_vars = {
+        'longitude', 'latitude', 'on_crossing_mask', 'crossing_number'
+    }
+    if var in location_vars:
+        dataset_array.attrs[
+            'ONC_stationCode'] = f'{location_config["station"]}'
+    else:
+        dataset_array.attrs['ONC_stationCode'] = f'{ferry_platform}'
     try:
         dataset_array.attrs['ONC_data_product_url'
                             ] = metadata[var]['ONC_data_product_url']
