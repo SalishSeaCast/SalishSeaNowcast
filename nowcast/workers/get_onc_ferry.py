@@ -371,7 +371,7 @@ def _create_dataset(
                 # qaqcFlag!=1, so substitute a DataArray full of NaNs
                 logger.warning(
                     f'ONC {ferry_platform} {array.device_category} '
-                    f'{array.name} data for {ymd} contains no qaqcFlag!=0 '
+                    f'{array.name} data for {ymd} contains no qaqcFlag!=1 '
                     f'values; substituting NaNs',
                     extra={
                         'data_date': ymd,
