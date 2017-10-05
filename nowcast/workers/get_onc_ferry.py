@@ -297,6 +297,7 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
         )
         ## TODO: Return a dataset containing dataarrays full of NaNs
         raise WorkerError(msg)
+    ## TODO: Handle TypeError due to None in json parsing; see issue #45
     device_data = data_tools.onc_json_to_dataset(onc_data)
     logger.debug(
         f'ONC {ferry_platform} {device_category} data for {ymd} '
