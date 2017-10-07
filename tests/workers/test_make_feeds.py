@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast make_feeds worker.
 """
 from collections import namedtuple
@@ -31,7 +30,9 @@ from nowcast.workers import make_feeds
 @pytest.fixture
 def config():
     return {
-        'ssh': {'tidal predictions': 'tidal_predictions/'},
+        'ssh': {
+            'tidal predictions': 'tidal_predictions/'
+        },
         'results archive': {
             'forecast': '/results/SalishSea/forecast/',
         },
@@ -45,13 +46,18 @@ def config():
             'feed entry template': 'storm_surge_advisory.mako',
             'feeds': {
                 'pmv.xml': {
-                    'title': 'SalishSeaCast for Port Metro Vancouver',
-                    'city': 'Vancouver',
-                    'tide gauge stn': 'Point Atkinson',
+                    'title':
+                    'SalishSeaCast for Port Metro Vancouver',
+                    'city':
+                    'Vancouver',
+                    'tide gauge stn':
+                    'Point Atkinson',
                     'tidal predictions':
-                        'Point Atkinson_tidal_prediction_'
-                        '01-Jan-2013_31-Dec-2020.csv',
-        }}},
+                    'Point Atkinson_tidal_prediction_'
+                    '01-Jan-2013_31-Dec-2020.csv',
+                }
+            }
+        },
     }
 
 
@@ -59,6 +65,7 @@ def config():
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         make_feeds.main()
         args, kwargs = m_worker.call_args
@@ -93,13 +100,15 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     @pytest.mark.parametrize('run_type', [
         'forecast',
         'forecast2',
     ])
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get('2015-12-21'))
+            run_type=run_type, run_date=arrow.get('2015-12-21')
+        )
         make_feeds.success(parsed_args)
         assert m_logger.info.called
 
@@ -109,7 +118,8 @@ class TestSuccess:
     ])
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get('2015-12-21'))
+            run_type=run_type, run_date=arrow.get('2015-12-21')
+        )
         msg_type = make_feeds.success(parsed_args)
         assert msg_type == 'success {run_type}'.format(run_type=run_type)
 
@@ -118,13 +128,15 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     @pytest.mark.parametrize('run_type', [
         'forecast',
         'forecast2',
     ])
     def test_failure_log_error(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get('2015-12-21'))
+            run_type=run_type, run_date=arrow.get('2015-12-21')
+        )
         make_feeds.failure(parsed_args)
         assert m_logger.critical.called
 
@@ -134,7 +146,8 @@ class TestFailure:
     ])
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get('2015-12-21'))
+            run_type=run_type, run_date=arrow.get('2015-12-21')
+        )
         msg_type = make_feeds.failure(parsed_args)
         assert msg_type == 'failure {run_type}'.format(run_type=run_type)
 
@@ -142,22 +155,26 @@ class TestFailure:
 class TestMakeFeeds:
     """Unit test for make_feeds() function.
     """
+
     @patch('nowcast.workers.make_feeds._generate_feed')
     @patch('nowcast.workers.make_feeds._calc_max_ssh_risk')
     def test_checklist(self, m_cmsr, m_gf, config):
         parsed_args = SimpleNamespace(
-            run_type='forecast', run_date=arrow.get('2016-11-12'))
+            run_type='forecast', run_date=arrow.get('2016-11-12')
+        )
         m_cmsr.return_value = {'risk_level': None}
         checklist = make_feeds.make_feeds(parsed_args, config)
         expected = {
             'forecast 2016-11-12':
-                ['/results/nowcast-sys/figures/storm-surge/atom/pmv.xml']}
+            ['/results/nowcast-sys/figures/storm-surge/atom/pmv.xml']
+        }
         assert checklist == expected
 
 
 class TestGenerateFeed:
     """Unit test for _generate_feed() function.
     """
+
     @patch('nowcast.workers.make_feeds.arrow.utcnow')
     def test_generate_feed(self, m_utcnow, config):
         m_utcnow.return_value = arrow.get('2016-02-20 11:02:42')
@@ -165,7 +182,8 @@ class TestGenerateFeed:
         atom_path = config['storm surge feeds']['storage path']
         fg = make_feeds._generate_feed(
             'pmv.xml', config['storm surge feeds'],
-            os.path.join(storm_surge_path, atom_path))
+            os.path.join(storm_surge_path, atom_path)
+        )
         feed = fg.atom_str(pretty=True).decode('ascii')
         expected = [
             "<?xml version='1.0' encoding='UTF-8'?>",
@@ -203,14 +221,17 @@ class TestGenerateFeed:
 class TestGenerateFeedEntry:
     """Unit tests for _generate_feed_entry() function.
     """
+
     def test_title(self, m_fe, m_rec, m_now, config):
         storm_surge_path = config['figures']['storm surge info portal path']
         atom_path = config['storm surge feeds']['storage path']
         make_feeds._generate_feed_entry(
             'pmv.xml', 'max_ssh_info', config,
-            os.path.join(storm_surge_path, atom_path))
+            os.path.join(storm_surge_path, atom_path)
+        )
         m_fe().title.assert_called_once_with(
-            'Storm Surge Alert for Point Atkinson')
+            'Storm Surge Alert for Point Atkinson'
+        )
 
     def test_id(self, m_fe, m_rec, m_now, config):
         storm_surge_path = config['figures']['storm surge info portal path']
@@ -218,28 +239,35 @@ class TestGenerateFeedEntry:
         m_now.return_value = arrow.get('2015-12-24 15:10:42')
         make_feeds._generate_feed_entry(
             'pmv.xml', 'max_ssh_info', config,
-            os.path.join(storm_surge_path, atom_path))
+            os.path.join(storm_surge_path, atom_path)
+        )
         m_fe().id.assert_called_once_with(
             make_feeds._build_tag_uri(
-                '2015-12-24', 'pmv.sml', m_now(), config['storm surge feeds'],
-                os.path.join(storm_surge_path, atom_path)))
+                '2015-12-24', 'pmv.sml',
+                m_now(), config['storm surge feeds'],
+                os.path.join(storm_surge_path, atom_path)
+            )
+        )
 
     def test_author(self, m_fe, m_rec, m_now, config):
         storm_surge_path = config['figures']['storm surge info portal path']
         atom_path = config['storm surge feeds']['storage path']
         make_feeds._generate_feed_entry(
             'pmv.xml', 'max_ssh_info', config,
-            os.path.join(storm_surge_path, atom_path))
+            os.path.join(storm_surge_path, atom_path)
+        )
         m_fe().author.assert_called_once_with(
             name='Salish Sea MEOPAR Project',
-            uri='https://salishsea.eos.ubc.ca/')
+            uri='https://salishsea.eos.ubc.ca/'
+        )
 
     def test_content(self, m_fe, m_rec, m_now, config):
         storm_surge_path = config['figures']['storm surge info portal path']
         atom_path = config['storm surge feeds']['storage path']
         make_feeds._generate_feed_entry(
             'pmv.xml', 'max_ssh_info', config,
-            os.path.join(storm_surge_path, atom_path))
+            os.path.join(storm_surge_path, atom_path)
+        )
         m_fe().content.assert_called_once_with(m_rec(), type='html')
 
     def test_link(self, m_fe, m_rec, m_now, config):
@@ -247,37 +275,44 @@ class TestGenerateFeedEntry:
         atom_path = config['storm surge feeds']['storage path']
         make_feeds._generate_feed_entry(
             'pmv.xml', 'max_ssh_info', config,
-            os.path.join(storm_surge_path, atom_path))
+            os.path.join(storm_surge_path, atom_path)
+        )
         m_fe().link.assert_called_once_with(
             href='https://salishsea.eos.ubc.ca/storm-surge/forecast.html',
-            rel='alternate', type='text/html')
+            rel='alternate',
+            type='text/html'
+        )
 
 
 class TestBuildTagURI:
     """Unit test for _build_tag_uri() function.
     """
+
     def test_build_tag_uri(self, config):
         storm_surge_path = config['figures']['storm surge info portal path']
         atom_path = config['storm surge feeds']['storage path']
         tag = make_feeds._build_tag_uri(
-            '2015-12-12', 'pmv.xml', arrow.get('2015-12-21 09:31:42'),
-            config['storm surge feeds'],
-            os.path.join(storm_surge_path, atom_path))
+            '2015-12-12', 'pmv.xml',
+            arrow.get('2015-12-21 09:31:42'), config['storm surge feeds'],
+            os.path.join(storm_surge_path, atom_path)
+        )
         expected = (
             'tag:salishsea.eos.ubc.ca,2015-12-12:'
-            '/storm-surge/atom/pmv/20151221093142')
+            '/storm-surge/atom/pmv/20151221093142'
+        )
         assert tag == expected
 
 
 class TestRenderEntryContent:
     """Unit test for _render_entry_content() function.
     """
+
     @patch('nowcast.workers.make_feeds._calc_wind_4h_avg')
     @patch('nowcast.workers.make_feeds.mako.template.Template')
     @patch('nowcast.workers.make_feeds.os.path.dirname')
     @patch('nowcast.workers.make_feeds.docutils.core.publish_parts')
     def test_render_entry_content(
-        self, m_pp, m_dirname, m_tmpl, m_cw4a, config,
+        self, m_pp, m_dirname, m_tmpl, m_cw4a, config
     ):
         max_ssh_info = {
             'max_ssh': 5.0319,
@@ -290,10 +325,12 @@ class TestRenderEntryContent:
         }
         m_dirname.return_value = 'nowcast/workers/'
         content = make_feeds._render_entry_content(
-            'pmv.xml', max_ssh_info, config)
+            'pmv.xml', max_ssh_info, config
+        )
         m_tmpl.assert_called_once_with(
             filename='nowcast/workers/storm_surge_advisory.mako',
-            input_encoding='utf-8')
+            input_encoding='utf-8'
+        )
         assert m_tmpl().render.called
         assert content == m_pp()['body']
 
@@ -301,6 +338,7 @@ class TestRenderEntryContent:
 class TestCalcMaxSshRisk:
     """Unit test for _calc_max_ssh_risk() function.
     """
+
     @patch('nowcast.workers.make_feeds.stormtools.load_tidal_predictions')
     @patch('nowcast.workers.make_feeds._calc_max_ssh')
     @patch('nowcast.workers.make_feeds.stormtools.storm_surge_risk_level')
@@ -311,39 +349,51 @@ class TestCalcMaxSshRisk:
         m_cms.return_value = (max_ssh, max_ssh_time)
         m_ltp.return_value = ('ttide', 'msl')
         max_ssh_info = make_feeds._calc_max_ssh_risk(
-            'pmv.xml', run_date, 'forecast', config)
+            'pmv.xml', run_date, 'forecast', config
+        )
         m_ltp.assert_called_once_with(
             'tidal_predictions/Point Atkinson_tidal_prediction_'
-            '01-Jan-2013_31-Dec-2020.csv')
+            '01-Jan-2013_31-Dec-2020.csv'
+        )
         m_cms.assert_called_once_with(
-            'pmv.xml', m_ltp()[0], run_date, 'forecast', config)
+            'pmv.xml', m_ltp()[0], run_date, 'forecast', config
+        )
         m_ssrl.assert_called_once_with('Point Atkinson', max_ssh, m_ltp()[0])
         np.testing.assert_array_equal(
-            max_ssh_info['max_ssh'], np.array([5.09]))
+            max_ssh_info['max_ssh'], np.array([5.09])
+        )
         np.testing.assert_array_equal(
-            max_ssh_info['max_ssh_time'], max_ssh_time)
+            max_ssh_info['max_ssh_time'], max_ssh_time
+        )
         assert max_ssh_info['risk_level'] == m_ssrl()
 
 
 class TestCalcMaxSsh:
     """Unit test for _calc_max_ssh() function.
     """
+
     @patch('nowcast.workers.make_feeds.nc.Dataset')
     @patch('nowcast.workers.make_feeds.nc_tools.ssh_timeseries_at_point')
-    @patch('nowcast.workers.make_feeds.nowcast.figures.shared.correct_model_ssh')
+    @patch(
+        'nowcast.workers.make_feeds.nowcast.figures.shared.correct_model_ssh'
+    )
     def test_calc_max_ssh(self, m_cmssh, m_sshtapt, m_ncd, config):
         ssh_ts = namedtuple('ssh_ts', 'ssh, time')
         m_sshtapt.return_value = ssh_ts(
             np.array([1.93]),
-            np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)]))
+            np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)])
+        )
         m_cmssh.return_value = np.array(2)
         max_ssh, max_ssh_time = make_feeds._calc_max_ssh(
-            'pmv.xml', 'ttide', arrow.get('2015-12-22').floor('day'),
-            'forecast', config)
+            'pmv.xml', 'ttide',
+            arrow.get('2015-12-22').floor('day'), 'forecast', config
+        )
         m_ncd.assert_called_once_with(
-            '/results/SalishSea/forecast/22dec15/PointAtkinson.nc')
+            '/results/SalishSea/forecast/22dec15/PointAtkinson.nc'
+        )
         m_sshtapt.assert_called_once_with(m_ncd(), 0, 0, datetimes=True)
         np.testing.assert_array_equal(max_ssh, np.array([5.09]))
         np.testing.assert_array_equal(
             max_ssh_time,
-            np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)]))
+            np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)])
+        )
