@@ -31,7 +31,7 @@ dependencies:
   - dask
   - docutils
   - mako
-  - matplotlib
+  - matplotlib=1.5.3
   - netcdf4
   - numpy
   - pandas

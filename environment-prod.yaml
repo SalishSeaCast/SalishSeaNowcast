@@ -28,7 +28,7 @@ dependencies:
   - dask
   - docutils
   - mako
-  - matplotlib
+  - matplotlib=1.5.3
   - nemo_nowcast
   - netcdf4
   - numpy
