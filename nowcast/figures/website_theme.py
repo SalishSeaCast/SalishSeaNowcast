@@ -12,19 +12,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Colour, fonts, and utility functions that define the look of figures for the
 https://salishsea.eos.ubc.ca/nemo/ web pages.
 """
 
-
 from matplotlib.font_manager import FontProperties
-
 
 #: The :kbd:`salishsea.eos.ubc.ca/nemo/` pages background colour,
 #: from the http://bootswatch.com/superhero/ theme.
 SITE_BACKGROUND_COLOUR = '#2B3E50'
-
 
 #: Colours of various figure elements;
 #: the dict key(s) should be descriptive enough to identify the element
@@ -49,7 +45,6 @@ COLOURS = {
         'facecolor': SITE_BACKGROUND_COLOUR,
     },
     'land': 'burlywood',
-
     'marker': {
         'place': 'white',
         'max ssh': 'white',
@@ -83,12 +78,12 @@ COLOURS = {
         'nitrate': 'darkgreen',
         'silicon': 'brown',
         'diatoms': 'brown',
-        'mesozooplankton' : 'brown',
-        'microzooplankton' : 'darkgreen',
-        'ciliates' : 'brown',
-        'flagellates' : 'darkgreen',
-        'temperature' : 'red',
-        'salinity' : 'blue',
+        'mesozooplankton': 'brown',
+        'microzooplankton': 'darkgreen',
+        'ciliates': 'brown',
+        'flagellates': 'darkgreen',
+        'temperature': 'red',
+        'salinity': 'blue',
     },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
@@ -96,37 +91,88 @@ COLOURS = {
     },
 }
 
-
 #: Font properties of various figure text elements;
 #: the top level dict keys should be descriptive enough to identify the element
 #: to which the font properties apply.
 FONTS = {
-    'axes annotation': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
-    'axes title': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
-    'axes title large': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=35),
-    'axis': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
-    'figure annotation': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
-    'figure annotation small': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=10),
-    'info box title': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=20),
-    'info box content': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
-    'legend label': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=15),
-    'legend label large': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=25),
-    'legend title': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=20),
-    'location label large': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=20),
-    'location label small': FontProperties(
-        family=['Bitstream Vera Sans', 'sans-serif'], weight='medium', size=13),
+    'axes annotation':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=15
+        ),
+    'axes title':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=15
+        ),
+    'axes title large':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=35
+        ),
+    'axis':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=15
+        ),
+    'figure annotation':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=15
+        ),
+    'figure annotation small':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=10
+        ),
+    'info box title':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=20
+        ),
+    'info box content':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=15
+        ),
+    'legend label':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=15
+        ),
+    'legend label large':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=25
+        ),
+    'legend title':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=20
+        ),
+    'location label large':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=20
+        ),
+    'location label small':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=13
+        ),
 }
 
 

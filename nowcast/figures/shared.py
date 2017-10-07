@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """A collection of functions for use by multiple figure modules in the
 :kbd:`nowcast.figures` namespaces.
 
@@ -72,7 +71,8 @@ def plot_map(
                 example.
     """
     mapfig = _make_background_map(
-        coastline, lat_range, lon_range, land_patch_min_area, theme)
+        coastline, lat_range, lon_range, land_patch_min_area, theme
+    )
     buffer_ = _render_png_buffer(mapfig)
     img = matplotlib.image.imread(buffer_, format='anything')
     ax.imshow(img, zorder=0, extent=[*lon_range, *lat_range])
@@ -81,7 +81,7 @@ def plot_map(
 
 
 def _make_background_map(
-    coastline, lat_range, lon_range, land_patch_min_area, theme,
+    coastline, lat_range, lon_range, land_patch_min_area, theme
 ):
     fig = Figure(figsize=(15, 15))
     ax = fig.add_subplot(1, 1, 1)
@@ -94,10 +94,11 @@ def _make_background_map(
     kss = coastline['k'][:, 0][:-1][mask]
     kee = coastline['k'][:, 0][1:][mask]
     for ks, ke in zip(kss, kee):
-        poly = list(zip(coast_lon[ks:ke-2], coast_lat[ks:ke-2]))
+        poly = list(zip(coast_lon[ks:ke - 2], coast_lat[ks:ke - 2]))
         ax.add_patch(
-            patches.Polygon(
-                poly, facecolor=theme.COLOURS['land'], rasterized=True))
+            patches.
+            Polygon(poly, facecolor=theme.COLOURS['land'], rasterized=True)
+        )
     # Format the axes
     ax.set_frame_on(False)
     ax.axes.get_yaxis().set_visible(False)
@@ -211,17 +212,21 @@ def interp_to_model_time(t_model, values, t_values):
     :rtype: :py:class:`numpy.ndarray`
     """
     epoch = t_model[0]
-    t_values_wrt_epoch = np.array(
-        [(t - epoch).total_seconds() for t in t_values])
-    t_model_wrt_epoch = np.array(
-        [(t - epoch).total_seconds() for t in t_model])
+    t_values_wrt_epoch = np.array([(t - epoch).total_seconds()
+                                   for t in t_values])
+    t_model_wrt_epoch = np.array([(t - epoch).total_seconds()
+                                  for t in t_model])
     return np.interp(
-        t_model_wrt_epoch, t_values_wrt_epoch, values,
-        left=np.NaN, right=np.NaN)
+        t_model_wrt_epoch,
+        t_values_wrt_epoch,
+        values,
+        left=np.NaN,
+        right=np.NaN,
+    )
 
 
 def plot_risk_level_marker(
-    ax, tide_gauge_name, risk_level, marker, msize, alpha, theme,
+    ax, tide_gauge_name, risk_level, marker, msize, alpha, theme
 ):
     """Draw a storm surge risk level marker at tide gauge location.
 
@@ -254,12 +259,16 @@ def plot_risk_level_marker(
     """
     ax.plot(
         *PLACES[tide_gauge_name]['lon lat'],
-        marker=marker, markersize=msize, markeredgewidth=2, alpha=alpha,
-        color=theme.COLOURS['storm surge risk levels'][risk_level])
+        marker=marker,
+        markersize=msize,
+        markeredgewidth=2,
+        alpha=alpha,
+        color=theme.COLOURS['storm surge risk levels'][risk_level],
+    )
 
 
 def plot_wind_arrow(
-    ax, lon, lat, u_wind, v_wind, theme, wind_arrow_scale_factor=0.1,
+    ax, lon, lat, u_wind, v_wind, theme, wind_arrow_scale_factor=0.1
 ):
     """Draw a wind arrow on an plot axes.
 
@@ -293,12 +302,16 @@ def plot_wind_arrow(
                 example.
     """
     ax.arrow(
-        lon, lat,
+        lon,
+        lat,
         wind_arrow_scale_factor * u_wind,
         wind_arrow_scale_factor * v_wind,
-        head_width=0.05, head_length=0.1, width=0.02,
+        head_width=0.05,
+        head_length=0.1,
+        width=0.02,
         facecolor=theme.COLOURS['wind arrow']['facecolor'],
-        edgecolor=theme.COLOURS['wind arrow']['edgecolor'])
+        edgecolor=theme.COLOURS['wind arrow']['edgecolor'],
+    )
 
 
 def interpolate_tracer_to_depths(
@@ -342,13 +355,17 @@ def interpolate_tracer_to_depths(
     try:
         if any(interp_depths > w_depths[tracer_mask == False][0]):
             raise ValueError(
-                'A requested depth is outside the interpolation range.')
+                'A requested depth is outside the interpolation range.'
+            )
     except TypeError:
         if interp_depths > w_depths[tracer_mask == False][0]:
             raise ValueError(
-                'A requested depth is outside the interpolation range.')
+                'A requested depth is outside the interpolation range.'
+            )
     depth_interp = scipy.interpolate.interp1d(
-        tracer_depths[tracer_mask == True], tracer[tracer_mask == True],
+        tracer_depths[tracer_mask == True],
+        tracer[tracer_mask == True],
         fill_value='extrapolate',
-        assume_sorted=True)
+        assume_sorted=True,
+    )
     return depth_interp(interp_depths)
