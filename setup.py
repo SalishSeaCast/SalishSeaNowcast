@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """SalishSeaNowcast -- Salish Sea NEMO model nowcast system
 """
 from setuptools import (
@@ -22,10 +21,10 @@ from setuptools import (
 
 import __pkg_metadata__
 
-
 python_classifiers = [
     f'Programming Language :: Python :: {py_version}'
-    for py_version in ['3', '3.6']]
+    for py_version in ['3', '3.6']
+]
 other_classifiers = [
     'Development Status :: ' + __pkg_metadata__.DEV_STATUS,
     'License :: OSI Approved :: Apache Software License',
@@ -46,7 +45,6 @@ install_requires = [
     # see environment-dev.yaml for conda environment dev installation
     # see requirements.txt for package versions used during recent development
     # see environment-rtd.yaml for conda environment used for readthedocs build
-
     'angles',
     'basemap',
     'beautifulsoup4',

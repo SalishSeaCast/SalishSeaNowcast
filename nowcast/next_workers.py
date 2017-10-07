@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Functions to calculate lists of workers to launch after previous workers
 end their work.
 
@@ -52,17 +51,20 @@ def after_download_weather(msg, config, checklist):
         'success 18': [],
     }
     if msg.type.startswith('success') and msg.type.endswith('06'):
-        next_workers['success 06'].append(
-            NextWorker('nowcast.workers.make_runoff_file'))
+        next_workers['success 06'
+                     ].append(NextWorker('nowcast.workers.make_runoff_file'))
         for stn in config['observations']['ctd data']['stations']:
             next_workers['success 06'].append(
-                NextWorker('nowcast.workers.get_onc_ctd', args=[stn]))
+                NextWorker('nowcast.workers.get_onc_ctd', args=[stn])
+            )
         if 'forecast2' in config['run types']:
             next_workers['success 06'].extend([
                 NextWorker(
-                    'nowcast.workers.get_NeahBay_ssh', args=['forecast2']),
+                    'nowcast.workers.get_NeahBay_ssh', args=['forecast2']
+                ),
                 NextWorker(
-                    'nowcast.workers.grib_to_netcdf', args=['forecast2']),
+                    'nowcast.workers.grib_to_netcdf', args=['forecast2']
+                ),
             ])
     if msg.type.endswith('12'):
         next_workers['success 12'].extend([
@@ -131,12 +133,14 @@ def after_get_NeahBay_ssh(msg, config, checklist):
             enabled_host_config = config['run']['enabled hosts'][host]
             upload_forcing_ssh = (
                 'forecast' in enabled_host_config['run types']
-                and not enabled_host_config['shared storage'])
+                and not enabled_host_config['shared storage']
+            )
             if upload_forcing_ssh:
                 next_workers['success forecast'].append(
                     NextWorker(
-                        'nowcast.workers.upload_forcing',
-                        args=[host, 'ssh']))
+                        'nowcast.workers.upload_forcing', args=[host, 'ssh']
+                    )
+                )
     return next_workers[msg.type]
 
 
@@ -172,7 +176,9 @@ def after_grib_to_netcdf(msg, config, checklist):
     if msg.type.startswith('success') and msg.type.endswith('nowcast+'):
         next_workers['success nowcast+'].append(
             NextWorker(
-                'nowcast.workers.ping_erddap', args=['download_weather']))
+                'nowcast.workers.ping_erddap', args=['download_weather']
+            )
+        )
     for host in config['run']['enabled hosts']:
         if not config['run']['enabled hosts'][host]['shared storage']:
             for msg_suffix, run_type in msg_run_type_mapping.items():
@@ -180,7 +186,8 @@ def after_grib_to_netcdf(msg, config, checklist):
                     next_workers[f'success {msg_suffix}'].append(
                         NextWorker(
                             'nowcast.workers.upload_forcing',
-                            args=[host, msg_suffix]),
+                            args=[host, msg_suffix]
+                        ),
                     )
     return next_workers[msg.type]
 
@@ -214,9 +221,8 @@ def after_get_onc_ctd(msg, config, checklist):
     if msg.type.startswith('success'):
         ctd_stn = msg.type.split()[1]
         next_workers[msg.type].append(
-            NextWorker(
-                'nowcast.workers.ping_erddap',
-                args=[f'{ctd_stn}-CTD']))
+            NextWorker('nowcast.workers.ping_erddap', args=[f'{ctd_stn}-CTD'])
+        )
     return next_workers[msg.type]
 
 
@@ -249,8 +255,11 @@ def after_download_live_ocean(msg, config, checklist):
                 'nowcast.workers.make_live_ocean_files',
                 args=[
                     '--run-date',
-                    list(checklist['Live Ocean products'].keys())[0]],
-                host=config['temperature salinity']['matlab host']))
+                    list(checklist['Live Ocean products'].keys())[0]
+                ],
+                host=config['temperature salinity']['matlab host']
+            )
+        )
     return next_workers[msg.type]
 
 
@@ -279,6 +288,7 @@ def after_make_live_ocean_files(msg, config, checklist):
     }
     return next_workers[msg.type]
 
+
 def after_make_turbidity_file(msg, config, checklist):
     """Calculate the list of workers to launch after the make_turbidity_file
     worker ends.
@@ -305,13 +315,15 @@ def after_make_turbidity_file(msg, config, checklist):
     if msg.type == 'success':
         for host in config['run']['enabled hosts']:
             shared_storage = (
-                config['run']['enabled hosts'][host]['shared storage'])
+                config['run']['enabled hosts'][host]['shared storage']
+            )
             host_run_types = config['run']['enabled hosts'][host]['run types']
             if 'nowcast-green' in host_run_types and not shared_storage:
                 next_workers['success'].append(
                     NextWorker(
                         'nowcast.workers.upload_forcing',
-                        args=[host, 'turbidity'])
+                        args=[host, 'turbidity']
+                    )
                 )
     return next_workers[msg.type]
 
@@ -363,13 +375,15 @@ def after_upload_forcing(msg, config, checklist):
             next_workers[f'success {links_run_type}'] = [
                 NextWorker(
                     'nowcast.workers.make_forcing_links',
-                    args=[host_name, links_run_type]),
+                    args=[host_name, links_run_type]
+                ),
             ]
             if links_run_type == 'turbidity':
                 next_workers[f'success {links_run_type}'] = [
                     NextWorker(
                         'nowcast.workers.make_forcing_links',
-                        args=[host_name, 'nowcast-green']),
+                        args=[host_name, 'nowcast-green']
+                    ),
                 ]
     return next_workers[msg.type]
 
@@ -421,8 +435,10 @@ def after_make_forcing_links(msg, config, checklist):
                             'nowcast.workers.run_NEMO',
                             args=[
                                 host, run_type, '--run-date',
-                                checklist['forcing links'][host]['run date']],
-                            host=host),
+                                checklist['forcing links'][host]['run date']
+                            ],
+                            host=host
+                        ),
                     ]
     return next_workers[msg.type]
 
@@ -462,7 +478,9 @@ def after_run_NEMO(msg, config, checklist):
         host = msg.payload[run_type]['host']
         next_workers[msg.type].append(
             NextWorker(
-                'nowcast.workers.watch_NEMO', args=[host, run_type], host=host))
+                'nowcast.workers.watch_NEMO', args=[host, run_type], host=host
+            )
+        )
     return next_workers[msg.type]
 
 
@@ -499,68 +517,87 @@ def after_watch_NEMO(msg, config, checklist):
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
         wave_forecast_after = (
-            config['wave forecasts']['run when'].split('after ')[1])
+            config['wave forecasts']['run when'].split('after ')[1]
+        )
         if run_type == 'nowcast':
             next_workers['success nowcast'].append(
                 NextWorker(
-                    'nowcast.workers.get_NeahBay_ssh', args=['forecast']))
+                    'nowcast.workers.get_NeahBay_ssh', args=['forecast']
+                )
+            )
         if run_type == 'forecast':
             if wave_forecast_after == 'forecast':
                 host_name = config['wave forecasts']['host']
-                next_workers['success forecast'].extend(
-                    [NextWorker(
+                next_workers['success forecast'].extend([
+                    NextWorker(
                         'nowcast.workers.make_ww3_wind_file',
-                        args=[host_name, 'forecast'], host=host_name),
-                        NextWorker(
-                            'nowcast.workers.make_ww3_current_file',
-                            args=[host_name, 'forecast'], host=host_name)
-                    ],
-                )
+                        args=[host_name, 'forecast'],
+                        host=host_name
+                    ),
+                    NextWorker(
+                        'nowcast.workers.make_ww3_current_file',
+                        args=[host_name, 'forecast'],
+                        host=host_name
+                    )
+                ],)
             else:
                 next_workers['success forecast'].append(
                     NextWorker(
                         'nowcast.workers.make_turbidity_file',
-                        args=['--run-date', msg.payload[run_type]['run date']]))
+                        args=['--run-date', msg.payload[run_type]['run date']]
+                    )
+                )
         if run_type == 'nowcast-green':
             if wave_forecast_after == 'nowcast-green':
                 host_name = config['wave forecasts']['host']
                 next_workers['success nowcast-green'].extend([
                     NextWorker(
                         'nowcast.workers.make_ww3_wind_file',
-                        args=[host_name, 'forecast'], host=host_name),
+                        args=[host_name, 'forecast'],
+                        host=host_name
+                    ),
                     NextWorker(
                         'nowcast.workers.make_ww3_current_file',
-                        args=[host_name, 'forecast'], host=host_name),
-                    ],
-                )
+                        args=[host_name, 'forecast'],
+                        host=host_name
+                    ),
+                ],)
             for host in config['run']['enabled hosts']:
                 run_types = config['run']['enabled hosts'][host]['run types']
                 if 'nowcast-dev' in run_types:
                     next_workers['success nowcast-green'].append(
                         NextWorker(
                             'nowcast.workers.make_forcing_links',
-                            args=[host, 'nowcast+', '--shared-storage'])
+                            args=[host, 'nowcast+', '--shared-storage']
+                        )
                     )
         if run_type == 'forecast2':
             host_name = config['wave forecasts']['host']
-            next_workers['success forecast2'].extend(
-                [NextWorker(
+            next_workers['success forecast2'].extend([
+                NextWorker(
                     'nowcast.workers.make_ww3_wind_file',
-                    args=[host_name, 'forecast2'], host=host_name),
-                    NextWorker(
-                        'nowcast.workers.make_ww3_current_file',
-                        args=[host_name, 'forecast2'], host=host_name)
-                ],
-            )
+                    args=[host_name, 'forecast2'],
+                    host=host_name
+                ),
+                NextWorker(
+                    'nowcast.workers.make_ww3_current_file',
+                    args=[host_name, 'forecast2'],
+                    host=host_name
+                )
+            ],)
         enabled_host_config = (
-            config['run']['enabled hosts'][msg.payload[run_type]['host']])
+            config['run']['enabled hosts'][msg.payload[run_type]['host']]
+        )
         if not enabled_host_config['shared storage']:
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.download_results',
                     args=[
-                        msg.payload[run_type]['host'], run_type,
-                        '--run-date', msg.payload[run_type]['run date']]))
+                        msg.payload[run_type]['host'], run_type, '--run-date',
+                        msg.payload[run_type]['run date']
+                    ]
+                )
+            )
     return next_workers[msg.type]
 
 
@@ -616,7 +653,8 @@ def after_make_ww3_current_file(msg, config, checklist):
         next_workers[msg.type].append(
             NextWorker(
                 'nowcast.workers.run_ww3',
-                args=[host_name, run_type], host=host_name
+                args=[host_name, run_type],
+                host=host_name
             )
         )
     return next_workers[msg.type]
@@ -652,7 +690,9 @@ def after_run_ww3(msg, config, checklist):
         host = msg.payload[run_type]['host']
         next_workers[msg.type].append(
             NextWorker(
-                'nowcast.workers.watch_ww3', args=[host, run_type], host=host))
+                'nowcast.workers.watch_ww3', args=[host, run_type], host=host
+            )
+        )
     return next_workers[msg.type]
 
 
@@ -723,27 +763,38 @@ def after_download_results(msg, config, checklist):
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.make_plots',
-                    args=[run_type, 'research', '--run-date', run_date]))
+                    args=[run_type, 'research', '--run-date', run_date]
+                )
+            )
             next_workers[msg.type].append(
                 NextWorker(
-                    'nowcast.workers.ping_erddap', args=['nowcast-green']))
+                    'nowcast.workers.ping_erddap', args=['nowcast-green']
+                )
+            )
             return next_workers[msg.type]
         next_workers[msg.type].append(
             NextWorker(
                 'nowcast.workers.make_plots',
-                args=[run_type, 'publish', '--run-date', run_date]))
+                args=[run_type, 'publish', '--run-date', run_date]
+            )
+        )
         if run_type == 'nowcast':
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.make_plots',
-                    args=[run_type, 'research', '--run-date', run_date]))
+                    args=[run_type, 'research', '--run-date', run_date]
+                )
+            )
             run_date = checklist['NEMO run']['nowcast']['run date']
             run_date = (
-                arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD'))
+                arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD')
+            )
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.make_plots',
-                    args=[run_type, 'comparison', '--run-date', run_date]))
+                    args=[run_type, 'comparison', '--run-date', run_date]
+                )
+            )
     return next_workers[msg.type]
 
 
@@ -786,8 +837,11 @@ def after_make_plots(msg, config, checklist):
             NextWorker(
                 'nowcast.workers.make_feeds',
                 args=[
-                    run_type,
-                    '--run-date', checklist['NEMO run'][run_type]['run date']]))
+                    run_type, '--run-date', checklist['NEMO run'][run_type]
+                    ['run date']
+                ]
+            )
+        )
     return next_workers[msg.type]
 
 
@@ -857,7 +911,8 @@ def after_make_feeds(msg, config, checklist):
         'failure forecast2': [],
         'success forecast': [],
         'success forecast2': [
-            NextWorker('nemo_nowcast.workers.clear_checklist')],
+            NextWorker('nemo_nowcast.workers.clear_checklist')
+        ],
     }
     return next_workers[msg.type]
 

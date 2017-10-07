@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast utility functions for use by workers.
 """
 import grp
@@ -26,27 +25,15 @@ import paramiko
 from driftwood.formatters import JSONFormatter
 from nemo_nowcast import WorkerError
 
-
 # File permissions:
 # rw-rw-r--
-
 PERMS_RW_RW_R = (
-    stat.S_IRUSR | stat.S_IWUSR |
-    stat.S_IRGRP | stat.S_IWGRP |
-    stat.S_IROTH
+    stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH
 )
 # rwxrwxr--
-PERMS_RWX_RWX_R = (
-    stat.S_IRWXU |
-    stat.S_IRWXG |
-    stat.S_IROTH
-)
+PERMS_RWX_RWX_R = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH)
 # rwxrwxr-x
-PERMS_RWX_RWX_R_X = (
-    stat.S_IRWXU |
-    stat.S_IRWXG |
-    stat.S_IROTH | stat.S_IXOTH
-)
+PERMS_RWX_RWX_R_X = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
 
 
 def configure_logging(config, logger, debug, email=True):
@@ -76,23 +63,29 @@ def configure_logging(config, logger, debug, email=True):
     logger.setLevel(logging.DEBUG)
     text_formatter = logging.Formatter(
         config['logging']['message_format'],
-        datefmt=config['logging']['datetime_format'])
-    json_formatter = JSONFormatter(extra_attrs=[
-        'forecast',
-        'date',
-        'run_type',
-        'host_name',
-        'plot_type',
-        'page_type',
-    ])
+        datefmt=config['logging']['datetime_format']
+    )
+    json_formatter = JSONFormatter(
+        extra_attrs=[
+            'forecast',
+            'date',
+            'run_type',
+            'host_name',
+            'plot_type',
+            'page_type',
+        ]
+    )
     for level, filename in config['logging']['log_files'].items():
         # Text log files
         log_file = os.path.join(
-            os.path.dirname(config['config_file']), filename)
+            os.path.dirname(config['config_file']), filename
+        )
         handler = (
-            logging.StreamHandler() if debug
-            else logging.handlers.RotatingFileHandler(
-                log_file, backupCount=config['logging']['backup_count']))
+            logging.StreamHandler()
+            if debug else logging.handlers.RotatingFileHandler(
+                log_file, backupCount=config['logging']['backup_count']
+            )
+        )
         handler.setLevel(getattr(logging, level.upper()))
         handler.setFormatter(text_formatter)
         logger.addHandler(handler)
@@ -100,7 +93,8 @@ def configure_logging(config, logger, debug, email=True):
             # JSON log files
             log_file = f'{log_file}.json'
             handler = logging.handlers.TimedRotatingFileHandler(
-                log_file, when='d', interval=30, backupCount=120)
+                log_file, when='d', interval=30, backupCount=120
+            )
             handler.setLevel(getattr(logging, level.upper()))
             handler.setFormatter(json_formatter)
             logger.addHandler(handler)
@@ -214,15 +208,16 @@ def run_in_subprocess(cmd, output_logger, error_logger):
 
     :raises: :py:exc:`nowcast.lib.WorkerError`
     """
-    output_logger(
-        f'running command in subprocess: {cmd}')
+    output_logger(f'running command in subprocess: {cmd}')
     try:
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         for line in output.splitlines():
             if line:
                 output_logger(line)
     except subprocess.CalledProcessError as e:
-        error_logger(f'subprocess {cmd} failed with return code {e.returncode}')
+        error_logger(
+            f'subprocess {cmd} failed with return code {e.returncode}'
+        )
         for line in e.output.splitlines():
             if line:
                 error_logger(line)
@@ -256,7 +251,8 @@ def ssh(host, key_filename, ssh_config_file='~/.ssh/config'):
         ssh_config.parse(f)
     host = ssh_config.lookup(host)
     ssh_client.connect(
-        host['hostname'], username=host['user'],
+        host['hostname'],
+        username=host['user'],
         key_filename=key_filename,
         compress=True,
     )
