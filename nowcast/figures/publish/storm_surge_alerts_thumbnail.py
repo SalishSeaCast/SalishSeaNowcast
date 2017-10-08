@@ -29,6 +29,7 @@ from collections import namedtuple
 import arrow
 from matplotlib import gridspec
 import matplotlib.pyplot as plt
+import numpy
 
 from salishsea_tools import (
     places,
@@ -139,8 +140,9 @@ def _prep_fig_axes(figsize, theme):
 def _plot_alerts_map(ax, coastline, plot_data, theme):
     shared.plot_map(ax, coastline)
     for name in places.TIDE_GAUGE_SITES:
+        alpha = 0 if numpy.isnan(plot_data.max_ssh[name]) else 0.3
         shared.plot_risk_level_marker(
-            ax, name, plot_data.risk_levels[name], 'o', 55, 0.3, theme
+            ax, name, plot_data.risk_levels[name], 'o', 55, alpha, theme
         )
         shared.plot_wind_arrow(
             ax, *places.PLACES[name]['lon lat'], plot_data.u_wind_4h_avg[name],
