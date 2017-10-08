@@ -26,7 +26,7 @@ import numpy as np
 import salishsea_tools.unit_conversions as converters
 from feedgen.entry import FeedEntry
 from feedgen.feed import FeedGenerator
-from nemo_nowcast import NowcastWorker
+from nemo_nowcast import NowcastWorker, WorkerError
 from salishsea_tools.places import PLACES
 
 import nowcast.figures.shared
@@ -253,11 +253,15 @@ def _calc_max_ssh(feed, ttide, run_date, run_type, config):
         )
     )
     ssh_ts = nc_tools.ssh_timeseries_at_point(grid_T_15m, 0, 0, datetimes=True)
-    ssh_corr = nowcast.figures.shared.correct_model_ssh(
-        ssh_ts.ssh, ssh_ts.time, ttide
+    max_ssh, max_ssh_time = nowcast.figures.shared.find_ssh_max(
+        tide_gauge_stn, ssh_ts, ttide
     )
-    max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
-    max_ssh_time = ssh_ts.time[np.argmax(ssh_corr)]
+    if np.isnan(max_ssh):
+        logger.critical(
+            f'no {tide_gauge_stn} feed generated: max sea surface height is '
+            f'NaN at {max_ssh_time}'
+        )
+        raise WorkerError
     return max_ssh, max_ssh_time
 
 
