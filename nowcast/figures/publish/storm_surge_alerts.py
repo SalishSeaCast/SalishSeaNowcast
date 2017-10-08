@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Produce a figure that shows a map of the Salish Sea with markers indicating
 the risks of high water levels at the Point Atkinson, Victoria, Campbell River,
 Nanaimo, and Cherry Point tide gauge locations.
@@ -42,9 +41,12 @@ import nowcast.figures.website_theme
 
 
 def make_figure(
-    grids_15m, weather_path, coastline, tidal_predictions,
+    grids_15m,
+    weather_path,
+    coastline,
+    tidal_predictions,
     figsize=(18, 20),
-    theme=nowcast.figures.website_theme,
+    theme=nowcast.figures.website_theme
 ):
     """Plot high water level risk indication markers and 4h average wind
     vectors on a Salish Sea map with summary text below.
@@ -71,8 +73,8 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(grids_15m, tidal_predictions, weather_path)
-    fig, (ax_map, ax_pa_info, ax_cr_info, ax_vic_info) = _prep_fig_axes(
-        figsize, theme)
+    fig, (ax_map, ax_pa_info, ax_cr_info,
+          ax_vic_info) = _prep_fig_axes(figsize, theme)
     _plot_alerts_map(ax_map, coastline, plot_data, theme)
     info_boxes = (ax_pa_info, ax_cr_info, ax_vic_info)
     info_places = ('Point Atkinson', 'Campbell River', 'Victoria')
@@ -87,30 +89,39 @@ def _prep_plot_data(grids_15m, tidal_predictions, weather_path):
     u_wind_4h_avg, v_wind_4h_avg, max_wind_avg = {}, {}, {}
     for name in places.TIDE_GAUGE_SITES:
         ssh_ts = nc_tools.ssh_timeseries_at_point(
-            grids_15m[name], 0, 0, datetimes=True)
+            grids_15m[name], 0, 0, datetimes=True
+        )
         ttide = shared.get_tides(name, tidal_predictions)
         max_ssh[name], max_ssh_time[name] = shared.find_ssh_max(
-            name, ssh_ts, ttide)
+            name, ssh_ts, ttide
+        )
         risk_levels[name] = stormtools.storm_surge_risk_level(
-                     name, max_ssh[name], ttide)
+            name, max_ssh[name], ttide
+        )
         wind_avg = wind_tools.calc_wind_avg_at_point(
-            arrow.get(max_ssh_time[name]), weather_path,
-            places.PLACES[name]['wind grid ji'], avg_hrs=-4)
+            arrow.get(max_ssh_time[name]),
+            weather_path,
+            places.PLACES[name]['wind grid ji'],
+            avg_hrs=-4
+        )
         u_wind_4h_avg[name], v_wind_4h_avg[name] = wind_avg
         max_wind_avg[name], _ = wind_tools.wind_speed_dir(
-            u_wind_4h_avg[name], v_wind_4h_avg[name])
+            u_wind_4h_avg[name], v_wind_4h_avg[name]
+        )
     plot_data = namedtuple(
-        'PlotData',
-        'ssh_ts, max_ssh, max_ssh_time, risk_levels, '
-        'u_wind_4h_avg, v_wind_4h_avg, max_wind_avg')
+        'PlotData', 'ssh_ts, max_ssh, max_ssh_time, risk_levels, '
+        'u_wind_4h_avg, v_wind_4h_avg, max_wind_avg'
+    )
     return plot_data(
-        ssh_ts, max_ssh, max_ssh_time, risk_levels,
-        u_wind_4h_avg, v_wind_4h_avg, max_wind_avg)
+        ssh_ts, max_ssh, max_ssh_time, risk_levels, u_wind_4h_avg,
+        v_wind_4h_avg, max_wind_avg
+    )
 
 
 def _prep_fig_axes(figsize, theme):
     fig = plt.figure(
-        figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
+        figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
+    )
     gs = gridspec.GridSpec(2, 3, width_ratios=[1, 1, 1], height_ratios=[6, 1])
     gs.update(hspace=-0.05, wspace=0.05)
     ax_map = fig.add_subplot(gs[0, :])
@@ -124,11 +135,12 @@ def _plot_alerts_map(ax, coastline, plot_data, theme):
     shared.plot_map(ax, coastline)
     for name in places.TIDE_GAUGE_SITES:
         shared.plot_risk_level_marker(
-            ax, name, plot_data.risk_levels[name], 'o', 55, 0.3, theme)
+            ax, name, plot_data.risk_levels[name], 'o', 55, 0.3, theme
+        )
         shared.plot_wind_arrow(
-            ax, *places.PLACES[name]['lon lat'],
-            plot_data.u_wind_4h_avg[name], plot_data.v_wind_4h_avg[name],
-            theme)
+            ax, *places.PLACES[name]['lon lat'], plot_data.u_wind_4h_avg[name],
+            plot_data.v_wind_4h_avg[name], theme
+        )
     # Format the axes and make it pretty
     _alerts_map_axis_labels(ax, plot_data.ssh_ts.time[0], theme)
     _alerts_map_marker_legend(ax, theme)
@@ -140,22 +152,28 @@ def _alerts_map_axis_labels(ax, date_time, theme):
     ax.set_title(
         f'Marine and Atmospheric Conditions\n {date_time:%A, %B %d, %Y}',
         fontproperties=theme.FONTS['axes title'],
-        color=theme.COLOURS['text']['axes title'])
+        color=theme.COLOURS['text']['axes title']
+    )
     ax.set_xlabel(
         'Longitude [°E]',
         fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
+        color=theme.COLOURS['text']['axis']
+    )
     ax.set_ylabel(
         'Latitude [°N]',
         fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
+        color=theme.COLOURS['text']['axis']
+    )
     ax.text(
-        0.4, -0.3,
+        0.4,
+        -0.3,
         'Wind vectors averaged over four hours prior to maximum water level',
-        horizontalalignment='left', verticalalignment='top',
+        horizontalalignment='left',
+        verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['figure annotation'],
-        color=theme.COLOURS['text']['figure annotation'])
+        color=theme.COLOURS['text']['figure annotation']
+    )
     ax.grid(axis='both')
     theme.set_axis_colors(ax)
 
@@ -171,38 +189,56 @@ def _alerts_map_marker_legend(ax, theme):
     )
     for level, label in risk_levels:
         ax.plot(
-            0, 0, marker='o', linestyle='', markersize=25, alpha=0.5,
+            0,
+            0,
+            marker='o',
+            linestyle='',
+            markersize=25,
+            alpha=0.5,
             color=theme.COLOURS['storm surge risk levels'][level],
-            label=label)
+            label=label
+        )
     legend = ax.legend(
-        numpoints=1, loc='upper left', bbox_to_anchor=(0.9, 1.05),
-        prop=theme.FONTS['legend label'])
-    legend.set_title(
-        ' Possible\nWarnings',
-        prop=theme.FONTS['legend title'])
+        numpoints=1,
+        loc='upper left',
+        bbox_to_anchor=(0.9, 1.05),
+        prop=theme.FONTS['legend label']
+    )
+    legend.set_title(' Possible\nWarnings', prop=theme.FONTS['legend title'])
 
 
 def _alerts_map_wind_legend(ax, theme):
     shared.plot_wind_arrow(ax, -122.5, 50.65, 0, -5, theme)
     ax.text(
-        -122.58, 50.5, 'Reference: 5 m/s', rotation=90,
+        -122.58,
+        50.5,
+        'Reference: 5 m/s',
+        rotation=90,
         fontproperties=theme.FONTS['axes annotation'],
-        color=theme.COLOURS['text']['axes annotation'])
+        color=theme.COLOURS['text']['axes annotation']
+    )
     shared.plot_wind_arrow(
-        ax, -122.75, 50.65, 0, unit_conversions.knots_mps(-5), theme)
+        ax, -122.75, 50.65, 0, unit_conversions.knots_mps(-5), theme
+    )
     ax.text(
-        -122.83, 50.5, 'Reference: 5 knots', rotation=90,
+        -122.83,
+        50.5,
+        'Reference: 5 knots',
+        rotation=90,
         fontproperties=theme.FONTS['axes annotation'],
-        color=theme.COLOURS['text']['axes annotation'])
+        color=theme.COLOURS['text']['axes annotation']
+    )
     ax.text(
-        -122.85, 49.9,
+        -122.85,
+        49.9,
         'Winds are 4 hour\n'
         'average before\n'
         'maximum water level',
         verticalalignment='top',
         bbox=theme.COLOURS['axes textbox'],
         fontproperties=theme.FONTS['axes annotation'],
-        color=theme.COLOURS['text']['axes annotation'])
+        color=theme.COLOURS['text']['axes annotation']
+    )
 
 
 def _alerts_map_geo_labels(ax, theme):
@@ -223,38 +259,55 @@ def _alerts_map_geo_labels(ax, theme):
     for place, dx, dy, rotation, justify, label_size in geo_labels:
         lon, lat = places.PLACES[place]['lon lat']
         ax.text(
-            lon + dx, lat + dy, place, rotation=rotation,
+            lon + dx,
+            lat + dy,
+            place,
+            rotation=rotation,
             horizontalalignment=justify,
-            fontproperties=theme.FONTS[f'location label {label_size}'])
+            fontproperties=theme.FONTS[f'location label {label_size}']
+        )
 
 
 def _plot_info_box(ax, place, plot_data, theme):
     ax.text(
-        0.05, 0.9, place,
-        horizontalalignment='left', verticalalignment='top',
+        0.05,
+        0.9,
+        place,
+        horizontalalignment='left',
+        verticalalignment='top',
         fontproperties=theme.FONTS['info box title'],
-        color=theme.COLOURS['text']['info box title'])
+        color=theme.COLOURS['text']['info box title']
+    )
     ax.text(
-        0.05, 0.7,
+        0.05,
+        0.7,
         f'Maximum Water Level: {plot_data.max_ssh[place]:.1f} m',
-        horizontalalignment='left', verticalalignment='top',
+        horizontalalignment='left',
+        verticalalignment='top',
         fontproperties=theme.FONTS['info box content'],
-        color=theme.COLOURS['text']['info box content'])
+        color=theme.COLOURS['text']['info box content']
+    )
     ax.text(
-        0.05, 0.5,
+        0.05,
+        0.5,
         f'Wind Speed: '
         f'{unit_conversions.mps_kph(plot_data.max_wind_avg[place]):.0f} km/hr',
-        horizontalalignment='left', verticalalignment='top',
+        horizontalalignment='left',
+        verticalalignment='top',
         fontproperties=theme.FONTS['info box content'],
-        color=theme.COLOURS['text']['info box content'])
+        color=theme.COLOURS['text']['info box content']
+    )
     display_time = arrow.get(plot_data.max_ssh_time[place]).to('local')
     ax.text(
-        0.05, 0.3,
+        0.05,
+        0.3,
         f'Time: {display_time.format("YYYY-MM-DD HH:mm")} '
         f'{display_time.tzinfo.tzname(display_time.datetime)}',
-        horizontalalignment='left', verticalalignment='top',
+        horizontalalignment='left',
+        verticalalignment='top',
         fontproperties=theme.FONTS['info box content'],
-        color=theme.COLOURS['text']['info box content'])
+        color=theme.COLOURS['text']['info box content']
+    )
     _info_box_hide_frame(ax, theme)
 
 
@@ -268,21 +321,27 @@ def _info_box_hide_frame(ax, theme):
 
 def _plot_attribution_text(ax, theme):
     ax.text(
-        0.4, -0.34,
+        0.4,
+        -0.34,
         'Modelled winds are from the High Resolution Deterministic Prediction '
         'System\n'
         'of Environment Canada: '
         'https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html.',
-        horizontalalignment='left', verticalalignment='top',
+        horizontalalignment='left',
+        verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['figure annotation'],
-        color=theme.COLOURS['text']['figure annotation'])
+        color=theme.COLOURS['text']['figure annotation']
+    )
     ax.text(
-        0.4, -0.4,
+        0.4,
+        -0.4,
         'Pacific North-West coastline was created from BC Freshwater Atlas '
         'Coastline\n'
         'and WA Marine Shorelines files and compiled by Rich Pawlowicz.',
-        horizontalalignment='left', verticalalignment='top',
+        horizontalalignment='left',
+        verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['figure annotation'],
-        color=theme.COLOURS['text']['figure annotation'])
+        color=theme.COLOURS['text']['figure annotation']
+    )
