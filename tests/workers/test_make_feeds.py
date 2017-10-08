@@ -21,6 +21,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import arrow
+from nemo_nowcast import WorkerError
 import numpy as np
 import pytest
 
@@ -368,22 +369,24 @@ class TestCalcMaxSshRisk:
         assert max_ssh_info['risk_level'] == m_ssrl()
 
 
+@patch('nowcast.workers.make_feeds.logger')
+@patch('nowcast.workers.make_feeds.nc.Dataset')
+@patch('nowcast.workers.make_feeds.nc_tools.ssh_timeseries_at_point')
+@patch('nowcast.workers.make_feeds.nowcast.figures.shared.find_ssh_max')
 class TestCalcMaxSsh:
     """Unit test for _calc_max_ssh() function.
     """
 
-    @patch('nowcast.workers.make_feeds.nc.Dataset')
-    @patch('nowcast.workers.make_feeds.nc_tools.ssh_timeseries_at_point')
-    @patch(
-        'nowcast.workers.make_feeds.nowcast.figures.shared.correct_model_ssh'
-    )
-    def test_calc_max_ssh(self, m_cmssh, m_sshtapt, m_ncd, config):
+    def test_calc_max_ssh(self, m_fsshmax, m_sshtapt, m_ncd, m_logger, config):
         ssh_ts = namedtuple('ssh_ts', 'ssh, time')
         m_sshtapt.return_value = ssh_ts(
             np.array([1.93]),
             np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)])
         )
-        m_cmssh.return_value = np.array(2)
+        m_fsshmax.return_value = (
+            np.array([5.09]),
+            np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)])
+        )
         max_ssh, max_ssh_time = make_feeds._calc_max_ssh(
             'pmv.xml', 'ttide',
             arrow.get('2015-12-22').floor('day'), 'forecast', config
@@ -392,8 +395,28 @@ class TestCalcMaxSsh:
             '/results/SalishSea/forecast/22dec15/PointAtkinson.nc'
         )
         m_sshtapt.assert_called_once_with(m_ncd(), 0, 0, datetimes=True)
+        assert not m_logger.critical.called
         np.testing.assert_array_equal(max_ssh, np.array([5.09]))
         np.testing.assert_array_equal(
             max_ssh_time,
             np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)])
         )
+
+    def test_max_ssh_is_nan(
+        self, m_fsshmax, m_sshtapt, m_ncd, m_logger, config
+    ):
+        ssh_ts = namedtuple('ssh_ts', 'ssh, time')
+        m_sshtapt.return_value = ssh_ts(
+            np.array([np.nan]),
+            np.array([datetime.datetime(2017, 10, 7, 17, 48, 42)])
+        )
+        m_fsshmax.return_value = (
+            np.array([np.nan]),
+            np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)])
+        )
+        with pytest.raises(WorkerError):
+            max_ssh, max_ssh_time = make_feeds._calc_max_ssh(
+                'pmv.xml', 'ttide',
+                arrow.get('2017-10-07').floor('day'), 'forecast', config
+            )
+        assert m_logger.critical.called
