@@ -297,8 +297,46 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
         )
         ## TODO: Return a dataset containing dataarrays full of NaNs
         raise WorkerError(msg)
-    ## TODO: Handle TypeError due to None in json parsing; see issue #45
-    device_data = data_tools.onc_json_to_dataset(onc_data)
+    try:
+        device_data = data_tools.onc_json_to_dataset(onc_data)
+    except TypeError:
+        # Response from ONC contains no sensor data, so return an
+        # empty DataArray
+        logger.warning(
+            f'No ONC {ferry_platform} {device_category} data for {ymd}; '
+            f'substituting empty dataset',
+            extra={
+                'data_date': ymd,
+                'ferry_platform': ferry_platform,
+                'device_category': device_category,
+            }
+        )
+        onc_units = {
+            'temperature': 'C',
+            'Conductivity': 'S/m',
+            'salinity': 'g/kg',
+            'oxygen_saturation': 'percent',
+            'oxygen_corrected': 'ml/l',
+            'cdom_fluorescence': 'ppb',
+            'chlorophyll': 'ug/l',
+            'turbidity': 'NTU',
+            'partial_pressure': 'pCO2 uatm',
+            'co2': 'umol/mol',
+        }
+        data_arrays = {
+            sensor: xarray.DataArray(
+                name=sensor,
+                data=numpy.array([], dtype=float),
+                coords={'sampleTime': numpy.array([], dtype='datetime64[ns]')},
+                dims=('sampleTime',),
+                attrs={
+                    'qaqcFlag': numpy.array([], dtype=numpy.int64),
+                    'unitOfMeasure': onc_units[sensor],
+                }
+            )
+            for sensor in sensors.split(',')
+        }
+        return xarray.Dataset(data_arrays)
     logger.debug(
         f'ONC {ferry_platform} {device_category} data for {ymd} '
         f'received and parsed',
@@ -371,7 +409,7 @@ def _create_dataset(
                 # qaqcFlag!=1, so substitute a DataArray full of NaNs
                 logger.warning(
                     f'ONC {ferry_platform} {array.device_category} '
-                    f'{array.name} data for {ymd} contains no qaqcFlag!=1 '
+                    f'{array.name} data for {ymd} contains no qaqcFlag==1 '
                     f'values; substituting NaNs',
                     extra={
                         'data_date': ymd,
