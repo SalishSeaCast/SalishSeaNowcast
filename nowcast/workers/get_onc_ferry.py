@@ -143,6 +143,7 @@ def get_onc_ferry(parsed_args, config, *args):
     dataset.to_netcdf(
         nc_filepath.as_posix(),
         encoding=encoding,
+        unlimited_dims=('time',),
     )
     checklist = {ferry_platform: os.fspath(nc_filepath)}
 
