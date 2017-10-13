@@ -104,8 +104,10 @@ def get_onc_ferry(parsed_args, config, *args):
     data_arrays = SimpleNamespace()
     nav_data = _get_nav_data(ferry_platform, ymd, location_config)
     (
-        data_arrays.longitude, data_arrays.latitude,
-        data_arrays.on_crossing_mask, data_arrays.crossing_number,
+        data_arrays.longitude,
+        data_arrays.latitude,
+        data_arrays.on_crossing_mask,
+        data_arrays.crossing_number,
     ) = _calc_location_arrays(nav_data, location_config)
     for device in devices_config:
         device_data = _get_water_data(
@@ -130,11 +132,17 @@ def get_onc_ferry(parsed_args, config, *args):
         extra={'data_date': ymd,
                'ferry_platform': parsed_args.ferry_platform}
     )
+    encoding = {
+        var: {
+            'dtype': 'int32',
+            '_FillValue': 0,
+        }
+        for var in dataset.data_vars if var.endswith('sample_count')
+    }
+    encoding['time'] = {'units': 'minutes since 1970-01-01 00:00'}
     dataset.to_netcdf(
         nc_filepath.as_posix(),
-        encoding={'time': {
-            'units': 'minutes since 1970-01-01 00:00'
-        }}
+        encoding=encoding,
     )
     checklist = {ferry_platform: os.fspath(nc_filepath)}
 
@@ -446,18 +454,6 @@ def _create_dataset(
                 sample_count_var, sample_count_array, ferry_platform,
                 location_config
             )
-            # If any of the DataArrays are short compared to the others the
-            # missing values are filled with NaNs. That makes sense for
-            # observation values, and their standard deviations, but not their
-            # sample counts. So, we change NaNs to zeros in the sample count
-            # DataArrays, and explicitly set the data type to int32 to keep
-            # netcdf3 happy.
-            data_vars[sample_count_var].values = numpy.nan_to_num(
-                data_vars[sample_count_var].values
-            )
-            tmp_array = data_vars[sample_count_var].astype(numpy.int32)
-            tmp_array.attrs = data_vars[sample_count_var].attrs
-            data_vars[sample_count_var] = tmp_array
     now = arrow.now().format('YYYY-MM-DD HH:mm:ss')
     dataset = xarray.Dataset(
         data_vars=data_vars,
@@ -840,8 +836,8 @@ def _create_dataarray(var, array, ferry_platform, location_config):
         'longitude', 'latitude', 'on_crossing_mask', 'crossing_number'
     }
     if var in location_vars:
-        dataset_array.attrs[
-            'ONC_stationCode'] = f'{location_config["station"]}'
+        dataset_array.attrs['ONC_stationCode'
+                            ] = f'{location_config["station"]}'
     else:
         dataset_array.attrs['ONC_stationCode'] = f'{ferry_platform}'
     try:
