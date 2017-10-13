@@ -57,6 +57,9 @@ def after_download_weather(msg, config, checklist):
             next_workers['success 06'].append(
                 NextWorker('nowcast.workers.get_onc_ctd', args=[stn])
             )
+        for ferry in config['observations']['ferry data']['ferries']:
+            next_workers['success 06'].append(
+                NextWorker('nowcast.workers.get_onc_ferry', args=[ferry]))
         if 'forecast2' in config['run types']:
             next_workers['success 06'].extend([
                 NextWorker(
@@ -223,6 +226,38 @@ def after_get_onc_ctd(msg, config, checklist):
         next_workers[msg.type].append(
             NextWorker('nowcast.workers.ping_erddap', args=[f'{ctd_stn}-CTD'])
         )
+    return next_workers[msg.type]
+
+
+def after_get_onc_ferry(msg, config, checklist):
+    """Calculate the list of workers to launch after the get_onc_ferry
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure': [],
+        'success TWDP': [],
+    }
+    if msg.type.startswith('success'):
+        ferry_platform = msg.type.split()[1]
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.ping_erddap',
+                args=[f'{ferry_platform}-ferry']))
     return next_workers[msg.type]
 
 
