@@ -37,6 +37,9 @@ def config():
             'ctd data': {
                 'stations': ['SCVIP', 'SEVIP', 'LSBBL', 'USDDL'],
             },
+            'ferry data': {
+                'ferries': {'TWDP': {}},
+            },
         },
         'run types': {
             'nowcast': {}, 'nowcast-green': {}, 'nowcast-dev': {},
@@ -133,6 +136,19 @@ class TestAfterDownloadWeather:
             Message('download_weather', 'success 06'), config, checklist)
         expected = NextWorker(
             'nowcast.workers.get_onc_ctd', args=[ctd_stn], host='localhost')
+        assert expected in workers
+
+    @pytest.mark.parametrize('ferry_platform', [
+        'TWDP',
+    ])
+    def test_success_06_launch_get_onc_ferry(
+        self, ferry_platform, config, checklist,
+    ):
+        workers = next_workers.after_download_weather(
+            Message('download_weather', 'success 06'), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.get_onc_ferry',
+            args=[ferry_platform], host='localhost')
         assert expected in workers
 
     def test_success_12_launch_download_live_ocean(self, config, checklist):
@@ -261,6 +277,35 @@ class TestAfterGetONC_CTD:
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
             args=['{}-CTD'.format(ctd_stn)], host='localhost')
+        assert expected in workers
+
+
+class TestAfterGetONC_Ferry:
+    """Unit tests for the after_get_onc_ferry function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_get_onc_ferry(
+            Message('get_onc_ferry', msg_type), config, checklist)
+        assert workers == []
+
+    @pytest.mark.parametrize('ferry_platform', [
+        'TWDP',
+    ])
+    def test_success_launch_ping_erddap(
+        self, ferry_platform, config, checklist
+    ):
+        workers = next_workers.after_get_onc_ferry(
+            Message(
+                'get_onc_ferry', 'success {}'.format(
+                    ferry_platform)), config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.ping_erddap',
+            args=['{}-ferry'.format(ferry_platform)], host='localhost')
         assert expected in workers
 
 

@@ -152,6 +152,20 @@ n and si:
   file template: 'single_bio_LO_{:y%Ym%md%d}.nc'
 
 observations:
+  # ONC Strait of Georgia nodes real-time CTD data
+  ctd data:
+    # ONC node station names to download data from
+    stations:
+      - SCVIP
+      - SEVIP
+      - LSBBL
+      - USDDL
+    # Destination directory for ONC CTD T&S data netCDF files
+    dest dir: /results/observations/ONC/CTD/
+    # Template for ONC CTD T&S data file path
+    # **Must be quoted to project {} characters**
+    filepath template: '{station}/{station}_CTD_15m_{yyyymmdd}.nc'
+
   # ONC Strait of Georgia ferry platforms real-time data
   ferry data:
     ferries:
@@ -193,25 +207,11 @@ observations:
             sensors:
               co2_partial_pressure: partial_pressure
               co2_concentration_linearized: co2
-        # Template for ONC ferry data data file path
+        # Template for ONC ferry data file path
         # **Must be quoted to project {} characters**
         filepath template: '{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_1m_{yyyymmdd}.nc'
-    # Destination directory for ONC CTD T&S data netCDF files
+    # Destination directory for ONC ferry data netCDF files
     dest dir: /results/observations/ONC/ferries/
-
-  # ONC Strait of Georgia nodes real-time CTD data
-  ctd data:
-    # ONC node station names to download data from
-    stations:
-      - SCVIP
-      - SEVIP
-      - LSBBL
-      - USDDL
-    # Destination directory for ONC CTD T&S data netCDF files
-    dest dir: /results/observations/ONC/CTD/
-    # Template for ONC CTD T&S data file path
-    # **Must be quoted to project {} characters**
-    filepath template: '{station}/{station}_CTD_15m_{yyyymmdd}.nc'
 
 
 run types:
@@ -293,6 +293,8 @@ erddap:
       - ubcONCLSBBLCTD15mV1
     USDDL-CTD:
       - ubcONCUSDDLCTD15mV1
+    TWDP-ferry:
+      - ubcONCTWDP1mV1
     nowcast-green:
       - ubcSSgPointAtkinsonSSH15mV17-02
       - ubcSSg3DBiologyFields1hV17-02
