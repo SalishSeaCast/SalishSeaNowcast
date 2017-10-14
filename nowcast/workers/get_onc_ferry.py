@@ -292,60 +292,27 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
             dateFrom=(data_tools.onc_datetime(f'{ymd} 00:00', 'utc')),
         )
     except requests.HTTPError as e:
-        msg = (
-            f'request for ONC {ferry_platform} {device_category} data '
-            f'for {ymd} failed: {e}'
-        )
-        logger.error(
-            msg,
-            extra={
-                'data_date': ymd,
-                'ferry_platform': ferry_platform,
-                'device_category': device_category,
-            }
-        )
-        ## TODO: Return a dataset containing dataarrays full of NaNs
-        raise WorkerError(msg)
+        if e.response.status_code == 504:
+            return _empty_device_data(
+                ferry_platform, device_category, ymd, sensors
+            )
+        else:
+            logger.error(
+                f'request for ONC {ferry_platform} {device_category} data '
+                f'for {ymd} failed: {e}',
+                extra={
+                    'data_date': ymd,
+                    'ferry_platform': ferry_platform,
+                    'device_category': device_category,
+                }
+            )
+            raise WorkerError
     try:
         device_data = data_tools.onc_json_to_dataset(onc_data)
     except TypeError:
-        # Response from ONC contains no sensor data, so return an
-        # empty DataArray
-        logger.warning(
-            f'No ONC {ferry_platform} {device_category} data for {ymd}; '
-            f'substituting empty dataset',
-            extra={
-                'data_date': ymd,
-                'ferry_platform': ferry_platform,
-                'device_category': device_category,
-            }
+        return _empty_device_data(
+            ferry_platform, device_category, ymd, sensors
         )
-        onc_units = {
-            'temperature': 'C',
-            'Conductivity': 'S/m',
-            'salinity': 'g/kg',
-            'oxygen_saturation': 'percent',
-            'oxygen_corrected': 'ml/l',
-            'cdom_fluorescence': 'ppb',
-            'chlorophyll': 'ug/l',
-            'turbidity': 'NTU',
-            'partial_pressure': 'pCO2 uatm',
-            'co2': 'umol/mol',
-        }
-        data_arrays = {
-            sensor: xarray.DataArray(
-                name=sensor,
-                data=numpy.array([], dtype=float),
-                coords={'sampleTime': numpy.array([], dtype='datetime64[ns]')},
-                dims=('sampleTime',),
-                attrs={
-                    'qaqcFlag': numpy.array([], dtype=numpy.int64),
-                    'unitOfMeasure': onc_units[sensor],
-                }
-            )
-            for sensor in sensors.split(',')
-        }
-        return xarray.Dataset(data_arrays)
     logger.debug(
         f'ONC {ferry_platform} {device_category} data for {ymd} '
         f'received and parsed',
@@ -356,6 +323,46 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
         }
     )
     return device_data
+
+
+def _empty_device_data(ferry_platform, device_category, ymd, sensors):
+    # Response from ONC contains no sensor data, so return an
+    # empty DataArray
+    logger.warning(
+        f'No ONC {ferry_platform} {device_category} data for {ymd}; '
+        f'substituting empty dataset',
+        extra={
+            'data_date': ymd,
+            'ferry_platform': ferry_platform,
+            'device_category': device_category,
+        }
+    )
+    onc_units = {
+        'temperature': 'C',
+        'Conductivity': 'S/m',
+        'salinity': 'g/kg',
+        'oxygen_saturation': 'percent',
+        'oxygen_corrected': 'ml/l',
+        'cdom_fluorescence': 'ppb',
+        'chlorophyll': 'ug/l',
+        'turbidity': 'NTU',
+        'partial_pressure': 'pCO2 uatm',
+        'co2': 'umol/mol',
+    }
+    data_arrays = {
+        sensor: xarray.DataArray(
+            name=sensor,
+            data=numpy.array([], dtype=float),
+            coords={'sampleTime': numpy.array([], dtype='datetime64[ns]')},
+            dims=('sampleTime',),
+            attrs={
+                'qaqcFlag': numpy.array([], dtype=numpy.int64),
+                'unitOfMeasure': onc_units[sensor],
+            }
+        )
+        for sensor in sensors.split(',')
+    }
+    return xarray.Dataset(data_arrays)
 
 
 def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
