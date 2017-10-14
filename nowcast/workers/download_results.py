@@ -95,10 +95,12 @@ def download_results(parsed_args, config, *args):
     dest = Path(config['results archive'][run_type])
     cmd = ['scp', '-Cpr', src, str(dest)]
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
+    results_archive_dir = dest/results_dir
+    for filepath in results_archive_dir.glob('FVCOM_[TUV].nc'):
+        filepath.unlink()
     lib.fix_perms(
         str(dest/results_dir),
         mode=lib.PERMS_RWX_RWX_R_X, grp_name=config['file group'])
-    results_archive_dir = dest/results_dir
     for filepath in results_archive_dir.glob('*'):
         lib.fix_perms(os.fspath(filepath), grp_name=config['file group'])
     checklist = {run_type: {}}
