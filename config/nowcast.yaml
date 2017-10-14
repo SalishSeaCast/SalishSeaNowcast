@@ -662,7 +662,7 @@ zmq:
       message_broker: 5560
       manager: 5561
       scheduler: 5562
-      workers: [5563, 5564, 5565, 5566, 5567, 5568, 5569]
+      workers: [5563, 5564, 5565, 5566, 5567, 5568, 5569, 5580, 5581, 5582]
     # **host:port pairs in lists must be quoted to protect : characters**
       run_NEMO: ['salish.eos.ubc.ca:5556', '206.12.48.112:5556']
       watch_NEMO: ['salish.eos.ubc.ca:5557', '206.12.48.112:5557']
