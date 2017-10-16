@@ -892,6 +892,8 @@ message registry:
       failure LSBBL-CTD: ONC LSBBL node CTD ERDDAP dataset flag files creation failed
       success USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files created
       failure USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files creation failed
+      success TWDP-ferry: ONC Tsawwassen/Duke Pt. ferry ERDDAP dataset flag files created
+      failure TWDP-ferry: ONC Tsawwassen/Duke Pt. ferry ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
 
     make_plots:
