@@ -41,6 +41,7 @@ class TestMain:
             'nowcast', 'nowcast-dev', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
             'SCVIP-CTD', 'SEVIP-CTD', 'LSBBL-CTD', 'USDDL-CTD',
+            'TWDP-ferry',
         }
         assert 'help' in kwargs
 
@@ -69,6 +70,7 @@ class TestSuccess:
         'SEVIP-CTD',
         'LSBBL-CTD',
         'USDDL-CTD',
+        'TWDP-ferry',
     ])
     def test_success_log_info(self, m_logger, dataset):
         parsed_args = SimpleNamespace(dataset=dataset)
@@ -86,6 +88,7 @@ class TestSuccess:
         ('SEVIP-CTD', 'success SEVIP-CTD'),
         ('LSBBL-CTD', 'success LSBBL-CTD'),
         ('USDDL-CTD', 'success USDDL-CTD'),
+        ('TWDP-ferry', 'success TWDP-ferry'),
     ])
     def test_success_msg_type(self, m_logger, dataset, expected):
         parsed_args = SimpleNamespace(dataset=dataset)
@@ -108,6 +111,7 @@ class TestFailure:
         'SEVIP-CTD',
         'LSBBL-CTD',
         'USDDL-CTD',
+        'TWDP-ferry',
     ])
     def test_failure_log_error(self, m_logger, dataset):
         parsed_args = SimpleNamespace(dataset=dataset)
@@ -125,6 +129,7 @@ class TestFailure:
         ('SEVIP-CTD', 'failure SEVIP-CTD'),
         ('LSBBL-CTD', 'failure LSBBL-CTD'),
         ('USDDL-CTD', 'failure USDDL-CTD'),
+        ('TWDP-ferry', 'failure TWDP-ferry'),
     ])
     def test_failure_msg_type(self, m_logger, dataset, expected):
         parsed_args = SimpleNamespace(dataset=dataset)
@@ -147,6 +152,7 @@ class TestPingErddap:
         'SEVIP-CTD',
         'LSBBL-CTD',
         'USDDL-CTD',
+        'TWDP-ferry',
     ])
     def test_ping_erddap(self, m_logger, dataset, tmpdir):
         parsed_args = SimpleNamespace(dataset=dataset)
@@ -173,6 +179,7 @@ class TestPingErddap:
                     'SEVIP-CTD': ['ubcONCSEVIPCTD15mV1'],
                     'LSBBL-CTD': ['ubcONCLSBBLCTD15mV1'],
                     'USDDL-CTD': ['ubcONCUSDDLCTD15mV1'],
+                    'TWDP-ferry': ['ubcONCTWDP1mV1'],
                 }}}
         checklist = ping_erddap.ping_erddap(parsed_args, config)
         dataset_ids = config['erddap']['datasetIDs'][dataset]

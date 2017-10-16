@@ -41,6 +41,7 @@ def main():
             'nowcast', 'nowcast-dev', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
             'SCVIP-CTD', 'SEVIP-CTD', 'LSBBL-CTD', 'USDDL-CTD',
+            'TWDP-ferry',
         },
         help='''
         Type of dataset to notify ERDDAP of:
@@ -58,6 +59,8 @@ def main():
         processed
         'USDDL-CTD' means ONC USDDL node CTD T&S observations downloaded &
         processed
+        'TWDP-ferry' means ONC Tsawwassen/Duke Pt. ferry observations 
+        downloaded & processed
         ''',
     )
     worker.run(ping_erddap, success, failure)
