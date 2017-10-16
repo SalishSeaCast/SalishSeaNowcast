@@ -102,7 +102,17 @@ def get_onc_ferry(parsed_args, config, *args):
     location_config = ferry_config['location']
     devices_config = ferry_config['devices']
     data_arrays = SimpleNamespace()
-    nav_data = _get_nav_data(ferry_platform, ymd, location_config)
+    try:
+        nav_data = _get_nav_data(ferry_platform, ymd, location_config)
+    except TypeError:
+        logger.error(
+            f'No nav data for {ferry_platform} so no dataset for {ymd}',
+            extra={
+                'data_date': ymd,
+                'ferry_platform': ferry_platform,
+            }
+        )
+        raise WorkerError
     (
         data_arrays.longitude,
         data_arrays.latitude,
