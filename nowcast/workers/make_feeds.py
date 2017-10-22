@@ -192,16 +192,18 @@ def _render_entry_content(feed, max_ssh_info, config):
                     converters.mps_knots(max_ssh_info['wind_speed_4h_avg']),
                 'wind_dir_4h_avg_heading':
                     converters.bearing_heading(
-                        converters.
-                        wind_to_from(max_ssh_info['wind_dir_4h_avg'])
+                        converters.wind_to_from(
+                            max_ssh_info['wind_dir_4h_avg']
+                        )
                     ),
                 'wind_dir_4h_avg_bearing':
                     converters.wind_to_from(max_ssh_info['wind_dir_4h_avg']),
                 'max_ssh_time':
                     max_ssh_time_local,
                 'max_ssh_time_tzname':
-                    max_ssh_time_local.tzinfo.
-                    tzname(max_ssh_time_local.datetime),
+                    max_ssh_time_local.tzinfo.tzname(
+                        max_ssh_time_local.datetime
+                    ),
                 'humanized_max_ssh_time':
                     converters.humanize_time_of_day(max_ssh_time_local),
             }
@@ -223,8 +225,8 @@ def _calc_max_ssh_risk(feed, run_date, run_type, config):
     feed_config = config['storm surge feeds']['feeds'][feed]
     ttide, _ = stormtools.load_tidal_predictions(
         os.path.join(
-            config['ssh']['tidal predictions'], feed_config['tidal predictions'
-                                                            ]
+            config['ssh']['tidal predictions'],
+            feed_config['tidal predictions']
         )
     )
     max_ssh, max_ssh_time = _calc_max_ssh(
