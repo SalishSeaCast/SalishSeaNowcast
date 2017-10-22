@@ -96,8 +96,9 @@ def _make_background_map(
     for ks, ke in zip(kss, kee):
         poly = list(zip(coast_lon[ks:ke - 2], coast_lat[ks:ke - 2]))
         ax.add_patch(
-            patches.
-            Polygon(poly, facecolor=theme.COLOURS['land'], rasterized=True)
+            patches.Polygon(
+                poly, facecolor=theme.COLOURS['land'], rasterized=True
+            )
         )
     # Format the axes
     ax.set_frame_on(False)

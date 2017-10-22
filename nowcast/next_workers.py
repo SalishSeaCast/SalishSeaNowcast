@@ -51,15 +51,17 @@ def after_download_weather(msg, config, checklist):
         'success 18': [],
     }
     if msg.type.startswith('success') and msg.type.endswith('06'):
-        next_workers['success 06'
-                     ].append(NextWorker('nowcast.workers.make_runoff_file'))
+        next_workers['success 06'].append(
+            NextWorker('nowcast.workers.make_runoff_file')
+        )
         for stn in config['observations']['ctd data']['stations']:
             next_workers['success 06'].append(
                 NextWorker('nowcast.workers.get_onc_ctd', args=[stn])
             )
         for ferry in config['observations']['ferry data']['ferries']:
             next_workers['success 06'].append(
-                NextWorker('nowcast.workers.get_onc_ferry', args=[ferry]))
+                NextWorker('nowcast.workers.get_onc_ferry', args=[ferry])
+            )
         if 'forecast2' in config['run types']:
             next_workers['success 06'].extend([
                 NextWorker(
@@ -257,7 +259,9 @@ def after_get_onc_ferry(msg, config, checklist):
         next_workers[msg.type].append(
             NextWorker(
                 'nowcast.workers.ping_erddap',
-                args=[f'{ferry_platform}-ferry']))
+                args=[f'{ferry_platform}-ferry']
+            )
+        )
     return next_workers[msg.type]
 
 
@@ -872,8 +876,8 @@ def after_make_plots(msg, config, checklist):
             NextWorker(
                 'nowcast.workers.make_feeds',
                 args=[
-                    run_type, '--run-date', checklist['NEMO run'][run_type]
-                    ['run date']
+                    run_type, '--run-date',
+                    checklist['NEMO run'][run_type]['run date']
                 ]
             )
         )
