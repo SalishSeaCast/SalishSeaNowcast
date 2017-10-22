@@ -511,10 +511,10 @@ run:
           # Directory on compute host where results are stored
           results: /global/scratch/sallen/SalishSea/hindcast/
 
-    jasper-hindcast:
+    cedar-hindcast:
       run types:
         hindcast:
-          results: /home/sallen/MEOPAR/SalishSea/hindcast/
+          results: $SCRATCH/hindcast/
 
     bugaboo-fs:
       run types:
