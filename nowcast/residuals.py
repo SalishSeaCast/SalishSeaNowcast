@@ -18,6 +18,10 @@
 visualizations.
 """
 import datetime
+import io
+
+import arrow
+import requests
 
 from dateutil import tz
 import pytz
@@ -558,9 +562,9 @@ def obs_residual_ssh_NOAA(name, tides, sdt, edt, product='hourly_height'):
     sites = figures.SITES
     start_date = sdt.strftime('%d-%b-%Y')
     end_date = edt.strftime('%d-%b-%Y')
-    obs = figures.get_NOAA_wlevels(sites[name]['stn_no'],
-                                   start_date, end_date,
-                                   product=product)
+    obs = get_NOAA_wlevels(sites[name]['stn_no'],
+                           start_date, end_date,
+                           product=product)
 
     # Prepare to find residual
     residual = compute_residual(obs.wlev, obs.time, tides)
@@ -746,3 +750,65 @@ def compute_residual(ssh, t_model, ttide):
     res = ssh - tides_interp
 
     return res
+
+
+def dateparse_NOAA(s):
+    """Parse the dates from the NOAA files."""
+
+    unaware = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M')
+    aware = unaware.replace(tzinfo=tz.tzutc())
+
+    return aware
+
+
+def get_NOAA_wlevels(station_no, start_date, end_date, product='water_level'):
+    """Retrieves recent NOAA water levels from a station in a given date range.
+
+    NOAA water levels are at 6 minute intervals and are relative to
+    mean sea level.
+    See: http://tidesandcurrents.noaa.gov/stations.html?type=Water+Levels.
+
+    :arg station_no: NOAA station number.
+    :type station_no: int
+
+    :arg start_date: The start of the date range; e.g. 01-Jan-2014.
+    :type start_date: str
+
+    :arg end_date: The end of the date range; e.g. 02-Jan-2014.
+    :type end_date: str
+
+    :arg product: Defines which NOAA product to use. Options are 'water_level'
+                  for recent data, 'hourly_height' for archived
+    :type product: str
+
+    :returns: DataFrame object (obs) with time and wlev columns,
+              among others that are irrelevant.
+    """
+
+    # Time range
+    st_ar = arrow.Arrow.strptime(start_date, '%d-%b-%Y')
+    end_ar = arrow.Arrow.strptime(end_date, '%d-%b-%Y')
+
+    base_url = (
+        'http://tidesandcurrents.noaa.gov/api/datagetter'
+        '?product={}&application=NOS.COOPS.TAC.WL'.format(product))
+    params = {
+        'begin_date': st_ar.format('YYYYMMDD'),
+        'end_date': end_ar.format('YYYYMMDD'),
+        'datum': 'MSL',
+        'station': str(station_no),
+        'time_zone': 'GMT',
+        'units': 'metric',
+        'format': 'csv',
+    }
+    response = requests.get(base_url, params=params)
+
+    fakefile = io.StringIO(response.text)
+    try:
+        obs = pd.read_csv(
+            fakefile, parse_dates=[0], date_parser=dateparse_NOAA)
+    except ValueError:
+        data = {'Date Time': st_ar.datetime, ' Water Level': float('NaN')}
+        obs = pd.DataFrame(data=data, index=[0])
+    obs = obs.rename(columns={'Date Time': 'time', ' Water Level': 'wlev'})
+    return obs
