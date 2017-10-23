@@ -212,6 +212,7 @@ def _alerts_map_geo_labels(ax, theme):
     geo_labels = (
         # PLACES key, offset x, y, rotation, text size
         ('Pacific Ocean', 0, 0, 0, 'left', 'small'),
+        ('Neah Bay', -0.04, -0.08, 0, 'right', 'large'),
         ('Juan de Fuca Strait', 0, 0, -18, 'left', 'small'),
         ('Puget Sound', 0, 0, -30, 'left', 'small'),
         ('Strait of Georgia', 0, 0, -20, 'left', 'small'),
