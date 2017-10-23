@@ -378,12 +378,11 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
 
 
 def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
+    cf_units_mapping = {
+        'C': 'degrees_Celcius',
+    }
     sensor_data_arrays = []
-    for sensor in devices_config[device]['sensors']:
-        cf_units_mapping = {
-            'C': 'degrees_Celcius',
-        }
-        onc_sensor = devices_config[device]['sensors'][sensor]
+    for sensor, onc_sensor in devices_config[device]['sensors'].items():
         logger.debug(
             f'filtering ONC {ferry_platform} {device} {onc_sensor} data '
             f'for {ymd} to exlude qaqcFlag!=1',
@@ -395,6 +394,7 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
             }
         )
         onc_data = getattr(device_data, onc_sensor)
+        not_nan_mask = numpy.logical_not(numpy.isnan(onc_data.values))
         sensor_qaqc_mask = onc_data.attrs['qaqcFlag'] == 1
         try:
             cf_units = cf_units_mapping[onc_data.unitOfMeasure]
@@ -403,8 +403,8 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
         sensor_data_arrays.append(
             xarray.DataArray(
                 name=sensor,
-                data=onc_data[sensor_qaqc_mask].values,
-                coords={'time': onc_data.sampleTime[sensor_qaqc_mask].values},
+                data=onc_data[not_nan_mask][sensor_qaqc_mask].values,
+                coords={'time': onc_data.sampleTime[not_nan_mask][sensor_qaqc_mask].values},
                 dims=('time',),
                 attrs={'device_category': device,
                        'units': cf_units},
