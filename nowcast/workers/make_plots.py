@@ -599,10 +599,6 @@ def _prep_publish_fig_functions(
                 'Campbell River', grid_T_hr, grids_15m, bathy, weather_path,
                 tidal_predictions, timezone)
         },
-        'NOAA_ssh': {
-            'function': figures.compare_water_levels,
-            'args': (grid_T_hr, bathy, grids_15m, coastline)
-        },
         'SH_wind': {
             'function': figures.SandHeads_winds,
             'args': (grid_T_hr, bathy, weather_path, coastline)

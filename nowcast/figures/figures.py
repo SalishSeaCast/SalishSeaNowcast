@@ -31,7 +31,6 @@ import glob
 import io
 import os
 
-import arrow
 import matplotlib.cm as cm
 import matplotlib.dates as mdates
 import matplotlib.gridspec as gridspec
@@ -43,9 +42,6 @@ import pandas as pd
 import requests
 from dateutil import tz
 from matplotlib.backends import backend_agg as backend
-from scipy import interpolate as interp
-
-from nowcast.figures import shared
 from salishsea_tools import (
     geo_tools,
     nc_tools,
@@ -53,7 +49,9 @@ from salishsea_tools import (
     tidetools,
     viz_tools,
 )
+from scipy import interpolate as interp
 
+from nowcast.figures import shared
 # =============================== #
 # <------- Kyle 2015/08/25
 ms2k = 1/0.514444
@@ -302,15 +300,6 @@ def get_model_time_variables(grid_T):
     return time[0], time[-1], time
 
 
-def dateparse_NOAA(s):
-    """Parse the dates from the NOAA files."""
-
-    unaware = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M')
-    aware = unaware.replace(tzinfo=tz.tzutc())
-
-    return aware
-
-
 def dateparse_PAObs(s1, s2, s3, s4):
     """Parse dates for Point Atkinson observations."""
 
@@ -417,113 +406,6 @@ def load_PA_observations():
     obs = obs.rename(columns={'0_1_2_3': 'time', 4: 'wlev'})
 
     return obs
-
-
-def get_NOAA_wlevels(station_no, start_date, end_date, product='water_level'):
-    """Retrieves recent NOAA water levels from a station in a given date range.
-
-    NOAA water levels are at 6 minute intervals and are relative to
-    mean sea level.
-    See: http://tidesandcurrents.noaa.gov/stations.html?type=Water+Levels.
-
-    :arg station_no: NOAA station number.
-    :type station_no: int
-
-    :arg start_date: The start of the date range; e.g. 01-Jan-2014.
-    :type start_date: str
-
-    :arg end_date: The end of the date range; e.g. 02-Jan-2014.
-    :type end_date: str
-
-    :arg product: Defines which NOAA product to use. Options are 'water_level'
-                  for recent data, 'hourly_height' for archived
-    :type product: str
-
-    :returns: DataFrame object (obs) with time and wlev columns,
-              among others that are irrelevant.
-    """
-
-    # Time range
-    st_ar = arrow.Arrow.strptime(start_date, '%d-%b-%Y')
-    end_ar = arrow.Arrow.strptime(end_date, '%d-%b-%Y')
-
-    base_url = (
-        'http://tidesandcurrents.noaa.gov/api/datagetter'
-        '?product={}&application=NOS.COOPS.TAC.WL'.format(product))
-    params = {
-        'begin_date': st_ar.format('YYYYMMDD'),
-        'end_date': end_ar.format('YYYYMMDD'),
-        'datum': 'MSL',
-        'station': str(station_no),
-        'time_zone': 'GMT',
-        'units': 'metric',
-        'format': 'csv',
-    }
-    response = requests.get(base_url, params=params)
-
-    fakefile = io.StringIO(response.text)
-    try:
-        obs = pd.read_csv(
-            fakefile, parse_dates=[0], date_parser=dateparse_NOAA)
-    except ValueError:
-        data = {'Date Time': st_ar.datetime, ' Water Level': float('NaN')}
-        obs = pd.DataFrame(data=data, index=[0])
-    obs = obs.rename(columns={'Date Time': 'time', ' Water Level': 'wlev'})
-    return obs
-
-
-def get_NOAA_tides(station_no, start_date, end_date, interval=''):
-    """Retrieves NOAA predicted tides from a station in a given date range.
-
-    NOAA predicted tides are at 6-minute intervals and are relative to
-    mean sea level. See:
-    http://tidesandcurrents.noaa.gov/stations.html?type=Water+Levels.
-
-    :arg station_no: NOAA station number.
-    :type station_no: integer
-
-    :arg start_date: The start of the date range eg. 01-Jan-2014.
-    :type start_date: string
-
-    :arg end_date: The end of the date range eg. 02-Jan-2014.
-    :type end_date: string
-
-    :arg interval: Interval for tide record. Default is '', meaning highest
-                   frequency available. 'h' corresponds to hourly.
-    :type interval: string
-
-    :returns: DataFrame object (tides) with time and pred columns.
-    """
-
-    # Time range
-    st_ar = arrow.Arrow.strptime(start_date, '%d-%b-%Y')
-    end_ar = arrow.Arrow.strptime(end_date, '%d-%b-%Y')
-
-    base_url = (
-        'http://tidesandcurrents.noaa.gov/api/datagetter'
-        '?product=predictions&application=NOS.COOPS.TAC.WL')
-    params = {
-        'begin_date': st_ar.format('YYYYMMDD'),
-        'end_date': end_ar.format('YYYYMMDD'),
-        'datum': 'MSL',
-        'station': str(station_no),
-        'time_zone': 'GMT',
-        'units': 'metric',
-        'interval': interval,
-        'format': 'csv',
-    }
-
-    response = requests.get(base_url, params=params)
-
-    fakefile = io.StringIO(response.text)
-    try:
-        tides = pd.read_csv(
-            fakefile, parse_dates=[0], date_parser=dateparse_NOAA)
-    except ValueError:
-        data = {'Date Time': st_ar.datetime, ' Prediction': float('NaN')}
-        tides = pd.DataFrame(data=data, index=[0])
-    tides = tides.rename(columns={'Date Time': 'time', ' Prediction': 'pred'})
-    return tides
 
 
 def get_maxes(ssh, t, res, lon, lat, weather_path):
@@ -799,119 +681,6 @@ def load_model_ssh(grid_T):
     ssh = grid_T.variables['sossheig'][:, 0, 0]
     t_orig, t_final, time = get_model_time_variables(grid_T)
     return ssh, time
-
-
-## Called by make_plots (publish)
-## TODO: Move/rename to figures.publish as compare_water_levels module
-def compare_water_levels(
-        grid_T, grid_B, grids, coastline, PST=1, figsize=(20, 15)):
-    """Compares modelled water levels to observed water levels and tides at a
-    NOAA station over one day.
-
-    See: http://tidesandcurrents.noaa.gov/stations.html?type=Water+Levels
-
-    This function applies to stations at Cherry Point, Neah Bay,
-    and Friday Harbor.
-
-    :arg grid_T: Hourly tracer results dataset from NEMO.
-    :type grid_T: :class:`netCDF4.Dataset`
-
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
-    :type grid_B: :class:`netCDF4.Dataset`
-
-    :arg grids: high frequency model results
-    :type grids: dictionary
-
-    :arg PST: Specifies if plot should be presented in PST.
-              1 = plot in PST, 0 = plot in UTC.
-    :type PST: 0 or 1
-
-    :arg figsize:  Figure size (width, height) in inches.
-    :type figsize: 2-tuple
-
-    :returns: matplotlib figure object instance (fig).
-    """
-
-    # Bathymetry
-    bathy, X, Y = tidetools.get_bathy_data(grid_B)
-
-    # Time range
-    t_orig, t_final, t = get_model_time_variables(grid_T)
-    start_date = t_orig.strftime('%d-%b-%Y')
-    end_date = t_final.strftime('%d-%b-%Y')
-    timezone = PST * '[PST]' + abs((PST - 1)) * '[UTC]'
-
-    # Figure
-    fig = plt.figure(figsize=figsize)
-    fig.patch.set_facecolor('#2B3E50')
-    gs = gridspec.GridSpec(3, 2, width_ratios=[1.5, 1])
-    gs.update(wspace=0.17, hspace=0.2)
-
-    # Map
-    ax0 = fig.add_subplot(gs[:, 1])
-    _plot_stations_map(ax0, coastline, title='Station Locations')
-
-    # Citation
-    ax0.text(
-        0.03, -0.45,
-        'Observed water levels and tidal predictions from NOAA:\n'
-        'http://tidesandcurrents.noaa.gov/stations.html?type=Water+Levels',
-        horizontalalignment='left',
-        verticalalignment='top',
-        transform=ax0.transAxes, color='white')
-
-    m = np.arange(3)
-    names = ['Neah Bay', 'Friday Harbor', 'Cherry Point']
-
-    for name, M in zip(names, m):
-        lat = SITES[name]['lat']
-        lon = SITES[name]['lon']
-        # Map
-        ax0.plot(lon, lat, marker='D', color='DarkMagenta',
-                 markersize=10, markeredgewidth=2)
-        bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.8)
-        ax0.annotate(name, (lon - 0.05, lat - 0.15), fontsize=15,
-                     color='black', bbox=bbox_args)
-
-        # NOAA
-        obs = get_NOAA_wlevels(SITES[name]['stn_no'], start_date, end_date)
-        tides = get_NOAA_tides(SITES[name]['stn_no'], start_date, end_date)
-
-        # Get sea surface height
-        ssh, t = load_model_ssh(grids[name])
-
-        # Sea surface height plots
-        ax = fig.add_subplot(gs[M, 0])
-        ax.plot(
-            t[:] + time_shift * PST, ssh,
-            c=model_c, linewidth=2, label='Model')
-        ax.plot(
-            obs.time[:] + time_shift * PST, obs.wlev, c=observations_c,
-            linewidth=2, label='Observed water levels')
-        ax.plot(
-            tides.time + time_shift * PST, tides.pred, c=predictions_c,
-            linewidth=2, label='Tidal predictions')
-
-        # Axis
-        ax.set_xlim(t_orig + time_shift * PST, t_final + time_shift * PST)
-        ax.set_ylim([-3, 3])
-        ax.set_title(
-            'Hourly Sea Surface Height at {name}: {t_orig:%d-%b-%Y}'
-            .format(name=name, t_orig=t_orig),
-            **title_font)
-        ax.set_ylabel('Water Levels wrt MSL (m)', **axis_font)
-        ax.set_xlabel('Time {}'.format(timezone), **axis_font)
-        ax.grid()
-        axis_colors(ax, 'gray')
-        ax.xaxis.set_major_formatter(hfmt)
-        fig.autofmt_xdate()
-        if M == 0:
-            legend = ax.legend(
-                bbox_to_anchor=(1.285, 1), loc=2, borderaxespad=0.,
-                prop={'size': 15}, title=r'Legend')
-            legend.get_title().set_fontsize('20')
-
-    return fig
 
 
 ## Called by make_plots (publish)
