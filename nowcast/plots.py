@@ -74,11 +74,6 @@ def make_research_plots(
     filename = os.path.join(plots_dir, f'Salinity_on_thalweg_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = figures.plot_surface(grid_T_dy, grid_U_dy, grid_V_dy, bathy,
-                               'default', 'default')
-    filename = os.path.join(plots_dir, f'T_S_Currents_on_surface_{dmy}.svg')
-    fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
-
     fig = figures.compare_VENUS('East', grid_T_hr, bathy)
     filename = os.path.join(plots_dir, f'Compare_VENUS_East_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
