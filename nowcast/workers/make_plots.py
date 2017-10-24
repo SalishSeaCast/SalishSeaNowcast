@@ -41,8 +41,8 @@ import xarray as xr
 from nowcast import lib
 from nowcast.figures.research import (
     time_series_plots,
-    tracer_thalweg_and_surface,
-    tracer_thalweg_and_surface_hourly
+    tracer_thalweg_and_surface_hourly,
+    velocity_section_and_surface,
 )
 from nowcast.figures.comparison import compare_venus_ctd
 from nowcast.figures.publish import (
@@ -216,6 +216,8 @@ def _prep_nowcast_research_fig_functions(
     grid_T_day = _results_dataset('1d', 'grid_T', results_dir)
     grid_U_day = _results_dataset('1d', 'grid_U', results_dir)
     grid_V_day = _results_dataset('1d', 'grid_V', results_dir)
+    grid_U_hr = _results_dataset('1h', 'grid_U', results_dir)
+    grid_V_hr = _results_dataset('1h', 'grid_V', results_dir)
     grid_central = _results_dataset_gridded('central', results_dir)
     grid_east = _results_dataset_gridded('east', results_dir)
     image_loops = {
@@ -261,9 +263,12 @@ def _prep_nowcast_research_fig_functions(
                     'thalweg_working.txt'
             }
         },
-        'T_S_Currents_on_surface': {
-            'function': figures.plot_surface,
-            'args': (grid_T_day, grid_U_day, grid_V_day, bathy),
+        'Currents_sections_and_surface': {
+            'function': velocity_section_and_surface.make_figure,
+            'args': (
+                grid_U_hr.variables['vozocrtx'],
+                grid_V_hr.variables['vomecrty'], bathy, mesh_mask
+            ),
         },
         'Currents_at_VENUS_Central': {
             'function': research_VENUS.plot_vel_NE_gridded,
