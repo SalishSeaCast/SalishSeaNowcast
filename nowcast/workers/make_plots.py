@@ -213,9 +213,6 @@ def _prep_nowcast_research_fig_functions(
 ):
     yyyymmdd = run_date.format('YYYYMMDD')
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
-    grid_T_day = _results_dataset('1d', 'grid_T', results_dir)
-    grid_U_day = _results_dataset('1d', 'grid_U', results_dir)
-    grid_V_day = _results_dataset('1d', 'grid_V', results_dir)
     grid_U_hr = _results_dataset('1h', 'grid_U', results_dir)
     grid_V_hr = _results_dataset('1h', 'grid_V', results_dir)
     grid_central = _results_dataset_gridded('central', results_dir)
@@ -245,24 +242,6 @@ def _prep_nowcast_research_fig_functions(
             for hr in range(24)
         })
     fig_functions.update({
-        'Salinity_on_thalweg': {
-            'function': figures.thalweg_salinity,
-            'args': (grid_T_day, mesh_mask, bathy),
-            'kwargs': {
-                'thalweg_pts_file':
-                    '/results/nowcast-sys/tools/bathymetry/'
-                    'thalweg_working.txt'
-            }
-        },
-        'Temperature_on_thalweg': {
-            'function': figures.thalweg_temperature,
-            'args': (grid_T_day, mesh_mask, bathy),
-            'kwargs': {
-                'thalweg_pts_file':
-                    '/results/nowcast-sys/tools/bathymetry/'
-                    'thalweg_working.txt'
-            }
-        },
         'Currents_sections_and_surface': {
             'function': velocity_section_and_surface.make_figure,
             'args': (
