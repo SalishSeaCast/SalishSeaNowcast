@@ -92,7 +92,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
     logger.debug(f'{run_type} on {host_name}: run pid: {pid}')
     # Get run time steps and date info from namelist
     run_dir = Path(run_info[run_type]['run dir'])
-    namelist = namelist2dict(str(run_dir/'namelist_cfg'))
+    namelist = namelist2dict(os.fspath(run_dir/'namelist_cfg'))
     it000 = namelist['namrun'][0]['nn_it000']
     itend = namelist['namrun'][0]['nn_itend']
     date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
