@@ -246,8 +246,17 @@ def _prep_nowcast_research_fig_functions(
             'function': velocity_section_and_surface.make_figure,
             'args': (
                 grid_U_hr.variables['vozocrtx'],
-                grid_V_hr.variables['vomecrty'], bathy, mesh_mask
+                grid_V_hr.variables['vomecrty'], bathy, mesh_mask,
             ),
+            'kwargs': {
+                'sections': (450, 520, 680),
+                'pos': ((0.1, 0.35), (0.4, 0.65), (0.7, 0.95)),
+                'section_lims': (
+                    (235, 318, 0, 445),
+                    (192, 277, 0, 445),
+                    (127, 197, 0, 445),
+                ),
+            }
         },
         'Currents_at_VENUS_Central': {
             'function': research_VENUS.plot_vel_NE_gridded,
