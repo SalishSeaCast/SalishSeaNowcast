@@ -26,7 +26,7 @@ https://salishsea.eos.ubc.ca/erddap/tabledap/.
 Development notebook:
 http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/tip/notebooks/ONC-Ferry-DataToERDDAP.ipynb
 """
-from contextlib2 import suppress
+from contextlib import suppress
 import logging
 import os
 from pathlib import Path
