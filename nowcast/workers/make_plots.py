@@ -596,19 +596,6 @@ def _prep_publish_fig_functions(
             'function': figures.SandHeads_winds,
             'args': (grid_T_hr, bathy, weather_path, coastline)
         },
-        'Avg_wind_vectors': {
-            'function': figures.winds_average_max,
-            'args': (grid_T_hr, bathy, weather_path, coastline),
-            'kwargs': {'station': 'all', 'wind_type': 'average'}
-        },
-        'Wind_vectors_at_max': {
-            ## TODO: Fix figures.py:840: FutureWarning:
-            ## elementwise comparison failed; returning scalar instead,
-            ## but in the future will perform elementwise comparison
-            'function': figures.winds_average_max,
-            'args': (grid_T_hr, bathy, weather_path, coastline),
-            'kwargs': {'station': 'all', 'wind_type': 'max'}
-        },
     }
     return fig_functions
 
