@@ -35,6 +35,7 @@ from salishsea_tools import (
     viz_tools,
     geo_tools
 )
+from scipy import interpolate as interp
 
 from nowcast import analyze
 from nowcast.figures import figures
@@ -211,8 +212,8 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
     salc = []
     tempc = []
     for ind in np.arange(0, sal.shape[0]):
-        salc.append(figures.interpolate_depth(sal[ind, :], ds, depth))
-        tempc.append(figures.interpolate_depth(temp[ind, :], ds, depth))
+        salc.append(interpolate_depth(sal[ind, :], ds, depth))
+        tempc.append(interpolate_depth(temp[ind, :], ds, depth))
 
     # Plot model data
     ax_sal.plot(t, salc, '-b', label='Model')
@@ -999,3 +1000,33 @@ def plot_ellipses_area(
     ax.set_ylabel('y index', fontsize=16)
     print('red is clockwise')
     return fig
+
+
+def interpolate_depth(data, depth_array, depth_new):
+    """Interpolates data field to a desired depth.
+
+    :arg data: The data to be interpolated.
+               Should be one-dimensional over the z-axis.
+    :type data: 1-d numpy array
+
+    :arg depth_array: The z-axis for data.
+    :type depth_array: 1-d numpy array
+
+    :arg depth_new: The new depth to which we want to interpolate.
+    :type depth_new: float
+
+    :returns: float representing the field interpolated to the desired depth
+              (data_interp).
+    """
+
+    # Masked arrays are used for more accurate interpolation.
+    mu = data == 0
+    datao = np.ma.array(data, mask=mu)
+    mu = depth_array == 0
+    depth_arrayo = np.ma.array(depth_array, mask=mu)
+
+    # Interpolations
+    f = interp.interp1d(depth_arrayo, datao)
+    data_interp = f(depth_new)
+
+    return data_interp
