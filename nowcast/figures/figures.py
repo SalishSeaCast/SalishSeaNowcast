@@ -34,7 +34,6 @@ import os
 import matplotlib.cm as cm
 import matplotlib.dates as mdates
 import matplotlib.gridspec as gridspec
-import matplotlib.patches as patches
 import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
@@ -46,7 +45,6 @@ from salishsea_tools import (
     geo_tools,
     nc_tools,
     stormtools,
-    tidetools,
     viz_tools,
 )
 from scipy import interpolate as interp
@@ -55,15 +53,12 @@ from nowcast.figures import shared
 # =============================== #
 # <------- Kyle 2015/08/25
 ms2k = 1/0.514444
-k2ms = 0.514444
 # conversion between m/s and knots
 # =============================== #
 
 # Plotting colors
 model_c = 'MediumBlue'
 observations_c = 'DarkGreen'
-predictions_c = 'MediumVioletRed'
-stations_c = cm.rainbow(np.linspace(0, 1, 7))
 SITE_BACKGROUND_COLOUR = '#2B3E50'  # salishsea site Superhero theme background
 COLOURS = {
     'figure': {
@@ -185,33 +180,6 @@ SITES = {
         }
     }
 
-# Sites for producing water level thresold plots
-TIDAL_SITES = ['Point Atkinson', 'Victoria', 'Campbell River', 'Nanaimo',
-               'Cherry Point']
-
-
-def save_image(fig, filename, **kwargs):
-    """Save fig as an image file in filename.
-
-    :arg fig: Figure object to save as image file.
-    :type fig: :class:`matplotlib.Figure`
-
-    :arg filename: File path/name to save fig object to.
-                   The filename extension specifies the type of image
-                   file to create;
-                   e.g. .png, .svg, etc.
-    :type filename: str
-
-    :arg kwargs: Keyword argument names and values to control how fig
-                 is rendered;
-                 e.g. :kbd:`facecolor=fig.get_facecolor()`,
-                 :kbd:`bbox_inches='tight'`, etc.
-                 See the matplotlib docs for details.
-    :type kwargs: dict
-    """
-    canvas = backend.FigureCanvasAgg(fig)
-    canvas.print_figure(filename, **kwargs)
-
 
 def axis_colors(ax, plot):
     """Formats the background colour of plots and colours of labels.
@@ -294,16 +262,6 @@ def get_model_time_variables(grid_T):
     return time[0], time[-1], time
 
 
-def dateparse_PAObs(s1, s2, s3, s4):
-    """Parse dates for Point Atkinson observations."""
-
-    s = s1 + s2 + s3 + s4
-    unaware = datetime.datetime.strptime(s, '%Y%m%d%H:%M')
-    aware = unaware.replace(tzinfo=tz.tzutc())
-
-    return aware
-
-
 def dateparse_archive_obs(s):
     """Function to make datetime object aware of time zone
     e.g. date_parser=dateParserMeasured('2014/05/31 11:42')
@@ -380,73 +338,6 @@ def load_archived_observations(name, start_date, end_date):
         columns={'Obs_date': 'time', 'SLEV(metres)': 'wlev'})
 
     return wlev_meas
-
-
-def load_PA_observations():
-    """Loads the recent water level observations at Point Atkinson.
-
-    Times are in UTC and water level is in metres with respect to Chart Datum.
-
-    :returns: DataFrame object (obs) with a time column and wlev column.
-    """
-
-    filename = (
-        '/data/nsoontie/MEOPAR/analysis/Nancy/tides/PA_observations/'
-        'ptatkin_rt.dat')
-
-    obs = pd.read_csv(
-        filename, delimiter=' ', parse_dates=[[0, 1, 2, 3]], header=None,
-        date_parser=dateparse_PAObs)
-    obs = obs.rename(columns={'0_1_2_3': 'time', 4: 'wlev'})
-
-    return obs
-
-
-def get_maxes(ssh, t, res, lon, lat, weather_path):
-    """Identifies maximum ssh and other important features such as the
-    timing, residual, and wind speed.
-
-    :arg ssh: The ssh field to be maximized.
-    :type ssh: numpy array
-
-    :arg t: The times corresponding to the ssh.
-    :type t: numpy array
-
-    :arg res: The residual.
-    :type res: numpy array
-
-    :arg float lon: The longitude of the station for looking up wind.
-
-    :arg float lat: The latitude of the station for looking up wind.
-
-    :arg str weather_path: The directory where the weather forcing files
-                           are stored.
-
-    :returns: maxmimum ssh (max_ssh), index of maximum ssh (index_ssh),
-              time of maximum ssh (tmax), residual at that time (max_res),
-              wind speed at that time (max_wind),
-              and the index of that wind speed (ind_w).
-    """
-
-    # Index when sea surface height is at its maximum at Point Atkinson
-    max_ssh = np.max(ssh)
-    index_ssh = np.argmax(ssh)
-    tmax = t[index_ssh]
-    max_res = res[index_ssh]
-
-    # Get model winds
-    t_orig = t[0]
-    t_final = t[-1]
-    [wind, direc, t_wind, pr, tem, sol, the, qr, pre] = get_model_winds(
-        lon, lat, t_orig, t_final, weather_path)
-    # Index where t_wind=tmax
-    # (Find a match between the year, month, day and hour)
-    ind_w = np.where(
-        t_wind == datetime.datetime(
-            tmax.year, tmax.month, tmax.day, tmax.hour))[0]
-    max_wind = wind[ind_w]
-
-    return max_ssh, index_ssh, tmax, max_res, max_wind, ind_w
 
 
 def get_weather_filenames(t_orig, t_final, weather_path):
@@ -541,21 +432,6 @@ def get_model_winds(lon, lat, t_orig, t_final, weather_path):
         for ind in np.arange(ts.shape[0]):
             t = np.append(t, torig + datetime.timedelta(seconds=ts[ind]))
     return wind, direc, t, pr, tem, sol, the, qr, pre
-
-
-def load_model_ssh(grid_T):
-    """Load an sea surface height (ssh) time series from a NEMO tracer
-    results dataset.
-
-    :arg grid_T: Tracer results dataset from NEMO.
-    :type grid_T: :py:class:`netCDF4.Dataset`
-
-    :returns: ssh, time - the ssh and time arrays
-    :rtype: 2-tuple of :py:class:`numpy.ndarray`
-    """
-    ssh = grid_T.variables['sossheig'][:, 0, 0]
-    t_orig, t_final, time = get_model_time_variables(grid_T)
-    return ssh, time
 
 
 ## Called by make_plots (publish)
@@ -678,37 +554,6 @@ def SandHeads_winds(
              horizontalalignment='left',
              verticalalignment='top',
              transform=ax0.transAxes, color='white')
-
-    return fig
-
-
-def ssh_PtAtkinson(grid_T, grid_B=None, figsize=(20, 5)):
-    """Plots hourly sea surface height at Point Atkinson.
-
-    :arg grid_T: Hourly tracer results dataset from NEMO.
-    :type grid_T: :class:`netCDF4.Dataset`
-
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
-    :type grid_B: :class:`netCDF4.Dataset`
-
-    :arg figsize: Figure size (width, height) in inches.
-    :type figsize: 2-tuple
-
-    :returns: matplotlib figure object instance (fig).
-    """
-
-    fig, ax = plt.subplots(1, 1, figsize=figsize)
-    ssh = grid_T.variables['sossheig']
-    results_date = nc_tools.timestamp(grid_T, 0).format('YYYY-MM-DD')
-    ax.plot(ssh[:, 468, 328], 'o')
-    ax.set_title(
-        'Hourly Sea Surface Height at Point Atkinson on {}'
-        .format(results_date))
-    ax.set_xlabel('UTC Hour from {}'.format(results_date))
-    ax.set_ylabel(
-        '{label} [{units}]'
-        .format(label=ssh.long_name.title(), units=ssh.units))
-    ax.grid()
 
     return fig
 
