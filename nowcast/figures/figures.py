@@ -31,7 +31,6 @@ import glob
 import io
 import os
 
-import matplotlib.cm as cm
 import matplotlib.dates as mdates
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
@@ -40,16 +39,16 @@ import numpy as np
 import pandas as pd
 import requests
 from dateutil import tz
-from matplotlib.backends import backend_agg as backend
 from salishsea_tools import (
     geo_tools,
     nc_tools,
     stormtools,
     viz_tools,
 )
-from scipy import interpolate as interp
 
 from nowcast.figures import shared
+
+
 # =============================== #
 # <------- Kyle 2015/08/25
 ms2k = 1/0.514444
@@ -214,36 +213,6 @@ def axis_colors(ax, plot):
     ax.title.set_color('white')
 
     return ax
-
-
-def interpolate_depth(data, depth_array, depth_new):
-    """Interpolates data field to a desired depth.
-
-    :arg data: The data to be interpolated.
-               Should be one-dimensional over the z-axis.
-    :type data: 1-d numpy array
-
-    :arg depth_array: The z-axis for data.
-    :type depth_array: 1-d numpy array
-
-    :arg depth_new: The new depth to which we want to interpolate.
-    :type depth_new: float
-
-    :returns: float representing the field interpolated to the desired depth
-              (data_interp).
-    """
-
-    # Masked arrays are used for more accurate interpolation.
-    mu = data == 0
-    datao = np.ma.array(data, mask=mu)
-    mu = depth_array == 0
-    depth_arrayo = np.ma.array(depth_array, mask=mu)
-
-    # Interpolations
-    f = interp.interp1d(depth_arrayo, datao)
-    data_interp = f(depth_new)
-
-    return data_interp
 
 
 def get_model_time_variables(grid_T):
