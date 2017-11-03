@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for nowcast.next_workers module.
 """
 from unittest.mock import patch
@@ -32,25 +31,33 @@ def config():
     a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
     """
     return {
-        'temperature salinity': {'matlab host': 'salish'},
+        'temperature salinity': {
+            'matlab host': 'salish'
+        },
         'observations': {
             'ctd data': {
                 'stations': ['SCVIP', 'SEVIP', 'LSBBL', 'USDDL'],
             },
             'ferry data': {
-                'ferries': {'TWDP': {}},
+                'ferries': {
+                    'TWDP': {}
+                },
             },
         },
         'run types': {
-            'nowcast': {}, 'nowcast-green': {}, 'nowcast-dev': {},
-            'forecast': {}, 'forecast2': {}
+            'nowcast': {},
+            'nowcast-green': {},
+            'nowcast-dev': {},
+            'forecast': {},
+            'forecast2': {}
         },
         'run': {
             'enabled hosts': {
                 'west.cloud': {
-                    'shared storage': False,
-                    'run types': [
-                        'nowcast', 'forecast', 'forecast2', 'nowcast-green'],
+                    'shared storage':
+                    False,
+                    'run types':
+                    ['nowcast', 'forecast', 'forecast2', 'nowcast-green'],
                 },
                 'salish': {
                     'shared storage': True,
@@ -78,51 +85,64 @@ class TestAfterDownloadWeather:
     """Unit tests for the after_download_weather function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure 00',
-        'failure 06',
-        'failure 12',
-        'failure 18',
-        'success 00',
-        'success 18',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure 00',
+            'failure 06',
+            'failure 12',
+            'failure 18',
+            'success 00',
+            'success 18',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_download_weather(
-            Message('download_weather', msg_type), config, checklist)
+            Message('download_weather', msg_type), config, checklist
+        )
         assert workers == []
 
     def test_success_06_launch_make_runoff_file(self, config, checklist):
         workers = next_workers.after_download_weather(
-            Message('download_weather', 'success 06'), config, checklist)
+            Message('download_weather', 'success 06'), config, checklist
+        )
         expected = NextWorker(
-            'nowcast.workers.make_runoff_file', [], host='localhost')
+            'nowcast.workers.make_runoff_file', [], host='localhost'
+        )
         assert expected in workers
 
-    @pytest.mark.parametrize('msg_type, args', [
-        ('success 06', ['forecast2']),
-        ('success 12', ['nowcast']),
-    ])
+    @pytest.mark.parametrize(
+        'msg_type, args', [
+            ('success 06', ['forecast2']),
+            ('success 12', ['nowcast']),
+        ]
+    )
     def test_success_launch_get_NeahBay_ssh(
-        self, msg_type, args, config, checklist,
+        self, msg_type, args, config, checklist
     ):
         workers = next_workers.after_download_weather(
-            Message('download_weather', msg_type), config, checklist)
+            Message('download_weather', msg_type), config, checklist
+        )
         expected = NextWorker(
-            'nowcast.workers.get_NeahBay_ssh', args, host='localhost')
+            'nowcast.workers.get_NeahBay_ssh', args, host='localhost'
+        )
         assert expected in workers
 
-    @pytest.mark.parametrize('msg_type, args', [
-        ('success 06', ['forecast2']),
-        ('success 12', ['nowcast+']),
-    ])
+    @pytest.mark.parametrize(
+        'msg_type, args', [
+            ('success 06', ['forecast2']),
+            ('success 12', ['nowcast+']),
+        ]
+    )
     def test_success_launch_grib_to_netcdf(
-        self, msg_type, args, config, checklist,
+        self, msg_type, args, config, checklist
     ):
         workers = next_workers.after_download_weather(
-            Message('download_weather', msg_type), config, checklist)
+            Message('download_weather', msg_type), config, checklist
+        )
         expected = NextWorker(
-            'nowcast.workers.grib_to_netcdf', args, host='localhost')
+            'nowcast.workers.grib_to_netcdf', args, host='localhost'
+        )
         assert expected in workers
 
     @pytest.mark.parametrize('ctd_stn', [
@@ -133,29 +153,36 @@ class TestAfterDownloadWeather:
     ])
     def test_success_06_launch_get_onc_ctd(self, ctd_stn, config, checklist):
         workers = next_workers.after_download_weather(
-            Message('download_weather', 'success 06'), config, checklist)
+            Message('download_weather', 'success 06'), config, checklist
+        )
         expected = NextWorker(
-            'nowcast.workers.get_onc_ctd', args=[ctd_stn], host='localhost')
+            'nowcast.workers.get_onc_ctd', args=[ctd_stn], host='localhost'
+        )
         assert expected in workers
 
     @pytest.mark.parametrize('ferry_platform', [
         'TWDP',
     ])
     def test_success_06_launch_get_onc_ferry(
-        self, ferry_platform, config, checklist,
+        self, ferry_platform, config, checklist
     ):
         workers = next_workers.after_download_weather(
-            Message('download_weather', 'success 06'), config, checklist)
+            Message('download_weather', 'success 06'), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.get_onc_ferry',
-            args=[ferry_platform], host='localhost')
+            args=[ferry_platform],
+            host='localhost'
+        )
         assert expected in workers
 
     def test_success_12_launch_download_live_ocean(self, config, checklist):
         workers = next_workers.after_download_weather(
-            Message('download_weather', 'success 12'), config, checklist)
+            Message('download_weather', 'success 12'), config, checklist
+        )
         expected = NextWorker(
-            'nowcast.workers.download_live_ocean', [], host='localhost')
+            'nowcast.workers.download_live_ocean', [], host='localhost'
+        )
         assert expected in workers
 
 
@@ -170,7 +197,8 @@ class TestAfterMakeRunoffFile:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_runoff_file(
-            Message('make_runoff_file', msg_type), config, checklist)
+            Message('make_runoff_file', msg_type), config, checklist
+        )
         assert workers == []
 
 
@@ -178,27 +206,35 @@ class TestAfterGetNeahBaySsh:
     """Unit tests for the after_get_NeahBay_ssh function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast',
-        'failure forecast',
-        'failure forecast2',
-        'success nowcast',
-        'success forecast2',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure forecast',
+            'failure forecast2',
+            'success nowcast',
+            'success forecast2',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_get_NeahBay_ssh(
-            Message('get_NeahBay_ssh', msg_type), config, checklist)
+            Message('get_NeahBay_ssh', msg_type), config, checklist
+        )
         assert workers == []
 
     def test_success_forecast_launch_upload_forcing_ssh(
-        self, config, checklist,
+        self,
+        config,
+        checklist,
     ):
         workers = next_workers.after_get_NeahBay_ssh(
-            Message('get_NeahBay_ssh', 'success forecast'), config, checklist)
+            Message('get_NeahBay_ssh', 'success forecast'), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['west.cloud', 'ssh'], host='localhost')
+            args=['west.cloud', 'ssh'],
+            host='localhost'
+        )
         assert expected in workers
 
 
@@ -206,14 +242,17 @@ class TestAfterGribToNetcdf:
     """Unit tests for the after_grib_to_netcdf function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast+',
-        'failure forecast2',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast+',
+            'failure forecast2',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_grib_to_netcdf(
-            Message('grib_to_netcdf', msg_type), config, checklist)
+            Message('grib_to_netcdf', msg_type), config, checklist
+        )
         assert workers == []
 
     @pytest.mark.parametrize('run_type', [
@@ -223,31 +262,39 @@ class TestAfterGribToNetcdf:
     def test_success_launch_upload_forcing(self, run_type, config, checklist):
         workers = next_workers.after_grib_to_netcdf(
             Message('grib_to_netcdf', 'success {}'.format(run_type)), config,
-            checklist)
+            checklist
+        )
         expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['west.cloud', run_type], host='localhost')
+            args=['west.cloud', run_type],
+            host='localhost'
+        )
         assert expected in workers
 
     def test_success_forecast2_no_launch_upload_forcing_nowcastp(
         self, config, checklist
     ):
         workers = next_workers.after_grib_to_netcdf(
-            Message('grib_to_netcdf', 'success forecast2'), config,
-            checklist)
+            Message('grib_to_netcdf', 'success forecast2'), config, checklist
+        )
         not_expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['salish', 'nowcast+'], host='localhost')
+            args=['salish', 'nowcast+'],
+            host='localhost'
+        )
         assert not_expected not in workers
 
     def test_success_nowcastp_launch_ping_erddap_download_weather(
-        self, config, checklist,
+        self, config, checklist
     ):
         workers = next_workers.after_grib_to_netcdf(
-            Message('grib_to_netcdf', 'success nowcast+'), config, checklist)
+            Message('grib_to_netcdf', 'success nowcast+'), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
-            args=['download_weather'], host='localhost')
+            args=['download_weather'],
+            host='localhost'
+        )
         assert expected in workers
 
 
@@ -261,7 +308,8 @@ class TestAfterGetONC_CTD:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_get_onc_ctd(
-            Message('get_onc_ctd', msg_type), config, checklist)
+            Message('get_onc_ctd', msg_type), config, checklist
+        )
         assert workers == []
 
     @pytest.mark.parametrize('ctd_stn', [
@@ -272,11 +320,14 @@ class TestAfterGetONC_CTD:
     ])
     def test_success_launch_ping_erddap(self, ctd_stn, config, checklist):
         workers = next_workers.after_get_onc_ctd(
-            Message(
-                'get_onc_ctd', 'success {}'.format(ctd_stn)), config, checklist)
+            Message('get_onc_ctd', 'success {}'.format(ctd_stn)), config,
+            checklist
+        )
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
-            args=['{}-CTD'.format(ctd_stn)], host='localhost')
+            args=['{}-CTD'.format(ctd_stn)],
+            host='localhost'
+        )
         assert expected in workers
 
 
@@ -290,7 +341,8 @@ class TestAfterGetONC_Ferry:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_get_onc_ferry(
-            Message('get_onc_ferry', msg_type), config, checklist)
+            Message('get_onc_ferry', msg_type), config, checklist
+        )
         assert workers == []
 
     @pytest.mark.parametrize('ferry_platform', [
@@ -300,12 +352,14 @@ class TestAfterGetONC_Ferry:
         self, ferry_platform, config, checklist
     ):
         workers = next_workers.after_get_onc_ferry(
-            Message(
-                'get_onc_ferry', 'success {}'.format(
-                    ferry_platform)), config, checklist)
+            Message('get_onc_ferry', 'success {}'.format(ferry_platform)),
+            config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
-            args=['{}-ferry'.format(ferry_platform)], host='localhost')
+            args=['{}-ferry'.format(ferry_platform)],
+            host='localhost'
+        )
         assert expected in workers
 
 
@@ -319,16 +373,26 @@ class TestAfterDownloadLiveOcean:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_download_live_ocean(
-            Message('download_live_ocean', msg_type), config, checklist)
+            Message('download_live_ocean', msg_type), config, checklist
+        )
         assert workers == []
 
     def test_success_launch_make_live_ocean_files(self, config, checklist):
-        with patch.dict(checklist, {'Live Ocean products': {'2017-02-15': []}}):
+        with patch.dict(
+            checklist, {
+                'Live Ocean products': {
+                    '2017-02-15': []
+                }
+            }
+        ):
             workers = next_workers.after_download_live_ocean(
-                Message('download_live_ocean', 'success'), config, checklist)
+                Message('download_live_ocean', 'success'), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_live_ocean_files',
-            args=['--run-date', '2017-02-15'], host='salish')
+            args=['--run-date', '2017-02-15'],
+            host='salish'
+        )
         assert expected in workers
 
 
@@ -343,7 +407,8 @@ class TestAfterMakeLiveOceanFiles:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_live_ocean_files(
-            Message('make_live_ocean_files', msg_type), config, checklist)
+            Message('make_live_ocean_files', msg_type), config, checklist
+        )
         assert workers == []
 
 
@@ -357,27 +422,30 @@ class TestAfterMakeTurbidityFile:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_turbidity_file(
-            Message('make_turbidity_file', msg_type), config, checklist)
+            Message('make_turbidity_file', msg_type), config, checklist
+        )
         assert workers == []
 
-    def test_success_launch_upload_forcing_west_cloud(
-        self, config, checklist,
-    ):
+    def test_success_launch_upload_forcing_west_cloud(self, config, checklist):
         workers = next_workers.after_make_turbidity_file(
-            Message('make_turbidity_file', 'success'), config, checklist)
+            Message('make_turbidity_file', 'success'), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['west.cloud', 'turbidity'], host='localhost')
+            args=['west.cloud', 'turbidity'],
+            host='localhost'
+        )
         assert expected in workers
 
-    def test_success_no_launch_upload_forcing_salish(
-        self, config, checklist,
-    ):
+    def test_success_no_launch_upload_forcing_salish(self, config, checklist):
         workers = next_workers.after_make_turbidity_file(
-            Message('make_turbidity_file', 'success'), config, checklist)
+            Message('make_turbidity_file', 'success'), config, checklist
+        )
         not_expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['salish-nowcast', 'turbidity'], host='localhost')
+            args=['salish-nowcast', 'turbidity'],
+            host='localhost'
+        )
         assert not_expected not in workers
 
 
@@ -385,21 +453,25 @@ class TestAfterUploadForcing:
     """Unit tests for the after_upload_forcing function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast+',
-        'failure forecast2',
-        'failure ssh',
-        'failure turbidity',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast+',
+            'failure forecast2',
+            'failure ssh',
+            'failure turbidity',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_upload_forcing(
-            Message('upload_forcing', msg_type), config, checklist)
+            Message('upload_forcing', msg_type), config, checklist
+        )
         assert workers == []
 
     def test_msg_payload_missing_host_name(self, config, checklist):
         workers = next_workers.after_upload_forcing(
-            Message('upload_forcing', 'crash'), config, checklist)
+            Message('upload_forcing', 'crash'), config, checklist
+        )
         assert workers == []
 
     @pytest.mark.parametrize('run_type', [
@@ -408,29 +480,37 @@ class TestAfterUploadForcing:
         'forecast2',
     ])
     def test_success_launch_make_forcing_links(
-        self, run_type, config, checklist,
+        self, run_type, config, checklist
     ):
         workers = next_workers.after_upload_forcing(
             Message(
-                'upload_forcing', 'success {}'.format(run_type),
-                {'west.cloud': '2016-10-11 ssh'}),
-            config, checklist)
+                'upload_forcing', 'success {}'.format(run_type), {
+                    'west.cloud': '2016-10-11 ssh'
+                }
+            ), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
-            args=['west.cloud', run_type], host='localhost')
+            args=['west.cloud', run_type],
+            host='localhost'
+        )
         assert expected in workers
 
     def test_success_turbidity_launch_make_forcing_links_nowcast_green(
-        self, config, checklist,
+        self, config, checklist
     ):
         workers = next_workers.after_upload_forcing(
             Message(
-                'upload_forcing', 'success turbidity',
-                {'west.cloud': '2017-08-10 turbidity'}),
-            config, checklist)
+                'upload_forcing', 'success turbidity', {
+                    'west.cloud': '2017-08-10 turbidity'
+                }
+            ), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
-            args=['west.cloud', 'nowcast-green'], host='localhost')
+            args=['west.cloud', 'nowcast-green'],
+            host='localhost'
+        )
         assert expected in workers
 
 
@@ -438,52 +518,73 @@ class TestAfterMakeForcingLinks:
     """Unit tests for the after_make_forcing_links function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast+',
-        'failure nowcast-green',
-        'failure forecast2',
-        'failure ssh',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast+',
+            'failure nowcast-green',
+            'failure forecast2',
+            'failure ssh',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_forcing_links(
-            Message('make_forcing_links', msg_type), config, checklist)
+            Message('make_forcing_links', msg_type), config, checklist
+        )
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type, args, host_name', [
-        ('success nowcast+',
-            ['west.cloud', 'nowcast', '--run-date', '2016-10-23'],
-            'west.cloud'),
-        ('success nowcast-green',
-            ['west.cloud', 'nowcast-green', '--run-date', '2016-10-23'],
-            'west.cloud'),
-        ('success nowcast+',
-            ['salish', 'nowcast-dev', '--run-date', '2016-10-23'],
-            'salish'),
-        ('success ssh',
-            ['west.cloud', 'forecast', '--run-date', '2016-10-23'],
-            'west.cloud'),
-        ('success forecast2',
-            ['west.cloud', 'forecast2', '--run-date', '2016-10-23'],
-            'west.cloud'),
-    ])
+    @pytest.mark.parametrize(
+        'msg_type, args, host_name', [
+            (
+                'success nowcast+', [
+                    'west.cloud', 'nowcast', '--run-date', '2016-10-23'
+                ], 'west.cloud'
+            ),
+            (
+                'success nowcast-green', [
+                    'west.cloud', 'nowcast-green', '--run-date', '2016-10-23'
+                ], 'west.cloud'
+            ),
+            (
+                'success nowcast+',
+                ['salish', 'nowcast-dev', '--run-date', '2016-10-23'], 'salish'
+            ),
+            (
+                'success ssh', [
+                    'west.cloud', 'forecast', '--run-date', '2016-10-23'
+                ], 'west.cloud'
+            ),
+            (
+                'success forecast2', [
+                    'west.cloud', 'forecast2', '--run-date', '2016-10-23'
+                ], 'west.cloud'
+            ),
+        ]
+    )
     def test_success_launch_run_NEMO(
-        self, msg_type, args, host_name, config, checklist,
+        self, msg_type, args, host_name, config, checklist
     ):
         p_checklist = patch.dict(
-            checklist,
-            {
+            checklist, {
                 'forcing links': {
-                    host_name: {'links': '', 'run date': '2016-10-23'}
+                    host_name: {
+                        'links': '',
+                        'run date': '2016-10-23'
+                    }
                 }
-            })
+            }
+        )
         with p_checklist:
             workers = next_workers.after_make_forcing_links(
                 Message(
-                    'make_forcing_links', msg_type, payload={host_name: ''}),
-                config, checklist)
+                    'make_forcing_links', msg_type, payload={
+                        host_name: ''
+                    }
+                ), config, checklist
+            )
         expected = NextWorker(
-            'nowcast.workers.run_NEMO', args=args, host=host_name)
+            'nowcast.workers.run_NEMO', args=args, host=host_name
+        )
         assert expected in workers
 
 
@@ -491,34 +592,45 @@ class TestAfterRunNEMO:
     """Unit tests for the after_run_NEMO function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast',
-        'failure nowcast-green',
-        'failure nowcast-dev',
-        'failure forecast',
-        'failure forecast2',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure nowcast-green',
+            'failure nowcast-dev',
+            'failure forecast',
+            'failure forecast2',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_run_NEMO(
-            Message('run_NEMO', msg_type), config, checklist)
+            Message('run_NEMO', msg_type), config, checklist
+        )
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type, host', [
-        ('success nowcast', 'west.cloud'),
-        ('success nowcast-green', 'west.cloud'),
-        ('success nowcast-dev', 'salish'),
-        ('success forecast', 'west.cloud'),
-        ('success forecast2', 'west.cloud'),
-    ])
-    def test_success_launch_watch_NEMO(self, msg_type, host, config, checklist):
+    @pytest.mark.parametrize(
+        'msg_type, host', [
+            ('success nowcast', 'west.cloud'),
+            ('success nowcast-green', 'west.cloud'),
+            ('success nowcast-dev', 'salish'),
+            ('success forecast', 'west.cloud'),
+            ('success forecast2', 'west.cloud'),
+        ]
+    )
+    def test_success_launch_watch_NEMO(
+        self, msg_type, host, config, checklist
+    ):
         run_type = msg_type.split()[1]
         workers = next_workers.after_run_NEMO(
-            Message(
-                'run_NEMO', msg_type, {run_type: {'host': host}}),
-            config, checklist)
+            Message('run_NEMO', msg_type, {
+                run_type: {
+                    'host': host
+                }
+            }), config, checklist
+        )
         expected = NextWorker(
-            'nowcast.workers.watch_NEMO', args=[host, run_type], host=host)
+            'nowcast.workers.watch_NEMO', args=[host, run_type], host=host
+        )
         assert workers[0] == expected
 
 
@@ -526,245 +638,315 @@ class TestAfterWatchNEMO:
     """Unit tests for the after_watch_NEMO function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast',
-        'failure nowcast-green',
-        'failure nowcast-dev',
-        'failure forecast',
-        'failure forecast2',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure nowcast-green',
+            'failure nowcast-dev',
+            'failure forecast',
+            'failure forecast2',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_NEMO(
-            Message('watch_NEMO', msg_type), config, checklist)
+            Message('watch_NEMO', msg_type), config, checklist
+        )
         assert workers == []
 
     def test_success_nowcast_launch_get_NeahBay_ssh_forecast(
-        self, config, checklist,
+        self, config, checklist
     ):
         workers = next_workers.after_watch_NEMO(
             Message(
                 'watch_NEMO', 'success nowcast', {
                     'nowcast': {
-                        'host': 'west.cloud', 'run date': '2016-10-16',
+                        'host': 'west.cloud',
+                        'run date': '2016-10-16',
                         'completed': True,
                     }
-                }),
-            config, checklist)
+                }
+            ), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.get_NeahBay_ssh',
-            args=['forecast'], host='localhost')
+            args=['forecast'],
+            host='localhost'
+        )
         assert workers[0] == expected
 
     def test_success_forecast_launch_make_turbidity_file(
-        self, config, checklist,
+        self, config, checklist
     ):
         workers = next_workers.after_watch_NEMO(
             Message(
                 'watch_NEMO', 'success forecast', {
                     'forecast': {
-                        'host': 'west.cloud', 'run date': '2017-08-10',
+                        'host': 'west.cloud',
+                        'run date': '2017-08-10',
                         'completed': True,
                     }
-                }),
-            config, checklist)
+                }
+            ), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.make_turbidity_file',
-            args=['--run-date', '2017-08-10'], host='localhost')
+            args=['--run-date', '2017-08-10'],
+            host='localhost'
+        )
         assert workers[0] == expected
 
     def test_success_forecast_launch_make_ww3_wind_file_forecast(
-        self, config, checklist,
+        self, config, checklist
     ):
         p_config = patch.dict(
-            config['wave forecasts'], {'run when': 'after forecast'})
+            config['wave forecasts'], {
+                'run when': 'after forecast'
+            }
+        )
         with p_config:
             workers = next_workers.after_watch_NEMO(
                 Message(
                     'watch_NEMO', 'success forecast', {
                         'forecast': {
-                            'host': 'west.cloud', 'run date': '2017-04-14',
+                            'host': 'west.cloud',
+                            'run date': '2017-04-14',
                             'completed': True,
                         }
-                    }),
-                config, checklist)
+                    }
+                ), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_ww3_wind_file',
-            args=['west.cloud', 'forecast'], host='west.cloud')
+            args=['west.cloud', 'forecast'],
+            host='west.cloud'
+        )
         assert workers[0] == expected
 
     def test_success_forecast_launch_make_ww3_current_file_forecast(
-        self, config, checklist,
+        self, config, checklist
     ):
         p_config = patch.dict(
-            config['wave forecasts'], {'run when': 'after forecast'})
+            config['wave forecasts'], {
+                'run when': 'after forecast'
+            }
+        )
         with p_config:
             workers = next_workers.after_watch_NEMO(
                 Message(
                     'watch_NEMO', 'success forecast', {
                         'forecast': {
-                            'host': 'west.cloud', 'run date': '2017-04-14',
+                            'host': 'west.cloud',
+                            'run date': '2017-04-14',
                             'completed': True,
                         }
-                    }),
-                config, checklist)
+                    }
+                ), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_ww3_current_file',
-            args=['west.cloud', 'forecast'], host='west.cloud')
+            args=['west.cloud', 'forecast'],
+            host='west.cloud'
+        )
         assert workers[1] == expected
 
     def test_success_forecast2_launch_make_ww3_wind_file_forecast2(
-        self, config, checklist,
+        self, config, checklist
     ):
         workers = next_workers.after_watch_NEMO(
             Message(
                 'watch_NEMO', 'success forecast2', {
                     'forecast2': {
-                        'host': 'west.cloud', 'run date': '2017-04-14',
+                        'host': 'west.cloud',
+                        'run date': '2017-04-14',
                         'completed': True,
                     }
-                }),
-            config, checklist)
+                }
+            ), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.make_ww3_wind_file',
-            args=['west.cloud', 'forecast2'], host='west.cloud')
+            args=['west.cloud', 'forecast2'],
+            host='west.cloud'
+        )
         assert workers[0] == expected
 
     def test_success_forecast2_launch_make_ww3_current_file_forecast2(
-        self, config, checklist,
+        self, config, checklist
     ):
         workers = next_workers.after_watch_NEMO(
             Message(
                 'watch_NEMO', 'success forecast2', {
                     'forecast2': {
-                        'host': 'west.cloud', 'run date': '2017-04-14',
+                        'host': 'west.cloud',
+                        'run date': '2017-04-14',
                         'completed': True,
                     }
-                }),
-            config, checklist)
+                }
+            ), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.make_ww3_current_file',
-            args=['west.cloud', 'forecast2'], host='west.cloud')
+            args=['west.cloud', 'forecast2'],
+            host='west.cloud'
+        )
         assert workers[1] == expected
 
     def test_success_nowcast_green_launch_make_ww3_wind_file_forecast(
-        self, config, checklist,
+        self, config, checklist
     ):
         p_config = patch.dict(
-            config['wave forecasts'], {'run when': 'after nowcast-green'})
+            config['wave forecasts'], {
+                'run when': 'after nowcast-green'
+            }
+        )
         with p_config:
             workers = next_workers.after_watch_NEMO(
                 Message(
                     'watch_NEMO', 'success nowcast-green', {
                         'nowcast-green': {
-                            'host': 'west.cloud', 'run date': '2017-04-14',
+                            'host': 'west.cloud',
+                            'run date': '2017-04-14',
                             'completed': True,
                         }
-                    }),
-                config, checklist)
+                    }
+                ), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_ww3_wind_file',
-            args=['west.cloud', 'forecast'], host='west.cloud')
+            args=['west.cloud', 'forecast'],
+            host='west.cloud'
+        )
         assert workers[0] == expected
 
     def test_success_nowcast_green_launch_make_ww3_current_file_forecast(
-        self, config, checklist,
+        self, config, checklist
     ):
         p_config = patch.dict(
-            config['wave forecasts'], {'run when': 'after nowcast-green'})
+            config['wave forecasts'], {
+                'run when': 'after nowcast-green'
+            }
+        )
         with p_config:
             workers = next_workers.after_watch_NEMO(
                 Message(
                     'watch_NEMO', 'success nowcast-green', {
                         'nowcast-green': {
-                            'host': 'west.cloud', 'run date': '2017-04-14',
+                            'host': 'west.cloud',
+                            'run date': '2017-04-14',
                             'completed': True,
                         }
-                    }),
-                config, checklist)
+                    }
+                ), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_ww3_current_file',
-            args=['west.cloud', 'forecast'], host='west.cloud')
+            args=['west.cloud', 'forecast'],
+            host='west.cloud'
+        )
         assert workers[1] == expected
 
     def test_success_nowcast_green_launch_mk_forcing_links_nowcastp_shrdstrg(
-        self, config, checklist,
+        self, config, checklist
     ):
         workers = next_workers.after_watch_NEMO(
             Message(
                 'watch_NEMO', 'success nowcast-green', {
                     'nowcast-green': {
-                        'host': 'west.cloud', 'run date': '2017-05-31',
+                        'host': 'west.cloud',
+                        'run date': '2017-05-31',
                         'completed': True,
                     }
-                }),
-                config, checklist)
+                }
+            ), config, checklist
+        )
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
             args=['salish', 'nowcast+', '--shared-storage'],
-            host='localhost')
+            host='localhost'
+        )
         assert expected in workers
 
-    @pytest.mark.parametrize('msg', [
-        Message(
-            'watch_NEMO', 'success nowcast', {
-                'nowcast': {
-                    'host': 'west.cloud', 'run date': '2016-10-15',
-                    'completed': True
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_NEMO', 'success nowcast', {
+                    'nowcast': {
+                        'host': 'west.cloud',
+                        'run date': '2016-10-15',
+                        'completed': True
+                    }
                 }
-            }),
-        Message(
-            'watch_NEMO', 'success forecast', {
-                'forecast': {
-                    'host': 'west.cloud', 'run date': '2016-10-15',
-                    'completed': True
+            ),
+            Message(
+                'watch_NEMO', 'success forecast', {
+                    'forecast': {
+                        'host': 'west.cloud',
+                        'run date': '2016-10-15',
+                        'completed': True
+                    }
                 }
-            }),
-        Message(
-            'watch_NEMO', 'success nowcast-green', {
-                'nowcast-green': {
-                    'host': 'west.cloud', 'run date': '2016-10-15',
-                    'completed': True
+            ),
+            Message(
+                'watch_NEMO', 'success nowcast-green', {
+                    'nowcast-green': {
+                        'host': 'west.cloud',
+                        'run date': '2016-10-15',
+                        'completed': True
+                    }
                 }
-            }),
-        Message(
-            'watch_NEMO', 'success forecast2', {
-                'forecast2': {
-                    'host': 'west.cloud', 'run date': '2016-10-15',
-                    'completed': True
+            ),
+            Message(
+                'watch_NEMO', 'success forecast2', {
+                    'forecast2': {
+                        'host': 'west.cloud',
+                        'run date': '2016-10-15',
+                        'completed': True
+                    }
                 }
-            }),
-    ])
+            ),
+        ]
+    )
     def test_success_launch_download_results(self, msg, config, checklist):
         workers = next_workers.after_watch_NEMO(msg, config, checklist)
         run_type = msg.type.split()[1]
         expected = NextWorker(
             'nowcast.workers.download_results',
             args=[
-                msg.payload[run_type]['host'], msg.type.split()[1],
-                '--run-date', msg.payload[run_type]['run date']],
-            host='localhost')
+                msg.payload[run_type]['host'],
+                msg.type.split()[1], '--run-date',
+                msg.payload[run_type]['run date']
+            ],
+            host='localhost'
+        )
         assert expected in workers
 
-    @pytest.mark.parametrize('msg', [
-        Message(
-            'watch_NEMO', 'success nowcast-dev', {
-                'nowcast-dev': {
-                    'host': 'salish', 'run date': '2016-10-15',
-                    'completed': True
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_NEMO', 'success nowcast-dev', {
+                    'nowcast-dev': {
+                        'host': 'salish',
+                        'run date': '2016-10-15',
+                        'completed': True
+                    }
                 }
-            }),
-    ])
+            ),
+        ]
+    )
     def test_success_nowcast_dev_no_launch_download_results(
-        self, msg, config, checklist,
+        self, msg, config, checklist
     ):
         workers = next_workers.after_watch_NEMO(msg, config, checklist)
         download_results = NextWorker(
             'nowcast.workers.download_results',
             args=[
-                msg.payload['nowcast-dev']['host'], msg.type.split()[1],
-                '--run-date', msg.payload['nowcast-dev']['run date']],
-            host='localhost')
+                msg.payload['nowcast-dev']['host'],
+                msg.type.split()[1], '--run-date',
+                msg.payload['nowcast-dev']['run date']
+            ],
+            host='localhost'
+        )
         assert download_results not in workers
 
 
@@ -772,16 +954,19 @@ class TestAfterMakeWW3WindFile:
     """Unit tests for the after_make_ww3_wind_file function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure forecast2',
-        'failure forecast',
-        'success forecast2',
-        'success forecast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure forecast2',
+            'failure forecast',
+            'success forecast2',
+            'success forecast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_ww3_wind_file(
-            Message('make_ww3_wind_file', msg_type), config, checklist)
+            Message('make_ww3_wind_file', msg_type), config, checklist
+        )
         assert workers == []
 
 
@@ -789,14 +974,17 @@ class TestAfterMakeWW3currentFile:
     """Unit tests for the after_make_ww3_current_file function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure forecast2',
-        'failure forecast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure forecast2',
+            'failure forecast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_ww3_current_file(
-            Message('make_ww3_current_file', msg_type), config, checklist)
+            Message('make_ww3_current_file', msg_type), config, checklist
+        )
         assert workers == []
 
     @pytest.mark.parametrize('run_type', [
@@ -808,11 +996,14 @@ class TestAfterMakeWW3currentFile:
             Message(
                 'make_ww3_current_file', f'success {run_type}', {
                     run_type: 'current/SoG_current_20170415.nc'
-                }),
-            config, checklist)
+                }
+            ), config, checklist
+        )
         expected = NextWorker(
-            'nowcast.workers.run_ww3', args=['west.cloud', run_type],
-            host='west.cloud')
+            'nowcast.workers.run_ww3',
+            args=['west.cloud', run_type],
+            host='west.cloud'
+        )
         assert workers[0] == expected
 
 
@@ -820,28 +1011,37 @@ class TestAfterRunWW3:
     """Unit tests for the after_run_ww3 function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure forecast2',
-        'failure forecast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure forecast2',
+            'failure forecast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_run_ww3(
-            Message('run_ww3', msg_type), config, checklist)
+            Message('run_ww3', msg_type), config, checklist
+        )
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type, host', [
-        ('success forecast2', 'west.cloud'),
-        ('success forecast', 'west.cloud'),
-    ])
+    @pytest.mark.parametrize(
+        'msg_type, host', [
+            ('success forecast2', 'west.cloud'),
+            ('success forecast', 'west.cloud'),
+        ]
+    )
     def test_success_launch_watch_ww3(self, msg_type, host, config, checklist):
         run_type = msg_type.split()[1]
         workers = next_workers.after_run_ww3(
-            Message(
-                'run_ww3', msg_type, {run_type: {'host': host}}),
-            config, checklist)
+            Message('run_ww3', msg_type, {
+                run_type: {
+                    'host': host
+                }
+            }), config, checklist
+        )
         expected = NextWorker(
-            'nowcast.workers.watch_ww3', args=[host, run_type], host=host)
+            'nowcast.workers.watch_ww3', args=[host, run_type], host=host
+        )
         assert workers[0] == expected
 
 
@@ -849,16 +1049,19 @@ class TestAfterWatchWW3:
     """Unit tests for the after_watch_ww3 function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure forecast2',
-        'failure forecast',
-        'success forecast2',
-        'success forecast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure forecast2',
+            'failure forecast',
+            'success forecast2',
+            'success forecast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_ww3(
-            Message('watch_ww3', msg_type), config, checklist)
+            Message('watch_ww3', msg_type), config, checklist
+        )
         assert workers == []
 
 
@@ -866,80 +1069,117 @@ class TestAfterDownloadResults:
     """Unit tests for the after_download_results function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast',
-        'failure nowcast-green',
-        'failure forecast',
-        'failure forecast2',
-        'failure hindcast',
-        'success hindcast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure nowcast-green',
+            'failure forecast',
+            'failure forecast2',
+            'failure hindcast',
+            'success hindcast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         p_checklist = patch.dict(
-            checklist,
-            {'NEMO run': {'nowcast-green': {'run date': '2016-10-22'}}})
+            checklist, {
+                'NEMO run': {
+                    'nowcast-green': {
+                        'run date': '2016-10-22'
+                    }
+                }
+            }
+        )
         with p_checklist:
             workers = next_workers.after_download_results(
-                Message('download_results', msg_type), config, checklist)
+                Message('download_results', msg_type), config, checklist
+            )
         assert workers == []
 
-    @pytest.mark.parametrize('run_type, plot_type', [
-        ('nowcast', 'publish'),
-        ('forecast', 'publish'),
-        ('forecast2', 'publish'),
-    ])
+    @pytest.mark.parametrize(
+        'run_type, plot_type', [
+            ('nowcast', 'publish'),
+            ('forecast', 'publish'),
+            ('forecast2', 'publish'),
+        ]
+    )
     def test_success_launch_make_plots_publish(
-        self, run_type, plot_type, config, checklist,
+        self, run_type, plot_type, config, checklist
     ):
         p_checklist = patch.dict(
-            checklist, {'NEMO run': {run_type: {'run date': '2016-10-22'}}})
+            checklist, {
+                'NEMO run': {
+                    run_type: {
+                        'run date': '2016-10-22'
+                    }
+                }
+            }
+        )
         with p_checklist:
             workers = next_workers.after_download_results(
-                Message(
-                    'download results', 'success {}'.format(run_type)),
-                config, checklist)
+                Message('download results', 'success {}'.format(run_type)),
+                config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_plots',
             args=[run_type, plot_type, '--run-date', '2016-10-22'],
-            host='localhost')
+            host='localhost'
+        )
         assert expected in workers
 
-    @pytest.mark.parametrize('run_type, plot_type, run_date', [
-        ('nowcast', 'research', '2016-10-29'),
-        ('nowcast', 'comparison', '2016-10-28'),
-        ('nowcast-green', 'research', '2016-10-29'),
-    ])
+    @pytest.mark.parametrize(
+        'run_type, plot_type, run_date', [
+            ('nowcast', 'research', '2016-10-29'),
+            ('nowcast', 'comparison', '2016-10-28'),
+            ('nowcast-green', 'research', '2016-10-29'),
+        ]
+    )
     def test_success_nowcast_launch_make_plots_specials(
-        self, run_type, plot_type, run_date, config, checklist,
+        self, run_type, plot_type, run_date, config, checklist
     ):
         p_checklist = patch.dict(
-            checklist, {'NEMO run': {run_type: {'run date': '2016-10-29'}}})
+            checklist, {
+                'NEMO run': {
+                    run_type: {
+                        'run date': '2016-10-29'
+                    }
+                }
+            }
+        )
         with p_checklist:
             workers = next_workers.after_download_results(
-                Message(
-                    'download results', 'success {}'.format(run_type)),
-                config, checklist)
+                Message('download results', 'success {}'.format(run_type)),
+                config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_plots',
             args=[run_type, plot_type, '--run-date', run_date],
-            host='localhost')
+            host='localhost'
+        )
         assert expected in workers
 
     def test_success_nowcast_green_launch_ping_erddap_nowcast_green(
-        self, config, checklist,
+        self, config, checklist
     ):
         p_checklist = patch.dict(
-            checklist,
-            {'NEMO run': {'nowcast-green': {'run date': '2017-06-22'}}})
+            checklist, {
+                'NEMO run': {
+                    'nowcast-green': {
+                        'run date': '2017-06-22'
+                    }
+                }
+            }
+        )
         with p_checklist:
             workers = next_workers.after_download_results(
-                Message(
-                    'download_results',
-                    'success nowcast-green'), config, checklist)
+                Message('download_results', 'success nowcast-green'), config,
+                checklist
+            )
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
-            args=['nowcast-green'], host='localhost')
+            args=['nowcast-green'],
+            host='localhost'
+        )
         assert expected in workers
 
 
@@ -947,14 +1187,17 @@ class TestAfterSplitResults:
     """Unit tests for after_split_results function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure hindcast',
-        'success hindcast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure hindcast',
+            'success hindcast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_split_results(
-            Message('split_results', msg_type), config, checklist)
+            Message('split_results', msg_type), config, checklist
+        )
         assert workers == []
 
 
@@ -962,26 +1205,29 @@ class TestAfterPingERDDAP:
     """Unit tests for the after_ping_erddap function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast',
-        'failure nowcast-green',
-        'failure forecast',
-        'failure forecast2',
-        'failure download_weather',
-        'failure SCVIP-CTD',
-        'failure SEVIP-CTD',
-        'success nowcast',
-        'success nowcast-green',
-        'success forecast',
-        'success forecast2',
-        'success download_weather',
-        'success SCVIP-CTD',
-        'success SEVIP-CTD',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure nowcast-green',
+            'failure forecast',
+            'failure forecast2',
+            'failure download_weather',
+            'failure SCVIP-CTD',
+            'failure SEVIP-CTD',
+            'success nowcast',
+            'success nowcast-green',
+            'success forecast',
+            'success forecast2',
+            'success download_weather',
+            'success SCVIP-CTD',
+            'success SEVIP-CTD',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_ping_erddap(
-            Message('ping_erddap', msg_type), config, checklist)
+            Message('ping_erddap', msg_type), config, checklist
+        )
         assert workers == []
 
 
@@ -989,44 +1235,54 @@ class TestAfterMakePlots:
     """Unit tests for the after_make_plots function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast research',
-        'failure nowcast comparison',
-        'failure nowcast publish',
-        'failure nowcast-green research',
-        'failure forecast publish',
-        'failure forecast2 publish',
-        'success nowcast research',
-        'success nowcast comparison',
-        'success nowcast publish',
-        'success nowcast-green research',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast research',
+            'failure nowcast comparison',
+            'failure nowcast publish',
+            'failure nowcast-green research',
+            'failure forecast publish',
+            'failure forecast2 publish',
+            'success nowcast research',
+            'success nowcast comparison',
+            'success nowcast publish',
+            'success nowcast-green research',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_plots(
-            Message('make_plots', msg_type), config, checklist)
+            Message('make_plots', msg_type), config, checklist
+        )
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type, run_type', [
-        ('success forecast publish', 'forecast'),
-        ('success forecast2 publish', 'forecast2'),
-    ])
+    @pytest.mark.parametrize(
+        'msg_type, run_type', [
+            ('success forecast publish', 'forecast'),
+            ('success forecast2 publish', 'forecast2'),
+        ]
+    )
     def test_success_forecast_launch_make_feeds(
-        self, msg_type, run_type, config, checklist,
+        self, msg_type, run_type, config, checklist
     ):
         p_checklist = patch.dict(
-            checklist,
-            {
+            checklist, {
                 'NEMO run': {
-                    run_type: {'run date': '2016-11-11'}
+                    run_type: {
+                        'run date': '2016-11-11'
+                    }
                 }
-            })
+            }
+        )
         with p_checklist:
             workers = next_workers.after_make_plots(
-                Message('make_plots', msg_type), config, checklist)
+                Message('make_plots', msg_type), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_feeds',
-            args=[run_type, '--run-date', '2016-11-11'], host='localhost')
+            args=[run_type, '--run-date', '2016-11-11'],
+            host='localhost'
+        )
         assert expected in workers
 
 
@@ -1034,25 +1290,29 @@ class TestAfterMakeFeeds:
     """Unit tests for the after_make_feeds function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure forecast',
-        'failure forecast2',
-        'success forecast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure forecast',
+            'failure forecast2',
+            'success forecast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_feeds(
-            Message('make_feeds', msg_type), config, checklist)
+            Message('make_feeds', msg_type), config, checklist
+        )
         assert workers == []
 
     def test_success_forecast2_publish_launch_clear_checklist(
-        self, config, checklist,
+        self, config, checklist
     ):
         workers = next_workers.after_make_feeds(
-            Message(
-                'make_feeds', 'success forecast2'), config, checklist)
+            Message('make_feeds', 'success forecast2'), config, checklist
+        )
         assert workers[-1] == NextWorker(
-            'nemo_nowcast.workers.clear_checklist', args=[], host='localhost')
+            'nemo_nowcast.workers.clear_checklist', args=[], host='localhost'
+        )
 
 
 class TestAfterClearChecklist:
@@ -1065,14 +1325,17 @@ class TestAfterClearChecklist:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_clear_checklist(
-            Message('clear_checklist', msg_type), config, checklist)
+            Message('clear_checklist', msg_type), config, checklist
+        )
         assert workers == []
 
     def test_success_launch_rotate_logs(self, config, checklist):
         workers = next_workers.after_clear_checklist(
-            Message('rotate_logs', 'success'), config, checklist)
+            Message('rotate_logs', 'success'), config, checklist
+        )
         assert workers[-1] == NextWorker(
-            'nemo_nowcast.workers.rotate_logs', args=[], host='localhost')
+            'nemo_nowcast.workers.rotate_logs', args=[], host='localhost'
+        )
 
 
 class TestAfterRotateLogs:
@@ -1086,5 +1349,6 @@ class TestAfterRotateLogs:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_rotate_logs(
-            Message('rotate_logs', msg_type), config, checklist)
+            Message('rotate_logs', msg_type), config, checklist
+        )
         assert workers == []
