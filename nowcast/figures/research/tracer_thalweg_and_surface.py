@@ -62,8 +62,8 @@ def make_figure(
     :param 2-tuple figsize: Figure size (width, height) in inches.
 
     :param theme: Module-like object that defines the style elements for the
-                figure. See :py:mod:`nowcast.figures.website_theme` for an
-                example.
+                  figure. See :py:mod:`nowcast.figures.website_theme` for an
+                  example.
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
