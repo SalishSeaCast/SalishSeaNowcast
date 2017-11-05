@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast watch_NEMO worker.
 """
 import subprocess
@@ -32,6 +31,7 @@ from nowcast.workers import watch_NEMO
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         watch_NEMO.main()
         args, kwargs = m_worker.call_args
@@ -49,7 +49,8 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
-            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'}
+            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'
+        }
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker):
@@ -66,13 +67,16 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    @pytest.mark.parametrize('run_type, host_name', [
-        ('nowcast', 'west.cloud-nowcast'),
-        ('nowcast-green', 'west.cloug-nowcast',),
-        ('nowcast-dev', 'salish-nowcast',),
-        ('forecast', 'west.cloud-nowcast'),
-        ('forecast2', 'west.cloud-nowcast'),
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('nowcast', 'west.cloud-nowcast'),
+            ('nowcast-green', 'west.cloug-nowcast'),
+            ('nowcast-dev', 'salish-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+            ('forecast2', 'west.cloud-nowcast'),
+        ]
+    )
     def test_success_log_info(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -81,13 +85,15 @@ class TestSuccess:
         watch_NEMO.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize('run_type, host_name, expected', [
-        ('nowcast', 'west.cloud-nowcast', 'success nowcast'),
-        ('nowcast-green', 'west.cloud-nowcast', 'success nowcast-green'),
-        ('nowcast-dev', 'salish-nowcast', 'success nowcast-dev'),
-        ('forecast', 'west.cloud-nowcast', 'success forecast'),
-        ('forecast2', 'west.cloud-nowcast', 'success forecast2'),
-    ])
+    @pytest.mark.parametrize(
+        'run_type, host_name, expected', [
+            ('nowcast', 'west.cloud-nowcast', 'success nowcast'),
+            ('nowcast-green', 'west.cloud-nowcast', 'success nowcast-green'),
+            ('nowcast-dev', 'salish-nowcast', 'success nowcast-dev'),
+            ('forecast', 'west.cloud-nowcast', 'success forecast'),
+            ('forecast2', 'west.cloud-nowcast', 'success forecast2'),
+        ]
+    )
     def test_success_msg_type(self, m_logger, run_type, host_name, expected):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -101,13 +107,16 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
-    @pytest.mark.parametrize('run_type, host_name', [
-        ('nowcast', 'west.cloud-nowcast'),
-        ('nowcast-green', 'west.cloud-nowcast'),
-        ('nowcast-dev', 'salish-nowcast'),
-        ('forecast', 'west.cloud-nowcast'),
-        ('forecast2', 'west.cloud-nowcast'),
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('nowcast', 'west.cloud-nowcast'),
+            ('nowcast-green', 'west.cloud-nowcast'),
+            ('nowcast-dev', 'salish-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+            ('forecast2', 'west.cloud-nowcast'),
+        ]
+    )
     def test_failure_log_critical(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -116,13 +125,15 @@ class TestFailure:
         watch_NEMO.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize('run_type, host_name, expected', [
-        ('nowcast', 'west.cloud-nowcast', 'failure nowcast'),
-        ('nowcast-green', 'west.cloud-nowcast', 'failure nowcast-green'),
-        ('nowcast-dev', 'salish-nowcast', 'failure nowcast-dev'),
-        ('forecast', 'west.cloud-nowcast', 'failure forecast'),
-        ('forecast2', 'west.cloud-nowcast', 'failure forecast2'),
-    ])
+    @pytest.mark.parametrize(
+        'run_type, host_name, expected', [
+            ('nowcast', 'west.cloud-nowcast', 'failure nowcast'),
+            ('nowcast-green', 'west.cloud-nowcast', 'failure nowcast-green'),
+            ('nowcast-dev', 'salish-nowcast', 'failure nowcast-dev'),
+            ('forecast', 'west.cloud-nowcast', 'failure forecast'),
+            ('forecast2', 'west.cloud-nowcast', 'failure forecast2'),
+        ]
+    )
     def test_failure_msg_type(self, m_logger, run_type, host_name, expected):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -137,6 +148,7 @@ class TestFailure:
 class TestFindRunPid:
     """Unit tests for _find_run_pid() function.
     """
+
     def test_find_qsub_run_pid(self, m_run, m_logger):
         run_info = {
             'run exec cmd': 'qsub SalishSeaNEMO.sh',
@@ -144,9 +156,12 @@ class TestFindRunPid:
         }
         m_run.return_value = Mock(stdout='4343')
         watch_NEMO._find_run_pid(run_info)
-        assert m_run.call_args_list == [call(
-            ['pgrep', '4446.master'], stdout=subprocess.PIPE, check=True,
-            universal_newlines=True)]
+        assert m_run.call_args_list == [
+            call(['pgrep', '4446.master'],
+                 stdout=subprocess.PIPE,
+                 check=True,
+                 universal_newlines=True)
+        ]
 
     def test_find_bash_run_pid(self, m_run, m_logger):
         run_info = {
@@ -155,14 +170,21 @@ class TestFindRunPid:
         }
         m_run.return_value = Mock(stdout='4343')
         watch_NEMO._find_run_pid(run_info)
-        assert m_run.call_args_list == [call(
-            ['pgrep', '--newest', '--exact', '--full', 'bash SalishSeaNEMO.sh'],
-            stdout=subprocess.PIPE, check=True, universal_newlines=True)]
+        assert m_run.call_args_list == [
+            call([
+                'pgrep', '--newest', '--exact', '--full',
+                'bash SalishSeaNEMO.sh'
+            ],
+                 stdout=subprocess.PIPE,
+                 check=True,
+                 universal_newlines=True)
+        ]
 
 
 class TestPidExists:
     """Unit tests for _pid_exists() function.
     """
+
     def test_negative_pid(self):
         pid_exists = watch_NEMO._pid_exists(-1)
         assert not pid_exists
@@ -176,7 +198,9 @@ class TestPidExists:
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch('nowcast.workers.watch_NEMO.os.kill', side_effect=ProcessLookupError)
+    @patch(
+        'nowcast.workers.watch_NEMO.os.kill', side_effect=ProcessLookupError
+    )
     def test_no_such_pid(self, m_kill):
         pid_exists = watch_NEMO._pid_exists(42)
         assert not pid_exists

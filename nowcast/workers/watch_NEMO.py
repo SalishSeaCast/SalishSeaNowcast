@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast worker that monitors and reports on the
 progress of a run on the ONC cloud computing facility or salish.
 """
@@ -27,10 +26,8 @@ import arrow
 from nemo_nowcast import NowcastWorker
 from nemo_cmd.namelist import namelist2dict
 
-
 NAME = 'watch_NEMO'
 logger = logging.getLogger(NAME)
-
 
 POLL_INTERVAL = 5 * 60  # seconds
 
@@ -45,12 +42,13 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name',
-        help='Name of the host to monitor the run on')
+        'host_name', help='Name of the host to monitor the run on'
+    )
     worker.cli.add_argument(
         'run_type',
         choices={
-            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'},
+            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'
+        },
         help='''
         Type of run to monitor:
         'nowcast' means nowcast physics run,
@@ -68,7 +66,8 @@ def success(parsed_args):
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
-        })
+        }
+    )
     msg_type = 'success {.run_type}'.format(parsed_args)
     return msg_type
 
@@ -79,7 +78,8 @@ def failure(parsed_args):
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
-        })
+        }
+    )
     msg_type = 'failure {.run_type}'.format(parsed_args)
     return msg_type
 
@@ -92,7 +92,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
     logger.debug(f'{run_type} on {host_name}: run pid: {pid}')
     # Get run time steps and date info from namelist
     run_dir = Path(run_info[run_type]['run dir'])
-    namelist = namelist2dict(os.fspath(run_dir/'namelist_cfg'))
+    namelist = namelist2dict(os.fspath(run_dir / 'namelist_cfg'))
     it000 = namelist['namrun'][0]['nn_it000']
     itend = namelist['namrun'][0]['nn_itend']
     date0 = arrow.get(str(namelist['namrun'][0]['nn_date0']), 'YYYYMMDD')
@@ -100,32 +100,37 @@ def watch_NEMO(parsed_args, config, tell_manager):
     # Watch for the run process to end
     while _pid_exists(pid):
         try:
-            with (run_dir/'time.step').open('rt') as f:
+            with (run_dir / 'time.step').open('rt') as f:
                 time_step = int(f.read().strip())
             model_seconds = (time_step - it000) * rdt
             model_time = (
                 date0.replace(seconds=model_seconds)
-                .format('YYYY-MM-DD HH:mm:ss UTC'))
+                .format('YYYY-MM-DD HH:mm:ss UTC')
+            )
             fraction_done = (time_step - it000) / (itend - it000)
             msg = (
                 f'{run_type} on {host_name}: timestep: '
-                f'{time_step} = {model_time}, {fraction_done:.1%} complete')
+                f'{time_step} = {model_time}, {fraction_done:.1%} complete'
+            )
         except FileNotFoundError:
             # time.step file not found; assume that run is young and it
             # hasn't been created yet, or has finished and it has been
             # moved to the results directory
             msg = (
                 f'{run_type} on {host_name}: time.step not found; '
-                f'continuing to watch...')
+                f'continuing to watch...'
+            )
         logger.info(msg)
         time.sleep(POLL_INTERVAL)
     ## TODO: confirm that the run and subsequent results gathering
     ## completed successfully
-    return {run_type: {
-        'host': host_name,
-        'run date': run_info[run_type]['run date'],
-        'completed': True,
-    }}
+    return {
+        run_type: {
+            'host': host_name,
+            'run date': run_info[run_type]['run date'],
+            'completed': True,
+        }
+    }
 
 
 def _find_run_pid(run_info):
@@ -141,8 +146,11 @@ def _find_run_pid(run_info):
     while pid is None:
         try:
             proc = subprocess.run(
-                cmd, stdout=subprocess.PIPE, check=True,
-                universal_newlines=True)
+                cmd,
+                stdout=subprocess.PIPE,
+                check=True,
+                universal_newlines=True
+            )
             pid = int(proc.stdout)
         except subprocess.CalledProcessError:
             # Process has not yet been spawned
