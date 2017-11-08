@@ -18,8 +18,10 @@ along a section of the domain thalweg,
 and on the surface for a section of the domain that excludes Puget Sound 
 in the south and Johnstone Strait in the north.
 
-.. note:: This module us no longer used in production but it preserved here
-because the `figure development and testing docs`_ and notebooks refer to it.
+.. note::
+    This module us no longer used in production but it preserved here
+    because the `figure development and testing docs`_ and notebooks
+    refer to it.
 
 .. _figure development and testing docs: https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html#creating-a-figure-module
 """

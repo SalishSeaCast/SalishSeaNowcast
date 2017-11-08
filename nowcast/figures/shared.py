@@ -377,9 +377,10 @@ def localize_time(data_array):
     """Offset DataArray times to account for local time zone difference from
     UTC and add :kbd:`tz_name` attribute to DataArray.
 
-    .. note:: This function is intended for use just before presentation/output
-    of the DataArray. It is strongly recommended to do all date/time
-    calculations in UTC to avoid time change issues.
+    .. note::
+        This function is intended for use just before presentation/output
+        of the DataArray. It is strongly recommended to do all date/time
+        calculations in UTC to avoid time change issues.
 
     :param data_array: Data array object to adjust time values of.
     :type data_array: :py:class:`xarray.DataArray`
