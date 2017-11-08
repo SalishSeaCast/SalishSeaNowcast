@@ -19,7 +19,6 @@ VENUS nodes and the model results with visualization figures for analysis
 of daily nowcast/forecast runs.
 """
 import datetime
-from io import StringIO
 
 from dateutil import tz
 import matplotlib.pyplot as plt
@@ -27,7 +26,6 @@ from matplotlib import dates as mdates
 from matplotlib.patches import Ellipse
 import numpy as np
 import pandas as pd
-import requests
 import netCDF4 as nc
 
 from salishsea_tools import (
@@ -38,8 +36,10 @@ from salishsea_tools import (
 )
 from scipy import interpolate as interp
 
-import residuals
-from nowcast import analyze
+from nowcast import (
+    analyze,
+    residuals,
+)
 
 
 # Font format

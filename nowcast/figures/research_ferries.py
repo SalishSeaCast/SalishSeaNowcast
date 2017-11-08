@@ -32,7 +32,7 @@ from salishsea_tools import (
 )
 from salishsea_tools.places import PLACES
 
-import figures.research_VENUS
+from nowcast.figures import research_VENUS
 
 
 # Font format
@@ -135,7 +135,7 @@ def salinity_ferry_route(
 
     # Plot ferry route.
     axs[1].plot(sal_obs[1], sal_obs[2], 'black', linewidth=4)
-    figures.research_VENUS.axis_colors(axs[1], 'grey')
+    research_VENUS.axis_colors(axs[1], 'grey')
 
     # Add locations and markers on plot for orientation
     bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.7)
@@ -175,7 +175,7 @@ def salinity_ferry_route(
     axs[0].grid(axis='both')
 
     fig.patch.set_facecolor('#2B3E50')
-    figures.research_VENUS.axis_colors(axs[0], 'grey')
+    research_VENUS.axis_colors(axs[0], 'grey')
 
     return fig
 
