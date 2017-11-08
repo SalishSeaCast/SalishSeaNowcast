@@ -558,6 +558,36 @@ Build the suite of wwatch3 programs with:
     $ w3_make
 
 
+.. _BuildFVCOM41:
+
+Build FVCOM-4.1
+===============
+
+Clone the FVCOM-4.1 repo into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ ssh-agent bash -c 'ssh-add ~/.ssh/salishsea-nowcast-deployment_id_rsa; git clone git@gitlab.com:mdunphy/FVCOM41.git'
+
+Hard-coded :envvar:`TOPDIR` paths in the FVCOM configuration and build scripts expect the source tree to the at :file:`$HOME/OPP/FVCOM41.git`,
+so make that so via symlinks:
+
+.. code-block:: bash
+
+    $ cd $HOME
+    $ mkdir /nemoShare/OPP
+    $ ln -s /nemoShare/OPP
+    $ ln -s /nemoShare/MEOPAR/nowcast-sys/FVCOM41 /nemoShare/OPP/FVCOM41.git
+
+Build FVCOM with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/OPP/FVCOM41.git/Configure
+    $ ./setup -a UBUNTU-14.04-GCC -c VancouverHarbourV2 && ./build -l –f
+
+
 Python Packages
 ===============
 
