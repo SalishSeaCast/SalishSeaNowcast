@@ -44,7 +44,10 @@ from nowcast.figures.research import (
     tracer_thalweg_and_surface_hourly,
     velocity_section_and_surface,
 )
-from nowcast.figures.comparison import compare_venus_ctd
+from nowcast.figures.comparison import (
+    compare_venus_ctd,
+    sandheads_winds,
+)
 from nowcast.figures.publish import (
     pt_atkinson_tide,
     storm_surge_alerts,
@@ -53,7 +56,6 @@ from nowcast.figures.publish import (
 )
 # Legacy figures code
 from nowcast.figures import (
-    figures,
     research_VENUS,
     research_ferries,
 )
@@ -103,11 +105,7 @@ def main():
         (e.g. SH_wind is the svg_name of figures stored as SH_wind_{ddmmmyy}.svg),
         the name of the website figure module
         (e.g. storm_surge_alerts is the module name of 
-        nowcast.figures.publish.storm_surge_alerts),
-        or name of the figure function for legacy nowcast.figures.figures
-        functions
-        (e.g. SandHeads_winds is the function name of
-        nowcast.figures.figures.SandHeads_winds).
+        nowcast.figures.publish.storm_surge_alerts).
         The figure will be rendered in
         /results/nowcast-sys/figures/test/{run_type}/{ddmmmyy}/ so that it is
         accessible in a browser at 
@@ -174,12 +172,13 @@ def make_plots(parsed_args, config, *args):
             bathy, mesh_mask, results_dir, run_date)
     if run_type == 'nowcast' and plot_type == 'comparison':
         fig_functions = _prep_comparison_fig_functions(
-            config, bathy, coastline, weather_path, mesh_mask, dev_mesh_mask,
-            results_dir, dev_results_home, dmy, timezone
+            config, bathy, coastline, mesh_mask, dev_mesh_mask, results_dir,
+            run_date, dev_results_home, dmy, timezone
         )
     if plot_type == 'publish':
         fig_functions = _prep_publish_fig_functions(
-            config, bathy, coastline, weather_path, results_dir, timezone
+            config, bathy, coastline, weather_path, results_dir, run_date,
+            timezone
         )
 
     checklist = _render_figures(
@@ -413,9 +412,10 @@ def _prep_nowcast_green_research_fig_functions(
 
 
 def _prep_comparison_fig_functions(
-    config, bathy, coastline, weather_path,
-    mesh_mask, dev_mesh_mask, results_dir, dev_results_home, dmy, timezone
+    config, bathy, coastline, mesh_mask, dev_mesh_mask, results_dir, run_date,
+    dev_results_home, dmy, timezone
 ):
+    hrdps_dataset_url = config['figures']['dataset URLs']['HRDPS fields']
     ferry_data_dir = config['observations']['ferry data']
     dev_results_dir = os.path.join(dev_results_home, dmy)
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
@@ -433,11 +433,8 @@ def _prep_comparison_fig_functions(
         datetime.datetime.strptime(dmy, '%d%b%y').replace(minute=45))
     fig_functions = {
         'SH_wind': {
-            ## TODO: Fix stormtools.py:403: RuntimeWarning:
-            ##  invalid value encountered in less
-            ##  wind_dir = wind_dir + 360 * (wind_dir < 0)
-            'function': figures.SandHeads_winds,
-            'args': (grid_T_hr, bathy, weather_path, coastline)
+            'function': sandheads_winds.make_figure,
+            'args': (hrdps_dataset_url, run_date, coastline)
         },
         'Compare_VENUS_East': {
             'function': compare_venus_ctd.make_figure,
@@ -521,7 +518,7 @@ def _prep_comparison_fig_functions(
 
 
 def _prep_publish_fig_functions(
-    config, bathy, coastline, weather_path, results_dir, timezone
+    config, bathy, coastline, weather_path, results_dir, run_date, timezone
 ):
     tidal_predictions = config['ssh']['tidal predictions']
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
@@ -534,6 +531,7 @@ def _prep_publish_fig_functions(
         name: nc.Dataset(filepath_tmpl.format(name.replace(' ', '')))
         for name in names
     }
+    hrdps_dataset_url = config['figures']['dataset URLs']['HRDPS fields']
     fig_functions = {
         'Website_thumbnail': {
             'function': storm_surge_alerts_thumbnail.make_figure,
@@ -593,8 +591,8 @@ def _prep_publish_fig_functions(
                 tidal_predictions, timezone)
         },
         'SH_wind': {
-            'function': figures.SandHeads_winds,
-            'args': (grid_T_hr, bathy, weather_path, coastline)
+            'function': sandheads_winds.make_figure,
+            'args': (hrdps_dataset_url, run_date, coastline)
         },
     }
     return fig_functions
@@ -616,8 +614,6 @@ def _render_figures(
             test_figure = any((
                 svg_name == test_figure_id,
                 fig_func.__module__.endswith(f'{plot_type}.{test_figure_id}'),
-                # legacy: for figures.figures module functions
-                fig_func.__name__ == test_figure_id,
             ))
             if not test_figure:
                 continue

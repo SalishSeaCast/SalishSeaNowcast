@@ -308,6 +308,9 @@ erddap:
 
 
 figures:
+  # ERDDAP dataset URLs
+  dataset URLs:
+    HRDPS fields: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1
   # Directory in which to find bathymetry and mesh mask files
   grid dir: /results/nowcast-sys/grid/
   # Pacific Now-West coastline polygons file

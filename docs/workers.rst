@@ -281,6 +281,15 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 :py:obj:`nowcast.figures.comparison`  Figure Modules
 ----------------------------------------------------
 
+.. _nowcast.figures.comparison.sandheads_winds:
+
+:py:mod:`nowcast.figures.comparison.sandheads_winds` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.comparison.sandheads_winds
+    :members:
+
+
 .. _nowcast.figures.comparison.salinity_ferry_track:
 
 :py:mod:`nowcast.figures.comparison.salinity_ferry_track` Module

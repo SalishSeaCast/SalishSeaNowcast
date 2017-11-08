@@ -24,18 +24,35 @@ product.
 """
 from types import SimpleNamespace
 
-from matplotlib import gridspec
 import matplotlib.pyplot as plt
+import numpy
+import xarray
+from matplotlib import gridspec
+from salishsea_tools import (
+    stormtools,
+    unit_conversions,
+)
+from salishsea_tools.places import PLACES
 
-from nowcast.figures import shared
 import nowcast.figures.website_theme
+from nowcast.figures import shared
 
 
 def make_figure(
-    coastline, figsize=(16, 6), theme=nowcast.figures.website_theme
+    hrdps_dataset_url,
+    run_date,
+    coastline,
+    figsize=(16, 7),
+    theme=nowcast.figures.website_theme
 ):
     """Plot the time series observed and HRDPS model forcing wind speed and
     direction at Sand Heads.
+
+    :param str hrdps_dataset_url: ERDDAP dataset URL for the HRDPS product
+                                  to be plotted.
+
+    :param run_date: Date of the run to create the figure for.
+    :type run_date: :py:class:`Arrow.arrow`
 
     :param coastline: Coastline dataset.
     :type coastline: :py:class:`mat.Dataset`
@@ -48,7 +65,7 @@ def make_figure(
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
-    plot_data = _prep_plot_data()
+    plot_data = _prep_plot_data(hrdps_dataset_url, run_date)
     fig, (ax_speed, ax_dir, ax_map) = _prep_fig_axes(figsize, theme)
     _plot_wind_speed_time_series(ax_speed, plot_data, theme)
     _plot_wind_direction_time_series(ax_dir, plot_data, theme)
@@ -57,8 +74,66 @@ def make_figure(
     return fig
 
 
-def _prep_plot_data():
-    return SimpleNamespace
+def _prep_plot_data(hrdps_dataset_url, run_date):
+    hrdps = xarray.open_dataset(hrdps_dataset_url)
+    j, i = PLACES['Sand Heads']['GEM2.5 grid ji']
+    u_hrdps = hrdps.u_wind.sel(time=run_date.format('YYYY-MM-DD')).isel(
+        gridY=j, gridX=i
+    )
+    v_hrdps = hrdps.v_wind.sel(time=run_date.format('YYYY-MM-DD')).isel(
+        gridY=j, gridX=i
+    )
+    hrdps_speed = numpy.sqrt(u_hrdps**2 + v_hrdps**2)
+    hrdps_speed.name = 'hrdps_wind_speed'
+    hrdps_speed.attrs.update({
+        'long_name': 'Wind Speed',
+        'units': 'm/s',
+        'label': 'Model',
+    })
+    shared.localize_time(hrdps_speed)
+    direction = numpy.arctan2(v_hrdps, u_hrdps)
+    hrdps_dir = numpy.rad2deg(direction + (direction < 0) * 2 * numpy.pi)
+    hrdps_dir.name = 'hrdps_wind_direction'
+    hrdps_dir.attrs.update({
+        'long_name': 'Wind To Direction',
+        'units': '°CCW from East',
+        'label': 'Model',
+    })
+    shared.localize_time(hrdps_dir)
+    ec_speed, ec_dir, _, ec_time, _, _ = stormtools.get_EC_observations(
+        'Sandheads',
+        run_date.format('DD-MMM-YYYY'), run_date.format('DD-MMM-YYYY')
+    )
+    obs_speed = xarray.DataArray(
+        name='obs_wind_speed',
+        data=ec_speed,
+        coords={'time': numpy.array(ec_time, dtype='datetime64[ns]')},
+        dims=('time',),
+        attrs={
+            'long_name': 'Wind Speed',
+            'units': 'm/s',
+            'label': 'Observations',
+        }
+    )
+    shared.localize_time(obs_speed)
+    obs_dir = xarray.DataArray(
+        name='obs_wind_direction',
+        data=ec_dir,
+        coords={'time': numpy.array(ec_time, dtype='datetime64[ns]')},
+        dims=('time',),
+        attrs={
+            'long_name': 'Wind To Direction',
+            'units': '°CCW from East',
+            'label': 'Observations',
+        }
+    )
+    shared.localize_time(obs_dir)
+    return SimpleNamespace(
+        hrdps_speed=hrdps_speed,
+        hrdps_dir=hrdps_dir,
+        obs_speed=obs_speed,
+        obs_dir=obs_dir,
+    )
 
 
 def _prep_fig_axes(figsize, theme):
@@ -66,7 +141,7 @@ def _prep_fig_axes(figsize, theme):
         figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
     )
     gs = gridspec.GridSpec(2, 2, width_ratios=[1.618, 1])
-    gs.update(wspace=0.23, hspace=0.1)
+    gs.update(wspace=0.23, hspace=0.15)
     ax_speed = {'mps': fig.add_subplot(gs[0, 0])}
     ax_speed['knots'] = ax_speed['mps'].twinx()
     ax_dir = fig.add_subplot(gs[1, 0])
@@ -75,58 +150,101 @@ def _prep_fig_axes(figsize, theme):
 
 
 def _plot_wind_speed_time_series(ax, plot_data, theme):
-    _wind_speed_axes_labels(ax, theme)
+    plot_data.hrdps_speed.plot(
+        ax=ax['mps'],
+        linewidth=2,
+        color=theme.COLOURS['time series']['Sand Heads HRDPS wind speed'],
+        label=plot_data.hrdps_speed.attrs['label']
+    )
+    plot_data.obs_speed.plot(
+        ax=ax['mps'],
+        linewidth=2,
+        color=theme.COLOURS['time series']['Sand Heads observed wind speed'],
+        label=plot_data.obs_speed.attrs['label']
+    )
+    _wind_speed_axes_labels(ax, plot_data, theme)
 
 
-def _wind_speed_axes_labels(ax, theme):
+def _wind_speed_axes_labels(ax, plot_data, theme):
     ax['mps'].set_title(
         'Winds at Sand Heads',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title']
     )
+    mps_limits = numpy.array((0, 20))
     ax['mps'].set_ylabel(
-        'Wind Speed [m/s]',
+        f'{plot_data.hrdps_speed.attrs["long_name"]} '
+        f'[{plot_data.hrdps_speed.attrs["units"]}]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )
+    ax['mps'].set_ylim(mps_limits)
     ax['knots'].set_ylabel(
-        'Wind Speed [knots]',
+        f'{plot_data.hrdps_speed.attrs["long_name"]} [knots]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )
+    ax['knots'].set_ylim(unit_conversions.mps_knots(mps_limits))
+    ax['mps'].legend(loc='best')
+    ax['mps'].grid(axis='both')
     for k in ax:
         ax[k].set_xticklabels([])
-        ax[k].grid(axis='both')
         theme.set_axis_colors(ax[k])
 
 
 def _plot_wind_direction_time_series(ax, plot_data, theme):
-    _wind_direction_axes_labels(ax, theme)
+    plot_data.hrdps_dir.plot(
+        ax=ax,
+        linewidth=2,
+        color=theme.COLOURS['time series']['Sand Heads HRDPS wind direction'],
+        label=plot_data.hrdps_dir.attrs['label']
+    )
+    plot_data.obs_dir.plot(
+        ax=ax,
+        linewidth=2,
+        color=theme.COLOURS['time series']['Sand Heads observed wind direction'
+                                           ],
+        label=plot_data.obs_dir.attrs['label']
+    )
+    _wind_direction_axes_labels(ax, plot_data, theme)
 
 
-def _wind_direction_axes_labels(ax, theme):
+def _wind_direction_axes_labels(ax, plot_data, theme):
+    ax.set_title('')
     ax.set_xlabel(
-        'Time [xxx]',
+        f'Time [{plot_data.hrdps_dir.attrs["tz_name"]}]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )
     ax.set_ylim(0, 360)
     ax.set_yticks((0, 45, 90, 135, 180, 225, 270, 315, 360))
+    ax.set_yticklabels(('E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE', 'E'))
     ax.set_ylabel(
-        'Wind To Direction\n[Degrees CCW of East]',
+        f'{plot_data.hrdps_dir.attrs["long_name"]} ',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )
+    ax.legend(loc='best')
     ax.grid(axis='both')
     theme.set_axis_colors(ax)
 
 
 def _plot_station_map(ax, coastline, theme):
     shared.plot_map(ax, coastline)
+    ax.plot(
+        *PLACES['Sand Heads']['lon lat'],
+        marker='o',
+        markersize=10,
+        markeredgewidth=3,
+        color=theme.COLOURS['marker']['place']
+    )
     _station_map_axes_labels(ax, theme)
 
 
 def _station_map_axes_labels(ax, theme):
+    ## TODO: There is a bug, probably in matplotlib, that causes the x-axes
+    ## labels to disappear on this axes when date/time labels are used on one
+    ## of the other axes. Perhaps the labels can be explicity restored here?
     ax.set_title(
         'Station Location',
         fontproperties=theme.FONTS['axes title'],
@@ -146,5 +264,19 @@ def _station_map_axes_labels(ax, theme):
     theme.set_axis_colors(ax)
 
 
-def _attribution_text(ax_map, theme):
-    pass
+def _attribution_text(ax, theme):
+    ax.text(
+        -0.15,
+        -0.25,
+        'Observations from Environment and Climate Change Canada data\n'
+        'http://climate.weather.gc.ca/ \n'
+        'Modelled winds are from the High Resolution Deterministic Prediction\n'
+        'System (HRDPS) of Environment and Climate Change '
+        'Canada\n'
+        'https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html',
+        horizontalalignment='left',
+        verticalalignment='top',
+        transform=ax.transAxes,
+        fontproperties=theme.FONTS['figure annotation small'],
+        color=theme.COLOURS['text']['figure annotation']
+    )
