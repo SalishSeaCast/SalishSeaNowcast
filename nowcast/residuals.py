@@ -32,16 +32,14 @@ import netCDF4 as nc
 import numpy as np
 import pandas as pd
 
-from salishsea_tools import(
+from salishsea_tools import (
     geo_tools,
     tidetools,
+    nc_tools,
 )
 
 from nowcast import analyze
-from nowcast.figures import (
-    figures,
-    shared,
-)
+from nowcast.figures import shared
 
 # Module constants
 
@@ -57,6 +55,81 @@ colours = {'nowcast': 'DodgerBlue',
            'predicted': 'ForestGreen',
            'model': 'blue',
            'residual': 'DimGray'}
+
+SITES = {
+    # Constant with station information: mean sea level, latitude,
+    # longitude, station number, historical extreme ssh, etc.
+    # Extreme ssh from DFO website
+    # Mean sea level from CHS tidal constiuents.
+    # VENUS coordinates from the VENUS website. Depth is in meters.
+    'Nanaimo': {
+        'lat': 49.16,
+        'lon': -123.93,
+        'msl': 3.08,
+        'extreme_ssh': 5.47},
+    'Halibut Bank': {
+        'lat': 49.34,
+        'lon': -123.72},
+    'Dungeness': {
+        'lat': 48.15,
+        'lon': -123.117},
+    'La Perouse Bank': {
+        'lat': 48.83,
+        'lon': -126.0},
+    'Point Atkinson': {
+        'lat': 49.33,
+        'lon': -123.25,
+        'msl': 3.09,
+        'stn_no': 7795,
+        'extreme_ssh': 5.61},
+    'Victoria': {
+        'lat': 48.41,
+        'lon': -123.36,
+        'msl': 1.8810,
+        'stn_no': 7120,
+        'extreme_ssh': 3.76},
+    'Campbell River': {
+        'lat': 50.04,
+        'lon': -125.24,
+        'msl': 2.916,
+        'stn_no': 8074,
+        'extreme_ssh': 5.35},
+    'Neah Bay': {
+        'lat': 48.4,
+        'lon': -124.6,
+        'stn_no':  9443090},
+    'Friday Harbor': {
+        'lat': 48.55,
+        'lon': -123.016667,
+        'stn_no': 9449880},
+    'Cherry Point': {
+        'lat': 48.866667,
+        'lon': -122.766667,
+        'stn_no': 9449424,
+        'msl': 3.543,
+        'extreme_ssh': 5.846},
+    'SandHeads': {
+        'lat': 49.10,
+        'lon': -123.30},
+    'Tofino': {
+        'lat': 49.15,
+        'lon': -125.91,
+        'stn_no': 8615},
+    'Bamfield': {
+        'lat': 48.84,
+        'lon': -125.14,
+        'stn_no': 8545},
+    'VENUS': {
+        'East': {
+            'lat': 49.0419,
+            'lon': -123.3176,
+            'depth': 170},
+        'Central': {
+            'lat': 49.0401,
+            'lon': -123.4261,
+            'depth': 300}
+        }
+    }
 
 # Module functions
 
@@ -83,7 +156,7 @@ def plot_residual_forcing(ax, runs_list, t_orig):
     edt = sdt + datetime.timedelta(days=1)
 
     # retrieve observations, tides and residual
-    tides = figures.shared.get_tides('Neah Bay', path=paths['tides'])
+    tides = shared.get_tides('Neah Bay', path=paths['tides'])
     res_obs, obs = obs_residual_ssh_NOAA('Neah Bay', tides, sdt, sdt)
     # truncate and plot
     res_obs_trun, time_trun = analyze.truncate_data(
@@ -139,12 +212,12 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
 
     for ax, name in zip(axs, names):
         # Identify model grid point
-        lat = figures.SITES[name]['lat']
-        lon = figures.SITES[name]['lon']
+        lat = SITES[name]['lat']
+        lon = SITES[name]['lon']
         j, i = geo_tools.find_closest_model_point(
             lon, lat, X, Y, land_mask=bathy.mask)
         # Observed residuals and wlevs and tides
-        ttide = figures.shared.get_tides(name, path=paths['tides'])
+        ttide = shared.get_tides(name, path=paths['tides'])
         res_obs, wlev_meas = obs_residual_ssh(
             name, ttide, t_orig_obs, t_final_obs)
         # truncate and plot
@@ -201,12 +274,12 @@ def get_error_model(names, runs_list, grid_B, t_orig):
         error_mod_dict[name] = {}
         t_mod_dict[name] = {}
         # Look up model grid
-        lat = figures.SITES[name]['lat']
-        lon = figures.SITES[name]['lon']
+        lat = SITES[name]['lat']
+        lon = SITES[name]['lon']
         j, i = geo_tools.find_closest_model_point(
             lon, lat, X, Y, land_mask=bathy.mask)
         # Observed residuals and wlevs and tides
-        ttide = figures.shared.get_tides(name, path=paths['tides'])
+        ttide = shared.get_tides(name, path=paths['tides'])
         res_obs, wlev_meas = obs_residual_ssh(
             name, ttide, t_orig_obs, t_final_obs)
         res_obs_trun, time_obs_trun = analyze.truncate_data(
@@ -247,7 +320,7 @@ def get_error_forcing(runs_list, t_orig):
     edt = sdt + datetime.timedelta(days=1)
 
     # retrieve observed residual
-    tides = figures.shared.get_tides('Neah Bay', path=paths['tides'])
+    tides = shared.get_tides('Neah Bay', path=paths['tides'])
     res_obs, obs = obs_residual_ssh_NOAA('Neah Bay', tides, sdt, sdt)
     res_obs_trun, time_trun = analyze.truncate_data(
         np.array(res_obs), np.array(obs.time), sdt, edt)
@@ -412,7 +485,7 @@ def combine_errors(name, mode, dates, grid_B):
             e_frc_tmp, t_frc_tmp = get_error_forcing([mode], t_sim)
             e_mod_tmp, t_mod_tmp = get_error_model([name], [mode],
                                                    grid_B, t_sim)
-            e_frc_tmp = figures.interp_to_model_time(
+            e_frc_tmp = shared.interp_to_model_time(
                 t_mod_tmp[name][mode], e_frc_tmp[mode], t_frc_tmp[mode])
             # append to larger array
             force['error'] = np.append(force['error'], e_frc_tmp)
@@ -444,7 +517,7 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
     fig, axs = plt.subplots(3, 1, figsize=figsize)
 
     force, model, time, daily_time = combine_errors(name, mode, dates, grid_B)
-    ttide = figures.shared.get_tides(name, path=paths['tides'])
+    ttide = shared.get_tides(name, path=paths['tides'])
 
     # Plotting time series
     ax = axs[0]
@@ -508,8 +581,8 @@ def model_residual_ssh(grid_T, j, i, tides):
     The model residual, model times, model corrected ssh, and
     unmodified model ssh"""
     ssh_mod = grid_T.variables['sossheig'][:, j, i]
-    t_s, t_f, t_model = figures.get_model_time_variables(grid_T)
-    ssh_corr = figures.correct_model_ssh(ssh_mod, t_model, tides)
+    t_s, t_f, t_model = get_model_time_variables(grid_T)
+    ssh_corr = shared.correct_model_ssh(ssh_mod, t_model, tides)
     res_mod = compute_residual(
         ssh_corr, t_model, tides)
     return res_mod, t_model, ssh_corr, ssh_mod
@@ -530,8 +603,8 @@ def obs_residual_ssh(name, tides, sdt, edt):
 
     :returns: residual (calculated residual), obs (observed water levels),
               tides (predicted tides)"""
-    msl = figures.SITES[name]['msl']
-    obs = figures.load_archived_observations(
+    msl = SITES[name]['msl']
+    obs = load_archived_observations(
         name, sdt.strftime('%d-%b-%Y'),
         edt.strftime('%d-%b-%Y'))
     residual = compute_residual(obs.wlev - msl, obs.time, tides)
@@ -559,7 +632,7 @@ def obs_residual_ssh_NOAA(name, tides, sdt, edt, product='hourly_height'):
     :returns: residual (calculated residual), obs (observed water levels),
               tides (predicted tides)
     """
-    sites = figures.SITES
+    sites = SITES
     start_date = sdt.strftime('%d-%b-%Y')
     end_date = edt.strftime('%d-%b-%Y')
     obs = get_NOAA_wlevels(sites[name]['stn_no'],
@@ -590,7 +663,7 @@ def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
 
     :returns: fig
     """
-    tides = figures.shared.get_tides('Neah Bay', path=paths['tides'])
+    tides = shared.get_tides('Neah Bay', path=paths['tides'])
     residual, obs = obs_residual_ssh_NOAA('Neah Bay', tides, t_orig, t_orig)
 
     # Figure
@@ -669,7 +742,7 @@ def _calculate_forcing_surge(data, dates, tide_file):
     forecast_flag = []
     surge = []
     # Load tides
-    ttide = figures.shared.get_tides(
+    ttide = shared.get_tides(
         'Neah Bay',
         path=tide_file,
     )
@@ -812,3 +885,97 @@ def get_NOAA_wlevels(station_no, start_date, end_date, product='water_level'):
         obs = pd.DataFrame(data=data, index=[0])
     obs = obs.rename(columns={'Date Time': 'time', ' Water Level': 'wlev'})
     return obs
+
+
+def load_archived_observations(name, start_date, end_date):
+    """
+    Loads tidal observations from the DFO archive website.
+    Note: only archived observations can be loaded. This usually means
+    at least one month old. If data is not available, a DataFrame with
+    one NaN recording is returned.
+
+    :arg name: a string representing the location for observations
+    :type name: a string from the following - Point Atkinson, Victoria,
+     Campbell River
+
+    :arg start_date: a string representing the starting date of the
+     observations.
+    :type start_date: string in format %d-%b-%Y
+
+    :arg end: a string representing the end date of the observations.
+    :type end: string in format %d-%b-%Y
+
+    :returns: wlev_meas: a dict object with the water level measurements
+     reference to Chart Datum. Columns are time and wlev. Time is in UTC.
+    """
+
+    station_no = SITES[name]['stn_no']
+    base_url = 'http://www.meds-sdmm.dfo-mpo.gc.ca/isdm-gdsi/twl-mne/inventory-inventaire/'
+    form_handler = (
+        'data-donnees-eng.asp?user=isdm-gdsi&region=PAC&tst=1&no='
+        + str(station_no))
+    sitedata = {
+        'start_period': start_date,
+        'end_period': end_date,
+        'resolution': 'h',
+        'time_zone': 'l',
+    }
+    data_provider = (
+        'download-telecharger.asp'
+        '?File=E:%5Ciusr_tmpfiles%5CTWL%5C'
+        + str(station_no) + '-'+start_date + '_slev.csv'
+        '&Name=' + str(station_no) + '-'+start_date+'_slev.csv')
+    # Go get the data from the DFO site
+    with requests.Session() as s:
+        s.post(base_url + form_handler, data=sitedata)
+        r = s.get(base_url + data_provider)
+    # Write the data to a fake file
+    fakefile = io.StringIO(r.text)
+    # Read the fake file
+    try:
+        wlev_meas = pd.read_csv(
+            fakefile, skiprows=7, parse_dates=[0],
+            date_parser=dateparse_archive_obs)
+    except pd.parser.CParserError:
+        data = {'Obs_date': datetime.datetime.strptime(start_date, '%d-%b-%Y'),
+                'SLEV(metres)': float('NaN')}
+        wlev_meas = pd.DataFrame(data=data, index=[0])
+
+    wlev_meas = wlev_meas.rename(
+        columns={'Obs_date': 'time', 'SLEV(metres)': 'wlev'})
+
+    return wlev_meas
+
+
+def dateparse_archive_obs(s):
+    """Function to make datetime object aware of time zone
+    e.g. date_parser=dateParserMeasured('2014/05/31 11:42')
+
+    :arg s: string of date and time
+    :type s: str
+
+    :returns: datetime object that is timezone aware
+    """
+    PST_tz = tz.tzoffset("PST", -28800)
+    # Convert the string to a datetime object
+    unaware = datetime.datetime.strptime(s, "%Y/%m/%d %H:%M")
+    # Add in the local time zone (Canada/Pacific)
+    aware = unaware.replace(tzinfo=PST_tz)
+    # Convert to UTC
+    return aware.astimezone(tz.tzutc())
+
+
+def get_model_time_variables(grid_T):
+    """Return start time, end time, and the time counter values from a
+    NEMO tracer results dataset.
+
+    :arg grid_T: Tracer results dataset from NEMO.
+    :type grid_T: :py:class:`netCDF4.Dataset`
+
+    :returns: dataset start time, dataset end time,
+              and array of output times all as datetime objects.
+    """
+    time = nc_tools.timestamp(
+        grid_T, range(grid_T.variables['time_counter'].size))
+    time = np.array([t.datetime for t in time])
+    return time[0], time[-1], time

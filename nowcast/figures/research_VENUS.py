@@ -23,6 +23,7 @@ from io import StringIO
 
 from dateutil import tz
 import matplotlib.pyplot as plt
+from matplotlib import dates as mdates
 from matplotlib.patches import Ellipse
 import numpy as np
 import pandas as pd
@@ -37,8 +38,8 @@ from salishsea_tools import (
 )
 from scipy import interpolate as interp
 
+import residuals
 from nowcast import analyze
-from nowcast.figures import figures
 
 
 # Font format
@@ -183,7 +184,7 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
     """
 
     # Time range
-    t_orig, t_end, t = figures.get_model_time_variables(grid_T)
+    t_orig, t_end, t = residuals.get_model_time_variables(grid_T)
 
     # Bathymetry
     bathy, X, Y = tt.get_bathy_data(grid_B)
@@ -227,8 +228,8 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
     ax_temp.set_ylim([7, 13])
     ax_temp.set_xlabel('Time [UTC]', **axis_font)
     ax_temp.set_ylabel('Temperature [deg C]', **axis_font)
-    figures.axis_colors(ax_sal, 'gray')
-    figures.axis_colors(ax_temp, 'gray')
+    axis_colors(ax_sal, 'gray')
+    axis_colors(ax_temp, 'gray')
 
     # Text box
     ax_temp.text(0.25, -0.3, 'Observations from Ocean Networks Canada',
@@ -323,7 +324,7 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     axu.set_ylim([dep_s, 0])
     axu.set_xlim([0, maxt])
     axu.set_ylabel('Depth [m]', **axis_font)
-    figures.axis_colors(axu, 'white')
+    axis_colors(axu, 'white')
     axu.set_title(
         f'East/West Velocities at VENUS {station} on '
         f'{timestamp.format("DD-MMM-YYYY")}', **title_font)
@@ -341,7 +342,7 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     axv.set_ylim([dep_s, 0])
     axv.set_xlim([0, maxt])
     axv.set_ylabel('Depth [m]', **axis_font)
-    figures.axis_colors(axv, 'white')
+    axis_colors(axv, 'white')
     axv.set_title(
         f'North/South Velocities at VENUS {station} on '
         f'{timestamp.format("DD-MMM-YYYY")}', **title_font)
@@ -359,7 +360,7 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     axw.set_xlim([0, maxt])
     axw.set_xlabel('Time [h]', **axis_font)
     axw.set_ylabel('Depth [m]', **axis_font)
-    figures.axis_colors(axw, 'white')
+    axis_colors(axw, 'white')
     axw.set_title(
         f'Vertical Velocities at VENUS {station} on '
         f'{timestamp.format("DD-MMM-YYYY")}', **title_font)
@@ -469,7 +470,7 @@ def VENUS_location(grid_B, figsize=(10, 10)):
     ax.set_xlim([-124.02, -123.02])
     ax.set_ylim([48.5, 49.6])
     plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
-    figures.axis_colors(ax, 'white')
+    axis_colors(ax, 'white')
     ax.set_xlabel('Longitude', **axis_font)
     ax.set_ylabel('Latitude', **axis_font)
     ax.set_title('VENUS Node Locations', **title_font)
@@ -634,7 +635,7 @@ def plotADCP(grid_m, grid_o, day, station, profile):
         ax.set_xlim([0.25, 23])
         ax.set_ylabel('Depth [m]', **axis_font)
 
-        figures.axis_colors(ax, 'gray')
+        axis_colors(ax, 'gray')
         ax.set_title(
             f'{direc} {name} Velocities at VENUS {station} - {date}',
             **title_font)
@@ -700,7 +701,7 @@ def plottimeavADCP(grid_m, grid_o, day, station):
             lastvel, axis=0), dep_t[-2:], '--b', label='Bottom grid cell')
         ax.set_xlabel('Daily averaged velocity [m/s]', **axis_font)
         ax.set_ylabel('Depth [m]', **axis_font)
-        figures.axis_colors(ax, 'gray')
+        axis_colors(ax, 'gray')
         ax.set_title(f'{direc} velocities at VENUS {station}', **title_font)
         ax.grid()
         ax.set_ylim(profile)
@@ -765,7 +766,7 @@ def plotdepavADCP(grid_m, grid_o, day, station):
         ax.plot(np.arange(0.25, 24, timestep), velo, label='Observations')
         ax.set_xlim([0, 24])
         ax.set_ylabel('Velocity [m/s]', **axis_font)
-        figures.axis_colors(ax, 'gray')
+        axis_colors(ax, 'gray')
         ax.set_title(
             f'Depth Averaged ({profile[0]}-{profile[1]}m) {direc} velocities '
             f'at VENUS {station} -{date}',
@@ -1030,3 +1031,41 @@ def interpolate_depth(data, depth_array, depth_new):
     data_interp = f(depth_new)
 
     return data_interp
+
+
+def axis_colors(ax, plot):
+    """Formats the background colour of plots and colours of labels.
+
+    :arg ax: Axis to be formatted.
+    :type ax: axis object
+
+    :arg plot: Keyword for background needed for plot.
+    :type plot: string
+
+    :returns: axis format
+    """
+
+    labels_c = 'white'
+    ticks_c = 'white'
+    spines_c = 'white'
+
+    if plot == 'blue':
+        ax.set_axis_bgcolor('#2B3E50')
+    if plot == 'gray':
+        ax.set_axis_bgcolor('#DBDEE1')
+    if plot == 'white':
+        ax.set_axis_bgcolor('white')
+
+    ax.xaxis.label.set_color(labels_c), ax.yaxis.label.set_color(labels_c)
+    ax.tick_params(axis='x', colors=ticks_c)
+    ax.tick_params(axis='y', colors=ticks_c)
+    ax.spines['bottom'].set_color(spines_c)
+    ax.spines['top'].set_color(spines_c)
+    ax.spines['left'].set_color(spines_c)
+    ax.spines['right'].set_color(spines_c)
+    ax.title.set_color('white')
+
+    return ax
+
+
+hfmt = mdates.DateFormatter('%m/%d %H:%M')

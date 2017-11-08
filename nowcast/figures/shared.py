@@ -25,6 +25,7 @@
 import io
 import os
 
+import arrow
 import matplotlib.image
 from matplotlib import patches
 from matplotlib.backends import backend_agg as backend
@@ -370,3 +371,25 @@ def interpolate_tracer_to_depths(
         assume_sorted=True,
     )
     return depth_interp(interp_depths)
+
+
+def localize_time(data_array):
+    """Offset DataArray times to account for local time zone difference from
+    UTC and add :kbd:`tz_name` attribute to DataArray.
+
+    .. note:: This function is intended for use just before presentation/output
+    of the DataArray. It is strongly recommended to do all date/time
+    calculations in UTC to avoid time change issues.
+
+    :param data_array: Data array object to adjust time values of.
+    :type data_array: :py:class:`xarray.DataArray`
+    """
+    local_datetime = arrow.get(str(data_array.time[0].values)).to('local')
+    tz_offset = local_datetime.tzinfo.utcoffset(local_datetime.datetime)
+    tz_name = local_datetime.tzinfo.tzname(local_datetime.datetime)
+    numpy_offset = (
+        np.timedelta64(tz_offset.days, 'D') +
+        np.timedelta64(tz_offset.seconds, 's')
+    )
+    data_array['time'] = data_array.time.values - numpy_offset
+    data_array.attrs['tz_name'] = tz_name
