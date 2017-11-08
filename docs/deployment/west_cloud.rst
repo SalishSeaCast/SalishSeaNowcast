@@ -245,15 +245,16 @@ and provision it with the following packages:
 .. code-block:: bash
 
     $ sudo add-apt-repository -y ppa:mercurial-ppa/releases
+    $ sudo add-apt-repository -y ppa:git-core/ppa
     $ sudo apt-get update
-    $ sudo apt-get install -y mercurial
+    $ sudo apt-get install -y mercurial git
     $ sudo apt-get install -y gfortran
     $ sudo apt-get install -y libopenmpi1.6 libopenmpi-dev
     $ sudo apt-get install -y openmpi-bin
     $ sudo apt-get install -y libnetcdf-dev netcdf-bin
     $ sudo apt-get install -y libhdf5-dev
     $ sudo apt-get install -y nco
-    $ sudo apt-get install -y liburi-perl
+    $ sudo apt-get install -y liburi-perl m4
     $ sudo apt-get install -y make ksh emacs24
     $ sudo apt-get install -y python-pip python-dev
     $ sudo apt-get install -y nfs-common
