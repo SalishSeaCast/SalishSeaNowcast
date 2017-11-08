@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast worker that produces visualization images for
 the web site from run results.
 """
@@ -60,7 +59,6 @@ from nowcast.figures import (
     research_ferries,
 )
 
-
 NAME = 'make_plots'
 logger = logging.getLogger(NAME)
 
@@ -86,7 +84,8 @@ def main():
         ''',
     )
     worker.cli.add_argument(
-        'plot_type', choices={'publish', 'research', 'comparison'},
+        'plot_type',
+        choices={'publish', 'research', 'comparison'},
         help='''
         Which type of plots to produce:
         "publish" means ssh, weather and other approved plots for publishing,
@@ -95,7 +94,8 @@ def main():
         '''
     )
     worker.cli.add_date_option(
-        '--run-date', default=arrow.now().floor('day'),
+        '--run-date',
+        default=arrow.now().floor('day'),
         help='Date of the run to symlink files for.'
     )
     worker.cli.add_argument(
@@ -124,7 +124,8 @@ def success(parsed_args):
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'success {parsed_args.run_type} {parsed_args.plot_type}'
     return msg_type
 
@@ -138,7 +139,8 @@ def failure(parsed_args):
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'failure {parsed_args.run_type} {parsed_args.plot_type}'
     return msg_type
 
@@ -157,19 +159,24 @@ def make_plots(parsed_args, config, *args):
     results_dir = os.path.join(config['results archive'][run_type], dmy)
     grid_dir = Path(config['figures']['grid dir'])
     bathy = nc.Dataset(
-        os.fspath(grid_dir / config['run types'][run_type]['bathymetry']))
+        os.fspath(grid_dir / config['run types'][run_type]['bathymetry'])
+    )
     mesh_mask = nc.Dataset(
-        os.fspath(grid_dir / config['run types'][run_type]['mesh mask']))
+        os.fspath(grid_dir / config['run types'][run_type]['mesh mask'])
+    )
     dev_mesh_mask = nc.Dataset(
-        os.fspath(grid_dir / config['run types']['nowcast-dev']['mesh mask']))
+        os.fspath(grid_dir / config['run types']['nowcast-dev']['mesh mask'])
+    )
     coastline = sio.loadmat(config['figures']['coastline'])
 
     if run_type == 'nowcast' and plot_type == 'research':
         fig_functions = _prep_nowcast_research_fig_functions(
-            bathy, mesh_mask, results_dir, run_date)
+            bathy, mesh_mask, results_dir, run_date
+        )
     if run_type == 'nowcast-green' and plot_type == 'research':
         fig_functions = _prep_nowcast_green_research_fig_functions(
-            bathy, mesh_mask, results_dir, run_date)
+            bathy, mesh_mask, results_dir, run_date
+        )
     if run_type == 'nowcast' and plot_type == 'comparison':
         fig_functions = _prep_comparison_fig_functions(
             config, bathy, coastline, mesh_mask, dev_mesh_mask, results_dir,
@@ -192,8 +199,11 @@ def _results_dataset(period, grid, results_dir):
     and grid (e.g. grid_T, grid_U) from results_dir.
     """
     filename_pattern = 'SalishSea_{period}_*_{grid}.nc'
-    filepaths = glob(os.path.join(
-        results_dir, filename_pattern.format(period=period, grid=grid)))
+    filepaths = glob(
+        os.path.join(
+            results_dir, filename_pattern.format(period=period, grid=grid)
+        )
+    )
     return nc.Dataset(filepaths[0])
 
 
@@ -202,8 +212,9 @@ def _results_dataset_gridded(station, results_dir):
     for the quarter hourly data from results_dir.
     """
     filename_pattern = 'VENUS_{station}_gridded.nc'
-    filepaths = glob(os.path.join(
-        results_dir, filename_pattern.format(station=station)))
+    filepaths = glob(
+        os.path.join(results_dir, filename_pattern.format(station=station))
+    )
     return nc.Dataset(filepaths[0])
 
 
@@ -217,35 +228,52 @@ def _prep_nowcast_research_fig_functions(
     grid_central = _results_dataset_gridded('central', results_dir)
     grid_east = _results_dataset_gridded('east', results_dir)
     image_loops = {
-        'salinity': {'nemo var': 'vosaline', 'cmap': cmocean.cm.haline},
-        'temperature': {'nemo var': 'votemper', 'cmap': cmocean.cm.thermal},
+        'salinity': {
+            'nemo var': 'vosaline',
+            'cmap': cmocean.cm.haline
+        },
+        'temperature': {
+            'nemo var': 'votemper',
+            'cmap': cmocean.cm.thermal
+        },
     }
     fig_functions = {}
     for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = (
             tracer_thalweg_and_surface_hourly.clevels(
-                grid_T_hr.variables[params['nemo var']], mesh_mask,
-                depth_integrated=False))
+                grid_T_hr.variables[params['nemo var']],
+                mesh_mask,
+                depth_integrated=False
+            )
+        )
         fig_functions.update({
-            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
-                {
-                    'function': tracer_thalweg_and_surface_hourly.make_figure,
-                    'args': (
-                        hr, grid_T_hr.variables[params['nemo var']], bathy,
-                        mesh_mask, clevels_thalweg, clevels_surface),
-                    'kwargs':
-                        {'cmap': params['cmap'], 'depth_integrated': False},
-                    'format': 'png',
-                    'image loop': True,
-                }
+            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC': {
+                'function':
+                    tracer_thalweg_and_surface_hourly.make_figure,
+                'args': (
+                    hr, grid_T_hr.variables[params['nemo var']], bathy,
+                    mesh_mask, clevels_thalweg, clevels_surface
+                ),
+                'kwargs': {
+                    'cmap': params['cmap'],
+                    'depth_integrated': False
+                },
+                'format':
+                    'png',
+                'image loop':
+                    True,
+            }
             for hr in range(24)
         })
     fig_functions.update({
         'Currents_sections_and_surface': {
-            'function': velocity_section_and_surface.make_figure,
+            'function':
+                velocity_section_and_surface.make_figure,
             'args': (
                 grid_U_hr.variables['vozocrtx'],
-                grid_V_hr.variables['vomecrty'], bathy, mesh_mask,
+                grid_V_hr.variables['vomecrty'],
+                bathy,
+                mesh_mask,
             ),
             'kwargs': {
                 'sections': (450, 520, 680),
@@ -277,26 +305,40 @@ def _prep_nowcast_green_research_fig_functions(
     ptrc_T_hr = _results_dataset('1h', 'ptrc_T', results_dir)
     fig_functions = {}
     image_loops = {
-        'salinity': {'nemo var': 'vosaline', 'cmap': cmocean.cm.haline},
-        'temperature': {'nemo var': 'votemper', 'cmap': cmocean.cm.thermal},
+        'salinity': {
+            'nemo var': 'vosaline',
+            'cmap': cmocean.cm.haline
+        },
+        'temperature': {
+            'nemo var': 'votemper',
+            'cmap': cmocean.cm.thermal
+        },
     }
     for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = (
             tracer_thalweg_and_surface_hourly.clevels(
-                grid_T_hr.variables[params['nemo var']], mesh_mask,
-                depth_integrated=False))
+                grid_T_hr.variables[params['nemo var']],
+                mesh_mask,
+                depth_integrated=False
+            )
+        )
         fig_functions.update({
-            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
-                {
-                    'function': tracer_thalweg_and_surface_hourly.make_figure,
-                    'args': (
-                        hr, grid_T_hr.variables[params['nemo var']], bathy,
-                        mesh_mask, clevels_thalweg, clevels_surface),
-                    'kwargs':
-                        {'cmap': params['cmap'], 'depth_integrated': False},
-                    'format': 'png',
-                    'image loop': True,
-                }
+            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC': {
+                'function':
+                    tracer_thalweg_and_surface_hourly.make_figure,
+                'args': (
+                    hr, grid_T_hr.variables[params['nemo var']], bathy,
+                    mesh_mask, clevels_thalweg, clevels_surface
+                ),
+                'kwargs': {
+                    'cmap': params['cmap'],
+                    'depth_integrated': False
+                },
+                'format':
+                    'png',
+                'image loop':
+                    True,
+            }
             for hr in range(24)
         })
     image_loops = {
@@ -364,32 +406,39 @@ def _prep_nowcast_green_research_fig_functions(
     for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = (
             tracer_thalweg_and_surface_hourly.clevels(
-                ptrc_T_hr.variables[params['nemo var']], mesh_mask,
-                depth_integrated=params['depth integrated']))
+                ptrc_T_hr.variables[params['nemo var']],
+                mesh_mask,
+                depth_integrated=params['depth integrated']
+            )
+        )
         fig_functions.update({
-            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC':
-                {
-                    'function': tracer_thalweg_and_surface_hourly.make_figure,
-                    'args': (
-                        hr, ptrc_T_hr.variables[params['nemo var']], bathy,
-                        mesh_mask, clevels_thalweg, clevels_surface),
-                    'kwargs':
-                        {
-                            'cmap': params['cmap'],
-                            'depth_integrated': params['depth integrated'],
-                        },
-                    'format': 'png',
-                    'image loop': True,
-                }
+            f'{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC': {
+                'function':
+                    tracer_thalweg_and_surface_hourly.make_figure,
+                'args': (
+                    hr, ptrc_T_hr.variables[params['nemo var']], bathy,
+                    mesh_mask, clevels_thalweg, clevels_surface
+                ),
+                'kwargs': {
+                    'cmap': params['cmap'],
+                    'depth_integrated': params['depth integrated'],
+                },
+                'format':
+                    'png',
+                'image loop':
+                    True,
+            }
             for hr in range(24)
         })
     place = 'S3'
     phys_dataset = xr.open_dataset(
         'https://salishsea.eos.ubc.ca/erddap/griddap'
-        '/ubcSSg3DTracerFields1hV17-02')
+        '/ubcSSg3DTracerFields1hV17-02'
+    )
     bio_dataset = xr.open_dataset(
         'https://salishsea.eos.ubc.ca/erddap/griddap'
-        '/ubcSSg3DBiologyFields1hV17-02')
+        '/ubcSSg3DBiologyFields1hV17-02'
+    )
     fig_functions.update({
         'temperature_salinity_timeseries': {
             'function': time_series_plots.make_figure,
@@ -405,7 +454,9 @@ def _prep_nowcast_green_research_fig_functions(
         },
         'mesozoo_microzoo_timeseries': {
             'function': time_series_plots.make_figure,
-            'args': (bio_dataset, 'mesozooplankton', 'microzooplankton', place)
+            'args': (
+                bio_dataset, 'mesozooplankton', 'microzooplankton', place
+            )
         },
     })
     return fig_functions
@@ -422,25 +473,27 @@ def _prep_comparison_fig_functions(
     dev_grid_T_hr = _results_dataset('1h', 'grid_T', dev_results_dir)
     grid_central = _results_dataset_gridded('central', results_dir)
     grid_obs_central = sio.loadmat(
-        '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat')
+        '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat'
+    )
     grid_east = _results_dataset_gridded('east', results_dir)
-    grid_obs_east = sio.loadmat(
-        '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPeast.mat')
+    grid_obs_east = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPeast.mat')
     grid_ddl = _results_dataset_gridded('delta', results_dir)
-    grid_obs_ddl = sio.loadmat(
-        '/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPddl.mat')
+    grid_obs_ddl = sio.loadmat('/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPddl.mat')
     adcp_datetime = (
-        datetime.datetime.strptime(dmy, '%d%b%y').replace(minute=45))
+        datetime.datetime.strptime(dmy, '%d%b%y').replace(minute=45)
+    )
     fig_functions = {
         'SH_wind': {
             'function': sandheads_winds.make_figure,
             'args': (hrdps_dataset_url, run_date, coastline)
         },
         'Compare_VENUS_East': {
-            'function': compare_venus_ctd.make_figure,
+            'function':
+                compare_venus_ctd.make_figure,
             'args': (
                 'East node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
-                dev_mesh_mask)
+                dev_mesh_mask
+            )
         },
         'HB_DB_ferry_salinity': {
             'function': research_ferries.salinity_ferry_route,
@@ -455,43 +508,50 @@ def _prep_comparison_fig_functions(
             'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_SB', dmy)
         },
         'Compare_VENUS_Central': {
-            'function': compare_venus_ctd.make_figure,
+            'function':
+                compare_venus_ctd.make_figure,
             'args': (
-                'Central node', grid_T_hr, dev_grid_T_hr, timezone,
-                mesh_mask, dev_mesh_mask)
+                'Central node', grid_T_hr, dev_grid_T_hr, timezone, mesh_mask,
+                dev_mesh_mask
+            )
         },
         'Compare_VENUS_Delta_BBL': {
-            'function': compare_venus_ctd.make_figure,
+            'function':
+                compare_venus_ctd.make_figure,
             'args': (
                 'Delta BBL node', grid_T_hr, dev_grid_T_hr, timezone,
-                mesh_mask, dev_mesh_mask)
+                mesh_mask, dev_mesh_mask
+            )
         },
         'Compare_VENUS_Delta_DDL': {
-            'function': compare_venus_ctd.make_figure,
+            'function':
+                compare_venus_ctd.make_figure,
             'args': (
                 'Delta DDL node', grid_T_hr, dev_grid_T_hr, timezone,
-                mesh_mask, dev_mesh_mask)
+                mesh_mask, dev_mesh_mask
+            )
         },
         'Central_ADCP': {
-            'function': research_VENUS.plotADCP,
+            'function':
+                research_VENUS.plotADCP,
             'args': (
                 grid_central, grid_obs_central, adcp_datetime, 'Central',
-                [0, 285])
+                [0, 285]
+            )
         },
         'Central_depavADCP': {
             'function': research_VENUS.plotdepavADCP,
-            'args': (
-                grid_central, grid_obs_central, adcp_datetime, 'Central')
+            'args': (grid_central, grid_obs_central, adcp_datetime, 'Central')
         },
         'Central_timeavADCP': {
             'function': research_VENUS.plottimeavADCP,
-            'args': (
-                grid_central, grid_obs_central, adcp_datetime, 'Central')
+            'args': (grid_central, grid_obs_central, adcp_datetime, 'Central')
         },
         'East_ADCP': {
             'function': research_VENUS.plotADCP,
             'args': (
-                grid_east, grid_obs_east, adcp_datetime, 'East', [0, 150])
+                grid_east, grid_obs_east, adcp_datetime, 'East', [0, 150]
+            )
         },
         'East_depavADCP': {
             'function': research_VENUS.plotdepavADCP,
@@ -523,8 +583,14 @@ def _prep_publish_fig_functions(
     tidal_predictions = config['ssh']['tidal predictions']
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     names = [
-        'Neah Bay', 'Victoria', 'Friday Harbor', 'Cherry Point', 'SandHeads',
-        'Point Atkinson', 'Nanaimo', 'Campbell River',
+        'Neah Bay',
+        'Victoria',
+        'Friday Harbor',
+        'Cherry Point',
+        'SandHeads',
+        'Point Atkinson',
+        'Nanaimo',
+        'Campbell River',
     ]
     filepath_tmpl = os.path.join(results_dir, '{}.nc')
     grids_15m = {
@@ -547,16 +613,20 @@ def _prep_publish_fig_functions(
             'args': (grid_T_hr, tidal_predictions, timezone)
         },
         'NB_maxSSH': {
-            'function': compare_tide_prediction_max_ssh.make_figure,
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
             'args': (
                 'Neah Bay', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone)
+                tidal_predictions, timezone
+            )
         },
         'Vic_maxSSH': {
-            'function': compare_tide_prediction_max_ssh.make_figure,
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
             'args': (
                 'Victoria', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone)
+                tidal_predictions, timezone
+            )
         },
         ## TODO: Need tidal_predictions CSV file for Friday Harbor before
         ## this figure can be produced
@@ -567,28 +637,36 @@ def _prep_publish_fig_functions(
         #         tidal_predictions, timezone)
         # },
         'CP_maxSSH': {
-            'function': compare_tide_prediction_max_ssh.make_figure,
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
             'args': (
                 'Cherry Point', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone)
+                tidal_predictions, timezone
+            )
         },
         'PA_maxSSH': {
-            'function': compare_tide_prediction_max_ssh.make_figure,
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
             'args': (
                 'Point Atkinson', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone)
+                tidal_predictions, timezone
+            )
         },
         'Nan_maxSSH': {
-            'function': compare_tide_prediction_max_ssh.make_figure,
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
             'args': (
                 'Nanaimo', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone)
+                tidal_predictions, timezone
+            )
         },
         'CR_maxSSH': {
-            'function': compare_tide_prediction_max_ssh.make_figure,
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
             'args': (
                 'Campbell River', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone)
+                tidal_predictions, timezone
+            )
         },
         'SH_wind': {
             'function': sandheads_winds.make_figure,
@@ -629,15 +707,21 @@ def _render_figures(
             fig_files_dir.mkdir(parents=True, exist_ok=True)
         else:
             fig_files_dir = Path(
-                config['figures']['storage path'], run_type, dmy)
+                config['figures']['storage path'], run_type, dmy
+            )
             lib.mkdir(
-                os.fspath(fig_files_dir), logger, grp_name=config['file group'])
+                os.fspath(fig_files_dir),
+                logger,
+                grp_name=config['file group']
+            )
         filename = fig_files_dir / f'{svg_name}_{dmy}.{fig_save_format}'
         if image_loop_figure:
             filename = fig_files_dir / f'{svg_name}.{fig_save_format}'
         fig.savefig(
-            os.fspath(filename), facecolor=fig.get_facecolor(),
-            bbox_inches='tight')
+            os.fspath(filename),
+            facecolor=fig.get_facecolor(),
+            bbox_inches='tight'
+        )
         logger.info(f'{filename} saved')
         matplotlib.pyplot.close(fig)
         if fig_save_format is 'svg':
@@ -647,12 +731,16 @@ def _render_figures(
             logger.debug(f'running subprocess: {cmd}')
             try:
                 proc = subprocess.run(
-                    shlex.split(cmd), check=True,
-                    stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                    universal_newlines=True)
+                    shlex.split(cmd),
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    universal_newlines=True
+                )
             except subprocess.CalledProcessError as e:
                 logger.warning(
-                    'SVG scouring failed, proceeding with unscoured figure')
+                    'SVG scouring failed, proceeding with unscoured figure'
+                )
                 logger.debug(f'scour return code: {e.returncode}')
                 if e.output:
                     logger.debug(e.output)
@@ -679,39 +767,48 @@ def _calc_figure(fig_func, args, kwargs):
         if fig_func.__name__.endswith('salinity_ferry_route'):
             logger.warning(
                 f'{args[3]} ferry route salinity comparison figure '
-                f'failed: {e}')
+                f'failed: {e}'
+            )
         else:
             logger.error(
                 f'unexpected FileNotFoundError in {fig_func.__name__}:',
-                exc_info=True)
+                exc_info=True
+            )
         raise
     except IndexError:
         adcp_plot_funcs = ('plotADCP', 'plotdepavADCP', 'plottimeavADCP')
         if fig_func.__name__.endswith(adcp_plot_funcs):
             logger.warning(
                 f'VENUS {args[3]} ADCP comparison figure failed: '
-                f'No observations available')
+                f'No observations available'
+            )
         else:
             logger.error(
-                f'unexpected IndexError in {fig_func.__name__}:', exc_info=True)
+                f'unexpected IndexError in {fig_func.__name__}:',
+                exc_info=True
+            )
         raise
     except KeyError:
         if fig_func.__name__.endswith('salinity_ferry_route'):
             logger.warning(
                 f'{args[3]} ferry route salinity comparison figure '
-                f'failed: No observations found in .mat file')
+                f'failed: No observations found in .mat file'
+            )
         else:
             logger.error(
-                f'unexpected KeyError in {fig_func.__name__}:', exc_info=True)
+                f'unexpected KeyError in {fig_func.__name__}:', exc_info=True
+            )
         raise
     except TypeError:
         if fig_func.__module__.endswith('compare_venus_ctd'):
             logger.warning(
                 f'VENUS {args[0]} CTD comparison figure failed: '
-                f'No observations available')
+                f'No observations available'
+            )
         else:
             logger.error(
-                f'unexpected TypeError in {fig_func.__name__}:', exc_info=True)
+                f'unexpected TypeError in {fig_func.__name__}:', exc_info=True
+            )
         raise
     return fig
 
@@ -728,29 +825,30 @@ def _render_storm_surge_alerts_thumbnail(
     yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
     thumbnail_root = config['figures']['storm surge alerts thumbnail']
     if not all((
-            plot_type == 'publish',
-            svg_name == thumbnail_root,
-            any((
-                        run_type == 'forecast' and dmy == today_dmy,
-                        run_type == 'forecast2' and dmy == yesterday_dmy,
-            ))
+        plot_type == 'publish', svg_name == thumbnail_root, any((
+            run_type == 'forecast' and dmy == today_dmy,
+            run_type == 'forecast2' and dmy == yesterday_dmy,
+        ))
     )):
         return
     if test_figure:
         dest_dir = Path(
             config['figures']['test path'],
-            config['figures']['storm surge info portal path'])
+            config['figures']['storm surge info portal path']
+        )
         dest_dir.mkdir(parents=True, exist_ok=True)
     else:
         dest_dir = Path(
             config['figures']['storage path'],
-            config['figures']['storm surge info portal path'])
+            config['figures']['storm surge info portal path']
+        )
     undated_thumbnail = dest_dir / f'{thumbnail_root}.{fig_save_format}'
     fig.savefig(
-        os.fspath(undated_thumbnail), facecolor=fig.get_facecolor(),
-        bbox_inches='tight')
-    lib.fix_perms(
-        os.fspath(undated_thumbnail), grp_name=config['file group'])
+        os.fspath(undated_thumbnail),
+        facecolor=fig.get_facecolor(),
+        bbox_inches='tight'
+    )
+    lib.fix_perms(os.fspath(undated_thumbnail), grp_name=config['file group'])
     logger.info(f'{undated_thumbnail} saved')
     return os.fspath(undated_thumbnail)
 
