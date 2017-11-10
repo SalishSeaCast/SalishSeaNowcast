@@ -366,7 +366,7 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
             name=sensor,
             data=numpy.array([], dtype=float),
             coords={'sampleTime': numpy.array([], dtype='datetime64[ns]')},
-            dims=('sampleTime',),
+            dims='sampleTime',
             attrs={
                 'qaqcFlag': numpy.array([], dtype=numpy.int64),
                 'unitOfMeasure': onc_units[sensor],
@@ -405,7 +405,7 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
                 name=sensor,
                 data=onc_data[not_nan_mask][sensor_qaqc_mask].values,
                 coords={'time': onc_data.sampleTime[not_nan_mask][sensor_qaqc_mask].values},
-                dims=('time',),
+                dims='time',
                 attrs={'device_category': device,
                        'units': cf_units},
             )
@@ -452,7 +452,7 @@ def _create_dataset(
                     name=array.name,
                     data=nan_values,
                     coords={'time': data_vars['longitude'].time},
-                    dims=('time',),
+                    dims='time',
                     attrs=array.attrs,
                 )
                 data_array = array.resample('1Min', 'time', how='mean')
