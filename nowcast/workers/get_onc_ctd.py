@@ -175,6 +175,7 @@ def _qaqc_filter(ctd_data, var):
         name=var,
         data=ctd_data.data_vars[var][qaqc_mask].values,
         coords={'time': ctd_data.data_vars[var].sampleTime[qaqc_mask].values},
+        dims='time',
     )
     return filtered_var
 
