@@ -157,13 +157,18 @@ def get_onc_ctd(parsed_args, config, *args):
             'onc_station': parsed_args.onc_station
         }
     )
+    encoding = {
+        var: {
+            'dtype': 'int64',
+            '_FillValue': 0,
+        }
+        for var in ds.data_vars if var.endswith('sample_count')
+    }
+    encoding['time'] = {'units': 'minutes since 1970-01-01 00:00'}
     ds.to_netcdf(
         nc_filepath.as_posix(),
-        encoding={
-            'time': {
-                'units': 'minutes since 1970-01-01 00:00'
-            }
-        }
+        encoding=encoding,
+        unlimited_dims=('time',),
     )
     checklist = {parsed_args.onc_station: nc_filepath.as_posix()}
     return checklist
@@ -372,13 +377,6 @@ def _create_dataset(onc_station, temperature, salinity):
                 f'&deviceCategory=CTD',
         },
     )
-    # Replace NaN sample counts with zeros in the case of NaN padded DataArrays
-    ds.temperature_sample_count.values = numpy.nan_to_num(
-        ds.temperature_sample_count.values
-    ).astype(int)
-    ds.salinity_sample_count.values = numpy.nan_to_num(
-        ds.salinity_sample_count.values
-    ).astype(int)
     return ds
 
 
