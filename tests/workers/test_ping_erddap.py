@@ -40,7 +40,7 @@ class TestMain:
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-dev', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
-            'SCVIP-CTD', 'SEVIP-CTD', 'LSBBL-CTD', 'USDDL-CTD',
+            'SCVIP-CTD', 'SEVIP-CTD', 'USDDL-CTD',
             'TWDP-ferry',
         }
         assert 'help' in kwargs
@@ -68,7 +68,6 @@ class TestSuccess:
         'download_weather',
         'SCVIP-CTD',
         'SEVIP-CTD',
-        'LSBBL-CTD',
         'USDDL-CTD',
         'TWDP-ferry',
     ])
@@ -86,7 +85,6 @@ class TestSuccess:
         ('download_weather', 'success download_weather'),
         ('SCVIP-CTD', 'success SCVIP-CTD'),
         ('SEVIP-CTD', 'success SEVIP-CTD'),
-        ('LSBBL-CTD', 'success LSBBL-CTD'),
         ('USDDL-CTD', 'success USDDL-CTD'),
         ('TWDP-ferry', 'success TWDP-ferry'),
     ])
@@ -109,7 +107,6 @@ class TestFailure:
         'download_weather',
         'SCVIP-CTD',
         'SEVIP-CTD',
-        'LSBBL-CTD',
         'USDDL-CTD',
         'TWDP-ferry',
     ])
@@ -127,7 +124,6 @@ class TestFailure:
         ('download_weather', 'failure download_weather'),
         ('SCVIP-CTD', 'failure SCVIP-CTD'),
         ('SEVIP-CTD', 'failure SEVIP-CTD'),
-        ('LSBBL-CTD', 'failure LSBBL-CTD'),
         ('USDDL-CTD', 'failure USDDL-CTD'),
         ('TWDP-ferry', 'failure TWDP-ferry'),
     ])
@@ -150,7 +146,6 @@ class TestPingErddap:
         'download_weather',
         'SCVIP-CTD',
         'SEVIP-CTD',
-        'LSBBL-CTD',
         'USDDL-CTD',
         'TWDP-ferry',
     ])
@@ -177,7 +172,6 @@ class TestPingErddap:
                         ['ubcSSaSurfaceAtmosphereFieldsV1'],
                     'SCVIP-CTD': ['ubcONCSCVIPCTD15mV1'],
                     'SEVIP-CTD': ['ubcONCSEVIPCTD15mV1'],
-                    'LSBBL-CTD': ['ubcONCLSBBLCTD15mV1'],
                     'USDDL-CTD': ['ubcONCUSDDLCTD15mV1'],
                     'TWDP-ferry': ['ubcONCTWDP1mV1'],
                 }}}

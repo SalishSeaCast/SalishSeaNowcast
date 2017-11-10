@@ -40,7 +40,7 @@ def main():
         choices={
             'nowcast', 'nowcast-dev', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
-            'SCVIP-CTD', 'SEVIP-CTD', 'LSBBL-CTD', 'USDDL-CTD',
+            'SCVIP-CTD', 'SEVIP-CTD', 'USDDL-CTD',
             'TWDP-ferry',
         },
         help='''
@@ -54,8 +54,6 @@ def main():
         'SCVIP-CTD' means ONC SCVIP node CTD T&S observations downloaded &
         processed,
         'SEVIP-CTD' means ONC SEVIP node CTD T&S observations downloaded &
-        processed
-        'LSBBL-CTD' means ONC LSBBL node CTD T&S observations downloaded &
         processed
         'USDDL-CTD' means ONC USDDL node CTD T&S observations downloaded &
         processed

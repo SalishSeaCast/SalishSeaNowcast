@@ -158,8 +158,8 @@ observations:
     stations:
       - SCVIP
       - SEVIP
-      - LSBBL
       - USDDL
+#      - LSBBL  # Decommissioned on 4-Nov-2017
     # Destination directory for ONC CTD T&S data netCDF files
     dest dir: /results/observations/ONC/CTD/
     # Template for ONC CTD T&S data file path
@@ -289,8 +289,9 @@ erddap:
       - ubcONCSCVIPCTD15mV1
     SEVIP-CTD:
       - ubcONCSEVIPCTD15mV1
-    LSBBL-CTD:
-      - ubcONCLSBBLCTD15mV1
+#    LSBBL-CTD:
+#      Decommissioned on 4-Nov-2017
+#      - ubcONCLSBBLCTD15mV1
     USDDL-CTD:
       - ubcONCUSDDLCTD15mV1
     TWDP-ferry:
@@ -737,7 +738,6 @@ message registry:
       checklist key: ONC CTD data
       success SCVIP: ONC SCVIP station CTD T&S data file created
       success SEVIP: ONC SEVIP station CTD T&S data file created
-      success LSBBL: ONC LSBBL station CTD T&S data file created
       success USDDL: ONC USDDL station CTD T&S data file created
       failure: ONC CTD T&S data file creation failed
       crash: get_onc_ctd worker crashed
@@ -891,8 +891,6 @@ message registry:
       failure SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files creation failed
       success SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files created
       failure SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files creation failed
-      success LSBBL-CTD: ONC LSBBL node CTD ERDDAP dataset flag files created
-      failure LSBBL-CTD: ONC LSBBL node CTD ERDDAP dataset flag files creation failed
       success USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files created
       failure USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files creation failed
       success TWDP-ferry: ONC Tsawwassen/Duke Pt. ferry ERDDAP dataset flag files created

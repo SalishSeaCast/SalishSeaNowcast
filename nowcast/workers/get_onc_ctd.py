@@ -52,7 +52,7 @@ def main():
     worker.init_cli()
     worker.cli.add_argument(
         'onc_station',
-        choices={'SCVIP', 'SEVIP', 'LSBBL', 'USDDL'},
+        choices={'SCVIP', 'SEVIP', 'USDDL'},
         help='Name of the ONC node station to download data for.',
     )
     worker.cli.add_date_option(
@@ -213,13 +213,6 @@ def _create_dataset(onc_station, temperature, salinity):
             'ONC_stationDescription':
                 'Pacific, Salish Sea, Strait of Georgia, East, '
                 'Strait of Georgia VENUS Instrument Platform',
-        },
-        'LSBBL': {
-            'place_name': 'Delta BBL node',
-            'ONC_station': 'Delta Lower Slope BBL',
-            'ONC_stationDescription':
-                'Pacific, Salish Sea, Strait of Georgia, Delta, Lower Slope, '
-                'Bottom Boundary Layer',
         },
         'USDDL': {
             'place_name': 'Delta DDL node',
