@@ -108,7 +108,17 @@ def get_onc_ctd(parsed_args, config, *args):
         sensors='salinity,temperature',
         dateFrom=data_tools.onc_datetime(f'{ymd} 00:00', 'utc'),
     )
-    ctd_data = data_tools.onc_json_to_dataset(onc_data)
+    try:
+        ctd_data = data_tools.onc_json_to_dataset(onc_data)
+    except TypeError:
+        logger.error(
+            f'No ONC {parsed_args.onc_station} CTD T&S data for {ymd}',
+            extra={
+                'data_date': ymd,
+                'onc_station': parsed_args.onc_station
+            }
+        )
+        raise WorkerError
     logger.debug(
         f'ONC {parsed_args.onc_station} CTD T&S data for {ymd} received and '
         f'parsed',
