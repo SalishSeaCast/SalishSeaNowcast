@@ -36,7 +36,7 @@ def config():
         },
         'observations': {
             'ctd data': {
-                'stations': ['SCVIP', 'SEVIP', 'LSBBL', 'USDDL'],
+                'stations': ['SCVIP', 'SEVIP', 'USDDL'],
             },
             'ferry data': {
                 'ferries': {
@@ -148,7 +148,6 @@ class TestAfterDownloadWeather:
     @pytest.mark.parametrize('ctd_stn', [
         'SCVIP',
         'SEVIP',
-        'LSBBL',
         'USDDL',
     ])
     def test_success_06_launch_get_onc_ctd(self, ctd_stn, config, checklist):
@@ -315,7 +314,6 @@ class TestAfterGetONC_CTD:
     @pytest.mark.parametrize('ctd_stn', [
         'SCVIP',
         'SEVIP',
-        'LSBBL',
         'USDDL',
     ])
     def test_success_launch_ping_erddap(self, ctd_stn, config, checklist):

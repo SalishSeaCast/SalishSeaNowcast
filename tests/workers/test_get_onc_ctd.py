@@ -38,7 +38,7 @@ class TestMain:
         get_onc_ctd.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('onc_station',)
-        assert kwargs['choices'] == {'SCVIP', 'SEVIP', 'LSBBL', 'USDDL'}
+        assert kwargs['choices'] == {'SCVIP', 'SEVIP', 'USDDL'}
         assert 'help' in kwargs
 
     def test_add_data_date_arg(self, m_worker):
@@ -63,14 +63,11 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize(
-        'onc_station', [
-            'SCVIP',
-            'SEVIP',
-            'LSBBL',
-            'USDDL',
-        ]
-    )
+    @pytest.mark.parametrize('onc_station', [
+        'SCVIP',
+        'SEVIP',
+        'USDDL',
+    ])
     def test_success_log_info(self, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get('2016-09-09')
@@ -82,14 +79,11 @@ class TestSuccess:
                                                    ] == onc_station
         assert m_logger.info.call_args[1]['extra']['data_date'] == '2016-09-09'
 
-    @pytest.mark.parametrize(
-        'onc_station', [
-            'SCVIP',
-            'SEVIP',
-            'LSBBL',
-            'USDDL',
-        ]
-    )
+    @pytest.mark.parametrize('onc_station', [
+        'SCVIP',
+        'SEVIP',
+        'USDDL',
+    ])
     def test_success_msg_type(self, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get('2016-09-09')
@@ -103,14 +97,11 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize(
-        'onc_station', [
-            'SCVIP',
-            'SEVIP',
-            'LSBBL',
-            'USDDL',
-        ]
-    )
+    @pytest.mark.parametrize('onc_station', [
+        'SCVIP',
+        'SEVIP',
+        'USDDL',
+    ])
     def test_failure_log_critical(self, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get('2016-09-09')
@@ -123,14 +114,11 @@ class TestFailure:
         extra_value = m_logger.critical.call_args[1]['extra']['data_date']
         assert extra_value == '2016-09-09'
 
-    @pytest.mark.parametrize(
-        'onc_station', [
-            'SCVIP',
-            'SEVIP',
-            'LSBBL',
-            'USDDL',
-        ]
-    )
+    @pytest.mark.parametrize('onc_station', [
+        'SCVIP',
+        'SEVIP',
+        'USDDL',
+    ])
     def test_failure_msg_type(self, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get('2016-09-09')

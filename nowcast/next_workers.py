@@ -220,7 +220,6 @@ def after_get_onc_ctd(msg, config, checklist):
         'failure': [],
         'success SCVIP': [],
         'success SEVIP': [],
-        'success LSBBL': [],
         'success USDDL': [],
     }
     if msg.type.startswith('success'):
