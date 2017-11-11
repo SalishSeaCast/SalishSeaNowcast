@@ -151,7 +151,7 @@ def get_onc_ferry(parsed_args, config, *args):
     }
     encoding['time'] = {'units': 'minutes since 1970-01-01 00:00'}
     dataset.to_netcdf(
-        nc_filepath.as_posix(),
+        os.fspath(nc_filepath),
         encoding=encoding,
         unlimited_dims=('time',),
     )
