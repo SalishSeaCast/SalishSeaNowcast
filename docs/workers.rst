@@ -195,6 +195,13 @@ Workers
     :members: main
 
 
+:kbd:`update_forecast_datasets`
+-------------------------------
+
+.. automodule:: nowcast.workers.update_forecast_datasets
+    :members: main
+
+
 :kbd:`ping_erddap`
 ------------------
 
