@@ -176,11 +176,11 @@ def get_onc_ctd(parsed_args, config, *args):
     }
     encoding['time'] = {'units': 'minutes since 1970-01-01 00:00'}
     ds.to_netcdf(
-        nc_filepath.as_posix(),
+        os.fspath(nc_filepath),
         encoding=encoding,
         unlimited_dims=('time',),
     )
-    checklist = {parsed_args.onc_station: nc_filepath.as_posix()}
+    checklist = {parsed_args.onc_station: os.fspath(nc_filepath)}
     return checklist
 
 
