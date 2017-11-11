@@ -38,18 +38,13 @@ def main():
     worker.cli.add_argument(
         'dataset',
         choices={
-            'nowcast', 'nowcast-dev', 'nowcast-green', 'forecast', 'forecast2',
             'download_weather',
             'SCVIP-CTD', 'SEVIP-CTD', 'USDDL-CTD',
             'TWDP-ferry',
+            'nowcast-green', 'nemo-forecast',
         },
         help='''
         Type of dataset to notify ERDDAP of:
-        'nowcast' means nowcast physics run,
-        'nowcast-dev' means nowcast physics development run,
-        'nowcast-green' means nowcast green ocean run,
-        'forecast' means updated forecast run,
-        'forecast2' means preliminary forecast run,
         'download_weather' means atmospheric forcing downloaded & processed,
         'SCVIP-CTD' means ONC SCVIP node CTD T&S observations downloaded &
         processed,
@@ -59,6 +54,8 @@ def main():
         processed
         'TWDP-ferry' means ONC Tsawwassen/Duke Pt. ferry observations 
         downloaded & processed
+        'nowcast-green' means nowcast green ocean run,
+        'nemo-forecast' means updated NEMO rolling forecast,
         ''',
     )
     worker.run(ping_erddap, success, failure)

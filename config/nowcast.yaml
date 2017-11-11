@@ -314,7 +314,7 @@ erddap:
       - ubcSSnNearSurfaceUVelocity20mV17-02
       - ubcSSnNearSurfaceVVelocity20mV17-02
     nemo-forecast:
-      - ubcSSfPointAtkinsonSSH15mV17-02
+      - ubcSSfPointAtkinsonSSH10mV17-02
 
 
 
@@ -891,16 +891,6 @@ message registry:
 
     ping_erddap:
       checklist key: ERDDAP flag files
-      success nowcast: nowcast ERDDAP dataset flag files created
-      failure nowcast: nowcast ERDDAP dataset flag files creation failed
-      success nowcast-dev: nowcast-dev ERDDAP dataset flag files created
-      failure nowcast-dev: nowcast-dev ERDDAP dataset flag files creation failed
-      success nowcast-green: nowcast-green ERDDAP dataset flag files created
-      failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
-      success forecast: forecast ERDDAP dataset flag files created
-      failure forecast: forecast ERDDAP dataset flag files creation failed
-      success forecast2: forecast2 ERDDAP dataset flag files created
-      failure forecast2: forecast2 ERDDAP dataset flag files creation failed
       success download_weather: atmospheric forcing ERDDAP dataset flag files created
       failure download_weather: atmospheric forcing ERDDAP dataset flag files creation failed
       success SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files created
@@ -911,6 +901,10 @@ message registry:
       failure USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files creation failed
       success TWDP-ferry: ONC Tsawwassen/Duke Pt. ferry ERDDAP dataset flag files created
       failure TWDP-ferry: ONC Tsawwassen/Duke Pt. ferry ERDDAP dataset flag files creation failed
+      success nowcast-green: nowcast-green ERDDAP dataset flag files created
+      failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
+      success nemo-forecast: NEMO forecast ERDDAP dataset flag files created
+      failure nemo-forecast: NEMO forecast ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
 
     make_plots:
