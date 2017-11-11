@@ -273,6 +273,14 @@ results archive:
   hindcast: /results/SalishSea/hindcast/
 
 
+rolling forecasts:
+  # Number of days prior to run date to include in forecast dataset
+  days from past: 5
+  nemo:
+    # Destination directory for rolling forecast results directories
+    dest dir: /results/SalishSea/rolling-forecasts/nemo/
+
+
 # Notifications to ERDDAP server that datasets have been updated
 erddap:
   # Directory in which to create flag files to signal ERDDAP server that
@@ -297,7 +305,6 @@ erddap:
     TWDP-ferry:
       - ubcONCTWDP1mV1
     nowcast-green:
-      - ubcSSgPointAtkinsonSSH15mV17-02
       - ubcSSg3DBiologyFields1hV17-02
       - ubcSSg3DTracerFields1hV17-02
       - ubcSSg3DuGridFields1hV17-02
@@ -306,6 +313,9 @@ erddap:
       - ubcSSgSurfaceTracerFields1hV17-02
       - ubcSSnNearSurfaceUVelocity20mV17-02
       - ubcSSnNearSurfaceVVelocity20mV17-02
+    nemo-forecast:
+      - ubcSSfPointAtkinsonSSH15mV17-02
+
 
 
 figures:
@@ -872,6 +882,12 @@ message registry:
       success hindcast: hindcast results files split into daily directories
       failure hindcast: hindcast results files splitting into daily directories failed
       crash: split_results worker crashed
+
+    update_forecast_datasets:
+     checklist key: update forecast datasets
+     success nemo forecast: NEMO forecast datasets updated from forecast run
+     failure nemo forecast: NEMO forecast datasets update from forecast run failed
+     crash: update_forecast_datasets worker crashed
 
     ping_erddap:
       checklist key: ERDDAP flag files
