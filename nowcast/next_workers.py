@@ -833,6 +833,14 @@ def after_download_results(msg, config, checklist):
                     args=[run_type, 'comparison', '--run-date', run_date]
                 )
             )
+        if run_type == 'forecast':
+            run_date = checklist['NEMO run']['forecast']['run date']
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.update_forecast_datasets',
+                    args=['nemo', run_type, '--run-date', run_date]
+                )
+            )
     return next_workers[msg.type]
 
 
@@ -902,6 +910,36 @@ def after_split_results(msg, config, checklist):
     :rtype: list
     """
     return []
+
+
+def after_update_forecast_datasets(msg, config, checklist):
+    """Calculate the list of workers to launch after the
+    update_forecast_datasets worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nemo forecast': [],
+        'success nemo forecast': [],
+    }
+    if msg.type == 'success nemo forecast':
+        next_workers[msg.type].append(
+            NextWorker('nowcast.workers.ping_erddap', args=['nemo-forecast'])
+        )
+    return next_workers[msg.type]
 
 
 def after_ping_erddap(msg, config, checklist):
