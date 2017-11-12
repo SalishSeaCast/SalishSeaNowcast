@@ -1180,6 +1180,30 @@ class TestAfterDownloadResults:
         )
         assert expected in workers
 
+    def test_success_forecast_launch_update_forecast_datasets(
+        self, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {
+                'NEMO run': {
+                    'forecast': {
+                        'run date': '2017-11-11'
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_download_results(
+                Message('download_results', 'success forecast'), config,
+                checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.update_forecast_datasets',
+            args=['nemo', 'forecast', '--run-date', '2017-11-11'],
+            host='localhost'
+        )
+        assert expected in workers
+
 
 class TestAfterSplitResults:
     """Unit tests for after_split_results function.
@@ -1199,6 +1223,35 @@ class TestAfterSplitResults:
         assert workers == []
 
 
+class TestAfterUpdateForecastDatasets:
+    """Unit tests for the after_update_forecast_datasets function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nemo forecast',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_update_forecast_datasets(
+            Message('update_forecast_datasets', msg_type), config, checklist
+        )
+        assert workers == []
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nemo forecast',
+    ])
+    def test_success_launches_ping_erddap(self, msg_type, config, checklist):
+        workers = next_workers.after_update_forecast_datasets(
+            Message('update_forecast_datasets', msg_type), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.ping_erddap',
+            args=['nemo-forecast'],
+            host='localhost'
+        )
+        assert expected in workers
+
+
 class TestAfterPingERDDAP:
     """Unit tests for the after_ping_erddap function.
     """
@@ -1206,20 +1259,20 @@ class TestAfterPingERDDAP:
     @pytest.mark.parametrize(
         'msg_type', [
             'crash',
-            'failure nowcast',
-            'failure nowcast-green',
-            'failure forecast',
-            'failure forecast2',
             'failure download_weather',
             'failure SCVIP-CTD',
             'failure SEVIP-CTD',
-            'success nowcast',
-            'success nowcast-green',
-            'success forecast',
-            'success forecast2',
+            'failure USDDL-CTD',
+            'failure TWDP-ferry',
+            'failure nowcast-green',
+            'failure nemo-forecast',
             'success download_weather',
             'success SCVIP-CTD',
             'success SEVIP-CTD',
+            'success USDDL-CTD',
+            'success TWDP-ferry',
+            'success nowcast-green',
+            'success nemo-forecast',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
