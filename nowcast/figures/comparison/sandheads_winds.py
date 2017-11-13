@@ -28,6 +28,7 @@ import matplotlib.pyplot as plt
 import numpy
 import xarray
 from matplotlib import gridspec
+import matplotlib.dates
 from salishsea_tools import (
     stormtools,
     unit_conversions,
@@ -69,6 +70,10 @@ def make_figure(
     fig, (ax_speed, ax_dir, ax_map) = _prep_fig_axes(figsize, theme)
     _plot_wind_speed_time_series(ax_speed, plot_data, theme)
     _plot_wind_direction_time_series(ax_dir, plot_data, theme)
+    # Adjust axes labels to accommodate dates/times
+    # This turns off *all* x-axes labels, so we do it here in order to be
+    # able to turn the labels back on for the map axes
+    fig.autofmt_xdate()
     _plot_station_map(ax_map, coastline, theme)
     _attribution_text(ax_map, theme)
     return fig
@@ -188,7 +193,6 @@ def _wind_speed_axes_labels(ax, plot_data, theme):
     ax['mps'].legend(loc='best')
     ax['mps'].grid(axis='both')
     for k in ax:
-        ax[k].set_xticklabels([])
         theme.set_axis_colors(ax[k])
 
 
@@ -216,6 +220,7 @@ def _wind_direction_axes_labels(ax, plot_data, theme):
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )
+    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter('%d%b %H:%M'))
     ax.set_ylim(0, 360)
     ax.set_yticks((0, 45, 90, 135, 180, 225, 270, 315, 360))
     ax.set_yticklabels(('E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE', 'E'))
@@ -242,14 +247,13 @@ def _plot_station_map(ax, coastline, theme):
 
 
 def _station_map_axes_labels(ax, theme):
-    ## TODO: There is a bug, probably in matplotlib, that causes the x-axes
-    ## labels to disappear on this axes when date/time labels are used on one
-    ## of the other axes. Perhaps the labels can be explicity restored here?
     ax.set_title(
         'Station Location',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title']
     )
+    for tick in ax.get_xticklabels():
+        tick.set_visible(True)
     ax.set_xlabel(
         'Longitude [°E]',
         fontproperties=theme.FONTS['axis'],
