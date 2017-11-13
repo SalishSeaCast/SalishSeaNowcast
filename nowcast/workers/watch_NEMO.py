@@ -122,15 +122,16 @@ def watch_NEMO(parsed_args, config, tell_manager):
             )
         logger.info(msg)
         time.sleep(POLL_INTERVAL)
-    ## TODO: confirm that the run and subsequent results gathering
-    ## completed successfully
-    return {
+    checklist = {
         run_type: {
             'host': host_name,
             'run date': run_info[run_type]['run date'],
             'completed': True,
         }
     }
+    ## TODO: confirm that the run and subsequent results gathering
+    ## completed successfully
+    return checklist
 
 
 def _find_run_pid(run_info):
