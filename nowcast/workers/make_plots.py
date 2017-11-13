@@ -180,12 +180,12 @@ def make_plots(parsed_args, config, *args):
     if run_type == 'nowcast' and plot_type == 'comparison':
         fig_functions = _prep_comparison_fig_functions(
             config, bathy, coastline, mesh_mask, dev_mesh_mask, results_dir,
-            run_date, dev_results_home, dmy, timezone
+            run_type, run_date, dev_results_home, dmy, timezone
         )
     if plot_type == 'publish':
         fig_functions = _prep_publish_fig_functions(
-            config, bathy, coastline, weather_path, results_dir, run_date,
-            timezone
+            config, bathy, coastline, weather_path, results_dir, run_type,
+            run_date, timezone
         )
 
     checklist = _render_figures(
@@ -463,8 +463,8 @@ def _prep_nowcast_green_research_fig_functions(
 
 
 def _prep_comparison_fig_functions(
-    config, bathy, coastline, mesh_mask, dev_mesh_mask, results_dir, run_date,
-    dev_results_home, dmy, timezone
+    config, bathy, coastline, mesh_mask, dev_mesh_mask, results_dir, run_type,
+    run_date, dev_results_home, dmy, timezone
 ):
     hrdps_dataset_url = config['figures']['dataset URLs']['HRDPS fields']
     ferry_data_dir = config['observations']['ferry data']
@@ -485,7 +485,7 @@ def _prep_comparison_fig_functions(
     fig_functions = {
         'SH_wind': {
             'function': sandheads_winds.make_figure,
-            'args': (hrdps_dataset_url, run_date, coastline)
+            'args': (hrdps_dataset_url, run_type, run_date, coastline)
         },
         'Compare_VENUS_East': {
             'function':
@@ -578,7 +578,8 @@ def _prep_comparison_fig_functions(
 
 
 def _prep_publish_fig_functions(
-    config, bathy, coastline, weather_path, results_dir, run_date, timezone
+    config, bathy, coastline, weather_path, results_dir, run_type, run_date,
+    timezone
 ):
     tidal_predictions = config['ssh']['tidal predictions']
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
@@ -587,7 +588,7 @@ def _prep_publish_fig_functions(
         'Victoria',
         'Friday Harbor',
         'Cherry Point',
-        'SandHeads',
+        'Sand Heads',
         'Point Atkinson',
         'Nanaimo',
         'Campbell River',
@@ -670,7 +671,7 @@ def _prep_publish_fig_functions(
         },
         'SH_wind': {
             'function': sandheads_winds.make_figure,
-            'args': (hrdps_dataset_url, run_date, coastline)
+            'args': (hrdps_dataset_url, run_type, run_date, coastline)
         },
     }
     return fig_functions
