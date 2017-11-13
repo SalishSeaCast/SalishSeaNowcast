@@ -23,6 +23,7 @@ from unittest.mock import (
 )
 
 import pytest
+from nemo_nowcast import NowcastWorker, Message
 
 from nowcast.workers import watch_NEMO
 
@@ -37,6 +38,10 @@ class TestMain:
         args, kwargs = m_worker.call_args
         assert args == ('watch_NEMO',)
         assert list(kwargs.keys()) == ['description']
+
+    def test_init_cli(self, m_worker):
+        watch_NEMO.main()
+        m_worker().init_cli.assert_called_once_with()
 
     def test_add_host_name_arg(self, m_worker):
         watch_NEMO.main()
@@ -56,11 +61,10 @@ class TestMain:
     def test_run_worker(self, m_worker):
         watch_NEMO.main()
         args, kwargs = m_worker().run.call_args
-        assert args == (
-            watch_NEMO.watch_NEMO,
-            watch_NEMO.success,
-            watch_NEMO.failure,
+        expected = (
+            watch_NEMO.watch_NEMO, watch_NEMO.success, watch_NEMO.failure
         )
+        assert args == expected
 
 
 @patch('nowcast.workers.watch_NEMO.logger')
@@ -141,6 +145,154 @@ class TestFailure:
         )
         msg_type = watch_NEMO.failure(parsed_args)
         assert msg_type == expected
+
+
+@pytest.mark.parametrize(
+    'run_type, host_name', [
+        ('nowcast', 'west.cloud-nowcast'),
+        ('nowcast-green', 'west.cloud-nowcast'),
+        ('nowcast-dev', 'salish-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
+        ('forecast2', 'west.cloud-nowcast'),
+    ]
+)
+@patch('nowcast.workers.watch_NEMO.logger')
+@patch('nowcast.workers.watch_NEMO._find_run_pid')
+@patch('nowcast.workers.watch_NEMO._pid_exists')
+@patch('nowcast.workers.watch_NEMO.namelist2dict')
+class TestWatchNEMO:
+    """Unit tests for watch_NEMO function.
+    """
+
+    def test_checklist(
+        self, m_nl2d, m_pid_exists, m_find_run_pid, m_logger, run_type,
+        host_name
+    ):
+        m_nl2d.return_value = {
+            'namrun': [{
+                'nn_it000': 1,
+                'nn_itend': 2161,
+                'nn_date0': 20171113,
+            }],
+            'namdom': [{
+                'rn_rdt': 40,
+            }]
+        }
+        m_pid_exists.return_value = False
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+        )
+        config = {}
+        tell_manager = Mock(
+            spec=NowcastWorker.tell_manager,
+            return_value=Message(
+                'manager',
+                'ack',
+                payload={
+                    run_type: {
+                        'run dir': 'tmp_run_dir',
+                        'run exec cmd': 'bash SalishSeaNEMO.sh',
+                        'run date': '2017-11-13',
+                    }
+                }
+            )
+        )
+        checklist = watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        expected = {
+            run_type: {
+                'host': host_name,
+                'run date': '2017-11-13',
+                'completed': True,
+            }
+        }
+        assert checklist == expected
+
+    def test_time_step_not_found(
+        self, m_nl2d, m_pid_exists, m_find_run_pid, m_logger, run_type,
+        host_name, tmpdir
+    ):
+        tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
+        m_nl2d.return_value = {
+            'namrun': [{
+                'nn_it000': 1,
+                'nn_itend': 2161,
+                'nn_date0': 20171113,
+            }],
+            'namdom': [{
+                'rn_rdt': 40,
+            }]
+        }
+        m_pid_exists.side_effect = (True, False)
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+        )
+        config = {}
+        tell_manager = Mock(
+            spec=NowcastWorker.tell_manager,
+            return_value=Message(
+                'manager',
+                'ack',
+                payload={
+                    run_type: {
+                        'run dir': tmp_run_dir,
+                        'run exec cmd': 'bash SalishSeaNEMO.sh',
+                        'run date': '2017-11-13',
+                    }
+                }
+            )
+        )
+        watch_NEMO.POLL_INTERVAL = 0
+        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        m_logger.info.assert_called_once_with(
+            f'{run_type} on {host_name}: '
+            f'time.step not found; continuing to watch...'
+        )
+
+    def test_time_step_found(
+        self, m_nl2d, m_pid_exists, m_find_run_pid, m_logger, run_type,
+        host_name, tmpdir
+    ):
+        tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
+        time_step = tmp_run_dir.ensure('time.step')
+        time_step.write('1081\n')
+        m_nl2d.return_value = {
+            'namrun': [{
+                'nn_it000': 1,
+                'nn_itend': 2161,
+                'nn_date0': 20171113,
+            }],
+            'namdom': [{
+                'rn_rdt': 40,
+            }]
+        }
+        m_pid_exists.side_effect = (True, False)
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+        )
+        config = {}
+        tell_manager = Mock(
+            spec=NowcastWorker.tell_manager,
+            return_value=Message(
+                'manager',
+                'ack',
+                payload={
+                    run_type: {
+                        'run dir': tmp_run_dir,
+                        'run exec cmd': 'bash SalishSeaNEMO.sh',
+                        'run date': '2017-11-13',
+                    }
+                }
+            )
+        )
+        watch_NEMO.POLL_INTERVAL = 0
+        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
+        m_logger.info.assert_called_once_with(
+            f'{run_type} on {host_name}: '
+            f'timestep: 1081 = 2017-11-13 12:00:00 UTC, 50.0% complete'
+        )
 
 
 @patch('nowcast.workers.watch_NEMO.logger')
