@@ -392,5 +392,5 @@ def localize_time(data_array):
         np.timedelta64(tz_offset.days, 'D') +
         np.timedelta64(tz_offset.seconds, 's')
     )
-    data_array['time'] = data_array.time.values - numpy_offset
+    data_array['time'] = data_array.time.values + numpy_offset
     data_array.attrs['tz_name'] = tz_name
