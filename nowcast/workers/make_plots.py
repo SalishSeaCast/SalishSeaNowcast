@@ -669,11 +669,14 @@ def _prep_publish_fig_functions(
                 tidal_predictions, timezone
             )
         },
-        'SH_wind': {
-            'function': sandheads_winds.make_figure,
-            'args': (hrdps_dataset_url, run_type, run_date, coastline)
-        },
     }
+    if not run_type.startswith('forecast'):
+        fig_functions.update({
+            'SH_wind': {
+                'function': sandheads_winds.make_figure,
+                'args': (hrdps_dataset_url, run_type, run_date, coastline)
+            }
+        })
     return fig_functions
 
 
