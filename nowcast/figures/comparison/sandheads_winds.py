@@ -269,6 +269,7 @@ def _station_map_axes_labels(ax, theme):
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title']
     )
+    ax.set_xticks((-125.5, -124.5, -123.5, -122.5))
     for tick in ax.get_xticklabels():
         tick.set_visible(True)
     ax.set_xlabel(
