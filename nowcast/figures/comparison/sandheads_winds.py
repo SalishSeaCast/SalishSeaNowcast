@@ -41,6 +41,7 @@ from nowcast.figures import shared
 
 def make_figure(
     hrdps_dataset_url,
+    run_type,
     run_date,
     coastline,
     figsize=(16, 7),
@@ -51,6 +52,8 @@ def make_figure(
 
     :param str hrdps_dataset_url: ERDDAP dataset URL for the HRDPS product
                                   to be plotted.
+
+    :param str run_type: Type of run to produce figure for.
 
     :param run_date: Date of the run to create the figure for.
     :type run_date: :py:class:`Arrow.arrow`
@@ -66,7 +69,7 @@ def make_figure(
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
-    plot_data = _prep_plot_data(hrdps_dataset_url, run_date)
+    plot_data = _prep_plot_data(hrdps_dataset_url, run_type, run_date)
     fig, (ax_speed, ax_dir, ax_map) = _prep_fig_axes(figsize, theme)
     _plot_wind_speed_time_series(ax_speed, plot_data, theme)
     _plot_wind_direction_time_series(ax_dir, plot_data, theme)
@@ -79,7 +82,7 @@ def make_figure(
     return fig
 
 
-def _prep_plot_data(hrdps_dataset_url, run_date):
+def _prep_plot_data(hrdps_dataset_url, run_type, run_date):
     hrdps = xarray.open_dataset(hrdps_dataset_url)
     j, i = PLACES['Sand Heads']['GEM2.5 grid ji']
     u_hrdps = hrdps.u_wind.sel(time=run_date.format('YYYY-MM-DD')).isel(
@@ -105,6 +108,11 @@ def _prep_plot_data(hrdps_dataset_url, run_date):
         'label': 'Model',
     })
     shared.localize_time(hrdps_dir)
+    if run_type.startswith('forecast'):
+        return SimpleNamespace(
+            hrdps_speed=hrdps_speed,
+            hrdps_dir=hrdps_dir,
+        )
     ec_speed, ec_dir, _, ec_time, _, _ = stormtools.get_EC_observations(
         'Sandheads',
         run_date.format('DD-MMM-YYYY'), run_date.format('DD-MMM-YYYY')
@@ -161,12 +169,17 @@ def _plot_wind_speed_time_series(ax, plot_data, theme):
         color=theme.COLOURS['time series']['Sand Heads HRDPS wind speed'],
         label=plot_data.hrdps_speed.attrs['label']
     )
-    plot_data.obs_speed.plot(
-        ax=ax['mps'],
-        linewidth=2,
-        color=theme.COLOURS['time series']['Sand Heads observed wind speed'],
-        label=plot_data.obs_speed.attrs['label']
-    )
+    try:
+        plot_data.obs_speed.plot(
+            ax=ax['mps'],
+            linewidth=2,
+            color=theme.COLOURS['time series']['Sand Heads observed wind speed'
+                                               ],
+            label=plot_data.obs_speed.attrs['label']
+        )
+    except AttributeError:
+        # No observations available
+        pass
     _wind_speed_axes_labels(ax, plot_data, theme)
 
 
@@ -203,13 +216,17 @@ def _plot_wind_direction_time_series(ax, plot_data, theme):
         color=theme.COLOURS['time series']['Sand Heads HRDPS wind direction'],
         label=plot_data.hrdps_dir.attrs['label']
     )
-    plot_data.obs_dir.plot(
-        ax=ax,
-        linewidth=2,
-        color=theme.COLOURS['time series']['Sand Heads observed wind direction'
-                                           ],
-        label=plot_data.obs_dir.attrs['label']
-    )
+    try:
+        plot_data.obs_dir.plot(
+            ax=ax,
+            linewidth=2,
+            color=theme.COLOURS['time series']
+            ['Sand Heads observed wind direction'],
+            label=plot_data.obs_dir.attrs['label']
+        )
+    except AttributeError:
+        # No observations available
+        pass
     _wind_direction_axes_labels(ax, plot_data, theme)
 
 
