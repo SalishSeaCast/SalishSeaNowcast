@@ -515,14 +515,6 @@ def _prep_comparison_fig_functions(
                 dev_mesh_mask
             )
         },
-        'Compare_VENUS_Delta_BBL': {
-            'function':
-                compare_venus_ctd.make_figure,
-            'args': (
-                'Delta BBL node', grid_T_hr, dev_grid_T_hr, timezone,
-                mesh_mask, dev_mesh_mask
-            )
-        },
         'Compare_VENUS_Delta_DDL': {
             'function':
                 compare_venus_ctd.make_figure,
