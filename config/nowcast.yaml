@@ -812,16 +812,16 @@ message registry:
     watch_NEMO:
       checklist key: NEMO run
       need: NEMO run information dict requested
-      success nowcast: nowcast NEMO run completed
-      failure nowcast: nowcast NEMO run failed
-      success nowcast-green: nowcast-green NEMO run completed
-      failure nowcast-green: nowcast-green NEMO run failed
-      success nowcast-dev: nowcast-dev NEMO run completed
-      failure nowcast-dev: nowcast-dev NEMO run failed
-      success forecast: forecast NEMO run completed
-      failure forecast: forecast NEMO run failed
-      success forecast2: forecast2 NEMO run completed
-      failure forecast2: forecast2 NEMO run failed
+      success nowcast: nowcast NEMO run ended
+      failure nowcast: nowcast watch_NEMO failed
+      success nowcast-green: nowcast-green NEMO run ended
+      failure nowcast-green: nowcast-green watch_NEMO failed
+      success nowcast-dev: nowcast-dev NEMO run ended
+      failure nowcast-dev: nowcast-dev watch_NEMO failed
+      success forecast: forecast NEMO run ended
+      failure forecast: forecast watch_NEMO failed
+      success forecast2: forecast2 NEMO run ended
+      failure forecast2: forecast2 watch_NEMO failed
       crash: watch_NEMO worker crashed
 
     make_turbidity_file:

@@ -88,6 +88,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_info = tell_manager('need', 'NEMO run').payload
+    run_date = arrow.get(run_info[run_type]['run date'])
     pid = _find_run_pid(run_info[run_type])
     logger.debug(f'{run_type} on {host_name}: run pid: {pid}')
     # Get run time steps and date info from namelist
@@ -125,12 +126,18 @@ def watch_NEMO(parsed_args, config, tell_manager):
     checklist = {
         run_type: {
             'host': host_name,
-            'run date': run_info[run_type]['run date'],
-            'completed': True,
+            'run date': run_date.format('YYYY-MM-DD'),
         }
     }
-    ## TODO: confirm that the run and subsequent results gathering
-    ## completed successfully
+    run_duration = config['run types'][run_type]['duration']
+    timesteps_per_day = 86400 / rdt
+    restart_timestep = (
+        int(it000 + int(run_duration) * timesteps_per_day) - 1
+        if run_type in ('forecast', 'forecast2') else itend
+    )
+    checklist[run_type]['completed'] = _confirm_run_success(
+        host_name, run_type, run_date, run_dir, itend, restart_timestep, config
+    )
     return checklist
 
 
@@ -182,6 +189,86 @@ def _pid_exists(pid):
     except OSError:
         raise
     return True
+
+
+def _confirm_run_success(
+    host_name, run_type, run_date, run_dir, itend, restart_timestep, config
+):
+    run_succeeded = True
+    run_config = (
+        config['run']['enabled hosts'][host_name]['run types'][run_type]
+    )
+    dmy = run_date.format('DDMMMYY').lower()
+    results_dir = Path(run_config['results'], dmy)
+    if not results_dir.exists():
+        run_succeeded = False
+        logger.critical(
+            f'No results directory for {host_name} run: {results_dir}'
+        )
+        # Continue the rest of the checks in the temporary run directory
+        results_dir = run_dir
+    if (results_dir / 'output.abort.nc').exists():
+        run_succeeded = False
+        logger.critical(
+            f'{host_name} {run_type}/{dmy} run aborted: '
+            f'{results_dir/"output.abort.nc"}'
+        )
+    with (results_dir / 'time.step').open('rt') as f:
+        time_step = int(f.read().strip())
+    if time_step != itend:
+        run_succeeded = False
+        logger.critical(
+            f'{host_name} {run_type}/{dmy} run failed: '
+            f'final time step is {time_step} not {itend}'
+        )
+    restart_file = (
+        results_dir / f'SalishSea_{restart_timestep:08d}_restart.nc'
+    )
+    if not restart_file.exists():
+        run_succeeded = False
+        logger.critical(
+            f'{host_name} {run_type}/{dmy} run failed; '
+            f'no physics restart file: {restart_file}'
+        )
+    if run_type == 'nowcast-green':
+        tracer_restart_file = (
+            results_dir / f'SalishSea_{restart_timestep:08d}_restart_trc.nc'
+        )
+        if not tracer_restart_file.exists():
+            run_succeeded = False
+            logger.critical(
+                f'{host_name} {run_type}/{dmy} run failed; '
+                f'no tracers restart file: {tracer_restart_file}'
+            )
+    with (results_dir / 'ocean.output').open('rt') as f:
+        for line in f:
+            if 'E R R O R' in line:
+                run_succeeded = False
+                logger.critical(
+                    f'{host_name} {run_type}/{dmy} run failed; '
+                    f'1 or more E R R O R in: {results_dir/"ocean.output"}'
+                )
+                break
+    with (results_dir / 'solver.stat').open('rt') as f:
+        for line in f:
+            if 'NaN' in line:
+                run_succeeded = False
+                logger.critical(
+                    f'{host_name} {run_type}/{dmy} run failed; '
+                    f'NaN in: {results_dir/"solver.stat"}'
+                )
+                break
+    if run_type == 'nowcast-green':
+        with (results_dir / 'tracer.stat').open('rt') as f:
+            for line in f:
+                if 'NaN' in line:
+                    run_succeeded = False
+                    logger.critical(
+                        f'{host_name} {run_type}/{dmy} run failed; '
+                        f'NaN in: {results_dir/"solver.stat"}'
+                    )
+                    break
+    return run_succeeded
 
 
 if __name__ == '__main__':
