@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast download_weather worker.
 """
 from pathlib import Path
@@ -52,8 +51,10 @@ def config():
                     'APCP_SFC_0',
                     'PRMSL_MSL_0',
                 ],
-                'forecast duration': 48,
-                'GRIB dir': '/tmp/',
+                'forecast duration':
+                    48,
+                'GRIB dir':
+                    '/tmp/',
             }
         }
     }
@@ -63,6 +64,7 @@ def config():
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         download_weather.main()
         args, kwargs = m_worker.call_args
@@ -97,6 +99,7 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     @pytest.mark.parametrize('forecast', [
         '00',
         '06',
@@ -124,6 +127,7 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     @pytest.mark.parametrize('forecast', [
         '00',
         '06',
@@ -155,55 +159,66 @@ class TestFailure:
 class TestGetGrib:
     """Unit tests for get_grib() function.
     """
+
     def test_make_hour_dirs(
         self, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
-        parsed_args, config,
+        parsed_args, config
     ):
         p_config = patch.dict(
-            config['weather']['download'], {'forecast duration': 6})
+            config['weather']['download'], {
+                'forecast duration': 6
+            }
+        )
         with p_config:
             download_weather.get_grib(parsed_args, config)
         for hr in range(1, 7):
-            args, kwargs = m_mkdir.call_args_list[hr+1]
+            args, kwargs = m_mkdir.call_args_list[hr + 1]
             assert args == ('/tmp/20150619/06/00{}'.format(hr), m_logger)
             assert kwargs == {'grp_name': 'foo', 'exist_ok': False}
 
     @patch('nowcast.workers.download_weather.requests.Session')
     def test_get_grib_variable_file(
         self, m_session, m_get_file, m_fix_perms, m_mkdir, m_calc_date,
-        m_logger, parsed_args, config,
+        m_logger, parsed_args, config
     ):
         p_config = patch.dict(
-            config['weather']['download'],
-            {'grib variables': ['UGRD_TGL_10'], 'forecast duration': 1})
+            config['weather']['download'], {
+                'grib variables': ['UGRD_TGL_10'],
+                'forecast duration': 1
+            }
+        )
         with p_config:
             download_weather.get_grib(parsed_args, config)
         args, kwargs = m_get_file.call_args
         assert args == (
             config['weather']['download']['url template'],
-            config['weather']['download']['file template'],
-            'UGRD_TGL_10', '/tmp/', '20150619', '06', '001',
-            m_session().__enter__())
+            config['weather']['download']['file template'], 'UGRD_TGL_10',
+            '/tmp/', '20150619', '06', '001', m_session().__enter__()
+        )
         assert kwargs == {}
 
     def test_fix_perms(
         self, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
-        parsed_args, config,
+        parsed_args, config
     ):
         p_config = patch.dict(
-            config['weather']['download'],
-            {'grib variables': ['UGRD_TGL_10'], 'forecast duration': 1})
+            config['weather']['download'], {
+                'grib variables': ['UGRD_TGL_10'],
+                'forecast duration': 1
+            }
+        )
         m_get_file.return_value = 'filepath'
         p_chmod = patch('nowcast.workers.download_weather.os.chmod')
         p_fileperms = patch('nowcast.workers.download_weather.FilePerms')
         with p_config, p_chmod as m_chmod, p_fileperms as m_fileperms:
             download_weather.get_grib(parsed_args, config)
         m_chmod.assert_called_once_with(
-            'filepath', m_fileperms(user='rw', group='rw', other='r'))
+            'filepath', m_fileperms(user='rw', group='rw', other='r')
+        )
 
     def test_checklist(
         self, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
-        parsed_args, config,
+        parsed_args, config
     ):
         checklist = download_weather.get_grib(parsed_args, config)
         assert checklist == {'20150619 06 forecast': True}
@@ -216,6 +231,7 @@ class TestGetGrib:
 class TestCalcDate:
     """Unit tests for _calc_date() function.
     """
+
     def test_calc_date_06_forecast(self, m_utcnow, parsed_args):
         date = download_weather._calc_date(parsed_args, '06')
         assert date == '20150618'
@@ -231,6 +247,7 @@ class TestCalcDate:
 class TestMkdirs:
     """Unit tests for _mkdirs() function.
     """
+
     def test_make_date_dir(self, m_mkdir, m_logger):
         download_weather._mkdirs('/tmp', '20150618', '06', 'foo')
         args, kwargs = m_mkdir.call_args_list[0]
@@ -250,12 +267,13 @@ class TestMkdirs:
 class TestGetFile:
     """Unit tests for _get_file() function.
     """
+
     def test_get_web_data(self, m_stat, m_get_web_data, m_logger, config):
         m_stat().st_size = 123456
         download_weather._get_file(
             config['weather']['download']['url template'],
-            config['weather']['download']['file template'],
-            'UGRD_TGL_10', '/tmp/', '20150619', '06', '001', None
+            config['weather']['download']['file template'], 'UGRD_TGL_10',
+            '/tmp/', '20150619', '06', '001', None
         )
         url = (
             'http://dd.beta.weather.gc.ca/model_hrdps/west/grib2/06/001/'
@@ -266,7 +284,10 @@ class TestGetFile:
             'CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015061906_P001-00.grib2'
         )
         m_get_web_data.assert_called_once_with(
-            url, 'download_weather', Path(filepath), session=None,
+            url,
+            'download_weather',
+            Path(filepath),
+            session=None,
             wait_exponential_max=9000,
         )
 
@@ -277,5 +298,6 @@ class TestGetFile:
         with pytest.raises(download_weather.WorkerError):
             download_weather._get_file(
                 config['weather']['download']['url template'],
-                config['weather']['download']['file template'],
-                'UGRD_TGL_10', '/tmp/', '20150619', '06', '001', None)
+                config['weather']['download']['file template'], 'UGRD_TGL_10',
+                '/tmp/', '20150619', '06', '001', None
+            )

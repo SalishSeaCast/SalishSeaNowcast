@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast make_forcing_links worker.
 """
 from pathlib import Path
@@ -33,6 +32,7 @@ from nowcast.workers import make_forcing_links
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         make_forcing_links.main()
         args, kwargs = m_worker.call_args
@@ -50,7 +50,8 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
-            'nowcast+', 'forecast2', 'ssh', 'nowcast-green'}
+            'nowcast+', 'forecast2', 'ssh', 'nowcast-green'
+        }
         assert 'help' in kwargs
 
     def test_add_shared_storage_arg(self, m_worker):
@@ -81,29 +82,40 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    @pytest.mark.parametrize('run_type', [
-        'nowcast+',
-        'forecast2',
-        'ssh',
-        'nowcast-green',
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast+',
+            'forecast2',
+            'ssh',
+            'nowcast-green',
+        ]
+    )
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type, shared_storaage=False,
-            run_date=arrow.get('2017-01-04'))
+            host_name='west.cloud',
+            run_type=run_type,
+            shared_storaage=False,
+            run_date=arrow.get('2017-01-04')
+        )
         make_forcing_links.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize('run_type', [
-        'nowcast+',
-        'forecast2',
-        'ssh',
-        'nowcast-green',
-    ])
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast+',
+            'forecast2',
+            'ssh',
+            'nowcast-green',
+        ]
+    )
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type, shared_storaage=False,
-            run_date=arrow.get('2017-01-04'))
+            host_name='west.cloud',
+            run_type=run_type,
+            shared_storaage=False,
+            run_date=arrow.get('2017-01-04')
+        )
         msg_type = make_forcing_links.success(parsed_args)
         assert msg_type == 'success {run_type}'.format(run_type=run_type)
 
@@ -112,29 +124,40 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
-    @pytest.mark.parametrize('run_type', [
-        'nowcast+',
-        'forecast2',
-        'ssh',
-        'nowcast-green',
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast+',
+            'forecast2',
+            'ssh',
+            'nowcast-green',
+        ]
+    )
     def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type, shared_storaage=False,
-            run_date=arrow.get('2017-01-04'))
+            host_name='west.cloud',
+            run_type=run_type,
+            shared_storaage=False,
+            run_date=arrow.get('2017-01-04')
+        )
         make_forcing_links.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize('run_type', [
-        'nowcast+',
-        'forecast2',
-        'ssh',
-        'nowcast-green',
-    ])
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast+',
+            'forecast2',
+            'ssh',
+            'nowcast-green',
+        ]
+    )
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type, shared_storaage=False,
-            run_date=arrow.get('2017-01-04'))
+            host_name='west.cloud',
+            run_type=run_type,
+            shared_storaage=False,
+            run_date=arrow.get('2017-01-04')
+        )
         msg_type = make_forcing_links.failure(parsed_args)
         assert msg_type == 'failure {run_type}'.format(run_type=run_type)
 
@@ -159,11 +182,13 @@ class TestMakeRunoffLinks:
                 'salish-nowcast': {
                     'run prep dir': 'runs/',
                     'forcing': {
-                        'rivers dir': '/results/forcing/rivers/',
-                        'rivers_month.nc': 'rivers/rivers_month.nc',
+                        'rivers dir':
+                            '/results/forcing/rivers/',
+                        'rivers_month.nc':
+                            'rivers/rivers_month.nc',
                         'Fraser turbidity dir':
                             '/results/forcing/rivers/river_turb/',
-    },
+                    },
                 },
             },
         }
@@ -178,29 +203,38 @@ class TestMakeRunoffLinks:
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         make_forcing_links._make_runoff_links(
-            m_sftp_client, run_type, run_date, self.config, 'salish-nowcast')
+            m_sftp_client, run_type, run_date, self.config, 'salish-nowcast'
+        )
         run_prep_dir = Path(
             self.config['run']['enabled hosts']['salish-nowcast']
-            ['run prep dir'])
+            ['run prep dir']
+        )
         m_clear_links.assert_called_once_with(
             m_sftp_client,
-            Path(self.config['run']['enabled hosts']['salish-nowcast']
-            ['run prep dir']), 'rivers/')
+            Path(
+                self.config['run']['enabled hosts']['salish-nowcast']
+                ['run prep dir']
+            ), 'rivers/'
+        )
 
     @pytest.mark.parametrize('run_type', [
         'nowcast+',
         'forecast2',
         'ssh',
     ])
-    def test_rivers_month_link(self, m_clear_links, m_create_symlink, run_type):
+    def test_rivers_month_link(
+        self, m_clear_links, m_create_symlink, run_type
+    ):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         make_forcing_links._make_runoff_links(
-            m_sftp_client, run_type, run_date, self.config, 'salish-nowcast')
+            m_sftp_client, run_type, run_date, self.config, 'salish-nowcast'
+        )
         assert m_create_symlink.call_args_list[0] == call(
             m_sftp_client, 'salish-nowcast',
             Path('rivers/rivers_month.nc'),
-            Path('runs/rivers/rivers_month.nc'))
+            Path('runs/rivers/rivers_month.nc')
+        )
 
     @pytest.mark.parametrize('run_type', [
         'nowcast+',
@@ -211,55 +245,64 @@ class TestMakeRunoffLinks:
         run_date = arrow.get('2016-10-14')
         m_sftp_client = Mock(name='sftp_client')
         p_config = patch.dict(
-            self.config['run']['enabled hosts']['salish-nowcast']['forcing'],
-            {
+            self.config['run']['enabled hosts']['salish-nowcast']['forcing'], {
                 'rivers dir': '/results/forcing/rivers/',
                 'rivers_month.nc': 'rivers/rivers_month.nc',
                 'rivers_temp.nc': 'rivers/river_ConsTemp_month.nc',
-            })
+            }
+        )
         with p_config:
             make_forcing_links._make_runoff_links(
                 m_sftp_client, run_type, run_date, self.config,
-                'salish-nowcast')
+                'salish-nowcast'
+            )
         assert m_create_symlink.call_args_list[1] == call(
             m_sftp_client, 'salish-nowcast',
             Path('rivers/river_ConsTemp_month.nc'),
-            Path('runs/rivers/river_ConsTemp_month.nc'))
+            Path('runs/rivers/river_ConsTemp_month.nc')
+        )
 
     @pytest.mark.parametrize('run_type', [
         'nowcast+',
         'forecast2',
         'ssh',
     ])
-    def test_bio_climatology_link(self, m_clear_links, m_create_symlink, run_type):
+    def test_bio_climatology_link(
+        self, m_clear_links, m_create_symlink, run_type
+    ):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         p_config = patch.dict(
-            self.config['run']['enabled hosts']['salish-nowcast']['forcing'],
-            {
+            self.config['run']['enabled hosts']['salish-nowcast']['forcing'], {
                 'rivers dir': '/results/forcing/rivers/',
                 'rivers_month.nc': 'rivers/rivers_month.nc',
                 'rivers_temp.nc': 'rivers/river_ConsTemp_month.nc',
                 'rivers bio dir': 'rivers/bio/',
-            })
+            }
+        )
         with p_config:
             make_forcing_links._make_runoff_links(
                 m_sftp_client, run_type, run_date, self.config,
-                'salish-nowcast')
+                'salish-nowcast'
+            )
         assert m_create_symlink.call_args_list[2] == call(
             m_sftp_client, 'salish-nowcast',
-            Path('rivers/bio/'), Path('runs/rivers/bio'))
+            Path('rivers/bio/'), Path('runs/rivers/bio')
+        )
 
     @pytest.mark.parametrize('run_type', [
         'nowcast+',
         'forecast2',
         'ssh',
     ])
-    def test_runoff_files_links(self, m_clear_links, m_create_symlink, run_type):
+    def test_runoff_files_links(
+        self, m_clear_links, m_create_symlink, run_type
+    ):
         run_date = arrow.get('2016-03-11')
         m_sftp_client = Mock(name='sftp_client')
         make_forcing_links._make_runoff_links(
-            m_sftp_client, run_type, run_date, self.config, 'salish-nowcast')
+            m_sftp_client, run_type, run_date, self.config, 'salish-nowcast'
+        )
         start = run_date.replace(days=-1)
         end = run_date.replace(days=+2)
         for date in arrow.Arrow.range('day', start, end):
@@ -267,19 +310,25 @@ class TestMakeRunoffLinks:
                 m_sftp_client, 'salish-nowcast',
                 Path(
                     '/results/forcing/rivers/RFraserCElse_{:y%Ym%md%d}.nc'
-                    .format(start.date())),
+                    .format(start.date())
+                ),
                 Path(
                     'runs/rivers/RFraserCElse_{:y%Ym%md%d}.nc'
-                    .format(date.date())))
+                    .format(date.date())
+                )
+            )
             assert expected in m_create_symlink.call_args_list
             expected = call(
                 m_sftp_client, 'salish-nowcast',
                 Path(
                     '/results/forcing/rivers/RLonFraCElse_{:y%Ym%md%d}.nc'
-                    .format( start.date())),
+                    .format(start.date())
+                ),
                 Path(
                     'runs/rivers/RLonFraCElse_{:y%Ym%md%d}.nc'
-                    .format(date.date())))
+                    .format(date.date())
+                )
+            )
             assert expected in m_create_symlink.call_args_list
 
     def test_runoff_files_links_nowcast_green(
@@ -289,7 +338,8 @@ class TestMakeRunoffLinks:
         m_sftp_client = Mock(name='sftp_client')
         make_forcing_links._make_runoff_links(
             m_sftp_client, 'nowcast-green', run_date, self.config,
-            'salish-nowcast')
+            'salish-nowcast'
+        )
         start = run_date.replace(days=-1)
         end = run_date.replace(days=+2)
         for date in arrow.Arrow.range('day', start, end):
@@ -297,27 +347,35 @@ class TestMakeRunoffLinks:
                 m_sftp_client, 'salish-nowcast',
                 Path(
                     '/results/forcing/rivers/RFraserCElse_{:y%Ym%md%d}.nc'
-                    .format(start.date())),
+                    .format(start.date())
+                ),
                 Path(
                     'runs/rivers/RFraserCElse_{:y%Ym%md%d}.nc'
-                    .format(date.date())))
+                    .format(date.date())
+                )
+            )
             assert expected in m_create_symlink.call_args_list
             expected = call(
                 m_sftp_client, 'salish-nowcast',
                 Path(
                     '/results/forcing/rivers/RLonFraCElse_{:y%Ym%md%d}.nc'
-                    .format(start.date())),
+                    .format(start.date())
+                ),
                 Path(
                     'runs/rivers/RLonFraCElse_{:y%Ym%md%d}.nc'
-                    .format(date.date())))
+                    .format(date.date())
+                )
+            )
             assert expected in m_create_symlink.call_args_list
         expected = call(
             m_sftp_client, 'salish-nowcast',
             Path(
                 '/results/forcing/rivers/river_turb/'
-                'riverTurbDaily2_{:y%Ym%md%d}.nc'
-                .format(run_date.date())),
+                'riverTurbDaily2_{:y%Ym%md%d}.nc'.format(run_date.date())
+            ),
             Path(
                 'runs/rivers/riverTurbDaily2_{:y%Ym%md%d}.nc'
-                .format(run_date.date())))
+                .format(run_date.date())
+            )
+        )
         assert expected in m_create_symlink.call_args_list

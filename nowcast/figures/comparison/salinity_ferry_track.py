@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Produce a figure that compares salinity at 1.5m depth model results to
 salinity observations from the ONC instrument package aboard a BC Ferries
 vessel.
@@ -31,9 +30,7 @@ from salishsea_tools import (
 
 
 def make_figure(
-    grid_T_hr,
-    figsize=(20, 7.5),
-    theme=nowcast.figures.website_theme,
+    grid_T_hr, figsize=(20, 7.5), theme=nowcast.figures.website_theme
 ):
     """Plot salinity comparison of 1.5m depth model results to
     salinity observations from the ONC instrument package aboard a BC Ferries
@@ -52,7 +49,8 @@ def make_figure(
     """
     lons, lats, sal_model, sal_obs = _prep_plot_data(grid_T_hr)
     fig, (ax_comp, ax_sal_map) = plt.subplots(
-        1, 2, figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
+        1, 2, figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
+    )
     _plot_salinity_map(ax_sal_map, lons, lats, sal_model, sal_obs, theme)
     # _plot_salinity_comparison(ax_comp, sal_model, sal_obs, theme)
     return fig
@@ -70,11 +68,13 @@ def _prep_plot_data(grid_T_hr):
     sal_hr = grid_T_hr.variables['vosaline']
     ## TODO: Use mesh mask instead of 0 for masking
     sal_masked = np.ma.masked_values(
-        sal_hr[model_time_step, model_depth_level, si:ei, sj:ej], 0)
+        sal_hr[model_time_step, model_depth_level, si:ei, sj:ej], 0
+    )
     timestamped_sal = namedtuple('timestamped_sal', 'salinity, timestamp')
     sal_model = timestamped_sal(
         teos_tools.psu_teos(sal_masked),
-        nc_tools.timestamp(grid_T_hr, model_time_step))
+        nc_tools.timestamp(grid_T_hr, model_time_step)
+    )
     return lons, lats, sal_model, None
 
 
@@ -83,7 +83,8 @@ def _plot_salinity_map(ax, lons, lats, sal_model, sal_obs, theme):
     cmap = plt.get_cmap('plasma')
     contour_levels = 20
     mesh = ax.contourf(
-        lons, lats, sal_model.salinity, contour_levels, cmap=cmap)
+        lons, lats, sal_model.salinity, contour_levels, cmap=cmap
+    )
     cbar = plt.colorbar(mesh, ax=ax, shrink=0.965)
     # Plot ferry track
     ## TODO: Handle sal_obs data structure
@@ -105,15 +106,18 @@ def _salinity_map_axis_labels(ax, sal_model, theme):
         f'1.5m Model Salinity at {sal_time.format("HH:mm")} '
         f'{sal_time.tzinfo.tzname(sal_time.datetime)} and Ferry Track',
         fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
+        color=theme.COLOURS['text']['axis']
+    )
     ax.set_xlabel(
         'Longitude [°E]',
         fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
+        color=theme.COLOURS['text']['axis']
+    )
     ax.set_ylabel(
         'Latitude [°N]',
         fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
+        color=theme.COLOURS['text']['axis']
+    )
     theme.set_axis_colors(ax)
 
 
@@ -122,7 +126,8 @@ def _salinity_map_cbar_labels(cbar, theme):
     cbar.set_label(
         'Absolute Salinity [g/kg]',
         fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
+        color=theme.COLOURS['text']['axis']
+    )
 
 
 def _salinity_map_set_view(ax, lats):
@@ -145,17 +150,23 @@ def _salinity_comparison_axis_labels(ax, theme):
     ax.set_xlabel(
         'Longitude',
         fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
+        color=theme.COLOURS['text']['axis']
+    )
     ax.set_ylabel(
         'Absolute Salinity [g/kg]',
         fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis'])
+        color=theme.COLOURS['text']['axis']
+    )
     ax.grid(axis='both')
     ax.legend(loc='lower left')
     ## TODO: Perhaps move ONC acknowledgement into frame, just below legend
     ax.text(
-        0.25, -0.1, 'Observations from Ocean Networks Canada',
-        transform=ax.transAxes, color=theme.COLOURS['axis']['labels'])
+        0.25,
+        -0.1,
+        'Observations from Ocean Networks Canada',
+        transform=ax.transAxes,
+        color=theme.COLOURS['axis']['labels']
+    )
     theme.set_axis_colors(ax)
 
 

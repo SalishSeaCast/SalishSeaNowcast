@@ -22,15 +22,19 @@ from salishsea_tools.nowcast import (
     figures,
 )
 
-paths = {'nowcast': '/data/dlatorne/MEOPAR/SalishSea/nowcast/',
-         'forecast': '/ocean/sallen/allen/research/MEOPAR/SalishSea/forecast/',
-         'forecast2': '/ocean/sallen/allen/research'
-                      '/MEOPAR/SalishSea/forecast2/'}
+paths = {
+    'nowcast': '/data/dlatorne/MEOPAR/SalishSea/nowcast/',
+    'forecast': '/ocean/sallen/allen/research/MEOPAR/SalishSea/forecast/',
+    'forecast2': '/ocean/sallen/allen/research'
+                 '/MEOPAR/SalishSea/forecast2/'
+}
 
 model_path = '/ocean/sallen/allen/research/MEOPAR/Operational/'
 coastline = sio.loadmat('/ocean/rich/more/mmapbase/bcgeo/PNW.mat')
-bathy = nc.Dataset('/data/nsoontie/MEOPAR/NEMO-forcing/grid/'
-                   'bathy_meter_SalishSea2.nc')
+bathy = nc.Dataset(
+    '/data/nsoontie/MEOPAR/NEMO-forcing/grid/'
+    'bathy_meter_SalishSea2.nc'
+)
 
 
 def main():
@@ -52,13 +56,20 @@ def main():
 
     if mode == 'nowcast':
         make_research_plots(
-            dmy, model_path, bathy, results_dir, plots_dir, coastline)
+            dmy, model_path, bathy, results_dir, plots_dir, coastline
+        )
     make_publish_plots(
-        dmy, model_path, bathy, results_dir, plots_dir, coastline)
+        dmy, model_path, bathy, results_dir, plots_dir, coastline
+    )
 
 
 def make_research_plots(
-    dmy, model_path, bathy, results_dir, plots_dir, coastline,
+    dmy,
+    model_path,
+    bathy,
+    results_dir,
+    plots_dir,
+    coastline,
 ):
     """Make the plots we wish to look at for research purposes.
     """
@@ -84,7 +95,12 @@ def make_research_plots(
 
 
 def make_publish_plots(
-        dmy, model_path, bathy, results_dir, plots_dir, coastline,
+    dmy,
+    model_path,
+    bathy,
+    results_dir,
+    plots_dir,
+    coastline,
 ):
     """Make the plots we wish to publish.
     """
@@ -93,12 +109,13 @@ def make_publish_plots(
     grid_T_hr = results_dataset('1h', 'grid_T', results_dir)
 
     # do the plots
-    fig = figures.website_thumbnail(
-        bathy, grid_T_hr, model_path, coastline)
+    fig = figures.website_thumbnail(bathy, grid_T_hr, model_path, coastline)
     filename = os.path.join(plots_dir, f'Website_thumbnail_{dmy}.png')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = figures.plot_threshold_website(bathy, grid_T_hr, model_path, coastline)
+    fig = figures.plot_threshold_website(
+        bathy, grid_T_hr, model_path, coastline
+    )
     filename = os.path.join(plots_dir, f'Threshold_website_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
@@ -107,17 +124,18 @@ def make_publish_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, model_path, name='Victoria')
+        grid_T_hr, bathy, model_path, name='Victoria'
+    )
     filename = os.path.join(plots_dir, f'Vic_maxSSH_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
-    fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, model_path)
+    fig = figures.compare_tidalpredictions_maxSSH(grid_T_hr, bathy, model_path)
     filename = os.path.join(plots_dir, f'PA_maxSSH_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
     fig = figures.compare_tidalpredictions_maxSSH(
-        grid_T_hr, bathy, model_path, name='Campbell River')
+        grid_T_hr, bathy, model_path, name='Campbell River'
+    )
     filename = os.path.join(plots_dir, f'CR_maxSSH_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor(), bbox_inches='tight')
 
@@ -134,12 +152,14 @@ def make_publish_plots(
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.average_winds_at_station(
-        grid_T_hr, bathy, model_path, coastline, station='all')
+        grid_T_hr, bathy, model_path, coastline, station='all'
+    )
     filename = os.path.join(plots_dir, f'Avg_wind_vectors_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
     fig = figures.winds_at_max_ssh(
-        grid_T_hr, bathy, model_path, coastline, station='all')
+        grid_T_hr, bathy, model_path, coastline, station='all'
+    )
     filename = os.path.join(plots_dir, f'Wind_vectors_at_max_{dmy}.svg')
     fig.savefig(filename, facecolor=fig.get_facecolor())
 
@@ -151,8 +171,11 @@ def results_dataset(period, grid, results_dir):
     filename_pattern = 'SalishSea_{period}_*_{grid}.nc'
     print(results_dir)
     filepaths = glob(
-        os.path.join(results_dir, filename_pattern.format(
-            period=period, grid=grid)))
+        os.path.join(
+            results_dir, filename_pattern.format(period=period, grid=grid)
+        )
+    )
     return nc.Dataset(filepaths[0])
+
 
 main()

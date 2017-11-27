@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast worker that prepares the YAML run
 description file and bash run script for a nowcast, nowcast-green, nowcast-dev,
 forecast or forecast2 run on the ONC cloud or salish,
@@ -36,7 +35,6 @@ import salishsea_cmd.lib
 import salishsea_cmd.run
 import yaml
 
-
 NAME = 'run_NEMO'
 logger = logging.getLogger(NAME)
 
@@ -51,12 +49,13 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name',
-        help='Name of the host to execute the run on')
+        'host_name', help='Name of the host to execute the run on'
+    )
     worker.cli.add_argument(
         'run_type',
         choices={
-            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'},
+            'nowcast', 'nowcast-green', 'nowcast-dev', 'forecast', 'forecast2'
+        },
         help='''
         Type of run to execute:
         'nowcast' means nowcast physics run,
@@ -67,8 +66,10 @@ def main():
         ''',
     )
     worker.cli.add_date_option(
-        '--run-date', default=arrow.now().floor('day'),
-        help='Date to execute the run for.')
+        '--run-date',
+        default=arrow.now().floor('day'),
+        help='Date to execute the run for.'
+    )
     worker.run(run_NEMO, success, failure)
 
 
@@ -81,7 +82,8 @@ def success(parsed_args):
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
@@ -95,7 +97,8 @@ def failure(parsed_args):
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
@@ -108,21 +111,26 @@ def run_NEMO(parsed_args, config, tell_manager):
         run_info = tell_manager('need', 'NEMO run').payload
         run_date = arrow.get(run_info['nowcast']['run date'])
     run_desc_filepath = _create_run_desc_file(
-        run_date, run_type, host_name, config)
+        run_date, run_type, host_name, config
+    )
     run_dir = Path(salishsea_cmd.api.prepare(run_desc_filepath))
     logger.debug(f'{run_type}: temporary run directory: {run_dir}')
     run_script_filepath = _create_run_script(
-        run_date, run_type, run_dir, run_desc_filepath, host_name, config)
+        run_date, run_type, run_dir, run_desc_filepath, host_name, config
+    )
     run_desc_filepath.unlink()
     run_exec_cmd, run_id = _launch_run_script(
-        run_type, run_script_filepath, host_name, config)
-    return {run_type: {
-        'host': host_name,
-        'run dir': os.fspath(run_dir),
-        'run exec cmd': run_exec_cmd,
-        'run id': run_id,
-        'run date': run_date.format('YYYY-MM-DD'),
-    }}
+        run_type, run_script_filepath, host_name, config
+    )
+    return {
+        run_type: {
+            'host': host_name,
+            'run dir': os.fspath(run_dir),
+            'run exec cmd': run_exec_cmd,
+            'run id': run_id,
+            'run date': run_date.format('YYYY-MM-DD'),
+        }
+    }
 
 
 def _create_run_desc_file(run_date, run_type, host_name, config):
@@ -139,10 +147,12 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
     host_config = config['run']['enabled hosts'][host_name]
     run_prep_dir = Path(host_config['run prep dir'])
     restart_timestep = _update_time_namelist(
-        run_date, run_type, run_duration, host_config, run_prep_dir)
+        run_date, run_type, run_duration, host_config, run_prep_dir
+    )
     run_desc = _run_description(
         run_days[run_type], run_type, run_id, restart_timestep, host_name,
-        config)
+        config
+    )
     run_desc_filepath = run_prep_dir / f'{run_id}.yaml'
     with run_desc_filepath.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
@@ -164,7 +174,9 @@ def _update_time_namelist(
     prev_run_type, date_offset = prev_runs[run_type]
     results_dir = Path(host_config['run types'][prev_run_type]['results'])
     dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
-    prev_run_namelist = namelist2dict(os.fspath(results_dir/dmy/'namelist_cfg'))
+    prev_run_namelist = namelist2dict(
+        os.fspath(results_dir / dmy / 'namelist_cfg')
+    )
     prev_it000 = prev_run_namelist['namrun'][0]['nn_it000']
     rdt = prev_run_namelist['namdom'][0]['rn_rdt']
     timesteps_per_day = 86400 / rdt
@@ -172,21 +184,23 @@ def _update_time_namelist(
     with namelist_time.open('rt') as f:
         lines = f.readlines()
     new_lines, restart_timestep = _calc_new_namelist_lines(
-        run_date, run_type, run_duration, prev_it000, timesteps_per_day, lines)
+        run_date, run_type, run_duration, prev_it000, timesteps_per_day, lines
+    )
     with namelist_time.open('wt') as f:
         f.writelines(new_lines)
     return restart_timestep
 
 
 def _calc_new_namelist_lines(
-    run_date, run_type, run_duration, prev_it000, timesteps_per_day, lines,
+    run_date, run_type, run_duration, prev_it000, timesteps_per_day, lines
 ):
     it000_line, it000 = _get_namelist_value('nn_it000', lines)
     itend_line, itend = _get_namelist_value('nn_itend', lines)
     new_it000 = int(prev_it000 + timesteps_per_day)
     lines[it000_line] = lines[it000_line].replace(it000, str(new_it000))
-    restart_timestep = int(
-        (prev_it000 - 1) + int(run_duration) * timesteps_per_day)
+    restart_timestep = (
+        int((prev_it000 - 1) + int(run_duration) * timesteps_per_day)
+    )
     new_itend = int(restart_timestep + (run_duration * timesteps_per_day))
     lines[itend_line] = lines[itend_line].replace(itend, str(new_itend))
     date0_line, date0 = _get_namelist_value('nn_date0', lines)
@@ -199,25 +213,29 @@ def _calc_new_namelist_lines(
     }
     new_date0 = run_date.replace(days=run_date_offset[run_type])
     lines[date0_line] = lines[date0_line].replace(
-        date0, new_date0.format('YYYYMMDD'))
+        date0, new_date0.format('YYYYMMDD')
+    )
     stocklist_line, stocklist = _get_namelist_value('nn_stocklist', lines)
-    next_restart_timestep = int(
-        restart_timestep + int(run_duration) * timesteps_per_day)
+    next_restart_timestep = (
+        int(restart_timestep + int(run_duration) * timesteps_per_day)
+    )
     lines[stocklist_line] = lines[stocklist_line].replace(
-        stocklist, f'{next_restart_timestep},')
+        stocklist, f'{next_restart_timestep},'
+    )
     return lines, restart_timestep
 
 
 def _get_namelist_value(key, lines):
     line_index = [
         i for i, line in enumerate(lines)
-        if line.strip() and line.split()[0] == key][-1]
+        if line.strip() and line.split()[0] == key
+    ][-1]
     value = lines[line_index].split()[2]
     return line_index, value
 
 
 def _run_description(
-    run_date, run_type, run_id, restart_timestep, host_name, config,
+    run_date, run_type, run_id, restart_timestep, host_name, config
 ):
     host_config = config['run']['enabled hosts'][host_name]
     restart_from = config['run types'][run_type]['restart from']
@@ -226,7 +244,8 @@ def _run_description(
     except KeyError:
         logger.critical(
             f'no results directory to get {restart_from} restart file from '
-            f'in {host_name} run config')
+            f'in {host_name} run config'
+        )
         raise WorkerError
     prev_run_dmys = {
         # run-type: previous run's ddmmmyy results directory name
@@ -239,67 +258,88 @@ def _run_description(
     restart_filepaths = {
         'restart.nc':
             os.fspath(
-                Path(restart_dir/prev_run_dmys[run_type] /
-                     f'SalishSea_{restart_timestep:08d}_restart.nc'
-                     ).resolve())
+                Path(
+                    restart_dir / prev_run_dmys[run_type] /
+                    f'SalishSea_{restart_timestep:08d}_restart.nc'
+                ).resolve()
+            )
     }
     if run_type == 'nowcast-green':
         restart_filepaths['restart_trc.nc'] = (
             os.fspath(
                 Path(
-                    restart_dir/prev_run_dmys[run_type] /
-                    f'SalishSea_{restart_timestep:08d}_restart_trc.nc')
-                .resolve())
+                    restart_dir / prev_run_dmys[run_type] /
+                    f'SalishSea_{restart_timestep:08d}_restart_trc.nc'
+                ).resolve()
+            )
         )
     run_prep_dir = Path(host_config['run prep dir'])
     bottom_friction_mask = Path(host_config['forcing']['bottom friction mask'])
     forcing = {
         'NEMO-atmos': {
-            'link to': os.fspath((run_prep_dir/'NEMO-atmos').resolve()),
+            'link to': os.fspath((run_prep_dir / 'NEMO-atmos').resolve()),
             'check link': {
                 'type': 'atmospheric',
                 'namelist filename': 'namelist_cfg',
             }
         },
         'ssh': {
-            'link to': os.fspath((run_prep_dir/'ssh/').resolve())},
+            'link to': os.fspath((run_prep_dir / 'ssh/').resolve())
+        },
         'tides': {
-            'link to': os.fspath((run_prep_dir/'tides/').resolve())},
+            'link to': os.fspath((run_prep_dir / 'tides/').resolve())
+        },
         'tracers': {
-            'link to': os.fspath((run_prep_dir/'tracers/').resolve())},
+            'link to': os.fspath((run_prep_dir / 'tracers/').resolve())
+        },
         'LiveOcean': {
-            'link to': os.fspath((run_prep_dir/'LiveOcean/').resolve())},
+            'link to': os.fspath((run_prep_dir / 'LiveOcean/').resolve())
+        },
         'rivers': {
-            'link to': os.fspath((run_prep_dir/'rivers/').resolve())},
+            'link to': os.fspath((run_prep_dir / 'rivers/').resolve())
+        },
         'bfr_coef.nc': {
-            'link to': os.fspath(bottom_friction_mask)},
+            'link to': os.fspath(bottom_friction_mask)
+        },
     }
     run_sets_dir = Path(host_config['run types'][run_type]['run sets dir'])
     namelists = {
-        'namelist_cfg': [os.fspath((run_prep_dir/'namelist.time').resolve())]
+        'namelist_cfg': [
+            os.fspath((run_prep_dir / 'namelist.time').resolve())
+        ]
     }
     namelist_sections = (
-        'namelist.domain', 'namelist.atmos_rivers', 'namelist.light',
-        'namelist.lateral', 'namelist.bottom', 'namelist.tracer',
-        'namelist.dynamics', 'namelist.vertical', 'namelist.compute',
+        'namelist.domain',
+        'namelist.atmos_rivers',
+        'namelist.light',
+        'namelist.lateral',
+        'namelist.bottom',
+        'namelist.tracer',
+        'namelist.dynamics',
+        'namelist.vertical',
+        'namelist.compute',
     )
     for namelist in namelist_sections:
         namelists['namelist_cfg'].append(
-            os.fspath((run_sets_dir/namelist).resolve()))
+            os.fspath((run_sets_dir / namelist).resolve())
+        )
     if run_type == 'nowcast-green':
         for namelist in ('namelist_top_cfg', 'namelist_smelt_cfg'):
             namelists[namelist] = [
-                os.fspath((run_sets_dir/namelist).resolve())]
+                os.fspath((run_sets_dir / namelist).resolve())
+            ]
     nemo_config_name = config['run types'][run_type]['config name']
     run_desc = salishsea_cmd.api.run_description(
         run_id=run_id,
         config_name=nemo_config_name,
         mpi_decomposition=(
-            host_config['run types'][run_type]['mpi decomposition']),
+            host_config['run types'][run_type]['mpi decomposition']
+        ),
         walltime=(host_config['run types'][run_type].get('walltime')),
         NEMO_code_config=os.fspath(
             (run_prep_dir / '../NEMO-3.6-code' / 'NEMOGCM' / 'CONFIG')
-            .resolve()),
+            .resolve()
+        ),
         XIOS_code=os.fspath((run_prep_dir / '../XIOS-2/').resolve()),
         forcing_path=os.fspath(run_prep_dir.resolve()),
         runs_dir=os.fspath(run_prep_dir.resolve()),
@@ -308,36 +348,40 @@ def _run_description(
     )
     grid_dir = Path(host_config['grid dir'])
     run_desc['grid']['coordinates'] = os.fspath(
-        grid_dir / config['run types'][run_type]['coordinates'])
+        grid_dir / config['run types'][run_type]['coordinates']
+    )
     run_desc['grid']['bathymetry'] = os.fspath(
-        grid_dir / config['run types'][run_type]['bathymetry'])
+        grid_dir / config['run types'][run_type]['bathymetry']
+    )
     lpe_filename = config['run types'][run_type]['land processor elimination']
     run_desc['grid']['land processor elimination'] = (
-        False if host_name == 'salish-nowcast'
-        else os.fspath(grid_dir / lpe_filename))
+        False if host_name == 'salish-nowcast' else
+        os.fspath(grid_dir / lpe_filename)
+    )
     run_desc['restart'] = restart_filepaths
     run_desc['output'].update({
-        'iodefs': os.fspath((run_sets_dir/'iodef.xml').resolve()),
-        'domaindefs': os.fspath((run_sets_dir/'domain_def.xml').resolve()),
-        'fielddefs': os.fspath((run_sets_dir/'field_def.xml').resolve()),
+        'iodefs': os.fspath((run_sets_dir / 'iodef.xml').resolve()),
+        'domaindefs': os.fspath((run_sets_dir / 'domain_def.xml').resolve()),
+        'fielddefs': os.fspath((run_sets_dir / 'field_def.xml').resolve()),
     })
     del run_desc['output']['domain']
     del run_desc['output']['fields']
-    if (run_sets_dir/'file_def.xml').exists():
+    if (run_sets_dir / 'file_def.xml').exists():
         run_desc['output']['filedefs'] = os.fspath(
-            (run_sets_dir/'file_def.xml').resolve())
+            (run_sets_dir / 'file_def.xml').resolve()
+        )
     run_desc['vcs revisions'] = {
         'hg': [
-            os.fspath((run_prep_dir/'../grid').resolve()),
-            os.fspath((run_prep_dir/'../NEMO-Cmd').resolve()),
-            os.fspath((run_prep_dir/'../NEMO_Nowcast').resolve()),
-            os.fspath((run_prep_dir/'../rivers-climatology').resolve()),
-            os.fspath((run_prep_dir/'../SalishSeaCmd').resolve()),
-            os.fspath((run_prep_dir/'../SS-run-sets').resolve()),
-            os.fspath((run_prep_dir/'../tides').resolve()),
-            os.fspath((run_prep_dir/'../tracers').resolve()),
-            os.fspath((run_prep_dir/'../tools').resolve()),
-            os.fspath((run_prep_dir/'../XIOS-ARCH').resolve()),
+            os.fspath((run_prep_dir / '../grid').resolve()),
+            os.fspath((run_prep_dir / '../NEMO-Cmd').resolve()),
+            os.fspath((run_prep_dir / '../NEMO_Nowcast').resolve()),
+            os.fspath((run_prep_dir / '../rivers-climatology').resolve()),
+            os.fspath((run_prep_dir / '../SalishSeaCmd').resolve()),
+            os.fspath((run_prep_dir / '../SS-run-sets').resolve()),
+            os.fspath((run_prep_dir / '../tides').resolve()),
+            os.fspath((run_prep_dir / '../tracers').resolve()),
+            os.fspath((run_prep_dir / '../tools').resolve()),
+            os.fspath((run_prep_dir / '../XIOS-ARCH').resolve()),
         ]
     }
     return run_desc
@@ -351,8 +395,9 @@ def _create_run_script(
     results_dir = Path(host_config['run types'][run_type]['results'])
     script = _build_script(
         run_dir, run_type, run_desc_filepath, results_dir / dmy, host_name,
-        config)
-    run_script_filepath = run_dir/'SalishSeaNEMO.sh'
+        config
+    )
+    run_script_filepath = run_dir / 'SalishSeaNEMO.sh'
     with run_script_filepath.open('wt') as f:
         f.write(script)
     run_script_filepath.chmod(FilePerms(user='rwx', group='rwx', other='r'))
@@ -361,7 +406,7 @@ def _create_run_script(
 
 
 def _build_script(
-    run_dir, run_type, run_desc_filepath, results_dir, host_name, config,
+    run_dir, run_type, run_desc_filepath, results_dir, host_name, config
 ):
     run_desc = salishsea_cmd.lib.load_run_desc(run_desc_filepath)
     host_config = config['run']['enabled hosts'][host_name]
@@ -371,20 +416,23 @@ def _build_script(
     xios_host = host_config.get('xios host')
     script = '#!/bin/bash\n'
     if host_config['job exec cmd'] == 'qsub':
-        script = '\n'.join((script, '{pbs_common}'.format(
-            pbs_common=salishsea_cmd.run._pbs_common(
-                run_desc, nemo_processors + xios_processors, email,
-                results_dir))))
+        script = '\n'.join((
+            script, '{pbs_common}'.format(
+                pbs_common=salishsea_cmd.run._pbs_common(
+                    run_desc, nemo_processors + xios_processors, email,
+                    results_dir
+                )
+            )
+        ))
     script = '\n'.join((
-        script,
-        '{defns}\n'
+        script, '{defns}\n'
         '{execute}\n'
         '{fix_permissions}\n'
-        '{cleanup}'
-        .format(
+        '{cleanup}'.format(
             defns=_definitions(
                 run_type, run_desc, run_desc_filepath, run_dir, results_dir,
-                host_name, config),
+                host_name, config
+            ),
             execute=_execute(nemo_processors, xios_processors, xios_host),
             fix_permissions=_fix_permissions(),
             cleanup=_cleanup(),
@@ -395,7 +443,7 @@ def _build_script(
 
 def _definitions(
     run_type, run_desc, run_desc_filepath, run_dir, results_dir, host_name,
-    config,
+    config
 ):
     host_config = config['run']['enabled hosts'][host_name]
     mpirun = 'mpirun'
@@ -423,12 +471,14 @@ def _definitions(
 def _execute(nemo_processors, xios_processors, xios_host):
     mpirun = (
         f'${{MPIRUN}} -np {nemo_processors} --bind-to-core ./nemo.exe : '
-        f'-np {xios_processors} --bind-to-core ./xios_server.exe')
+        f'-np {xios_processors} --bind-to-core ./xios_server.exe'
+    )
     if xios_host is not None:
         mpirun = (
             f'${{MPIRUN}} -np {nemo_processors} --bind-to-core ./nemo.exe : '
             f'-host {xios_host} -np {xios_processors} --bind-to-core '
-            f'./xios_server.exe')
+            f'./xios_server.exe'
+        )
     script = (
         'mkdir -p ${RESULTS_DIR}\n'
         '\n'
@@ -438,7 +488,8 @@ def _execute(nemo_processors, xios_processors, xios_host):
         'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
     )
     script += (
-        f'{mpirun} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr\n')
+        f'{mpirun} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr\n'
+    )
     script += (
         'echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout\n'
         '\n'
@@ -478,11 +529,15 @@ def _launch_run_script(run_type, run_script_filepath, host_name, config):
     cmd = f'{host_config["job exec cmd"]} {run_script_filepath}'
     run_exec_cmd = cmd
     logger.debug(
-        f'{run_type}: running command in subprocess: {shlex.split(cmd)}')
+        f'{run_type}: running command in subprocess: {shlex.split(cmd)}'
+    )
     if host_config['job exec cmd'] == 'qsub':
         proc = subprocess.run(
-            shlex.split(cmd), stdout=subprocess.PIPE,
-            check=True, universal_newlines=True)
+            shlex.split(cmd),
+            stdout=subprocess.PIPE,
+            check=True,
+            universal_newlines=True
+        )
         torque_id = proc.stdout.strip()
         logger.debug(f'{run_type}: TORQUE/PBD job id: {torque_id}')
         cmd = shlex.split(f'pgrep {torque_id}')
@@ -495,8 +550,11 @@ def _launch_run_script(run_type, run_script_filepath, host_name, config):
     while not run_process_pid:
         try:
             proc = subprocess.run(
-                cmd, stdout=subprocess.PIPE, check=True,
-                universal_newlines=True)
+                cmd,
+                stdout=subprocess.PIPE,
+                check=True,
+                universal_newlines=True
+            )
             run_process_pid = int(proc.stdout)
         except subprocess.CalledProcessError:
             # Process has not yet been spawned

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea nowcast worker that monitors and reports on the
 progress of a WaveWatch3 run on the ONC cloud computing facility.
 """
@@ -25,10 +24,8 @@ import time
 
 from nemo_nowcast import NowcastWorker
 
-
 NAME = 'watch_ww3'
 logger = logging.getLogger(NAME)
-
 
 POLL_INTERVAL = 5 * 60  # seconds
 
@@ -43,8 +40,8 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name',
-        help='Name of the host to monitor the run on')
+        'host_name', help='Name of the host to monitor the run on'
+    )
     worker.cli.add_argument(
         'run_type',
         choices={'forecast2', 'forecast'},
@@ -63,7 +60,8 @@ def success(parsed_args):
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
-        })
+        }
+    )
     msg_type = 'success {.run_type}'.format(parsed_args)
     return msg_type
 
@@ -74,7 +72,8 @@ def failure(parsed_args):
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
-        })
+        }
+    )
     msg_type = 'failure {.run_type}'.format(parsed_args)
     return msg_type
 
@@ -89,7 +88,7 @@ def watch_ww3(parsed_args, config, tell_manager):
     # Watch for the run process to end
     while _pid_exists(pid):
         try:
-            with (run_dir/'log.ww3').open('rt') as f:
+            with (run_dir / 'log.ww3').open('rt') as f:
                 lines = f.readlines()
             lines.reverse()
             for line in lines:
@@ -101,23 +100,27 @@ def watch_ww3(parsed_args, config, tell_manager):
             fraction_done = time_step / 1080
             msg = (
                 f'{run_type} on {host_name}: timestep: {time_step}, '
-                f'{fraction_done:.1%} complete')
+                f'{fraction_done:.1%} complete'
+            )
         except FileNotFoundError:
             # log.ww3 file not found; assume that run is young and it
             # hasn't been created yet, or has finished and it has been
             # moved to the results directory
             msg = (
                 f'{run_type} on {host_name}: log.ww3 not found; '
-                f'continuing to watch...')
+                f'continuing to watch...'
+            )
         logger.info(msg)
         time.sleep(POLL_INTERVAL)
         ## TODO: confirm that the run and subsequent results gathering
         ## completed successfully
-    return {run_type: {
-        'host': host_name,
-        'run date': run_info[run_type]['run date'],
-        'completed': True,
-    }}
+    return {
+        run_type: {
+            'host': host_name,
+            'run date': run_info[run_type]['run date'],
+            'completed': True,
+        }
+    }
 
 
 def _find_run_pid(run_info):
@@ -128,8 +131,11 @@ def _find_run_pid(run_info):
     while pid is None:
         try:
             proc = subprocess.run(
-                cmd, stdout=subprocess.PIPE, check=True,
-                universal_newlines=True)
+                cmd,
+                stdout=subprocess.PIPE,
+                check=True,
+                universal_newlines=True
+            )
             pid = int(proc.stdout)
         except subprocess.CalledProcessError:
             # Process has not yet been spawned

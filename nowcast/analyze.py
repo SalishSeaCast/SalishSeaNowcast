@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 """A collection of Python functions to produce model results visualization
 figures for analysis and model evaluation of nowcast, forecast, and
 forecast2 runs.
@@ -22,12 +20,10 @@ import datetime
 import glob
 import os
 
-from dateutil import tz
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
-import pandas as pd
 
 from salishsea_tools import (
     nc_tools,
@@ -37,20 +33,23 @@ from salishsea_tools import (
 
 from nowcast import figures
 
-
 # Paths for model results
-paths = {'nowcast': '/results/SalishSea/nowcast/',
-         'forecast': '/results/SalishSea/forecast/',
-         'forecast2': '/results/SalishSea/forecast2/'}
+paths = {
+    'nowcast': '/results/SalishSea/nowcast/',
+    'forecast': '/results/SalishSea/forecast/',
+    'forecast2': '/results/SalishSea/forecast2/',
+}
 
 # Colours for plots
-colours = {'nowcast': 'DodgerBlue',
-           'forecast': 'ForestGreen',
-           'forecast2': 'MediumVioletRed',
-           'observed': 'Indigo',
-           'predicted': 'ForestGreen',
-           'model': 'blue',
-           'residual': 'DimGray'}
+colours = {
+    'nowcast': 'DodgerBlue',
+    'forecast': 'ForestGreen',
+    'forecast2': 'MediumVioletRed',
+    'observed': 'Indigo',
+    'predicted': 'ForestGreen',
+    'model': 'blue',
+    'residual': 'DimGray',
+}
 
 
 def get_filenames(t_orig, t_final, period, grid, model_path):
@@ -76,12 +75,15 @@ def get_filenames(t_orig, t_final, period, grid, model_path):
     :returns: files, a list of filenames
     """
 
-    numdays = (t_final-t_orig).days
-    dates = [t_orig + datetime.timedelta(days=num)
-             for num in range(0, numdays+1)]
+    numdays = (t_final - t_orig).days
+    dates = [
+        t_orig + datetime.timedelta(days=num) for num in range(0, numdays + 1)
+    ]
     dates.sort()
 
-    allfiles = glob.glob(model_path+'*/SalishSea_'+period+'*_'+grid+'.nc')
+    allfiles = glob.glob(
+        model_path + '*/SalishSea_' + period + '*_' + grid + '.nc'
+    )
     sdt = dates[0].strftime('%Y%m%d')
     edt = dates[-1].strftime('%Y%m%d')
     sstr = f'SalishSea_{period}_{sdt}_{sdt}_{grid}.nc'
@@ -119,9 +121,10 @@ def get_filenames_15(t_orig, t_final, station, model_path):
     :returns: files, a list of filenames
     """
 
-    numdays = (t_final-t_orig).days
-    dates = [t_orig + datetime.timedelta(days=num)
-             for num in range(0, numdays+1)]
+    numdays = (t_final - t_orig).days
+    dates = [
+        t_orig + datetime.timedelta(days=num) for num in range(0, numdays + 1)
+    ]
     dates.sort()
 
     files = []
@@ -186,8 +189,9 @@ def combine_files(files, var, kss, jss, iss):
     return var_ary, time
 
 
-def plot_files(ax, grid_B, files, var, depth, t_orig, t_final,
-               name, label, colour):
+def plot_files(
+    ax, grid_B, files, var, depth, t_orig, t_final, name, label, colour
+):
     """Plots values of  variable over multiple files covering
     a certain period of time.
 
@@ -235,8 +239,9 @@ def plot_files(ax, grid_B, files, var, depth, t_orig, t_final,
     bathy, X, Y = tidetools.get_bathy_data(grid_B)
 
     # Get index
-    [j, i] = geo_tools.find_closest_model_point(lon, lat, X, Y,
-                                                land_mask=bathy.mask)
+    j, i = geo_tools.find_closest_model_point(
+        lon, lat, X, Y, land_mask=bathy.mask
+    )
 
     # Call function
     var_ary, time = combine_files(files, var, depth, j, i)
@@ -254,8 +259,9 @@ def plot_files(ax, grid_B, files, var, depth, t_orig, t_final,
     return ax
 
 
-def compare_ssh_tides(grid_B, files, t_orig, t_final, name, PST=0, MSL=0,
-                      figsize=(20, 6)):
+def compare_ssh_tides(
+    grid_B, files, t_orig, t_final, name, PST=0, MSL=0, figsize=(20, 6)
+):
     """
     :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
@@ -290,15 +296,18 @@ def compare_ssh_tides(grid_B, files, t_orig, t_final, name, PST=0, MSL=0,
     fig, ax = plt.subplots(1, 1, figsize=figsize)
 
     # Model
-    ax = plot_files(ax, grid_B, files, 'sossheig', 'None',
-                    t_orig, t_final, name, 'Model', colours['model'])
+    ax = plot_files(
+        ax, grid_B, files, 'sossheig', 'None', t_orig, t_final, name, 'Model',
+        colours['model']
+    )
     # Tides
     figures.plot_tides(ax, name, PST, MSL, color=colours['predicted'])
 
     # Figure format
     ax.set_title(
         f'Modelled Sea Surface Height versus Predicted Tides at {name}: '
-        f'{t_orig:%d-%b-%Y} to {t_final:%d-%b-%Y}')
+        f'{t_orig:%d-%b-%Y} to {t_final:%d-%b-%Y}'
+    )
     ax.set_ylim([-3.0, 3.0])
     ax.set_xlabel('[hrs]')
     ax.legend(loc=2, ncol=2)
@@ -341,8 +350,9 @@ def create_path(mode, t_orig, file_part):
         results_home = paths['forecast2']
         run_date = run_date + datetime.timedelta(days=-2)
 
-    results_dir = os.path.join(results_home,
-                               run_date.strftime('%d%b%y').lower())
+    results_dir = os.path.join(
+        results_home, run_date.strftime('%d%b%y').lower()
+    )
 
     filename = glob.glob(os.path.join(results_dir, file_part))
 
@@ -448,11 +458,11 @@ def depth_average(var, depths, depth_axis):
     # Find depth for averaging
     # Need to expand the depths array to same shape as the integrand.
     # This is really awkward..
-    for n in np.arange(var.ndim-1):
+    for n in np.arange(var.ndim - 1):
         de = de[:, np.newaxis]
     roll = np.rollaxis(var, depth_axis)
     expanded_depths = de + np.zeros(roll.shape)
-    expanded_depths = np.rollaxis(expanded_depths, 0, depth_axis+1)
+    expanded_depths = np.rollaxis(expanded_depths, 0, depth_axis + 1)
 
     # Apply variable mask to depth masks
     mask = np.ma.getmask(var)
@@ -461,12 +471,13 @@ def depth_average(var, depths, depth_axis):
     # Calculate depth of water column
     max_depths = np.ma.max(depth_masked, axis=depth_axis)
     surface_depths = depth_masked.take(0, axis=depth_axis)
-    total_depth = max_depths-surface_depths
+    total_depth = max_depths - surface_depths
 
     # Divide integral by total depth
-    average = integral/total_depth
+    average = integral / total_depth
 
     return average
+
 
 def depth_average_mask(var, e3, mask, depth_axis):
     """Calculate depth average using the NEMO vertical scale factors and mask.
@@ -474,10 +485,10 @@ def depth_average_mask(var, e3, mask, depth_axis):
     # If depth_axis is not 0, give e3 and mask a time dimension
     if depth_axis != 0:
         e3 = np.expand_dims(e3, 0)
-        mask = np.expand_dims(mask,0)
+        mask = np.expand_dims(mask, 0)
 
-    integral = np.sum(var*e3*mask, axis=depth_axis)
-    total_depth = np.sum(e3*mask, axis=depth_axis)
-    avg = integral/total_depth
+    integral = np.sum(var * e3 * mask, axis=depth_axis)
+    total_depth = np.sum(e3 * mask, axis=depth_axis)
+    avg = integral / total_depth
     avg = np.ma.masked_invalid(avg)
     return avg

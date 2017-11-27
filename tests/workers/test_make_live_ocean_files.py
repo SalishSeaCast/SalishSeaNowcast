@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast make_live_ocean_files worker.
 """
 from types import SimpleNamespace
@@ -27,6 +26,7 @@ from nowcast.workers import make_live_ocean_files
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         make_live_ocean_files.main()
         args, kwargs = m_worker.call_args
@@ -45,8 +45,8 @@ class TestMain:
         args, kwargs = m_worker().run.call_args
         expected = (
             make_live_ocean_files.make_live_ocean_files,
-            make_live_ocean_files.success,
-            make_live_ocean_files.failure)
+            make_live_ocean_files.success, make_live_ocean_files.failure
+        )
         assert args == expected
 
 
@@ -54,6 +54,7 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     def test_success_log_info(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-12'))
         make_live_ocean_files.success(parsed_args)
@@ -70,6 +71,7 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     def test_failure_log_critical(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-12'))
         make_live_ocean_files.failure(parsed_args)
@@ -88,17 +90,22 @@ class TestFailure:
 class TestMakeLiveOceanFiles:
     """Unit test for make_live_ocean_files() function.
     """
+
     def test_checklist(self, m_create_bio, m_create_ts):
         parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-30'))
         config = {
             'temperature salinity': {
-                'download': {'dest dir': 'forcing/LiveOcean/downloaded'},
+                'download': {
+                    'dest dir': 'forcing/LiveOcean/downloaded'
+                },
                 'bc dir': 'forcing/LiveOcean/boundary_conditions',
                 'boundary info': 'SalishSea_west_TEOS10.nc',
             },
             'n and si': {
-                'file template': 'LO_bio_{:y%Ym%md%d}.nc',
-                'bc dir': 'forcing/LiveOcean/boundary_conditions/bio',
+                'file template':
+                    'LO_bio_{:y%Ym%md%d}.nc',
+                'bc dir':
+                    'forcing/LiveOcean/boundary_conditions/bio',
                 'n fit':
                     'forcing/LiveOcean/boundary_conditions/bio/fits/'
                     'bioOBCfit_NTS.csv',
@@ -114,7 +121,8 @@ class TestMakeLiveOceanFiles:
         m_create_ts.return_value = ['LO_TS_y2017m01d30.nc']
         m_create_bio.return_value = 'LO_bio_y2017m01d30.nc'
         checklist = make_live_ocean_files.make_live_ocean_files(
-            parsed_args, config)
+            parsed_args, config
+        )
         expected = {
             'temperature & salinity': 'LO_TS_y2017m01d30.nc',
             'nutrients': 'LO_bio_y2017m01d30.nc',

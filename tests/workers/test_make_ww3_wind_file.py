@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea WaveWatch3 forecast worker make_ww3_wind_file
 worker.
 """
@@ -29,6 +28,7 @@ from nowcast.workers import make_ww3_wind_file
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         make_ww3_wind_file.main()
         args, kwargs = m_worker.call_args
@@ -59,9 +59,9 @@ class TestMain:
         make_ww3_wind_file.main()
         args, kwargs = m_worker().run.call_args
         expected = (
-            make_ww3_wind_file.make_ww3_wind_file,
-            make_ww3_wind_file.success,
-            make_ww3_wind_file.failure)
+            make_ww3_wind_file.make_ww3_wind_file, make_ww3_wind_file.success,
+            make_ww3_wind_file.failure
+        )
         assert args == expected
 
 
@@ -73,10 +73,13 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         make_ww3_wind_file.success(parsed_args)
         assert m_logger.info.called
         expected = '2017-04-07 00:00:00 +00:00'
@@ -84,8 +87,10 @@ class TestSuccess:
 
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         msg_type = make_ww3_wind_file.success(parsed_args)
         assert msg_type == f'success {run_type}'
 
@@ -98,10 +103,13 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         make_ww3_wind_file.failure(parsed_args)
         assert m_logger.critical.called
         expected = '2017-04-07 00:00:00 +00:00'
@@ -109,8 +117,10 @@ class TestFailure:
 
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         msg_type = make_ww3_wind_file.failure(parsed_args)
         assert msg_type == f'failure {run_type}'
 
@@ -132,10 +142,14 @@ class TestMakeWW3WindFile:
         run_type
     ):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         config = {
-            'weather': {'file template': 'ops_{:y%Ym%md%d}.nc'},
+            'weather': {
+                'file template': 'ops_{:y%Ym%md%d}.nc'
+            },
             'run': {
                 'enabled hosts': {
                     'west.cloud': {
@@ -155,16 +169,21 @@ class TestMakeWW3WindFile:
         assert checklist == {
             run_type:
                 '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/wind/'
-                'SoG_wind_20170407.nc'}
+                'SoG_wind_20170407.nc'
+        }
 
     def test_forecast_datasets(
         self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset
     ):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type='forecast',
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type='forecast',
+            run_date=arrow.get('2017-04-07')
+        )
         config = {
-            'weather': {'file template': 'ops_{:y%Ym%md%d}.nc'},
+            'weather': {
+                'file template': 'ops_{:y%Ym%md%d}.nc'
+            },
             'run': {
                 'enabled hosts': {
                     'west.cloud': {
@@ -182,7 +201,8 @@ class TestMakeWW3WindFile:
         }
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
         m_open_dataset.assert_called_once_with(
-            '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc')
+            '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc'
+        )
         m_open_mfdataset.assert_called_once_with([
             '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc',
             '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d08.nc',
@@ -193,10 +213,14 @@ class TestMakeWW3WindFile:
         self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset
     ):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type='forecast2',
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type='forecast2',
+            run_date=arrow.get('2017-04-07')
+        )
         config = {
-            'weather': {'file template': 'ops_{:y%Ym%md%d}.nc'},
+            'weather': {
+                'file template': 'ops_{:y%Ym%md%d}.nc'
+            },
             'run': {
                 'enabled hosts': {
                     'west.cloud': {
@@ -214,7 +238,8 @@ class TestMakeWW3WindFile:
         }
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
         m_open_dataset.assert_called_once_with(
-            '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc')
+            '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc'
+        )
         m_open_mfdataset.assert_called_once_with([
             '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc',
             '/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d08.nc',

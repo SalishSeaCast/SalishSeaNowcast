@@ -158,11 +158,7 @@ class TestUpdateForecastDatasets:
             checklist = update_forecast_datasets.update_forecast_datasets(
                 parsed_args, config
             )
-        expected = {
-            model: {
-                run_type: str(forecast_dir),
-            }
-        }
+        expected = {model: {run_type: str(forecast_dir)}}
         assert checklist == expected
 
 

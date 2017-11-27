@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea nowcast watch_ww3 worker.
 """
 from types import SimpleNamespace
@@ -32,6 +31,7 @@ from nowcast.workers import watch_ww3
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         watch_ww3.main()
         args, kwargs = m_worker.call_args
@@ -65,10 +65,13 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    @pytest.mark.parametrize('run_type, host_name', [
-        ('forecast2', 'west.cloud-nowcast'),
-        ('forecast', 'west.cloud-nowcast'),
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('forecast2', 'west.cloud-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+        ]
+    )
     def test_success_log_info(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -77,10 +80,12 @@ class TestSuccess:
         watch_ww3.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize('run_type, host_name, expected', [
-        ('forecast2', 'west.cloud-nowcast', 'success forecast2'),
-        ('forecast', 'west.cloud-nowcast', 'success forecast'),
-    ])
+    @pytest.mark.parametrize(
+        'run_type, host_name, expected', [
+            ('forecast2', 'west.cloud-nowcast', 'success forecast2'),
+            ('forecast', 'west.cloud-nowcast', 'success forecast'),
+        ]
+    )
     def test_success_msg_type(self, m_logger, run_type, host_name, expected):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -94,10 +99,13 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
-    @pytest.mark.parametrize('run_type, host_name', [
-        ('forecast2', 'west.cloud-nowcast'),
-        ('forecast', 'west.cloud-nowcast'),
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('forecast2', 'west.cloud-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+        ]
+    )
     def test_failure_log_critical(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -106,10 +114,12 @@ class TestFailure:
         watch_ww3.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize('run_type, host_name, expected', [
-        ('forecast2', 'west.cloud-nowcast', 'failure forecast2'),
-        ('forecast', 'west.cloud-nowcast', 'failure forecast'),
-    ])
+    @pytest.mark.parametrize(
+        'run_type, host_name, expected', [
+            ('forecast2', 'west.cloud-nowcast', 'failure forecast2'),
+            ('forecast', 'west.cloud-nowcast', 'failure forecast'),
+        ]
+    )
     def test_failure_msg_type(self, m_logger, run_type, host_name, expected):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -124,18 +134,23 @@ class TestFailure:
 class TestFindRunPid:
     """Unit test for _find_run_pid() function.
     """
+
     def test_find_run_pid(self, m_run, m_logger):
         run_info = {'run exec cmd': 'bash SoGWW3.sh'}
         m_run.return_value = Mock(stdout='4343')
         watch_ww3._find_run_pid(run_info)
-        assert m_run.call_args_list == [call(
-            ['pgrep', '--newest', '--exact', '--full', 'bash SoGWW3.sh'],
-            stdout=subprocess.PIPE, check=True, universal_newlines=True)]
+        assert m_run.call_args_list == [
+            call(['pgrep', '--newest', '--exact', '--full', 'bash SoGWW3.sh'],
+                 stdout=subprocess.PIPE,
+                 check=True,
+                 universal_newlines=True)
+        ]
 
 
 class TestPidExists:
     """Unit tests for _pid_exists() function.
     """
+
     def test_negative_pid(self):
         pid_exists = watch_ww3._pid_exists(-1)
         assert not pid_exists

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast upload_forcing worker.
 """
 import logging
@@ -59,6 +58,7 @@ def config():
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         upload_forcing.main()
         args, kwargs = m_worker.call_args
@@ -76,7 +76,8 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
-            'nowcast+', 'forecast2', 'ssh', 'turbidity'}
+            'nowcast+', 'forecast2', 'ssh', 'turbidity'
+        }
         assert 'help' in kwargs
 
     def test_add_run_date_arg(self, m_worker):
@@ -100,29 +101,38 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    @pytest.mark.parametrize('run_type', [
-        'nowcast+',
-        'forecast2',
-        'ssh',
-        'turbidity',
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast+',
+            'forecast2',
+            'ssh',
+            'turbidity',
+        ]
+    )
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-01-02'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-01-02')
+        )
         upload_forcing.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize('run_type', [
-        'nowcast+',
-        'forecast2',
-        'ssh',
-        'turbidity',
-    ])
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast+',
+            'forecast2',
+            'ssh',
+            'turbidity',
+        ]
+    )
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-01-02'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-01-02')
+        )
         msg_type = upload_forcing.success(parsed_args)
         assert msg_type == 'success {run_type}'.format(run_type=run_type)
 
@@ -131,44 +141,57 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
-    @pytest.mark.parametrize('run_type', [
-        'nowcast+',
-        'forecast2',
-        'ssh',
-        'turbidity',
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast+',
+            'forecast2',
+            'ssh',
+            'turbidity',
+        ]
+    )
     def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-01-02'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-01-02')
+        )
         upload_forcing.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize('run_type', [
-        'nowcast+',
-        'forecast2',
-        'ssh',
-        'turbidity',
-    ])
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast+',
+            'forecast2',
+            'ssh',
+            'turbidity',
+        ]
+    )
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-01-02'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-01-02')
+        )
         msg_type = upload_forcing.failure(parsed_args)
         assert msg_type == 'failure {run_type}'.format(run_type=run_type)
 
 
 @patch(
     'nowcast.workers.upload_forcing._upload_file',
-    side_effect=[FileNotFoundError, None, FileNotFoundError, None])
+    side_effect=[FileNotFoundError, None, FileNotFoundError, None]
+)
 @patch('nowcast.workers.upload_forcing.logger')
 class TestUploadLiveOceanFiles:
     """Unit tests for _upload_live_ocean_files() function.
     """
-    @pytest.mark.parametrize('run_type, logging_level', [
-        ('nowcast+', logging.CRITICAL),
-        ('forecast2', logging.INFO),
-    ])
+
+    @pytest.mark.parametrize(
+        'run_type, logging_level', [
+            ('nowcast+', logging.CRITICAL),
+            ('forecast2', logging.INFO),
+        ]
+    )
     def test_live_ocean_persistence_symlink_logging_level(
         self, m_logger, m_upload_file, run_type, logging_level, config
     ):
@@ -178,7 +201,8 @@ class TestUploadLiveOceanFiles:
         with patch('nowcast.workers.upload_forcing.Path.symlink_to'):
             upload_forcing._upload_live_ocean_files(
                 sftp_client, run_type, run_date, config, 'west.cloud',
-                host_config)
+                host_config
+            )
         if logging_level is None:
             assert not m_logger.log.called
         else:

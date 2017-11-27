@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast worker that produces daily average Fraser River
 turbidity file from hourly real-time turbidity data collected from Environment
 and Climate Change Canada Fraser River water quality buoy.
@@ -30,7 +29,6 @@ import pytz
 
 from nemo_nowcast import NowcastWorker
 
-
 NAME = 'make_turbidity_file'
 logger = logging.getLogger(NAME)
 
@@ -45,8 +43,10 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_date_option(
-        '--run-date', default=arrow.now().floor('day'),
-        help='Date of the run to produce turbidity file for.')
+        '--run-date',
+        default=arrow.now().floor('day'),
+        help='Date of the run to produce turbidity file for.'
+    )
     worker.run(make_turbidity_file, success, failure)
 
 
@@ -60,7 +60,10 @@ def success(parsed_args):
     logger.info(
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f'Fraser River turbidity file creation complete',
-        extra={'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ')})
+        extra={
+            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
+        }
+    )
     return 'success'
 
 
@@ -74,7 +77,10 @@ def failure(parsed_args):
     logger.critical(
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f'Fraser River turbidity file creation failed',
-        extra={'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ')})
+        extra={
+            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
+        }
+    )
     return 'failure'
 
 
@@ -95,7 +101,9 @@ def make_turbidity_file(parsed_args, config, *args):
 
     # Pick time as 19:00, which means selected times will begin with 19:10
     # on prev day and go to 18:10
-    idatedt = dt.datetime(run_date.year, run_date.month, run_date.day, 19, 0, 0)
+    idatedt = dt.datetime(
+        run_date.year, run_date.month, run_date.day, 19, 0, 0
+    )
     idateDD = _dateTimeToDecDay(idatedt)
 
     # Read most recent 24 hours data + extra for itnerpolation from
@@ -130,16 +138,18 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
     # Read file into pandas dataframe
     tdf = pd.read_csv(turbidity_csv, header=0)
     tdf['dtdate'] = pd.to_datetime(
-        tdf['# date'] + ' ' + tdf['time'], format='%Y-%m-%d %H:%M:%S')
+        tdf['# date'] + ' ' + tdf['time'], format='%Y-%m-%d %H:%M:%S'
+    )
     tdf['DD'] = [
-        _dateTimeToDecDay(jj) for jj in _pacToUTC(tdf['dtdate'].values)]
+        _dateTimeToDecDay(jj) for jj in _pacToUTC(tdf['dtdate'].values)
+    ]
     # Select current 24 hr period + extra for interpolation
     # this will break if np.datetime64 string format changes
     tdf2 = (
-        tdf.loc[
-            (tdf['DD'] > (idate - 1.0 - mthresh / 24))
-            & (tdf['DD'] <= (idate + mthresh / 24))
-        ].sort_values('DD').copy())
+        tdf.loc[(tdf['DD'] > (idate - 1.0 - mthresh / 24))
+                & (tdf['DD'] <= (idate + mthresh / 24))].sort_values('DD')
+        .copy()
+    )
     tdf2.drop_duplicates(inplace=True)
     tdf2.index = range(len(tdf2))
     if len(tdf2) < 5:
@@ -147,7 +157,8 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
         msg = (
             f'Insufficient data to proceed to turbidity interpolation; '
             f'cannot create Fraser River turbidity file '
-            f'for {ymd}')
+            f'for {ymd}'
+        )
         logger.warning(msg)
         raise ValueError(msg)
     logger.debug(f'read turbidity data from {turbidity_csv}')
@@ -156,9 +167,11 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
 
 def _interpTurb(tdf2, idate, mthresh):
     dfout = pd.DataFrame(
-        index=range(int(mthresh) * 2 + 24), columns=('hDD', 'turbidity'))
+        index=range(int(mthresh) * 2 + 24), columns=('hDD', 'turbidity')
+    )
     dfout['hDD'] = [
-        idate - 1 + (ind - int(mthresh)) / 24.0 for ind in range(len(dfout))]
+        idate - 1 + (ind - int(mthresh)) / 24.0 for ind in range(len(dfout))
+    ]
     pd.set_option('precision', 9)
     iout = 0
     for ind, row in tdf2.iterrows():
@@ -169,7 +182,8 @@ def _interpTurb(tdf2, idate, mthresh):
             nint = int(np.round((ddlast - dfout.loc[iout]['hDD']) * 24))
             for ii in range(0, nint):
                 iout += 1
-        if ((row['DD'] - ddlast) < mthresh / 24.0) & ((row['DD'] - ddlast) > 1.5 / 24.0):
+        if ((row['DD'] - ddlast) < mthresh / 24.0) & ((row['DD'] - ddlast) >
+                                                      1.5 / 24.0):
             # if a break consists of 4 missing data points or less, linearly
             # interpolate through
             tlast = tdf2.loc[ind - 1]['turbidity']
@@ -178,15 +192,18 @@ def _interpTurb(tdf2, idate, mthresh):
             nint = int(np.round((ddnext - ddlast) * 24) - 1)
             for ii in range(1, nint + 1):
                 dd0 = ddlast + ii / 24.0
-                tur0 = tlast + (dd0 - ddlast) / (ddnext - ddlast) * (
-                tnext - tlast)
+                tur0 = (
+                    tlast + (dd0 - ddlast) / (ddnext - ddlast) *
+                    (tnext - tlast)
+                )
                 if (dfout.loc[iout]['hDD'] - dd0) < .5 / 24.0:
                     dfout.loc[iout, 'turbidity'] = tur0
                     iout += 1
                 else:
                     logger.error(
                         f'ERROR 2: {dfout.loc[iout]["hDD"]} {dd0} '
-                        f'{dfout.loc[iout]["hDD"] - dd0}')
+                        f'{dfout.loc[iout]["hDD"] - dd0}'
+                    )
                     raise ValueError
         elif (row['DD'] - ddlast) >= mthresh / 24.0:
             # insert NaNs in larger holes
@@ -204,7 +221,8 @@ def _interpTurb(tdf2, idate, mthresh):
         else:
             logger.error(
                 f'ERROR 1: iout={iout} ind={ind} {dfout.loc[iout]["hDD"]} '
-                f'{row["DD"]}')
+                f'{row["DD"]}'
+            )
             raise ValueError
         iout += 1
         ddlast = row['DD']
@@ -224,14 +242,16 @@ def _calcAvgT(dfout, mthresh, ymd):
         msg = (
             f'Insufficient data after interpolation to create Fraser River '
             f'turbidity file '
-            f'for {ymd}')
+            f'for {ymd}'
+        )
         logger.warning(msg)
         raise ValueError(msg)
     return iTurb
 
 
 def _writeTFile(
-    fname, iTurb,
+    fname,
+    iTurb,
     dimTemplate='/results/forcing/rivers/RLonFraCElse_y2016m01d23.nc'
 ):
     f = nc.Dataset(dimTemplate)  # example for dims
@@ -240,17 +260,20 @@ def _writeTFile(
     # Copy dimensions
     for dname, the_dim in f.dimensions.items():
         new.createDimension(
-            dname, len(the_dim) if not the_dim.isunlimited() else None)
+            dname, len(the_dim) if not the_dim.isunlimited() else None
+        )
     # create dimension variables:
     new_x = new.createVariable('nav_lat', np.float32, ('y', 'x'), zlib=True)
     new_x[:] = f.variables['nav_lat'][:, :]
     new_y = new.createVariable('nav_lon', np.float32, ('y', 'x'), zlib=True)
     new_y[:] = f.variables['nav_lon'][:, :]
     new_tc = new.createVariable(
-        'time_counter', np.float32, 'time_counter', zlib=True)
+        'time_counter', np.float32, 'time_counter', zlib=True
+    )
     new_tc[:] = f.variables['time_counter']
     new_run = new.createVariable(
-        'turb', float, ('time_counter', 'y', 'x'), zlib=True)
+        'turb', float, ('time_counter', 'y', 'x'), zlib=True
+    )
     new_run[:, :, :] = -999.99  # most cells are masked with negative numbers
     new_run[:, 400:448, 338:380] = iTurb  # set turbidity to daily average
 
@@ -266,7 +289,7 @@ def _dateTimeToDecDay(dtin):
 
 
 def _pacToUTC(pactime0):
-    # input datetime object without tzinfo in Pacific Time and 
+    # input datetime object without tzinfo in Pacific Time and
     # output datetime object (or np array of them) without tzinfo in UTC
     pactime = np.array(pactime0, ndmin=1)
     if pactime.ndim > 1:

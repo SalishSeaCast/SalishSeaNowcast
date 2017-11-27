@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Produce 4 figures that show the time series of surface:
 
   - nitrate and diatom concentrations
@@ -33,7 +32,11 @@ import nowcast.figures.website_theme
 
 
 def make_figure(
-    xr_dataset, left_variable, right_variable, place, figsize=(20, 8),
+    xr_dataset,
+    left_variable,
+    right_variable,
+    place,
+    figsize=(20, 8),
     theme=nowcast.figures.website_theme
 ):
     """
@@ -64,12 +67,14 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(
-        xr_dataset, left_variable, right_variable, place)
+        xr_dataset, left_variable, right_variable, place
+    )
     fig, axl, axr = _prep_fig_axes(figsize, theme)
     _plot_timeseries(axl, plot_data.left_var, left_variable, theme)
     _plot_timeseries(axr, plot_data.right_var, right_variable, theme)
     _timeseries_axes_labels(
-        axl, axr, left_variable, right_variable, plot_data, theme)
+        axl, axr, left_variable, right_variable, plot_data, theme
+    )
     return fig
 
 
@@ -79,13 +84,13 @@ def _prep_plot_data(xr_dataset, left_variable, right_variable, place):
     time_slice = slice(start_day.date(), end_day.replace(days=+1).date())
     grid_y, grid_x = places.PLACES[place]['NEMO grid ji']
     left_var = (
-        xr_dataset[left_variable]
-        .sel(time=time_slice)
-        .isel(depth=0, gridX=grid_x, gridY=grid_y))
+        xr_dataset[left_variable].sel(time=time_slice)
+        .isel(depth=0, gridX=grid_x, gridY=grid_y)
+    )
     right_var = (
-        xr_dataset[right_variable]
-        .sel(time=time_slice)
-        .isel(depth=0, gridX=grid_x, gridY=grid_y))
+        xr_dataset[right_variable].sel(time=time_slice)
+        .isel(depth=0, gridX=grid_x, gridY=grid_y)
+    )
     return SimpleNamespace(
         left_var=left_var,
         right_var=right_var,
@@ -98,7 +103,8 @@ def _prep_plot_data(xr_dataset, left_variable, right_variable, place):
 
 def _prep_fig_axes(figsize, theme):
     fig, axl = plt.subplots(
-        figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor'])
+        figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
+    )
 
     axl.set_axis_bgcolor(theme.COLOURS['axes']['background'])
     axr = axl.twinx()
@@ -109,7 +115,10 @@ def _prep_fig_axes(figsize, theme):
 
 def _plot_timeseries(ax, plot_data, variable, theme):
     ax.plot(
-        plot_data.time, plot_data, color=theme.COLOURS['time series'][variable])
+        plot_data.time,
+        plot_data,
+        color=theme.COLOURS['time series'][variable]
+    )
     return
 
 
@@ -119,28 +128,38 @@ def _timeseries_axes_labels(
     axl.set_xlabel(
         'Date',
         color=theme.COLOURS['text']['axis'],
-        fontproperties=theme.FONTS['axis'])
+        fontproperties=theme.FONTS['axis']
+    )
     axl.set_ylabel(
         f'{plot_data.left_long_name} [{plot_data.left_units}]',
-        fontproperties=theme.FONTS['axis'])
+        fontproperties=theme.FONTS['axis']
+    )
     theme.set_axis_colors(axl)
     axr.set_ylabel(
         f'{plot_data.right_long_name} [{plot_data.right_units}]',
         fontproperties=theme.FONTS['axis'],
-        rotation=-90, verticalalignment='bottom')
+        rotation=-90,
+        verticalalignment='bottom'
+    )
     theme.set_axis_colors(axr)
 
     axl.text(
-        0.5, 0.95, plot_data.left_long_name,
+        0.5,
+        0.95,
+        plot_data.left_long_name,
         horizontalalignment='center',
         color=theme.COLOURS['time series'][left_variable],
         fontproperties=theme.FONTS['legend label large'],
-        transform=axl.transAxes)
+        transform=axl.transAxes
+    )
     axl.text(
-        0.5, 0.9, plot_data.right_long_name,
+        0.5,
+        0.9,
+        plot_data.right_long_name,
         horizontalalignment='center',
         color=theme.COLOURS['time series'][right_variable],
         fontproperties=theme.FONTS['legend label large'],
-        transform=axl.transAxes)
+        transform=axl.transAxes
+    )
 
     axl.grid(axis='x')

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea nowcast worker that downloads a daily averaged file from the
 University of Washington Live Ocean model forecast product for a specified date.
 The file contains a hyperslab that covers the Salish Sea NEMO model western
@@ -46,8 +45,10 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_date_option(
-        '--run-date', default=arrow.now().floor('day'),
-        help='Date to download the Live Ocean forecast product for.')
+        '--run-date',
+        default=arrow.now().floor('day'),
+        help='Date to download the Live Ocean forecast product for.'
+    )
     worker.run(download_live_ocean, success, failure)
 
 
@@ -55,7 +56,10 @@ def success(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
         f'{ymd} Live Ocean file for Salish Sea western boundary downloaded',
-        extra={'run_date': ymd})
+        extra={
+            'run_date': ymd
+        }
+    )
     msg_type = 'success'
     return msg_type
 
@@ -65,7 +69,10 @@ def failure(parsed_args):
     logger.critical(
         f'{ymd} Live Ocean file for Salish Sea western boundary download '
         f'failed',
-        extra={'run_date': ymd})
+        extra={
+            'run_date': ymd
+        }
+    )
     msg_type = 'failure'
     return msg_type
 
@@ -75,13 +82,15 @@ def download_live_ocean(parsed_args, config, *args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
         f'downloading Salish Sea western boundary daily averaged Live Ocean '
-        f'file for {ymd}')
+        f'file for {ymd}'
+    )
     base_url = config['temperature salinity']['download']['url']
     dir_prefix = config['temperature salinity']['download']['directory prefix']
     filename = config['temperature salinity']['download']['file name']
     url = f'{base_url}{dir_prefix}{yyyymmdd}/{filename}'
     dest_dir = Path(
-        config['temperature salinity']['download']['dest dir'], yyyymmdd)
+        config['temperature salinity']['download']['dest dir'], yyyymmdd
+    )
     grp_name = config['file group']
     lib.mkdir(str(dest_dir), logger, grp_name=grp_name)
     checklist = {ymd: []}
@@ -89,8 +98,8 @@ def download_live_ocean(parsed_args, config, *args):
         url = f'{base_url}{dir_prefix}{yyyymmdd}/{filename}'
         filepath = _get_file(url, filename, dest_dir, session)
     checklist[ymd].append(str(filepath))
-    nemo_cmd.api.deflate(
-        [filepath], math.floor(multiprocessing.cpu_count() / 2))
+    nemo_cmd.api.deflate([filepath],
+                         math.floor(multiprocessing.cpu_count() / 2))
     checklist = {ymd: os.fspath(filepath)}
     return checklist
 
@@ -104,7 +113,11 @@ def _get_file(url, filename, dest_dir, session):
     size = filepath.stat().st_size
     logger.debug(
         f'downloaded {size} bytes from {url}',
-        extra={'url': url, 'dest_dir': dest_dir})
+        extra={
+            'url': url,
+            'dest_dir': dest_dir,
+        }
+    )
     return filepath
 
 
