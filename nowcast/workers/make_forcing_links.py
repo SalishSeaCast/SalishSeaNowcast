@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast forcing files symlink creation worker.
 
 Create the forcing file symlinks for a nowcast run on the HPC/cloud
@@ -28,7 +27,6 @@ from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
 
-
 NAME = 'make_forcing_links'
 logger = logging.getLogger(NAME)
 
@@ -43,27 +41,34 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name', help='Name of the host to symlink forcing files on')
+        'host_name', help='Name of the host to symlink forcing files on'
+    )
     worker.cli.add_argument(
-        'run_type', choices={'nowcast+', 'forecast2', 'ssh', 'nowcast-green'},
+        'run_type',
+        choices={'nowcast+', 'forecast2', 'ssh', 'nowcast-green'},
         help='''
         Type of run to symlink files for:
         'nowcast+' means nowcast & 1st forecast runs,
         'forecast2' means 2nd forecast run,
         'ssh' means Neah Bay sea surface height files only (for forecast run).
         'nowcast-green' means nowcast green ocean run,
-        ''')
+        '''
+    )
     worker.cli.add_argument(
-        '--shared-storage', action='store_true',
+        '--shared-storage',
+        action='store_true',
         help='''
         If running on a machine (Salish) that directly accesses
         the repo datafiles, copy the forcing files instead of symlinking them
         so that they do not get changed as a result of preparations for faster
         runs on remote hosts
-        ''')
+        '''
+    )
     worker.cli.add_date_option(
-        '--run-date', default=(arrow.now().floor('day')),
-        help='Date of the run to symlink files for.')
+        '--run-date',
+        default=(arrow.now().floor('day')),
+        help='Date of the run to symlink files for.'
+    )
     worker.run(make_forcing_links, success, failure)
 
 
@@ -75,7 +80,8 @@ def success(parsed_args):
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
@@ -88,7 +94,8 @@ def failure(parsed_args):
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
@@ -100,10 +107,12 @@ def make_forcing_links(parsed_args, config, *args):
     shared_storage = parsed_args.shared_storage
     ssh_key = Path(
         os.environ['HOME'], '.ssh',
-        config['run']['enabled hosts'][host_name]['ssh key'])
+        config['run']['enabled hosts'][host_name]['ssh key']
+    )
     ssh_client, sftp_client = lib.sftp(host_name, os.fspath(ssh_key))
     _make_NeahBay_ssh_links(
-        sftp_client, run_date, config, host_name, shared_storage)
+        sftp_client, run_date, config, host_name, shared_storage
+    )
     if run_type == 'ssh':
         sftp_client.close()
         ssh_client.close()
@@ -112,12 +121,15 @@ def make_forcing_links(parsed_args, config, *args):
                 'links':
                     f'{parsed_args.run_type} '
                     f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh',
-                'run date': parsed_args.run_date.format('YYYY-MM-DD')}}
+                'run date': parsed_args.run_date.format('YYYY-MM-DD')
+            }
+        }
         return checklist
     _make_runoff_links(sftp_client, run_type, run_date, config, host_name)
     _make_weather_links(sftp_client, run_date, config, host_name, run_type)
     _make_live_ocean_links(
-        sftp_client, run_date, config, host_name, shared_storage)
+        sftp_client, run_date, config, host_name, shared_storage
+    )
     sftp_client.close()
     ssh_client.close()
     checklist = {
@@ -133,14 +145,15 @@ def make_forcing_links(parsed_args, config, *args):
 
 
 def _make_NeahBay_ssh_links(
-    sftp_client, run_date, config, host_name, shared_storage,
+    sftp_client, run_date, config, host_name, shared_storage
 ):
     host_config = config['run']['enabled hosts'][host_name]
     run_prep_dir = Path(host_config['run prep dir'])
     _clear_links(sftp_client, run_prep_dir, 'ssh')
     for day in range(-1, 3):
         filename = config['ssh']['file template'].format(
-            run_date.replace(days=day).date())
+            run_date.replace(days=day).date()
+        )
         dir = 'obs' if day == -1 else 'fcst'
         src = Path(host_config['forcing']['ssh dir'], dir, filename)
         dest = run_prep_dir / 'ssh' / filename
@@ -178,7 +191,8 @@ def _make_runoff_links(sftp_client, run_type, run_date, config, host_name):
         src = Path(
             host_config['forcing']['Fraser turbidity dir'],
             config['rivers']['turbidity']['file template'].format(
-                run_date.date())
+                run_date.date()
+            )
         )
         dest = run_prep_dir / 'rivers' / src.name
         _create_symlink(sftp_client, host_name, src, dest)
@@ -197,7 +211,8 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
     weather_start = -1 if run_type in nowcast_runs else 0
     for day in range(weather_start, 3):
         filename = config['weather']['file template'].format(
-            run_date.replace(days=day).date())
+            run_date.replace(days=day).date()
+        )
         if run_type in nowcast_runs:
             dir = '' if day <= 0 else 'fcst'
         else:
@@ -208,7 +223,7 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
 
 
 def _make_live_ocean_links(
-    sftp_client, run_date, config, host_name, shared_storage,
+    sftp_client, run_date, config, host_name, shared_storage
 ):
     host_config = config['run']['enabled hosts'][host_name]
     run_prep_dir = Path(host_config['run prep dir'])
@@ -217,7 +232,8 @@ def _make_live_ocean_links(
     for bcs in ('temperature salinity', 'n and si'):
         for day in range(-1, 3):
             filename = config[bcs]['file template'].format(
-                run_date.replace(days=day).date())
+                run_date.replace(days=day).date()
+            )
             if day <= 0:
                 # if day=1 or 2, we use the current day as source
                 src = (
@@ -225,7 +241,7 @@ def _make_live_ocean_links(
                     if bcs == 'temperature salinity' else
                     Path(host_config['forcing']['bio bc dir'], filename)
                 )
-            dest = run_prep_dir/dest_path/filename
+            dest = run_prep_dir / dest_path / filename
             if shared_storage:
                 shutil.copy2(os.fspath(src), os.fspath(dest))
             else:
@@ -233,7 +249,7 @@ def _make_live_ocean_links(
 
 
 def _clear_links(sftp_client, run_prep_dir, dir):
-    links_dir = run_prep_dir/dir
+    links_dir = run_prep_dir / dir
     for linkname in sftp_client.listdir(os.fspath(links_dir)):
         sftp_client.unlink(os.fspath(links_dir / linkname))
     logger.debug(f'{links_dir} symlinks cleared')

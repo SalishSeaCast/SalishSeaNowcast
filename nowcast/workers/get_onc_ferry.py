@@ -139,8 +139,10 @@ def get_onc_ferry(parsed_args, config, *args):
     )
     logger.debug(
         f'storing ONC {ferry_platform} dataset for {ymd} as {nc_filepath}',
-        extra={'data_date': ymd,
-               'ferry_platform': parsed_args.ferry_platform}
+        extra={
+            'data_date': ymd,
+            'ferry_platform': parsed_args.ferry_platform
+        }
     )
     encoding = {
         var: {
@@ -404,7 +406,11 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
             xarray.DataArray(
                 name=sensor,
                 data=onc_data[not_nan_mask][sensor_qaqc_mask].values,
-                coords={'time': onc_data.sampleTime[not_nan_mask][sensor_qaqc_mask].values},
+                coords={
+                    'time':
+                        onc_data.sampleTime[not_nan_mask][sensor_qaqc_mask]
+                        .values
+                },
                 dims='time',
                 attrs={'device_category': device,
                        'units': cf_units},

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast upload forcing files worker.
 
 Upload the forcing files for a nowcast or forecast run to the HPC/cloud
@@ -26,7 +25,6 @@ import arrow
 from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
-
 
 NAME = 'upload_forcing'
 logger = logging.getLogger(NAME)
@@ -42,9 +40,11 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name', help='Name of the host to upload forcing files to')
+        'host_name', help='Name of the host to upload forcing files to'
+    )
     worker.cli.add_argument(
-        'run_type', choices={'nowcast+', 'forecast2', 'ssh', 'turbidity'},
+        'run_type',
+        choices={'nowcast+', 'forecast2', 'ssh', 'turbidity'},
         help='''
         Type of run to upload files for:
         'nowcast+' means nowcast & 1st forecast runs,
@@ -55,8 +55,10 @@ def main():
         ''',
     )
     worker.cli.add_date_option(
-        '--run-date', default=arrow.now().floor('day'),
-        help='Date of the run to upload files for.')
+        '--run-date',
+        default=arrow.now().floor('day'),
+        help='Date of the run to upload files for.'
+    )
     worker.run(upload_forcing, success, failure)
 
 
@@ -68,7 +70,8 @@ def success(parsed_args):
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
@@ -81,7 +84,8 @@ def failure(parsed_args):
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
@@ -92,16 +96,20 @@ def upload_forcing(parsed_args, config, *args):
     run_date = parsed_args.run_date
     ssh_key = Path(
         os.environ['HOME'], '.ssh',
-        config['run']['enabled hosts'][host_name]['ssh key'])
+        config['run']['enabled hosts'][host_name]['ssh key']
+    )
     host_config = config['run']['enabled hosts'][host_name]
     ssh_client, sftp_client = lib.sftp(host_name, os.fspath(ssh_key))
     # Neah Bay sea surface height
     for day in range(-1, 3):
         filename = config['ssh']['file template'].format(
-            run_date.replace(days=day).date())
+            run_date.replace(days=day).date()
+        )
         dest_dir = 'obs' if day == -1 else 'fcst'
         localpath = Path(config['ssh']['ssh dir'], dest_dir, filename)
-        remotepath = Path(host_config['forcing']['ssh dir'], dest_dir, filename)
+        remotepath = Path(
+            host_config['forcing']['ssh dir'], dest_dir, filename
+        )
         try:
             _upload_file(sftp_client, host_name, localpath, remotepath)
         except FileNotFoundError:
@@ -117,7 +125,8 @@ def upload_forcing(parsed_args, config, *args):
                     'run_type': run_type,
                     'host_name': host_name,
                     'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-                })
+                }
+            )
             _upload_file(sftp_client, host_name, localpath, remotepath)
     if run_type == 'ssh':
         sftp_client.close()
@@ -125,21 +134,25 @@ def upload_forcing(parsed_args, config, *args):
         checklist = {
             host_name:
                 f'{parsed_args.run_type} '
-                f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh'}
+                f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh'
+        }
         return checklist
     # Rivers turbidity and runoff
     if run_type == 'turbidity':
         _upload_fraser_turbidity_file(
-            sftp_client, run_date, config, host_name, host_config)
+            sftp_client, run_date, config, host_name, host_config
+        )
         sftp_client.close()
         ssh_client.close()
         checklist = {
             host_name:
                 f'{parsed_args.run_type} '
-                f'{parsed_args.run_date.format("YYYY-MM-DD")} turbidity'}
+                f'{parsed_args.run_date.format("YYYY-MM-DD")} turbidity'
+        }
         return checklist
     _upload_river_runoff_files(
-        sftp_client, run_date, config, host_name, host_config)
+        sftp_client, run_date, config, host_name, host_config
+    )
     # Weather
     if run_type == 'nowcast+':
         weather_start = 0
@@ -147,23 +160,26 @@ def upload_forcing(parsed_args, config, *args):
         weather_start = 1
     for day in range(weather_start, 3):
         filename = config['weather']['file template'].format(
-            run_date.replace(days=day).date())
+            run_date.replace(days=day).date()
+        )
         dest_dir = '' if day == 0 else 'fcst'
-        localpath = Path(
-            config['weather']['ops dir'], dest_dir, filename)
+        localpath = Path(config['weather']['ops dir'], dest_dir, filename)
         remotepath = Path(
-            host_config['forcing']['weather dir'], dest_dir, filename)
+            host_config['forcing']['weather dir'], dest_dir, filename
+        )
         _upload_file(sftp_client, host_name, localpath, remotepath)
     # Live Ocean Boundary Conditions
     _upload_live_ocean_files(
-        sftp_client, run_type, run_date, config, host_name, host_config)
+        sftp_client, run_type, run_date, config, host_name, host_config
+    )
     sftp_client.close()
     ssh_client.close()
     checklist = {
         host_name:
             f'{parsed_args.run_type} '
             f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-            f'ssh  rivers  weather  boundary conditions'}
+            f'ssh  rivers  weather  boundary conditions'
+    }
     return checklist
 
 
@@ -188,7 +204,8 @@ def _upload_fraser_turbidity_file(
                 'run_type': 'turbidity',
                 'host_name': host_name,
                 'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
-            })
+            }
+        )
         _upload_file(sftp_client, host_name, localpath, remotepath)
 
 
@@ -223,7 +240,9 @@ def _upload_live_ocean_files(
             # but for other run types it is a cause for concern.
             prev_day_fn = (
                 config[bcs]['file template'].format(
-                    run_date.replace(days=-1).date()))
+                    run_date.replace(days=-1).date()
+                )
+            )
             localpath.symlink_to(localpath.with_name(prev_day_fn))
             logging_level = (
                 logging.INFO if run_type == 'forecast2' else logging.CRITICAL
@@ -236,15 +255,15 @@ def _upload_live_ocean_files(
                     'run_type': run_type,
                     'host_name': host_name,
                     'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
-                })
+                }
+            )
             _upload_file(sftp_client, host_name, localpath, remotepath)
 
 
 def _upload_file(sftp_client, host_name, localpath, remotepath):
     sftp_client.put(os.fspath(localpath), os.fspath(remotepath))
     sftp_client.chmod(os.fspath(remotepath), lib.PERMS_RW_RW_R)
-    logger.debug(
-        f'{localpath} uploaded to {host_name} at {remotepath}')
+    logger.debug(f'{localpath} uploaded to {host_name} at {remotepath}')
 
 
 if __name__ == '__main__':

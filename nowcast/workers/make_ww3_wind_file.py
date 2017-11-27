@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea WaveWatch3 forecast worker that produces the hourly wind forcing
 file for a prelim-forecast or forecast run 
 """
@@ -23,7 +22,6 @@ from pathlib import Path
 import arrow
 import xarray
 from nemo_nowcast import NowcastWorker
-
 
 NAME = 'make_ww3_wind_file'
 logger = logging.getLogger(NAME)
@@ -39,8 +37,8 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name',
-        help='Name of the host to create the wind file on')
+        'host_name', help='Name of the host to create the wind file on'
+    )
     worker.cli.add_argument(
         'run_type',
         choices={'forecast2', 'forecast'},
@@ -51,8 +49,10 @@ def main():
         ''',
     )
     worker.cli.add_date_option(
-        '--run-date', default=arrow.now().floor('day'),
-        help='Start date of run to create the wind file for.')
+        '--run-date',
+        default=arrow.now().floor('day'),
+        help='Start date of run to create the wind file for.'
+    )
     worker.run(make_ww3_wind_file, success, failure)
 
 
@@ -65,7 +65,8 @@ def success(parsed_args):
         extra={
             'run_type': parsed_args.run_type,
             'run_date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
@@ -79,7 +80,8 @@ def failure(parsed_args):
         extra={
             'run_type': parsed_args.run_type,
             'run_date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
@@ -89,8 +91,7 @@ def make_ww3_wind_file(parsed_args, config, *args):
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     ymd = run_date.format('YYYY-MM-DD')
-    logger.info(
-        f'Creating wwatch3 wind forcing file for {ymd} {run_type} run')
+    logger.info(f'Creating wwatch3 wind forcing file for {ymd} {run_type} run')
     host_config = config['run']['enabled hosts'][host_name]
     hrdps_dir = Path(host_config['forcing']['weather dir'])
     hrdps_file_tmpl = config['weather']['file template']
@@ -100,22 +101,27 @@ def make_ww3_wind_file(parsed_args, config, *args):
         datasets.append(os.fspath(hrdps_file))
         logger.debug(f'dataset: {hrdps_file}')
         day_range = arrow.Arrow.range(
-            'day', run_date.replace(days=+1), run_date.replace(days=+2))
+            'day', run_date.replace(days=+1), run_date.replace(days=+2)
+        )
         for day in day_range:
-            hrdps_file = (hrdps_dir/'fcst')/hrdps_file_tmpl.format(day.datetime)
+            hrdps_file = ((hrdps_dir / 'fcst') /
+                          hrdps_file_tmpl.format(day.datetime))
             datasets.append(os.fspath(hrdps_file))
             logger.debug(f'dataset: {hrdps_file}')
     else:
         day_range = arrow.Arrow.range(
-            'day', run_date, run_date.replace(days=+2))
+            'day', run_date, run_date.replace(days=+2)
+        )
         for day in day_range:
-            hrdps_file = (hrdps_dir/'fcst')/hrdps_file_tmpl.format(day.datetime)
+            hrdps_file = ((hrdps_dir / 'fcst') /
+                          hrdps_file_tmpl.format(day.datetime))
             datasets.append(os.fspath(hrdps_file))
             logger.debug(f'dataset: {hrdps_file}')
     dest_dir = Path(config['wave forecasts']['run prep dir'], 'wind')
     filepath_tmpl = config['wave forecasts']['wind file template']
-    nc_filepath = dest_dir / filepath_tmpl.format(
-        yyyymmdd=run_date.format('YYYYMMDD'))
+    nc_filepath = (
+        dest_dir / filepath_tmpl.format(yyyymmdd=run_date.format('YYYYMMDD'))
+    )
     with xarray.open_dataset(datasets[0]) as lats_lons:
         lats = lats_lons.nav_lat
         lons = lats_lons.nav_lon
@@ -123,7 +129,8 @@ def make_ww3_wind_file(parsed_args, config, *args):
         with xarray.open_mfdataset(datasets) as hrdps:
             ds = _create_dataset(
                 hrdps.time_counter, lats, lons, hrdps.u_wind, hrdps.v_wind,
-                datasets)
+                datasets
+            )
             ds.to_netcdf(os.fspath(nc_filepath))
     logger.debug(f'stored wind forcing file: {nc_filepath}')
     checklist = {run_type: os.fspath(nc_filepath)}
@@ -134,20 +141,28 @@ def _create_dataset(time, lats, lons, u_wind, v_wind, datasets):
     now = arrow.now()
     ds = xarray.Dataset(
         data_vars={
-            'u_wind': u_wind.rename({'time_counter': 'time'}),
-            'v_wind': v_wind.rename({'time_counter': 'time'}),
+            'u_wind': u_wind.rename({
+                'time_counter': 'time'
+            }),
+            'v_wind': v_wind.rename({
+                'time_counter': 'time'
+            }),
         },
         coords={
-            'time': time.rename('time').rename({'time_counter': 'time'}),
+            'time': time.rename('time').rename({
+                'time_counter': 'time'
+            }),
             'latitude': lats,
             'longitude': lons,
         },
         attrs={
             'creation_date': str(now),
-            'history': f'[{now.format("YYYY-MM-DD HH:mm:ss")}] '
-                       f'created by SalishSeaNowcast make_ww3_wind_file worker',
-            'source': f'EC HRDPS via UBC SalishSeaCast NEMO forcing datasets: '
-                      f'{datasets}'
+            'history':
+                f'[{now.format("YYYY-MM-DD HH:mm:ss")}] '
+                f'created by SalishSeaNowcast make_ww3_wind_file worker',
+            'source':
+                f'EC HRDPS via UBC SalishSeaCast NEMO forcing datasets: '
+                f'{datasets}'
         }
     )
     del ds.u_wind.attrs['coordinates']

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast make_runoff_file worker.
 """
 from types import SimpleNamespace
@@ -27,6 +26,7 @@ from nowcast.workers import make_runoff_file
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         make_runoff_file.main()
         args, kwargs = m_worker.call_args
@@ -54,6 +54,7 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     def test_success_log_info(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2017-05-17'))
         make_runoff_file.success(parsed_args)
@@ -69,6 +70,7 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     def test_failure_log_critical(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2017-05-17'))
         make_runoff_file.failure(parsed_args)

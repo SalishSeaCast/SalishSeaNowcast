@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast get_onc_ferry worker.
 """
 from types import SimpleNamespace
@@ -28,6 +27,7 @@ from nowcast.workers import get_onc_ferry
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         get_onc_ferry.main()
         args, kwargs = m_worker.call_args
@@ -52,9 +52,9 @@ class TestMain:
         get_onc_ferry.main()
         args, kwargs = m_worker().run.call_args
         expected = (
-            get_onc_ferry.get_onc_ferry,
-            get_onc_ferry.success,
-            get_onc_ferry.failure)
+            get_onc_ferry.get_onc_ferry, get_onc_ferry.success,
+            get_onc_ferry.failure
+        )
         assert args == expected
 
 
@@ -64,9 +64,11 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     def test_success_log_info(self, ferry_platform):
         parsed_args = SimpleNamespace(
-            ferry_platform=ferry_platform, data_date=arrow.get('2016-09-09'))
+            ferry_platform=ferry_platform, data_date=arrow.get('2016-09-09')
+        )
         with patch('nowcast.workers.get_onc_ferry.logger') as m_logger:
             get_onc_ferry.success(parsed_args)
         assert m_logger.info.called
@@ -76,7 +78,8 @@ class TestSuccess:
 
     def test_success_msg_type(self, ferry_platform):
         parsed_args = SimpleNamespace(
-            ferry_platform=ferry_platform, data_date=arrow.get('2016-09-09'))
+            ferry_platform=ferry_platform, data_date=arrow.get('2016-09-09')
+        )
         with patch('nowcast.workers.get_onc_ferry.logger') as m_logger:
             msg_type = get_onc_ferry.success(parsed_args)
         assert msg_type == 'success {}'.format(ferry_platform)
@@ -88,9 +91,11 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     def test_failure_log_critical(self, ferry_platform):
         parsed_args = SimpleNamespace(
-            ferry_platform=ferry_platform, data_date=arrow.get('2016-09-09'))
+            ferry_platform=ferry_platform, data_date=arrow.get('2016-09-09')
+        )
         with patch('nowcast.workers.get_onc_ferry.logger') as m_logger:
             get_onc_ferry.failure(parsed_args)
         assert m_logger.critical.called
@@ -101,7 +106,8 @@ class TestFailure:
 
     def test_failure_msg_type(self, ferry_platform):
         parsed_args = SimpleNamespace(
-            ferry_platform=ferry_platform, data_date=arrow.get('2016-09-09'))
+            ferry_platform=ferry_platform, data_date=arrow.get('2016-09-09')
+        )
         with patch('nowcast.workers.get_onc_ferry.logger') as m_logger:
             msg_type = get_onc_ferry.failure(parsed_args)
         assert msg_type == 'failure'

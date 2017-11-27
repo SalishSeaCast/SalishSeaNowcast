@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast ping_erddap worker.
 """
 from types import SimpleNamespace
@@ -27,6 +26,7 @@ from nowcast.workers import ping_erddap
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         ping_erddap.main()
         args, kwargs = m_worker.call_args
@@ -39,9 +39,12 @@ class TestMain:
         assert args == ('dataset',)
         assert kwargs['choices'] == {
             'download_weather',
-            'SCVIP-CTD', 'SEVIP-CTD', 'USDDL-CTD',
+            'SCVIP-CTD',
+            'SEVIP-CTD',
+            'USDDL-CTD',
             'TWDP-ferry',
-            'nowcast-green', 'nemo-forecast',
+            'nowcast-green',
+            'nemo-forecast',
         }
         assert 'help' in kwargs
 
@@ -59,29 +62,34 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
-    @pytest.mark.parametrize('dataset', [
-        'download_weather',
-        'SCVIP-CTD',
-        'SEVIP-CTD',
-        'USDDL-CTD',
-        'TWDP-ferry',
-        'nowcast-green',
-        'nemo-forecast',
-    ])
+
+    @pytest.mark.parametrize(
+        'dataset', [
+            'download_weather',
+            'SCVIP-CTD',
+            'SEVIP-CTD',
+            'USDDL-CTD',
+            'TWDP-ferry',
+            'nowcast-green',
+            'nemo-forecast',
+        ]
+    )
     def test_success_log_info(self, m_logger, dataset):
         parsed_args = SimpleNamespace(dataset=dataset)
         ping_erddap.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize('dataset, expected', [
-        ('download_weather', 'success download_weather'),
-        ('SCVIP-CTD', 'success SCVIP-CTD'),
-        ('SEVIP-CTD', 'success SEVIP-CTD'),
-        ('USDDL-CTD', 'success USDDL-CTD'),
-        ('TWDP-ferry', 'success TWDP-ferry'),
-        ('nowcast-green', 'success nowcast-green'),
-        ('nemo-forecast', 'success nemo-forecast'),
-    ])
+    @pytest.mark.parametrize(
+        'dataset, expected', [
+            ('download_weather', 'success download_weather'),
+            ('SCVIP-CTD', 'success SCVIP-CTD'),
+            ('SEVIP-CTD', 'success SEVIP-CTD'),
+            ('USDDL-CTD', 'success USDDL-CTD'),
+            ('TWDP-ferry', 'success TWDP-ferry'),
+            ('nowcast-green', 'success nowcast-green'),
+            ('nemo-forecast', 'success nemo-forecast'),
+        ]
+    )
     def test_success_msg_type(self, m_logger, dataset, expected):
         parsed_args = SimpleNamespace(dataset=dataset)
         msg_type = ping_erddap.success(parsed_args)
@@ -92,29 +100,34 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
-    @pytest.mark.parametrize('dataset', [
-        'download_weather',
-        'SCVIP-CTD',
-        'SEVIP-CTD',
-        'USDDL-CTD',
-        'TWDP-ferry',
-        'nowcast-green',
-        'nemo-forecast',
-    ])
+
+    @pytest.mark.parametrize(
+        'dataset', [
+            'download_weather',
+            'SCVIP-CTD',
+            'SEVIP-CTD',
+            'USDDL-CTD',
+            'TWDP-ferry',
+            'nowcast-green',
+            'nemo-forecast',
+        ]
+    )
     def test_failure_log_error(self, m_logger, dataset):
         parsed_args = SimpleNamespace(dataset=dataset)
         ping_erddap.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize('dataset, expected', [
-        ('download_weather', 'failure download_weather'),
-        ('SCVIP-CTD', 'failure SCVIP-CTD'),
-        ('SEVIP-CTD', 'failure SEVIP-CTD'),
-        ('USDDL-CTD', 'failure USDDL-CTD'),
-        ('TWDP-ferry', 'failure TWDP-ferry'),
-        ('nowcast-green', 'failure nowcast-green'),
-        ('nemo-forecast', 'failure nemo-forecast'),
-    ])
+    @pytest.mark.parametrize(
+        'dataset, expected', [
+            ('download_weather', 'failure download_weather'),
+            ('SCVIP-CTD', 'failure SCVIP-CTD'),
+            ('SEVIP-CTD', 'failure SEVIP-CTD'),
+            ('USDDL-CTD', 'failure USDDL-CTD'),
+            ('TWDP-ferry', 'failure TWDP-ferry'),
+            ('nowcast-green', 'failure nowcast-green'),
+            ('nemo-forecast', 'failure nemo-forecast'),
+        ]
+    )
     def test_failure_msg_type(self, m_logger, dataset, expected):
         parsed_args = SimpleNamespace(dataset=dataset)
         msg_type = ping_erddap.failure(parsed_args)
@@ -125,15 +138,18 @@ class TestFailure:
 class TestPingErddap:
     """Unit tests for ping_erddap() function.
     """
-    @pytest.mark.parametrize('dataset', [
-        'download_weather',
-        'SCVIP-CTD',
-        'SEVIP-CTD',
-        'USDDL-CTD',
-        'TWDP-ferry',
-        'nowcast-green',
-        'nemo-forecast',
-    ])
+
+    @pytest.mark.parametrize(
+        'dataset', [
+            'download_weather',
+            'SCVIP-CTD',
+            'SEVIP-CTD',
+            'USDDL-CTD',
+            'TWDP-ferry',
+            'nowcast-green',
+            'nemo-forecast',
+        ]
+    )
     def test_ping_erddap(self, m_logger, dataset, tmpdir):
         parsed_args = SimpleNamespace(dataset=dataset)
         tmp_flag_dir = tmpdir.ensure_dir('flag')
@@ -141,16 +157,18 @@ class TestPingErddap:
             'erddap': {
                 'flag dir': str(tmp_flag_dir),
                 'datasetIDs': {
-                    'download_weather':
-                        ['ubcSSaSurfaceAtmosphereFieldsV1'],
+                    'download_weather': ['ubcSSaSurfaceAtmosphereFieldsV1'],
                     'SCVIP-CTD': ['ubcONCSCVIPCTD15mV1'],
                     'SEVIP-CTD': ['ubcONCSEVIPCTD15mV1'],
                     'USDDL-CTD': ['ubcONCUSDDLCTD15mV1'],
                     'TWDP-ferry': ['ubcONCTWDP1mV1'],
                     'nowcast-green': [
-                        'ubcSSg3DTracerFields1hV1', 'ubcSSg3DuVelocity1hV1'],
+                        'ubcSSg3DTracerFields1hV1', 'ubcSSg3DuVelocity1hV1'
+                    ],
                     'nemo-forecast': ['ubcSSfPointAtkinson10mV17-02'],
-                }}}
+                }
+            }
+        }
         checklist = ping_erddap.ping_erddap(parsed_args, config)
         dataset_ids = config['erddap']['datasetIDs'][dataset]
         for i, dataset_id in enumerate(dataset_ids):
@@ -168,7 +186,9 @@ class TestPingErddap:
                 'flag dir': str(tmp_flag_dir),
                 'datasetIDs': {
                     'nemo-forecast': ['ubcSSfPointAtkinson10mV17-02'],
-                }}}
+                }
+            }
+        }
         checklist = ping_erddap.ping_erddap(parsed_args, config)
         assert not m_logger.debug.called
         assert checklist == {'nowcast-green': []}

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast worker that uploads the forcing files
 for a nowcast run to the HPC/cloud facility where the run will be
 executed assuming that the previous nowcasts were not run there
@@ -29,7 +28,6 @@ import zmq
 from nowcast import lib
 from nemo_nowcast import WorkerError
 
-
 worker_name = lib.get_module_name()
 
 logger = logging.getLogger(worker_name)
@@ -40,7 +38,8 @@ context = zmq.Context()
 def main():
     # Prepare the worker
     base_parser = lib.basic_arg_parser(
-        worker_name, description=__doc__, add_help=False)
+        worker_name, description=__doc__, add_help=False
+    )
     parser = configure_argparser(
         prog=base_parser.prog,
         description=base_parser.description,
@@ -56,24 +55,29 @@ def main():
     # Do the work
     try:
         checklist = upload_all_files(
-            parsed_args.host_name, parsed_args.run_date,
-            config)
+            parsed_args.host_name, parsed_args.run_date, config
+        )
         logger.info(
             'Nowcast ALL files upload to {0.host_name} completed'
-            .format(parsed_args), extra={
+            .format(parsed_args),
+            extra={
                 'host_name': parsed_args.host_name,
                 'date': parsed_args.run_date,
-            })
+            }
+        )
         # Exchange success messages with the nowcast manager process
         lib.tell_manager(
-            worker_name, 'success', config, logger, socket, checklist)
+            worker_name, 'success', config, logger, socket, checklist
+        )
     except WorkerError:
         logger.critical(
             'Nowcast ALL files upload to {0.host_name} failed'
-            .format(parsed_args), extra={
+            .format(parsed_args),
+            extra={
                 'host_name': parsed_args.host_name,
                 'date': parsed_args.run_date,
-            })
+            }
+        )
         # Exchange failure messages with the nowcast manager process
         lib.tell_manager(worker_name, 'failure', config, logger, socket)
     except SystemExit:
@@ -92,11 +96,15 @@ def main():
 
 def configure_argparser(prog, description, parents):
     parser = argparse.ArgumentParser(
-        prog=prog, description=description, parents=parents)
+        prog=prog, description=description, parents=parents
+    )
     parser.add_argument(
-        'host_name', help='Name of the host to upload the files to')
+        'host_name', help='Name of the host to upload the files to'
+    )
     parser.add_argument(
-        '--run-date', type=lib.arrow_date, default=arrow.now(),
+        '--run-date',
+        type=lib.arrow_date,
+        default=arrow.now(),
         help='''
         Date of the run to upload files from;
         use YYYY-MM-DD format.
@@ -109,11 +117,13 @@ def configure_argparser(prog, description, parents):
 def upload_all_files(host_name, run_date, config):
     host = config['run'][host_name]
     ssh_client, sftp_client = lib.sftp(
-        host_name, host['ssh key name']['nowcast'])
+        host_name, host['ssh key name']['nowcast']
+    )
     # Neah Bay sea surface height
     for day in range(-1, 2):
         filename = config['ssh']['file template'].format(
-            run_date.replace(days=day).date())
+            run_date.replace(days=day).date()
+        )
         dest_dir = 'obs' if day == -1 else 'fcst'
         localpath = os.path.join(config['ssh']['ssh_dir'], dest_dir, filename)
         remotepath = os.path.join(host['ssh_dir'], dest_dir, filename)
@@ -131,7 +141,8 @@ def upload_all_files(host_name, run_date, config):
                 extra={
                     'host_name': host_name,
                     'date': run_date,
-                })
+                }
+            )
             upload_file(sftp_client, host_name, localpath, remotepath)
     # Rivers runoff
     for tmpl in config['rivers']['file templates'].values():
@@ -142,28 +153,34 @@ def upload_all_files(host_name, run_date, config):
     # Weather
     for day in range(-1, 2):
         filename = config['weather']['file template'].format(
-            run_date.replace(days=day).date())
+            run_date.replace(days=day).date()
+        )
         dest_dir = '' if day <= 0 else 'fcst'
         localpath = os.path.join(
-            config['weather']['ops_dir'], dest_dir, filename)
+            config['weather']['ops_dir'], dest_dir, filename
+        )
         remotepath = os.path.join(host['weather_dir'], dest_dir, filename)
         upload_file(sftp_client, host_name, localpath, remotepath)
     # Live Ocean Boundary Conditions
     for day in range(-1, 2):
         filename = config['temperature salinity']['file template'].format(
-            run_date.replace(days=day).date())
+            run_date.replace(days=day).date()
+        )
         dest_dir = '' if day <= 0 else 'fcst'
         localpath = os.path.join(
-            config['temperature salinity']['bc dir'], dest_dir, filename)
+            config['temperature salinity']['bc dir'], dest_dir, filename
+        )
         remotepath = os.path.join(
-            host['forcing']['bc dir'], dest_dir, filename)
+            host['forcing']['bc dir'], dest_dir, filename
+        )
         upload_file(sftp_client, host_name, localpath, remotepath)
 
     # Restart File
     prev_run_id = run_date.replace(days=-1).date()
     prev_run_dir = prev_run_id.strftime('%d%b%y').lower()
     local_dir = os.path.join(
-        config['run']['results archive']['nowcast'], prev_run_dir)
+        config['run']['results archive']['nowcast'], prev_run_dir
+    )
     localpath = glob.glob(os.path.join(local_dir, '*restart.nc'))
     filename = os.path.basename(localpath[0])
     remote_dir = os.path.join(host['results']['nowcast'], prev_run_dir)
@@ -181,15 +198,17 @@ def upload_file(sftp_client, host_name, localpath, remotepath):
     sftp_client.chmod(remotepath, lib.PERMS_RW_RW_R)
     logger.debug(
         '{local} uploaded to {host} at {remote}'
-        .format(local=localpath, host=host_name, remote=remotepath))
+        .format(local=localpath, host=host_name, remote=remotepath)
+    )
 
 
 def make_remote_directory(sftp_client, host_name, remote_dir):
     sftp_client.mkdir(remote_dir, mode=lib.PERMS_RWX_RWX_R_X)
     logger.debug(
         '{remote} directory made on {host}'
-        .format(remote=remote_dir, host=host_name))
+        .format(remote=remote_dir, host=host_name)
+    )
 
 
 if __name__ == '__main__':
-    main()
+    main()  # pragma: no cover

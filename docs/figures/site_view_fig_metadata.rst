@@ -130,3 +130,22 @@ Testing the Website View
 
 #. If you need to edit the :py:class:`~salishsea_site.views.salishseacast.FigureMetadata` for your figure,
    the web server will restart automatically when you save the file so that you can see your changes by refreshing the page in your browser.
+
+
+.. _SalishseacastAutomaticCodeFormatting:
+
+Automatic Code Formatting
+=========================
+
+The :kbd:`salishsea_site` package uses the `yapf`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+
+.. _yapf: https://github.com/google/yapf
+.. _PEP 8: https://www.python.org/dev/peps/pep-0008/
+
+:command:`yapf` is installed as part of the :ref:`NowcastFiguresDevEnv` setup.
+
+Before each commit of the :py:mod:`salishsea_site.views.salishseacast` module please run :program:`yapf` to automatically format the code with the command:
+
+.. code-block:: bash
+
+    $ yapf --in-place salishsea_site/views/salishseacast.py

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea WaveWatch3 forecast worker make_ww3_current_file
 worker.
 """
@@ -46,9 +45,12 @@ def config():
             }
         },
         'wave forecasts': {
-            'run prep dir': '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs',
-            'grid dir': 'grid/',
-            'current file template': 'SoG_current_{yyyymmdd}.nc',
+            'run prep dir':
+                '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs',
+            'grid dir':
+                'grid/',
+            'current file template':
+                'SoG_current_{yyyymmdd}.nc',
             'NEMO file template':
                 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
         }
@@ -59,6 +61,7 @@ def config():
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         make_ww3_current_file.main()
         args, kwargs = m_worker.call_args
@@ -90,8 +93,8 @@ class TestMain:
         args, kwargs = m_worker().run.call_args
         expected = (
             make_ww3_current_file.make_ww3_current_file,
-            make_ww3_current_file.success,
-            make_ww3_current_file.failure)
+            make_ww3_current_file.success, make_ww3_current_file.failure
+        )
         assert args == expected
 
 
@@ -103,10 +106,13 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         make_ww3_current_file.success(parsed_args)
         assert m_logger.info.called
         expected = '2017-04-07 00:00:00 +00:00'
@@ -114,8 +120,10 @@ class TestSuccess:
 
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         msg_type = make_ww3_current_file.success(parsed_args)
         assert msg_type == f'success {run_type}'
 
@@ -128,10 +136,13 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         make_ww3_current_file.failure(parsed_args)
         assert m_logger.critical.called
         expected = '2017-04-07 00:00:00 +00:00'
@@ -139,8 +150,10 @@ class TestFailure:
 
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-07'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-07')
+        )
         msg_type = make_ww3_current_file.failure(parsed_args)
         assert msg_type == f'failure {run_type}'
 
@@ -164,15 +177,18 @@ class TestMakeWW3CurrentFile:
     def test_checklist(
         self, m_calc_fcst2_datasets, m_calc_fcst_datasets, m_logger,
         m_open_dataset, m_open_mfdataset, m_rotate_vel, m_unstagger,
-        m_create_dataset,  run_type, config
+        m_create_dataset, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-12'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-12')
+        )
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
         checklist = make_ww3_current_file.make_ww3_current_file(
-            parsed_args, config)
+            parsed_args, config
+        )
         if run_type == 'forecast2':
             m_calc_fcst2_datasets.assert_called_once_with(
                 arrow.get('2017-04-12'),
@@ -189,7 +205,8 @@ class TestMakeWW3CurrentFile:
         assert checklist == {
             run_type:
                 '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/'
-                'SoG_current_20170412.nc'}
+                'SoG_current_20170412.nc'
+        }
 
     @pytest.mark.parametrize('run_type', [
         'forecast2',
@@ -200,8 +217,10 @@ class TestMakeWW3CurrentFile:
         m_unstagger, m_create_dataset, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-18'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-18')
+        )
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
         make_ww3_current_file.make_ww3_current_file(parsed_args, config)
@@ -216,8 +235,10 @@ class TestMakeWW3CurrentFile:
         m_unstagger, m_create_dataset, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-18'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-18')
+        )
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
         make_ww3_current_file.make_ww3_current_file(parsed_args, config)
@@ -245,8 +266,10 @@ class TestMakeWW3CurrentFile:
         m_unstagger, m_create_dataset, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name='west.cloud', run_type=run_type,
-            run_date=arrow.get('2017-04-18'))
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2017-04-18')
+        )
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
         make_ww3_current_file.make_ww3_current_file(parsed_args, config)
@@ -273,8 +296,10 @@ class TestCalcForecastDatasets:
 
     def test_forecast_datasets(self, m_logger):
         datasets = make_ww3_current_file._calc_forecast_datasets(
-            arrow.get('2017-04-12'), Path('/nemoShare/MEOPAR/SalishSea/'),
-            'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc')
+            arrow.get('2017-04-12'),
+            Path('/nemoShare/MEOPAR/SalishSea/'),
+            'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
+        )
         assert datasets == {
             'u': [
                 '/nemoShare/MEOPAR/SalishSea/nowcast/12apr17/'
@@ -299,9 +324,11 @@ class TestCalcForecast2Datasets:
 
     def test_forecast2_datasets(self, m_run, m_logger):
         datasets = make_ww3_current_file._calc_forecast2_datasets(
-            arrow.get('2017-04-13'), Path('/nemoShare/MEOPAR/SalishSea/'),
+            arrow.get('2017-04-13'),
+            Path('/nemoShare/MEOPAR/SalishSea/'),
             'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
-            Path('/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current'))
+            Path('/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current')
+        )
         assert datasets == {
             'u': [
                 '/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/'

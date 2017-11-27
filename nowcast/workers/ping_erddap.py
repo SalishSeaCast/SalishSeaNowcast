@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea nowcast worker that creates flag files to tell the ERDDAP
 server to reload datasets for which new results have been downloaded.
 """
@@ -20,7 +19,6 @@ import logging
 from pathlib import Path
 
 from nemo_nowcast import NowcastWorker
-
 
 NAME = 'ping_erddap'
 logger = logging.getLogger(NAME)
@@ -39,9 +37,12 @@ def main():
         'dataset',
         choices={
             'download_weather',
-            'SCVIP-CTD', 'SEVIP-CTD', 'USDDL-CTD',
+            'SCVIP-CTD',
+            'SEVIP-CTD',
+            'USDDL-CTD',
             'TWDP-ferry',
-            'nowcast-green', 'nemo-forecast',
+            'nowcast-green',
+            'nemo-forecast',
         },
         help='''
         Type of dataset to notify ERDDAP of:
@@ -64,7 +65,10 @@ def main():
 def success(parsed_args):
     logger.info(
         f'{parsed_args.dataset} ERDDAP dataset flag file(s) created',
-        extra={'dataset': parsed_args.dataset})
+        extra={
+            'dataset': parsed_args.dataset
+        }
+    )
     msg_type = f'success {parsed_args.dataset}'
     return msg_type
 
@@ -72,7 +76,10 @@ def success(parsed_args):
 def failure(parsed_args):
     logger.critical(
         f'{parsed_args.dataset} ERDDAP dataset flag file(s) creation failed',
-        extra={'dataset': parsed_args.dataset})
+        extra={
+            'dataset': parsed_args.dataset
+        }
+    )
     msg_type = f'failure {parsed_args.dataset}'
     return msg_type
 

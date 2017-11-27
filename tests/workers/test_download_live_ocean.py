@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast download_live_ocean worker.
 """
 import os
@@ -29,6 +28,7 @@ from nowcast.workers import download_live_ocean
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         download_live_ocean.main()
         args, kwargs = m_worker.call_args
@@ -47,8 +47,8 @@ class TestMain:
         args, kwargs = m_worker().run.call_args
         expected = (
             download_live_ocean.download_live_ocean,
-            download_live_ocean.success,
-            download_live_ocean.failure)
+            download_live_ocean.success, download_live_ocean.failure
+        )
         assert args == expected
 
 
@@ -56,6 +56,7 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     def test_success_log_info(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2016-11-24'))
         download_live_ocean.success(parsed_args)
@@ -66,12 +67,13 @@ class TestSuccess:
         parsed_args = SimpleNamespace(run_date=arrow.get('2016-11-24'))
         msg_type = download_live_ocean.success(parsed_args)
         assert msg_type == 'success'
-        
-        
+
+
 @patch('nowcast.workers.download_live_ocean.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     def test_failure_log_critical(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get('2016-11-24'))
         download_live_ocean.failure(parsed_args)
@@ -88,6 +90,7 @@ class TestFailure:
 class TestDownloadLiveOcean:
     """Unit test for download_live_ocean() function.
     """
+
     @patch('nowcast.workers.download_live_ocean.lib.mkdir')
     @patch('nowcast.workers.download_live_ocean._get_file')
     @patch('nowcast.workers.download_live_ocean.nemo_cmd.api.deflate')
@@ -105,8 +108,13 @@ class TestDownloadLiveOcean:
             }
         }
         m_get_file.return_value = Path(
-            '/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc')
-        checklist = download_live_ocean.download_live_ocean(parsed_args, config)
-        expected = {'2016-12-28':
-            '/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc'}
+            '/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc'
+        )
+        checklist = download_live_ocean.download_live_ocean(
+            parsed_args, config
+        )
+        expected = {
+            '2016-12-28':
+                '/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc'
+        }
         assert checklist == expected

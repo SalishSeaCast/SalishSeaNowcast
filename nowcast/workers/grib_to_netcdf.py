@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea NEMO nowcast weather forcing file generation worker.
 
 Collect weather forecast results from hourly GRIB2 files and produce
@@ -36,11 +35,9 @@ import numpy as np
 
 from nowcast import lib
 
-
 NAME = 'grib_to_netcdf'
 logger = logging.getLogger(NAME)
 wgrib2_logger = logging.getLogger('wgrib2')
-
 
 # Corners of sub-region of GEM 2.5km operational forecast grid
 # that enclose the watersheds (other than the Fraser River)
@@ -64,7 +61,8 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'run_type', choices={'nowcast+', 'forecast2'},
+        'run_type',
+        choices={'nowcast+', 'forecast2'},
         help='''
         Type of run to produce netCDF files for:
         'nowcast+' means nowcast & 1st forecast runs,
@@ -72,8 +70,10 @@ def main():
         ''',
     )
     worker.cli.add_date_option(
-        '--run-date', default=arrow.now().floor('day'),
-        help='Date of the run to produce netCDF files for.')
+        '--run-date',
+        default=arrow.now().floor('day'),
+        help='Date of the run to produce netCDF files for.'
+    )
     worker.run(grib_to_netcdf, success, failure)
 
 
@@ -81,7 +81,11 @@ def success(parsed_args):
     ymd = parsed_args.run_date.format('YYYY-MM-DD')
     logger.info(
         f'{ymd} NEMO-atmos forcing file for {parsed_args.run_type} created',
-        extra={'run_date': ymd, 'run_type': parsed_args.run_type})
+        extra={
+            'run_date': ymd,
+            'run_type': parsed_args.run_type
+        }
+    )
     msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
@@ -91,7 +95,11 @@ def failure(parsed_args):
     logger.critical(
         f'{ymd} NEMO-atmos forcing file creation for {parsed_args.run_type} '
         f'failed',
-        extra={'run_date': ymd, 'run_type': parsed_args.run_type})
+        extra={
+            'run_date': ymd,
+            'run_type': parsed_args.run_type
+        }
+    )
     msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
@@ -115,17 +123,18 @@ def grib_to_netcdf(parsed_args, config, *args):
     checklist = {}
     ip = 0
     for fcst_section_hrs, zstart, flen, subdir, ymd in zip(
-            fcst_section_hrs_arr, zerostart, length, subdirectory,
-            yearmonthday):
+        fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday
+    ):
         _rotate_grib_wind(config, fcst_section_hrs)
         _collect_grib_scalars(config, fcst_section_hrs)
         outgrib, outzeros = _concat_hourly_gribs(config, ymd, fcst_section_hrs)
         outgrib, outzeros = _crop_to_watersheds(
-            config, ymd, IST, IEN, JST, JEN, outgrib, outzeros)
+            config, ymd, IST, IEN, JST, JEN, outgrib, outzeros
+        )
         outnetcdf, out0netcdf = _make_netCDF_files(
-            config, ymd, subdir, outgrib, outzeros)
-        _calc_instantaneous(
-            outnetcdf, out0netcdf, ymd, flen, zstart, axs)
+            config, ymd, subdir, outgrib, outzeros
+        )
+        _calc_instantaneous(outnetcdf, out0netcdf, ymd, flen, zstart, axs)
         _change_to_NEMO_variable_names(outnetcdf, axs, ip)
         ip += 1
 
@@ -164,9 +173,9 @@ def _define_forecast_segments_nowcast(rundate):
     logger.debug(f'forecast sections: {p1} {p2} {p3}')
     fcst_section_hrs_arr[0] = OrderedDict([
         # (part, (dir, real start hr, forecast start hr, end hr))
-        ('section 1', (p1, -1, 24-18-1, 24-18+0)),
-        ('section 2', (p2, 1, 1-0, 12-0)),
-        ('section 3', (p3, 13, 13-12, 23-12)),
+        ('section 1', (p1, -1, 24 - 18 - 1, 24 - 18 + 0)),
+        ('section 2', (p2, 1, 1 - 0, 12 - 0)),
+        ('section 3', (p3, 13, 13 - 12, 23 - 12)),
     ])
     zerostart = [[1, 13]]
     length = [24]
@@ -178,7 +187,7 @@ def _define_forecast_segments_nowcast(rundate):
     logger.debug(f'tomorrow forecast section: {p1}')
     fcst_section_hrs_arr[1] = OrderedDict([
         # (part, (dir, start hr, end hr))
-        ('section 1', (p1, -1, 24-12-1, 24+23-12)),
+        ('section 1', (p1, -1, 24 - 12 - 1, 24 + 23 - 12)),
     ])
     zerostart.append([])
     length.append(24)
@@ -190,14 +199,15 @@ def _define_forecast_segments_nowcast(rundate):
     logger.debug(f'next day forecast section: {p1}')
     fcst_section_hrs_arr[2] = OrderedDict([
         # (part, (dir, start hr, end hr))
-        ('section 1', (p1, -1, 24+24-12-1, 24+24+12-12)),
+        ('section 1', (p1, -1, 24 + 24 - 12 - 1, 24 + 24 + 12 - 12)),
     ])
     zerostart.append([])
     length.append(13)
     subdirectory.append('fcst')
     yearmonthday.append(nextday.strftime('y%Ym%md%d'))
-    return (fcst_section_hrs_arr, zerostart, length, subdirectory,
-            yearmonthday)
+    return (
+        fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday
+    )
 
 
 def _define_forecast_segments_forecast2(rundate):
@@ -216,7 +226,7 @@ def _define_forecast_segments_forecast2(rundate):
     p1 = os.path.join(today.format('YYYYMMDD'), '06')
     logger.info(f'forecast section: {p1}')
     fcst_section_hrs_arr[0] = OrderedDict([
-        ('section 1', (p1, -1, 24-6-1, 24+23-6)),
+        ('section 1', (p1, -1, 24 - 6 - 1, 24 + 23 - 6)),
     ])
     zerostart = [[]]
     length = [24]
@@ -228,15 +238,16 @@ def _define_forecast_segments_forecast2(rundate):
     logger.info(f'next day forecast section: {p1}')
     fcst_section_hrs_arr[1] = OrderedDict([
         # (part, (dir, start hr, end hr))
-        ('section 1', (p1, -1, 24+24-6-1, 24+24+6-6)),
+        ('section 1', (p1, -1, 24 + 24 - 6 - 1, 24 + 24 + 6 - 6)),
     ])
     zerostart.append([])
     length.append(7)
     subdirectory.append('fcst')
     yearmonthday.append(nextday.strftime('y%Ym%md%d'))
 
-    return (fcst_section_hrs_arr, zerostart, length, subdirectory,
-            yearmonthday)
+    return (
+        fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday
+    )
 
 
 def _rotate_grib_wind(config, fcst_section_hrs):
@@ -275,13 +286,13 @@ def _rotate_grib_wind(config, fcst_section_hrs):
                 fn = glob.glob(pattern)
                 try:
                     if os.stat(fn[0]).st_size == 0:
-                        logger.critical(
-                            f'Problem: 0 size file {fn[0]}')
+                        logger.critical(f'Problem: 0 size file {fn[0]}')
                         raise WorkerError
                 except IndexError:
                     logger.critical(
                         f'No GRIB files match pattern; a previous download;'
-                        f' may have failed: {pattern}')
+                        f' may have failed: {pattern}'
+                    )
                     raise WorkerError
                 cmd = [wgrib2, fn[0], '-append', '-grib', outuv]
                 lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
@@ -309,13 +320,14 @@ def _collect_grib_scalars(config, fcst_section_hrs):
     # grid_defn.pl expects to find wgrib2 in the pwd,
     # create a symbolic link to keep it happy
     os.symlink(wgrib2, 'wgrib2')
-    for day_fcst,  realstart, start_hr, end_hr in fcst_section_hrs.values():
+    for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
             sfhour = f'{fhour:03d}'
             outscalar = os.path.join(GRIBdir, day_fcst, sfhour, 'scalar.grib')
             outscalargrid = os.path.join(
-                GRIBdir, day_fcst, sfhour, 'gscalar.grib')
+                GRIBdir, day_fcst, sfhour, 'gscalar.grib'
+            )
             # Delete residual instances of files that are created so that
             # function can be re-run cleanly
             try:
@@ -331,7 +343,8 @@ def _collect_grib_scalars(config, fcst_section_hrs):
                 if not ('GRD' in fn) and ('CMC' in fn):
                     cmd = [wgrib2, fn, '-append', '-grib', outscalar]
                     lib.run_in_subprocess(
-                        cmd, wgrib2_logger.debug, logger.error)
+                        cmd, wgrib2_logger.debug, logger.error
+                    )
             #  Re-grid
             GRIDspec = subprocess.check_output([grid_defn, outscalar])
             cmd = [wgrib2, outscalar]
@@ -368,14 +381,15 @@ def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
         os.remove(outzeros)
     except OSError:
         pass
-    for day_fcst,  realstart, start_hr, end_hr in fcst_section_hrs.values():
+    for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
             sfhour = f'{fhour:03d}'
             outuvrot = os.path.join(GRIBdir, day_fcst, sfhour, 'UVrot.grib')
             outscalargrid = os.path.join(
-                GRIBdir, day_fcst, sfhour, 'gscalar.grib')
-            if (fhour == start_hr and realstart == -1):
+                GRIBdir, day_fcst, sfhour, 'gscalar.grib'
+            )
+            if fhour == start_hr and realstart == -1:
                 cmd = [wgrib2, outuvrot, '-append', '-grib', outzeros]
                 lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
                 cmd = [wgrib2, outscalargrid, '-append', '-grib', outzeros]
@@ -389,16 +403,16 @@ def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
             os.remove(outscalargrid)
     logger.debug(
         f'concatenated variables in hour order from hourly files to daily '
-        f'file {outgrib}')
+        f'file {outgrib}'
+    )
     logger.debug(
         f'created zero-hour file for initialization of accumulated -> '
-        f'instantaneous values calculations: {outzeros}')
+        f'instantaneous values calculations: {outzeros}'
+    )
     return outgrib, outzeros
 
 
-def _crop_to_watersheds(
-    config, ymd, ist, ien, jst, jen, outgrib, outzeros,
-):
+def _crop_to_watersheds(config, ymd, ist, ien, jst, jen, outgrib, outzeros):
     """Crop the grid to the sub-region of GEM 2.5km operational forecast
     grid that encloses the watersheds that are used to calculate river
     flows for runoff forcing files for the Salish Sea NEMO model.
@@ -461,27 +475,31 @@ def _calc_instantaneous(outnetcdf, out0netcdf, ymd, flen, zstart, axs):
     axs[1, 0].plot(acc_values['acc']['APCP_surface'][:, SandI, SandJ], 'o-')
 
     for var in acc_vars:
-        acc_values['inst'][var][0] = (
-            acc_values['acc'][var][0] - acc_values['zero'][var][0]) / 3600
+        acc_values['inst'][var][0] = ((
+            acc_values['acc'][var][0] - acc_values['zero'][var][0]
+        ) / 3600)
         for realhour in range(1, flen):
             if realhour in zstart:
                 acc_values['inst'][var][realhour] = (
-                    acc_values['acc'][var][realhour] / 3600)
+                    acc_values['acc'][var][realhour] / 3600
+                )
             else:
                 acc_values['inst'][var][realhour] = (
-                    acc_values['acc'][var][realhour]
-                    - acc_values['acc'][var][realhour-1]) / 3600
+                    acc_values['acc'][var][realhour] -
+                    acc_values['acc'][var][realhour - 1]
+                ) / 3600
 
     axs[1, 1].plot(
-        acc_values['inst']['APCP_surface'][:, SandI, SandJ], 'o-',
-        label=ymd)
+        acc_values['inst']['APCP_surface'][:, SandI, SandJ], 'o-', label=ymd
+    )
 
     for var in acc_vars:
         data.variables[var][:] = acc_values['inst'][var][:]
     data.close()
     logger.debug(
         'calculated instantaneous values from forecast accumulated values '
-        'for precipitation and long- & short-wave radiation')
+        'for precipitation and long- & short-wave radiation'
+    )
 
 
 def _change_to_NEMO_variable_names(outnetcdf, axs, ip):
@@ -493,8 +511,8 @@ def _change_to_NEMO_variable_names(outnetcdf, axs, ip):
     data.renameVariable('longitude', 'nav_lon')
     data.renameVariable('time', 'time_counter')
     time_counter = data.variables['time_counter']
-    time_counter.time_origin = arrow.get(
-        '1970-01-01 00:00:00').format('YYYY-MMM-DD HH:mm:ss')
+    time_counter.time_origin = arrow.get('1970-01-01 00:00:00'
+                                         ).format('YYYY-MMM-DD HH:mm:ss')
     data.renameVariable('UGRD_10maboveground', 'u_wind')
     data.renameVariable('VGRD_10maboveground', 'v_wind')
     data.renameVariable('DSWRF_surface', 'solar')
@@ -530,8 +548,9 @@ def _change_to_NEMO_variable_names(outnetcdf, axs, ip):
     axs[3, 0].plot(uwind[:, SandI, SandJ], '-o')
     vwind = data.variables['v_wind'][:]
     axs[3, 1].plot(vwind[:, SandI, SandJ], '-o')
-    axs[3, 2].plot(np.sqrt(
-        uwind[:, SandI, SandJ]**2 + vwind[:, SandI, SandJ]**2), '-o')
+    axs[3, 2].plot(
+        np.sqrt(uwind[:, SandI, SandJ]**2 + vwind[:, SandI, SandJ]**2), '-o'
+    )
 
     data.close()
 

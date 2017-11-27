@@ -12,16 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast split_results worker.
 """
 from unittest.mock import (
     Mock,
     patch,
 )
-
-import arrow
-import pytest
 
 from nowcast.workers import split_results
 
@@ -30,6 +26,7 @@ from nowcast.workers import split_results
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         split_results.main()
         args, kwargs = m_worker.call_args
@@ -63,6 +60,7 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     def test_success_log_info(self):
         parsed_args = Mock(run_type='hindcast')
         with patch('nowcast.workers.split_results.logger') as m_logger:
@@ -80,12 +78,14 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     def test_failure_log_info(self):
         parsed_args = Mock(run_type='hindcast')
         with patch('nowcast.workers.split_results.logger') as m_logger:
             split_results.failure(parsed_args)
         assert m_logger.critical.called
-        assert m_logger.critical.call_args[1]['extra']['run_type'] == 'hindcast'
+        assert m_logger.critical.call_args[1]['extra']['run_type'
+                                                       ] == 'hindcast'
 
     def test_failure_msg_type(self):
         parsed_args = Mock(run_type='hindcast')

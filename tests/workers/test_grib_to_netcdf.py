@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Unit tests for Salish Sea NEMO nowcast grib_to_netcdf worker.
 """
 from unittest.mock import (
@@ -30,6 +29,7 @@ from nowcast.workers import grib_to_netcdf
 class TestMain:
     """Unit tests for main() function.
     """
+
     def test_instantiate_worker(self, m_worker):
         grib_to_netcdf.main()
         args, kwargs = m_worker.call_args
@@ -63,6 +63,7 @@ class TestMain:
 class TestSuccess:
     """Unit tests for success() function.
     """
+
     @pytest.mark.parametrize('run_type', [
         'nowcast+',
         'forecast2',
@@ -88,6 +89,7 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function.
     """
+
     @pytest.mark.parametrize('run_type', [
         'nowcast+',
         'forecast2',

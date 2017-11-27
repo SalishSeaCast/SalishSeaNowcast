@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea WaveWatch3 forecast worker that prepares the temporary run
 directory and bash run script for a prelim-forecast or forecast run on the 
 ONC cloud, and launches the run.
@@ -28,7 +27,6 @@ import arrow
 from nemo_nowcast import NowcastWorker
 from nemo_nowcast.fileutils import FilePerms
 
-
 NAME = 'run_ww3'
 logger = logging.getLogger(NAME)
 
@@ -43,8 +41,8 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name',
-        help='Name of the host to execute the run on')
+        'host_name', help='Name of the host to execute the run on'
+    )
     worker.cli.add_argument(
         'run_type',
         choices={'forecast2', 'forecast'},
@@ -55,8 +53,10 @@ def main():
         ''',
     )
     worker.cli.add_date_option(
-        '--run-date', default=arrow.now().floor('day'),
-        help='Date to execute the run for.')
+        '--run-date',
+        default=arrow.now().floor('day'),
+        help='Date to execute the run for.'
+    )
     worker.run(run_ww3, success, failure)
 
 
@@ -75,7 +75,8 @@ def success(parsed_args):
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
@@ -95,7 +96,8 @@ def failure(parsed_args):
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
@@ -114,8 +116,9 @@ def run_ww3(parsed_args, config, *args):
     run_dir_path = _build_tmp_run_dir(run_date, run_type, config)
     logger.info(f'Created run directory {run_dir_path}')
     results_path = Path(config['wave forecasts']['results'][run_type])
-    script = _build_run_script(run_date, run_type, run_dir_path, results_path,
-                               config)
+    script = _build_run_script(
+        run_date, run_type, run_dir_path, results_path, config
+    )
     run_script_path = _write_run_script(run_type, script, run_dir_path)
     run_exec_cmd = _launch_run(run_type, run_script_path, host_name)
     checklist = {
@@ -152,7 +155,7 @@ def _make_run_dir(run_prep_dir):
     :return: Temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
-    run_dir_path = run_prep_dir/str(uuid.uuid1())
+    run_dir_path = run_prep_dir / str(uuid.uuid1())
     run_dir_path.mkdir(mode=0o775)
     return run_dir_path
 
@@ -218,6 +221,7 @@ $ Forcing source file path/name
 $ File is produced by make_ww3_wind_file worker
   'wind/SoG_wind_{start_date}.nc'
 '''
+
     return contents
 
 
@@ -246,6 +250,7 @@ $ Forcing source file path/name
 $ File is produced by make_ww3_current_file worker
   'current/SoG_current_{start_date}.nc'
 '''
+
     return contents
 
 
@@ -313,6 +318,7 @@ $
 $ Homogeneous field data (required placeholder for unused feature)
   ’STP’
 '''
+
     return contents
 
 
@@ -351,6 +357,7 @@ $
   8
   1 1000000 1 1000000
 '''
+
     return contents
 
 
@@ -387,6 +394,7 @@ $ WMO standard output
   T
   6
 '''
+
     start_date = run_date.format('YYYYMMDD')
     return contents
 
@@ -405,17 +413,17 @@ def _build_run_script(run_date, run_type, run_dir_path, results_path, config):
     script = (
         '#!/bin/bash\n'
         'set -e  # abort on first error\n'
-        'set -u  # abort if undefinded variable is encountered\n')
+        'set -u  # abort if undefinded variable is encountered\n'
+    )
     script = '\n'.join((
-        script,
-        '{defns}\n'
+        script, '{defns}\n'
         '{prepare}\n'
         '{execute}\n'
         '{netcdf_output}\n'
-        '{cleanup}'
-        .format(
+        '{cleanup}'.format(
             defns=_definitions(
-                run_date, run_type, run_dir_path, results_path, config),
+                run_date, run_type, run_dir_path, results_path, config
+            ),
             prepare=_prepare(),
             execute=_execute(run_date),
             netcdf_output=_netcdf_output(run_date),
@@ -516,11 +524,13 @@ def _netcdf_output(run_date):
     end_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
     fields_files = ' '.join(
         f'SoG_ww3_fields_{day.format("YYYYMMDD")}.nc'
-        for day in arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
+        for day in
+        arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
     )
     points_files = ' '.join(
         f'SoG_ww3_points_{day.format("YYYYMMDD")}_tab.nc'
-        for day in arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
+        for day in
+        arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
     )
     output_to_netcdf = (
         'echo "Starting netCDF4 fields output at $(date)" '
@@ -574,7 +584,7 @@ def _write_run_script(run_type, script, run_dir_path):
     :return: wwatch3 run set-up and execution script path
     :rtype: :py:class:`pathlib.Path`
     """
-    run_script_path = run_dir_path/'SoGWW3.sh'
+    run_script_path = run_dir_path / 'SoGWW3.sh'
     with run_script_path.open('wt') as f:
         f.write(script)
     run_script_path.chmod(FilePerms(user='rwx', group='rwx', other='r'))
@@ -595,14 +605,18 @@ def _launch_run(run_type, run_script_path, host_name):
     run_exec_cmd = f'bash {run_script_path}'
     logger.debug(
         f'{run_type}: running command in subprocess: '
-        f'{shlex.split(run_exec_cmd)}')
+        f'{shlex.split(run_exec_cmd)}'
+    )
     subprocess.Popen(shlex.split(run_exec_cmd))
     run_process_pid = None
     while not run_process_pid:
         try:
             proc = subprocess.run(
                 shlex.split(f'pgrep --full "{run_exec_cmd}"'),
-                stdout=subprocess.PIPE, check=True, universal_newlines=True)
+                stdout=subprocess.PIPE,
+                check=True,
+                universal_newlines=True
+            )
             run_process_pid = int(proc.stdout)
         except subprocess.CalledProcessError:
             # Process has not yet been spawned

@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 """Salish Sea nowcast worker that splits downloaded results of multi-day runs
 (e.g. hindcast runs) into daily results directories.
 The results files are renamed so that they look like they came from a
@@ -26,7 +25,6 @@ from pathlib import Path
 import arrow
 import shutil
 from nemo_nowcast import NowcastWorker
-
 
 NAME = 'split_results'
 logger = logging.getLogger(NAME)
@@ -47,10 +45,12 @@ def main():
         help='Type of run to split results files from.',
     )
     worker.cli.add_argument(
-        'run_date', type=worker.cli._arrow_date,
+        'run_date',
+        type=worker.cli._arrow_date,
         help=(
             'Date of the 1st day of the run to split results files from.'
-            'Use YYYY-MM-DD format.')
+            'Use YYYY-MM-DD format.'
+        )
     )
     worker.run(split_results, success, failure)
 
@@ -62,7 +62,8 @@ def success(parsed_args):
         extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = '{} {}'.format('success', parsed_args.run_type)
     return msg_type
 
@@ -74,7 +75,8 @@ def failure(parsed_args):
         extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     msg_type = '{} {}'.format('failure', parsed_args.run_type)
     return msg_type
 
@@ -85,14 +87,16 @@ def split_results(parsed_args, config, *args):
     logger.info(
         'splitting {run_date} {run_type} results files '
         'into daily directories'.format(
-            run_date=run_date.format('YYYY-MM-DD'), run_type=run_type),
+            run_date=run_date.format('YYYY-MM-DD'), run_type=run_type
+        ),
         extra={
             'run_type': run_type,
             'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        })
+        }
+    )
     results_dir = run_date.format('DDMMMYY').lower()
     run_type_results = Path(config['results archive'][run_type])
-    src_dir = run_type_results/results_dir
+    src_dir = run_type_results / results_dir
     last_date = run_date
     checklist = set()
     for fp in src_dir.glob('*.nc'):
@@ -101,24 +105,27 @@ def split_results(parsed_args, config, *args):
         date = arrow.get(fp.stem[-8:], 'YYYYMMDD')
         checklist.add(date.format('YYYY-MM-DD'))
         last_date = max(date, last_date)
-        dest_dir = run_type_results/date.format('DDMMMYY').lower()
+        dest_dir = run_type_results / date.format('DDMMMYY').lower()
         dest_dir.mkdir(exist_ok=True)
         if fp.stem.startswith('SalishSea_1'):
             fn = Path(
                 '{prefix}_{date}_{date}_{grid}'.format(
                     prefix=fp.stem[:12],
                     date=date.format('YYYYMMDD'),
-                    grid=fp.stem[31:37])).with_suffix('.nc')
+                    grid=fp.stem[31:37]
+                )
+            ).with_suffix('.nc')
         else:
             fn = Path(fp.stem[:-18]).with_suffix('.nc')
-        dest = dest_dir/fn
+        dest = dest_dir / fn
         shutil.move(str(fp), str(dest))
         logger.debug('moved {fp} to {dest}'.format(fp=fp, dest=dest))
     for fp in src_dir.glob('SalishSea_*_restart*.nc'):
-        dest_dir = run_type_results/last_date.format('DDMMMYY').lower()
+        dest_dir = run_type_results / last_date.format('DDMMMYY').lower()
         shutil.move(str(fp), str(dest_dir))
         logger.debug(
-            'moved {fp} to {dest_dir}'.format(fp=fp, dest_dir=dest_dir))
+            'moved {fp} to {dest_dir}'.format(fp=fp, dest_dir=dest_dir)
+        )
     return checklist
 
 

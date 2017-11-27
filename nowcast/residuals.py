@@ -12,8 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
 """A collection of Python functions to produce model residual calculations and
 visualizations.
 """
@@ -43,18 +41,22 @@ from nowcast.figures import shared
 
 # Module constants
 
-paths = {'nowcast': '/results/SalishSea/nowcast/',
-         'forecast': '/results/SalishSea/forecast/',
-         'forecast2': '/results/SalishSea/forecast2/',
-         'tides': '/data/nsoontie/MEOPAR/tools/SalishSeaNowcast/tidal_predictions/'}
+paths = {
+    'nowcast': '/results/SalishSea/nowcast/',
+    'forecast': '/results/SalishSea/forecast/',
+    'forecast2': '/results/SalishSea/forecast2/',
+    'tides': '/data/nsoontie/MEOPAR/tools/SalishSeaNowcast/tidal_predictions/'
+}
 
-colours = {'nowcast': 'DodgerBlue',
-           'forecast': 'ForestGreen',
-           'forecast2': 'MediumVioletRed',
-           'observed': 'Indigo',
-           'predicted': 'ForestGreen',
-           'model': 'blue',
-           'residual': 'DimGray'}
+colours = {
+    'nowcast': 'DodgerBlue',
+    'forecast': 'ForestGreen',
+    'forecast2': 'MediumVioletRed',
+    'observed': 'Indigo',
+    'predicted': 'ForestGreen',
+    'model': 'blue',
+    'residual': 'DimGray'
+}
 
 SITES = {
     # Constant with station information: mean sea level, latitude,
@@ -66,70 +68,85 @@ SITES = {
         'lat': 49.16,
         'lon': -123.93,
         'msl': 3.08,
-        'extreme_ssh': 5.47},
+        'extreme_ssh': 5.47
+    },
     'Halibut Bank': {
         'lat': 49.34,
-        'lon': -123.72},
+        'lon': -123.72
+    },
     'Dungeness': {
         'lat': 48.15,
-        'lon': -123.117},
+        'lon': -123.117
+    },
     'La Perouse Bank': {
         'lat': 48.83,
-        'lon': -126.0},
+        'lon': -126.0
+    },
     'Point Atkinson': {
         'lat': 49.33,
         'lon': -123.25,
         'msl': 3.09,
         'stn_no': 7795,
-        'extreme_ssh': 5.61},
+        'extreme_ssh': 5.61
+    },
     'Victoria': {
         'lat': 48.41,
         'lon': -123.36,
         'msl': 1.8810,
         'stn_no': 7120,
-        'extreme_ssh': 3.76},
+        'extreme_ssh': 3.76
+    },
     'Campbell River': {
         'lat': 50.04,
         'lon': -125.24,
         'msl': 2.916,
         'stn_no': 8074,
-        'extreme_ssh': 5.35},
+        'extreme_ssh': 5.35
+    },
     'Neah Bay': {
         'lat': 48.4,
         'lon': -124.6,
-        'stn_no':  9443090},
+        'stn_no': 9443090
+    },
     'Friday Harbor': {
         'lat': 48.55,
         'lon': -123.016667,
-        'stn_no': 9449880},
+        'stn_no': 9449880
+    },
     'Cherry Point': {
         'lat': 48.866667,
         'lon': -122.766667,
         'stn_no': 9449424,
         'msl': 3.543,
-        'extreme_ssh': 5.846},
+        'extreme_ssh': 5.846
+    },
     'SandHeads': {
         'lat': 49.10,
-        'lon': -123.30},
+        'lon': -123.30
+    },
     'Tofino': {
         'lat': 49.15,
         'lon': -125.91,
-        'stn_no': 8615},
+        'stn_no': 8615
+    },
     'Bamfield': {
         'lat': 48.84,
         'lon': -125.14,
-        'stn_no': 8545},
+        'stn_no': 8545
+    },
     'VENUS': {
         'East': {
             'lat': 49.0419,
             'lon': -123.3176,
-            'depth': 170},
+            'depth': 170
+        },
         'Central': {
             'lat': 49.0401,
             'lon': -123.4261,
-            'depth': 300}
+            'depth': 300
         }
     }
+}
 
 # Module functions
 
@@ -160,22 +177,28 @@ def plot_residual_forcing(ax, runs_list, t_orig):
     res_obs, obs = obs_residual_ssh_NOAA('Neah Bay', tides, sdt, sdt)
     # truncate and plot
     res_obs_trun, time_trun = analyze.truncate_data(
-        np.array(res_obs), np.array(obs.time), sdt, edt)
-    ax.plot(time_trun, res_obs_trun, colours['observed'],
-            label='observed', lw=2.5)
+        np.array(res_obs), np.array(obs.time), sdt, edt
+    )
+    ax.plot(
+        time_trun, res_obs_trun, colours['observed'], label='observed', lw=2.5
+    )
 
-   # plot forcing for each simulation
+    # plot forcing for each simulation
     for mode in runs_list:
         filename_NB, run_date = analyze.create_path(mode, t_orig, 'ssh*.txt')
         if filename_NB:
-            dates, surge, fflag = NeahBay_forcing_anom(filename_NB, run_date,
-                                                       paths['tides'])
-            surge_t, dates_t = analyze.truncate_data(np.array(surge),
-                                                     np.array(dates), sdt, edt)
+            dates, surge, fflag = NeahBay_forcing_anom(
+                filename_NB, run_date, paths['tides']
+            )
+            surge_t, dates_t = analyze.truncate_data(
+                np.array(surge), np.array(dates), sdt, edt
+            )
             ax.plot(dates_t, surge_t, label=mode, lw=2.5, color=colours[mode])
-    ax.set_title('Comparison of observed and forced sea surface'
-                 ' height residuals at Neah Bay:'
-                 '{t_forcing:%d-%b-%Y}'.format(t_forcing=t_orig))
+    ax.set_title(
+        'Comparison of observed and forced sea surface'
+        ' height residuals at Neah Bay:'
+        '{t_forcing:%d-%b-%Y}'.format(t_forcing=t_orig)
+    )
 
 
 def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
@@ -215,31 +238,45 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
         lat = SITES[name]['lat']
         lon = SITES[name]['lon']
         j, i = geo_tools.find_closest_model_point(
-            lon, lat, X, Y, land_mask=bathy.mask)
+            lon, lat, X, Y, land_mask=bathy.mask
+        )
         # Observed residuals and wlevs and tides
         ttide = shared.get_tides(name, path=paths['tides'])
         res_obs, wlev_meas = obs_residual_ssh(
-            name, ttide, t_orig_obs, t_final_obs)
+            name, ttide, t_orig_obs, t_final_obs
+        )
         # truncate and plot
         res_obs_trun, time_obs_trun = analyze.truncate_data(
-            np.array(res_obs), np.array(wlev_meas.time), sdt, edt)
-        ax.plot(time_obs_trun, res_obs_trun, c=colours['observed'],
-                lw=2.5, label='observed')
+            np.array(res_obs), np.array(wlev_meas.time), sdt, edt
+        )
+        ax.plot(
+            time_obs_trun,
+            res_obs_trun,
+            c=colours['observed'],
+            lw=2.5,
+            label='observed'
+        )
 
         for mode in runs_list:
             filename, run_date = analyze.create_path(
-                mode, t_orig, 'SalishSea_1h_*_grid_T.nc')
+                mode, t_orig, 'SalishSea_1h_*_grid_T.nc'
+            )
             grid_T = nc.Dataset(filename)
             res_mod, t_model, ssh_corr, ssh_mod = model_residual_ssh(
-                grid_T, j, i, ttide)
+                grid_T, j, i, ttide
+            )
             # truncate and plot
             res_mod_trun, t_mod_trun = analyze.truncate_data(
-                res_mod, t_model, sdt, edt)
-            ax.plot(t_mod_trun, res_mod_trun, label=mode,
-                    c=colours[mode], lw=2.5)
+                res_mod, t_model, sdt, edt
+            )
+            ax.plot(
+                t_mod_trun, res_mod_trun, label=mode, c=colours[mode], lw=2.5
+            )
 
-        ax.set_title('Comparison of modelled sea surface height residuals at'
-                     ' {station}: {t:%d-%b-%Y}'.format(station=name, t=t_orig))
+        ax.set_title(
+            'Comparison of modelled sea surface height residuals at'
+            ' {station}: {t:%d-%b-%Y}'.format(station=name, t=t_orig)
+        )
 
 
 def get_error_model(names, runs_list, grid_B, t_orig):
@@ -277,26 +314,33 @@ def get_error_model(names, runs_list, grid_B, t_orig):
         lat = SITES[name]['lat']
         lon = SITES[name]['lon']
         j, i = geo_tools.find_closest_model_point(
-            lon, lat, X, Y, land_mask=bathy.mask)
+            lon, lat, X, Y, land_mask=bathy.mask
+        )
         # Observed residuals and wlevs and tides
         ttide = shared.get_tides(name, path=paths['tides'])
         res_obs, wlev_meas = obs_residual_ssh(
-            name, ttide, t_orig_obs, t_final_obs)
+            name, ttide, t_orig_obs, t_final_obs
+        )
         res_obs_trun, time_obs_trun = analyze.truncate_data(
-            np.array(res_obs), np.array(wlev_meas.time), sdt, edt)
+            np.array(res_obs), np.array(wlev_meas.time), sdt, edt
+        )
 
         for mode in runs_list:
             filename, run_date = analyze.create_path(
-                mode, t_orig, 'SalishSea_1h_*_grid_T.nc')
+                mode, t_orig, 'SalishSea_1h_*_grid_T.nc'
+            )
             grid_T = nc.Dataset(filename)
             res_mod, t_model, ssh_corr, ssh_mod = model_residual_ssh(
-                grid_T, j, i, ttide)
+                grid_T, j, i, ttide
+            )
             # Truncate
             res_mod_trun, t_mod_trun = analyze.truncate_data(
-                res_mod, t_model, sdt, edt)
+                res_mod, t_model, sdt, edt
+            )
             # Error
-            error_mod = analyze.calculate_error(res_mod_trun, t_mod_trun,
-                                                res_obs_trun, time_obs_trun)
+            error_mod = analyze.calculate_error(
+                res_mod_trun, t_mod_trun, res_obs_trun, time_obs_trun
+            )
             error_mod_dict[name][mode] = error_mod
             t_mod_dict[name][mode] = t_mod_trun
 
@@ -323,7 +367,8 @@ def get_error_forcing(runs_list, t_orig):
     tides = shared.get_tides('Neah Bay', path=paths['tides'])
     res_obs, obs = obs_residual_ssh_NOAA('Neah Bay', tides, sdt, sdt)
     res_obs_trun, time_trun = analyze.truncate_data(
-        np.array(res_obs), np.array(obs.time), sdt, edt)
+        np.array(res_obs), np.array(obs.time), sdt, edt
+    )
 
     # calculate forcing error
     error_frc_dict = {}
@@ -331,12 +376,15 @@ def get_error_forcing(runs_list, t_orig):
     for mode in runs_list:
         filename_NB, run_date = analyze.create_path(mode, t_orig, 'ssh*.txt')
         if filename_NB:
-            dates, surge, fflag = NeahBay_forcing_anom(filename_NB, run_date,
-                                                       paths['tides'])
+            dates, surge, fflag = NeahBay_forcing_anom(
+                filename_NB, run_date, paths['tides']
+            )
             surge_t, dates_t = analyze.truncate_data(
-                np.array(surge), np.array(dates), sdt, edt)
+                np.array(surge), np.array(dates), sdt, edt
+            )
             error_frc = analyze.calculate_error(
-                surge_t, dates_t, res_obs_trun, obs.time)
+                surge_t, dates_t, res_obs_trun, obs.time
+            )
             error_frc_dict[mode] = error_frc
             t_frc_dict[mode] = dates_t
 
@@ -364,14 +412,22 @@ def plot_error_model(axs, names, runs_list, grid_B, t_orig):
     """
 
     error_mod_dict, t_mod_dict = get_error_model(
-        names, runs_list, grid_B, t_orig)
+        names, runs_list, grid_B, t_orig
+    )
 
     for ax, name in zip(axs, names):
-        ax.set_title('Comparison of modelled residual errors at {station}:'
-                     ' {t:%d-%b-%Y}'.format(station=name, t=t_orig))
+        ax.set_title(
+            'Comparison of modelled residual errors at {station}:'
+            ' {t:%d-%b-%Y}'.format(station=name, t=t_orig)
+        )
         for mode in runs_list:
-            ax.plot(t_mod_dict[name][mode], error_mod_dict[name][mode],
-                    label=mode, c=colours[mode], lw=2.5)
+            ax.plot(
+                t_mod_dict[name][mode],
+                error_mod_dict[name][mode],
+                label=mode,
+                c=colours[mode],
+                lw=2.5
+            )
 
 
 def plot_error_forcing(ax, runs_list, t_orig):
@@ -391,10 +447,17 @@ def plot_error_forcing(ax, runs_list, t_orig):
     error_frc_dict, t_frc_dict = get_error_forcing(runs_list, t_orig)
 
     for mode in runs_list:
-        ax.plot(t_frc_dict[mode], error_frc_dict[mode],
-                label=mode, c=colours[mode], lw=2.5)
-        ax.set_title('Comparison of observed and forced residual errors at '
-                     'Neah Bay: {t_forcing:%d-%b-%Y}'.format(t_forcing=t_orig))
+        ax.plot(
+            t_frc_dict[mode],
+            error_frc_dict[mode],
+            label=mode,
+            c=colours[mode],
+            lw=2.5
+        )
+        ax.set_title(
+            'Comparison of observed and forced residual errors at '
+            'Neah Bay: {t_forcing:%d-%b-%Y}'.format(t_forcing=t_orig)
+        )
 
 
 def plot_residual_error_all(subject, grid_B, t_orig, figsize=(20, 16)):
@@ -471,10 +534,8 @@ def combine_errors(name, mode, dates, grid_B):
     daily_time is an array of timea corresponding to daily means
     """
 
-    model = {'error': np.array([]),
-             'daily': np.array([])}
-    force = {'error': np.array([]),
-             'daily': np.array([])}
+    model = {'error': np.array([]), 'daily': np.array([])}
+    force = {'error': np.array([]), 'daily': np.array([])}
     time = np.array([])
     daily_time = np.array([])
 
@@ -483,20 +544,23 @@ def combine_errors(name, mode, dates, grid_B):
         if mode in analyze.verified_runs(t_sim):
             # retrieve forcing and model error
             e_frc_tmp, t_frc_tmp = get_error_forcing([mode], t_sim)
-            e_mod_tmp, t_mod_tmp = get_error_model([name], [mode],
-                                                   grid_B, t_sim)
+            e_mod_tmp, t_mod_tmp = get_error_model([name], [mode], grid_B,
+                                                   t_sim)
             e_frc_tmp = shared.interp_to_model_time(
-                t_mod_tmp[name][mode], e_frc_tmp[mode], t_frc_tmp[mode])
+                t_mod_tmp[name][mode], e_frc_tmp[mode], t_frc_tmp[mode]
+            )
             # append to larger array
             force['error'] = np.append(force['error'], e_frc_tmp)
             model['error'] = np.append(model['error'], e_mod_tmp[name][mode])
             time = np.append(time, t_mod_tmp[name][mode])
             # append daily mean error
             force['daily'] = np.append(force['daily'], np.nanmean(e_frc_tmp))
-            model['daily'] = np.append(model['daily'],
-                                       np.nanmean(e_mod_tmp[name][mode]))
-            daily_time = np.append(daily_time,
-                                   t_sim + datetime.timedelta(hours=12))
+            model['daily'] = np.append(
+                model['daily'], np.nanmean(e_mod_tmp[name][mode])
+            )
+            daily_time = np.append(
+                daily_time, t_sim + datetime.timedelta(hours=12)
+            )
         else:
             print('{} simulation for {} did not occur'.format(mode, t_sim))
 
@@ -508,9 +572,10 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
      between dates start and end for a simulation mode."""
 
     # array of dates for iteration
-    numdays = (end-start).days
-    dates = [start + datetime.timedelta(days=num)
-             for num in range(0, numdays+1)]
+    numdays = (end - start).days
+    dates = [
+        start + datetime.timedelta(days=num) for num in range(0, numdays + 1)
+    ]
     dates.sort()
 
     # intiialize figure and arrays
@@ -523,25 +588,41 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
     ax = axs[0]
     ax.plot(time, force['error'], 'b', label='Forcing error', lw=2)
     ax.plot(time, model['error'], 'g', lw=2, label='Model error')
-    ax.set_title('Comparison of {mode} error at'
-                 ' {name}'.format(mode=mode, name=name))
+    ax.set_title(
+        'Comparison of {mode} error at'
+        ' {name}'.format(mode=mode, name=name)
+    )
     ax.set_ylim([-.4, .4])
     hfmt = mdates.DateFormatter('%m/%d %H:%M')
 
     # Plotting daily mean
     ax = axs[1]
-    ax.plot(daily_time, force['daily'], 'b',
-            label='Forcing daily mean error', lw=2)
+    ax.plot(
+        daily_time,
+        force['daily'],
+        'b',
+        label='Forcing daily mean error',
+        lw=2
+    )
     ax.plot([time[0], time[-1]],
-            [np.nanmean(force['error']), np.nanmean(force['error'])],
-            '--b', label='Mean forcing error', lw=2)
-    ax.plot(daily_time, model['daily'], 'g', lw=2,
-            label='Model daily mean error')
+            [np.nanmean(force['error']),
+             np.nanmean(force['error'])],
+            '--b',
+            label='Mean forcing error',
+            lw=2)
+    ax.plot(
+        daily_time, model['daily'], 'g', lw=2, label='Model daily mean error'
+    )
     ax.plot([time[0], time[-1]],
-            [np.nanmean(model['error']), np.nanmean(model['error'])],
-            '--g', label='Mean model error', lw=2)
-    ax.set_title('Comparison of {mode} daily mean error at'
-                 ' {name}'.format(mode=mode, name=name))
+            [np.nanmean(model['error']),
+             np.nanmean(model['error'])],
+            '--g',
+            label='Mean model error',
+            lw=2)
+    ax.set_title(
+        'Comparison of {mode} daily mean error at'
+        ' {name}'.format(mode=mode, name=name)
+    )
     ax.set_ylim([-.4, .4])
 
     # Plot tides
@@ -556,7 +637,7 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
         ax.xaxis.set_major_formatter(hfmt)
         ax.legend(loc=2, ncol=4)
         ax.grid()
-        ax.set_xlim([start, end+datetime.timedelta(days=1)])
+        ax.set_xlim([start, end + datetime.timedelta(days=1)])
         ax.set_ylabel('[m]')
 
     return fig
@@ -583,8 +664,7 @@ def model_residual_ssh(grid_T, j, i, tides):
     ssh_mod = grid_T.variables['sossheig'][:, j, i]
     t_s, t_f, t_model = get_model_time_variables(grid_T)
     ssh_corr = shared.correct_model_ssh(ssh_mod, t_model, tides)
-    res_mod = compute_residual(
-        ssh_corr, t_model, tides)
+    res_mod = compute_residual(ssh_corr, t_model, tides)
     return res_mod, t_model, ssh_corr, ssh_mod
 
 
@@ -605,8 +685,8 @@ def obs_residual_ssh(name, tides, sdt, edt):
               tides (predicted tides)"""
     msl = SITES[name]['msl']
     obs = load_archived_observations(
-        name, sdt.strftime('%d-%b-%Y'),
-        edt.strftime('%d-%b-%Y'))
+        name, sdt.strftime('%d-%b-%Y'), edt.strftime('%d-%b-%Y')
+    )
     residual = compute_residual(obs.wlev - msl, obs.time, tides)
 
     return residual, obs
@@ -635,9 +715,9 @@ def obs_residual_ssh_NOAA(name, tides, sdt, edt, product='hourly_height'):
     sites = SITES
     start_date = sdt.strftime('%d-%b-%Y')
     end_date = edt.strftime('%d-%b-%Y')
-    obs = get_NOAA_wlevels(sites[name]['stn_no'],
-                           start_date, end_date,
-                           product=product)
+    obs = get_NOAA_wlevels(
+        sites[name]['stn_no'], start_date, end_date, product=product
+    )
 
     # Prepare to find residual
     residual = compute_residual(obs.wlev, obs.time, tides)
@@ -670,17 +750,34 @@ def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
     fig, ax = plt.subplots(1, 1, figsize=figsize)
 
     # Plot
-    ax.plot(obs.time, residual, colours['residual'], label='Observed Residual',
-            linewidth=2.5)
+    ax.plot(
+        obs.time,
+        residual,
+        colours['residual'],
+        label='Observed Residual',
+        linewidth=2.5
+    )
     if elements == 'all':
-        ax.plot(obs.time, obs.wlev,
-                colours['observed'], label='Observed Water Level', lw=2.5)
-        ax.plot(tides.time, tides.pred[tides.time == obs.time],
-                colours['predicted'], label='Tidal Predictions', linewidth=2.5)
+        ax.plot(
+            obs.time,
+            obs.wlev,
+            colours['observed'],
+            label='Observed Water Level',
+            lw=2.5
+        )
+        ax.plot(
+            tides.time,
+            tides.pred[tides.time == obs.time],
+            colours['predicted'],
+            label='Tidal Predictions',
+            linewidth=2.5
+        )
     if elements == 'residual':
         pass
-    ax.set_title('Residual of the observed water levels at'
-                 ' Neah Bay: {t:%d-%b-%Y}'.format(t=t_orig))
+    ax.set_title(
+        'Residual of the observed water levels at'
+        ' Neah Bay: {t:%d-%b-%Y}'.format(t=t_orig)
+    )
     ax.set_ylim([-3.0, 3.0])
     ax.set_xlabel('[hrs]')
     hfmt = mdates.DateFormatter('%m/%d %H:%M')
@@ -772,11 +869,11 @@ def _calculate_forcing_surge(data, dates, tide_file):
 
 
 def _feet_to_metres(feet):
-    metres = feet*0.3048
+    metres = feet * 0.3048
     return metres
 
 
-def _to_datetime(datestr,  year, isDec, isJan):
+def _to_datetime(datestr, year, isDec, isJan):
     """Convert the string given by datestr to a datetime object.
 
     The year is an argument because the datestr in the NOAA data doesn't
@@ -786,12 +883,13 @@ def _to_datetime(datestr,  year, isDec, isJan):
     Return a datetime representation of datestr.
     """
     dt = datetime.datetime.strptime(
-        '{year}/{datestr}'.format(year=year, datestr=datestr), '%Y/%m/%d %HZ')
+        '{year}/{datestr}'.format(year=year, datestr=datestr), '%Y/%m/%d %HZ'
+    )
     # Dealing with year changes.
     if isDec and dt.month == 1:
-        dt = dt.replace(year=year+1)
+        dt = dt.replace(year=year + 1)
     elif isJan and dt.month == 12:
-        dt = dt.replace(year=year-1)
+        dt = dt.replace(year=year - 1)
     else:
         dt = dt.replace(year=year)
     dt = dt.replace(tzinfo=pytz.timezone('UTC'))
@@ -818,7 +916,9 @@ def compute_residual(ssh, t_model, ttide):
     """
 
     # interpolate tides to model time
-    tides_interp = shared.interp_to_model_time(t_model, ttide.pred_all, ttide.time)
+    tides_interp = shared.interp_to_model_time(
+        t_model, ttide.pred_all, ttide.time
+    )
 
     res = ssh - tides_interp
 
@@ -864,7 +964,8 @@ def get_NOAA_wlevels(station_no, start_date, end_date, product='water_level'):
 
     base_url = (
         'http://tidesandcurrents.noaa.gov/api/datagetter'
-        '?product={}&application=NOS.COOPS.TAC.WL'.format(product))
+        '?product={}&application=NOS.COOPS.TAC.WL'.format(product)
+    )
     params = {
         'begin_date': st_ar.format('YYYYMMDD'),
         'end_date': end_ar.format('YYYYMMDD'),
@@ -879,7 +980,8 @@ def get_NOAA_wlevels(station_no, start_date, end_date, product='water_level'):
     fakefile = io.StringIO(response.text)
     try:
         obs = pd.read_csv(
-            fakefile, parse_dates=[0], date_parser=dateparse_NOAA)
+            fakefile, parse_dates=[0], date_parser=dateparse_NOAA
+        )
     except ValueError:
         data = {'Date Time': st_ar.datetime, ' Water Level': float('NaN')}
         obs = pd.DataFrame(data=data, index=[0])
@@ -912,8 +1014,9 @@ def load_archived_observations(name, start_date, end_date):
     station_no = SITES[name]['stn_no']
     base_url = 'http://www.meds-sdmm.dfo-mpo.gc.ca/isdm-gdsi/twl-mne/inventory-inventaire/'
     form_handler = (
-        'data-donnees-eng.asp?user=isdm-gdsi&region=PAC&tst=1&no='
-        + str(station_no))
+        'data-donnees-eng.asp?user=isdm-gdsi&region=PAC&tst=1&no=' +
+        str(station_no)
+    )
     sitedata = {
         'start_period': start_date,
         'end_period': end_date,
@@ -922,9 +1025,10 @@ def load_archived_observations(name, start_date, end_date):
     }
     data_provider = (
         'download-telecharger.asp'
-        '?File=E:%5Ciusr_tmpfiles%5CTWL%5C'
-        + str(station_no) + '-'+start_date + '_slev.csv'
-        '&Name=' + str(station_no) + '-'+start_date+'_slev.csv')
+        '?File=E:%5Ciusr_tmpfiles%5CTWL%5C' + str(station_no) + '-' +
+        start_date + '_slev.csv'
+        '&Name=' + str(station_no) + '-' + start_date + '_slev.csv'
+    )
     # Go get the data from the DFO site
     with requests.Session() as s:
         s.post(base_url + form_handler, data=sitedata)
@@ -934,15 +1038,24 @@ def load_archived_observations(name, start_date, end_date):
     # Read the fake file
     try:
         wlev_meas = pd.read_csv(
-            fakefile, skiprows=7, parse_dates=[0],
-            date_parser=dateparse_archive_obs)
+            fakefile,
+            skiprows=7,
+            parse_dates=[0],
+            date_parser=dateparse_archive_obs
+        )
     except pd.parser.CParserError:
-        data = {'Obs_date': datetime.datetime.strptime(start_date, '%d-%b-%Y'),
-                'SLEV(metres)': float('NaN')}
+        data = {
+            'Obs_date': datetime.datetime.strptime(start_date, '%d-%b-%Y'),
+            'SLEV(metres)': float('NaN')
+        }
         wlev_meas = pd.DataFrame(data=data, index=[0])
 
     wlev_meas = wlev_meas.rename(
-        columns={'Obs_date': 'time', 'SLEV(metres)': 'wlev'})
+        columns={
+            'Obs_date': 'time',
+            'SLEV(metres)': 'wlev'
+        }
+    )
 
     return wlev_meas
 
@@ -976,6 +1089,7 @@ def get_model_time_variables(grid_T):
               and array of output times all as datetime objects.
     """
     time = nc_tools.timestamp(
-        grid_T, range(grid_T.variables['time_counter'].size))
+        grid_T, range(grid_T.variables['time_counter'].size)
+    )
     time = np.array([t.datetime for t in time])
     return time[0], time[-1], time

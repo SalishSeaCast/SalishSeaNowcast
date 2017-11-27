@@ -55,9 +55,10 @@ def config():
             'enabled hosts': {
                 'west.cloud': {
                     'shared storage':
-                    False,
-                    'run types':
-                    ['nowcast', 'forecast', 'forecast2', 'nowcast-green'],
+                        False,
+                    'run types': [
+                        'nowcast', 'forecast', 'forecast2', 'nowcast-green'
+                    ],
                 },
                 'salish': {
                     'shared storage': True,

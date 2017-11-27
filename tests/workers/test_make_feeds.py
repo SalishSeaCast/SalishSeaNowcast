@@ -47,15 +47,12 @@ def config():
             'feed entry template': 'storm_surge_advisory.mako',
             'feeds': {
                 'pmv.xml': {
-                    'title':
-                    'SalishSeaCast for Port Metro Vancouver',
-                    'city':
-                    'Vancouver',
-                    'tide gauge stn':
-                    'Point Atkinson',
+                    'title': 'SalishSeaCast for Port Metro Vancouver',
+                    'city': 'Vancouver',
+                    'tide gauge stn': 'Point Atkinson',
                     'tidal predictions':
-                    'Point Atkinson_tidal_prediction_'
-                    '01-Jan-2013_31-Dec-2020.csv',
+                        'Point Atkinson_tidal_prediction_'
+                        '01-Jan-2013_31-Dec-2020.csv',
                 }
             }
         },
@@ -166,8 +163,9 @@ class TestMakeFeeds:
         m_cmsr.return_value = {'risk_level': None}
         checklist = make_feeds.make_feeds(parsed_args, config)
         expected = {
-            'forecast 2016-11-12':
-            ['/results/nowcast-sys/figures/storm-surge/atom/pmv.xml']
+            'forecast 2016-11-12': [
+                '/results/nowcast-sys/figures/storm-surge/atom/pmv.xml'
+            ]
         }
         assert checklist == expected
 
