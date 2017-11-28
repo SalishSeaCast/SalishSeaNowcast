@@ -543,6 +543,30 @@ class TestConfirmRunSuccess:
             ('forecast2', 2700, 2160),
         ]
     )
+    def test_no_time_step_file(
+        self, m_logger, run_type, itend, restart_timestep
+    ):
+        with patch('nowcast.workers.watch_NEMO.Path.exists') as m_exists:
+            m_exists.side_effect = (True, False, True, True)
+            with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
+                m_open.side_effect = FileNotFoundError
+                run_succeeded = watch_NEMO._confirm_run_success(
+                    'west.cloud', run_type,
+                    arrow.get('2017-11-16'),
+                    Path('tmp_run_dir'), itend, restart_timestep, self.config
+                )
+        assert 'time.step' in m_logger.critical.call_args_list[0][0][0]
+        assert not run_succeeded
+
+    @pytest.mark.parametrize(
+        'run_type, itend, restart_timestep', [
+            ('nowcast', 2160, 2160),
+            ('nowcast-green', 2160, 2160),
+            ('nowcast-dev', 2160, 2160),
+            ('forecast', 3240, 2160),
+            ('forecast2', 2700, 2160),
+        ]
+    )
     def test_wrong_final_time_step(
         self, m_logger, run_type, itend, restart_timestep
     ):
@@ -560,7 +584,10 @@ class TestConfirmRunSuccess:
     @pytest.mark.parametrize(
         'run_type, itend, restart_timestep', [
             ('nowcast', 2160, 2160),
+            ('nowcast-green', 2160, 2160),
+            ('nowcast-dev', 2160, 2160),
             ('forecast', 3240, 2160),
+            ('forecast2', 2700, 2160),
         ]
     )
     def test_no_physics_restart_file(
@@ -603,6 +630,30 @@ class TestConfirmRunSuccess:
             ('forecast2', 2700, 2160),
         ]
     )
+    def test_no_ocean_output_file(
+        self, m_logger, run_type, itend, restart_timestep
+    ):
+        with patch('nowcast.workers.watch_NEMO.Path.exists') as m_exists:
+            m_exists.side_effect = (True, False, True, True)
+            with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
+                m_open.side_effect = FileNotFoundError
+                run_succeeded = watch_NEMO._confirm_run_success(
+                    'west.cloud', run_type,
+                    arrow.get('2017-11-16'),
+                    Path('tmp_run_dir'), itend, restart_timestep, self.config
+                )
+        assert 'ocean.output' in m_logger.critical.call_args_list[1][0][0]
+        assert not run_succeeded
+
+    @pytest.mark.parametrize(
+        'run_type, itend, restart_timestep', [
+            ('nowcast', 2160, 2160),
+            ('nowcast-green', 2160, 2160),
+            ('nowcast-dev', 2160, 2160),
+            ('forecast', 3240, 2160),
+            ('forecast2', 2700, 2160),
+        ]
+    )
     def test_error_in_ocean_output(
         self, m_logger, run_type, itend, restart_timestep
     ):
@@ -618,6 +669,30 @@ class TestConfirmRunSuccess:
                     arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
+        assert not run_succeeded
+
+    @pytest.mark.parametrize(
+        'run_type, itend, restart_timestep', [
+            ('nowcast', 2160, 2160),
+            ('nowcast-green', 2160, 2160),
+            ('nowcast-dev', 2160, 2160),
+            ('forecast', 3240, 2160),
+            ('forecast2', 2700, 2160),
+        ]
+    )
+    def test_no_solver_stat_file(
+        self, m_logger, run_type, itend, restart_timestep
+    ):
+        with patch('nowcast.workers.watch_NEMO.Path.exists') as m_exists:
+            m_exists.side_effect = (True, False, True, True)
+            with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
+                m_open.side_effect = FileNotFoundError
+                run_succeeded = watch_NEMO._confirm_run_success(
+                    'west.cloud', run_type,
+                    arrow.get('2017-11-16'),
+                    Path('tmp_run_dir'), itend, restart_timestep, self.config
+                )
+        assert 'solver.stat' in m_logger.critical.call_args_list[2][0][0]
         assert not run_succeeded
 
     @pytest.mark.parametrize(
@@ -661,4 +736,18 @@ class TestConfirmRunSuccess:
                     arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), 2160, 2160, self.config
                 )
+        assert not run_succeeded
+
+    def test_no_tracer_stat_file(self, m_logger):
+        with patch('nowcast.workers.watch_NEMO.Path.exists') as m_exists:
+            m_exists.side_effect = (True, False, True, True)
+            with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
+                m_open().__enter__().read.return_value = '2160\n'
+                m_open.side_effect = FileNotFoundError
+                run_succeeded = watch_NEMO._confirm_run_success(
+                    'west.cloud', 'nowcast-green',
+                    arrow.get('2017-11-16'),
+                    Path('tmp_run_dir'), 2160, 2160, self.config
+                )
+        assert 'tracer.stat' in m_logger.critical.call_args_list[3][0][0]
         assert not run_succeeded
