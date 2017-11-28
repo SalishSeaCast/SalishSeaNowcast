@@ -213,14 +213,21 @@ def _confirm_run_success(
             f'{host_name} {run_type}/{dmy} run aborted: '
             f'{results_dir/"output.abort.nc"}'
         )
-    with (results_dir / 'time.step').open('rt') as f:
-        time_step = int(f.read().strip())
-    if time_step != itend:
+    try:
+        with (results_dir / 'time.step').open('rt') as f:
+            time_step = int(f.read().strip())
+        if time_step != itend:
+            run_succeeded = False
+            logger.critical(
+                f'{host_name} {run_type}/{dmy} run failed: '
+                f'final time step is {time_step} not {itend}'
+            )
+    except FileNotFoundError:
         run_succeeded = False
         logger.critical(
-            f'{host_name} {run_type}/{dmy} run failed: '
-            f'final time step is {time_step} not {itend}'
+            f'{host_name} {run_type}/{dmy} run failed; no time.step file'
         )
+        pass
     restart_file = (
         results_dir / f'SalishSea_{restart_timestep:08d}_restart.nc'
     )
@@ -240,26 +247,24 @@ def _confirm_run_success(
                 f'{host_name} {run_type}/{dmy} run failed; '
                 f'no tracers restart file: {tracer_restart_file}'
             )
-    with (results_dir / 'ocean.output').open('rt') as f:
-        for line in f:
-            if 'E R R O R' in line:
-                run_succeeded = False
-                logger.critical(
-                    f'{host_name} {run_type}/{dmy} run failed; '
-                    f'1 or more E R R O R in: {results_dir/"ocean.output"}'
-                )
-                break
-    with (results_dir / 'solver.stat').open('rt') as f:
-        for line in f:
-            if 'NaN' in line:
-                run_succeeded = False
-                logger.critical(
-                    f'{host_name} {run_type}/{dmy} run failed; '
-                    f'NaN in: {results_dir/"solver.stat"}'
-                )
-                break
-    if run_type == 'nowcast-green':
-        with (results_dir / 'tracer.stat').open('rt') as f:
+    try:
+        with (results_dir / 'ocean.output').open('rt') as f:
+            for line in f:
+                if 'E R R O R' in line:
+                    run_succeeded = False
+                    logger.critical(
+                        f'{host_name} {run_type}/{dmy} run failed; '
+                        f'1 or more E R R O R in: {results_dir/"ocean.output"}'
+                    )
+                    break
+    except FileNotFoundError:
+        run_succeeded = False
+        logger.critical(
+            f'{host_name} {run_type}/{dmy} run failed; no ocean.output file'
+        )
+        pass
+    try:
+        with (results_dir / 'solver.stat').open('rt') as f:
             for line in f:
                 if 'NaN' in line:
                     run_succeeded = False
@@ -268,6 +273,29 @@ def _confirm_run_success(
                         f'NaN in: {results_dir/"solver.stat"}'
                     )
                     break
+    except FileNotFoundError:
+        run_succeeded = False
+        logger.critical(
+            f'{host_name} {run_type}/{dmy} run failed; no solver.stat file'
+        )
+        pass
+    if run_type == 'nowcast-green':
+        try:
+            with (results_dir / 'tracer.stat').open('rt') as f:
+                for line in f:
+                    if 'NaN' in line:
+                        run_succeeded = False
+                        logger.critical(
+                            f'{host_name} {run_type}/{dmy} run failed; '
+                            f'NaN in: {results_dir/"solver.stat"}'
+                        )
+                        break
+        except FileNotFoundError:
+            run_succeeded = False
+            logger.critical(
+                f'{host_name} {run_type}/{dmy} run failed; no tracer.stat file'
+            )
+            pass
     return run_succeeded
 
 
