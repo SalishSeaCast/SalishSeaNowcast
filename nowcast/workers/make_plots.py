@@ -621,14 +621,14 @@ def _prep_publish_fig_functions(
                 tidal_predictions, timezone
             )
         },
-        ## TODO: Need tidal_predictions CSV file for Friday Harbor before
-        ## this figure can be produced
-        # 'FH_maxSSH': {
-        #     'function': compare_tide_prediction_max_ssh.make_figure,
-        #     'args': (
-        #         'Friday Harbor', grid_T_hr, grids_15m, bathy, weather_path,
-        #         tidal_predictions, timezone)
-        # },
+        'FH_maxSSH': {
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
+            'args': (
+                'Friday Harbor', grid_T_hr, grids_15m, bathy, weather_path,
+                tidal_predictions, timezone
+            )
+        },
         'CP_maxSSH': {
             'function':
                 compare_tide_prediction_max_ssh.make_figure,
