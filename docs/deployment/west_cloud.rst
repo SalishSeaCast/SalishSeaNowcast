@@ -576,7 +576,8 @@ so make that so via symlinks:
 .. code-block:: bash
 
     $ cd $HOME
-    $ mkdir /nemoShare/OPP
+    $ sudo mkdir /nemoShare/OPP
+    $ sudo chown ubuntu:ubuntu /nemoShare/OPP
     $ ln -s /nemoShare/OPP
     $ ln -s /nemoShare/MEOPAR/nowcast-sys/FVCOM41 /nemoShare/OPP/FVCOM41.git
 
