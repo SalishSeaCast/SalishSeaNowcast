@@ -568,7 +568,7 @@ Clone the FVCOM-4.1 repo into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ ssh-agent bash -c 'ssh-add ~/.ssh/salishsea-nowcast-deployment_id_rsa; git clone git@gitlab.com:mdunphy/FVCOM41.git'
+    $ ssh-agent bash -c 'ssh-add ~/.ssh/salishsea-nowcast-deployment_id_rsa; git clone git@gitlab.com:mdunphy/FVCOM41.git FVCOM41'
 
 Hard-coded :envvar:`TOPDIR` paths in the FVCOM configuration and build scripts expect the source tree to the at :file:`$HOME/OPP/FVCOM41.git`,
 so make that so via symlinks:
@@ -584,8 +584,27 @@ Build FVCOM with:
 
 .. code-block:: bash
 
-    $ cd /nemoShare/OPP/FVCOM41.git/Configure
-    $ ./setup -a UBUNTU-14.04-GCC -c VancouverHarbourV2 && ./build -l –f
+    $ cd $HOME/OPP/FVCOM41.git/Configure
+    $ ./setup -a UBUNTU-14.04-GCC -c VancouverHarbourV2
+    $ ./build -l –f
+
+
+.. _UpdateFVCOM41:
+
+Update FVCOM-4.1
+----------------
+
+Fetch and merge changes from the `FVCOM41 repo on GitLab`_ and do a clean build:
+
+.. _FVCOM41 repo on GitLab: https://gitlab.com/mdunphy/FVCOM41
+
+.. code-block:: bash
+
+    $ cd $HOME/OPP/FVCOM41.git/
+    $ git pull origin master
+    $ cd Configure/
+    $ ./setup -a UBUNTU-14.04-GCC -c VancouverHarbourV2
+    $ ./build -l –f
 
 
 Python Packages
