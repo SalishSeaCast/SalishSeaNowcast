@@ -284,9 +284,7 @@ def _calc_crossing_numbers(on_crossing_mask):
 
 
 def _get_water_data(ferry_platform, device_category, ymd, devices_config):
-    sensors = '' if device_category == 'TSG' else ','.join(
-        devices_config[device_category]['sensors'].values()
-    )
+    sensors = ','.join(devices_config[device_category]['sensors'].values())
     logger.info(
         f'requesting ONC {ferry_platform} {device_category} data for {ymd}',
         extra={
@@ -353,7 +351,7 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
     )
     onc_units = {
         'temperature': 'C',
-        'Conductivity': 'S/m',
+        'conductivity': 'S/m',
         'salinity': 'g/kg',
         'oxygen_saturation': 'percent',
         'oxygen_corrected': 'ml/l',

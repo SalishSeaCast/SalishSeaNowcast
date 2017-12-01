@@ -178,8 +178,8 @@ observations:
           station: TWDP.N2
           device category: NAV
           sensors:
-            - Longitude
-            - Latitude
+            - longitude
+            - latitude
           terminals:
             # Terminal names from salishsea_tools.places.PLACES
             - Tsawwassen
@@ -191,7 +191,7 @@ observations:
             sensors:
               # ERDDAP sensor name: ONC sensor name
               temperature: temperature
-              conductivity: Conductivity
+              conductivity: conductivity
               salinity: salinity
           OXYSENSOR:
             sensors:
