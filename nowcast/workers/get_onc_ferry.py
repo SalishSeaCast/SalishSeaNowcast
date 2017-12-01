@@ -395,7 +395,7 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
         )
         onc_data = getattr(device_data, onc_sensor)
         not_nan_mask = numpy.logical_not(numpy.isnan(onc_data.values))
-        sensor_qaqc_mask = onc_data.attrs['qaqcFlag'] == 1
+        sensor_qaqc_mask = onc_data.attrs['qaqcFlag'] <= 1
         try:
             cf_units = cf_units_mapping[onc_data.unitOfMeasure]
         except KeyError:
