@@ -580,6 +580,7 @@ def _prep_publish_fig_functions(
         'Victoria',
         'Friday Harbor',
         'Cherry Point',
+        'Boundary Bay',
         'Sand Heads',
         'Point Atkinson',
         'Nanaimo',
@@ -636,6 +637,22 @@ def _prep_publish_fig_functions(
                 'Cherry Point', grid_T_hr, grids_15m, bathy, weather_path,
                 tidal_predictions, timezone
             )
+        },
+        'BB_maxSSH': {
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
+            'args': (
+                'Boundary Bay', grid_T_hr, grids_15m, bathy, weather_path,
+                tidal_predictions, timezone
+                )
+        },
+        'SH_maxSSH': {
+            'function':
+                compare_tide_prediction_max_ssh.make_figure,
+            'args': (
+                'Sand Heads', grid_T_hr, grids_15m, bathy, weather_path,
+                tidal_predictions, timezone
+                )
         },
         'PA_maxSSH': {
             'function':
