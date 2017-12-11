@@ -35,6 +35,10 @@ class TestMain:
         assert args == ('download_live_ocean',)
         assert 'description' in kwargs
 
+    def test_init_cli(self, m_worker):
+        download_live_ocean.main()
+        m_worker().init_cli.assert_called_once_with()
+
     def test_add_run_date_arg(self, m_worker):
         download_live_ocean.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]

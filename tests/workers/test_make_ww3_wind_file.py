@@ -35,6 +35,10 @@ class TestMain:
         assert args == ('make_ww3_wind_file',)
         assert list(kwargs.keys()) == ['description']
 
+    def test_init_cli(self, m_worker):
+        make_ww3_wind_file.main()
+        m_worker().init_cli.assert_called_once_with()
+
     def test_add_host_name_arg(self, m_worker):
         make_ww3_wind_file.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]

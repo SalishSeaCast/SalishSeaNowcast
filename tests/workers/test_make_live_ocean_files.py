@@ -33,6 +33,10 @@ class TestMain:
         assert args == ('make_live_ocean_files',)
         assert 'description' in kwargs
 
+    def test_init_cli(self, m_worker):
+        make_live_ocean_files.main()
+        m_worker().init_cli.assert_called_once_with()
+
     def test_add_run_date_arg(self, m_worker):
         make_live_ocean_files.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
