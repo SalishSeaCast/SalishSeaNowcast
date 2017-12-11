@@ -68,7 +68,7 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f'{parsed_args.run_type} NEMO run for '
+        f'{parsed_args.run_type} WaveWatch3 run for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f'on {parsed_args.host_name} started',
         extra={
@@ -89,7 +89,7 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'{parsed_args.run_type} NEMO run for '
+        f'{parsed_args.run_type} WaveWatch3 run for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f'on {parsed_args.host_name} failed',
         extra={
