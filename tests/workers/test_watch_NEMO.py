@@ -41,6 +41,10 @@ class TestMain:
         watch_NEMO.main()
         m_worker().init_cli.assert_called_once_with()
 
+    def test_init_cli(self, m_worker):
+        watch_NEMO.main()
+        m_worker().init_cli.assert_called_once_with()
+
     def test_add_host_name_arg(self, m_worker):
         watch_NEMO.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]

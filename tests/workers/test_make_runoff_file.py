@@ -33,6 +33,10 @@ class TestMain:
         assert args == ('make_runoff_file',)
         assert list(kwargs.keys()) == ['description']
 
+    def test_init_cli(self, m_worker):
+        make_runoff_file.main()
+        m_worker().init_cli.assert_called_once_with()
+
     def test_add_run_date_arg(self, m_worker):
         make_runoff_file.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]

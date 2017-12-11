@@ -34,6 +34,10 @@ class TestMain:
         assert args == ('get_onc_ferry',)
         assert 'description' in kwargs
 
+    def test_init_cli(self, m_worker):
+        get_onc_ferry.main()
+        m_worker().init_cli.assert_called_once_with()
+
     def test_add_onc_station_arg(self, m_worker):
         get_onc_ferry.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]

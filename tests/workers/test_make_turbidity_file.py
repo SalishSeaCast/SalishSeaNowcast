@@ -33,6 +33,10 @@ class TestMain:
         assert args == ('make_turbidity_file',)
         assert list(kwargs.keys()) == ['description']
 
+    def test_init_cli(self, m_worker):
+        make_turbidity_file.main()
+        m_worker().init_cli.assert_called_once_with()
+
     def test_add_run_date_option(self, m_worker):
         make_turbidity_file.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]

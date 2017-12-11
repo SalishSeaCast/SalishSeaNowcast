@@ -37,6 +37,10 @@ class TestMain:
         assert args == ('get_NeahBay_ssh',)
         assert list(kwargs.keys()) == ['description']
 
+    def test_init_cli(self, m_worker):
+        get_NeahBay_ssh.main()
+        m_worker().init_cli.assert_called_once_with()
+
     def test_add_run_type_arg(self, m_worker):
         get_NeahBay_ssh.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
