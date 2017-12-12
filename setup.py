@@ -55,6 +55,7 @@ install_requires = [
     'docutils',
     'driftwood',
     'feedgen',
+    'lxml',
     'mako',
     'matplotlib',
     'nemo_nowcast',
@@ -69,6 +70,7 @@ install_requires = [
     'scipy',
     'scour',
     'xarray',
+    'zeep',
 
     # 'NEMO_Nowcast',  # use pip install --editable NEMO_Nowcast/
     # 'SalishSeaTools',  # use pip install --editable SalishSeaTools/

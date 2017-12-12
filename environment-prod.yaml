@@ -27,6 +27,7 @@ dependencies:
   - cmocean
   - dask
   - docutils
+  - lxml
   - mako
   - matplotlib=1.5.3
   - nemo_nowcast
@@ -48,3 +49,4 @@ dependencies:
     - raven
     - retrying
     - scour
+    - zeep
