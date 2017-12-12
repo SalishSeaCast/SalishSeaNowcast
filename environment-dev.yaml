@@ -30,6 +30,7 @@ dependencies:
   - cmocean
   - dask
   - docutils
+  - lxml
   - mako
   - matplotlib=1.5.3
   - netcdf4
@@ -65,6 +66,7 @@ dependencies:
     - python-hglib
     - retrying
     - scour
+    - zeep
 
     # For exception monitoring
     - raven
