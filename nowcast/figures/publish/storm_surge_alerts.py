@@ -88,7 +88,7 @@ def make_figure(
 def _prep_plot_data(grids_15m, tidal_predictions, weather_path):
     max_ssh, max_ssh_time, risk_levels = {}, {}, {}
     u_wind_4h_avg, v_wind_4h_avg, max_wind_avg = {}, {}, {}
-    for name in places.TIDE_GAUGE_SITES:
+    for name in places.TIDE_GAUGE_SITES+places.SUPP_TIDE_SITES:
         ssh_ts = nc_tools.ssh_timeseries_at_point(
             grids_15m[name], 0, 0, datetimes=True
         )
@@ -137,12 +137,18 @@ def _plot_alerts_map(ax, coastline, plot_data, theme):
     for name in places.TIDE_GAUGE_SITES:
         alpha = 0 if numpy.isnan(plot_data.max_ssh[name]) else 0.3
         shared.plot_risk_level_marker(
-            ax, name, plot_data.risk_levels[name], 'o', 55, alpha, theme
+            ax, name, plot_data.risk_levels[name], 'o', 50, alpha, theme
         )
         shared.plot_wind_arrow(
             ax, *places.PLACES[name]['lon lat'], plot_data.u_wind_4h_avg[name],
             plot_data.v_wind_4h_avg[name], theme
         )
+    for name in places.SUPP_TIDE_SITES:
+        alpha = 0 if numpy.isnan(plot_data.max_ssh[name]) else 0.3
+        shared.plot_risk_level_marker(
+            ax, name, plot_data.risk_levels[name], 'o', 50, alpha, theme
+        )
+
     # Format the axes and make it pretty
     _alerts_map_axis_labels(ax, plot_data.ssh_ts.time[0], theme)
     _alerts_map_marker_legend(ax, theme)
@@ -248,13 +254,20 @@ def _alerts_map_geo_labels(ax, theme):
         # PLACES key, offset x, y, rotation, text size
         ('Pacific Ocean', 0, 0, 0, 'left', 'small'),
         ('Neah Bay', -0.04, -0.08, 0, 'right', 'large'),
+        ('Port Renfrew', -0.04, 0.04, 0, 'right', 'large'),
         ('Juan de Fuca Strait', 0, 0, -18, 'left', 'small'),
         ('Puget Sound', 0, 0, -30, 'left', 'small'),
         ('Strait of Georgia', 0, 0, -20, 'left', 'small'),
-        ('Victoria', -0.04, 0.04, 0, 'right', 'large'),
+        ('Patricia Bay', -0.04, 0, 0, 'right', 'large'),
+        ('Victoria', -0.05, 0.03, 0, 'right', 'large'),
+        ('Sand Heads', 0.04, 0.01, 0, 'left', 'large'),
+        ('Boundary Bay', 0.04, 0, 0, 'left', 'large'),
         ('Cherry Point', 0.04, 0, 0, 'left', 'large'),
-        ('Point Atkinson', 0.06, 0.16, 0, 'left', 'large'),
+        ('Friday Harbor', 0.08, -0.19, 0, 'center', 'large'),
+        ('Point Atkinson', 0.06, 0.06, 0, 'left', 'large'),
         ('Nanaimo', -0.04, 0, 0, 'right', 'large'),
+        ('Squamish', -0.04, 0.03, 0, 'right', 'large'),
+        ('Halfmoon Bay', 0.0, -0.13, 0, 'center', 'large'),
         ('Campbell River', -0.04, -0.04, 0, 'right', 'large'),
         ('British Columbia', 0, 0, 0, 'left', 'small'),
         ('Washington State', 0, 0, 0, 'left', 'small'),
