@@ -577,13 +577,17 @@ def _prep_publish_fig_functions(
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     names = [
         'Neah Bay',
+        'Port Renfrew',
         'Victoria',
+        'Patricia Bay',
         'Friday Harbor',
         'Cherry Point',
         'Boundary Bay',
         'Sand Heads',
         'Point Atkinson',
         'Nanaimo',
+        'Squamish',
+        'Halfmoon Bay',
         'Campbell River',
     ]
     filepath_tmpl = os.path.join(results_dir, '{}.nc')
