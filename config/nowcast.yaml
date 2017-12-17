@@ -314,7 +314,22 @@ erddap:
       - ubcSSnNearSurfaceUVelocity20mV17-02
       - ubcSSnNearSurfaceVVelocity20mV17-02
     nemo-forecast:
+      - ubcSSfBoundaryBaySSH10mV17-02
+      - ubcSSfCampbellRiverSSH10mV17-02
+      - ubcSSfCherryPointSSH10mV17-02
+      - ubcSSfFridayHarborSSH10mV17-02
+      - ubcSSfHalfmoonBaySSH10mV17-02
+      - ubcSSfNanaimoSSH10mV17-02
+      - ubcSSfNeahBaySSH10mV17-02
+      - ubcSSfNewWestminsterSSH10mV17-02
+      - ubcSSfPatriciaBaySSH10mV17-02
       - ubcSSfPointAtkinsonSSH10mV17-02
+      - ubcSSfPortRenfrewSSH10mV17-02
+      - ubcSSfSandyCoveSSH10mV17-02
+      - ubcSSfSandHeadsSSH10mV17-02
+      - ubcSSfSquamishSSH10mV17-02
+      - ubcSSfVictoriaSSH10mV17-02
+      - ubcSSfWoodwardsLandingSSH10mV17-02
 
 
 
