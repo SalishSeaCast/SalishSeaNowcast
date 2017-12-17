@@ -260,7 +260,8 @@ def _writeTFile(
     # Copy dimensions
     for dname, the_dim in f.dimensions.items():
         new.createDimension(
-            dname, len(the_dim) if not the_dim.isunlimited() else None
+            dname,
+            len(the_dim) if not the_dim.isunlimited() else None
         )
     # create dimension variables:
     new_x = new.createVariable('nav_lat', np.float32, ('y', 'x'), zlib=True)
