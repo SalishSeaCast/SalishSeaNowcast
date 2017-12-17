@@ -242,8 +242,7 @@ class TestGenerateFeedEntry:
         )
         m_fe().id.assert_called_once_with(
             make_feeds._build_tag_uri(
-                '2015-12-24', 'pmv.sml',
-                m_now(), config['storm surge feeds'],
+                '2015-12-24', 'pmv.sml', m_now(), config['storm surge feeds'],
                 os.path.join(storm_surge_path, atom_path)
             )
         )
@@ -291,8 +290,8 @@ class TestBuildTagURI:
         storm_surge_path = config['figures']['storm surge info portal path']
         atom_path = config['storm surge feeds']['storage path']
         tag = make_feeds._build_tag_uri(
-            '2015-12-12', 'pmv.xml',
-            arrow.get('2015-12-21 09:31:42'), config['storm surge feeds'],
+            '2015-12-12', 'pmv.xml', arrow.get('2015-12-21 09:31:42'),
+            config['storm surge feeds'],
             os.path.join(storm_surge_path, atom_path)
         )
         expected = (
@@ -355,7 +354,8 @@ class TestCalcMaxSshRisk:
             '01-Jan-2013_31-Dec-2020.csv'
         )
         m_cms.assert_called_once_with(
-            'pmv.xml', m_ltp()[0], run_date, 'forecast', config
+            'pmv.xml',
+            m_ltp()[0], run_date, 'forecast', config
         )
         m_ssrl.assert_called_once_with('Point Atkinson', max_ssh, m_ltp()[0])
         np.testing.assert_array_equal(

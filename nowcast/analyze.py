@@ -351,7 +351,8 @@ def create_path(mode, t_orig, file_part):
         run_date = run_date + datetime.timedelta(days=-2)
 
     results_dir = os.path.join(
-        results_home, run_date.strftime('%d%b%y').lower()
+        results_home,
+        run_date.strftime('%d%b%y').lower()
     )
 
     filename = glob.glob(os.path.join(results_dir, file_part))

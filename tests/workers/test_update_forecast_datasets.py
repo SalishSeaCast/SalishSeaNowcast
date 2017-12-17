@@ -250,8 +250,7 @@ class TestSymlinkResults:
         forecast_day = arrow.get('2017-11-11')
         forecast_dir = tmpdir.ensure_dir(f'rolling-forecasts/{model}_new')
         update_forecast_datasets._symlink_results(
-            Path(f'results/{run_type}/'),
-            arrow.get('2017-11-10'),
+            Path(f'results/{run_type}/'), arrow.get('2017-11-10'),
             Path(str(forecast_dir)), forecast_day, model, run_type
         )
         assert forecast_dir.join('11nov17').check(dir=True)
@@ -263,8 +262,8 @@ class TestSymlinkResults:
         forecast_day = arrow.get('2017-11-11')
         forecast_dir = tmpdir.ensure_dir(f'rolling-forecasts/{model}_new')
         update_forecast_datasets._symlink_results(
-            Path(str(results_archive)), results_day,
-            Path(str(forecast_dir)), forecast_day, model, run_type
+            Path(str(results_archive)), results_day, Path(str(forecast_dir)),
+            forecast_day, model, run_type
         )
         assert forecast_dir.join('11nov17',
                                  'PointAtkinson.nc').check(link=True)

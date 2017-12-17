@@ -231,8 +231,7 @@ class TestMakeRunoffLinks:
             m_sftp_client, run_type, run_date, self.config, 'salish-nowcast'
         )
         assert m_create_symlink.call_args_list[0] == call(
-            m_sftp_client, 'salish-nowcast',
-            Path('rivers/rivers_month.nc'),
+            m_sftp_client, 'salish-nowcast', Path('rivers/rivers_month.nc'),
             Path('runs/rivers/rivers_month.nc')
         )
 
@@ -286,8 +285,8 @@ class TestMakeRunoffLinks:
                 'salish-nowcast'
             )
         assert m_create_symlink.call_args_list[2] == call(
-            m_sftp_client, 'salish-nowcast',
-            Path('rivers/bio/'), Path('runs/rivers/bio')
+            m_sftp_client, 'salish-nowcast', Path('rivers/bio/'),
+            Path('runs/rivers/bio')
         )
 
     @pytest.mark.parametrize('run_type', [

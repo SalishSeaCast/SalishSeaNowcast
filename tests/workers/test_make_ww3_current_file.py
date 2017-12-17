@@ -191,8 +191,7 @@ class TestMakeWW3CurrentFile:
         )
         if run_type == 'forecast2':
             m_calc_fcst2_datasets.assert_called_once_with(
-                arrow.get('2017-04-12'),
-                Path('/nemoShare/MEOPAR/SalishSea/'),
+                arrow.get('2017-04-12'), Path('/nemoShare/MEOPAR/SalishSea/'),
                 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
                 Path('/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current')
             )
@@ -296,8 +295,7 @@ class TestCalcForecastDatasets:
 
     def test_forecast_datasets(self, m_logger):
         datasets = make_ww3_current_file._calc_forecast_datasets(
-            arrow.get('2017-04-12'),
-            Path('/nemoShare/MEOPAR/SalishSea/'),
+            arrow.get('2017-04-12'), Path('/nemoShare/MEOPAR/SalishSea/'),
             'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
         )
         assert datasets == {
@@ -324,8 +322,7 @@ class TestCalcForecast2Datasets:
 
     def test_forecast2_datasets(self, m_run, m_logger):
         datasets = make_ww3_current_file._calc_forecast2_datasets(
-            arrow.get('2017-04-13'),
-            Path('/nemoShare/MEOPAR/SalishSea/'),
+            arrow.get('2017-04-13'), Path('/nemoShare/MEOPAR/SalishSea/'),
             'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc',
             Path('/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current')
         )

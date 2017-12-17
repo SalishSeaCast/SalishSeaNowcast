@@ -88,7 +88,7 @@ def make_figure(
 def _prep_plot_data(grids_15m, tidal_predictions, weather_path):
     max_ssh, max_ssh_time, risk_levels = {}, {}, {}
     u_wind_4h_avg, v_wind_4h_avg, max_wind_avg = {}, {}, {}
-    for name in places.TIDE_GAUGE_SITES+places.SUPP_TIDE_SITES:
+    for name in places.TIDE_GAUGE_SITES + places.SUPP_TIDE_SITES:
         ssh_ts = nc_tools.ssh_timeseries_at_point(
             grids_15m[name], 0, 0, datetimes=True
         )

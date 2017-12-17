@@ -648,7 +648,7 @@ def _prep_publish_fig_functions(
             'args': (
                 'Boundary Bay', grid_T_hr, grids_15m, bathy, weather_path,
                 tidal_predictions, timezone
-                )
+            )
         },
         'SH_maxSSH': {
             'function':
@@ -656,7 +656,7 @@ def _prep_publish_fig_functions(
             'args': (
                 'Sand Heads', grid_T_hr, grids_15m, bathy, weather_path,
                 tidal_predictions, timezone
-                )
+            )
         },
         'PA_maxSSH': {
             'function':
@@ -842,7 +842,8 @@ def _render_storm_surge_alerts_thumbnail(
     yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
     thumbnail_root = config['figures']['storm surge alerts thumbnail']
     if not all((
-        plot_type == 'publish', svg_name == thumbnail_root, any((
+        plot_type == 'publish', svg_name == thumbnail_root,
+        any((
             run_type == 'forecast' and dmy == today_dmy,
             run_type == 'forecast2' and dmy == yesterday_dmy,
         ))

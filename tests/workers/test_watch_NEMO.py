@@ -357,9 +357,8 @@ class TestWatchNEMO:
             }
         }
         m_confirm.assert_called_once_with(
-            host_name, run_type,
-            arrow.get('2017-11-13'),
-            Path('tmp_run_dir'), 2160, 2160, self.config
+            host_name, run_type, arrow.get('2017-11-13'), Path('tmp_run_dir'),
+            2160, 2160, self.config
         )
 
 
@@ -484,8 +483,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open().__enter__().read.return_value = f'{itend}\n'
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', run_type,
-                    arrow.get('2017-11-16'),
+                    'west.cloud', run_type, arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert run_succeeded
@@ -505,8 +503,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open().__enter__().read.return_value = f'{itend}\n'
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', run_type,
-                    arrow.get('2017-11-16'),
+                    'west.cloud', run_type, arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert not run_succeeded
@@ -528,8 +525,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open().__enter__().read.return_value = f'{itend}\n'
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', 'nowcast',
-                    arrow.get('2017-11-16'),
+                    'west.cloud', 'nowcast', arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert not run_succeeded
@@ -551,8 +547,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open.side_effect = FileNotFoundError
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', run_type,
-                    arrow.get('2017-11-16'),
+                    'west.cloud', run_type, arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert 'time.step' in m_logger.critical.call_args_list[0][0][0]
@@ -575,8 +570,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open().__enter__().read.return_value = '43\n'
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', 'nowcast',
-                    arrow.get('2017-11-16'),
+                    'west.cloud', 'nowcast', arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert not run_succeeded
@@ -598,8 +592,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open().__enter__().read.return_value = f'{itend}\n'
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', run_type,
-                    arrow.get('2017-11-16'),
+                    'west.cloud', run_type, arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         expected = f'SalishSea_{restart_timestep:08d}_restart.nc'
@@ -613,8 +606,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open().__enter__().read.return_value = '2160\n'
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', 'nowcast-green',
-                    arrow.get('2017-11-16'),
+                    'west.cloud', 'nowcast-green', arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), 2160, restart_timestep, self.config
                 )
         expected = f'SalishSea_{restart_timestep:08d}_restart_trc.nc'
@@ -638,8 +630,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open.side_effect = FileNotFoundError
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', run_type,
-                    arrow.get('2017-11-16'),
+                    'west.cloud', run_type, arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert 'ocean.output' in m_logger.critical.call_args_list[1][0][0]
@@ -665,8 +656,7 @@ class TestConfirmRunSuccess:
                     'foo E R R O R bar\n'
                 ]
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', run_type,
-                    arrow.get('2017-11-16'),
+                    'west.cloud', run_type, arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert not run_succeeded
@@ -688,8 +678,7 @@ class TestConfirmRunSuccess:
             with patch('nowcast.workers.watch_NEMO.Path.open') as m_open:
                 m_open.side_effect = FileNotFoundError
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', run_type,
-                    arrow.get('2017-11-16'),
+                    'west.cloud', run_type, arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert 'solver.stat' in m_logger.critical.call_args_list[2][0][0]
@@ -715,8 +704,7 @@ class TestConfirmRunSuccess:
                     'foo bar\n', 'it : 43 ssh2: NaN Umax: 0.2450101238E+01\n'
                 )
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', run_type,
-                    arrow.get('2017-11-16'),
+                    'west.cloud', run_type, arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), itend, restart_timestep, self.config
                 )
         assert not run_succeeded
@@ -732,8 +720,7 @@ class TestConfirmRunSuccess:
                     '43  NaN\n'
                 )
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', 'nowcast-green',
-                    arrow.get('2017-11-16'),
+                    'west.cloud', 'nowcast-green', arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), 2160, 2160, self.config
                 )
         assert not run_succeeded
@@ -745,8 +732,7 @@ class TestConfirmRunSuccess:
                 m_open().__enter__().read.return_value = '2160\n'
                 m_open.side_effect = FileNotFoundError
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    'west.cloud', 'nowcast-green',
-                    arrow.get('2017-11-16'),
+                    'west.cloud', 'nowcast-green', arrow.get('2017-11-16'),
                     Path('tmp_run_dir'), 2160, 2160, self.config
                 )
         assert 'tracer.stat' in m_logger.critical.call_args_list[3][0][0]

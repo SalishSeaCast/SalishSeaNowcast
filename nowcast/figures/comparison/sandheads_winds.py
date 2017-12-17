@@ -114,8 +114,8 @@ def _prep_plot_data(hrdps_dataset_url, run_type, run_date):
             hrdps_dir=hrdps_dir,
         )
     ec_speed, ec_dir, _, ec_time, _, _ = stormtools.get_EC_observations(
-        'Sandheads',
-        run_date.format('DD-MMM-YYYY'), run_date.format('DD-MMM-YYYY')
+        'Sandheads', run_date.format('DD-MMM-YYYY'),
+        run_date.format('DD-MMM-YYYY')
     )
     obs_speed = xarray.DataArray(
         name='obs_wind_speed',

@@ -94,15 +94,13 @@ class TestDepthAverage:
             (np.ones((10, linear_depths().shape[0])), 1, np.ones((10,))),
             # Cell 8 case - ones array with shape (10, 40, 11)
             (
-                np.ones((10, linear_depths().shape[0], 11)), 1, np.ones(
-                    (10, 11)
-                )
+                np.ones((10, linear_depths().shape[0], 11)), 1,
+                np.ones((10, 11))
             ),
             # Cell 9 case - ones array with shape (1, 40, 2, 3)
             (
-                np.ones((1, linear_depths().shape[0], 2, 3)), 1, np.ones(
-                    (1, 2, 3)
-                )
+                np.ones((1, linear_depths().shape[0], 2, 3)), 1,
+                np.ones((1, 2, 3))
             ),
             # Cell 10 case - ones array with shape (1, 2, 40)
             (np.ones((1, 2, linear_depths().shape[0])), 2, np.ones((1, 2))),

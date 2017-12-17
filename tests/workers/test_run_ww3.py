@@ -364,8 +364,8 @@ class TestBuildRunScript:
     ])
     def test_top_of_script(self, run_type, config):
         script = run_ww3._build_run_script(
-            arrow.get('2017-03-29'), run_type,
-            Path('wwatch3-runs/tmp_run_dir'),
+            arrow.get('2017-03-29'),
+            run_type, Path('wwatch3-runs/tmp_run_dir'),
             Path(f'wwatch3-{run_type}'), config
         )
         assert script.startswith(
@@ -385,8 +385,8 @@ class TestDefinitions:
     ])
     def test_definitions(self, run_type, config):
         defns = run_ww3._definitions(
-            arrow.get('2017-03-29'), run_type,
-            Path('wwatch3-runs/tmp_run_dir'),
+            arrow.get('2017-03-29'),
+            run_type, Path('wwatch3-runs/tmp_run_dir'),
             Path(f'wwatch3-{run_type}'), config
         )
         expected = f'''RUN_ID="29mar17ww3-{run_type}"

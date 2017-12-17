@@ -1090,8 +1090,8 @@ class TestCreateRunScript:
     ):
         tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
         run_script_filepath = run_NEMO._create_run_script(
-            arrow.get('2016-12-03'), run_type,
-            Path(str(tmp_run_dir)), '30nov16.yaml', 'west.cloud', config
+            arrow.get('2016-12-03'), run_type, Path(str(tmp_run_dir)),
+            '30nov16.yaml', 'west.cloud', config
         )
         expected = Path(str(tmp_run_dir.join('SalishSeaNEMO.sh')))
         assert run_script_filepath == expected
@@ -1131,8 +1131,7 @@ class TestBuildScript:
         }
         with p_config:
             script = run_NEMO._build_script(
-                Path(str(tmp_run_dir)), run_type,
-                Path(str(run_desc_file)),
+                Path(str(tmp_run_dir)), run_type, Path(str(run_desc_file)),
                 Path(str(results_dir)) / '13may17', 'west.cloud', config
             )
         expected = '''#!/bin/bash
