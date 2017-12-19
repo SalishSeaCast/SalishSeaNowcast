@@ -575,23 +575,23 @@ def _prep_publish_fig_functions(
 ):
     tidal_predictions = config['ssh']['tidal predictions']
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
-    names = [
-        'Neah Bay',
-        'Port Renfrew',
-        'Victoria',
-        'Patricia Bay',
-        'Friday Harbor',
-        'Cherry Point',
-        'Boundary Bay',
-        'Sand Heads',
-        'Point Atkinson',
-        'Nanaimo',
-        'Squamish',
-        'Halfmoon Bay',
-        'Campbell River',
-    ]
+    names = {
+        'Boundary Bay': 'BB_maxSSH',
+        'Campbell River': 'CR_maxSSH',
+        'Cherry Point': 'CP_maxSSH',
+        'Friday Harbor': 'FH_maxSSH',
+        'Halfmoon Bay': 'HB_maxSSH',
+        'Nanaimo': 'Nan_maxSSH',
+        'Neah Bay': 'NB_maxSSH',
+        'Patricia Bay': 'PB_maxSSH',
+        'Point Atkinson': 'PA_maxSSH',
+        'Port Renfrew': 'PR_maxSSH',
+        'Sand Heads': 'SH_maxSSH',
+        'Squamish': 'Sqam_maxSSH',
+        'Victoria': 'Vic_maxSSH',
+    }
     filepath_tmpl = os.path.join(results_dir, '{}.nc')
-    grids_15m = {
+    grids_10m = {
         name: nc.Dataset(filepath_tmpl.format(name.replace(' ', '')))
         for name in names
     }
@@ -599,90 +599,29 @@ def _prep_publish_fig_functions(
     fig_functions = {
         'Website_thumbnail': {
             'function': storm_surge_alerts_thumbnail.make_figure,
-            'args': (grids_15m, weather_path, coastline, tidal_predictions),
+            'args': (grids_10m, weather_path, coastline, tidal_predictions),
             'format': 'png'
         },
         'Threshold_website': {
             'function': storm_surge_alerts.make_figure,
-            'args': (grids_15m, weather_path, coastline, tidal_predictions)
+            'args': (grids_10m, weather_path, coastline, tidal_predictions)
         },
         'PA_tidal_predictions': {
             'function': pt_atkinson_tide.make_figure,
             'args': (grid_T_hr, tidal_predictions, timezone)
-        },
-        'NB_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Neah Bay', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
-        'Vic_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Victoria', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
-        'FH_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Friday Harbor', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
-        'CP_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Cherry Point', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
-        'BB_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Boundary Bay', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
-        'SH_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Sand Heads', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
-        'PA_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Point Atkinson', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
-        'Nan_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Nanaimo', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
-        'CR_maxSSH': {
-            'function':
-                compare_tide_prediction_max_ssh.make_figure,
-            'args': (
-                'Campbell River', grid_T_hr, grids_15m, bathy, weather_path,
-                tidal_predictions, timezone
-            )
-        },
+        }
     }
+    for place, svg_root in names.items():
+        fig_functions.update({
+            svg_root: {
+                'function':
+                    compare_tide_prediction_max_ssh.make_figure,
+                'args': (
+                    place, grid_T_hr, grids_10m, bathy, weather_path,
+                    tidal_predictions, timezone
+                )
+            }
+        })
     if not run_type.startswith('forecast'):
         fig_functions.update({
             'SH_wind': {
