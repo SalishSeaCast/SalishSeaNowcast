@@ -605,8 +605,8 @@ def _prep_publish_fig_functions(
                 'function':
                     compare_tide_prediction_max_ssh.make_figure,
                 'args': (
-                    place, grid_T_hr, grids_10m, bathy, weather_path,
-                    tidal_predictions, timezone
+                    place, grid_T_hr, bathy, weather_path, tidal_predictions,
+                    timezone
                 )
             }
         })

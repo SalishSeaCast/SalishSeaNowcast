@@ -34,9 +34,13 @@ The figure is annotated with the calcualted maximum sea surface height at the
 tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
 """
+import os
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
+import netCDF4
+import requests
 from matplotlib import gridspec
 from matplotlib.dates import DateFormatter
 import matplotlib.pyplot as plt
@@ -58,7 +62,6 @@ import nowcast.figures.website_theme
 def make_figure(
     place,
     grid_T_hr,
-    grids_15m,
     bathy,
     weather_path,
     tidal_predictions,
@@ -77,10 +80,6 @@ def make_figure(
     :arg grid_T_hr: Hourly averaged tracer results dataset that includes
                     calculated sea surface height.
     :type grid_T_hr: :py:class:`netCDF4.Dataset`
-
-    :arg dict grids_15m: Collection of 15 minute averaged sea surface height
-                         datasets at tide gauge locations,
-                         keyed by tide gauge station name.
 
     :arg bathy: Model bathymetry.
     :type bathy: :py:class:`netCDF4.Dataset`
@@ -102,8 +101,7 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(
-        place, grid_T_hr, grids_15m, bathy, timezone, weather_path,
-        tidal_predictions
+        place, grid_T_hr, bathy, timezone, weather_path, tidal_predictions
     )
     fig, (ax_info, ax_ssh, ax_map, ax_res) = _prep_fig_axes(figsize, theme)
     _plot_info_box(ax_info, place, plot_data, theme)
@@ -114,8 +112,7 @@ def make_figure(
 
 
 def _prep_plot_data(
-    place, grid_T_hr, grids_15m, bathy, timezone, weather_path,
-    tidal_predictions
+    place, grid_T_hr, bathy, timezone, weather_path, tidal_predictions
 ):
     ssh_hr = grid_T_hr.variables['sossheig']
     time_ssh_hr = nc_tools.timestamp(
@@ -130,11 +127,12 @@ def _prep_plot_data(
         )
     itime_max_ssh = np.argmax(ssh_hr[:, j, i])
     time_max_ssh_hr = time_ssh_hr[itime_max_ssh]
-    ssh_15m_ts = nc_tools.ssh_timeseries_at_point(
-        grids_15m[place], 0, 0, datetimes=True
+    grids_10m = _get_ssh_forecast(place)
+    ssh_10m_ts = nc_tools.ssh_timeseries_at_point(
+        grids_10m, 0, 0, datetimes=True, time_var='time', ssh_var='ssh'
     )
     ttide = shared.get_tides(place, tidal_predictions)
-    ssh_corr = shared.correct_model_ssh(ssh_15m_ts.ssh, ssh_15m_ts.time, ttide)
+    ssh_corr = shared.correct_model_ssh(ssh_10m_ts.ssh, ssh_10m_ts.time, ttide)
 
     msl = PLACES[place]['mean sea lvl']
     extreme_ssh = PLACES[place]['hist max sea lvl']
@@ -143,16 +141,16 @@ def _prep_plot_data(
     max_ssh = np.max(ssh_corr) + msl
     thresholds = (max_tides, mid_tides, extreme_ssh)
 
-    max_ssh_15m, time_max_ssh_15m = shared.find_ssh_max(
-        place, ssh_15m_ts, ttide
+    max_ssh_10m, time_max_ssh_10m = shared.find_ssh_max(
+        place, ssh_10m_ts, ttide
     )
-    tides_15m = shared.interp_to_model_time(
-        ssh_15m_ts.time, ttide.pred_all, ttide.time
+    tides_10m = shared.interp_to_model_time(
+        ssh_10m_ts.time, ttide.pred_all, ttide.time
     )
-    residual = ssh_corr - tides_15m
-    max_ssh_residual = residual[ssh_15m_ts.time == time_max_ssh_15m][0]
+    residual = ssh_corr - tides_10m
+    max_ssh_residual = residual[ssh_10m_ts.time == time_max_ssh_10m][0]
     wind_4h_avg = wind_tools.calc_wind_avg_at_point(
-        arrow.get(time_max_ssh_15m),
+        arrow.get(time_max_ssh_10m),
         weather_path,
         PLACES[place]['wind grid ji'],
         avg_hrs=-4
@@ -161,10 +159,10 @@ def _prep_plot_data(
     return SimpleNamespace(
         ssh_max_field=ssh_hr[itime_max_ssh],
         time_max_ssh_hr=time_max_ssh_hr.to(timezone),
-        ssh_15m_ts=ssh_15m_ts,
+        ssh_10m_ts=ssh_10m_ts,
         ssh_corr=ssh_corr,
-        max_ssh_15m=max_ssh_15m - PLACES[place]['mean sea lvl'],
-        time_max_ssh_15m=arrow.get(time_max_ssh_15m).to(timezone),
+        max_ssh_10m=max_ssh_10m - PLACES[place]['mean sea lvl'],
+        time_max_ssh_10m=arrow.get(time_max_ssh_10m).to(timezone),
         residual=residual,
         max_ssh_residual=max_ssh_residual,
         wind_4h_avg=wind_4h_avg,
@@ -173,6 +171,20 @@ def _prep_plot_data(
         thresholds=thresholds,
         msl=msl,
     )
+
+
+def _get_ssh_forecast(place):
+    ## TODO: This is a work-around because neither netCDF4 nor xarray are able
+    ## to load the dataset directly from the URL due to an OpenDAP issue
+    dataset_id = f'ubcSSf{place.replace(" ", "")}SSH10mV17-02'
+    ssh_file = Path('/tmp').joinpath(dataset_id).with_suffix('.nc')
+    with ssh_file.open('wb') as f:
+        resp = requests.get(
+            f'https://salishsea.eos.ubc.ca/erddap/griddap/{ssh_file.name}'
+        )
+        f.write(resp.content)
+    grids_10m = netCDF4.Dataset(os.fspath(ssh_file))
+    return grids_10m
 
 
 def _prep_fig_axes(figsize, theme):
@@ -212,19 +224,20 @@ def _plot_info_box(ax, place, plot_data, theme):
     ax.text(
         0.05,
         0.75,
-        f'Max SSH: {plot_data.max_ssh_15m+plot_data.msl:.2f} metres above chart datum',
+        f'Max SSH: {plot_data.max_ssh_10m+plot_data.msl:.2f} '
+        f'metres above chart datum',
         horizontalalignment='left',
         verticalalignment='top',
         transform=ax.transAxes,
         fontproperties=theme.FONTS['info box content'],
         color=theme.COLOURS['text']['info box content']
     )
-    time_max_ssh_15m = plot_data.time_max_ssh_15m
+    time_max_ssh_10m = plot_data.time_max_ssh_10m
     ax.text(
         0.05,
         0.6,
-        f'Time of max: {time_max_ssh_15m.format("YYYY-MM-DD HH:mm")} '
-        f'{time_max_ssh_15m.datetime.tzname()}',
+        f'Time of max: {time_max_ssh_10m.format("YYYY-MM-DD HH:mm")} '
+        f'{time_max_ssh_10m.datetime.tzname()}',
         horizontalalignment='left',
         verticalalignment='top',
         transform=ax.transAxes,
@@ -271,7 +284,7 @@ def _plot_ssh_time_series(
 ):
     time = [
         t.astimezone(pytz.timezone(timezone))
-        for t in plot_data.ssh_15m_ts.time
+        for t in plot_data.ssh_10m_ts.time
     ]
 
     ax[0].plot(
@@ -293,15 +306,15 @@ def _plot_ssh_time_series(
     )
     ax[0].plot(
         time,
-        plot_data.ssh_15m_ts.ssh + plot_data.msl,
+        plot_data.ssh_10m_ts.ssh + plot_data.msl,
         linewidth=1,
         linestyle='--',
         label='Model',
         color=theme.COLOURS['time series']['tide gauge ssh']
     )
     ax[0].plot(
-        plot_data.time_max_ssh_15m.datetime,
-        plot_data.max_ssh_15m + plot_data.msl,
+        plot_data.time_max_ssh_10m.datetime,
+        plot_data.max_ssh_10m + plot_data.msl,
         marker='o',
         markersize=10,
         markeredgewidth=3,
@@ -325,7 +338,7 @@ def _plot_ssh_time_series(
     )
     legend.get_title().set_fontsize('16')
 
-    ax[0].set_xlim(plot_data.ssh_15m_ts.time[0], plot_data.ssh_15m_ts.time[-1])
+    ax[0].set_xlim(plot_data.ssh_10m_ts.time[0], plot_data.ssh_10m_ts.time[-1])
     _ssh_time_series_labels(ax, place, plot_data, ylims, theme)
 
 
@@ -362,7 +375,7 @@ def _plot_residual_time_series(
 ):
     time = [
         t.astimezone(pytz.timezone(timezone))
-        for t in plot_data.ssh_15m_ts.time
+        for t in plot_data.ssh_10m_ts.time
     ]
     ax.plot(
         time,
