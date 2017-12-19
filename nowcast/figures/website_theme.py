@@ -81,7 +81,7 @@ COLOURS = {
         'ssh residual': 'black',
         'temperature': 'red',
         'tidal prediction': 'black',
-        'tidal prediction vs model': 'red',
+        'tidal prediction vs model': 'purple',
         'tide gauge ssh': 'MediumBlue',
         'VENUS node model salinity': 'blue',
         'VENUS node dev model salinity': 'magenta',

@@ -194,13 +194,8 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(3, 2, width_ratios=[2, 1])
     gs.update(wspace=0.13, hspace=0.2)
     ax_info = fig.add_subplot(gs[0, 0])
-
-    # Make left axis ax[0] in chart datum and right axis ax[1] in meters above mean sea level
-    # Currently, all data belongs to the left axis ax[0]
-    # It might be cleaner to have data belong to the right axis and not do as many conversions from meters above sea level to chart datum
-    ax_ssh = [0, 0]
-    ax_ssh[0] = fig.add_subplot(gs[1, 0])
-    ax_ssh[1] = ax_ssh[0].twinx()
+    ax_ssh = [fig.add_subplot(gs[1, 0])]
+    ax_ssh.append(ax_ssh[0].twinx())
     for axis in ax_ssh:
         axis.set_axis_bgcolor(theme.COLOURS['axes']['background'])
     ax_res = fig.add_subplot(gs[2, 0])
@@ -280,23 +275,22 @@ def _info_box_hide_frame(ax, theme):
 
 
 def _plot_ssh_time_series(
-    ax, place, plot_data, timezone, theme, ylims=(-1, 6)
+    ax_ssh, place, plot_data, timezone, theme, ylims=(-1, 6)
 ):
     time = [
         t.astimezone(pytz.timezone(timezone))
         for t in plot_data.ssh_10m_ts.time
     ]
 
-    ax[0].plot(
+    ax_chart_dataum = ax_ssh[0]
+    ax_chart_dataum.plot(
         plot_data.ttide.time,
         plot_data.ttide.pred_all + plot_data.msl,
         linewidth=2,
         label='Tide Prediction',
-        # theme color conflict with theme
-        # color=theme.COLOURS['time series']['tidal prediction vs model']
-        color='purple'
+        color=theme.COLOURS['time series']['tidal prediction vs model']
     )
-    ax[0].plot(
+    ax_chart_dataum.plot(
         time,
         plot_data.ssh_corr + plot_data.msl,
         linewidth=2,
@@ -304,7 +298,7 @@ def _plot_ssh_time_series(
         label='Corrected model',
         color=theme.COLOURS['time series']['tide gauge ssh']
     )
-    ax[0].plot(
+    ax_chart_dataum.plot(
         time,
         plot_data.ssh_10m_ts.ssh + plot_data.msl,
         linewidth=1,
@@ -312,7 +306,7 @@ def _plot_ssh_time_series(
         label='Model',
         color=theme.COLOURS['time series']['tide gauge ssh']
     )
-    ax[0].plot(
+    ax_chart_dataum.plot(
         plot_data.time_max_ssh_10m.datetime,
         plot_data.max_ssh_10m + plot_data.msl,
         marker='o',
@@ -326,9 +320,10 @@ def _plot_ssh_time_series(
     colors = ['Gold', 'Red', 'DarkRed']
     labels = ['Maximum tides', 'Extreme water', 'Historical maximum']
     for wlev, color, label in zip(plot_data.thresholds, colors, labels):
-        ax[0].axhline(y=wlev, color=color, lw=2, ls='solid', label=label)
-
-    legend = ax[0].legend(
+        ax_chart_dataum.axhline(
+            y=wlev, color=color, lw=2, ls='solid', label=label
+        )
+    legend = ax_chart_dataum.legend(
         numpoints=1,
         bbox_to_anchor=(0.75, 1.2),
         loc='lower left',
@@ -337,26 +332,26 @@ def _plot_ssh_time_series(
         title=r'Legend'
     )
     legend.get_title().set_fontsize('16')
+    ax_chart_dataum.set_xlim(
+        plot_data.ssh_10m_ts.time[0], plot_data.ssh_10m_ts.time[-1]
+    )
+    _ssh_time_series_labels(ax_ssh, place, plot_data, ylims, theme)
 
-    ax[0].set_xlim(plot_data.ssh_10m_ts.time[0], plot_data.ssh_10m_ts.time[-1])
-    _ssh_time_series_labels(ax, place, plot_data, ylims, theme)
 
-
-def _ssh_time_series_labels(ax, place, plot_data, ylims, theme):
-    ax[0].set_title(
+def _ssh_time_series_labels(ax_ssh, place, plot_data, ylims, theme):
+    ax_chart_datum, ax_msl = ax_ssh
+    ax_chart_datum.set_title(
         f'Sea Surface Height at {place}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title']
     )
-    ax[0].grid(axis='both')
-    ax[0].set_ylim(ylims)
-
-    # Make right axis ax[1] in metres above mean sea level
-    ax[1].set_ylim((ylims[0] - plot_data.msl, ylims[1] - plot_data.msl))
-    ylabels = [
+    ax_chart_datum.grid(axis='both')
+    ax_chart_datum.set_ylim(ylims)
+    ax_msl.set_ylim((ylims[0] - plot_data.msl, ylims[1] - plot_data.msl))
+    ylabels = (
         'Water Level above \n Chart Datum [m]', 'Water Level wrt MSL [m]'
-    ]
-    for axis, ylabel in zip(ax, ylabels):
+    )
+    for axis, ylabel in zip(ax_ssh, ylabels):
         axis.set_ylabel(
             ylabel,
             fontproperties=theme.FONTS['axis'],
