@@ -34,7 +34,7 @@ The figure is annotated with the calcualted maximum sea surface height at the
 tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
 """
-from collections import namedtuple
+from types import SimpleNamespace
 
 import arrow
 from matplotlib import gridspec
@@ -158,15 +158,7 @@ def _prep_plot_data(
         avg_hrs=-4
     )
     wind_4h_avg = wind_tools.wind_speed_dir(*wind_4h_avg)
-
-    # Add thresholds and msl to plot_data
-    plot_data = namedtuple(
-        'PlotData', 'ssh_max_field, time_max_ssh_hr, ssh_15m_ts, ssh_corr, '
-        'max_ssh_15m, time_max_ssh_15m, residual, max_ssh_residual, '
-        'wind_4h_avg, '
-        'ttide, bathy, thresholds, msl'
-    )
-    return plot_data(
+    return SimpleNamespace(
         ssh_max_field=ssh_hr[itime_max_ssh],
         time_max_ssh_hr=time_max_ssh_hr.to(timezone),
         ssh_15m_ts=ssh_15m_ts,
