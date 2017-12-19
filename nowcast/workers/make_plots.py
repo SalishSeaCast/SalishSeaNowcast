@@ -495,18 +495,6 @@ def _prep_comparison_fig_functions(
                 dev_mesh_mask
             )
         },
-        'HB_DB_ferry_salinity': {
-            'function': research_ferries.salinity_ferry_route,
-            'args': (ferry_data_dir, grid_T_hr, bathy, 'HB_DB', dmy)
-        },
-        'TW_DP_ferry_salinity': {
-            'function': research_ferries.salinity_ferry_route,
-            'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_DP', dmy)
-        },
-        'TW_SB_ferry_salinity': {
-            'function': research_ferries.salinity_ferry_route,
-            'args': (ferry_data_dir, grid_T_hr, bathy, 'TW_SB', dmy)
-        },
         'Compare_VENUS_Central': {
             'function':
                 compare_venus_ctd.make_figure,
