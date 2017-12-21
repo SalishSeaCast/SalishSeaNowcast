@@ -1181,9 +1181,9 @@ class TestBuildScript:
             tmp_run_dir=tmp_run_dir,
             results_dir=Path(str(results_dir)) / '13may17',
         )
-        expected = expected.splitlines()
-        for i, line in enumerate(script.splitlines()):
-            assert line.strip() == expected[i].strip()
+        script = script.splitlines()
+        for i, line in enumerate(expected.splitlines()[:-1]):
+            assert script[i].strip() == line.strip()
 
     @patch('nowcast.workers.run_NEMO.salishsea_cmd.lib.load_run_desc')
     @patch(
@@ -1266,9 +1266,9 @@ class TestBuildScript:
         echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
         '''
 
-        expected = expected.splitlines()
-        for i, line in enumerate(script.splitlines()):
-            assert line.strip() == expected[i].strip()
+        script = script.splitlines()
+        for i, line in enumerate(expected.splitlines()[:-1]):
+            assert script[i].strip() == line.strip()
 
 
 class TestDefinitions:
@@ -1301,9 +1301,9 @@ class TestDefinitions:
         COMBINE="bin/salishsea combine"
         GATHER="bin/salishsea gather"
         '''
-        expected = expected.splitlines()
-        for i, line in enumerate(defns.splitlines()):
-            assert line.strip() == expected[i].strip()
+        defns = defns.splitlines()
+        for i, line in enumerate(expected.splitlines()[:-1]):
+            assert defns[i].strip() == line.strip()
 
     @pytest.mark.parametrize(
         'run_type', [
@@ -1331,9 +1331,9 @@ class TestDefinitions:
         COMBINE="bin/salishsea combine"
         GATHER="bin/salishsea gather"
         '''
-        expected = expected.splitlines()
-        for i, line in enumerate(defns.splitlines()):
-            assert line.strip() == expected[i].strip()
+        defns = defns.splitlines()
+        for i, line in enumerate(expected.splitlines()[:-1]):
+            assert defns[i].strip() == line.strip()
 
 
 class TestExecute:
@@ -1363,9 +1363,9 @@ class TestExecute:
         ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
         echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
         '''
-        expected = expected.splitlines()
-        for i, line in enumerate(script.splitlines()):
-            assert line.strip() == expected[i].strip()
+        script = script.splitlines()
+        for i, line in enumerate(expected.splitlines()[:-1]):
+            assert script[i].strip() == line.strip()
 
     def test_execute_with_xios_host(self, config):
         script = run_NEMO._execute(
@@ -1390,9 +1390,9 @@ class TestExecute:
         ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
         echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
         '''
-        expected = expected.splitlines()
-        for i, line in enumerate(script.splitlines()):
-            assert line.strip() == expected[i].strip()
+        script = script.splitlines()
+        for i, line in enumerate(expected.splitlines()[:-1]):
+            assert script[i].strip() == line.strip()
 
 
 @patch('nowcast.workers.run_NEMO.subprocess.Popen')
