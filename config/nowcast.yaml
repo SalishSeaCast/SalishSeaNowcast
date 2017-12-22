@@ -580,6 +580,30 @@ wave forecasts:
     forecast2: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/
 
 
+# Vancouver Harbour & Fraser River FVCOM model forecasts
+vhfr forecasts:
+  # FVCOM case name
+  case name: vhfr_low_v2
+  # Directory on compute host where files and directories necessary to
+  # prepare and execute the fvcom runs are stored
+  run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs
+  # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
+  FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41
+  # Number of processors
+  number of processors: 32
+  # Location on the compute host of the file that contains IP addresses
+  # and MPI slots specifications.
+  mpi hosts file: ${HOME}/mpi_hosts.fvcom
+  # Path to the FVCOM command processor executable to use in the run script
+  fvc_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/fvc
+  # Run type specific configurations for the runs that are executed on the
+  # compute host; keyed by run type
+  run types:
+    forecast:
+      # Directory on compute host where results are stored
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
+
+
 # Distributed logging system configuration
 logging:
   aggregator:
@@ -844,6 +868,12 @@ message registry:
       success: Fraser River turbidity file created
       failure: Fraser River turbidity file creation failed
       crash: make_turbidity_file worker crashed
+
+    run_fvcom:
+      checklist key: FVCOM run
+      success forecast: forecast FVCOM run started
+      failure forecast: forecast FVCOM run failed
+      crash: run_fvcom worker crashed
 
     make_ww3_wind_file:
       checklist key: WW3 wind forcing
