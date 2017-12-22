@@ -581,7 +581,7 @@ wave forecasts:
 
 
 # Vancouver Harbour & Fraser River FVCOM model forecasts
-vhfr forecasts:
+vhfr fvcom runs:
   # FVCOM case name
   case name: vhfr_low_v2
   # Directory on compute host where files and directories necessary to

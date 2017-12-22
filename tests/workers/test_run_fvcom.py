@@ -35,7 +35,7 @@ def config():
     :rtype: dict
     """
     return {
-        'vhfr forecasts': {
+        'vhfr fvcom runs': {
             'case name': 'vhfr_low_v2',
             'run prep dir': 'fvcom-runs',
             'number of processors': 32,
@@ -243,7 +243,7 @@ class TestRunDescription:
         fvcom_repo_dir = Path(str(tmpdir.ensure_dir('nowcast-sys/FVCOM41')))
         run_prep_dir = Path(str(tmpdir.ensure_dir('nowcast-sys/fvcom-runs')))
         p_config = patch.dict(
-            config['vhfr forecasts'], {
+            config['vhfr fvcom runs'], {
                 'run prep dir': run_prep_dir,
                 'FVCOM exe path': fvcom_repo_dir,
             }
@@ -304,7 +304,7 @@ class TestBuildScript:
             'run_id': f'20dec17fvcom-{run_type}',
         }
         results_dir = tmpdir.ensure_dir(
-            config['vhfr forecasts']['run types'][run_type]['results']
+            config['vhfr fvcom runs']['run types'][run_type]['results']
         )
         script = run_fvcom._build_script(
             Path(str(tmp_run_dir)), Path(str(run_desc_file_path)),
