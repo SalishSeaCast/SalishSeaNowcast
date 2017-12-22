@@ -146,6 +146,20 @@ Workers
     :members: main
 
 
+:kbd:`make_turbidity_file`
+--------------------------
+
+.. automodule:: nowcast.workers.make_turbidity_file
+    :members: main
+
+
+:kbd:`run_fvcom`
+----------------
+
+.. automodule:: nowcast.workers.run_fvcom
+    :members: main
+
+
 :kbd:`make_ww3_wind_file`
 -------------------------
 
