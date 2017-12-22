@@ -217,7 +217,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
     """Save the surge for a given day in a netCDF4 file.
     """
     # Western open boundary (JdF) grid parameter values for NEMO
-    startj, endj, r = 384, 471, 1
+    startj, endj, r = 370, 470, 1
     lengthj = endj - startj
 
     # netCDF4 file setup
