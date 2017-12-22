@@ -17,16 +17,16 @@ prepares the temporary run directory and bash run script for a prelim-forecast
 or forecast run on the ONC cloud, and launches the run.
 """
 import logging
+import os
 from pathlib import Path
 import shlex
+import shutil
 import subprocess
 
 import arrow
 import fvcom_cmd.api
-import shutil
 from nemo_nowcast import NowcastWorker
 from nemo_nowcast.fileutils import FilePerms
-import os
 import yaml
 
 NAME = 'run_fvcom'
@@ -47,10 +47,12 @@ def main():
     )
     worker.cli.add_argument(
         'run_type',
-        choices={'forecast'},
+        choices={'nowcast', 'forecast'},
         help='''
         Type of run to execute:
-        'forecast' means updated forecast run (after NEMO forecast run)
+        'nowcast' means run for present UTC day (after NEMO nowcast run)
+        'forecast' means updated forecast run 
+        (next 36h UTC, after NEMO forecast run)
         ''',
     )
     worker.cli.add_date_option(

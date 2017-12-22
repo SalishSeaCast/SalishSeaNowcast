@@ -51,7 +51,7 @@ class TestMain:
         run_fvcom.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        assert kwargs['choices'] == {'forecast'}
+        assert kwargs['choices'] == {'nowcast', 'forecast'}
         assert 'help' in kwargs
 
     def test_add_run_date_option(self, m_worker):
@@ -72,6 +72,7 @@ class TestMain:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger')
@@ -99,6 +100,7 @@ class TestSuccess:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger')
@@ -126,6 +128,7 @@ class TestFailure:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger')
@@ -147,26 +150,24 @@ class TestRunFVCOM:
             run_date=arrow.get('2017-11-29')
         )
         config = {}
-        m_prep.return_value = (
-            '/fvcom-runs/29nov17vhfr-forecast_2017-11-29T183043.555919-0700'
+        tmp_run_dir = (
+            '/fvcom-runs/29nov17vhfr-{run_type}_2017-11-29T183043.555919-0700'
         )
+        m_prep.return_value = tmp_run_dir
         checklist = run_fvcom.run_fvcom(parsed_args, config)
         expected = {
             run_type: {
-                'host':
-                    'west.cloud',
-                'run dir':
-                    '/fvcom-runs/29nov17vhfr-forecast_2017-11-29T183043.555919-0700',
-                'run exec cmd':
-                    m_launch(),
-                'run date':
-                    '2017-11-29',
+                'host': 'west.cloud',
+                'run dir': tmp_run_dir,
+                'run exec cmd': m_launch(),
+                'run date': '2017-11-29',
             }
         }
         assert checklist == expected
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger')
@@ -211,6 +212,7 @@ class TestCreateRunDescFile:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger')
@@ -246,6 +248,7 @@ class TestRunDescription:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger')
@@ -259,6 +262,9 @@ class TestCreateRunScript:
         config = {
             'vhfr forecasts': {
                 'run types': {
+                    'nowcast': {
+                        'results': 'SalishSea/fvcom-nowcast/',
+                    },
                     'forecast': {
                         'results': 'SalishSea/fvcom-forecast/',
                     }
@@ -274,6 +280,7 @@ class TestCreateRunScript:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.yaml.load')
@@ -293,6 +300,9 @@ class TestBuildScript:
                 'mpi hosts file': '${HOME}/mpi_hosts.fvcom',
                 'fvc_cmd': 'bin/fvc',
                 'run types': {
+                    'nowcast': {
+                        'results': 'SalishSea/fvcom-nowcast/',
+                    },
                     'forecast': {
                         'results': 'SalishSea/fvcom-forecast/',
                     }
@@ -352,6 +362,7 @@ class TestBuildScript:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 class TestDefinitions:
@@ -362,7 +373,7 @@ class TestDefinitions:
         run_desc_file_path = tmpdir.ensure(f'21dec17fvcom-{run_type}.yaml')
         run_desc = {'run_id': f'21dec17fvcom-{run_type}'}
         tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
-        results_dir = tmpdir.ensure_dir('SalishSea/fvcom-forecast/21dec17/')
+        results_dir = tmpdir.ensure_dir(f'SalishSea/fvcom-{run_type}/21dec17/')
         config = {
             'vhfr forecasts': {
                 'mpi hosts file': '${HOME}/mpi_hosts.fvcom',
@@ -390,6 +401,7 @@ class TestDefinitions:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 class TestExecute:
@@ -425,6 +437,7 @@ class TestExecute:
 
 
 @pytest.mark.parametrize('run_type', [
+    'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.subprocess.Popen')
