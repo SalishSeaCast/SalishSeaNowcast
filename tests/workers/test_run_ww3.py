@@ -520,10 +520,12 @@ class TestLaunchRun:
 
     def test_find_run_process_pid(self, m_run, m_popen, run_type):
         run_ww3._launch_run(run_type, Path('SoGWW3.sh'), 'west.cloud')
-        m_run.assert_called_once_with(['pgrep', '--full', 'bash SoGWW3.sh'],
-                                      stdout=subprocess.PIPE,
-                                      check=True,
-                                      universal_newlines=True)
+        m_run.assert_called_once_with(
+            ['pgrep', '--newest', '--exact', '--full', 'bash SoGWW3.sh'],
+            stdout=subprocess.PIPE,
+            check=True,
+            universal_newlines=True
+        )
 
     def test_run_exec_cmd(self, m_run, m_popen, run_type):
         m_run.return_value = SimpleNamespace(stdout=43)

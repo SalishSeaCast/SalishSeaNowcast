@@ -612,7 +612,7 @@ def _launch_run(run_type, run_script_path, host_name):
     while not run_process_pid:
         try:
             proc = subprocess.run(
-                shlex.split(f'pgrep --full "{run_exec_cmd}"'),
+                shlex.split(f'pgrep --newest --exact --full "{run_exec_cmd}"'),
                 stdout=subprocess.PIPE,
                 check=True,
                 universal_newlines=True
