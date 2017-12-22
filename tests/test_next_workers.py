@@ -956,7 +956,9 @@ class TestAfterRunFVCOM:
     @pytest.mark.parametrize(
         'msg_type', [
             'crash',
+            'failure nowcast',
             'failure forecast',
+            'success nowcast',
             'success forecast',
         ]
     )

@@ -599,8 +599,10 @@ vhfr forecasts:
   # Run type specific configurations for the runs that are executed on the
   # compute host; keyed by run type
   run types:
-    forecast:
+    nowcast:
       # Directory on compute host where results are stored
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast/
+    forecast:
       results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
 
 
@@ -871,7 +873,9 @@ message registry:
 
     run_fvcom:
       checklist key: FVCOM run
+      success nowcast: nowcast FVCOM run started
       success forecast: forecast FVCOM run started
+      failure nowcast: nowcast FVCOM run failed
       failure forecast: forecast FVCOM run failed
       crash: run_fvcom worker crashed
 
