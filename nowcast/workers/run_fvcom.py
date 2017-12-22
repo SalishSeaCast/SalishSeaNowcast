@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Salish Sea FVCOM Vancouver Harbour and Fraser River model worker that
-prepares the temporary run directory and bash run script for a prelim-forecast
-or forecast run on the ONC cloud, and launches the run.
+prepares the temporary run directory and bash run script for a nowcast or
+forecast run on the ONC cloud, and launches the run.
 """
 import logging
 import os
@@ -147,7 +147,7 @@ def _create_run_desc_file(run_date, run_type, config):
     """
     ddmmmyy = run_date.format('DDMMMYY').lower()
     run_id = f'{ddmmmyy}fvcom-{run_type}'
-    run_prep_dir = Path(config['vhfr forecasts']['run prep dir'])
+    run_prep_dir = Path(config['vhfr fvcom runs']['run prep dir'])
     run_desc = _run_description(run_id, run_prep_dir, config)
     run_desc_file_path = run_prep_dir / f'{run_id}.yaml'
     with run_desc_file_path.open('wt') as f:
@@ -165,18 +165,18 @@ def _run_description(run_id, run_prep_dir, config):
     :return: Run description
     :rtype dict:
     """
-    casename = config['vhfr forecasts']['case name']
+    casename = config['vhfr fvcom runs']['case name']
     run_desc = {
         'run_id':
             run_id,
         'casename':
             casename,
         'nproc':
-            config['vhfr forecasts']['number of processors'],
+            config['vhfr fvcom runs']['number of processors'],
         'paths': {
             'FVCOM':
                 os.fspath(
-                    Path(config['vhfr forecasts']['FVCOM exe path']).resolve()
+                    Path(config['vhfr fvcom runs']['FVCOM exe path']).resolve()
                 ),
             'runs directory':
                 os.fspath(run_prep_dir.resolve()),
@@ -208,7 +208,7 @@ def _create_run_script(
     :rtype: :py:class:`pathlib.Path`
     """
     results_dir = Path(
-        config['vhfr forecasts']['run types'][run_type]['results']
+        config['vhfr fvcom runs']['run types'][run_type]['results']
     )
     ddmmmyy = run_date.format('DDMMMYY').lower()
     script = _build_script(
@@ -277,8 +277,8 @@ def _definitions(
         run_dir=tmp_run_dir,
         results_dir=results_dir,
         mpirun=
-        f'mpirun --hostfile {config["vhfr forecasts"]["mpi hosts file"]}',
-        fvc_cmd=config['vhfr forecasts']['fvc_cmd'],
+        f'mpirun --hostfile {config["vhfr fvcom runs"]["mpi hosts file"]}',
+        fvc_cmd=config['vhfr fvcom runs']['fvc_cmd'],
     )
     return defns
 
@@ -291,9 +291,9 @@ def _execute(config):
     :rtype: str
     """
     mpirun = (
-        f'${{MPIRUN}} -np {config["vhfr forecasts"]["number of processors"]} '
+        f'${{MPIRUN}} -np {config["vhfr fvcom runs"]["number of processors"]} '
         f'--bind-to-core ./fvcom '
-        f'--casename={config["vhfr forecasts"]["case name"]} '
+        f'--casename={config["vhfr fvcom runs"]["case name"]} '
         f'--logfile=./fvcom.log'
     )
     script = (
