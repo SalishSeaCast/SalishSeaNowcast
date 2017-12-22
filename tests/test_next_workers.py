@@ -949,6 +949,24 @@ class TestAfterWatchNEMO:
         assert download_results not in workers
 
 
+class TestAfterRunFVCOM:
+    """Unit tests for the after_run_fvcom function.
+    """
+
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure forecast',
+            'success forecast',
+        ]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_run_fvcom(
+            Message('run_fvcom', msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterMakeWW3WindFile:
     """Unit tests for the after_make_ww3_wind_file function.
     """
