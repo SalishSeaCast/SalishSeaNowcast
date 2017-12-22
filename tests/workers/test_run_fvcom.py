@@ -26,6 +26,33 @@ import pytest
 from nowcast.workers import run_fvcom
 
 
+@pytest.fixture(scope='function')
+def config():
+    """
+    nowcast.yaml config object section for FVCOM VHFR runs.
+
+    :return: :py:class:`nemo_nowcast.Config`-like dict
+    :rtype: dict
+    """
+    return {
+        'vhfr forecasts': {
+            'case name': 'vhfr_low_v2',
+            'run prep dir': 'fvcom-runs',
+            'number of processors': 32,
+            'mpi hosts file': '${HOME}/mpi_hosts.fvcom',
+            'fvc_cmd': 'bin/fvc',
+            'run types': {
+                'nowcast': {
+                    'results': 'SalishSea/fvcom-nowcast/',
+                },
+                'forecast': {
+                    'results': 'SalishSea/fvcom-forecast/',
+                }
+            }
+        }
+    }
+
+
 @patch('nowcast.workers.run_fvcom.NowcastWorker')
 class TestMain:
     """Unit tests for main() function.
@@ -142,14 +169,14 @@ class TestRunFVCOM:
     """
 
     def test_checklist(
-        self, m_launch, m_crs, m_copy2, m_prep, m_crdf, m_logger, run_type
+        self, m_launch, m_crs, m_copy2, m_prep, m_crdf, m_logger, run_type,
+        config
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
             run_type=run_type,
             run_date=arrow.get('2017-11-29')
         )
-        config = {}
         tmp_run_dir = (
             '/fvcom-runs/29nov17vhfr-{run_type}_2017-11-29T183043.555919-0700'
         )
@@ -178,10 +205,9 @@ class TestCreateRunDescFile:
     """
 
     def test_run_desc_file_path(
-        self, m_run_desc, m_yaml_dump, m_logger, run_type
+        self, m_run_desc, m_yaml_dump, m_logger, run_type, config
     ):
         run_date = arrow.get('2017-12-11')
-        config = {'vhfr forecasts': {'run prep dir': 'fvcom-runs'}}
         with patch('nowcast.workers.run_fvcom.Path.open') as m_open:
             run_desc_file_path = run_fvcom._create_run_desc_file(
                 run_date, run_type, config
@@ -190,18 +216,10 @@ class TestCreateRunDescFile:
         assert run_desc_file_path == expected
 
     def test_run_desc_yaml_dump(
-        self, m_run_desc, m_yaml_dump, m_logger, run_type, tmpdir
+        self, m_run_desc, m_yaml_dump, m_logger, run_type, config, tmpdir
     ):
         run_date = arrow.get('2017-12-12')
         run_prep_dir = Path(str(tmpdir.ensure_dir('nowcast-sys/fvcom-runs')))
-        config = {
-            'vhfr forecasts': {
-                'case name': 'vhfr_low_v2',
-                'run prep dir': run_prep_dir,
-                'FVCOM exe path': 'nowcast-sys/FVCOM41',
-                'number of processors': 32,
-            }
-        }
         with patch('nowcast.workers.run_fvcom.Path.open') as m_open:
             run_desc_file_path = run_fvcom._create_run_desc_file(
                 run_date, run_type, config
@@ -220,19 +238,18 @@ class TestRunDescription:
     """Unit tests for _run_description() function.
     """
 
-    def test_run_desc(self, m_logger, run_type, tmpdir):
+    def test_run_desc(self, m_logger, run_type, config, tmpdir):
         run_id = f'11dec17fvcom-{run_type}'
         fvcom_repo_dir = Path(str(tmpdir.ensure_dir('nowcast-sys/FVCOM41')))
         run_prep_dir = Path(str(tmpdir.ensure_dir('nowcast-sys/fvcom-runs')))
-        config = {
-            'vhfr forecasts': {
-                'case name': 'vhfr_low_v2',
+        p_config = patch.dict(
+            config['vhfr forecasts'], {
                 'run prep dir': run_prep_dir,
                 'FVCOM exe path': fvcom_repo_dir,
-                'number of processors': 32,
             }
-        }
-        run_desc = run_fvcom._run_description(run_id, run_prep_dir, config)
+        )
+        with p_config:
+            run_desc = run_fvcom._run_description(run_id, run_prep_dir, config)
         expected = {
             'run_id': run_id,
             'casename': 'vhfr_low_v2',
@@ -257,20 +274,10 @@ class TestCreateRunScript:
     """Unit tests for _create_run_script() function.
     """
 
-    def test_run_script_path(self, m_bld_script, m_logger, run_type, tmpdir):
+    def test_run_script_path(
+        self, m_bld_script, m_logger, run_type, config, tmpdir
+    ):
         tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
-        config = {
-            'vhfr forecasts': {
-                'run types': {
-                    'nowcast': {
-                        'results': 'SalishSea/fvcom-nowcast/',
-                    },
-                    'forecast': {
-                        'results': 'SalishSea/fvcom-forecast/',
-                    }
-                }
-            }
-        }
         run_script_path = run_fvcom._create_run_script(
             arrow.get('2017-12-20'), run_type, Path(str(tmp_run_dir)),
             Path(f'20dec17fvcom-{run_type}.yaml'), config
@@ -288,27 +295,11 @@ class TestBuildScript:
     """Unit tests for _build_script() function.
     """
 
-    def test_script(self, m_yaml_load, run_type, tmpdir):
+    def test_script(self, m_yaml_load, run_type, config, tmpdir):
         tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
         run_desc_file_path = tmp_run_dir.ensure(
             f'20dec17fvcom-{run_type}.yaml'
         )
-        config = {
-            'vhfr forecasts': {
-                'case name': 'vhfr_low_v2',
-                'number of processors': 32,
-                'mpi hosts file': '${HOME}/mpi_hosts.fvcom',
-                'fvc_cmd': 'bin/fvc',
-                'run types': {
-                    'nowcast': {
-                        'results': 'SalishSea/fvcom-nowcast/',
-                    },
-                    'forecast': {
-                        'results': 'SalishSea/fvcom-forecast/',
-                    }
-                }
-            }
-        }
         m_yaml_load.return_value = {
             'run_id': f'20dec17fvcom-{run_type}',
         }
@@ -369,17 +360,11 @@ class TestDefinitions:
     """Unit tests for _definitions() function.
     """
 
-    def test_definitions(self, run_type, tmpdir):
+    def test_definitions(self, run_type, config, tmpdir):
         run_desc_file_path = tmpdir.ensure(f'21dec17fvcom-{run_type}.yaml')
         run_desc = {'run_id': f'21dec17fvcom-{run_type}'}
         tmp_run_dir = tmpdir.ensure_dir('tmp_run_dir')
         results_dir = tmpdir.ensure_dir(f'SalishSea/fvcom-{run_type}/21dec17/')
-        config = {
-            'vhfr forecasts': {
-                'mpi hosts file': '${HOME}/mpi_hosts.fvcom',
-                'fvc_cmd': 'bin/fvc',
-            }
-        }
         defns = run_fvcom._definitions(
             run_desc, Path(str(tmp_run_dir)), Path(str(run_desc_file_path)),
             Path(str(results_dir)), config
@@ -408,13 +393,7 @@ class TestExecute:
     """Unit tests for _execute() function.
     """
 
-    def test_execute(self, run_type):
-        config = {
-            'vhfr forecasts': {
-                'case name': 'vhfr_low_v2',
-                'number of processors': 32,
-            }
-        }
+    def test_execute(self, run_type, config):
         script = run_fvcom._execute(config)
         expected = '''mkdir -p ${RESULTS_DIR}
 
