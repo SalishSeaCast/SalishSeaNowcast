@@ -330,7 +330,7 @@ erddap:
       - ubcSSfSquamishSSH10mV17-02
       - ubcSSfVictoriaSSH10mV17-02
       - ubcSSfWoodwardsLandingSSH10mV17-02
-
+      - ubcSSfSurfaceTracerFields1hV17-02
 
 
 figures:
