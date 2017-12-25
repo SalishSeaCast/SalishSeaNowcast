@@ -779,7 +779,18 @@ def after_watch_ww3(msg, config, checklist):
         'success forecast2': [],
         'success forecast': [],
     }
-    return []
+    if msg.type.startswith('success'):
+        run_type = msg.type.split()[1]
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.download_wwatch3_results',
+                args=[
+                    msg.payload[run_type]['host'], run_type, '--run-date',
+                    msg.payload[run_type]['run date']
+                ]
+            )
+        )
+    return next_workers[msg.type]
 
 
 def after_download_results(msg, config, checklist):
@@ -865,6 +876,55 @@ def after_download_results(msg, config, checklist):
     return next_workers[msg.type]
 
 
+def after_split_results(msg, config, checklist):
+    """Calculate the list of workers to launch after the split_results
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    return []
+
+
+def after_download_wwatch3_results(msg, config, checklist):
+    """Calculate the list of workers to launch after the
+    download_wwatch3_results worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure forecast': [],
+        'failure forecast2': [],
+        'success forecast': [],
+        'success forecast2': [],
+    }
+    return next_workers[msg.type]
+
+
 def after_make_plots(msg, config, checklist):
     """Calculate the list of workers to launch after the make_plots
     worker ends.
@@ -910,27 +970,6 @@ def after_make_plots(msg, config, checklist):
             )
         )
     return next_workers[msg.type]
-
-
-def after_split_results(msg, config, checklist):
-    """Calculate the list of workers to launch after the split_results
-    worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    return []
 
 
 def after_update_forecast_datasets(msg, config, checklist):

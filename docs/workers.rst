@@ -202,6 +202,13 @@ Workers
     :members: main
 
 
+:kbd:`download_wwatch3_results`
+-------------------------------
+
+.. automodule:: nowcast.workers.download_wwatch3_results
+    :members: main
+
+
 :kbd:`get_onc_ctd`
 ------------------
 

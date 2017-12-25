@@ -1073,8 +1073,6 @@ class TestAfterWatchWW3:
             'crash',
             'failure forecast2',
             'failure forecast',
-            'success forecast2',
-            'success forecast',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1082,6 +1080,44 @@ class TestAfterWatchWW3:
             Message('watch_ww3', msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_ww3', 'success forecast', {
+                    'forecast': {
+                        'host': 'west.cloud',
+                        'run date': '2017-12-24',
+                        'completed': True
+                    }
+                }
+            ),
+            Message(
+                'watch_ww3', 'success forecast2', {
+                    'forecast2': {
+                        'host': 'west.cloud',
+                        'run date': '2017-12-24',
+                        'completed': True
+                    }
+                }
+            ),
+        ]
+    )
+    def test_success_launch_download_wwatch3_results(
+        self, msg, config, checklist
+    ):
+        workers = next_workers.after_watch_ww3(msg, config, checklist)
+        run_type = msg.type.split()[1]
+        expected = NextWorker(
+            'nowcast.workers.download_wwatch3_results',
+            args=[
+                msg.payload[run_type]['host'],
+                msg.type.split()[1], '--run-date',
+                msg.payload[run_type]['run date']
+            ],
+            host='localhost'
+        )
+        assert expected in workers
 
 
 class TestAfterDownloadResults:
@@ -1241,6 +1277,37 @@ class TestAfterSplitResults:
         workers = next_workers.after_split_results(
             Message('split_results', msg_type), config, checklist
         )
+        assert workers == []
+
+
+class TestAfterDownloadWWatch3Results:
+    """Unit tests for the after_download_wwatch3_results function.
+    """
+
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure forecast',
+            'failure forecast2',
+            'success forecast',
+            'success forecast2',
+        ]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        p_checklist = patch.dict(
+            checklist, {
+                'WW3 run': {
+                    'forecast': {
+                        'run date': '2017-12-24'
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_download_wwatch3_results(
+                Message('download_wwatch3_results', msg_type), config,
+                checklist
+            )
         assert workers == []
 
 
