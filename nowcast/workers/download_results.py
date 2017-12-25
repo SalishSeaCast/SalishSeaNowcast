@@ -18,6 +18,7 @@ from a run on the HPC/cloud facility to archival storage.
 import logging
 import os
 from pathlib import Path
+import shlex
 
 import arrow
 from nemo_nowcast import NowcastWorker, WorkerError
@@ -90,27 +91,27 @@ def download_results(parsed_args, config, *args):
     except KeyError:
         logger.critical(f'unrecognized host: {host_name}')
         raise WorkerError
-    results_dir = run_date.strftime('%d%b%y').lower()
+    results_dir = run_date.format('ddmmmyy').lower()
     run_type_results = Path(host_config['run types'][run_type]['results'])
     src_dir = run_type_results / results_dir
     src = f'{host_name}:{src_dir}'
     dest = Path(config['results archive'][run_type])
-    cmd = ['scp', '-Cpr', src, str(dest)]
+    cmd = shlex.split(f'scp -Cpr {src} {dest}')
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     results_archive_dir = dest / results_dir
     for filepath in results_archive_dir.glob('FVCOM_[TUV].nc'):
         filepath.unlink()
     lib.fix_perms(
-        str(dest / results_dir),
-        mode=lib.PERMS_RWX_RWX_R_X,
+        dest / results_dir,
+        mode=lib.FilePerms(user='rwx', group='rwx', other='rx'),
         grp_name=config['file group']
     )
     for filepath in results_archive_dir.glob('*'):
-        lib.fix_perms(os.fspath(filepath), grp_name=config['file group'])
+        lib.fix_perms(filepath, grp_name=config['file group'])
     checklist = {run_type: {}}
     for freq in '1h 1d'.split():
         checklist[run_type][freq] = list(
-            map(str, results_archive_dir.glob(f'SalishSea_{freq}_*.nc'))
+            map(os.fspath, results_archive_dir.glob(f'SalishSea_{freq}_*.nc'))
         )
     return checklist
 
