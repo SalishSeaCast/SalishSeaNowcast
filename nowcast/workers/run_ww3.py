@@ -25,7 +25,8 @@ import uuid
 
 import arrow
 from nemo_nowcast import NowcastWorker
-from nemo_nowcast.fileutils import FilePerms
+
+from nowcast import lib
 
 NAME = 'run_ww3'
 logger = logging.getLogger(NAME)
@@ -587,7 +588,9 @@ def _write_run_script(run_type, script, run_dir_path):
     run_script_path = run_dir_path / 'SoGWW3.sh'
     with run_script_path.open('wt') as f:
         f.write(script)
-    run_script_path.chmod(FilePerms(user='rwx', group='rwx', other='r'))
+    lib.fix_perms(
+        run_script_path, lib.FilePerms(user='rwx', group='rwx', other='r')
+    )
     logger.debug(f'wwatch3-{run_type}: run script: {run_script_path}')
     return run_script_path
 

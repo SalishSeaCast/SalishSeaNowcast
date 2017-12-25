@@ -212,13 +212,10 @@ class TestGetGrib:
             }
         )
         m_get_file.return_value = 'filepath'
-        p_chmod = patch('nowcast.workers.download_weather.os.chmod')
-        p_fileperms = patch('nowcast.workers.download_weather.FilePerms')
-        with p_config, p_chmod as m_chmod, p_fileperms as m_fileperms:
+        p_fix_perms = patch('nowcast.workers.download_weather.lib.fix_perms')
+        with p_config, p_fix_perms as m_fix_perms:
             download_weather.get_grib(parsed_args, config)
-        m_chmod.assert_called_once_with(
-            'filepath', m_fileperms(user='rw', group='rw', other='r')
-        )
+        m_fix_perms.assert_called_once_with('filepath')
 
     def test_checklist(
         self, m_get_file, m_fix_perms, m_mkdir, m_calc_date, m_logger,
