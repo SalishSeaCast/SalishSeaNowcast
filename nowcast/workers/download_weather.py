@@ -28,7 +28,6 @@ from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
-from nemo_nowcast.fileutils import FilePerms
 
 from nowcast import lib
 
@@ -119,7 +118,7 @@ def get_grib(parsed_args, config, *args):
                     url_tmpl, filename_tmpl, var, dest_dir_root, date,
                     forecast, hr_str, session
                 )
-                os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
+                lib.fix_perms(filepath)
     checklist = {f'{date} {forecast} forecast': True}
     return checklist
 

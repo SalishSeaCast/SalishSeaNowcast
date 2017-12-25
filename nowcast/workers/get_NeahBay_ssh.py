@@ -31,7 +31,6 @@ from nemo_nowcast import (
     get_web_data,
     NowcastWorker,
 )
-from nemo_nowcast.fileutils import FilePerms
 import netCDF4 as nc
 import numpy as np
 import pytz
@@ -193,7 +192,7 @@ def _read_website(save_path):
     )
     with open(filepath, 'wt') as f:
         f.writelines(table)
-    os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
+    lib.fix_perms(filepath)
     logger.debug(f'observations & predictions table saved to {filepath}')
     return filepath
 
@@ -326,7 +325,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
         vobtcrty[:, 0, ib] = np.zeros(len(surges))
     ssh_file.close()
     try:
-        os.chmod(filepath, FilePerms(user='rw', group='rw', other='r'))
+        lib.fix_perms(filepath)
     except PermissionError:
         # Can't change permissions/group because we don't own the file
         # but that's okay because we were able to write it above

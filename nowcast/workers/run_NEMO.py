@@ -29,11 +29,12 @@ from nemo_nowcast import (
     WorkerError,
 )
 from nemo_cmd.namelist import namelist2dict
-from nemo_nowcast.fileutils import FilePerms
 import salishsea_cmd.api
 import salishsea_cmd.lib
 import salishsea_cmd.run
 import yaml
+
+from nowcast import lib
 
 NAME = 'run_NEMO'
 logger = logging.getLogger(NAME)
@@ -400,7 +401,9 @@ def _create_run_script(
     run_script_filepath = run_dir / 'SalishSeaNEMO.sh'
     with run_script_filepath.open('wt') as f:
         f.write(script)
-    run_script_filepath.chmod(FilePerms(user='rwx', group='rwx', other='r'))
+    lib.fix_perms(
+        run_script_filepath, lib.FilePerms(user='rwx', group='rwx', other='r')
+    )
     logger.debug(f'{run_type}: run script: {run_script_filepath}')
     return run_script_filepath
 

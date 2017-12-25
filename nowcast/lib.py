@@ -18,22 +18,12 @@ import grp
 import logging
 import logging.handlers
 import os
-import stat
 import subprocess
 
 import paramiko
 from driftwood.formatters import JSONFormatter
 from nemo_nowcast import WorkerError
-
-# File permissions:
-# rw-rw-r--
-PERMS_RW_RW_R = (
-    stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IROTH
-)
-# rwxrwxr--
-PERMS_RWX_RWX_R = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH)
-# rwxrwxr-x
-PERMS_RWX_RWX_R_X = (stat.S_IRWXU | stat.S_IRWXG | stat.S_IROTH | stat.S_IXOTH)
+from nemo_nowcast.fileutils import FilePerms
 
 
 def configure_logging(config, logger, debug, email=True):
@@ -113,7 +103,9 @@ def configure_logging(config, logger, debug, email=True):
         logger.addHandler(email)
 
 
-def fix_perms(path, mode=PERMS_RW_RW_R, grp_name=None):
+def fix_perms(
+    path, mode=FilePerms(user='rw', group='rw', other='r'), grp_name=None
+):
     """Try to set the permissions and group ownership of the file
     or directory at path.
 
@@ -128,10 +120,10 @@ def fix_perms(path, mode=PERMS_RW_RW_R, grp_name=None):
     :arg path: Path to fix the permissions of.
     :type path: str
 
-    :arg mode: Numeric mode to set the directory's permissions to.
-    :type mode: int
+    :arg mode: Permissions to set for the path.
+    :type mode: :py:class:`nemo_nowcast.fileutils.FilePerms` or int
 
-    :arg grp_name: Group name to change the path's ownership to.
+    :arg grp_name: Group name to change the path ownership to.
                    Defaults to None meaning do nothing.
     :type grp_name: str
     """
@@ -146,7 +138,13 @@ def fix_perms(path, mode=PERMS_RW_RW_R, grp_name=None):
         pass
 
 
-def mkdir(path, logger, mode=PERMS_RWX_RWX_R_X, grp_name=None, exist_ok=True):
+def mkdir(
+    path,
+    logger,
+    mode=FilePerms(user='rwx', group='rwx', other='rx'),
+    grp_name=None,
+    exist_ok=True
+):
     """Create a directory at path with its permissions set to mode.
     If grp_name is given,
     set the directory's gid to that associated with the grp_name.
@@ -163,8 +161,8 @@ def mkdir(path, logger, mode=PERMS_RWX_RWX_R_X, grp_name=None, exist_ok=True):
     :arg logger: Logger object.
     :type logger: :class:`logging.Logger`
 
-    :arg mode: Numeric mode to set the directory's permissions to.
-    :type mode: int
+    :arg mode: Permissions to set for the directory.
+    :type mode: :py:class:`nemo_nowcast.fileutils.FilePerms` or int
 
     :arg grp_name: Group name to change the directory's ownership to.
                    Defaults to None meaning that the directory's group
