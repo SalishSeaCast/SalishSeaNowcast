@@ -692,7 +692,7 @@ def _render_figures(
             logger.debug(proc.stdout)
             tmpfilename.rename(filename)
             logger.info(f'{filename} scoured')
-        lib.fix_perms(os.fspath(filename), grp_name=config['file group'])
+        lib.fix_perms(filename, grp_name=config['file group'])
         fig_files.append(os.fspath(filename))
         fig_path = _render_storm_surge_alerts_thumbnail(
             config, run_type, plot_type, dmy, fig, svg_name, fig_save_format,
@@ -793,7 +793,7 @@ def _render_storm_surge_alerts_thumbnail(
         facecolor=fig.get_facecolor(),
         bbox_inches='tight'
     )
-    lib.fix_perms(os.fspath(undated_thumbnail), grp_name=config['file group'])
+    lib.fix_perms(undated_thumbnail, grp_name=config['file group'])
     logger.info(f'{undated_thumbnail} saved')
     return os.fspath(undated_thumbnail)
 
