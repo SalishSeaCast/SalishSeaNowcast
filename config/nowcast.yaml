@@ -578,6 +578,11 @@ wave forecasts:
   results:
     forecast: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast/
     forecast2: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/
+  # Directories on results server where run results are stored
+  # in ddmmmyy/ directories; keyed by run type
+  results archive:
+    forecast: /opp/wwatch3/forecast/
+    forecast2: /opp/wwatch3/forecast2/
 
 
 # Vancouver Harbour & Fraser River FVCOM model forecasts
@@ -925,6 +930,14 @@ message registry:
       success hindcast: hindcast results files downloaded
       failure hindcast: hindcast results files download failed
       crash: download_results worker crashed
+
+    download_wwatch3_results:
+      checklist key: WW3 results files
+      success forecast: WW3 forecast results files downloaded
+      failure forecast: WW3 forecast results files download failed
+      success forecast2: WW3 forecast2 results files downloaded
+      failure forecast2: WW3 forecast2 results files download failed
+      crash: download_wwatch3_results worker crashed
 
     split_results:
       checklist key: results splitting
