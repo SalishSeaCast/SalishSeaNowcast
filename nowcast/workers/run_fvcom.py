@@ -26,8 +26,9 @@ import subprocess
 import arrow
 import fvcom_cmd.api
 from nemo_nowcast import NowcastWorker
-from nemo_nowcast.fileutils import FilePerms
 import yaml
+
+from nowcast import lib
 
 NAME = 'run_fvcom'
 logger = logging.getLogger(NAME)
@@ -217,7 +218,9 @@ def _create_run_script(
     run_script_path = tmp_run_dir / 'VHFR_FVCOM.sh'
     with run_script_path.open('wt') as f:
         f.write(script)
-    run_script_path.chmod(FilePerms(user='rwx', group='rwx', other='r'))
+    lib.fix_perms(
+        run_script_path, lib.FilePerms(user='rwx', group='rwx', other='r')
+    )
     logger.debug(f'{run_type}: run script: {run_script_path}')
     return run_script_path
 
