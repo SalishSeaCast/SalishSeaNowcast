@@ -91,7 +91,7 @@ def download_results(parsed_args, config, *args):
     except KeyError:
         logger.critical(f'unrecognized host: {host_name}')
         raise WorkerError
-    results_dir = run_date.format('ddmmmyy').lower()
+    results_dir = run_date.format('DDMMMYY').lower()
     run_type_results = Path(host_config['run types'][run_type]['results'])
     src_dir = run_type_results / results_dir
     src = f'{host_name}:{src_dir}'
