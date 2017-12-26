@@ -195,7 +195,9 @@ def upload_all_files(host_name, run_date, config):
 
 def upload_file(sftp_client, host_name, localpath, remotepath):
     sftp_client.put(localpath, remotepath)
-    sftp_client.chmod(remotepath, lib.PERMS_RW_RW_R)
+    sftp_client.chmod(
+        remotepath, lib.FilePerms(user='rw', group='rw', other='r')
+    )
     logger.debug(
         '{local} uploaded to {host} at {remote}'
         .format(local=localpath, host=host_name, remote=remotepath)
@@ -203,7 +205,9 @@ def upload_file(sftp_client, host_name, localpath, remotepath):
 
 
 def make_remote_directory(sftp_client, host_name, remote_dir):
-    sftp_client.mkdir(remote_dir, mode=lib.PERMS_RWX_RWX_R_X)
+    sftp_client.mkdir(
+        remote_dir, mode=lib.FilePerms(user='rwx', group='rwx', other='rx')
+    )
     logger.debug(
         '{remote} directory made on {host}'
         .format(remote=remote_dir, host=host_name)
