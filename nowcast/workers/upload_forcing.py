@@ -263,7 +263,8 @@ def _upload_live_ocean_files(
 def _upload_file(sftp_client, host_name, localpath, remotepath):
     sftp_client.put(os.fspath(localpath), os.fspath(remotepath))
     sftp_client.chmod(
-        os.fspath(remotepath), lib.FilePerms(user='rw', group='rw', other='r')
+        os.fspath(remotepath),
+        int(lib.FilePerms(user='rw', group='rw', other='r'))
     )
     logger.debug(f'{localpath} uploaded to {host_name} at {remotepath}')
 
