@@ -184,16 +184,17 @@ def after_grib_to_netcdf(msg, config, checklist):
                 'nowcast.workers.ping_erddap', args=['download_weather']
             )
         )
-#    for host in config['run']['enabled hosts']:
-#        if not config['run']['enabled hosts'][host]['shared storage']:
-#            for msg_suffix, run_type in msg_run_type_mapping.items():
+    for host in config['run']['enabled hosts']:
+        if not config['run']['enabled hosts'][host]['shared storage']:
+            for msg_suffix, run_type in msg_run_type_mapping.items():
 #                if run_type in config['run types']:
-#                    next_workers[f'success {msg_suffix}'].append(
-#                        NextWorker(
-#                            'nowcast.workers.upload_forcing',
-#                            args=[host, msg_suffix]
-#                        ),
-#                    )
+                if run_type in 'forecast2':
+                    next_workers[f'success {msg_suffix}'].append(
+                        NextWorker(
+                            'nowcast.workers.upload_forcing',
+                            args=[host, msg_suffix]
+                        ),
+                    )
     return next_workers[msg.type]
 
 
