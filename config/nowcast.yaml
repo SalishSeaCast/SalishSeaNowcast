@@ -127,29 +127,18 @@ temperature salinity:
     file name: 'low_passed_UBC.nc'
     # Destination directory for downloaded UW Live Ocean files
     dest dir: /results/forcing/LiveOcean/downloaded
-  # File containing western boundary tracer grid points information
-  boundary info: /results/nowcast-sys/tracers/west/SalishSea_west_TEOS10.nc
   # Destination directory for daily temperature and salinity boundary conditions
   # files generated from UW Live Ocean forecast
-  bc dir: /results/forcing/LiveOcean/modified
+  bc dir: /results/forcing/LiveOcean/boundary_conditions
   # Host on which to run make_live_ocean_files worker that requires matlab
   matlab host: salish-nowcast
   # File name template for the daily temperature and salinity boundary
   # conditions files generated from UW Live Ocean forecast
   # **Must be quoted to project {} characters**
-  file template: 'single_LO_{:y%Ym%md%d}.nc'
+  file basename: LiveOcean_v201712
+  file template: 'LiveOcean_v201712_{:y%Ym%md%d}.nc'
+  mesh mask: /results/nowcast-sys/grid/mesh_mask201702.nc
 
-n and si:
-  # Files containing fits to T and S
-  n fit: /results/forcing/LiveOcean/boundary_conditions/bio/fits/bioOBCfit_NTS.csv
-  si fit: /results/forcing/LiveOcean/boundary_conditions/bio/fits/bioOBCfit_SiTS.csv
-  # upper ocean climatology files
-  n clim: /results/forcing/LiveOcean/boundary_conditions/bio/fits/nmat.csv
-  si clim: /results/forcing/LiveOcean/boundary_conditions/bio/fits/simat.csv
-  # output directory
-  bc dir: /results/forcing/LiveOcean/modified/bio
-  # output file name template
-  file template: 'single_bio_LO_{:y%Ym%md%d}.nc'
 
 observations:
   # ONC Strait of Georgia nodes real-time CTD data
