@@ -187,8 +187,7 @@ def after_grib_to_netcdf(msg, config, checklist):
     for host in config['run']['enabled hosts']:
         if not config['run']['enabled hosts'][host]['shared storage']:
             for msg_suffix, run_type in msg_run_type_mapping.items():
-#                if run_type in config['run types']:
-                if run_type in 'forecast2':
+                if run_type in config['run types']:
                     next_workers[f'success {msg_suffix}'].append(
                         NextWorker(
                             'nowcast.workers.upload_forcing',
