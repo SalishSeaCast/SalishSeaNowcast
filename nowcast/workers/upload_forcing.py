@@ -222,32 +222,29 @@ def _upload_river_runoff_files(
 def _upload_live_ocean_files(
     sftp_client, run_type, run_date, config, host_name, host_config
 ):
-    for bcs in ('temperature salinity', 'n and si'):
-        filename = config[bcs]['file template'].format(run_date.date())
-        localpath = Path(config[bcs]['bc dir'], filename)
-        remotepath = (
-            Path(host_config['forcing']['bc dir'], filename)
-            if bcs == 'temperature salinity' else
-            Path(host_config['forcing']['bio bc dir'], filename)
-        )
-        try:
-            _upload_file(sftp_client, host_name, localpath, remotepath)
-        except FileNotFoundError:
-            # Boundary condition file does not exist, so create symlink to
-            # persist previous day's file.
-            # This happens as a matter of course for forecast2 runs because
-            # they run before the day's LiveOcean product is available,
+    filename = config['temperature salinity']['file template'].format(run_date.date())
+    localpath = Path(config['temperature salinity']['bc dir'], filename)
+    remotepath = (
+        Path(host_config['forcing']['bc dir'], filename)
+    )
+    try:
+        _upload_file(sftp_client, host_name, localpath, remotepath)
+    except FileNotFoundError:
+        # Boundary condition file does not exist, so create symlink to
+        # persist previous day's file.
+        # This happens as a matter of course for forecast2 runs because
+           # they run before the day's LiveOcean product is available,
             # but for other run types it is a cause for concern.
-            prev_day_fn = (
+        prev_day_fn = (
                 config[bcs]['file template'].format(
                     run_date.replace(days=-1).date()
                 )
             )
-            localpath.symlink_to(localpath.with_name(prev_day_fn))
-            logging_level = (
+        localpath.symlink_to(localpath.with_name(prev_day_fn))
+        logging_level = (
                 logging.INFO if run_type == 'forecast2' else logging.CRITICAL
             )
-            logger.log(
+        logger.log(
                 logging_level,
                 f'LiveOcean boundary conditions file not found; '
                 f'created symlink to {localpath.with_name(prev_day_fn)}',
@@ -257,7 +254,7 @@ def _upload_live_ocean_files(
                     'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
                 }
             )
-            _upload_file(sftp_client, host_name, localpath, remotepath)
+        _upload_file(sftp_client, host_name, localpath, remotepath)
 
 
 def _upload_file(sftp_client, host_name, localpath, remotepath):
