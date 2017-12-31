@@ -85,11 +85,11 @@ def make_live_ocean_files(parsed_args, config, *args):
     )
     download_dir = Path(config['temperature salinity']['download']['dest dir'])
     bc_dir = Path(config['temperature salinity']['bc dir'])
-    basename = Path(config['temperature salinity']['file basename'])
+    file_template = Path(config['temperature salinity']['file template'])
     meshfilename = Path(config['temperature salinity']['mesh mask'])
     filepaths = create_LiveOcean_TS_BCs(
         ymd,
-        basename=basename,
+        file_template=file_template,
         meshfilename=meshfilename,
         bc_dir=str(bc_dir),
         LO_dir=str(download_dir),
