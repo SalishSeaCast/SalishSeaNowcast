@@ -102,15 +102,15 @@ class TestMakeLiveOceanFiles:
                     'dest dir': 'forcing/LiveOcean/downloaded'
                 },
                 'bc dir': 'forcing/LiveOcean/boundary_conditions',
-                'file basename': 'LiveOcean_v201712',
+                'file template': 'LiveOcean_v201712_{:y%Ym%md%d}.nc',
                 'mesh mask': 'grid/mesh_mask201702.nc',
             },
         }
-        m_create_ts.return_value = ['LO_TS_y2017m01d30.nc']
+        m_create_ts.return_value = ['LiveOcean_v201712_y2017m01d30.nc']
         checklist = make_live_ocean_files.make_live_ocean_files(
             parsed_args, config
         )
         expected = {
-            'temperature & salinity': 'LO_TS_y2017m01d30.nc',
+            'temperature & salinity': 'LiveOcean_v201712_y2017m01d30.nc',
         }
         assert checklist == expected

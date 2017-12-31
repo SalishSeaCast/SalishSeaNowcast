@@ -135,7 +135,6 @@ temperature salinity:
   # File name template for the daily temperature and salinity boundary
   # conditions files generated from UW Live Ocean forecast
   # **Must be quoted to project {} characters**
-  file basename: LiveOcean_v201712
   file template: 'LiveOcean_v201712_{:y%Ym%md%d}.nc'
   # Mesh mask from which to get grid parameters for boundary conditions files
   mesh mask: /results/nowcast-sys/grid/mesh_mask201702.nc
