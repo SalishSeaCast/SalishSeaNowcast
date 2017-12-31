@@ -481,8 +481,7 @@ run:
           results: /results/SalishSea/nowcast-green/
       forcing:
         ssh dir: /results/forcing/sshNeahBay/
-        bc dir: /results/forcing/LiveOcean/modified/
-        bio bc dir: /results/forcing/LiveOcean/modified/bio/
+        bc dir: /results/forcing/LiveOcean/boundary_conditions/
         rivers dir: /results/forcing/rivers/
         rivers_month.nc: /results/nowcast-sys/rivers-climatology/rivers_month_201702.nc
         rivers_temp.nc: /results/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc
