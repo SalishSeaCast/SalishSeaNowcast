@@ -25,7 +25,6 @@ import arrow
 from nemo_nowcast import NowcastWorker
 from salishsea_tools.LiveOcean_BCs import (
     create_LiveOcean_TS_BCs,
-    create_LiveOcean_bio_BCs_fromTS,
 )
 
 NAME = 'make_live_ocean_files'
@@ -86,8 +85,8 @@ def make_live_ocean_files(parsed_args, config, *args):
     )
     download_dir = Path(config['temperature salinity']['download']['dest dir'])
     bc_dir = Path(config['temperature salinity']['bc dir'])
-    basename = Path(config['temperature salinity']['file basename']
-    meshfilename = Path(config['temperature salinity']['mesh mask']
+    basename = Path(config['temperature salinity']['file basename'])
+    meshfilename = Path(config['temperature salinity']['mesh mask'])
     filepaths = create_LiveOcean_TS_BCs(
         ymd,
         basename=basename,
