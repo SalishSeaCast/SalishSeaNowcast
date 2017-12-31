@@ -86,42 +86,19 @@ def make_live_ocean_files(parsed_args, config, *args):
     )
     download_dir = Path(config['temperature salinity']['download']['dest dir'])
     bc_dir = Path(config['temperature salinity']['bc dir'])
-    boundary_info = Path(config['temperature salinity']['boundary info'])
+    basename = Path(config['temperature salinity']['file basename']
+    meshfilename = Path(config['temperature salinity']['mesh mask']
     filepaths = create_LiveOcean_TS_BCs(
         ymd,
-        ymd,
-        '1D',
-        'daily',
-        single_nowcast=True,
-        teos_10=True,
-        basename='single_LO',
+        basename=basename,
+        meshfilename=meshfilename,
         bc_dir=str(bc_dir),
         LO_dir=str(download_dir),
-        NEMO_BC=str(boundary_info)
     )
     logger.debug(
         f'Stored T&S western boundary conditions file: {filepaths[0]}'
     )
     checklist = {'temperature & salinity': filepaths[0]}
-    logger.info(
-        'Creating nutrient western boundary conditions file from T&S file'
-    )
-    ts_filepath = Path(filepaths[0])
-    filepath = create_LiveOcean_bio_BCs_fromTS(
-        ts_filepath.name,
-        strdate=ymd,
-        TSdir=os.fspath(ts_filepath.parent),
-        outFile=config['n and si']['file template'],
-        outDir=config['n and si']['bc dir'],
-        nFitFilePath=config['n and si']['n fit'],
-        siFitFilePath=config['n and si']['si fit'],
-        nClimFilePath=config['n and si']['n clim'],
-        siClimFilePath=config['n and si']['si clim'],
-    )
-    logger.debug(
-        f'Stored nutients western boundary conditions file: {filepath}'
-    )
-    checklist['nutrients'] = filepath
     return checklist
 
 
