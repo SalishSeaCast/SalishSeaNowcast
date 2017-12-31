@@ -236,7 +236,7 @@ def _upload_live_ocean_files(
         # they run before the day's LiveOcean product is available,
         # but for other run types it is a cause for concern.
         prev_day_fn = (
-            config[bcs]['file template'].format(
+            config['temperature salinity']['file template'].format(
                 run_date.replace(days=-1).date()
             )
         )
