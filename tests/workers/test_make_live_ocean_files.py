@@ -90,12 +90,11 @@ class TestFailure:
 
 
 @patch('nowcast.workers.make_live_ocean_files.create_LiveOcean_TS_BCs')
-@patch('nowcast.workers.make_live_ocean_files.create_LiveOcean_bio_BCs_fromTS')
 class TestMakeLiveOceanFiles:
     """Unit test for make_live_ocean_files() function.
     """
 
-    def test_checklist(self, m_create_bio, m_create_ts):
+    def test_checklist(self, m_create_ts):
         parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-30'))
         config = {
             'temperature salinity': {
@@ -103,32 +102,15 @@ class TestMakeLiveOceanFiles:
                     'dest dir': 'forcing/LiveOcean/downloaded'
                 },
                 'bc dir': 'forcing/LiveOcean/boundary_conditions',
-                'boundary info': 'SalishSea_west_TEOS10.nc',
+                'file basename': 'LiveOcean_v201712',
+                'mesh mask': 'grid/mesh_mask201702.nc',
             },
-            'n and si': {
-                'file template':
-                    'LO_bio_{:y%Ym%md%d}.nc',
-                'bc dir':
-                    'forcing/LiveOcean/boundary_conditions/bio',
-                'n fit':
-                    'forcing/LiveOcean/boundary_conditions/bio/fits/'
-                    'bioOBCfit_NTS.csv',
-                'si fit':
-                    'forcing/LiveOcean/boundary_conditions/bio/fits/'
-                    'bioOBCfit_SiTS.csv',
-                'n clim':
-                    'forcing/LiveOcean/boundary_conditions/bio/fits/nmat.csv',
-                'si clim':
-                    'forcing/LiveOcean/boundary_conditions/bio/fits/simat.csv'
-            }
         }
         m_create_ts.return_value = ['LO_TS_y2017m01d30.nc']
-        m_create_bio.return_value = 'LO_bio_y2017m01d30.nc'
         checklist = make_live_ocean_files.make_live_ocean_files(
             parsed_args, config
         )
         expected = {
             'temperature & salinity': 'LO_TS_y2017m01d30.nc',
-            'nutrients': 'LO_bio_y2017m01d30.nc',
         }
         assert checklist == expected
