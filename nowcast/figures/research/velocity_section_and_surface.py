@@ -16,11 +16,6 @@
 along a section of the domain thalweg,
 and on the surface for a section of the domain that excludes Puget Sound 
 in the south and Johnstone Strait in the north.
-
-.. note:: This module us no longer used in production but it preserved here
-because the `figure development and testing docs`_ and notebooks refer to it.
-
-.. _figure development and testing docs: https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html#creating-a-figure-module
 """
 from types import SimpleNamespace
 
@@ -29,7 +24,6 @@ from matplotlib import gridspec
 import numpy as np
 import cmocean
 
-from salishsea_tools import visualisations as vis
 from salishsea_tools import viz_tools
 
 import nowcast.figures.website_theme
@@ -50,12 +44,51 @@ def make_figure(
     section_lims=((235, 318, 0, 445),),
     surface_lims=(0, 397, 200, 750)
 ):
+    """Produce a figure that shows colour contours of a tracer on a vertical slice 
+    along a section of the domain thalweg,
+    and on the surface for a section of the domain that excludes Puget Sound 
+    in the south and Johnstone Strait in the north.
 
+    :param U_var: Hourly average U velocity from NEMO run
+    :type U_var: :class:`numpy.ndarray`
+
+    :param V_var: Hourly average V velocity from NEMO run
+    :type V_var: :class:`numpy.ndarray`
+
+    :param bathy: Salish Sea NEMO model bathymetry data.
+    :type bathy: :class:`netCDF4.Dataset`
+
+    :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
+    :type mesh_mask: :class:`netCDF4.Dataset`
+
+    :param cmap: Colour map to use for tracer_var contour plots.
+    :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
+
+    :param 2-tuple figsize: Figure size (width, height) in inches.
+
+    :param theme: Module-like object that defines the style elements for the
+                figure. See :py:mod:`nowcast.figures.website_theme` for an
+                example.
+
+    :param levels: List of numbers indicating level curves to draw in increasing order.
+    :type levels: :class:`numpy.ndarray`
+
+    :param ibreak: 
+    :type ibreak: `int`
+
+    :param 1-tuple sections: tuple of section to plot velocity.
+
+    :param 2-tuple pos: position of subfigures in their axis. 
+  
+    :param 4-tuple section_lims: 4-tuple of axis limits for section plots in form of (xmin, xmax, zmin, zmax)
+
+    :param 4-tuple surface_lims: 4-tuple of axis limits for surface plot in form of (xmin, xmax, ymin, ymax)
+
+    :returns: :py:class:`matplotlib.figure.Figure`
+    """
     # Prepare data
-    plot_data = _prep_plot_data(U_var, V_var, mesh_mask, sections=sections)
-    bathy_array = bathy.variables['Bathymetry'][...]
-    bathy_array[bathy_array.mask] = 0
-
+    plot_data = _prep_plot_data(U_var, V_var, mesh_mask, bathy, sections=sections)
+    
     # Prepare layout
     fig, (ax_section, ax_surface, ax_cbar) = _prep_fig_axes(
         figsize, theme, sections=sections, pos=pos
@@ -73,7 +106,7 @@ def make_figure(
             ax_cbar,
             plot_data.V_section[index, ...],
             plot_data,
-            bathy_array[section[0], 1:],
+            plot_data.bathy_array[section[0], 1:],
             cmap=cmap,
             levels=levels,
             ibreak=ibreak,
@@ -91,7 +124,7 @@ def make_figure(
     )
 
     # Plot surface
-    Q = _plot_vel_surface(
+    _plot_vel_surface(
         ax_surface, plot_data, bathy, sections=(sections, section_lims)
     )
     _surface_axes_labels(ax_surface, theme, lims=surface_lims)
@@ -99,7 +132,7 @@ def make_figure(
     return fig
 
 
-def _prep_plot_data(U, V, mesh_mask, hr=0, sections=(450,)):
+def _prep_plot_data(U, V, mesh_mask, bathy, hr=0, sections=(450,)):
 
     # Index, mask, and unstagger U and V
     U_trim, V_trim = viz_tools.unstagger(
@@ -118,6 +151,10 @@ def _prep_plot_data(U, V, mesh_mask, hr=0, sections=(450,)):
     for index, section in enumerate(sections):
         U_section[index, :, :] = U_trim[:, section - 1, :]
         V_section[index, :, :] = V_trim[:, section - 1, :]
+   
+    bathy_array = bathy.variables['Bathymetry'][...].data
+    bathy_mask = bathy.variables['Bathymetry'][:].mask
+    bathy_array[bathy_mask] = 0
 
     return SimpleNamespace(
         U_surface=U_surface,
@@ -127,6 +164,7 @@ def _prep_plot_data(U, V, mesh_mask, hr=0, sections=(450,)):
         gridX=np.arange(U_surface.shape[1]) + 1,
         gridY=np.arange(U_surface.shape[0]) + 1,
         depth=mesh_mask["gdept_1d"][0, ...],
+        bathy_array=bathy_array
     )
 
 
@@ -257,7 +295,7 @@ def _section_axes_labels(
 
 def _plot_vel_surface(ax, plot_data, bathy, sections=None):
 
-    Q = ax.quiver(
+    ax.quiver(
         plot_data.gridX[::5],
         plot_data.gridY[::5],
         plot_data.U_surface[::5, ::5],
@@ -271,8 +309,6 @@ def _plot_vel_surface(ax, plot_data, bathy, sections=None):
             )
     viz_tools.plot_land_mask(ax, bathy, color='burlywood')
     viz_tools.plot_coastline(ax, bathy)
-
-    return Q
 
 
 def _surface_axes_labels(ax, theme, lims=(0, 397, 200, 750)):
