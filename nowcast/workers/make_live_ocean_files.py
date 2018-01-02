@@ -44,8 +44,6 @@ def main():
         default=arrow.now().floor('day'),
         help='''
         Date of Live Ocean forecast product to produce files from.
-        Note that boundary conditions files are produced for the 2 days
-        following run-date.
         '''
     )
     worker.run(make_live_ocean_files, success, failure)
