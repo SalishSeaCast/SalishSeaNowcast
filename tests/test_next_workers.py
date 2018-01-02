@@ -949,6 +949,26 @@ class TestAfterWatchNEMO:
         assert download_results not in workers
 
 
+class TestAfterMakeFVCOMBoundary:
+    """Unit tests for the after_make_fvcom_boundary function.
+    """
+
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure forecast',
+            'success nowcast',
+            'success forecast',
+        ]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_fvcom_boundary(
+            Message('make_fvcom_boundary', msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterRunFVCOM:
     """Unit tests for the after_run_fvcom function.
     """

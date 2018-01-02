@@ -877,6 +877,14 @@ message registry:
       failure: Fraser River turbidity file creation failed
       crash: make_turbidity_file worker crashed
 
+    make_fvcom_boundary:
+      checklist key: FVCOM boundary conditions
+      success nowcast: nowcast FVCOM boundary condition files created
+      success forecast: forecast FVCOM boundary condition files created
+      failure nowcast: nowcast FVCOM boundary condition files creation failed
+      failure forecast: forecast FVCOM boundary condition files creation failed
+      crash: make_fvcom_boundary worker crashed
+
     run_fvcom:
       checklist key: FVCOM run
       success nowcast: nowcast FVCOM run started

@@ -153,6 +153,13 @@ Workers
     :members: main
 
 
+:kbd:`make_fvcom_boundary`
+--------------------------
+
+.. automodule:: nowcast.workers.make_fvcom_boundary
+    :members: main
+
+
 :kbd:`run_fvcom`
 ----------------
 
