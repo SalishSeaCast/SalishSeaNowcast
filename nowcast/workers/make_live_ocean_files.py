@@ -18,7 +18,6 @@ open boundary from the University of Washington Live Ocean model forecast
 product.
 """
 import logging
-import os
 from pathlib import Path
 
 import arrow
@@ -91,8 +90,8 @@ def make_live_ocean_files(parsed_args, config, *args):
         ymd,
         file_template=file_template,
         meshfilename=meshfilename,
-        bc_dir=str(bc_dir),
-        LO_dir=str(download_dir),
+        bc_dir=bc_dir,
+        LO_dir=download_dir,
     )
     logger.debug(
         f'Stored T&S western boundary conditions file: {filepaths[0]}'
