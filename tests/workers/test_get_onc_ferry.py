@@ -151,3 +151,74 @@ class TestOnCrossing:
     """Unit tests for _on_crossing() function.
     """
     pass
+
+
+@pytest.mark.parametrize('ferry_platform', [
+    'TWDP',
+])
+class TestCalcCrossingNumbers:
+    """Unit tests for _calc_crossing_numbers() function.
+    """
+    pass
+
+
+@pytest.mark.parametrize('ferry_platform', [
+    'TWDP',
+])
+class TestGetWaterData:
+    """Unit tests for _get_water_data() function.
+    """
+    pass
+
+
+@pytest.mark.parametrize(
+    'ferry_platform, device, sensors', [
+        ('TWDP', 'TSG', 'temperature,conductivity,salinity'),
+    ]
+)
+@patch('nowcast.workers.get_onc_ferry.logger', autospec=True)
+class TestEmptyDeviceData:
+    """Unit tests for _empty_device_data() function.
+    """
+
+    def test_empty_device_data(
+        self, m_logger, ferry_platform, device, sensors
+    ):
+        dataset = get_onc_ferry._empty_device_data(
+            ferry_platform, device, '2017-12-01', sensors
+        )
+        for sensor in sensors.split(','):
+            assert sensor in dataset.data_vars
+            assert dataset.data_vars[sensor].shape == (0,)
+            assert dataset.data_vars[sensor].dtype == float
+            assert 'sampleTime' in dataset.coords
+            assert dataset.sampleTime.shape == (0,)
+            assert dataset.sampleTime.dtype == 'datetime64[ns]'
+            assert 'sampleTime' in dataset.dims
+
+
+@pytest.mark.parametrize('ferry_platform', [
+    'TWDP',
+])
+class TestQaqcFilter:
+    """Unit tests for _qaqc_filter() function.
+    """
+    pass
+
+
+@pytest.mark.parametrize('ferry_platform', [
+    'TWDP',
+])
+class TestCreateDataset:
+    """Unit tests for _create_dataset() function.
+    """
+    pass
+
+
+@pytest.mark.parametrize('ferry_platform', [
+    'TWDP',
+])
+class TestCreateDataarray:
+    """Unit tests for _create_dataarray() function.
+    """
+    pass
