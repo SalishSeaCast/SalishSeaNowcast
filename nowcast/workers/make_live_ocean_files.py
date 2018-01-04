@@ -80,10 +80,13 @@ def make_live_ocean_files(parsed_args, config, *args):
         f'Creating T&S western boundary conditions file from {ymd} Live '
         f'Ocean run'
     )
-    download_dir = Path(config['temperature salinity']['download']['dest dir'])
     bc_dir = Path(config['temperature salinity']['bc dir'])
     file_template = config['temperature salinity']['file template']
+    bc_filepath = bc_dir / file_template.format(parsed_args.run_date.datetime)
+    if bc_filepath.is_symlink():
+        bc_filepath.unlink()
     meshfilename = Path(config['temperature salinity']['mesh mask'])
+    download_dir = Path(config['temperature salinity']['download']['dest dir'])
     filepaths = create_LiveOcean_TS_BCs(
         ymd,
         file_template=file_template,
