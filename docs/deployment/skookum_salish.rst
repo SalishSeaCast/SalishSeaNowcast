@@ -53,6 +53,17 @@ Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
         /results/nowcast-sys/private-tools/grib2/wgrib2/
 
 
+Git Repositories
+================
+
+Clone the following repos into :file:`/results/nowcast-sys/`:
+
+.. code-block:: bash
+
+    $ cd /results/nowcast-sys/
+    $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
+
+
 Build XIOS-2
 ============
 
@@ -103,9 +114,10 @@ The Python packages that the system depends on are installed in a conda environm
         scipy xarray
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ pip install angles cmocean driftwood \
-        feedgen python-hglib raven retrying scour
+        feedgen python-hglib raven retrying scour utm
     (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable tools/SalishSeaTools/
+    (/results/nowcast-sys/nowcast-env)$ pip install --editable OPPTools/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO-Cmd/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaCmd/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaNowcast/
