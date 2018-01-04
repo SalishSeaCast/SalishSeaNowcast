@@ -196,9 +196,22 @@ observations:
             sensors:
               co2_partial_pressure: partial_pressure
               co2_concentration_linearized: co2
+          TEMPHUMID:
+            sensors:
+              air_temperature: air_temperature
+              relative_humidity: REL_HUMIDITY
+          BARPRESS:
+            sensors:
+              barometric_pressure: barometric_pressure
+          PYRANOMETER:
+            sensors:
+              solar_radiation: solar_radiation
+          PYRGEOMETER:
+            sensors:
+              longwave_radiation: downward_radiation
         # Template for ONC ferry data file path
         # **Must be quoted to project {} characters**
-        filepath template: '{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_1m_{yyyymmdd}.nc'
+        filepath template: '{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_METEO_1m_{yyyymmdd}.nc'
     # Destination directory for ONC ferry data netCDF files
     dest dir: /results/observations/ONC/ferries/
 

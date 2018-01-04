@@ -360,6 +360,11 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
         'turbidity': 'NTU',
         'partial_pressure': 'pCO2 uatm',
         'co2': 'umol/mol',
+        'air_temperature': 'C',
+        'REL_HUMIDITY': '%',
+        'barometric_pressure': 'hPa',
+        'solar_radiation': 'W/m^2',
+        'downward_radiation': 'W/m^2',
     }
     data_arrays = {
         sensor: xarray.DataArray(
@@ -834,7 +839,113 @@ def _create_dataarray(var, array, ferry_platform, location_config):
                 'mole_fraction_of_carbon_dioxide_in_sea_water_sample_count',
             'long name':
                 'CO2 partial pressure sample count',
-        }
+        },
+        'air_temperature': {
+            'name': 'air_temperature',
+            'ioos category': 'meteorology',
+            'standard name': 'air_temperature',
+            'long name': 'air temperature',
+        },
+        'air_temperature_std_dev': {
+            'name': 'air_temperature_std_dev',
+            'ioos category': 'meteorology',
+            'standard name': 'air_temperature_standard_deviations',
+            'long name': 'air temperature standard deviation',
+        },
+        'air_temperature_sample_count': {
+            'name': 'air_temperature_sample_count',
+            'ioos category': 'meteorology',
+            'standard name': 'air_temperature_sample_count',
+            'long name': 'air temperature sample count',
+        },
+        'relative_humidity': {
+            'name': 'relative_humidity',
+            'ioos category': 'meteorology',
+            'standard name': 'relative_humidity',
+            'long name': 'relative humidity',
+        },
+        'relative_humidity_std_dev': {
+            'name': 'relative_humidity_std_dev',
+            'ioos category': 'meteorology',
+            'standard name': 'relative_humidity_standard_deviation',
+            'long name': 'relative humidity standard deviation',
+        },
+        'relative_humidity_sample_count': {
+            'name': 'relative_humidity_sample_count',
+            'ioos category': 'meteorology',
+            'standard name': 'relative_humidity_sample_count',
+            'long name': 'relative humidity sample count',
+        },
+        'barometric_pressure': {
+            'name': 'barometric_pressure',
+            'ioos category': 'pressure',
+            'standard name': 'surface_air_pressure',
+            'long name': 'barometric pressure',
+        },
+        'barometric_pressure_std_dev': {
+            'name': 'barometric_pressure_std_dev',
+            'ioos category': 'pressure',
+            'standard name': 'surface_air_pressure_standard_deviation',
+            'long name': 'barometric pressure standard deviation',
+        },
+        'barometric_pressure_sample_count': {
+            'name': 'barometric_pressure_sample_count',
+            'ioos category': 'pressure',
+            'standard name': 'surface_air_pressure_sample_count',
+            'long name': 'barometric pressure sample count',
+        },
+        'solar_radiation': {
+            'name': 'solar_radiation',
+            'ioos category': 'Meteorology',
+            'standard name': 'surface_downwelling_shortwave_flux_in_air',
+            'long name': 'solar radiation',
+        },
+        'solar_radiation_std_dev': {
+            'name':
+                'solar_radiation_std_dev',
+            'ioos category':
+                'Meteorology',
+            'standard name':
+                'surface_downwelling_shortwave_flux_in_air_standard_deviation',
+            'long name':
+                'solar radiation standard deviation',
+        },
+        'solar_radiation_sample_count': {
+            'name':
+                'solar_radiation_sample_count',
+            'ioos category':
+                'Meteorology',
+            'standard name':
+                'surface_downwelling_shortwave_flux_in_air_sample_count',
+            'long name':
+                'solar radiation sample count',
+        },
+        'longwave_radiation': {
+            'name': 'longwave_radiation',
+            'ioos category': 'Meteorology',
+            'standard name': 'surface_downwelling_longwave_flux_in_air',
+            'long name': 'longwave radiation',
+        },
+        'longwave_radiation_std_dev': {
+            'name':
+                'longwave_radiation_std_dev',
+            'ioos category':
+                'Meteorology',
+            'standard name':
+                'surface_downwelling_longwave_flux_in_air_standard_deviation',
+            'long name':
+                'longwave radiation standard deviation',
+        },
+        'longwave_radiation_sample_count': {
+            'name':
+                'longwave_radiation_sample_count',
+            'ioos category':
+                'Meteorology',
+            'standard name':
+                'surface_downwelling_longwave_flux_in_air_sample_count',
+            'long name':
+                'longwave radiation sample count',
+        },
     }
     aggregation_attrs = {
         'aggregation_operation': 'mean',
