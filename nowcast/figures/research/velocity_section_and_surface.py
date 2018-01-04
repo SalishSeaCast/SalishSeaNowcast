@@ -87,8 +87,10 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     # Prepare data
-    plot_data = _prep_plot_data(U_var, V_var, mesh_mask, bathy, sections=sections)
-    
+    plot_data = _prep_plot_data(
+        U_var, V_var, mesh_mask, bathy, sections=sections
+    )
+
     # Prepare layout
     fig, (ax_section, ax_surface, ax_cbar) = _prep_fig_axes(
         figsize, theme, sections=sections, pos=pos
@@ -151,7 +153,7 @@ def _prep_plot_data(U, V, mesh_mask, bathy, hr=0, sections=(450,)):
     for index, section in enumerate(sections):
         U_section[index, :, :] = U_trim[:, section - 1, :]
         V_section[index, :, :] = V_trim[:, section - 1, :]
-   
+
     bathy_array = bathy.variables['Bathymetry'][...].data
     bathy_mask = bathy.variables['Bathymetry'][:].mask
     bathy_array[bathy_mask] = 0
