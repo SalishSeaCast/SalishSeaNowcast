@@ -43,6 +43,7 @@ matplotlib==1.5.3
 netCDF4==1.2.4
 numpy==1.11.3
 olefile==0.44
+-e OPPTools==0.1.0
 packaging==16.8
 pandas==0.20.1
 paramiko==2.1.2
@@ -81,6 +82,7 @@ sphinxcontrib-websupport==1.0.1
 stevedore==1.27.1
 toolz==0.8.2
 tornado==4.5.2
+utm==0.4.2
 xarray==0.9.6
 yapf==0.20.0
 zeep==2.4.0
