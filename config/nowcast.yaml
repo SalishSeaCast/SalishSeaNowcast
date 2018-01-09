@@ -593,6 +593,38 @@ vhfr fvcom runs:
   # Directory on compute host where files and directories necessary to
   # prepare and execute the fvcom runs are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs
+  # Directory on compute host where FVCOM-NEMO coupling files are stored
+  coupling dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/coupling
+  # NEMO nesting zone nodes file (stored in coupling directory)
+  nemo nz nodes file: nemo_nesting_zone_cut.txt
+  # FVCOM nesting zone nodes file (stored in coupling directory)
+  fvcom nz nodes file: nesting-zone-utm10-nodes.txt
+  # FVCOM nesting zone element centroids file (stored in coupling directory)
+  fvcom nz centroids file: nesting-zone-utm10-centr.txt
+  # Interpolant files for transformation of u and v current components from
+  # NEMO grid to FVCOM element centroids (stored in coupling directory)
+  grid interpolant files:
+    ui: interpolant_indices_u_i_cut.txt
+    uj: interpolant_indices_u_j_cut.txt
+    uw: interpolant_weights_u_cut.txt
+    vi: interpolant_indices_v_i_cut.txt
+    vj: interpolant_indices_v_j_cut.txt
+    vw: interpolant_weights_v_cut.txt
+  # NEMO layer thickness for each grid point for u and v
+  nemo vertical weights file: nemo_vertical_weight_cut.mat
+  # NEMO grid orientation
+  nemo azimuth file: nemo_azimuth_cut.txt
+  # FVCOM grid file
+  fvcom grid file: vhfr_low_v2_utm10_grd.dat
+  # FVCOM depths file
+  fvcom depths file: vhfr_low_v2_utm10_dep.dat
+  # FVCOM sigma levels file
+  fvcom sigma file: vhfr_low_v2_sigma.dat
+  # Directory on compute host where FVCOM input files are stored
+  input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input
+  # Template for boundary forcing file names
+  # **Must be quoted to project {} characters**
+  boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
   # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
   FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41
   # Number of processors
@@ -606,10 +638,14 @@ vhfr fvcom runs:
   # compute host; keyed by run type
   run types:
     nowcast:
+      # Directory on compute host where NEMO run results for boundary forcing
+      # are stored
+      nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
       # Directory on compute host where results are stored
       results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast/
     forecast:
       results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
+      nemo boundary results: /nemoShare/MEOPAR/SalishSea/forecast/
 
 
 # Distributed logging system configuration
@@ -879,10 +915,10 @@ message registry:
 
     make_fvcom_boundary:
       checklist key: FVCOM boundary conditions
-      success nowcast: nowcast FVCOM boundary condition files created
-      success forecast: forecast FVCOM boundary condition files created
-      failure nowcast: nowcast FVCOM boundary condition files creation failed
-      failure forecast: forecast FVCOM boundary condition files creation failed
+      success nowcast: nowcast FVCOM boundary condition file created
+      success forecast: forecast FVCOM boundary condition file created
+      failure nowcast: nowcast FVCOM boundary condition file creation failed
+      failure forecast: forecast FVCOM boundary condition file creation failed
       crash: make_fvcom_boundary worker crashed
 
     run_fvcom:
