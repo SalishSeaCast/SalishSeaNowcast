@@ -16,10 +16,15 @@
 produces boundary condition files for the FVCOM model open boundary in the
 Strait of Georgia from the Salish Sea NEMO model results.
 """
+from datetime import timedelta
 import logging
+import os
+from pathlib import Path
+from types import SimpleNamespace
 
 import arrow
 from nemo_nowcast import NowcastWorker
+import OPPTools
 
 NAME = 'make_fvcom_boundary'
 logger = logging.getLogger(NAME)
@@ -63,7 +68,7 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f'FVCOM {parsed_args.run_type} run boundary condition files for '
+        f'FVCOM {parsed_args.run_type} run boundary condition file for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f'created on {parsed_args.host_name}',
         extra={
@@ -84,7 +89,7 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'FVCOM {parsed_args.run_type} run boundary condition files creation'
+        f'FVCOM {parsed_args.run_type} run boundary condition file creation'
         f' for {parsed_args.run_date.format("YYYY-MM-DD")} '
         f'failed on {parsed_args.host_name}',
         extra={
@@ -105,7 +110,69 @@ def make_fvcom_boundary(parsed_args, config, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
-    checklist = {}
+    run_type = parsed_args.run_type
+    run_date = parsed_args.run_date
+    logger.info(
+        f'Creating VHFR FVCOM open boundary file for {run_type} run from '
+        f'{run_date.format("YYYY-MM-DD")} NEMO run'
+    )
+    dest_dir = Path(config['vhfr fvcom runs']['input dir'])
+    bdy_file_tmpl = config['vhfr fvcom runs']['boundary file template']
+    bdy_file = bdy_file_tmpl.format(
+        run_type=run_type, yyyymmdd=run_date.format('YYYYMMDD')
+    )
+    coupling_dir = Path(config['vhfr fvcom runs']['coupling dir'])
+    nemo_nz_nodes_file = Path(config['vhfr fvcom runs']['nemo nz nodes file'])
+    fvcom_nz_nodes_file = Path(
+        config['vhfr fvcom runs']['fvcom nz nodes file']
+    )
+    fvcom_nz_centroids_file = Path(
+        config['vhfr fvcom runs']['fvcom nz centroids file']
+    )
+    interpolant_files = config['vhfr fvcom runs']['grid interpolant files']
+    interpolants = SimpleNamespace()
+    for attr, filename in interpolant_files.items():
+        setattr(interpolants, attr, os.fspath(coupling_dir / filename))
+    nemo_vert_wrights_file = Path(
+        config['vhfr fvcom runs']['nemo vertical weights file']
+    )
+    nemo_azimuth_file = Path(config['vhfr fvcom runs']['nemo azimuth file'])
+    fvcom_grid_file = Path(config['vhfr fvcom runs']['fvcom grid file'])
+    fvcom_depths_file = Path(config['vhfr fvcom runs']['fvcom depths file'])
+    fvcom_sigma_file = Path(config['vhfr fvcom runs']['fvcom sigma file'])
+    nemo_bdy_dir = Path(
+        config['vhfr fvcom runs']['run types'][run_type]
+        ['nemo boundary results']
+    )
+    time_start_offsets = {
+        'nowcast': timedelta(seconds=-5 * 60),
+        'forecast': timedelta(hours=24, seconds=-5 * 60),
+    }
+    time_start = run_date + time_start_offsets[run_type]
+    time_end_offsets = {
+        'nowcast': timedelta(hours=24, seconds=5 * 60),
+        'forecast': timedelta(hours=60, seconds=5 * 60),
+    }
+    time_end = run_date + time_end_offsets[run_type]
+    OPPTools.nesting.make_type3_nesting_file(
+        fout=os.fspath(dest_dir / bdy_file),
+        fnest_nemo=os.fspath(coupling_dir / nemo_nz_nodes_file),
+        fnest_nodes=os.fspath(coupling_dir / fvcom_nz_nodes_file),
+        fnest_elems=os.fspath(coupling_dir / fvcom_nz_centroids_file),
+        interp_uv=interpolants,
+        nemo_vertical_weight_file=os.fspath(
+            coupling_dir / nemo_vert_wrights_file
+        ),
+        nemo_azimuth_file=os.fspath(coupling_dir / nemo_azimuth_file),
+        fgrd=os.fspath(dest_dir / fvcom_grid_file),
+        fbathy=os.fspath(dest_dir / fvcom_depths_file),
+        fsigma=os.fspath(dest_dir / fvcom_sigma_file),
+        input_dir=os.fspath(nemo_bdy_dir),
+        time_start=time_start.format('YYYY-MM-DD HH:mm:ss'),
+        time_end=time_end.format('YYYY-MM-DD HH:mm:ss')
+    )
+    logger.debug(f'Stored VHFR FVCOM open boundary file: {dest_dir/bdy_file}')
+    checklist = os.fspath(dest_dir / bdy_file)
     return checklist
 
 
