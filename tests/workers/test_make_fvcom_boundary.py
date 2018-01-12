@@ -184,11 +184,12 @@ class TestMakeFVCOMBoundary:
             run_type=run_type,
             run_date=arrow.get('2018-01-08')
         )
-        checklist = make_fvcom_boundary.make_fvcom_boundary(
-            parsed_args, self.config
-        )
-        run_prep_dir = Path(self.config['vhfr fvcom runs']['run prep dir'])
-        expected = os.fspath(run_prep_dir / f'bdy_{run_type}_btrp_20180108.nc')
+        with patch('nowcast.workers.make_fvcom_boundary.Path.mkdir'):
+            checklist = make_fvcom_boundary.make_fvcom_boundary(
+                parsed_args, self.config
+            )
+        input_dir = Path(self.config['vhfr fvcom runs']['input dir'])
+        expected = os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc')
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -205,14 +206,15 @@ class TestMakeFVCOMBoundary:
             run_type=run_type,
             run_date=arrow.get('2018-01-08')
         )
-        checklist = make_fvcom_boundary.make_fvcom_boundary(
-            parsed_args, self.config
-        )
-        run_prep_dir = Path(self.config['vhfr fvcom runs']['run prep dir'])
+        with patch('nowcast.workers.make_fvcom_boundary.Path.mkdir'):
+            checklist = make_fvcom_boundary.make_fvcom_boundary(
+                parsed_args, self.config
+            )
+        input_dir = Path(self.config['vhfr fvcom runs']['input dir'])
         coupling_dir = Path(self.config['vhfr fvcom runs']['coupling dir'])
         grid_dir = Path(self.config['vhfr fvcom runs']['grid dir'])
         m_mk_nest_file.assert_called_once_with(
-            fout=os.fspath(run_prep_dir / f'bdy_{run_type}_btrp_20180108.nc'),
+            fout=os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc'),
             fnest_nemo=os.fspath(coupling_dir / 'nemo_nesting_zone_cut.txt'),
             fnest_nodes=os.fspath(
                 coupling_dir / 'nesting-zone-utm10-nodes.txt'

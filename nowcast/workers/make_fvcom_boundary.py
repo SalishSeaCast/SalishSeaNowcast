@@ -20,6 +20,7 @@ from datetime import timedelta
 import logging
 import os
 from pathlib import Path
+import shutil
 from types import SimpleNamespace
 
 import arrow
@@ -116,7 +117,13 @@ def make_fvcom_boundary(parsed_args, config, *args):
         f'Creating VHFR FVCOM open boundary file for {run_type} run from '
         f'{run_date.format("YYYY-MM-DD")} NEMO run'
     )
-    dest_dir = Path(config['vhfr fvcom runs']['run prep dir'])
+    fvcom_input_dir = Path(config['vhfr fvcom runs']['input dir'])
+    try:
+        shutil.rmtree(fvcom_input_dir)
+    except FileNotFoundError:
+        # input/ directory doesn't exist, and that's what we wanted
+        pass
+    fvcom_input_dir.mkdir()
     bdy_file_tmpl = config['vhfr fvcom runs']['boundary file template']
     bdy_file = bdy_file_tmpl.format(
         run_type=run_type, yyyymmdd=run_date.format('YYYYMMDD')
@@ -156,7 +163,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
     }
     time_end = run_date + time_end_offsets[run_type]
     OPPTools.nesting.make_type3_nesting_file(
-        fout=os.fspath(dest_dir / bdy_file),
+        fout=os.fspath(fvcom_input_dir / bdy_file),
         fnest_nemo=os.fspath(coupling_dir / nemo_nz_nodes_file),
         fnest_nodes=os.fspath(coupling_dir / fvcom_nz_nodes_file),
         fnest_elems=os.fspath(coupling_dir / fvcom_nz_centroids_file),
@@ -172,8 +179,10 @@ def make_fvcom_boundary(parsed_args, config, *args):
         time_start=time_start.format('YYYY-MM-DD HH:mm:ss'),
         time_end=time_end.format('YYYY-MM-DD HH:mm:ss')
     )
-    logger.debug(f'Stored VHFR FVCOM open boundary file: {dest_dir/bdy_file}')
-    checklist = os.fspath(dest_dir / bdy_file)
+    logger.debug(
+        f'Stored VHFR FVCOM open boundary file: {fvcom_input_dir/bdy_file}'
+    )
+    checklist = os.fspath(fvcom_input_dir / bdy_file)
     return checklist
 
 
