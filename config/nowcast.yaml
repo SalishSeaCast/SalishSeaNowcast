@@ -614,6 +614,8 @@ vhfr fvcom runs:
   nemo vertical weights file: nemo_vertical_weight_cut.mat
   # NEMO grid orientation
   nemo azimuth file: nemo_azimuth_cut.txt
+  # Directory on compute host where FVCOM grid files are stored
+  grid dir: /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/grid/
   # FVCOM grid file
   fvcom grid file: vhfr_low_v2_utm10_grd.dat
   # FVCOM depths file
