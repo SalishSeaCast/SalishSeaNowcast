@@ -15,6 +15,8 @@
 """Unit tests for Vancouver Harbour & Fraser River FVCOM make_fvcom_boundary
 worker.
 """
+import os
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -140,6 +142,7 @@ class TestMakeFVCOMBoundary:
 
     config = {
         'vhfr fvcom runs': {
+            'run prep dir': 'fvcom-runs/',
             'coupling dir': 'fvcom-runs/coupling',
             'nemo nz nodes file': 'nemo_nesting_zone_cut.txt',
             'fvcom nz nodes file': 'nesting-zone-utm10-nodes.txt',
@@ -183,7 +186,8 @@ class TestMakeFVCOMBoundary:
         checklist = make_fvcom_boundary.make_fvcom_boundary(
             parsed_args, self.config
         )
-        expected = f'fvcom-runs/input/bdy_{run_type}_btrp_20180108.nc'
+        run_prep_dir = Path(self.config["vhfr fvcom runs"]["run prep dir"])
+        expected = os.fspath(run_prep_dir / f'bdy_{run_type}_btrp_20180108.nc')
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -203,8 +207,9 @@ class TestMakeFVCOMBoundary:
         checklist = make_fvcom_boundary.make_fvcom_boundary(
             parsed_args, self.config
         )
+        run_prep_dir = Path(self.config["vhfr fvcom runs"]["run prep dir"])
         m_mk_nest_file.assert_called_once_with(
-            fout=f'fvcom-runs/input/bdy_{run_type}_btrp_20180108.nc',
+            fout=os.fspath(run_prep_dir / f'bdy_{run_type}_btrp_20180108.nc'),
             fnest_nemo='fvcom-runs/coupling/nemo_nesting_zone_cut.txt',
             fnest_nodes='fvcom-runs/coupling/nesting-zone-utm10-nodes.txt',
             fnest_elems='fvcom-runs/coupling/nesting-zone-utm10-centr.txt',
@@ -219,9 +224,9 @@ class TestMakeFVCOMBoundary:
             nemo_vertical_weight_file=
             'fvcom-runs/coupling/nemo_vertical_weight_cut.mat',
             nemo_azimuth_file='fvcom-runs/coupling/nemo_azimuth_cut.txt',
-            fgrd='fvcom-runs/input/vhfr_low_v2_utm10_grd.dat',
-            fbathy='fvcom-runs/input/vhfr_low_v2_utm10_dep.dat',
-            fsigma='fvcom-runs/input/vhfr_low_v2_sigma.dat',
+            fgrd='fvcom-runs/vhfr_low_v2_utm10_grd.dat',
+            fbathy='fvcom-runs/vhfr_low_v2_utm10_dep.dat',
+            fsigma='fvcom-runs/vhfr_low_v2_sigma.dat',
             input_dir=f'SalishSea/{run_type}',
             time_start=time_start,
             time_end=time_end

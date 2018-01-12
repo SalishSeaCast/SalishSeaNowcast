@@ -116,7 +116,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
         f'Creating VHFR FVCOM open boundary file for {run_type} run from '
         f'{run_date.format("YYYY-MM-DD")} NEMO run'
     )
-    dest_dir = Path(config['vhfr fvcom runs']['input dir'])
+    dest_dir = Path(config['vhfr fvcom runs']['run prep dir'])
     bdy_file_tmpl = config['vhfr fvcom runs']['boundary file template']
     bdy_file = bdy_file_tmpl.format(
         run_type=run_type, yyyymmdd=run_date.format('YYYYMMDD')

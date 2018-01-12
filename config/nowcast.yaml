@@ -592,7 +592,7 @@ vhfr fvcom runs:
   case name: vhfr_low_v2
   # Directory on compute host where files and directories necessary to
   # prepare and execute the fvcom runs are stored
-  run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs
+  run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/
   # Directory on compute host where FVCOM-NEMO coupling files are stored
   coupling dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/coupling
   # NEMO nesting zone nodes file (stored in coupling directory)
