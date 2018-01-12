@@ -594,7 +594,7 @@ vhfr fvcom runs:
   # prepare and execute the fvcom runs are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/
   # Directory on compute host where FVCOM-NEMO coupling files are stored
-  coupling dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/coupling
+  coupling dir: /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/coupling_nemo_cut/
   # NEMO nesting zone nodes file (stored in coupling directory)
   nemo nz nodes file: nemo_nesting_zone_cut.txt
   # FVCOM nesting zone nodes file (stored in coupling directory)
