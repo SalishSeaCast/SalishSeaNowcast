@@ -157,10 +157,12 @@ class TestMakeFVCOMBoundary:
             },
             'nemo vertical weights file': 'nemo_vertical_weight_cut.mat',
             'nemo azimuth file': 'nemo_azimuth_cut.txt',
-            'grid dir': 'VHFR-FVCOM-config/grid/',
-            'fvcom grid file': 'vhfr_low_v2_utm10_grd.dat',
-            'fvcom depths file': 'vhfr_low_v2_utm10_dep.dat',
-            'fvcom sigma file': 'vhfr_low_v2_sigma.dat',
+            'fvcom grid': {
+                'grid dir': 'VHFR-FVCOM-config/grid/',
+                'grid file': 'vhfr_low_v2_utm10_grd.dat',
+                'depths file': 'vhfr_low_v2_utm10_dep.dat',
+                'sigma file': 'vhfr_low_v2_sigma.dat',
+            },
             'input dir': 'fvcom-runs/input',
             'boundary file template': 'bdy_{run_type}_btrp_{yyyymmdd}.nc',
             'run types': {
@@ -212,7 +214,9 @@ class TestMakeFVCOMBoundary:
             )
         input_dir = Path(self.config['vhfr fvcom runs']['input dir'])
         coupling_dir = Path(self.config['vhfr fvcom runs']['coupling dir'])
-        grid_dir = Path(self.config['vhfr fvcom runs']['grid dir'])
+        grid_dir = Path(
+            self.config['vhfr fvcom runs']['fvcom grid']['grid dir']
+        )
         m_mk_nest_file.assert_called_once_with(
             fout=os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc'),
             fnest_nemo=os.fspath(coupling_dir / 'nemo_nesting_zone_cut.txt'),
