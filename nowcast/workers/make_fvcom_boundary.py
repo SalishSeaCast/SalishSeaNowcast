@@ -137,6 +137,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
         config['vhfr fvcom runs']['nemo vertical weights file']
     )
     nemo_azimuth_file = Path(config['vhfr fvcom runs']['nemo azimuth file'])
+    grid_dir = Path(config['vhfr fvcom runs']['grid dir'])
     fvcom_grid_file = Path(config['vhfr fvcom runs']['fvcom grid file'])
     fvcom_depths_file = Path(config['vhfr fvcom runs']['fvcom depths file'])
     fvcom_sigma_file = Path(config['vhfr fvcom runs']['fvcom sigma file'])
@@ -164,9 +165,9 @@ def make_fvcom_boundary(parsed_args, config, *args):
             coupling_dir / nemo_vert_wrights_file
         ),
         nemo_azimuth_file=os.fspath(coupling_dir / nemo_azimuth_file),
-        fgrd=os.fspath(dest_dir / fvcom_grid_file),
-        fbathy=os.fspath(dest_dir / fvcom_depths_file),
-        fsigma=os.fspath(dest_dir / fvcom_sigma_file),
+        fgrd=os.fspath(grid_dir / fvcom_grid_file),
+        fbathy=os.fspath(grid_dir / fvcom_depths_file),
+        fsigma=os.fspath(grid_dir / fvcom_sigma_file),
         input_dir=os.fspath(nemo_bdy_dir),
         time_start=time_start.format('YYYY-MM-DD HH:mm:ss'),
         time_end=time_end.format('YYYY-MM-DD HH:mm:ss')
