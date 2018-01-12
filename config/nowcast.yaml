@@ -614,14 +614,15 @@ vhfr fvcom runs:
   nemo vertical weights file: nemo_vertical_weight_cut.mat
   # NEMO grid orientation
   nemo azimuth file: nemo_azimuth_cut.txt
-  # Directory on compute host where FVCOM grid files are stored
-  grid dir: /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/grid/
-  # FVCOM grid file
-  fvcom grid file: vhfr_low_v2_utm10_grd.dat
-  # FVCOM depths file
-  fvcom depths file: vhfr_low_v2_utm10_dep.dat
-  # FVCOM sigma levels file
-  fvcom sigma file: vhfr_low_v2_sigma.dat
+  fvcom grid:
+    # Directory on compute host where FVCOM grid files are stored
+    grid dir: /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/grid/
+    # Grid file
+    grid file: vhfr_low_v2_utm10_grd.dat
+    # Depths file
+    depths file: vhfr_low_v2_utm10_dep.dat
+    # Sigma levels file
+    sigma file: vhfr_low_v2_sigma.dat
   # Directory on compute host where FVCOM input files are stored
   input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input
   # Template for boundary forcing file names

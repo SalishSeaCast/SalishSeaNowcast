@@ -144,10 +144,16 @@ def make_fvcom_boundary(parsed_args, config, *args):
         config['vhfr fvcom runs']['nemo vertical weights file']
     )
     nemo_azimuth_file = Path(config['vhfr fvcom runs']['nemo azimuth file'])
-    grid_dir = Path(config['vhfr fvcom runs']['grid dir'])
-    fvcom_grid_file = Path(config['vhfr fvcom runs']['fvcom grid file'])
-    fvcom_depths_file = Path(config['vhfr fvcom runs']['fvcom depths file'])
-    fvcom_sigma_file = Path(config['vhfr fvcom runs']['fvcom sigma file'])
+    grid_dir = Path(config['vhfr fvcom runs']['fvcom grid']['grid dir'])
+    fvcom_grid_file = Path(
+        config['vhfr fvcom runs']['fvcom grid']['grid file']
+    )
+    fvcom_depths_file = Path(
+        config['vhfr fvcom runs']['fvcom grid']['depths file']
+    )
+    fvcom_sigma_file = Path(
+        config['vhfr fvcom runs']['fvcom grid']['sigma file']
+    )
     nemo_bdy_dir = Path(
         config['vhfr fvcom runs']['run types'][run_type]
         ['nemo boundary results']
