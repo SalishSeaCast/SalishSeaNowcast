@@ -143,7 +143,7 @@ class TestMakeFVCOMBoundary:
     config = {
         'vhfr fvcom runs': {
             'run prep dir': 'fvcom-runs/',
-            'coupling dir': 'fvcom-runs/coupling',
+            'coupling dir': 'VHFR-FVCOM-config/coupling_nemo_cut/',
             'nemo nz nodes file': 'nemo_nesting_zone_cut.txt',
             'fvcom nz nodes file': 'nesting-zone-utm10-nodes.txt',
             'fvcom nz centroids file': 'nesting-zone-utm10-centr.txt',
@@ -208,22 +208,28 @@ class TestMakeFVCOMBoundary:
             parsed_args, self.config
         )
         run_prep_dir = Path(self.config["vhfr fvcom runs"]["run prep dir"])
+        coupling_dir = Path(self.config["vhfr fvcom runs"]["coupling dir"])
         m_mk_nest_file.assert_called_once_with(
             fout=os.fspath(run_prep_dir / f'bdy_{run_type}_btrp_20180108.nc'),
-            fnest_nemo='fvcom-runs/coupling/nemo_nesting_zone_cut.txt',
-            fnest_nodes='fvcom-runs/coupling/nesting-zone-utm10-nodes.txt',
-            fnest_elems='fvcom-runs/coupling/nesting-zone-utm10-centr.txt',
-            interp_uv=SimpleNamespace(
-                ui='fvcom-runs/coupling/interpolant_indices_u_i_cut.txt',
-                uj='fvcom-runs/coupling/interpolant_indices_u_j_cut.txt',
-                uw='fvcom-runs/coupling/interpolant_weights_u_cut.txt',
-                vi='fvcom-runs/coupling/interpolant_indices_v_i_cut.txt',
-                vj='fvcom-runs/coupling/interpolant_indices_v_j_cut.txt',
-                vw='fvcom-runs/coupling/interpolant_weights_v_cut.txt'
+            fnest_nemo=os.fspath(coupling_dir / 'nemo_nesting_zone_cut.txt'),
+            fnest_nodes=os.fspath(
+                coupling_dir / 'nesting-zone-utm10-nodes.txt'
             ),
-            nemo_vertical_weight_file=
-            'fvcom-runs/coupling/nemo_vertical_weight_cut.mat',
-            nemo_azimuth_file='fvcom-runs/coupling/nemo_azimuth_cut.txt',
+            fnest_elems=os.fspath(
+                coupling_dir / 'nesting-zone-utm10-centr.txt'
+            ),
+            interp_uv=SimpleNamespace(
+                ui=os.fspath(coupling_dir / 'interpolant_indices_u_i_cut.txt'),
+                uj=os.fspath(coupling_dir / 'interpolant_indices_u_j_cut.txt'),
+                uw=os.fspath(coupling_dir / 'interpolant_weights_u_cut.txt'),
+                vi=os.fspath(coupling_dir / 'interpolant_indices_v_i_cut.txt'),
+                vj=os.fspath(coupling_dir / 'interpolant_indices_v_j_cut.txt'),
+                vw=os.fspath(coupling_dir / 'interpolant_weights_v_cut.txt')
+            ),
+            nemo_vertical_weight_file=os.fspath(
+                coupling_dir / 'nemo_vertical_weight_cut.mat'
+            ),
+            nemo_azimuth_file=os.fspath(coupling_dir / 'nemo_azimuth_cut.txt'),
             fgrd='fvcom-runs/vhfr_low_v2_utm10_grd.dat',
             fbathy='fvcom-runs/vhfr_low_v2_utm10_dep.dat',
             fsigma='fvcom-runs/vhfr_low_v2_sigma.dat',
