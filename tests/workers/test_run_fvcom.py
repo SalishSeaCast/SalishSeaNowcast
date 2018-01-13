@@ -21,6 +21,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import run_fvcom
@@ -36,11 +37,29 @@ def config():
     """
     return {
         'vhfr fvcom runs': {
-            'case name': 'vhfr_low_v2',
-            'run prep dir': 'fvcom-runs',
-            'number of processors': 32,
-            'mpi hosts file': '${HOME}/mpi_hosts.fvcom',
-            'fvc_cmd': 'bin/fvc',
+            'case name':
+                'vhfr_low_v2',
+            'run prep dir':
+                'fvcom-runs/',
+            'fvcom grid': {
+                'grid dir': 'VHFR-FVCOM-config/grid/',
+                'grid file': 'vhfr_low_v2_utm10_grd.dat',
+                'depths file': 'vhfr_low_v2_utm10_dep.dat',
+                'sigma file': 'vhfr_low_v2_sigma.dat',
+                'coriolis file': 'vhfr_low_v2_utm10_cor.dat',
+                'sponge file': 'vhfr_low_v2_nospg_spg.dat',
+                'obc nodes file': 'vhfr_low_v2_obc.dat',
+            },
+            'input dir':
+                'fvcom-runs/input/',
+            'output station timeseries':
+                'VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat',
+            'number of processors':
+                32,
+            'mpi hosts file':
+                '${HOME}/mpi_hosts.fvcom',
+            'fvc_cmd':
+                'bin/fvc',
             'run types': {
                 'nowcast': {
                     'results': 'SalishSea/fvcom-nowcast/',
@@ -53,7 +72,9 @@ def config():
     }
 
 
-@patch('nowcast.workers.run_fvcom.NowcastWorker')
+@patch(
+    'nowcast.workers.run_fvcom.NowcastWorker', spec=nemo_nowcast.NowcastWorker
+)
 class TestMain:
     """Unit tests for main() function.
     """
@@ -102,7 +123,7 @@ class TestMain:
     'nowcast',
     'forecast',
 ])
-@patch('nowcast.workers.run_fvcom.logger')
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -130,7 +151,7 @@ class TestSuccess:
     'nowcast',
     'forecast',
 ])
-@patch('nowcast.workers.run_fvcom.logger')
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -158,10 +179,11 @@ class TestFailure:
     'nowcast',
     'forecast',
 ])
-@patch('nowcast.workers.run_fvcom.logger')
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
 @patch('nowcast.workers.run_fvcom._create_run_desc_file')
 @patch('nowcast.workers.run_fvcom.fvcom_cmd.api.prepare')
-@patch('nowcast.workers.run_fvcom.shutil.copy2')
+@patch('nowcast.workers.run_fvcom._prep_fvcom_input_dir')
+@patch('nowcast.workers.run_fvcom.shutil.copy2', autospec=True)
 @patch('nowcast.workers.run_fvcom._create_run_script')
 @patch('nowcast.workers.run_fvcom._launch_run_script')
 class TestRunFVCOM:
@@ -169,8 +191,8 @@ class TestRunFVCOM:
     """
 
     def test_checklist(
-        self, m_launch, m_crs, m_copy2, m_prep, m_crdf, m_logger, run_type,
-        config
+        self, m_launch, m_crs, m_copy2, m_pfid, m_prep, m_crdf, m_logger,
+        run_type, config
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -197,8 +219,8 @@ class TestRunFVCOM:
     'nowcast',
     'forecast',
 ])
-@patch('nowcast.workers.run_fvcom.logger')
-@patch('nowcast.workers.run_fvcom.yaml.dump')
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
+@patch('nowcast.workers.run_fvcom.yaml.dump', autospec=True)
 @patch('nowcast.workers.run_fvcom._run_description')
 class TestCreateRunDescFile:
     """Unit tests for _create_fun_desc_file() function.
@@ -233,7 +255,7 @@ class TestCreateRunDescFile:
     'nowcast',
     'forecast',
 ])
-@patch('nowcast.workers.run_fvcom.logger')
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
 class TestRunDescription:
     """Unit tests for _run_description() function.
     """
@@ -268,8 +290,26 @@ class TestRunDescription:
     'nowcast',
     'forecast',
 ])
-@patch('nowcast.workers.run_fvcom.logger')
-@patch('nowcast.workers.run_fvcom._build_script', return_value='script')
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
+class TestPrepFVCOM_InputDir:
+    """Unit test for _prep_fvcom_input_dir() function.
+    """
+
+    def test_prep_fvcom_input_dir(self, m_logger, run_type, config, tmpdir):
+        with patch('nowcast.workers.run_fvcom.Path.symlink_to') as m_limk:
+            run_fvcom._prep_fvcom_input_dir(config)
+
+
+@pytest.mark.parametrize('run_type', [
+    'nowcast',
+    'forecast',
+])
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
+@patch(
+    'nowcast.workers.run_fvcom._build_script',
+    return_value='script',
+    autospec=True
+)
 class TestCreateRunScript:
     """Unit tests for _create_run_script() function.
     """
@@ -290,7 +330,7 @@ class TestCreateRunScript:
     'nowcast',
     'forecast',
 ])
-@patch('nowcast.workers.run_fvcom.yaml.load')
+@patch('nowcast.workers.run_fvcom.yaml.load', autospec=True)
 class TestBuildScript:
     """Unit tests for _build_script() function.
     """
@@ -419,8 +459,8 @@ class TestExecute:
     'nowcast',
     'forecast',
 ])
-@patch('nowcast.workers.run_fvcom.subprocess.Popen')
-@patch('nowcast.workers.run_fvcom.subprocess.run')
+@patch('nowcast.workers.run_fvcom.subprocess.Popen', autospec=True)
+@patch('nowcast.workers.run_fvcom.subprocess.run', autospec=True)
 class TestLaunchRunScript:
     """Unit tests for _launch_run_script() function.
     """
