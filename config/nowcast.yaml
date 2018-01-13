@@ -623,13 +623,22 @@ vhfr fvcom runs:
     depths file: vhfr_low_v2_utm10_dep.dat
     # Sigma levels file
     sigma file: vhfr_low_v2_sigma.dat
+    # Coriolis file
+    coriolis file: vhfr_low_v2_utm10_cor.dat
+    # Sponge file
+    sponge file: vhfr_low_v2_nospg_spg.dat
+    # Open boundaries nodes list file
+    obc nodes file: vhfr_low_v2_obc.dat
   # Directory on compute host where FVCOM input files are stored
-  input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input
+  input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
   # Template for boundary forcing file names
   # **Must be quoted to project {} characters**
   boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
+  # Path and name of file on compute host that defines the tide gauge stations
+  # to produce point outputs at
+  output station timeseries: /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat
   # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
-  FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41
+  FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
   # Number of processors
   number of processors: 32
   # Location on the compute host of the file that contains IP addresses
