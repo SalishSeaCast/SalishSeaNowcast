@@ -54,6 +54,9 @@ def config():
                 'fvcom-runs/input/',
             'output station timeseries':
                 'VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat',
+            'namelists': {
+                '{casename}_run.nml': ['namelist.case'],
+            },
             'number of processors':
                 32,
             'mpi hosts file':
@@ -256,14 +259,16 @@ class TestCreateRunDescFile:
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger', autospec=True)
+@patch('nowcast.workers.run_fvcom._make_namelist')
 class TestRunDescription:
-    """Unit tests for _run_description() function.
+    """Unit test for _run_description() function.
     """
 
-    def test_run_desc(self, m_logger, run_type, config, tmpdir):
+    def test_run_desc(self, m_mk_nml, m_logger, run_type, config, tmpdir):
         run_id = f'11dec17fvcom-{run_type}'
-        fvcom_repo_dir = Path(str(tmpdir.ensure_dir('nowcast-sys/FVCOM41')))
-        run_prep_dir = Path(str(tmpdir.ensure_dir('nowcast-sys/fvcom-runs')))
+        fvcom_repo_dir = Path(str(tmpdir.ensure_dir('FVCOM41')))
+        run_prep_dir = Path(str(tmpdir.ensure_dir('fvcom-runs')))
+        m_mk_nml.return_value = Path(str(run_prep_dir), 'vhfr_low_v2_run.nml')
         p_config = patch.dict(
             config['vhfr fvcom runs'], {
                 'run prep dir': run_prep_dir,
@@ -271,7 +276,9 @@ class TestRunDescription:
             }
         )
         with p_config:
-            run_desc = run_fvcom._run_description(run_id, run_prep_dir, config)
+            run_desc = run_fvcom._run_description(
+                run_id, run_type, run_prep_dir, config
+            )
         expected = {
             'run_id': run_id,
             'casename': 'vhfr_low_v2',
@@ -284,6 +291,24 @@ class TestRunDescription:
             'namelist': os.fspath(run_prep_dir / 'vhfr_low_v2_run.nml'),
         }
         assert run_desc == expected
+
+
+@pytest.mark.parametrize('run_type', [
+    'nowcast',
+    'forecast',
+])
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
+class TestMakeNamelist:
+    """Unit test for _make_namelist() function.
+    """
+
+    def test_make_namelist(self, m_logger, run_type, config, tmpdir):
+        run_prep_dir = Path(str(tmpdir.ensure_dir('fvcom-runs')))
+        tmpdir.ensure('fvcom-runs', 'namelist.case')
+        namelist_path = run_fvcom._make_namelist(
+            'vhfr_low_v2', run_type, run_prep_dir, config
+        )
+        assert namelist_path.exists()
 
 
 @pytest.mark.parametrize('run_type', [

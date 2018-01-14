@@ -150,7 +150,7 @@ def _create_run_desc_file(run_date, run_type, config):
     ddmmmyy = run_date.format('DDMMMYY').lower()
     run_id = f'{ddmmmyy}fvcom-{run_type}'
     run_prep_dir = Path(config['vhfr fvcom runs']['run prep dir'])
-    run_desc = _run_description(run_id, run_prep_dir, config)
+    run_desc = _run_description(run_id, run_type, run_prep_dir, config)
     run_desc_file_path = run_prep_dir / f'{run_id}.yaml'
     with run_desc_file_path.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
@@ -158,9 +158,10 @@ def _create_run_desc_file(run_date, run_type, config):
     return run_desc_file_path
 
 
-def _run_description(run_id, run_prep_dir, config):
+def _run_description(run_id, run_type, run_prep_dir, config):
     """
     :param str run_id:
+    :param str run_type:
     :param :py:class:`pathlib.Path` run_prep_dir:
     :param :py:class:`nemo_nowcast.Config` config:
 
@@ -168,13 +169,11 @@ def _run_description(run_id, run_prep_dir, config):
     :rtype dict:
     """
     casename = config['vhfr fvcom runs']['case name']
+    namelist_path = _make_namelist(casename, run_type, run_prep_dir, config)
     run_desc = {
-        'run_id':
-            run_id,
-        'casename':
-            casename,
-        'nproc':
-            config['vhfr fvcom runs']['number of processors'],
+        'run_id': run_id,
+        'casename': casename,
+        'nproc': config['vhfr fvcom runs']['number of processors'],
         'paths': {
             'FVCOM':
                 os.fspath(
@@ -185,15 +184,36 @@ def _run_description(run_id, run_prep_dir, config):
             'input':
                 os.fspath((run_prep_dir / 'input').resolve()),
         },
-        ## TODO: I would prefer to split the namelist into sections.
-        ## If we change fvcom.prepare, then this becomes a list of sections,
-        ## otherwise the sections have to be concatenated here.
-        'namelist':
-            os.fspath((run_prep_dir / f'{casename}_run.nml').resolve()),
+        'namelist': os.fspath(namelist_path.resolve()),
         ## TODO: Add VCS revision tracking, but need to be able to handle Git
         ## repos to do so.
     }
     return run_desc
+
+
+def _make_namelist(casename, run_type, run_prep_dir, config):
+    """
+    :param str casename:
+    :param str run_type:
+    :param :py:class:`pathlib.Path` run_prep_dir:
+    :param :py:class:`nemo_nowcast.Config` config:
+
+    :return: Namelist file path
+    :rtype: :py:class:`pathlib.Path`
+    """
+    namelist_file_tmpl = list(config['vhfr fvcom runs']['namelists'].keys())[0]
+    namelist_files = config['vhfr fvcom runs']['namelists'][namelist_file_tmpl]
+    namelist_file = namelist_file_tmpl.format(casename=casename)
+    with (run_prep_dir / namelist_file).open('wt') as namelist:
+        for nml in namelist_files:
+            nml_path = Path(nml)
+            if not nml_path.is_absolute():
+                nml_path = run_prep_dir / nml
+            with nml_path.open('rt') as f:
+                namelist.writelines(f.readlines())
+                namelist.write('\n')
+    logger.debug(f'{run_type}: namelist file: {run_prep_dir/namelist_file}')
+    return run_prep_dir / namelist_file
 
 
 def _prep_fvcom_input_dir(config):

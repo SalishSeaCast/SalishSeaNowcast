@@ -637,6 +637,29 @@ vhfr fvcom runs:
   # Path and name of file on compute host that defines the tide gauge stations
   # to produce point outputs at
   output station timeseries: /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat
+  namelists:
+    # Name of the namelist file to create by concatenating the list of namelist
+    # section files below
+    # **Must be quoted to project {} characters**
+    '{casename}_run.nml':
+      - namelist.case
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.startup
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.io
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.numerics
+      - namelist.restart
+      - namelist.netcdf
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.physics
+      - namelist.surface
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.rivers
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.obc
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.grid
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.groundwater
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.lagrangian
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.probes
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.bounds_check
+      - namelist.nesting
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.station_timeseries
+      - /nemoShare/MEOPAR/nowcast-sys/VHFR-FVCOM-config/namelists/namelist.additional_models
   # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
   FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
   # Number of processors
