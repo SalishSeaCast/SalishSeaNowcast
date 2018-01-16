@@ -16,14 +16,17 @@
 prepares the temporary run directory and bash run script for a nowcast or
 forecast run on the ONC cloud, and launches the run.
 """
+from datetime import timedelta
 import logging
 import os
 from pathlib import Path
 import shlex
 import shutil
 import subprocess
+import tempfile
 
 import arrow
+import f90nml
 import fvcom_cmd.api
 from nemo_nowcast import NowcastWorker
 import yaml
@@ -150,7 +153,9 @@ def _create_run_desc_file(run_date, run_type, config):
     ddmmmyy = run_date.format('DDMMMYY').lower()
     run_id = f'{ddmmmyy}fvcom-{run_type}'
     run_prep_dir = Path(config['vhfr fvcom runs']['run prep dir'])
-    run_desc = _run_description(run_id, run_type, run_prep_dir, config)
+    run_desc = _run_description(
+        run_id, run_date, run_type, run_prep_dir, config
+    )
     run_desc_file_path = run_prep_dir / f'{run_id}.yaml'
     with run_desc_file_path.open('wt') as f:
         yaml.dump(run_desc, f, default_flow_style=False)
@@ -158,9 +163,10 @@ def _create_run_desc_file(run_date, run_type, config):
     return run_desc_file_path
 
 
-def _run_description(run_id, run_type, run_prep_dir, config):
+def _run_description(run_id, run_date, run_type, run_prep_dir, config):
     """
     :param str run_id:
+    :param :py:class:`arrow.Arrow` run_date:
     :param str run_type:
     :param :py:class:`pathlib.Path` run_prep_dir:
     :param :py:class:`nemo_nowcast.Config` config:
@@ -169,7 +175,10 @@ def _run_description(run_id, run_type, run_prep_dir, config):
     :rtype dict:
     """
     casename = config['vhfr fvcom runs']['case name']
-    namelist_path = _make_namelist(casename, run_type, run_prep_dir, config)
+    _edit_namelists(casename, run_date, run_type, run_prep_dir, config)
+    namelist_path = _assemble_namelist(
+        casename, run_type, run_prep_dir, config
+    )
     run_desc = {
         'run_id': run_id,
         'casename': casename,
@@ -191,7 +200,64 @@ def _run_description(run_id, run_type, run_prep_dir, config):
     return run_desc
 
 
-def _make_namelist(casename, run_type, run_prep_dir, config):
+def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
+    """
+    :param str casename:
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
+    :param :py:class:`pathlib.Path` run_prep_dir:
+    :param :py:class:`nemo_nowcast.Config` config:
+    """
+    start_offsets = {
+        'nowcast': timedelta(hours=0),
+        'forecast': timedelta(hours=24),
+    }
+    start_date = (run_date + start_offsets[run_type])
+    run_durations = {
+        'nowcast': timedelta(hours=24),
+        'forecast': timedelta(hours=36),
+    }
+    patches = {
+        run_prep_dir / 'namelist.case': {
+            'nml_case': {
+                'start_date':
+                    start_date.format('YYYY-MM-DD HH:mm:ss.00'),
+                'end_date': (start_date + run_durations[run_type])
+                            .format('YYYY-MM-DD HH:mm:ss.00'),
+            }
+        },
+        run_prep_dir / 'namelist.netcdf': {
+            'nml_netcdf': {
+                'nc_first_out': start_date.format('YYYY-MM-DD HH:mm:ss.00'),
+            }
+        },
+        run_prep_dir / 'namelist.restart': {
+            'nml_restart': {
+                'rst_first_out':
+                    start_date.replace(days=+1)
+                    .format('YYYY-MM-DD HH:mm:ss.00'),
+            }
+        }
+    }
+    for namelist_path, patch in patches.items():
+        _patch_namelist(namelist_path, patch)
+
+
+def _patch_namelist(namelist_path, patch):
+    """
+    :param :py:class:`pathlib.Path` namelist_path:
+    :param dict patch:
+    """
+    # f90nml insists on writing the patched namelist to a file,
+    # so we use an ephemeral temporary file
+    with tempfile.TemporaryFile('wt') as tmp_patched_namelist:
+        nml = f90nml.patch(namelist_path, patch, tmp_patched_namelist)
+    with namelist_path.open('wt') as patched_nameslist:
+        nml.write(patched_nameslist)
+    logger.debug(f'patched namelist: {namelist_path}')
+
+
+def _assemble_namelist(casename, run_type, run_prep_dir, config):
     """
     :param str casename:
     :param str run_type:
