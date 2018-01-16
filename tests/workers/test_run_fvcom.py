@@ -18,7 +18,7 @@ import os
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import call, patch
 
 import arrow
 import nemo_nowcast
@@ -259,12 +259,15 @@ class TestCreateRunDescFile:
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger', autospec=True)
-@patch('nowcast.workers.run_fvcom._make_namelist')
+@patch('nowcast.workers.run_fvcom._edit_namelists')
+@patch('nowcast.workers.run_fvcom._assemble_namelist')
 class TestRunDescription:
     """Unit test for _run_description() function.
     """
 
-    def test_run_desc(self, m_mk_nml, m_logger, run_type, config, tmpdir):
+    def test_run_desc(
+        self, m_mk_nml, m_edit_nml, m_logger, run_type, config, tmpdir
+    ):
         run_id = f'11dec17fvcom-{run_type}'
         fvcom_repo_dir = Path(str(tmpdir.ensure_dir('FVCOM41')))
         run_prep_dir = Path(str(tmpdir.ensure_dir('fvcom-runs')))
@@ -277,7 +280,7 @@ class TestRunDescription:
         )
         with p_config:
             run_desc = run_fvcom._run_description(
-                run_id, run_type, run_prep_dir, config
+                run_id, arrow.get('2017-12-11'), run_type, run_prep_dir, config
             )
         expected = {
             'run_id': run_id,
@@ -293,19 +296,86 @@ class TestRunDescription:
         assert run_desc == expected
 
 
+@patch('nowcast.workers.run_fvcom.logger', autospec=True)
+@patch('nowcast.workers.run_fvcom._patch_namelist')
+class TestEditNamelists:
+    """Unit test for _edit_namelists() function.
+    """
+
+    def test_edit_namelists_nowcast(self, m_patch_nml, m_logger, config):
+        run_fvcom._edit_namelists(
+            'vhfr_low_v2', arrow.get('2018-01-15'), 'nowcast',
+            Path('run_prep_dir'), config
+        )
+        assert m_patch_nml.call_args_list == [
+            call(
+                Path('run_prep_dir/namelist.case'), {
+                    'nml_case': {
+                        'start_date': '2018-01-15 00:00:00.00',
+                        'end_date': '2018-01-16 00:00:00.00'
+                    }
+                }
+            ),
+            call(
+                Path('run_prep_dir/namelist.netcdf'), {
+                    'nml_netcdf': {
+                        'nc_first_out': '2018-01-15 00:00:00.00'
+                    }
+                }
+            ),
+            call(
+                Path('run_prep_dir/namelist.restart'), {
+                    'nml_restart': {
+                        'rst_first_out': '2018-01-16 00:00:00.00'
+                    }
+                }
+            ),
+        ]
+
+    def test_edit_namelists_forecast(self, m_patch_nml, m_logger, config):
+        run_fvcom._edit_namelists(
+            'vhfr_low_v2', arrow.get('2018-01-15'), 'forecast',
+            Path('run_prep_dir'), config
+        )
+        assert m_patch_nml.call_args_list == [
+            call(
+                Path('run_prep_dir/namelist.case'), {
+                    'nml_case': {
+                        'start_date': '2018-01-16 00:00:00.00',
+                        'end_date': '2018-01-17 12:00:00.00'
+                    }
+                }
+            ),
+            call(
+                Path('run_prep_dir/namelist.netcdf'), {
+                    'nml_netcdf': {
+                        'nc_first_out': '2018-01-16 00:00:00.00'
+                    }
+                }
+            ),
+            call(
+                Path('run_prep_dir/namelist.restart'), {
+                    'nml_restart': {
+                        'rst_first_out': '2018-01-17 00:00:00.00'
+                    }
+                }
+            ),
+        ]
+
+
 @pytest.mark.parametrize('run_type', [
     'nowcast',
     'forecast',
 ])
 @patch('nowcast.workers.run_fvcom.logger', autospec=True)
-class TestMakeNamelist:
-    """Unit test for _make_namelist() function.
+class TestAssembleNamelist:
+    """Unit test for _assemble_namelist() function.
     """
 
-    def test_make_namelist(self, m_logger, run_type, config, tmpdir):
+    def test_assemble_namelist(self, m_logger, run_type, config, tmpdir):
         run_prep_dir = Path(str(tmpdir.ensure_dir('fvcom-runs')))
         tmpdir.ensure('fvcom-runs', 'namelist.case')
-        namelist_path = run_fvcom._make_namelist(
+        namelist_path = run_fvcom._assemble_namelist(
             'vhfr_low_v2', run_type, run_prep_dir, config
         )
         assert namelist_path.exists()
