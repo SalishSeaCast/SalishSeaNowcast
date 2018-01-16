@@ -29,6 +29,8 @@ docutils==0.14
 driftwood==1.1.21
 f90nml==0.23
 feedgen==0.6.1
+h5netcdf==0.5.0
+h5py==2.7.0
 idna==2.6
 imagesize==0.7.1
 iowait==0.2
@@ -84,6 +86,6 @@ stevedore==1.27.1
 toolz==0.8.2
 tornado==4.5.2
 utm==0.4.2
-xarray==0.9.6
+xarray==0.10.0
 yapf==0.20.0
 zeep==2.4.0
