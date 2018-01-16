@@ -496,7 +496,7 @@ If you don't have a good reason to choose something else,
 use :kbd:`figsize=(16, 9)` because that matches the aspect ration of wide displays that most people use to view web sites
 (even phones in landscape orientation).
 
-The :kbd:`theme` should be defaulted to :py:mod:`nowcast.figures.wehsite_theme`, a module that provides colours and font specifications that fit with the `salishsea site`_ colour scheme and provide consistency among the figures.
+The :kbd:`theme` should be defaulted to :py:mod:`nowcast.figures.website_theme`, a module that provides colours and font specifications that fit with the `salishsea site`_ colour scheme and provide consistency among the figures.
 
 .. _salishsea site: https://salishsea.eos.ubc.ca
 
