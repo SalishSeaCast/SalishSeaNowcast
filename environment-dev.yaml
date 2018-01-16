@@ -63,6 +63,7 @@ dependencies:
   - pip:
     - angles
     - driftwood
+    - f90nml
     - feedgen
     - python-hglib
     - retrying

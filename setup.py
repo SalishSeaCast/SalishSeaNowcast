@@ -54,6 +54,7 @@ install_requires = [
     'dask',
     'docutils',
     'driftwood',
+    'f90nml'
     'feedgen',
     'lxml',
     'mako',
