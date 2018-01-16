@@ -636,7 +636,7 @@ The Python packages that the system depends on are installed in a conda environm
         pillow pip python=3 pyyaml pyzmq requests schedule scipy xarray
     $ source /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install angles cmocean \
-        driftwood feedgen python-hglib raven retrying scour utm
+        driftwood f90nml feedgen python-hglib raven retrying scour utm
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable OPPTools/
