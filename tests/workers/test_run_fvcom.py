@@ -203,7 +203,7 @@ class TestRunFVCOM:
             run_date=arrow.get('2017-11-29')
         )
         tmp_run_dir = (
-            '/fvcom-runs/29nov17vhfr-{run_type}_2017-11-29T183043.555919-0700'
+            f'/fvcom-runs/29nov17vhfr-{run_type}_2017-11-29T183043.555919-0700'
         )
         m_prep.return_value = tmp_run_dir
         checklist = run_fvcom.run_fvcom(parsed_args, config)
