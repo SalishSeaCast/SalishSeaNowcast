@@ -217,6 +217,10 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
         'nowcast': timedelta(hours=24),
         'forecast': timedelta(hours=36),
     }
+    bdy_file_tmpl = config['vhfr fvcom runs']['boundary file template']
+    bdy_file = bdy_file_tmpl.format(
+        run_type=run_type, yyyymmdd=start_date.format('YYYYMMDD')
+    )
     patches = {
         run_prep_dir / 'namelist.case': {
             'nml_case': {
@@ -224,6 +228,11 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
                     start_date.format('YYYY-MM-DD HH:mm:ss.00'),
                 'end_date': (start_date + run_durations[run_type])
                             .format('YYYY-MM-DD HH:mm:ss.00'),
+            }
+        },
+        run_prep_dir / 'namelist.nesting': {
+            'nml_nesting': {
+                'nesting_file_name': bdy_file,
             }
         },
         run_prep_dir / 'namelist.netcdf': {
