@@ -406,9 +406,27 @@ class TestPrepFVCOM_InputDir:
     """Unit test for _prep_fvcom_input_dir() function.
     """
 
-    def test_prep_fvcom_input_dir(self, m_logger, run_type, config, tmpdir):
-        with patch('nowcast.workers.run_fvcom.Path.symlink_to') as m_limk:
-            run_fvcom._prep_fvcom_input_dir(config)
+    def test_prep_fvcom_input_dir(self, m_logger, run_type, config):
+        with patch('nowcast.workers.run_fvcom.Path.symlink_to') as m_link:
+            run_fvcom._prep_fvcom_input_dir(
+                arrow.get('2018-01-18'), run_type, config
+            )
+        assert m_link.call_args_list == [
+            call(Path('VHFR-FVCOM-config/grid/vhfr_low_v2_utm10_grd.dat')),
+            call(Path('VHFR-FVCOM-config/grid/vhfr_low_v2_utm10_dep.dat')),
+            call(Path('VHFR-FVCOM-config/grid/vhfr_low_v2_sigma.dat')),
+            call(Path('VHFR-FVCOM-config/grid/vhfr_low_v2_utm10_cor.dat')),
+            call(Path('VHFR-FVCOM-config/grid/vhfr_low_v2_nospg_spg.dat')),
+            call(Path('VHFR-FVCOM-config/grid/vhfr_low_v2_obc.dat')),
+            call(
+                Path('VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat')
+            ),
+            call(
+                Path(
+                    f'SalishSea/fvcom-{run_type}/17jan18/vhfr_low_v2_restart_0001.nc'
+                )
+            ),
+        ]
 
 
 @pytest.mark.parametrize('run_type', [
