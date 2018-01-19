@@ -52,6 +52,8 @@ def config():
             },
             'input dir':
                 'fvcom-runs/input/',
+            'boundary file template':
+                'bdy_{run_type}_btrp_{yyyymmdd}.nc',
             'output station timeseries':
                 'VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat',
             'namelists': {
@@ -317,6 +319,13 @@ class TestEditNamelists:
                 }
             ),
             call(
+                Path('run_prep_dir/namelist.nesting'), {
+                    'nml_nesting': {
+                        'nesting_file_name': 'bdy_nowcast_btrp_20180115.nc'
+                    }
+                }
+            ),
+            call(
                 Path('run_prep_dir/namelist.netcdf'), {
                     'nml_netcdf': {
                         'nc_first_out': '2018-01-15 00:00:00.00'
@@ -343,6 +352,13 @@ class TestEditNamelists:
                     'nml_case': {
                         'start_date': '2018-01-16 00:00:00.00',
                         'end_date': '2018-01-17 12:00:00.00'
+                    }
+                }
+            ),
+            call(
+                Path('run_prep_dir/namelist.nesting'), {
+                    'nml_nesting': {
+                        'nesting_file_name': 'bdy_forecast_btrp_20180116.nc'
                     }
                 }
             ),
