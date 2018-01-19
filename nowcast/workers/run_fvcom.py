@@ -125,7 +125,7 @@ def run_fvcom(parsed_args, config, *args):
     logger.debug(f'{run_type}: temporary run directory: {tmp_run_dir}')
     ## TODO: It would be nice if prepare() copied YAML file to tmp run dir
     shutil.copy2(run_desc_file_path, tmp_run_dir / run_desc_file_path.name)
-    _prep_fvcom_input_dir(config)
+    _prep_fvcom_input_dir(run_date, run_type, config)
     run_script_path = _create_run_script(
         run_date, run_type, tmp_run_dir, run_desc_file_path, config
     )
@@ -291,8 +291,10 @@ def _assemble_namelist(casename, run_type, run_prep_dir, config):
     return run_prep_dir / namelist_file
 
 
-def _prep_fvcom_input_dir(config):
+def _prep_fvcom_input_dir(run_date, run_type, config):
     """
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
     :param :py:class:`nemo_nowcast.Config` config:
     """
     fvcom_input_dir = Path(config['vhfr fvcom runs']['input dir'])
@@ -301,8 +303,8 @@ def _prep_fvcom_input_dir(config):
         'grid file',
         'depths file',
         'sigma file',
-        'sponge file',
         'coriolis file',
+        'sponge file',
         'obc nodes file',
     ):
         f = Path(config['vhfr fvcom runs']['fvcom grid'][grid_file])
@@ -316,6 +318,15 @@ def _prep_fvcom_input_dir(config):
     logger.debug(
         f'symlinked {output_timeseries_file} file into {fvcom_input_dir}'
     )
+    results_dir = Path(
+        config['vhfr fvcom runs']['run types'][run_type]['results']
+    )
+    casename = config['vhfr fvcom runs']['case name']
+    restart_file = results_dir / run_date.replace(
+        days=-1
+    ).format('DDMMMYY').lower() / f'{casename}_restart_0001.nc'
+    (fvcom_input_dir / restart_file.name).symlink_to(restart_file)
+    logger.debug(f'symlinked {restart_file} file into {fvcom_input_dir}')
 
 
 def _create_run_script(
