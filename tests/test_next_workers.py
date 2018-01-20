@@ -70,7 +70,10 @@ def config():
         'wave forecasts': {
             'host': 'west.cloud',
             'run when': 'after nowcast-green',
-        }
+        },
+        'vhfr fvcom runs': {
+            'host': 'west.cloud',
+        },
     }
 
 
@@ -673,6 +676,27 @@ class TestAfterWatchNEMO:
             host='localhost'
         )
         assert workers[0] == expected
+
+    def test_success_nowcast_launch_make_fvcom_boundary(
+        self, config, checklist
+    ):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                'watch_NEMO', 'success nowcast', {
+                    'nowcast': {
+                        'host': 'west.cloud',
+                        'run date': '2018-01-20',
+                        'completed': True,
+                    }
+                }
+            ), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.make_fvcom_boundary',
+            args=['west.cloud', 'nowcast'],
+            host='west.cloud'
+        )
+        assert expected in workers
 
     def test_success_forecast_launch_make_turbidity_file(
         self, config, checklist
