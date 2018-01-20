@@ -558,11 +558,16 @@ def after_watch_NEMO(msg, config, checklist):
             config['wave forecasts']['run when'].split('after ')[1]
         )
         if run_type == 'nowcast':
-            next_workers['success nowcast'].append(
+            next_workers['success nowcast'].extend([
                 NextWorker(
                     'nowcast.workers.get_NeahBay_ssh', args=['forecast']
-                )
-            )
+                ),
+                NextWorker(
+                    'nowcast.workers.make_fvcom_boundary',
+                    args=[(config['vhfr fvcom runs']['host']), 'nowcast'],
+                    host=(config['vhfr fvcom runs']['host'])
+                ),
+            ])
         if run_type == 'forecast':
             if wave_forecast_after == 'forecast':
                 host_name = config['wave forecasts']['host']
@@ -576,8 +581,8 @@ def after_watch_NEMO(msg, config, checklist):
                         'nowcast.workers.make_ww3_current_file',
                         args=[host_name, 'forecast'],
                         host=host_name
-                    )
-                ],)
+                    ),
+                ])
             else:
                 next_workers['success forecast'].append(
                     NextWorker(
@@ -599,7 +604,7 @@ def after_watch_NEMO(msg, config, checklist):
                         args=[host_name, 'forecast'],
                         host=host_name
                     ),
-                ],)
+                ])
             for host in config['run']['enabled hosts']:
                 run_types = config['run']['enabled hosts'][host]['run types']
                 if 'nowcast-dev' in run_types:
@@ -621,8 +626,8 @@ def after_watch_NEMO(msg, config, checklist):
                     'nowcast.workers.make_ww3_current_file',
                     args=[host_name, 'forecast2'],
                     host=host_name
-                )
-            ],)
+                ),
+            ])
         enabled_host_config = (
             config['run']['enabled hosts'][msg.payload[run_type]['host']]
         )

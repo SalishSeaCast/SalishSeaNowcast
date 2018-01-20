@@ -549,6 +549,7 @@ run:
           results: /global/scratch/sallen/SalishSea/hindcast/
 
 
+# Strait of Georgia WaveWatch3 model runs
 wave forecasts:
   # Compute host to run wave forecast on
   host: west.cloud-nowcast
@@ -586,8 +587,10 @@ wave forecasts:
     forecast2: /opp/wwatch3/forecast2/
 
 
-# Vancouver Harbour & Fraser River FVCOM model forecasts
+# Vancouver Harbour & Fraser River FVCOM model runs
 vhfr fvcom runs:
+  # Compute host to run VHFR FVCOM model on
+  host: west.cloud-nowcast
   # FVCOM case name
   case name: vhfr_low_v2
   # Directory on compute host where files and directories necessary to
@@ -663,7 +666,7 @@ vhfr fvcom runs:
   # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
   FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
   # Number of processors
-  number of processors: 32
+  number of processors: 35
   # Location on the compute host of the file that contains IP addresses
   # and MPI slots specifications.
   mpi hosts file: ${HOME}/mpi_hosts.fvcom
