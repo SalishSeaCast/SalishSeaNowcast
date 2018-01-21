@@ -152,20 +152,18 @@ def make_plots(parsed_args, config, *args):
     run_type = parsed_args.run_type
     plot_type = parsed_args.plot_type
     test_figure_id = parsed_args.test_figure
-    dev_results_home = config['results archive']['nowcast-dev']
-    weather_path = config['weather']['ops dir']
+    dev_results_home = Path(config['results archive']['nowcast-dev'])
+    weather_path = Path(config['weather']['ops dir'])
     if run_type in ['forecast', 'forecast2']:
-        weather_path = os.path.join(weather_path, 'fcst/')
-    results_dir = os.path.join(config['results archive'][run_type], dmy)
+        weather_path = weather_path / 'fcst'
+    results_dir = Path(config['results archive'][run_type], dmy)
     grid_dir = Path(config['figures']['grid dir'])
-    bathy = nc.Dataset(
-        os.fspath(grid_dir / config['run types'][run_type]['bathymetry'])
-    )
+    bathy = nc.Dataset(grid_dir / config['run types'][run_type]['bathymetry'])
     mesh_mask = nc.Dataset(
-        os.fspath(grid_dir / config['run types'][run_type]['mesh mask'])
+        grid_dir / config['run types'][run_type]['mesh mask']
     )
     dev_mesh_mask = nc.Dataset(
-        os.fspath(grid_dir / config['run types']['nowcast-dev']['mesh mask'])
+        grid_dir / config['run types']['nowcast-dev']['mesh mask']
     )
     coastline = sio.loadmat(config['figures']['coastline'])
 
@@ -182,7 +180,7 @@ def make_plots(parsed_args, config, *args):
             config, bathy, coastline, mesh_mask, dev_mesh_mask, results_dir,
             run_type, run_date, dev_results_home, dmy, timezone
         )
-    if plot_type == 'publish':
+    if run_type.startswith('forecast') and plot_type == 'publish':
         fig_functions = _prep_publish_fig_functions(
             config, bathy, coastline, weather_path, results_dir, run_type,
             run_date, timezone
@@ -561,8 +559,18 @@ def _prep_publish_fig_functions(
     config, bathy, coastline, weather_path, results_dir, run_type, run_date,
     timezone
 ):
-    tidal_predictions = config['ssh']['tidal predictions']
+    tidal_predictions = Path(config['ssh']['tidal predictions'])
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
+    start_day = {
+        'forecast': run_date.replace(days=+1).format('YYYYMMDD'),
+    }
+    end_day = {
+        'forecast': run_date.replace(days=+2).format('YYYYMMDD'),
+    }
+    grid_T_hr_path = (
+        results_dir /
+        f'SalishSea_1h_{start_day[run_type]}_{end_day[run_type]}_grid_T.nc'
+    )
     names = {
         'Boundary Bay': 'BB_maxSSH',
         'Campbell River': 'CR_maxSSH',
@@ -578,12 +586,11 @@ def _prep_publish_fig_functions(
         'Squamish': 'Sqam_maxSSH',
         'Victoria': 'Vic_maxSSH',
     }
-    filepath_tmpl = os.path.join(results_dir, '{}.nc')
+    filepath_tmpl = results_dir / '{}.nc'
     grids_10m = {
         name: nc.Dataset(filepath_tmpl.format(name.replace(' ', '')))
         for name in names
     }
-    hrdps_dataset_url = config['figures']['dataset URLs']['HRDPS fields']
     fig_functions = {
         'Website_thumbnail': {
             'function': storm_surge_alerts_thumbnail.make_figure,
@@ -605,16 +612,9 @@ def _prep_publish_fig_functions(
                 'function':
                     compare_tide_prediction_max_ssh.make_figure,
                 'args': (
-                    place, grid_T_hr, bathy, weather_path, tidal_predictions,
-                    timezone
+                    place, tidal_predictions, weather_path, bathy,
+                    grid_T_hr_path
                 )
-            }
-        })
-    if not run_type.startswith('forecast'):
-        fig_functions.update({
-            'SH_wind': {
-                'function': sandheads_winds.make_figure,
-                'args': (hrdps_dataset_url, run_type, run_date, coastline)
             }
         })
     return fig_functions

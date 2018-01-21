@@ -30,26 +30,26 @@ and include all tide constituents.
 The corrected model results take into account the errors that result from using
 only 8 tidal constituents in the model calculations.
 
-The figure is annotated with the calcualted maximum sea surface height at the
+The figure is annotated with the calculated maximum sea surface height at the
 tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
+
+Development notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopTidePredictionMaxSSH.ipynb
 """
-import os
 from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
-import netCDF4
-import requests
 from matplotlib import gridspec
-from matplotlib.dates import DateFormatter
+import matplotlib.dates
 import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
-import numpy as np
-import pytz
+import netCDF4
+import numpy
+import requests
+import xarray
 
 from salishsea_tools import (
-    nc_tools,
     viz_tools,
     wind_tools,
 )
@@ -61,11 +61,10 @@ import nowcast.figures.website_theme
 
 def make_figure(
     place,
-    grid_T_hr,
-    bathy,
-    weather_path,
     tidal_predictions,
-    timezone,
+    weather_path,
+    bathy,
+    grid_T_hr_path,
     figsize=(20, 12),
     theme=nowcast.figures.website_theme
 ):
@@ -77,20 +76,18 @@ def make_figure(
     :arg str place: Tide gauge station name;
                     must be a key in :py:obj:`salishsea_tools.places.PLACES`.
 
-    :arg grid_T_hr: Hourly averaged tracer results dataset that includes
-                    calculated sea surface height.
-    :type grid_T_hr: :py:class:`netCDF4.Dataset`
+    :arg tidal_predictions: Path to directory of tidal prediction file.
+    :type tidal_predictions: :py:class:`pathlib.Path`
+
+    :arg weather_path: The directory where the weather forcing files
+                       are stored.
+    :type weather_path: :py:class:`pathlib.Path`
 
     :arg bathy: Model bathymetry.
     :type bathy: :py:class:`netCDF4.Dataset`
 
-    :arg str weather_path: The directory where the weather forcing files
-                           are stored.
-
-    :arg str tidal_predictions: Path to directory of tidal prediction file.
-
-    :arg str timezone: Timezone to use for presentation of dates and times;
-                       e.g. :kbd:`Canada/Pacific`.
+    :arg grid_T_hr_path: Path and file name of hourly averaged tracer results
+                         dataset that includes calculated sea surface height.
 
     :arg 2-tuple figsize: Figure size (width, height) in inches.
 
@@ -101,75 +98,73 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(
-        place, grid_T_hr, bathy, timezone, weather_path, tidal_predictions
+        place, tidal_predictions, weather_path, bathy, grid_T_hr_path
     )
     fig, (ax_info, ax_ssh, ax_map, ax_res) = _prep_fig_axes(figsize, theme)
     _plot_info_box(ax_info, place, plot_data, theme)
-    _plot_ssh_time_series(ax_ssh, place, plot_data, timezone, theme)
-    _plot_residual_time_series(ax_res, plot_data, timezone, theme)
+    _plot_ssh_time_series(ax_ssh, place, plot_data, theme)
+    _plot_residual_time_series(ax_res, plot_data, theme)
     _plot_ssh_map(ax_map, plot_data, place, theme)
     return fig
 
 
 def _prep_plot_data(
-    place, grid_T_hr, bathy, timezone, weather_path, tidal_predictions
+    place, tidal_predictions, weather_path, bathy, grid_T_hr_path
 ):
-    ssh_hr = grid_T_hr.variables['sossheig']
-    time_ssh_hr = nc_tools.timestamp(
-        grid_T_hr, range(grid_T_hr.variables['time_counter'].size)
+    ssh_forecast = _get_ssh_forecast(place)
+    shared.localize_time(ssh_forecast)
+    model_ssh_period = slice(
+        str(ssh_forecast.time[0].values), str(ssh_forecast.time[-1].values)
     )
-    try:
-        j, i = PLACES[place]['NEMO grid ji']
-    except KeyError as e:
-        raise KeyError(
-            f'place name or info key not found in '
-            f'salishsea_tools.places.PLACES: {e}'
-        )
-    itime_max_ssh = np.argmax(ssh_hr[:, j, i])
-    time_max_ssh_hr = time_ssh_hr[itime_max_ssh]
-    grids_10m = _get_ssh_forecast(place)
-    ssh_10m_ts = nc_tools.ssh_timeseries_at_point(
-        grids_10m, 0, 0, datetimes=True, time_var='time', ssh_var='ssh'
+    forecast_hrs = 36
+    forecast_period = slice(
+        str(ssh_forecast.time[-forecast_hrs * 6].values),
+        str(ssh_forecast.time[-1].values)
     )
     ttide = shared.get_tides(place, tidal_predictions)
-    ssh_corr = shared.correct_model_ssh(ssh_10m_ts.ssh, ssh_10m_ts.time, ttide)
-
+    ttide.rename(columns={' pred_noshallow ': 'pred_noshallow'}, inplace=True)
+    ttide.index = ttide.time
+    ttide_ds = xarray.Dataset.from_dataframe(ttide)
+    shared.localize_time(ttide_ds)
+    ssh_correction = ttide_ds.pred_noshallow.sel(
+        time=model_ssh_period
+    ) - ttide_ds.pred_8.sel(time=model_ssh_period)
+    ssh_corrected = ssh_forecast + ssh_correction
     msl = PLACES[place]['mean sea lvl']
     extreme_ssh = PLACES[place]['hist max sea lvl']
-    max_tides = max(ttide.pred_all) + msl
+    max_tides = ttide.pred_all.max() + msl
     mid_tides = 0.5 * (extreme_ssh - max_tides) + max_tides
-    max_ssh = np.max(ssh_corr) + msl
     thresholds = (max_tides, mid_tides, extreme_ssh)
-
-    max_ssh_10m, time_max_ssh_10m = shared.find_ssh_max(
-        place, ssh_10m_ts, ttide
-    )
-    tides_10m = shared.interp_to_model_time(
-        ssh_10m_ts.time, ttide.pred_all, ttide.time
-    )
-    residual = ssh_corr - tides_10m
-    max_ssh_residual = residual[ssh_10m_ts.time == time_max_ssh_10m][0]
+    max_ssh = ssh_corrected.ssh.sel(time=forecast_period)
+    max_ssh = max_ssh.where(max_ssh == max_ssh.max(), drop=True).squeeze()
+    residual = ssh_corrected - ttide_ds.pred_all.sel(time=model_ssh_period)
+    residual.attrs['tz_name'] = ssh_forecast.attrs['tz_name']
+    max_residual = residual.max()
     wind_4h_avg = wind_tools.calc_wind_avg_at_point(
-        arrow.get(time_max_ssh_10m),
+        arrow.get(str(max_ssh.time.values)),
         weather_path,
         PLACES[place]['wind grid ji'],
         avg_hrs=-4
     )
     wind_4h_avg = wind_tools.wind_speed_dir(*wind_4h_avg)
+    tracers_ds = xarray.open_dataset(grid_T_hr_path)
+    max_ssh_time_utc = arrow.get(
+        str(max_ssh.time.values)
+    ).replace(tzinfo=ssh_forecast.attrs['tz_name']).to('utc')
     return SimpleNamespace(
-        ssh_max_field=ssh_hr[itime_max_ssh],
-        time_max_ssh_hr=time_max_ssh_hr.to(timezone),
-        ssh_10m_ts=ssh_10m_ts,
-        ssh_corr=ssh_corr,
-        max_ssh_10m=max_ssh_10m - PLACES[place]['mean sea lvl'],
-        time_max_ssh_10m=arrow.get(time_max_ssh_10m).to(timezone),
-        residual=residual,
-        max_ssh_residual=max_ssh_residual,
-        wind_4h_avg=wind_4h_avg,
-        ttide=ttide,
-        bathy=bathy,
-        thresholds=thresholds,
+        ssh_forecast=ssh_forecast,
+        ttide=ttide_ds,
+        ssh_corrected=ssh_corrected,
         msl=msl,
+        thresholds=thresholds,
+        max_ssh=max_ssh,
+        residual=residual,
+        max_residual=max_residual,
+        wind_4h_avg=wind_4h_avg,
+        bathy=bathy,
+        max_ssh_field=tracers_ds.sossheig.sel(
+            time_counter=max_ssh_time_utc.naive, method='nearest'
+        )
     )
 
 
@@ -183,8 +178,8 @@ def _get_ssh_forecast(place):
             f'https://salishsea.eos.ubc.ca/erddap/griddap/{ssh_file.name}'
         )
         f.write(resp.content)
-    grids_10m = netCDF4.Dataset(os.fspath(ssh_file))
-    return grids_10m
+    ssh_forecast = xarray.open_dataset(ssh_file)
+    return ssh_forecast
 
 
 def _prep_fig_axes(figsize, theme):
@@ -194,9 +189,9 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(3, 2, width_ratios=[2, 1])
     gs.update(wspace=0.13, hspace=0.2)
     ax_info = fig.add_subplot(gs[0, 0])
-    ax_ssh = [fig.add_subplot(gs[1, 0])]
-    ax_ssh.append(ax_ssh[0].twinx())
-    for axis in ax_ssh:
+    ax_ssh = {'chart_datum': fig.add_subplot(gs[1, 0])}
+    ax_ssh['msl'] = ax_ssh['chart_datum'].twinx()
+    for axis in ax_ssh.values():
         axis.set_axis_bgcolor(theme.COLOURS['axes']['background'])
     ax_res = fig.add_subplot(gs[2, 0])
     ax_res.set_axis_bgcolor(theme.COLOURS['axes']['background'])
@@ -205,153 +200,142 @@ def _prep_fig_axes(figsize, theme):
     return fig, (ax_info, ax_ssh, ax_map, ax_res)
 
 
-def _plot_info_box(ax, place, plot_data, theme):
-    ax.text(
+def _plot_info_box(ax_info, place, plot_data, theme):
+    ax_info.text(
         0.05,
         0.9,
         place,
         horizontalalignment='left',
         verticalalignment='top',
-        transform=ax.transAxes,
+        transform=ax_info.transAxes,
         fontproperties=theme.FONTS['info box title'],
         color=theme.COLOURS['text']['info box title']
-    )
-    ax.text(
-        0.05,
-        0.75,
-        f'Max SSH: {plot_data.max_ssh_10m+plot_data.msl:.2f} '
-        f'metres above chart datum',
-        horizontalalignment='left',
-        verticalalignment='top',
-        transform=ax.transAxes,
-        fontproperties=theme.FONTS['info box content'],
-        color=theme.COLOURS['text']['info box content']
-    )
-    time_max_ssh_10m = plot_data.time_max_ssh_10m
-    ax.text(
-        0.05,
-        0.6,
-        f'Time of max: {time_max_ssh_10m.format("YYYY-MM-DD HH:mm")} '
-        f'{time_max_ssh_10m.datetime.tzname()}',
-        horizontalalignment='left',
-        verticalalignment='top',
-        transform=ax.transAxes,
-        fontproperties=theme.FONTS['info box content'],
-        color=theme.COLOURS['text']['info box content']
-    )
-    ax.text(
-        0.05,
-        0.45,
-        f'Residual: {plot_data.max_ssh_residual:.2f} metres',
-        horizontalalignment='left',
-        verticalalignment='top',
-        transform=ax.transAxes,
-        fontproperties=theme.FONTS['info box content'],
-        color=theme.COLOURS['text']['info box content']
     )
     heading = wind_tools.bearing_heading(
         wind_tools.wind_to_from(plot_data.wind_4h_avg.dir)
     )
-    ax.text(
-        0.05,
-        0.3,
-        f'Wind: {plot_data.wind_4h_avg.speed:.0f} m/s from the {heading} \n'
-        f'(averaged over four hours prior to maximum water level)',
-        horizontalalignment='left',
-        verticalalignment='top',
-        transform=ax.transAxes,
-        fontproperties=theme.FONTS['info box content'],
-        color=theme.COLOURS['text']['info box content']
+    texts = (
+        SimpleNamespace(
+            x=0.05,
+            y=0.75,
+            words=(
+                f'Max SSH: '
+                f'{numpy.asscalar(plot_data.max_ssh)+plot_data.msl:.2f} '
+                f'metres above chart datum'
+            )
+        ),
+        SimpleNamespace(
+            x=0.05,
+            y=0.6,
+            words=(
+                f'Time of max: '
+                f'{arrow.get(str(plot_data.max_ssh.time.values)).format("YYYY-MM-DD HH:mm")} '
+                f'{plot_data.ssh_forecast.attrs["tz_name"]}'
+            )
+        ),
+        SimpleNamespace(
+            x=0.05,
+            y=0.45,
+            words=
+            f'Residual: {numpy.asscalar(plot_data.max_residual.ssh):.2f} metres'
+        ),
+        SimpleNamespace(
+            x=0.05,
+            y=0.3,
+            words=(
+                f'Wind: '
+                f'{plot_data.wind_4h_avg.speed:.0f} m/s from the {heading} \n'
+                f'(averaged over four hours prior to maximum water level)'
+            )
+        )
     )
-    _info_box_hide_frame(ax, theme)
+    for text in texts:
+        ax_info.text(
+            text.x,
+            text.y,
+            text.words,
+            horizontalalignment='left',
+            verticalalignment='top',
+            transform=ax_info.transAxes,
+            fontproperties=theme.FONTS['info box content'],
+            color=theme.COLOURS['text']['info box content']
+        )
+    _info_box_hide_frame(ax_info, theme)
 
 
-def _info_box_hide_frame(ax, theme):
-    ax.set_axis_bgcolor(theme.COLOURS['figure']['facecolor'])
-    ax.xaxis.set_visible(False)
-    ax.yaxis.set_visible(False)
-    for spine in ax.spines:
-        ax.spines[spine].set_visible(False)
+def _info_box_hide_frame(ax_info, theme):
+    ax_info.set_axis_bgcolor(theme.COLOURS['figure']['facecolor'])
+    ax_info.xaxis.set_visible(False)
+    ax_info.yaxis.set_visible(False)
+    for spine in ax_info.spines:
+        ax_info.spines[spine].set_visible(False)
 
 
-def _plot_ssh_time_series(
-    ax_ssh, place, plot_data, timezone, theme, ylims=(-1, 6)
-):
-    time = [
-        t.astimezone(pytz.timezone(timezone))
-        for t in plot_data.ssh_10m_ts.time
-    ]
-
-    ax_chart_dataum = ax_ssh[0]
-    ax_chart_dataum.plot(
-        plot_data.ttide.time,
-        plot_data.ttide.pred_all + plot_data.msl,
+def _plot_ssh_time_series(ax_ssh, place, plot_data, theme, ylims=(-1, 6)):
+    (plot_data.ttide.pred_all + plot_data.msl).plot(
+        ax=ax_ssh['chart_datum'],
         linewidth=2,
         label='Tide Prediction',
         color=theme.COLOURS['time series']['tidal prediction vs model']
     )
-    ax_chart_dataum.plot(
-        time,
-        plot_data.ssh_corr + plot_data.msl,
+    (plot_data.ssh_corrected.ssh + plot_data.msl).plot(
+        ax=ax_ssh['chart_datum'],
         linewidth=2,
         linestyle='-',
-        label='Corrected model',
+        label='Corrected Model',
         color=theme.COLOURS['time series']['tide gauge ssh']
     )
-    ax_chart_dataum.plot(
-        time,
-        plot_data.ssh_10m_ts.ssh + plot_data.msl,
+    (plot_data.ssh_forecast.ssh + plot_data.msl).plot(
+        ax=ax_ssh['chart_datum'],
         linewidth=1,
         linestyle='--',
         label='Model',
         color=theme.COLOURS['time series']['tide gauge ssh']
     )
-    ax_chart_dataum.plot(
-        plot_data.time_max_ssh_10m.datetime,
-        plot_data.max_ssh_10m + plot_data.msl,
+    ax_ssh['chart_datum'].plot(
+        plot_data.max_ssh.time,
+        plot_data.max_ssh + plot_data.msl,
         marker='o',
         markersize=10,
         markeredgewidth=3,
         label='Maximum SSH',
         color=theme.COLOURS['marker']['max ssh']
     )
-
-    # Add extreme water levels
     colors = ['Gold', 'Red', 'DarkRed']
     labels = ['Maximum tides', 'Extreme water', 'Historical maximum']
     for wlev, color, label in zip(plot_data.thresholds, colors, labels):
-        ax_chart_dataum.axhline(
+        ax_ssh['chart_datum'].axhline(
             y=wlev, color=color, lw=2, ls='solid', label=label
         )
-    legend = ax_chart_dataum.legend(
+    legend = ax_ssh['chart_datum'].legend(
         numpoints=1,
         bbox_to_anchor=(0.75, 1.2),
         loc='lower left',
-        borderaxespad=0.,
-        prop={'size': 12},
-        title=r'Legend'
+        borderaxespad=0,
+        prop=theme.FONTS['legend label small']
     )
-    legend.get_title().set_fontsize('16')
-    ax_chart_dataum.set_xlim(
-        plot_data.ssh_10m_ts.time[0], plot_data.ssh_10m_ts.time[-1]
-    )
+    legend.set_title('Legend', prop=theme.FONTS['legend title small'])
     _ssh_time_series_labels(ax_ssh, place, plot_data, ylims, theme)
 
 
 def _ssh_time_series_labels(ax_ssh, place, plot_data, ylims, theme):
-    ax_chart_datum, ax_msl = ax_ssh
-    ax_chart_datum.set_title(
+    ax_ssh['chart_datum'].set_title(
         f'Sea Surface Height at {place}',
         fontproperties=theme.FONTS['axes title'],
         color=theme.COLOURS['text']['axes title']
     )
-    ax_chart_datum.grid(axis='both')
-    ax_chart_datum.set_ylim(ylims)
-    ax_msl.set_ylim((ylims[0] - plot_data.msl, ylims[1] - plot_data.msl))
+    ax_ssh['chart_datum'].grid(axis='both')
+    ax_ssh['chart_datum'].set_xlim(
+        plot_data.ssh_forecast.time.values[0],
+        plot_data.ssh_forecast.time.values[-1]
+    )
+    ax_ssh['msl'].set_ylim(
+        (ylims[0] - plot_data.msl, ylims[1] - plot_data.msl)
+    )
     ylabels = (
         'Water Level above \n Chart Datum [m]', 'Water Level wrt MSL [m]'
     )
-    for axis, ylabel in zip(ax_ssh, ylabels):
+    for axis, ylabel in zip(ax_ssh.values(), ylabels):
         axis.set_ylabel(
             ylabel,
             fontproperties=theme.FONTS['axis'],
@@ -360,86 +344,64 @@ def _ssh_time_series_labels(ax_ssh, place, plot_data, ylims, theme):
         theme.set_axis_colors(axis)
 
 
-def _plot_residual_time_series(
-    ax,
-    plot_data,
-    timezone,
-    theme,
-    ylims=(-1, 1),
-    yticks=np.arange(-1, 1.25, 0.25)
-):
-    time = [
-        t.astimezone(pytz.timezone(timezone))
-        for t in plot_data.ssh_10m_ts.time
-    ]
-    ax.plot(
-        time,
-        plot_data.residual,
+def _plot_residual_time_series(ax_res, plot_data, theme):
+    plot_data.residual.ssh.plot(
+        ax=ax_res,
         linewidth=2,
         label='Residual',
         color=theme.COLOURS['time series']['ssh residual']
     )
-    ax.legend()
-    _residual_time_series_labels(
-        ax, ylims, yticks, timezone, time[0].tzname(), theme
-    )
+    ax_res.legend()
+    _residual_time_series_labels(ax_res, plot_data, theme)
 
 
-def _residual_time_series_labels(ax, ylims, yticks, timezone, tzname, theme):
-    ax.set_xlabel(
-        f'Date and Time [{tzname}]',
+def _residual_time_series_labels(
+    ax_res,
+    plot_data,
+    theme,
+    ylims=(-1, 1),
+    yticks=numpy.arange(-1, 1.25, 0.25)
+):
+    ax_res.set_title('')
+    ax_res.set_xlabel(
+        f'Time [{plot_data.residual.attrs["tz_name"]}]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )
-    ax.xaxis.set_major_formatter(
-        DateFormatter('%d-%b %H:%M', tz=pytz.timezone(timezone))
+    ax_res.xaxis.set_major_formatter(
+        matplotlib.dates.DateFormatter('%d%b %H:%M')
     )
-    ax.set_ylabel(
+    ax_res.set_ylabel(
         'Residual [m]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )
-    ax.set_ylim(ylims)
-    ax.set_yticks(yticks)
-    ax.grid(axis='both')
-    theme.set_axis_colors(ax)
+    ax_res.set_ylim(ylims)
+    ax_res.set_yticks(yticks)
+    ax_res.grid(axis='both')
+    theme.set_axis_colors(ax_res)
 
 
-def _plot_ssh_map(ax, plot_data, place, theme):
+def _plot_ssh_map(ax_map, plot_data, place, theme):
     contour_intervals = [
         -1, -0.5, 0.5, 1, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.4, 2.6
     ]
-    mesh = ax.contourf(
-        plot_data.ssh_max_field,
+    mesh = ax_map.contourf(
+        plot_data.max_ssh_field,
         contour_intervals,
         cmap='YlOrRd',
         extend='both',
         alpha=0.6
     )
-    ax.contour(
-        plot_data.ssh_max_field,
+    ax_map.contour(
+        plot_data.max_ssh_field,
         contour_intervals,
         colors='black',
         linestyles='--'
     )
-    cbar = plt.colorbar(mesh, ax=ax)
-    viz_tools.plot_coastline(ax, plot_data.bathy)
-    viz_tools.plot_land_mask(ax, plot_data.bathy, color=theme.COLOURS['land'])
-    _ssh_map_axis_labels(ax, place, plot_data, theme)
-    _ssh_map_cbar_labels(cbar, contour_intervals, theme)
-
-
-def _ssh_map_axis_labels(ax, place, plot_data, theme):
-    time_max_ssh_hr = plot_data.time_max_ssh_hr
-    ax.set_title(
-        f'Sea Surface Height at {time_max_ssh_hr.format("HH:mm")} '
-        f'{time_max_ssh_hr.datetime.tzname()} '
-        f'{time_max_ssh_hr.format("DD-MMM-YYYY")}',
-        fontproperties=theme.FONTS['axes title'],
-        color=theme.COLOURS['text']['axes title']
-    )
+    cbar = plt.colorbar(mesh, ax=ax_map)
     j, i = PLACES[place]['NEMO grid ji']
-    ax.plot(
+    ax_map.plot(
         i,
         j,
         marker='o',
@@ -447,16 +409,33 @@ def _ssh_map_axis_labels(ax, place, plot_data, theme):
         markeredgewidth=3,
         color=theme.COLOURS['marker']['place']
     )
-    ax.yaxis.set_major_formatter(NullFormatter())
-    ax.grid(axis='both')
-    theme.set_axis_colors(ax)
+    viz_tools.plot_coastline(ax_map, plot_data.bathy)
+    viz_tools.plot_land_mask(
+        ax_map, plot_data.bathy, color=theme.COLOURS['land']
+    )
+    _ssh_map_axis_labels(ax_map, place, plot_data, theme)
+    _ssh_map_cbar_labels(cbar, contour_intervals, theme)
+
+
+def _ssh_map_axis_labels(ax_map, place, plot_data, theme):
+    max_ssh_time = arrow.get(str(plot_data.max_ssh_field.time_counter.values))
+    tz_name = plot_data.ssh_forecast.attrs["tz_name"]
+    ax_map.set_title(
+        f'Sea Surface Height at '
+        f'{max_ssh_time.to(tz_name).format("YYYY-MM-DD HH:mm")} {tz_name}',
+        fontproperties=theme.FONTS['axes title'],
+        color=theme.COLOURS['text']['axes title']
+    )
+    ax_map.yaxis.set_major_formatter(NullFormatter())
+    ax_map.grid(axis='both')
+    theme.set_axis_colors(ax_map)
 
 
 def _ssh_map_cbar_labels(cbar, contour_intervals, theme):
     cbar.set_ticks(contour_intervals)
     cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
     cbar.set_label(
-        'Sea Surface Height [m]',
+        'Water Level wrt MSL [m]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )

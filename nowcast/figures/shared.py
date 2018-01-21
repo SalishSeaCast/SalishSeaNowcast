@@ -383,7 +383,7 @@ def localize_time(data_array):
         calculations in UTC to avoid time change issues.
 
     :param data_array: Data array object to adjust time values of.
-    :type data_array: :py:class:`xarray.DataArray`
+    :type data_array: :py:class:`xarray.DataArray` or :py:class:`xarray.Dataset`
     """
     local_datetime = arrow.get(str(data_array.time[0].values)).to('local')
     tz_offset = local_datetime.tzinfo.utcoffset(local_datetime.datetime)
