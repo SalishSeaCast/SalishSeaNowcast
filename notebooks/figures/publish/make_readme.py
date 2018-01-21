@@ -22,7 +22,7 @@ import os
 import re
 
 
-NBVIEWER = 'http://nbviewer.jupyter.org/urls'
+NBVIEWER = 'https://nbviewer.jupyter.org/urls'
 REPO = 'bitbucket.org/salishsea/salishseanowcast/raw/tip'
 REPO_DIR = 'notebooks/figures/publish'
 TITLE_PATTERN = re.compile('#{1,6} ?')
@@ -35,7 +35,7 @@ The Jupyter Notebooks in this directory are for development and testing of
 the results figures generation modules of the Salish Sea model nowcast system.
 
 The links below are to static renderings of the notebooks via
-[nbviewer.jupyter.org](http://nbviewer.jupyter.org/).
+[nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
@@ -51,7 +51,7 @@ by the Salish Sea MEOPAR Project Contributors
 and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Please see the LICENSE file for details of the license.
 """
     with open('README.md', 'wt') as f:
