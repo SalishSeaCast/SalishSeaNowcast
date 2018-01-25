@@ -1281,26 +1281,32 @@ class TestAfterDownloadResults:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize(
+        'run_type, run_date', [
+            ('forecast', '2017-11-11'),
+            ('forecast2', '2018-01-24'),
+        ]
+    )
     def test_success_forecast_launch_update_forecast_datasets(
-        self, config, checklist
+        self, run_type, run_date, config, checklist
     ):
         p_checklist = patch.dict(
             checklist, {
                 'NEMO run': {
-                    'forecast': {
-                        'run date': '2017-11-11'
+                    run_type: {
+                        'run date': run_date
                     }
                 }
             }
         )
         with p_checklist:
             workers = next_workers.after_download_results(
-                Message('download_results', 'success forecast'), config,
+                Message('download_results', f'success {run_type}'), config,
                 checklist
             )
         expected = NextWorker(
             'nowcast.workers.update_forecast_datasets',
-            args=['nemo', 'forecast', '--run-date', '2017-11-11'],
+            args=['nemo', run_type, '--run-date', run_date],
             host='localhost'
         )
         assert expected in workers
@@ -1359,19 +1365,25 @@ class TestAfterUpdateForecastDatasets:
     """Unit tests for the after_update_forecast_datasets function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nemo forecast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nemo forecast',
+            'failure nemo forecast2',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_update_forecast_datasets(
             Message('update_forecast_datasets', msg_type), config, checklist
         )
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type', [
-        'success nemo forecast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'success nemo forecast',
+            'success nemo forecast2',
+        ]
+    )
     def test_success_launches_ping_erddap(self, msg_type, config, checklist):
         workers = next_workers.after_update_forecast_datasets(
             Message('update_forecast_datasets', msg_type), config, checklist

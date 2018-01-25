@@ -19,6 +19,8 @@ rolling forecast directory with the new one.
 import logging
 import os
 from pathlib import Path
+import shlex
+import subprocess
 import shutil
 
 import arrow
@@ -44,10 +46,11 @@ def main():
     )
     worker.cli.add_argument(
         'run_type',
-        choices={'forecast'},
+        choices={'forecast', 'forecast2'},
         help='''
         Type of run to update rolling forecast datasets for:
         'forecast' means afternoon updated forecast runs,
+        'forecast2' means early morning preliminary forecast runs,
         '''
     )
     worker.cli.add_date_option(
@@ -96,7 +99,7 @@ def update_forecast_datasets(parsed_args, config, *args):
     run_date = parsed_args.run_date
     ddmmmyy = run_date.format('DDMMMYY').lower()
     logger.info(
-        f'updating {model} forecast directory for {run_type}{ddmmmyy} run'
+        f'updating {model} forecast directory for {run_type}/{ddmmmyy} run'
     )
     forecast_dir = Path(config['rolling forecasts'][model]['dest dir'])
     new_forecast_dir = _create_new_forecast_dir(forecast_dir, model, run_type)
@@ -108,7 +111,7 @@ def update_forecast_datasets(parsed_args, config, *args):
     shutil.rmtree(os.fspath(forecast_dir))
     new_forecast_dir.replace(forecast_dir)
     logger.info(
-        f'updated {model} forecast directory for {run_type}{ddmmmyy} run: '
+        f'updated {model} forecast directory for {run_type}/{ddmmmyy} run: '
         f'{forecast_dir}'
     )
     checklist = {model: {run_type: os.fspath(forecast_dir)}}
@@ -139,15 +142,77 @@ def _add_past_days_results(
 
 
 def _add_forecast_results(run_date, new_forecast_dir, model, run_type, config):
-    results_archive = Path(config['results archive'][run_type])
+    if run_type == 'forecast':
+        results_archive = Path(config['results archive'][run_type])
+        _symlink_results(
+            results_archive,
+            run_date,
+            new_forecast_dir,
+            run_date.replace(days=+1),
+            model,
+            run_type
+        )
+        return
+    # For preliminary forecast (run_type == 'forecast2'):
+    # Use 1st 24h of forecast run for run_date+1.
+    tmp_forecast_results_archive = Path(f'/tmp/{model}_forecast')
+    _extract_1st_forecast_day(
+        tmp_forecast_results_archive, run_date, model, config
+    )
     _symlink_results(
-        results_archive,
+        tmp_forecast_results_archive,
         run_date,
         new_forecast_dir,
         run_date.replace(days=+1),
         model,
         run_type
     )
+    # Use forecast2 run for run_date+2
+    results_archive = Path(config['results archive'][run_type])
+    _symlink_results(
+        results_archive,
+        run_date,
+        new_forecast_dir,
+        run_date.replace(days=+2),
+        model,
+        run_type
+    )
+
+
+def _extract_1st_forecast_day(
+    tmp_forecast_results_archive, run_date, model, config
+):
+    try:
+        shutil.rmtree(tmp_forecast_results_archive)
+    except FileNotFoundError:
+        # Temporary forecast results directory doesn't exist, and that's okay
+        pass
+    # Create the destination directory
+    ddmmmyy = run_date.format('DDMMMYY').lower()
+    ddmmmyy_p1 = run_date.replace(days=+1).format('DDMMMYY').lower()
+    day_dir = tmp_forecast_results_archive / ddmmmyy_p1
+    day_dir.mkdir(parents=True)
+    logger.debug(
+        f'created new {model} temporary forecast directory: {day_dir}'
+    )
+    results_archive = Path(config['results archive']['forecast'])
+    for forecast_file in (results_archive / ddmmmyy).glob('*.nc'):
+        if forecast_file.name.startswith('SalishSea_1d'):
+            continue
+        if forecast_file.name.endswith('restart.nc'):
+            continue
+        forecast_file_24h = (
+            tmp_forecast_results_archive / ddmmmyy_p1 / forecast_file.name
+        )
+        cmd = (
+            f'/usr/bin/ncks -d time_counter,0,23 '
+            f'{forecast_file} {forecast_file_24h}'
+        )
+        logger.debug(f'running {cmd} in subprocess')
+        subprocess.run(shlex.split(cmd))
+        logger.debug(
+            f'extracted 1st 24h of {forecast_file} to {forecast_file_24h}'
+        )
 
 
 def _symlink_results(

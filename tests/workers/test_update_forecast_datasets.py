@@ -15,6 +15,7 @@
 """Unit tests for Salish Sea NEMO nowcast update_forecast_datasets worker.
 """
 from pathlib import Path
+import shlex
 from types import SimpleNamespace
 from unittest.mock import patch, call
 
@@ -50,7 +51,7 @@ class TestMain:
         update_forecast_datasets.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        assert kwargs['choices'] == {'forecast'}
+        assert kwargs['choices'] == {'forecast', 'forecast2'}
         assert 'help' in kwargs
 
     def test_add_data_date_arg(self, m_worker):
@@ -213,21 +214,21 @@ class TestAddPastDaysResults:
         assert m_symlink_results.call_args_list == expected
 
 
-@pytest.mark.parametrize('model, run_type', [
-    ('nemo', 'forecast'),
-])
 @patch('nowcast.workers.update_forecast_datasets._symlink_results')
+@patch('nowcast.workers.update_forecast_datasets._extract_1st_forecast_day')
 class TestAddForecastResults:
-    """Unit test for _add_forecast_results() function.
+    """Unit tests for _add_forecast_results() function.
     """
 
-    def test_symlink_nowcast_days(
-        self, m_symlink_results, model, run_type, tmpdir
+    def test_symlink_forecast_run(
+        self, m_ex_1st_fcst_day, m_symlink_results, tmpdir
     ):
-        run_date = arrow.get('2017-11-11')
         new_forecast_dir = Path(
-            str(tmpdir.ensure_dir(f'rolling-forecasts/{model}_new'))
+            str(tmpdir.ensure_dir(f'rolling-forecasts/nemo_new'))
         )
+        run_date = arrow.get('2017-11-11')
+        model = 'nemo'
+        run_type = 'forecast'
         config = {'results archive': {run_type: f'results/{run_type}/'}}
         update_forecast_datasets._add_forecast_results(
             run_date, new_forecast_dir, model, run_type, config
@@ -239,6 +240,99 @@ class TestAddForecastResults:
             run_date.replace(days=+1),
             model,
             run_type
+        )
+
+    def test_forecast2_extract_1st_forecast_day(
+        self, m_ex_1st_fcst_day, m_symlink_results, tmpdir
+    ):
+        new_forecast_dir = Path(
+            str(tmpdir.ensure_dir(f'rolling-forecasts/nemo_new'))
+        )
+        run_date = arrow.get('2018-01-24')
+        model = 'nemo'
+        run_type = 'forecast2'
+        config = {'results archive': {run_type: f'results/{run_type}/'}}
+        update_forecast_datasets._add_forecast_results(
+            run_date, new_forecast_dir, 'nemo', run_type, config
+        )
+        m_ex_1st_fcst_day.assert_called_once_with(
+            Path('/tmp/nemo_forecast'), run_date, model, config
+        )
+
+    def test_symlink_forecast2_run(
+        self, m_ex_1st_fcst_day, m_symlink_results, tmpdir
+    ):
+        new_forecast_dir = Path(
+            str(tmpdir.ensure_dir(f'rolling-forecasts/nemo_new'))
+        )
+        run_date = arrow.get('2018-01-24')
+        model = 'nemo'
+        run_type = 'forecast2'
+        config = {'results archive': {run_type: f'results/{run_type}/'}}
+        update_forecast_datasets._add_forecast_results(
+            run_date, new_forecast_dir, model, run_type, config
+        )
+        assert m_symlink_results.call_args_list == [
+            call(
+                Path(f'/tmp/nemo_forecast'),
+                run_date,
+                new_forecast_dir,
+                run_date.replace(days=+1),
+                model,
+                run_type
+            ),
+            call(
+                Path(f'results/{run_type}/'),
+                run_date,
+                new_forecast_dir,
+                run_date.replace(days=+2),
+                model,
+                run_type
+            ),
+        ]
+
+
+@patch('nowcast.workers.update_forecast_datasets.logger')
+class TestExtract1stForecastDay:
+    """Unit tests for _extract_1st_forecast_day() function.
+    """
+
+    def test_create_tmp_forecast_results_archive(self, m_logger, tmpdir):
+        tmp_forecast_results_archive = tmpdir.ensure_dir('tmp_nemo_forecast')
+        run_date = arrow.get('2018-01-24')
+        model = 'nemo'
+        config = {'results archive': {'forecast': f'results/forecast/'}}
+        update_forecast_datasets._extract_1st_forecast_day(
+            Path(str(tmp_forecast_results_archive)), run_date, model, config
+        )
+        assert Path(str(tmp_forecast_results_archive), '25jan18').exists()
+
+    @patch('nowcast.workers.update_forecast_datasets.Path.glob')
+    @patch('nowcast.workers.update_forecast_datasets.subprocess.run')
+    def test_ncks_subprocess(self, m_run, m_glob, m_logger, tmpdir):
+        tmp_forecast_results_archive = tmpdir.ensure_dir('tmp_nemo_forecast')
+        run_date = arrow.get('2018-01-24')
+        model = 'nemo'
+        config = {'results archive': {'forecast': 'results/forecast/'}}
+        m_glob.return_value = [
+            # A file that we want to operate on
+            Path('results/forecast/24jan18/CampbellRiver.nc'),
+            # Files that we don't want to operate on
+            Path('results/forecast/24jan18/SalishSea_02702160_restart.nc'),
+            Path(
+                'results/forecast/24jan18/'
+                'SalishSea_1d_20180124_20180125_grid_T.nc'
+            ),
+        ]
+        update_forecast_datasets._extract_1st_forecast_day(
+            Path(str(tmp_forecast_results_archive)), run_date, model, config
+        )
+        m_run.assert_called_once_with(
+            shlex.split(
+                f'/usr/bin/ncks -d time_counter,0,23 '
+                f'results/forecast/24jan18/CampbellRiver.nc '
+                f'{tmp_forecast_results_archive}/25jan18/CampbellRiver.nc'
+            )
         )
 
 
