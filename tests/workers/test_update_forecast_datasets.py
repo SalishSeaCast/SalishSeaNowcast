@@ -197,9 +197,15 @@ class TestCreateNewForecastDir:
 
 
 @pytest.mark.parametrize(
-    'model, run_type', [
-        ('nemo', 'forecast'),
-        ('nemo', 'forecast2'),
+    'model, run_type, run_date, days_from_past, first_date', [
+        (
+            'nemo', 'forecast', arrow.get('2017-11-11'), 5,
+            arrow.get('2017-11-06')
+        ),
+        (
+            'nemo', 'forecast2', arrow.get('2018-01-24'), 5,
+            arrow.get('2018-01-20')
+        ),
     ]
 )
 @patch('nowcast.workers.update_forecast_datasets._symlink_results')
@@ -208,10 +214,9 @@ class TestAddPastDaysResults:
     """
 
     def test_symlink_nowcast_days(
-        self, m_symlink_results, model, run_type, tmpdir
+        self, m_symlink_results, model, run_type, run_date, days_from_past,
+        first_date, tmpdir
     ):
-        run_date = arrow.get('2017-11-11')
-        days_from_past = 5
         new_forecast_dir = Path(
             str(tmpdir.ensure_dir(f'rolling-forecasts/{model}_new'))
         )
@@ -223,8 +228,7 @@ class TestAddPastDaysResults:
             call(
                 Path('results/nowcast-blue/'), day, new_forecast_dir, day,
                 model, run_type
-            ) for day in arrow.Arrow.
-            range('day', run_date.replace(days=-days_from_past), run_date)
+            ) for day in arrow.Arrow.range('day', first_date, run_date)
         ]
         assert m_symlink_results.call_args_list == expected
 

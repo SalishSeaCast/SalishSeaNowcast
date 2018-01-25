@@ -131,9 +131,11 @@ def _create_new_forecast_dir(forecast_dir, model, run_type):
 def _add_past_days_results(
     run_date, days_from_past, new_forecast_dir, model, run_type, config
 ):
-    nowcast_days = arrow.Arrow.range(
-        'day', run_date.replace(days=-days_from_past), run_date
+    first_date = (
+        run_date.replace(days=-(days_from_past - 1))
+        if run_type == 'forecast2' else run_date.replace(days=-days_from_past)
     )
+    nowcast_days = arrow.Arrow.range('day', first_date, run_date)
     results_archive = Path(config['results archive']['nowcast'])
     for day in nowcast_days:
         _symlink_results(
@@ -204,9 +206,9 @@ def _extract_1st_forecast_day(
         forecast_file_24h = (
             tmp_forecast_results_archive / ddmmmyy_p1 / forecast_file.name
         )
-        forecast_times = 24 if forecast_file.name.startswith(
-            'SalishSea_1h'
-        ) else 24 * 6
+        forecast_times = (
+            24 if forecast_file.name.startswith('SalishSea_1h') else 24 * 6
+        )
         cmd = (
             f'/usr/bin/ncks -d time_counter,0,{forecast_times-1} '
             f'{forecast_file} {forecast_file_24h}'
