@@ -71,9 +71,12 @@ class TestMain:
         assert args == expected
 
 
-@pytest.mark.parametrize('model, run_type', [
-    ('nemo', 'forecast'),
-])
+@pytest.mark.parametrize(
+    'model, run_type', [
+        ('nemo', 'forecast'),
+        ('nemo', 'forecast2'),
+    ]
+)
 @patch('nowcast.workers.update_forecast_datasets.logger')
 class TestSuccess:
     """Unit tests for success() function.
@@ -99,9 +102,12 @@ class TestSuccess:
         assert msg_type == f'success {model} {run_type}'
 
 
-@pytest.mark.parametrize('model, run_type', [
-    ('nemo', 'forecast'),
-])
+@pytest.mark.parametrize(
+    'model, run_type', [
+        ('nemo', 'forecast'),
+        ('nemo', 'forecast2'),
+    ]
+)
 @patch('nowcast.workers.update_forecast_datasets.logger')
 class TestFailure:
     """Unit tests for failure() function.
@@ -128,9 +134,12 @@ class TestFailure:
         assert msg_type == f'failure {model} {run_type}'
 
 
-@pytest.mark.parametrize('model, run_type', [
-    ('nemo', 'forecast'),
-])
+@pytest.mark.parametrize(
+    'model, run_type', [
+        ('nemo', 'forecast'),
+        ('nemo', 'forecast2'),
+    ]
+)
 @patch('nowcast.workers.update_forecast_datasets.logger')
 class TestUpdateForecastDatasets:
     """Unit tests for update_forecast_datasets() function.
@@ -144,6 +153,7 @@ class TestUpdateForecastDatasets:
             'results archive': {
                 'nowcast': 'results/nowcast-blue/',
                 'forecast': 'results/forecast/',
+                'forecast2': 'results/forecast2/',
             },
             'rolling forecasts': {
                 'days from past': 5,
@@ -167,9 +177,12 @@ class TestUpdateForecastDatasets:
         assert checklist == expected
 
 
-@pytest.mark.parametrize('model, run_type', [
-    ('nemo', 'forecast'),
-])
+@pytest.mark.parametrize(
+    'model, run_type', [
+        ('nemo', 'forecast'),
+        ('nemo', 'forecast2'),
+    ]
+)
 @patch('nowcast.workers.update_forecast_datasets.logger')
 class TestCreateNewForecastDir:
     """Unit test for _create_new_forecast_dir() function.
@@ -183,9 +196,12 @@ class TestCreateNewForecastDir:
         assert new_forecast_dir == Path(f'{forecast_dir}_new')
 
 
-@pytest.mark.parametrize('model, run_type', [
-    ('nemo', 'forecast'),
-])
+@pytest.mark.parametrize(
+    'model, run_type', [
+        ('nemo', 'forecast'),
+        ('nemo', 'forecast2'),
+    ]
+)
 @patch('nowcast.workers.update_forecast_datasets._symlink_results')
 class TestAddPastDaysResults:
     """Unit test for _add_past_days_results() function.
@@ -351,9 +367,12 @@ class TestExtract1stForecastDay:
         ]
 
 
-@pytest.mark.parametrize('model, run_type', [
-    ('nemo', 'forecast'),
-])
+@pytest.mark.parametrize(
+    'model, run_type', [
+        ('nemo', 'forecast'),
+        ('nemo', 'forecast2'),
+    ]
+)
 @patch('nowcast.workers.update_forecast_datasets.logger')
 class TestSymlinkResults:
     """Unit tests for _symlink_results() function.
@@ -378,5 +397,6 @@ class TestSymlinkResults:
             Path(str(results_archive)), results_day, Path(str(forecast_dir)),
             forecast_day, model, run_type
         )
-        assert forecast_dir.join('11nov17',
-                                 'PointAtkinson.nc').check(link=True)
+        assert (
+            forecast_dir.join('11nov17', 'PointAtkinson.nc').check(link=True)
+        )
