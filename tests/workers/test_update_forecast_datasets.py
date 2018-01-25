@@ -275,7 +275,7 @@ class TestAddForecastResults:
         assert m_symlink_results.call_args_list == [
             call(
                 Path(f'/tmp/nemo_forecast'),
-                run_date,
+                run_date.replace(days=+1),
                 new_forecast_dir,
                 run_date.replace(days=+1),
                 model,
