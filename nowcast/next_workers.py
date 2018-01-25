@@ -891,8 +891,8 @@ def after_download_results(msg, config, checklist):
                     args=[run_type, 'comparison', '--run-date', run_date]
                 )
             )
-        if run_type == 'forecast':
-            run_date = checklist['NEMO run']['forecast']['run date']
+        if run_type.startswith('forecast'):
+            run_date = checklist['NEMO run'][run_type]['run date']
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.update_forecast_datasets',
@@ -1019,9 +1019,11 @@ def after_update_forecast_datasets(msg, config, checklist):
     next_workers = {
         'crash': [],
         'failure nemo forecast': [],
+        'failure nemo forecast2': [],
         'success nemo forecast': [],
+        'success nemo forecast2': [],
     }
-    if msg.type == 'success nemo forecast':
+    if msg.type.startswith('success nemo forecast'):
         next_workers[msg.type].append(
             NextWorker('nowcast.workers.ping_erddap', args=['nemo-forecast'])
         )

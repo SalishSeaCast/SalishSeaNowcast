@@ -1032,6 +1032,8 @@ message registry:
      checklist key: update forecast datasets
      success nemo forecast: NEMO forecast datasets updated from forecast run
      failure nemo forecast: NEMO forecast datasets update from forecast run failed
+     success nemo forecast2: NEMO forecast datasets updated from forecast2 run
+     failure nemo forecast2: NEMO forecast datasets update from forecast2 run failed
      crash: update_forecast_datasets worker crashed
 
     ping_erddap:
