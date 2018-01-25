@@ -207,8 +207,7 @@ class TestAddPastDaysResults:
             call(
                 Path('results/nowcast-blue/'), day, new_forecast_dir, day,
                 model, run_type
-            )
-            for day in arrow.Arrow.
+            ) for day in arrow.Arrow.
             range('day', run_date.replace(days=-days_from_past), run_date)
         ]
         assert m_symlink_results.call_args_list == expected
@@ -315,8 +314,13 @@ class TestExtract1stForecastDay:
         model = 'nemo'
         config = {'results archive': {'forecast': 'results/forecast/'}}
         m_glob.return_value = [
-            # A file that we want to operate on
+            # A 10min file that we want to operate on
             Path('results/forecast/24jan18/CampbellRiver.nc'),
+            # A 1hr file that we want to operate on
+            Path(
+                'results/forecast/24jan18/'
+                'SalishSea_1h_20180124_20180125_grid_T.nc'
+            ),
             # Files that we don't want to operate on
             Path('results/forecast/24jan18/SalishSea_02702160_restart.nc'),
             Path(
@@ -327,13 +331,24 @@ class TestExtract1stForecastDay:
         update_forecast_datasets._extract_1st_forecast_day(
             Path(str(tmp_forecast_results_archive)), run_date, model, config
         )
-        m_run.assert_called_once_with(
-            shlex.split(
-                f'/usr/bin/ncks -d time_counter,0,23 '
-                f'results/forecast/24jan18/CampbellRiver.nc '
-                f'{tmp_forecast_results_archive}/25jan18/CampbellRiver.nc'
-            )
-        )
+        assert m_run.call_args_list == [
+            call(
+                shlex.split(
+                    f'/usr/bin/ncks -d time_counter,0,143 '
+                    f'results/forecast/24jan18/CampbellRiver.nc '
+                    f'{tmp_forecast_results_archive}/25jan18/CampbellRiver.nc'
+                )
+            ),
+            call(
+                shlex.split(
+                    f'/usr/bin/ncks -d time_counter,0,23 '
+                    f'results/forecast/24jan18/'
+                    f'SalishSea_1h_20180124_20180125_grid_T.nc '
+                    f'{tmp_forecast_results_archive}/25jan18/'
+                    f'SalishSea_1h_20180124_20180125_grid_T.nc'
+                )
+            ),
+        ]
 
 
 @pytest.mark.parametrize('model, run_type', [
