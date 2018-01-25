@@ -161,7 +161,7 @@ def _add_forecast_results(run_date, new_forecast_dir, model, run_type, config):
     )
     _symlink_results(
         tmp_forecast_results_archive,
-        run_date,
+        run_date.replace(days=+1),
         new_forecast_dir,
         run_date.replace(days=+1),
         model,
