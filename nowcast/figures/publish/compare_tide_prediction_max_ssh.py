@@ -62,6 +62,7 @@ import nowcast.figures.website_theme
 def make_figure(
     place,
     tidal_predictions,
+    forecast_hrs,
     weather_path,
     bathy,
     grid_T_hr_path,
@@ -78,6 +79,12 @@ def make_figure(
 
     :arg tidal_predictions: Path to directory of tidal prediction file.
     :type tidal_predictions: :py:class:`pathlib.Path`
+
+    :arg int forecast_hrs: Number of hours in the water level dataset that
+                           constitute the forecast.
+                           Used control the portion of the dataset that is
+                           included in calculations like the maximum sea
+                           surface height, etc.
 
     :arg weather_path: The directory where the weather forcing files
                        are stored.
@@ -98,7 +105,8 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(
-        place, tidal_predictions, weather_path, bathy, grid_T_hr_path
+        place, tidal_predictions, forecast_hrs, weather_path, bathy,
+        grid_T_hr_path
     )
     fig, (ax_info, ax_ssh, ax_map, ax_res) = _prep_fig_axes(figsize, theme)
     _plot_info_box(ax_info, place, plot_data, theme)
@@ -109,14 +117,13 @@ def make_figure(
 
 
 def _prep_plot_data(
-    place, tidal_predictions, weather_path, bathy, grid_T_hr_path
+    place, tidal_predictions, forecast_hrs, weather_path, bathy, grid_T_hr_path
 ):
     ssh_forecast = _get_ssh_forecast(place)
     shared.localize_time(ssh_forecast)
     model_ssh_period = slice(
         str(ssh_forecast.time[0].values), str(ssh_forecast.time[-1].values)
     )
-    forecast_hrs = 36
     forecast_period = slice(
         str(ssh_forecast.time[-forecast_hrs * 6].values),
         str(ssh_forecast.time[-1].values)

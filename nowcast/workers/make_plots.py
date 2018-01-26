@@ -560,12 +560,15 @@ def _prep_publish_fig_functions(
     timezone
 ):
     tidal_predictions = Path(config['ssh']['tidal predictions'])
+    forecast_hrs = int(config['run types'][run_type]['duration'] * 24)
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     start_day = {
         'forecast': run_date.replace(days=+1).format('YYYYMMDD'),
+        'forecast2': run_date.replace(days=+2).format('YYYYMMDD'),
     }
     end_day = {
         'forecast': run_date.replace(days=+2).format('YYYYMMDD'),
+        'forecast2': run_date.replace(days=+3).format('YYYYMMDD'),
     }
     grid_T_hr_path = (
         results_dir /
@@ -586,9 +589,8 @@ def _prep_publish_fig_functions(
         'Squamish': 'Sqam_maxSSH',
         'Victoria': 'Vic_maxSSH',
     }
-    filepath_tmpl = results_dir / '{}.nc'
     grids_10m = {
-        name: nc.Dataset(filepath_tmpl.format(name.replace(' ', '')))
+        name: nc.Dataset(results_dir / '{}.nc'.format(name.replace(' ', '')))
         for name in names
     }
     fig_functions = {
@@ -612,8 +614,8 @@ def _prep_publish_fig_functions(
                 'function':
                     compare_tide_prediction_max_ssh.make_figure,
                 'args': (
-                    place, tidal_predictions, weather_path, bathy,
-                    grid_T_hr_path
+                    place, tidal_predictions, forecast_hrs, weather_path,
+                    bathy, grid_T_hr_path
                 )
             }
         })
