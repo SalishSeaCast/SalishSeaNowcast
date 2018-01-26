@@ -196,8 +196,8 @@ class TestMakeFVCOMBoundary:
 
     @pytest.mark.parametrize(
         'run_type, time_start, time_end', [
-            ('nowcast', '2018-01-07 23:55:00', '2018-01-09 00:05:00'),
-            ('forecast', '2018-01-08 23:55:00', '2018-01-10 12:05:00'),
+            ('nowcast', '2018-01-08 00:00:00', '2018-01-09 00:00:00'),
+            ('forecast', '2018-01-09 00:00:00', '2018-01-10 12:00:00'),
         ]
     )
     def test_make_type3_nesting_file(
