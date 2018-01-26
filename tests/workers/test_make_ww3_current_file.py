@@ -215,9 +215,12 @@ class TestMakeWW3CurrentFile:
         'forecast2',
         'forecast',
     ])
+    @patch('nowcast.workers.make_ww3_current_file._calc_forecast_datasets')
+    @patch('nowcast.workers.make_ww3_current_file._calc_forecast2_datasets')
     def test_mesh_mask_dataset(
-        self, m_logger, m_open_dataset, m_open_mfdataset, m_rotate_vel,
-        m_unstagger, m_create_dataset, run_type, config
+        self, m_calc_fcst2_datasets, m_calc_fcst_datasets, m_logger,
+        m_open_dataset, m_open_mfdataset, m_rotate_vel, m_unstagger,
+        m_create_dataset, run_type, config
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -233,9 +236,12 @@ class TestMakeWW3CurrentFile:
         'forecast2',
         'forecast',
     ])
+    @patch('nowcast.workers.make_ww3_current_file._calc_forecast_datasets')
+    @patch('nowcast.workers.make_ww3_current_file._calc_forecast2_datasets')
     def test_u_datasets(
-        self, m_logger, m_open_dataset, m_open_mfdataset, m_rotate_vel,
-        m_unstagger, m_create_dataset, run_type, config
+        self, m_calc_fcst2_datasets, m_calc_fcst_datasets, m_logger,
+        m_open_dataset, m_open_mfdataset, m_rotate_vel, m_unstagger,
+        m_create_dataset, run_type, config
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -264,9 +270,12 @@ class TestMakeWW3CurrentFile:
         'forecast2',
         'forecast',
     ])
+    @patch('nowcast.workers.make_ww3_current_file._calc_forecast_datasets')
+    @patch('nowcast.workers.make_ww3_current_file._calc_forecast2_datasets')
     def test_v_datasets(
-        self, m_logger, m_open_dataset, m_open_mfdataset, m_rotate_vel,
-        m_unstagger, m_create_dataset, run_type, config
+        self, m_calc_fcst2_datasets, m_calc_fcst_datasets, m_logger,
+        m_open_dataset, m_open_mfdataset, m_rotate_vel, m_unstagger,
+        m_create_dataset, run_type, config
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
