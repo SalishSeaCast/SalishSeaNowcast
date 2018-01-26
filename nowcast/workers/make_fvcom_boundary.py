@@ -159,13 +159,13 @@ def make_fvcom_boundary(parsed_args, config, *args):
         ['nemo boundary results']
     )
     time_start_offsets = {
-        'nowcast': timedelta(seconds=-5 * 60),
-        'forecast': timedelta(hours=24, seconds=-5 * 60),
+        'nowcast': timedelta(hours=0),
+        'forecast': timedelta(hours=24),
     }
     time_start = run_date + time_start_offsets[run_type]
     time_end_offsets = {
-        'nowcast': timedelta(hours=24, seconds=5 * 60),
-        'forecast': timedelta(hours=60, seconds=5 * 60),
+        'nowcast': timedelta(hours=24),
+        'forecast': timedelta(hours=60),
     }
     time_end = run_date + time_end_offsets[run_type]
     OPPTools.nesting.make_type3_nesting_file(
