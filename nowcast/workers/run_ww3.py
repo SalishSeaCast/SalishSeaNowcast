@@ -524,13 +524,11 @@ def _netcdf_output(run_date):
     start_yyyymmdd = run_date.format('YYYYMMDD')
     end_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
     fields_files = ' '.join(
-        f'SoG_ww3_fields_{day.format("YYYYMMDD")}.nc'
-        for day in
+        f'SoG_ww3_fields_{day.format("YYYYMMDD")}.nc' for day in
         arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
     )
     points_files = ' '.join(
-        f'SoG_ww3_points_{day.format("YYYYMMDD")}_tab.nc'
-        for day in
+        f'SoG_ww3_points_{day.format("YYYYMMDD")}_tab.nc' for day in
         arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
     )
     output_to_netcdf = (
