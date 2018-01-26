@@ -7,18 +7,19 @@
 #    $ conda env create -f SalishSeaNowcast/environment-dev.yaml
 #    $ source activate salishsea-nowcast
 #    $ pip install --editable NEMO_Nowcast/
-#    $ pip install --editable SalishSeaTools/
+#    $ pip install --editable tools/SalishSeaTools/
 #    $ pip install --editable OPPTools/
 #    $ pip install --editable NEMO-Cmd/
 #    $ pip install --editable SalishSeaCmd/
+#    $ pip install --editable FVCOM-Cmd/
 #    $ pip install --editable SalishSeaNowcast/
 
 name: salishsea-nowcast
 
 channels:
   - gomss-nowcast
-  - defaults
   - conda-forge
+  - defaults
 
 dependencies:
   - arrow
@@ -39,6 +40,7 @@ dependencies:
   - pandas
   - paramiko
   - pillow
+  - pygrib
   - pyyaml
   - pyzmq
   - pip
