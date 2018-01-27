@@ -982,7 +982,6 @@ class TestAfterMakeFVCOMBoundary:
             'crash',
             'failure nowcast',
             'failure forecast',
-            'success nowcast',
             'success forecast',
         ]
     )
@@ -991,6 +990,21 @@ class TestAfterMakeFVCOMBoundary:
             Message('make_fvcom_boundary', msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+    ])
+    def test_success_launch_run_fvcom(self, run_type, config, checklist):
+        workers = next_workers.after_make_fvcom_boundary(
+            Message('make_fvcom_boundary', f'success {run_type}'), config,
+            checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.run_fvcom',
+            args=['west.cloud', run_type],
+            host='west.cloud'
+        )
+        assert workers[0] == expected
 
 
 class TestAfterRunFVCOM:

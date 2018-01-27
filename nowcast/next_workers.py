@@ -662,7 +662,24 @@ def after_make_fvcom_boundary(msg, config, checklist):
     :returns: Worker(s) to launch next
     :rtype: list
     """
-    return []
+    next_workers = {
+        'crash': [],
+        'failure nowcast': [],
+        'failure forecast': [],
+        'success nowcast': [],
+        'success forecast': [],
+    }
+    if msg.type == 'success nowcast':
+        host_name = config['vhfr fvcom runs']['host']
+        run_type = msg.type.split()[1]
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.run_fvcom',
+                args=[host_name, run_type],
+                host=host_name
+            )
+        )
+    return next_workers[msg.type]
 
 
 def after_run_fvcom(msg, config, checklist):
