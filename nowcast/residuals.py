@@ -32,6 +32,7 @@ import pandas as pd
 
 from salishsea_tools import (
     geo_tools,
+    stormtools,
     tidetools,
     nc_tools,
 )
