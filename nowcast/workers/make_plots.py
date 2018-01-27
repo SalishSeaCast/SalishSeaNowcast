@@ -88,9 +88,11 @@ def main():
         choices={'publish', 'research', 'comparison'},
         help='''
         Which type of plots to produce:
-        "publish" means ssh, weather and other approved plots for publishing,
+        "publish" means storm surge and other approved plots for publishing
+        (forecast and forecast2 runs only),
         "research" means tracers, currents and other research plots
-        "comparison" means ferry salinity plots
+        (nowcast and nowcast-green runs only)
+        "comparison" means model vs. observation plots (nowcast runs only)
         '''
     )
     worker.cli.add_date_option(
