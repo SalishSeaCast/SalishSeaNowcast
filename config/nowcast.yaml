@@ -107,6 +107,9 @@ ssh:
   coordinates: /results/nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc
   # Directory containing tidal predication file for sea surface height correction
   tidal predictions: /results/nowcast-sys/SalishSeaNowcast/tidal_predictions/
+  # Name of Neah Bay hourly prediction file
+  # **Must be quoted because of space**
+  neah bay hourly: 'Neah Bay_1h_tidal_prediction_01-Jan-2013_31-Dec-2020.csv'
   # Destination directory for Neah Bay sea surface height open boundary files
   ssh dir: /results/forcing/sshNeahBay/
   # Template for the sea surface height forcing file name
