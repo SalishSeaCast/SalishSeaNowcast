@@ -1196,37 +1196,6 @@ class TestAfterDownloadResults:
         assert workers == []
 
     @pytest.mark.parametrize(
-        'run_type, plot_type', [
-            ('nowcast', 'publish'),
-            ('forecast', 'publish'),
-            ('forecast2', 'publish'),
-        ]
-    )
-    def test_success_launch_make_plots_publish(
-        self, run_type, plot_type, config, checklist
-    ):
-        p_checklist = patch.dict(
-            checklist, {
-                'NEMO run': {
-                    run_type: {
-                        'run date': '2016-10-22'
-                    }
-                }
-            }
-        )
-        with p_checklist:
-            workers = next_workers.after_download_results(
-                Message('download results', 'success {}'.format(run_type)),
-                config, checklist
-            )
-        expected = NextWorker(
-            'nowcast.workers.make_plots',
-            args=[run_type, plot_type, '--run-date', '2016-10-22'],
-            host='localhost'
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize(
         'run_type, plot_type, run_date', [
             ('nowcast', 'research', '2016-10-29'),
             ('nowcast', 'comparison', '2016-10-28'),
@@ -1379,18 +1348,63 @@ class TestAfterUpdateForecastDatasets:
         assert workers == []
 
     @pytest.mark.parametrize(
-        'msg_type', [
-            'success nemo forecast',
-            'success nemo forecast2',
+        'run_type, run_date', [
+            ('forecast', '2018-01-26'),
+            ('forecast2', '2018-01-26'),
         ]
     )
-    def test_success_launches_ping_erddap(self, msg_type, config, checklist):
-        workers = next_workers.after_update_forecast_datasets(
-            Message('update_forecast_datasets', msg_type), config, checklist
+    def test_success_launch_ping_erddap_nemo_forecast(
+        self, run_type, run_date, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {
+                'NEMO run': {
+                    run_type: {
+                        'run date': run_date
+                    }
+                }
+            }
         )
+        with p_checklist:
+            workers = next_workers.after_update_forecast_datasets(
+                Message(
+                    'update_forecast_datasets', f'success nemo {run_type}'
+                ), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
             args=['nemo-forecast'],
+            host='localhost'
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize(
+        'run_type, run_date', [
+            ('forecast', '2018-01-26'),
+            ('forecast2', '2018-01-26'),
+        ]
+    )
+    def test_success_launch_make_plots_forecast_publish(
+        self, run_type, run_date, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {
+                'NEMO run': {
+                    run_type: {
+                        'run date': run_date
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_update_forecast_datasets(
+                Message(
+                    'update_forecast_datasets', f'success nemo {run_type}'
+                ), config, checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.make_plots',
+            args=[run_type, 'publish', '--run-date', run_date],
             host='localhost'
         )
         assert expected in workers

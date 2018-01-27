@@ -855,44 +855,31 @@ def after_download_results(msg, config, checklist):
             return next_workers[msg.type]
         run_type = msg.type.split()[1]
         run_date = checklist['NEMO run'][run_type]['run date']
-        if run_type == 'nowcast-green':
+        if run_type.startswith('nowcast'):
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.make_plots',
                     args=[run_type, 'research', '--run-date', run_date]
                 )
             )
-            next_workers[msg.type].append(
-                NextWorker(
-                    'nowcast.workers.ping_erddap', args=['nowcast-green']
+            if run_type == 'nowcast':
+                run_date = (
+                    arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD')
                 )
-            )
-            return next_workers[msg.type]
-        next_workers[msg.type].append(
-            NextWorker(
-                'nowcast.workers.make_plots',
-                args=[run_type, 'publish', '--run-date', run_date]
-            )
-        )
-        if run_type == 'nowcast':
-            next_workers[msg.type].append(
-                NextWorker(
-                    'nowcast.workers.make_plots',
-                    args=[run_type, 'research', '--run-date', run_date]
+                next_workers[msg.type].append(
+                    NextWorker(
+                        'nowcast.workers.make_plots',
+                        args=[run_type, 'comparison', '--run-date', run_date]
+                    )
                 )
-            )
-            run_date = checklist['NEMO run']['nowcast']['run date']
-            run_date = (
-                arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD')
-            )
-            next_workers[msg.type].append(
-                NextWorker(
-                    'nowcast.workers.make_plots',
-                    args=[run_type, 'comparison', '--run-date', run_date]
+            if run_type == 'nowcast-green':
+                next_workers[msg.type].append(
+                    NextWorker(
+                        'nowcast.workers.ping_erddap', args=['nowcast-green']
+                    )
                 )
-            )
+                return next_workers[msg.type]
         if run_type.startswith('forecast'):
-            run_date = checklist['NEMO run'][run_type]['run date']
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.update_forecast_datasets',
@@ -1024,9 +1011,15 @@ def after_update_forecast_datasets(msg, config, checklist):
         'success nemo forecast2': [],
     }
     if msg.type.startswith('success nemo forecast'):
-        next_workers[msg.type].append(
-            NextWorker('nowcast.workers.ping_erddap', args=['nemo-forecast'])
-        )
+        run_type = msg.type.split()[2]
+        run_date = checklist['NEMO run'][run_type]['run date']
+        next_workers[msg.type].extend([
+            NextWorker('nowcast.workers.ping_erddap', args=['nemo-forecast']),
+            NextWorker(
+                'nowcast.workers.make_plots',
+                args=[run_type, 'publish', '--run-date', run_date]
+            ),
+        ])
     return next_workers[msg.type]
 
 
