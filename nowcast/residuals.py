@@ -797,7 +797,7 @@ def NeahBay_forcing_anom(textfile, run_date, tide_file):
     :arg run_date: date of the simulation
     :type run_date: datetime object
 
-    :arg tide_file: path for the tide file
+    :arg tide_file: path and name for the tide file
     :type tide_file: string
 
     :returns: dates, surge, forecast_flag
@@ -839,10 +839,7 @@ def _calculate_forcing_surge(data, dates, tide_file):
     forecast_flag = []
     surge = []
     # Load tides
-    ttide = shared.get_tides(
-        'Neah Bay',
-        path=tide_file,
-    )
+    ttide, _ = stormtools.load_tidal_predictions(tide_file)
     for d in dates:
         # Convert datetime to string for comparing with times in data
         daystr = d.strftime('%m/%d %HZ')

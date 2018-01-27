@@ -129,7 +129,9 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     shutil.copy2(textfile, results_dir)
     # Grab all surge data in the textfile
     dates, sshs, fflags = residuals.NeahBay_forcing_anom(
-        textfile, run_date, config['ssh']['tidal predictions']
+        textfile, run_date,
+        os.path.join(config['ssh']['tidal predictions'],
+                     config['ssh']['neah bay hourly'])
     )
     # Identify days with full ssh information
     dates_full = _list_full_days(dates, sshs, fflags)
