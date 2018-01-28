@@ -584,12 +584,15 @@ def _prep_publish_fig_functions(
         'Halfmoon Bay': 'HB_maxSSH',
         'Nanaimo': 'Nan_maxSSH',
         'Neah Bay': 'NB_maxSSH',
+        'New Westminster': 'NW_maxSSH',
         'Patricia Bay': 'PB_maxSSH',
         'Point Atkinson': 'PA_maxSSH',
         'Port Renfrew': 'PR_maxSSH',
         'Sand Heads': 'SH_maxSSH',
+        'Sandy Cove': 'SC_maxSSH',
         'Squamish': 'Sqam_maxSSH',
         'Victoria': 'Vic_maxSSH',
+        'Woodwards Landing': 'WL_maxSSH',
     }
     grids_10m = {
         name: nc.Dataset(results_dir / '{}.nc'.format(name.replace(' ', '')))
