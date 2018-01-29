@@ -271,7 +271,7 @@ def _writeTFile(
     new_tc = new.createVariable(
         'time_counter', np.float32, 'time_counter', zlib=True
     )
-    new_tc[:] = f.variables['time_counter']
+    new_tc[:] = f.variables['time_counter'][:]
     new_run = new.createVariable(
         'turb', float, ('time_counter', 'y', 'x'), zlib=True
     )
