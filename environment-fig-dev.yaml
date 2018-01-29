@@ -32,10 +32,10 @@ dependencies:
   - pandas
   - paramiko
   - pillow
-  - pyyaml
-  - pyzmq
   - pip
   - python=3.6
+  - pyyaml
+  - pyzmq
   - requests
   - scipy
   - xarray

@@ -40,11 +40,11 @@ dependencies:
   - pandas
   - paramiko
   - pillow
+  - pip
   - pygrib
+  - python=3.6
   - pyyaml
   - pyzmq
-  - pip
-  - python=3.6
   - requests
   - schedule
   - scipy
