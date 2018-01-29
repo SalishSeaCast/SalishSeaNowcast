@@ -29,7 +29,7 @@ Documentation for the package is in the ``docs/`` directory and is rendered at h
 License
 =======
 
-The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2017 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2018 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
 
 .. _Salish Sea MEOPAR Project Contributors: https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
 

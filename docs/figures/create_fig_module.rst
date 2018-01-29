@@ -1,4 +1,4 @@
-.. Copyright 2013-2017 The Salish Sea MEOPAR contributors
+.. Copyright 2013-2018 The Salish Sea MEOPAR contributors
 .. and The University of British Columbia
 ..
 .. Licensed under the Apache License, Version 2.0 (the "License");
@@ -54,7 +54,7 @@ and then we'll look at each section in detail.
 
 .. code-block:: python
 
-    # Copyright 2013-2017 The Salish Sea MEOPAR contributors
+    # Copyright 2013-2018 The Salish Sea MEOPAR contributors
     # and The University of British Columbia
 
     # Licensed under the Apache License, Version 2.0 (the "License");
@@ -337,7 +337,7 @@ At the top of the file is our :ref:`LibraryCodeStandardCopyrightHeaderBlock`:
 
 .. code-block:: python
 
-    # Copyright 2013-2017 The Salish Sea MEOPAR contributors
+    # Copyright 2013-2018 The Salish Sea MEOPAR contributors
     # and The University of British Columbia
 
     # Licensed under the Apache License, Version 2.0 (the "License");

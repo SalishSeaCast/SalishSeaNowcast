@@ -1,4 +1,4 @@
-.. Copyright 2013-2017 The Salish Sea MEOPAR contributors
+.. Copyright 2013-2018 The Salish Sea MEOPAR contributors
 .. and The University of British Columbia
 ..
 .. Licensed under the Apache License, Version 2.0 (the "License");
