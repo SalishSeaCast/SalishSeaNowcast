@@ -365,6 +365,15 @@ figures:
   # for use on the Strm Surge Information Portal page.
   storm surge alerts thumbnail: Website_thumbnail
 
+  # Surface current tile figures
+  surface current tiles:
+    # Rolling forecast u and v velocity fields ERDDAP dataset URLs
+    u field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DuGridFields1hV17-02
+    v field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DvGridFields1hV17-02
+    # Directory tree behind the https://salishsea.eos.ubc.ca/nowcast-sys/figures/
+    # static web server that tile files are to be stored in and requested from
+    storage path: /results/nowcast-sys/figures/surface_currents/
+
 
 # Storm surge alerts ATOM feeds
 storm surge feeds:
@@ -1074,6 +1083,12 @@ message registry:
       success forecast2 publish: forecast2 publish plots produced
       failure forecast2 publish: forecast2 publish plots failed
       crash: make_plots worker crashed
+
+    make_surface_current_tiles:
+      checklist key: surface current tiles
+      success: surface current tile figures produced
+      failure: surface current tile figure production failed
+      crash: make_surface_current_tiles worker crashed
 
     make_feeds:
       checklist key: storm surge alert feeds
