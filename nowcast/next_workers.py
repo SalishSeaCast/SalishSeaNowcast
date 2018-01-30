@@ -955,6 +955,65 @@ def after_download_wwatch3_results(msg, config, checklist):
     return next_workers[msg.type]
 
 
+def after_update_forecast_datasets(msg, config, checklist):
+    """Calculate the list of workers to launch after the
+    update_forecast_datasets worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nemo forecast': [],
+        'failure nemo forecast2': [],
+        'success nemo forecast': [],
+        'success nemo forecast2': [],
+    }
+    if msg.type.startswith('success nemo forecast'):
+        run_type = msg.type.split()[2]
+        run_date = checklist['NEMO run'][run_type]['run date']
+        next_workers[msg.type].extend([
+            NextWorker('nowcast.workers.ping_erddap', args=['nemo-forecast']),
+            NextWorker(
+                'nowcast.workers.make_plots',
+                args=[run_type, 'publish', '--run-date', run_date]
+            ),
+        ])
+    return next_workers[msg.type]
+
+
+def after_ping_erddap(msg, config, checklist):
+    """Calculate the list of workers to launch after the ping_erddap
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    return []
+
+
 def after_make_plots(msg, config, checklist):
     """Calculate the list of workers to launch after the make_plots
     worker ends.
@@ -1002,47 +1061,9 @@ def after_make_plots(msg, config, checklist):
     return next_workers[msg.type]
 
 
-def after_update_forecast_datasets(msg, config, checklist):
+def after_make_surface_current_tiles(msg, config, checklist):
     """Calculate the list of workers to launch after the
-    update_forecast_datasets worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        'crash': [],
-        'failure nemo forecast': [],
-        'failure nemo forecast2': [],
-        'success nemo forecast': [],
-        'success nemo forecast2': [],
-    }
-    if msg.type.startswith('success nemo forecast'):
-        run_type = msg.type.split()[2]
-        run_date = checklist['NEMO run'][run_type]['run date']
-        next_workers[msg.type].extend([
-            NextWorker('nowcast.workers.ping_erddap', args=['nemo-forecast']),
-            NextWorker(
-                'nowcast.workers.make_plots',
-                args=[run_type, 'publish', '--run-date', run_date]
-            ),
-        ])
-    return next_workers[msg.type]
-
-
-def after_ping_erddap(msg, config, checklist):
-    """Calculate the list of workers to launch after the ping_erddap
-    worker ends.
+    make_surface_current_tiles worker ends.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`nemo_nowcast.message.Message`
