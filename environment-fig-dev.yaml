@@ -15,6 +15,7 @@
 name: nowcast-fig-dev
 
 channels:
+  - conda-forge
   - defaults
 
 dependencies:

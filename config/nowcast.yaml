@@ -342,6 +342,9 @@ figures:
   # ERDDAP dataset URLs
   dataset URLs:
     HRDPS fields: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1
+    tide stn ssh time series:
+      # **Must be quoted to project {} characters**
+      'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10mV17-02'
   # Directory in which to find bathymetry and mesh mask files
   grid dir: /results/nowcast-sys/grid/
   # Pacific Now-West coastline polygons file
