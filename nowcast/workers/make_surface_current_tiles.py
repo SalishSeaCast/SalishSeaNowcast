@@ -71,3 +71,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
     """
     config = {}
     return config
+
+
+if __name__ == '__main__':
+    main()  # pragma: no cover
