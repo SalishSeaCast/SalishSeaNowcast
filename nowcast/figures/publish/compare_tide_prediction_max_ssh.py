@@ -34,6 +34,8 @@ The figure is annotated with the calculated maximum sea surface height at the
 tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
 
+Testing notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+
 Development notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopTidePredictionMaxSSH.ipynb
 """
 from pathlib import Path
@@ -61,6 +63,7 @@ import nowcast.figures.website_theme
 
 def make_figure(
     place,
+    ssh_fcst_dataset_url_tmpl,
     tidal_predictions,
     forecast_hrs,
     weather_path,
@@ -76,6 +79,10 @@ def make_figure(
 
     :arg str place: Tide gauge station name;
                     must be a key in :py:obj:`salishsea_tools.places.PLACES`.
+
+    :arg str ssh_fcst_dataset_url_tmpl: ERDDAP URL template for tide gauge
+                                        station sea surface height forecast
+                                        dataset time series.
 
     :arg tidal_predictions: Path to directory of tidal prediction file.
     :type tidal_predictions: :py:class:`pathlib.Path`
@@ -105,8 +112,8 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(
-        place, tidal_predictions, forecast_hrs, weather_path, bathy,
-        grid_T_hr_path
+        place, ssh_fcst_dataset_url_tmpl, tidal_predictions, forecast_hrs,
+        weather_path, bathy, grid_T_hr_path
     )
     fig, (ax_info, ax_ssh, ax_map, ax_res) = _prep_fig_axes(figsize, theme)
     _plot_info_box(ax_info, place, plot_data, theme)
@@ -117,9 +124,10 @@ def make_figure(
 
 
 def _prep_plot_data(
-    place, tidal_predictions, forecast_hrs, weather_path, bathy, grid_T_hr_path
+    place, ssh_fcst_dataset_url_tmpl, tidal_predictions, forecast_hrs,
+    weather_path, bathy, grid_T_hr_path
 ):
-    ssh_forecast = _get_ssh_forecast(place)
+    ssh_forecast = _get_ssh_forecast(place, ssh_fcst_dataset_url_tmpl)
     shared.localize_time(ssh_forecast)
     model_ssh_period = slice(
         str(ssh_forecast.time[0].values), str(ssh_forecast.time[-1].values)
@@ -175,15 +183,17 @@ def _prep_plot_data(
     )
 
 
-def _get_ssh_forecast(place):
+def _get_ssh_forecast(place, dataset_url_tmpl):
     ## TODO: This is a work-around because neither netCDF4 nor xarray are able
     ## to load the dataset directly from the URL due to an OpenDAP issue
-    dataset_id = f'ubcSSf{place.replace(" ", "")}SSH10mV17-02'
-    ssh_file = Path('/tmp').joinpath(dataset_id).with_suffix('.nc')
+    dataset_url = dataset_url_tmpl.format(place=place.replace(" ", ""))
+    dataset_file = Path(dataset_url.rsplit('/', 1)[1]).with_suffix('.nc')
+    ssh_file = (
+        Path('/tmp').joinpath(dataset_url.rsplit('/',
+                                                 1)[1]).with_suffix('.nc')
+    )
     with ssh_file.open('wb') as f:
-        resp = requests.get(
-            f'https://salishsea.eos.ubc.ca/erddap/griddap/{ssh_file.name}'
-        )
+        resp = requests.get(f'{dataset_url}.nc')
         f.write(resp.content)
     ssh_forecast = xarray.open_dataset(ssh_file)
     return ssh_forecast

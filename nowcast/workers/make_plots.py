@@ -54,10 +54,7 @@ from nowcast.figures.publish import (
     compare_tide_prediction_max_ssh,
 )
 # Legacy figures code
-from nowcast.figures import (
-    research_VENUS,
-    research_ferries,
-)
+from nowcast.figures import research_VENUS
 
 NAME = 'make_plots'
 logger = logging.getLogger(NAME)
@@ -561,6 +558,9 @@ def _prep_publish_fig_functions(
     config, bathy, coastline, weather_path, results_dir, run_type, run_date,
     timezone
 ):
+    ssh_fcst_dataset_url_tmpl = (
+        config['figures']['dataset URLs']['tide stn ssh time series']
+    )
     tidal_predictions = Path(config['ssh']['tidal predictions'])
     forecast_hrs = int(config['run types'][run_type]['duration'] * 24)
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
@@ -619,8 +619,8 @@ def _prep_publish_fig_functions(
                 'function':
                     compare_tide_prediction_max_ssh.make_figure,
                 'args': (
-                    place, tidal_predictions, forecast_hrs, weather_path,
-                    bathy, grid_T_hr_path
+                    place, ssh_fcst_dataset_url_tmpl, tidal_predictions,
+                    forecast_hrs, weather_path, bathy, grid_T_hr_path
                 )
             }
         })
