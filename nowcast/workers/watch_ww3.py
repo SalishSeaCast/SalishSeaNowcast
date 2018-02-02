@@ -35,7 +35,7 @@ def main():
 
     For command-line usage see:
 
-    :command:`python -m nowcast.workers.watch_NEMO --help`
+    :command:`python -m nowcast.workers.watch_ww3 --help`
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
