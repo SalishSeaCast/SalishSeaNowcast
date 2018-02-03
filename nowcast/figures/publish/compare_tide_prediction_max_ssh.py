@@ -38,6 +38,7 @@ Testing notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.
 
 Development notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopTidePredictionMaxSSH.ipynb
 """
+from datetime import timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -52,6 +53,7 @@ import requests
 import xarray
 
 from salishsea_tools import (
+    data_tools,
     viz_tools,
     wind_tools,
 )
@@ -127,8 +129,34 @@ def _prep_plot_data(
     place, ssh_fcst_dataset_url_tmpl, tidal_predictions, forecast_hrs,
     weather_path, bathy, grid_T_hr_path
 ):
+    # NEMO sea surface height forecast dataset
     ssh_forecast = _get_ssh_forecast(place, ssh_fcst_dataset_url_tmpl)
+    # CHS water level observations dataset
+    try:
+        obs_1min = data_tools.get_chs_tides(
+            'obs',
+            place,
+            arrow.get(str(ssh_forecast.time[0].values)) -
+            timedelta(seconds=5 * 60),
+            arrow.get(str(ssh_forecast.time[-1].values))
+        )
+        obs_10min_avg = xarray.DataArray(
+            obs_1min.resample('10min', loffset='5min').mean()
+        )
+        obs = xarray.Dataset({
+            'water_level': obs_10min_avg.rename({
+                'dim_0': 'time'
+            })
+        })
+    except TypeError:
+        # No observations available
+        obs = None
     shared.localize_time(ssh_forecast)
+    try:
+        shared.localize_time(obs)
+    except (IndexError, AttributeError):
+        # No observations available
+        obs = None
     model_ssh_period = slice(
         str(ssh_forecast.time[0].values), str(ssh_forecast.time[-1].values)
     )
@@ -136,15 +164,23 @@ def _prep_plot_data(
         str(ssh_forecast.time[-forecast_hrs * 6].values),
         str(ssh_forecast.time[-1].values)
     )
+    try:
+        obs_period = slice(str(obs.time.values[0]), str(obs.time.values[-1]))
+    except AttributeError:
+        # No observations available
+        obs_period = None
+    # Predicted tide water levels dataset from ttide
     ttide = shared.get_tides(place, tidal_predictions)
     ttide.rename(columns={' pred_noshallow ': 'pred_noshallow'}, inplace=True)
     ttide.index = ttide.time
     ttide_ds = xarray.Dataset.from_dataframe(ttide)
     shared.localize_time(ttide_ds)
+    # NEMO sea surface height dataset corrected to include unmodeled tide constituents
     ssh_correction = ttide_ds.pred_noshallow.sel(
         time=model_ssh_period
     ) - ttide_ds.pred_8.sel(time=model_ssh_period)
     ssh_corrected = ssh_forecast + ssh_correction
+    # Mean sea level and extreme water levels
     msl = PLACES[place]['mean sea lvl']
     extreme_ssh = PLACES[place]['hist max sea lvl']
     max_tides = ttide.pred_all.max() + msl
@@ -152,9 +188,19 @@ def _prep_plot_data(
     thresholds = (max_tides, mid_tides, extreme_ssh)
     max_ssh = ssh_corrected.ssh.sel(time=forecast_period)
     max_ssh = max_ssh.where(max_ssh == max_ssh.max(), drop=True).squeeze()
-    residual = ssh_corrected - ttide_ds.pred_all.sel(time=model_ssh_period)
-    residual.attrs['tz_name'] = ssh_forecast.attrs['tz_name']
-    max_residual = residual.max()
+    # Residual differences between corrected model and observations and predicted tides
+    model_residual = ssh_corrected - ttide_ds.pred_all.sel(
+        time=model_ssh_period
+    )
+    model_residual.attrs['tz_name'] = ssh_forecast.attrs['tz_name']
+    max_model_residual = model_residual.max()
+    try:
+        obs_residual = obs - ttide_ds.pred_all.sel(time=obs_period) - msl
+        obs_residual.attrs['tz_name'] = obs.attrs['tz_name']
+    except KeyError:
+        # No observations available
+        obs_residual = None
+    # Wind at NEmo model time of max sea surface height
     wind_4h_avg = wind_tools.calc_wind_avg_at_point(
         arrow.get(str(max_ssh.time.values)),
         weather_path,
@@ -162,19 +208,22 @@ def _prep_plot_data(
         avg_hrs=-4
     )
     wind_4h_avg = wind_tools.wind_speed_dir(*wind_4h_avg)
+    # Model sea surface height field for contour map
     tracers_ds = xarray.open_dataset(grid_T_hr_path)
     max_ssh_time_utc = arrow.get(
         str(max_ssh.time.values)
     ).replace(tzinfo=ssh_forecast.attrs['tz_name']).to('utc')
     return SimpleNamespace(
         ssh_forecast=ssh_forecast,
+        obs=obs,
         ttide=ttide_ds,
         ssh_corrected=ssh_corrected,
         msl=msl,
         thresholds=thresholds,
         max_ssh=max_ssh,
-        residual=residual,
-        max_residual=max_residual,
+        model_residual=model_residual,
+        max_model_residual=max_model_residual,
+        obs_residual=obs_residual,
         wind_4h_avg=wind_4h_avg,
         bathy=bathy,
         max_ssh_field=tracers_ds.sossheig.sel(
@@ -250,8 +299,8 @@ def _plot_info_box(ax_info, place, plot_data, theme):
         SimpleNamespace(
             x=0.05,
             y=0.45,
-            words=
-            f'Residual: {numpy.asscalar(plot_data.max_residual.ssh):.2f} metres'
+            words=f'Residual: '
+            f'{numpy.asscalar(plot_data.max_model_residual.ssh):.2f} metres'
         ),
         SimpleNamespace(
             x=0.05,
@@ -286,24 +335,34 @@ def _info_box_hide_frame(ax_info, theme):
 
 
 def _plot_ssh_time_series(ax_ssh, place, plot_data, theme, ylims=(-1, 6)):
+    try:
+        plot_data.obs.water_level.plot(
+            ax=ax_ssh['chart_datum'],
+            linewidth=2,
+            label='Observed',
+            color=theme.COLOURS['time series']['tide gauge obs']
+        )
+    except AttributeError:
+        # No observations available
+        pass
     (plot_data.ttide.pred_all + plot_data.msl).plot(
         ax=ax_ssh['chart_datum'],
         linewidth=2,
         label='Tide Prediction',
         color=theme.COLOURS['time series']['tidal prediction vs model']
     )
-    (plot_data.ssh_corrected.ssh + plot_data.msl).plot(
-        ax=ax_ssh['chart_datum'],
-        linewidth=2,
-        linestyle='-',
-        label='Corrected Model',
-        color=theme.COLOURS['time series']['tide gauge ssh']
-    )
     (plot_data.ssh_forecast.ssh + plot_data.msl).plot(
         ax=ax_ssh['chart_datum'],
         linewidth=1,
         linestyle='--',
         label='Model',
+        color=theme.COLOURS['time series']['tide gauge ssh']
+    )
+    (plot_data.ssh_corrected.ssh + plot_data.msl).plot(
+        ax=ax_ssh['chart_datum'],
+        linewidth=2,
+        linestyle='-',
+        label='Corrected Model',
         color=theme.COLOURS['time series']['tide gauge ssh']
     )
     ax_ssh['chart_datum'].plot(
@@ -359,12 +418,22 @@ def _ssh_time_series_labels(ax_ssh, place, plot_data, ylims, theme):
 
 
 def _plot_residual_time_series(ax_res, plot_data, theme):
-    plot_data.residual.ssh.plot(
+    plot_data.model_residual.ssh.plot(
         ax=ax_res,
         linewidth=2,
-        label='Residual',
+        label='Model Residual',
         color=theme.COLOURS['time series']['ssh residual']
     )
+    try:
+        plot_data.obs_residual.water_level.plot(
+            ax=ax_res,
+            linewidth=2,
+            label='Observed Residual',
+            color=theme.COLOURS['time series']['obs residual']
+        )
+    except AttributeError:
+        # No observations available
+        pass
     ax_res.legend()
     _residual_time_series_labels(ax_res, plot_data, theme)
 
@@ -378,7 +447,7 @@ def _residual_time_series_labels(
 ):
     ax_res.set_title('')
     ax_res.set_xlabel(
-        f'Time [{plot_data.residual.attrs["tz_name"]}]',
+        f'Time [{plot_data.model_residual.attrs["tz_name"]}]',
         fontproperties=theme.FONTS['axis'],
         color=theme.COLOURS['text']['axis']
     )
