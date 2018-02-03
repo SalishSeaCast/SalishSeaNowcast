@@ -187,11 +187,8 @@ def _get_ssh_forecast(place, dataset_url_tmpl):
     ## TODO: This is a work-around because neither netCDF4 nor xarray are able
     ## to load the dataset directly from the URL due to an OpenDAP issue
     dataset_url = dataset_url_tmpl.format(place=place.replace(" ", ""))
-    dataset_file = Path(dataset_url.rsplit('/', 1)[1]).with_suffix('.nc')
-    ssh_file = (
-        Path('/tmp').joinpath(dataset_url.rsplit('/',
-                                                 1)[1]).with_suffix('.nc')
-    )
+    dataset_id = dataset_url.rsplit('/', 1)[1]
+    ssh_file = Path('/tmp').joinpath(dataset_id).with_suffix('.nc')
     with ssh_file.open('wb') as f:
         resp = requests.get(f'{dataset_url}.nc')
         f.write(resp.content)
