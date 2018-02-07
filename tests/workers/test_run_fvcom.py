@@ -328,7 +328,7 @@ class TestEditNamelists:
             call(
                 Path('run_prep_dir/namelist.netcdf'), {
                     'nml_netcdf': {
-                        'nc_first_out': '2018-01-15 00:00:00.00'
+                        'nc_first_out': '2018-01-15 01:00:00.00'
                     }
                 }
             ),
@@ -365,7 +365,7 @@ class TestEditNamelists:
             call(
                 Path('run_prep_dir/namelist.netcdf'), {
                     'nml_netcdf': {
-                        'nc_first_out': '2018-01-16 00:00:00.00'
+                        'nc_first_out': '2018-01-16 01:00:00.00'
                     }
                 }
             ),
