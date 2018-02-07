@@ -237,7 +237,7 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
         },
         run_prep_dir / 'namelist.netcdf': {
             'nml_netcdf': {
-                'nc_first_out': start_date.format('YYYY-MM-DD HH:mm:ss.00'),
+                'nc_first_out': start_date.format('YYYY-MM-DD 01:00:00.00'),
             }
         },
         run_prep_dir / 'namelist.restart': {
