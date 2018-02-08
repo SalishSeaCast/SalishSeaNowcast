@@ -700,6 +700,44 @@ def after_run_fvcom(msg, config, checklist):
     :returns: Worker(s) to launch next
     :rtype: list
     """
+    next_workers = {
+        'crash': [],
+        'failure nowcast': [],
+        'failure forecast': [],
+        'success nowcast': [],
+        'success forecast': [],
+    }
+    if msg.type.startswith('success'):
+        run_type = msg.type.split()[1]
+        host = msg.payload[run_type]['host']
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.watch_fvcom',
+                args=[host, run_type],
+                host=host
+            )
+        )
+    return next_workers[msg.type]
+
+
+def after_watch_fvcom(msg, config, checklist):
+    """Calculate the list of workers to launch after the after_watch_fvcom worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
     return []
 
 

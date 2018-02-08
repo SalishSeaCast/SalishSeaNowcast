@@ -1047,6 +1047,64 @@ class TestAfterMakeWW3WindFile:
         assert workers == []
 
 
+class TestAfterRunFVCOM:
+    """Unit tests for the after_run_fvcom function.
+    """
+
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure forecast',
+        ]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_run_fvcom(
+            Message('run_fvcom', msg_type), config, checklist
+        )
+        assert workers == []
+
+    @pytest.mark.parametrize(
+        'msg_type, host', [
+            ('success nowcast', 'west.cloud'),
+            ('success forecast', 'west.cloud'),
+        ]
+    )
+    def test_success_launch_watch_fvcom(
+        self, msg_type, host, config, checklist
+    ):
+        run_type = msg_type.split()[1]
+        workers = next_workers.after_run_fvcom(
+            Message('run_fvcom', msg_type, {
+                run_type: {
+                    'host': host
+                }
+            }), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.watch_fvcom', args=[host, run_type], host=host
+        )
+        assert workers[0] == expected
+
+
+class TestAfterWatchFVCOM:
+    """Unit tests for the after_watch_fvcom function.
+    """
+
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcacst',
+            'success forecast',
+        ]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_watch_fvcom(
+            Message('watch_fvcom', msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterMakeWW3currentFile:
     """Unit tests for the after_make_ww3_current_file function.
     """

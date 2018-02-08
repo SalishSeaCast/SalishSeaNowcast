@@ -167,6 +167,13 @@ Workers
     :members: main
 
 
+:kbd:`watch_fvcom`
+------------------
+
+.. automodule:: nowcast.workers.watch_fvcom
+    :members: main
+
+
 :kbd:`make_ww3_wind_file`
 -------------------------
 
