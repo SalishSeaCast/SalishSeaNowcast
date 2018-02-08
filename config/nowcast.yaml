@@ -823,6 +823,7 @@ zmq:
       watch_ww3: '206.12.48.112:5573'
       make_fvcom_boundary: '206.12.48.112:5580'
       run_fvcom: '206.12.48.112:5581'
+      watch_fvcom: '206.12.48.112:5582'
 
 
 message registry:
@@ -983,6 +984,13 @@ message registry:
       failure nowcast: nowcast FVCOM run failed
       failure forecast: forecast FVCOM run failed
       crash: run_fvcom worker crashed
+
+    watch_fvcom:
+      checklist key: FVCOM run
+      need: FVCOM run information dict requested
+      success nowcast: nowcast FVCOM run completed
+      failure nowcast: nowcast FVCOM run failed
+      watch_fvcom: watch_fvcom worker crashed
 
     make_ww3_wind_file:
       checklist key: WW3 wind forcing
