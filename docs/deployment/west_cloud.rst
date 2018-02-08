@@ -632,7 +632,7 @@ The Python packages that the system depends on are installed in a conda environm
     $ conda update conda
     $ conda create \
         --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
-        --channel gomss-nowcast --channel defaults --channel conda-forge \
+        --channel gomss-nowcast --channel conda-forge --channel defaults \
         arrow attrs basemap beautifulsoup4 bottleneck circus cliff dask docutils \
         hdf4=4.2.12 lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
         pillow pip python=3 pyyaml pyzmq requests schedule scipy xarray
