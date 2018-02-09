@@ -990,7 +990,7 @@ message registry:
       need: FVCOM run information dict requested
       success nowcast: nowcast FVCOM run completed
       failure nowcast: nowcast FVCOM run failed
-      watch_fvcom: watch_fvcom worker crashed
+      crash: watch_fvcom worker crashed
 
     make_ww3_wind_file:
       checklist key: WW3 wind forcing
