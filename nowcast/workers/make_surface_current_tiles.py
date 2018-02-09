@@ -30,7 +30,7 @@ def main():
 
     For command-line usage see:
 
-    :command:`python -m nowcast.workers.run_fvcom --help`
+    :command:`python -m nowcast.workers.make_surface_current_tiles --help`
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
