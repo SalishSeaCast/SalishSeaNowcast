@@ -102,7 +102,7 @@ def watch_fvcom(parsed_args, config, tell_manager):
     """
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
-    run_info = tell_manager('need', 'WW3 run').payload
+    run_info = tell_manager('need', 'FVCOM run').payload
     pid = _find_run_pid(run_info[run_type])
     logger.debug(f'{run_type} on {host_name}: run pid: {pid}')
     run_dir = Path(run_info[run_type]['run dir'])
