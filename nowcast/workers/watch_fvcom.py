@@ -113,15 +113,16 @@ def watch_fvcom(parsed_args, config, tell_manager):
                 lines = f.readlines()
             lines.reverse()
             for line in lines:
-                if line.startswith(' !') and line.endswith('|'):
+                if line.strip().startswith('!') and line.strip().endswith('|'):
                     _, time_step, model_time, time_to_finish, _ = (
                         line.split(maxsplit=4)
                     )
                     msg = (
                         f'{run_type} on {host_name}: timestep: '
-                        f'{time_step} = {model_time[:-7].replace("T", " ")} UTC'
-                        f'estimated time to finish: {time_to_finish}'
+                        f'{time_step} = {model_time[:-7].replace("T", " ")} '
+                        f'UTC estimated time to finish: {time_to_finish}'
                     )
+                    break
         except FileNotFoundError:
             # fvcom.log file not found; assume that run is young and it
             # hasn't been created yet, or has finished and it has been
