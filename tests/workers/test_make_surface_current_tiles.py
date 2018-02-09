@@ -18,7 +18,6 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import nemo_nowcast
-import pytest
 
 from nowcast.workers import make_surface_current_tiles
 
