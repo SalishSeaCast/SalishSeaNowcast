@@ -167,7 +167,11 @@ observations:
         ONC station description: Mobile Platforms, British Columbia Ferries, Tsawwassen - Duke Point
         location:
           # ONC scalardata.getByStation API query parameters:
-          station: TWDP.N2
+          #
+          # ONC station identifiers to use for nav data, in priority order
+          stations:
+            - TWDP.N1
+            - TWDP.N2
           device category: NAV
           sensors:
             - longitude
