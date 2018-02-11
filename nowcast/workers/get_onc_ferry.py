@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 
-#    http://www.apache.org/licenses/LICENSE-2.0
+#    https://www.apache.org/licenses/LICENSE-2.0
 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ The data are stored as a netCDF-4/HDF5 file that is accessible via
 https://salishsea.eos.ubc.ca/erddap/tabledap/.
 
 Development notebook:
-http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/tip/notebooks/ONC-Ferry-DataToERDDAP.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/tip/notebooks/ONC-Ferry-DataToERDDAP.ipynb
 """
 from contextlib import suppress
 import logging
@@ -216,18 +216,14 @@ def _get_nav_data(ferry_platform, ymd, location_config):
 
 
 def _calc_location_arrays(nav_data, location_config):
-    lons = (
-        nav_data.longitude.resample('1Min', 'sampleTime', how='mean').rename({
-            'sampleTime': 'time'
-        })
-    )
+    lons = ((nav_data.longitude.resample(sampleTime='1Min').mean()).rename({
+        'sampleTime': 'time'
+    }))
     lons.attrs['units'] = 'degree_east'
     lons.attrs['station'] = nav_data.attrs['station']
-    lats = (
-        nav_data.latitude.resample('1Min', 'sampleTime', how='mean').rename({
-            'sampleTime': 'time'
-        })
-    )
+    lats = ((nav_data.latitude.resample(sampleTime='1Min').mean()).rename({
+        'sampleTime': 'time'
+    }))
     lats.attrs['units'] = 'degree_north'
     lats.attrs['station'] = nav_data.attrs['station']
     terminals = [
@@ -446,7 +442,7 @@ def _create_dataset(
             )
         else:
             try:
-                data_array = array.resample('1Min', 'time', how='mean')
+                data_array = array.resample(time='1Min').mean()
             except IndexError:
                 # array is empty, meaning there are no observations with
                 # qaqcFlag!=1, so substitute a DataArray full of NaNs
@@ -470,19 +466,19 @@ def _create_dataset(
                     dims='time',
                     attrs=array.attrs,
                 )
-                data_array = array.resample('1Min', 'time', how='mean')
+                data_array = array.resample(time='1Min').mean()
             data_array.attrs = array.attrs
             data_vars[var] = _create_dataarray(
                 var, data_array, ferry_platform, location_config
             )
             std_dev_var = f'{var}_std_dev'
-            std_dev_array = array.resample('1Min', 'time', how='std')
+            std_dev_array = array.resample(time='1Min').std()
             std_dev_array.attrs = array.attrs
             data_vars[std_dev_var] = _create_dataarray(
                 std_dev_var, std_dev_array, ferry_platform, location_config
             )
             sample_count_var = f'{var}_sample_count'
-            sample_count_array = array.resample('1Min', 'time', how=count)
+            sample_count_array = array.resample(time='1Min').count()
             sample_count_array.attrs = array.attrs
             del sample_count_array.attrs['units']
             data_vars[sample_count_var] = _create_dataarray(
