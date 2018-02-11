@@ -163,9 +163,7 @@ def get_onc_ferry(parsed_args, config, *args):
 def _get_nav_data(ferry_platform, ymd, location_config):
     station = location_config['station']
     device_category = location_config['device category']
-    sensors = '' if station.endswith('N2') else ','.join(
-        location_config['sensors']
-    )
+    sensors = ','.join(location_config['sensors'])
     logger.info(
         f'requesting ONC {station} {device_category} data for {ymd}',
         extra={
