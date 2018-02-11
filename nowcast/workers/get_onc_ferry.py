@@ -161,48 +161,54 @@ def get_onc_ferry(parsed_args, config, *args):
 
 
 def _get_nav_data(ferry_platform, ymd, location_config):
-    station = location_config['station']
-    device_category = location_config['device category']
-    sensors = ','.join(location_config['sensors'])
-    logger.info(
-        f'requesting ONC {station} {device_category} data for {ymd}',
-        extra={
-            'data_date': ymd,
-            'ferry_platform': ferry_platform,
-            'device_category': device_category,
-        }
-    )
-    try:
-        onc_data = data_tools.get_onc_data(
-            'scalardata',
-            'getByStation',
-            os.environ['ONC_USER_TOKEN'],
-            station=station,
-            deviceCategory=device_category,
-            sensors=sensors,
-            dateFrom=(data_tools.onc_datetime(f'{ymd} 00:00', 'utc')),
-        )
-    except requests.HTTPError as e:
-        msg = (
-            f'request for ONC {station} {device_category} data for {ymd} '
-            f'failed: {e}'
-        )
-        logger.error(
-            msg,
+    for station in location_config['stations']:
+        device_category = location_config['device category']
+        sensors = ','.join(location_config['sensors'])
+        logger.info(
+            f'requesting ONC {station} {device_category} data for {ymd}',
             extra={
                 'data_date': ymd,
                 'ferry_platform': ferry_platform,
                 'device_category': device_category,
-                'sensors': sensors,
             }
         )
-        raise WorkerError(msg)
-    nav_data = data_tools.onc_json_to_dataset(onc_data)
+        try:
+            onc_data = data_tools.get_onc_data(
+                'scalardata',
+                'getByStation',
+                os.environ['ONC_USER_TOKEN'],
+                station=station,
+                deviceCategory=device_category,
+                sensors=sensors,
+                dateFrom=(data_tools.onc_datetime(f'{ymd} 00:00', 'utc')),
+            )
+        except requests.HTTPError as e:
+            msg = (
+                f'request for ONC {station} {device_category} data for {ymd} '
+                f'failed: {e}'
+            )
+            logger.error(
+                msg,
+                extra={
+                    'data_date': ymd,
+                    'ferry_platform': ferry_platform,
+                    'station': station,
+                    'device_category': device_category,
+                    'sensors': sensors,
+                }
+            )
+            raise WorkerError(msg)
+        try:
+            nav_data = data_tools.onc_json_to_dataset(onc_data)
+        except TypeError:
+            # Invalid data from NAV device, so try the next one
+            continue
     logger.debug(
         f'ONC {station} {device_category} data for {ymd} received and parsed',
         extra={
             'data_date': ymd,
             'ferry_platform': ferry_platform,
+            'station': station,
             'device_category': device_category,
         }
     )
@@ -216,12 +222,14 @@ def _calc_location_arrays(nav_data, location_config):
         })
     )
     lons.attrs['units'] = 'degree_east'
+    lons.attrs['station'] = nav_data.attrs['station']
     lats = (
         nav_data.latitude.resample('1Min', 'sampleTime', how='mean').rename({
             'sampleTime': 'time'
         })
     )
     lats.attrs['units'] = 'degree_north'
+    lats.attrs['station'] = nav_data.attrs['station']
     terminals = [
         SimpleNamespace(
             lon=PLACES[terminal]['lon lat'][0],
@@ -513,8 +521,7 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             'long name': 'Longitude',
             'ONC_data_product_url':
                 f'http://dmas.uvic.ca/DataSearch'
-                f'?location={location_config["station"]}'
-                f'&deviceCategory={location_config["device category"]}'
+                f'?deviceCategory={location_config["device category"]}'
         },
         'latitude': {
             'name': 'latitude',
@@ -523,8 +530,7 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             'long name': 'Latitude',
             'ONC_data_product_url':
                 f'http://dmas.uvic.ca/DataSearch'
-                f'?location={location_config["station"]}'
-                f'&deviceCategory={location_config["device category"]}'
+                f'?deviceCategory={location_config["device category"]}'
         },
         'on_crossing_mask': {
             'name':
@@ -968,14 +974,14 @@ def _create_dataarray(var, array, ferry_platform, location_config):
     location_vars = {
         'longitude', 'latitude', 'on_crossing_mask', 'crossing_number'
     }
-    if var in location_vars:
-        dataset_array.attrs['ONC_stationCode'
-                            ] = f'{location_config["station"]}'
-    else:
-        dataset_array.attrs['ONC_stationCode'] = f'{ferry_platform}'
+    dataset_array.attrs['ONC_stationCode'] = f'{ferry_platform}'
     try:
         dataset_array.attrs['ONC_data_product_url'
                             ] = metadata[var]['ONC_data_product_url']
+        if var in ('longitude', 'latitude'):
+            dataset_array.attrs['ONC_stationCode'] = array.attrs['station']
+            dataset_array.attrs['ONC_data_product_url'
+                                ] += (f'&location={array.attrs["station"]}')
     except KeyError:
         dataset_array.attrs['ONC_data_product_url'] = (
             f'http://dmas.uvic.ca/DataSearch?location={ferry_platform}'
