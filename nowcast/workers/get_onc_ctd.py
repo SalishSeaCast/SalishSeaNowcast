@@ -223,20 +223,18 @@ def _create_dataset(onc_station, temperature, salinity):
         },
     }
     try:
-        temperature_mean = temperature.resample('15Min', 'time', how='mean')
-        temperature_std_dev = temperature.resample('15Min', 'time', how='std')
-        temperature_sample_count = temperature.resample(
-            '15Min', 'time', how=count
-        )
+        temperature_mean = temperature.resample(time='15Min').mean()
+        temperature_std_dev = temperature.resample(time='15Min').std()
+        temperature_sample_count = temperature.resample(time='15Min').count()
     except IndexError:
         # If the temperature data is messing no dataset can be created
         raise WorkerError(
             f'no {onc_station} temperate data; no dataset created'
         )
     try:
-        salinity_mean = salinity.resample('15Min', 'time', how='mean')
-        salinity_std_dev = salinity.resample('15Min', 'time', how='std')
-        salinity_sample_count = salinity.resample('15Min', 'time', how=count)
+        salinity_mean = salinity.resample(time='15Min').mean()
+        salinity_std_dev = salinity.resample(time='15Min').std()
+        salinity_sample_count = salinity.resample(time='15Min').count()
     except IndexError:
         logger.warning(f'no {onc_station} salinity data')
         salinity_mean = temperature_mean.copy()
