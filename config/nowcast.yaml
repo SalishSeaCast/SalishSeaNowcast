@@ -523,6 +523,14 @@ run:
         no_snow.nc: /results/nowcast-sys/grid/no_snow.nc
         weights: /results/nowcast-sys/grid/weights-gem2.5-ops_201702.nc
 
+
+    cedar-hindcast:
+      # Comma separated list of compute host user ids to use in queue and accounting queries
+      users: allen,dlatorne
+      # Directory on compute host where temporary run directories and run results are stored
+      scratch dir: /scratch/dlatorne/hindcast
+
+
 #    orcinus-nowcast:
 #      shared storage: False
 #      ssh key: SalishSeaNEMO-nowcast_id_rsa
@@ -966,6 +974,12 @@ message registry:
       success forecast2: forecast2 NEMO run ended
       failure forecast2: forecast2 watch_NEMO failed
       crash: watch_NEMO worker crashed
+
+    watch_NEMO_hindcast:
+      checklist key: NEMO run
+      success: NEMO hindcast run ended
+      failure: watch_NEMO_hindcast failed
+      crash: watch_NEMO_hindcast worker crashed
 
     make_turbidity_file:
       checklist key: Fraser River turbidity
