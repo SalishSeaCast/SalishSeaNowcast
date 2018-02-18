@@ -1007,6 +1007,22 @@ class TestAfterMakeFVCOMBoundary:
         assert workers[0] == expected
 
 
+class TestAfterWatchNEMO_Hindcast:
+    """Unit tests for the after_watch_NEMO_hindcast function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_watch_NEMO_hindcast(
+            Message('watch_NEMO_hindcast', msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterRunFVCOM:
     """Unit tests for the after_run_fvcom function.
     """
