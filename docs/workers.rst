@@ -146,6 +146,13 @@ Workers
     :members: main
 
 
+:kbd:`watch_NEMO_hindcast`
+--------------------------
+
+.. automodule:: nowcast.workers.watch_NEMO_hindcast
+    :members: main
+
+
 :kbd:`make_turbidity_file`
 --------------------------
 
