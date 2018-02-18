@@ -61,7 +61,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def make_surface_current_tiles(parsed_args, config, *args):
+def make_surface_current_tiles(parsed_args, checklist, *args):
     """
     :param :py:class:`argparse.Namespace` parsed_args:
     :param :py:class:`nemo_nowcast.Config` config:
@@ -69,8 +69,8 @@ def make_surface_current_tiles(parsed_args, config, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
-    config = {}
-    return config
+    checklist = {}
+    return checklist
 
 
 if __name__ == '__main__':
