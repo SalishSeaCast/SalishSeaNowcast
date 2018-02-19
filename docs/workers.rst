@@ -230,6 +230,13 @@ Workers
     :members: main
 
 
+:kbd:`download_fvcom_results`
+-----------------------------
+
+.. automodule:: nowcast.workers.download_fvcom_results
+    :members: main
+
+
 :kbd:`get_onc_ctd`
 ------------------
 

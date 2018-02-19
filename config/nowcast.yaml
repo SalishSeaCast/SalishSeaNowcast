@@ -711,6 +711,10 @@ vhfr fvcom runs:
     forecast:
       results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
       nemo boundary results: /nemoShare/MEOPAR/SalishSea/forecast/
+  # Directories on results server where run results are stored
+  # in ddmmmyy/ directories; keyed by run type
+  results archive:
+    nowcast: /opp/fvcom/nowcast/
 
 
 # Distributed logging system configuration
@@ -1064,6 +1068,12 @@ message registry:
       success forecast2: WW3 forecast2 results files downloaded
       failure forecast2: WW3 forecast2 results files download failed
       crash: download_wwatch3_results worker crashed
+
+    download_fvcom_results:
+      checklist key: VHFR FVCOM results files
+      success nowcast: VHFR FVCOM nowcast results files downloaded
+      failure nowcast: VHFR FVCOM nowcast results files download failed
+      crash: download_fvcom_results worker crashed
 
     split_results:
       checklist key: results splitting

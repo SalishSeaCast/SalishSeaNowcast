@@ -1107,18 +1107,44 @@ class TestAfterWatchFVCOM:
     """Unit tests for the after_watch_fvcom function.
     """
 
-    @pytest.mark.parametrize(
-        'msg_type', [
-            'crash',
-            'failure nowcacst',
-            'success forecast',
-        ]
-    )
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+    ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_fvcom(
             Message('watch_fvcom', msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_fvcom', 'success nowcast', {
+                    'nowcast': {
+                        'host': 'west.cloud',
+                        'run date': '2018-02-16',
+                        'completed': True
+                    }
+                }
+            )
+        ]
+    )
+    def test_success_launch_download_fvcom_results(
+        self, msg, config, checklist
+    ):
+        workers = next_workers.after_watch_fvcom(msg, config, checklist)
+        run_type = msg.type.split()[1]
+        expected = NextWorker(
+            'nowcast.workers.download_fvcom_results',
+            args=[
+                msg.payload[run_type]['host'],
+                msg.type.split()[1], '--run-date',
+                msg.payload[run_type]['run date']
+            ],
+            host='localhost'
+        )
+        assert expected in workers
 
 
 class TestAfterMakeWW3currentFile:
@@ -1414,6 +1440,34 @@ class TestAfterDownloadWWatch3Results:
             workers = next_workers.after_download_wwatch3_results(
                 Message('download_wwatch3_results', msg_type), config,
                 checklist
+            )
+        assert workers == []
+
+
+class TestAfterDownloadFVCOMResults:
+    """Unit tests for the after_download_fvcom_results function.
+    """
+
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'success nowcast',
+        ]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        p_checklist = patch.dict(
+            checklist, {
+                'WW3 run': {
+                    'forecast': {
+                        'run date': '2017-12-24'
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_download_fvcom_results(
+                Message('download_fvcom_results', msg_type), config, checklist
             )
         assert workers == []
 
