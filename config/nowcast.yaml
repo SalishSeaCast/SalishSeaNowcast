@@ -794,6 +794,9 @@ logging:
         formatter: simple
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
         backupCount: 7
+      zeep:
+        qualname: zeep
+        level: WARNING
     loggers:
       wgrib2:
         qualname: wgrib2
