@@ -12,7 +12,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""SalishSeaCast worker that 
+"""SalishSeaCast worker that monitors and reports on the progress of a
+NEMO hindcast run on an HPC cluster that uses the SLURM scheduler.
 """
 import logging
 from pathlib import Path
@@ -107,6 +108,7 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
         'hindcast': {
             'host': host_name,
             'run id': run_id,
+            'run date': arrow.get(run_id[:7], 'DDMMMYY').format('YYYY-MM-DD'),
             'completed': True,
         }
     }
@@ -262,8 +264,8 @@ def _is_completed(host_name, users, job_id, run_id):
 
 def _get_queue_info(host_name, users, job_id=None):
     """
-    :param users:
     :param str host_name:
+    :param users:
     :param int job_id:
 
     :return: None or 1 line of output from slurm squeue command that describes
@@ -286,7 +288,7 @@ def _get_queue_info(host_name, users, job_id=None):
     )
     if len(proc.stdout.splitlines()) == 1:
         if job_id is None:
-            logger.error(f'no hindcast jobs found on {host_name} queue')
+            logger.error(f'no jobs found on {host_name} queue')
             raise WorkerError
         else:
             # Various callers handle job id not on queue in difference ways
