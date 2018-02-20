@@ -91,9 +91,9 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     :rtype: dict
     """
     host_name = parsed_args.host_name
-    users = config['run']['enabled hosts'][host_name]['users']
+    users = config['run']['hindcast hosts'][host_name]['users']
     scratch_dir = Path(
-        config['run']['enabled hosts'][host_name]['scratch dir']
+        config['run']['hindcast hosts'][host_name]['scratch dir']
     )
     job_id, run_id = _get_run_id(host_name, users)
     while _is_queued(host_name, users, job_id, run_id):

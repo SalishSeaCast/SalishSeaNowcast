@@ -399,7 +399,7 @@ storm surge feeds:
 
 run:
   enabled hosts:
-    # Compute host name where runs are executed under automation
+    # Compute host name where daily runs are executed under automation
     west.cloud-nowcast:
       # Does the host share storage with the machine where the nowcast manager
       # is running?
@@ -524,6 +524,8 @@ run:
         weights: /results/nowcast-sys/grid/weights-gem2.5-ops_201702.nc
 
 
+  hindcast hosts:
+    # HPC compute host name where hindcast runs are executed under automation
     cedar-hindcast:
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: allen,dlatorne
