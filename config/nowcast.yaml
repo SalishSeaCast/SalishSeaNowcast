@@ -531,6 +531,8 @@ run:
       users: allen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
       scratch dir: /scratch/dlatorne/hindcast
+      run prep dir: /home/dlatorne/project/SalishSea/hindcast-sys/runs
+      salishsea cmd: /home/dlatorne/project/SalishSea/hindcast-sys/hincast-env/bin/salishsea
 
 
 #    orcinus-nowcast:
@@ -990,6 +992,12 @@ message registry:
       success: NEMO hindcast run ended
       failure: watch_NEMO_hindcast failed
       crash: watch_NEMO_hindcast worker crashed
+
+    run_NEMO_hindcast:
+      checklist key: NEMO run
+      success: NEMO hindcast run queued
+      failure: NEMO hindcast run queue submission failed
+      crash: run_NEMO_hindcast worker crashed
 
     make_turbidity_file:
       checklist key: Fraser River turbidity

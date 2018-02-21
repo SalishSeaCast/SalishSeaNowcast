@@ -137,6 +137,13 @@ Workers
     :members: main
 
 
+:kbd:`run_NEMO_hindcast`
+------------------------
+
+.. automodule:: nowcast.workers.run_NEMO_hindcast
+    :members: main
+
+
 .. _WatchNEMO-Worker:
 
 :kbd:`watch_NEMO`
