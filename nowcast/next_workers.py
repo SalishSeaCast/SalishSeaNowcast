@@ -667,7 +667,33 @@ def after_watch_NEMO_hindcast(msg, config, checklist):
         'failure': [],
         'success': [],
     }
-    return []
+    return next_workers[msg.type]
+
+
+def after_run_NEMO_hindcast(msg, config, checklist):
+    """Calculate the list of workers to launch after the run_NEMO_hindcast
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure': [],
+        'success': [],
+    }
+    return next_workers[msg.type]
 
 
 def after_make_fvcom_boundary(msg, config, checklist):

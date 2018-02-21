@@ -1023,6 +1023,22 @@ class TestAfterWatchNEMO_Hindcast:
         assert workers == []
 
 
+class TestAfterRunNEMO_Hindcast:
+    """Unit tests for the after_run_NEMO_hindcast function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_run_NEMO_hindcast(
+            Message('run_NEMO_hindcast', msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterRunFVCOM:
     """Unit tests for the after_run_fvcom function.
     """
