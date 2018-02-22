@@ -339,6 +339,21 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
     :members:
 
 
+.. _nowcast.figures.fvcom:
+
+:py:obj:`nowcast.figures.fvcom`  Figure Modules
+-----------------------------------------------
+
+.. _nowcast.figures.fvcom.tide_stn_water_level:
+
+:py:mod:`nowcast.figures.fvcom.tide_stn_water_level` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.fvcom.tide_stn_water_level
+    :members:
+
+
+
 .. _nowcast.figures.comparison:
 
 :py:obj:`nowcast.figures.comparison`  Figure Modules
@@ -360,6 +375,7 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 
 .. automodule:: nowcast.figures.comparison.salinity_ferry_track
     :members:
+
 
 
 .. _nowcast.figures.publish:
@@ -401,6 +417,7 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 
 .. automodule:: nowcast.figures.publish.storm_surge_alerts_thumbnail
     :members:
+
 
 
 .. _nowcast.figures.research:
