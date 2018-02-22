@@ -24,7 +24,6 @@ dependencies:
   - bottleneck
   - dask
   - docutils
-  - hdf4
   - lxml
   - mako
   - matplotlib=1.5.3
