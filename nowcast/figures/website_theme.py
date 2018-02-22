@@ -91,6 +91,7 @@ COLOURS = {
         'VENUS node model temperature': 'blue',
         'VENUS node dev model temperature': 'magenta',
         'VENUS CTD temperature': 'green',
+        'vhfr fvcom ssh': 'magenta',
     },
     'wind arrow': {
         'facecolor': 'DarkMagenta',
