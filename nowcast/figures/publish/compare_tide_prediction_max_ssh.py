@@ -15,7 +15,7 @@
 """Produce a figure that shows a map of the Salish Sea with coloured contours
 showing the sea surface height when it is at its maximum at a specified tide
 gauge station.
-The figure also shows 24 hour time series graphs of:
+The figure also shows ~7.5 day long time series graphs of:
 
 * Raw and corrected model water levels compared to the
   tidal prediction for the gauge location
