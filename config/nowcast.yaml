@@ -1127,18 +1127,18 @@ message registry:
 
     make_plots:
       checklist key: plots
-      success nowcast publish: nowcast publish plots produced
-      success nowcast research: nowcast reseach plots produced
-      success nowcast comparison: nowcast comparison plots produced
-      failure nowcast publish: nowcast publish plots failed
-      failure nowcast research: nowcast research plots failed
-      failure nowcast comparison: nowcast comparison plots failed
-      success nowcast-green research: nowcast-green reseach plots produced
-      failure nowcast-green research: nowcast-green research plots failed
-      success forecast publish: forecast publish plots produced
-      failure forecast publish: forecast publish plots failed
-      success forecast2 publish: forecast2 publish plots produced
-      failure forecast2 publish: forecast2 publish plots failed
+      success nemo nowcast publish: nemo nowcast publish plots produced
+      success nemo nowcast research: nemo nowcast reseach plots produced
+      success nemo nowcast comparison: nemo nowcast comparison plots produced
+      failure nemo nowcast publish: nemo nowcast publish plots failed
+      failure nemo nowcast research: nemo nowcast research plots failed
+      failure nemo nowcast comparison: nemo nowcast comparison plots failed
+      success nemo nowcast-green research: nemo nowcast-green reseach plots produced
+      failure nemo nowcast-green research: nemo nowcast-green research plots failed
+      success nemo forecast publish: nemo forecast publish plots produced
+      failure nemo forecast publish: nemo forecast publish plots failed
+      success nemo forecast2 publish: nemo forecast2 publish plots produced
+      failure nemo forecast2 publish: nemo forecast2 publish plots failed
       crash: make_plots worker crashed
 
     make_surface_current_tiles:

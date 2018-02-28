@@ -70,6 +70,11 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
+        'model',
+        choices={'nemo'},
+        help='Model to produce plots for.',
+    )
+    worker.cli.add_argument(
         'run_type',
         choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
         help='''
@@ -116,77 +121,92 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        f'{parsed_args.plot_type} plots for '
+        f'{parsed_args.model} {parsed_args.plot_type} plots for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f'{parsed_args.run_type} completed',
         extra={
+            'model': parsed_args.model,
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         }
     )
-    msg_type = f'success {parsed_args.run_type} {parsed_args.plot_type}'
+    msg_type = (
+        f'success {parsed_args.model} {parsed_args.run_type} '
+        f'{parsed_args.plot_type}'
+    )
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        f'{parsed_args.plot_type} plots failed for '
+        f'{parsed_args.model} {parsed_args.plot_type} plots failed for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} {parsed_args.run_type} '
         f'failed',
         extra={
+            'model': parsed_args.model,
             'run_type': parsed_args.run_type,
             'plot_type': parsed_args.plot_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         }
     )
-    msg_type = f'failure {parsed_args.run_type} {parsed_args.plot_type}'
+    msg_type = (
+        f'failure {parsed_args.model} {parsed_args.run_type} '
+        f'{parsed_args.plot_type}'
+    )
     return msg_type
 
 
 def make_plots(parsed_args, config, *args):
+    model = parsed_args.model
     run_date = parsed_args.run_date
     dmy = run_date.format('DDMMMYY').lower()
     timezone = config['figures']['timezone']
     run_type = parsed_args.run_type
     plot_type = parsed_args.plot_type
     test_figure_id = parsed_args.test_figure
-    dev_results_home = Path(config['results archive']['nowcast-dev'])
-    weather_path = Path(config['weather']['ops dir'])
-    if run_type in ['forecast', 'forecast2']:
-        weather_path = weather_path / 'fcst'
-    results_dir = Path(config['results archive'][run_type], dmy)
-    grid_dir = Path(config['figures']['grid dir'])
-    bathy = nc.Dataset(grid_dir / config['run types'][run_type]['bathymetry'])
-    mesh_mask = nc.Dataset(
-        grid_dir / config['run types'][run_type]['mesh mask']
-    )
-    dev_mesh_mask = nc.Dataset(
-        grid_dir / config['run types']['nowcast-dev']['mesh mask']
-    )
-    coastline = sio.loadmat(config['figures']['coastline'])
 
-    if run_type == 'nowcast' and plot_type == 'research':
-        fig_functions = _prep_nowcast_research_fig_functions(
-            bathy, mesh_mask, results_dir, run_date
+    fig_functions = {}
+    if model == 'nemo':
+        dev_results_home = Path(config['results archive']['nowcast-dev'])
+        weather_path = Path(config['weather']['ops dir'])
+        if run_type in ['forecast', 'forecast2']:
+            weather_path = weather_path / 'fcst'
+        results_dir = Path(config['results archive'][run_type], dmy)
+        grid_dir = Path(config['figures']['grid dir'])
+        bathy = nc.Dataset(
+            grid_dir / config['run types'][run_type]['bathymetry']
         )
-    if run_type == 'nowcast-green' and plot_type == 'research':
-        fig_functions = _prep_nowcast_green_research_fig_functions(
-            bathy, mesh_mask, results_dir, run_date
+        mesh_mask = nc.Dataset(
+            grid_dir / config['run types'][run_type]['mesh mask']
         )
-    if run_type == 'nowcast' and plot_type == 'comparison':
-        fig_functions = _prep_comparison_fig_functions(
-            config, bathy, coastline, mesh_mask, dev_mesh_mask, results_dir,
-            run_type, run_date, dev_results_home, dmy, timezone
+        dev_mesh_mask = nc.Dataset(
+            grid_dir / config['run types']['nowcast-dev']['mesh mask']
         )
-    if run_type.startswith('forecast') and plot_type == 'publish':
-        fig_functions = _prep_publish_fig_functions(
-            config, bathy, coastline, weather_path, results_dir, run_type,
-            run_date, timezone
-        )
+        coastline = sio.loadmat(config['figures']['coastline'])
+
+        if run_type == 'nowcast' and plot_type == 'research':
+            fig_functions = _prep_nowcast_research_fig_functions(
+                bathy, mesh_mask, results_dir, run_date
+            )
+        if run_type == 'nowcast-green' and plot_type == 'research':
+            fig_functions = _prep_nowcast_green_research_fig_functions(
+                bathy, mesh_mask, results_dir, run_date
+            )
+        if run_type == 'nowcast' and plot_type == 'comparison':
+            fig_functions = _prep_comparison_fig_functions(
+                config, bathy, coastline, mesh_mask, dev_mesh_mask,
+                results_dir, run_type, run_date, dev_results_home, dmy,
+                timezone
+            )
+        if run_type.startswith('forecast') and plot_type == 'publish':
+            fig_functions = _prep_publish_fig_functions(
+                config, bathy, coastline, weather_path, results_dir, run_type,
+                run_date, timezone
+            )
 
     checklist = _render_figures(
-        config, run_type, plot_type, dmy, fig_functions, test_figure_id
+        config, model, run_type, plot_type, dmy, fig_functions, test_figure_id
     )
     return checklist
 
@@ -628,7 +648,7 @@ def _prep_publish_fig_functions(
 
 
 def _render_figures(
-    config, run_type, plot_type, dmy, fig_functions, test_figure_id
+    config, model, run_type, plot_type, dmy, fig_functions, test_figure_id
 ):
     checklist = {}
     fig_files = []
@@ -707,7 +727,7 @@ def _render_figures(
         )
         if checklist is not None:
             checklist['storm surge alerts thumbnail'] = fig_path
-    checklist[f'{run_type} {plot_type}'] = fig_files
+    checklist[f'{model} {run_type} {plot_type}'] = fig_files
     return checklist
 
 

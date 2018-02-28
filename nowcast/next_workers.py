@@ -982,7 +982,9 @@ def after_download_results(msg, config, checklist):
             next_workers[msg.type].append(
                 NextWorker(
                     'nowcast.workers.make_plots',
-                    args=[run_type, 'research', '--run-date', run_date]
+                    args=[
+                        'nemo', run_type, 'research', '--run-date', run_date
+                    ]
                 )
             )
             if run_type == 'nowcast':
@@ -992,7 +994,10 @@ def after_download_results(msg, config, checklist):
                 next_workers[msg.type].append(
                     NextWorker(
                         'nowcast.workers.make_plots',
-                        args=[run_type, 'comparison', '--run-date', run_date]
+                        args=[
+                            'nemo', run_type, 'comparison', '--run-date',
+                            run_date
+                        ]
                     )
                 )
             if run_type == 'nowcast-green':
@@ -1119,7 +1124,7 @@ def after_update_forecast_datasets(msg, config, checklist):
             NextWorker('nowcast.workers.ping_erddap', args=['nemo-forecast']),
             NextWorker(
                 'nowcast.workers.make_plots',
-                args=[run_type, 'publish', '--run-date', run_date]
+                args=['nemo', run_type, 'publish', '--run-date', run_date]
             ),
         ])
     return next_workers[msg.type]
@@ -1166,21 +1171,21 @@ def after_make_plots(msg, config, checklist):
     """
     next_workers = {
         'crash': [],
-        'failure nowcast research': [],
-        'failure nowcast comparison': [],
-        'failure nowcast publish': [],
-        'failure nowcast-green research': [],
-        'failure forecast publish': [],
-        'failure forecast2 publish': [],
-        'success nowcast research': [],
-        'success nowcast comparison': [],
-        'success nowcast publish': [],
-        'success nowcast-green research': [],
-        'success forecast publish': [],
-        'success forecast2 publish': [],
+        'failure nemo nowcast research': [],
+        'failure nemo nowcast comparison': [],
+        'failure nemo nowcast publish': [],
+        'failure nemo nowcast-green research': [],
+        'failure nemo forecast publish': [],
+        'failure nemo forecast2 publish': [],
+        'success nemo nowcast research': [],
+        'success nemo nowcast comparison': [],
+        'success nemo nowcast publish': [],
+        'success nemo nowcast-green research': [],
+        'success nemo forecast publish': [],
+        'success nemo forecast2 publish': [],
     }
-    if msg.type.startswith('success') and 'forecast' in msg.type:
-        _, run_type, _ = msg.type.split()
+    if msg.type.startswith('success nemo') and 'forecast' in msg.type:
+        _, _, run_type, _ = msg.type.split()
         next_workers[msg.type].append(
             NextWorker(
                 'nowcast.workers.make_feeds',
