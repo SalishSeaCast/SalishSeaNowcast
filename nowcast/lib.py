@@ -118,7 +118,7 @@ def fix_perms(
     probably correct already.
 
     :arg path: Path to fix the permissions of.
-    :type path: str
+    :type path: :py:class:`pathlib.Path` or str
 
     :arg mode: Permissions to set for the path.
     :type mode: :py:class:`nemo_nowcast.fileutils.FilePerms` or int
