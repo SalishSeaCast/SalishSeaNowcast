@@ -70,6 +70,7 @@ install_requires = [
     'retrying',
     'scipy',
     'scour',
+    'shapely',
     'utm',
     'xarray',
     'zeep',

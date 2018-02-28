@@ -67,8 +67,6 @@ autodoc_mock_imports = [
     'netCDF4',
     'pandas',
     'paramiko',
-    'scipy.interpolate',
-    'scipy.io',
     'salishsea_cmd',
     'salishsea_cmd.api',
     'salishsea_cmd.lib',
@@ -78,6 +76,9 @@ autodoc_mock_imports = [
     'salishsea_tools.places',
     'salishsea_tools.UBC_subdomain',
     'salishsea_tools.unit_conversions',
+    'scipy.interpolate',
+    'scipy.io',
+    'shapely',
     'xarray',
 ]
 
