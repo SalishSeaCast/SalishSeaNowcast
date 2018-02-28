@@ -1186,12 +1186,14 @@ def after_make_plots(msg, config, checklist):
         'failure nemo nowcast-green research': [],
         'failure nemo forecast publish': [],
         'failure nemo forecast2 publish': [],
+        'failure fvcom nowcast publish': [],
         'success nemo nowcast research': [],
         'success nemo nowcast comparison': [],
         'success nemo nowcast publish': [],
         'success nemo nowcast-green research': [],
         'success nemo forecast publish': [],
         'success nemo forecast2 publish': [],
+        'success fvcom nowcast publish': [],
     }
     if msg.type.startswith('success nemo') and 'forecast' in msg.type:
         _, _, run_type, _ = msg.type.split()
