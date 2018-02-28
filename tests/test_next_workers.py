@@ -1632,10 +1632,12 @@ class TestAfterMakePlots:
             'failure nemo nowcast-green research',
             'failure nemo forecast publish',
             'failure nemo forecast2 publish',
+            'failure fvcom nowcast publish',
             'success nemo nowcast research',
             'success nemo nowcast comparison',
             'success nemo nowcast publish',
             'success nemo nowcast-green research',
+            'success fvcom nowcast publish',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
