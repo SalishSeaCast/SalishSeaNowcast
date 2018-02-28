@@ -48,6 +48,7 @@ dependencies:
   - requests
   - schedule
   - scipy
+  - shapely
   - xarray
 
   - pip:

@@ -38,6 +38,7 @@ dependencies:
   - pyzmq
   - requests
   - scipy
+  - shapely
   - xarray
 
   # For figures development
