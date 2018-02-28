@@ -35,9 +35,10 @@ import cmocean
 from nemo_nowcast import NowcastWorker
 import netCDF4 as nc
 import scipy.io as sio
-import xarray as xr
+import xarray
 
 from nowcast import lib
+from nowcast.figures.fvcom import tide_stn_water_level
 from nowcast.figures.research import (
     time_series_plots,
     tracer_thalweg_and_surface_hourly,
@@ -71,8 +72,12 @@ def main():
     worker.init_cli()
     worker.cli.add_argument(
         'model',
-        choices={'nemo'},
-        help='Model to produce plots for.',
+        choices={'nemo', 'fvcom'},
+        help='''
+        Model to produce plots for:
+        'nemo' means the Salish Sea NEMO model,
+        'fvcom' means the Vancouver Harbour/Fraser River FVCOM model.
+        ''',
     )
     worker.cli.add_argument(
         'run_type',
@@ -204,6 +209,29 @@ def make_plots(parsed_args, config, *args):
                 config, bathy, coastline, weather_path, results_dir, run_type,
                 run_date, timezone
             )
+
+    if model == 'fvcom':
+        results_dir = Path(
+            config['vhfr fvcom runs']['results archive'][run_type], dmy
+        )
+        fvcom_ssh_dataset_filename = (
+            config['vhfr fvcom runs']['ssh dataset filename']
+        )
+        fvcom_ssh_dataset_path = results_dir / fvcom_ssh_dataset_filename
+        cmd = (
+            f'ncrename -O -v siglay,sigma_layer -v siglev,sigma_level '
+            f'{fvcom_ssh_dataset_path} /tmp/{fvcom_ssh_dataset_path.name}'
+        )
+        subprocess.check_output(shlex.split(cmd))
+        fvcom_ssh_dataset = xarray.open_dataset(
+            f'/tmp/{fvcom_ssh_dataset_path.name}'
+        )
+        nemo_ssh_dataset_url_tmpl = (
+            config['figures']['dataset URLs']['tide stn ssh time series']
+        )
+        fig_functions = _prep_fvcom_publish_fig_functions(
+            fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl
+        )
 
     checklist = _render_figures(
         config, model, run_type, plot_type, dmy, fig_functions, test_figure_id
@@ -448,11 +476,11 @@ def _prep_nowcast_green_research_fig_functions(
             for hr in range(24)
         })
     place = 'S3'
-    phys_dataset = xr.open_dataset(
+    phys_dataset = xarray.open_dataset(
         'https://salishsea.eos.ubc.ca/erddap/griddap'
         '/ubcSSg3DTracerFields1hV17-02'
     )
-    bio_dataset = xr.open_dataset(
+    bio_dataset = xarray.open_dataset(
         'https://salishsea.eos.ubc.ca/erddap/griddap'
         '/ubcSSg3DBiologyFields1hV17-02'
     )
@@ -647,6 +675,30 @@ def _prep_publish_fig_functions(
     return fig_functions
 
 
+def _prep_fvcom_publish_fig_functions(
+    fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl
+):
+    names = {
+        'Calamity Point': 'CP_waterlevel',
+        'Indian Arm Head': 'IAH_waterlevel',
+        'New Westminster': 'NW_waterlevel',
+        'Port Moody': 'PM_waterlevel',
+        'Sand Heads': 'SH_waterlevel',
+        'Sandy Cove': 'SC_waterlevel',
+        'Vancouver Harbour': 'VH_waterlevel',
+        'Woodwards Landing': 'WL_waterlevel',
+    }
+    fig_functions = {}
+    for place, svg_root in names.items():
+        fig_functions.update({
+            svg_root: {
+                'function': tide_stn_water_level.make_figure,
+                'args': (place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl),
+            }
+        })
+    return fig_functions
+
+
 def _render_figures(
     config, model, run_type, plot_type, dmy, fig_functions, test_figure_id
 ):
@@ -677,8 +729,10 @@ def _render_figures(
             fig_files_dir = Path(config['figures']['test path'], run_type, dmy)
             fig_files_dir.mkdir(parents=True, exist_ok=True)
         else:
-            fig_files_dir = Path(
-                config['figures']['storage path'], run_type, dmy
+            fig_files_dir = (
+                Path(config['figures']['storage path'], run_type, dmy)
+                if model == 'nemo' else
+                Path(config['figures']['storage path'], model, run_type, dmy)
             )
             lib.mkdir(
                 os.fspath(fig_files_dir),

@@ -1089,6 +1089,15 @@ def after_download_fvcom_results(msg, config, checklist):
         'failure nowcast': [],
         'success nowcast': [],
     }
+    if msg.type.startswith('success'):
+        run_type = msg.type.split()[1]
+        run_date = checklist['FVCOM run'][run_type]['run date']
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.make_plots',
+                args=['fvcom', run_type, 'publish', '--run-date', run_date]
+            )
+        )
     return next_workers[msg.type]
 
 

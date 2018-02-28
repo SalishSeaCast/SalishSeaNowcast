@@ -1464,19 +1464,16 @@ class TestAfterDownloadFVCOMResults:
     """Unit tests for the after_download_fvcom_results function.
     """
 
-    @pytest.mark.parametrize(
-        'msg_type', [
-            'crash',
-            'failure nowcast',
-            'success nowcast',
-        ]
-    )
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+    ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         p_checklist = patch.dict(
             checklist, {
-                'WW3 run': {
-                    'forecast': {
-                        'run date': '2017-12-24'
+                'FVCOM run': {
+                    'nowcast': {
+                        'run date': '2018-02-19'
                     }
                 }
             }
@@ -1486,6 +1483,30 @@ class TestAfterDownloadFVCOMResults:
                 Message('download_fvcom_results', msg_type), config, checklist
             )
         assert workers == []
+
+    @pytest.mark.parametrize('msg_type', [
+        'success nowcast',
+    ])
+    def test_success_launch_make_plots(self, msg_type, config, checklist):
+        p_checklist = patch.dict(
+            checklist, {
+                'FVCOM run': {
+                    'nowcast': {
+                        'run date': '2018-02-27'
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_download_fvcom_results(
+                Message('download_fvcom_results', msg_type), config, checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.make_plots',
+            args=['fvcom', 'nowcast', 'publish', '--run-date', '2018-02-27'],
+            host='localhost'
+        )
+        assert expected in workers
 
 
 class TestAfterUpdateForecastDatasets:
