@@ -1326,14 +1326,14 @@ class TestAfterDownloadResults:
         assert workers == []
 
     @pytest.mark.parametrize(
-        'run_type, plot_type, run_date', [
-            ('nowcast', 'research', '2016-10-29'),
-            ('nowcast', 'comparison', '2016-10-28'),
-            ('nowcast-green', 'research', '2016-10-29'),
+        'model, run_type, plot_type, run_date', [
+            ('nemo', 'nowcast', 'research', '2016-10-29'),
+            ('nemo', 'nowcast', 'comparison', '2016-10-28'),
+            ('nemo', 'nowcast-green', 'research', '2016-10-29'),
         ]
     )
     def test_success_nowcast_launch_make_plots_specials(
-        self, run_type, plot_type, run_date, config, checklist
+        self, model, run_type, plot_type, run_date, config, checklist
     ):
         p_checklist = patch.dict(
             checklist, {
@@ -1351,7 +1351,7 @@ class TestAfterDownloadResults:
             )
         expected = NextWorker(
             'nowcast.workers.make_plots',
-            args=[run_type, plot_type, '--run-date', run_date],
+            args=[model, run_type, plot_type, '--run-date', run_date],
             host='localhost'
         )
         assert expected in workers
@@ -1562,7 +1562,7 @@ class TestAfterUpdateForecastDatasets:
             )
         expected = NextWorker(
             'nowcast.workers.make_plots',
-            args=[run_type, 'publish', '--run-date', run_date],
+            args=['nemo', run_type, 'publish', '--run-date', run_date],
             host='localhost'
         )
         assert expected in workers
@@ -1605,16 +1605,16 @@ class TestAfterMakePlots:
     @pytest.mark.parametrize(
         'msg_type', [
             'crash',
-            'failure nowcast research',
-            'failure nowcast comparison',
-            'failure nowcast publish',
-            'failure nowcast-green research',
-            'failure forecast publish',
-            'failure forecast2 publish',
-            'success nowcast research',
-            'success nowcast comparison',
-            'success nowcast publish',
-            'success nowcast-green research',
+            'failure nemo nowcast research',
+            'failure nemo nowcast comparison',
+            'failure nemo nowcast publish',
+            'failure nemo nowcast-green research',
+            'failure nemo forecast publish',
+            'failure nemo forecast2 publish',
+            'success nemo nowcast research',
+            'success nemo nowcast comparison',
+            'success nemo nowcast publish',
+            'success nemo nowcast-green research',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1625,8 +1625,8 @@ class TestAfterMakePlots:
 
     @pytest.mark.parametrize(
         'msg_type, run_type', [
-            ('success forecast publish', 'forecast'),
-            ('success forecast2 publish', 'forecast2'),
+            ('success nemo forecast publish', 'forecast'),
+            ('success nemo forecast2 publish', 'forecast2'),
         ]
     )
     def test_success_forecast_launch_make_feeds(

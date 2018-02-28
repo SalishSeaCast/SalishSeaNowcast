@@ -38,9 +38,16 @@ class TestMain:
         make_plots.main()
         m_worker().init_cli.assert_called_once_with()
 
-    def test_add_run_type_arg(self, m_worker):
+    def test_add_model_arg(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
+        assert args == ('model',)
+        assert kwargs['choices'] == {'nemo'}
+        assert 'help' in kwargs
+
+    def test_add_run_type_arg(self, m_worker):
+        make_plots.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
             'nowcast', 'nowcast-green', 'forecast', 'forecast2'
@@ -49,7 +56,7 @@ class TestMain:
 
     def test_add_plot_type_arg(self, m_worker):
         make_plots.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ('plot_type',)
         assert kwargs['choices'] == {'publish', 'research', 'comparison'}
         assert 'help' in kwargs
@@ -63,7 +70,7 @@ class TestMain:
 
     def test_add_test_figure_arg(self, m_worker):
         make_plots.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
+        args, kwargs = m_worker().cli.add_argument.call_args_list[3]
         assert args == ('--test-figure',)
         assert 'help' in kwargs
 
@@ -77,22 +84,23 @@ class TestMain:
         )
 
 
+@pytest.mark.parametrize(
+    'model, run_type, plot_type', [
+        ('nemo', 'nowcast', 'publish'),
+        ('nemo', 'nowcast', 'research'),
+        ('nemo', 'nowcast', 'comparison'),
+        ('nemo', 'forecast', 'publish'),
+        ('nemo', 'forecast2', 'publish'),
+    ]
+)
 @patch('nowcast.workers.make_plots.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize(
-        'run_type, plot_type', [
-            ('nowcast', 'publish'),
-            ('nowcast', 'research'),
-            ('nowcast', 'comparison'),
-            ('forecast', 'publish'),
-            ('forecast2', 'publish'),
-        ]
-    )
-    def test_success_log_info(self, m_logger, run_type, plot_type):
+    def test_success_log_info(self, m_logger, model, run_type, plot_type):
         parsed_args = SimpleNamespace(
+            model=model,
             run_type=run_type,
             plot_type=plot_type,
             run_date=arrow.get('2017-01-02')
@@ -100,43 +108,34 @@ class TestSuccess:
         make_plots.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize(
-        'run_type, plot_type', [
-            ('nowcast', 'publish'),
-            ('nowcast', 'research'),
-            ('nowcast', 'comparison'),
-            ('forecast', 'publish'),
-            ('forecast2', 'publish'),
-        ]
-    )
-    def test_success_msg_type(self, m_logger, run_type, plot_type):
+    def test_success_msg_type(self, m_logger, model, run_type, plot_type):
         parsed_args = SimpleNamespace(
+            model=model,
             run_type=run_type,
             plot_type=plot_type,
             run_date=arrow.get('2017-01-02')
         )
         msg_type = make_plots.success(parsed_args)
-        assert msg_type == 'success {run_type} {plot_type}'.format(
-            run_type=run_type, plot_type=plot_type
-        )
+        assert msg_type == f'success {model} {run_type} {plot_type}'
 
 
+@pytest.mark.parametrize(
+    'model, run_type, plot_type', [
+        ('nemo', 'nowcast', 'publish'),
+        ('nemo', 'nowcast', 'research'),
+        ('nemo', 'nowcast', 'comparison'),
+        ('nemo', 'forecast', 'publish'),
+        ('nemo', 'forecast2', 'publish'),
+    ]
+)
 @patch('nowcast.workers.make_plots.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize(
-        'run_type, plot_type', [
-            ('nowcast', 'publish'),
-            ('nowcast', 'research'),
-            ('nowcast', 'comparison'),
-            ('forecast', 'publish'),
-            ('forecast2', 'publish'),
-        ]
-    )
-    def test_failure_log_error(self, m_logger, run_type, plot_type):
+    def test_failure_log_error(self, m_logger, model, run_type, plot_type):
         parsed_args = SimpleNamespace(
+            model=model,
             run_type=run_type,
             plot_type=plot_type,
             run_date=arrow.get('2017-01-02')
@@ -144,22 +143,12 @@ class TestFailure:
         make_plots.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize(
-        'run_type, plot_type', [
-            ('nowcast', 'publish'),
-            ('nowcast', 'research'),
-            ('nowcast', 'comparison'),
-            ('forecast', 'publish'),
-            ('forecast2', 'publish'),
-        ]
-    )
-    def test_failure_msg_type(self, m_logger, run_type, plot_type):
+    def test_failure_msg_type(self, m_logger, model, run_type, plot_type):
         parsed_args = SimpleNamespace(
+            model=model,
             run_type=run_type,
             plot_type=plot_type,
             run_date=arrow.get('2017-01-02')
         )
         msg_type = make_plots.failure(parsed_args)
-        assert msg_type == 'failure {run_type} {plot_type}'.format(
-            run_type=run_type, plot_type=plot_type
-        )
+        assert msg_type == f'failure {model} {run_type} {plot_type}'
