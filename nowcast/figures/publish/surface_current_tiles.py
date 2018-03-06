@@ -1,0 +1,308 @@
+import netCDF4 as nc
+import numpy as np
+import numpy.ma as ma
+import pytz
+import datetime
+import time as tm
+
+import matplotlib as mpl
+from matplotlib.figure import Figure
+from matplotlib.backend_bases import FigureCanvasBase
+
+from os import listdir
+import os
+from glob import glob
+
+from PyPDF2 import PdfFileMerger
+from salishsea_tools import nc_tools, viz_tools
+from IPython import embed
+
+import nowcast.figures.website_theme
+
+
+def make_figure(
+    run_date,
+    t_index,
+    Vf,
+    Uf,
+    coordf,
+    mesh_maskf,
+    bathyf,
+    tile_coords_dic,
+    expansion_factor,
+    theme=nowcast.figures.website_theme
+):
+
+    with nc.Dataset(coordf) as dsCoord:
+        coord_xt, coord_yt = _prepareDomain(dsCoord)
+
+    with nc.Dataset(Uf) as dsU, \
+      nc.Dataset(Vf) as dsV, \
+      nc.Dataset(mesh_maskf) as dsMask, \
+      nc.Dataset(bathyf) as dsBathy:
+        allTiles = _makeTiles(
+            t_index, dsU, dsV, dsMask, coord_xt, coord_yt, dsBathy, theme,
+            tile_coords_dic, expansion_factor
+        )
+    return allTiles
+
+
+def _prepareVelocity(time, dsU, dsV, dsMask):
+    #Get array of u (x-direction velocity) at time time and depthU =0 (top layer)
+    u = dsU.variables['vozocrtx'][time, 0, :, :]
+
+    #Get array of v (y-direction velocity) at time time and depthU =0 (top layer)
+    v = dsV.variables['vomecrty'][time, 0, :, :]
+
+    unstaggerU, unstaggerV = viz_tools.unstagger(u, v)
+
+    #Rotating the velocities from grid coordinate to east-north
+    unstaggerU_rotate, unstaggerV_rotate = viz_tools.rotate_vel(
+        unstaggerU, unstaggerV, origin='grid'
+    )
+
+    #Apply land mask to velocities data
+    #Drop the first row and first column to match the domain of unstaggerU and unstaggerV at t= 0 and z=0
+    #Load land mask (0 for land, 1 for water)
+    mask = dsMask.variables['tmask'][0, 0, 1:, 1:]
+    #Use 1 for mask becasue masked_array needs 1 for missing values.
+    maskU = ma.masked_array(unstaggerU_rotate, 1 - mask)
+    maskV = ma.masked_array(unstaggerV_rotate, 1 - mask)
+
+    return maskU, maskV
+
+
+def _prepareDomain(_dsCoord):
+    #Drop the first row and first column to match the domain of unstaggerU and unstaggerV
+    coord_xt = _dsCoord.variables['glamt'][0, 1:, 1:]
+    coord_yt = _dsCoord.variables['gphit'][0, 1:, 1:]
+    return coord_xt, coord_yt
+
+
+def _createTileTitle(sec, units, calendar):
+
+    #convert UTC time from file to PST (local time)
+    dt = nc.num2date(sec, units, calendar=calendar)
+    dt_utc = datetime.datetime.combine(dt.date(), dt.time(),
+                                       pytz.utc)  #add timezone to utc time
+    pst_tz = pytz.timezone('Canada/Pacific')
+    fmt = '%Y-%m-%d %H:%M:%S %Z'
+
+    loc_dt = dt_utc.astimezone(pst_tz)
+    title_pst = loc_dt.strftime(fmt)
+    title_utc = dt_utc.strftime(fmt)
+
+    return title_pst + "\n" + title_utc
+
+
+def _makeTiles(
+    t_index, dsU, dsV, dsMask, coord_xt, coord_yt, dsBathy, theme,
+    tile_coords_dic, expansion_factor
+):
+
+    units = dsU.variables['time_counter'].units
+    calendar = dsU.variables['time_counter'].calendar
+    maskU, maskV = _prepareVelocity(t_index, dsU, dsV, dsMask)
+
+    k = 3
+
+    tiles = []
+    figs = []
+    for tile, values in tile_coords_dic.items():
+
+        x1, x2, y1, y2 = values[0], values[1], values[2], values[3]
+        sec = dsU.variables['time_counter'][t_index]
+
+        if theme is None:
+            fig = Figure(figsize=(8.5, 11), facecolor='white')
+        else:
+            fig = Figure(
+                figsize=(11, 9),
+                facecolor=theme.COLOURS['figure']['facecolor']
+            )
+
+        ax = fig.add_subplot(111)
+
+        X, Y = coord_xt[::k, ::k].flatten(), coord_yt[::k, ::k].flatten()
+        U, V = maskU[::k, ::k].flatten(), maskV[::k, ::k].flatten()
+
+        i = U.mask == False
+        XC, YC, UC, VC = X[i], Y[i], U[i].data, V[i].data
+
+        # Add some vectors in the middle of the Atlantic to ensure we get at least one for each arrow size
+        tempU = np.linspace(0, 5, 50)
+        zeros = np.zeros(tempU.shape)
+        XC = np.concatenate([XC, zeros])
+        YC = np.concatenate([YC, zeros])
+        UC = np.concatenate([UC, tempU])
+        VC = np.concatenate([VC, zeros])
+        SC = np.sqrt(UC**2 + VC**2)
+        i = SC < 0.05
+        if np.any(i):
+            UCC, VCC, XCC, YCC = _cut(UC, VC, XC, YC, i)
+            ax.scatter(XCC, YCC, s=2)
+
+        # Arrow parameters: list of tuples of (speed_min, speed_max, arrow_width, arrow_head_width)
+        arrowparamslist = [
+                (0.05, 0.25, 0.003, 3.00), 
+                (0.25, 0.50, 0.005, 2.75),
+                (0.50, 1.00, 0.007, 2.25),
+                (1.00, 1.50, 0.009, 2.00),
+                (1.50, 2.00, 0.011, 1.50),
+                (2.00, 2.50, 0.013, 1.25),
+                (2.50, 3.00, 0.015, 1.00),
+                (3.00, 4.00, 0.017, 0.75),
+                (4.00, 100 , 0.020, 2.00)
+                ]
+
+        if theme is None:
+            # Quiver key positions (x,y) relative to axes that spans [0,1]x[0,1]
+            positionslist = [(0.55, 1.14),
+                             (0.55, 1.10),
+                             (0.55, 1.06),
+                             (0.55, 1.02),
+                             (0.80, 1.18),
+                             (0.80, 1.14),
+                             (0.80, 1.10),
+                             (0.80, 1.06),
+                             (0.80, 1.02)]
+            FP = None
+            ax.text(
+                0.53, 1.17, r'$\bullet$    < 0.05 m/s', transform=ax.transAxes
+            )
+
+        else:
+            # Quiver key positions (x,y) relative to axes that spans [0,1]x[0,1]
+            positionslist = [(1.05, 0.95),
+                             (1.05, 0.90),
+                             (1.05, 0.85),
+                             (1.05, 0.80),
+                             (1.05, 0.75),
+                             (1.05, 0.70),
+                             (1.05, 0.65),
+                             (1.05, 0.60),
+                             (1.05, 0.55)]
+
+            FP = theme.FONTS['axis']
+            fontsize = FP.get_size() - 4
+            ax.text(
+                1.03,
+                0.98,
+                r'$\bullet$    < 0.05 m/s',
+                color=theme.COLOURS['text']['axis'],
+                fontsize=fontsize,
+                transform=ax.transAxes
+            )
+
+        # Draw each arrow
+        for arrowparams, positions in zip(arrowparamslist, positionslist):
+            _drawArrows(
+                arrowparams, positions, UC, VC, XC, YC, SC, ax, theme, FP
+            )
+
+        ax.grid(True)
+
+        dx = (x2 - x1) * expansion_factor
+        dy = (y2 - y1) * expansion_factor
+        ax.set_xlim([x1 - dx, x2 + dx])
+        ax.set_ylim([y1 - dy, y2 + dy])
+
+        # Decorations
+        title = _createTileTitle(sec, units, calendar) + '\n' + tile
+        x_label = "Longitude"
+        y_label = "Latitude"
+
+        if theme is None:
+            title_notheme = "SalishSeaCast Surface Currents\n" + title + '\n'
+            ax.set_title(title_notheme, fontsize=12, loc='left')
+            ax.set_xlabel(x_label)
+            ax.set_ylabel(y_label)
+        else:
+            ax.set_title(
+                title,
+                fontsize=10,
+                color=theme.COLOURS['text']['axis'],
+                fontproperties=FP
+            )
+            ax.set_xlabel(
+                x_label,
+                fontsize=8,
+                color=theme.COLOURS['text']['axis'],
+                fontproperties=FP
+            )
+            ax.set_ylabel(
+                y_label,
+                color=theme.COLOURS['text']['axis'],
+                fontproperties=FP
+            )
+            theme.set_axis_colors(
+                ax
+            )  # Makes the x and y numbers and axis lines into near-white
+
+        x_tick_loc = ax.get_xticks()
+        x_tick_label = ['{:.1f}'.format(q) for q in x_tick_loc]
+        ax.set_xticklabels(x_tick_label, rotation=45)
+
+        viz_tools.plot_land_mask(ax, dsBathy, coords='map', color='burlywood')
+        viz_tools.plot_coastline(ax, dsBathy, coords='map')
+        viz_tools.set_aspect(ax, coords='map', lats=coord_yt)
+
+        tiles += [tile]
+        figs += [fig]
+    return figs, tiles
+
+
+def _cut(UC, VC, XC, YC, i):
+    return UC[i], VC[i], XC[i], YC[i]
+
+
+def _drawArrows(arrowparams, positions, UC, VC, XC, YC, SC, ax, theme, FP):
+
+    # Unpack tuples
+    speed_min, speed_max, width, headwidth = arrowparams
+    xpos, ypos = positions
+
+    i = (SC >= speed_min) & (SC < speed_max)
+    if np.any(i):
+        UCC, VCC, XCC, YCC = _cut(UC, VC, XC, YC, i)
+        q = ax.quiver(
+            XCC,
+            YCC,
+            UCC / SC[i],
+            VCC / SC[i],
+            headwidth=2,
+            headlength=0.008 / width,
+            headaxislength=0.008 / width,
+            width=width,
+            scale=50,
+            zorder=3
+        )
+
+        if speed_min >= 4:
+            label = r'>= {:.2f} m/s'.format(speed_min)
+        else:
+            label = r'{:.2f}-{:.2f} m/s'.format(speed_min, speed_max)
+
+        if theme is None:
+            qk = ax.quiverkey(q, xpos, ypos, 1, label, labelpos='E')
+        else:
+            fontsize = FP.get_size() - 4
+            quickerKey_dict = {
+                'family': FP.get_family(),
+                'style': FP.get_style(),
+                'variant': FP.get_variant(),
+                'weight': FP.get_weight(),
+                'stretch': FP.get_stretch(),
+                'size': fontsize
+            }
+            qk = ax.quiverkey(
+                q,
+                xpos,
+                ypos,
+                1,
+                label,
+                labelpos='E',
+                color=theme.COLOURS['text']['axis'],
+                labelcolor=theme.COLOURS['text']['axis'],
+                fontproperties=quickerKey_dict
+            )
