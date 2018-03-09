@@ -114,8 +114,8 @@ def watch_fvcom(parsed_args, config, tell_manager):
             lines.reverse()
             for line in lines:
                 if line.strip().startswith('!') and line.strip().endswith('|'):
-                    _, time_step, model_time, time_to_finish, _ = (
-                        line.split(maxsplit=4)
+                    time_step, model_time, time_to_finish, _ = (
+                        line.strip().strip('!').split(maxsplit=3)
                     )
                     msg = (
                         f'{run_type} on {host_name}: timestep: '
