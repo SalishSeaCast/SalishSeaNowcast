@@ -533,53 +533,18 @@ run:
       users: allen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
       scratch dir: /scratch/dlatorne/hindcast
+      # Directory on compute host where files (e.g. namelist.time) necessary to prepare
+      # the NEMO runs are stored
       run prep dir: /home/dlatorne/project/SalishSea/hindcast-sys/runs
+      # Path to the salishsea command processor executable to use in the run
+      # script
       salishsea cmd: /home/dlatorne/project/SalishSea/hindcast-sys/hincast-env/bin/salishsea
-
-
-#    orcinus-nowcast:
-#      shared storage: False
-#      ssh key: SalishSeaNEMO-nowcast_id_rsa
-#      run prep dir: /home/sallen/MEOPAR/nowcast/
-#      run types:
-#        nowcast:
-#          results: /home/sallen/MEOPAR/SalishSea/nowcast/
-#        nowcast-green:
-#          results: /home/sallen/MEOPAR/SalishSea/nowcast-green/
-#        forecast:
-#          results: /home/dlatorne/MEOPAR/SalishSea/forecast/
-#        forecast2:
-#          results: /home/dlatorne/MEOPAR/SalishSea/forecast2/
-#      forcing:
-#        ssh dir: /home/sallen/MEOPAR/sshNeahBay/
-#        bc dir: /home/sallen/MEOPAR/LiveOcean/
-#        rivers dir: /home/sallen/MEOPAR/rivers/
-#        rivers_month.nc: /home/sallen/MEOPAR/rivers/rivers_month_extended.nc
-#        rivers_temp.nc: /home/sallen/MEOPAR/rivers/rivers_ConsTemp_month.nc
-#        weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
-#        no_snow.nc: /home/sallen/MEOPAR/grid/no_snow.nc
-#        weights: /home/sallen/MEOPAR/grid/weights-gem2.5-ops.nc
-
-  download hosts:
-    # HPC Compute host name where runs are executed manually but download_results
-    # worker is used to download results
-    orcinus-hindcast:
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /global/scratch/sallen/SalishSea/hindcast/
-
-    cedar-hindcast:
-      run types:
-        hindcast:
-          results: $SCRATCH/hindcast/
-
-    bugaboo-fs:
-      run types:
-        hindcast:
-          results: /global/scratch/sallen/SalishSea/hindcast/
+          results: /scratch/dlatorne/hindcast
 
 
 # Strait of Georgia WaveWatch3 model runs

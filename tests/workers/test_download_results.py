@@ -79,6 +79,7 @@ class TestMain:
         ('nowcast-green', 'salish-nowcast'),
         ('forecast', 'west.cloud-nowcast'),
         ('forecast2', 'west.cloud-nowcast'),
+        ('hindcast', 'cedar-nowcast'),
     ]
 )
 class TestSuccess:
@@ -106,6 +107,7 @@ class TestSuccess:
         ('nowcast-green', 'salish-nowcast'),
         ('forecast', 'west.cloud-nowcast'),
         ('forecast2', 'west.cloud-nowcast'),
+        ('hindcast', 'cedar-nowcast'),
     ]
 )
 @patch('nowcast.workers.download_results.logger')

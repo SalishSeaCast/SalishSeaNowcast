@@ -87,7 +87,7 @@ def download_results(parsed_args, config, *args):
         try:
             host_config = config['run']['enabled hosts'][host_name]
         except KeyError:
-            host_config = config['run']['download hosts'][host_name]
+            host_config = config['run']['hindcast hosts'][host_name]
     except KeyError:
         logger.critical(f'unrecognized host: {host_name}')
         raise WorkerError
