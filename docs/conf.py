@@ -60,6 +60,7 @@ autodoc_mock_imports = [
     'feedgen',
     'feedgen.entry',
     'feedgen.feed',
+    'fvcom_cmd',
     'mako',
     'mako.template',
     'nemo_cmd',
