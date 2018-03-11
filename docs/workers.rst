@@ -274,6 +274,13 @@ Workers
     :members: main
 
 
+:kbd:`make_surface_current_tiles`
+---------------------------------
+
+.. automodule:: nowcast.workers.make_surface_current_tiles
+    :members: main
+
+
 :kbd:`make_feeds`
 -----------------
 
@@ -336,6 +343,15 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 ----------------------------------------------
 
 .. automodule:: nowcast.figures.website_theme
+    :members:
+
+
+.. _nowcast.figures.surface_current_domain:
+
+:py:mod:`nowcast.figures.surface_current_domain` Module
+-------------------------------------------------------
+
+.. automodule:: nowcast.figures.surface_current_domain
     :members:
 
 
@@ -418,6 +434,14 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 .. automodule:: nowcast.figures.publish.storm_surge_alerts_thumbnail
     :members:
 
+
+.. _nowcast.figures.publish.surface_current_tiles:
+
+:py:mod:`nowcast.figures.publish.surface_current_tiles` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.surface_current_tiles
+    :members:
 
 
 .. _nowcast.figures.research:

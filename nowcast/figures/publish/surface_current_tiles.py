@@ -1,3 +1,21 @@
+# Copyright 2013-2018 The Salish Sea MEOPAR Contributors
+# and The University of British Columbia
+
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+
+#    https://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""
+Produce surface currents tile figures in both website themed and unthemed style.
+"""
+
 import netCDF4 as nc
 import numpy as np
 import numpy.ma as ma
@@ -9,13 +27,7 @@ import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib.backend_bases import FigureCanvasBase
 
-from os import listdir
-import os
-from glob import glob
-
-from PyPDF2 import PdfFileMerger
 from salishsea_tools import nc_tools, viz_tools
-from IPython import embed
 
 import nowcast.figures.website_theme
 
@@ -23,8 +35,8 @@ import nowcast.figures.website_theme
 def make_figure(
     run_date,
     t_index,
-    Vf,
     Uf,
+    Vf,
     coordf,
     mesh_maskf,
     bathyf,
@@ -32,56 +44,102 @@ def make_figure(
     expansion_factor,
     theme=nowcast.figures.website_theme
 ):
+    """
+    Create a list of surface current tile figures for a given time index t_index.
+
+    :param run_date: Date of the run to create the figure tiles for.
+    :type run_date: :py:class:`Arrow.arrow`
+
+    :param t_index: time index 
+    :type t_index: int
+
+    :param Uf: Path to Salish Sea NEMO grid_U output file.
+    :type Uf: :py:class:`pathlib.Path`
+
+    :param Vf: Path to Salish Sea NEMO grid_V output file.
+    :type Vf: :py:class:`pathlib.Path`
+
+    :param coordf: Path to Salish Sea NEMO model coordinates file.
+    :type coordf: :py:class:`pathlib.Path`
+
+    :param mesh_maskf: Path to Salish Sea NEMO-generated mesh mask file.
+    :type mesh_maskf: :py:class:`pathlib.Path`
+
+    :param bathyf: Path to Salish Sea NEMO model bathymetry file.
+    :type bathyf: :py:class:`pathlib.Path`
+
+    :param tile_coords_dic: Dictionary containing tile coordinate definitions in longitude and latitude.
+                            See :py:mod:`nowcast.figures.surface_current_domain`.
+    :type tile_coords_dic: dict
+
+    :param expansion_factor: Overlap fraction for tiles (typically between 0 and 0.25)
+    :type expansion_factor: float
+
+    :param theme: Module-like object that defines the style elements for the
+                figure. See :py:mod:`nowcast.figures.website_theme` for an
+                example.
+
+    :returns: list of matplotlib Figures and list of names for all figures
+    """
 
     with nc.Dataset(coordf) as dsCoord:
-        coord_xt, coord_yt = _prepareDomain(dsCoord)
+        coord_xt, coord_yt = _prepareCoordinates(dsCoord)
 
     with nc.Dataset(Uf) as dsU, \
       nc.Dataset(Vf) as dsV, \
       nc.Dataset(mesh_maskf) as dsMask, \
       nc.Dataset(bathyf) as dsBathy:
-        allTiles = _makeTiles(
+        fig_list, tile_list = _makeTiles(
             t_index, dsU, dsV, dsMask, coord_xt, coord_yt, dsBathy, theme,
             tile_coords_dic, expansion_factor
         )
-    return allTiles
+
+    return fig_list, tile_list
 
 
 def _prepareVelocity(time, dsU, dsV, dsMask):
-    #Get array of u (x-direction velocity) at time time and depthU =0 (top layer)
+    """
+    Load the velocities and unstagger, rotate and mask them.
+    """
+
+    # Get array of u (x-direction velocity) at time index time and depthU=0 (top layer)
     u = dsU.variables['vozocrtx'][time, 0, :, :]
 
-    #Get array of v (y-direction velocity) at time time and depthU =0 (top layer)
+    # Get array of v (y-direction velocity) at time index time and depthV=0 (top layer)
     v = dsV.variables['vomecrty'][time, 0, :, :]
 
+    # Unstagger the velocities so they are on T points
     unstaggerU, unstaggerV = viz_tools.unstagger(u, v)
 
-    #Rotating the velocities from grid coordinate to east-north
+    # Rotate the velocities from grid coordinates to east-north
     unstaggerU_rotate, unstaggerV_rotate = viz_tools.rotate_vel(
         unstaggerU, unstaggerV, origin='grid'
     )
 
-    #Apply land mask to velocities data
-    #Drop the first row and first column to match the domain of unstaggerU and unstaggerV at t= 0 and z=0
-    #Load land mask (0 for land, 1 for water)
+    # Load land mask (0 for land, 1 for water)
+    # Drop the first row and first column of the mask to match the unstaggered velocities
     mask = dsMask.variables['tmask'][0, 0, 1:, 1:]
-    #Use 1 for mask becasue masked_array needs 1 for missing values.
+
+    # Apply land mask to velocities data
+    # Use 1-mask here because masked_array needs 1 for missing values.
     maskU = ma.masked_array(unstaggerU_rotate, 1 - mask)
     maskV = ma.masked_array(unstaggerV_rotate, 1 - mask)
-
     return maskU, maskV
 
 
-def _prepareDomain(_dsCoord):
-    #Drop the first row and first column to match the domain of unstaggerU and unstaggerV
+def _prepareCoordinates(_dsCoord):
+    """
+    Loads the longitude and latitude coordinates and trim to match unstaggered velocities
+    """
     coord_xt = _dsCoord.variables['glamt'][0, 1:, 1:]
     coord_yt = _dsCoord.variables['gphit'][0, 1:, 1:]
     return coord_xt, coord_yt
 
 
 def _createTileTitle(sec, units, calendar):
-
-    #convert UTC time from file to PST (local time)
+    """
+    Constructs the time stamp in both UTC and local time for the figure title
+    """
     dt = nc.num2date(sec, units, calendar=calendar)
     dt_utc = datetime.datetime.combine(dt.date(), dt.time(),
                                        pytz.utc)  #add timezone to utc time
@@ -99,7 +157,9 @@ def _makeTiles(
     t_index, dsU, dsV, dsMask, coord_xt, coord_yt, dsBathy, theme,
     tile_coords_dic, expansion_factor
 ):
-
+    """
+    Produce surface current tile figures for each tile at time index t_index
+    """
     units = dsU.variables['time_counter'].units
     calendar = dsU.variables['time_counter'].calendar
     maskU, maskV = _prepareVelocity(t_index, dsU, dsV, dsMask)
@@ -140,7 +200,7 @@ def _makeTiles(
         i = SC < 0.05
         if np.any(i):
             UCC, VCC, XCC, YCC = _cut(UC, VC, XC, YC, i)
-            ax.scatter(XCC, YCC, s=2)
+            ax.scatter(XCC, YCC, s=2, c='k')
 
         # Arrow parameters: list of tuples of (speed_min, speed_max, arrow_width, arrow_head_width)
         arrowparamslist = [
@@ -202,6 +262,7 @@ def _makeTiles(
 
         ax.grid(True)
 
+        # Use expansion factor to set axes limits
         dx = (x2 - x1) * expansion_factor
         dy = (y2 - y1) * expansion_factor
         ax.set_xlim([x1 - dx, x2 + dx])
@@ -243,7 +304,8 @@ def _makeTiles(
         x_tick_label = ['{:.1f}'.format(q) for q in x_tick_loc]
         ax.set_xticklabels(x_tick_label, rotation=45)
 
-        viz_tools.plot_land_mask(ax, dsBathy, coords='map', color='burlywood')
+        viz_tools.plot_land_mask(ax, dsBathy, coords='map', color='burlywood', zorder=-9)
+        ax.set_rasterization_zorder(-1)
         viz_tools.plot_coastline(ax, dsBathy, coords='map')
         viz_tools.set_aspect(ax, coords='map', lats=coord_yt)
 
@@ -253,17 +315,30 @@ def _makeTiles(
 
 
 def _cut(UC, VC, XC, YC, i):
+    """
+    Helper function to subset vectors
+    """
     return UC[i], VC[i], XC[i], YC[i]
 
 
 def _drawArrows(arrowparams, positions, UC, VC, XC, YC, SC, ax, theme, FP):
+    """
+    Helper function to draw arrows in each velocity range
+    arrowparams holds the quiver arrow parameters corresponding to each speed range
+    positions holds the coordinates relative to the [0,1]x[0,1] axes to draw the quiverkey
+    UC, VC are the velocity components at positions XC, YC
+    SC is the speed
+    ax is the axes to draw on
+    theme is the theme
+    FP is a font properties dictionary
+    """
 
-    # Unpack tuples
     speed_min, speed_max, width, headwidth = arrowparams
     xpos, ypos = positions
 
     i = (SC >= speed_min) & (SC < speed_max)
     if np.any(i):
+        # Draw the quiver arrows
         UCC, VCC, XCC, YCC = _cut(UC, VC, XC, YC, i)
         q = ax.quiver(
             XCC,
@@ -278,11 +353,13 @@ def _drawArrows(arrowparams, positions, UC, VC, XC, YC, SC, ax, theme, FP):
             zorder=3
         )
 
+        # Construct quiver label
         if speed_min >= 4:
             label = r'>= {:.2f} m/s'.format(speed_min)
         else:
             label = r'{:.2f}-{:.2f} m/s'.format(speed_min, speed_max)
 
+        # Add the quiverkey label
         if theme is None:
             qk = ax.quiverkey(q, xpos, ypos, 1, label, labelpos='E')
         else:

@@ -1,11 +1,22 @@
-"""This class creates main surface current domain (both with theme and without) and save 
-the file in static folder. 
-If the tiles specification change we need to re-run make_figure_domain. 
+# Copyright 2013-2018 The Salish Sea MEOPAR Contributors
+# and The University of British Columbia
 
-_makeHTMLmap, produce the boundry of each tiles. Replace <map name="tileclickmap"> in surface_current.mako file
-with text produce by this function.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 
-The tile specifications and initial code implementation were provided by IOS.
+#    https://www.apache.org/licenses/LICENSE-2.0
+
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+"""
+This standalone code produces the surface current tiled domain figure in both website themed and unthemed style and saves
+the figure files in '/results/nowcast-sys/salishsea-site/salishsea_site/static/img/'. 
+
+The domain is divided into different tiles and needs to be re-run if the tiles specification/coordinates are changed.
 """
 
 import netCDF4 as nc
@@ -20,9 +31,23 @@ from pathlib import Path
 import nowcast.figures.website_theme
 
 
-def _make_figure_domain(
-    coordf, bathyf, tile_coords_dic, theme=nowcast.figures.website_theme
-):
+def _make_figure_domain(coordf, bathyf, theme):
+    """
+    Create surface currents tiled domain figure showing the boundary and labels of each tile.
+
+    :param coordf: Path to Salish Sea NEMO model coordinates file.
+    :type coordf: :py:class:`pathlib.Path`
+
+    :param bathyf: Path to Salish Sea NEMO model bathymetry file.
+    :type bathyf: :py:class:`pathlib.Path`
+
+    :param theme: Module-like object that defines the style elements for the
+                figure. See :py:mod:`nowcast.figures.website_theme` for an
+                example.
+
+    :returns: :py:class:`matplotlib.figure.Figure` and plot axes. 
+    """
+
     if theme is None:
         fig = Figure(figsize=(8.5, 11), facecolor='white')
     else:
@@ -66,13 +91,12 @@ def _make_figure_domain(
         )  # Makes the x and y numbers and axis lines into near-white
 
     with nc.Dataset(bathyf) as _dsBathy:
-        viz_tools.plot_land_mask(ax, _dsBathy, coords='map', color='burlywood')
+        viz_tools.plot_land_mask(ax, _dsBathy, coords='map', color='burlywood', zorder=-9)
+        ax.set_rasterization_zorder(-1)
         viz_tools.plot_coastline(ax, _dsBathy, coords='map')
 
     with nc.Dataset(coordf) as _dsCoord:
-        coord_xt = _dsCoord.variables['glamt'][0, 1:, 1:]
-        coord_yt = _dsCoord.variables['gphit'][0, 1:, 1:]
-        # coord_xt, coord_yt = _prepareDomain(_dsCoord)
+        coord_yt = _dsCoord.variables['gphit'][0, :, :]
         viz_tools.set_aspect(ax, coords='map', lats=coord_yt)
 
     _drawTile(tile_coords_dic, ax)
@@ -80,8 +104,10 @@ def _make_figure_domain(
     return fig, ax
 
 
-#Draw tiles in main domain
 def _drawTile(tile_coords_dic, ax):
+    """
+     Draw boundary of each tile in the main domain.
+    """
     i = 1
     for tile, values in tile_coords_dic.items():
         x1, x2, y1, y2 = values[0], values[1], values[2], values[3]
@@ -96,30 +122,31 @@ def _drawTile(tile_coords_dic, ax):
         ax.plot(cornersX, cornersY, color='b', linestyle='--', linewidth=1)
 
 
-def _makeHTMLmap(fig, ax, tile_coords_dic, htmlmap_path):
+def _makeHTMLmap(fig, ax, htmlmap_path):
+    """
+    Update 'surface_current_tilemap.html' file that includes a HTML fragment which makes the domain map clickable.
+    """
     i = 1
     header = "<map name=\"tileclickmap\">\n"
     footer = "</map>\n"
     with open(
-        htmlmap_path + "surface_current_tilemap.html", 'w'
+        htmlmap_path / "surface_current_tilemap.html", 'w'
     ) as tilemapfile:
         tilemapfile.write(header)
         for tile, values in tile_coords_dic.items():
             x1, x2, y1, y2 = values[0], values[1], values[2], values[3]
 
-            # Get the x and y data and transform it into pixel coordinates
-            #x, y = points.get_data()
+            # Transform x,y data into pixel coordinates
             xy_pixels = ax.transData.transform(
                 np.vstack([[x1, x2], [y1, y2]]).T
             )
             xpix, ypix = xy_pixels.T
 
-            # In matplotlib, 0,0 is the lower left corner, whereas it's usually the upper
-            # right for most image software, so we'll flip the y-coords...
+            # 0,0 is the lower left coordinate in matplotlib but it's the upper left in HTML
+            # so the y-coordinate needs to be flipped here
             width, height = FigureCanvasBase(fig).get_width_height()
             ypix = height - ypix
 
-            # print('Coordinates of the points in pixel coordinates...')
             curline = "    <area shape=\"rect\" coords=\"{:3d},{:3d},{:3d},{:3d}\"  href=\"JavaScript: regionMap({:2d}); void(0);\">\n".format(
                 int(xpix[0]), int(ypix[0]), int(xpix[1]), int(ypix[1]), i
             )
@@ -129,7 +156,7 @@ def _makeHTMLmap(fig, ax, tile_coords_dic, htmlmap_path):
         tilemapfile.write(footer)
 
 
-def _saveFiguresDomain(fig, storage_path, file_type):
+def _render_figure(fig, storage_path, file_type):
     domain_name = "surface_currents_tilemap.{}".format(file_type)
     outfile = Path(storage_path, domain_name)
     FigureCanvasBase(fig).print_figure(
@@ -138,6 +165,8 @@ def _saveFiguresDomain(fig, storage_path, file_type):
     print(domain_name)
 
 
+# Coordinates of each tile (lon1, lon2, lat1, lat2)
+# NOTE: The tiles must be the same size to get consistent arrows between tiles
 tile_coords_dic = {
     'tile01': (-126.18, -125.43, 50.30, 50.80),
     'tile02': (-125.42, -124.67, 50.50, 51.00),
@@ -162,23 +191,25 @@ tile_coords_dic = {
 }
 
 if __name__ == "__main__":
-    root_dir = '/results/nowcast-sys/'
-    coordf = root_dir + 'grid/coordinates_seagrid_SalishSea201702.nc'
-    bathyf = root_dir + 'grid/bathymetry_201702.nc'
+    root_dir = Path('/results/nowcast-sys/')
+    coordf = root_dir / 'grid/coordinates_seagrid_SalishSea201702.nc'
+    bathyf = root_dir / 'grid/bathymetry_201702.nc'
 
     # Path to save the tile map
-    image_path = root_dir + 'salishsea-site/salishsea_site/static/img/'
+    image_path = root_dir / 'salishsea-site/salishsea_site/static/img/'
 
-    # Path to save the HTML fragment that makes the map clickable
-    htmlmap_path = root_dir + 'salishsea-site/salishsea_site/templates/salishseacast/'
+    # Path to save the HTML fragment that makes the map clickable.
+    htmlmap_path = root_dir / 'salishsea-site/salishsea_site/templates/salishseacast/'
 
+    # Un-themed version of the domain
+    fig_domain, ax_domain = _make_figure_domain(coordf, bathyf, theme=None)
+    _render_figure(fig_domain, image_path, "pdf")
+
+    # Themed version of the domain
     fig_domain, ax_domain = _make_figure_domain(
-        coordf, bathyf, tile_coords_dic, theme=None
+        coordf, bathyf, theme=nowcast.figures.website_theme
     )
-    _saveFiguresDomain(fig_domain, image_path, "pdf")
+    _render_figure(fig_domain, image_path, "svg")
 
-    fig_domain, ax_domain = _make_figure_domain(
-        coordf, bathyf, tile_coords_dic
-    )
-    _saveFiguresDomain(fig_domain, image_path, "svg")
-    _makeHTMLmap(fig_domain, ax_domain, tile_coords_dic, htmlmap_path)
+    # Save the html fragment that makes the map clickable.
+    _makeHTMLmap(fig_domain, ax_domain, htmlmap_path)

@@ -5,7 +5,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 
-#    http://www.apache.org/licenses/LICENSE-2.0
+#    https://www.apache.org/licenses/LICENSE-2.0
 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,9 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """SalishSeaCast worker that produces tiles of surface current visualization
-images for the web site from run results.
-
-The tile specifications and initial code implementation were provided by IOS.
+images for the web site from run results, as well as pdf format files.
 """
 import logging
 
@@ -27,23 +25,18 @@ import time
 from glob import glob
 from pathlib import Path
 
+import os
+import shlex
+import subprocess
 import multiprocessing
 from queue import Empty
 
-import shlex
-import subprocess
-
+from PyPDF2 import PdfFileMerger
 
 from matplotlib.backend_bases import FigureCanvasBase
 
-import os
 from nowcast.figures.publish import surface_current_tiles
-
-# Get the tiles dict
 from nowcast.figures.surface_current_domain import tile_coords_dic
-
-from PyPDF2 import PdfFileMerger
-from IPython import embed
 
 from nemo_nowcast import NowcastWorker
 
@@ -144,8 +137,8 @@ def make_surface_current_tiles(parsed_args, config, *args):
         u_list = glob(os.fspath(results_dir) + '/SalishSea_1h_*_grid_U.nc')
         v_list = glob(os.fspath(results_dir) + '/SalishSea_1h_*_grid_V.nc')
 
-        Vf = v_list[0]
-        Uf = u_list[0]
+        Uf = Path(u_list[0])
+        Vf = Path(v_list[0])
 
         with nc.Dataset(Uf) as dsU:
             max_time_index = dsU.dimensions['time_counter'].size
@@ -153,34 +146,43 @@ def make_surface_current_tiles(parsed_args, config, *args):
             calendar = dsU.variables['time_counter'].calendar
             sec = dsU.variables['time_counter'][:]
 
-        expansion_factor = 0.1  #10% overlap
+        expansion_factor = 0.1  # 10% overlap for each tile
 
-        ######################################
-        ##### BEGIN MULTIPROCESSING CODE #####
-        ######################################
-        # Add tasks to a joinable queue
-        q = multiprocessing.JoinableQueue()
-        for t_index in range(max_time_index):  #range(5,7):
-            task = (t_index, sec, units, calendar, run_date, Vf, Uf, coordf, mesh_maskf, bathyf, tile_coords_dic, expansion_factor, storage_path)
-            q.put(task)
-        # Spawn a set of worker processes
-        num_procs = 4
-        procs = []
-        for i in range(num_procs):
-            name = str(i)
-            p = multiprocessing.Process(target=_process_time_slice, args=(q,name))
-            procs.append(p)
-        # Start each one
-        for p in procs:
-            p.start()
-        # Wait until they complete
-        for p in procs:
-            p.join()
-        # Close the queue
-        q.close()
-        ######################################
-        ###### END MULTIPROCESSING CODE ######
-        ######################################
+        num_procs = 6
+        if num_procs == 1:
+            # Single proccessor mode
+            for t_index in range(max_time_index):
+                _callMakeFigure(
+                    t_index, sec, units, calendar, run_date, Uf, Vf, coordf,
+                    mesh_maskf, bathyf, tile_coords_dic, expansion_factor,
+                    storage_path
+                )
+        else:
+            # Multiprocessing mode
+            # Add tasks to a joinable queue
+            q = multiprocessing.JoinableQueue()
+            for t_index in range(max_time_index):
+                task = (
+                    t_index, sec, units, calendar, run_date, Uf, Vf, coordf,
+                    mesh_maskf, bathyf, tile_coords_dic, expansion_factor,
+                    storage_path
+                )
+                q.put(task)
+            # Spawn a set of worker processes
+            procs = []
+            for i in range(num_procs):
+                p = multiprocessing.Process(
+                    target=_process_time_slice, args=(q,)
+                )
+                procs.append(p)
+            # Start each one
+            for p in procs:
+                p.start()
+            # Wait until they complete
+            for p in procs:
+                p.join()
+            # Close the queue
+            q.close()
 
     tile_names = []
     for t in tile_coords_dic:
@@ -191,51 +193,68 @@ def make_surface_current_tiles(parsed_args, config, *args):
     config = {}
     return config
 
-def _process_time_slice(q,name):
+
+def _process_time_slice(q):
+    """
+    This is the worker function that gets called when multiprocessing is in used (num_procs > 1).
+    """
     while True:
         try:
             task = q.get_nowait()
-            t_index, sec, units, calendar, run_date, Vf, Uf, coordf, mesh_maskf, bathyf, tile_coords_dic, expansion_factor, storage_path = task
+            t_index, sec, units, calendar, run_date, Uf, Vf, coordf, mesh_maskf, bathyf, tile_coords_dic, expansion_factor, storage_path = task
 
-            ######################################
-            #### BEGIN INNER LOOP OVER TIME ######
-            ######################################
-            ## Here is the core of the work
-            date_stamp = _getTimeFileName(sec[t_index], units, calendar)
-
-            # make website theme version
-            fig_list, tile_names = surface_current_tiles.make_figure(
-                run_date, t_index, Vf, Uf, coordf, mesh_maskf, bathyf,
-                tile_coords_dic, expansion_factor
+            _callMakeFigure(
+                t_index, sec, units, calendar, run_date, Uf, Vf, coordf,
+                mesh_maskf, bathyf, tile_coords_dic, expansion_factor,
+                storage_path
             )
-            _saveFigures(fig_list, tile_names, storage_path, date_stamp, "png")
-            del fig_list
-
-            # make pdf version - different thickness
-            fig_list, tile_names = surface_current_tiles.make_figure(
-                run_date,
-                t_index,
-                Vf,
-                Uf,
-                coordf,
-                mesh_maskf,
-                bathyf,
-                tile_coords_dic,
-                expansion_factor,
-                theme=None
-            )
-            _saveFigures(fig_list, tile_names, storage_path, date_stamp, "pdf")
-            del fig_list
-            ######################################
-            ###### END INNER LOOP OVER TIME ######
-            ######################################
 
             q.task_done()
 
         except Empty:
             break
 
+
+def _callMakeFigure(
+    t_index, sec, units, calendar, run_date, Uf, Vf, coordf, mesh_maskf,
+    bathyf, tile_coords_dic, expansion_factor, storage_path
+):
+    """
+    Calls the make_figure() function in the surface_currents_tiles module for time index t_index.
+    make_figure() function is called once to produce figures with website theme and called again
+    to produce figures in pdf format.
+    """
+    date_stamp = _getTimeFileName(sec[t_index], units, calendar)
+
+    # make website theme version
+    fig_list, tile_names = surface_current_tiles.make_figure(
+        run_date, t_index, Uf, Vf, coordf, mesh_maskf, bathyf, tile_coords_dic,
+        expansion_factor
+    )
+    _render_figures(fig_list, tile_names, storage_path, date_stamp, "png")
+    del fig_list
+
+    # make pdf version
+    fig_list, tile_names = surface_current_tiles.make_figure(
+        run_date,
+        t_index,
+        Uf,
+        Vf,
+        coordf,
+        mesh_maskf,
+        bathyf,
+        tile_coords_dic,
+        expansion_factor,
+        theme=None
+    )
+    _render_figures(fig_list, tile_names, storage_path, date_stamp, "pdf")
+    del fig_list
+
+
 def _getTimeFileName(sec, units, calendar):
+    """
+    Constructs UTC timestamp for the figure file name.
+    """
     dt = nc.num2date(sec, units, calendar=calendar)
     dt_utc = datetime.datetime.combine(dt.date(), dt.time(),
                                        pytz.utc)  #add timezone to utc time
@@ -246,7 +265,7 @@ def _getTimeFileName(sec, units, calendar):
     return time_utc
 
 
-def _saveFigures(
+def _render_figures(
     fig_list,
     tile_names,
     storage_path,
@@ -261,10 +280,15 @@ def _saveFigures(
         FigureCanvasBase(fig).print_figure(
             outfile.as_posix(), facecolor=fig.get_facecolor()
         )
-        print(ftile)
+        logger.info(f'{outfile.as_posix()} saved')
 
 
 def _pdfMerger(path, allTiles):
+    """
+    For each tile combine the time series of pdf files into one file.
+    Delete the individual pdf files, leaving only the per tile files.
+    Shrink the merged pdf files.
+    """
     for tile in allTiles:
 
         file_list = glob(
@@ -273,21 +297,29 @@ def _pdfMerger(path, allTiles):
         file_list_sorted = sorted(file_list)
         result = os.fspath(path) + "/" + tile + ".pdf"
         print(result)
+        try:
+            merger = PdfFileMerger()
 
-        merger = PdfFileMerger()
+            for pdf in file_list_sorted:
+                merger.append(pdf)
 
-        for pdf in file_list_sorted:
-           merger.append(pdf)
+            merger.write(result)
+            merger.close()
 
-        merger.write(result)
-        merger.close()
+            for pdf in file_list_sorted:
+                os.remove(pdf)
 
+        except:
+            logger.warning('PDF merging failed for tile {}'.format(tile))
+
+        # Shrink the merged pdfs.
         _pdfShrink(Path(result))
 
-    # ToDo: delete the per-time-per-tile pdfs
 
 def _pdfShrink(filename):
-    # Strategy borrowed from make_plots.py
+    """
+    Strategy borrowed from make_plots.py to shrink pdf file 
+    """
     logger.debug(f'Starting PDF optimizing for {filename}')
     tmpfilename = filename.with_suffix('.temp')
     cmd = f'pdftocairo -pdf {filename} {tmpfilename}'
@@ -304,9 +336,7 @@ def _pdfShrink(filename):
         tmpfilename.rename(filename)
         logger.info(f'{filename} shrunk')
     except subprocess.CalledProcessError as e:
-        logger.warning(
-            'PDF shrinking failed, proceeding with unshrunk PDF'
-        )
+        logger.warning('PDF shrinking failed, proceeding with unshrunk PDF')
         logger.debug(f'pdftocairo return code: {e.returncode}')
         if e.output:
             logger.debug(e.output)
