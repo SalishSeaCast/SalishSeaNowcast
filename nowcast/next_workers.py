@@ -667,6 +667,16 @@ def after_watch_NEMO_hindcast(msg, config, checklist):
         'failure': [],
         'success': [],
     }
+    if msg.type == 'success':
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.download_results',
+                args=[
+                    msg.payload['hindcast']['host'], 'hindcast', '--run-date',
+                    msg.payload['hindcast']['run date']
+                ]
+            )
+        )
     return next_workers[msg.type]
 
 

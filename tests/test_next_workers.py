@@ -65,7 +65,9 @@ def config():
                     'run types': ['nowcast-dev'],
                 },
             },
-            'cloud host': 'west.cloud',
+            'hindcast hosts': {
+                'cedar': {},
+            },
         },
         'wave forecasts': {
             'host': 'west.cloud',
@@ -936,8 +938,7 @@ class TestAfterWatchNEMO:
         expected = NextWorker(
             'nowcast.workers.download_results',
             args=[
-                msg.payload[run_type]['host'],
-                msg.type.split()[1], '--run-date',
+                msg.payload[run_type]['host'], run_type, '--run-date',
                 msg.payload[run_type]['run date']
             ],
             host='localhost'
@@ -1014,13 +1015,39 @@ class TestAfterWatchNEMO_Hindcast:
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure',
-        'success',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_NEMO_hindcast(
             Message('watch_NEMO_hindcast', msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_NEMO_hindcast', 'success', {
+                    'hindcast': {
+                        'host': 'cedar',
+                        'run date': '2018-03-10',
+                        'completed': True
+                    }
+                }
+            ),
+        ]
+    )
+    def test_success_launch_download_results(self, msg, config, checklist):
+        workers = next_workers.after_watch_NEMO_hindcast(
+            msg, config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.download_results',
+            args=[
+                msg.payload['hindcast']['host'], 'hindcast', '--run-date',
+                msg.payload['hindcast']['run date']
+            ],
+            host='localhost'
+        )
+        assert expected in workers
 
 
 class TestAfterRunNEMO_Hindcast:
