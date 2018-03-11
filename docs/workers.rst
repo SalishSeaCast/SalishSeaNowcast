@@ -66,10 +66,6 @@ please read the code in the :py:mod:`nowcast.next_workers` module.
 Workers
 =======
 
-.. note::
-    A version conflict issue on readthedocs is presently preventing the worker module docstrings from rendering here.
-    Please see the module docstring in the source code at https://bitbucket.org/salishsea/salishseanowcast/src/tip/nowcast/workers/.
-
 .. _DownloadWeatherWorker:
 
 :kbd:`download_weather`
