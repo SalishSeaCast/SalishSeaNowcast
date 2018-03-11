@@ -1333,7 +1333,6 @@ class TestAfterDownloadResults:
             'failure forecast',
             'failure forecast2',
             'failure hindcast',
-            'success hindcast',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1433,6 +1432,28 @@ class TestAfterDownloadResults:
         expected = NextWorker(
             'nowcast.workers.update_forecast_datasets',
             args=['nemo', run_type, '--run-date', run_date],
+            host='localhost'
+        )
+        assert expected in workers
+
+    def test_success_hindcast_launch_split_results(self, config, checklist):
+        p_checklist = patch.dict(
+            checklist, {
+                'NEMO run': {
+                    'hindcast': {
+                        'run date': '2018-10-11'
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_download_results(
+                Message('download_results', f'success hindcast'), config,
+                checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.split_results',
+            args=['hindcast', '--run-date', '2018-10-11'],
             host='localhost'
         )
         assert expected in workers

@@ -984,8 +984,6 @@ def after_download_results(msg, config, checklist):
         'success hindcast': [],
     }
     if msg.type.startswith('success'):
-        if msg.type.endswith('hindcast'):
-            return next_workers[msg.type]
         run_type = msg.type.split()[1]
         run_date = checklist['NEMO run'][run_type]['run date']
         if run_type.startswith('nowcast'):
@@ -1022,6 +1020,13 @@ def after_download_results(msg, config, checklist):
                 NextWorker(
                     'nowcast.workers.update_forecast_datasets',
                     args=['nemo', run_type, '--run-date', run_date]
+                )
+            )
+        if run_type == 'hindcast':
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.split_results',
+                    args=[run_type, '--run-date', run_date]
                 )
             )
     return next_workers[msg.type]
