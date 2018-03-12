@@ -1029,8 +1029,7 @@ def after_download_results(msg, config, checklist):
         if run_type == 'hindcast':
             next_workers[msg.type].append(
                 NextWorker(
-                    'nowcast.workers.split_results',
-                    args=[run_type, '--run-date', run_date]
+                    'nowcast.workers.split_results', args=[run_type, run_date]
                 )
             )
     return next_workers[msg.type]
