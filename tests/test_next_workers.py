@@ -1477,7 +1477,7 @@ class TestAfterDownloadResults:
             )
         expected = NextWorker(
             'nowcast.workers.split_results',
-            args=['hindcast', '--run-date', '2018-10-11'],
+            args=['hindcast', '2018-10-11'],
             host='localhost'
         )
         assert expected in workers
