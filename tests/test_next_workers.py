@@ -1465,7 +1465,7 @@ class TestAfterDownloadResults:
             checklist, {
                 'NEMO run': {
                     'hindcast': {
-                        'run date': '2018-10-11'
+                        'run id': '11mar18hindcast'
                     }
                 }
             }
@@ -1477,7 +1477,7 @@ class TestAfterDownloadResults:
             )
         expected = NextWorker(
             'nowcast.workers.split_results',
-            args=['hindcast', '2018-10-11'],
+            args=['hindcast', '2018-03-11'],
             host='localhost'
         )
         assert expected in workers

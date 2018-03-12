@@ -989,6 +989,17 @@ def after_download_results(msg, config, checklist):
     }
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
+        if run_type == 'hindcast':
+            run_date = arrow.get(
+                checklist['NEMO run']['hindcast']['run id'][:7], 'DDMMMYY'
+            )
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.split_results',
+                    args=[run_type, run_date.format('YYYY-MM-DD')]
+                )
+            )
+            return next_workers[msg.type]
         run_date = checklist['NEMO run'][run_type]['run date']
         if run_type.startswith('nowcast'):
             next_workers[msg.type].append(
@@ -1024,12 +1035,6 @@ def after_download_results(msg, config, checklist):
                 NextWorker(
                     'nowcast.workers.update_forecast_datasets',
                     args=['nemo', run_type, '--run-date', run_date]
-                )
-            )
-        if run_type == 'hindcast':
-            next_workers[msg.type].append(
-                NextWorker(
-                    'nowcast.workers.split_results', args=[run_type, run_date]
                 )
             )
     return next_workers[msg.type]
