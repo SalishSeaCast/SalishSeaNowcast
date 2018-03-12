@@ -96,6 +96,7 @@ def download_results(parsed_args, config, *args):
     src_dir = run_type_results / results_dir
     src = f'{host_name}:{src_dir}'
     dest = Path(config['results archive'][run_type])
+    logger.info(f'downloading results from {src} to {dest}')
     cmd = shlex.split(f'scp -Cpr {src} {dest}')
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     results_archive_dir = dest / results_dir
