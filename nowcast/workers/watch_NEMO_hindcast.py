@@ -101,7 +101,7 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     tmp_run_dir = _get_tmp_run_dir(host_name, scratch_dir, run_id)
     run_info = _get_run_info(host_name, tmp_run_dir)
     while _is_running(host_name, users, job_id, run_id, tmp_run_dir, run_info):
-        time.sleep(60)
+        time.sleep(60 * 5)
     while not _is_completed(host_name, users, job_id, run_id):
         time.sleep(60)
     checklist = {
