@@ -133,7 +133,15 @@ class TestFailure:
 
 @patch('nowcast.workers.make_fvcom_boundary.logger', autospec=True)
 @patch(
-    'nowcast.workers.make_fvcom_boundary.OPPTools.nesting.make_type3_nesting_file',
+    'nowcast.workers.make_fvcom_boundary.OPPTools.nesting.read_metrics',
+    return_value=tuple(
+        'x y z tri nsiglev siglev nsiglay siglay inest xb yb '
+        'nemo_lon nemo_lat e1t e2t e3u_0 e3v_0 mbathy'.split()
+    ),
+    autospec=True
+)
+@patch(
+    'nowcast.workers.make_fvcom_boundary.OPPTools.nesting.make_type3_nesting_file2',
     autospec=True
 )
 class TestMakeFVCOMBoundary:
@@ -143,23 +151,30 @@ class TestMakeFVCOMBoundary:
     config = {
         'vhfr fvcom runs': {
             'run prep dir': 'fvcom-runs/',
-            'coupling dir': 'VHFR-FVCOM-config/coupling_nemo_cut/',
-            'nemo nz nodes file': 'nemo_nesting_zone_cut.txt',
-            'fvcom nz nodes file': 'nesting-zone-utm10-nodes.txt',
-            'fvcom nz centroids file': 'nesting-zone-utm10-centr.txt',
-            'grid interpolant files': {
-                'ui': 'interpolant_indices_u_i_cut.txt',
-                'uj': 'interpolant_indices_u_j_cut.txt',
-                'uw': 'interpolant_weights_u_cut.txt',
-                'vi': 'interpolant_indices_v_i_cut.txt',
-                'vj': 'interpolant_indices_v_j_cut.txt',
-                'vw': 'interpolant_weights_v_cut.txt',
+            'nemo coupling': {
+                'coupling dir':
+                    'VHFR-FVCOM-config/coupling_nemo_cut/',
+                'fvcom nest indices file':
+                    'vhfr_low_v2_nesting_indices.txt',
+                'fvcom nest ref line file':
+                    'vhfr_low_v2_nesting_innerboundary.txt',
+                'nemo cut i range': [225, 369],
+                'nemo cut j range': [340, 561],
+                'transition zone width':
+                    8500,
+                'tanh dl':
+                    2,
+                'tanh du':
+                    2,
+                'nemo coordinates':
+                    'grid/coordinates_seagrid_SalishSea201702.nc',
+                'nemo mesh mask':
+                    'grid/mesh_mask201702.nc',
             },
-            'nemo vertical weights file': 'nemo_vertical_weight_cut.mat',
-            'nemo azimuth file': 'nemo_azimuth_cut.txt',
             'fvcom grid': {
                 'grid dir': 'VHFR-FVCOM-config/grid/',
                 'grid file': 'vhfr_low_v2_utm10_grd.dat',
+                'utm zone': 10,
                 'depths file': 'vhfr_low_v2_utm10_dep.dat',
                 'sigma file': 'vhfr_low_v2_sigma.dat',
             },
@@ -180,7 +195,9 @@ class TestMakeFVCOMBoundary:
         'nowcast',
         'forecast',
     ])
-    def test_checklist(self, m_mk_nest_file, m_logger, run_type):
+    def test_checklist(
+        self, m_mk_nest_file2, m_read_metrics, m_logger, run_type
+    ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
             run_type=run_type,
@@ -200,8 +217,9 @@ class TestMakeFVCOMBoundary:
             ('forecast', '2018-01-09 00:00:00', '2018-01-10 12:00:00'),
         ]
     )
-    def test_make_type3_nesting_file(
-        self, m_mk_nest_file, m_logger, run_type, time_start, time_end
+    def test_nesting_read_metrics(
+        self, m_mk_nest_file2, m_read_metrics, m_logger, run_type, time_start,
+        time_end
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -209,38 +227,69 @@ class TestMakeFVCOMBoundary:
             run_date=arrow.get('2018-01-08')
         )
         with patch('nowcast.workers.make_fvcom_boundary.Path.mkdir'):
-            checklist = make_fvcom_boundary.make_fvcom_boundary(
-                parsed_args, self.config
-            )
-        input_dir = Path(self.config['vhfr fvcom runs']['input dir'])
-        coupling_dir = Path(self.config['vhfr fvcom runs']['coupling dir'])
+            make_fvcom_boundary.make_fvcom_boundary(parsed_args, self.config)
+        coupling_dir = Path(
+            self.config['vhfr fvcom runs']['nemo coupling']['coupling dir']
+        )
         grid_dir = Path(
             self.config['vhfr fvcom runs']['fvcom grid']['grid dir']
         )
-        m_mk_nest_file.assert_called_once_with(
-            fout=os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc'),
-            fnest_nemo=os.fspath(coupling_dir / 'nemo_nesting_zone_cut.txt'),
-            fnest_nodes=os.fspath(
-                coupling_dir / 'nesting-zone-utm10-nodes.txt'
-            ),
-            fnest_elems=os.fspath(
-                coupling_dir / 'nesting-zone-utm10-centr.txt'
-            ),
-            interp_uv=SimpleNamespace(
-                ui=os.fspath(coupling_dir / 'interpolant_indices_u_i_cut.txt'),
-                uj=os.fspath(coupling_dir / 'interpolant_indices_u_j_cut.txt'),
-                uw=os.fspath(coupling_dir / 'interpolant_weights_u_cut.txt'),
-                vi=os.fspath(coupling_dir / 'interpolant_indices_v_i_cut.txt'),
-                vj=os.fspath(coupling_dir / 'interpolant_indices_v_j_cut.txt'),
-                vw=os.fspath(coupling_dir / 'interpolant_weights_v_cut.txt')
-            ),
-            nemo_vertical_weight_file=os.fspath(
-                coupling_dir / 'nemo_vertical_weight_cut.mat'
-            ),
-            nemo_azimuth_file=os.fspath(coupling_dir / 'nemo_azimuth_cut.txt'),
+        m_read_metrics.assert_called_once_with(
             fgrd=os.fspath(grid_dir / 'vhfr_low_v2_utm10_grd.dat'),
             fbathy=os.fspath(grid_dir / 'vhfr_low_v2_utm10_dep.dat'),
             fsigma=os.fspath(grid_dir / 'vhfr_low_v2_sigma.dat'),
+            fnest=os.fspath(coupling_dir / 'vhfr_low_v2_nesting_indices.txt'),
+            frefline=os.fspath(
+                coupling_dir / 'vhfr_low_v2_nesting_innerboundary.txt'
+            ),
+            fnemocoord='grid/coordinates_seagrid_SalishSea201702.nc',
+            fnemomask='grid/mesh_mask201702.nc',
+            nemo_cut_i=[225, 369],
+            nemo_cut_j=[340, 561]
+        )
+
+    @pytest.mark.parametrize(
+        'run_type, time_start, time_end', [
+            ('nowcast', '2018-01-08 00:00:00', '2018-01-09 00:00:00'),
+            ('forecast', '2018-01-09 00:00:00', '2018-01-10 12:00:00'),
+        ]
+    )
+    def test_nesting_make_type3_nesting_file2(
+        self, m_mk_nest_file2, m_read_metrics, m_logger, run_type, time_start,
+        time_end
+    ):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2018-01-08')
+        )
+        with patch('nowcast.workers.make_fvcom_boundary.Path.mkdir'):
+            make_fvcom_boundary.make_fvcom_boundary(parsed_args, self.config)
+        input_dir = Path(self.config['vhfr fvcom runs']['input dir'])
+        m_mk_nest_file2.assert_called_once_with(
+            fout=os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc'),
+            x='x',
+            y='y',
+            z='z',
+            tri='tri',
+            nsiglev='nsiglev',
+            siglev='siglev',
+            nsiglay='nsiglay',
+            siglay='siglay',
+            utmzone=10,
+            inest='inest',
+            xb='xb',
+            yb='yb',
+            rwidth=8500,
+            dl=2,
+            du=2,
+            nemo_lon='nemo_lon',
+            nemo_lat='nemo_lat',
+            e1t='e1t',
+            e2t='e2t',
+            e3u_0='e3u_0',
+            e3v_0='e3v_0',
+            mbathy='mbathy',
             input_dir=f'SalishSea/{run_type}',
             time_start=time_start,
             time_end=time_end

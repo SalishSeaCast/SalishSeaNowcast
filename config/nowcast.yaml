@@ -594,32 +594,34 @@ vhfr fvcom runs:
   # Directory on compute host where files and directories necessary to
   # prepare and execute the fvcom runs are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/
-  # Directory on compute host where FVCOM-NEMO coupling files are stored
-  coupling dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/
-  # NEMO nesting zone nodes file (stored in coupling directory)
-  nemo nz nodes file: nemo_nesting_zone_cut.txt
-  # FVCOM nesting zone nodes file (stored in coupling directory)
-  fvcom nz nodes file: nesting-zone-utm10-nodes.txt
-  # FVCOM nesting zone element centroids file (stored in coupling directory)
-  fvcom nz centroids file: nesting-zone-utm10-centr.txt
-  # Interpolant files for transformation of u and v current components from
-  # NEMO grid to FVCOM element centroids (stored in coupling directory)
-  grid interpolant files:
-    ui: interpolant_indices_u_i_cut.txt
-    uj: interpolant_indices_u_j_cut.txt
-    uw: interpolant_weights_u_cut.txt
-    vi: interpolant_indices_v_i_cut.txt
-    vj: interpolant_indices_v_j_cut.txt
-    vw: interpolant_weights_v_cut.txt
-  # NEMO layer thickness for each grid point for u and v
-  nemo vertical weights file: nemo_vertical_weight_cut.mat
-  # NEMO grid orientation
-  nemo azimuth file: nemo_azimuth_cut.txt
+
+  nemo coupling:
+    # Directory on compute host where FVCOM-NEMO coupling files are stored
+    coupling dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/
+    # File containing FVCOM indices for the NEMO nesting zone
+    fvcom nest indices file: vhfr_low_v2_nesting_indices.txt
+    # File containing nesting zone reference line for weights calculation
+    fvcom nest ref line file: vhfr_low_v2_nesting_innerboundary.txt
+    # NEMO index ranges contained in the boundary files
+    nemo cut i range: [225, 369]
+    nemo cut j range: [340, 561]
+    # Transition zone width [m] over which weights rise from 0 to 1
+    transition zone width: 8500
+    # Transition profile tanh function parameters
+    tanh dl: 2
+    tanh du: 2
+    # NEMO coordinates file
+    nemo coordinates: /nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc
+    # NEMO mesh mask file
+    nemo mesh mask: /nemoShare/MEOPAR/nowcast-sys/grid/mesh_mask201702.nc
+
   fvcom grid:
     # Directory on compute host where FVCOM grid files are stored
     grid dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/
     # Grid file
     grid file: vhfr_low_v2_utm10_grd.dat
+    # UTM zone:
+    utm zone: 10
     # Depths file
     depths file: vhfr_low_v2_utm10_dep.dat
     # Sigma levels file
@@ -630,6 +632,7 @@ vhfr fvcom runs:
     sponge file: vhfr_low_v2_nospg_spg.dat
     # Open boundaries nodes list file
     obc nodes file: vhfr_low_v2_obc.dat
+
   # Directory on compute host where FVCOM input files are stored
   input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
   # Template for boundary forcing file names

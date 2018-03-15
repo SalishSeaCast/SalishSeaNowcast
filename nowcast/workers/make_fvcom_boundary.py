@@ -128,22 +128,6 @@ def make_fvcom_boundary(parsed_args, config, *args):
     bdy_file = bdy_file_tmpl.format(
         run_type=run_type, yyyymmdd=run_date.format('YYYYMMDD')
     )
-    coupling_dir = Path(config['vhfr fvcom runs']['coupling dir'])
-    nemo_nz_nodes_file = Path(config['vhfr fvcom runs']['nemo nz nodes file'])
-    fvcom_nz_nodes_file = Path(
-        config['vhfr fvcom runs']['fvcom nz nodes file']
-    )
-    fvcom_nz_centroids_file = Path(
-        config['vhfr fvcom runs']['fvcom nz centroids file']
-    )
-    interpolant_files = config['vhfr fvcom runs']['grid interpolant files']
-    interpolants = SimpleNamespace()
-    for attr, filename in interpolant_files.items():
-        setattr(interpolants, attr, os.fspath(coupling_dir / filename))
-    nemo_vert_wrights_file = Path(
-        config['vhfr fvcom runs']['nemo vertical weights file']
-    )
-    nemo_azimuth_file = Path(config['vhfr fvcom runs']['nemo azimuth file'])
     grid_dir = Path(config['vhfr fvcom runs']['fvcom grid']['grid dir'])
     fvcom_grid_file = Path(
         config['vhfr fvcom runs']['fvcom grid']['grid file']
@@ -154,9 +138,38 @@ def make_fvcom_boundary(parsed_args, config, *args):
     fvcom_sigma_file = Path(
         config['vhfr fvcom runs']['fvcom grid']['sigma file']
     )
+    coupling_dir = Path(
+        config['vhfr fvcom runs']['nemo coupling']['coupling dir']
+    )
+    fvcom_nest_indices_file = Path(
+        config['vhfr fvcom runs']['nemo coupling']['fvcom nest indices file']
+    )
+    fvcom_nest_ref_line_file = Path(
+        config['vhfr fvcom runs']['nemo coupling']['fvcom nest ref line file']
+    )
     nemo_bdy_dir = Path(
         config['vhfr fvcom runs']['run types'][run_type]
         ['nemo boundary results']
+    )
+    (
+        x, y, z, tri, nsiglev, siglev, nsiglay, siglay, inest, xb, yb,
+        nemo_lon, nemo_lat, e1t, e2t, e3u_0, e3v_0, mbathy
+    ) = OPPTools.nesting.read_metrics(
+        fgrd=os.fspath(grid_dir / fvcom_grid_file),
+        fbathy=os.fspath(grid_dir / fvcom_depths_file),
+        fsigma=os.fspath(grid_dir / fvcom_sigma_file),
+        fnest=os.fspath(coupling_dir / fvcom_nest_indices_file),
+        frefline=os.fspath(coupling_dir / fvcom_nest_ref_line_file),
+        fnemocoord=(
+            config['vhfr fvcom runs']['nemo coupling']['nemo coordinates']
+        ),
+        fnemomask=config['vhfr fvcom runs']['nemo coupling']['nemo mesh mask'],
+        nemo_cut_i=(
+            config['vhfr fvcom runs']['nemo coupling']['nemo cut i range']
+        ),
+        nemo_cut_j=(
+            config['vhfr fvcom runs']['nemo coupling']['nemo cut j range']
+        )
     )
     time_start_offsets = {
         'nowcast': timedelta(hours=0),
@@ -168,19 +181,32 @@ def make_fvcom_boundary(parsed_args, config, *args):
         'forecast': timedelta(hours=60),
     }
     time_end = run_date + time_end_offsets[run_type]
-    OPPTools.nesting.make_type3_nesting_file(
+    OPPTools.nesting.make_type3_nesting_file2(
         fout=os.fspath(fvcom_input_dir / bdy_file),
-        fnest_nemo=os.fspath(coupling_dir / nemo_nz_nodes_file),
-        fnest_nodes=os.fspath(coupling_dir / fvcom_nz_nodes_file),
-        fnest_elems=os.fspath(coupling_dir / fvcom_nz_centroids_file),
-        interp_uv=interpolants,
-        nemo_vertical_weight_file=os.fspath(
-            coupling_dir / nemo_vert_wrights_file
+        x=x,
+        y=y,
+        z=z,
+        tri=tri,
+        nsiglev=nsiglev,
+        siglev=siglev,
+        nsiglay=nsiglay,
+        siglay=siglay,
+        utmzone=config['vhfr fvcom runs']['fvcom grid']['utm zone'],
+        inest=inest,
+        xb=xb,
+        yb=yb,
+        rwidth=(
+            config['vhfr fvcom runs']['nemo coupling']['transition zone width']
         ),
-        nemo_azimuth_file=os.fspath(coupling_dir / nemo_azimuth_file),
-        fgrd=os.fspath(grid_dir / fvcom_grid_file),
-        fbathy=os.fspath(grid_dir / fvcom_depths_file),
-        fsigma=os.fspath(grid_dir / fvcom_sigma_file),
+        dl=config['vhfr fvcom runs']['nemo coupling']['tanh dl'],
+        du=config['vhfr fvcom runs']['nemo coupling']['tanh du'],
+        nemo_lon=nemo_lon,
+        nemo_lat=nemo_lat,
+        e1t=e1t,
+        e2t=e2t,
+        e3u_0=e3u_0,
+        e3v_0=e3v_0,
+        mbathy=mbathy,
         input_dir=os.fspath(nemo_bdy_dir),
         time_start=time_start.format('YYYY-MM-DD HH:mm:ss'),
         time_end=time_end.format('YYYY-MM-DD HH:mm:ss')
