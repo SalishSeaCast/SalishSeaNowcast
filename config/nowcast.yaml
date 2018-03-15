@@ -420,11 +420,11 @@ run:
       # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
-      envvars: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/etc/conda/activate.d/envvars.sh
+      envvars: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/etc/conda/activate.d/envvars.sh
       # Python interpreter on compute host in an environment with all
       # dependencies installed. Used to, for example, launch run_NEMO and
       # watch_NEMO workers.
-      python: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/python3
+      python: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/python3
       # Location on the compute host of the nowcast system config file
       config file: /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       # Directory on compute host where files (e.g. namelist.time) and symlinks
@@ -435,7 +435,7 @@ run:
       grid dir: /nemoShare/MEOPAR/nowcast-sys/grid/
       # Path to the salishsea command processor executable to use in the run
       # script
-      salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
+      salishsea_cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea
       # Executable to use to submit the SalishSeaNEMO.sh script to be run
       job exec cmd: bash
       # Run type specific configurations for the runs that are executed on the
@@ -573,7 +573,7 @@ wave forecasts:
   # Path to the wwatch3 executables directory
   wwatch3 exe path: /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe
   # Path to the salishsea command processor executable to use in the run script
-  salishsea cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/salishsea
+  salishsea cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea
   # Directories on compute host where results are stored, keyed by run type
   results:
     forecast: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast/
@@ -672,7 +672,7 @@ vhfr fvcom runs:
   # and MPI slots specifications.
   mpi hosts file: ${HOME}/mpi_hosts.fvcom
   # Path to the FVCOM command processor executable to use in the run script
-  fvc_cmd: /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/fvc
+  fvc_cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/fvc
   # Run type specific configurations for the runs that are executed on the
   # compute host; keyed by run type
   run types:
