@@ -42,6 +42,7 @@ dependencies:
   - pillow
   - pip
   - pygrib
+  - pyproj
   - python=3.6
   - pyyaml
   - pyzmq
