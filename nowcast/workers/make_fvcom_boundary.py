@@ -21,7 +21,6 @@ import logging
 import os
 from pathlib import Path
 import shutil
-from types import SimpleNamespace
 
 import arrow
 from nemo_nowcast import NowcastWorker
@@ -47,7 +46,7 @@ def main():
         'run_type',
         choices={'nowcast', 'forecast'},
         help='''
-        Type of run to make boundary files for:
+        Type of run to make boundary file for:
         'nowcast' means run for present UTC day (after NEMO nowcast run)
         'forecast' means updated forecast run 
         (next 36h UTC, after NEMO forecast run)
@@ -56,7 +55,7 @@ def main():
     worker.cli.add_date_option(
         '--run-date',
         default=arrow.now().floor('day'),
-        help='Date to make boundary files for.'
+        help='Date to make boundary file for.'
     )
     worker.run(make_fvcom_boundary, success, failure)
 
@@ -214,7 +213,12 @@ def make_fvcom_boundary(parsed_args, config, *args):
     logger.debug(
         f'Stored VHFR FVCOM open boundary file: {fvcom_input_dir/bdy_file}'
     )
-    checklist = os.fspath(fvcom_input_dir / bdy_file)
+    checklist = {
+        run_type: {
+            'run date': run_date.format('YYYY-MM-DD'),
+            'open boundary file': os.fspath(fvcom_input_dir / bdy_file)
+        }
+    }
     return checklist
 
 

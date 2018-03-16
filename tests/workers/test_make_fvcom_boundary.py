@@ -151,6 +151,13 @@ class TestMakeFVCOMBoundary:
     config = {
         'vhfr fvcom runs': {
             'run prep dir': 'fvcom-runs/',
+            'fvcom grid': {
+                'grid dir': 'VHFR-FVCOM-config/grid/',
+                'grid file': 'vhfr_low_v2_utm10_grd.dat',
+                'utm zone': 10,
+                'depths file': 'vhfr_low_v2_utm10_dep.dat',
+                'sigma file': 'vhfr_low_v2_sigma.dat',
+            },
             'nemo coupling': {
                 'coupling dir':
                     'VHFR-FVCOM-config/coupling_nemo_cut/',
@@ -170,13 +177,6 @@ class TestMakeFVCOMBoundary:
                     'grid/coordinates_seagrid_SalishSea201702.nc',
                 'nemo mesh mask':
                     'grid/mesh_mask201702.nc',
-            },
-            'fvcom grid': {
-                'grid dir': 'VHFR-FVCOM-config/grid/',
-                'grid file': 'vhfr_low_v2_utm10_grd.dat',
-                'utm zone': 10,
-                'depths file': 'vhfr_low_v2_utm10_dep.dat',
-                'sigma file': 'vhfr_low_v2_sigma.dat',
             },
             'input dir': 'fvcom-runs/input',
             'boundary file template': 'bdy_{run_type}_btrp_{yyyymmdd}.nc',
@@ -208,7 +208,14 @@ class TestMakeFVCOMBoundary:
                 parsed_args, self.config
             )
         input_dir = Path(self.config['vhfr fvcom runs']['input dir'])
-        expected = os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc')
+        expected = {
+            run_type: {
+                'run date':
+                    '2018-01-08',
+                'open boundary file':
+                    os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc')
+            }
+        }
         assert checklist == expected
 
     @pytest.mark.parametrize(
