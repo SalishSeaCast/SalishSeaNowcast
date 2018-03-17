@@ -632,6 +632,9 @@ vhfr fvcom runs:
     nemo coordinates: /nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc
     # NEMO mesh mask file
     nemo mesh mask: /nemoShare/MEOPAR/nowcast-sys/grid/mesh_mask201702.nc
+    # Template for boundary forcing file names
+    # **Must be quoted to project {} characters**
+    boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
 
   atmospheric forcing:
     # Directory on host where make_fccom_atmos_forcing worker runs where HRDPS GRIB files are stored
@@ -646,9 +649,6 @@ vhfr fvcom runs:
 
   # Directory on compute host where FVCOM input files are stored
   input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
-  # Template for boundary forcing file names
-  # **Must be quoted to project {} characters**
-  boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
   # Path and name of file on compute host that defines the tide gauge stations
   # to produce point outputs at
   output station timeseries: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vhfr_low_v2_utm10_station.dat

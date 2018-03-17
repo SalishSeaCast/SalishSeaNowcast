@@ -177,9 +177,10 @@ class TestMakeFVCOMBoundary:
                     'grid/coordinates_seagrid_SalishSea201702.nc',
                 'nemo mesh mask':
                     'grid/mesh_mask201702.nc',
+                'boundary file template':
+                    'bdy_{run_type}_btrp_{yyyymmdd}.nc',
             },
             'input dir': 'fvcom-runs/input',
-            'boundary file template': 'bdy_{run_type}_btrp_{yyyymmdd}.nc',
             'run types': {
                 'nowcast': {
                     'nemo boundary results': 'SalishSea/nowcast/',
