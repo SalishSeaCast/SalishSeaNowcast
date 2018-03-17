@@ -219,7 +219,7 @@ class TestEditNamelistTime:
         )
         assert m_cmd_in_subprocess.call_args_list[1] == call(
             'scp /tmp/patched_hindcast.namelist.time '
-            'cedar:hindcast-sys/runs/patched_namelist.time'
+            'cedar:hindcast-sys/runs/namelist.time'
         )
 
 
