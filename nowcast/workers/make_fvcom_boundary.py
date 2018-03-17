@@ -123,7 +123,9 @@ def make_fvcom_boundary(parsed_args, config, *args):
         # input/ directory doesn't exist, and that's what we wanted
         pass
     fvcom_input_dir.mkdir()
-    bdy_file_tmpl = config['vhfr fvcom runs']['boundary file template']
+    bdy_file_tmpl = (
+        config['vhfr fvcom runs']['nemo coupling']['boundary file template']
+    )
     bdy_file = bdy_file_tmpl.format(
         run_type=run_type, yyyymmdd=run_date.format('YYYYMMDD')
     )
