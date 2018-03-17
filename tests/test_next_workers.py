@@ -983,7 +983,6 @@ class TestAfterMakeFVCOMBoundary:
             'crash',
             'failure nowcast',
             'failure forecast',
-            'success forecast',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -995,137 +994,72 @@ class TestAfterMakeFVCOMBoundary:
     @pytest.mark.parametrize('run_type', [
         'nowcast',
     ])
-    def test_success_launch_run_fvcom(self, run_type, config, checklist):
+    def test_success_launch_make_fvcom_atmos_forcing(
+        self, run_type, config, checklist
+    ):
+
+        msg = Message(
+            'make_fvcom_boundary',
+            f'success {run_type}',
+            payload={
+                run_type: {
+                    'run date': '2018-03-16',
+                    'open boundary file': 'input/bdy_nowcast_btrp_20180316.nc'
+                }
+            }
+        )
         workers = next_workers.after_make_fvcom_boundary(
-            Message('make_fvcom_boundary', f'success {run_type}'), config,
-            checklist
+            msg, config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.make_fvcom_atmos_forcing',
+            args=[run_type, '--run-date', '2018-03-16'],
+            host='localhost'
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+    ])
+    def test_success_launch_run_fvcom(self, run_type, config, checklist):
+        """
+        TODO: Move to after_make_fvcom_atmos_forcing when run_fvcom is capable of handling atmos forcing
+        """
+        msg = Message(
+            'make_fvcom_boundary',
+            f'success {run_type}',
+            payload={
+                run_type: {
+                    'run date': '2018-03-16',
+                    'open boundary file': 'input/bdy_nowcast_btrp_20180316.nc'
+                }
+            }
+        )
+        workers = next_workers.after_make_fvcom_boundary(
+            msg, config, checklist
         )
         expected = NextWorker(
             'nowcast.workers.run_fvcom',
-            args=['west.cloud', run_type],
+            args=['west.cloud', run_type, '--run-date', '2018-03-16'],
             host='west.cloud'
         )
-        assert workers[0] == expected
-
-
-class TestAfterWatchNEMO_Hindcast:
-    """Unit tests for the after_watch_NEMO_hindcast function.
-    """
-
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure',
-    ])
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_watch_NEMO_hindcast(
-            Message('watch_NEMO_hindcast', msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        'msg', [
-            Message(
-                'watch_NEMO_hindcast', 'success', {
-                    'hindcast': {
-                        'host': 'cedar',
-                        'run date': '2018-03-10',
-                        'completed': True
-                    }
-                }
-            ),
-        ]
-    )
-    def test_success_launch_download_results(self, msg, config, checklist):
-        workers = next_workers.after_watch_NEMO_hindcast(
-            msg, config, checklist
-        )
-        expected = NextWorker(
-            'nowcast.workers.download_results',
-            args=[
-                msg.payload['hindcast']['host'], 'hindcast', '--run-date',
-                msg.payload['hindcast']['run date']
-            ],
-            host='localhost'
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize(
-        'msg', [
-            Message(
-                'watch_NEMO_hindcast', 'success', {
-                    'hindcast': {
-                        'host': 'cedar',
-                        'run date': '2018-03-12',
-                        'completed': True
-                    }
-                }
-            ),
-        ]
-    )
-    def test_success_launch_watch_NEMO_hindcast(self, msg, config, checklist):
-        workers = next_workers.after_watch_NEMO_hindcast(
-            msg, config, checklist
-        )
-        expected = NextWorker(
-            'nowcast.workers.watch_NEMO_hindcast',
-            args=[msg.payload['hindcast']['host']],
-            host='localhost'
-        )
         assert expected in workers
 
 
-class TestAfterRunNEMO_Hindcast:
-    """Unit tests for the after_run_NEMO_hindcast function.
-    """
-
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure',
-        'success',
-    ])
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_run_NEMO_hindcast(
-            Message('run_NEMO_hindcast', msg_type), config, checklist
-        )
-        assert workers == []
-
-
-class TestAfterRunFVCOM:
-    """Unit tests for the after_run_fvcom function.
+class TestAfterMakeFVCOMAtmosForcing:
+    """Unit tests for the after_make_fvcom_boundary function.
     """
 
     @pytest.mark.parametrize(
         'msg_type', [
             'crash',
             'failure nowcast',
-            'failure forecast',
             'success nowcast',
-            'success forecast',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_run_fvcom(
-            Message('run_fvcom', msg_type), config, checklist
-        )
-        assert workers == []
-
-
-class TestAfterMakeWW3WindFile:
-    """Unit tests for the after_make_ww3_wind_file function.
-    """
-
-    @pytest.mark.parametrize(
-        'msg_type', [
-            'crash',
-            'failure forecast2',
-            'failure forecast',
-            'success forecast2',
-            'success forecast',
-        ]
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_make_ww3_wind_file(
-            Message('make_ww3_wind_file', msg_type), config, checklist
+        workers = next_workers.after_make_fvcom_atmos_forcing(
+            Message('make_fvcom_atmos_forcing', msg_type), config, checklist
         )
         assert workers == []
 
@@ -1212,6 +1146,26 @@ class TestAfterWatchFVCOM:
             host='localhost'
         )
         assert expected in workers
+
+
+class TestAfterMakeWW3WindFile:
+    """Unit tests for the after_make_ww3_wind_file function.
+    """
+
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure forecast2',
+            'failure forecast',
+            'success forecast2',
+            'success forecast',
+        ]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_ww3_wind_file(
+            Message('make_ww3_wind_file', msg_type), config, checklist
+        )
+        assert workers == []
 
 
 class TestAfterMakeWW3currentFile:
@@ -1343,6 +1297,88 @@ class TestAfterWatchWW3:
             host='localhost'
         )
         assert expected in workers
+
+
+class TestAfterWatchNEMO_Hindcast:
+    """Unit tests for the after_watch_NEMO_hindcast function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_watch_NEMO_hindcast(
+            Message('watch_NEMO_hindcast', msg_type), config, checklist
+        )
+        assert workers == []
+
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_NEMO_hindcast', 'success', {
+                    'hindcast': {
+                        'host': 'cedar',
+                        'run date': '2018-03-10',
+                        'completed': True
+                    }
+                }
+            ),
+        ]
+    )
+    def test_success_launch_download_results(self, msg, config, checklist):
+        workers = next_workers.after_watch_NEMO_hindcast(
+            msg, config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.download_results',
+            args=[
+                msg.payload['hindcast']['host'], 'hindcast', '--run-date',
+                msg.payload['hindcast']['run date']
+            ],
+            host='localhost'
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_NEMO_hindcast', 'success', {
+                    'hindcast': {
+                        'host': 'cedar',
+                        'run date': '2018-03-12',
+                        'completed': True
+                    }
+                }
+            ),
+        ]
+    )
+    def test_success_launch_watch_NEMO_hindcast(self, msg, config, checklist):
+        workers = next_workers.after_watch_NEMO_hindcast(
+            msg, config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.watch_NEMO_hindcast',
+            args=[msg.payload['hindcast']['host']],
+            host='localhost'
+        )
+        assert expected in workers
+
+
+class TestAfterRunNEMO_Hindcast:
+    """Unit tests for the after_run_NEMO_hindcast function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_run_NEMO_hindcast(
+            Message('run_NEMO_hindcast', msg_type), config, checklist
+        )
+        assert workers == []
 
 
 class TestAfterDownloadResults:

@@ -61,6 +61,7 @@ Clone the following repos into :file:`/results/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /results/nowcast-sys/
+    $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
 
 

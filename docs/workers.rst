@@ -170,6 +170,13 @@ Workers
     :members: main
 
 
+:kbd:`make_fvcom_atmos_forcing`
+-------------------------------
+
+.. automodule:: nowcast.workers.make_fvcom_atmos_forcing
+    :members: main
+
+
 :kbd:`run_fvcom`
 ----------------
 

@@ -595,6 +595,24 @@ vhfr fvcom runs:
   # prepare and execute the fvcom runs are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/
 
+  fvcom grid:
+    # Directory on compute host where FVCOM grid files are stored
+    grid dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/
+    # Grid file
+    grid file: vhfr_low_v2_utm10_grd.dat
+    # UTM zone:
+    utm zone: 10
+    # Depths file
+    depths file: vhfr_low_v2_utm10_dep.dat
+    # Sigma levels file
+    sigma file: vhfr_low_v2_sigma.dat
+    # Coriolis file
+    coriolis file: vhfr_low_v2_utm10_cor.dat
+    # Sponge file
+    sponge file: vhfr_low_v2_nospg_spg.dat
+    # Open boundaries nodes list file
+    obc nodes file: vhfr_low_v2_obc.dat
+
   nemo coupling:
     # Directory on compute host where FVCOM-NEMO coupling files are stored
     coupling dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/
@@ -615,23 +633,16 @@ vhfr fvcom runs:
     # NEMO mesh mask file
     nemo mesh mask: /nemoShare/MEOPAR/nowcast-sys/grid/mesh_mask201702.nc
 
-  fvcom grid:
-    # Directory on compute host where FVCOM grid files are stored
-    grid dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/
-    # Grid file
-    grid file: vhfr_low_v2_utm10_grd.dat
-    # UTM zone:
-    utm zone: 10
-    # Depths file
-    depths file: vhfr_low_v2_utm10_dep.dat
-    # Sigma levels file
-    sigma file: vhfr_low_v2_sigma.dat
-    # Coriolis file
-    coriolis file: vhfr_low_v2_utm10_cor.dat
-    # Sponge file
-    sponge file: vhfr_low_v2_nospg_spg.dat
-    # Open boundaries nodes list file
-    obc nodes file: vhfr_low_v2_obc.dat
+  atmospheric forcing:
+    # Directory on host where make_fccom_atmos_forcing worker runs where HRDPS GRIB files are stored
+    hrdps grib dir: /results/forcing/atmospheric/GEM2.5/GRIB/
+    # Directory on host where make_fccom_atmos_forcing worker runs where FVCOM atmospheric forcing files are stored
+    fvcom atmos dir: /results/forcing/atmospheric/GEM2.5/vhfr-fvcom
+    # Template for atmospheric forcing file names
+    # **Must be quoted to project {} characters**
+    atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
+    # Directory on host where make_fvcom_atmos_forcing worker runs where FVCOM grid files are stored
+    fvcom grid dir: /results/nowcast-sys/FVCOM-VHFR-config/grid/
 
   # Directory on compute host where FVCOM input files are stored
   input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
@@ -984,6 +995,12 @@ message registry:
       failure nowcast: nowcast FVCOM boundary condition file creation failed
       failure forecast: forecast FVCOM boundary condition file creation failed
       crash: make_fvcom_boundary worker crashed
+
+    make_fvcom_atmos_forcing:
+      checklist key: FVCOM atmospheric forcing
+      success nowcast: nowcast FVCOM atmospheric forcing file created
+      failure nowcast: nowcast FVCOM atmospheric forcing file creation failed
+      crash: make_fvcom_atmos_forcing worker crashed
 
     run_fvcom:
       checklist key: FVCOM run
