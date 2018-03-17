@@ -50,10 +50,11 @@ def config():
                 'sponge file': 'vhfr_low_v2_nospg_spg.dat',
                 'obc nodes file': 'vhfr_low_v2_obc.dat',
             },
+            'nemo coupling': {
+                'boundary file template': 'bdy_{run_type}_btrp_{yyyymmdd}.nc',
+            },
             'input dir':
                 'fvcom-runs/input/',
-            'boundary file template':
-                'bdy_{run_type}_btrp_{yyyymmdd}.nc',
             'output station timeseries':
                 'VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat',
             'namelists': {

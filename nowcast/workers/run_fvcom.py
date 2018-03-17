@@ -217,7 +217,9 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
         'nowcast': timedelta(hours=24),
         'forecast': timedelta(hours=36),
     }
-    bdy_file_tmpl = config['vhfr fvcom runs']['boundary file template']
+    bdy_file_tmpl = (
+        config['vhfr fvcom runs']['nemo coupling']['boundary file template']
+    )
     bdy_file = bdy_file_tmpl.format(
         run_type=run_type, yyyymmdd=start_date.format('YYYYMMDD')
     )
