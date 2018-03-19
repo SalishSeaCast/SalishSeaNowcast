@@ -126,10 +126,9 @@ def make_ww3_current_file(parsed_args, config, *args):
                 u_unstaggered, v_unstaggered = viz_tools.unstagger(
                     u_nemo.vozocrtx[:, 0, ...], v_nemo.vomecrty[:, 0, ...]
                 )
-                for coord in ('nav_lat', 'nav_lon', 'time_centered'):
-                    del u_unstaggered.coords[coord]
-                    del v_unstaggered.coords[coord]
+                del u_unstaggered.coords['time_centered']
                 del u_unstaggered.coords['depthu']
+                del v_unstaggered.coords['time_centered']
                 del v_unstaggered.coords['depthv']
                 logger.debug(
                     'unstaggered velocity components on to mesh mask lats/lons'
