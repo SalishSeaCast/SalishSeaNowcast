@@ -102,7 +102,7 @@ tornado==4.5.3
 typing==3.6.2
 urllib3==1.22
 utm==0.4.2
-xarray==0.10.0
+xarray==0.10.2
 yapf==0.20.1
 zeep==2.5.0
 zict==0.1.3
