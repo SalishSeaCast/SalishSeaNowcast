@@ -166,6 +166,8 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
 
 
 def _interpTurb(tdf2, idate, mthresh):
+    errtxt=' A check that the anticipated and output hour were consistent has failed. '+\
+            'Error number is an indication of where in _interpTurb this occurred.'
     dfout = pd.DataFrame(
         index=range(int(mthresh) * 2 + 24), columns=('hDD', 'turbidity')
     )
@@ -203,6 +205,7 @@ def _interpTurb(tdf2, idate, mthresh):
                     logger.error(
                         f'ERROR 2: {dfout.loc[iout]["hDD"]} {dd0} '
                         f'{dfout.loc[iout]["hDD"] - dd0}'
+                        +errtxt
                     )
                     raise ValueError
         elif (row['DD'] - ddlast) >= mthresh / 24.0:
@@ -213,7 +216,7 @@ def _interpTurb(tdf2, idate, mthresh):
                 if (dfout.loc[iout]['hDD'] - dd0) < .5 / 24.0:
                     iout += 1
                 else:
-                    logger.error('ERROR 4:')
+                    logger.error('ERROR 4:'+errtxt)
                     raise ValueError
         # always append current tdf2 row's value
         if np.abs(dfout.loc[iout]['hDD'] - row['DD']) < .5 / 24.0:
@@ -222,6 +225,7 @@ def _interpTurb(tdf2, idate, mthresh):
             logger.error(
                 f'ERROR 1: iout={iout} ind={ind} {dfout.loc[iout]["hDD"]} '
                 f'{row["DD"]}'
+                +errtxt
             )
             raise ValueError
         iout += 1
