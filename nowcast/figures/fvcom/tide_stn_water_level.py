@@ -105,11 +105,8 @@ def _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl):
             arrow.get(fvcom_period.start) - timedelta(seconds=5 * 60),
             arrow.get(fvcom_period.stop)
         )
-        obs_10min_avg = xarray.DataArray(
-            obs_1min.resample('10min', loffset='5min').mean()
-        )
         obs = xarray.Dataset({
-            'water_level': obs_10min_avg.rename({
+            'water_level': xarray.DataArray(obs_1min).rename({
                 'dim_0': 'time'
             })
         })
