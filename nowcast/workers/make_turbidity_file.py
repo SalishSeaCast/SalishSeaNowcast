@@ -117,10 +117,7 @@ def make_turbidity_file(parsed_args, config, *args):
         return None
 
     # Interpolate and average data and write netcdf file to nc_filepath
-    try:
-        itdf = _interpTurb(tdf, idateDD, mthresh)
-    except ValueError:
-        return None
+    itdf = _interpTurb(tdf, idateDD, mthresh)
     try:
         iTurb = _calcAvgT(itdf, mthresh, ymd)
     except ValueError:
@@ -166,8 +163,6 @@ def _loadturb(idate, turbidity_csv, mthresh, ymd):
 
 
 def _interpTurb(tdf2, idate, mthresh):
-    errtxt=' A check that the anticipated and output hour were consistent has failed. '+\
-            'Error number is an indication of where in _interpTurb this occurred.'
     dfout = pd.DataFrame(
         index=range(int(mthresh) * 2 + 24), columns=('hDD', 'turbidity')
     )
@@ -202,12 +197,13 @@ def _interpTurb(tdf2, idate, mthresh):
                     dfout.loc[iout, 'turbidity'] = tur0
                     iout += 1
                 else:
-                    logger.error(
-                        f'ERROR 2: {dfout.loc[iout]["hDD"]} {dd0} '
+                    msg = (
+                        f'Anticipated and output hour were consistent: '
+                        f'{dfout.loc[iout]["hDD"]} {dd0} '
                         f'{dfout.loc[iout]["hDD"] - dd0}'
-                        +errtxt
                     )
-                    raise ValueError
+                    logger.error(msg)
+                    raise ValueError(msg)
         elif (row['DD'] - ddlast) >= mthresh / 24.0:
             # insert NaNs in larger holes
             nint = int(np.round((row['DD'] - ddlast) * 24) - 1)
@@ -216,18 +212,19 @@ def _interpTurb(tdf2, idate, mthresh):
                 if (dfout.loc[iout]['hDD'] - dd0) < .5 / 24.0:
                     iout += 1
                 else:
-                    logger.error('ERROR 4:'+errtxt)
-                    raise ValueError
+                    msg = 'Anticipated and output hour were consistent'
+                    logger.error(msg)
+                    raise ValueError(msg)
         # always append current tdf2 row's value
         if np.abs(dfout.loc[iout]['hDD'] - row['DD']) < .5 / 24.0:
             dfout.loc[iout, 'turbidity'] = row['turbidity']
         else:
-            logger.error(
-                f'ERROR 1: iout={iout} ind={ind} {dfout.loc[iout]["hDD"]} '
-                f'{row["DD"]}'
-                +errtxt
+            msg = (
+                f'Anticipated and output hour were consistent: '
+                f'iout={iout} ind={ind} {dfout.loc[iout]["hDD"]} {row["DD"]}'
             )
-            raise ValueError
+            logger.error(msg)
+            raise ValueError(msg)
         iout += 1
         ddlast = row['DD']
     logger.debug('interpolated turbidity data')
