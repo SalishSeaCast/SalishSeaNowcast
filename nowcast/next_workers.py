@@ -423,10 +423,6 @@ def after_upload_forcing(msg, config, checklist):
                         'nowcast.workers.make_forcing_links',
                         args=[host_name, 'nowcast-green']
                     ),
-                    NextWorker(
-                        'nowcast.workers.make_forcing_links',
-                        args=[host_name, 'nowcast-agrif']
-                    ),
                 ]
     return next_workers[msg.type]
 

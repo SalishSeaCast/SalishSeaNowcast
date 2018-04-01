@@ -522,23 +522,6 @@ class TestAfterUploadForcing:
         )
         assert expected in workers
 
-    def test_success_turbidity_launch_make_forcing_links_nowcast_agrif(
-        self, config, checklist
-    ):
-        workers = next_workers.after_upload_forcing(
-            Message(
-                'upload_forcing', 'success turbidity', {
-                    'orcinus': '2018-03-31 turbidity'
-                }
-            ), config, checklist
-        )
-        expected = NextWorker(
-            'nowcast.workers.make_forcing_links',
-            args=['orcinus', 'nowcast-agrif'],
-            host='localhost'
-        )
-        assert expected in workers
-
 
 class TestAfterMakeForcingLinks:
     """Unit tests for the after_make_forcing_links function.
