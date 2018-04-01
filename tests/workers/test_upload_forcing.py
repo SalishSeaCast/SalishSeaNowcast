@@ -37,16 +37,11 @@ def config():
             'bc dir': '/results/forcing/LiveOcean/modified',
             'file template': 'single_LO_{:y%Ym%md%d}.nc',
         },
-        'n and si': {
-            'bc dir': '/results/forcing/LiveOcean/modified/bio',
-            'file template': 'single_bio_LO_{:y%Ym%md%d}.nc',
-        },
         'run': {
             'enabled hosts': {
                 'west.cloud': {
                     'forcing': {
                         'bc dir': '/nemoShare/MEOPAR/LiveOcean/',
-                        'bio bc dir': '/nemoShare/MEOPAR/LiveOcean/bio',
                     }
                 },
             },
@@ -101,19 +96,19 @@ class TestMain:
         )
 
 
+@pytest.mark.parametrize(
+    'run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+        'turbidity',
+    ]
+)
 @patch('nowcast.workers.upload_forcing.logger')
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize(
-        'run_type', [
-            'nowcast+',
-            'forecast2',
-            'ssh',
-            'turbidity',
-        ]
-    )
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -123,14 +118,6 @@ class TestSuccess:
         upload_forcing.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize(
-        'run_type', [
-            'nowcast+',
-            'forecast2',
-            'ssh',
-            'turbidity',
-        ]
-    )
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -141,19 +128,19 @@ class TestSuccess:
         assert msg_type == 'success {run_type}'.format(run_type=run_type)
 
 
+@pytest.mark.parametrize(
+    'run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+        'turbidity',
+    ]
+)
 @patch('nowcast.workers.upload_forcing.logger')
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize(
-        'run_type', [
-            'nowcast+',
-            'forecast2',
-            'ssh',
-            'turbidity',
-        ]
-    )
     def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -163,14 +150,6 @@ class TestFailure:
         upload_forcing.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize(
-        'run_type', [
-            'nowcast+',
-            'forecast2',
-            'ssh',
-            'turbidity',
-        ]
-    )
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',

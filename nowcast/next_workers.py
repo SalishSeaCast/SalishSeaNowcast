@@ -407,6 +407,7 @@ def after_upload_forcing(msg, config, checklist):
         ('forecast', 'ssh'),
         ('forecast2', 'forecast2'),
         ('nowcast-green', 'turbidity'),
+        ('nowcast-agrif', 'turbidity'),
     ]
     for run_type, links_run_type in run_types:
         if run_type in config['run types']:
@@ -421,6 +422,10 @@ def after_upload_forcing(msg, config, checklist):
                     NextWorker(
                         'nowcast.workers.make_forcing_links',
                         args=[host_name, 'nowcast-green']
+                    ),
+                    NextWorker(
+                        'nowcast.workers.make_forcing_links',
+                        args=[host_name, 'nowcast-agrif']
                     ),
                 ]
     return next_workers[msg.type]

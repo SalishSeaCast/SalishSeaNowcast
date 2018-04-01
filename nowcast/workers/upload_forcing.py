@@ -101,6 +101,56 @@ def upload_forcing(parsed_args, config, *args):
     host_config = config['run']['enabled hosts'][host_name]
     ssh_client, sftp_client = lib.sftp(host_name, os.fspath(ssh_key))
     # Neah Bay sea surface height
+    _upload_ssh_files(
+        sftp_client, run_type, run_date, config, host_name, host_config
+    )
+    if run_type == 'ssh':
+        sftp_client.close()
+        ssh_client.close()
+        checklist = {
+            host_name:
+                f'{parsed_args.run_type} '
+                f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh'
+        }
+        return checklist
+    # Rivers turbidity and runoff
+    if run_type == 'turbidity':
+        _upload_fraser_turbidity_file(
+            sftp_client, run_date, config, host_name, host_config
+        )
+        sftp_client.close()
+        ssh_client.close()
+        checklist = {
+            host_name:
+                f'{parsed_args.run_type} '
+                f'{parsed_args.run_date.format("YYYY-MM-DD")} turbidity'
+        }
+        return checklist
+    _upload_river_runoff_files(
+        sftp_client, run_date, config, host_name, host_config
+    )
+    # Weather
+    _upload_weather(
+        sftp_client, run_type, run_date, config, host_name, host_config
+    )
+    # Live Ocean Boundary Conditions
+    _upload_live_ocean_files(
+        sftp_client, run_type, run_date, config, host_name, host_config
+    )
+    sftp_client.close()
+    ssh_client.close()
+    checklist = {
+        host_name:
+            f'{parsed_args.run_type} '
+            f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+            f'ssh  rivers  weather  boundary conditions'
+    }
+    return checklist
+
+
+def _upload_ssh_files(
+    sftp_client, run_type, run_date, config, host_name, host_config
+):
     for day in range(-1, 3):
         filename = config['ssh']['file template'].format(
             run_date.replace(days=day).date()
@@ -128,59 +178,6 @@ def upload_forcing(parsed_args, config, *args):
                 }
             )
             _upload_file(sftp_client, host_name, localpath, remotepath)
-    if run_type == 'ssh':
-        sftp_client.close()
-        ssh_client.close()
-        checklist = {
-            host_name:
-                f'{parsed_args.run_type} '
-                f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh'
-        }
-        return checklist
-    # Rivers turbidity and runoff
-    if run_type == 'turbidity':
-        _upload_fraser_turbidity_file(
-            sftp_client, run_date, config, host_name, host_config
-        )
-        sftp_client.close()
-        ssh_client.close()
-        checklist = {
-            host_name:
-                f'{parsed_args.run_type} '
-                f'{parsed_args.run_date.format("YYYY-MM-DD")} turbidity'
-        }
-        return checklist
-    _upload_river_runoff_files(
-        sftp_client, run_date, config, host_name, host_config
-    )
-    # Weather
-    if run_type == 'nowcast+':
-        weather_start = 0
-    else:
-        weather_start = 1
-    for day in range(weather_start, 3):
-        filename = config['weather']['file template'].format(
-            run_date.replace(days=day).date()
-        )
-        dest_dir = '' if day == 0 else 'fcst'
-        localpath = Path(config['weather']['ops dir'], dest_dir, filename)
-        remotepath = Path(
-            host_config['forcing']['weather dir'], dest_dir, filename
-        )
-        _upload_file(sftp_client, host_name, localpath, remotepath)
-    # Live Ocean Boundary Conditions
-    _upload_live_ocean_files(
-        sftp_client, run_type, run_date, config, host_name, host_config
-    )
-    sftp_client.close()
-    ssh_client.close()
-    checklist = {
-        host_name:
-            f'{parsed_args.run_type} '
-            f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-            f'ssh  rivers  weather  boundary conditions'
-    }
-    return checklist
 
 
 def _upload_fraser_turbidity_file(
@@ -216,6 +213,25 @@ def _upload_river_runoff_files(
         filename = tmpl.format(run_date.replace(days=-1).date())
         localpath = Path(config['rivers']['rivers dir'], filename)
         remotepath = Path(host_config['forcing']['rivers dir'], filename)
+        _upload_file(sftp_client, host_name, localpath, remotepath)
+
+
+def _upload_weather(
+    sftp_client, run_type, run_date, config, host_name, host_config
+):
+    if run_type == 'nowcast+':
+        weather_start = 0
+    else:
+        weather_start = 1
+    for day in range(weather_start, 3):
+        filename = config['weather']['file template'].format(
+            run_date.replace(days=day).date()
+        )
+        dest_dir = '' if day == 0 else 'fcst'
+        localpath = Path(config['weather']['ops dir'], dest_dir, filename)
+        remotepath = Path(
+            host_config['forcing']['weather dir'], dest_dir, filename
+        )
         _upload_file(sftp_client, host_name, localpath, remotepath)
 
 
@@ -259,10 +275,15 @@ def _upload_live_ocean_files(
 
 def _upload_file(sftp_client, host_name, localpath, remotepath):
     sftp_client.put(os.fspath(localpath), os.fspath(remotepath))
-    sftp_client.chmod(
-        os.fspath(remotepath),
-        int(lib.FilePerms(user='rw', group='rw', other='r'))
-    )
+    try:
+        sftp_client.chmod(
+            os.fspath(remotepath),
+            int(lib.FilePerms(user='rw', group='rw', other='r'))
+        )
+    except PermissionError:
+        # We're probably trying to change permissions on a file owned by
+        # another user. We can live with not being able to do that.
+        pass
     logger.debug(f'{localpath} uploaded to {host_name} at {remotepath}')
 
 

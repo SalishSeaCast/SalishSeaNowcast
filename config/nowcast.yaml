@@ -252,6 +252,14 @@ run types:
     land processor elimination: bathymetry_201702.csv
     duration: 1  # day
     restart from: nowcast-green
+  nowcast-agrif:
+    config name:  SMELTAGRIF
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
+    land processor elimination: False
+    duration: 1  # day
+    restart from: nowcast-agrif
   forecast:
     config name:  SalishSea
     coordinates: coordinates_seagrid_SalishSea201702.nc
@@ -467,9 +475,6 @@ run:
         # Directory on compute host where temperature and salinity boundary
         # conditions files generated from UW Live Ocean forecast are stored
         bc dir: /nemoShare/MEOPAR/LiveOcean/
-        # Directory on compute host where nitrate and silicon boundary
-        # conditions files generated from UW Live Ocean forecast are stored
-        bio bc dir: /nemoShare/MEOPAR/LiveOcean/bio/
         # Directory on compute host where rivers runoff forcing files are stored
         rivers dir: /nemoShare/MEOPAR/rivers/
         # Locations on compute host of rivers runoff monthly climatology files
@@ -524,6 +529,15 @@ run:
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
         no_snow.nc: /results/nowcast-sys/grid/no_snow.nc
         weights: /results/nowcast-sys/grid/weights-gem2.5-ops_201702.nc
+
+    orcinus-nowcast-agrif:
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      forcing:
+        ssh dir: /home/sallen/MEOPAR/sshNeahBay/
+        Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
+        rivers dir: /home/sallen/MEOPAR/rivers/
+        weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
+        bc dir: /home/sallen/MEOPAR/LiveOcean/
 
 
   hindcast hosts:
