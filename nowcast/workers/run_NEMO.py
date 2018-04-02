@@ -421,7 +421,7 @@ def _build_script(
     if host_config['job exec cmd'] == 'qsub':
         script = '\n'.join((
             script, '{pbs_common}'.format(
-                pbs_common=salishsea_cmd.run._pbs_common(
+                pbs_common=salishsea_cmd.run._pbs_directives(
                     run_desc, nemo_processors + xios_processors, email,
                     results_dir
                 )
