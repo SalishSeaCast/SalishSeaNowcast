@@ -23,10 +23,10 @@ import os
 import traceback
 
 import arrow
+from nemo_nowcast import WorkerError
 import zmq
 
-from nowcast import lib
-from nemo_nowcast import WorkerError
+from nowcast import lib, ssh_sftp
 
 worker_name = lib.get_module_name()
 
@@ -116,7 +116,7 @@ def configure_argparser(prog, description, parents):
 
 def upload_all_files(host_name, run_date, config):
     host = config['run'][host_name]
-    ssh_client, sftp_client = lib.sftp(
+    ssh_client, sftp_client = ssh_sftp.sftp(
         host_name, host['ssh key name']['nowcast']
     )
     # Neah Bay sea surface height

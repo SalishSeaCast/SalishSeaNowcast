@@ -25,7 +25,7 @@ import shutil
 import arrow
 from nemo_nowcast import NowcastWorker
 
-from nowcast import lib
+from nowcast import ssh_sftp
 
 NAME = 'make_forcing_links'
 logger = logging.getLogger(NAME)
@@ -109,7 +109,7 @@ def make_forcing_links(parsed_args, config, *args):
         os.environ['HOME'], '.ssh',
         config['run']['enabled hosts'][host_name]['ssh key']
     )
-    ssh_client, sftp_client = lib.sftp(host_name, os.fspath(ssh_key))
+    ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
     _make_NeahBay_ssh_links(
         sftp_client, run_date, config, host_name, shared_storage
     )

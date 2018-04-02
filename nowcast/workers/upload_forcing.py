@@ -24,7 +24,7 @@ from pathlib import Path
 import arrow
 from nemo_nowcast import NowcastWorker
 
-from nowcast import lib
+from nowcast import lib, ssh_sftp
 
 NAME = 'upload_forcing'
 logger = logging.getLogger(NAME)
@@ -99,7 +99,7 @@ def upload_forcing(parsed_args, config, *args):
         config['run']['enabled hosts'][host_name]['ssh key']
     )
     host_config = config['run']['enabled hosts'][host_name]
-    ssh_client, sftp_client = lib.sftp(host_name, os.fspath(ssh_key))
+    ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
     # Neah Bay sea surface height
     _upload_ssh_files(
         sftp_client, run_type, run_date, config, host_name, host_config

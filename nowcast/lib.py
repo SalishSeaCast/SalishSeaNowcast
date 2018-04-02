@@ -20,7 +20,6 @@ import logging.handlers
 import os
 import subprocess
 
-import paramiko
 from driftwood.formatters import JSONFormatter
 from nemo_nowcast import WorkerError
 from nemo_nowcast.fileutils import FilePerms
@@ -220,64 +219,3 @@ def run_in_subprocess(cmd, output_logger, error_logger):
             if line:
                 error_logger(line)
         raise WorkerError
-
-
-def ssh(host, key_filename, ssh_config_file='~/.ssh/config'):
-    """Return an SSH client connected to host.
-
-    It is assumed that ssh_config_file contains an entry for host,
-    and that the corresponding identity is loaded and active in the
-    user's ssh agent.
-
-    The client's close() method should be called when its usefulness
-    had ended.
-
-    :arg host: Name of the host to connect the client to.
-    :type config: str
-
-    :arg ssh_config_file: File path/name of the SSH2 config file to obtain
-                     the hostname and username values.
-    :type ssh_config_file: str
-
-    :returns: :class:`paramiko.client.SSHClient` object
-    """
-    ssh_client = paramiko.client.SSHClient()
-    ssh_client.load_system_host_keys()
-    ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh_config = paramiko.config.SSHConfig()
-    with open(os.path.expanduser(ssh_config_file)) as f:
-        ssh_config.parse(f)
-    host = ssh_config.lookup(host)
-    ssh_client.connect(
-        host['hostname'],
-        username=host['user'],
-        key_filename=key_filename,
-        compress=True,
-    )
-    return ssh_client
-
-
-def sftp(host, key_filename, ssh_config_file='~/.ssh/config'):
-    """Return an SFTP client connected to host, and the SSH client on
-    which it is based.
-
-    It is assumed that ssh_config_file contains an entry for host,
-    and that the corresponding identity is loaded and active in the
-    user's ssh agent.
-
-    The clients' close() methods should be called when their usefulness
-    had ended.
-
-    :arg host: Name of the host to connect the client to.
-    :type config: str
-
-    :arg ssh_config_file: File path/name of the SSH2 config file to obtain
-                     the hostname and username values.
-    :type ssh_config_file: str
-
-    :returns: 2-tuple containing a :class:`paramiko.client.SSHClient`
-              object and a :class:`paramiko.sftp_client.SFTPClient` object.
-    """
-    ssh_client = ssh(host, key_filename, ssh_config_file)
-    sftp_client = ssh_client.open_sftp()
-    return ssh_client, sftp_client
