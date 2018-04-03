@@ -414,6 +414,9 @@ run:
       # Does the host share storage with the machine where the nowcast manager
       # is running?
       shared storage: False
+      # Should the make_forcing_links worker be launched upon successful completion
+      # of upload_forcing worker runs?
+      make forcing links: True
       # Passphrase-less deployment key used by automation for authentication
       # on the host.
       # The key-pair is assumed to be stored in $USER/.ssh/.
@@ -498,6 +501,7 @@ run:
 
     salish-nowcast:
       shared storage: True
+      make forcing links: True
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       envvars: /results/nowcast-sys/nowcast-env/etc/conda/activate.d/envvars.sh
       python: /results/nowcast-sys/nowcast-env/bin/python
@@ -533,6 +537,7 @@ run:
     orcinus-nowcast-agrif:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False
+      make forcing links: False
       run prep dir: /home/dlatorne/nowcast-agrif-sys/runs
       run types:
         nowcast-agrif:
