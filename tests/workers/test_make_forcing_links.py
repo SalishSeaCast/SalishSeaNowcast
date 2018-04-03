@@ -23,12 +23,16 @@ from unittest.mock import (
 )
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import make_forcing_links
 
 
-@patch('nowcast.workers.make_forcing_links.NowcastWorker')
+@patch(
+    'nowcast.workers.make_forcing_links.NowcastWorker',
+    spec=nemo_nowcast.NowcastWorker
+)
 class TestMain:
     """Unit tests for main() function.
     """
@@ -54,7 +58,7 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
-            'nowcast+', 'forecast2', 'ssh', 'nowcast-green'
+            'nowcast+', 'forecast2', 'ssh', 'nowcast-green', 'nowcast-agrif'
         }
         assert 'help' in kwargs
 
@@ -82,19 +86,20 @@ class TestMain:
         )
 
 
-@patch('nowcast.workers.make_forcing_links.logger')
+@pytest.mark.parametrize(
+    'run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+        'nowcast-green',
+        'nowcast-agrif',
+    ]
+)
+@patch('nowcast.workers.make_forcing_links.logger', autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize(
-        'run_type', [
-            'nowcast+',
-            'forecast2',
-            'ssh',
-            'nowcast-green',
-        ]
-    )
     def test_success_log_info(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -105,14 +110,6 @@ class TestSuccess:
         make_forcing_links.success(parsed_args)
         assert m_logger.info.called
 
-    @pytest.mark.parametrize(
-        'run_type', [
-            'nowcast+',
-            'forecast2',
-            'ssh',
-            'nowcast-green',
-        ]
-    )
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -124,19 +121,19 @@ class TestSuccess:
         assert msg_type == 'success {run_type}'.format(run_type=run_type)
 
 
-@patch('nowcast.workers.make_forcing_links.logger')
+@pytest.mark.parametrize(
+    'run_type', [
+        'nowcast+',
+        'forecast2',
+        'ssh',
+        'nowcast-green',
+    ]
+)
+@patch('nowcast.workers.make_forcing_links.logger', autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize(
-        'run_type', [
-            'nowcast+',
-            'forecast2',
-            'ssh',
-            'nowcast-green',
-        ]
-    )
     def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -147,14 +144,6 @@ class TestFailure:
         make_forcing_links.failure(parsed_args)
         assert m_logger.critical.called
 
-    @pytest.mark.parametrize(
-        'run_type', [
-            'nowcast+',
-            'forecast2',
-            'ssh',
-            'nowcast-green',
-        ]
-    )
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -166,8 +155,8 @@ class TestFailure:
         assert msg_type == 'failure {run_type}'.format(run_type=run_type)
 
 
-@patch('nowcast.workers.make_forcing_links._create_symlink')
-@patch('nowcast.workers.make_forcing_links._clear_links')
+@patch('nowcast.workers.make_forcing_links._create_symlink', autospec=True)
+@patch('nowcast.workers.make_forcing_links._clear_links', autospec=True)
 class TestMakeRunoffLinks:
     """Unit tests for _make_runoff_links() function.
     """
@@ -218,7 +207,7 @@ class TestMakeRunoffLinks:
             Path(
                 self.config['run']['enabled hosts']['salish-nowcast']
                 ['run prep dir']
-            ), 'rivers/'
+            ), 'rivers'
         )
 
     @pytest.mark.parametrize('run_type', [
@@ -334,7 +323,7 @@ class TestMakeRunoffLinks:
             )
             assert expected in m_create_symlink.call_args_list
 
-    def test_runoff_files_links_nowcast_green(
+    def test_runoff_files_links_turbidity(
         self, m_clear_links, m_create_symlink
     ):
         run_date = arrow.get('2017-08-12')

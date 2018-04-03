@@ -533,14 +533,20 @@ run:
     orcinus-nowcast-agrif:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False
+      run prep dir: /home/dlatorne/nowcast-agrif-sys/runs
       run types:
         nowcast-agrif:
           results: /results/SalishSea/nowcast-agrif/
       forcing:
         ssh dir: /home/sallen/MEOPAR/sshNeahBay/
-        Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         rivers dir: /home/sallen/MEOPAR/rivers/
+        rivers_month.nc: /home/dlatorne/nowcast-agrif-sys/rivers-climatology/rivers_month_201702.nc
+        rivers_temp.nc: /home/dlatorne/nowcast-agrif-sys/rivers-climatology/rivers_ConsTemp_month.nc
+        rivers bio dir: /home/dlatorne/nowcast-agrif-sys/rivers-climatology/bio/
+        Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
+        no_snow.nc: /home/dlatorne/nowcast-agrif-sys/grid/no_snow.nc
+        weights: /home/dlatorne/nowcast-agrif-sys/grid/weights-gem2.5-ops_201702.nc
         bc dir: /home/sallen/MEOPAR/LiveOcean/
 
 
@@ -956,6 +962,8 @@ message registry:
       failure ssh: sea surface height forcing file links for forecast failed
       success nowcast-green: forcing file links for nowcast-green created
       failure nowcast-green: forcing file links for nowcast-green failed
+      success nowcast-agrif: forcing file links for nowcast-agrif created
+      failure nowcast-agrif: forcing file links for nowcast-agrif failed
       crash: make_forcing_links worker crashed
 
     run_NEMO:
