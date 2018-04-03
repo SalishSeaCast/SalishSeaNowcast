@@ -532,6 +532,9 @@ run:
 
     orcinus-nowcast-agrif:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
+      run types:
+        nowcast-agrif:
+          results: /results/SalishSea/nowcast-agrif/
       forcing:
         ssh dir: /home/sallen/MEOPAR/sshNeahBay/
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
