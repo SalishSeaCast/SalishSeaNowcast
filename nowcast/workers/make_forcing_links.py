@@ -45,13 +45,16 @@ def main():
     )
     worker.cli.add_argument(
         'run_type',
-        choices={'nowcast+', 'forecast2', 'ssh', 'nowcast-green'},
+        choices={
+            'nowcast+', 'forecast2', 'ssh', 'nowcast-green', 'nowcast-agrif'
+        },
         help='''
         Type of run to symlink files for:
         'nowcast+' means nowcast & 1st forecast runs,
         'forecast2' means 2nd forecast run,
-        'ssh' means Neah Bay sea surface height files only (for forecast run).
+        'ssh' means Neah Bay sea surface height files only (for forecast run),
         'nowcast-green' means nowcast green ocean run,
+        'nowcast-agrif' means nowcast green ocean run with AGRIF sub-domains.
         '''
     )
     worker.cli.add_argument(
@@ -166,7 +169,7 @@ def _make_NeahBay_ssh_links(
 def _make_runoff_links(sftp_client, run_type, run_date, config, host_name):
     host_config = config['run']['enabled hosts'][host_name]
     run_prep_dir = Path(host_config['run prep dir'])
-    _clear_links(sftp_client, run_prep_dir, 'rivers/')
+    _clear_links(sftp_client, run_prep_dir, 'rivers')
     src = Path(host_config['forcing']['rivers_month.nc'])
     dest = run_prep_dir / 'rivers' / src.name
     _create_symlink(sftp_client, host_name, src, dest)
@@ -187,7 +190,7 @@ def _make_runoff_links(sftp_client, run_type, run_date, config, host_name):
             filename = tmpl.format(run_date.replace(days=day).date())
             dest = run_prep_dir / 'rivers' / filename
             _create_symlink(sftp_client, host_name, src, dest)
-    if run_type == 'nowcast-green':
+    if run_type in {'nowcast-green', 'nowcast-agrif'}:
         src = Path(
             host_config['forcing']['Fraser turbidity dir'],
             config['rivers']['turbidity']['file template'].format(
@@ -207,7 +210,7 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
         src = Path(host_config['forcing'][linkfile])
         dest = NEMO_atmos_dir / src.name
         _create_symlink(sftp_client, host_name, src, dest)
-    nowcast_runs = {'nowcast+', 'nowcast-green'}
+    nowcast_runs = {'nowcast+', 'nowcast-green', 'nowcast-agrif'}
     weather_start = -1 if run_type in nowcast_runs else 0
     for day in range(weather_start, 3):
         filename = config['weather']['file template'].format(
