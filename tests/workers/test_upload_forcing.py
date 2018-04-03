@@ -161,7 +161,7 @@ class TestFailure:
 
 
 @patch(
-    'nowcast.workers.upload_forcing._upload_file',
+    'nowcast.workers.upload_forcing.upload_file',
     side_effect=[FileNotFoundError, None, FileNotFoundError, None]
 )
 @patch('nowcast.workers.upload_forcing.logger')

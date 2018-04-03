@@ -24,7 +24,8 @@ from pathlib import Path
 import arrow
 from nemo_nowcast import NowcastWorker
 
-from nowcast import lib, ssh_sftp
+from nowcast import ssh_sftp
+from ssh_sftp import upload_file
 
 NAME = 'upload_forcing'
 logger = logging.getLogger(NAME)
@@ -161,7 +162,7 @@ def _upload_ssh_files(
             host_config['forcing']['ssh dir'], dest_dir, filename
         )
         try:
-            _upload_file(sftp_client, host_name, localpath, remotepath)
+            upload_file(sftp_client, host_name, localpath, remotepath, logger)
         except FileNotFoundError:
             if dest_dir != 'obs':
                 raise
@@ -177,7 +178,7 @@ def _upload_ssh_files(
                     'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
                 }
             )
-            _upload_file(sftp_client, host_name, localpath, remotepath)
+            upload_file(sftp_client, host_name, localpath, remotepath, logger)
 
 
 def _upload_fraser_turbidity_file(
@@ -188,7 +189,7 @@ def _upload_fraser_turbidity_file(
     localpath = Path(config['rivers']['turbidity']['forcing dir'], filename)
     remotepath = Path(host_config['forcing']['Fraser turbidity dir'], filename)
     try:
-        _upload_file(sftp_client, host_name, localpath, remotepath)
+        upload_file(sftp_client, host_name, localpath, remotepath, logger)
     except FileNotFoundError:
         # turbidity file does not exist, so create symlink to persist
         # previous day's file
@@ -203,7 +204,7 @@ def _upload_fraser_turbidity_file(
                 'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
             }
         )
-        _upload_file(sftp_client, host_name, localpath, remotepath)
+        upload_file(sftp_client, host_name, localpath, remotepath, logger)
 
 
 def _upload_river_runoff_files(
@@ -213,7 +214,7 @@ def _upload_river_runoff_files(
         filename = tmpl.format(run_date.replace(days=-1).date())
         localpath = Path(config['rivers']['rivers dir'], filename)
         remotepath = Path(host_config['forcing']['rivers dir'], filename)
-        _upload_file(sftp_client, host_name, localpath, remotepath)
+        upload_file(sftp_client, host_name, localpath, remotepath, logger)
 
 
 def _upload_weather(
@@ -232,7 +233,7 @@ def _upload_weather(
         remotepath = Path(
             host_config['forcing']['weather dir'], dest_dir, filename
         )
-        _upload_file(sftp_client, host_name, localpath, remotepath)
+        upload_file(sftp_client, host_name, localpath, remotepath, logger)
 
 
 def _upload_live_ocean_files(
@@ -244,7 +245,7 @@ def _upload_live_ocean_files(
     localpath = Path(config['temperature salinity']['bc dir'], filename)
     remotepath = (Path(host_config['forcing']['bc dir'], filename))
     try:
-        _upload_file(sftp_client, host_name, localpath, remotepath)
+        upload_file(sftp_client, host_name, localpath, remotepath, logger)
     except FileNotFoundError:
         # Boundary condition file does not exist, so create symlink to
         # persist previous day's file.
@@ -270,21 +271,7 @@ def _upload_live_ocean_files(
                 'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ')
             }
         )
-        _upload_file(sftp_client, host_name, localpath, remotepath)
-
-
-def _upload_file(sftp_client, host_name, localpath, remotepath):
-    sftp_client.put(os.fspath(localpath), os.fspath(remotepath))
-    try:
-        sftp_client.chmod(
-            os.fspath(remotepath),
-            int(lib.FilePerms(user='rw', group='rw', other='r'))
-        )
-    except PermissionError:
-        # We're probably trying to change permissions on a file owned by
-        # another user. We can live with not being able to do that.
-        pass
-    logger.debug(f'{localpath} uploaded to {host_name} at {remotepath}')
+        upload_file(sftp_client, host_name, localpath, remotepath, logger)
 
 
 if __name__ == '__main__':

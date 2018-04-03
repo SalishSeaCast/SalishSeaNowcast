@@ -18,6 +18,8 @@ import os
 
 import paramiko
 
+from nowcast import lib
+
 
 def ssh(host, key_filename, ssh_config_file='~/.ssh/config'):
     """Return an SSH client connected to host.
@@ -78,3 +80,33 @@ def sftp(host, key_filename, ssh_config_file='~/.ssh/config'):
     ssh_client = ssh(host, key_filename, ssh_config_file)
     sftp_client = ssh_client.open_sftp()
     return ssh_client, sftp_client
+
+
+def upload_file(sftp_client, host_name, localpath, remotepath, logger):
+    """Upload the file at localpath to remotepath on host_name via SFTP.
+
+    :arg sftp_client: SFTP client instance to use for upload.
+    :type sftp_client: :py:class:`paramiko.sftp_client.SFTPClient`
+
+    :arg str host_name: Name of the host to upload the file to.
+
+    :arg localpath: Local path and file name of file to upload.
+    :type localpath: :py:class:`pathlib.Path`
+
+    :arg remotepath: Path and file name to upload file to on remote host.
+    :type localpath: :py:class:`pathlib.Path`
+
+    :arg logger: Logger object to send debug message to.
+    :type logger: :py:class:`logging.Logger`
+    """
+    sftp_client.put(os.fspath(localpath), os.fspath(remotepath))
+    try:
+        sftp_client.chmod(
+            os.fspath(remotepath),
+            int(lib.FilePerms(user='rw', group='rw', other='r'))
+        )
+    except PermissionError:
+        # We're probably trying to change permissions on a file owned by
+        # another user. We can live with not being able to do that.
+        pass
+    logger.debug(f'{localpath} uploaded to {host_name} at {remotepath}')
