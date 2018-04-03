@@ -532,6 +532,7 @@ run:
 
     orcinus-nowcast-agrif:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
+      shared storage: False
       run types:
         nowcast-agrif:
           results: /results/SalishSea/nowcast-agrif/
