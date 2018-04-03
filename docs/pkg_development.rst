@@ -79,7 +79,7 @@ Setting up an isolated development environment using `Conda`_ is recommended.
 Assuming that you have the `Anaconda Python Distribution`_ or `Miniconda3`_ installed,
 you can create and activate an environment called :kbd:`salishsea-nowcast` that will have all of the Python packages necessary for development,
 testing,
-and building the documentation with the commands:
+and building the documentation with the commands below.
 
 .. _Conda: http://conda.pydata.org/docs/
 .. _Anaconda Python Distribution: https://www.continuum.io/downloads
