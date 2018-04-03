@@ -410,7 +410,11 @@ def after_upload_forcing(msg, config, checklist):
         ('nowcast-agrif', 'turbidity'),
     ]
     for run_type, links_run_type in run_types:
-        if run_type in config['run types']:
+        make_forcing_links = (
+            run_type in config['run types']
+            and config['run']['enabled hosts'][host_name]['make forcing links']
+        )
+        if make_forcing_links:
             next_workers[f'success {links_run_type}'] = [
                 NextWorker(
                     'nowcast.workers.make_forcing_links',

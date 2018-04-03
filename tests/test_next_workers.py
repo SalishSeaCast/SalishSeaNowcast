@@ -57,16 +57,20 @@ def config():
                 'west.cloud': {
                     'shared storage':
                         False,
+                    'make forcing links':
+                        True,
                     'run types': [
                         'nowcast', 'forecast', 'forecast2', 'nowcast-green'
                     ],
                 },
                 'salish': {
                     'shared storage': True,
+                    'make forcing links': True,
                     'run types': ['nowcast-dev'],
                 },
                 'orcinus': {
                     'shared storage': False,
+                    'make forcing links': False,
                     'run types': ['nowcast-agrif'],
                 },
             },
@@ -493,8 +497,8 @@ class TestAfterUploadForcing:
     ):
         workers = next_workers.after_upload_forcing(
             Message(
-                'upload_forcing', 'success {}'.format(run_type), {
-                    'west.cloud': '2016-10-11 ssh'
+                'upload_forcing', f'success {run_type}', {
+                    'west.cloud': f'2016-10-11 {run_type}'
                 }
             ), config, checklist
         )
@@ -504,6 +508,28 @@ class TestAfterUploadForcing:
             host='localhost'
         )
         assert expected in workers
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast+',
+        'ssh',
+        'forecast2',
+    ])
+    def test_success_no_launch_make_forcing_links_orcinus(
+        self, run_type, config, checklist
+    ):
+        workers = next_workers.after_upload_forcing(
+            Message(
+                'upload_forcing', f'success {run_type}', {
+                    'orcinus': f'2018-04-03 {run_type}'
+                }
+            ), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['orcinus', run_type],
+            host='localhost'
+        )
+        assert expected not in workers
 
     def test_success_turbidity_launch_make_forcing_links_nowcast_green(
         self, config, checklist
@@ -521,6 +547,23 @@ class TestAfterUploadForcing:
             host='localhost'
         )
         assert expected in workers
+
+    def test_success_turbidity_no_launch_make_forcing_links_green_orcinus(
+        self, config, checklist
+    ):
+        workers = next_workers.after_upload_forcing(
+            Message(
+                'upload_forcing', 'success turbidity', {
+                    'orcinus': '2018-04-03 turbidity'
+                }
+            ), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['west.cloud', 'nowcast-green'],
+            host='localhost'
+        )
+        assert expected not in workers
 
 
 class TestAfterMakeForcingLinks:
