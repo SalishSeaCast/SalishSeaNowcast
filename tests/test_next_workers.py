@@ -1066,50 +1066,83 @@ class TestAfterMakeFVCOMBoundary:
         )
         assert expected in workers
 
-    @pytest.mark.parametrize('run_type', [
-        'nowcast',
-    ])
-    def test_success_launch_run_fvcom(self, run_type, config, checklist):
-        """
-        TODO: Move to after_make_fvcom_atmos_forcing when run_fvcom is capable of handling atmos forcing
-        """
-        msg = Message(
-            'make_fvcom_boundary',
-            f'success {run_type}',
-            payload={
-                run_type: {
-                    'run date': '2018-03-16',
-                    'open boundary file': 'input/bdy_nowcast_btrp_20180316.nc'
-                }
-            }
-        )
-        workers = next_workers.after_make_fvcom_boundary(
-            msg, config, checklist
-        )
-        expected = NextWorker(
-            'nowcast.workers.run_fvcom',
-            args=['west.cloud', run_type, '--run-date', '2018-03-16'],
-            host='west.cloud'
-        )
-        assert expected in workers
-
 
 class TestAfterMakeFVCOMAtmosForcing:
-    """Unit tests for the after_make_fvcom_boundary function.
+    """Unit tests for the after_make_fvcom_atmos_forcing function.
     """
 
-    @pytest.mark.parametrize(
-        'msg_type', [
-            'crash',
-            'failure nowcast',
-            'success nowcast',
-        ]
-    )
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+    ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_fvcom_atmos_forcing(
             Message('make_fvcom_atmos_forcing', msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+    ])
+    def test_success_launch_upload_fvcom_atmos_forcing(
+        self, run_type, config, checklist
+    ):
+        msg = Message(
+            'make_fvcom_atmos_forcing',
+            f'success {run_type}',
+            payload={
+                run_type: {
+                    'run date': '2018-04-04',
+                }
+            }
+        )
+        workers = next_workers.after_make_fvcom_atmos_forcing(
+            msg, config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.upload_fvcom_atmos_forcing',
+            args=['west.cloud', run_type, '--run-date', '2018-04-04'],
+            host='localhost'
+        )
+        assert expected in workers
+
+
+class TestAfterUploadFVCOMAtmosForcing:
+    """Unit tests for the after_upload_fvcom_atmos_forcing function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure nowcast',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_upload_fvcom_atmos_forcing(
+            Message('upload_fvcom_atmos_forcing', msg_type), config, checklist
+        )
+        assert workers == []
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+    ])
+    def test_success_launch_run_fvcom(self, run_type, config, checklist):
+        msg = Message(
+            'upload_fvcom_atmos_forcing',
+            f'success {run_type}',
+            payload={
+                run_type: {
+                    'run date': '2018-04-04',
+                }
+            }
+        )
+        workers = next_workers.after_upload_fvcom_atmos_forcing(
+            msg, config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.run_fvcom',
+            args=['west.cloud', run_type, '--run-date', '2018-04-04'],
+            host='west.cloud'
+        )
+        assert expected in workers
 
 
 class TestAfterRunFVCOM:

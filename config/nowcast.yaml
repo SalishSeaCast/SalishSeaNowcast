@@ -618,6 +618,10 @@ wave forecasts:
 vhfr fvcom runs:
   # Compute host to run VHFR FVCOM model on
   host: west.cloud-nowcast
+  # Passphrase-less deployment key used by automation for authentication
+  # on the host.
+  # The key-pair is assumed to be stored in $HOME/.ssh/.
+  ssh key: SalishSeaNEMO-nowcast_id_rsa
   # FVCOM case name
   case name: vhfr_low_v2
   # Directory on compute host where files and directories necessary to
@@ -1032,6 +1036,12 @@ message registry:
       success nowcast: nowcast FVCOM atmospheric forcing file created
       failure nowcast: nowcast FVCOM atmospheric forcing file creation failed
       crash: make_fvcom_atmos_forcing worker crashed
+
+    upload_fvcom_atmos_forcing:
+      checklist key: FVCOM atmospheric forcing upload
+      success nowcast: FVCOM nowcast atmospheric forcing file uploaded
+      failure nowcast: FVCOM nowcast atmospheric forcing file upload failed
+      crash: upload_fvcom_atmos_forcing worker crashed
 
     run_fvcom:
       checklist key: FVCOM run

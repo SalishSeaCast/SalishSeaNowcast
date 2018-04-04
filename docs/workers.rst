@@ -177,6 +177,13 @@ Workers
     :members: main
 
 
+:kbd:`upload_fvcom_atmos_forcing`
+---------------------------------
+
+.. automodule:: nowcast.workers.upload_fvcom_atmos_forcing
+    :members: main
+
+
 :kbd:`run_fvcom`
 ----------------
 
