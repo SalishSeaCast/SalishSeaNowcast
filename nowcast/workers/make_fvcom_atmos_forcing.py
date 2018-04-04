@@ -66,6 +66,7 @@ def success(parsed_args):
         f'FVCOM {parsed_args.run_type} run atmospheric forcing file for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} created',
         extra={
+            'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         }
     )
@@ -114,8 +115,9 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
     fvcom_atmos_dir = Path(
         config['vhfr fvcom runs']['atmospheric forcing']['fvcom atmos dir']
     )
-    atmos_file_tmpl = config['vhfr fvcom runs']['atmospheric forcing'
-                                                ]['atmos file template']
+    atmos_file_tmpl = (
+        config['vhfr fvcom runs']['atmospheric forcing']['atmos file template']
+    )
     atmos_file = atmos_file_tmpl.format(
         run_type=run_type,
         field_type=atmos_field_type,
