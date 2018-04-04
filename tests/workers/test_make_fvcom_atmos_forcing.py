@@ -16,7 +16,7 @@
 make_fvcom_atmos_forcing worker.
 """
 from types import SimpleNamespace
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -99,7 +99,7 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_error(self, m_logger, run_type):
+    def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get('2018-03-15')
         )
