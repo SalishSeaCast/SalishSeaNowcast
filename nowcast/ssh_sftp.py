@@ -51,7 +51,6 @@ def ssh(host, key_filename, ssh_config_file='~/.ssh/config'):
         host['hostname'],
         username=host['user'],
         key_filename=key_filename,
-        compress=True,
     )
     return ssh_client
 
