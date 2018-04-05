@@ -822,7 +822,7 @@ def after_upload_fvcom_atmos_forcing(msg, config, checklist):
     if msg.type == 'success nowcast':
         host_name = config['vhfr fvcom runs']['host']
         run_type = msg.type.split()[1]
-        run_date = msg.payload[run_type]['run date']
+        run_date = msg.payload[host_name][run_type]['run date']
         next_workers[msg.type].append(
             NextWorker(
                 'nowcast.workers.run_fvcom',
