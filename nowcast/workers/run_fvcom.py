@@ -217,6 +217,15 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
         'nowcast': timedelta(hours=24),
         'forecast': timedelta(hours=36),
     }
+    atmos_file_tmpl = (
+        config['vhfr fvcom runs']['atmospheric forcing']['atmos file template']
+    )
+    atmos_field_type = 'wnd'
+    atmos_file = atmos_file_tmpl.format(
+        run_type=run_type,
+        field_type=atmos_field_type,
+        yyyymmdd=start_date.format('YYYYMMDD')
+    )
     bdy_file_tmpl = (
         config['vhfr fvcom runs']['nemo coupling']['boundary file template']
     )
@@ -228,18 +237,10 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
             'nml_case': {
                 'start_date':
                     start_date.format('YYYY-MM-DD HH:mm:ss.00'),
-                'end_date': (start_date + run_durations[run_type])
-                            .format('YYYY-MM-DD HH:mm:ss.00'),
-            }
-        },
-        run_prep_dir / 'namelist.nesting': {
-            'nml_nesting': {
-                'nesting_file_name': bdy_file,
-            }
-        },
-        run_prep_dir / 'namelist.netcdf': {
-            'nml_netcdf': {
-                'nc_first_out': start_date.format('YYYY-MM-DD 01:00:00.00'),
+                'end_date': (
+                    (start_date +
+                     run_durations[run_type]).format('YYYY-MM-DD HH:mm:ss.00')
+                ),
             }
         },
         run_prep_dir / 'namelist.restart': {
@@ -248,7 +249,22 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
                     start_date.replace(days=+1)
                     .format('YYYY-MM-DD HH:mm:ss.00'),
             }
-        }
+        },
+        run_prep_dir / 'namelist.netcdf': {
+            'nml_netcdf': {
+                'nc_first_out': start_date.format('YYYY-MM-DD 01:00:00.00'),
+            }
+        },
+        run_prep_dir / 'namelist.surface': {
+            'nml_surface_forcing': {
+                'wind_file': atmos_file,
+            }
+        },
+        run_prep_dir / 'namelist.nesting': {
+            'nml_nesting': {
+                'nesting_file_name': bdy_file,
+            }
+        },
     }
     for namelist_path, patch in patches.items():
         _patch_namelist(namelist_path, patch)
