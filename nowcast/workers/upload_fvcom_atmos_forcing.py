@@ -143,9 +143,10 @@ def upload_fvcom_atmos_forcing(parsed_args, config, *args):
     )
     checklist = {
         host_name: {
-            'run type': f'{parsed_args.run_type}',
-            'run date': f'{parsed_args.run_date.format("YYYY-MM-DD")}',
-            'file': atmos_file,
+            parsed_args.run_type: {
+                'run date': f'{parsed_args.run_date.format("YYYY-MM-DD")}',
+                'file': atmos_file,
+            }
         }
     }
     return checklist
