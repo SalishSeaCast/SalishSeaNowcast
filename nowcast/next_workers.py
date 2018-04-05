@@ -744,19 +744,13 @@ def after_make_fvcom_boundary(msg, config, checklist):
         host_name = config['vhfr fvcom runs']['host']
         run_type = msg.type.split()[1]
         run_date = msg.payload[run_type]['run date']
-        next_workers[msg.type].extend([
+        next_workers[msg.type].append(
             NextWorker(
                 'nowcast.workers.make_fvcom_atmos_forcing',
                 args=[run_type, '--run-date', run_date],
                 host='localhost'
-            ),
-            ## TODO: Move to after_make_fvcom_atmos_forcing when run_fvcom is capable of handling atmos forcing
-            NextWorker(
-                'nowcast.workers.run_fvcom',
-                args=[host_name, run_type, '--run-date', run_date],
-                host=host_name
             )
-        ])
+        )
     return next_workers[msg.type]
 
 
