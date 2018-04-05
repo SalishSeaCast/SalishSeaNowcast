@@ -171,9 +171,10 @@ class TestUploadFVCOMAtmosForcing:
         )
         expected = {
             'west.cloud': {
-                'run type': run_type,
-                'run date': '2018-04-04',
-                'file': f'atmos_{run_type}_wnd_20180404.nc',
+                run_type: {
+                    'run date': '2018-04-04',
+                    'file': f'atmos_{run_type}_wnd_20180404.nc',
+                }
             }
         }
         assert checklist == expected
