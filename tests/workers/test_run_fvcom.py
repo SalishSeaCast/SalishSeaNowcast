@@ -53,6 +53,10 @@ def config():
             'nemo coupling': {
                 'boundary file template': 'bdy_{run_type}_btrp_{yyyymmdd}.nc',
             },
+            'atmospheric forcing': {
+                'atmos file template':
+                    'atmos_{run_type}_{field_type}_{yyyymmdd}.nc',
+            },
             'input dir':
                 'fvcom-runs/input/',
             'output station timeseries':
@@ -320,9 +324,9 @@ class TestEditNamelists:
                 }
             ),
             call(
-                Path('run_prep_dir/namelist.nesting'), {
-                    'nml_nesting': {
-                        'nesting_file_name': 'bdy_nowcast_btrp_20180115.nc'
+                Path('run_prep_dir/namelist.restart'), {
+                    'nml_restart': {
+                        'rst_first_out': '2018-01-16 00:00:00.00'
                     }
                 }
             ),
@@ -334,9 +338,16 @@ class TestEditNamelists:
                 }
             ),
             call(
-                Path('run_prep_dir/namelist.restart'), {
-                    'nml_restart': {
-                        'rst_first_out': '2018-01-16 00:00:00.00'
+                Path('run_prep_dir/namelist.surface'), {
+                    'nml_surface_forcing': {
+                        'wind_file': 'atmos_nowcast_wnd_20180115.nc'
+                    }
+                }
+            ),
+            call(
+                Path('run_prep_dir/namelist.nesting'), {
+                    'nml_nesting': {
+                        'nesting_file_name': 'bdy_nowcast_btrp_20180115.nc'
                     }
                 }
             ),
@@ -357,9 +368,9 @@ class TestEditNamelists:
                 }
             ),
             call(
-                Path('run_prep_dir/namelist.nesting'), {
-                    'nml_nesting': {
-                        'nesting_file_name': 'bdy_forecast_btrp_20180116.nc'
+                Path('run_prep_dir/namelist.restart'), {
+                    'nml_restart': {
+                        'rst_first_out': '2018-01-17 00:00:00.00'
                     }
                 }
             ),
@@ -371,9 +382,16 @@ class TestEditNamelists:
                 }
             ),
             call(
-                Path('run_prep_dir/namelist.restart'), {
-                    'nml_restart': {
-                        'rst_first_out': '2018-01-17 00:00:00.00'
+                Path('run_prep_dir/namelist.surface'), {
+                    'nml_surface_forcing': {
+                        'wind_file': 'atmos_forecast_wnd_20180116.nc'
+                    }
+                }
+            ),
+            call(
+                Path('run_prep_dir/namelist.nesting'), {
+                    'nml_nesting': {
+                        'nesting_file_name': 'bdy_forecast_btrp_20180116.nc'
                     }
                 }
             ),
