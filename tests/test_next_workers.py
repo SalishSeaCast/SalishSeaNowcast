@@ -1129,8 +1129,10 @@ class TestAfterUploadFVCOMAtmosForcing:
             'upload_fvcom_atmos_forcing',
             f'success {run_type}',
             payload={
-                run_type: {
-                    'run date': '2018-04-04',
+                'west.cloud': {
+                    run_type: {
+                        'run date': '2018-04-04',
+                    }
                 }
             }
         )
