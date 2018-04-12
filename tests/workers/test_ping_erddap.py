@@ -17,12 +17,16 @@
 from types import SimpleNamespace
 from unittest.mock import patch
 
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import ping_erddap
 
 
-@patch('nowcast.workers.ping_erddap.NowcastWorker')
+@patch(
+    'nowcast.workers.ping_erddap.NowcastWorker',
+    spec=nemo_nowcast.NowcastWorker
+)
 class TestMain:
     """Unit tests for main() function.
     """
@@ -49,6 +53,7 @@ class TestMain:
             'TWDP-ferry',
             'nowcast-green',
             'nemo-forecast',
+            'wwatch3-forecast',
         }
         assert 'help' in kwargs
 
@@ -62,7 +67,7 @@ class TestMain:
         )
 
 
-@patch('nowcast.workers.ping_erddap.logger')
+@patch('nowcast.workers.ping_erddap.logger', autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -76,6 +81,7 @@ class TestSuccess:
             'TWDP-ferry',
             'nowcast-green',
             'nemo-forecast',
+            'wwatch3-forecast',
         ]
     )
     def test_success_log_info(self, m_logger, dataset):
@@ -92,6 +98,7 @@ class TestSuccess:
             ('TWDP-ferry', 'success TWDP-ferry'),
             ('nowcast-green', 'success nowcast-green'),
             ('nemo-forecast', 'success nemo-forecast'),
+            ('wwatch3-forecast', 'success wwatch3-forecast'),
         ]
     )
     def test_success_msg_type(self, m_logger, dataset, expected):
@@ -100,7 +107,7 @@ class TestSuccess:
         assert msg_type == expected
 
 
-@patch('nowcast.workers.ping_erddap.logger')
+@patch('nowcast.workers.ping_erddap.logger', autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -114,6 +121,7 @@ class TestFailure:
             'TWDP-ferry',
             'nowcast-green',
             'nemo-forecast',
+            'wwatch3-forecast',
         ]
     )
     def test_failure_log_error(self, m_logger, dataset):
@@ -130,6 +138,7 @@ class TestFailure:
             ('TWDP-ferry', 'failure TWDP-ferry'),
             ('nowcast-green', 'failure nowcast-green'),
             ('nemo-forecast', 'failure nemo-forecast'),
+            ('wwatch3-forecast', 'failure wwatch3-forecast'),
         ]
     )
     def test_failure_msg_type(self, m_logger, dataset, expected):
@@ -138,7 +147,7 @@ class TestFailure:
         assert msg_type == expected
 
 
-@patch('nowcast.workers.ping_erddap.logger')
+@patch('nowcast.workers.ping_erddap.logger', autospec=True)
 class TestPingErddap:
     """Unit tests for ping_erddap() function.
     """
@@ -152,6 +161,7 @@ class TestPingErddap:
             'TWDP-ferry',
             'nowcast-green',
             'nemo-forecast',
+            'wwatch3-forecast',
         ]
     )
     def test_ping_erddap(self, m_logger, dataset, tmpdir):
@@ -170,6 +180,7 @@ class TestPingErddap:
                         'ubcSSg3DTracerFields1hV1', 'ubcSSg3DuVelocity1hV1'
                     ],
                     'nemo-forecast': ['ubcSSfPointAtkinson10mV17-02'],
+                    'wwatch3-forecast': ['ubcSSf2DWaveFields30mV17-02'],
                 }
             }
         }

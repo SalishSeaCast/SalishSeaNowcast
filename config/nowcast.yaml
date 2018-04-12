@@ -355,6 +355,8 @@ erddap:
       - ubcSSfSurfaceTracerFields1hV17-02
       - ubcSSf3DuGridFields1hV17-02
       - ubcSSf3DvGridFields1hV17-02
+    wwatch3-forecast:
+      - ubcSSf2DWaveFields30mV17-02
 
 
 figures:
@@ -1080,7 +1082,7 @@ message registry:
       crash: make_ww3_current_files worker crashed
 
     run_ww3:
-      checklist key: WW3 run
+      checklist key: WWATCH3 run
       success forecast2: forecast2 WaveWatch3 run started
       failure forecast2: forecast2 WaveWatch3 run failed
       success forecast: forecast WaveWatch3 run started
@@ -1088,8 +1090,8 @@ message registry:
       crash: run_ww3 worker crashed
 
     watch_ww3:
-      checklist key: WW3 run
-      need: WW3 run information dict requested
+      checklist key: WWATCH3 run
+      need: wwatch3 run information dict requested
       success forecast2: forecast2 WaveWatch3 run completed
       failure forecast2: forecast2 WaveWatch3 run failed
       success forecast: forecast WaveWatch3 run completed
@@ -1111,7 +1113,7 @@ message registry:
       crash: download_results worker crashed
 
     download_wwatch3_results:
-      checklist key: WW3 results files
+      checklist key: WWATCH3 results files
       success forecast: WaveWatch3 forecast results files downloaded
       failure forecast: WaveWatch3 forecast results files download failed
       success forecast2: WaveWatch3 forecast2 results files downloaded
@@ -1158,6 +1160,8 @@ message registry:
       failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
       success nemo-forecast: NEMO forecast ERDDAP dataset flag files created
       failure nemo-forecast: NEMO forecast ERDDAP dataset flag files creation failed
+      success wwatch3-forecast: WaveWatch3 forecast ERDDAP dataset flag files created
+      failure wwatch3-forecast: WaveWatch3 forecast ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
 
     make_plots:
