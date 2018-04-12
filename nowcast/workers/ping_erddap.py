@@ -43,6 +43,7 @@ def main():
             'TWDP-ferry',
             'nowcast-green',
             'nemo-forecast',
+            'wwatch3-forecast',
         },
         help='''
         Type of dataset to notify ERDDAP of:
@@ -57,6 +58,7 @@ def main():
         downloaded & processed
         'nowcast-green' means nowcast green ocean run,
         'nemo-forecast' means updated NEMO rolling forecast,
+        'wwatch3-forecast' means updated WaveWatch3 rolling forecast
         ''',
     )
     worker.run(ping_erddap, success, failure)

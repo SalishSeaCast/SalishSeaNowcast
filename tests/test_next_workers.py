@@ -1634,7 +1634,7 @@ class TestAfterDownloadWWatch3Results:
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         p_checklist = patch.dict(
             checklist, {
-                'WW3 run': {
+                'WWATCH3 run': {
                     'forecast': {
                         'run date': '2017-12-24'
                     }
@@ -1659,7 +1659,7 @@ class TestAfterDownloadWWatch3Results:
     ):
         p_checklist = patch.dict(
             checklist, {
-                'WW3 run': {
+                'WWATCH3 run': {
                     run_type: {
                         'run date': run_date
                     }
@@ -1751,7 +1751,7 @@ class TestAfterUpdateForecastDatasets:
             ('forecast2', '2018-01-26'),
         ]
     )
-    def test_success_launch_ping_erddap_nemo_forecast(
+    def test_success_nemo_launch_ping_erddap_nemo_forecast(
         self, run_type, run_date, config, checklist
     ):
         p_checklist = patch.dict(
@@ -1782,7 +1782,7 @@ class TestAfterUpdateForecastDatasets:
             ('forecast2', '2018-01-26'),
         ]
     )
-    def test_success_launch_make_plots_forecast_publish(
+    def test_success_nemo_launch_make_plots_forecast_publish(
         self, run_type, run_date, config, checklist
     ):
         p_checklist = patch.dict(
@@ -1803,6 +1803,37 @@ class TestAfterUpdateForecastDatasets:
         expected = NextWorker(
             'nowcast.workers.make_plots',
             args=['nemo', run_type, 'publish', '--run-date', run_date],
+            host='localhost'
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize(
+        'run_type, run_date', [
+            ('forecast', '2018-04-12'),
+            ('forecast2', '2018-04-12'),
+        ]
+    )
+    def test_success_wwatch3_launch_ping_erddap_wwatch3_forecast(
+        self, run_type, run_date, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {
+                'WWATCH3 run': {
+                    run_type: {
+                        'run date': run_date
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_update_forecast_datasets(
+                Message(
+                    'update_forecast_datasets', f'success wwatch3 {run_type}'
+                ), config, checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.ping_erddap',
+            args=['wwatch3-forecast'],
             host='localhost'
         )
         assert expected in workers

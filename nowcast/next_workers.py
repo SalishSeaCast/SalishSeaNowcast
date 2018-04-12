@@ -1167,7 +1167,7 @@ def after_download_wwatch3_results(msg, config, checklist):
     }
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
-        run_date = checklist['WW3 run'][run_type]['run date']
+        run_date = checklist['WWATCH3 run'][run_type]['run date']
         if run_type.startswith('forecast'):
             next_workers[msg.type].append(
                 NextWorker(
@@ -1235,19 +1235,29 @@ def after_update_forecast_datasets(msg, config, checklist):
         'crash': [],
         'failure nemo forecast': [],
         'failure nemo forecast2': [],
+        'failure wwatch3 forecast': [],
+        'failure wwatch3 forecast2': [],
         'success nemo forecast': [],
         'success nemo forecast2': [],
+        'success wwatch3 forecast': [],
+        'success wwatch3 forecast2': [],
     }
-    if msg.type.startswith('success nemo forecast'):
+    if msg.type.startswith('success'):
+        model = msg.type.split()[1]
         run_type = msg.type.split()[2]
-        run_date = checklist['NEMO run'][run_type]['run date']
-        next_workers[msg.type].extend([
-            NextWorker('nowcast.workers.ping_erddap', args=['nemo-forecast']),
+        run_date = checklist[f'{model.upper()} run'][run_type]['run date']
+        next_workers[msg.type].append(
             NextWorker(
-                'nowcast.workers.make_plots',
-                args=['nemo', run_type, 'publish', '--run-date', run_date]
-            ),
-        ])
+                'nowcast.workers.ping_erddap', args=[f'{model}-forecast']
+            )
+        )
+        if model == 'nemo':
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.make_plots',
+                    args=['nemo', run_type, 'publish', '--run-date', run_date]
+                )
+            )
     return next_workers[msg.type]
 
 

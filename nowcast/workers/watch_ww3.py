@@ -56,7 +56,8 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} WW3 run on {0.host_name} completed'.format(parsed_args),
+        '{0.run_type} WWATCH3 run on {0.host_name} completed'.
+        format(parsed_args),
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
@@ -68,7 +69,7 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} WW3 run on {0.host_name} failed'.format(parsed_args),
+        '{0.run_type} WWATCH3 run on {0.host_name} failed'.format(parsed_args),
         extra={
             'run_type': parsed_args.run_type,
             'host_name': parsed_args.host_name,
@@ -81,7 +82,7 @@ def failure(parsed_args):
 def watch_ww3(parsed_args, config, tell_manager):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
-    run_info = tell_manager('need', 'WW3 run').payload
+    run_info = tell_manager('need', 'WWATCH3 run').payload
     pid = _find_run_pid(run_info[run_type])
     logger.debug(f'{run_type} on {host_name}: run pid: {pid}')
     run_dir = Path(run_info[run_type]['run dir'])
