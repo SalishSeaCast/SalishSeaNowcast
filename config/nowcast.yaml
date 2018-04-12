@@ -293,9 +293,14 @@ results archive:
 rolling forecasts:
   # Number of days prior to run date to include in forecast dataset
   days from past: 5
+  # Root of directory tree to hold temporary results files
+  temporary results archives: /tmp/
   nemo:
     # Destination directory for rolling forecast results directories
     dest dir: /results/SalishSea/rolling-forecasts/nemo/
+  wwatch3:
+    # Destination directory for rolling forecast results directories
+    dest dir: /results/SalishSea/rolling-forecasts/wwatch3/
 
 
 # Notifications to ERDDAP server that datasets have been updated
@@ -1060,35 +1065,35 @@ message registry:
 
     make_ww3_wind_file:
       checklist key: WW3 wind forcing
-      success forecast2: WW3 wind forcing file for forecast2 run ready
-      failure forecast2: WW3 wind forcing file creation for forecast2 run failed
-      success forecast: WW3 wind forcing file for forecast run ready
-      failure forecast: WW3 wind forcing file creation for forecast run failed
+      success forecast2: WaveWatch3 wind forcing file for forecast2 run ready
+      failure forecast2: WaveWatch3 wind forcing file creation for forecast2 run failed
+      success forecast: WaveWatch3 wind forcing file for forecast run ready
+      failure forecast: WaveWatch3 wind forcing file creation for forecast run failed
       crash: make_ww3_wind_files worker crashed
 
     make_ww3_current_file:
       checklist key: WW3 currents forcing
-      success forecast2: WW3 currents forcing file for forecast2 run ready
-      failure forecast2: WW3 currents forcing file creation for forecast2 run failed
-      success forecast: WW3 currents forcing file for forecast run ready
-      failure forecast: WW3 currents forcing file creation for forecast run failed
+      success forecast2: WaveWatch3 currents forcing file for forecast2 run ready
+      failure forecast2: WaveWatch3 currents forcing file creation for forecast2 run failed
+      success forecast: WaveWatch3 currents forcing file for forecast run ready
+      failure forecast: WaveWatch3 currents forcing file creation for forecast run failed
       crash: make_ww3_current_files worker crashed
 
     run_ww3:
       checklist key: WW3 run
-      success forecast2: forecast2 WW3 run started
-      failure forecast2: forecast2 WW3 run failed
-      success forecast: forecast WW3 run started
-      failure forecast: forecast WW3 run failed
+      success forecast2: forecast2 WaveWatch3 run started
+      failure forecast2: forecast2 WaveWatch3 run failed
+      success forecast: forecast WaveWatch3 run started
+      failure forecast: forecast WaveWatch3 run failed
       crash: run_ww3 worker crashed
 
     watch_ww3:
       checklist key: WW3 run
       need: WW3 run information dict requested
-      success forecast2: forecast2 WW3 run completed
-      failure forecast2: forecast2 WW3 run failed
-      success forecast: forecast WW3 run completed
-      failure forecast: forecast WW3 run failed
+      success forecast2: forecast2 WaveWatch3 run completed
+      failure forecast2: forecast2 WaveWatch3 run failed
+      success forecast: forecast WaveWatch3 run completed
+      failure forecast: forecast WaveWatch3 run failed
       crash: watch_ww3 worker crashed
 
     download_results:
@@ -1107,10 +1112,10 @@ message registry:
 
     download_wwatch3_results:
       checklist key: WW3 results files
-      success forecast: WW3 forecast results files downloaded
-      failure forecast: WW3 forecast results files download failed
-      success forecast2: WW3 forecast2 results files downloaded
-      failure forecast2: WW3 forecast2 results files download failed
+      success forecast: WaveWatch3 forecast results files downloaded
+      failure forecast: WaveWatch3 forecast results files download failed
+      success forecast2: WaveWatch3 forecast2 results files downloaded
+      failure forecast2: WaveWatch3 forecast2 results files download failed
       crash: download_wwatch3_results worker crashed
 
     download_fvcom_results:
@@ -1131,6 +1136,10 @@ message registry:
      failure nemo forecast: NEMO forecast datasets update from forecast run failed
      success nemo forecast2: NEMO forecast datasets updated from forecast2 run
      failure nemo forecast2: NEMO forecast datasets update from forecast2 run failed
+     success wwatch3 forecast: WaveWatch3 forecast datasets updated from forecast run
+     failure wwatch3 forecast: WaveWatch3 forecast datasets update from forecast run failed
+     success wwatch3 forecast2: WaveWatch3 forecast datasets updated from forecast2 run
+     failure wwatch3 forecast2: WaveWatch3 forecast datasets update from forecast2 run failed
      crash: update_forecast_datasets worker crashed
 
     ping_erddap:
