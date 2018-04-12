@@ -1629,8 +1629,6 @@ class TestAfterDownloadWWatch3Results:
             'crash',
             'failure forecast',
             'failure forecast2',
-            'success forecast',
-            'success forecast2',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1649,6 +1647,36 @@ class TestAfterDownloadWWatch3Results:
                 checklist
             )
         assert workers == []
+
+    @pytest.mark.parametrize(
+        'run_type, run_date', [
+            ('forecast', '2018-04-11'),
+            ('forecast2', '2018-04-11'),
+        ]
+    )
+    def test_success_forecast_launch_update_forecast_datasets(
+        self, run_type, run_date, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {
+                'WW3 run': {
+                    run_type: {
+                        'run date': run_date
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_download_wwatch3_results(
+                Message('download_wwatch3_results', f'success {run_type}'),
+                config, checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.update_forecast_datasets',
+            args=['wwatch3', run_type, '--run-date', run_date],
+            host='localhost'
+        )
+        assert expected in workers
 
 
 class TestAfterDownloadFVCOMResults:

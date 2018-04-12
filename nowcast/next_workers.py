@@ -1165,6 +1165,16 @@ def after_download_wwatch3_results(msg, config, checklist):
         'success forecast': [],
         'success forecast2': [],
     }
+    if msg.type.startswith('success'):
+        run_type = msg.type.split()[1]
+        run_date = checklist['WW3 run'][run_type]['run date']
+        if run_type.startswith('forecast'):
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.update_forecast_datasets',
+                    args=['wwatch3', run_type, '--run-date', run_date]
+                )
+            )
     return next_workers[msg.type]
 
 
