@@ -42,7 +42,7 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name', help='Name of the host to monitor the run on'
+        'host_name', help='Name of the host to queue the run on'
     )
     worker.cli.add_argument(
         '--prev-run-date',
