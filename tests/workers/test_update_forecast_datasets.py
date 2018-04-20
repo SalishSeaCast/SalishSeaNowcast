@@ -269,11 +269,11 @@ class TestAddPastDaysResults:
         'model, run_type, run_date, days_from_past, first_date', [
             (
                 'wwatch3', 'forecast', arrow.get('2018-04-11'), 5,
-                arrow.get('2018-04-06')
+                arrow.get('2018-04-05')
             ),
             (
                 'wwatch3', 'forecast2', arrow.get('2018-04-11'), 5,
-                arrow.get('2018-04-07')
+                arrow.get('2018-04-06')
             ),
         ]
     )

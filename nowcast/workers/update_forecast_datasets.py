@@ -149,23 +149,32 @@ def _add_past_days_results(
     run_date, days_from_past, new_forecast_dir, tmp_forecast_results_archive,
     model, run_type, config
 ):
-    first_date = (
-        run_date.replace(days=-days_from_past) if run_type == 'forecast' else
-        run_date.replace(days=-(days_from_past - 1))
-    )
     model_params = {
         'nemo': {
-            'results archive': Path(config['results archive']['nowcast']),
-            'last date': run_date,
+            'results archive':
+                Path(config['results archive']['nowcast']),
+            'first date': (
+                run_date.replace(days=-days_from_past)
+                if run_type == 'forecast' else
+                run_date.replace(days=-(days_from_past - 1))
+            ),
+            'last date':
+                run_date,
         },
         'wwatch3': {
             'results archive':
                 Path(config['wave forecasts']['results archive']['forecast']),
+            'first date': (
+                run_date.replace(days=-days_from_past - 1)
+                if run_type == 'forecast' else
+                run_date.replace(days=-days_from_past)
+            ),
             'last date':
                 run_date.replace(days=-1),
         },
     }
     results_archive = model_params[model]['results archive']
+    first_date = model_params[model]['first date']
     last_date = model_params[model]['last date']
     for day in arrow.Arrow.range('day', first_date, last_date):
         if model == 'nemo':
