@@ -49,6 +49,7 @@ The following instructions assume that you have the `Anaconda Python Distributio
 You will also need up-to-date clones of the following repositories from Bitbucket:
 
 * NEMO_Nowcast: https://bitbucket.org/43ravens/nemo_nowcast/
+* moad_tools: https://bitbucket.org/UBC_MOAD/moad_tools
 * tools: https://bitbucket.org/salishsea/tools/
 * NEMO-Cmd :https://bitbucket.org/salishsea/nemo-cmd/
 * SalishSeaCmd: https://bitbucket.org/salishsea/salishseacmd/
@@ -67,6 +68,7 @@ you can create and activate a figures development environment with these command
     $ conda env create -f environment-fig-dev.yaml
     $ source activate nowcast-fig-dev
     (nowcast-fig-dev)$ pip install --editable ../NEMO_Nowcast
+    (nowcast-fig-dev)$ pip install --editable ../moad_tools
     (nowcast-fig-dev)$ pip install --editable ../tools/SalishSeaTools
     (nowcast-fig-dev)$ pip install --editable ../NEMO-Cmd
     (nowcast-fig-dev)$ pip install --editable ../SalishSeaCmd

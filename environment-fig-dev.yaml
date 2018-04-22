@@ -6,6 +6,7 @@
 #    $ conda env create -f SalishSeaNowcast/environment-fig-dev.yaml
 #    $ source activate nowcast-fig-dev
 #    $ pip install --editable NEMO_Nowcast/
+#    $ pip install --editable moad_tools/
 #    $ pip install --editable tools/SalishSeaTools/
 #    $ pip install --editable NEMO-Cmd/
 #    $ pip install --editable SalishSeaCmd/

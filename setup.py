@@ -78,6 +78,7 @@ install_requires = [
     'zeep',
 
     # 'NEMO_Nowcast',  # use pip install --editable NEMO_Nowcast/
+    # 'moad_tools',  # use pip install --editable moad_tools
     # 'SalishSeaTools',  # use pip install --editable SalishSeaTools/
     # 'NEMO-Cmd',  # use pip install --editable NEMO-Cmd/
     # 'SalishSeaCmd',  # use pip install --editable SalishSeaCmd/
