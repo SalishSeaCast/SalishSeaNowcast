@@ -29,6 +29,7 @@ Clone the following repos into :file:`/results/nowcast-sys/`:
 
     $ cd /results/nowcast-sys/
     $ hg clone ssh://hg@bitbucket.org/salishsea/grid grid
+    $ hg clone ssh://hg@bitbucket.org/UBC_MOAD/moad_tools moad_tools
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-cmd NEMO-Cmd
     $ hg clone ssh://hg@bitbucket.org/43ravens/nemo_nowcast NEMO_Nowcast
@@ -116,6 +117,7 @@ The Python packages that the system depends on are installed in a conda environm
     (/results/nowcast-sys/nowcast-env)$ pip install angles driftwood \
         f90nml feedgen python-hglib raven retrying scour utm zeep
     (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO_Nowcast/
+    (/results/nowcast-sys/nowcast-env)$ pip install --editable moad_tools/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable tools/SalishSeaTools/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable OPPTools/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO-Cmd/
