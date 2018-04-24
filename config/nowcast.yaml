@@ -545,6 +545,8 @@ run:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False
       make forcing links: False
+      # Directory on compute host where temporary run directories and run results are stored
+      scratch dir: /global/scratch/dlatorne/nowcast-agrif
       run prep dir: /home/dlatorne/nowcast-agrif-sys/runs
       run types:
         nowcast-agrif:
@@ -1017,6 +1019,12 @@ message registry:
       success: NEMO hindcast run ended
       failure: watch_NEMO_hindcast failed
       crash: watch_NEMO_hindcast worker crashed
+
+    watch_NEMO_agrif:
+      checklist key: NEMO run
+      success: NEMO AGRIF run ended
+      failure: watch_NEMO_agrif failed
+      crash: watch_NEMO_agrif worker crashed
 
     run_NEMO_hindcast:
       checklist key: NEMO run
