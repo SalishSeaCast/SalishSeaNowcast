@@ -206,8 +206,6 @@ def _is_running(host_name, users, job_id, run_id, tmp_run_dir, run_info):
             universal_newlines=True
         )
         time_step = int(proc.stdout.strip())
-        # with (tmp_run_dir / 'time.step').open('rt') as f:
-        #     time_step = int(f.read().strip())
         model_seconds = (time_step - run_info.it000) * run_info.rdt
         model_time = (
             run_info.date0.replace(seconds=model_seconds)
@@ -265,7 +263,7 @@ def _is_completed(host_name, users, job_id, run_id):
 def _get_queue_info(host_name, users, job_id=None):
     """
     :param str host_name:
-    :param users:
+    :param str users:
     :param int job_id:
 
     :return: None or 1 line of output from slurm squeue command that describes
