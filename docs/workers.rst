@@ -149,6 +149,13 @@ Workers
     :members: main
 
 
+:kbd:`watch_NEMO_agrif`
+-----------------------
+
+.. automodule:: nowcast.workers.watch_NEMO_agrif
+    :members: main
+
+
 :kbd:`watch_NEMO_hindcast`
 --------------------------
 
