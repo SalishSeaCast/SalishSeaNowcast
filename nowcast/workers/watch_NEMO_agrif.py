@@ -186,7 +186,12 @@ def _is_running(ssh_client, host_name, job_id, run_id, tmp_run_dir, run_info):
     :return: Flag indicating whether or not run is executing
     :rtype: boolean
     """
-    queue_info = _get_queue_info(ssh_client, host_name, job_id)
+    try:
+        queue_info = _get_queue_info(ssh_client, host_name, job_id)
+    except WorkerError:
+        # Job has disappeared from queue, so it has finished, crashed, or
+        # been terminated by the resource manager
+        return False
     state = 'UNKNOWN'
     for line in queue_info:
         if line.strip().startswith('job_state'):

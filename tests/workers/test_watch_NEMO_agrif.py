@@ -223,6 +223,24 @@ class TestIsRunning:
     """Unit test for _is_running() function.
     """
 
+    def test_job_not_on_queue(self, m_get_queue_info, m_logger):
+        m_get_queue_info.side_effect = nemo_nowcast.WorkerError
+        ssh_client = Mock(name='ssh_client')
+        run_info = SimpleNamespace(
+            it000=2360881,
+            itend=2363040,
+            date0=arrow.get('2018-04-24'),
+            rdt=40,
+        )
+        is_running = watch_NEMO_agrif._is_running(
+            ssh_client, 'orcinus', '9305855', '24apr18nowcast-agrif',
+            Path('tmp_run_dir'), run_info
+        )
+        m_get_queue_info.assert_called_once_with(
+            ssh_client, 'orcinus', '9305855'
+        )
+        assert not is_running
+
     @pytest.mark.parametrize(
         'queue_info, expected', [
             (['job_state = R'], True),
