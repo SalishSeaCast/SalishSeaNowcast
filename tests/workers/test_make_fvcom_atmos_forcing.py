@@ -210,5 +210,5 @@ class TestMakeFVCOMAtmosForcing:
         assert m_create_atm_hrdps.call_args[1]['utmzone'] == 10
         expected = 'forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_nowcast_wnd_20180316.nc'
         assert m_create_atm_hrdps.call_args[1]['fname'] == expected
-        expected = 'forcing/atmospheric/GEM2.5/GRIB/20180316/12/'
+        expected = 'forcing/atmospheric/GEM2.5/GRIB/20180316/'
         assert m_create_atm_hrdps.call_args[1]['hrdps_folder'] == expected

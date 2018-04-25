@@ -82,8 +82,8 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'FVCOM {parsed_args.run_type} run atmospheric forcing file creation'
-        f' for {parsed_args.run_date.format("YYYY-MM-DD")} failed',
+        f'FVCOM {parsed_args.run_type} run atmospheric forcing file creation '
+        f'for {parsed_args.run_date.format("YYYY-MM-DD")} failed',
         extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -111,7 +111,7 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
     hrdps_gribs = Path(
         config['vhfr fvcom runs']['atmospheric forcing']['hrdps grib dir']
     )
-    hrdps_grib_dir = hrdps_gribs / run_date.format('YYYYMMDD') / '12'
+    hrdps_grib_dir = hrdps_gribs / run_date.format('YYYYMMDD')
     fvcom_atmos_dir = Path(
         config['vhfr fvcom runs']['atmospheric forcing']['fvcom atmos dir']
     )
