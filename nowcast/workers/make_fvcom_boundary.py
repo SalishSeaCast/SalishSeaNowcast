@@ -126,9 +126,6 @@ def make_fvcom_boundary(parsed_args, config, *args):
     bdy_file_tmpl = (
         config['vhfr fvcom runs']['nemo coupling']['boundary file template']
     )
-    bdy_file = bdy_file_tmpl.format(
-        run_type=run_type, yyyymmdd=run_date.format('YYYYMMDD')
-    )
     grid_dir = Path(config['vhfr fvcom runs']['fvcom grid']['grid dir'])
     fvcom_grid_file = Path(
         config['vhfr fvcom runs']['fvcom grid']['grid file']
@@ -153,24 +150,30 @@ def make_fvcom_boundary(parsed_args, config, *args):
         ['nemo boundary results']
     )
     (
-        x, y, z, tri, nsiglev, siglev, nsiglay, siglay, inest, xb, yb,
-        nemo_lon, nemo_lat, e1t, e2t, e3u_0, e3v_0, mbathy
+        x, y, z, tri, nsiglev, siglev, nsiglay, siglay, nemo_lon, nemo_lat,
+        e1t, e2t, e3u_0, e3v_0, gdept_0, gdepw_0, gdepu, gdepv, tmask, umask,
+        vmask, gdept_1d, nemo_h
     ) = OPPTools.nesting.read_metrics(
         fgrd=os.fspath(grid_dir / fvcom_grid_file),
         fbathy=os.fspath(grid_dir / fvcom_depths_file),
         fsigma=os.fspath(grid_dir / fvcom_sigma_file),
-        fnest=os.fspath(coupling_dir / fvcom_nest_indices_file),
-        frefline=os.fspath(coupling_dir / fvcom_nest_ref_line_file),
         fnemocoord=(
             config['vhfr fvcom runs']['nemo coupling']['nemo coordinates']
         ),
         fnemomask=config['vhfr fvcom runs']['nemo coupling']['nemo mesh mask'],
+        fnemobathy=(
+            config['vhfr fvcom runs']['nemo coupling']['nemo bathymetry']
+        ),
         nemo_cut_i=(
             config['vhfr fvcom runs']['nemo coupling']['nemo cut i range']
         ),
         nemo_cut_j=(
             config['vhfr fvcom runs']['nemo coupling']['nemo cut j range']
         )
+    )
+    inest, xb, yb = OPPTools.nesting.read_nesting(
+        fnest=os.fspath(coupling_dir / fvcom_nest_indices_file),
+        frefline=os.fspath(coupling_dir / fvcom_nest_ref_line_file),
     )
     time_start_offsets = {
         'nowcast': timedelta(hours=0),
@@ -182,6 +185,12 @@ def make_fvcom_boundary(parsed_args, config, *args):
         'forecast': timedelta(hours=60),
     }
     time_end = run_date + time_end_offsets[run_type]
+    bdy_file_date = run_date if run_type == 'nowcast' else run_date.replace(
+        days=+1
+    )
+    bdy_file = bdy_file_tmpl.format(
+        run_type=run_type, yyyymmdd=bdy_file_date.format('YYYYMMDD')
+    )
     OPPTools.nesting.make_type3_nesting_file2(
         fout=os.fspath(fvcom_input_dir / bdy_file),
         x=x,
@@ -207,8 +216,8 @@ def make_fvcom_boundary(parsed_args, config, *args):
         e2t=e2t,
         e3u_0=e3u_0,
         e3v_0=e3v_0,
-        mbathy=mbathy,
         input_dir=os.fspath(nemo_bdy_dir),
+        nemo_file_pattern='SalishSea_1h_*_grid_',
         time_start=time_start.format('YYYY-MM-DD HH:mm:ss'),
         time_end=time_end.format('YYYY-MM-DD HH:mm:ss')
     )

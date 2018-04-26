@@ -135,9 +135,15 @@ class TestFailure:
 @patch(
     'nowcast.workers.make_fvcom_boundary.OPPTools.nesting.read_metrics',
     return_value=tuple(
-        'x y z tri nsiglev siglev nsiglay siglay inest xb yb '
-        'nemo_lon nemo_lat e1t e2t e3u_0 e3v_0 mbathy'.split()
+        'x y z tri nsiglev siglev nsiglay siglay nemo_lon nemo_lat '
+        'e1t e2t e3u_0 e3v_0 gdept_0 gdepw_0 gdepu gdepv '
+        'tmask umask vmask gdept_1d nemo_h'.split()
     ),
+    autospec=True
+)
+@patch(
+    'nowcast.workers.make_fvcom_boundary.OPPTools.nesting.read_nesting',
+    return_value=tuple('inest xb yb'.split()),
     autospec=True
 )
 @patch(
@@ -177,6 +183,8 @@ class TestMakeFVCOMBoundary:
                     'grid/coordinates_seagrid_SalishSea201702.nc',
                 'nemo mesh mask':
                     'grid/mesh_mask201702.nc',
+                'nemo bathymetry':
+                    'grid/bathymetry_201702.nc',
                 'boundary file template':
                     'bdy_{run_type}_btrp_{yyyymmdd}.nc',
             },
@@ -192,12 +200,15 @@ class TestMakeFVCOMBoundary:
         }
     }
 
-    @pytest.mark.parametrize('run_type', [
-        'nowcast',
-        'forecast',
-    ])
+    @pytest.mark.parametrize(
+        'run_type, file_date', [
+            ('nowcast', '20180108'),
+            ('forecast', '20180109'),
+        ]
+    )
     def test_checklist(
-        self, m_mk_nest_file2, m_read_metrics, m_logger, run_type
+        self, m_mk_nest_file2, m_read_nesting, m_read_metrics, m_logger,
+        run_type, file_date
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -214,20 +225,20 @@ class TestMakeFVCOMBoundary:
                 'run date':
                     '2018-01-08',
                 'open boundary file':
-                    os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc')
+                    os.fspath(
+                        input_dir / f'bdy_{run_type}_btrp_{file_date}.nc'
+                    )
             }
         }
         assert checklist == expected
 
-    @pytest.mark.parametrize(
-        'run_type, time_start, time_end', [
-            ('nowcast', '2018-01-08 00:00:00', '2018-01-09 00:00:00'),
-            ('forecast', '2018-01-09 00:00:00', '2018-01-10 12:00:00'),
-        ]
-    )
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'forecast',
+    ])
     def test_nesting_read_metrics(
-        self, m_mk_nest_file2, m_read_metrics, m_logger, run_type, time_start,
-        time_end
+        self, m_mk_nest_file2, m_read_nesting, m_read_metrics, m_logger,
+        run_type
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -246,14 +257,36 @@ class TestMakeFVCOMBoundary:
             fgrd=os.fspath(grid_dir / 'vhfr_low_v2_utm10_grd.dat'),
             fbathy=os.fspath(grid_dir / 'vhfr_low_v2_utm10_dep.dat'),
             fsigma=os.fspath(grid_dir / 'vhfr_low_v2_sigma.dat'),
+            fnemocoord='grid/coordinates_seagrid_SalishSea201702.nc',
+            fnemomask='grid/mesh_mask201702.nc',
+            fnemobathy='grid/bathymetry_201702.nc',
+            nemo_cut_i=[225, 369],
+            nemo_cut_j=[340, 561]
+        )
+
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'forecast',
+    ])
+    def test_nesting_read_nesting(
+        self, m_mk_nest_file2, m_read_nesting, m_read_metrics, m_logger,
+        run_type
+    ):
+        parsed_args = SimpleNamespace(
+            host_name='west.cloud',
+            run_type=run_type,
+            run_date=arrow.get('2018-04-25')
+        )
+        with patch('nowcast.workers.make_fvcom_boundary.Path.mkdir'):
+            make_fvcom_boundary.make_fvcom_boundary(parsed_args, self.config)
+        coupling_dir = Path(
+            self.config['vhfr fvcom runs']['nemo coupling']['coupling dir']
+        )
+        m_read_nesting.assert_called_once_with(
             fnest=os.fspath(coupling_dir / 'vhfr_low_v2_nesting_indices.txt'),
             frefline=os.fspath(
                 coupling_dir / 'vhfr_low_v2_nesting_innerboundary.txt'
             ),
-            fnemocoord='grid/coordinates_seagrid_SalishSea201702.nc',
-            fnemomask='grid/mesh_mask201702.nc',
-            nemo_cut_i=[225, 369],
-            nemo_cut_j=[340, 561]
         )
 
     @pytest.mark.parametrize(
@@ -263,8 +296,8 @@ class TestMakeFVCOMBoundary:
         ]
     )
     def test_nesting_make_type3_nesting_file2(
-        self, m_mk_nest_file2, m_read_metrics, m_logger, run_type, time_start,
-        time_end
+        self, m_mk_nest_file2, m_read_nesting, m_read_metrics, m_logger,
+        run_type, time_start, time_end
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -275,7 +308,10 @@ class TestMakeFVCOMBoundary:
             make_fvcom_boundary.make_fvcom_boundary(parsed_args, self.config)
         input_dir = Path(self.config['vhfr fvcom runs']['input dir'])
         m_mk_nest_file2.assert_called_once_with(
-            fout=os.fspath(input_dir / f'bdy_{run_type}_btrp_20180108.nc'),
+            fout=os.fspath(
+                input_dir /
+                f'bdy_{run_type}_btrp_{arrow.get(time_start).format("YYYYMMDD")}.nc'
+            ),
             x='x',
             y='y',
             z='z',
@@ -297,8 +333,8 @@ class TestMakeFVCOMBoundary:
             e2t='e2t',
             e3u_0='e3u_0',
             e3v_0='e3v_0',
-            mbathy='mbathy',
             input_dir=f'SalishSea/{run_type}',
+            nemo_file_pattern='SalishSea_1h_*_grid_',
             time_start=time_start,
             time_end=time_end
         )
