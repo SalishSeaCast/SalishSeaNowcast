@@ -56,6 +56,7 @@ install_requires = [
     'driftwood',
     'f90nml',
     'feedgen',
+    'gsw',
     'lxml',
     'mako',
     'matplotlib',
