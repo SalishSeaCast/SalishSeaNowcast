@@ -52,7 +52,7 @@ class TestMain:
         watch_fvcom.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        assert kwargs['choices'] == {'nowcast'}
+        assert kwargs['choices'] == {'nowcast', 'forecast'}
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker):
@@ -67,6 +67,7 @@ class TestMain:
 
 @pytest.mark.parametrize('run_type', [
     'nowcast',
+    'forecast',
 ])
 @patch('nowcast.workers.watch_fvcom.logger', autospec=True)
 class TestSuccess:
@@ -92,6 +93,7 @@ class TestSuccess:
 
 @pytest.mark.parametrize('run_type', [
     'nowcast',
+    'forecast',
 ])
 @patch('nowcast.workers.watch_fvcom.logger', autospec=True)
 class TestFailure:

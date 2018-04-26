@@ -1077,6 +1077,8 @@ message registry:
       need: FVCOM run information dict requested
       success nowcast: nowcast FVCOM run completed
       failure nowcast: nowcast FVCOM run failed
+      success forecast: forecast FVCOM run completed
+      failure forecast: forecast FVCOM run failed
       crash: watch_fvcom worker crashed
 
     make_ww3_wind_file:
