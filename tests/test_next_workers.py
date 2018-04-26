@@ -1713,34 +1713,28 @@ class TestAfterDownloadFVCOMResults:
     """Unit tests for the after_download_fvcom_results function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure forecast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        p_checklist = patch.dict(
-            checklist, {
-                'FVCOM run': {
-                    'nowcast': {
-                        'run date': '2018-02-19'
-                    }
-                }
-            }
+        workers = next_workers.after_download_fvcom_results(
+            Message('download_fvcom_results', msg_type), config, checklist
         )
-        with p_checklist:
-            workers = next_workers.after_download_fvcom_results(
-                Message('download_fvcom_results', msg_type), config, checklist
-            )
         assert workers == []
 
-    @pytest.mark.parametrize('msg_type', [
-        'success nowcast',
+    @pytest.mark.parametrize('run_type', [
+        'nowcast',
+        'forecast',
     ])
-    def test_success_launch_make_plots(self, msg_type, config, checklist):
+    def test_success_launch_make_plots(self, run_type, config, checklist):
         p_checklist = patch.dict(
             checklist, {
                 'FVCOM run': {
-                    'nowcast': {
+                    run_type: {
                         'run date': '2018-02-27'
                     }
                 }
@@ -1748,11 +1742,12 @@ class TestAfterDownloadFVCOMResults:
         )
         with p_checklist:
             workers = next_workers.after_download_fvcom_results(
-                Message('download_fvcom_results', msg_type), config, checklist
+                Message('download_fvcom_results', f'success {run_type}'),
+                config, checklist
             )
         expected = NextWorker(
             'nowcast.workers.make_plots',
-            args=['fvcom', 'nowcast', 'publish', '--run-date', '2018-02-27'],
+            args=['fvcom', run_type, 'publish', '--run-date', '2018-02-27'],
             host='localhost'
         )
         assert expected in workers

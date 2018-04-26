@@ -1212,7 +1212,9 @@ def after_download_fvcom_results(msg, config, checklist):
     next_workers = {
         'crash': [],
         'failure nowcast': [],
+        'failure forecast': [],
         'success nowcast': [],
+        'success forecast': [],
     }
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
