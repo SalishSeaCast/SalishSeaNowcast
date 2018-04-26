@@ -200,19 +200,32 @@ def _get_nav_data(ferry_platform, ymd, location_config):
             raise WorkerError(msg)
         try:
             nav_data = data_tools.onc_json_to_dataset(onc_data)
+            logger.debug(
+                f'ONC {station} {device_category} data for {ymd} received and parsed',
+                extra={
+                    'data_date': ymd,
+                    'ferry_platform': ferry_platform,
+                    'station': station,
+                    'device_category': device_category,
+                }
+            )
+            return nav_data
         except TypeError:
             # Invalid data from NAV device, so try the next one
             continue
-    logger.debug(
-        f'ONC {station} {device_category} data for {ymd} received and parsed',
+    msg = (
+        f'no valid nav data found from ONC ferry nav station devices '
+        f'{location_config["stations"]} for {ymd} '
+    )
+    logger.error(
+        msg,
         extra={
             'data_date': ymd,
             'ferry_platform': ferry_platform,
-            'station': station,
-            'device_category': device_category,
+            'stations': location_config['stations'],
         }
     )
-    return nav_data
+    raise WorkerError(msg)
 
 
 def _calc_location_arrays(nav_data, location_config):
