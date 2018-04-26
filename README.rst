@@ -22,7 +22,7 @@ message-based architecture that:
 Documentation for the package is in the ``docs/`` directory and is rendered at https://salishsea-nowcast.readthedocs.io/en/latest/.
 
 .. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
-    :target: https://salishsea-nowcast.readthedocs.io/en/nemo_nowcast/?badge=latest
+    :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status
 
 
