@@ -744,6 +744,7 @@ vhfr fvcom runs:
   # in ddmmmyy/ directories; keyed by run type
   results archive:
     nowcast: /opp/fvcom/nowcast/
+    forecast: /opp/fvcom/forecast/
   # Name of the results file containing the tide gauge stations sea surface height time series
   ssh dataset filename: vhfr_low_v2_station_timeseries.nc
 
