@@ -44,7 +44,7 @@ def main():
     )
     worker.cli.add_argument(
         'run_type',
-        choices={'nowcast'},
+        choices={'nowcast', 'forecast'},
         help='''
         Type of run to monitor:
         'nowcast' means nowcast run (after NEMO nowcast run)
