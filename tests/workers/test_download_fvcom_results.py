@@ -14,16 +14,14 @@
 # limitations under the License.
 """Unit tests for SalishSeaCast download_fvcom_results worker.
 """
-from pathlib import Path, PosixPath
 import shlex
 from types import SimpleNamespace
-from unittest.mock import patch, call
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
 import pytest
 
-from nowcast.lib import FilePerms
 from nowcast.workers import download_fvcom_results
 
 
@@ -55,7 +53,7 @@ class TestMain:
         download_fvcom_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        expected = {'nowcast'}
+        expected = {'nowcast', 'forecast'}
         assert kwargs['choices'] == expected
         assert 'help' in kwargs
 
@@ -79,6 +77,7 @@ class TestMain:
 @pytest.mark.parametrize(
     'run_type, host_name', [
         ('nowcast', 'west.cloud-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
     ]
 )
 @patch('nowcast.workers.download_fvcom_results.logger', autospec=True)
@@ -110,6 +109,7 @@ class TestSuccess:
 @pytest.mark.parametrize(
     'run_type, host_name', [
         ('nowcast', 'west.cloud-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
     ]
 )
 @patch('nowcast.workers.download_fvcom_results.logger', autospec=True)
@@ -142,6 +142,7 @@ class TestFailure:
 @pytest.mark.parametrize(
     'run_type, host_name', [
         ('nowcast', 'west.cloud-nowcast'),
+        ('forecast', 'west.cloud-nowcast'),
     ]
 )
 @patch('nowcast.workers.download_fvcom_results.logger', autospec=True)

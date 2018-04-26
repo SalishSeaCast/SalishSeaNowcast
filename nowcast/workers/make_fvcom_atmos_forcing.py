@@ -41,10 +41,11 @@ def main():
     worker.init_cli()
     worker.cli.add_argument(
         'run_type',
-        choices={'nowcast'},
+        choices={'nowcast', 'forecast'},
         help='''
         Type of run to make atmospheric forcing file for:
-        'nowcast' means run for present UTC day (after NEMO nowcast run)
+        'nowcast' means run for present UTC day (after NEMO nowcast run),
+        'forecast' means updated forecast run (next 36h UTC, after NEMO forecast run)
         ''',
     )
     worker.cli.add_date_option(
@@ -118,11 +119,6 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
     atmos_file_tmpl = (
         config['vhfr fvcom runs']['atmospheric forcing']['atmos file template']
     )
-    atmos_file = atmos_file_tmpl.format(
-        run_type=run_type,
-        field_type=atmos_field_type,
-        yyyymmdd=run_date.format('YYYYMMDD')
-    )
     grid_dir = Path(
         config['vhfr fvcom runs']['atmospheric forcing']['fvcom grid dir']
     )
@@ -136,12 +132,22 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
     x, y = nodes[:, 0], nodes[:, 1]
     time_start_offsets = {
         'nowcast': timedelta(hours=0),
+        'forecast': timedelta(hours=24),
     }
     time_start = run_date + time_start_offsets[run_type]
     time_end_offsets = {
         'nowcast': timedelta(hours=24),
+        'forecast': timedelta(hours=60),
     }
     time_end = run_date + time_end_offsets[run_type]
+    atmos_file_date = run_date if run_type == 'nowcast' else run_date.replace(
+        days=+1
+    )
+    atmos_file = atmos_file_tmpl.format(
+        run_type=run_type,
+        field_type=atmos_field_type,
+        yyyymmdd=atmos_file_date.format('YYYYMMDD')
+    )
     logger.debug(
         f'creating {atmos_field_type} file for {time_start} to {time_end} '
         f'from {hrdps_grib_dir}'

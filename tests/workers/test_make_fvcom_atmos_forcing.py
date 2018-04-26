@@ -48,7 +48,7 @@ class TestMain:
         make_fvcom_atmos_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('run_type',)
-        assert kwargs['choices'] == {'nowcast'}
+        assert kwargs['choices'] == {'nowcast', 'forecast'}
         assert 'help' in kwargs
 
     def test_add_run_date_option(self, m_worker):
@@ -70,6 +70,7 @@ class TestMain:
 
 @pytest.mark.parametrize('run_type', [
     'nowcast',
+    'forecast',
 ])
 @patch('nowcast.workers.make_fvcom_atmos_forcing.logger', autospec=True)
 class TestSuccess:
@@ -93,6 +94,7 @@ class TestSuccess:
 
 @pytest.mark.parametrize('run_type', [
     'nowcast',
+    'forecast',
 ])
 @patch('nowcast.workers.make_fvcom_atmos_forcing.logger', autospec=True)
 class TestFailure:
@@ -171,6 +173,7 @@ class TestMakeFVCOMAtmosForcing:
 
     @pytest.mark.parametrize('run_type', [
         'nowcast',
+        'forecast',
     ])
     def test_readMesh_V3(
         self, m_create_atm_hrdps, m_readMesh, m_logger, run_type
@@ -185,11 +188,14 @@ class TestMakeFVCOMAtmosForcing:
             'nowcast-sys/FVCOM-VHFR-config/grid/vhfr_low_v2_utm10_grd.dat'
         )
 
-    @pytest.mark.parametrize('run_type', [
-        'nowcast',
-    ])
+    @pytest.mark.parametrize(
+        'run_type, file_date', [
+            ('nowcast', '20180316'),
+            ('forecast', '20180317'),
+        ]
+    )
     def test_create_atm_hrdps(
-        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type
+        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, file_date
     ):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get('2018-03-16')
@@ -208,7 +214,10 @@ class TestMakeFVCOMAtmosForcing:
             m_create_atm_hrdps.call_args[0][3], numpy.ones((44157, 2))
         )
         assert m_create_atm_hrdps.call_args[1]['utmzone'] == 10
-        expected = 'forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_nowcast_wnd_20180316.nc'
+        expected = (
+            f'forcing/atmospheric/GEM2.5/vhfr-fvcom/'
+            f'atmos_{run_type}_wnd_{file_date}.nc'
+        )
         assert m_create_atm_hrdps.call_args[1]['fname'] == expected
         expected = 'forcing/atmospheric/GEM2.5/GRIB/20180316/'
         assert m_create_atm_hrdps.call_args[1]['hrdps_folder'] == expected

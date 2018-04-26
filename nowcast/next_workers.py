@@ -595,6 +595,13 @@ def after_watch_NEMO(msg, config, checklist):
                         args=['--run-date', msg.payload[run_type]['run date']]
                     )
                 )
+            next_workers['success forecast'].append(
+                NextWorker(
+                    'nowcast.workers.make_fvcom_boundary',
+                    args=[(config['vhfr fvcom runs']['host']), 'forecast'],
+                    host=(config['vhfr fvcom runs']['host'])
+                ),
+            )
         if run_type == 'nowcast-green':
             if wave_forecast_after == 'nowcast-green':
                 host_name = config['wave forecasts']['host']
@@ -740,7 +747,7 @@ def after_make_fvcom_boundary(msg, config, checklist):
         'success nowcast': [],
         'success forecast': [],
     }
-    if msg.type == 'success nowcast':
+    if msg.type.startswith('success'):
         host_name = config['vhfr fvcom runs']['host']
         run_type = msg.type.split()[1]
         run_date = msg.payload[run_type]['run date']
@@ -775,9 +782,11 @@ def after_make_fvcom_atmos_forcing(msg, config, checklist):
     next_workers = {
         'crash': [],
         'failure nowcast': [],
+        'failure forecast': [],
         'success nowcast': [],
+        'success forecast': [],
     }
-    if msg.type == 'success nowcast':
+    if msg.type.startswith('success'):
         host_name = config['vhfr fvcom runs']['host']
         run_type = msg.type.split()[1]
         run_date = msg.payload[run_type]['run date']
@@ -811,9 +820,11 @@ def after_upload_fvcom_atmos_forcing(msg, config, checklist):
     next_workers = {
         'crash': [],
         'failure nowcast': [],
+        'failure forecast': [],
         'success nowcast': [],
+        'success forecast': [],
     }
-    if msg.type == 'success nowcast':
+    if msg.type.startswith('success'):
         host_name = config['vhfr fvcom runs']['host']
         run_type = msg.type.split()[1]
         run_date = msg.payload[host_name][run_type]['run date']

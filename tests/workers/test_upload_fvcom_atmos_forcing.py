@@ -54,7 +54,7 @@ class TestMain:
         upload_fvcom_atmos_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
-        assert kwargs['choices'] == {'nowcast'}
+        assert kwargs['choices'] == {'nowcast', 'forecast'}
         assert 'help' in kwargs
 
     def test_add_run_date_option(self, m_worker):
@@ -76,6 +76,7 @@ class TestMain:
 
 @pytest.mark.parametrize('run_type', [
     'nowcast',
+    'forecast',
 ])
 @patch('nowcast.workers.upload_fvcom_atmos_forcing.logger', autospec=True)
 class TestSuccess:
@@ -103,6 +104,7 @@ class TestSuccess:
 
 @pytest.mark.parametrize('run_type', [
     'nowcast',
+    'forecast',
 ])
 @patch('nowcast.workers.upload_fvcom_atmos_forcing.logger', autospec=True)
 class TestFailure:
@@ -128,9 +130,12 @@ class TestFailure:
         assert msg_type == f'failure {run_type}'
 
 
-@pytest.mark.parametrize('run_type', [
-    'nowcast',
-])
+@pytest.mark.parametrize(
+    'run_type, file_date', [
+        ('nowcast', '20180404'),
+        ('forecast', '20180405'),
+    ]
+)
 @patch(
     'nowcast.workers.upload_fvcom_atmos_forcing.ssh_sftp.sftp', autospec=True
 )
@@ -157,7 +162,9 @@ class TestUploadFVCOMAtmosForcing:
         }
     }
 
-    def test_checklist(self, m_logger, m_upload_file, m_sftp, run_type):
+    def test_checklist(
+        self, m_logger, m_upload_file, m_sftp, run_type, file_date
+    ):
         m_sftp.return_value = (
             Mock(name='ssh_client'), Mock(name='sftp_client')
         )
@@ -173,13 +180,15 @@ class TestUploadFVCOMAtmosForcing:
             'west.cloud': {
                 run_type: {
                     'run date': '2018-04-04',
-                    'file': f'atmos_{run_type}_wnd_20180404.nc',
+                    'file': f'atmos_{run_type}_wnd_{file_date}.nc',
                 }
             }
         }
         assert checklist == expected
 
-    def test_upload_file(self, m_logger, m_upload_file, m_sftp, run_type):
+    def test_upload_file(
+        self, m_logger, m_upload_file, m_sftp, run_type, file_date
+    ):
         m_sftp_client = Mock(name='sftp_client')
         m_sftp.return_value = (Mock(name='ssh_client'), m_sftp_client)
         parsed_args = SimpleNamespace(
@@ -194,7 +203,7 @@ class TestUploadFVCOMAtmosForcing:
             m_sftp_client, 'west.cloud',
             Path(
                 f'forcing/atmospheric/GEM2.5/vhfr-fvcom/'
-                f'atmos_{run_type}_wnd_20180404.nc'
-            ), Path(f'fvcom-runs/input/atmos_{run_type}_wnd_20180404.nc'),
+                f'atmos_{run_type}_wnd_{file_date}.nc'
+            ), Path(f'fvcom-runs/input/atmos_{run_type}_wnd_{file_date}.nc'),
             m_logger
         )

@@ -823,6 +823,27 @@ class TestAfterWatchNEMO:
         )
         assert workers[1] == expected
 
+    def test_success_forecast_launch_make_fvcom_boundary(
+        self, config, checklist
+    ):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                'watch_NEMO', 'success forecast', {
+                    'forecast': {
+                        'host': 'west.cloud',
+                        'run date': '2018-01-20',
+                        'completed': True,
+                    }
+                }
+            ), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.make_fvcom_boundary',
+            args=['west.cloud', 'forecast'],
+            host='west.cloud'
+        )
+        assert expected in workers
+
     def test_success_forecast2_launch_make_ww3_wind_file_forecast2(
         self, config, checklist
     ):
@@ -1041,6 +1062,7 @@ class TestAfterMakeFVCOMBoundary:
 
     @pytest.mark.parametrize('run_type', [
         'nowcast',
+        'forecast',
     ])
     def test_success_launch_make_fvcom_atmos_forcing(
         self, run_type, config, checklist
@@ -1071,10 +1093,13 @@ class TestAfterMakeFVCOMAtmosForcing:
     """Unit tests for the after_make_fvcom_atmos_forcing function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure forecast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_fvcom_atmos_forcing(
             Message('make_fvcom_atmos_forcing', msg_type), config, checklist
@@ -1083,6 +1108,7 @@ class TestAfterMakeFVCOMAtmosForcing:
 
     @pytest.mark.parametrize('run_type', [
         'nowcast',
+        'forecast',
     ])
     def test_success_launch_upload_fvcom_atmos_forcing(
         self, run_type, config, checklist
@@ -1111,10 +1137,13 @@ class TestAfterUploadFVCOMAtmosForcing:
     """Unit tests for the after_upload_fvcom_atmos_forcing function.
     """
 
-    @pytest.mark.parametrize('msg_type', [
-        'crash',
-        'failure nowcast',
-    ])
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure forecast',
+        ]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_upload_fvcom_atmos_forcing(
             Message('upload_fvcom_atmos_forcing', msg_type), config, checklist
@@ -1123,6 +1152,7 @@ class TestAfterUploadFVCOMAtmosForcing:
 
     @pytest.mark.parametrize('run_type', [
         'nowcast',
+        'forecast',
     ])
     def test_success_launch_run_fvcom(self, run_type, config, checklist):
         msg = Message(

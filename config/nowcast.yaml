@@ -674,6 +674,8 @@ vhfr fvcom runs:
     nemo coordinates: /nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc
     # NEMO mesh mask file
     nemo mesh mask: /nemoShare/MEOPAR/nowcast-sys/grid/mesh_mask201702.nc
+    # NEMO bathymetry file
+    nemo bathymetry: /nemoShare/MEOPAR/nowcast-sys/grid/bathymetry_201702.nc
     # Template for boundary forcing file names
     # **Must be quoted to project {} characters**
     boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
@@ -1050,12 +1052,16 @@ message registry:
       checklist key: FVCOM atmospheric forcing
       success nowcast: nowcast FVCOM atmospheric forcing file created
       failure nowcast: nowcast FVCOM atmospheric forcing file creation failed
+      success forecast: forecast FVCOM atmospheric forcing file created
+      failure forecast: forecast FVCOM atmospheric forcing file creation failed
       crash: make_fvcom_atmos_forcing worker crashed
 
     upload_fvcom_atmos_forcing:
       checklist key: FVCOM atmospheric forcing upload
       success nowcast: FVCOM nowcast atmospheric forcing file uploaded
       failure nowcast: FVCOM nowcast atmospheric forcing file upload failed
+      success forecast: FVCOM forecast atmospheric forcing file uploaded
+      failure forecast: FVCOM forecast atmospheric forcing file upload failed
       crash: upload_fvcom_atmos_forcing worker crashed
 
     run_fvcom:
@@ -1132,6 +1138,8 @@ message registry:
       checklist key: VHFR FVCOM results files
       success nowcast: VHFR FVCOM nowcast results files downloaded
       failure nowcast: VHFR FVCOM nowcast results files download failed
+      success forecast: VHFR FVCOM forecast results files downloaded
+      failure forecast: VHFR FVCOM forecast results files download failed
       crash: download_fvcom_results worker crashed
 
     split_results:

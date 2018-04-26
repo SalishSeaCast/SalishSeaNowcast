@@ -416,16 +416,20 @@ class TestAssembleNamelist:
         assert namelist_path.exists()
 
 
-@pytest.mark.parametrize('run_type', [
-    'nowcast',
-    'forecast',
-])
+@pytest.mark.parametrize(
+    'run_type, restart_date', [
+        ('nowcast', '17jan18'),
+        ('forecast', '18jan18'),
+    ]
+)
 @patch('nowcast.workers.run_fvcom.logger', autospec=True)
 class TestPrepFVCOM_InputDir:
     """Unit test for _prep_fvcom_input_dir() function.
     """
 
-    def test_prep_fvcom_input_dir(self, m_logger, run_type, config):
+    def test_prep_fvcom_input_dir(
+        self, m_logger, run_type, restart_date, config
+    ):
         with patch('nowcast.workers.run_fvcom.Path.symlink_to') as m_link:
             run_fvcom._prep_fvcom_input_dir(
                 arrow.get('2018-01-18'), run_type, config
@@ -442,7 +446,7 @@ class TestPrepFVCOM_InputDir:
             ),
             call(
                 Path(
-                    f'SalishSea/fvcom-{run_type}/17jan18/vhfr_low_v2_restart_0001.nc'
+                    f'SalishSea/fvcom-nowcast/{restart_date}/vhfr_low_v2_restart_0001.nc'
                 )
             ),
         ]
