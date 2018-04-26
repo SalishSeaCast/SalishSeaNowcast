@@ -217,9 +217,11 @@ def make_fvcom_boundary(parsed_args, config, *args):
         e3u_0=e3u_0,
         e3v_0=e3v_0,
         input_dir=os.fspath(nemo_bdy_dir),
-        nemo_file_pattern='SalishSea_1h_*_grid_',
+        nemo_file_pattern='FVCOM_*',
         time_start=time_start.format('YYYY-MM-DD HH:mm:ss'),
-        time_end=time_end.format('YYYY-MM-DD HH:mm:ss')
+        time_end=time_end.format('YYYY-MM-DD HH:mm:ss'),
+        ua_name='ubarotropic',
+        va_name='vbarotropic',
     )
     logger.debug(
         f'Stored VHFR FVCOM open boundary file: {fvcom_input_dir/bdy_file}'

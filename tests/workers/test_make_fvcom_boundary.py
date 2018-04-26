@@ -334,7 +334,9 @@ class TestMakeFVCOMBoundary:
             e3u_0='e3u_0',
             e3v_0='e3v_0',
             input_dir=f'SalishSea/{run_type}',
-            nemo_file_pattern='SalishSea_1h_*_grid_',
+            nemo_file_pattern='FVCOM_*',
             time_start=time_start,
-            time_end=time_end
+            time_end=time_end,
+            ua_name='ubarotropic',
+            va_name='vbarotropic',
         )
