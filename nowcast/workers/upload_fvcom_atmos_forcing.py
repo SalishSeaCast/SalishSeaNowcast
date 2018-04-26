@@ -43,10 +43,11 @@ def main():
     )
     worker.cli.add_argument(
         'run_type',
-        choices={'nowcast'},
+        choices={'nowcast', 'forecast'},
         help='''
         Type of run to upload atmospheric forcing file for:
-        'nowcast' means run for present UTC day (after NEMO nowcast run)
+        'nowcast' means run for present UTC day (after NEMO nowcast run),
+        'forecast' means updated forecast run (next 36h UTC, after NEMO forecast run)
         ''',
     )
     worker.cli.add_date_option(
@@ -121,10 +122,13 @@ def upload_fvcom_atmos_forcing(parsed_args, config, *args):
     atmos_file_tmpl = (
         config['vhfr fvcom runs']['atmospheric forcing']['atmos file template']
     )
+    atmos_file_date = run_date if run_type == 'nowcast' else run_date.replace(
+        days=+1
+    )
     atmos_file = atmos_file_tmpl.format(
         run_type=run_type,
         field_type=atmos_field_type,
-        yyyymmdd=run_date.format('YYYYMMDD')
+        yyyymmdd=atmos_file_date.format('YYYYMMDD')
     )
     fvcom_input_dir = Path(config['vhfr fvcom runs']['input dir'])
     ssh_key = Path(

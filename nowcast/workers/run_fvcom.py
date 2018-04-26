@@ -340,9 +340,14 @@ def _prep_fvcom_input_dir(run_date, run_type, config):
         config['vhfr fvcom runs']['run types'][run_type]['results']
     )
     casename = config['vhfr fvcom runs']['case name']
-    restart_file = results_dir / run_date.replace(
+    restart_dir = Path(
+        config['vhfr fvcom runs']['run types']['nowcast']['results']
+    )
+    restart_file_date = run_date.replace(
         days=-1
-    ).format('DDMMMYY').lower() / f'{casename}_restart_0001.nc'
+    ) if run_type == 'nowcast' else run_date
+    restart_file = restart_dir / restart_file_date.format('DDMMMYY').lower(
+    ) / f'{casename}_restart_0001.nc'
     (fvcom_input_dir / restart_file.name).symlink_to(restart_file)
     logger.debug(f'symlinked {restart_file} file into {fvcom_input_dir}')
 
