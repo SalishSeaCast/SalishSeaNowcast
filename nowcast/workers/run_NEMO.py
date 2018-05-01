@@ -75,6 +75,12 @@ def main():
 
 
 def success(parsed_args):
+    """
+    :param :py:class:`argparse.Namespace` parsed_args:
+
+    :return: Nowcast system message type
+    :rtype: str
+    """
     logger.info(
         f'{parsed_args.run_type} NEMO run for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
@@ -90,6 +96,12 @@ def success(parsed_args):
 
 
 def failure(parsed_args):
+    """
+    :param :py:class:`argparse.Namespace` parsed_args:
+
+    :return: Nowcast system message type
+    :rtype: str
+    """
     logger.critical(
         f'{parsed_args.run_type} NEMO run for '
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
@@ -105,6 +117,14 @@ def failure(parsed_args):
 
 
 def run_NEMO(parsed_args, config, tell_manager):
+    """
+    :param :py:class:`argparse.Namespace` parsed_args:
+    :param :py:class:`nemo_nowcast.Config` config:
+    :param :py:func:`nemo_nowcast.NowcastWorker.tell_manager` tell_manager:
+
+    :return: Nowcast system checklist items
+    :rtype: dict
+    """
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
