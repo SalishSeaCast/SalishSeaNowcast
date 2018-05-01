@@ -251,7 +251,7 @@ class TestEditRunDesc:
             '/tmp/hindcast.namelist.time'
         )
 
-    def test_upload_run_desc_template(self, m_cmd_in_subprocess, m_logger):
+    def test_upload_run_desc(self, m_cmd_in_subprocess, m_logger):
         prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
         run_NEMO_hindcast._edit_run_desc(
             'cedar', arrow.get('2018-01-01'), prev_namelist_info,
