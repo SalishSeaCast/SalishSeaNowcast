@@ -182,9 +182,7 @@ class TestGetRunId:
     def test_get_run_id(self, m_get_queue_info, m_logger):
         ssh_client = Mock(name='ssh_client')
         run_id = watch_NEMO_agrif._get_run_id(ssh_client, 'orcinus', '9305855')
-        m_get_queue_info.assert_called_once_with(
-            ssh_client, 'orcinus', '9305855'
-        )
+        m_get_queue_info.assert_called_once_with(ssh_client, '9305855')
         assert m_logger.info.called
         assert run_id == '23apr18nowcast-agrif'
 
@@ -207,9 +205,7 @@ class TestIsQueued:
         is_queued = watch_NEMO_agrif._is_queued(
             ssh_client, 'orcinus', '9305855', '24apr18nowcast-agrif'
         )
-        m_get_queue_info.assert_called_once_with(
-            ssh_client, 'orcinus', '9305855'
-        )
+        m_get_queue_info.assert_called_once_with(ssh_client, '9305855')
         if expected:
             assert m_logger.info.called
             assert is_queued
@@ -236,9 +232,7 @@ class TestIsRunning:
             ssh_client, 'orcinus', '9305855', '24apr18nowcast-agrif',
             Path('tmp_run_dir'), run_info
         )
-        m_get_queue_info.assert_called_once_with(
-            ssh_client, 'orcinus', '9305855'
-        )
+        m_get_queue_info.assert_called_once_with(ssh_client, '9305855')
         assert not is_running
 
     @pytest.mark.parametrize(
@@ -268,9 +262,7 @@ class TestIsRunning:
             ssh_client, 'orcinus', '9305855', '24apr18nowcast-agrif',
             Path('tmp_run_dir'), run_info
         )
-        m_get_queue_info.assert_called_once_with(
-            ssh_client, 'orcinus', '9305855'
-        )
+        m_get_queue_info.assert_called_once_with(ssh_client, '9305855')
         if expected:
             assert m_logger.info.called
             assert is_running
@@ -297,8 +289,6 @@ class TestIsRunning:
             ssh_client, 'orcinus', '9305855', '24apr18nowcast-agrif',
             Path('tmp_run_dir'), run_info
         )
-        m_get_queue_info.assert_called_once_with(
-            ssh_client, 'orcinus', '9305855'
-        )
+        m_get_queue_info.assert_called_once_with(ssh_client, '9305855')
         assert m_logger.info.called
         assert is_running

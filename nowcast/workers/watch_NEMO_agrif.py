@@ -143,7 +143,7 @@ def _get_run_id(ssh_client, host_name, job_id):
     :return: run id
     :rtype: str
     """
-    queue_info = _get_queue_info(ssh_client, host_name, job_id)
+    queue_info = _get_queue_info(ssh_client, job_id)
     for line in queue_info:
         if line.strip().startswith('Job_Name'):
             run_id = line.split()[2]
@@ -161,7 +161,7 @@ def _is_queued(ssh_client, host_name, job_id, run_id):
     :return: Flag indicating whether or not run is queued
     :rtype: boolean
     """
-    queue_info = _get_queue_info(ssh_client, host_name, job_id)
+    queue_info = _get_queue_info(ssh_client, job_id)
     state = 'UNKNOWN'
     for line in queue_info:
         if line.strip().startswith('job_state'):
@@ -169,7 +169,7 @@ def _is_queued(ssh_client, host_name, job_id, run_id):
             break
     if state != 'Q':
         return False
-    msg = f'{run_id} job {job_id} is queued'
+    msg = f'{run_id} job {job_id} is queued on {host_name}'
     logger.info(msg)
     return True
 
@@ -187,7 +187,7 @@ def _is_running(ssh_client, host_name, job_id, run_id, tmp_run_dir, run_info):
     :rtype: boolean
     """
     try:
-        queue_info = _get_queue_info(ssh_client, host_name, job_id)
+        queue_info = _get_queue_info(ssh_client, job_id)
     except WorkerError:
         # Job has disappeared from queue, so it has finished, crashed, or
         # been terminated by the resource manager
@@ -225,10 +225,9 @@ def _is_running(ssh_client, host_name, job_id, run_id, tmp_run_dir, run_info):
     return True
 
 
-def _get_queue_info(ssh_client, host_name, job_id):
+def _get_queue_info(ssh_client, job_id):
     """
     :param :py:class:`paramiko.client.SSHClient` ssh_client:
-    :param str host_name:
     :param str job_id:
 
     :return: Output from TORQUE/MOAB qstat command that describes the run's
