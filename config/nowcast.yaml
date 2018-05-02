@@ -1201,6 +1201,10 @@ message registry:
       failure nemo forecast2 publish: nemo forecast2 publish plots failed
       success fvcom nowcast publish: fvcom nowcast publish plots produced
       failure fvcom nowcast publish: fvcom nowcast publish plots failed
+      success wwatch3 forecast publish: wwatch3 forecast publish plots produced
+      failure wwatch3 forecast publish: wwatch3 forecast publish plots failed
+      success wwatch3 forecast2 publish: wwatch3 forecast2 publish plots produced
+      failure wwatch3 forecast2 publish: wwatch3 forecast2 publish plots failed
       crash: make_plots worker crashed
 
     make_surface_current_tiles:

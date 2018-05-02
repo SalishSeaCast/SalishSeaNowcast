@@ -1838,7 +1838,7 @@ class TestAfterUpdateForecastDatasets:
             ('forecast2', '2018-04-12'),
         ]
     )
-    def test_success_wwatch3_launch_ping_erddap_wwatch3_forecast(
+    def test_success_wwatch3_launch_ping_erddap_wwatch3(
         self, run_type, run_date, config, checklist
     ):
         p_checklist = patch.dict(
@@ -1859,6 +1859,37 @@ class TestAfterUpdateForecastDatasets:
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
             args=['wwatch3-forecast'],
+            host='localhost'
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize(
+        'run_type, run_date', [
+            ('forecast', '2018-05-01'),
+            ('forecast2', '2018-05-01'),
+        ]
+    )
+    def test_success_wwatch3_launch_make_plots_wwatch3(
+        self, run_type, run_date, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {
+                'WWATCH3 run': {
+                    run_type: {
+                        'run date': run_date
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_update_forecast_datasets(
+                Message(
+                    'update_forecast_datasets', f'success wwatch3 {run_type}'
+                ), config, checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.make_plots',
+            args=['wwatch3', run_type, 'publish', '--run-date', run_date],
             host='localhost'
         )
         assert expected in workers
