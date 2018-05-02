@@ -1219,12 +1219,15 @@ def after_download_fvcom_results(msg, config, checklist):
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
         run_date = checklist['FVCOM run'][run_type]['run date']
-        next_workers[msg.type].append(
-            NextWorker(
-                'nowcast.workers.make_plots',
-                args=['fvcom', run_type, 'publish', '--run-date', run_date]
+        if run_type == 'nowcast':
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.make_plots',
+                    args=[
+                        'fvcom', run_type, 'publish', '--run-date', run_date
+                    ]
+                )
             )
-        )
     return next_workers[msg.type]
 
 
@@ -1271,6 +1274,15 @@ def after_update_forecast_datasets(msg, config, checklist):
                 NextWorker(
                     'nowcast.workers.make_plots',
                     args=['nemo', run_type, 'publish', '--run-date', run_date]
+                )
+            )
+        if model == 'wwatch3':
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.make_plots',
+                    args=[
+                        'wwatch3', run_type, 'publish', '--run-date', run_date
+                    ]
                 )
             )
     return next_workers[msg.type]
@@ -1324,6 +1336,8 @@ def after_make_plots(msg, config, checklist):
         'failure nemo forecast publish': [],
         'failure nemo forecast2 publish': [],
         'failure fvcom nowcast publish': [],
+        'failure wwatch3 forecast publish': [],
+        'failure wwatch3 forecast2 publish': [],
         'success nemo nowcast research': [],
         'success nemo nowcast comparison': [],
         'success nemo nowcast publish': [],
@@ -1331,6 +1345,8 @@ def after_make_plots(msg, config, checklist):
         'success nemo forecast publish': [],
         'success nemo forecast2 publish': [],
         'success fvcom nowcast publish': [],
+        'success wwatch3 forecast publish': [],
+        'success wwatch3 forecast2 publish': [],
     }
     if msg.type.startswith('success nemo') and 'forecast' in msg.type:
         _, _, run_type, _ = msg.type.split()

@@ -38,7 +38,6 @@ import scipy.io as sio
 import xarray
 
 from nowcast import lib
-from nowcast.figures.fvcom import tide_stn_water_level
 from nowcast.figures.research import (
     time_series_plots,
     tracer_thalweg_and_surface_hourly,
@@ -54,6 +53,8 @@ from nowcast.figures.publish import (
     storm_surge_alerts_thumbnail,
     compare_tide_prediction_max_ssh,
 )
+from nowcast.figures.fvcom import tide_stn_water_level
+from nowcast.figures.wwatch3 import wave_height_period
 # Legacy figures code
 from nowcast.figures import research_VENUS
 
@@ -72,11 +73,12 @@ def main():
     worker.init_cli()
     worker.cli.add_argument(
         'model',
-        choices={'nemo', 'fvcom'},
+        choices={'nemo', 'fvcom', 'wwatch3'},
         help='''
         Model to produce plots for:
         'nemo' means the Salish Sea NEMO model,
-        'fvcom' means the Vancouver Harbour/Fraser River FVCOM model.
+        'fvcom' means the Vancouver Harbour/Fraser River FVCOM model,
+        'wwatch3' means the Strait of Georgia WaveWatch3(TM) model,
         ''',
     )
     worker.cli.add_argument(
@@ -231,6 +233,14 @@ def make_plots(parsed_args, config, *args):
         )
         fig_functions = _prep_fvcom_publish_fig_functions(
             fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl
+        )
+
+    if model == 'wwatch3':
+        wwatch3_dataset_url = (
+            config['figures']['dataset URLs']['wwatch3 fields']
+        )
+        fig_functions = _prep_wwatch3_publish_fig_functions(
+            wwatch3_dataset_url
         )
 
     checklist = _render_figures(
@@ -694,6 +704,22 @@ def _prep_fvcom_publish_fig_functions(
             svg_root: {
                 'function': tide_stn_water_level.make_figure,
                 'args': (place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl),
+            }
+        })
+    return fig_functions
+
+
+def _prep_wwatch3_publish_fig_functions(wwatch3_dataset_url):
+    buoys = {
+        'Halibut Bank': 'HB_waves',
+        'Sentry Shoal': 'SS_waves',
+    }
+    fig_functions = {}
+    for buoy, svg_root in buoys.items():
+        fig_functions.update({
+            svg_root: {
+                'function': wave_height_period.make_figure,
+                'args': (buoy, wwatch3_dataset_url),
             }
         })
     return fig_functions

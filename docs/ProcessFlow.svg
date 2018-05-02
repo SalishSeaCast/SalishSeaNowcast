@@ -9,9 +9,9 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="256.29175mm"
+   width="283.75107mm"
    height="384.86926mm"
-   viewBox="0 0 908.12041 1363.7101"
+   viewBox="0 0 1005.4172 1363.7101"
    id="svg4938"
    version="1.1"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.56096972"
-     inkscape:cx="484.33086"
-     inkscape:cy="727.312"
+     inkscape:cx="536.22248"
+     inkscape:cy="727.31198"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -62,7 +62,7 @@
      id="layer2"
      inkscape:label="future"
      style="display:none"
-     transform="translate(160,-5.4423829e-6)">
+     transform="translate(160,-5.8847656e-6)">
     <g
        transform="translate(-20.799344,-62.974211)"
        id="g4435">
@@ -150,6 +150,20 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(139.20066,-62.974215)">
+    <g
+       id="g1357">
+      <path
+         style="display:inline;fill:none;stroke:#000000;stroke-width:1.99968755;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:5.99906268, 5.99906268;stroke-dashoffset:0;stroke-opacity:1"
+         d="M 745.06958,1350.5983 V 1034.5662"
+         id="path1346"
+         inkscape:connector-curvature="0" />
+      <path
+         sodipodi:nodetypes="ccccc"
+         inkscape:connector-curvature="0"
+         id="path1348"
+         d="m 745.39526,1362.6241 7.60791,-23.1585 -7.7493,7.3611 -7.23623,-7.227 z"
+         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
     <g
        id="g1420">
       <path
@@ -1350,18 +1364,17 @@
            sodipodi:role="line">download_results</tspan></text>
     </g>
     <g
-       id="g4423"
-       transform="translate(-5.9999986,367.1136)">
+       id="g1336">
       <path
-         style="display:inline;fill:none;stroke:#000000;stroke-width:2.00000024;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:6.00000044, 6.00000044;stroke-dashoffset:0;stroke-opacity:1"
-         d="M 282.91432,987.73087 240.30783,837.74319"
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2.00000024;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:6.00000031, 6.00000031;stroke-dashoffset:0;stroke-opacity:1"
+         d="M 276.71906,1354.9164 216.2211,1161.3926"
          id="path4564"
          inkscape:connector-curvature="0" />
       <path
          sodipodi:nodetypes="ccccc"
          inkscape:connector-curvature="0"
          id="path4566"
-         d="m 285.06113,995.51848 1.22,-23.83523 -5.52215,8.89973 -8.87506,-5.05212 z"
+         d="m 279.06113,1362.6321 1.22,-23.8352 -5.52215,8.8997 -8.87506,-5.0521 z"
          style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
     <g
@@ -1380,114 +1393,25 @@
          sodipodi:nodetypes="ccccc" />
     </g>
     <g
-       id="g5236"
-       transform="translate(20.86063,214.68856)">
+       id="g1344">
       <rect
-         y="1148.116"
-         x="172.1384"
+         y="1362.8046"
+         x="1.5593781"
          height="31.859035"
-         width="368.95016"
+         width="819.18781"
          id="rect3164"
          style="fill:#cccccf;fill-rule:evenodd;stroke:none;stroke-width:1.16199994;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
       <text
          id="text3166"
-         y="1169.0225"
-         x="356.62796"
+         y="1383.7111"
+         x="411.10934"
          style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
          xml:space="preserve"><tspan
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:18px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle"
-           y="1169.0225"
-           x="356.62796"
+           y="1383.7111"
+           x="411.10934"
            id="tspan3168"
-           sodipodi:role="line">salishsea.eos.ubc.ca/nemo/results</tspan></text>
-    </g>
-    <g
-       id="g4353"
-       transform="translate(-5.9999986,365.1136)">
-      <rect
-         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         id="rect4345"
-         width="194.99524"
-         height="31.859035"
-         x="103.97647"
-         y="722.79468" />
-      <text
-         id="text4340"
-         y="742.53101"
-         x="201.59857"
-         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-         xml:space="preserve"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle"
-           y="742.53101"
-           x="201.59857"
-           id="tspan4342"
-           sodipodi:role="line">make_plots publish</tspan></text>
-    </g>
-    <g
-       id="g4505"
-       transform="translate(84.000006,320.76418)">
-      <rect
-         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         id="rect4378"
-         width="172.53827"
-         height="31.859035"
-         x="375.20499"
-         y="761.50604" />
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-         x="461.59857"
-         y="781.23486"
-         id="text4380"><tspan
-           sodipodi:role="line"
-           id="tspan4382"
-           x="461.59857"
-           y="781.23486"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle">make_plots publish</tspan></text>
-    </g>
-    <g
-       id="g4358"
-       transform="translate(-5.9999986,365.1136)">
-      <rect
-         y="762.65369"
-         x="103.97647"
-         height="31.859035"
-         width="194.99524"
-         id="rect4337"
-         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      <text
-         id="text4542"
-         y="782.38251"
-         x="201.59856"
-         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-         xml:space="preserve"><tspan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle"
-           y="782.38251"
-           x="201.59856"
-           id="tspan4544"
-           sodipodi:role="line">make_plots research</tspan></text>
-    </g>
-    <g
-       id="g1406"
-       transform="translate(0,-58.125001)">
-      <rect
-         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:4.00000009, 4.00000009;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-         id="rect4296"
-         width="203.67056"
-         height="122.55149"
-         x="93.638824"
-         y="1140.5332" />
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         x="92.43692"
-         y="1137.8562"
-         id="text4298"><tspan
-           sodipodi:role="line"
-           id="tspan4300"
-           x="92.43692"
-           y="1137.8562"
-           style="font-size:12.5px;line-height:1.25;font-family:sans-serif">Concurrent</tspan></text>
+           sodipodi:role="line">https://salishsea.eos.ubc.ca/</tspan></text>
     </g>
     <g
        id="g4428"
@@ -1582,28 +1506,6 @@
            x="488.56946"
            id="tspan3485"
            sodipodi:role="line">rotate_logs</tspan></text>
-    </g>
-    <g
-       id="g4340"
-       transform="translate(-5.9999986,365.1136)">
-      <rect
-         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         id="rect4320"
-         width="194.99524"
-         height="31.859035"
-         x="103.97647"
-         y="802.50525" />
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-         x="201.59856"
-         y="822.24158"
-         id="text4322"><tspan
-           sodipodi:role="line"
-           id="tspan4324"
-           x="201.59856"
-           y="822.24158"
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle">make_plots comparison</tspan></text>
     </g>
     <g
        id="g4329"
@@ -1880,67 +1782,63 @@
       </g>
     </g>
     <g
-       id="g1360"
-       transform="translate(0,-120.00004)">
-      <g
-         id="g1286"
-         transform="translate(244.28625,61.875001)">
-        <rect
-           style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.50520718px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-           id="rect1280"
-           width="198.60344"
-           height="31.859035"
-           x="277.76321"
-           y="1001.3798" />
-        <text
-           xml:space="preserve"
-           style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-           x="377.20334"
+       transform="translate(244.28625,-58.125039)"
+       id="g1286">
+      <rect
+         y="1001.3798"
+         x="277.76321"
+         height="31.859035"
+         width="198.60344"
+         id="rect1280"
+         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.50520718px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         id="text1284"
+         y="1020.9963"
+         x="377.20334"
+         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle"
            y="1020.9963"
-           id="text1284"><tspan
-             sodipodi:role="line"
-             id="tspan1282"
-             x="377.20334"
-             y="1020.9963"
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle">update_forecast_datasets</tspan></text>
-      </g>
-      <g
-         transform="translate(248.25405,184.34035)"
-         id="g1294">
-        <rect
-           y="945.29962"
-           x="317.98755"
-           height="31.859035"
-           width="111.03751"
-           id="rect1288"
-           style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.50520718px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-        <text
-           id="text1292"
-           y="964.91608"
+           x="377.20334"
+           id="tspan1282"
+           sodipodi:role="line">update_forecast_datasets</tspan></text>
+    </g>
+    <g
+       id="g1294"
+       transform="translate(437.19148,-2.0448388)">
+      <rect
+         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.50520718px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         id="rect1288"
+         width="111.03751"
+         height="31.859035"
+         x="317.98755"
+         y="945.29962" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         x="373.23553"
+         y="964.91608"
+         id="text1292"><tspan
+           sodipodi:role="line"
+           id="tspan1290"
            x="373.23553"
-           style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
-           xml:space="preserve"><tspan
-             style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle"
-             y="964.91608"
-             x="373.23553"
-             id="tspan1290"
-             sodipodi:role="line">ping_erddap</tspan></text>
-      </g>
-      <g
-         id="g1300"
-         transform="translate(290.80476,993.40324)">
-        <path
-           style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-           d="M 330.51479,127.20539 V 101.7106"
-           id="path1296"
-           inkscape:connector-curvature="0" />
-        <path
-           sodipodi:nodetypes="ccccc"
-           inkscape:connector-curvature="0"
-           id="path1298"
-           d="m 330.84052,136.05622 7.60791,-23.15845 -7.7493,7.36104 -7.23623,-7.22693 z"
-           style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
-      </g>
+           y="964.91608"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle">ping_erddap</tspan></text>
+    </g>
+    <g
+       transform="translate(290.80476,873.4032)"
+       id="g1300">
+      <path
+         inkscape:connector-curvature="0"
+         id="path1296"
+         d="M 330.51479,127.20539 V 101.7106"
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 330.84052,136.05622 7.60791,-23.15845 -7.7493,7.36104 -7.23623,-7.22693 z"
+         id="path1298"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="ccccc" />
     </g>
     <g
        id="g1347"
@@ -2025,6 +1923,133 @@
            x="37.747906"
            id="tspan1182"
            sodipodi:role="line">upload_fvcom_atmos_forcing</tspan></text>
+    </g>
+    <g
+       id="g3603-3"
+       transform="rotate(-90,954.5411,335.5988)">
+      <path
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="M 330.51479,127.20539 V 101.7106"
+         id="path3605-6"
+         inkscape:connector-curvature="0" />
+      <path
+         sodipodi:nodetypes="ccccc"
+         inkscape:connector-curvature="0"
+         id="path3607-7"
+         d="m 330.84052,136.05622 7.60791,-23.15845 -7.7493,7.36104 -7.23623,-7.22693 z"
+         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
+    <g
+       id="g1238"
+       transform="translate(54.375001)">
+      <rect
+         y="1009.6399"
+         x="510.423"
+         height="31.859035"
+         width="222.67468"
+         id="rect1224"
+         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <text
+         id="text1228"
+         y="1029.4956"
+         x="621.72375"
+         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         xml:space="preserve"><tspan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle"
+           y="1029.4956"
+           x="621.72375"
+           id="tspan1226"
+           sodipodi:role="line">make_plots wwatch3 publish</tspan></text>
+    </g>
+    <g
+       id="g1254"
+       transform="translate(-130.66125,72.63033)">
+      <rect
+         style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976336px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         id="rect1240"
+         width="222.67468"
+         height="31.859035"
+         x="564.79803"
+         y="1009.6399" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+         x="676.09875"
+         y="1029.4956"
+         id="text1244"><tspan
+           sodipodi:role="line"
+           id="tspan1242"
+           x="676.09875"
+           y="1029.4956"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle">make_plots nemo publish</tspan></text>
+    </g>
+    <g
+       id="g1330">
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         x="73.217972"
+         y="1079.7312"
+         id="text4298"><tspan
+           sodipodi:role="line"
+           id="tspan4300"
+           x="73.217972"
+           y="1079.7312"
+           style="font-size:12.5px;line-height:1.25;font-family:sans-serif">Concurrent</tspan></text>
+      <g
+         id="g1316">
+        <rect
+           y="1082.4082"
+           x="74.419876"
+           height="79.935555"
+           width="242.10847"
+           id="rect4296"
+           style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:none;fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:4.00000006, 4.00000006;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
+        <g
+           id="g1305"
+           transform="translate(5.1757809e-7,-39.85161)">
+          <rect
+             y="1126.3689"
+             x="79.123108"
+             height="31.859035"
+             width="232.70197"
+             id="rect1291"
+             style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976342px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+          <text
+             id="text1295"
+             y="1146.2246"
+             x="195.4375"
+             style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+             xml:space="preserve"><tspan
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle"
+               y="1146.2246"
+               x="195.4375"
+               id="tspan1293"
+               sodipodi:role="line">make_plots nemo research</tspan></text>
+        </g>
+        <g
+           id="g1289"
+           transform="translate(-6.2293946e-6,39.851515)">
+          <rect
+             style="fill:#aaccee;fill-rule:evenodd;stroke:none;stroke-width:0.62976342px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+             id="rect1275"
+             width="232.70197"
+             height="31.859035"
+             x="79.123116"
+             y="1086.5173" />
+          <text
+             xml:space="preserve"
+             style="font-style:normal;font-weight:normal;line-height:0%;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none"
+             x="195.4375"
+             y="1106.373"
+             id="text1279"><tspan
+               sodipodi:role="line"
+               id="tspan1277"
+               x="195.4375"
+               y="1106.373"
+               style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle">make_plots nemo comparison</tspan></text>
+        </g>
+      </g>
     </g>
   </g>
 </svg>

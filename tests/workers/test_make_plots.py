@@ -42,7 +42,7 @@ class TestMain:
         make_plots.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ('model',)
-        assert kwargs['choices'] == {'nemo', 'fvcom'}
+        assert kwargs['choices'] == {'nemo', 'fvcom', 'wwatch3'}
         assert 'help' in kwargs
 
     def test_add_run_type_arg(self, m_worker):
@@ -92,6 +92,8 @@ class TestMain:
         ('nemo', 'forecast', 'publish'),
         ('nemo', 'forecast2', 'publish'),
         ('fvcom', 'nowcast', 'publish'),
+        ('wwatch3', 'forecast', 'publish'),
+        ('wwatch3', 'forecast2', 'publish'),
     ]
 )
 @patch('nowcast.workers.make_plots.logger')
@@ -128,6 +130,8 @@ class TestSuccess:
         ('nemo', 'forecast', 'publish'),
         ('nemo', 'forecast2', 'publish'),
         ('fvcom', 'nowcast', 'publish'),
+        ('wwatch3', 'forecast', 'publish'),
+        ('wwatch3', 'forecast2', 'publish'),
     ]
 )
 @patch('nowcast.workers.make_plots.logger')
