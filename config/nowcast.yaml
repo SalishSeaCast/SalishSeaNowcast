@@ -366,6 +366,8 @@ figures:
     tide stn ssh time series:
       # **Must be quoted to project {} characters**
       'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10mV17-02'
+    wwatch3 fields:
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02.nc?hs,fp
   # Directory in which to find bathymetry and mesh mask files
   grid dir: /results/nowcast-sys/grid/
   # Pacific Now-West coastline polygons file
