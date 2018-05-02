@@ -6,6 +6,15 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
+* ##[TestWaveHeightPeriod.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb)  
+    
+    **Test `wave_height_period` Figure Module**  
+      
+    Render figure object produced by the `nowcast.figures.wwatch3.wave_height_period` module.  
+    Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
+
 * ##[DevelopWaveHeightPeriod.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb)  
     
     **Develop `wave_height_period` Figure Module**  

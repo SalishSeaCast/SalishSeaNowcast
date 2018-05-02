@@ -356,21 +356,6 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
     :members:
 
 
-.. _nowcast.figures.fvcom:
-
-:py:obj:`nowcast.figures.fvcom`  Figure Modules
------------------------------------------------
-
-.. _nowcast.figures.fvcom.tide_stn_water_level:
-
-:py:mod:`nowcast.figures.fvcom.tide_stn_water_level` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.tide_stn_water_level
-    :members:
-
-
-
 .. _nowcast.figures.comparison:
 
 :py:obj:`nowcast.figures.comparison`  Figure Modules
@@ -456,5 +441,33 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: nowcast.figures.research.time_series_plots
+    :members:
+
+
+.. _nowcast.figures.fvcom:
+
+:py:obj:`nowcast.figures.fvcom`  Figure Modules
+-----------------------------------------------
+
+.. _nowcast.figures.fvcom.tide_stn_water_level:
+
+:py:mod:`nowcast.figures.fvcom.tide_stn_water_level` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.fvcom.tide_stn_water_level
+    :members:
+
+
+.. _nowcast.figures.wwatch3:
+
+:py:obj:`nowcast.figures.wwatch3`  Figure Modules
+-------------------------------------------------
+
+.. _nowcast.figures.wwatch3.tide_stn_water_level:
+
+:py:mod:`nowcast.figures.wwatch3.wave_height_period` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.wwatch3.wave_height_period
     :members:
 
