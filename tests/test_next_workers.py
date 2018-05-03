@@ -598,6 +598,11 @@ class TestAfterMakeForcingLinks:
                 ], 'west.cloud'
             ),
             (
+                'success nowcast-green', [
+                    'orcinus', 'nowcast-agrif', '--run-date', '2018-05-03'
+                ], 'orcinus'
+            ),
+            (
                 'success nowcast+',
                 ['salish', 'nowcast-dev', '--run-date', '2016-10-23'], 'salish'
             ),
@@ -621,7 +626,7 @@ class TestAfterMakeForcingLinks:
                 'forcing links': {
                     host_name: {
                         'links': '',
-                        'run date': '2016-10-23'
+                        'run date': args[-1]
                     }
                 }
             }

@@ -453,11 +453,13 @@ def after_make_forcing_links(msg, config, checklist):
         'crash': [],
         'failure nowcast+': [],
         'failure nowcast-green': [],
+        'failure nowcast-agrif': [],
         'failure nowcast-dev': [],
         'failure forecast2': [],
         'failure ssh': [],
         'success nowcast+': [],
         'success nowcast-green': [],
+        'success nowcast-agrif': [],
         'success nowcast-dev': [],
         'success forecast2': [],
         'success ssh': [],
@@ -465,7 +467,7 @@ def after_make_forcing_links(msg, config, checklist):
     if msg.type.startswith('success'):
         run_types = {
             'nowcast+': ('nowcast', 'nowcast-dev'),
-            'nowcast-green': ('nowcast-green',),
+            'nowcast-green': ('nowcast-green', 'nowcast-agrif'),
             'ssh': ('forecast',),
             'forecast2': ('forecast2',),
         }[msg.type.split()[1]]
