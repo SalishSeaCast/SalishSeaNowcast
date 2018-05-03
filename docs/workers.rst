@@ -133,6 +133,13 @@ Workers
     :members: main
 
 
+:kbd:`run_NEMO_agrif`
+---------------------
+
+.. automodule:: nowcast.workers.run_NEMO_agrif
+    :members: main
+
+
 :kbd:`run_NEMO_hindcast`
 ------------------------
 

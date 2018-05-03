@@ -550,6 +550,7 @@ run:
       # Directory on compute host where temporary run directories and run results are stored
       scratch dir: /global/scratch/dlatorne/nowcast-agrif
       run prep dir: /home/dlatorne/nowcast-agrif-sys/runs
+      salishsea cmd: /home/dlatorne/.local/bin/salishsea
       run types:
         nowcast-agrif:
           results: /results/SalishSea/nowcast-agrif/
@@ -1004,6 +1005,18 @@ message registry:
       failure forecast2: forecast2 NEMO run failed
       crash: run_NEMO worker crashed
 
+    run_NEMO_hindcast:
+      checklist key: NEMO run
+      success: NEMO hindcast run queued
+      failure: NEMO hindcast run queue submission failed
+      crash: run_NEMO_hindcast worker crashed
+
+    run_NEMO_agrif:
+      checklist key: NEMO run
+      success: NEMO AGRIF run queued
+      failure: NEMO AGRIF run queue submission failed
+      crash: run_NEMO_agrif worker crashed
+
     watch_NEMO:
       checklist key: NEMO run
       need: NEMO run information dict requested
@@ -1030,12 +1043,6 @@ message registry:
       success: NEMO AGRIF run ended
       failure: watch_NEMO_agrif failed
       crash: watch_NEMO_agrif worker crashed
-
-    run_NEMO_hindcast:
-      checklist key: NEMO run
-      success: NEMO hindcast run queued
-      failure: NEMO hindcast run queue submission failed
-      crash: run_NEMO_hindcast worker crashed
 
     make_turbidity_file:
       checklist key: Fraser River turbidity
