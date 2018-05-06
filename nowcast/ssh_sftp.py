@@ -38,7 +38,7 @@ def ssh(host, key_filename, ssh_config_file='~/.ssh/config'):
                      the hostname and username values.
     :type ssh_config_file: str
 
-    :returns: :class:`paramiko.client.SSHClient` object
+    :returns: :py:class:`paramiko.client.SSHClient` object
     """
     ssh_client = paramiko.client.SSHClient()
     ssh_client.load_system_host_keys()
