@@ -570,6 +570,10 @@ run:
   hindcast hosts:
     # HPC compute host name where hindcast runs are executed under automation
     cedar-hindcast:
+      # Passphrase-less deployment key used by automation for authentication
+      # on the host.
+      # The key-pair is assumed to be stored in $USER/.ssh/.
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: allen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
@@ -579,7 +583,7 @@ run:
       run prep dir: /home/dlatorne/project/SalishSea/hindcast-sys/runs
       # Path to the salishsea command processor executable to use in the run
       # script
-      salishsea cmd: /home/dlatorne/project/SalishSea/hindcast-sys/hincast-env/bin/salishsea
+      salishsea cmd: /home/dlatorne/project/SalishSea/hindcast-sys/hindcast-env/bin/salishsea
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
       run types:

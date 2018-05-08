@@ -16,9 +16,8 @@
 NEMO hindcast run on an HPC cluster that uses the SLURM scheduler.
 """
 import logging
+import os
 from pathlib import Path
-import shlex
-import subprocess
 import tempfile
 import time
 from types import SimpleNamespace
@@ -26,6 +25,8 @@ from types import SimpleNamespace
 import arrow
 import f90nml
 from nemo_nowcast import NowcastWorker, WorkerError
+
+from nowcast import ssh_sftp
 
 NAME = 'watch_NEMO_hindcast'
 logger = logging.getLogger(NAME)
@@ -91,19 +92,32 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     :rtype: dict
     """
     host_name = parsed_args.host_name
+    ssh_key = Path(
+        os.environ['HOME'], '.ssh',
+        config['run']['hindcast hosts'][host_name]['ssh key']
+    )
     users = config['run']['hindcast hosts'][host_name]['users']
     scratch_dir = Path(
         config['run']['hindcast hosts'][host_name]['scratch dir']
     )
-    job_id, run_id = _get_run_id(host_name, users)
-    while _is_queued(host_name, users, job_id, run_id):
-        time.sleep(60)
-    tmp_run_dir = _get_tmp_run_dir(host_name, scratch_dir, run_id)
-    run_info = _get_run_info(host_name, tmp_run_dir)
-    while _is_running(host_name, users, job_id, run_id, tmp_run_dir, run_info):
-        time.sleep(60 * 5)
-    while not _is_completed(host_name, users, job_id, run_id):
-        time.sleep(60)
+    try:
+        ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
+        job_id, run_id = _get_run_id(ssh_client, host_name, users)
+        while _is_queued(ssh_client, host_name, users, job_id, run_id):
+            time.sleep(60)
+        tmp_run_dir = _get_tmp_run_dir(
+            ssh_client, host_name, scratch_dir, run_id
+        )
+        run_info = _get_run_info(sftp_client, host_name, tmp_run_dir)
+        while _is_running(
+            ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_info
+        ):
+            time.sleep(60 * 5)
+        while not _is_completed(ssh_client, host_name, users, job_id, run_id):
+            time.sleep(60)
+    finally:
+        sftp_client.close()
+        ssh_client.close()
     checklist = {
         'hindcast': {
             'host': host_name,
@@ -115,22 +129,24 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     return checklist
 
 
-def _get_run_id(host_name, users):
+def _get_run_id(ssh_client, host_name, users):
     """
+    :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
     :param str users:
 
     :return: slurm job id number, run id string
     :rtype: 2-tuple (int, str)
     """
-    queue_info = _get_queue_info(host_name, users)
+    queue_info = _get_queue_info(ssh_client, host_name, users)
     job_id, run_id = queue_info.split()[:2]
     logger.info(f'watching {run_id} job {job_id} on {host_name}')
     return job_id, run_id
 
 
-def _is_queued(host_name, users, job_id, run_id):
+def _is_queued(ssh_client, host_name, users, job_id, run_id):
     """
+    :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
     :param str users:
     :param int job_id:
@@ -139,7 +155,7 @@ def _is_queued(host_name, users, job_id, run_id):
     :return: Flag indicating whether or not run is queued in PENDING state
     :rtype: boolean
     """
-    queue_info = _get_queue_info(host_name, users, job_id)
+    queue_info = _get_queue_info(ssh_client, host_name, users, job_id)
     try:
         state, reason, start_time = queue_info.split()[2:]
     except AttributeError:
@@ -155,8 +171,9 @@ def _is_queued(host_name, users, job_id, run_id):
     return True
 
 
-def _get_tmp_run_dir(host_name, scratch_dir, run_id):
+def _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id):
     """
+    :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
     :param :py:class:`pathlib.Path` scratch_dir:
     :param str run_id:
@@ -164,20 +181,25 @@ def _get_tmp_run_dir(host_name, scratch_dir, run_id):
     :return: Temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
-    cmd = f'ssh {host_name} ls -d {scratch_dir/run_id}*'
-    proc = subprocess.run(
-        shlex.split(cmd),
-        stdout=subprocess.PIPE,
-        check=True,
-        universal_newlines=True
-    )
-    tmp_run_dir = Path(proc.stdout.strip())
+    try:
+        stdout = ssh_sftp.ssh_exec_command(
+            ssh_client, f'ssh {host_name} ls -d {scratch_dir/run_id}*',
+            host_name, logger
+        )
+    except ssh_sftp.SSHCommandError as exc:
+        for line in exc.stderr.splitlines():
+            logger.error(line)
+        raise WorkerError
+    tmp_run_dir = Path(stdout.splitlines().strip())
     logger.debug(f'found tmp run dir: {host_name}:{tmp_run_dir}')
     return tmp_run_dir
 
 
-def _is_running(host_name, users, job_id, run_id, tmp_run_dir, run_info):
+def _is_running(
+    ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_info
+):
     """
+    :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
     :param str users:
     :param int job_id:
@@ -189,48 +211,43 @@ def _is_running(host_name, users, job_id, run_id, tmp_run_dir, run_info):
     :rtype: boolean
     """
     try:
-        queue_info = _get_queue_info(host_name, users, job_id)
+        queue_info = _get_queue_info(ssh_client, host_name, users, job_id)
         state = queue_info.split()[2]
-    except (subprocess.CalledProcessError, AttributeError):
+    except (WorkerError, AttributeError):
         # job has disappeared from the queue; finished or cancelled
         logger.info(f'{run_id} job {job_id} not found on {host_name} queue')
         state = 'UNKNOWN'
     if state != 'RUNNING':
         return False
     try:
-        cmd = f'ssh {host_name} cat {tmp_run_dir}/time.step'
-        proc = subprocess.run(
-            shlex.split(cmd),
-            stdout=subprocess.PIPE,
-            check=True,
-            universal_newlines=True
+        stdout = ssh_sftp.ssh_exec_command(
+            ssh_client, f'ssh {host_name} cat {tmp_run_dir}/time.step',
+            host_name, logger
         )
-        time_step = int(proc.stdout.strip())
-        model_seconds = (time_step - run_info.it000) * run_info.rdt
-        model_time = (
-            run_info.date0.replace(seconds=model_seconds)
-            .format('YYYY-MM-DD HH:mm:ss UTC')
-        )
-        fraction_done = (time_step - run_info.it000
-                         ) / (run_info.itend - run_info.it000)
-        msg = (
-            f'{run_id} on {host_name}: timestep: '
-            f'{time_step} = {model_time}, {fraction_done:.1%} complete'
-        )
-    except (subprocess.CalledProcessError, ValueError):
-        # time.step file not found or empty; assume that run is young and it
-        # hasn't been created yet, or has finished and it has been
-        # moved to the results directory
-        msg = (
+    except ssh_sftp.SSHCommandError as exc:
+        logger.info(
             f'{run_id} on {host_name}: time.step not found; '
             f'continuing to watch...'
         )
-    logger.info(msg)
+        return True
+    time_step = int(stdout.splitlines().strip())
+    model_seconds = (time_step - run_info.it000) * run_info.rdt
+    model_time = (
+        run_info.date0.replace(seconds=model_seconds)
+        .format('YYYY-MM-DD HH:mm:ss UTC')
+    )
+    fraction_done = (time_step - run_info.it000
+                     ) / (run_info.itend - run_info.it000)
+    logger.info(
+        f'{run_id} on {host_name}: timestep: '
+        f'{time_step} = {model_time}, {fraction_done:.1%} complete'
+    )
     return True
 
 
-def _is_completed(host_name, users, job_id, run_id):
+def _is_completed(ssh_client, host_name, users, job_id, run_id):
     """
+    :param :py:class:`paramiko.client.SSHClient`
     :param users:
     :param str host_name:
     :param int job_id:
@@ -239,29 +256,30 @@ def _is_completed(host_name, users, job_id, run_id):
     :return: Flag indicating whether or not run is in COMPLETED state
     :rtype: boolean
     """
-    sacct_cmd = f'ssh {host_name} /opt/software/slurm/bin/sacct --user {users}'
+    sacct_cmd = f'/opt/software/slurm/bin/sacct --user {users}'
     cmd = f'{sacct_cmd} --job {job_id}.batch --format=state'
-    proc = subprocess.run(
-        shlex.split(cmd),
-        stdout=subprocess.PIPE,
-        check=True,
-        universal_newlines=True
-    )
-    if len(proc.stdout.splitlines()) == 2:
+    try:
+        stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
+    except ssh_sftp.SSHCommandError as exc:
+        for line in exc.stderr.splitlines():
+            logger.error(line)
+        raise WorkerError
+    if len(stdout.splitlines()) == 2:
         logger.debug(
             f'{job_id} batch step not found in saact report; '
             f'continuing to look...'
         )
         return False
-    state = proc.stdout.splitlines()[2].strip()
+    state = stdout.splitlines()[2].strip()
     if state != 'COMPLETED':
         return False
     logger.info(f'{run_id} on {host_name}: completed')
     return True
 
 
-def _get_queue_info(host_name, users, job_id=None):
+def _get_queue_info(ssh_client, host_name, users, job_id=None):
     """
+    :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
     :param str users:
     :param int job_id:
@@ -278,26 +296,27 @@ def _get_queue_info(host_name, users, job_id=None):
         f'{squeue_cmd} {queue_info_format}' if job_id is None else
         f'{squeue_cmd} --job {job_id} {queue_info_format}'
     )
-    proc = subprocess.run(
-        shlex.split(cmd),
-        stdout=subprocess.PIPE,
-        check=True,
-        universal_newlines=True
-    )
-    if len(proc.stdout.splitlines()) == 1:
+    try:
+        stdout = ssh_client.exec_command(cmd)
+    except ssh_sftp.SSHCommandError as exc:
+        for line in exc.stderr.splitlines():
+            logger.error(line)
+        raise WorkerError
+    if len(stdout.splitlines()) == 1:
         if job_id is None:
             logger.error(f'no jobs found on {host_name} queue')
             raise WorkerError
         else:
             # Various callers handle job id not on queue in difference ways
             return
-    for queue_info in proc.stdout.splitlines()[1:]:
+    for queue_info in stdout.splitlines()[1:]:
         if 'hindcast' in queue_info.strip().split()[1]:
             return queue_info.strip()
 
 
-def _get_run_info(host_name, tmp_run_dir):
+def _get_run_info(sftp_client, host_name, tmp_run_dir):
     """
+    :param :py:class:`paramiko.sftp_client.SFTPClient` sftp_client:
     :param str host_name:
     :param :py:class:`pathlib.Path` tmp_run_dir:
 
@@ -309,13 +328,7 @@ def _get_run_info(host_name, tmp_run_dir):
     :rtype: :py:class:`types.SimpleNamespace`
     """
     with tempfile.NamedTemporaryFile('wt') as namelist_cfg:
-        cmd = f'scp {host_name}:{tmp_run_dir}/namelist_cfg {namelist_cfg.name}'
-        subprocess.run(
-            shlex.split(cmd),
-            stdout=subprocess.PIPE,
-            check=True,
-            universal_newlines=True
-        )
+        sftp_client.get(f'{tmp_run_dir}/namelist_cfg {namelist_cfg.name}')
         logger.debug(f'downloaded {host_name}:{tmp_run_dir}/namelist_cfg')
         namelist = f90nml.read(namelist_cfg.name)
         run_info = SimpleNamespace(
