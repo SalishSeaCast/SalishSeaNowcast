@@ -91,7 +91,7 @@ def ssh_exec_command(ssh_client, cmd, host, logger):
     :raises: :py:class:`nowcast.ssh_sftp.SSHError`
     """
     _, _stdout, _stderr = ssh_client.exec_command(cmd)
-    logger.debug(f'executed {cmd} on {host}')
+    logger.debug(f'executing {cmd} on {host}')
     stderr = _stderr.read().decode()
     if stderr:
         raise SSHCommandError(cmd, _stdout.read().decode(), stderr)

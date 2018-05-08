@@ -231,7 +231,7 @@ def _edit_namelist_times(
             f'/tmp/nowcast-agrif.{namelist}', patches[namelist],
             f'/tmp/patched_nowcast-agrif.{namelist}'
         )
-        logger.debug('patched namelist.time')
+        logger.debug(f'patched {namelist}')
         sftp_client.put(
             f'/tmp/patched_nowcast-agrif.{namelist}',
             os.fspath(run_prep_dir / namelist)
