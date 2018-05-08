@@ -21,6 +21,7 @@ import arrow
 import nemo_nowcast
 import pytest
 
+import nowcast.ssh_sftp
 from nowcast.workers import run_NEMO_agrif
 
 
@@ -388,6 +389,9 @@ class TestEditRunDesc:
 
 
 @patch('nowcast.workers.run_NEMO_agrif.logger', autospec=True)
+@patch(
+    'nowcast.workers.run_NEMO_agrif.ssh_sftp.ssh_exec_command', autospec=True
+)
 class TestLaunchRun:
     """
     Unit tests for _launch_run() function.
@@ -405,22 +409,13 @@ class TestLaunchRun:
         },
     }
 
-    def test_launch_run(self, m_logger):
+    def test_launch_run(self, m_ssh_exec_cmd, m_logger):
         m_ssh_client = Mock(name='ssh_client')
-        m_stdout = Mock(name='stdout')
-        m_stderr = Mock(name='stderr')
         run_id = '30apr18nowcast-agrif'
-        m_stdout.readlines = Mock(
-            name='stdout_readlines',
-            return_value=(
-                f'[INFO] salishsea_cmd '
-                f'{run_id}_2018-05-03T110532.335255-0700\n',
-                f'[INFO] salishsea_cmd 9332731.orca2.ibb\n'
-            )
-        )
-        m_stderr.readlines = Mock(name='stderr_readlines', return_value=[])
-        m_ssh_client.exec_command = Mock(
-            name='exec_command', return_value=('stdin', m_stdout, m_stderr)
+        m_ssh_exec_cmd.return_value = (
+            f'[INFO] salishsea_cmd '
+            f'{run_id}_2018-05-03T110532.335255-0700\n'
+            f'[INFO] salishsea_cmd 9332731.orca2.ibb\n'
         )
         run_dir, job_id = run_NEMO_agrif._launch_run(
             m_ssh_client, 'orcinus', run_id, self.config
@@ -428,18 +423,13 @@ class TestLaunchRun:
         assert run_dir == f'{run_id}_2018-05-03T110532.335255-0700'
         assert job_id == '9332731.orca2.ibb'
 
-    def test_ssh_error(self, m_logger):
+    def test_ssh_error(self, m_ssh_exec_cmd, m_logger):
         m_ssh_client = Mock(name='ssh_client')
-        m_stdout = Mock(name='stdout')
-        m_stderr = Mock(name='stderr')
-        m_stdout.readlines = Mock(name='stdout_readlines', return_value=[])
-        m_stderr.readlines = Mock(
-            name='stderr_readlines', return_value=['error\n']
-        )
-        m_ssh_client.exec_command = Mock(
-            name='exec_command', return_value=('stdin', m_stdout, m_stderr)
+        m_ssh_exec_cmd.side_effect = nowcast.ssh_sftp.SSHCommandError(
+            'cmd', 'stdout', 'stderr'
         )
         with pytest.raises(nemo_nowcast.WorkerError):
             run_NEMO_agrif._launch_run(
                 m_ssh_client, 'orcinus', '30apr18nowcast-agrif', self.config
             )
+        m_logger.error.assert_called_once_with('stderr')

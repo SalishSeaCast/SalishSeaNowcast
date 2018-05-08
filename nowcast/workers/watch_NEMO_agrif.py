@@ -143,8 +143,8 @@ def _get_run_id(ssh_client, host_name, job_id):
     :return: run id
     :rtype: str
     """
-    queue_info = _get_queue_info(ssh_client, job_id)
-    for line in queue_info:
+    queue_info = _get_queue_info(ssh_client, host_name, job_id)
+    for line in queue_info.splitlines():
         if line.strip().startswith('Job_Name'):
             run_id = line.split()[2]
             logger.info(f'watching {run_id} job {job_id} on {host_name}')
@@ -161,9 +161,9 @@ def _is_queued(ssh_client, host_name, job_id, run_id):
     :return: Flag indicating whether or not run is queued
     :rtype: boolean
     """
-    queue_info = _get_queue_info(ssh_client, job_id)
+    queue_info = _get_queue_info(ssh_client, host_name, job_id)
     state = 'UNKNOWN'
-    for line in queue_info:
+    for line in queue_info.splitlines():
         if line.strip().startswith('job_state'):
             state = line.split()[2]
             break
@@ -187,56 +187,66 @@ def _is_running(ssh_client, host_name, job_id, run_id, tmp_run_dir, run_info):
     :rtype: boolean
     """
     try:
-        queue_info = _get_queue_info(ssh_client, job_id)
+        queue_info = _get_queue_info(ssh_client, host_name, job_id)
     except WorkerError:
         # Job has disappeared from queue, so it has finished, crashed, or
         # been terminated by the resource manager
         return False
     state = 'UNKNOWN'
-    for line in queue_info:
+    for line in queue_info.splitlines():
         if line.strip().startswith('job_state'):
             state = line.split()[2]
             break
     if state != 'R':
         return False
     try:
-        stdout = _ssh_exec_command(ssh_client, f'cat {tmp_run_dir}/time.step')
-        time_step = int(stdout[0].strip())
-        model_seconds = (time_step - run_info.it000) * run_info.rdt
-        model_time = (
-            run_info.date0.replace(seconds=model_seconds
-                                   ).format('YYYY-MM-DD HH:mm:ss UTC')
+        stdout = ssh_sftp.ssh_exec_command(
+            ssh_client, f'cat {tmp_run_dir}/time.step', host_name, logger
         )
-        fraction_done = ((time_step - run_info.it000) /
-                         (run_info.itend - run_info.it000))
-        msg = (
-            f'{run_id} on {host_name}: timestep: '
-            f'{time_step} = {model_time}, {fraction_done:.1%} complete'
-        )
-    except WorkerError:
+    except ssh_sftp.SSHCommandError:
         # time.step file not found or empty; assume that run is young and it
         # hasn't been created yet, or has finished and it has been
         # moved to the results directory
-        msg = (
+        logger.info(
             f'{run_id} on {host_name}: time.step not found; '
             f'continuing to watch...'
         )
-    logger.info(msg)
+        return True
+    time_step = int(stdout.splitlines()[0].strip())
+    model_seconds = (time_step - run_info.it000) * run_info.rdt
+    model_time = (
+        run_info.date0.replace(seconds=model_seconds
+                               ).format('YYYY-MM-DD HH:mm:ss UTC')
+    )
+    fraction_done = ((time_step - run_info.it000) /
+                     (run_info.itend - run_info.it000))
+    logger.info(
+        f'{run_id} on {host_name}: timestep: '
+        f'{time_step} = {model_time}, {fraction_done:.1%} complete'
+    )
     return True
 
 
-def _get_queue_info(ssh_client, job_id):
+def _get_queue_info(ssh_client, host_name, job_id):
     """
     :param :py:class:`paramiko.client.SSHClient` ssh_client:
+    :param str host_name:
     :param str job_id:
 
     :return: Output from TORQUE/MOAB qstat command that describes the run's
              state
     :rtype: str
     """
-    return _ssh_exec_command(
-        ssh_client, f'/global/system/torque/bin/qstat -f -1 {job_id}'
-    )
+    try:
+        stdout = ssh_sftp.ssh_exec_command(
+            ssh_client, f'/global/system/torque/bin/qstat -f -1 {job_id}',
+            host_name, logger
+        )
+    except ssh_sftp.SSHCommandError as exc:
+        for line in exc.stderr.splitlines():
+            logger.error(line)
+        raise WorkerError
+    return stdout
 
 
 def _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id):
@@ -249,8 +259,10 @@ def _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id):
     :return: Temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
-    stdout = _ssh_exec_command(ssh_client, f'ls -d {scratch_dir/run_id}_*')
-    tmp_run_dir = Path(stdout[0].strip())
+    stdout = ssh_sftp.ssh_exec_command(
+        ssh_client, f'ls -d {scratch_dir/run_id}_*', host_name, logger
+    )
+    tmp_run_dir = Path(stdout.splitlines()[0].strip())
     logger.debug(f'found tmp run dir: {host_name}:{tmp_run_dir}')
     return tmp_run_dir
 
@@ -279,25 +291,6 @@ def _get_run_info(sftp_client, host_name, tmp_run_dir):
             rdt=namelist['namdom']['rn_rdt'],
         )
     return run_info
-
-
-def _ssh_exec_command(ssh_client, cmd):
-    """
-    :param :py:class:`paramiko.client.SSHClient` ssh_client:
-    :param str cmd:
-
-    :raises WorkerError:
-
-    :returns: stdout stream from command execution as a list of lines
-    :rtype: list
-    """
-    _, stdout, stderr = ssh_client.exec_command(cmd)
-    stderr_lines = stderr.readlines()
-    if stderr_lines:
-        for line in stderr_lines:
-            logger.error(line.strip())
-        raise WorkerError
-    return stdout.readlines()
 
 
 if __name__ == '__main__':

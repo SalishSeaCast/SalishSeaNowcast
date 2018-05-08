@@ -315,7 +315,7 @@ def _edit_run_desc(
 
 def _launch_run(ssh_client, host_name, run_id, config):
     """
-    :param :py:class:`paramiko.sftp_client.SFTPClient` ssh_client:
+    :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
     :param str run_id:
     :param :py:class:`nemo_nowcast.Config` config:
@@ -334,16 +334,15 @@ def _launch_run(ssh_client, host_name, run_id, config):
     results_dir = scratch_dir / run_id[:7]
     cmd = f'{salishsea_cmd} run {run_desc} {results_dir} --no-deflate'
     logger.debug(f'launching run on {host_name}: {cmd}')
-    _, stdout, stderr = ssh_client.exec_command(cmd)
-    stderr_lines = stderr.readlines()
-    if stderr_lines:
-        for line in stderr_lines:
-            logger.error(line.strip())
+    try:
+        stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
+    except ssh_sftp.SSHCommandError as exc:
+        for line in exc.stderr.splitlines():
+            logger.error(line)
         raise WorkerError
-    stdout_lines = stdout.readlines()
-    run_dir = stdout_lines[0].split()[-1]
+    run_dir = stdout.splitlines()[0].split()[-1]
     logger.debug(f'temporary run dir: {host_name}:{run_dir}')
-    job_id = stdout_lines[1].split()[-1]
+    job_id = stdout.splitlines()[1].split()[-1]
     logger.info(f'job id for {run_id}: {job_id}')
     return run_dir, job_id
 
