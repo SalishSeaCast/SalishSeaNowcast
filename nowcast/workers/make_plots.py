@@ -213,13 +213,35 @@ def make_plots(parsed_args, config, *args):
             )
 
     if model == 'fvcom':
-        results_dir = Path(
-            config['vhfr fvcom runs']['results archive'][run_type], dmy
-        )
         fvcom_ssh_dataset_filename = (
             config['vhfr fvcom runs']['ssh dataset filename']
         )
-        fvcom_ssh_dataset_path = results_dir / fvcom_ssh_dataset_filename
+        if run_type == 'nowcast':
+            results_dir = Path(
+                config['vhfr fvcom runs']['results archive'][run_type], dmy
+            )
+            fvcom_ssh_dataset_path = results_dir / fvcom_ssh_dataset_filename
+        else:
+            nowcast_results_dir = Path(
+                config['vhfr fvcom runs']['results archive']['nowcast'], dmy
+            )
+            nowcast_dataset_path = (
+                nowcast_results_dir / fvcom_ssh_dataset_filename
+            )
+            forecast_results_dir = Path(
+                config['vhfr fvcom runs']['results archive']['forecast'], dmy
+            )
+            forecast_dataset_path = (
+                forecast_results_dir / fvcom_ssh_dataset_filename
+            )
+            fvcom_ssh_dataset_path = Path(
+                '/tmp/vhfr_low_v2_station_timeseries_forecast.nc'
+            )
+            cmd = (
+                f'ncrcat -O {nowcast_dataset_path} {forecast_dataset_path} '
+                f'-o {fvcom_ssh_dataset_path}'
+            )
+            subprocess.check_output(shlex.split(cmd))
         cmd = (
             f'ncrename -O -v siglay,sigma_layer -v siglev,sigma_level '
             f'{fvcom_ssh_dataset_path} /tmp/{fvcom_ssh_dataset_path.name}'
