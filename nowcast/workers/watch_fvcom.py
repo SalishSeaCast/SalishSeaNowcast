@@ -123,6 +123,12 @@ def watch_fvcom(parsed_args, config, tell_manager):
                         f'UTC estimated time to finish: {time_to_finish}'
                     )
                     break
+            else:
+                # fvcom.log file found, but no run status line found
+                msg = (
+                    f'{run_type} on {host_name}: no run progress found in '
+                    f'fvcom.log ; continuing to watch...'
+                )
         except FileNotFoundError:
             # fvcom.log file not found; assume that run is young and it
             # hasn't been created yet, or has finished and it has been
