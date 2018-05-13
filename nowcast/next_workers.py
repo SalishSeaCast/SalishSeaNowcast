@@ -397,6 +397,7 @@ def after_upload_forcing(msg, config, checklist):
     }
     try:
         host_name = list(msg.payload.keys())[0]
+        host_config = config['run']['enabled hosts'][host_name]
     except (AttributeError, IndexError):
         # Malformed payload - no host name in payload;
         # upload_forcing worker probably crashed
@@ -406,26 +407,26 @@ def after_upload_forcing(msg, config, checklist):
         ('nowcast', 'nowcast+'),
         ('forecast', 'ssh'),
         ('forecast2', 'forecast2'),
-        ('nowcast-green', 'turbidity'),
-        ('nowcast-agrif', 'turbidity'),
+        ('turbidity', 'nowcast-green'),
+        ('turbidity', 'nowcast-agrif'),
     ]
     for run_type, links_run_type in run_types:
-        make_forcing_links = (
-            run_type in config['run types']
-            and config['run']['enabled hosts'][host_name]['make forcing links']
-        )
-        if make_forcing_links:
-            next_workers[f'success {links_run_type}'] = [
-                NextWorker(
-                    'nowcast.workers.make_forcing_links',
-                    args=[host_name, links_run_type]
-                ),
-            ]
-            if links_run_type == 'turbidity':
+        if host_config['make forcing links']:
+            if (
+                run_type == 'turbidity'
+                and links_run_type in host_config['run types']
+            ):
+                next_workers[f'success turbidity'] = [
+                    NextWorker(
+                        'nowcast.workers.make_forcing_links',
+                        args=[host_name, links_run_type]
+                    ),
+                ]
+            if run_type in config['run types']:
                 next_workers[f'success {links_run_type}'] = [
                     NextWorker(
                         'nowcast.workers.make_forcing_links',
-                        args=[host_name, 'nowcast-green']
+                        args=[host_name, links_run_type]
                     ),
                 ]
     return next_workers[msg.type]

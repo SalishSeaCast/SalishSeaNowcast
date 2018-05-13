@@ -514,16 +514,29 @@ class TestAfterUploadForcing:
         'ssh',
         'forecast2',
     ])
-    def test_success_no_launch_make_forcing_links_orcinus(
+    def test_success_no_launch_make_forcing_links(
         self, run_type, config, checklist
     ):
-        workers = next_workers.after_upload_forcing(
-            Message(
-                'upload_forcing', f'success {run_type}', {
-                    'orcinus': f'2018-04-03 {run_type}'
+        p_checklist = patch.dict(
+            checklist, {
+                'run': {
+                    'enabled hosts': {
+                        'orcinus': {
+                            'run types': 'nowcast-agrif',
+                            'make forcing links': False,
+                        }
+                    }
                 }
-            ), config, checklist
+            }
         )
+        with p_checklist:
+            workers = next_workers.after_upload_forcing(
+                Message(
+                    'upload_forcing', f'success {run_type}', {
+                        'orcinus': f'2018-04-03 {run_type}'
+                    }
+                ), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
             args=['orcinus', run_type],
@@ -548,19 +561,32 @@ class TestAfterUploadForcing:
         )
         assert expected in workers
 
-    def test_success_turbidity_no_launch_make_forcing_links_green_orcinus(
+    def test_success_turbidity_no_launch_make_forcing_links_agrif(
         self, config, checklist
     ):
-        workers = next_workers.after_upload_forcing(
-            Message(
-                'upload_forcing', 'success turbidity', {
-                    'orcinus': '2018-04-03 turbidity'
+        p_checklist = patch.dict(
+            checklist, {
+                'run': {
+                    'enabled hosts': {
+                        'orcinus': {
+                            'run types': 'nowcast-agrif',
+                            'make forcing links': False,
+                        }
+                    }
                 }
-            ), config, checklist
+            }
         )
+        with p_checklist:
+            workers = next_workers.after_upload_forcing(
+                Message(
+                    'upload_forcing', 'success turbidity', {
+                        'orcinus': '2018-04-03 turbidity'
+                    }
+                ), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
-            args=['west.cloud', 'nowcast-green'],
+            args=['orcinus', 'nowcast-agrif'],
             host='localhost'
         )
         assert expected not in workers
