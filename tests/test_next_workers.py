@@ -439,13 +439,14 @@ class TestAfterMakeTurbidityFile:
         )
         assert workers == []
 
-    def test_success_launch_upload_forcing_west_cloud(self, config, checklist):
+    @pytest.mark.parametrize('host_name', ['west.cloud', 'orcinus'])
+    def test_success_launch_upload_forcing(self, host_name, config, checklist):
         workers = next_workers.after_make_turbidity_file(
             Message('make_turbidity_file', 'success'), config, checklist
         )
         expected = NextWorker(
             'nowcast.workers.upload_forcing',
-            args=['west.cloud', 'turbidity'],
+            args=[host_name, 'turbidity'],
             host='localhost'
         )
         assert expected in workers

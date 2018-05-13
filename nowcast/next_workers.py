@@ -356,7 +356,11 @@ def after_make_turbidity_file(msg, config, checklist):
                 config['run']['enabled hosts'][host]['shared storage']
             )
             host_run_types = config['run']['enabled hosts'][host]['run types']
-            if 'nowcast-green' in host_run_types and not shared_storage:
+            upload_rubidity = (
+                'nowcast-green' in host_run_types
+                or 'nowcast-agrif' in host_run_types
+            )
+            if upload_rubidity and not shared_storage:
                 next_workers['success'].append(
                     NextWorker(
                         'nowcast.workers.upload_forcing',
