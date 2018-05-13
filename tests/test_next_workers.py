@@ -495,13 +495,26 @@ class TestAfterUploadForcing:
     def test_success_launch_make_forcing_links(
         self, run_type, config, checklist
     ):
-        workers = next_workers.after_upload_forcing(
-            Message(
-                'upload_forcing', f'success {run_type}', {
-                    'west.cloud': f'2016-10-11 {run_type}'
+        p_config = patch.dict(
+            config, {
+                'run': {
+                    'enabled hosts': {
+                        'west.cloud': {
+                            'run types': 'nowcast-agrif',
+                            'make forcing links': True,
+                        }
+                    }
                 }
-            ), config, checklist
+            }
         )
+        with p_config:
+            workers = next_workers.after_upload_forcing(
+                Message(
+                    'upload_forcing', f'success {run_type}', {
+                        'west.cloud': f'2016-10-11 {run_type}'
+                    }
+                ), config, checklist
+            )
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
             args=['west.cloud', run_type],
@@ -517,8 +530,8 @@ class TestAfterUploadForcing:
     def test_success_no_launch_make_forcing_links(
         self, run_type, config, checklist
     ):
-        p_checklist = patch.dict(
-            checklist, {
+        p_config = patch.dict(
+            config, {
                 'run': {
                     'enabled hosts': {
                         'orcinus': {
@@ -529,7 +542,7 @@ class TestAfterUploadForcing:
                 }
             }
         )
-        with p_checklist:
+        with p_config:
             workers = next_workers.after_upload_forcing(
                 Message(
                     'upload_forcing', f'success {run_type}', {
@@ -564,8 +577,8 @@ class TestAfterUploadForcing:
     def test_success_turbidity_no_launch_make_forcing_links_agrif(
         self, config, checklist
     ):
-        p_checklist = patch.dict(
-            checklist, {
+        p_config = patch.dict(
+            config, {
                 'run': {
                     'enabled hosts': {
                         'orcinus': {
@@ -576,7 +589,7 @@ class TestAfterUploadForcing:
                 }
             }
         )
-        with p_checklist:
+        with p_config:
             workers = next_workers.after_upload_forcing(
                 Message(
                     'upload_forcing', 'success turbidity', {
@@ -590,6 +603,36 @@ class TestAfterUploadForcing:
             host='localhost'
         )
         assert expected not in workers
+
+    def test_success_turbidity_launch_make_forcing_links_agrif(
+        self, config, checklist
+    ):
+        p_config = patch.dict(
+            config, {
+                'run': {
+                    'enabled hosts': {
+                        'orcinus': {
+                            'run types': 'nowcast-agrif',
+                            'make forcing links': True,
+                        }
+                    }
+                }
+            }
+        )
+        with p_config:
+            workers = next_workers.after_upload_forcing(
+                Message(
+                    'upload_forcing', 'success turbidity', {
+                        'orcinus': '2018-04-03 turbidity'
+                    }
+                ), config, checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.make_forcing_links',
+            args=['orcinus', 'nowcast-agrif'],
+            host='localhost'
+        )
+        assert expected in workers
 
 
 class TestAfterMakeForcingLinks:
