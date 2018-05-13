@@ -601,6 +601,7 @@ class TestAfterMakeForcingLinks:
             'crash',
             'failure nowcast+',
             'failure nowcast-green',
+            'failure nowcast-agrif',
             'failure forecast2',
             'failure ssh',
         ]
@@ -624,11 +625,6 @@ class TestAfterMakeForcingLinks:
                 ], 'west.cloud'
             ),
             (
-                'success nowcast-green', [
-                    'orcinus', 'nowcast-agrif', '--run-date', '2018-05-03'
-                ], 'orcinus'
-            ),
-            (
                 'success nowcast+',
                 ['salish', 'nowcast-dev', '--run-date', '2016-10-23'], 'salish'
             ),
@@ -650,7 +646,7 @@ class TestAfterMakeForcingLinks:
         p_checklist = patch.dict(
             checklist, {
                 'forcing links': {
-                    host_name: {
+                    args[0]: {
                         'links': '',
                         'run date': args[-1]
                     }
@@ -659,14 +655,44 @@ class TestAfterMakeForcingLinks:
         )
         with p_checklist:
             workers = next_workers.after_make_forcing_links(
-                Message(
-                    'make_forcing_links', msg_type, payload={
-                        host_name: ''
-                    }
-                ), config, checklist
+                Message('make_forcing_links', msg_type, payload={
+                    args[0]: ''
+                }), config, checklist
             )
         expected = NextWorker(
             'nowcast.workers.run_NEMO', args=args, host=host_name
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize(
+        'msg_type, args', [
+            (
+                'success nowcast-agrif',
+                ['orcinus', 'nowcast-agrif', '--run-date', '2018-05-03']
+            ),
+        ]
+    )
+    def test_success_nowcast_agrif_launch_run_NEMO_agrif(
+        self, msg_type, args, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {
+                'forcing links': {
+                    args[0]: {
+                        'links': '',
+                        'run date': args[-1]
+                    }
+                }
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_make_forcing_links(
+                Message('make_forcing_links', msg_type, payload={
+                    args[0]: ''
+                }), config, checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.run_NEMO_agrif', args=args, host='localhost'
         )
         assert expected in workers
 
@@ -1072,6 +1098,38 @@ class TestAfterWatchNEMO:
             host='localhost'
         )
         assert download_results not in workers
+
+
+class TestAfterRunNEMO_AGRIF:
+    """Unit tests for the after_run_NEMO_agrif function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_run_NEMO_agrif(
+            Message('run_NEMO', msg_type), config, checklist
+        )
+        assert workers == []
+
+    def test_success_launch_watch_NEMO(self, config, checklist):
+        workers = next_workers.after_run_NEMO_agrif(
+            Message(
+                'run_NEMO_agrif', 'success', {
+                    'nowcast-agrif': {
+                        'host': 'orcinus'
+                    }
+                }
+            ), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.watch_NEMO_agrif',
+            args=['orcinus', 'nowcast-agrif'],
+            host='localhost'
+        )
+        assert workers == [expected]
 
 
 class TestAfterMakeFVCOMBoundary:
