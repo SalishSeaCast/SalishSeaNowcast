@@ -1110,7 +1110,7 @@ class TestAfterRunNEMO_AGRIF:
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_run_NEMO_agrif(
-            Message('run_NEMO', msg_type), config, checklist
+            Message('run_NEMO_agrif', msg_type), config, checklist
         )
         assert workers == []
 
@@ -1130,6 +1130,22 @@ class TestAfterRunNEMO_AGRIF:
             host='localhost'
         )
         assert workers == [expected]
+
+
+class TestAfterWatchNEMO_AGRIF:
+    """Unit tests for the after_watch_NEMO_agrif function.
+    """
+
+    @pytest.mark.parametrize('msg_type', [
+        'crash',
+        'failure',
+        'success',
+    ])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_watch_NEMO_agrif(
+            Message('warch_NEMO_agrif', msg_type), config, checklist
+        )
+        assert workers == []
 
 
 class TestAfterMakeFVCOMBoundary:
