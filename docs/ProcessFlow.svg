@@ -28,16 +28,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.56096972"
+     inkscape:zoom="0.56096973"
      inkscape:cx="536.22248"
-     inkscape:cy="727.31198"
+     inkscape:cy="727.31201"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1920"
      inkscape:window-height="1011"
-     inkscape:window-x="1920"
-     inkscape:window-y="33"
+     inkscape:window-x="1366"
+     inkscape:window-y="55"
      inkscape:window-maximized="1"
      fit-margin-top="0"
      fit-margin-left="0"
@@ -53,7 +53,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -1826,21 +1826,6 @@
            style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:14.9875021px;line-height:1.25;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;text-anchor:middle">ping_erddap</tspan></text>
     </g>
     <g
-       transform="translate(290.80476,873.4032)"
-       id="g1300">
-      <path
-         inkscape:connector-curvature="0"
-         id="path1296"
-         d="M 330.51479,127.20539 V 101.7106"
-         style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 330.84052,136.05622 7.60791,-23.15845 -7.7493,7.36104 -7.23623,-7.22693 z"
-         id="path1298"
-         inkscape:connector-curvature="0"
-         sodipodi:nodetypes="ccccc" />
-    </g>
-    <g
        id="g1347"
        transform="translate(290.80476,807.01806)">
       <path
@@ -1940,8 +1925,23 @@
          style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
     </g>
     <g
+       transform="translate(479.74218,873.4032)"
+       id="g1300">
+      <path
+         inkscape:connector-curvature="0"
+         id="path1296"
+         d="M 330.51479,127.20539 V 101.7106"
+         style="display:inline;fill:none;stroke:#000000;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      <path
+         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 330.84052,136.05622 7.60791,-23.15845 -7.7493,7.36104 -7.23623,-7.22693 z"
+         id="path1298"
+         inkscape:connector-curvature="0"
+         sodipodi:nodetypes="ccccc" />
+    </g>
+    <g
        id="g1238"
-       transform="translate(54.375001)">
+       transform="translate(133.11886)">
       <rect
          y="1009.6399"
          x="510.423"
