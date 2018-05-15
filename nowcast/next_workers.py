@@ -1384,7 +1384,36 @@ def after_ping_erddap(msg, config, checklist):
     :returns: Worker(s) to launch next
     :rtype: list
     """
-    return []
+    next_workers = {
+        'crash': [],
+        'success download_weather': [],
+        'failure download_weather': [],
+        'success SCVIP-CTD': [],
+        'failure SCVIP-CTD': [],
+        'success SEVIP-CTD': [],
+        'failure SEVIP-CTD': [],
+        'success USDDL-CTD': [],
+        'failure USDDL-CTD': [],
+        'success TWDP-ferry': [],
+        'failure TWDP-ferry': [],
+        'success nowcast-green': [],
+        'failure nowcast-green': [],
+        'success nemo-forecast': [],
+        'failure nemo-forecast': [],
+        'success wwatch3-forecast': [],
+        'failure wwatch3-forecast': [],
+    }
+    if msg.type == 'success wwatch3-forecast':
+        run_types = checklist['WWATCH3 run'].keys()
+        run_type = 'forecast' if 'forecast' in run_types else 'forecast2'
+        run_date = checklist['WWATCH3 run'][run_type]['run date']
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.make_plots',
+                args=['wwatch3', run_type, 'publish', '--run-date', run_date]
+            )
+        )
+    return next_workers[msg.type]
 
 
 def after_make_plots(msg, config, checklist):
