@@ -1354,15 +1354,6 @@ def after_update_forecast_datasets(msg, config, checklist):
                     args=['nemo', run_type, 'publish', '--run-date', run_date]
                 )
             )
-        if model == 'wwatch3':
-            next_workers[msg.type].append(
-                NextWorker(
-                    'nowcast.workers.make_plots',
-                    args=[
-                        'wwatch3', run_type, 'publish', '--run-date', run_date
-                    ]
-                )
-            )
     return next_workers[msg.type]
 
 
