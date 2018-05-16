@@ -59,7 +59,7 @@ The production deployment uses 3 systems:
    .. _west.cloud: https://www.westgrid.ca/support/systems/cc-cloud
    .. _Ceph object storage: https://en.wikipedia.org/wiki/Ceph_(software)
 
-This sections describe the setup of the nowcast system on :kbd:`skookum`/:kbd:`salish` and :kbd:`west.cloud`,
+These sections describe the setup of the nowcast system on :kbd:`skookum`/:kbd:`salish` and :kbd:`west.cloud`,
 and it operation.
 
 .. toctree::
@@ -68,3 +68,13 @@ and it operation.
    skookum_salish
    west_cloud
    operations
+
+In May 2018 production runs of a :kbd:`nowcast-green` configuration with AGRIF sub-grids for Baynes Sound and Haro Strait were added to the system.
+Those runs are executed on a reserved chassis on :kbd:`orcinus`.
+The setup on :kbd:`orcinus`,
+as well are the sub-grid initialization preparation with the NEMO-AGRIF nesting tools are described in:
+
+.. toctree::
+   :maxdepth: 2
+
+   orcinus
