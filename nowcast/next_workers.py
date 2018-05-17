@@ -702,10 +702,10 @@ def after_run_NEMO_agrif(msg, config, checklist):
     }
     if msg.type.startswith('success'):
         host = msg.payload['nowcast-agrif']['host']
+        job_id = msg.payload['nowcast-agrif']['job id']
         next_workers[msg.type].append(
             NextWorker(
-                'nowcast.workers.watch_NEMO_agrif',
-                args=[host, 'nowcast-agrif']
+                'nowcast.workers.watch_NEMO_agrif', args=[host, job_id]
             )
         )
     return next_workers[msg.type]
