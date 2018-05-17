@@ -1163,14 +1163,15 @@ class TestAfterRunNEMO_AGRIF:
             Message(
                 'run_NEMO_agrif', 'success', {
                     'nowcast-agrif': {
-                        'host': 'orcinus'
+                        'host': 'orcinus',
+                        'job id': '9379405.orca2.ibb',
                     }
                 }
             ), config, checklist
         )
         expected = NextWorker(
             'nowcast.workers.watch_NEMO_agrif',
-            args=['orcinus', 'nowcast-agrif'],
+            args=['orcinus', '9379405.orca2.ibb'],
             host='localhost'
         )
         assert workers == [expected]
