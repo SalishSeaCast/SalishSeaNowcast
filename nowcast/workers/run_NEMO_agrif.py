@@ -166,7 +166,7 @@ def _get_prev_run_namelists_info(
         config['run']['enabled hosts'][host_name]['scratch dir']
     )
     dmy = prev_run_date.format('DDMMMYY').lower()
-    prev_namelist_cfgs = ['namelist_cfg', '1_namelist_cfg', '2_namelist_cfg']
+    prev_namelist_cfgs = ['namelist_cfg', '1_namelist_cfg']
     prev_run_namelists_info = SimpleNamespace()
     for i, namelist in enumerate(prev_namelist_cfgs):
         prev_namelist_cfg = scratch_dir / dmy / namelist
@@ -204,11 +204,6 @@ def _edit_namelist_times(
             'namrun': {
                 'nn_it000': prev_run_namelists_info.itend + 1,
                 'nn_itend': int(itend),
-                'nn_date0': int(run_date.format('YYYYMMDD')),
-            }
-        },
-        'namelist.time.HS': {
-            'namrun': {
                 'nn_date0': int(run_date.format('YYYYMMDD')),
             }
         },
@@ -289,7 +284,7 @@ def _edit_run_desc(
     )
     run_desc['restart']['restart_trc.nc'] = restart_trc_file
     logger.debug(f'set restart_trc.nc to {restart_trc_file}')
-    for i in range(1, 3):
+    for i in range(1, 2):
         itend = int(
             prev_run_namelists_info.itend * prev_run_namelists_info.rdt /
             getattr(prev_run_namelists_info, f'{i}_rdt')
