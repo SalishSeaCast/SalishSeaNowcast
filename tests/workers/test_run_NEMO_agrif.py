@@ -205,10 +205,6 @@ class TestEditNamelistTimes:
                 '/tmp/nowcast-agrif.namelist.time'
             ),
             call(
-                'nowcast-agrif-sys/runs/namelist.time.HS',
-                '/tmp/nowcast-agrif.namelist.time.HS'
-            ),
-            call(
                 'nowcast-agrif-sys/runs/namelist.time.BS',
                 '/tmp/nowcast-agrif.namelist.time.BS'
             ),
@@ -233,12 +229,6 @@ class TestEditNamelistTimes:
                 }, '/tmp/patched_nowcast-agrif.namelist.time'
             ),
             call(
-                '/tmp/nowcast-agrif.namelist.time.HS',
-                {'namrun': {
-                    'nn_date0': 20180430,
-                }}, '/tmp/patched_nowcast-agrif.namelist.time.HS'
-            ),
-            call(
                 '/tmp/nowcast-agrif.namelist.time.BS',
                 {'namrun': {
                     'nn_date0': 20180430,
@@ -260,10 +250,6 @@ class TestEditNamelistTimes:
                 'nowcast-agrif-sys/runs/namelist.time'
             ),
             call(
-                '/tmp/patched_nowcast-agrif.namelist.time.HS',
-                'nowcast-agrif-sys/runs/namelist.time.HS'
-            ),
-            call(
                 '/tmp/patched_nowcast-agrif.namelist.time.BS',
                 'nowcast-agrif-sys/runs/namelist.time.BS'
             ),
@@ -279,10 +265,6 @@ class TestEditNamelistTimes:
             'restart.nc': '',
             'restart_trc.nc': '',
             'AGRIF_1': {
-                'restart.nc': '',
-                'restart_trc.nc': '',
-            },
-            'AGRIF_2': {
                 'restart.nc': '',
                 'restart_trc.nc': '',
             },
@@ -309,8 +291,7 @@ class TestEditRunDesc:
     def test_download_run_desc_template(self, m_safe_load, m_logger, tmpdir):
         m_sftp_client = Mock(name='sftp_client')
         prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
-        setattr(prev_run_namelists_info, '1_rdt', 10)
-        setattr(prev_run_namelists_info, '2_rdt', 20)
+        setattr(prev_run_namelists_info, '1_rdt', 20)
         yaml_tmpl = tmpdir.ensure('nowcast-agrif_template.yaml')
         run_NEMO_agrif._edit_run_desc(
             m_sftp_client,
@@ -330,8 +311,7 @@ class TestEditRunDesc:
     def test_edit_run_desc(self, m_safe_dump, m_safe_load, m_logger, tmpdir):
         m_sftp_client = Mock(name='sftp_client')
         prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
-        setattr(prev_run_namelists_info, '1_rdt', 10)
-        setattr(prev_run_namelists_info, '2_rdt', 20)
+        setattr(prev_run_namelists_info, '1_rdt', 20)
         yaml_tmpl = tmpdir.ensure('nowcast-agrif_template.yaml')
         with patch('nowcast.workers.run_NEMO_agrif.Path.open') as m_open:
             run_NEMO_agrif._edit_run_desc(
@@ -344,6 +324,7 @@ class TestEditRunDesc:
                 yaml_tmpl=yaml_tmpl
             )
         m_safe_dump.assert_called_once_with({
+            'run_id': '30apr18nowcast-agrif',
             'restart': {
                 'restart.nc':
                     'scratch/nowcast-agrif/29apr18/SalishSea_02363040_restart.nc',
@@ -351,18 +332,11 @@ class TestEditRunDesc:
                     'scratch/nowcast-agrif/29apr18/SalishSea_02363040_restart_trc.nc',
                 'AGRIF_1': {
                     'restart.nc':
-                        'scratch/nowcast-agrif/29apr18/1_SalishSea_09452160_restart.nc',
+                        'scratch/nowcast-agrif/29apr18/1_SalishSea_04726080_restart.nc',
                     'restart_trc.nc':
-                        'scratch/nowcast-agrif/29apr18/1_SalishSea_09452160_restart_trc.nc',
-                },
-                'AGRIF_2': {
-                    'restart.nc':
-                        'scratch/nowcast-agrif/29apr18/2_SalishSea_04726080_restart.nc',
-                    'restart_trc.nc':
-                        'scratch/nowcast-agrif/29apr18/2_SalishSea_04726080_restart_trc.nc',
+                        'scratch/nowcast-agrif/29apr18/1_SalishSea_04726080_restart_trc.nc',
                 },
             },
-            'run_id': '30apr18nowcast-agrif',
         },
                                             m_open().__enter__(),
                                             default_flow_style=False)
@@ -370,8 +344,7 @@ class TestEditRunDesc:
     def test_upload_run_desc(self, m_safe_load, m_logger, tmpdir):
         m_sftp_client = Mock(name='sftp_client')
         prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
-        setattr(prev_run_namelists_info, '1_rdt', 10)
-        setattr(prev_run_namelists_info, '2_rdt', 20)
+        setattr(prev_run_namelists_info, '1_rdt', 20)
         yaml_tmpl = tmpdir.ensure('nowcast-agrif_template.yaml')
         run_NEMO_agrif._edit_run_desc(
             m_sftp_client,
