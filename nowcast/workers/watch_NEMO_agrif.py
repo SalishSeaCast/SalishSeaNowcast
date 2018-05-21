@@ -78,7 +78,7 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'NEMO hindcast run {parsed_args.job_id} on {parsed_args.host_name} '
+        f'NEMO AGRIF run {parsed_args.job_id} on {parsed_args.host_name} '
         f'watcher failed',
         extra={
             'run_type': 'hindcast',
