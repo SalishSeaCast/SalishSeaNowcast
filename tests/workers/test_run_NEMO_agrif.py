@@ -386,14 +386,18 @@ class TestLaunchRun:
         m_ssh_client = Mock(name='ssh_client')
         run_id = '30apr18nowcast-agrif'
         m_ssh_exec_cmd.return_value = (
-            f'[INFO] salishsea_cmd '
-            f'{run_id}_2018-05-03T110532.335255-0700\n'
-            f'[INFO] salishsea_cmd 9332731.orca2.ibb\n'
+            f'nemo_cmd.prepare WARNING: uncommitted changes in SS-run-sets\n'
+            f'salishsea_cmd.run INFO: run directory '
+            f'scratch/nowcast-agrif/{run_id}_2018-05-03T110532.335255-0700\n'
+            f'salishsea_cmd.run INFO: 9332731.orca2.ibb\n\n'
         )
         run_dir, job_id = run_NEMO_agrif._launch_run(
             m_ssh_client, 'orcinus', run_id, self.config
         )
-        assert run_dir == f'{run_id}_2018-05-03T110532.335255-0700'
+        expected = (
+            f'scratch/nowcast-agrif/{run_id}_2018-05-03T110532.335255-0700'
+        )
+        assert run_dir == expected
         assert job_id == '9332731.orca2.ibb'
 
     def test_ssh_error(self, m_ssh_exec_cmd, m_logger):

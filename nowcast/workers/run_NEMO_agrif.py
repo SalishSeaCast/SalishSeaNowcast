@@ -335,9 +335,9 @@ def _launch_run(ssh_client, host_name, run_id, config):
         for line in exc.stderr.splitlines():
             logger.error(line)
         raise WorkerError
-    run_dir = stdout.splitlines()[0].split()[-1]
+    run_dir = stdout.splitlines()[-3].split()[-1]
     logger.debug(f'temporary run dir: {host_name}:{run_dir}')
-    job_id = stdout.splitlines()[1].split()[-1]
+    job_id = stdout.splitlines()[-2].split()[-1]
     logger.info(f'job id for {run_id}: {job_id}')
     return run_dir, job_id
 
