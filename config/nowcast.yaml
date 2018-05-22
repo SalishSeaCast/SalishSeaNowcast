@@ -287,6 +287,7 @@ results archive:
   forecast: /results/SalishSea/forecast/
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
+  nowcast-agrif: /results/SalishSea/nowcast-agrif/
   hindcast: /results/SalishSea/hindcast/
 
 
@@ -553,7 +554,7 @@ run:
       salishsea cmd: /home/dlatorne/.local/bin/salishsea
       run types:
         nowcast-agrif:
-          results: /results/SalishSea/nowcast-agrif/
+          results: /global/scratch/dlatorne/nowcast-agrif/
       forcing:
         ssh dir: /home/sallen/MEOPAR/sshNeahBay/
         rivers dir: /home/sallen/MEOPAR/rivers/
@@ -1140,6 +1141,8 @@ message registry:
       failure forecast2: forecast2 results files download failed
       success hindcast: hindcast results files downloaded
       failure hindcast: hindcast results files download failed
+      success nowcast-agrif: nowcast-agrif results files downloaded
+      failure nowcast-agrif: nowcast-agrif results files download failed
       crash: download_results worker crashed
 
     download_wwatch3_results:

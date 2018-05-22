@@ -734,6 +734,16 @@ def after_watch_NEMO_agrif(msg, config, checklist):
         'failure': [],
         'success': [],
     }
+    if msg.type == 'success':
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.download_results',
+                args=[
+                    msg.payload['nowcast-agrif']['host'], 'nowcast-agrif',
+                    '--run-date', msg.payload['nowcast-agrif']['run date']
+                ]
+            )
+        )
     return next_workers[msg.type]
 
 
@@ -1154,14 +1164,18 @@ def after_download_results(msg, config, checklist):
         'failure forecast': [],
         'failure forecast2': [],
         'failure hindcast': [],
+        'failure nowcast-agrif': [],
         'success nowcast': [],
         'success nowcast-green': [],
         'success forecast': [],
         'success forecast2': [],
         'success hindcast': [],
+        'success nowcast-agrif': [],
     }
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
+        if run_type == 'nowcast-agrif':
+            return next_workers[msg.type]
         if run_type == 'hindcast':
             run_date = arrow.get(
                 checklist['NEMO run']['hindcast']['run id'][:7], 'DDMMMYY'

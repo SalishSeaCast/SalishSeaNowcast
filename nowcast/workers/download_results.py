@@ -39,7 +39,8 @@ def main():
     worker.cli.add_argument(
         'run_type',
         choices={
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2', 'hindcast'
+            'nowcast', 'nowcast-green', 'forecast', 'forecast2', 'hindcast',
+            'nowcast-agrif'
         },
         help='Type of run to download results files from.',
     )
@@ -97,7 +98,7 @@ def download_results(parsed_args, config, *args):
     src = f'{host_name}:{src_dir}'
     dest = Path(config['results archive'][run_type])
     logger.info(f'downloading results from {src} to {dest}')
-    cmd = shlex.split(f'scp -Cpr {src} {dest}')
+    cmd = shlex.split(f'scp -pr {src} {dest}')
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     results_archive_dir = dest / results_dir
     for filepath in results_archive_dir.glob('FVCOM_[TUV].nc'):
