@@ -124,7 +124,7 @@ def watch_NEMO_agrif(parsed_args, config, *args):
         sftp_client.close()
         ssh_client.close()
     checklist = {
-        'smelt-agrif': {
+        'nowcast-agrif': {
             'host': host_name,
             'job id': job_id,
             'run date': arrow.get(run_id[:7], 'DDMMMYY').format('YYYY-MM-DD'),

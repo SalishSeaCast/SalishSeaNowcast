@@ -160,7 +160,7 @@ class TestWatchNEMO_AGRIF:
         }
         checklist = watch_NEMO_agrif.watch_NEMO_agrif(parsed_args, config)
         expected = {
-            'smelt-agrif': {
+            'nowcast-agrif': {
                 'host': 'orcinus',
                 'job id': '9305855',
                 'run date': '2018-04-23',
