@@ -125,12 +125,8 @@ Create an populate forcing sub-directories with:
     $ mkdir -p LiveOcean NEMO-atmos rivers ssh
     $ chmod g+w LiveOcean NEMO-atmos rivers ssh
     $ cd NEMO-atmos/
-    $ ln -s /home/dlatorne/nowcast-agrif-sys/grid/no_snow.nc
-    $ ln -s /home/dlatorne/nowcast-agrif-sys/grid/weights-gem2.5-ops_201702.nc
     $ cd rivers/
     $ ln -s /home/dlatorne/nowcast-agrif-sys/rivers-climatology/bio
-    $ ln -s /home/dlatorne/nowcast-agrif-sys/rivers-climatology/rivers_ConsTemp_month.nc
-    $ ln -s /home/dlatorne/nowcast-agrif-sys/rivers-climatology/rivers_month_201702.nc
 
 The :file:`make_forcing_links` worker will create symlinks to the appropriate forcing files in the :file:`LiveOcean`,
 :file:`NEMO-atmos`,
@@ -240,7 +236,7 @@ Bathymetry
 Physics Restart Files
 ^^^^^^^^^^^^^^^^^^^^^
 
-The code in this section is for generation of sub-grid physics restart files from the :file:`nowcast-green/12may18/SalishSea_02935440_restart.nc` file
+The commands in this section are for generation of sub-grid physics restart files from the :file:`nowcast-green/12may18/SalishSea_02935440_restart.nc` file
 (path provided in the :file:`namelist.nesting.BaynesSound` and :file:`namelist.nesting.HaroStrait` files).
 
 For the Baynes Sound sub-grid,
@@ -275,7 +271,7 @@ Note that the time step number in the Haro Strait sub-grid restart file name is 
 Tracer Restart Files
 ^^^^^^^^^^^^^^^^^^^^
 
-The code in this section is for generation of sub-grid tracer restart files from the :file:`nowcast-green/12may18/SalishSea_02935440_restart_trc.nc` file
+The commands in this section are for generation of sub-grid tracer restart files from the :file:`nowcast-green/12may18/SalishSea_02935440_restart_trc.nc` file
 (path provided in the :file:`namelist.nesting.BaynesSound` and :file:`namelist.nesting.HaroStrait` files).
 
 For the Baynes Sound sub-grid,
@@ -314,3 +310,12 @@ To deal with that we duplicate the :kbd:`TRNTRA` field values as :kbd:`TRBTRA` a
     $ ncks -4 -O 1_SalishSea_02935440_restart_trc.nc 1_SalishSea_02935440_restart_trc.nc
     $ ncrename -O -v TRNTRA,TRBTRA TRNTRA.nc TRBTRA.nc
     $ ncks -4 -A TRBTRA.nc 1_SalishSea_02935440_restart_trc.nc
+
+and upload the file to the appropriate run results directory on :kbd:`orcinus`:
+
+.. code-block:: bash
+
+    $ scp 1_SalishSea_02935440_restart_trc.nc \
+        orcinus:/global/scratch/dlatorne/nowcast-agrif/12may18/1_SalishSea_11741760_restart_trc.nc
+
+Note that the time step number in the Haro Strait sub-grid restart file name is 4x that of the full domain file because the Haro Strait sub-grid time step is 10s in contrast to 40s for the full domain.
