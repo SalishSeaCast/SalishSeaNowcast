@@ -14,18 +14,24 @@
 # limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast download_results worker.
 """
-from unittest.mock import (
-    Mock,
-    patch,
-)
+import logging
+from pathlib import Path
+import shlex
+from types import SimpleNamespace
+from unittest.mock import patch, Mock, call
 
 import arrow
+import nemo_nowcast
 import pytest
 
+import nowcast.lib
 from nowcast.workers import download_results
 
 
-@patch('nowcast.workers.download_results.NowcastWorker')
+@patch(
+    'nowcast.workers.download_results.NowcastWorker',
+    spec=nemo_nowcast.NowcastWorker
+)
 class TestMain:
     """Unit tests for main() function.
     """
@@ -51,7 +57,8 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         expected = {
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2', 'hindcast'
+            'nowcast', 'nowcast-green', 'forecast', 'forecast2', 'hindcast',
+            'nowcast-agrif'
         }
         assert kwargs['choices'] == expected
         assert 'help' in kwargs
@@ -76,47 +83,60 @@ class TestMain:
 @pytest.mark.parametrize(
     'run_type, host_name', [
         ('nowcast', 'west.cloud-nowcast'),
-        ('nowcast-green', 'salish-nowcast'),
+        ('nowcast-green', 'west.cloud-nowcast'),
         ('forecast', 'west.cloud-nowcast'),
         ('forecast2', 'west.cloud-nowcast'),
-        ('hindcast', 'cedar-nowcast'),
+        ('hindcast', 'cedar-hindcast'),
+        ('nowcast-agrif', 'orcinus-nowcast-agrif'),
     ]
 )
+@patch('nowcast.workers.download_results.logger', autospec=logging.Logger)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, run_type, host_name):
-        parsed_args = Mock(host_name=host_name, run_type=run_type)
-        with patch('nowcast.workers.download_results.logger') as m_logger:
-            download_results.success(parsed_args)
+    def test_success_log_info(self, m_logger, run_type, host_name):
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get('2017-12-24')
+        )
+        download_results.success(parsed_args)
         assert m_logger.info.called
         assert m_logger.info.call_args[1]['extra']['run_type'] == run_type
         assert m_logger.info.call_args[1]['extra']['host_name'] == host_name
 
-    def test_success_msg_type(self, run_type, host_name):
-        parsed_args = Mock(host_name=host_name, run_type=run_type)
-        with patch('nowcast.workers.download_results.logger'):
-            msg_typ = download_results.success(parsed_args)
+    def test_success_msg_type(self, m_logger, run_type, host_name):
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get('2017-12-24')
+        )
+        msg_typ = download_results.success(parsed_args)
         assert msg_typ == 'success {}'.format(run_type)
 
 
 @pytest.mark.parametrize(
     'run_type, host_name', [
         ('nowcast', 'west.cloud-nowcast'),
-        ('nowcast-green', 'salish-nowcast'),
+        ('nowcast-green', 'west.cloud-nowcast'),
         ('forecast', 'west.cloud-nowcast'),
         ('forecast2', 'west.cloud-nowcast'),
-        ('hindcast', 'cedar-nowcast'),
+        ('hindcast', 'cedar-hindcast'),
+        ('nowcast-agrif', 'orcinus-nowcast-agrif'),
     ]
 )
-@patch('nowcast.workers.download_results.logger')
+@patch('nowcast.workers.download_results.logger', autospec=logging.Logger)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
     def test_failure_log_critical(self, m_logger, run_type, host_name):
-        parsed_args = Mock(host_name=host_name, run_type=run_type)
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get('2017-12-24')
+        )
         download_results.failure(parsed_args)
         assert m_logger.critical.called
         assert m_logger.critical.call_args[1]['extra']['run_type'] == run_type
@@ -124,6 +144,241 @@ class TestFailure:
                                                        ] == host_name
 
     def test_failure_msg_type(self, m_logger, run_type, host_name):
-        parsed_args = Mock(run_type=run_type, host_name=host_name)
+        parsed_args = SimpleNamespace(
+            run_type=run_type,
+            host_name=host_name,
+            run_date=arrow.get('2017-12-24')
+        )
         msg_typ = download_results.failure(parsed_args)
         assert msg_typ == 'failure {}'.format(run_type)
+
+
+@patch('nowcast.workers.download_results.logger', autospec=logging.Logger)
+@patch(
+    'nowcast.workers.download_results.lib.run_in_subprocess',
+    autospec=nowcast.lib.run_in_subprocess
+)
+@patch(
+    'nowcast.workers.download_results.lib.fix_perms',
+    autospec=nowcast.lib.fix_perms
+)
+class TestDownloadResults:
+    """Unit tests for download_results() function.
+    """
+
+    config = {
+        'file group': 'sallen',
+        'results archive': {
+            'nowcast': 'SalishSea/nowcast',
+            'nowcast-green': 'SalishSea/nowcast-green',
+            'forecast': 'SalishSea/forecast',
+            'forecast2': 'SalishSea/forecast2',
+            'nowcast-agrif': 'SalishSea/nowcast-agrif',
+            'hindcast': 'SalishSea/hindcast',
+        },
+        'run': {
+            'enabled hosts': {
+                'west.cloud-nowcast': {
+                    'run types': {
+                        'nowcast': {
+                            'results': 'SalishSea/nowcast'
+                        },
+                        'nowcast-green': {
+                            'results': 'SalishSea/nowcast-green'
+                        },
+                        'forecast': {
+                            'results': 'SalishSea/forecast'
+                        },
+                        'forecast2': {
+                            'results': 'SalishSea/forecast2'
+                        },
+                    },
+                },
+                'orcinus-nowcast-agrif': {
+                    'run types': {
+                        'nowcast-agrif': {
+                            'results': 'SalishSea/nowcast-agrif'
+                        },
+                    },
+                },
+            },
+            'hindcast hosts': {
+                'cedar-hindcast': {
+                    'run types': {
+                        'hindcast': {
+                            'results': 'SalishSea/hindcast'
+                        },
+                    },
+                },
+            }
+        }
+    }
+
+    @pytest.mark.parametrize(
+        'run_type', [
+            'nowcast',
+            'nowcast-green',
+            'forecast',
+            'forecast2',
+            'hindcast',
+            'nowcast-agrif',
+        ]
+    )
+    def test_unrecognized_host(
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type
+    ):
+        parsed_args = SimpleNamespace(
+            host_name='foo',
+            run_type=run_type,
+            run_date=arrow.get('2018-05-22')
+        )
+        config = {}
+        with pytest.raises(nemo_nowcast.WorkerError):
+            download_results.download_results(parsed_args, config)
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('nowcast', 'west.cloud-nowcast'),
+            ('nowcast-green', 'west.cloud-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+            ('forecast2', 'west.cloud-nowcast'),
+            ('hindcast', 'cedar-hindcast'),
+            ('nowcast-agrif', 'orcinus-nowcast-agrif'),
+        ]
+    )
+    def test_scp_subprocess(
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+    ):
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get('2018-05-22')
+        )
+        download_results.download_results(parsed_args, self.config)
+        m_run_in_subproc.assert_called_once_with(
+            shlex.split(
+                f'scp -pr {host_name}:SalishSea/{run_type}/22may18 SalishSea/{run_type}'
+            ), m_logger.debug, m_logger.error
+        )
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('nowcast', 'west.cloud-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+            ('forecast2', 'west.cloud-nowcast'),
+        ]
+    )
+    def test_unlink_fvcom_boundary_files(
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+    ):
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get('2018-05-22')
+        )
+        m_fvcom_t = Mock(name='FVCOM_T.nc')
+        m_fvcom_u = Mock(name='FVCOM_U.nc')
+        m_fvcom_v = Mock(name='FVCOM_V.nc')
+        p_glob = patch(
+            'nowcast.workers.download_results.Path.glob',
+            side_effect=[[m_fvcom_t, m_fvcom_u, m_fvcom_v], [], [], []]
+        )
+        with p_glob:
+            download_results.download_results(parsed_args, self.config)
+        assert m_fvcom_t.unlink.called
+        assert m_fvcom_u.unlink.called
+        assert m_fvcom_v.unlink.called
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('nowcast', 'west.cloud-nowcast'),
+            ('nowcast-green', 'west.cloud-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+            ('forecast2', 'west.cloud-nowcast'),
+            ('hindcast', 'cedar-hindcast'),
+            ('nowcast-agrif', 'orcinus-nowcast-agrif'),
+        ]
+    )
+    @patch(
+        'nowcast.workers.download_results.lib.FilePerms',
+        autospec=nowcast.lib.FilePerms
+    )
+    def test_results_dir_fix_perms(
+        self, m_file_perms, m_fix_perms, m_run_in_subproc, m_logger, run_type,
+        host_name
+    ):
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get('2018-05-22')
+        )
+        download_results.download_results(parsed_args, self.config)
+        assert m_fix_perms.call_args_list[0][0] == (
+            Path('SalishSea', run_type, '22may18'),
+        )
+        assert m_fix_perms.call_args_list[0][1] == {
+            'mode': m_file_perms(user='rwx', group='rwx', other='rx'),
+            'grp_name': 'sallen'
+        }
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('nowcast', 'west.cloud-nowcast'),
+            ('nowcast-green', 'west.cloud-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+            ('forecast2', 'west.cloud-nowcast'),
+            ('hindcast', 'cedar-hindcast'),
+            ('nowcast-agrif', 'orcinus-nowcast-agrif'),
+        ]
+    )
+    def test_results_files_fix_perms(
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+    ):
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get('2018-05-22')
+        )
+        p_glob = patch(
+            'nowcast.workers.download_results.Path.glob',
+            side_effect=[[], [Path('namelist_cfg')], [], []]
+        )
+        with p_glob:
+            download_results.download_results(parsed_args, self.config)
+        assert m_fix_perms.call_args_list[1][0] == (Path('namelist_cfg'),)
+        assert m_fix_perms.call_args_list[1][1] == {'grp_name': 'sallen'}
+
+    @pytest.mark.parametrize(
+        'run_type, host_name', [
+            ('nowcast', 'west.cloud-nowcast'),
+            ('nowcast-green', 'west.cloud-nowcast'),
+            ('forecast', 'west.cloud-nowcast'),
+            ('forecast2', 'west.cloud-nowcast'),
+            ('hindcast', 'cedar-hindcast'),
+            ('nowcast-agrif', 'orcinus-nowcast-agrif'),
+        ]
+    )
+    def test_checklist(
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+    ):
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get('2018-05-22')
+        )
+        p_glob = patch(
+            'nowcast.workers.download_results.Path.glob',
+            side_effect=[[], [],
+                         [Path('Salishsea_1h_20180522_20180522_grid_T.nc')],
+                         [Path('Salishsea_1d_20180522_20180522_grid_T.nc')]]
+        )
+        with p_glob:
+            checklist = download_results.download_results(
+                parsed_args, self.config
+            )
+        assert checklist == {
+            run_type: {
+                '1h': ['Salishsea_1h_20180522_20180522_grid_T.nc'],
+                '1d': ['Salishsea_1d_20180522_20180522_grid_T.nc'],
+            }
+        }

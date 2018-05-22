@@ -1184,13 +1184,38 @@ class TestAfterWatchNEMO_AGRIF:
     @pytest.mark.parametrize('msg_type', [
         'crash',
         'failure',
-        'success',
     ])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_NEMO_agrif(
             Message('warch_NEMO_agrif', msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_NEMO_agrif', 'success', {
+                    'nowcast-agrif': {
+                        'host': 'orcinus',
+                        'job id': '9305855',
+                        'run date': '2018-05-22',
+                        'completed': True
+                    }
+                }
+            ),
+        ]
+    )
+    def test_success_launch_download_results(self, msg, config, checklist):
+        workers = next_workers.after_watch_NEMO_agrif(msg, config, checklist)
+        expected = NextWorker(
+            'nowcast.workers.download_results',
+            args=[
+                msg.payload['nowcast-agrif']['host'], 'nowcast-agrif',
+                '--run-date', msg.payload['nowcast-agrif']['run date']
+            ],
+            host='localhost'
+        )
+        assert expected in workers
 
 
 class TestAfterMakeFVCOMBoundary:
@@ -1656,6 +1681,8 @@ class TestAfterDownloadResults:
             'failure forecast',
             'failure forecast2',
             'failure hindcast',
+            'failure nowcast-agrif',
+            'success nowcast-agrif',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
