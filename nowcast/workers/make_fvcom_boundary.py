@@ -145,10 +145,6 @@ def make_fvcom_boundary(parsed_args, config, *args):
     fvcom_nest_ref_line_file = Path(
         config['vhfr fvcom runs']['nemo coupling']['fvcom nest ref line file']
     )
-    nemo_bdy_dir = Path(
-        config['vhfr fvcom runs']['run types'][run_type]
-        ['nemo boundary results']
-    )
     (
         x, y, z, tri, nsiglev, siglev, nsiglay, siglay, nemo_lon, nemo_lat,
         e1t, e2t, e3u_0, e3v_0, gdept_0, gdepw_0, gdepu, gdepv, tmask, umask,
@@ -185,6 +181,21 @@ def make_fvcom_boundary(parsed_args, config, *args):
         'forecast': timedelta(hours=60),
     }
     time_end = run_date + time_end_offsets[run_type]
+    nemo_files_list = [
+        os.path.join(
+            config['vhfr fvcom runs']['run types']['nowcast']
+            ['nemo boundary results'],
+            run_date.format('DDMMMYY').lower(), 'FVCOM_T.nc'
+        )
+    ]
+    if run_type == 'forecast':
+        nemo_files_list.append(
+            os.path.join(
+                config['vhfr fvcom runs']['run types']['forecast']
+                ['nemo boundary results'],
+                run_date.format('DDMMMYY').lower(), 'FVCOM_T.nc'
+            )
+        )
     bdy_file_date = run_date if run_type == 'nowcast' else run_date.replace(
         days=+1
     )
@@ -216,8 +227,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
         e2t=e2t,
         e3u_0=e3u_0,
         e3v_0=e3v_0,
-        input_dir=os.fspath(nemo_bdy_dir),
-        nemo_file_pattern='FVCOM_*',
+        nemo_file_list=nemo_files_list,
         time_start=time_start.format('YYYY-MM-DD HH:mm:ss'),
         time_end=time_end.format('YYYY-MM-DD HH:mm:ss'),
         ua_name='ubarotropic',
