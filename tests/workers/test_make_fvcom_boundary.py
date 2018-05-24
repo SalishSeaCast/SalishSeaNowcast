@@ -290,14 +290,22 @@ class TestMakeFVCOMBoundary:
         )
 
     @pytest.mark.parametrize(
-        'run_type, time_start, time_end', [
-            ('nowcast', '2018-01-08 00:00:00', '2018-01-09 00:00:00'),
-            ('forecast', '2018-01-09 00:00:00', '2018-01-10 12:00:00'),
+        'run_type, time_start, time_end, nemo_file_list', [
+            (
+                'nowcast', '2018-01-08 00:00:00', '2018-01-09 00:00:00',
+                ['SalishSea/nowcast/08jan18/FVCOM_T.nc']
+            ),
+            (
+                'forecast', '2018-01-09 00:00:00', '2018-01-10 12:00:00', [
+                    'SalishSea/nowcast/08jan18/FVCOM_T.nc',
+                    'SalishSea/forecast/08jan18/FVCOM_T.nc'
+                ]
+            ),
         ]
     )
     def test_nesting_make_type3_nesting_file2(
         self, m_mk_nest_file2, m_read_nesting, m_read_metrics, m_logger,
-        run_type, time_start, time_end
+        run_type, time_start, time_end, nemo_file_list
     ):
         parsed_args = SimpleNamespace(
             host_name='west.cloud',
@@ -333,8 +341,7 @@ class TestMakeFVCOMBoundary:
             e2t='e2t',
             e3u_0='e3u_0',
             e3v_0='e3v_0',
-            input_dir=f'SalishSea/{run_type}',
-            nemo_file_pattern='FVCOM_*',
+            nemo_file_list=nemo_file_list,
             time_start=time_start,
             time_end=time_end,
             ua_name='ubarotropic',
