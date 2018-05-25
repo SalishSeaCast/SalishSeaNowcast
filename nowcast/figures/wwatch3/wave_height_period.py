@@ -31,6 +31,7 @@ import matplotlib.pyplot as plt
 import moad_tools.observations
 import moad_tools.places
 import requests
+from retrying import retry
 import xarray
 
 import nowcast.figures.website_theme
@@ -103,6 +104,7 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
     )
 
 
+@retry(wait_fixed=2000, stop_max_attempt_number=10)
 def _get_wwatch3_fields(dataset_url):
     ## TODO: This is a work-around because neither netCDF4 nor xarray are able
     ## to load the dataset directly from the URL due to an OpenDAP issue
