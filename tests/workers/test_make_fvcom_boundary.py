@@ -292,11 +292,14 @@ class TestMakeFVCOMBoundary:
     @pytest.mark.parametrize(
         'run_type, time_start, time_end, nemo_file_list', [
             (
-                'nowcast', '2018-01-08 00:00:00', '2018-01-09 00:00:00',
-                ['SalishSea/nowcast/08jan18/FVCOM_T.nc']
+                'nowcast', '2018-01-08 00:00:00', '2018-01-09 00:00:00', [
+                    'SalishSea/nowcast/07jan18/FVCOM_T.nc',
+                    'SalishSea/nowcast/08jan18/FVCOM_T.nc'
+                ]
             ),
             (
                 'forecast', '2018-01-09 00:00:00', '2018-01-10 12:00:00', [
+                    'SalishSea/nowcast/07jan18/FVCOM_T.nc',
                     'SalishSea/nowcast/08jan18/FVCOM_T.nc',
                     'SalishSea/forecast/08jan18/FVCOM_T.nc'
                 ]
