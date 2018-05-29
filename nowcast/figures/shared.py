@@ -373,9 +373,9 @@ def interpolate_tracer_to_depths(
     return depth_interp(interp_depths)
 
 
-def localize_time(data_array):
-    """Offset DataArray times to account for local time zone difference from
-    UTC and add :kbd:`tz_name` attribute to DataArray.
+def localize_time(data_array, time_coord='time'):
+    """Offset DataArray for Dataset times to account for local time zone
+    difference from UTC and add :kbd:`tz_name` attribute to DataArray.
 
     .. note::
         This function is intended for use just before presentation/output
@@ -384,13 +384,17 @@ def localize_time(data_array):
 
     :param data_array: Data array object to adjust time values of.
     :type data_array: :py:class:`xarray.DataArray` or :py:class:`xarray.Dataset`
+
+    :param str time_coord: Name of the time coordinate.
     """
-    local_datetime = arrow.get(str(data_array.time[0].values)).to('local')
+    local_datetime = arrow.get(str(getattr(data_array,
+                                           time_coord)[0].values)).to('local')
     tz_offset = local_datetime.tzinfo.utcoffset(local_datetime.datetime)
     tz_name = local_datetime.tzinfo.tzname(local_datetime.datetime)
     numpy_offset = (
         np.timedelta64(tz_offset.days, 'D') +
         np.timedelta64(tz_offset.seconds, 's')
     )
-    data_array['time'] = data_array.time.values + numpy_offset
+    data_array[time_coord
+               ] = (getattr(data_array, time_coord).values + numpy_offset)
     data_array.attrs['tz_name'] = tz_name
