@@ -317,7 +317,7 @@ def _launch_run(ssh_client, host_name, run_id, prev_job_id, config):
         config['run']['hindcast hosts'][host_name]['scratch dir']
     )
     results_dir = scratch_dir / run_id[:7]
-    cmd = (f'{salishsea_cmd} run {run_desc} {results_dir} --no-deflate')
+    cmd = f'{salishsea_cmd} run {run_desc} {results_dir}'
     if prev_job_id:
         cmd = f'{cmd} --waitjob {prev_job_id} --nocheck-initial-conditions'
     try:

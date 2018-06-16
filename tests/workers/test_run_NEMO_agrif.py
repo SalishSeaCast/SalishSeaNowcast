@@ -394,6 +394,11 @@ class TestLaunchRun:
         run_dir, job_id = run_NEMO_agrif._launch_run(
             m_ssh_client, 'orcinus', run_id, self.config
         )
+        m_ssh_exec_cmd.assert_called_once_with(
+            m_ssh_client, f'/home/dlatorne/.local/bin/salishsea run '
+            f'nowcast-agrif-sys/runs/{run_id}.yaml '
+            f'scratch/nowcast-agrif/30apr18', 'orcinus', m_logger
+        )
         expected = (
             f'scratch/nowcast-agrif/{run_id}_2018-05-03T110532.335255-0700'
         )

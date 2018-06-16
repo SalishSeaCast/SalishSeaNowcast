@@ -464,7 +464,7 @@ class TestLaunchRun:
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            'bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 --no-deflate',
+            'bin/salishsea run runs/01may18hindcast.yaml scratch/01may18',
             'cedar', m_logger
         )
 
@@ -479,7 +479,7 @@ class TestLaunchRun:
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            'bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 --no-deflate '
+            'bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 '
             '--waitjob 12345678 --nocheck-initial-conditions', 'cedar',
             m_logger
         )
