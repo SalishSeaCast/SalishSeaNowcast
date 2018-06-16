@@ -327,7 +327,7 @@ def _launch_run(ssh_client, host_name, run_id, config):
         config['run']['enabled hosts'][host_name]['scratch dir']
     )
     results_dir = scratch_dir / run_id[:7]
-    cmd = f'{salishsea_cmd} run {run_desc} {results_dir} --no-deflate'
+    cmd = f'{salishsea_cmd} run {run_desc} {results_dir}'
     logger.debug(f'launching run on {host_name}: {cmd}')
     try:
         stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
