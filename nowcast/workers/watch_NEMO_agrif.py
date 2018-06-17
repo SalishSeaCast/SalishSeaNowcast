@@ -186,13 +186,10 @@ def _is_running(ssh_client, host_name, job_id, run_id, tmp_run_dir, run_info):
     :return: Flag indicating whether or not run is executing
     :rtype: boolean
     """
-    try:
-        queue_info = _get_queue_info(ssh_client, host_name, job_id)
-    except WorkerError:
-        # Job has disappeared from queue, so it has finished, crashed, or
-        # been terminated by the resource manager
-        return False
     state = 'UNKNOWN'
+    queue_info = _get_queue_info(
+        ssh_client, host_name, job_id, ignore_unknown_job=True
+    )
     for line in queue_info.splitlines():
         if line.strip().startswith('job_state'):
             state = line.split()[2]
@@ -227,11 +224,12 @@ def _is_running(ssh_client, host_name, job_id, run_id, tmp_run_dir, run_info):
     return True
 
 
-def _get_queue_info(ssh_client, host_name, job_id):
+def _get_queue_info(ssh_client, host_name, job_id, ignore_unknown_job=False):
     """
     :param :py:class:`paramiko.client.SSHClient` ssh_client:
     :param str host_name:
     :param str job_id:
+    :param boolean ignore_unknown_job:
 
     :return: Output from TORQUE/MOAB qstat command that describes the run's
              state
@@ -243,6 +241,9 @@ def _get_queue_info(ssh_client, host_name, job_id):
             host_name, logger
         )
     except ssh_sftp.SSHCommandError as exc:
+        if ignore_unknown_job:
+            if exc.stderr == f'qstat: Unknown Job Id {job_id}.orca2.ibb\n':
+                return 'job_state = UNKNOWN\n'
         for line in exc.stderr.splitlines():
             logger.error(line)
         raise WorkerError

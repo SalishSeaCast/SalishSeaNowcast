@@ -225,7 +225,7 @@ class TestIsRunning:
     """
 
     def test_job_not_on_queue(self, m_get_queue_info, m_logger):
-        m_get_queue_info.side_effect = nemo_nowcast.WorkerError
+        m_get_queue_info.return_value = 'job_state = UNKNOWN\n'
         ssh_client = Mock(name='ssh_client')
         run_info = SimpleNamespace(
             it000=2360881,
@@ -238,7 +238,7 @@ class TestIsRunning:
             Path('tmp_run_dir'), run_info
         )
         m_get_queue_info.assert_called_once_with(
-            ssh_client, 'orcinus', '9305855'
+            ssh_client, 'orcinus', '9305855', ignore_unknown_job=True
         )
         assert not is_running
 
@@ -270,7 +270,7 @@ class TestIsRunning:
             Path('tmp_run_dir'), run_info
         )
         m_get_queue_info.assert_called_once_with(
-            ssh_client, 'orcinus', '9305855'
+            ssh_client, 'orcinus', '9305855', ignore_unknown_job=True
         )
         if expected:
             assert m_logger.info.called
@@ -301,7 +301,7 @@ class TestIsRunning:
             Path('tmp_run_dir'), run_info
         )
         m_get_queue_info.assert_called_once_with(
-            ssh_client, 'orcinus', '9305855'
+            ssh_client, 'orcinus', '9305855', ignore_unknown_job=True
         )
         assert m_logger.info.called
         assert is_running
@@ -341,6 +341,20 @@ class TestGetQueueInfo:
             watch_NEMO_agrif._get_queue_info(
                 m_ssh_client, 'orcinus', '9305855'
             )
+
+    @patch(
+        'nowcast.workers.watch_NEMO_agrif.ssh_sftp.ssh_exec_command',
+        side_effect=nowcast.ssh_sftp.SSHCommandError(
+            'cmd', 'stdout', 'qstat: Unknown Job Id 9305855.orca2.ibb\n'
+        ),
+        autospec=True
+    )
+    def test_ignore_unknown_job(self, m_ssh_exec_cmd, m_logger):
+        m_ssh_client = Mock(name='ssh_client')
+        stdout = watch_NEMO_agrif._get_queue_info(
+            m_ssh_client, 'orcinus', '9305855', ignore_unknown_job=True
+        )
+        assert stdout == 'job_state = UNKNOWN\n'
 
 
 @patch('nowcast.workers.watch_NEMO_agrif.logger', autospec=True)
