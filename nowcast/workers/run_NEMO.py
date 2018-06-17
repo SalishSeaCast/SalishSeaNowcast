@@ -322,6 +322,13 @@ def _run_description(
         'bfr_coef.nc': {
             'link to': os.fspath(bottom_friction_mask)
         },
+        'grid': {
+            'link to': os.fspath((run_prep_dir / 'grid/').resolve())
+        },
+        'rivers-climatology': {
+            'link to':
+                os.fspath((run_prep_dir / 'rivers-climatology/').resolve())
+        },
     }
     run_sets_dir = Path(host_config['run types'][run_type]['run sets dir'])
     namelists = {

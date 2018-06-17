@@ -777,12 +777,57 @@ class TestRunDescription:
             ('west.cloud', 'nowcast', 'ssh', 'ssh'),
             ('west.cloud', 'nowcast', 'tides', 'tides'),
             ('west.cloud', 'nowcast', 'tracers', 'tracers'),
+            ('west.cloud', 'nowcast', 'LiveOcean', 'LiveOcean'),
             ('west.cloud', 'nowcast', 'rivers', 'rivers'),
-            ('west.cloud', 'forecast', 'NEMO-atmos', 'NEMO-atmos'),
+            ('west.cloud', 'nowcast', 'grid', 'grid'),
+            (
+                'west.cloud', 'nowcast', 'rivers-climatology',
+                'rivers-climatology'
+            ),
+            ('west.cloud', 'nowcast-green', 'NEMO-atmos', 'NEMO-atmos'),
+            ('west.cloud', 'nowcast-green', 'ssh', 'ssh'),
+            ('west.cloud', 'nowcast-green', 'tides', 'tides'),
             ('west.cloud', 'nowcast-green', 'tracers', 'tracers'),
+            ('west.cloud', 'nowcast-green', 'LiveOcean', 'LiveOcean'),
+            ('west.cloud', 'nowcast-green', 'rivers', 'rivers'),
+            ('west.cloud', 'nowcast-green', 'grid', 'grid'),
+            (
+                'west.cloud', 'nowcast-green', 'rivers-climatology',
+                'rivers-climatology'
+            ),
+            ('salish-nowcast', 'nowcast-dev', 'NEMO-atmos', 'NEMO-atmos'),
+            ('salish-nowcast', 'nowcast-dev', 'ssh', 'ssh'),
             ('salish-nowcast', 'nowcast-dev', 'tides', 'tides'),
+            ('salish-nowcast', 'nowcast-dev', 'tracers', 'tracers'),
             ('salish-nowcast', 'nowcast-dev', 'LiveOcean', 'LiveOcean'),
+            ('salish-nowcast', 'nowcast-dev', 'rivers', 'rivers'),
+            ('salish-nowcast', 'nowcast-dev', 'grid', 'grid'),
+            (
+                'salish-nowcast', 'nowcast-dev', 'rivers-climatology',
+                'rivers-climatology'
+            ),
+            ('west.cloud', 'forecast', 'NEMO-atmos', 'NEMO-atmos'),
+            ('west.cloud', 'forecast', 'ssh', 'ssh'),
+            ('west.cloud', 'forecast', 'tides', 'tides'),
+            ('west.cloud', 'forecast', 'tracers', 'tracers'),
+            ('west.cloud', 'forecast', 'LiveOcean', 'LiveOcean'),
+            ('west.cloud', 'forecast', 'rivers', 'rivers'),
+            ('west.cloud', 'forecast', 'grid', 'grid'),
+            (
+                'west.cloud', 'forecast', 'rivers-climatology',
+                'rivers-climatology'
+            ),
+            ('west.cloud', 'forecast2', 'NEMO-atmos', 'NEMO-atmos'),
+            ('west.cloud', 'forecast2', 'ssh', 'ssh'),
+            ('west.cloud', 'forecast2', 'tides', 'tides'),
+            ('west.cloud', 'forecast2', 'tracers', 'tracers'),
+            ('west.cloud', 'forecast2', 'LiveOcean', 'LiveOcean'),
             ('west.cloud', 'forecast2', 'rivers', 'rivers'),
+            ('west.cloud', 'forecast2', 'grid', 'grid'),
+            (
+                'west.cloud', 'forecast2', 'rivers-climatology',
+                'rivers-climatology'
+            ),
         ]
     )
     def test_forcing_links(
