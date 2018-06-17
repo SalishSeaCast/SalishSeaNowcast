@@ -490,12 +490,6 @@ run:
         bc dir: /nemoShare/MEOPAR/LiveOcean/
         # Directory on compute host where rivers runoff forcing files are stored
         rivers dir: /nemoShare/MEOPAR/rivers/
-        # Locations on compute host of rivers runoff monthly climatology files
-        rivers_month.nc: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_month_201702.nc
-        rivers_temp.nc: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc
-        # Directory on compute host where the rivers runoff daily tracers
-        # climatology files are stored
-        rivers bio dir: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/bio/
         # Directory on compute host where the Fraser River turbidity forcing
         # files are stored
         Fraser turbidity dir: /nemoShare/MEOPAR/rivers/river_turb/
@@ -503,11 +497,6 @@ run:
         bottom friction mask: /nemoShare/MEOPAR/nowcast-sys/grid/jetty_mask_bathy201702.nc
         # Directory on compute host where atmospheric forcing files are stored
         weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
-        # Location on compute host of no_snow.nc constraint file
-        no_snow.nc: /nemoShare/MEOPAR/nowcast-sys/grid/no_snow.nc
-        # Location on compute host of NEMO on-the-fly interpolation weights file
-        # for GEM 2.5km operational forecast
-        weights: /nemoShare/MEOPAR/nowcast-sys/grid/weights-gem2.5-ops_201702.nc
 
     salish-nowcast:
       shared storage: True
@@ -536,13 +525,8 @@ run:
         ssh dir: /results/forcing/sshNeahBay/
         bc dir: /results/forcing/LiveOcean/boundary_conditions/
         rivers dir: /results/forcing/rivers/
-        rivers_month.nc: /results/nowcast-sys/rivers-climatology/rivers_month_201702.nc
-        rivers_temp.nc: /results/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc
-        rivers bio dir: /results/nowcast-sys/rivers-climatology/bio/
         bottom friction mask: /results/nowcast-sys/grid/jetty_mask_bathy201702.nc
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
-        no_snow.nc: /results/nowcast-sys/grid/no_snow.nc
-        weights: /results/nowcast-sys/grid/weights-gem2.5-ops_201702.nc
 
     orcinus-nowcast-agrif:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
@@ -557,15 +541,10 @@ run:
           results: /global/scratch/dlatorne/nowcast-agrif/
       forcing:
         ssh dir: /home/sallen/MEOPAR/sshNeahBay/
+        bc dir: /home/sallen/MEOPAR/LiveOcean/
         rivers dir: /home/sallen/MEOPAR/rivers/
-        rivers_month.nc: /home/dlatorne/nowcast-agrif-sys/rivers-climatology/rivers_month_201702.nc
-        rivers_temp.nc: /home/dlatorne/nowcast-agrif-sys/rivers-climatology/rivers_ConsTemp_month.nc
-        rivers bio dir: /home/dlatorne/nowcast-agrif-sys/rivers-climatology/bio/
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
-        no_snow.nc: /home/dlatorne/nowcast-agrif-sys/grid/no_snow.nc
-        weights: /home/dlatorne/nowcast-agrif-sys/grid/weights-gem2.5-ops_201702.nc
-        bc dir: /home/sallen/MEOPAR/LiveOcean/
 
 
   hindcast hosts:

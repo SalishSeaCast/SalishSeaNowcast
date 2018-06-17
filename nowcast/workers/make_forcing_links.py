@@ -170,17 +170,6 @@ def _make_runoff_links(sftp_client, run_type, run_date, config, host_name):
     host_config = config['run']['enabled hosts'][host_name]
     run_prep_dir = Path(host_config['run prep dir'])
     _clear_links(sftp_client, run_prep_dir, 'rivers')
-    src = Path(host_config['forcing']['rivers_month.nc'])
-    dest = run_prep_dir / 'rivers' / src.name
-    _create_symlink(sftp_client, host_name, src, dest)
-    if 'rivers_temp.nc' in host_config['forcing']:
-        src = Path(host_config['forcing']['rivers_temp.nc'])
-        dest = run_prep_dir / 'rivers' / src.name
-        _create_symlink(sftp_client, host_name, src, dest)
-    if 'rivers bio dir' in host_config['forcing']:
-        src = Path(host_config['forcing']['rivers bio dir'])
-        dest = run_prep_dir / 'rivers' / 'bio'
-        _create_symlink(sftp_client, host_name, src, dest)
     for tmpl in config['rivers']['file templates'].values():
         src = Path(
             host_config['forcing']['rivers dir'],
@@ -206,10 +195,6 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
     run_prep_dir = Path(host_config['run prep dir'])
     _clear_links(sftp_client, run_prep_dir, 'NEMO-atmos/')
     NEMO_atmos_dir = run_prep_dir / 'NEMO-atmos'
-    for linkfile in 'no_snow.nc weights'.split():
-        src = Path(host_config['forcing'][linkfile])
-        dest = NEMO_atmos_dir / src.name
-        _create_symlink(sftp_client, host_name, src, dest)
     nowcast_runs = {'nowcast+', 'nowcast-green', 'nowcast-agrif'}
     weather_start = -1 if run_type in nowcast_runs else 0
     for day in range(weather_start, 3):
