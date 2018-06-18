@@ -923,33 +923,6 @@ class TestRunDescription:
         assert run_desc['restart'][link_name] == expected
 
     @pytest.mark.parametrize(
-        'host_name, run_type, link_name, expected', [
-            (
-                'west.cloud', 'nowcast', 'NEMO-atmos',
-                '/nowcast-sys/nowcast/NEMO-atmos'
-            ),
-        ]
-    )
-    def test_forcing_atmospheric_link_check(
-        self, host_name, run_type, link_name, expected, config, run_date,
-        tmp_results, tmpdir
-    ):
-        dmy = run_date.format('DDMMMYY').lower()
-        run_id = '{dmy}{run_type}'.format(dmy=dmy, run_type=run_type)
-        host_config = config['run']['enabled hosts'][host_name]
-        p_config_results = patch.dict(
-            host_config['run types'][run_type],
-            results=str(tmp_results['results'][run_type])
-        )
-        with p_config_results:
-            run_desc = run_NEMO._run_description(
-                run_date, run_type, run_id, 2160, host_name, config
-            )
-        check_link_dict = run_desc['forcing'][link_name]['check link']
-        assert check_link_dict['type'] == 'atmospheric'
-        assert check_link_dict['namelist filename'] == 'namelist_cfg'
-
-    @pytest.mark.parametrize(
         'host_name, run_type', [
             ('west.cloud', 'nowcast'),
             ('west.cloud', 'nowcast-green'),
