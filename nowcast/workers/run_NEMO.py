@@ -299,10 +299,6 @@ def _run_description(
     forcing = {
         'NEMO-atmos': {
             'link to': os.fspath((run_prep_dir / 'NEMO-atmos').resolve()),
-            'check link': {
-                'type': 'atmospheric',
-                'namelist filename': 'namelist_cfg',
-            }
         },
         'ssh': {
             'link to': os.fspath((run_prep_dir / 'ssh/').resolve())
