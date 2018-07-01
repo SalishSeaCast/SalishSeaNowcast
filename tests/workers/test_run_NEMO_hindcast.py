@@ -307,12 +307,20 @@ class TestEditNamelistTime:
             'hindcast-sys/runs/namelist.time', '/tmp/hindcast.namelist.time'
         )
 
-    def test_patch_namelist_time(self, m_patch, m_logger):
+    @pytest.mark.parametrize(
+        'run_date, itend',
+        [
+            (arrow.get('2018-02-01'), 2784240),  # 31 day month
+            (arrow.get('2018-03-01'), 2777760),  # February
+            (arrow.get('2016-03-01'), 2779920),  # leap year
+            (arrow.get('2018-05-01'), 2782080),  # 30 day month
+        ]
+    )
+    def test_patch_namelist_time(self, m_patch, m_logger, run_date, itend):
         sftp_client = Mock(name='sftp_client')
         prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
-            sftp_client, 'cedar', prev_namelist_info, arrow.get('2018-02-01'),
-            self.config
+            sftp_client, 'cedar', prev_namelist_info, run_date, self.config
         )
         m_patch.assert_called_once_with(
             '/tmp/hindcast.namelist.time', {
@@ -320,11 +328,11 @@ class TestEditNamelistTime:
                     'nn_it000':
                         2717280 + 1,
                     'nn_itend':
-                        2777760,
+                        itend,
                     'nn_date0':
-                        20180201,
+                        int(run_date.format('YYYYMMDD')),
                     'nn_stocklist': [
-                        2738880, 2760480, 2777760, 0, 0, 0, 0, 0, 0, 0
+                        2738880, 2760480, itend, 0, 0, 0, 0, 0, 0, 0
                     ],
                 }
             }, '/tmp/patched_hindcast.namelist.time'
