@@ -213,10 +213,10 @@ def _edit_namelist_time(
     :param :py:class:`paramiko.sftp_client.SFTPClient` sftp_client:
     :param str host_name:
     :param :py:class:`types.SimpleNamespace` prev_namelist_info:
-    :param :py:class:`arrow.Arrow` prev_run_date:
+    :param :py:class:`arrow.Arrow` run_date:
     :param :py:class:`nemo_nowcast.Config` config:
     """
-    run_days = (run_date.replace(months=+1) - run_date).days
+    run_days = (run_date - run_date.replace(months=-1)).days
     timesteps_per_day = 24 * 60 * 60 / prev_namelist_info.rdt
     itend = prev_namelist_info.itend + run_days * timesteps_per_day
     patch = {
