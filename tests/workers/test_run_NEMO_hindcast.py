@@ -14,6 +14,7 @@
 # limitations under the License.
 """Unit tests for SalishSeaCast run_NEMO_hindcast worker.
 """
+import datetime
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch, call, Mock
@@ -133,6 +134,27 @@ class TestRunNEMO_Hindcast:
             }
         }
     }
+
+    def test_checklist_run_date_in_future(
+        self, m_launch_run, m_edit_run_desc, m_edit_namelist_time,
+        m_get_prev_run_namelist_info, m_get_prev_run_queue_info, m_sftp,
+        m_logger
+    ):
+        parsed_args = SimpleNamespace(
+            host_name='cedar', prev_run_date=arrow.get('2018-06-01')
+        )
+        with patch('nowcast.workers.run_NEMO_hindcast.arrow.now') as m_now:
+            m_now.return_value = arrow.get('2018-07-01')
+            checklist = run_NEMO_hindcast.run_NEMO_hindcast(
+                parsed_args, self.config
+            )
+        expected = {
+            'hindcast': {
+                'host': 'cedar',
+                'run id': 'None',
+            }
+        }
+        assert checklist == expected
 
     def test_checklist_with_prev_run_date(
         self, m_launch_run, m_edit_run_desc, m_edit_namelist_time,
