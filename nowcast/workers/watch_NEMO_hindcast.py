@@ -183,8 +183,7 @@ def _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id):
     """
     try:
         stdout = ssh_sftp.ssh_exec_command(
-            ssh_client, f'ssh {host_name} ls -d {scratch_dir/run_id}*',
-            host_name, logger
+            ssh_client, f'ls -d {scratch_dir/run_id}*', host_name, logger
         )
     except ssh_sftp.SSHCommandError as exc:
         for line in exc.stderr.splitlines():
@@ -221,8 +220,7 @@ def _is_running(
         return False
     try:
         stdout = ssh_sftp.ssh_exec_command(
-            ssh_client, f'ssh {host_name} cat {tmp_run_dir}/time.step',
-            host_name, logger
+            ssh_client, f'cat {tmp_run_dir}/time.step', host_name, logger
         )
     except ssh_sftp.SSHCommandError as exc:
         logger.info(
@@ -288,16 +286,14 @@ def _get_queue_info(ssh_client, host_name, users, job_id=None):
              the run's state
     :rtype: str
     """
-    squeue_cmd = (
-        f'ssh {host_name} /opt/software/slurm/bin/squeue --user {users}'
-    )
+    squeue_cmd = f'/opt/software/slurm/bin/squeue --user {users}'
     queue_info_format = '--Format "jobid,name,state,reason,starttime"'
     cmd = (
         f'{squeue_cmd} {queue_info_format}' if job_id is None else
         f'{squeue_cmd} --job {job_id} {queue_info_format}'
     )
     try:
-        stdout = ssh_client.exec_command(cmd)
+        stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
     except ssh_sftp.SSHCommandError as exc:
         for line in exc.stderr.splitlines():
             logger.error(line)
