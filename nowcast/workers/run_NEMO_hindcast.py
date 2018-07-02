@@ -111,7 +111,17 @@ def run_NEMO_hindcast(parsed_args, config, *args):
         else:
             prev_run_date = arrow.get(parsed_args.prev_run_date)
             prev_job_id = None
-        run_date = prev_run_date.replace(months=+1)
+        run_date = prev_run_date.shift(months=+1)
+        if run_date.naive >= arrow.now().floor('day').naive:
+            sftp_client.close()
+            ssh_client.close()
+            checklist = {
+                'hindcast': {
+                    'host': host_name,
+                    'run id': 'None',
+                }
+            }
+            return checklist
         prev_namelist_info = _get_prev_run_namelist_info(
             ssh_client, sftp_client, host_name, prev_run_date, config
         )
