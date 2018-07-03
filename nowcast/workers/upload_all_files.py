@@ -122,7 +122,7 @@ def upload_all_files(host_name, run_date, config):
     # Neah Bay sea surface height
     for day in range(-1, 2):
         filename = config['ssh']['file template'].format(
-            run_date.replace(days=day).date()
+            run_date.shift(days=day).date()
         )
         dest_dir = 'obs' if day == -1 else 'fcst'
         localpath = os.path.join(config['ssh']['ssh_dir'], dest_dir, filename)
@@ -146,14 +146,14 @@ def upload_all_files(host_name, run_date, config):
             upload_file(sftp_client, host_name, localpath, remotepath)
     # Rivers runoff
     for tmpl in config['rivers']['file templates'].values():
-        filename = tmpl.format(run_date.replace(days=-1).date())
+        filename = tmpl.format(run_date.shift(days=-1).date())
         localpath = os.path.join(config['rivers']['rivers_dir'], filename)
         remotepath = os.path.join(host['rivers_dir'], filename)
         upload_file(sftp_client, host_name, localpath, remotepath)
     # Weather
     for day in range(-1, 2):
         filename = config['weather']['file template'].format(
-            run_date.replace(days=day).date()
+            run_date.shift(days=day).date()
         )
         dest_dir = '' if day <= 0 else 'fcst'
         localpath = os.path.join(
@@ -164,7 +164,7 @@ def upload_all_files(host_name, run_date, config):
     # Live Ocean Boundary Conditions
     for day in range(-1, 2):
         filename = config['temperature salinity']['file template'].format(
-            run_date.replace(days=day).date()
+            run_date.shift(days=day).date()
         )
         dest_dir = '' if day <= 0 else 'fcst'
         localpath = os.path.join(
@@ -176,7 +176,7 @@ def upload_all_files(host_name, run_date, config):
         upload_file(sftp_client, host_name, localpath, remotepath)
 
     # Restart File
-    prev_run_id = run_date.replace(days=-1).date()
+    prev_run_id = run_date.shift(days=-1).date()
     prev_run_dir = prev_run_id.strftime('%d%b%y').lower()
     local_dir = os.path.join(
         config['run']['results archive']['nowcast'], prev_run_dir

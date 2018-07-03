@@ -121,7 +121,7 @@ def run_NEMO_agrif(parsed_args, config, *args):
     try:
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
         prev_run_namelists_info = _get_prev_run_namelists_info(
-            sftp_client, host_name, run_date.replace(days=-1), config
+            sftp_client, host_name, run_date.shift(days=-1), config
         )
         _edit_namelist_times(
             sftp_client, host_name, prev_run_namelists_info, run_date, config
@@ -270,7 +270,7 @@ def _edit_run_desc(
         config['run']['enabled hosts'][host_name]['scratch dir']
     )
     prev_run_dir = scratch_dir / (
-        run_date.replace(days=-1).format('DDMMMYY').lower()
+        run_date.shift(days=-1).format('DDMMMYY').lower()
     )
     restart_file = (
         f'{prev_run_dir}/'

@@ -645,12 +645,12 @@ def _prep_publish_fig_functions(
     forecast_hrs = int(config['run types'][run_type]['duration'] * 24)
     grid_T_hr = _results_dataset('1h', 'grid_T', results_dir)
     start_day = {
-        'forecast': run_date.replace(days=+1).format('YYYYMMDD'),
-        'forecast2': run_date.replace(days=+2).format('YYYYMMDD'),
+        'forecast': run_date.shift(days=+1).format('YYYYMMDD'),
+        'forecast2': run_date.shift(days=+2).format('YYYYMMDD'),
     }
     end_day = {
-        'forecast': run_date.replace(days=+2).format('YYYYMMDD'),
-        'forecast2': run_date.replace(days=+3).format('YYYYMMDD'),
+        'forecast': run_date.shift(days=+2).format('YYYYMMDD'),
+        'forecast2': run_date.shift(days=+3).format('YYYYMMDD'),
     }
     grid_T_hr_path = (
         results_dir /
@@ -895,7 +895,7 @@ def _render_storm_surge_alerts_thumbnail(
     """
     now = arrow.now()
     today_dmy = now.format('DDMMMYY').lower()
-    yesterday_dmy = now.replace(days=-1).format('DDMMMYY').lower()
+    yesterday_dmy = now.shift(days=-1).format('DDMMMYY').lower()
     thumbnail_root = config['figures']['storm surge alerts thumbnail']
     if not all((
         plot_type == 'publish', svg_name == thumbnail_root,

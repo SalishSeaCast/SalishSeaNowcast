@@ -185,7 +185,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
         os.path.join(
             config['vhfr fvcom runs']['run types']['nowcast']
             ['nemo boundary results'],
-            run_date.replace(days=-1).format('DDMMMYY').lower(),
+            run_date.shift(days=-1).format('DDMMMYY').lower(),
             'FVCOM_T.nc'
         ),
         os.path.join(
@@ -202,7 +202,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
                 run_date.format('DDMMMYY').lower(), 'FVCOM_T.nc'
             )
         )
-    bdy_file_date = run_date if run_type == 'nowcast' else run_date.replace(
+    bdy_file_date = run_date if run_type == 'nowcast' else run_date.shift(
         days=+1
     )
     bdy_file = bdy_file_tmpl.format(

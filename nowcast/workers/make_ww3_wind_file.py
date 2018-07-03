@@ -101,7 +101,7 @@ def make_ww3_wind_file(parsed_args, config, *args):
         datasets.append(os.fspath(hrdps_file))
         logger.debug(f'dataset: {hrdps_file}')
         day_range = arrow.Arrow.range(
-            'day', run_date.replace(days=+1), run_date.replace(days=+2)
+            'day', run_date.shift(days=+1), run_date.shift(days=+2)
         )
         for day in day_range:
             hrdps_file = ((hrdps_dir / 'fcst') /
@@ -109,9 +109,7 @@ def make_ww3_wind_file(parsed_args, config, *args):
             datasets.append(os.fspath(hrdps_file))
             logger.debug(f'dataset: {hrdps_file}')
     else:
-        day_range = arrow.Arrow.range(
-            'day', run_date, run_date.replace(days=+2)
-        )
+        day_range = arrow.Arrow.range('day', run_date, run_date.shift(days=+2))
         for day in day_range:
             hrdps_file = ((hrdps_dir / 'fcst') /
                           hrdps_file_tmpl.format(day.datetime))

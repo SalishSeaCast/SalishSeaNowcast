@@ -60,7 +60,7 @@ def main():
     )
     worker.cli.add_date_option(
         '--data-date',
-        default=arrow.now().floor('day').replace(days=-1),
+        default=arrow.now().floor('day').shift(days=-1),
         help='UTC date to get ONC ferry data for.'
     )
     worker.run(get_onc_ferry, success, failure)

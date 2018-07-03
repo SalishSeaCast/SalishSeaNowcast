@@ -161,8 +161,8 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
         'nowcast': run_date,
         'nowcast-green': run_date,
         'nowcast-dev': run_date,
-        'forecast': run_date.replace(days=1),
-        'forecast2': run_date.replace(days=2),
+        'forecast': run_date.shift(days=1),
+        'forecast2': run_date.shift(days=2),
     }
     run_duration = config['run types'][run_type]['duration']
     host_config = config['run']['enabled hosts'][host_name]
@@ -194,7 +194,7 @@ def _update_time_namelist(
     }
     prev_run_type, date_offset = prev_runs[run_type]
     results_dir = Path(host_config['run types'][prev_run_type]['results'])
-    dmy = run_date.replace(days=date_offset).format('DDMMMYY').lower()
+    dmy = run_date.shift(days=date_offset).format('DDMMMYY').lower()
     prev_run_namelist = namelist2dict(
         os.fspath(results_dir / dmy / 'namelist_cfg')
     )
@@ -232,7 +232,7 @@ def _calc_new_namelist_lines(
         'forecast': 1,
         'forecast2': 2,
     }
-    new_date0 = run_date.replace(days=run_date_offset[run_type])
+    new_date0 = run_date.shift(days=run_date_offset[run_type])
     lines[date0_line] = lines[date0_line].replace(
         date0, new_date0.format('YYYYMMDD')
     )
@@ -270,11 +270,11 @@ def _run_description(
         raise WorkerError
     prev_run_dmys = {
         # run-type: previous run's ddmmmyy results directory name
-        'nowcast': run_date.replace(days=-1).format('DDMMMYY').lower(),
-        'nowcast-green': run_date.replace(days=-1).format('DDMMMYY').lower(),
-        'nowcast-dev': run_date.replace(days=-1).format('DDMMMYY').lower(),
-        'forecast': run_date.replace(days=-1).format('DDMMMYY').lower(),
-        'forecast2': run_date.replace(days=-2).format('DDMMMYY').lower(),
+        'nowcast': run_date.shift(days=-1).format('DDMMMYY').lower(),
+        'nowcast-green': run_date.shift(days=-1).format('DDMMMYY').lower(),
+        'nowcast-dev': run_date.shift(days=-1).format('DDMMMYY').lower(),
+        'forecast': run_date.shift(days=-1).format('DDMMMYY').lower(),
+        'forecast2': run_date.shift(days=-2).format('DDMMMYY').lower(),
     }
     restart_filepaths = {
         'restart.nc':

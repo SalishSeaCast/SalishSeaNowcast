@@ -1199,7 +1199,7 @@ def after_download_results(msg, config, checklist):
             )
             if run_type == 'nowcast':
                 run_date = (
-                    arrow.get(run_date).replace(days=-1).format('YYYY-MM-DD')
+                    arrow.get(run_date).shift(days=-1).format('YYYY-MM-DD')
                 )
                 next_workers[msg.type].append(
                     NextWorker(

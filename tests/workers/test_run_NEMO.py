@@ -174,25 +174,25 @@ def tmp_results(tmpdir, run_date, scope='function'):
         tmp_results.ensure(
             'SalishSea',
             run_type,
-            run_date.replace(days=-1).format('DDMMMYY').lower(),
+            run_date.shift(days=-1).format('DDMMMYY').lower(),
             'SalishSea_00002160_restart.nc'
         )
     tmp_results.ensure(
         'SalishSea',
         'forecast',
-        run_date.replace(days=-2).format('DDMMMYY').lower(),
+        run_date.shift(days=-2).format('DDMMMYY').lower(),
         'SalishSea_00002160_restart.nc'
     )
     tmp_results.ensure(
         'SalishSea',
         'forecast2',
-        run_date.replace(days=-2).format('DDMMMYY').lower(),
+        run_date.shift(days=-2).format('DDMMMYY').lower(),
         'SalishSea_00002160_restart.nc'
     )
     tmp_results.ensure(
         'SalishSea',
         'nowcast-green',
-        run_date.replace(days=-1).format('DDMMMYY').lower(),
+        run_date.shift(days=-1).format('DDMMMYY').lower(),
         'SalishSea_00002160_restart_trc.nc'
     )
     tmp_run_prep = tmp_results.ensure_dir('nowcast-sys', 'runs')

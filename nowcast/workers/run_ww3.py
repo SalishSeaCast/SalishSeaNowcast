@@ -172,7 +172,7 @@ def _create_symlinks(run_date, run_type, run_prep_path, run_dir_path, config):
     for target in ('mod_def.ww3', 'wind', 'current'):
         (run_dir_path / target).symlink_to(run_prep_path / target)
     results_path = Path(config['wave forecasts']['results'][run_type])
-    ddmmmyy = run_date.replace(days=-1).format('DDMMMYY').lower()
+    ddmmmyy = run_date.shift(days=-1).format('DDMMMYY').lower()
     prev_run_path = results_path / ddmmmyy
     (run_dir_path / 'restart.ww3').symlink_to(prev_run_path / 'restart001.ww3')
 
@@ -264,8 +264,8 @@ def _ww3_shel_contents(run_date, run_type):
     :rtype: str 
     """
     start_date = run_date.format('YYYYMMDD')
-    restart_date = run_date.replace(days=+1).format('YYYYMMDD')
-    end_date = run_date.replace(days=+2).format('YYYYMMDD')
+    restart_date = run_date.shift(days=+1).format('YYYYMMDD')
+    end_date = run_date.shift(days=+2).format('YYYYMMDD')
     end_time = '120000' if run_type == 'forecast' else '060000'
     contents = f'''$ WAVEWATCH III shell input file
 $
@@ -522,14 +522,14 @@ def _netcdf_output(run_date):
     :rtype: str 
     """
     start_yyyymmdd = run_date.format('YYYYMMDD')
-    end_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
+    end_yyyymmdd = run_date.shift(days=+2).format('YYYYMMDD')
     fields_files = ' '.join(
-        f'SoG_ww3_fields_{day.format("YYYYMMDD")}.nc' for day in
-        arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
+        f'SoG_ww3_fields_{day.format("YYYYMMDD")}.nc'
+        for day in arrow.Arrow.range('day', run_date, run_date.shift(days=+2))
     )
     points_files = ' '.join(
-        f'SoG_ww3_points_{day.format("YYYYMMDD")}_tab.nc' for day in
-        arrow.Arrow.range('day', run_date, run_date.replace(days=+2))
+        f'SoG_ww3_points_{day.format("YYYYMMDD")}_tab.nc'
+        for day in arrow.Arrow.range('day', run_date, run_date.shift(days=+2))
     )
     output_to_netcdf = (
         'echo "Starting netCDF4 fields output at $(date)" '

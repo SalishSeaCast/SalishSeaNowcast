@@ -105,8 +105,8 @@ def _plot_tide_cycle(ax, plot_data, theme, ylims=(-3, 3)):
             linewidth=2,
             color=theme.COLOURS['time series']['datetime line'])
     ax.set_xlim(
-        plot_data.results_t_start.replace(weeks=-2).datetime,
-        plot_data.results_t_end.replace(weeks=2).datetime
+        plot_data.results_t_start.shift(weeks=-2).datetime,
+        plot_data.results_t_end.shift(weeks=2).datetime
     )
     _ax_labels(ax, plot_data, ylims, theme)
 

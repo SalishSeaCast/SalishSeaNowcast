@@ -153,7 +153,7 @@ def _upload_ssh_files(
 ):
     for day in range(-1, 3):
         filename = config['ssh']['file template'].format(
-            run_date.replace(days=day).date()
+            run_date.shift(days=day).date()
         )
         dest_dir = 'obs' if day == -1 else 'fcst'
         localpath = Path(config['ssh']['ssh dir'], dest_dir, filename)
@@ -198,7 +198,7 @@ def _upload_fraser_turbidity_file(
     except FileNotFoundError:
         # turbidity file does not exist, so create symlink to persist
         # previous day's file
-        prev_day_fn = filename_tmpl.format(run_date.replace(days=-1).date())
+        prev_day_fn = filename_tmpl.format(run_date.shift(days=-1).date())
         localpath.symlink_to(localpath.with_name(prev_day_fn))
         logger.critical(
             f'Fraser River turbidity forcing file not found; '
@@ -218,7 +218,7 @@ def _upload_river_runoff_files(
     sftp_client, run_date, config, host_name, host_config
 ):
     for tmpl in config['rivers']['file templates'].values():
-        filename = tmpl.format(run_date.replace(days=-1).date())
+        filename = tmpl.format(run_date.shift(days=-1).date())
         localpath = Path(config['rivers']['rivers dir'], filename)
         remotepath = Path(host_config['forcing']['rivers dir'], filename)
         ssh_sftp.upload_file(
@@ -235,7 +235,7 @@ def _upload_weather(
         weather_start = 1
     for day in range(weather_start, 3):
         filename = config['weather']['file template'].format(
-            run_date.replace(days=day).date()
+            run_date.shift(days=day).date()
         )
         dest_dir = '' if day == 0 else 'fcst'
         localpath = Path(config['weather']['ops dir'], dest_dir, filename)
@@ -267,7 +267,7 @@ def _upload_live_ocean_files(
         # but for other run types it is a cause for concern.
         prev_day_fn = (
             config['temperature salinity']['file template'].format(
-                run_date.replace(days=-1).date()
+                run_date.shift(days=-1).date()
             )
         )
         localpath.symlink_to(localpath.with_name(prev_day_fn))
