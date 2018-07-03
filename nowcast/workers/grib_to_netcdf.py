@@ -161,9 +161,9 @@ def _define_forecast_segments_nowcast(rundate):
     """
 
     today = rundate
-    yesterday = today.replace(days=-1)
-    tomorrow = today.replace(days=+1)
-    nextday = today.replace(days=+2)
+    yesterday = today.shift(days=-1)
+    tomorrow = today.shift(days=+1)
+    nextday = today.shift(days=+2)
     fcst_section_hrs_arr = [OrderedDict() for x in range(3)]
 
     # today
@@ -217,8 +217,8 @@ def _define_forecast_segments_forecast2(rundate):
 
     # today is the day after this nowcast/forecast sequence started
     today = rundate
-    tomorrow = today.replace(days=+1)
-    nextday = today.replace(days=+2)
+    tomorrow = today.shift(days=+1)
+    nextday = today.shift(days=+2)
 
     fcst_section_hrs_arr = [OrderedDict() for x in range(2)]
 

@@ -49,9 +49,7 @@ class TestMain:
         get_onc_ctd.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ('--data-date',)
-        assert kwargs['default'] == arrow.utcnow().floor('day').replace(
-            days=-1
-        )
+        assert kwargs['default'] == arrow.utcnow().floor('day').shift(days=-1)
         assert 'help' in kwargs
 
     def test_run_worker(self, m_worker):

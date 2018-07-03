@@ -246,8 +246,7 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
         run_prep_dir / 'namelist.restart': {
             'nml_restart': {
                 'rst_first_out':
-                    start_date.replace(days=+1)
-                    .format('YYYY-MM-DD HH:mm:ss.00'),
+                    start_date.shift(days=+1).format('YYYY-MM-DD HH:mm:ss.00'),
             }
         },
         run_prep_dir / 'namelist.netcdf': {
@@ -344,7 +343,7 @@ def _prep_fvcom_input_dir(run_date, run_type, config):
     restart_dir = Path(
         config['vhfr fvcom runs']['run types']['nowcast']['results']
     )
-    restart_file_date = run_date.replace(
+    restart_file_date = run_date.shift(
         days=-1
     ) if run_type == 'nowcast' else run_date
     restart_file = restart_dir / restart_file_date.format('DDMMMYY').lower(

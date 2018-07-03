@@ -159,8 +159,8 @@ def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
         ))
         datasets[grid].append(os.fspath(nowcast_file))
         logger.debug(f'{grid} dataset: {nowcast_file}')
-    s_yyyymmdd = run_date.replace(days=+1).format('YYYYMMDD')
-    e_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
+    s_yyyymmdd = run_date.shift(days=+1).format('YYYYMMDD')
+    e_yyyymmdd = run_date.shift(days=+2).format('YYYYMMDD')
     for grid in datasets:
         forecast_file = ((
             nemo_dir / f'forecast/{dmy}'
@@ -174,9 +174,9 @@ def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
 
 def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl, dest_dir):
     datasets = {'u': [], 'v': []}
-    dmy = run_date.replace(days=-1).format('DDMMMYY').lower()
+    dmy = run_date.shift(days=-1).format('DDMMMYY').lower()
     s_yyyymmdd = run_date.format('YYYYMMDD')
-    e_yyyymmdd = run_date.replace(days=+1).format('YYYYMMDD')
+    e_yyyymmdd = run_date.shift(days=+1).format('YYYYMMDD')
     for grid in datasets:
         forecast_file = ((
             nemo_dir / f'forecast/{dmy}'
@@ -201,8 +201,8 @@ def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl, dest_dir):
         )
         datasets[grid].append(os.fspath(forecast_file_24h))
         logger.debug(f'{grid} dataset: {forecast_file_24h}')
-    s_yyyymmdd = run_date.replace(days=+1).format('YYYYMMDD')
-    e_yyyymmdd = run_date.replace(days=+2).format('YYYYMMDD')
+    s_yyyymmdd = run_date.shift(days=+1).format('YYYYMMDD')
+    e_yyyymmdd = run_date.shift(days=+2).format('YYYYMMDD')
     for grid in datasets:
         forecast2_file = (
             nemo_dir / f'forecast2/{dmy}'

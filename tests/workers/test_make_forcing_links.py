@@ -221,8 +221,8 @@ class TestMakeRunoffLinks:
         make_forcing_links._make_runoff_links(
             m_sftp_client, run_type, run_date, self.config, 'salish-nowcast'
         )
-        start = run_date.replace(days=-1)
-        end = run_date.replace(days=+2)
+        start = run_date.shift(days=-1)
+        end = run_date.shift(days=+2)
         for date in arrow.Arrow.range('day', start, end):
             expected = call(
                 m_sftp_client, 'salish-nowcast',
@@ -258,8 +258,8 @@ class TestMakeRunoffLinks:
             m_sftp_client, 'nowcast-green', run_date, self.config,
             'salish-nowcast'
         )
-        start = run_date.replace(days=-1)
-        end = run_date.replace(days=+2)
+        start = run_date.shift(days=-1)
+        end = run_date.shift(days=+2)
         for date in arrow.Arrow.range('day', start, end):
             expected = call(
                 m_sftp_client, 'salish-nowcast',

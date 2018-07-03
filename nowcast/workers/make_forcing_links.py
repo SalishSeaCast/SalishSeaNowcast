@@ -155,7 +155,7 @@ def _make_NeahBay_ssh_links(
     _clear_links(sftp_client, run_prep_dir, 'ssh')
     for day in range(-1, 3):
         filename = config['ssh']['file template'].format(
-            run_date.replace(days=day).date()
+            run_date.shift(days=day).date()
         )
         dir = 'obs' if day == -1 else 'fcst'
         src = Path(host_config['forcing']['ssh dir'], dir, filename)
@@ -173,10 +173,10 @@ def _make_runoff_links(sftp_client, run_type, run_date, config, host_name):
     for tmpl in config['rivers']['file templates'].values():
         src = Path(
             host_config['forcing']['rivers dir'],
-            tmpl.format(run_date.replace(days=-1).date())
+            tmpl.format(run_date.shift(days=-1).date())
         )
         for day in range(-1, 3):
-            filename = tmpl.format(run_date.replace(days=day).date())
+            filename = tmpl.format(run_date.shift(days=day).date())
             dest = run_prep_dir / 'rivers' / filename
             _create_symlink(sftp_client, host_name, src, dest)
     if run_type in {'nowcast-green', 'nowcast-agrif'}:
@@ -199,7 +199,7 @@ def _make_weather_links(sftp_client, run_date, config, host_name, run_type):
     weather_start = -1 if run_type in nowcast_runs else 0
     for day in range(weather_start, 3):
         filename = config['weather']['file template'].format(
-            run_date.replace(days=day).date()
+            run_date.shift(days=day).date()
         )
         if run_type in nowcast_runs:
             dir = '' if day <= 0 else 'fcst'
@@ -219,7 +219,7 @@ def _make_live_ocean_links(
     _clear_links(sftp_client, run_prep_dir, dest_path)
     for day in range(-1, 3):
         filename = config['temperature salinity']['file template'].format(
-            run_date.replace(days=day).date()
+            run_date.shift(days=day).date()
         )
         if day <= 0:
             # if day=1 or 2, we use the current day as source

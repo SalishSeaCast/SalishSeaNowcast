@@ -57,7 +57,7 @@ def main():
     )
     worker.cli.add_date_option(
         '--data-date',
-        default=arrow.utcnow().floor('day').replace(days=-1),
+        default=arrow.utcnow().floor('day').shift(days=-1),
         help='UTC date to get ONC node CTD data for.'
     )
     worker.run(get_onc_ctd, success, failure)

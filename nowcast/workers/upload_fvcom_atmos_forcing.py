@@ -122,7 +122,7 @@ def upload_fvcom_atmos_forcing(parsed_args, config, *args):
     atmos_file_tmpl = (
         config['vhfr fvcom runs']['atmospheric forcing']['atmos file template']
     )
-    atmos_file_date = run_date if run_type == 'nowcast' else run_date.replace(
+    atmos_file_date = run_date if run_type == 'nowcast' else run_date.shift(
         days=+1
     )
     atmos_file = atmos_file_tmpl.format(

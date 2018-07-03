@@ -78,7 +78,7 @@ def make_runoff_file(parsed_args, config, *args):
     """Create a rivers runoff file from real-time Fraser River at Hope
     average flow yesterday and climatology for all of the other rivers.
     """
-    yesterday = parsed_args.run_date.replace(days=-1)
+    yesterday = parsed_args.run_date.shift(days=-1)
     # Find history of fraser flow
     fraserflow = _get_fraser_at_hope(config)
     # Select yesterday's value

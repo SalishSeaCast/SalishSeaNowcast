@@ -154,9 +154,8 @@ def _add_past_days_results(
             'results archive':
                 Path(config['results archive']['nowcast']),
             'first date': (
-                run_date.replace(days=-days_from_past)
-                if run_type == 'forecast' else
-                run_date.replace(days=-(days_from_past - 1))
+                run_date.shift(days=-days_from_past) if run_type == 'forecast'
+                else run_date.shift(days=-(days_from_past - 1))
             ),
             'last date':
                 run_date,
@@ -165,12 +164,12 @@ def _add_past_days_results(
             'results archive':
                 Path(config['wave forecasts']['results archive']['forecast']),
             'first date': (
-                run_date.replace(days=-days_from_past - 1)
+                run_date.shift(days=-days_from_past - 1)
                 if run_type == 'forecast' else
-                run_date.replace(days=-days_from_past)
+                run_date.shift(days=-days_from_past)
             ),
             'last date':
-                run_date.replace(days=-1),
+                run_date.shift(days=-1),
         },
     }
     results_archive = model_params[model]['results archive']
@@ -200,7 +199,7 @@ def _add_forecast_results(
     model_params = {
         'nemo': {
             'results archive': Path(config['results archive'][run_type]),
-            'forecast date': run_date.replace(days=+1),
+            'forecast date': run_date.shift(days=+1),
         },
         'wwatch3': {
             'results archive':
@@ -231,9 +230,9 @@ def _add_forecast_results(
     )
     _symlink_results(
         tmp_forecast_results_archive,
-        run_date.replace(days=+1),
+        run_date.shift(days=+1),
         new_forecast_dir,
-        run_date.replace(days=+1),
+        run_date.shift(days=+1),
         model,
         run_type
     )
@@ -242,7 +241,7 @@ def _add_forecast_results(
         results_archive,
         run_date,
         new_forecast_dir,
-        run_date.replace(days=+2),
+        run_date.shift(days=+2),
         model,
         run_type
     )
@@ -253,7 +252,7 @@ def _extract_1st_forecast_day(
 ):
     # Create the destination directory
     ddmmmyy = run_date.format('DDMMMYY').lower()
-    ddmmmyy_p1 = run_date.replace(days=+1).format('DDMMMYY').lower()
+    ddmmmyy_p1 = run_date.shift(days=+1).format('DDMMMYY').lower()
     model_params = {
         'nemo': {
             'day dir': tmp_forecast_results_archive / ddmmmyy_p1,

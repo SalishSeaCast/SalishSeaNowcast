@@ -304,7 +304,7 @@ class TestAddPastDaysResults:
                 Path('/tmp', f'{model}_forecast'), day, new_forecast_dir, day,
                 model, run_type
             ) for day in
-            arrow.Arrow.range('day', first_date, run_date.replace(days=-1))
+            arrow.Arrow.range('day', first_date, run_date.shift(days=-1))
         ]
         assert m_symlink_results.call_args_list == expected
 
@@ -434,9 +434,9 @@ class TestAddForecastResults:
         assert m_symlink_results.call_args_list == [
             call(
                 Path(f'/tmp/nemo_forecast'),
-                run_date.replace(days=+1),
+                run_date.shift(days=+1),
                 new_forecast_dir,
-                run_date.replace(days=+1),
+                run_date.shift(days=+1),
                 model,
                 run_type
             ),
@@ -444,7 +444,7 @@ class TestAddForecastResults:
                 Path(f'results/{run_type}/'),
                 run_date,
                 new_forecast_dir,
-                run_date.replace(days=+2),
+                run_date.shift(days=+2),
                 model,
                 run_type
             ),

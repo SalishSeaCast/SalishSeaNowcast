@@ -59,7 +59,7 @@ def main():
 
 def success(parsed_args):
     if parsed_args.yesterday:
-        ymd = arrow.now().floor('day').replace(days=-1).format('YYYY-MM-DD')
+        ymd = arrow.now().floor('day').shift(days=-1).format('YYYY-MM-DD')
     else:
         ymd = arrow.now().floor('day').format('YYYY-MM-DD')
     logger.info(
@@ -75,7 +75,7 @@ def success(parsed_args):
 
 def failure(parsed_args):
     if parsed_args.yesterday:
-        ymd = arrow.now().floor('day').replace(days=-1).format('YYYY-MM-DD')
+        ymd = arrow.now().floor('day').shift(days=-1).format('YYYY-MM-DD')
     else:
         ymd = arrow.now().floor('day').format('YYYY-MM-DD')
     logger.critical(
@@ -126,9 +126,9 @@ def get_grib(parsed_args, config, *args):
 def _calc_date(parsed_args, forecast):
     yesterday = parsed_args.yesterday
     utc = arrow.utcnow()
-    utc = utc.replace(hours=-int(forecast))
+    utc = utc.shift(hours=-int(forecast))
     if yesterday:
-        utc = utc.replace(days=-1)
+        utc = utc.shift(days=-1)
     date = utc.format('YYYYMMDD')
     return date
 
