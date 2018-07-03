@@ -28,6 +28,7 @@ from nemo_nowcast import (
     NowcastWorker,
     WorkerError,
 )
+import nemo_cmd.prepare
 from nemo_cmd.namelist import namelist2dict
 import salishsea_cmd.api
 import salishsea_cmd.lib
@@ -436,7 +437,7 @@ def _build_script(
 ):
     run_desc = salishsea_cmd.lib.load_run_desc(run_desc_filepath)
     host_config = config['run']['enabled hosts'][host_name]
-    nemo_processors = salishsea_cmd.lib.get_n_processors(run_desc, run_dir)
+    nemo_processors = nemo_cmd.prepare.get_n_processors(run_desc, run_dir)
     xios_processors = int(run_desc['output']['XIOS servers'])
     email = host_config.get('email', 'nobody@example.com')
     xios_host = host_config.get('xios host')
