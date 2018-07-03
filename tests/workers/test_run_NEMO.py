@@ -1133,7 +1133,7 @@ class TestBuildScript:
     )
     @patch('nowcast.workers.run_NEMO.salishsea_cmd.lib.load_run_desc')
     @patch(
-        'nowcast.workers.run_NEMO.salishsea_cmd.lib.get_n_processors',
+        'nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors',
         return_value=112
     )
     def test_script_west_cloud(self, m_gnp, m_lrd, run_type, config, tmpdir):
@@ -1205,7 +1205,7 @@ class TestBuildScript:
 
     @patch('nowcast.workers.run_NEMO.salishsea_cmd.lib.load_run_desc')
     @patch(
-        'nowcast.workers.run_NEMO.salishsea_cmd.lib.get_n_processors',
+        'nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors',
         return_value=7
     )
     def test_script_salish(self, m_gnp, m_lrd, config, tmpdir):
