@@ -194,7 +194,7 @@ def _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id):
         for line in exc.stderr.splitlines():
             logger.error(line)
         raise WorkerError
-    tmp_run_dir = Path(stdout.splitlines().strip())
+    tmp_run_dir = Path(stdout.splitlines()[0].strip())
     logger.debug(f'found tmp run dir: {host_name}:{tmp_run_dir}')
     return tmp_run_dir
 
