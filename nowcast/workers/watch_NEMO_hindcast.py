@@ -44,6 +44,9 @@ def main():
     worker.cli.add_argument(
         'host_name', help='Name of the host to monitor the run on'
     )
+    worker.cli.add_argument(
+        '--run-id', help='Run id to watch; e.g. 01dec14hindcast'
+    )
     worker.run(watch_NEMO_hindcast, success, failure)
 
 
@@ -92,6 +95,7 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     :rtype: dict
     """
     host_name = parsed_args.host_name
+    run_id = parsed_args.run_id
     ssh_key = Path(
         os.environ['HOME'], '.ssh',
         config['run']['hindcast hosts'][host_name]['ssh key']
@@ -102,7 +106,7 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     )
     try:
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
-        job_id, run_id = _get_run_id(ssh_client, host_name, users)
+        job_id, run_id = _get_run_id(ssh_client, host_name, users, run_id)
         while _is_queued(ssh_client, host_name, users, job_id, run_id):
             time.sleep(60)
         tmp_run_dir = _get_tmp_run_dir(
@@ -129,16 +133,17 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     return checklist
 
 
-def _get_run_id(ssh_client, host_name, users):
+def _get_run_id(ssh_client, host_name, users, run_id):
     """
     :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
     :param str users:
+    :param str run_id:
 
     :return: slurm job id number, run id string
     :rtype: 2-tuple (int, str)
     """
-    queue_info = _get_queue_info(ssh_client, host_name, users)
+    queue_info = _get_queue_info(ssh_client, host_name, users, run_id=run_id)
     job_id, run_id = queue_info.split()[:2]
     logger.info(f'watching {run_id} job {job_id} on {host_name}')
     return job_id, run_id
@@ -155,7 +160,7 @@ def _is_queued(ssh_client, host_name, users, job_id, run_id):
     :return: Flag indicating whether or not run is queued in PENDING state
     :rtype: boolean
     """
-    queue_info = _get_queue_info(ssh_client, host_name, users, job_id)
+    queue_info = _get_queue_info(ssh_client, host_name, users, job_id=job_id)
     try:
         state, reason, start_time = queue_info.split()[2:]
     except AttributeError:
@@ -210,7 +215,9 @@ def _is_running(
     :rtype: boolean
     """
     try:
-        queue_info = _get_queue_info(ssh_client, host_name, users, job_id)
+        queue_info = _get_queue_info(
+            ssh_client, host_name, users, job_id=job_id
+        )
         state = queue_info.split()[2]
     except (WorkerError, AttributeError):
         # job has disappeared from the queue; finished or cancelled
@@ -275,11 +282,12 @@ def _is_completed(ssh_client, host_name, users, job_id, run_id):
     return True
 
 
-def _get_queue_info(ssh_client, host_name, users, job_id=None):
+def _get_queue_info(ssh_client, host_name, users, run_id=None, job_id=None):
     """
     :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
     :param str users:
+    :param str run_id:
     :param int job_id:
 
     :return: None or 1 line of output from slurm squeue command that describes
@@ -306,8 +314,12 @@ def _get_queue_info(ssh_client, host_name, users, job_id=None):
             # Various callers handle job id not on queue in difference ways
             return
     for queue_info in stdout.splitlines()[1:]:
-        if 'hindcast' in queue_info.strip().split()[1]:
-            return queue_info.strip()
+        if run_id is not None:
+            if run_id in queue_info.strip().split()[1]:
+                return queue_info.strip()
+        else:
+            if 'hindcast' in queue_info.strip().split()[1]:
+                return queue_info.strip()
 
 
 def _get_run_info(sftp_client, host_name, tmp_run_dir):

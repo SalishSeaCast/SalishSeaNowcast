@@ -46,6 +46,12 @@ class TestMain:
         assert args == ('host_name',)
         assert 'help' in kwargs
 
+    def test_add_run_id_option(self, m_worker):
+        watch_NEMO_hindcast.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ('--run-id',)
+        assert 'help' in kwargs
+
     def test_run_worker(self, m_worker):
         watch_NEMO_hindcast.main()
         args, kwargs = m_worker().run.call_args
