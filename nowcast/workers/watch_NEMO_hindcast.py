@@ -235,7 +235,7 @@ def _is_running(
             f'continuing to watch...'
         )
         return True
-    time_step = int(stdout.splitlines().strip())
+    time_step = int(stdout.splitlines()[0].strip())
     model_seconds = (time_step - run_info.it000) * run_info.rdt
     model_time = (
         run_info.date0.replace(seconds=model_seconds)
@@ -336,7 +336,7 @@ def _get_run_info(sftp_client, host_name, tmp_run_dir):
     :rtype: :py:class:`types.SimpleNamespace`
     """
     with tempfile.NamedTemporaryFile('wt') as namelist_cfg:
-        sftp_client.get(f'{tmp_run_dir}/namelist_cfg {namelist_cfg.name}')
+        sftp_client.get(f'{tmp_run_dir}/namelist_cfg', namelist_cfg.name)
         logger.debug(f'downloaded {host_name}:{tmp_run_dir}/namelist_cfg')
         namelist = f90nml.read(namelist_cfg.name)
         run_info = SimpleNamespace(
