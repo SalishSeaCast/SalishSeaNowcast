@@ -138,7 +138,7 @@ class TestFailure:
     autospec=True
 )
 class TestWatchNEMO_AGRIF:
-    """Unit test for run_NEMO_agrif() function.
+    """Unit test for watch_NEMO_agrif() function.
     """
 
     def test_checklist(
