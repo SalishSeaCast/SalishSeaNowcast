@@ -783,6 +783,10 @@ def after_watch_NEMO_hindcast(msg, config, checklist):
                 'nowcast.workers.watch_NEMO_hindcast',
                 args=[msg.payload['hindcast']['host']]
             ),
+            NextWorker(
+                'nowcast.workers.run_NEMO_hindcast',
+                args=[msg.payload['hindcast']['host']]
+            ),
         ])
     return next_workers[msg.type]
 
