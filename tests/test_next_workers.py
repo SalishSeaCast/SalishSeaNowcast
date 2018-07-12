@@ -1652,6 +1652,30 @@ class TestAfterWatchNEMO_Hindcast:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize(
+        'msg', [
+            Message(
+                'watch_NEMO_hindcast', 'success', {
+                    'hindcast': {
+                        'host': 'cedar',
+                        'run date': '2018-03-12',
+                        'completed': True
+                    }
+                }
+            ),
+        ]
+    )
+    def test_success_launch_run_NEMO_hindcast(self, msg, config, checklist):
+        workers = next_workers.after_watch_NEMO_hindcast(
+            msg, config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.run_NEMO_hindcast',
+            args=[msg.payload['hindcast']['host']],
+            host='localhost'
+        )
+        assert expected in workers
+
 
 class TestAfterRunNEMO_Hindcast:
     """Unit tests for the after_run_NEMO_hindcast function.
