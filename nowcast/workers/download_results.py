@@ -110,7 +110,7 @@ def download_results(parsed_args, config, *args):
     )
     for filepath in results_archive_dir.glob('*'):
         lib.fix_perms(filepath, grp_name=config['file group'])
-    checklist = {run_type: {}}
+    checklist = {run_type: {'run date': run_date.format('YYYY-MM-DD')}}
     for freq in '1h 1d'.split():
         checklist[run_type][freq] = list(
             map(os.fspath, results_archive_dir.glob(f'SalishSea_{freq}_*.nc'))
