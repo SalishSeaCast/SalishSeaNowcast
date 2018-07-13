@@ -1710,19 +1710,21 @@ class TestAfterDownloadResults:
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        p_checklist = patch.dict(
-            checklist, {
-                'NEMO run': {
-                    'nowcast-green': {
+        try:
+            run_type = msg_type.split()[1]
+        except IndexError:
+            run_type = None
+        workers = next_workers.after_download_results(
+            Message(
+                'download_results',
+                msg_type,
+                payload={
+                    run_type: {
                         'run date': '2016-10-22'
                     }
                 }
-            }
+            ), config, checklist
         )
-        with p_checklist:
-            workers = next_workers.after_download_results(
-                Message('download_results', msg_type), config, checklist
-            )
         assert workers == []
 
     @pytest.mark.parametrize(
@@ -1735,20 +1737,17 @@ class TestAfterDownloadResults:
     def test_success_nowcast_launch_make_plots_specials(
         self, model, run_type, plot_type, run_date, config, checklist
     ):
-        p_checklist = patch.dict(
-            checklist, {
-                'NEMO run': {
+        workers = next_workers.after_download_results(
+            Message(
+                'download results',
+                f'success {run_type}',
+                payload={
                     run_type: {
                         'run date': '2016-10-29'
                     }
                 }
-            }
+            ), config, checklist
         )
-        with p_checklist:
-            workers = next_workers.after_download_results(
-                Message('download results', 'success {}'.format(run_type)),
-                config, checklist
-            )
         expected = NextWorker(
             'nowcast.workers.make_plots',
             args=[model, run_type, plot_type, '--run-date', run_date],
@@ -1759,20 +1758,17 @@ class TestAfterDownloadResults:
     def test_success_nowcast_green_launch_ping_erddap_nowcast_green(
         self, config, checklist
     ):
-        p_checklist = patch.dict(
-            checklist, {
-                'NEMO run': {
+        workers = next_workers.after_download_results(
+            Message(
+                'download_results',
+                'success nowcast-green',
+                payload={
                     'nowcast-green': {
                         'run date': '2017-06-22'
                     }
                 }
-            }
+            ), config, checklist
         )
-        with p_checklist:
-            workers = next_workers.after_download_results(
-                Message('download_results', 'success nowcast-green'), config,
-                checklist
-            )
         expected = NextWorker(
             'nowcast.workers.ping_erddap',
             args=['nowcast-green'],
@@ -1789,20 +1785,17 @@ class TestAfterDownloadResults:
     def test_success_forecast_launch_update_forecast_datasets(
         self, run_type, run_date, config, checklist
     ):
-        p_checklist = patch.dict(
-            checklist, {
-                'NEMO run': {
+        workers = next_workers.after_download_results(
+            Message(
+                'download_results',
+                f'success {run_type}',
+                payload={
                     run_type: {
                         'run date': run_date
                     }
                 }
-            }
+            ), config, checklist
         )
-        with p_checklist:
-            workers = next_workers.after_download_results(
-                Message('download_results', f'success {run_type}'), config,
-                checklist
-            )
         expected = NextWorker(
             'nowcast.workers.update_forecast_datasets',
             args=['nemo', run_type, '--run-date', run_date],
@@ -1822,8 +1815,15 @@ class TestAfterDownloadResults:
         )
         with p_checklist:
             workers = next_workers.after_download_results(
-                Message('download_results', f'success hindcast'), config,
-                checklist
+                Message(
+                    'download_results',
+                    f'success hindcast',
+                    payload={
+                        'hindcast': {
+                            'run date': '2018-03-11'
+                        }
+                    }
+                ), config, checklist
             )
         expected = NextWorker(
             'nowcast.workers.split_results',

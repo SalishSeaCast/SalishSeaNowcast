@@ -378,6 +378,7 @@ class TestDownloadResults:
             )
         assert checklist == {
             run_type: {
+                'run date': '2018-05-22',
                 '1h': ['Salishsea_1h_20180522_20180522_grid_T.nc'],
                 '1d': ['Salishsea_1d_20180522_20180522_grid_T.nc'],
             }

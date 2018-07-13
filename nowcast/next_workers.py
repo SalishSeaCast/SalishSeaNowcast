@@ -1178,20 +1178,16 @@ def after_download_results(msg, config, checklist):
     }
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
+        run_date = msg.payload[run_type]['run date']
         if run_type == 'nowcast-agrif':
             return next_workers[msg.type]
         if run_type == 'hindcast':
-            run_date = arrow.get(
-                checklist['NEMO run']['hindcast']['run id'][:7], 'DDMMMYY'
-            )
             next_workers[msg.type].append(
                 NextWorker(
-                    'nowcast.workers.split_results',
-                    args=[run_type, run_date.format('YYYY-MM-DD')]
+                    'nowcast.workers.split_results', args=[run_type, run_date]
                 )
             )
             return next_workers[msg.type]
-        run_date = checklist['NEMO run'][run_type]['run date']
         if run_type.startswith('nowcast'):
             next_workers[msg.type].append(
                 NextWorker(
