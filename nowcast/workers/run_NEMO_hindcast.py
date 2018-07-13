@@ -226,7 +226,7 @@ def _edit_namelist_time(
     :param :py:class:`arrow.Arrow` run_date:
     :param :py:class:`nemo_nowcast.Config` config:
     """
-    run_days = (run_date - run_date.shift(months=-1)).days
+    run_days = (run_date.shift(months=+1) - run_date).days
     timesteps_per_day = 24 * 60 * 60 / prev_namelist_info.rdt
     itend = prev_namelist_info.itend + run_days * timesteps_per_day
     patch = {

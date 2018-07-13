@@ -332,10 +332,10 @@ class TestEditNamelistTime:
     @pytest.mark.parametrize(
         'run_date, itend',
         [
-            (arrow.get('2018-02-01'), 2784240),  # 31 day month
-            (arrow.get('2018-03-01'), 2777760),  # February
-            (arrow.get('2016-03-01'), 2779920),  # leap year
-            (arrow.get('2018-05-01'), 2782080),  # 30 day month
+            (arrow.get('2018-03-01'), 2784240),  # 31 day month
+            (arrow.get('2018-02-01'), 2777760),  # February
+            (arrow.get('2016-02-01'), 2779920),  # leap year
+            (arrow.get('2018-04-01'), 2782080),  # 30 day month
         ]
     )
     def test_patch_namelist_time(self, m_patch, m_logger, run_date, itend):
