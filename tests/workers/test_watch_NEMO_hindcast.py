@@ -15,7 +15,7 @@
 """Unit tests for SalishSeaCast watch_NEMO_hindcast worker.
 """
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import nemo_nowcast
 
@@ -92,3 +92,73 @@ class TestFailure:
         parsed_args = SimpleNamespace(host_name='cedar')
         msg_type = watch_NEMO_hindcast.failure(parsed_args)
         assert msg_type == f'failure'
+
+
+class TestWatchNEMO_Hindcast:
+    """Unit test for watch_NEMO_hindcast() function.
+    """
+
+    @patch('nowcast.workers.watch_NEMO_hindcast.logger', autospec=True)
+    @patch(
+        'nowcast.workers.watch_NEMO_hindcast.ssh_sftp.sftp',
+        return_value=(Mock(name='ssh_client'), Mock(name='sftp_client')),
+        autospec=True
+    )
+    @patch(
+        'nowcast.workers.watch_NEMO_hindcast._get_run_id',
+        return_value=('9813234', '01jul18hindcast'),
+        autospec=True
+    )
+    @patch(
+        'nowcast.workers.watch_NEMO_hindcast._is_queued',
+        return_value=False,
+        autospec=True
+    )
+    @patch(
+        'nowcast.workers.watch_NEMO_hindcast._get_tmp_run_dir',
+        return_value='tmp_run_dir',
+        autospec=True
+    )
+    @patch(
+        'nowcast.workers.watch_NEMO_hindcast._get_run_info',
+        return_value=SimpleNamespace(),
+        autospec=True
+    )
+    @patch(
+        'nowcast.workers.watch_NEMO_hindcast._is_running',
+        return_value=False,
+        autospec=True
+    )
+    @patch(
+        'nowcast.workers.watch_NEMO_hindcast._is_completed',
+        return_value=True,
+        autospec=True
+    )
+    def test_checklist(
+        self, m_is_completed, m_is_running, m_get_run_info, m_get_tmp_run_dir,
+        m_is_queued, m_get_run_id, m_sftp, m_logger
+    ):
+        parsed_args = SimpleNamespace(host_name='cedar', run_id=None)
+        config = {
+            'run': {
+                'hindcast hosts': {
+                    'cedar': {
+                        'ssh key': 'SalishSeaNEMO-nowcast_id_rsa',
+                        'users': 'allen,dlatorne',
+                        'scratch dir': 'scratch/hindcast',
+                    }
+                }
+            }
+        }
+        checklist = watch_NEMO_hindcast.watch_NEMO_hindcast(
+            parsed_args, config
+        )
+        expected = {
+            'hindcast': {
+                'host': 'cedar',
+                'run id': '01jul18hindcast',
+                'run date': '2018-07-01',
+                'completed': True,
+            }
+        }
+        assert checklist == expected

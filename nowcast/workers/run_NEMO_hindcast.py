@@ -159,8 +159,8 @@ def _get_prev_run_queue_info(ssh_client, host_name, config):
     users = config['run']['hindcast hosts'][host_name]['users']
     stdout = ssh_sftp.ssh_exec_command(
         ssh_client,
-        f'/opt/software/slurm/bin/squeue --user {users} --Format "jobid,name"',
-        host_name, logger
+        f'/opt/software/slurm/bin/squeue --user {users} --Format "jobid,name" '
+        f'--sort=i', host_name, logger
     )
     if len(stdout.splitlines()) == 1:
         logger.error(f'no jobs found on {host_name} queue')
