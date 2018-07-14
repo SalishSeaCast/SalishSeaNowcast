@@ -57,27 +57,27 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} {date} results files split into daily directories'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'results files split into daily directories',
         extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         }
     )
-    msg_type = '{} {}'.format('success', parsed_args.run_type)
+    msg_type = f'success {parsed_args.run_type}'
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} {date} results files splitting failed'
-        .format(parsed_args, date=parsed_args.run_date.format('YYYY-MM-DD')),
+        f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f'results files splitting failed',
         extra={
             'run_type': parsed_args.run_type,
             'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
         }
     )
-    msg_type = '{} {}'.format('failure', parsed_args.run_type)
+    msg_type = f'failure {parsed_args.run_type}'
     return msg_type
 
 
@@ -85,10 +85,8 @@ def split_results(parsed_args, config, *args):
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     logger.info(
-        'splitting {run_date} {run_type} results files '
-        'into daily directories'.format(
-            run_date=run_date.format('YYYY-MM-DD'), run_type=run_type
-        ),
+        f'splitting {run_date.format("YYYY-MM-DD")} {run_type} '
+        f'results files into daily directories',
         extra={
             'run_type': run_type,
             'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
@@ -109,23 +107,19 @@ def split_results(parsed_args, config, *args):
         dest_dir.mkdir(exist_ok=True)
         if fp.stem.startswith('SalishSea_1'):
             fn = Path(
-                '{prefix}_{date}_{date}_{grid}'.format(
-                    prefix=fp.stem[:12],
-                    date=date.format('YYYYMMDD'),
-                    grid=fp.stem[31:37]
-                )
+                f'{fp.stem[:12]}_'
+                f'{date.format("YYYYMMDD")}_{date.format("YYYYMMDD")}_'
+                f'{fp.stem[31:37]}'
             ).with_suffix('.nc')
         else:
             fn = Path(fp.stem[:-18]).with_suffix('.nc')
         dest = dest_dir / fn
         shutil.move(str(fp), str(dest))
-        logger.debug('moved {fp} to {dest}'.format(fp=fp, dest=dest))
+        logger.debug(f'moved {fp} to {dest}')
     for fp in src_dir.glob('SalishSea_*_restart*.nc'):
         dest_dir = run_type_results / last_date.format('DDMMMYY').lower()
         shutil.move(str(fp), str(dest_dir))
-        logger.debug(
-            'moved {fp} to {dest_dir}'.format(fp=fp, dest_dir=dest_dir)
-        )
+        logger.debug(f'moved {fp} to {dest_dir}')
     return checklist
 
 
