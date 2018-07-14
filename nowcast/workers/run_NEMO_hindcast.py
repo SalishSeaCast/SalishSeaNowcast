@@ -336,6 +336,7 @@ def _launch_run(ssh_client, host_name, run_id, prev_job_id, config):
         for line in exc.stderr.splitlines():
             logger.error(line)
         raise WorkerError
+    logger.info(f'{run_id} run submitted to scheduler on {host_name}')
 
 
 if __name__ == '__main__':
