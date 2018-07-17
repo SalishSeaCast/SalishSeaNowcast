@@ -16,10 +16,34 @@ import datetime
 import os
 import sys
 
+from nowcast import __pkg_metadata__
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('..'))
+
+
+# -- Project information -----------------------------------------------------
+
+project = 'Salish Sea Nowcast System'
+author = (
+    'Salish Sea MEOPAR Project Contributors '
+    'and The University of British Columbia')
+copyright_years = (
+    '2013' if datetime.date.today().year == 2013
+    else '2016-{this_year:%Y}'.format(this_year=datetime.date.today()))
+copyright = '{copyright_years}, {author}'.format(
+    copyright_years=copyright_years, author=author)
+
+# The version info for the project you're documenting, acts as replacement for
+# |version| and |release|, also used in various other places throughout the
+# built documents.
+# The short X.Y version.
+version = __pkg_metadata__.VERSION
+# The full version, including alpha/beta/rc tags.
+release = version
 
 
 # -- General configuration ----------------------------------------------------
@@ -101,26 +125,6 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-# General information about the project.
-project = 'Salish Sea Nowcast System'
-author = (
-    'Salish Sea MEOPAR Project Contributors '
-    'and The University of British Columbia')
-copyright_years = (
-    '2013' if datetime.date.today().year == 2013
-    else '2016-{this_year:%Y}'.format(this_year=datetime.date.today()))
-copyright = '{copyright_years}, {author}'.format(
-    copyright_years=copyright_years, author=author)
-
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-from nowcast import __pkg_metadata__
-# The short X.Y version.
-version = __pkg_metadata__.VERSION
-# The full version, including alpha/beta/rc tags.
-release = version
-
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 exclude_patterns = ['_build', '**.ipynb_checkpoints']
@@ -155,5 +159,11 @@ html_domain_indices = False
 # If false, no index is generated.
 html_use_index = False
 
-# Output file base name for HTML help builder.
-htmlhelp_basename = 'SalishSeaNowcastdoc'
+# If true, links to the reST sources are added to the pages.
+html_show_sourcelink = True
+
+# If true, "Created using Sphinx" is shown in the HTML footer. Default is True.
+html_show_sphinx = True
+
+# If true, "(C) Copyright ..." is shown in the HTML footer. Default is True.
+html_show_copyright = True
