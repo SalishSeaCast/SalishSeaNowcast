@@ -535,8 +535,8 @@ class TestAfterUploadForcing:
             config, {
                 'run': {
                     'enabled hosts': {
-                        'orcinus': {
-                            'run types': 'nowcast-agrif',
+                        'cedar-hindcast': {
+                            'run types': {},
                             'make forcing links': False,
                         }
                     }
@@ -547,13 +547,13 @@ class TestAfterUploadForcing:
             workers = next_workers.after_upload_forcing(
                 Message(
                     'upload_forcing', f'success {run_type}', {
-                        'orcinus': f'2018-04-03 {run_type}'
+                        'cedar-hindcast': f'2018-04-03 {run_type}'
                     }
                 ), config, checklist
             )
         expected = NextWorker(
             'nowcast.workers.make_forcing_links',
-            args=['orcinus', run_type],
+            args=['cedar-hindcast', run_type],
             host='localhost'
         )
         assert expected not in workers
