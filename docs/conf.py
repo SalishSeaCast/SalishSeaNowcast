@@ -16,8 +16,6 @@ import datetime
 import os
 import sys
 
-from nowcast import __pkg_metadata__
-
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -41,6 +39,7 @@ copyright = '{copyright_years}, {author}'.format(
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 # The short X.Y version.
+from nowcast import __pkg_metadata__
 version = __pkg_metadata__.VERSION
 # The full version, including alpha/beta/rc tags.
 release = version
