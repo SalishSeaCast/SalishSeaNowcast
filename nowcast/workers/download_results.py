@@ -86,9 +86,11 @@ def download_results(parsed_args, config, *args):
     run_type = parsed_args.run_type
     try:
         try:
-            host_config = config['run']['enabled hosts'][host_name]
-        except KeyError:
+            # Hindcast special case 1st due to hindcast host in enabled hosts
+            # with empty run types collection to enable forcing uploads
             host_config = config['run']['hindcast hosts'][host_name]
+        except KeyError:
+            host_config = config['run']['enabled hosts'][host_name]
     except KeyError:
         logger.critical(f'unrecognized host: {host_name}')
         raise WorkerError
