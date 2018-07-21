@@ -131,6 +131,12 @@ FONTS = {
             weight='medium',
             size=15
         ),
+    'axis small':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=12
+        ),
     'figure annotation':
         FontProperties(
             family=['Bitstream Vera Sans', 'sans-serif'],
