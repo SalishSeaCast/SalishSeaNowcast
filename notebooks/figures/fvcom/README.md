@@ -21,6 +21,12 @@ Descriptions under the links below are from the first cell of the notebooks
       
     Development of functions for `nowcast.figures.fvcom.tide_stn_water_level` web site figure module.  
 
+* ##[DevelopSecondNarrowsCurrent.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/DevelopSecondNarrowsCurrent.ipynb)  
+    
+    **Develop `second_narrows_current` Figure Module**  
+      
+    Development of functions for `nowcast.figures.fvcom.second_narrows_current` web site figure module.  
+
 
 ##License
 
