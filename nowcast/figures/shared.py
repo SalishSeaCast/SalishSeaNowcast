@@ -373,28 +373,34 @@ def interpolate_tracer_to_depths(
     return depth_interp(interp_depths)
 
 
-def localize_time(data_array, time_coord='time'):
-    """Offset DataArray for Dataset times to account for local time zone
-    difference from UTC and add :kbd:`tz_name` attribute to DataArray.
+def localize_time(data_array, time_coord='time', local_datetime=None):
+    """Offset :kbd:`data_array` times to account for local time zone
+    difference from UTC and add :kbd:`tz_name` attribute to :kbd:`data_array`.
 
     .. note::
         This function is intended for use just before presentation/output
-        of the DataArray. It is strongly recommended to do all date/time
+        of :kbd:`data_array`. It is strongly recommended to do all date/time
         calculations in UTC to avoid time change issues.
 
-    :param data_array: Data array object to adjust time values of.
+    :param data_array: Data array or dataset object to adjust time values of.
     :type data_array: :py:class:`xarray.DataArray` or :py:class:`xarray.Dataset`
 
-    :param str time_coord: Name of the time coordinate.
+    :param str time_coord: Optional name of the time coordinate.
+
+    :param local_datetime: Optional timezone-aware local date/time to use as
+                           basis to calculate offset from UTC. The 1st element
+                           of :kbd:`data_array` is used when
+                           :kbd:`local_datetime` is :py:class:`None`.
+    :type local_datetime: :py:class:`arrow.Arrow`
     """
-    local_datetime = arrow.get(str(getattr(data_array,
-                                           time_coord)[0].values)).to('local')
+    time_values = getattr(data_array, time_coord).values
+    if local_datetime is None:
+        local_datetime = arrow.get(str(time_values[0])).to('local')
     tz_offset = local_datetime.tzinfo.utcoffset(local_datetime.datetime)
     tz_name = local_datetime.tzinfo.tzname(local_datetime.datetime)
     numpy_offset = (
         np.timedelta64(tz_offset.days, 'D') +
         np.timedelta64(tz_offset.seconds, 's')
     )
-    data_array[time_coord
-               ] = (getattr(data_array, time_coord).values + numpy_offset)
+    data_array[time_coord] = time_values + numpy_offset
     data_array.attrs['tz_name'] = tz_name
