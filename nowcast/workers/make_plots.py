@@ -53,7 +53,10 @@ from nowcast.figures.publish import (
     storm_surge_alerts_thumbnail,
     compare_tide_prediction_max_ssh,
 )
-from nowcast.figures.fvcom import tide_stn_water_level
+from nowcast.figures.fvcom import (
+    second_narrows_current,
+    tide_stn_water_level,
+)
 from nowcast.figures.wwatch3 import wave_height_period
 # Legacy figures code
 from nowcast.figures import research_VENUS
@@ -213,48 +216,48 @@ def make_plots(parsed_args, config, *args):
             )
 
     if model == 'fvcom':
-        fvcom_ssh_dataset_filename = (
-            config['vhfr fvcom runs']['ssh dataset filename']
+        fvcom_stns_dataset_filename = (
+            config['vhfr fvcom runs']['stations dataset filename']
         )
         if run_type == 'nowcast':
             results_dir = Path(
                 config['vhfr fvcom runs']['results archive'][run_type], dmy
             )
-            fvcom_ssh_dataset_path = results_dir / fvcom_ssh_dataset_filename
+            fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
         else:
             nowcast_results_dir = Path(
                 config['vhfr fvcom runs']['results archive']['nowcast'], dmy
             )
             nowcast_dataset_path = (
-                nowcast_results_dir / fvcom_ssh_dataset_filename
+                nowcast_results_dir / fvcom_stns_dataset_filename
             )
             forecast_results_dir = Path(
                 config['vhfr fvcom runs']['results archive']['forecast'], dmy
             )
             forecast_dataset_path = (
-                forecast_results_dir / fvcom_ssh_dataset_filename
+                forecast_results_dir / fvcom_stns_dataset_filename
             )
-            fvcom_ssh_dataset_path = Path(
+            fvcom_stns_dataset_path = Path(
                 '/tmp/vhfr_low_v2_station_timeseries_forecast.nc'
             )
             cmd = (
                 f'ncrcat -O {nowcast_dataset_path} {forecast_dataset_path} '
-                f'-o {fvcom_ssh_dataset_path}'
+                f'-o {fvcom_stns_dataset_path}'
             )
             subprocess.check_output(shlex.split(cmd))
         cmd = (
             f'ncrename -O -v siglay,sigma_layer -v siglev,sigma_level '
-            f'{fvcom_ssh_dataset_path} /tmp/{fvcom_ssh_dataset_path.name}'
+            f'{fvcom_stns_dataset_path} /tmp/{fvcom_stns_dataset_path.name}'
         )
         subprocess.check_output(shlex.split(cmd))
-        fvcom_ssh_dataset = xarray.open_dataset(
-            f'/tmp/{fvcom_ssh_dataset_path.name}'
+        fvcom_stns_dataset = xarray.open_dataset(
+            f'/tmp/{fvcom_stns_dataset_path.name}'
         )
         nemo_ssh_dataset_url_tmpl = (
             config['figures']['dataset URLs']['tide stn ssh time series']
         )
         fig_functions = _prep_fvcom_publish_fig_functions(
-            fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl
+            fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl
         )
 
     if model == 'wwatch3':
@@ -708,7 +711,7 @@ def _prep_publish_fig_functions(
 
 
 def _prep_fvcom_publish_fig_functions(
-    fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl
+    fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl
 ):
     names = {
         'Calamity Point': 'CP_waterlevel',
@@ -725,9 +728,15 @@ def _prep_fvcom_publish_fig_functions(
         fig_functions.update({
             svg_root: {
                 'function': tide_stn_water_level.make_figure,
-                'args': (place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl),
+                'args': (place, fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl),
             }
         })
+    fig_functions.update({
+        '2ndNarrows_current': {
+            'function': second_narrows_current.make_figure,
+            'args': ('2nd Narrows', fvcom_stns_dataset),
+        }
+    })
     return fig_functions
 
 
