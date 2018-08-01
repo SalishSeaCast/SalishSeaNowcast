@@ -158,11 +158,11 @@ def _prep_plot_data(
         # No observations available
         obs = None
     model_ssh_period = slice(
-        str(ssh_forecast.time[0].values), str(ssh_forecast.time[-1].values)
+        str(ssh_forecast.time.values[0]), str(ssh_forecast.time.values[-1])
     )
     forecast_period = slice(
-        str(ssh_forecast.time[-forecast_hrs * 6].values),
-        str(ssh_forecast.time[-1].values)
+        str(ssh_forecast.time.values[-forecast_hrs * 6]),
+        str(ssh_forecast.time.values[-1])
     )
     try:
         obs_period = slice(str(obs.time.values[0]), str(obs.time.values[-1]))
@@ -174,7 +174,12 @@ def _prep_plot_data(
     ttide.rename(columns={' pred_noshallow ': 'pred_noshallow'}, inplace=True)
     ttide.index = ttide.time
     ttide_ds = xarray.Dataset.from_dataframe(ttide)
-    shared.localize_time(ttide_ds)
+    # Localize ttide dataset timezone to ssh_forecast times because ttide
+    # extends well beyond ends of ssh_forecast period
+    shared.localize_time(
+        ttide_ds,
+        local_datetime=arrow.get(str(ssh_forecast.time.values[0])).to('local')
+    )
     # NEMO sea surface height dataset corrected to include unmodeled tide constituents
     ssh_correction = ttide_ds.pred_noshallow.sel(
         time=model_ssh_period
