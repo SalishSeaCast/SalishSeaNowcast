@@ -199,7 +199,15 @@ def _upload_fraser_turbidity_file(
         # turbidity file does not exist, so create symlink to persist
         # previous day's file
         prev_day_fn = filename_tmpl.format(run_date.shift(days=-1).date())
-        localpath.symlink_to(localpath.with_name(prev_day_fn))
+        try:
+            localpath.symlink_to(localpath.with_name(prev_day_fn))
+        except FileExistsError:
+            # This probably happens due to a race condition when 2 or more
+            # upload_forcing workers are running concurrently; see
+            # https://bitbucket.org/salishsea/salishseanowcast/issues/57
+            # So, we assume that another instance created the symlink, and
+            # don't worry.
+            pass
         logger.critical(
             f'Fraser River turbidity forcing file not found; '
             f'created symlink to {localpath.with_name(prev_day_fn)}',
