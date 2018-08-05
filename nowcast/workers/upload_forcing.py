@@ -278,7 +278,15 @@ def _upload_live_ocean_files(
                 run_date.shift(days=-1).date()
             )
         )
-        localpath.symlink_to(localpath.with_name(prev_day_fn))
+        try:
+            localpath.symlink_to(localpath.with_name(prev_day_fn))
+        except FileExistsError:
+            # This probably happens due to a race condition when 2 or more
+            # upload_forcing workers are running concurrently; see
+            # https://bitbucket.org/salishsea/salishseanowcast/issues/57
+            # So, we assume that another instance created the symlink, and
+            # don't worry.
+            pass
         logging_level = (
             logging.INFO if run_type == 'forecast2' else logging.CRITICAL
         )
