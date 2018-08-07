@@ -11,3 +11,10 @@ dependencies:
   - matplotlib=1.5.3
   - nemo_nowcast
   - python=3.6
+  - retrying
+
+  # RTD packages
+  - mock
+  - pillow
+  - sphinx
+  - sphinx_rtd_theme
