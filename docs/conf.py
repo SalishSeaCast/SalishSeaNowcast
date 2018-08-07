@@ -101,7 +101,6 @@ autodoc_mock_imports = [
     'paramiko',
     'salishsea_cmd',
     'salishsea_cmd.api',
-    'salishsea_cmd.lib',
     'salishsea_tools',
     'salishsea_tools.LiveOcean_BCs',
     'salishsea_tools.namelist',

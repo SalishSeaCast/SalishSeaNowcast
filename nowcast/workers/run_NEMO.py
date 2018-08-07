@@ -31,7 +31,6 @@ from nemo_nowcast import (
 import nemo_cmd.prepare
 from nemo_cmd.namelist import namelist2dict
 import salishsea_cmd.api
-import salishsea_cmd.lib
 import salishsea_cmd.run
 import yaml
 
@@ -435,7 +434,7 @@ def _create_run_script(
 def _build_script(
     run_dir, run_type, run_desc_filepath, results_dir, host_name, config
 ):
-    run_desc = salishsea_cmd.lib.load_run_desc(run_desc_filepath)
+    run_desc = nemo_cmd.prepare.load_run_desc(run_desc_filepath)
     host_config = config['run']['enabled hosts'][host_name]
     nemo_processors = nemo_cmd.prepare.get_n_processors(run_desc, run_dir)
     xios_processors = int(run_desc['output']['XIOS servers'])

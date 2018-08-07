@@ -1131,7 +1131,7 @@ class TestBuildScript:
             'forecast2',
         ]
     )
-    @patch('nowcast.workers.run_NEMO.salishsea_cmd.lib.load_run_desc')
+    @patch('nowcast.workers.run_NEMO.nemo_cmd.prepare.load_run_desc')
     @patch(
         'nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors',
         return_value=112
@@ -1203,7 +1203,7 @@ class TestBuildScript:
         for i, line in enumerate(expected.splitlines()[:-1]):
             assert script[i].strip() == line.strip()
 
-    @patch('nowcast.workers.run_NEMO.salishsea_cmd.lib.load_run_desc')
+    @patch('nowcast.workers.run_NEMO.nemo_cmd.prepare.load_run_desc')
     @patch(
         'nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors',
         return_value=7
