@@ -21,7 +21,7 @@ click==6.7
 cliff==2.9.1
 cloudpickle==0.5.2
 cmd2==0.7.9
-cmocean==1.1
+cmocean==1.2
 coverage==4.4.2
 cryptography==2.1.4
 cycler==0.10.0
