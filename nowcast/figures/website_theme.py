@@ -41,6 +41,9 @@ COLOURS = {
         'label': 'white',
         'tick labels': 'white',
     },
+    'contour lines': {
+        'Baynes Sound entrance': 'black',
+    },
     'figure': {
         'facecolor': SITE_BACKGROUND_COLOUR,
     },
