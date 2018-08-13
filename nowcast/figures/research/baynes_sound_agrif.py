@@ -101,7 +101,10 @@ def make_figure(
     hour = numpy.asscalar(time.dt.hour.values)
     minute = numpy.asscalar(time.dt.minute.values)
     fig.suptitle(
-        f'{year}-{month:02d}-{day:02d} {hour:02d}:{minute:02d} {plot_data.tz_name}'
+        f'{year}-{month:02d}-{day:02d} {hour:02d}:{minute:02d} {plot_data.tz_name}',
+        color=theme.COLOURS['text']['figure title'],
+        fontproperties=theme.FONTS['figure title'],
+        fontsize=theme.FONTS['figure title'].get_size(),
     )
     return fig
 
@@ -120,6 +123,7 @@ def _prep_plot_data(
     :param :py:class:`pathlib.Path` bs_grid_path:
     :returns: :py:class:`types.SimpleNamespace`
     """
+
     ss_phys = xarray.open_dataset(ss_phys_url)
     ss_bio = xarray.open_dataset(ss_bio_url)
     for dataset in (ss_phys, ss_bio):
@@ -157,6 +161,7 @@ def _prep_plot_data(
         ss_nitrate=ss_nitrate,
         bs_nitrate=bs_nitrate,
         run_date=run_date,
+        tz_name=bs_phys.attrs['tz_name'],
         ss_grid=ss_grid,
         bs_grid=bs_grid,
     )
