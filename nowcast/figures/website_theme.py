@@ -62,6 +62,7 @@ COLOURS = {
         'axes title': 'white',
         'axis': 'white',
         'figure annotation': 'white',
+        'figure title': 'white',
         'info box title': 'white',
         'info box content': 'white',
         'risk level label': 'white',
@@ -155,6 +156,12 @@ FONTS = {
             family=['Bitstream Vera Sans', 'sans-serif'],
             weight='medium',
             size=10
+        ),
+    'figure title':
+        FontProperties(
+            family=['Bitstream Vera Sans', 'sans-serif'],
+            weight='medium',
+            size=15
         ),
     'info box title':
         FontProperties(

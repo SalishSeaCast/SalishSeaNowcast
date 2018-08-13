@@ -85,6 +85,15 @@ Descriptions under the links below are from the first cell of the notebooks
     a fringe of the full domain on the 3 non-land sides.  
     Ideally the axes tick labels will be lon/lat with angled grid lines.  
 
+* ##[TestBaynesSoundAGRIF.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestBaynesSoundAGRIF.ipynb)  
+    
+    **Test `baynes_sound_agrif` Module**  
+      
+    Render figure object produced by the `nowcast.figures.research.baynes_sound_agrif` module.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker  
+    to help ensure that the module will work in the nowcast production context.  
+
 * ##[DevelopTimeSeriesPlots.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb)  
     
     **Develop `time_series_plots` Figure Module**  
