@@ -1706,6 +1706,7 @@ class TestAfterDownloadResults:
             'failure forecast2',
             'failure hindcast',
             'failure nowcast-agrif',
+            'success nowcast-agrif',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1731,7 +1732,6 @@ class TestAfterDownloadResults:
             ('nemo', 'nowcast', 'research', '2016-10-29', '2016-10-29'),
             ('nemo', 'nowcast', 'comparison', '2016-10-28', '2016-10-27'),
             ('nemo', 'nowcast-green', 'research', '2016-10-29', '2016-10-29'),
-            ('nemo', 'nowcast-agrif', 'research', '2018-08-13', '2018-08-13'),
         ]
     )
     def test_success_nowcast_launch_make_plots_specials(
@@ -2086,7 +2086,6 @@ class TestAfterPingERDDAP:
             'success SEVIP-CTD',
             'success USDDL-CTD',
             'success TWDP-ferry',
-            'success nowcast-green',
             'success nemo-forecast',
         ]
     )
@@ -2121,6 +2120,31 @@ class TestAfterPingERDDAP:
         expected = NextWorker(
             'nowcast.workers.make_plots',
             args=['wwatch3', run_type, 'publish', '--run-date', run_date],
+            host='localhost'
+        )
+        assert expected in workers
+
+    def test_success_nowcast_green_launch_make_plots_nowcast_agrif(
+        self, config, checklist
+    ):
+        run_date = '2018-08-14'
+        p_checklist = patch.dict(
+            checklist, {
+                'NEMO run': {
+                    'nowcast-agrif': {
+                        'run date': run_date
+                    }
+                },
+            }
+        )
+        with p_checklist:
+            workers = next_workers.after_ping_erddap(
+                Message('ping_erddap', f'success nowcast-green'), config,
+                checklist
+            )
+        expected = NextWorker(
+            'nowcast.workers.make_plots',
+            args=['nemo', 'nowcast-agrif', 'research', '--run-date', run_date],
             host='localhost'
         )
         assert expected in workers
