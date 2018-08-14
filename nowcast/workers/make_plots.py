@@ -39,6 +39,7 @@ import xarray
 
 from nowcast import lib
 from nowcast.figures.research import (
+    baynes_sound_agrif,
     time_series_plots,
     tracer_thalweg_and_surface_hourly,
     velocity_section_and_surface,
@@ -86,11 +87,15 @@ def main():
     )
     worker.cli.add_argument(
         'run_type',
-        choices={'nowcast', 'nowcast-green', 'forecast', 'forecast2'},
+        choices={
+            'nowcast', 'nowcast-green', 'nowcast-agrif', 'forecast',
+            'forecast2'
+        },
         help='''
         Type of run to produce plots for:
         'nowcast' means nowcast physics-only runs,
         'nowcast-green' means nowcast-green physics/biology runs
+        'nowcast-agrif' means nowcast-green physics/biology runs with AGRIF sub-grid(s)
         'forecast' means forecast physics-only runs,
         'forecast2' means forecast2 preliminary forecast physics-only runs.
         ''',
@@ -202,6 +207,10 @@ def make_plots(parsed_args, config, *args):
         if run_type == 'nowcast-green' and plot_type == 'research':
             fig_functions = _prep_nowcast_green_research_fig_functions(
                 bathy, mesh_mask, results_dir, run_date
+            )
+        if run_type == 'nowcast-agrif' and plot_type == 'research':
+            fig_functions = _prep_nowcast_agrif_research_fig_functions(
+                config, results_dir, run_date
             )
         if run_type == 'nowcast' and plot_type == 'comparison':
             fig_functions = _prep_comparison_fig_functions(
@@ -539,6 +548,36 @@ def _prep_nowcast_green_research_fig_functions(
             )
         },
     })
+    return fig_functions
+
+
+def _prep_nowcast_agrif_research_fig_functions(
+    config, agrif_results_dir, run_date
+):
+    yyyymmdd = run_date.format('YYYYMMDD')
+    ss_phys_url = config['figures']['dataset URLs']['3d phys tracer fields']
+    bs_phys_path = agrif_results_dir / f'1_SalishSea_1h_{yyyymmdd}_{yyyymmdd}_grid_T.nc'
+    ss_bio_url = config['figures']['dataset URLs']['3d bio tracer fields']
+    bs_bio_path = agrif_results_dir / f'1_SalishSea_1h_{yyyymmdd}_{yyyymmdd}_ptrc_T.nc'
+    ss_grid_url = config['figures']['dataset URLs']['bathymetry']
+    bs_grid_path = Path(
+        config['run types']['nowcast-agrif']['sub-grid bathymetry']
+    )
+    fig_functions = {
+        'baynes_sound_surface': {
+            'function':
+                baynes_sound_agrif.make_figure,
+            'args': (
+                ss_phys_url,
+                bs_phys_path,
+                ss_bio_url,
+                bs_bio_path,
+                run_date,
+                ss_grid_url,
+                bs_grid_path,
+            ),
+        }
+    }
     return fig_functions
 
 

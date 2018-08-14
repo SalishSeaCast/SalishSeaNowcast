@@ -257,6 +257,7 @@ run types:
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
+    sub-grid bathymetry: /results/nowcast-sys/grid/subgrids/BaynesSound/bathymetry_201702_BS.nc
     land processor elimination: False
     duration: 1  # day
     restart from: nowcast-agrif
@@ -363,12 +364,19 @@ erddap:
 figures:
   # ERDDAP dataset URLs
   dataset URLs:
-    HRDPS fields: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1
+    bathymetry:
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02
+    HRDPS fields:
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1
     tide stn ssh time series:
       # **Must be quoted to project {} characters**
       'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10mV17-02'
     wwatch3 fields:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02.nc?hs,fp
+    3d phys tracer fields:
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV17-02
+    3d bio tracer fields:
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV17-02
   # Directory in which to find bathymetry and mesh mask files
   grid dir: /results/nowcast-sys/grid/
   # Pacific Now-West coastline polygons file

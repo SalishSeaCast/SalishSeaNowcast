@@ -1706,7 +1706,6 @@ class TestAfterDownloadResults:
             'failure forecast2',
             'failure hindcast',
             'failure nowcast-agrif',
-            'success nowcast-agrif',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1728,14 +1727,16 @@ class TestAfterDownloadResults:
         assert workers == []
 
     @pytest.mark.parametrize(
-        'model, run_type, plot_type, run_date', [
-            ('nemo', 'nowcast', 'research', '2016-10-29'),
-            ('nemo', 'nowcast', 'comparison', '2016-10-28'),
-            ('nemo', 'nowcast-green', 'research', '2016-10-29'),
+        'model, run_type, plot_type, run_date, plot_date', [
+            ('nemo', 'nowcast', 'research', '2016-10-29', '2016-10-29'),
+            ('nemo', 'nowcast', 'comparison', '2016-10-28', '2016-10-27'),
+            ('nemo', 'nowcast-green', 'research', '2016-10-29', '2016-10-29'),
+            ('nemo', 'nowcast-agrif', 'research', '2018-08-13', '2018-08-13'),
         ]
     )
     def test_success_nowcast_launch_make_plots_specials(
-        self, model, run_type, plot_type, run_date, config, checklist
+        self, model, run_type, plot_type, run_date, plot_date, config,
+        checklist
     ):
         workers = next_workers.after_download_results(
             Message(
@@ -1743,14 +1744,14 @@ class TestAfterDownloadResults:
                 f'success {run_type}',
                 payload={
                     run_type: {
-                        'run date': '2016-10-29'
+                        'run date': run_date
                     }
                 }
             ), config, checklist
         )
         expected = NextWorker(
             'nowcast.workers.make_plots',
-            args=[model, run_type, plot_type, '--run-date', run_date],
+            args=[model, run_type, plot_type, '--run-date', plot_date],
             host='localhost'
         )
         assert expected in workers

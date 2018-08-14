@@ -50,7 +50,8 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ('run_type',)
         assert kwargs['choices'] == {
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2'
+            'nowcast', 'nowcast-green', 'nowcast-agrif', 'forecast',
+            'forecast2'
         }
         assert 'help' in kwargs
 
