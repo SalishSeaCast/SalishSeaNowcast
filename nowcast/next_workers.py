@@ -1171,8 +1171,6 @@ def after_download_results(msg, config, checklist):
     if msg.type.startswith('success'):
         run_type = msg.type.split()[1]
         run_date = msg.payload[run_type]['run date']
-        if run_type == 'nowcast-agrif':
-            return next_workers[msg.type]
         if run_type == 'hindcast':
             next_workers[msg.type].append(
                 NextWorker(
