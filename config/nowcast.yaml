@@ -1210,6 +1210,8 @@ message registry:
       failure nemo nowcast comparison: nemo nowcast comparison plots failed
       success nemo nowcast-green research: nemo nowcast-green reseach plots produced
       failure nemo nowcast-green research: nemo nowcast-green research plots failed
+      success nemo nowcast-agrif research: nemo nowcast-agrif reseach plots produced
+      failure nemo nowcast-agrif research: nemo nowcast-agrif research plots failed
       success nemo forecast publish: nemo forecast publish plots produced
       failure nemo forecast publish: nemo forecast publish plots failed
       success nemo forecast2 publish: nemo forecast2 publish plots produced
