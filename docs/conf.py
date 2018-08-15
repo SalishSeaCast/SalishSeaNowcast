@@ -90,6 +90,7 @@ autodoc_mock_imports = [
     'moad_tools',
     'moad_tools.observations',
     'moad_tools.places',
+    'mpl_toolkits.basemap',
     'nemo_cmd',
     'nemo_nowcast.fileutils',
     'nemo_nowcast.workers',
