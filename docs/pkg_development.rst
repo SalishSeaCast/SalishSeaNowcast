@@ -192,34 +192,46 @@ use:
 to do a clean build of the documentation.
 The output looks something like::
 
-  rm -rf _build/*
-  sphinx-build -b html -d _build/doctrees   . _build/html
-  Running Sphinx v1.4.6
+  Removing everything under '_build'...
+  Running Sphinx v1.7.6
   making output directory...
   loading pickled environment... not yet created
-  loading intersphinx inventory from http://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv...
-  loading intersphinx inventory from http://salishsea-meopar-tools.readthedocs.io/en/latest/objects.inv...
-  loading intersphinx inventory from https://nemo-nowcast.readthedocs.io/en/latest/objects.inv...
   loading intersphinx inventory from https://docs.python.org/3/objects.inv...
+  loading intersphinx inventory from https://nemo-nowcast.readthedocs.io/en/latest/objects.inv...
+  loading intersphinx inventory from https://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv...
+  loading intersphinx inventory from https://salishsea-meopar-tools.readthedocs.io/en/latest/objects.inv...
+  loading intersphinx inventory from https://salishsea-site.readthedocs.io/en/latest/objects.inv...
+  loading intersphinx inventory from https://salishseacmd.readthedocs.io/en/latest/objects.inv...
   building [mo]: targets for 0 po files that are out of date
-  building [html]: targets for 10 source files that are out of date
-  updating environment: 10 added, 0 changed, 0 removed
-  reading sources... [100%] workers
+  building [html]: targets for 20 source files that are out of date
+  updating environment: 20 added, 0 changed, 0 removed
+  /media/doug/warehouse/conda_envs/nowcast-sphinx-build/lib/python3.6/site-packages/matplotlib/__init__.py:1357: UserWarning:  This call to matplotlib.use() has no effect
+  because the backend has already been chosen;
+  matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
+  or matplotlib.backends is imported for the first time.
+
+    warnings.warn(_use_error_msg)
+
   looking for now-outdated files... none found
   pickling environment... done
   checking consistency... done
   preparing documents... done
   writing output... [100%] workers
   generating indices...
+  highlighting module code... [100%] nowcast.workers.watch_ww3
   writing additional pages... search
-  copying images... [100%] ProcessFlow.svg
+  copying images... [100%] ProcessFlow.png
   copying static files... done
   copying extra files... done
   dumping search index in English (code: en) ... done
   dumping object inventory... done
-  build succeeded.
+  build succeeded, 1 warnings.
 
-  Build finished. The HTML pages are in _build/html.
+  The HTML pages are in _build/html.
+
+The warning about :kbd:`matplotlib.use()` is expected; see `issue #19`_.
+
+.. _issue #19: https://bitbucket.org/salishsea/salishseanowcast/issues/19
 
 The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
 You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build.
