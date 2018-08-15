@@ -20,6 +20,22 @@
 :kbd:`SalishSeaNowcast` Package Development
 *******************************************
 
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target: https://docs.python.org/3.6/
+    :alt: Python Version
+.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
+    :target: https://bitbucket.org/salishsea/salishseanowcast/
+    :alt: Mercurial on Bitbucket
+.. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
+    :target: https://salishsea-nowcast.readthedocs.io/en/latest/
+    :alt: Documentation Status
+.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseanowcast.svg
+    :target: https://bitbucket.org/salishsea/salishseanowcast/issues?status=new&status=open
+    :alt: Issue Tracker
+
 The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
 The package uses the `NEMO_Nowcast`_ framework to implement the :ref:`SalishSeaNowcastSystem`.
 
@@ -30,6 +46,10 @@ The package uses the `NEMO_Nowcast`_ framework to implement the :ref:`SalishSeaN
 
 Python Versions
 ===============
+
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target: https://docs.python.org/3.6/
+    :alt: Python Version
 
 The :kbd:`SalishSeaNowcast` package is developed and tested using `Python`_ 3.6 or later.
 The package uses some Python language features that are not available in versions prior to 3.6,
@@ -48,6 +68,10 @@ in particular:
 
 Getting the Code
 ================
+
+.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
+    :target: https://bitbucket.org/salishsea/salishseanowcast/
+    :alt: Mercurial on Bitbucket
 
 Clone the code and documentation `repository`_ from Bitbucket with:
 
@@ -147,6 +171,10 @@ in the repository root directory.
 
 Building the Documentation
 ==========================
+
+.. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
+    :target: https://salishsea-nowcast.readthedocs.io/en/latest/
+    :alt: Documentation Status
 
 The documentation for the :kbd:`SalishSeaNowcast` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
 Creating a :ref:`SalishSeaNowcastDevelopmentEnvironment` as described above includes the installation of Sphinx.
@@ -285,6 +313,10 @@ to produce an HTML report that you can view in your browser by opening :file:`Sa
 Version Control Repository
 ==========================
 
+.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
+    :target: https://bitbucket.org/salishsea/salishseanowcast/
+    :alt: Mercurial on Bitbucket
+
 The :kbd:`SalishSeaNowcast` package code and documentation source files are available as a `Mercurial`_ repository at https://bitbucket.org/salishsea/salishseanowcast.
 
 .. _Mercurial: https://www.mercurial-scm.org/
@@ -295,6 +327,26 @@ The :kbd:`SalishSeaNowcast` package code and documentation source files are avai
 Issue Tracker
 =============
 
+.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseanowcast.svg
+    :target: https://bitbucket.org/salishsea/salishseanowcast/issues?status=new&status=open
+    :alt: Issue Tracker
+
 Development tasks,
 bug reports,
 and enhancement ideas are recorded and managed in the issue tracker at https://bitbucket.org/salishsea/salishseanowcast/issues.
+
+
+License
+=======
+
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
+
+The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2018 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+
+.. _Salish Sea MEOPAR Project Contributors: https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
+
+They are licensed under the Apache License, Version 2.0.
+http://www.apache.org/licenses/LICENSE-2.0
+Please see the LICENSE file for details of the license.
