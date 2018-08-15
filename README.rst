@@ -2,6 +2,24 @@
 Salish Sea NEMO Model Nowcast
 *****************************
 
+:License: Apache License, Version 2.0
+
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+    :target: https://docs.python.org/3.6/
+    :alt: Python Version
+.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
+    :target: https://bitbucket.org/salishsea/salishseanowcast/
+    :alt: Mercurial on Bitbucket
+.. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
+    :target: https://salishsea-nowcast.readthedocs.io/en/latest/
+    :alt: Documentation Status
+.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseanowcast.svg
+    :target: https://bitbucket.org/salishsea/salishseanowcast/issues?status=new&status=open
+    :alt: Issue Tracker
+
 The ``SalishSeaNowcast`` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
 The runs use as-recent-as-available
 (typically previous day)
@@ -28,6 +46,10 @@ Documentation for the package is in the ``docs/`` directory and is rendered at h
 
 License
 =======
+
+.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    :target: https://www.apache.org/licenses/LICENSE-2.0
+    :alt: Licensed under the Apache License, Version 2.0
 
 The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2018 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
 
