@@ -48,12 +48,25 @@ def main():
     worker.cli.add_argument(
         '--full-month',
         action='store_true',
-        help='Start date of the previous hindcast run.'
+        help='''
+        Configure the hindcast run to be a calendar month in duration.
+        The default run duration is 10 days, or the number of days remaining
+        in the calendar month of the run.
+        '''
     )
     worker.cli.add_argument(
         '--prev-run-date',
         default=None,
         help='Start date of the previous hindcast run.'
+    )
+    worker.cli.add_argument(
+        '--walltime',
+        default=None,
+        help='''
+        Walltime to request for the hindcast run.
+        Defaults to 3 hours (03:00:00) for 10-ish day runs,
+        and 8.5 hours (08:30:00) for --full-month runs.
+        '''
     )
     worker.run(run_NEMO_hindcast, success, failure)
 
@@ -147,9 +160,13 @@ def run_NEMO_hindcast(parsed_args, config, *args):
             sftp_client, host_name, prev_namelist_info, run_date, run_days,
             config
         )
+        walltime = (
+            parsed_args.walltime
+            or ('08:30:00' if parsed_args.full_month else '03:00:00')
+        )
         _edit_run_desc(
             sftp_client, host_name, prev_run_date, prev_namelist_info,
-            run_date, config
+            run_date, walltime, config
         )
         run_id = f'{run_date.format("DDMMMYY").lower()}hindcast'
         _launch_run(ssh_client, host_name, run_id, prev_job_id, config)
@@ -288,6 +305,7 @@ def _edit_run_desc(
     prev_run_date,
     prev_namelist_info,
     run_date,
+    walltime,
     config,
     yaml_tmpl=Path('/tmp/hindcast_template.yaml')
 ):
@@ -297,6 +315,7 @@ def _edit_run_desc(
     :param :py:class:`arrow.Arrow` prev_run_date:
     :param :py:class:`types.SimpleNamespace` prev_namelist_info:
     :param :py:class:`arrow.Arrow` run_date:
+    :param str walltime:
     :param :py:class:`nemo_nowcast.Config` config:
     :param :py:class:`pathlib.Path` yaml_tmpl:
     """
@@ -310,6 +329,8 @@ def _edit_run_desc(
     run_id = f'{run_date.format("DDMMMYY").lower()}hindcast'
     run_desc['run_id'] = run_id
     logger.debug(f'set run_id to {run_id}')
+    run_desc['walltime'] = walltime
+    logger.debug(f'set walltime to {walltime}')
     scratch_dir = Path(
         config['run']['hindcast hosts'][host_name]['scratch dir']
     )
