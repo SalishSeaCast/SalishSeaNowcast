@@ -65,6 +65,13 @@ class TestMain:
         assert kwargs['default'] is None
         assert 'help' in kwargs
 
+    def test_add_walltime_option(self, m_worker):
+        run_NEMO_hindcast.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[3]
+        assert args == ('--walltime',)
+        assert kwargs['default'] is None
+        assert 'help' in kwargs
+
     def test_run_worker(self, m_worker):
         run_NEMO_hindcast.main()
         args, kwargs = m_worker().run.call_args
@@ -186,6 +193,7 @@ class TestRunNEMO_Hindcast:
             host_name='cedar',
             full_month=full_month,
             prev_run_date=prev_run_date,
+            walltime=None,
         )
         checklist = run_NEMO_hindcast.run_NEMO_hindcast(
             parsed_args, self.config
@@ -220,6 +228,7 @@ class TestRunNEMO_Hindcast:
             host_name='cedar',
             full_month=full_month,
             prev_run_date=None,
+            walltime=None,
         )
         m_get_prev_run_queue_info.return_value = (prev_run_date, 12345678)
         checklist = run_NEMO_hindcast.run_NEMO_hindcast(
@@ -274,11 +283,52 @@ class TestRunNEMO_Hindcast:
             host_name='cedar',
             full_month=full_month,
             prev_run_date=prev_run_date,
+            walltime=None,
         )
         run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, self.config)
         m_edit_namelist_time.assert_called_once_with(
             m_sftp()[1], 'cedar', m_get_prev_run_namelist_info(),
             expected_run_date, expected_run_days, self.config
+        )
+
+    @pytest.mark.parametrize(
+        'full_month, prev_run_date, walltime, expected_run_date, expected_walltime',
+        [
+            (
+                True, arrow.get('2018-07-01'), None, arrow.get('2018-08-01'),
+                '08:30:00'
+            ),  # default
+            (
+                True, arrow.get('2018-07-01'), '12:00:00',
+                arrow.get('2018-08-01'), '12:00:00'
+            ),
+            (
+                False, arrow.get('2018-07-01'), None, arrow.get('2018-07-11'),
+                '03:00:00'
+            ),  # default
+            (
+                False, arrow.get('2018-07-01'), '06:00:00',
+                arrow.get('2018-07-11'), '06:00:00'
+            ),
+        ]
+    )
+    def test_edit_run_desc_walltime(
+        self, m_launch_run, m_edit_run_desc, m_edit_namelist_time,
+        m_get_prev_run_namelist_info, m_get_prev_run_queue_info, m_sftp,
+        m_logger, full_month, prev_run_date, walltime, expected_run_date,
+        expected_walltime
+    ):
+        parsed_args = SimpleNamespace(
+            host_name='cedar',
+            full_month=full_month,
+            prev_run_date=prev_run_date,
+            walltime=walltime,
+        )
+        run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, self.config)
+        m_edit_run_desc.assert_called_once_with(
+            m_sftp()[1], 'cedar', prev_run_date,
+            m_get_prev_run_namelist_info(), expected_run_date,
+            expected_walltime, self.config
         )
 
 
@@ -501,7 +551,8 @@ class TestEditNamelistTime:
         'restart': {
             'restart.nc': '',
             'restart_trc.nc': '',
-        }
+        },
+        'walltime': '06:00:00',
     },
     autospec=True
 )
@@ -530,6 +581,7 @@ class TestEditRunDesc:
             arrow.get('2018-01-01'),
             prev_namelist_info,
             arrow.get('2018-02-01'),
+            '03:00:00',
             self.config,
             yaml_tmpl=Path(str(yaml_tmpl))
         )
@@ -537,8 +589,11 @@ class TestEditRunDesc:
             'hindcast-sys/runs/hindcast_template.yaml', yaml_tmpl
         )
 
+    @pytest.mark.parametrize('walltime', ['03:00:00', '08:30:00', '12:00:00'])
     @patch('nowcast.workers.run_NEMO_hindcast.yaml.safe_dump', autospec=True)
-    def test_edit_run_desc(self, m_safe_dump, m_safe_load, m_logger, tmpdir):
+    def test_edit_run_desc(
+        self, m_safe_dump, m_safe_load, m_logger, walltime, tmpdir
+    ):
         m_sftp_client = Mock(name='sftp_client')
         prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
         yaml_tmpl = tmpdir.ensure('hindcast_tmpl.yaml')
@@ -549,6 +604,7 @@ class TestEditRunDesc:
                 arrow.get('2018-05-01'),
                 prev_namelist_info,
                 arrow.get('2018-06-01'),
+                walltime,
                 self.config,
                 yaml_tmpl=Path(str(yaml_tmpl))
             )
@@ -559,7 +615,8 @@ class TestEditRunDesc:
                     '/scratch/dlatorne/hindcast/01may18/SalishSea_02717280_restart.nc',
                 'restart_trc.nc':
                     '/scratch/dlatorne/hindcast/01may18/SalishSea_02717280_restart_trc.nc',
-            }
+            },
+            'walltime': walltime,
         },
                                             m_open().__enter__(),
                                             default_flow_style=False)
@@ -574,6 +631,7 @@ class TestEditRunDesc:
             arrow.get('2018-01-01'),
             prev_namelist_info,
             arrow.get('2018-02-01'),
+            '03:00:00',
             self.config,
             yaml_tmpl=Path(str(yaml_tmpl))
         )
