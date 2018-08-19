@@ -51,9 +51,16 @@ class TestMain:
         assert args == ('host_name',)
         assert 'help' in kwargs
 
-    def test_add_prev_run_date_option(self, m_worker):
+    def test_add_full_month_option(self, m_worker):
         run_NEMO_hindcast.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ('--full-month',)
+        assert kwargs['action'] == 'store_true'
+        assert 'help' in kwargs
+
+    def test_add_prev_run_date_option(self, m_worker):
+        run_NEMO_hindcast.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ('--prev-run-date',)
         assert kwargs['default'] is None
         assert 'help' in kwargs
@@ -104,7 +111,6 @@ class TestFailure:
 @patch(
     'nowcast.workers.watch_NEMO_agrif.ssh_sftp.sftp',
     return_value=(Mock(name='ssh_client'), Mock(name='sftp_client')),
-    autospec=True
 )
 @patch(
     'nowcast.workers.run_NEMO_hindcast._get_prev_run_queue_info',
@@ -113,7 +119,6 @@ class TestFailure:
 )
 @patch(
     'nowcast.workers.run_NEMO_hindcast._get_prev_run_namelist_info',
-    autospec=True
 )
 @patch('nowcast.workers.run_NEMO_hindcast._edit_namelist_time', autospec=True)
 @patch('nowcast.workers.run_NEMO_hindcast._edit_run_desc', autospec=True)
@@ -135,16 +140,19 @@ class TestRunNEMO_Hindcast:
         }
     }
 
+    @pytest.mark.parametrize('full_month', [True, False])
     def test_checklist_run_date_in_future(
         self, m_launch_run, m_edit_run_desc, m_edit_namelist_time,
         m_get_prev_run_namelist_info, m_get_prev_run_queue_info, m_sftp,
-        m_logger
+        m_logger, full_month
     ):
         parsed_args = SimpleNamespace(
-            host_name='cedar', prev_run_date=arrow.get('2018-06-01')
+            host_name='cedar',
+            full_month=full_month,
+            prev_run_date=arrow.get('2018-06-01')
         )
         with patch('nowcast.workers.run_NEMO_hindcast.arrow.now') as m_now:
-            m_now.return_value = arrow.get('2018-07-01')
+            m_now.return_value = arrow.get('2018-06-08')
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(
                 parsed_args, self.config
             )
@@ -156,13 +164,28 @@ class TestRunNEMO_Hindcast:
         }
         assert checklist == expected
 
+    @pytest.mark.parametrize(
+        'full_month, prev_run_date, expected_run_id',
+        [
+            (True, arrow.get('2018-01-01'), '01feb18hindcast'),
+            (False, arrow.get('2018-07-01'), '11jul18hindcast'),
+            (False, arrow.get('2018-07-11'), '21jul18hindcast'),
+            (False, arrow.get('2018-07-21'), '01aug18hindcast'),  # 31 day mo
+            (False, arrow.get('2018-06-21'), '01jul18hindcast'),  # 30 day mo
+            (False, arrow.get('2018-02-21'), '01mar18hindcast'),  # feb
+            (False, arrow.get('2016-02-21'), '01mar16hindcast'),  # leap year
+            (False, arrow.get('2017-12-21'), '01jan18hindcast'),  # year end
+        ]
+    )
     def test_checklist_with_prev_run_date(
         self, m_launch_run, m_edit_run_desc, m_edit_namelist_time,
         m_get_prev_run_namelist_info, m_get_prev_run_queue_info, m_sftp,
-        m_logger
+        m_logger, full_month, prev_run_date, expected_run_id
     ):
         parsed_args = SimpleNamespace(
-            host_name='cedar', prev_run_date=arrow.get('2018-01-01')
+            host_name='cedar',
+            full_month=full_month,
+            prev_run_date=prev_run_date,
         )
         checklist = run_NEMO_hindcast.run_NEMO_hindcast(
             parsed_args, self.config
@@ -170,27 +193,93 @@ class TestRunNEMO_Hindcast:
         expected = {
             'hindcast': {
                 'host': 'cedar',
-                'run id': '01feb18hindcast',
+                'run id': expected_run_id,
             }
         }
         assert checklist == expected
 
+    @pytest.mark.parametrize(
+        'full_month, prev_run_date, expected_run_id',
+        [
+            (True, arrow.get('2018-01-01'), '01feb18hindcast'),
+            (False, arrow.get('2018-07-01'), '11jul18hindcast'),
+            (False, arrow.get('2018-07-11'), '21jul18hindcast'),
+            (False, arrow.get('2018-07-21'), '01aug18hindcast'),  # 31 day mo
+            (False, arrow.get('2018-06-21'), '01jul18hindcast'),  # 30 day mo
+            (False, arrow.get('2018-02-21'), '01mar18hindcast'),  # feb
+            (False, arrow.get('2016-02-21'), '01mar16hindcast'),  # leap year
+            (False, arrow.get('2017-12-21'), '01jan18hindcast'),  # year end
+        ]
+    )
     def test_checklist_without_prev_run_date(
         self, m_launch_run, m_edit_run_desc, m_edit_namelist_time,
         m_get_prev_run_namelist_info, m_get_prev_run_queue_info, m_sftp,
-        m_logger
+        m_logger, full_month, prev_run_date, expected_run_id
     ):
-        parsed_args = SimpleNamespace(host_name='cedar', prev_run_date=None)
+        parsed_args = SimpleNamespace(
+            host_name='cedar',
+            full_month=full_month,
+            prev_run_date=None,
+        )
+        m_get_prev_run_queue_info.return_value = (prev_run_date, 12345678)
         checklist = run_NEMO_hindcast.run_NEMO_hindcast(
             parsed_args, self.config
         )
         expected = {
             'hindcast': {
                 'host': 'cedar',
-                'run id': '01feb18hindcast',
+                'run id': expected_run_id,
             }
         }
         assert checklist == expected
+
+    @pytest.mark.parametrize(
+        'full_month, prev_run_date, expected_run_date, expected_run_days',
+        [
+            (True, arrow.get('2018-01-01'), arrow.get('2018-02-01'),
+             28),  # 28d run
+            (True, arrow.get('2016-01-01'), arrow.get('2016-02-01'),
+             29),  # 29d run
+            (True, arrow.get('2018-02-01'), arrow.get('2018-03-01'),
+             31),  # 31d run
+            (True, arrow.get('2018-03-01'), arrow.get('2018-04-01'),
+             30),  # 30d run
+            (False, arrow.get('2018-07-01'), arrow.get('2018-07-11'),
+             10),  # 10d run
+            (False, arrow.get('2018-07-11'), arrow.get('2018-07-21'),
+             11),  # 11d run
+            (False, arrow.get('2018-02-11'), arrow.get('2018-02-21'),
+             8),  # 8d run
+            (False, arrow.get('2016-02-11'), arrow.get('2016-02-21'),
+             9),  # 9d run
+            (False, arrow.get('2018-07-21'), arrow.get('2018-08-01'),
+             10),  # 31 day mo
+            (False, arrow.get('2018-06-21'), arrow.get('2018-07-01'),
+             10),  # 30 day mo
+            (False, arrow.get('2018-02-21'), arrow.get('2018-03-01'),
+             10),  # feb
+            (False, arrow.get('2016-02-21'), arrow.get('2016-03-01'),
+             10),  # leap year
+            (False, arrow.get('2017-12-21'), arrow.get('2018-01-01'),
+             10),  # year end
+        ]
+    )
+    def test_edit_namelist_time_run_date(
+        self, m_launch_run, m_edit_run_desc, m_edit_namelist_time,
+        m_get_prev_run_namelist_info, m_get_prev_run_queue_info, m_sftp,
+        m_logger, full_month, prev_run_date, expected_run_date,
+        expected_run_days
+    ):
+        parsed_args = SimpleNamespace(
+            host_name='cedar',
+            full_month=full_month,
+            prev_run_date=prev_run_date,
+        )
+        run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, self.config)
+        m_edit_namelist_time.assert_called_once_with(
+            m_sftp()[1], 'cedar', m_get_prev_run_namelist_info(),
+            expected_run_date, expected_run_days, self.config
+        )
 
 
 @patch('nowcast.workers.run_NEMO_hindcast.logger', autospec=True)
@@ -323,39 +412,70 @@ class TestEditNamelistTime:
         prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
             m_sftp_client, 'cedar', prev_namelist_info,
-            arrow.get('2018-02-01'), self.config
+            arrow.get('2018-02-01'), 28, self.config
         )
         m_sftp_client.get.assert_called_once_with(
             'hindcast-sys/runs/namelist.time', '/tmp/hindcast.namelist.time'
         )
 
     @pytest.mark.parametrize(
-        'run_date, itend',
+        'run_date, run_days, expected_itend, expected_stocklist',
         [
-            (arrow.get('2018-03-01'), 2784240),  # 31 day month
-            (arrow.get('2018-02-01'), 2777760),  # February
-            (arrow.get('2016-02-01'), 2779920),  # leap year
-            (arrow.get('2018-04-01'), 2782080),  # 30 day month
+            (
+                arrow.get('2018-03-01'), 31, 2784240,
+                [2738880, 2760480, 2784240, 0, 0, 0, 0, 0, 0, 0]
+            ),  # 31 day month
+            (
+                arrow.get('2018-02-01'), 28, 2777760,
+                [2738880, 2760480, 2777760, 0, 0, 0, 0, 0, 0, 0]
+            ),  # February
+            (
+                arrow.get('2016-02-01'), 29, 2779920,
+                [2738880, 2760480, 2779920, 0, 0, 0, 0, 0, 0, 0]
+            ),  # leap year
+            (
+                arrow.get('2018-04-01'), 30, 2782080,
+                [2738880, 2760480, 2782080, 0, 0, 0, 0, 0, 0, 0]
+            ),  # 30 day month
+            (
+                arrow.get('2018-04-01'), 10, 2738880,
+                [2738880, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            ),  # 10d run
+            (
+                arrow.get('2018-04-11'), 10, 2738880,
+                [2738880, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            ),  # 10d run
+            (
+                arrow.get('2018-02-21'), 8, 2734560,
+                [2734560, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            ),  # 8d run
+            (
+                arrow.get('2016-02-21'), 9, 2736720,
+                [2736720, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            ),  # 9d run
+            (
+                arrow.get('2018-03-21'), 11, 2741040,
+                [2741040, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            ),  # 11d run
         ]
     )
-    def test_patch_namelist_time(self, m_patch, m_logger, run_date, itend):
+    def test_patch_namelist_time(
+        self, m_patch, m_logger, run_date, run_days, expected_itend,
+        expected_stocklist
+    ):
         sftp_client = Mock(name='sftp_client')
         prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
-            sftp_client, 'cedar', prev_namelist_info, run_date, self.config
+            sftp_client, 'cedar', prev_namelist_info, run_date, run_days,
+            self.config
         )
         m_patch.assert_called_once_with(
             '/tmp/hindcast.namelist.time', {
                 'namrun': {
-                    'nn_it000':
-                        2717280 + 1,
-                    'nn_itend':
-                        itend,
-                    'nn_date0':
-                        int(run_date.format('YYYYMMDD')),
-                    'nn_stocklist': [
-                        2738880, 2760480, itend, 0, 0, 0, 0, 0, 0, 0
-                    ],
+                    'nn_it000': 2717280 + 1,
+                    'nn_itend': expected_itend,
+                    'nn_date0': int(run_date.format('YYYYMMDD')),
+                    'nn_stocklist': expected_stocklist,
                 }
             }, '/tmp/patched_hindcast.namelist.time'
         )
@@ -365,7 +485,7 @@ class TestEditNamelistTime:
         prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
             m_sftp_client, 'cedar', prev_namelist_info,
-            arrow.get('2018-02-01'), self.config
+            arrow.get('2018-02-01'), 28, self.config
         )
         m_sftp_client.put.assert_called_once_with(
             '/tmp/patched_hindcast.namelist.time',

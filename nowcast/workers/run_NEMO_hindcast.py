@@ -46,6 +46,11 @@ def main():
         'host_name', help='Name of the host to queue the run on'
     )
     worker.cli.add_argument(
+        '--full-month',
+        action='store_true',
+        help='Start date of the previous hindcast run.'
+    )
+    worker.cli.add_argument(
         '--prev-run-date',
         default=None,
         help='Start date of the previous hindcast run.'
@@ -111,7 +116,20 @@ def run_NEMO_hindcast(parsed_args, config, *args):
         else:
             prev_run_date = arrow.get(parsed_args.prev_run_date)
             prev_job_id = None
-        run_date = prev_run_date.shift(months=+1)
+        if parsed_args.full_month:
+            run_date = prev_run_date.shift(months=+1)
+            run_days = (run_date.shift(months=+1) - run_date).days
+        else:
+            if prev_run_date.day != 21:
+                run_date = prev_run_date.shift(days=+10)
+            else:
+                run_date = prev_run_date.shift(months=+1).replace(day=1)
+            if run_date.day != 21:
+                run_days = 10
+            else:
+                run_days = (
+                    run_date.shift(months=+1).replace(day=1) - run_date
+                ).days
         if run_date.naive >= arrow.now().floor('day').naive:
             sftp_client.close()
             ssh_client.close()
@@ -126,7 +144,8 @@ def run_NEMO_hindcast(parsed_args, config, *args):
             ssh_client, sftp_client, host_name, prev_run_date, config
         )
         _edit_namelist_time(
-            sftp_client, host_name, prev_namelist_info, run_date, config
+            sftp_client, host_name, prev_namelist_info, run_date, run_days,
+            config
         )
         _edit_run_desc(
             sftp_client, host_name, prev_run_date, prev_namelist_info,
@@ -217,31 +236,33 @@ def _get_prev_run_namelist_info(
 
 
 def _edit_namelist_time(
-    sftp_client, host_name, prev_namelist_info, run_date, config
+    sftp_client, host_name, prev_namelist_info, run_date, run_days, config
 ):
     """
     :param :py:class:`paramiko.sftp_client.SFTPClient` sftp_client:
     :param str host_name:
     :param :py:class:`types.SimpleNamespace` prev_namelist_info:
     :param :py:class:`arrow.Arrow` run_date:
+    :param int run_days:
     :param :py:class:`nemo_nowcast.Config` config:
     """
-    run_days = (run_date.shift(months=+1) - run_date).days
     timesteps_per_day = 24 * 60 * 60 / prev_namelist_info.rdt
     itend = prev_namelist_info.itend + run_days * timesteps_per_day
+    nn_stocklist = [0] * 10
+    if run_days < 28:
+        nn_stocklist[0] = int(itend)
+    else:
+        nn_stocklist[0:3] = [
+            int(prev_namelist_info.itend + timesteps_per_day * 10),
+            int(prev_namelist_info.itend + timesteps_per_day * 20),
+            int(itend)
+        ]
     patch = {
         'namrun': {
-            'nn_it000':
-                prev_namelist_info.itend + 1,
-            'nn_itend':
-                int(itend),
-            'nn_date0':
-                int(run_date.format('YYYYMMDD')),
-            'nn_stocklist': [
-                (int(prev_namelist_info.itend + timesteps_per_day * 10)),
-                (int(prev_namelist_info.itend + timesteps_per_day * 20)),
-                int(itend), 0, 0, 0, 0, 0, 0, 0
-            ],
+            'nn_it000': prev_namelist_info.itend + 1,
+            'nn_itend': int(itend),
+            'nn_date0': int(run_date.format('YYYYMMDD')),
+            'nn_stocklist': nn_stocklist,
         }
     }
     run_prep_dir = Path(
