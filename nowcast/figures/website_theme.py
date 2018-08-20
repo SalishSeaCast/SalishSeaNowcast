@@ -19,7 +19,7 @@ https://salishsea.eos.ubc.ca/nemo/ web pages.
 from matplotlib.font_manager import FontProperties
 
 #: The :kbd:`salishsea.eos.ubc.ca/nemo/` pages background colour,
-#: from the http://bootswatch.com/superhero/ theme.
+#: from the https://bootswatch.com/superhero/ theme.
 SITE_BACKGROUND_COLOUR = '#2B3E50'
 
 #: Colours of various figure elements;

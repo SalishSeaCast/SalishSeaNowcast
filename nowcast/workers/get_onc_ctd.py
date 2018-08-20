@@ -21,7 +21,7 @@ After filtering the data are aggregated into 15 minute bins.
 The aggregation functions are mean, standard deviation, and sample count.
 
 The data are stored as a netCDF-4/HDF5 file that is accessible via
-https://salishsea.eos.ubc.ca/erddap/tabledap/.
+https://salishsea.eos.ubc.ca/erddap/tabledap/index.html?page=1&itemsPerPage=1000.
 
 Development notebook:
 http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/tip/notebooks/ONC-CTD-DataToERDDAP.ipynb

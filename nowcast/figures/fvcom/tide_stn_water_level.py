@@ -15,7 +15,7 @@
 """Produce a figure that shows water levels at a tide gauge station
 calculated by the VHFR FVCOM and SalishSeaCast NEMO models,
 and predicted and observed water levels from the CHS
-https://ws-shc.qc.dfo-mpo.gc.ca/ water levels web service.
+:kbd:`https://ws-shc.qc.dfo-mpo.gc.ca/` water levels web service.
 
 Testing notebook for this module is
 https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestTideStnWaterLevel.ipynb
@@ -49,7 +49,7 @@ def make_figure(
 ):
     """Plot water levels calculated by the VHFR FVCOM and SalishSeaCast NEMO
     models, and predicted and observed water levels from the CHS
-    https://ws-shc.qc.dfo-mpo.gc.ca/ water levels web service for the
+    :kbd:`https://ws-shc.qc.dfo-mpo.gc.ca/` water levels web service for the
     tide gauge station at :kbd:`place`.
 
     :arg str place: Tide gauge station name;

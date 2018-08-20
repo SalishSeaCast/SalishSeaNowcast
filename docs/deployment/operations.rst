@@ -36,7 +36,7 @@ the manager,
 and the scheduler,
 are managed by the `circus`_ process manager tool.
 
-.. _circus: http://circus.readthedocs.io/en/latest/
+.. _circus: https://circus.readthedocs.io/en/latest/
 
 Start the nowcast system with:
 
@@ -59,7 +59,7 @@ Start it with:
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ circusctl --endpoint tcp://127.0.0.1:4444
 
-.. _circusctl: http://circus.readthedocs.io/en/latest/man/circusctl/
+.. _circusctl: https://circus.readthedocs.io/en/latest/man/circusctl/
 
 See the `circusctl`_ man page,
 or use the :kbd:`help` command within :command:`circusctl` to get information on the available commands.

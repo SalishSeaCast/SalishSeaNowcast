@@ -35,7 +35,7 @@ It then saves the result in a netCDF file for use in NEMO simulations.
 
 .. _NOAA forecast: http://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
 
-.. _NOAA tides and water levels: http://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
+.. _NOAA tides and water levels: https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
 
 .. _SSH_NeahBay: https://nbviewer.jupyter.org/url/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/SSH_NeahBay.ipynb
 
@@ -68,8 +68,8 @@ If a failure does occur the `info log file`_ will contain a :kbd:`CRITICAL` mess
 followed by the traceback from the error that caused the failure.
 The `debug log file`_ will show more details about the specific file downloads and will also include the :kbd:`CRITICAL` log message.
 
-.. _info log file: http://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
-.. _debug log file: http://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.debug.log
+.. _info log file: https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
+.. _debug log file: https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.debug.log
 
 In the rare event that the nowcast automation system fails to download the HRDPS products every 6 hours via the :py:mod:`SalishSeaNowcast.nowcast.workers.download_weather` worker,
 it is critical that someone re-run that worker.

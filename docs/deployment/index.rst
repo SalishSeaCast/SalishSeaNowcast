@@ -23,7 +23,7 @@ Nowcast Production Deployment
 In October 2016 the production deployment of the nowcast system was changed to use the :ref:`SalishSeaNowcast-repo` package that is based on the `NEMO_Nowcast framework`_ framework.
 The production deployment uses 3 systems:
 
-.. _NEMO_Nowcast framework: http://nemo-nowcast.readthedocs.io/en/latest/
+.. _NEMO_Nowcast framework: https://nemo-nowcast.readthedocs.io/en/latest/
 
 #. The :py:mod:`nemo_nowcast.message_broker`,
    :py:mod:`nemo_nowcast.manager`,
@@ -45,8 +45,8 @@ The production deployment uses 3 systems:
    (preliminary forecast),
    :kbd:`nowcast`,
    :kbd:`forecast`,
-   and :kbd:`nowcast-green` NEMO-3.6 model runs are computed on a cluster of virtual machines on the `Ocean Networks Canada`_ private cloud computing facility that is part of `west.cloud`_.
-   The shared storage for those VMs is provided by an NFS-mounted volume of west.cloud `Ceph object storage`_.
+   and :kbd:`nowcast-green` NEMO-3.6 model runs are computed on a cluster of virtual machines on the `Ocean Networks Canada`_ private cloud computing facility known as :kbd:`west.cloud` that is part of the Compute Canada `arbutus`_ cluster.
+   The shared storage for those VMs is provided by an NFS-mounted volume of ::kbd:`west.cloud` `Ceph object storage`_.
    The nowcast deployment is in the :file:`/nemoShare/MEOPAR/nowcast-sys/` directory tree.
 
    In April 2017,
@@ -56,7 +56,7 @@ The production deployment uses 3 systems:
    They are executed after the :kbd:`forecast2` and :kbd:`forecast` NEMO-3.6 runs.
 
    .. _Ocean Networks Canada: http://www.oceannetworks.ca/
-   .. _west.cloud: https://www.westgrid.ca/support/systems/cc-cloud
+   .. _arbutus: https://www.westgrid.ca/support/systems/arbutus
    .. _Ceph object storage: https://en.wikipedia.org/wiki/Ceph_(software)
 
 These sections describe the setup of the nowcast system on :kbd:`skookum`/:kbd:`salish` and :kbd:`west.cloud`,

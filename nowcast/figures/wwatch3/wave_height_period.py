@@ -15,7 +15,7 @@
 """Produce a figure that shows significant wave height and dominant wave period
 at a wave buoy calculated by the SoG WaveWatch3(TM) model,
 and observed wave heights and dominant wave periods from the NOAA NDBC
-http://www.ndbc.noaa.gov/data/realtime2/ web service.
+https://www.ndbc.noaa.gov/data/realtime2/ web service.
 
 Testing notebook for this module is
 https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
@@ -44,10 +44,11 @@ def make_figure(
     figsize=(16, 9),
     theme=nowcast.figures.website_theme
 ):
-    """Plot water levels calculated by the VHFR FVCOM and SalishSeaCast NEMO
-    models, and predicted and observed water levels from the CHS
-    https://ws-shc.qc.dfo-mpo.gc.ca/ water levels web service for the
-    tide gauge station at :kbd:`place`.
+    """Plot significant wave height and dominant wave period calculated
+    by the SoG WaveWatch3(TM) model,
+    and observed wave heights and dominant wave periods from the NOAA NDBC
+    https://www.ndbc.noaa.gov/data/realtime2/ web service for the wave buoy
+    at :kbd:`buoy`.
 
     :arg str buoy: Wave buoy name;
                    must be a key in :py:obj:`salishsea_tools.places.PLACES`.

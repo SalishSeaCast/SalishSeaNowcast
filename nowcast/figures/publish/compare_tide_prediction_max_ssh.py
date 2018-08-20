@@ -24,7 +24,7 @@ The figure also shows ~7.5 day long time series graphs of:
   (the difference between the corrected model results and the tidal predictions)
 
 The tidal predictions are calculated by :program:`ttide`
-(http://www.eos.ubc.ca/~rich/#T_Tide).
+(https://www.eoas.ubc.ca/~rich/#T_Tide).
 Those predictions use Canadian Hydrographic Service (CHS) tidal constituents
 and include all tide constituents.
 The corrected model results take into account the errors that result from using
@@ -36,7 +36,7 @@ wind speed and direction at that time.
 
 Testing notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
 
-Development notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopTidePredictionMaxSSH.ipynb
+Development notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
 """
 from datetime import timedelta
 from pathlib import Path

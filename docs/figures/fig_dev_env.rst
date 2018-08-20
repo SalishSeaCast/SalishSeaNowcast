@@ -24,7 +24,7 @@ The environment will have both the :kbd:`SalishSeaNowcast` nowcast system packag
 and the :kbd:`salishsea-site` web site app package installed in it,
 along with all of their dependencies.
 
-.. _Conda: http://conda.pydata.org/docs/
+.. _Conda: https://conda.io/docs/
 
 The :kbd:`SalishSeaNowcast` and :kbd:`salishsea-site` packages use some Python language features that are not available in versions prior to Python 3.6,
 in particular:
@@ -43,8 +43,8 @@ you should set up this environment on a Waterhole "fish" machine.
 
 The following instructions assume that you have the `Anaconda Python Distribution`_ or `Miniconda3`_ installed.
 
-.. _Anaconda Python Distribution: https://www.continuum.io/downloads
-.. _Miniconda3: http://conda.pydata.org/docs/install/quick.html
+.. _Anaconda Python Distribution: https://www.anaconda.com/download/
+.. _Miniconda3: https://conda.io/docs/install/quick.html
 
 You will also need up-to-date clones of the following repositories from Bitbucket:
 
