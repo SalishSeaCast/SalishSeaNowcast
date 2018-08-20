@@ -91,7 +91,7 @@ if you don't have `ssh key authentication`_ set up on Bitbucket
 (replace :kbd:`you_userid` with you Bitbucket userid,
 or copy the link from the :guilabel:`Clone` action pop-up on the `repository`_ page).
 
-.. _ssh key authentication: https://confluence.atlassian.com/bitbucket/set-up-ssh-for-mercurial-728138122.html
+.. _ssh key authentication: https://confluence.atlassian.com/bitbucket/set-up-an-ssh-key-728138079.html
 
 
 .. _SalishSeaNowcastDevelopmentEnvironment:
@@ -105,9 +105,9 @@ you can create and activate an environment called :kbd:`salishsea-nowcast` that 
 testing,
 and building the documentation with the commands below.
 
-.. _Conda: http://conda.pydata.org/docs/
-.. _Anaconda Python Distribution: https://www.continuum.io/downloads
-.. _Miniconda3: http://conda.pydata.org/docs/install/quick.html
+.. _Conda: https://conda.io/docs/
+.. _Anaconda Python Distribution: https://www.anaconda.com/download/
+.. _Miniconda3: https://conda.io/docs/install/quick.html
 
 :kbd:`SalishSeaNowcast` depends on the `NEMO_Nowcast`_,
 :ref:`SalishSeaToolsPackage`,
@@ -182,8 +182,8 @@ Building the documentation is driven by the :file:`docs/Makefile`.
 With your :kbd:`salishsea-nowcast` development environment activated,
 use:
 
-.. _reStructuredText: http://sphinx-doc.org/rest.html
-.. _Sphinx: http://sphinx-doc.org/
+.. _reStructuredText: http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+.. _Sphinx: http://www.sphinx-doc.org/en/master/
 
 .. code-block:: bash
 
@@ -237,7 +237,206 @@ The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
 You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build.
 
 If you have write access to the `repository`_ on Bitbucket,
-whenever you push changes to Bitbucket the documentation is automatically re-built and rendered at http://salishsea-nowcast.readthedocs.io/en/latest/.
+whenever you push changes to Bitbucket the documentation is automatically re-built and rendered at https://salishsea-nowcast.readthedocs.io/en/latest/.
+
+
+.. _SalishSeaNowcastLinkCheckingTheDocumentation:
+
+Link Checking the Documentation
+-------------------------------
+
+Sphinx also provides a link checker utility which can be run to find broken or redirected links in the docs.
+With your :kbd:`salishsea-nowcast` environment activated,
+use:
+
+.. code-block:: bash
+
+    (salishsea-nowcast)$ cd SalishSeaNowcast/docs/
+    (salishsea-nowcast) docs$ make linkcheck
+
+The output looks something like::
+
+  Running Sphinx v1.7.6
+  loading pickled environment... done
+  building [mo]: targets for 0 po files that are out of date
+  building [linkcheck]: targets for 19 source files that are out of date
+  updating environment: 0 added, 1 changed, 0 removed
+  reading sources... [100%] worker_failures
+  looking for now-outdated files... none found
+  pickling environment... done
+  checking consistency... done
+  preparing documents... done
+  writing output... [  5%] config
+  writing output... [ 10%] creating_workers
+  (line   23) ok        https://nemo-nowcast.readthedocs.io/en/latest/nowcast_system/workers.html#creatingnowcastworkermodules
+  (line   23) ok        https://nemo-nowcast.readthedocs.io/en/latest/
+  writing output... [ 15%] deployment/index
+  (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.manager
+  (line   23) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseanowcast-repo
+  (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.message_broker
+  (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.log_aggregator
+  (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.scheduler
+  (line   43) ok        http://www.oceannetworks.ca/
+  (line   43) ok        https://www.westgrid.ca/support/systems/arbutus
+  (line   43) ok        https://en.wikipedia.org/wiki/Ceph_(software)
+  (line   28) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/results_server/index.html#salishseamodelresultsserver
+  writing output... [ 21%] deployment/operations
+  (line   33) ok        https://circus.readthedocs.io/en/latest/
+  (line   54) ok        https://circus.readthedocs.io/en/latest/man/circusctl/
+  (line   64) ok        https://circus.readthedocs.io/en/latest/man/circusctl/
+  writing output... [ 26%] deployment/orcinus
+  writing output... [ 31%] deployment/skookum_salish
+  (line  174) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#ss-run-sets-repo
+  (line  174) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#ss-run-sets-repo
+  writing output... [ 36%] deployment/west_cloud
+  (line   34) ok        https://www.computecanada.ca/
+  (line   43) redirect  https://west.cloud.computecanada.ca/dashboard/ - with Found to https://west.cloud.computecanada.ca/auth/login/?next=/
+  (line   29) redirect  https://west.cloud.computecanada.ca/dashboard/ - with Found to https://west.cloud.computecanada.ca/auth/login/?next=/
+  (line   29) ok        https://docs.openstack.org/horizon/queens/user/
+  (line   23) ok        https://www.openstack.org/
+  (line   43) ok        https://docs.openstack.org/queens/user/
+  (line   43) ok        https://docs.computecanada.ca/wiki/Cloud_Quick_Start
+  (line  368) ok        https://docs.computecanada.ca/wiki/CC-Cloud_Resources
+  (line  502) ok        http://polar.ncep.noaa.gov/waves/wavewatch/license.shtml
+  (line  502) ok        http://polar.ncep.noaa.gov/waves/wavewatch/distribution/ - unauthorized
+  (line  516) ok        https://www.vagrantup.com/
+  (line  380) ok        https://help.ubuntu.com/community/SettingUpNFSHowTo
+  (line  408) ok        https://help.ubuntu.com/community/SettingUpNFSHowTo
+  (line  611) redirect  https://gitlab.com/mdunphy/FVCOM41 - with Found to https://gitlab.com/users/sign_in
+  (line  516) ok        https://bitbucket.org/salishsea/west.cloud-vm
+  (line  522) ok        http://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
+  (line   97) ok        http://cloud-images.ubuntu.com/trusty/current/trusty-server-cloudimg-amd64-disk1.img
+  writing output... [ 42%] figures/create_fig_module
+  (line   40) ok        https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
+  (line   34) ok        https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
+  (line   23) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaNowcast/index.html#salishseanowcastpackage
+  (line  336) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodestandardcopyrightheaderblock
+  (line  359) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodeautogenerateddocs
+  (line  389) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/index.html#salishseatoolspackage
+  (line  499) ok        https://salishsea.eos.ubc.ca
+  (line  407) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodeimports
+  (line  668) ok        https://docs.python.org/3/library/types.html#types.SimpleNamespace
+  (line  541) ok        http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists
+  (line  417) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodepublicandprivate
+  (line  668) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodereturnsimplenamespacesfromfunctions
+  (line  673) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodesalishseatoolsplaces
+  (line  867) ok        https://www.python.org/dev/peps/pep-0008/
+  (line  673) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#module-salishsea_tools.places
+  (line  761) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.visualisations.contour_thalweg
+  (line  867) ok        https://github.com/google/yapf
+  writing output... [ 47%] figures/fig_dev_env
+  (line   34) ok        https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
+  (line   44) ok        https://www.anaconda.com/download/
+  (line   22) ok        https://conda.io/docs/
+  (line   32) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
+  (line   44) ok        https://conda.io/docs/install/quick.html
+  (line   53) ok        https://bitbucket.org/salishsea/tools/
+  (line   55) ok        https://bitbucket.org/salishsea/salishseacmd/
+  (line   52) ok        https://bitbucket.org/UBC_MOAD/moad_tools
+  (line   54) ok        https://bitbucket.org/salishsea/nemo-cmd/
+  (line   56) ok        https://bitbucket.org/salishsea/salishseanowcast
+  (line   57) ok        https://bitbucket.org/salishsea/salishsea-site
+  (line   51) ok        https://bitbucket.org/43ravens/nemo_nowcast/
+  writing output... [ 52%] figures/fig_module_tips
+  writing output... [ 57%] figures/fig_modules
+  (line   55) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.viz_tools.set_aspect
+  writing output... [ 63%] figures/index
+  (line   33) ok        https://salishsea-site.readthedocs.io/en/latest/
+  (line   33) ok        https://salishsea.eos.ubc.ca/nemo/results/
+  (line   20) ok        https://salishsea.eos.ubc.ca/nemo/results/
+  writing output... [ 68%] figures/make_figure_calls
+  (line  145) ok        https://docs.python.org/3/library/stdtypes.html#tuple
+  (line  148) ok        https://docs.python.org/3/library/stdtypes.html#dict
+  (line  117) ok        https://docs.python.org/3/library/stdtypes.html#dict
+  (line  132) ok        https://docs.python.org/3/library/stdtypes.html#dict
+  writing output... [ 73%] figures/site_view_fig_metadata
+  writing output... [ 78%] figures/website_theme
+  (line   37) ok        https://bootswatch.com/superhero/
+  writing output... [ 84%] index
+  (line   50) ok        https://salishsea.eos.ubc.ca/erddap/index.html
+  (line   23) ok        https://salishsea.eos.ubc.ca/nemo/
+  (line   55) ok        https://www.westgrid.ca/
+  (line   23) ok        https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html
+  (line   61) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/index.html#frameworkarchitecture
+  (line   81) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/scheduler.html#scheduler
+  (line   61) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo-nowcastbuiltinworkers
+  (line  113) ok        http://www.apache.org/licenses/LICENSE-2.0
+  (line  109) ok        https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
+  writing output... [ 89%] pkg_development
+  (line   21) ok        https://docs.python.org/3.6/
+  (line   54) ok        https://www.python.org/
+  (line   21) ok        https://www.apache.org/licenses/LICENSE-2.0
+  (line   21) ok        https://salishsea-nowcast.readthedocs.io/en/latest/
+  (line   21) ok        https://bitbucket.org/salishsea/salishseanowcast/issues?status=new&status=open
+  (line   21) ok        https://bitbucket.org/salishsea/salishseanowcast/
+  (line   90) ok        https://confluence.atlassian.com/bitbucket/set-up-an-ssh-key-728138079.html
+  (line   70) ok        https://bitbucket.org/salishsea/salishseanowcast/
+  (line  112) ok        https://nemo-cmd.readthedocs.io/en/latest/
+  (line  179) ok        http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+  (line  112) ok        https://bitbucket.org/salishsea/nemo-cmd
+  (line  112) ok        https://bitbucket.org/43ravens/nemo_nowcast
+  (line  179) ok        http://www.sphinx-doc.org/en/master/
+  (line  112) ok        https://bitbucket.org/salishsea/tools
+  (line  112) ok        https://salishseacmd.readthedocs.io/en/latest/index.html#salishseacmdprocessor
+  (line  320) ok        https://coverage.readthedocs.io/en/latest/
+  (line  232) ok        https://bitbucket.org/salishsea/salishseanowcast/issues/19
+  (line  368) ok        https://bitbucket.org/salishsea/salishseanowcast/issues
+  (line  270) ok        https://docs.pytest.org/en/latest/
+  (line  354) ok        https://www.mercurial-scm.org/
+  writing output... [ 94%] worker_failures
+  (line   59) ok        https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
+  (line   30) ok        https://nbviewer.jupyter.org/url/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/SSH_NeahBay.ipynb
+  (line   68) ok        https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.debug.log
+  (line   26) ok        http://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
+  (line  162) ok        http://dd.weather.gc.ca/model_hrdps/west/grib2/
+  (line  162) ok        http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/
+  (line   26) ok        https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
+  writing output... [100%] workers
+  (line   12) ok        http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/tip/notebooks/ONC-CTD-DataToERDDAP.ipynb
+  (line    9) ok        https://salishsea.eos.ubc.ca/erddap/tabledap/index.html?page=1&itemsPerPage=1000
+  (line  326) ok        https://docs.python.org/3/library/logging.html#logging.Logger
+  (line  326) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
+  (line  326) ok        https://docs.python.org/3/library/stdtypes.html#str
+  (line  326) ok        https://docs.python.org/3/library/stdtypes.html#str
+  (line   44) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/message_broker.html#messagebroker
+  (line   40) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/manager.html#systemmanager
+  (line   40) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/messaging.html#messagingsystem
+  (line  326) ok        https://docs.python.org/3/library/stdtypes.html#list
+  (line  333) ok        https://docs.python.org/3/library/stdtypes.html#list
+  (line  333) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.message.Message
+  (line  333) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.config.Config
+  (line  333) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.message.Message
+  (line  333) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.config.Config
+  (line  351) ok        https://docs.python.org/3/library/datetime.html#datetime.datetime
+  (line  351) ok        https://docs.python.org/3/library/datetime.html#datetime.datetime
+  (line  333) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.message.Message
+  (line   33) ok        https://docs.python.org/3/library/exceptions.html#ValueError
+  (line  351) ok        https://docs.python.org/3/library/functions.html#float
+  (line  351) ok        https://docs.python.org/3/library/constants.html#None
+  (line   12) ok        https://www.eoas.ubc.ca/~rich/#T_Tide
+  (line  333) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.config.Config
+  (line    1) ok        http://climate.weather.gc.ca/
+  (line    4) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.correct_model
+  (line   23) ok        https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+  (line   25) ok        https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
+  (line    8) ok        https://salishsea.eos.ubc.ca/storm-surge/
+  (line  398) ok        https://docs.python.org/3/library/functions.html#int
+  (line  351) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.storm_surge_risk_level
+  (line  440) ok        https://docs.python.org/3/library/constants.html#True
+  (line  448) ok        https://salishsea.eos.ubc.ca/erddap/griddap/index.html?page=1&itemsPerPage=1000
+  (line    9) ok        https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/DevelopTideStnWaterLevel.ipynb
+  (line    6) ok        https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestTideStnWaterLevel.ipynb
+  (line    7) ok        https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html#creating-a-figure-module
+  (line  398) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.places.PLACES
+  (line    6) ok        https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
+  (line    9) ok        https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
+  (line  462) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.places.PLACES
+  (line    1) ok        https://www.ndbc.noaa.gov/data/realtime2/
+  (line    1) ok        https://www.ndbc.noaa.gov/data/realtime2/
+
+  build succeeded.
+
+  Look for any errors in the above output or in _build/linkcheck/output.txt
 
 
 .. _SalishSeaNowcastRunningTheUnitTests:
