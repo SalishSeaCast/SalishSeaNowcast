@@ -35,7 +35,7 @@ The module contains:
 =================================================================
 
 :py:const:`SITE_BACKGROUND_COLOUR` is the hex code for the :kbd:`salishsea.eos.ubc.ca/` pages background colour,
-from the http://bootswatch.com/superhero/ theme.
+from the https://bootswatch.com/superhero/ theme.
 It is defined explicitly to make it obvious in the :py:mod:`~nowcast.figures.website_theme` module.
 It is used in the :py:const:`COLOURS` dictionary as :kbd:`COLOURS['figure']['facecolor']` so that you can apply it to :py:class:`~matplotlib.figure.Figure` objects by creating them with calls like:
 

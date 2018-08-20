@@ -20,16 +20,16 @@
 :kbd:`west.cloud` Deployment
 ****************************
 
-The `Ocean Networks Canada`_ private cloud computing facility that is part of `west.cloud`_ runs on `OpenStack`_.
+The `Ocean Networks Canada`_ private cloud computing facility known as :kbd:`west.cloud` that is part of the Compute Canada `arbutus`_ cluster runs on `OpenStack`_.
 
 .. _Ocean Networks Canada: http://www.oceannetworks.ca/
-.. _west.cloud: https://www.westgrid.ca/support/systems/cc-cloud
-.. _OpenStack: http://www.openstack.org/
+.. _arbutus: https://www.westgrid.ca/support/systems/arbutus
+.. _OpenStack: https://www.openstack.org/
 
 The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
 The :kbd:`west.cloud` dashboard is at https://west.cloud.computecanada.ca/dashboard/.
 
-.. _OpenStack dashboard: http://docs.openstack.org/user-guide/content/ch_dashboard.html
+.. _OpenStack dashboard: https://docs.openstack.org/horizon/queens/user/
 
 Authentication and authorization for :kbd:`west.cloud` is managed by `computecanada`_,
 so those are the userid/password that are required to log in to the dashboard.
@@ -41,11 +41,10 @@ Web Interface
 =============
 
 Initial setup was done via the https://west.cloud.computecanada.ca/dashboard/ web interface with guidance from the
-(unpublished at time of writing)
-`CC-Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
+`Compute Canada Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
 
-.. _CC-Cloud Quickstart Guide: https://docs.computecanada.ca/wiki/Cloud_Quick_Start
-.. _OpenStack End User Guide: http://docs.openstack.org/user-guide/content/openstack_user_guide.html
+.. _Compute Canada Cloud Quickstart Guide: https://docs.computecanada.ca/wiki/Cloud_Quick_Start
+.. _OpenStack End User Guide: https://docs.openstack.org/queens/user/
 
 The project (aka tenant) name for the the Salish Sea NEMO model is :kbd:`NEMO`.
 

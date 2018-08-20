@@ -122,7 +122,7 @@ Testing the Website View
    The web server is now running in this terminal session.
    You can stop it with :kbd:`Ctrl-C` when you are finished.
 
-#. Use your browser to navigate to http://localhost:6543/nemo/results/.
+#. Use your browser to navigate to :kbd:`http://localhost:6543/nemo/results/`.
    From there you should be able to navigate to the page that will show you the figures
    for the date that you ran the :py:mod:`make_plots` worker for;
    for our test of the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` figure module,

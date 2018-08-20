@@ -44,8 +44,7 @@ def make_figure(
                        (ubcSSg3DBiologyFields1hV17-02) and tracer fields
                        (ubcSSg3DTracerFields1hV17-02) from the gridapp datasets
                        of the data server ERDAPP
-                       (https://salishsea.eos.ubc.ca/erddap/griddap/index.html
-                       ?page=1&itemsPerPage=1000).
+                       (https://salishsea.eos.ubc.ca/erddap/griddap/index.html?page=1&itemsPerPage=1000).
     :type xr_dataset: :class:`xarray.core.dataset.Dataset`
 
     :param left_variable: One of the data variables among 'nitrate',
