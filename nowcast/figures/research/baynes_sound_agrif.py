@@ -79,11 +79,11 @@ def make_figure(
                          sub-grid, and water depths.
     :type :py:class:`pathlib.Path` bs_grid_path:
 
-    :arg 2-tuple figsize: Figure size (width, height) in inches.
+    :param 2-tuple figsize: Figure size (width, height) in inches.
 
-    :arg theme: Module-like object that defines the style elements for the
-                figure. See :py:mod:`nowcast.figures.website_theme` for an
-                example.
+    :param theme: Module-like object that defines the style elements for the
+                  figure. See :py:mod:`nowcast.figures.website_theme` for an
+                  example.
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
@@ -299,7 +299,7 @@ def _plot_surface_field(ax, ss_var, bs_var, cmap, grids, bs_bathy, theme):
         levels=clevels,
         extend='max'
     )
-    ax.set_axis_bgcolor('burlywood')
+    ax.set_axis_bgcolor(theme.COLOURS['land'])
     cbar = plt.colorbar(contour_set, ax=ax)
     cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
     cbar.set_label(
