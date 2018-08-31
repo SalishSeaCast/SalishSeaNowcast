@@ -115,7 +115,7 @@ def main():
     worker.cli.add_date_option(
         '--run-date',
         default=arrow.now().floor('day'),
-        help='Date of the run to symlink files for.'
+        help='Date of the run to make plots for.'
     )
     worker.cli.add_argument(
         '--test-figure',
