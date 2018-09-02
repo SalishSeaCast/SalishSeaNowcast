@@ -129,11 +129,11 @@ def make_CHS_currents_file(parsed_args, config, *args):
     )
 
     urot5, vrot5, urot10, vrot10 = _read_avg_unstagger_rotate(
-        mesh, src_dir, ufile, vfile
+        mesh, src_dir, ufile, vfile, run_type
     )
 
     CHS_currents_filename = _write_netcdf(
-        src_dir, urot5, vrot5, urot10, vrot10
+        src_dir, urot5, vrot5, urot10, vrot10, run_type
     )
 
     lib.fix_perms(CHS_currents_filename, grp_name=config['file group'])
