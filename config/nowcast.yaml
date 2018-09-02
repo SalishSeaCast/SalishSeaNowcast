@@ -1050,6 +1050,16 @@ message registry:
       failure: watch_NEMO_agrif failed
       crash: watch_NEMO_agrif worker crashed
 
+    make_CHS_currents_file:
+      checklist key: CHS currents file
+      success nowcast: CHS currents file created for nowcast-blue
+      failure nowcast: CHS currents file creation failed for nowcast-blue
+      success forecast: CHS currents file created for forecast
+      failure forecast: CHS currents file creation failed for forecast
+      success forecast2: CHS currents file created for forecast2
+      failure forecast2: CHS currents file creation failed for forecast2
+      crash: make_CHS_currents_file worker crashed
+
     make_turbidity_file:
       checklist key: Fraser River turbidity
       success: Fraser River turbidity file created
