@@ -108,7 +108,7 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
         job_id, run_id = _get_run_id(ssh_client, host_name, users, run_id)
         while _is_queued(ssh_client, host_name, users, job_id, run_id):
-            time.sleep(60)
+            time.sleep(60 * 5)
         tmp_run_dir = _get_tmp_run_dir(
             ssh_client, host_name, scratch_dir, run_id
         )
