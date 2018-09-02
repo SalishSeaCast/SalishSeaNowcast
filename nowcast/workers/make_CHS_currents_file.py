@@ -148,12 +148,13 @@ def make_CHS_currents_file(parsed_args, config, *args):
     return checklist
 
 
-def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile):
+def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile, run_type):
     """
     :param :py:class:`xarray.Dataset` mesh:
     :param :py:class:`pathlib.Path` src_dir:
     :param str: ufile:
     :param str: vfile:
+    :param str: run_type:
 
     :return: 4_tuple of data arrays
                urot5: east velocity averaged over top 5 grid cells
@@ -173,7 +174,9 @@ def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile):
         })
     ).mean('depthu')
 
-    logger.debug(f'{run_type}: u velocity read and averaged from {src_dir/ufile}')
+    logger.debug(
+        f'{run_type}: u velocity read and averaged from {src_dir/ufile}'
+    )
 
     vds = xarray.open_dataset(src_dir / vfile)
     vupper = vds.vomecrty.isel(depthv=slice(5)).where(
@@ -187,7 +190,9 @@ def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile):
         })
     ).mean('depthv')
 
-    logger.debug(f'{run_type}: v velocity read and averaged from {src_dir/ufile}')
+    logger.debug(
+        f'{run_type}: v velocity read and averaged from {src_dir/ufile}'
+    )
 
     u5 = viz_tools.unstagger_xarray(uupper[:, :, :, 0], 'x')
     v5 = viz_tools.unstagger_xarray(vupper[:, :, :, 0], 'y')
@@ -202,13 +207,14 @@ def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile):
     return urot5, vrot5, urot10, vrot10
 
 
-def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10):
+def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
     """
     :param :py:class:`pathlib.Path` src_dir:
     :param :py:class:`xarray.DataArray` urot5:
     :param :py:class:`xarray.DataArray` vrot5:
     :param :py:class:`xarray.DataArray` urot10:
     :param :py:class:`xarray.DataArray` vrot10:
+    :param str: run_type:
 
     :return: str CHS_currents_filename
     """
