@@ -100,36 +100,26 @@ def make_CHS_currents_file(parsed_args, config, *args):
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     if run_type == 'nowcast':
-        start_date = run_date
-        end_date = run_date
+        start_date = run_date.format("YYYYMMDD")
+        end_date = run_date.format("YYYYMMDD")
     elif run_type == 'forecast':
-        start_date = run_date.shift(days=1)
-        end_date = run_date.shift(days=2)
+        start_date = run_date.shift(days=1).format("YYYYMMDD")
+        end_date = run_date.shift(days=2).format("YYYYMMDD")
     elif run_type == 'forecast2':
-        start_date = run_date.shift(days=2)
-        end_date = run_date.shift(days=3)
+        start_date = run_date.shift(days=2).format("YYYYMMDD")
+        end_date = run_date.shift(days=3).format("YYYYMMDD")
 
-    meshfilename = Path(config['temperature salinity']['mesh mask'])
-    mesh = xarray.open_dataset(meshfilename)
+    grid_dir = Path(config['figures']['grid dir'])
+    meshfilename = grid_dir / config['run types'][run_type]['mesh mask']
 
-    results_dir = run_date.format('DDMMMYY').lower()
     run_type_results = Path(config['results archive'][run_type])
+    results_dir = run_date.format('DDMMMYY').lower()
     src_dir = run_type_results / results_dir
-
-    # match directory and files for forecast and forecast2
-    ufile = (
-        f'SalishSea_1h_'
-        f'{start_date.format("YYYYMMDD")}_{end_date.format("YYYYMMDD")}_'
-        f'grid_U.nc'
-    )
-    vfile = (
-        f'SalishSea_1h_'
-        f'{start_date.format("YYYYMMDD")}_{end_date.format("YYYYMMDD")}_'
-        f'grid_V.nc'
-    )
+    ufile = f'SalishSea_1h_{start_date}_{end_date}_grid_U.nc'
+    vfile = f'SalishSea_1h_{start_date}_{end_date}_grid_V.nc'
 
     urot5, vrot5, urot10, vrot10 = _read_avg_unstagger_rotate(
-        mesh, src_dir, ufile, vfile, run_type
+        meshfilename, src_dir, ufile, vfile, run_type
     )
 
     CHS_currents_filename = _write_netcdf(
@@ -139,8 +129,7 @@ def make_CHS_currents_file(parsed_args, config, *args):
     lib.fix_perms(CHS_currents_filename, grp_name=config['file group'])
 
     checklist = {
-        'CHS currents file': {
-            'run_type': run_type,
+        run_type: {
             'filename': CHS_currents_filename,
             'run date': run_date.format('YYYY-MM-DD'),
         }
@@ -148,9 +137,9 @@ def make_CHS_currents_file(parsed_args, config, *args):
     return checklist
 
 
-def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile, run_type):
+def _read_avg_unstagger_rotate(meshfilename, src_dir, ufile, vfile, run_type):
     """
-    :param :py:class:`xarray.Dataset` mesh:
+    :param str meshfilename:
     :param :py:class:`pathlib.Path` src_dir:
     :param str: ufile:
     :param str: vfile:
@@ -162,6 +151,7 @@ def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile, run_type):
                urot10: east velocity averaged over top 10 grid cells
                vrot10: north velocity averaged over top 5 grid cells
     """
+    mesh = xarray.open_dataset(meshfilename)
     uds = xarray.open_dataset(src_dir / ufile)
     uupper = uds.vozocrtx.isel(depthu=slice(5)).where(
         mesh.umask.isel(z=slice(5)).rename({

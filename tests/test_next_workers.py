@@ -1804,6 +1804,34 @@ class TestAfterDownloadResults:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize(
+        'run_type, run_date', [
+            ('nowcast', '2018-09-01'),
+            ('forecast', '2018-09-01'),
+            ('forecast2', '2018-09-01'),
+        ]
+    )
+    def test_success_launch_make_CHS_currents_file(
+        self, run_type, run_date, config, checklist
+    ):
+        workers = next_workers.after_download_results(
+            Message(
+                'download_results',
+                f'success {run_type}',
+                payload={
+                    run_type: {
+                        'run date': run_date
+                    }
+                }
+            ), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.make_CHS_currents_file',
+            args=[run_type, '--run-date', run_date],
+            host='localhost'
+        )
+        assert expected in workers
+
     def test_success_hindcast_launch_split_results(self, config, checklist):
         p_checklist = patch.dict(
             checklist, {
@@ -1832,6 +1860,28 @@ class TestAfterDownloadResults:
             host='localhost'
         )
         assert expected in workers
+
+
+class TestAfterMakeCHSCurrentsFile:
+    """Unit tests for the after_make_CHS_currents_file function.
+    """
+
+    @pytest.mark.parametrize(
+        'msg_type', [
+            'crash',
+            'failure nowcast',
+            'failure forecast',
+            'failure forecast2',
+            'success nowcast',
+            'success forecast',
+            'success forecast2',
+        ]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_CHS_currents_file(
+            Message('make_CHS_currents_file', msg_type), config, checklist
+        )
+        assert workers == []
 
 
 class TestAfterSplitResults:
