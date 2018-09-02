@@ -1190,18 +1190,22 @@ def after_download_results(msg, config, checklist):
                 )
             )
             if run_type == 'nowcast':
-                run_date = (
+                compare_date = (
                     arrow.get(run_date).shift(days=-1).format('YYYY-MM-DD')
                 )
-                next_workers[msg.type].append(
+                next_workers[msg.type].extend([
                     NextWorker(
                         'nowcast.workers.make_plots',
                         args=[
                             'nemo', run_type, 'comparison', '--run-date',
-                            run_date
+                            compare_date
                         ]
-                    )
-                )
+                    ),
+                    NextWorker(
+                        'nowcast.workers.make_CHS_currents_file',
+                        args=[run_type, '--run-date', run_date]
+                    ),
+                ])
             if run_type == 'nowcast-green':
                 next_workers[msg.type].append(
                     NextWorker(
@@ -1216,6 +1220,42 @@ def after_download_results(msg, config, checklist):
                     args=['nemo', run_type, '--run-date', run_date]
                 )
             )
+            next_workers[msg.type].append(
+                NextWorker(
+                    'nowcast.workers.make_CHS_currents_file',
+                    args=[run_type, '--run-date', run_date]
+                )
+            )
+    return next_workers[msg.type]
+
+
+def after_make_CHS_currents_file(msg, config, checklist):
+    """Calculate the list of workers to launch after the make_CHS_currents_file
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        'crash': [],
+        'failure nowcast': [],
+        'failure forecast': [],
+        'failure forecast2': [],
+        'success nowcast': [],
+        'success forecast': [],
+        'success forecast2': [],
+    }
     return next_workers[msg.type]
 
 
