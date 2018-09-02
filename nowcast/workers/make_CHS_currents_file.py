@@ -16,6 +16,7 @@
 surface velocities, and writes them out in an nc file for CHS to use
 """
 import logging
+import os
 from pathlib import Path
 
 import arrow
@@ -135,7 +136,6 @@ def make_CHS_currents_file(parsed_args, config, *args):
         src_dir, urot5, vrot5, urot10, vrot10
     )
 
-    print(CHS_currents_filename)
     lib.fix_perms(CHS_currents_filename, grp_name=config['file group'])
 
     checklist = {
@@ -172,6 +172,9 @@ def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile):
             'z': 'depthu'
         })
     ).mean('depthu')
+
+    logger.debug(f'{run_type}: u velocity read and averaged from {src_dir/ufile}')
+
     vds = xarray.open_dataset(src_dir / vfile)
     vupper = vds.vomecrty.isel(depthv=slice(5)).where(
         mesh.vmask.isel(z=slice(5)).rename({
@@ -184,6 +187,8 @@ def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile):
         })
     ).mean('depthv')
 
+    logger.debug(f'{run_type}: v velocity read and averaged from {src_dir/ufile}')
+
     u5 = viz_tools.unstagger_xarray(uupper[:, :, :, 0], 'x')
     v5 = viz_tools.unstagger_xarray(vupper[:, :, :, 0], 'y')
     u10 = viz_tools.unstagger_xarray(ufull[:, :, :, 0], 'x')
@@ -191,6 +196,8 @@ def _read_avg_unstagger_rotate(mesh, src_dir, ufile, vfile):
 
     urot5, vrot5 = viz_tools.rotate_vel(u5, v5, origin='grid')
     urot10, vrot10 = viz_tools.rotate_vel(u10, v10, origin='grid')
+
+    logger.debug(f'{run_type}: velocities unstaggered and rotated')
 
     return urot5, vrot5, urot10, vrot10
 
@@ -324,7 +331,9 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10):
     filename = src_dir / 'CHS_currents.nc'
     myds.to_netcdf(filename, encoding=encoding, unlimited_dims=('time',))
 
-    return filename
+    logger.debug(f'{run_type}: netcdf file written: {filename}')
+
+    return os.fspath(filename)
 
 
 if __name__ == '__main__':
