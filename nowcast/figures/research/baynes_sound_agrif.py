@@ -37,9 +37,8 @@ from nowcast.figures import shared
 
 
 def make_figure(
-    ss_phys_url,
+    ss_tracers_path,
     bs_phys_path,
-    ss_bio_url,
     bs_bio_path,
     run_date,
     ss_grid_url,
@@ -53,15 +52,13 @@ def make_figure(
     as well as a fringe of the full domain on the 3 non-land sides. The axes
     grid and tick labels are an angled lon/lat grid.
 
-    :param str ss_phys_url: ERDDAP URL for the full domain hourly physics
-                            tracers dataset.
+    :param ss_tracers_path: File path of full domain hourly physics tracers
+                            dataset.
+    :type ss_tracers_path: :py:class:`pathlib.Path`
 
     :param bs_phys_path: File path of Baynes Sound sub-grid hourly physics
                          tracers dataset.
     :type bs_phys_path: :py:class:`pathlib.Path`
-
-    :param str ss_bio_url: ERDDAP URL for the full domain hourly biology
-                           tracers dataset.
 
     :param bs_bio_path: File path of Baynes Sound sub-grid hourly biology
                         tracers dataset.
@@ -88,8 +85,8 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(
-        ss_phys_url, bs_phys_path, ss_bio_url, bs_bio_path, run_date,
-        ss_grid_url, bs_grid_path
+        ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url,
+        bs_grid_path
     )
     fig, axs, grids = _prep_fig_axes(figsize, plot_data, theme)
     _plot_surface_fields(axs, plot_data, grids, theme)
@@ -110,46 +107,44 @@ def make_figure(
 
 
 def _prep_plot_data(
-    ss_phys_url, bs_phys_path, ss_bio_url, bs_bio_path, run_date, ss_grid_url,
+    ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url,
     bs_grid_path
 ):
     """
-    :param str ss_phys_url:
+    :param :py:class:`pathlib.Path` ss_tracers_path:
     :param :py:class:`pathlib.Path` bs_phys_path:
-    :param str ss_bio_url:
     :param :py:class:`pathlib.Path` bs_bio_path:
     :param :py:class:`arrow.Arrow` run_date:
     :param str ss_grid_url:
     :param :py:class:`pathlib.Path` bs_grid_path:
     :returns: :py:class:`types.SimpleNamespace`
     """
+    SS_BAYNES_SOUND_X, SS_BAYNES_SOUND_Y = slice(112, 166), slice(550, 699)
+    ss_grid = xarray.open_dataset(ss_grid_url, mask_and_scale=False) \
+        .sel(gridX=SS_BAYNES_SOUND_X, gridY=SS_BAYNES_SOUND_Y)
+    ss_water_mask = (ss_grid.bathymetry != 0).values
+    bs_grid = xarray.open_dataset(bs_grid_path, mask_and_scale=False)
+    bs_water_mask = (bs_grid.Bathymetry != 0).values
 
-    ss_phys = xarray.open_dataset(ss_phys_url)
-    ss_bio = xarray.open_dataset(ss_bio_url)
-    for dataset in (ss_phys, ss_bio):
-        shared.localize_time(dataset, time_coord='time')
+    ss_tracers = xarray.open_dataset(ss_tracers_path)
+    shared.localize_time(ss_tracers, time_coord='time_counter')
 
     bs_phys = xarray.open_dataset(bs_phys_path)
     bs_bio = xarray.open_dataset(bs_bio_path)
     for dataset in (bs_phys, bs_bio):
         shared.localize_time(dataset, time_coord='time_counter')
 
-    ss_grid = xarray.open_dataset(ss_grid_url, mask_and_scale=False)
-    ss_water_mask = ss_grid.bathymetry != 0
-    bs_grid = xarray.open_dataset(bs_grid_path, mask_and_scale=False)
-    bs_water_mask = bs_grid.Bathymetry != 0
-
     ss_temperature = _get_data_array(
-        ss_phys.temperature, ss_water_mask, run_date
+        ss_tracers.votemper, ss_water_mask, run_date
     )
     bs_temperature = _get_data_array(bs_phys.votemper, bs_water_mask, run_date)
     bs_temperature.attrs['long_name'] = 'Conservative Temperature'
-    ss_salinity = _get_data_array(ss_phys.salinity, ss_water_mask, run_date)
+    ss_salinity = _get_data_array(ss_tracers.vosaline, ss_water_mask, run_date)
     bs_salinity = _get_data_array(bs_phys.vosaline, bs_water_mask, run_date)
     bs_salinity.attrs['long_name'] = 'Reference Salinity'
-    ss_diatoms = _get_data_array(ss_bio.diatoms, ss_water_mask, run_date)
+    ss_diatoms = _get_data_array(ss_tracers.diatoms, ss_water_mask, run_date)
     bs_diatoms = _get_data_array(bs_bio.diatoms, bs_water_mask, run_date)
-    ss_nitrate = _get_data_array(ss_bio.nitrate, ss_water_mask, run_date)
+    ss_nitrate = _get_data_array(ss_tracers.nitrate, ss_water_mask, run_date)
     bs_nitrate = _get_data_array(bs_bio.nitrate, bs_water_mask, run_date)
     return SimpleNamespace(
         ss_temperature=ss_temperature,
@@ -176,13 +171,13 @@ def _get_data_array(ds_var, water_mask, run_date):
     """
     try:
         return ds_var \
-            .isel(deptht=0) \
+            .isel(nearsurface_T=0) \
             .sel(time_counter=run_date.format('YYYY-MM-DD 12:30')) \
             .where(water_mask)
     except ValueError:
         return ds_var \
-            .isel(depth=0) \
-            .sel(time=run_date.format('YYYY-MM-DD 12:30')) \
+            .isel(deptht=0) \
+            .sel(time_counter=run_date.format('YYYY-MM-DD 12:30')) \
             .where(water_mask)
 
 
@@ -299,7 +294,6 @@ def _plot_surface_field(ax, ss_var, bs_var, cmap, grids, bs_bathy, theme):
         levels=clevels,
         extend='max'
     )
-    ax.set_axis_bgcolor(theme.COLOURS['land'])
     cbar = plt.colorbar(contour_set, ax=ax)
     cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
     cbar.set_label(
@@ -315,4 +309,5 @@ def _plot_surface_field(ax, ss_var, bs_var, cmap, grids, bs_bathy, theme):
         colors=theme.COLOURS['contour lines']['Baynes Sound entrance'],
     )
     plt.clabel(isobath, fmt={isobath.levels[0]: f'{isobath.levels[0]:.0f} m'})
+    ax.set_axis_bgcolor(theme.COLOURS['dark land'])
     theme.set_axis_colors(ax)

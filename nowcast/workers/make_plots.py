@@ -555,9 +555,8 @@ def _prep_nowcast_agrif_research_fig_functions(
     config, agrif_results_dir, run_date
 ):
     yyyymmdd = run_date.format('YYYYMMDD')
-    ss_phys_url = config['figures']['dataset URLs']['3d phys tracer fields']
+    ss_tracers_path = agrif_results_dir / 'BaynesSoundSurface_grid_T.nc'
     bs_phys_path = agrif_results_dir / f'1_SalishSea_1h_{yyyymmdd}_{yyyymmdd}_grid_T.nc'
-    ss_bio_url = config['figures']['dataset URLs']['3d bio tracer fields']
     bs_bio_path = agrif_results_dir / f'1_SalishSea_1h_{yyyymmdd}_{yyyymmdd}_ptrc_T.nc'
     ss_grid_url = config['figures']['dataset URLs']['bathymetry']
     bs_grid_path = Path(
@@ -568,9 +567,8 @@ def _prep_nowcast_agrif_research_fig_functions(
             'function':
                 baynes_sound_agrif.make_figure,
             'args': (
-                ss_phys_url,
+                ss_tracers_path,
                 bs_phys_path,
-                ss_bio_url,
                 bs_bio_path,
                 run_date,
                 ss_grid_url,
