@@ -47,6 +47,7 @@ COLOURS = {
     'figure': {
         'facecolor': SITE_BACKGROUND_COLOUR,
     },
+    'dark land': '#8b7765',
     'land': 'burlywood',
     'marker': {
         'place': 'white',
