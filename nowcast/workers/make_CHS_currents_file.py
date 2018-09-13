@@ -23,7 +23,6 @@ import arrow
 from nemo_nowcast import NowcastWorker
 from nowcast import lib
 from salishsea_tools import viz_tools
-import yaml
 import xarray
 
 NAME = 'make_CHS_currents_file'
@@ -273,7 +272,8 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
 
     encoding = {
         'time': {
-            'units': 'minutes since 1970-01-01 00:00'
+            'units': 'minutes since 1970-01-01 00:00',
+            'dtype': float
         },
         'VelEast5': {
             'zlib': True,
@@ -303,7 +303,7 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
     myds.coords['time'].attrs = {
         'axis': 'T',
         'comment':
-            'time values are the centre of the intervals over which the '
+            'time values are UTC at the centre of the intervals over which the '
             'calculated model results are averaged',
         'ioos_category': 'Time',
         'long_name': 'Time axis',
