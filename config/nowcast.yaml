@@ -349,8 +349,9 @@ erddap:
       - ubcSSfPatriciaBaySSH10mV17-02
       - ubcSSfPointAtkinsonSSH10mV17-02
       - ubcSSfPortRenfrewSSH10mV17-02
-      - ubcSSfSandyCoveSSH10mV17-02
+      - ubcSSfDepthAvgdCurrents1hV17-02
       - ubcSSfSandHeadsSSH10mV17-02
+      - ubcSSfSandyCoveSSH10mV17-02
       - ubcSSfSquamishSSH10mV17-02
       - ubcSSfVictoriaSSH10mV17-02
       - ubcSSfWoodwardsLandingSSH10mV17-02
