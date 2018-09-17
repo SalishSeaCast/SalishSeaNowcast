@@ -292,10 +292,6 @@ def _extract_1st_forecast_day(
                 if forecast_file.name.startswith('SoG_ww3_fields') else 24 * 6,
         }
         forecast_times = forecast_time_intervals[model]
-        time_vars = {
-            'nemo': 'time_counter',
-            'wwatch3': 'time',
-        }
         time_var = model_params[model]['time variable']
         cmd = (
             f'/usr/bin/ncks -d {time_var},0,{forecast_times-1} '
