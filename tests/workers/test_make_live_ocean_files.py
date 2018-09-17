@@ -22,7 +22,7 @@ import arrow
 from nowcast.workers import make_live_ocean_files
 
 
-@patch('nowcast.workers.make_live_ocean_files.NowcastWorker')
+@patch("nowcast.workers.make_live_ocean_files.NowcastWorker")
 class TestMain:
     """Unit tests for main() function.
     """
@@ -30,8 +30,8 @@ class TestMain:
     def test_instantiate_worker(self, m_worker):
         make_live_ocean_files.main()
         args, kwargs = m_worker.call_args
-        assert args == ('make_live_ocean_files',)
-        assert 'description' in kwargs
+        assert args == ("make_live_ocean_files",)
+        assert "description" in kwargs
 
     def test_init_cli(self, m_worker):
         make_live_ocean_files.main()
@@ -40,77 +40,72 @@ class TestMain:
     def test_add_run_date_arg(self, m_worker):
         make_live_ocean_files.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ('--run-date',)
-        assert kwargs['default'] == arrow.now().floor('day')
-        assert 'help' in kwargs
+        assert args == ("--run-date",)
+        assert kwargs["default"] == arrow.now().floor("day")
+        assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
         make_live_ocean_files.main()
         args, kwargs = m_worker().run.call_args
         expected = (
             make_live_ocean_files.make_live_ocean_files,
-            make_live_ocean_files.success, make_live_ocean_files.failure
+            make_live_ocean_files.success,
+            make_live_ocean_files.failure,
         )
         assert args == expected
 
 
-@patch('nowcast.workers.make_live_ocean_files.logger')
+@patch("nowcast.workers.make_live_ocean_files.logger")
 class TestSuccess:
     """Unit tests for success() function.
     """
 
     def test_success_log_info(self, m_logger):
-        parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-12'))
+        parsed_args = SimpleNamespace(run_date=arrow.get("2017-01-12"))
         make_live_ocean_files.success(parsed_args)
         assert m_logger.info.called
-        assert m_logger.info.call_args[1]['extra']['run_date'] == '2017-01-12'
+        assert m_logger.info.call_args[1]["extra"]["run_date"] == "2017-01-12"
 
     def test_success_msg_type(self, m_logger):
-        parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-12'))
+        parsed_args = SimpleNamespace(run_date=arrow.get("2017-01-12"))
         msg_type = make_live_ocean_files.success(parsed_args)
-        assert msg_type == 'success'
+        assert msg_type == "success"
 
 
-@patch('nowcast.workers.make_live_ocean_files.logger')
+@patch("nowcast.workers.make_live_ocean_files.logger")
 class TestFailure:
     """Unit tests for failure() function.
     """
 
     def test_failure_log_critical(self, m_logger):
-        parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-12'))
+        parsed_args = SimpleNamespace(run_date=arrow.get("2017-01-12"))
         make_live_ocean_files.failure(parsed_args)
         assert m_logger.critical.called
-        expected = '2017-01-12'
-        assert m_logger.critical.call_args[1]['extra']['run_date'] == expected
+        expected = "2017-01-12"
+        assert m_logger.critical.call_args[1]["extra"]["run_date"] == expected
 
     def test_failure_msg_type(self, m_logger):
-        parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-12'))
+        parsed_args = SimpleNamespace(run_date=arrow.get("2017-01-12"))
         msg_type = make_live_ocean_files.failure(parsed_args)
-        assert msg_type == 'failure'
+        assert msg_type == "failure"
 
 
-@patch('nowcast.workers.make_live_ocean_files.create_LiveOcean_TS_BCs')
+@patch("nowcast.workers.make_live_ocean_files.create_LiveOcean_TS_BCs")
 class TestMakeLiveOceanFiles:
     """Unit test for make_live_ocean_files() function.
     """
 
     def test_checklist(self, m_create_ts):
-        parsed_args = SimpleNamespace(run_date=arrow.get('2017-01-30'))
+        parsed_args = SimpleNamespace(run_date=arrow.get("2017-01-30"))
         config = {
-            'temperature salinity': {
-                'download': {
-                    'dest dir': 'forcing/LiveOcean/downloaded'
-                },
-                'bc dir': 'forcing/LiveOcean/boundary_conditions',
-                'file template': 'LiveOcean_v201712_{:y%Ym%md%d}.nc',
-                'mesh mask': 'grid/mesh_mask201702.nc',
-            },
+            "temperature salinity": {
+                "download": {"dest dir": "forcing/LiveOcean/downloaded"},
+                "bc dir": "forcing/LiveOcean/boundary_conditions",
+                "file template": "LiveOcean_v201712_{:y%Ym%md%d}.nc",
+                "mesh mask": "grid/mesh_mask201702.nc",
+            }
         }
-        m_create_ts.return_value = ['LiveOcean_v201712_y2017m01d30.nc']
-        checklist = make_live_ocean_files.make_live_ocean_files(
-            parsed_args, config
-        )
-        expected = {
-            'temperature & salinity': 'LiveOcean_v201712_y2017m01d30.nc',
-        }
+        m_create_ts.return_value = ["LiveOcean_v201712_y2017m01d30.nc"]
+        checklist = make_live_ocean_files.make_live_ocean_files(parsed_args, config)
+        expected = {"temperature & salinity": "LiveOcean_v201712_y2017m01d30.nc"}
         assert checklist == expected

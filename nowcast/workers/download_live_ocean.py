@@ -31,7 +31,7 @@ from nemo_nowcast import get_web_data, NowcastWorker
 
 from nowcast import lib
 
-NAME = 'download_live_ocean'
+NAME = "download_live_ocean"
 logger = logging.getLogger(NAME)
 
 
@@ -45,61 +45,53 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_date_option(
-        '--run-date',
-        default=arrow.now().floor('day'),
-        help='Date to download the Live Ocean forecast product for.'
+        "--run-date",
+        default=arrow.now().floor("day"),
+        help="Date to download the Live Ocean forecast product for.",
     )
     worker.run(download_live_ocean, success, failure)
 
 
 def success(parsed_args):
-    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
-        f'{ymd} Live Ocean file for Salish Sea western boundary downloaded',
-        extra={
-            'run_date': ymd
-        }
+        f"{ymd} Live Ocean file for Salish Sea western boundary downloaded",
+        extra={"run_date": ymd},
     )
-    msg_type = 'success'
+    msg_type = "success"
     return msg_type
 
 
 def failure(parsed_args):
-    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
-        f'{ymd} Live Ocean file for Salish Sea western boundary download '
-        f'failed',
-        extra={
-            'run_date': ymd
-        }
+        f"{ymd} Live Ocean file for Salish Sea western boundary download " f"failed",
+        extra={"run_date": ymd},
     )
-    msg_type = 'failure'
+    msg_type = "failure"
     return msg_type
 
 
 def download_live_ocean(parsed_args, config, *args):
-    yyyymmdd = parsed_args.run_date.format('YYYYMMDD')
-    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    yyyymmdd = parsed_args.run_date.format("YYYYMMDD")
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
-        f'downloading Salish Sea western boundary daily averaged Live Ocean '
-        f'file for {ymd}'
+        f"downloading Salish Sea western boundary daily averaged Live Ocean "
+        f"file for {ymd}"
     )
-    base_url = config['temperature salinity']['download']['url']
-    dir_prefix = config['temperature salinity']['download']['directory prefix']
-    filename = config['temperature salinity']['download']['file name']
-    url = f'{base_url}{dir_prefix}{yyyymmdd}/{filename}'
-    dest_dir = Path(
-        config['temperature salinity']['download']['dest dir'], yyyymmdd
-    )
-    grp_name = config['file group']
+    base_url = config["temperature salinity"]["download"]["url"]
+    dir_prefix = config["temperature salinity"]["download"]["directory prefix"]
+    filename = config["temperature salinity"]["download"]["file name"]
+    url = f"{base_url}{dir_prefix}{yyyymmdd}/{filename}"
+    dest_dir = Path(config["temperature salinity"]["download"]["dest dir"], yyyymmdd)
+    grp_name = config["file group"]
     lib.mkdir(str(dest_dir), logger, grp_name=grp_name)
     checklist = {ymd: []}
     with requests.Session() as session:
-        url = f'{base_url}{dir_prefix}{yyyymmdd}/{filename}'
+        url = f"{base_url}{dir_prefix}{yyyymmdd}/{filename}"
         filepath = _get_file(url, filename, dest_dir, session)
     checklist[ymd].append(str(filepath))
-    nemo_cmd.api.deflate([filepath],
-                         math.floor(multiprocessing.cpu_count() / 2))
+    nemo_cmd.api.deflate([filepath], math.floor(multiprocessing.cpu_count() / 2))
     checklist = {ymd: os.fspath(filepath)}
     return checklist
 
@@ -112,14 +104,10 @@ def _get_file(url, filename, dest_dir, session):
     get_web_data(url, NAME, filepath, session)
     size = filepath.stat().st_size
     logger.debug(
-        f'downloaded {size} bytes from {url}',
-        extra={
-            'url': url,
-            'dest_dir': dest_dir,
-        }
+        f"downloaded {size} bytes from {url}", extra={"url": url, "dest_dir": dest_dir}
     )
     return filepath
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

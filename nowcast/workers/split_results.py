@@ -26,7 +26,7 @@ import arrow
 import shutil
 from nemo_nowcast import NowcastWorker
 
-NAME = 'split_results'
+NAME = "split_results"
 logger = logging.getLogger(NAME)
 
 
@@ -40,17 +40,17 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'run_type',
-        choices={'hindcast'},
-        help='Type of run to split results files from.',
+        "run_type",
+        choices={"hindcast"},
+        help="Type of run to split results files from.",
     )
     worker.cli.add_argument(
-        'run_date',
+        "run_date",
         type=worker.cli._arrow_date,
         help=(
-            'Date of the 1st day of the run to split results files from.'
-            'Use YYYY-MM-DD format.'
-        )
+            "Date of the 1st day of the run to split results files from."
+            "Use YYYY-MM-DD format."
+        ),
     )
     worker.run(split_results, success, failure)
 
@@ -58,26 +58,26 @@ def main():
 def success(parsed_args):
     logger.info(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f'results files split into daily directories',
+        f"results files split into daily directories",
         extra={
-            'run_type': parsed_args.run_type,
-            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        }
+            "run_type": parsed_args.run_type,
+            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
+        },
     )
-    msg_type = f'success {parsed_args.run_type}'
+    msg_type = f"success {parsed_args.run_type}"
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f'results files splitting failed',
+        f"results files splitting failed",
         extra={
-            'run_type': parsed_args.run_type,
-            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        }
+            "run_type": parsed_args.run_type,
+            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
+        },
     )
-    msg_type = f'failure {parsed_args.run_type}'
+    msg_type = f"failure {parsed_args.run_type}"
     return msg_type
 
 
@@ -86,42 +86,39 @@ def split_results(parsed_args, config, *args):
     run_date = parsed_args.run_date
     logger.info(
         f'splitting {run_date.format("YYYY-MM-DD")} {run_type} '
-        f'results files into daily directories',
-        extra={
-            'run_type': run_type,
-            'date': run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        }
+        f"results files into daily directories",
+        extra={"run_type": run_type, "date": run_date.format("YYYY-MM-DD HH:mm:ss ZZ")},
     )
-    results_dir = run_date.format('DDMMMYY').lower()
-    run_type_results = Path(config['results archive'][run_type])
+    results_dir = run_date.format("DDMMMYY").lower()
+    run_type_results = Path(config["results archive"][run_type])
     src_dir = run_type_results / results_dir
     last_date = run_date
     checklist = set()
-    for fp in src_dir.glob('*.nc'):
-        if 'restart' in str(fp):
+    for fp in src_dir.glob("*.nc"):
+        if "restart" in str(fp):
             continue
-        date = arrow.get(fp.stem[-8:], 'YYYYMMDD')
-        checklist.add(date.format('YYYY-MM-DD'))
+        date = arrow.get(fp.stem[-8:], "YYYYMMDD")
+        checklist.add(date.format("YYYY-MM-DD"))
         last_date = max(date, last_date)
-        dest_dir = run_type_results / date.format('DDMMMYY').lower()
+        dest_dir = run_type_results / date.format("DDMMMYY").lower()
         dest_dir.mkdir(exist_ok=True)
-        if fp.stem.startswith('SalishSea_1'):
+        if fp.stem.startswith("SalishSea_1"):
             fn = Path(
-                f'{fp.stem[:12]}_'
+                f"{fp.stem[:12]}_"
                 f'{date.format("YYYYMMDD")}_{date.format("YYYYMMDD")}_'
-                f'{fp.stem[31:37]}'
-            ).with_suffix('.nc')
+                f"{fp.stem[31:37]}"
+            ).with_suffix(".nc")
         else:
-            fn = Path(fp.stem[:-18]).with_suffix('.nc')
+            fn = Path(fp.stem[:-18]).with_suffix(".nc")
         dest = dest_dir / fn
         shutil.move(str(fp), str(dest))
-        logger.debug(f'moved {fp} to {dest}')
-    for fp in src_dir.glob('SalishSea_*_restart*.nc'):
-        dest_dir = run_type_results / last_date.format('DDMMMYY').lower()
+        logger.debug(f"moved {fp} to {dest}")
+    for fp in src_dir.glob("SalishSea_*_restart*.nc"):
+        dest_dir = run_type_results / last_date.format("DDMMMYY").lower()
         shutil.move(str(fp), str(dest_dir))
-        logger.debug(f'moved {fp} to {dest_dir}')
+        logger.debug(f"moved {fp} to {dest_dir}")
     return checklist
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

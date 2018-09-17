@@ -21,7 +21,7 @@ import logging
 
 from nemo_nowcast import NowcastWorker
 
-NAME = 'make_surface_current_tiles'
+NAME = "make_surface_current_tiles"
 logger = logging.getLogger(NAME)
 
 
@@ -44,8 +44,8 @@ def success(parsed_args):
     :return: Nowcast system message type
     :rtype: str
     """
-    logger.info('surface current tile figures completed')
-    msg_type = f'success'
+    logger.info("surface current tile figures completed")
+    msg_type = f"success"
     return msg_type
 
 
@@ -56,8 +56,8 @@ def failure(parsed_args):
     :return: Nowcast system message type
     :rtype: str
     """
-    logger.critical('surface current tile figures production failed')
-    msg_type = f'failure'
+    logger.critical("surface current tile figures production failed")
+    msg_type = f"failure"
     return msg_type
 
 
@@ -73,5 +73,5 @@ def make_surface_current_tiles(parsed_args, checklist, *args):
     return checklist
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

@@ -42,7 +42,7 @@ def make_figure(
     sections=(450,),
     pos=((0.1, 0.95),),
     section_lims=((235, 318, 0, 445),),
-    surface_lims=(0, 397, 200, 750)
+    surface_lims=(0, 397, 200, 750),
 ):
     """Produce a figure that shows colour contours of a tracer on a vertical slice 
     along a section of the domain thalweg,
@@ -87,9 +87,7 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     # Prepare data
-    plot_data = _prep_plot_data(
-        U_var, V_var, mesh_mask, bathy, sections=sections
-    )
+    plot_data = _prep_plot_data(U_var, V_var, mesh_mask, bathy, sections=sections)
 
     # Prepare layout
     fig, (ax_section, ax_surface, ax_cbar) = _prep_fig_axes(
@@ -119,16 +117,12 @@ def make_figure(
             theme,
             lims=section[1],
             ibreak=ibreak,
-            xlabel=xlabel
+            xlabel=xlabel,
         )
-    _cbar_labels(
-        cbar, np.arange(-0.5, 0.6, 0.1), theme, 'Alongstrait Velocity [m/s]'
-    )
+    _cbar_labels(cbar, np.arange(-0.5, 0.6, 0.1), theme, "Alongstrait Velocity [m/s]")
 
     # Plot surface
-    _plot_vel_surface(
-        ax_surface, plot_data, bathy, sections=(sections, section_lims)
-    )
+    _plot_vel_surface(ax_surface, plot_data, bathy, sections=(sections, section_lims))
     _surface_axes_labels(ax_surface, theme, lims=surface_lims)
 
     return fig
@@ -154,8 +148,8 @@ def _prep_plot_data(U, V, mesh_mask, bathy, hr=0, sections=(450,)):
         U_section[index, :, :] = U_trim[:, section - 1, :]
         V_section[index, :, :] = V_trim[:, section - 1, :]
 
-    bathy_array = bathy.variables['Bathymetry'][...].data
-    bathy_mask = bathy.variables['Bathymetry'][:].mask
+    bathy_array = bathy.variables["Bathymetry"][...].data
+    bathy_mask = bathy.variables["Bathymetry"][:].mask
     bathy_array[bathy_mask] = 0
 
     return SimpleNamespace(
@@ -166,43 +160,32 @@ def _prep_plot_data(U, V, mesh_mask, bathy, hr=0, sections=(450,)):
         gridX=np.arange(U_surface.shape[1]) + 1,
         gridY=np.arange(U_surface.shape[0]) + 1,
         depth=mesh_mask["gdept_1d"][0, ...],
-        bathy_array=bathy_array
+        bathy_array=bathy_array,
     )
 
 
 def _prep_fig_axes(figsize, theme, sections=(450,), pos=((0.1, 0.95),)):
 
     # Make Figure
-    fig = plt.figure(
-        figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
-    )
+    fig = plt.figure(figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"])
 
     # Make Sections
     ax_section = {}
     for index, section in enumerate(zip(sections, pos)):
         gs = gridspec.GridSpec(2, 1, height_ratios=[1, 2])
         gs.update(
-            bottom=section[1][0],
-            top=section[1][1],
-            left=0.1,
-            right=0.5,
-            hspace=0.05
+            bottom=section[1][0], top=section[1][1], left=0.1, right=0.5, hspace=0.05
         )
-        ax_section[str(section[0])] = [
-            fig.add_subplot(gs[0]),
-            fig.add_subplot(gs[1])
-        ]
+        ax_section[str(section[0])] = [fig.add_subplot(gs[0]), fig.add_subplot(gs[1])]
         for ax, shift, axis in zip(
-            ax_section[str(section[0])], [0, 1], ['bottom', 'top']
+            ax_section[str(section[0])], [0, 1], ["bottom", "top"]
         ):
             ax.spines[axis].set_visible(False)
-            ax.tick_params(
-                which='both', top='off', right='off', direction='out'
-            )
-            ax.set_axis_bgcolor(theme.COLOURS['axes']['background'])
+            ax.tick_params(which="both", top="off", right="off", direction="out")
+            ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
             theme.set_axis_colors(ax)
         ax_section[str(section[0])][0].tick_params(
-            which='both', labelbottom='off', bottom='off'
+            which="both", labelbottom="off", bottom="off"
         )
 
     # Make Surface
@@ -233,40 +216,38 @@ def _plot_vel_section(
             V[iz, :],
             levels,
             cmap=cmap,
-            extend='both',
-            zorder=0
+            extend="both",
+            zorder=0,
         )
         ax.contour(
             plot_data.gridX,
             plot_data.depth[iz],
             V[iz, :],
             levels,
-            colors='gray',
+            colors="gray",
             linewidths=0.5,
-            zorder=1
+            zorder=1,
         )
         ax.fill_between(
             plot_data.gridX,
             bathy,
             plot_data.depth[ifill],
-            facecolor='burlywood',
+            facecolor="burlywood",
             linewidth=0,
-            zorder=2
+            zorder=2,
         )
-        ax.plot(plot_data.gridX, bathy, 'k-', zorder=3)
+        ax.plot(plot_data.gridX, bathy, "k-", zorder=3)
 
-    cbar = fig.colorbar(C, cax=cax, orientation='horizontal')
+    cbar = fig.colorbar(C, cax=cax, orientation="horizontal")
 
     return cbar
 
 
 def _cbar_labels(cbar, contour_intervals, theme, label):
     cbar.set_ticks(contour_intervals)
-    cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
+    cbar.ax.axes.tick_params(labelcolor=theme.COLOURS["cbar"]["tick labels"])
     cbar.set_label(
-        label,
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        label, fontproperties=theme.FONTS["axis"], color=theme.COLOURS["text"]["axis"]
     )
 
 
@@ -282,16 +263,16 @@ def _section_axes_labels(
     ax[1].set_xlim(lims[:2])
     ax[1].set_ylim([lims[3], plot_data.depth[ibreak]])
     ax[1].set_ylabel(
-        'Depth [m]',
-        color=theme.COLOURS['text']['axis'],
-        fontproperties=theme.FONTS['axis']
+        "Depth [m]",
+        color=theme.COLOURS["text"]["axis"],
+        fontproperties=theme.FONTS["axis"],
     )
     ax[1].yaxis.set_label_coords(-0.07, 0.8)
     if xlabel:
         ax[1].set_xlabel(
-            'Grid x',
-            color=theme.COLOURS['text']['axis'],
-            fontproperties=theme.FONTS['axis']
+            "Grid x",
+            color=theme.COLOURS["text"]["axis"],
+            fontproperties=theme.FONTS["axis"],
         )
 
 
@@ -302,14 +283,12 @@ def _plot_vel_surface(ax, plot_data, bathy, sections=None):
         plot_data.gridY[::5],
         plot_data.U_surface[::5, ::5],
         plot_data.V_surface[::5, ::5],
-        scale=20
+        scale=20,
     )
     if sections is not None:
         for section in zip(*sections):
-            ax.plot(
-                section[1][:2], (section[0], section[0]), 'r--', linewidth=2
-            )
-    viz_tools.plot_land_mask(ax, bathy, color='burlywood')
+            ax.plot(section[1][:2], (section[0], section[0]), "r--", linewidth=2)
+    viz_tools.plot_land_mask(ax, bathy, color="burlywood")
     viz_tools.plot_coastline(ax, bathy)
 
 
@@ -317,12 +296,12 @@ def _surface_axes_labels(ax, theme, lims=(0, 397, 200, 750)):
     ax.set_xlim(lims[:2])
     ax.set_ylim(lims[2:])
     ax.set_xlabel(
-        'Grid x',
-        color=theme.COLOURS['text']['axis'],
-        fontproperties=theme.FONTS['axis']
+        "Grid x",
+        color=theme.COLOURS["text"]["axis"],
+        fontproperties=theme.FONTS["axis"],
     )
     ax.set_ylabel(
-        'Grid y',
-        color=theme.COLOURS['text']['axis'],
-        fontproperties=theme.FONTS['axis']
+        "Grid y",
+        color=theme.COLOURS["text"]["axis"],
+        fontproperties=theme.FONTS["axis"],
     )

@@ -24,7 +24,7 @@ import time
 
 from nemo_nowcast import NowcastWorker
 
-NAME = 'watch_ww3'
+NAME = "watch_ww3"
 logger = logging.getLogger(NAME)
 
 POLL_INTERVAL = 5 * 60  # seconds
@@ -39,57 +39,48 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
+    worker.cli.add_argument("host_name", help="Name of the host to monitor the run on")
     worker.cli.add_argument(
-        'host_name', help='Name of the host to monitor the run on'
-    )
-    worker.cli.add_argument(
-        'run_type',
-        choices={'forecast2', 'forecast'},
-        help='''
+        "run_type",
+        choices={"forecast2", "forecast"},
+        help="""
         Type of run to monitor:
         'forecast2' means preliminary forecast run (after NEMO forecast2 run),
         'forecast' means updated forecast run (after NEMO forecast run)
-        ''',
+        """,
     )
     worker.run(watch_ww3, success, failure)
 
 
 def success(parsed_args):
     logger.info(
-        '{0.run_type} WWATCH3 run on {0.host_name} completed'.
-        format(parsed_args),
-        extra={
-            'run_type': parsed_args.run_type,
-            'host_name': parsed_args.host_name,
-        }
+        "{0.run_type} WWATCH3 run on {0.host_name} completed".format(parsed_args),
+        extra={"run_type": parsed_args.run_type, "host_name": parsed_args.host_name},
     )
-    msg_type = 'success {.run_type}'.format(parsed_args)
+    msg_type = "success {.run_type}".format(parsed_args)
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        '{0.run_type} WWATCH3 run on {0.host_name} failed'.format(parsed_args),
-        extra={
-            'run_type': parsed_args.run_type,
-            'host_name': parsed_args.host_name,
-        }
+        "{0.run_type} WWATCH3 run on {0.host_name} failed".format(parsed_args),
+        extra={"run_type": parsed_args.run_type, "host_name": parsed_args.host_name},
     )
-    msg_type = 'failure {.run_type}'.format(parsed_args)
+    msg_type = "failure {.run_type}".format(parsed_args)
     return msg_type
 
 
 def watch_ww3(parsed_args, config, tell_manager):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
-    run_info = tell_manager('need', 'WWATCH3 run').payload
+    run_info = tell_manager("need", "WWATCH3 run").payload
     pid = _find_run_pid(run_info[run_type])
-    logger.debug(f'{run_type} on {host_name}: run pid: {pid}')
-    run_dir = Path(run_info[run_type]['run dir'])
+    logger.debug(f"{run_type} on {host_name}: run pid: {pid}")
+    run_dir = Path(run_info[run_type]["run dir"])
     # Watch for the run process to end
     while _pid_exists(pid):
         try:
-            with (run_dir / 'log.ww3').open('rt') as f:
+            with (run_dir / "log.ww3").open("rt") as f:
                 lines = f.readlines()
             lines.reverse()
             for line in lines:
@@ -100,16 +91,16 @@ def watch_ww3(parsed_args, config, tell_manager):
                     continue
             fraction_done = time_step / 1080
             msg = (
-                f'{run_type} on {host_name}: timestep: {time_step}, '
-                f'{fraction_done:.1%} complete'
+                f"{run_type} on {host_name}: timestep: {time_step}, "
+                f"{fraction_done:.1%} complete"
             )
         except FileNotFoundError:
             # log.ww3 file not found; assume that run is young and it
             # hasn't been created yet, or has finished and it has been
             # moved to the results directory
             msg = (
-                f'{run_type} on {host_name}: log.ww3 not found; '
-                f'continuing to watch...'
+                f"{run_type} on {host_name}: log.ww3 not found; "
+                f"continuing to watch..."
             )
         logger.info(msg)
         time.sleep(POLL_INTERVAL)
@@ -117,25 +108,22 @@ def watch_ww3(parsed_args, config, tell_manager):
         ## completed successfully
     return {
         run_type: {
-            'host': host_name,
-            'run date': run_info[run_type]['run date'],
-            'completed': True,
+            "host": host_name,
+            "run date": run_info[run_type]["run date"],
+            "completed": True,
         }
     }
 
 
 def _find_run_pid(run_info):
-    run_exec_cmd = run_info['run exec cmd']
+    run_exec_cmd = run_info["run exec cmd"]
     cmd = shlex.split(f'pgrep --newest --exact --full "{run_exec_cmd}"')
     logger.debug(f'searching processes for "{run_exec_cmd}"')
     pid = None
     while pid is None:
         try:
             proc = subprocess.run(
-                cmd,
-                stdout=subprocess.PIPE,
-                check=True,
-                universal_newlines=True
+                cmd, stdout=subprocess.PIPE, check=True, universal_newlines=True
             )
             pid = int(proc.stdout)
         except subprocess.CalledProcessError:
@@ -156,7 +144,7 @@ def _pid_exists(pid):
         # in the process group of the calling process.
         # On certain systems 0 is a valid PID but we have no way
         # to know that in a portable fashion.
-        raise ValueError('invalid PID 0')
+        raise ValueError("invalid PID 0")
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -169,5 +157,5 @@ def _pid_exists(pid):
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

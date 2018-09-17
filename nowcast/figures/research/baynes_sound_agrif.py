@@ -44,7 +44,7 @@ def make_figure(
     ss_grid_url,
     bs_grid_path,
     figsize=(22, 9),
-    theme=nowcast.figures.website_theme
+    theme=nowcast.figures.website_theme,
 ):
     """Plot 4-panel figure that shows surface values of temperature, salinity,
     diatoms biomass, and nitrate concentration in the Baynes Sound region at
@@ -85,8 +85,7 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(
-        ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url,
-        bs_grid_path
+        ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url, bs_grid_path
     )
     fig, axs, grids = _prep_fig_axes(figsize, plot_data, theme)
     _plot_surface_fields(axs, plot_data, grids, theme)
@@ -98,17 +97,16 @@ def make_figure(
     hour = numpy.asscalar(time.dt.hour.values)
     minute = numpy.asscalar(time.dt.minute.values)
     fig.suptitle(
-        f'{year}-{month:02d}-{day:02d} {hour:02d}:{minute:02d} {plot_data.tz_name}',
-        color=theme.COLOURS['text']['figure title'],
-        fontproperties=theme.FONTS['figure title'],
-        fontsize=theme.FONTS['figure title'].get_size(),
+        f"{year}-{month:02d}-{day:02d} {hour:02d}:{minute:02d} {plot_data.tz_name}",
+        color=theme.COLOURS["text"]["figure title"],
+        fontproperties=theme.FONTS["figure title"],
+        fontsize=theme.FONTS["figure title"].get_size(),
     )
     return fig
 
 
 def _prep_plot_data(
-    ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url,
-    bs_grid_path
+    ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url, bs_grid_path
 ):
     """
     :param :py:class:`pathlib.Path` ss_tracers_path:
@@ -120,28 +118,27 @@ def _prep_plot_data(
     :returns: :py:class:`types.SimpleNamespace`
     """
     SS_BAYNES_SOUND_X, SS_BAYNES_SOUND_Y = slice(112, 166), slice(550, 699)
-    ss_grid = xarray.open_dataset(ss_grid_url, mask_and_scale=False) \
-        .sel(gridX=SS_BAYNES_SOUND_X, gridY=SS_BAYNES_SOUND_Y)
+    ss_grid = xarray.open_dataset(ss_grid_url, mask_and_scale=False).sel(
+        gridX=SS_BAYNES_SOUND_X, gridY=SS_BAYNES_SOUND_Y
+    )
     ss_water_mask = (ss_grid.bathymetry != 0).values
     bs_grid = xarray.open_dataset(bs_grid_path, mask_and_scale=False)
     bs_water_mask = (bs_grid.Bathymetry != 0).values
 
     ss_tracers = xarray.open_dataset(ss_tracers_path)
-    shared.localize_time(ss_tracers, time_coord='time_counter')
+    shared.localize_time(ss_tracers, time_coord="time_counter")
 
     bs_phys = xarray.open_dataset(bs_phys_path)
     bs_bio = xarray.open_dataset(bs_bio_path)
     for dataset in (bs_phys, bs_bio):
-        shared.localize_time(dataset, time_coord='time_counter')
+        shared.localize_time(dataset, time_coord="time_counter")
 
-    ss_temperature = _get_data_array(
-        ss_tracers.votemper, ss_water_mask, run_date
-    )
+    ss_temperature = _get_data_array(ss_tracers.votemper, ss_water_mask, run_date)
     bs_temperature = _get_data_array(bs_phys.votemper, bs_water_mask, run_date)
-    bs_temperature.attrs['long_name'] = 'Conservative Temperature'
+    bs_temperature.attrs["long_name"] = "Conservative Temperature"
     ss_salinity = _get_data_array(ss_tracers.vosaline, ss_water_mask, run_date)
     bs_salinity = _get_data_array(bs_phys.vosaline, bs_water_mask, run_date)
-    bs_salinity.attrs['long_name'] = 'Reference Salinity'
+    bs_salinity.attrs["long_name"] = "Reference Salinity"
     ss_diatoms = _get_data_array(ss_tracers.diatoms, ss_water_mask, run_date)
     bs_diatoms = _get_data_array(bs_bio.diatoms, bs_water_mask, run_date)
     ss_nitrate = _get_data_array(ss_tracers.nitrate, ss_water_mask, run_date)
@@ -156,7 +153,7 @@ def _prep_plot_data(
         ss_nitrate=ss_nitrate,
         bs_nitrate=bs_nitrate,
         run_date=run_date,
-        tz_name=bs_phys.attrs['tz_name'],
+        tz_name=bs_phys.attrs["tz_name"],
         ss_grid=ss_grid,
         bs_grid=bs_grid,
     )
@@ -170,15 +167,17 @@ def _get_data_array(ds_var, water_mask, run_date):
     :returns: :py:class:`xarray.DataArray`
     """
     try:
-        return ds_var \
-            .isel(nearsurface_T=0) \
-            .sel(time_counter=run_date.format('YYYY-MM-DD 12:30')) \
+        return (
+            ds_var.isel(nearsurface_T=0)
+            .sel(time_counter=run_date.format("YYYY-MM-DD 12:30"))
             .where(water_mask)
+        )
     except ValueError:
-        return ds_var \
-            .isel(deptht=0) \
-            .sel(time_counter=run_date.format('YYYY-MM-DD 12:30')) \
+        return (
+            ds_var.isel(deptht=0)
+            .sel(time_counter=run_date.format("YYYY-MM-DD 12:30"))
             .where(water_mask)
+        )
 
 
 def _prep_fig_axes(figsize, plot_data, theme):
@@ -191,7 +190,7 @@ def _prep_fig_axes(figsize, plot_data, theme):
               `types.SimpleNamespace`
     """
     fig, axs = plt.subplots(
-        1, 4, figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
+        1, 4, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
     map_params = SimpleNamespace(
         ll_lon=-124.68,
@@ -202,14 +201,16 @@ def _prep_fig_axes(figsize, plot_data, theme):
         meridians=numpy.arange(-125.1, -124.3, 0.1),
         parallels=numpy.arange(49.2, 50, 0.1),
     )
-    central_lon = ((map_params.ur_lon - map_params.ll_lon) / 2 +
-                   map_params.ll_lon + map_params.lon_0_offset)
-    central_lat = ((map_params.ur_lat - map_params.ll_lat) / 2 +
-                   map_params.ll_lat)
+    central_lon = (
+        (map_params.ur_lon - map_params.ll_lon) / 2
+        + map_params.ll_lon
+        + map_params.lon_0_offset
+    )
+    central_lat = (map_params.ur_lat - map_params.ll_lat) / 2 + map_params.ll_lat
     for ax in axs:
         m = Basemap(
             ax=ax,
-            projection='lcc',
+            projection="lcc",
             lon_0=central_lon,
             lat_0=central_lat,
             llcrnrlon=map_params.ll_lon,
@@ -221,21 +222,19 @@ def _prep_fig_axes(figsize, plot_data, theme):
         m.drawmeridians(
             map_params.meridians,
             labels=(False, False, False, True),
-            textcolor=theme.COLOURS['text']['axis'],
-            fontproperties=theme.FONTS['axis small'],
+            textcolor=theme.COLOURS["text"]["axis"],
+            fontproperties=theme.FONTS["axis small"],
         )
         m.drawparallels(
             map_params.parallels,
             labels=(True, False, False, False),
-            textcolor=theme.COLOURS['text']['axis'],
-            fontproperties=theme.FONTS['axis small'],
+            textcolor=theme.COLOURS["text"]["axis"],
+            fontproperties=theme.FONTS["axis small"],
         )
     ss_x, ss_y = m(
         plot_data.ss_grid.longitude.values, plot_data.ss_grid.latitude.values
     )
-    bs_x, bs_y = m(
-        plot_data.bs_grid.nav_lon.values, plot_data.bs_grid.nav_lat.values
-    )
+    bs_x, bs_y = m(plot_data.bs_grid.nav_lon.values, plot_data.bs_grid.nav_lat.values)
     grids = SimpleNamespace(ss_x=ss_x, ss_y=ss_y, bs_x=bs_x, bs_y=bs_y)
     return fig, axs, grids
 
@@ -248,18 +247,14 @@ def _plot_surface_fields(axs, plot_data, grids, theme):
     :param :py:mod:`nowcast.figures.website_theme` theme:
     """
     vars = [
-        (
-            plot_data.ss_temperature, plot_data.bs_temperature,
-            cmocean.cm.thermal
-        ),
+        (plot_data.ss_temperature, plot_data.bs_temperature, cmocean.cm.thermal),
         (plot_data.ss_salinity, plot_data.bs_salinity, cmocean.cm.haline),
         (plot_data.ss_diatoms, plot_data.bs_diatoms, cmocean.cm.algae),
         (plot_data.ss_nitrate, plot_data.bs_nitrate, cmocean.cm.matter),
     ]
     for i, (ss_var, bs_var, cmap) in enumerate(vars):
         _plot_surface_field(
-            axs[i], ss_var, bs_var, cmap, grids, plot_data.bs_grid.Bathymetry,
-            theme
+            axs[i], ss_var, bs_var, cmap, grids, plot_data.bs_grid.Bathymetry, theme
         )
 
 
@@ -276,38 +271,27 @@ def _plot_surface_field(ax, ss_var, bs_var, cmap, grids, bs_bathy, theme):
     cmap = plt.get_cmap(cmap)
     clevels = numpy.linspace(
         numpy.floor(bs_var.where(bs_var > 0).min()),
-        numpy.ceil(bs_var.where(bs_var > 0).max()), 20
+        numpy.ceil(bs_var.where(bs_var > 0).max()),
+        20,
     )
-    ax.contourf(
-        grids.ss_x,
-        grids.ss_y,
-        ss_var,
-        cmap=cmap,
-        levels=clevels,
-        extend='max'
-    )
+    ax.contourf(grids.ss_x, grids.ss_y, ss_var, cmap=cmap, levels=clevels, extend="max")
     contour_set = ax.contourf(
-        grids.bs_x,
-        grids.bs_y,
-        bs_var,
-        cmap=cmap,
-        levels=clevels,
-        extend='max'
+        grids.bs_x, grids.bs_y, bs_var, cmap=cmap, levels=clevels, extend="max"
     )
     cbar = plt.colorbar(contour_set, ax=ax)
-    cbar.ax.axes.tick_params(labelcolor=theme.COLOURS['cbar']['tick labels'])
+    cbar.ax.axes.tick_params(labelcolor=theme.COLOURS["cbar"]["tick labels"])
     cbar.set_label(
         f'{bs_var.attrs["long_name"]} [{bs_var.attrs["units"]}]',
-        color=theme.COLOURS['text']['axis'],
-        fontproperties=theme.FONTS['axis'],
+        color=theme.COLOURS["text"]["axis"],
+        fontproperties=theme.FONTS["axis"],
     )
     isobath = ax.contour(
         grids.bs_x,
         grids.bs_y,
         bs_bathy,
         (25,),
-        colors=theme.COLOURS['contour lines']['Baynes Sound entrance'],
+        colors=theme.COLOURS["contour lines"]["Baynes Sound entrance"],
     )
-    plt.clabel(isobath, fmt={isobath.levels[0]: f'{isobath.levels[0]:.0f} m'})
-    ax.set_axis_bgcolor(theme.COLOURS['dark land'])
+    plt.clabel(isobath, fmt={isobath.levels[0]: f"{isobath.levels[0]:.0f} m"})
+    ax.set_axis_bgcolor(theme.COLOURS["dark land"])
     theme.set_axis_colors(ax)

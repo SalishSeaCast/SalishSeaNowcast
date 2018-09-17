@@ -27,27 +27,21 @@ import shutil
 from bs4 import BeautifulSoup
 import matplotlib.backends.backend_agg
 import matplotlib.figure
-from nemo_nowcast import (
-    get_web_data,
-    NowcastWorker,
-)
+from nemo_nowcast import get_web_data, NowcastWorker
 import netCDF4 as nc
 import numpy as np
 import pytz
 from salishsea_tools import nc_tools
 
-from nowcast import (
-    lib,
-    residuals,
-)
+from nowcast import lib, residuals
 
-NAME = 'get_NeahBay_ssh'
+NAME = "get_NeahBay_ssh"
 logger = logging.getLogger(NAME)
 
 #: NOAA Neah Bay sea surface height observations & forecast site URL
 URL = (
-    'http://nws.noaa.gov/mdl/etsurge/index.php'
-    '?page=stn&region=wc&datum=msl&list=&map=0-48&type=both&stn=waneah'
+    "http://nws.noaa.gov/mdl/etsurge/index.php"
+    "?page=stn&region=wc&datum=msl&list=&map=0-48&type=both&stn=waneah"
 )
 
 
@@ -61,8 +55,8 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'run_type',
-        choices={'nowcast', 'forecast', 'forecast2'},
+        "run_type",
+        choices={"nowcast", "forecast", "forecast2"},
         help="""
         Type of run to prepare open boundary sea surface height file for.
         """,
@@ -72,25 +66,21 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        f'Neah Bay sea surface height web scraping and open boundary file '
-        f'creation for {parsed_args.run_type} complete',
-        extra={
-            'run_type': parsed_args.run_type
-        }
+        f"Neah Bay sea surface height web scraping and open boundary file "
+        f"creation for {parsed_args.run_type} complete",
+        extra={"run_type": parsed_args.run_type},
     )
-    msg_type = f'success {parsed_args.run_type}'
+    msg_type = f"success {parsed_args.run_type}"
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        f'Neah Bay sea surface height web scraping and open boundary file '
-        f'creation for {parsed_args.run_type} failed',
-        extra={
-            'run_type': parsed_args.run_type
-        }
+        f"Neah Bay sea surface height web scraping and open boundary file "
+        f"creation for {parsed_args.run_type} failed",
+        extra={"run_type": parsed_args.run_type},
     )
-    msg_type = f'failure {parsed_args.run_type}'
+    msg_type = f"failure {parsed_args.run_type}"
     return msg_type
 
 
@@ -99,41 +89,34 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     storm surge website.
     """
     run_type = parsed_args.run_type
-    coords = Path(config['ssh']['coordinates'])
+    coords = Path(config["ssh"]["coordinates"])
     with nc.Dataset(os.fspath(coords)) as coordinates:
-        lats = coordinates.variables['nav_lat'][:]
-        lons = coordinates.variables['nav_lon'][:]
-    logger.debug(
-        f'loaded lats & lons from {coords}', extra={
-            'run_type': run_type
-        }
-    )
+        lats = coordinates.variables["nav_lat"][:]
+        lons = coordinates.variables["nav_lon"][:]
+    logger.debug(f"loaded lats & lons from {coords}", extra={"run_type": run_type})
     # Scrape the surge data from the website into a text file,
     # store the file in the run results directory,
     # and load the data for processing into netCDF4 files
-    utc_now = datetime.datetime.now(pytz.timezone('UTC'))
-    textfile = _read_website(config['ssh']['ssh dir'])
-    lib.fix_perms(textfile, grp_name=config['file group'])
-    checklist = {'txt': os.path.basename(textfile)}
+    utc_now = datetime.datetime.now(pytz.timezone("UTC"))
+    textfile = _read_website(config["ssh"]["ssh dir"])
+    lib.fix_perms(textfile, grp_name=config["file group"])
+    checklist = {"txt": os.path.basename(textfile)}
     # Store a copy of the text file in the run results directory so that
     # there is definitive record of the sea surface height data that was
     # used for the run
     run_date = _utc_now_to_run_date(utc_now, run_type)
     results_dir = os.path.join(
-        config['results archive'][run_type],
-        run_date.strftime('%d%b%y').lower()
+        config["results archive"][run_type], run_date.strftime("%d%b%y").lower()
     )
-    lib.mkdir(
-        results_dir, logger, grp_name=config['file group'], exist_ok=True
-    )
+    lib.mkdir(results_dir, logger, grp_name=config["file group"], exist_ok=True)
     shutil.copy2(textfile, results_dir)
     # Grab all surge data in the textfile
     dates, sshs, fflags = residuals.NeahBay_forcing_anom(
-        textfile, run_date,
+        textfile,
+        run_date,
         os.path.join(
-            config['ssh']['tidal predictions'],
-            config['ssh']['neah bay hourly']
-        )
+            config["ssh"]["tidal predictions"], config["ssh"]["neah bay hourly"]
+        ),
     )
     # Identify days with full ssh information
     dates_full = _list_full_days(dates, sshs, fflags)
@@ -146,25 +129,25 @@ def get_NeahBay_ssh(parsed_args, config, *args):
         forecast_flag = fflagd.any()
         # Plotting
         if ip < 3:
-            ax.plot(sshd, '-o', lw=2, label=d.strftime('%d-%b-%Y'))
+            ax.plot(sshd, "-o", lw=2, label=d.strftime("%d-%b-%Y"))
         ip = ip + 1
         filepath = _save_netcdf(
             d, tc, sshd, forecast_flag, textfile, config, lats, lons
         )
         filename = os.path.basename(filepath)
-        lib.fix_perms(filename, grp_name=config['file group'])
+        lib.fix_perms(filename, grp_name=config["file group"])
         if forecast_flag:
-            if 'fcst' in checklist:
-                checklist['fcst'].append(filename)
+            if "fcst" in checklist:
+                checklist["fcst"].append(filename)
             else:
-                checklist['fcst'] = [filename]
+                checklist["fcst"] = [filename]
         else:
-            checklist['obs'] = filename
+            checklist["obs"] = filename
     ax.legend(loc=4)
-    image_file = config['ssh']['monitoring image']
+    image_file = config["ssh"]["monitoring image"]
     canvas = matplotlib.backends.backend_agg.FigureCanvasAgg(fig)
     canvas.print_figure(image_file)
-    lib.fix_perms(image_file, grp_name=config['file group'])
+    lib.fix_perms(image_file, grp_name=config["file group"])
     return checklist
 
 
@@ -177,27 +160,22 @@ def _read_website(save_path):
     """
     html = get_web_data(URL, NAME)
     logger.debug(
-        f'downloaded Neah Bay storm surge observations & predictions '
-        f'from {URL}'
+        f"downloaded Neah Bay storm surge observations & predictions " f"from {URL}"
     )
     # Parse the text table out of the HTML
-    soup = BeautifulSoup(html, 'html.parser')
-    table = soup.find('pre').contents
+    soup = BeautifulSoup(html, "html.parser")
+    table = soup.find("pre").contents
     for line in table:
-        line = line.replace('[', '')
-        line = line.replace(']', '')
-    logger.debug(
-        'scraped observations & predictions table from downloaded HTML'
-    )
+        line = line.replace("[", "")
+        line = line.replace("]", "")
+    logger.debug("scraped observations & predictions table from downloaded HTML")
     # Save the table as a text file with the date it was generated as its name
-    utc_now = datetime.datetime.now(pytz.timezone('UTC'))
-    filepath = os.path.join(
-        save_path, 'txt', f'sshNB_{utc_now:%Y-%m-%d_%H}.txt'
-    )
-    with open(filepath, 'wt') as f:
+    utc_now = datetime.datetime.now(pytz.timezone("UTC"))
+    filepath = os.path.join(save_path, "txt", f"sshNB_{utc_now:%Y-%m-%d_%H}.txt")
+    with open(filepath, "wt") as f:
         f.writelines(table)
     lib.fix_perms(filepath)
-    logger.debug(f'observations & predictions table saved to {filepath}')
+    logger.debug(f"observations & predictions table saved to {filepath}")
     return filepath
 
 
@@ -208,11 +186,7 @@ def _utc_now_to_run_date(utc_now, run_type):
     The offsets used in the calculation are based on nominal start times
     of the NEMO runs less 2 hours.
     """
-    offsets = {
-        'nowcast': 16,
-        'forecast': 18,
-        'forecast2': 34,
-    }
+    offsets = {"nowcast": 16, "forecast": 18, "forecast2": 34}
     return (utc_now - datetime.timedelta(hours=offsets[run_type])).date()
 
 
@@ -224,13 +198,13 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
     lengthj = endj - startj
 
     # netCDF4 file setup
-    save_path = config['ssh']['ssh dir']
-    filename = config['ssh']['file template'].format(day)
+    save_path = config["ssh"]["ssh dir"]
+    filename = config["ssh"]["file template"].format(day)
     if forecast_flag:
-        filepath = os.path.join(save_path, 'fcst', filename)
-        comment = 'Prediction from Neah Bay storm surge website'
+        filepath = os.path.join(save_path, "fcst", filename)
+        comment = "Prediction from Neah Bay storm surge website"
     else:
-        filepath = os.path.join(save_path, 'obs', filename)
+        filepath = os.path.join(save_path, "obs", filename)
         try:
             # Unlink file path in case it exists as a symlink to a fcst/
             # file created byh upload_forcing worker because there was
@@ -239,89 +213,79 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
         except OSError:
             # File path does not exist
             pass
-        comment = 'Observation from Neah Bay storm surge website'
-    comment = ' '.join(
-        (comment, f'generated by Salish Sea NEMO nowcast {NAME} worker')
-    )
-    ssh_file = nc.Dataset(filepath, 'w')
+        comment = "Observation from Neah Bay storm surge website"
+    comment = " ".join((comment, f"generated by Salish Sea NEMO nowcast {NAME} worker"))
+    ssh_file = nc.Dataset(filepath, "w")
     nc_tools.init_dataset_attrs(
         ssh_file,
-        title='Neah Bay SSH hourly values',
-        notebook_name='N/A',
+        title="Neah Bay SSH hourly values",
+        notebook_name="N/A",
         nc_filepath=filepath,
         comment=comment,
         quiet=True,
     )
     ssh_file.source = textfile
     ssh_file.references = (
-        f'https://bitbucket.org/salishsea/tools/src/tip/SalishSeaNowcast/'
-        f'nowcast/workers/{NAME}.py'
+        f"https://bitbucket.org/salishsea/tools/src/tip/SalishSeaNowcast/"
+        f"nowcast/workers/{NAME}.py"
     )
-    logger.debug(f'created western open boundary file {filepath}')
+    logger.debug(f"created western open boundary file {filepath}")
 
     # Create netCDF dimensions
-    ssh_file.createDimension('time_counter', None)
-    ssh_file.createDimension('yb', 1)
-    ssh_file.createDimension('xbT', lengthj * r)
+    ssh_file.createDimension("time_counter", None)
+    ssh_file.createDimension("yb", 1)
+    ssh_file.createDimension("xbT", lengthj * r)
 
     # Create netCDF variables
-    time_counter = ssh_file.createVariable(
-        'time_counter', 'float32', 'time_counter'
-    )
-    time_counter.long_name = 'Time axis'
-    time_counter.axis = 'T'
-    time_counter.units = f'hour since 00:00:00 on {day:%Y-%m-%d}'
+    time_counter = ssh_file.createVariable("time_counter", "float32", "time_counter")
+    time_counter.long_name = "Time axis"
+    time_counter.axis = "T"
+    time_counter.units = f"hour since 00:00:00 on {day:%Y-%m-%d}"
     # Latitudes and longitudes
-    nav_lat = ssh_file.createVariable('nav_lat', 'float32', ('yb', 'xbT'))
-    nav_lat.long_name = 'Latitude'
-    nav_lat.units = 'degrees_north'
-    nav_lon = ssh_file.createVariable('nav_lon', 'float32', ('yb', 'xbT'))
-    nav_lon.long_name = 'Longitude'
-    nav_lon.units = 'degrees_east'
+    nav_lat = ssh_file.createVariable("nav_lat", "float32", ("yb", "xbT"))
+    nav_lat.long_name = "Latitude"
+    nav_lat.units = "degrees_north"
+    nav_lon = ssh_file.createVariable("nav_lon", "float32", ("yb", "xbT"))
+    nav_lon.long_name = "Longitude"
+    nav_lon.units = "degrees_east"
     # Sea surface height
     sossheig = ssh_file.createVariable(
-        'sossheig', 'float32', ('time_counter', 'yb', 'xbT'), zlib=True
+        "sossheig", "float32", ("time_counter", "yb", "xbT"), zlib=True
     )
-    sossheig.units = 'm'
-    sossheig.long_name = 'Sea surface height'
-    sossheig.grid = 'SalishSea2'
+    sossheig.units = "m"
+    sossheig.long_name = "Sea surface height"
+    sossheig.grid = "SalishSea2"
     # Baroclinic u and v velocity components
     vobtcrtx = ssh_file.createVariable(
-        'vobtcrtx', 'float32', ('time_counter', 'yb', 'xbT'), zlib=True
+        "vobtcrtx", "float32", ("time_counter", "yb", "xbT"), zlib=True
     )
-    vobtcrtx.units = 'm/s'
-    vobtcrtx.long_name = 'Barotropic U Velocity'
-    vobtcrtx.grid = 'SalishSea2'
+    vobtcrtx.units = "m/s"
+    vobtcrtx.long_name = "Barotropic U Velocity"
+    vobtcrtx.grid = "SalishSea2"
     vobtcrty = ssh_file.createVariable(
-        'vobtcrty', 'float32', ('time_counter', 'yb', 'xbT'), zlib=True
+        "vobtcrty", "float32", ("time_counter", "yb", "xbT"), zlib=True
     )
-    vobtcrty.units = 'm/s'
-    vobtcrty.long_name = 'Barotropic V Velocity'
-    vobtcrty.grid = 'SalishSea2'
+    vobtcrty.units = "m/s"
+    vobtcrty.long_name = "Barotropic V Velocity"
+    vobtcrty.grid = "SalishSea2"
     # Boundary description for NEMO
-    nbidta = ssh_file.createVariable(
-        'nbidta', 'int32', ('yb', 'xbT'), zlib=True
-    )
-    nbidta.long_name = 'i grid position'
+    nbidta = ssh_file.createVariable("nbidta", "int32", ("yb", "xbT"), zlib=True)
+    nbidta.long_name = "i grid position"
     nbidta.units = 1
-    nbjdta = ssh_file.createVariable(
-        'nbjdta', 'int32', ('yb', 'xbT'), zlib=True
-    )
-    nbjdta.long_name = 'j grid position'
+    nbjdta = ssh_file.createVariable("nbjdta", "int32", ("yb", "xbT"), zlib=True)
+    nbjdta.long_name = "j grid position"
     nbjdta.units = 1
-    nbrdta = ssh_file.createVariable(
-        'nbrdta', 'int32', ('yb', 'xbT'), zlib=True
-    )
-    nbrdta.long_name = 'position from boundary'
+    nbrdta = ssh_file.createVariable("nbrdta", "int32", ("yb", "xbT"), zlib=True)
+    nbrdta.long_name = "position from boundary"
     nbrdta.units = 1
 
     # Load values
     for ir in range(r):
-        nav_lat[0, ir * lengthj:(ir + 1) * lengthj] = lats[startj:endj, ir]
-        nav_lon[0, ir * lengthj:(ir + 1) * lengthj] = lons[startj:endj, ir]
-        nbidta[0, ir * lengthj:(ir + 1) * lengthj] = ir
-        nbjdta[0, ir * lengthj:(ir + 1) * lengthj] = range(startj, endj)
-        nbrdta[0, ir * lengthj:(ir + 1) * lengthj] = ir
+        nav_lat[0, ir * lengthj : (ir + 1) * lengthj] = lats[startj:endj, ir]
+        nav_lon[0, ir * lengthj : (ir + 1) * lengthj] = lons[startj:endj, ir]
+        nbidta[0, ir * lengthj : (ir + 1) * lengthj] = ir
+        nbjdta[0, ir * lengthj : (ir + 1) * lengthj] = range(startj, endj)
+        nbrdta[0, ir * lengthj : (ir + 1) * lengthj] = ir
     for ib in range(lengthj * r):
         sossheig[:, 0, ib] = surges
         time_counter[:] = tc + 1
@@ -334,7 +298,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
         # Can't change permissions/group because we don't own the file
         # but that's okay because we were able to write it above
         pass
-    logger.debug(f'saved western open boundary file {filepath}')
+    logger.debug(f"saved western open boundary file {filepath}")
     return filepath
 
 
@@ -366,7 +330,7 @@ def _list_full_days(dates, surges, forecast_flags):
     else:
         start = dates[0] + datetime.timedelta(days=1)
     start = datetime.datetime(
-        start.year, start.month, start.day, tzinfo=pytz.timezone('UTC')
+        start.year, start.month, start.day, tzinfo=pytz.timezone("UTC")
     )
     # Check if last day is a full day
     tc, ds, _, _ = _isolate_day(dates[-1], dates, surges, forecast_flags)
@@ -374,13 +338,10 @@ def _list_full_days(dates, surges, forecast_flags):
         end = dates[-1]
     else:
         end = dates[-1] - datetime.timedelta(days=1)
-    end = datetime.datetime(
-        end.year, end.month, end.day, tzinfo=pytz.timezone('UTC')
-    )
+    end = datetime.datetime(end.year, end.month, end.day, tzinfo=pytz.timezone("UTC"))
     # list of dates that are full
     dates_list = [
-        start + datetime.timedelta(days=i)
-        for i in range((end - start).days + 1)
+        start + datetime.timedelta(days=i) for i in range((end - start).days + 1)
     ]
     return dates_list
 
@@ -388,12 +349,12 @@ def _list_full_days(dates, surges, forecast_flags):
 def _setup_plotting():
     fig = matplotlib.figure.Figure(figsize=(10, 4))
     ax = fig.add_subplot(1, 1, 1)
-    ax.set_title('Neah Bay SSH')
+    ax.set_title("Neah Bay SSH")
     ax.set_ylim([-1, 1])
     ax.grid()
-    ax.set_ylabel('Sea surface height (m)')
+    ax.set_ylabel("Sea surface height (m)")
     return fig, ax
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

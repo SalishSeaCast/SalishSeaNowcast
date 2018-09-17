@@ -39,7 +39,7 @@ def make_figure(
     tidal_predictions,
     timezone,
     figsize=(20, 5),
-    theme=nowcast.figures.website_theme
+    theme=nowcast.figures.website_theme,
 ):
     """Plot the tidal cycle at Point Atkinson during a 4 week period centred
     around the model results in :kbd:`grid_T` with that period indicated on
@@ -69,20 +69,16 @@ def make_figure(
 
 def _prep_plot_data(grid_T_hr, timezone, tidal_predictions):
     results_t_start, results_t_end = nc_tools.timestamp(grid_T_hr, (0, -1))
-    ttide = shared.get_tides('Point Atkinson', tidal_predictions)
+    ttide = shared.get_tides("Point Atkinson", tidal_predictions)
     ttide.time = ttide.time.dt.tz_convert(pytz.timezone(timezone))
-    plot_data = namedtuple('PlotData', 'results_t_start, results_t_end, ttide')
-    return plot_data(
-        results_t_start.to(timezone), results_t_end.to(timezone), ttide
-    )
+    plot_data = namedtuple("PlotData", "results_t_start, results_t_end, ttide")
+    return plot_data(results_t_start.to(timezone), results_t_end.to(timezone), ttide)
 
 
 def _prep_fig_axes(figsize, theme):
-    fig = plt.figure(
-        figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
-    )
+    fig = plt.figure(figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"])
     ax = fig.add_subplot(1, 1, 1)
-    ax.set_axis_bgcolor(theme.COLOURS['axes']['background'])
+    ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     fig.autofmt_xdate()
     return fig, ax
 
@@ -92,21 +88,25 @@ def _plot_tide_cycle(ax, plot_data, theme, ylims=(-3, 3)):
         plot_data.ttide.time,
         plot_data.ttide.pred_all,
         linewidth=2,
-        color=theme.COLOURS['time series']['tidal prediction']
+        color=theme.COLOURS["time series"]["tidal prediction"],
     )
-    ax.plot((plot_data.results_t_start.datetime,) * 2,
-            ylims,
-            linestyle='solid',
-            linewidth=2,
-            color=theme.COLOURS['time series']['datetime line'])
-    ax.plot((plot_data.results_t_end.datetime,) * 2,
-            ylims,
-            linestyle='solid',
-            linewidth=2,
-            color=theme.COLOURS['time series']['datetime line'])
+    ax.plot(
+        (plot_data.results_t_start.datetime,) * 2,
+        ylims,
+        linestyle="solid",
+        linewidth=2,
+        color=theme.COLOURS["time series"]["datetime line"],
+    )
+    ax.plot(
+        (plot_data.results_t_end.datetime,) * 2,
+        ylims,
+        linestyle="solid",
+        linewidth=2,
+        color=theme.COLOURS["time series"]["datetime line"],
+    )
     ax.set_xlim(
         plot_data.results_t_start.shift(weeks=-2).datetime,
-        plot_data.results_t_end.shift(weeks=2).datetime
+        plot_data.results_t_end.shift(weeks=2).datetime,
     )
     _ax_labels(ax, plot_data, ylims, theme)
 
@@ -115,22 +115,22 @@ def _ax_labels(ax, plot_data, ylims, theme):
     t_end = plot_data.results_t_end
     ax.set_title(
         f'Tidal Predictions at Point Atkinson: {t_end.format("DD-MMM-YYYY")}',
-        fontproperties=theme.FONTS['axes title'],
-        color=theme.COLOURS['text']['axes title']
+        fontproperties=theme.FONTS["axes title"],
+        color=theme.COLOURS["text"]["axes title"],
     )
     ax.set_xlabel(
-        f'Date [{t_end.tzinfo.tzname(t_end.datetime)}]',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        f"Date [{t_end.tzinfo.tzname(t_end.datetime)}]",
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
     )
-    ax.xaxis.set_major_formatter(DateFormatter('%d-%b-%Y'))
+    ax.xaxis.set_major_formatter(DateFormatter("%d-%b-%Y"))
     ax.set_ylabel(
-        'Sea Surface Height [m]',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        "Sea Surface Height [m]",
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
     )
     ax.set_ylim(ylims)
-    ax.grid(axis='both')
+    ax.grid(axis="both")
     theme.set_axis_colors(ax)
 
 
@@ -138,12 +138,12 @@ def _attribution_text(ax, theme):
     ax.text(
         1.,
         -0.35,
-        'Tidal predictions calculated with t_tide: '
-        'https://www.eoas.ubc.ca/~rich/#T_Tide\n'
-        'using CHS tidal constituents',
-        horizontalalignment='right',
-        verticalalignment='top',
+        "Tidal predictions calculated with t_tide: "
+        "https://www.eoas.ubc.ca/~rich/#T_Tide\n"
+        "using CHS tidal constituents",
+        horizontalalignment="right",
+        verticalalignment="top",
         transform=ax.transAxes,
-        fontproperties=theme.FONTS['figure annotation small'],
-        color=theme.COLOURS['text']['figure annotation']
+        fontproperties=theme.FONTS["figure annotation small"],
+        color=theme.COLOURS["text"]["figure annotation"],
     )

@@ -51,28 +51,27 @@ def configure_logging(config, logger, debug, email=True):
     """
     logger.setLevel(logging.DEBUG)
     text_formatter = logging.Formatter(
-        config['logging']['message_format'],
-        datefmt=config['logging']['datetime_format']
+        config["logging"]["message_format"],
+        datefmt=config["logging"]["datetime_format"],
     )
     json_formatter = JSONFormatter(
         extra_attrs=[
-            'forecast',
-            'date',
-            'run_type',
-            'host_name',
-            'plot_type',
-            'page_type',
+            "forecast",
+            "date",
+            "run_type",
+            "host_name",
+            "plot_type",
+            "page_type",
         ]
     )
-    for level, filename in config['logging']['log_files'].items():
+    for level, filename in config["logging"]["log_files"].items():
         # Text log files
-        log_file = os.path.join(
-            os.path.dirname(config['config_file']), filename
-        )
+        log_file = os.path.join(os.path.dirname(config["config_file"]), filename)
         handler = (
             logging.StreamHandler()
-            if debug else logging.handlers.RotatingFileHandler(
-                log_file, backupCount=config['logging']['backup_count']
+            if debug
+            else logging.handlers.RotatingFileHandler(
+                log_file, backupCount=config["logging"]["backup_count"]
             )
         )
         handler.setLevel(getattr(logging, level.upper()))
@@ -80,21 +79,21 @@ def configure_logging(config, logger, debug, email=True):
         logger.addHandler(handler)
         if not debug:
             # JSON log files
-            log_file = f'{log_file}.json'
+            log_file = f"{log_file}.json"
             handler = logging.handlers.TimedRotatingFileHandler(
-                log_file, when='d', interval=30, backupCount=120
+                log_file, when="d", interval=30, backupCount=120
             )
             handler.setLevel(getattr(logging, level.upper()))
             handler.setFormatter(json_formatter)
             logger.addHandler(handler)
     if not debug and email:
         # Email notifications
-        level = config['logging']['email']['level']
-        subject = config['logging']['email']['subject'].format(level=level)
+        level = config["logging"]["email"]["level"]
+        subject = config["logging"]["email"]["subject"].format(level=level)
         email = logging.handlers.SMTPHandler(
-            mailhost=config['logging']['email']['mailhost'],
-            fromaddr=config['logging']['email']['fromaddr'],
-            toaddrs=config['logging']['email']['toaddrs'],
+            mailhost=config["logging"]["email"]["mailhost"],
+            fromaddr=config["logging"]["email"]["fromaddr"],
+            toaddrs=config["logging"]["email"]["toaddrs"],
             subject=subject,
         )
         email.setLevel(getattr(logging, level.upper()))
@@ -102,9 +101,7 @@ def configure_logging(config, logger, debug, email=True):
         logger.addHandler(email)
 
 
-def fix_perms(
-    path, mode=FilePerms(user='rw', group='rw', other='r'), grp_name=None
-):
+def fix_perms(path, mode=FilePerms(user="rw", group="rw", other="r"), grp_name=None):
     """Try to set the permissions and group ownership of the file
     or directory at path.
 
@@ -140,9 +137,9 @@ def fix_perms(
 def mkdir(
     path,
     logger,
-    mode=FilePerms(user='rwx', group='rwx', other='rx'),
+    mode=FilePerms(user="rwx", group="rwx", other="rx"),
     grp_name=None,
-    exist_ok=True
+    exist_ok=True,
 ):
     """Create a directory at path with its permissions set to mode.
     If grp_name is given,
@@ -181,7 +178,7 @@ def mkdir(
         os.mkdir(path)
     except OSError:
         if not exist_ok:
-            msg = f'{path} directory already exists; not overwriting'
+            msg = f"{path} directory already exists; not overwriting"
             logger.error(msg)
             raise WorkerError
     fix_perms(path, mode, grp_name)
@@ -205,16 +202,14 @@ def run_in_subprocess(cmd, output_logger, error_logger):
 
     :raises: :py:exc:`nowcast.lib.WorkerError`
     """
-    output_logger(f'running command in subprocess: {cmd}')
+    output_logger(f"running command in subprocess: {cmd}")
     try:
         output = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
         for line in output.splitlines():
             if line:
                 output_logger(line)
     except subprocess.CalledProcessError as e:
-        error_logger(
-            f'subprocess {cmd} failed with return code {e.returncode}'
-        )
+        error_logger(f"subprocess {cmd} failed with return code {e.returncode}")
         for line in e.output.splitlines():
             if line:
                 error_logger(line)

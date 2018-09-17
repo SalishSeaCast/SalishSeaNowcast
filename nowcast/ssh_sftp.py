@@ -38,7 +38,7 @@ class SSHCommandError(Exception):
         self.stderr = stderr
 
 
-def ssh(host, key_filename, ssh_config_file='~/.ssh/config'):
+def ssh(host, key_filename, ssh_config_file="~/.ssh/config"):
     """Return an SSH client connected to host.
 
     It is assumed that ssh_config_file contains an entry for host,
@@ -66,9 +66,7 @@ def ssh(host, key_filename, ssh_config_file='~/.ssh/config'):
         ssh_config.parse(f)
     host = ssh_config.lookup(host)
     ssh_client.connect(
-        host['hostname'],
-        username=host['user'],
-        key_filename=key_filename,
+        host["hostname"], username=host["user"], key_filename=key_filename
     )
     return ssh_client
 
@@ -91,14 +89,14 @@ def ssh_exec_command(ssh_client, cmd, host, logger):
     :raises: :py:class:`nowcast.ssh_sftp.SSHError`
     """
     _, _stdout, _stderr = ssh_client.exec_command(cmd)
-    logger.debug(f'executing {cmd} on {host}')
+    logger.debug(f"executing {cmd} on {host}")
     stderr = _stderr.read().decode()
     if stderr:
         raise SSHCommandError(cmd, _stdout.read().decode(), stderr)
     return _stdout.read().decode()
 
 
-def sftp(host, key_filename, ssh_config_file='~/.ssh/config'):
+def sftp(host, key_filename, ssh_config_file="~/.ssh/config"):
     """Return an SFTP client connected to host, and the SSH client on
     which it is based.
 
@@ -145,11 +143,10 @@ def upload_file(sftp_client, host, localpath, remotepath, logger):
     sftp_client.put(os.fspath(localpath), os.fspath(remotepath))
     try:
         sftp_client.chmod(
-            os.fspath(remotepath),
-            int(lib.FilePerms(user='rw', group='rw', other='r'))
+            os.fspath(remotepath), int(lib.FilePerms(user="rw", group="rw", other="r"))
         )
     except PermissionError:
         # We're probably trying to change permissions on a file owned by
         # another user. We can live with not being able to do that.
         pass
-    logger.debug(f'{localpath} uploaded to {host} at {remotepath}')
+    logger.debug(f"{localpath} uploaded to {host} at {remotepath}")

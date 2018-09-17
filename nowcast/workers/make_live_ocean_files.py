@@ -22,11 +22,9 @@ from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
-from salishsea_tools.LiveOcean_BCs import (
-    create_LiveOcean_TS_BCs,
-)
+from salishsea_tools.LiveOcean_BCs import create_LiveOcean_TS_BCs
 
-NAME = 'make_live_ocean_files'
+NAME = "make_live_ocean_files"
 logger = logging.getLogger(NAME)
 
 
@@ -40,53 +38,47 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_date_option(
-        '--run-date',
-        default=arrow.now().floor('day'),
-        help='''
+        "--run-date",
+        default=arrow.now().floor("day"),
+        help="""
         Date of Live Ocean forecast product to produce files from.
-        '''
+        """,
     )
     worker.run(make_live_ocean_files, success, failure)
 
 
 def success(parsed_args):
-    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
-        f'{ymd} Live Ocean western boundary conditions files created',
-        extra={
-            'run_date': ymd
-        }
+        f"{ymd} Live Ocean western boundary conditions files created",
+        extra={"run_date": ymd},
     )
-    msg_type = 'success'
+    msg_type = "success"
     return msg_type
 
 
 def failure(parsed_args):
-    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
-        f'{ymd} Live Ocean western boundary conditions files preparation '
-        f'failed',
-        extra={
-            'run_date': ymd
-        }
+        f"{ymd} Live Ocean western boundary conditions files preparation " f"failed",
+        extra={"run_date": ymd},
     )
-    msg_type = 'failure'
+    msg_type = "failure"
     return msg_type
 
 
 def make_live_ocean_files(parsed_args, config, *args):
-    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
-        f'Creating T&S western boundary conditions file from {ymd} Live '
-        f'Ocean run'
+        f"Creating T&S western boundary conditions file from {ymd} Live " f"Ocean run"
     )
-    bc_dir = Path(config['temperature salinity']['bc dir'])
-    file_template = config['temperature salinity']['file template']
+    bc_dir = Path(config["temperature salinity"]["bc dir"])
+    file_template = config["temperature salinity"]["file template"]
     bc_filepath = bc_dir / file_template.format(parsed_args.run_date.datetime)
     if bc_filepath.is_symlink():
         bc_filepath.unlink()
-    meshfilename = Path(config['temperature salinity']['mesh mask'])
-    download_dir = Path(config['temperature salinity']['download']['dest dir'])
+    meshfilename = Path(config["temperature salinity"]["mesh mask"])
+    download_dir = Path(config["temperature salinity"]["download"]["dest dir"])
     filepaths = create_LiveOcean_TS_BCs(
         ymd,
         file_template=file_template,
@@ -94,12 +86,10 @@ def make_live_ocean_files(parsed_args, config, *args):
         bc_dir=bc_dir,
         LO_dir=download_dir,
     )
-    logger.debug(
-        f'Stored T&S western boundary conditions file: {filepaths[0]}'
-    )
-    checklist = {'temperature & salinity': filepaths[0]}
+    logger.debug(f"Stored T&S western boundary conditions file: {filepaths[0]}")
+    checklist = {"temperature & salinity": filepaths[0]}
     return checklist
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

@@ -28,7 +28,7 @@ from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import ssh_sftp
 
-NAME = 'watch_NEMO_hindcast'
+NAME = "watch_NEMO_hindcast"
 logger = logging.getLogger(NAME)
 
 
@@ -41,12 +41,8 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
-    worker.cli.add_argument(
-        'host_name', help='Name of the host to monitor the run on'
-    )
-    worker.cli.add_argument(
-        '--run-id', help='Run id to watch; e.g. 01dec14hindcast'
-    )
+    worker.cli.add_argument("host_name", help="Name of the host to monitor the run on")
+    worker.cli.add_argument("--run-id", help="Run id to watch; e.g. 01dec14hindcast")
     worker.run(watch_NEMO_hindcast, success, failure)
 
 
@@ -58,13 +54,10 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f'NEMO hindcast run on {parsed_args.host_name} completed',
-        extra={
-            'run_type': 'hindcast',
-            'host_name': parsed_args.host_name,
-        }
+        f"NEMO hindcast run on {parsed_args.host_name} completed",
+        extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
     )
-    msg_type = 'success'
+    msg_type = "success"
     return msg_type
 
 
@@ -76,13 +69,10 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'NEMO hindcast run on {parsed_args.host_name} watcher failed',
-        extra={
-            'run_type': 'hindcast',
-            'host_name': parsed_args.host_name,
-        }
+        f"NEMO hindcast run on {parsed_args.host_name} watcher failed",
+        extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
     )
-    msg_type = 'failure'
+    msg_type = "failure"
     return msg_type
 
 
@@ -97,21 +87,18 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_id = parsed_args.run_id
     ssh_key = Path(
-        os.environ['HOME'], '.ssh',
-        config['run']['hindcast hosts'][host_name]['ssh key']
+        os.environ["HOME"],
+        ".ssh",
+        config["run"]["hindcast hosts"][host_name]["ssh key"],
     )
-    users = config['run']['hindcast hosts'][host_name]['users']
-    scratch_dir = Path(
-        config['run']['hindcast hosts'][host_name]['scratch dir']
-    )
+    users = config["run"]["hindcast hosts"][host_name]["users"]
+    scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
     try:
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
         job_id, run_id = _get_run_id(ssh_client, host_name, users, run_id)
         while _is_queued(ssh_client, host_name, users, job_id, run_id):
             time.sleep(60 * 5)
-        tmp_run_dir = _get_tmp_run_dir(
-            ssh_client, host_name, scratch_dir, run_id
-        )
+        tmp_run_dir = _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id)
         run_info = _get_run_info(sftp_client, host_name, tmp_run_dir)
         while _is_running(
             ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_info
@@ -123,11 +110,11 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
         sftp_client.close()
         ssh_client.close()
     checklist = {
-        'hindcast': {
-            'host': host_name,
-            'run id': run_id,
-            'run date': arrow.get(run_id[:7], 'DDMMMYY').format('YYYY-MM-DD'),
-            'completed': True,
+        "hindcast": {
+            "host": host_name,
+            "run id": run_id,
+            "run date": arrow.get(run_id[:7], "DDMMMYY").format("YYYY-MM-DD"),
+            "completed": True,
         }
     }
     return checklist
@@ -145,7 +132,7 @@ def _get_run_id(ssh_client, host_name, users, run_id):
     """
     queue_info = _get_queue_info(ssh_client, host_name, users, run_id=run_id)
     job_id, run_id = queue_info.split()[:2]
-    logger.info(f'watching {run_id} job {job_id} on {host_name}')
+    logger.info(f"watching {run_id} job {job_id} on {host_name}")
     return job_id, run_id
 
 
@@ -165,13 +152,13 @@ def _is_queued(ssh_client, host_name, users, job_id, run_id):
         state, reason, start_time = queue_info.split()[2:]
     except AttributeError:
         # job has disappeared from the queue; maybe cancelled
-        logger.error(f'{run_id} job {job_id} not found on {host_name} queue')
+        logger.error(f"{run_id} job {job_id} not found on {host_name} queue")
         raise WorkerError
-    if state != 'PENDING':
+    if state != "PENDING":
         return False
-    msg = f'{run_id} job {job_id} pending due to {reason.lower()}'
-    if start_time != 'N/A':
-        msg = f'{msg}, scheduled for {start_time}'
+    msg = f"{run_id} job {job_id} pending due to {reason.lower()}"
+    if start_time != "N/A":
+        msg = f"{msg}, scheduled for {start_time}"
     logger.info(msg)
     return True
 
@@ -188,20 +175,18 @@ def _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id):
     """
     try:
         stdout = ssh_sftp.ssh_exec_command(
-            ssh_client, f'ls -d {scratch_dir/run_id}*', host_name, logger
+            ssh_client, f"ls -d {scratch_dir/run_id}*", host_name, logger
         )
     except ssh_sftp.SSHCommandError as exc:
         for line in exc.stderr.splitlines():
             logger.error(line)
         raise WorkerError
     tmp_run_dir = Path(stdout.splitlines()[0].strip())
-    logger.debug(f'found tmp run dir: {host_name}:{tmp_run_dir}')
+    logger.debug(f"found tmp run dir: {host_name}:{tmp_run_dir}")
     return tmp_run_dir
 
 
-def _is_running(
-    ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_info
-):
+def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_info):
     """
     :param :py:class:`paramiko.client.SSHClient`
     :param str host_name:
@@ -215,37 +200,32 @@ def _is_running(
     :rtype: boolean
     """
     try:
-        queue_info = _get_queue_info(
-            ssh_client, host_name, users, job_id=job_id
-        )
+        queue_info = _get_queue_info(ssh_client, host_name, users, job_id=job_id)
         state = queue_info.split()[2]
     except (WorkerError, AttributeError):
         # job has disappeared from the queue; finished or cancelled
-        logger.info(f'{run_id} job {job_id} not found on {host_name} queue')
-        state = 'UNKNOWN'
-    if state != 'RUNNING':
+        logger.info(f"{run_id} job {job_id} not found on {host_name} queue")
+        state = "UNKNOWN"
+    if state != "RUNNING":
         return False
     try:
         stdout = ssh_sftp.ssh_exec_command(
-            ssh_client, f'cat {tmp_run_dir}/time.step', host_name, logger
+            ssh_client, f"cat {tmp_run_dir}/time.step", host_name, logger
         )
     except ssh_sftp.SSHCommandError as exc:
         logger.info(
-            f'{run_id} on {host_name}: time.step not found; '
-            f'continuing to watch...'
+            f"{run_id} on {host_name}: time.step not found; " f"continuing to watch..."
         )
         return True
     time_step = int(stdout.splitlines()[0].strip())
     model_seconds = (time_step - run_info.it000) * run_info.rdt
-    model_time = (
-        run_info.date0.replace(seconds=model_seconds)
-        .format('YYYY-MM-DD HH:mm:ss UTC')
+    model_time = run_info.date0.replace(seconds=model_seconds).format(
+        "YYYY-MM-DD HH:mm:ss UTC"
     )
-    fraction_done = (time_step - run_info.it000
-                     ) / (run_info.itend - run_info.it000)
+    fraction_done = (time_step - run_info.it000) / (run_info.itend - run_info.it000)
     logger.info(
-        f'{run_id} on {host_name}: timestep: '
-        f'{time_step} = {model_time}, {fraction_done:.1%} complete'
+        f"{run_id} on {host_name}: timestep: "
+        f"{time_step} = {model_time}, {fraction_done:.1%} complete"
     )
     return True
 
@@ -261,8 +241,8 @@ def _is_completed(ssh_client, host_name, users, job_id, run_id):
     :return: Flag indicating whether or not run is in COMPLETED state
     :rtype: boolean
     """
-    sacct_cmd = f'/opt/software/slurm/bin/sacct --user {users}'
-    cmd = f'{sacct_cmd} --job {job_id}.batch --format=state'
+    sacct_cmd = f"/opt/software/slurm/bin/sacct --user {users}"
+    cmd = f"{sacct_cmd} --job {job_id}.batch --format=state"
     try:
         stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
     except ssh_sftp.SSHCommandError as exc:
@@ -271,14 +251,13 @@ def _is_completed(ssh_client, host_name, users, job_id, run_id):
         raise WorkerError
     if len(stdout.splitlines()) == 2:
         logger.debug(
-            f'{job_id} batch step not found in saact report; '
-            f'continuing to look...'
+            f"{job_id} batch step not found in saact report; " f"continuing to look..."
         )
         return False
     state = stdout.splitlines()[2].strip()
-    if state != 'COMPLETED':
+    if state != "COMPLETED":
         return False
-    logger.info(f'{run_id} on {host_name}: completed')
+    logger.info(f"{run_id} on {host_name}: completed")
     return True
 
 
@@ -294,11 +273,12 @@ def _get_queue_info(ssh_client, host_name, users, run_id=None, job_id=None):
              the run's state
     :rtype: str
     """
-    squeue_cmd = f'/opt/software/slurm/bin/squeue --user {users}'
+    squeue_cmd = f"/opt/software/slurm/bin/squeue --user {users}"
     queue_info_format = '--Format "jobid,name,state,reason,starttime"'
     cmd = (
-        f'{squeue_cmd} {queue_info_format}' if job_id is None else
-        f'{squeue_cmd} --job {job_id} {queue_info_format}'
+        f"{squeue_cmd} {queue_info_format}"
+        if job_id is None
+        else f"{squeue_cmd} --job {job_id} {queue_info_format}"
     )
     try:
         stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
@@ -308,7 +288,7 @@ def _get_queue_info(ssh_client, host_name, users, run_id=None, job_id=None):
         raise WorkerError
     if len(stdout.splitlines()) == 1:
         if job_id is None:
-            logger.error(f'no jobs found on {host_name} queue')
+            logger.error(f"no jobs found on {host_name} queue")
             raise WorkerError
         else:
             # Various callers handle job id not on queue in difference ways
@@ -318,7 +298,7 @@ def _get_queue_info(ssh_client, host_name, users, run_id=None, job_id=None):
             if run_id in queue_info.strip().split()[1]:
                 return queue_info.strip()
         else:
-            if 'hindcast' in queue_info.strip().split()[1]:
+            if "hindcast" in queue_info.strip().split()[1]:
                 return queue_info.strip()
 
 
@@ -335,18 +315,18 @@ def _get_run_info(sftp_client, host_name, tmp_run_dir):
                rdt: time step in seconds
     :rtype: :py:class:`types.SimpleNamespace`
     """
-    with tempfile.NamedTemporaryFile('wt') as namelist_cfg:
-        sftp_client.get(f'{tmp_run_dir}/namelist_cfg', namelist_cfg.name)
-        logger.debug(f'downloaded {host_name}:{tmp_run_dir}/namelist_cfg')
+    with tempfile.NamedTemporaryFile("wt") as namelist_cfg:
+        sftp_client.get(f"{tmp_run_dir}/namelist_cfg", namelist_cfg.name)
+        logger.debug(f"downloaded {host_name}:{tmp_run_dir}/namelist_cfg")
         namelist = f90nml.read(namelist_cfg.name)
         run_info = SimpleNamespace(
-            it000=namelist['namrun']['nn_it000'],
-            itend=namelist['namrun']['nn_itend'],
-            date0=arrow.get(str(namelist['namrun']['nn_date0']), 'YYYYMMDD'),
-            rdt=namelist['namdom']['rn_rdt'],
+            it000=namelist["namrun"]["nn_it000"],
+            itend=namelist["namrun"]["nn_itend"],
+            date0=arrow.get(str(namelist["namrun"]["nn_date0"]), "YYYYMMDD"),
+            rdt=namelist["namdom"]["rn_rdt"],
         )
     return run_info
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

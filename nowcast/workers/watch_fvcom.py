@@ -24,7 +24,7 @@ import subprocess
 import time
 from nemo_nowcast import NowcastWorker
 
-NAME = 'watch_fvcom'
+NAME = "watch_fvcom"
 logger = logging.getLogger(NAME)
 
 POLL_INTERVAL = 3 * 60  # seconds
@@ -39,16 +39,14 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
+    worker.cli.add_argument("host_name", help="Name of the host to monitor the run on")
     worker.cli.add_argument(
-        'host_name', help='Name of the host to monitor the run on'
-    )
-    worker.cli.add_argument(
-        'run_type',
-        choices={'nowcast', 'forecast'},
-        help='''
+        "run_type",
+        choices={"nowcast", "forecast"},
+        help="""
         Type of run to monitor:
         'nowcast' means nowcast run (after NEMO nowcast run)
-        ''',
+        """,
     )
     worker.run(watch_fvcom, success, failure)
 
@@ -61,14 +59,11 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f'{parsed_args.run_type} FVCOM VH-FR run '
-        f'on {parsed_args.host_name} completed',
-        extra={
-            'run_type': parsed_args.run_type,
-            'host_name': parsed_args.host_name,
-        }
+        f"{parsed_args.run_type} FVCOM VH-FR run "
+        f"on {parsed_args.host_name} completed",
+        extra={"run_type": parsed_args.run_type, "host_name": parsed_args.host_name},
     )
-    msg_type = f'success {parsed_args.run_type}'
+    msg_type = f"success {parsed_args.run_type}"
     return msg_type
 
 
@@ -80,14 +75,10 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'{parsed_args.run_type} FVCOM VH-FR run '
-        f'on {parsed_args.host_name} failed',
-        extra={
-            'run_type': parsed_args.run_type,
-            'host_name': parsed_args.host_name,
-        }
+        f"{parsed_args.run_type} FVCOM VH-FR run " f"on {parsed_args.host_name} failed",
+        extra={"run_type": parsed_args.run_type, "host_name": parsed_args.host_name},
     )
-    msg_type = f'failure {parsed_args.run_type}'
+    msg_type = f"failure {parsed_args.run_type}"
     return msg_type
 
 
@@ -102,64 +93,61 @@ def watch_fvcom(parsed_args, config, tell_manager):
     """
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
-    run_info = tell_manager('need', 'FVCOM run').payload
+    run_info = tell_manager("need", "FVCOM run").payload
     pid = _find_run_pid(run_info[run_type])
-    logger.debug(f'{run_type} on {host_name}: run pid: {pid}')
-    run_dir = Path(run_info[run_type]['run dir'])
+    logger.debug(f"{run_type} on {host_name}: run pid: {pid}")
+    run_dir = Path(run_info[run_type]["run dir"])
     # Watch for the run process to end
     while _pid_exists(pid):
         try:
-            with (run_dir / 'fvcom.log').open('rt') as f:
+            with (run_dir / "fvcom.log").open("rt") as f:
                 lines = f.readlines()
             lines.reverse()
             for line in lines:
-                if line.strip().startswith('!') and line.strip().endswith('|'):
+                if line.strip().startswith("!") and line.strip().endswith("|"):
                     time_step, model_time, time_to_finish, _ = (
-                        line.strip().strip('!').split(maxsplit=3)
+                        line.strip().strip("!").split(maxsplit=3)
                     )
                     msg = (
-                        f'{run_type} on {host_name}: timestep: '
+                        f"{run_type} on {host_name}: timestep: "
                         f'{time_step} = {model_time[:-7].replace("T", " ")} '
-                        f'UTC estimated time to finish: {time_to_finish}'
+                        f"UTC estimated time to finish: {time_to_finish}"
                     )
                     break
             else:
                 # fvcom.log file found, but no run status line found
                 msg = (
-                    f'{run_type} on {host_name}: no run progress found in '
-                    f'fvcom.log ; continuing to watch...'
+                    f"{run_type} on {host_name}: no run progress found in "
+                    f"fvcom.log ; continuing to watch..."
                 )
         except FileNotFoundError:
             # fvcom.log file not found; assume that run is young and it
             # hasn't been created yet, or has finished and it has been
             # moved to the results directory
             msg = (
-                f'{run_type} on {host_name}: fvcom.log not found; '
-                f'continuing to watch...'
+                f"{run_type} on {host_name}: fvcom.log not found; "
+                f"continuing to watch..."
             )
         logger.info(msg)
         time.sleep(POLL_INTERVAL)
     return {
         run_type: {
-            'host': host_name,
-            'run date': run_info[run_type]['run date'],
-            'completed': True,
+            "host": host_name,
+            "run date": run_info[run_type]["run date"],
+            "completed": True,
         }
     }
 
 
 def _find_run_pid(run_info):
-    run_exec_cmd = run_info['run exec cmd']
+    run_exec_cmd = run_info["run exec cmd"]
     cmd = shlex.split(f'pgrep --newest --exact --full "{run_exec_cmd}"')
     logger.debug(f'searching processes for "{run_exec_cmd}"')
     pid = None
     while pid is None:
         try:
             proc = subprocess.run(
-                cmd,
-                stdout=subprocess.PIPE,
-                check=True,
-                universal_newlines=True
+                cmd, stdout=subprocess.PIPE, check=True, universal_newlines=True
             )
             pid = int(proc.stdout)
         except subprocess.CalledProcessError:
@@ -180,7 +168,7 @@ def _pid_exists(pid):
         # in the process group of the calling process.
         # On certain systems 0 is a valid PID but we have no way
         # to know that in a portable fashion.
-        raise ValueError('invalid PID 0')
+        raise ValueError("invalid PID 0")
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
@@ -193,5 +181,5 @@ def _pid_exists(pid):
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

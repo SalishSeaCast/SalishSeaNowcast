@@ -26,7 +26,7 @@ import shutil
 import arrow
 from nemo_nowcast import NowcastWorker
 
-NAME = 'update_forecast_datasets'
+NAME = "update_forecast_datasets"
 logger = logging.getLogger(NAME)
 
 
@@ -40,27 +40,27 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'model',
-        choices={'nemo', 'wwatch3'},
-        help='''
+        "model",
+        choices={"nemo", "wwatch3"},
+        help="""
         Model to update the rolling forecast datasets for:
         'nemo' means the Salish Sea NEMO model,
         'wwatch3' means the Strait of Georgia WaveWatch3(TM) model.
-        ''',
+        """,
     )
     worker.cli.add_argument(
-        'run_type',
-        choices={'forecast', 'forecast2'},
-        help='''
+        "run_type",
+        choices={"forecast", "forecast2"},
+        help="""
         Type of run to update rolling forecast datasets for:
         'forecast' means afternoon updated forecast runs,
         'forecast2' means early morning preliminary forecast runs,
-        '''
+        """,
     )
     worker.cli.add_date_option(
-        '--run-date',
-        default=(arrow.now().floor('day')),
-        help='Date of the run to update rolling forecast datasets for.'
+        "--run-date",
+        default=(arrow.now().floor("day")),
+        help="Date of the run to update rolling forecast datasets for.",
     )
     worker.run(update_forecast_datasets, success, failure)
 
@@ -68,32 +68,24 @@ def main():
 def success(parsed_args):
     model = parsed_args.model
     run_type = parsed_args.run_type
-    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
-        f'{model} {ymd} {run_type} rolling forecast datasets updated',
-        extra={
-            'run_date': ymd,
-            'model': model,
-            'run_type': run_type,
-        }
+        f"{model} {ymd} {run_type} rolling forecast datasets updated",
+        extra={"run_date": ymd, "model": model, "run_type": run_type},
     )
-    msg_type = f'success {model} {run_type}'
+    msg_type = f"success {model} {run_type}"
     return msg_type
 
 
 def failure(parsed_args):
     model = parsed_args.model
     run_type = parsed_args.run_type
-    ymd = parsed_args.run_date.format('YYYY-MM-DD')
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
-        f'{model} {ymd} {run_type} rolling forecast datasets update failed',
-        extra={
-            'run_date': ymd,
-            'model': model,
-            'run_type': run_type,
-        }
+        f"{model} {ymd} {run_type} rolling forecast datasets update failed",
+        extra={"run_date": ymd, "model": model, "run_type": run_type},
     )
-    msg_type = f'failure {model} {run_type}'
+    msg_type = f"failure {model} {run_type}"
     return msg_type
 
 
@@ -101,16 +93,13 @@ def update_forecast_datasets(parsed_args, config, *args):
     model = parsed_args.model
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    ddmmmyy = run_date.format('DDMMMYY').lower()
-    logger.info(
-        f'updating {model} forecast directory for {run_type}/{ddmmmyy} run'
-    )
-    forecast_dir = Path(config['rolling forecasts'][model]['dest dir'])
+    ddmmmyy = run_date.format("DDMMMYY").lower()
+    logger.info(f"updating {model} forecast directory for {run_type}/{ddmmmyy} run")
+    forecast_dir = Path(config["rolling forecasts"][model]["dest dir"])
     new_forecast_dir = _create_new_forecast_dir(forecast_dir, model, run_type)
-    days_from_past = config['rolling forecasts']['days from past']
+    days_from_past = config["rolling forecasts"]["days from past"]
     tmp_forecast_results_archive = Path(
-        config['rolling forecasts']['temporary results archives'],
-        f'{model}_forecast'
+        config["rolling forecasts"]["temporary results archives"], f"{model}_forecast"
     )
     try:
         shutil.rmtree(tmp_forecast_results_archive)
@@ -118,123 +107,138 @@ def update_forecast_datasets(parsed_args, config, *args):
         # Temporary forecast results directory doesn't exist, and that's okay
         pass
     _add_past_days_results(
-        run_date, days_from_past, new_forecast_dir,
-        tmp_forecast_results_archive, model, run_type, config
+        run_date,
+        days_from_past,
+        new_forecast_dir,
+        tmp_forecast_results_archive,
+        model,
+        run_type,
+        config,
     )
     _add_forecast_results(
-        run_date, new_forecast_dir, tmp_forecast_results_archive, model,
-        run_type, config
+        run_date,
+        new_forecast_dir,
+        tmp_forecast_results_archive,
+        model,
+        run_type,
+        config,
     )
     shutil.rmtree(os.fspath(forecast_dir))
     new_forecast_dir.replace(forecast_dir)
     logger.info(
-        f'updated {model} forecast directory for {run_type}/{ddmmmyy} run: '
-        f'{forecast_dir}'
+        f"updated {model} forecast directory for {run_type}/{ddmmmyy} run: "
+        f"{forecast_dir}"
     )
     checklist = {model: {run_type: os.fspath(forecast_dir)}}
     return checklist
 
 
 def _create_new_forecast_dir(forecast_dir, model, run_type):
-    new_forecast_dir = forecast_dir.with_name(f'{forecast_dir.name}_new')
+    new_forecast_dir = forecast_dir.with_name(f"{forecast_dir.name}_new")
     new_forecast_dir.mkdir()
     logger.debug(
-        f'created new {model} forecast directory for {run_type} run: '
-        f'{new_forecast_dir}'
+        f"created new {model} forecast directory for {run_type} run: "
+        f"{new_forecast_dir}"
     )
     return new_forecast_dir
 
 
 def _add_past_days_results(
-    run_date, days_from_past, new_forecast_dir, tmp_forecast_results_archive,
-    model, run_type, config
+    run_date,
+    days_from_past,
+    new_forecast_dir,
+    tmp_forecast_results_archive,
+    model,
+    run_type,
+    config,
 ):
     model_params = {
-        'nemo': {
-            'results archive':
-                Path(config['results archive']['nowcast']),
-            'first date': (
-                run_date.shift(days=-days_from_past) if run_type == 'forecast'
+        "nemo": {
+            "results archive": Path(config["results archive"]["nowcast"]),
+            "first date": (
+                run_date.shift(days=-days_from_past)
+                if run_type == "forecast"
                 else run_date.shift(days=-(days_from_past - 1))
             ),
-            'last date':
-                run_date,
+            "last date": run_date,
         },
-        'wwatch3': {
-            'results archive':
-                Path(config['wave forecasts']['results archive']['forecast']),
-            'first date': (
-                run_date.shift(days=-days_from_past - 1)
-                if run_type == 'forecast' else
-                run_date.shift(days=-days_from_past)
+        "wwatch3": {
+            "results archive": Path(
+                config["wave forecasts"]["results archive"]["forecast"]
             ),
-            'last date':
-                run_date.shift(days=-1),
+            "first date": (
+                run_date.shift(days=-days_from_past - 1)
+                if run_type == "forecast"
+                else run_date.shift(days=-days_from_past)
+            ),
+            "last date": run_date.shift(days=-1),
         },
     }
-    results_archive = model_params[model]['results archive']
-    first_date = model_params[model]['first date']
-    last_date = model_params[model]['last date']
-    for day in arrow.Arrow.range('day', first_date, last_date):
-        if model == 'nemo':
+    results_archive = model_params[model]["results archive"]
+    first_date = model_params[model]["first date"]
+    last_date = model_params[model]["last date"]
+    for day in arrow.Arrow.range("day", first_date, last_date):
+        if model == "nemo":
             _symlink_results(
                 results_archive, day, new_forecast_dir, day, model, run_type
             )
             continue
-        if model == 'wwatch3':
-            _extract_1st_forecast_day(
-                tmp_forecast_results_archive, day, model, config
-            )
+        if model == "wwatch3":
+            _extract_1st_forecast_day(tmp_forecast_results_archive, day, model, config)
             _symlink_results(
-                tmp_forecast_results_archive, day, new_forecast_dir, day,
-                model, run_type
+                tmp_forecast_results_archive,
+                day,
+                new_forecast_dir,
+                day,
+                model,
+                run_type,
             )
             continue
 
 
 def _add_forecast_results(
-    run_date, new_forecast_dir, tmp_forecast_results_archive, model, run_type,
-    config
+    run_date, new_forecast_dir, tmp_forecast_results_archive, model, run_type, config
 ):
     model_params = {
-        'nemo': {
-            'results archive': Path(config['results archive'][run_type]),
-            'forecast date': run_date.shift(days=+1),
+        "nemo": {
+            "results archive": Path(config["results archive"][run_type]),
+            "forecast date": run_date.shift(days=+1),
         },
-        'wwatch3': {
-            'results archive':
-                Path(config['wave forecasts']['results archive'][run_type]),
-            'forecast date':
-                run_date,
+        "wwatch3": {
+            "results archive": Path(
+                config["wave forecasts"]["results archive"][run_type]
+            ),
+            "forecast date": run_date,
         },
     }
-    results_archive = model_params[model]['results archive']
-    if run_type == 'forecast':
+    results_archive = model_params[model]["results archive"]
+    if run_type == "forecast":
         _symlink_results(
-            results_archive, run_date, new_forecast_dir,
-            model_params[model]['forecast date'], model, run_type
+            results_archive,
+            run_date,
+            new_forecast_dir,
+            model_params[model]["forecast date"],
+            model,
+            run_type,
         )
         return
-    if model == 'wwatch3':
+    if model == "wwatch3":
         # For preliminary WaveWatch3 forecast (run_type == 'forecast2'):
         # Run for run date covers run date through end of forecast period
         _symlink_results(
-            results_archive, run_date, new_forecast_dir, run_date, model,
-            run_type
+            results_archive, run_date, new_forecast_dir, run_date, model, run_type
         )
         return
     # For preliminary NEMO forecast (run_type == 'forecast2'):
     # Use 1st 24h of forecast run for run_date+1.
-    _extract_1st_forecast_day(
-        tmp_forecast_results_archive, run_date, model, config
-    )
+    _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, config)
     _symlink_results(
         tmp_forecast_results_archive,
         run_date.shift(days=+1),
         new_forecast_dir,
         run_date.shift(days=+1),
         model,
-        run_type
+        run_type,
     )
     # Use forecast2 run for run_date+2
     _symlink_results(
@@ -243,85 +247,74 @@ def _add_forecast_results(
         new_forecast_dir,
         run_date.shift(days=+2),
         model,
-        run_type
+        run_type,
     )
 
 
-def _extract_1st_forecast_day(
-    tmp_forecast_results_archive, run_date, model, config
-):
+def _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, config):
     # Create the destination directory
-    ddmmmyy = run_date.format('DDMMMYY').lower()
-    ddmmmyy_p1 = run_date.shift(days=+1).format('DDMMMYY').lower()
+    ddmmmyy = run_date.format("DDMMMYY").lower()
+    ddmmmyy_p1 = run_date.shift(days=+1).format("DDMMMYY").lower()
     model_params = {
-        'nemo': {
-            'day dir': tmp_forecast_results_archive / ddmmmyy_p1,
-            'results archive': Path(config['results archive']['forecast']),
-            'time variable': 'time_counter',
+        "nemo": {
+            "day dir": tmp_forecast_results_archive / ddmmmyy_p1,
+            "results archive": Path(config["results archive"]["forecast"]),
+            "time variable": "time_counter",
         },
-        'wwatch3': {
-            'day dir':
-                tmp_forecast_results_archive / ddmmmyy,
-            'results archive':
-                Path(config['wave forecasts']['results archive']['forecast']),
-            'time variable':
-                'time',
+        "wwatch3": {
+            "day dir": tmp_forecast_results_archive / ddmmmyy,
+            "results archive": Path(
+                config["wave forecasts"]["results archive"]["forecast"]
+            ),
+            "time variable": "time",
         },
     }
-    day_dir = model_params[model]['day dir']
+    day_dir = model_params[model]["day dir"]
     try:
         day_dir.mkdir(parents=True)
     except FileExistsError:
         pass
-    logger.debug(
-        f'created new {model} temporary forecast directory: {day_dir}'
-    )
-    results_archive = model_params[model]['results archive']
-    for forecast_file in (results_archive / ddmmmyy).glob('*.nc'):
-        if forecast_file.name.startswith('SalishSea_1d'):
+    logger.debug(f"created new {model} temporary forecast directory: {day_dir}")
+    results_archive = model_params[model]["results archive"]
+    for forecast_file in (results_archive / ddmmmyy).glob("*.nc"):
+        if forecast_file.name.startswith("SalishSea_1d"):
             continue
-        if forecast_file.name.endswith('restart.nc'):
+        if forecast_file.name.endswith("restart.nc"):
             continue
         forecast_file_24h = day_dir / forecast_file.name
         forecast_time_intervals = {
-            'nemo':
-                24
-                if forecast_file.name.startswith('SalishSea_1h') else 24 * 6,
-            'wwatch3':
-                24 * 2
-                if forecast_file.name.startswith('SoG_ww3_fields') else 24 * 6,
+            "nemo": 24 if forecast_file.name.startswith("SalishSea_1h") else 24 * 6,
+            "wwatch3": 24 * 2
+            if forecast_file.name.startswith("SoG_ww3_fields")
+            else 24 * 6,
         }
         forecast_times = forecast_time_intervals[model]
-        time_var = model_params[model]['time variable']
+        time_var = model_params[model]["time variable"]
         cmd = (
-            f'/usr/bin/ncks -d {time_var},0,{forecast_times-1} '
-            f'{forecast_file} {forecast_file_24h}'
+            f"/usr/bin/ncks -d {time_var},0,{forecast_times-1} "
+            f"{forecast_file} {forecast_file_24h}"
         )
-        logger.debug(f'running {cmd} in subprocess')
+        logger.debug(f"running {cmd} in subprocess")
         subprocess.run(shlex.split(cmd))
-        logger.debug(
-            f'extracted 1st 24h of {forecast_file} to {forecast_file_24h}'
-        )
+        logger.debug(f"extracted 1st 24h of {forecast_file} to {forecast_file_24h}")
 
 
 def _symlink_results(
     results_archive, results_day, forecast_dir, forecast_day, model, run_type
 ):
     # Create the destination directory
-    ddmmmyy = forecast_day.format('DDMMMYY').lower()
+    ddmmmyy = forecast_day.format("DDMMMYY").lower()
     day_dir = forecast_dir / ddmmmyy
     day_dir.mkdir()
     logger.debug(
-        f'created new {model} forecast directory for {run_type} run: {day_dir}'
+        f"created new {model} forecast directory for {run_type} run: {day_dir}"
     )
     # Symlink the results files into the destination directory
-    ddmmmyy = results_day.format('DDMMMYY').lower()
-    for f in (results_archive / ddmmmyy).glob('*.nc'):
+    ddmmmyy = results_day.format("DDMMMYY").lower()
+    for f in (results_archive / ddmmmyy).glob("*.nc"):
         (day_dir / f.name).symlink_to(f)
-    logger.debug(
-        f'symlinked *.nc files from {results_archive/ddmmmyy} in to {day_dir}'
-    )
+    logger.debug(f"symlinked *.nc files from {results_archive/ddmmmyy} in to {day_dir}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

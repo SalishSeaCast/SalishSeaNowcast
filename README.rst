@@ -13,6 +13,9 @@ Salish Sea NEMO Model Nowcast
 .. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
     :target: https://bitbucket.org/salishsea/salishseanowcast/
     :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://black.readthedocs.io/en/stable/
+    :alt: The uncompromising Python code formatter
 .. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
     :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status

@@ -23,7 +23,7 @@ import pytest
 from nowcast.workers import make_plots
 
 
-@patch('nowcast.workers.make_plots.NowcastWorker')
+@patch("nowcast.workers.make_plots.NowcastWorker")
 class TestMain:
     """Unit tests for main() function.
     """
@@ -31,8 +31,8 @@ class TestMain:
     def test_instantiate_worker(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker.call_args
-        assert args == ('make_plots',)
-        assert list(kwargs.keys()) == ['description']
+        assert args == ("make_plots",)
+        assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
         make_plots.main()
@@ -41,63 +41,63 @@ class TestMain:
     def test_add_model_arg(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ('model',)
-        assert kwargs['choices'] == {'nemo', 'fvcom', 'wwatch3'}
-        assert 'help' in kwargs
+        assert args == ("model",)
+        assert kwargs["choices"] == {"nemo", "fvcom", "wwatch3"}
+        assert "help" in kwargs
 
     def test_add_run_type_arg(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ('run_type',)
-        assert kwargs['choices'] == {
-            'nowcast', 'nowcast-green', 'nowcast-agrif', 'forecast',
-            'forecast2'
+        assert args == ("run_type",)
+        assert kwargs["choices"] == {
+            "nowcast",
+            "nowcast-green",
+            "nowcast-agrif",
+            "forecast",
+            "forecast2",
         }
-        assert 'help' in kwargs
+        assert "help" in kwargs
 
     def test_add_plot_type_arg(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[2]
-        assert args == ('plot_type',)
-        assert kwargs['choices'] == {'publish', 'research', 'comparison'}
-        assert 'help' in kwargs
+        assert args == ("plot_type",)
+        assert kwargs["choices"] == {"publish", "research", "comparison"}
+        assert "help" in kwargs
 
     def test_add_run_date_arg(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ('--run-date',)
-        assert kwargs['default'] == arrow.now().floor('day')
-        assert 'help' in kwargs
+        assert args == ("--run-date",)
+        assert kwargs["default"] == arrow.now().floor("day")
+        assert "help" in kwargs
 
     def test_add_test_figure_arg(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[3]
-        assert args == ('--test-figure',)
-        assert 'help' in kwargs
+        assert args == ("--test-figure",)
+        assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
         make_plots.main()
         args, kwargs = m_worker().run.call_args
-        assert args == (
-            make_plots.make_plots,
-            make_plots.success,
-            make_plots.failure,
-        )
+        assert args == (make_plots.make_plots, make_plots.success, make_plots.failure)
 
 
 @pytest.mark.parametrize(
-    'model, run_type, plot_type', [
-        ('nemo', 'nowcast', 'publish'),
-        ('nemo', 'nowcast', 'research'),
-        ('nemo', 'nowcast', 'comparison'),
-        ('nemo', 'forecast', 'publish'),
-        ('nemo', 'forecast2', 'publish'),
-        ('fvcom', 'nowcast', 'publish'),
-        ('wwatch3', 'forecast', 'publish'),
-        ('wwatch3', 'forecast2', 'publish'),
-    ]
+    "model, run_type, plot_type",
+    [
+        ("nemo", "nowcast", "publish"),
+        ("nemo", "nowcast", "research"),
+        ("nemo", "nowcast", "comparison"),
+        ("nemo", "forecast", "publish"),
+        ("nemo", "forecast2", "publish"),
+        ("fvcom", "nowcast", "publish"),
+        ("wwatch3", "forecast", "publish"),
+        ("wwatch3", "forecast2", "publish"),
+    ],
 )
-@patch('nowcast.workers.make_plots.logger')
+@patch("nowcast.workers.make_plots.logger")
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -107,7 +107,7 @@ class TestSuccess:
             model=model,
             run_type=run_type,
             plot_type=plot_type,
-            run_date=arrow.get('2017-01-02')
+            run_date=arrow.get("2017-01-02"),
         )
         make_plots.success(parsed_args)
         assert m_logger.info.called
@@ -117,25 +117,26 @@ class TestSuccess:
             model=model,
             run_type=run_type,
             plot_type=plot_type,
-            run_date=arrow.get('2017-01-02')
+            run_date=arrow.get("2017-01-02"),
         )
         msg_type = make_plots.success(parsed_args)
-        assert msg_type == f'success {model} {run_type} {plot_type}'
+        assert msg_type == f"success {model} {run_type} {plot_type}"
 
 
 @pytest.mark.parametrize(
-    'model, run_type, plot_type', [
-        ('nemo', 'nowcast', 'publish'),
-        ('nemo', 'nowcast', 'research'),
-        ('nemo', 'nowcast', 'comparison'),
-        ('nemo', 'forecast', 'publish'),
-        ('nemo', 'forecast2', 'publish'),
-        ('fvcom', 'nowcast', 'publish'),
-        ('wwatch3', 'forecast', 'publish'),
-        ('wwatch3', 'forecast2', 'publish'),
-    ]
+    "model, run_type, plot_type",
+    [
+        ("nemo", "nowcast", "publish"),
+        ("nemo", "nowcast", "research"),
+        ("nemo", "nowcast", "comparison"),
+        ("nemo", "forecast", "publish"),
+        ("nemo", "forecast2", "publish"),
+        ("fvcom", "nowcast", "publish"),
+        ("wwatch3", "forecast", "publish"),
+        ("wwatch3", "forecast2", "publish"),
+    ],
 )
-@patch('nowcast.workers.make_plots.logger')
+@patch("nowcast.workers.make_plots.logger")
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -145,7 +146,7 @@ class TestFailure:
             model=model,
             run_type=run_type,
             plot_type=plot_type,
-            run_date=arrow.get('2017-01-02')
+            run_date=arrow.get("2017-01-02"),
         )
         make_plots.failure(parsed_args)
         assert m_logger.critical.called
@@ -155,7 +156,7 @@ class TestFailure:
             model=model,
             run_type=run_type,
             plot_type=plot_type,
-            run_date=arrow.get('2017-01-02')
+            run_date=arrow.get("2017-01-02"),
         )
         msg_type = make_plots.failure(parsed_args)
-        assert msg_type == f'failure {model} {run_type} {plot_type}'
+        assert msg_type == f"failure {model} {run_type} {plot_type}"

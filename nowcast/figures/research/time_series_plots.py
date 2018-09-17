@@ -37,7 +37,7 @@ def make_figure(
     right_variable,
     place,
     figsize=(20, 8),
-    theme=nowcast.figures.website_theme
+    theme=nowcast.figures.website_theme,
 ):
     """
     :param xr_dataset: Hourly average 3d biological fields
@@ -65,15 +65,11 @@ def make_figure(
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
-    plot_data = _prep_plot_data(
-        xr_dataset, left_variable, right_variable, place
-    )
+    plot_data = _prep_plot_data(xr_dataset, left_variable, right_variable, place)
     fig, axl, axr = _prep_fig_axes(figsize, theme)
     _plot_timeseries(axl, plot_data.left_var, left_variable, theme)
     _plot_timeseries(axr, plot_data.right_var, right_variable, theme)
-    _timeseries_axes_labels(
-        axl, axr, left_variable, right_variable, plot_data, theme
-    )
+    _timeseries_axes_labels(axl, axr, left_variable, right_variable, plot_data, theme)
     return fig
 
 
@@ -81,13 +77,15 @@ def _prep_plot_data(xr_dataset, left_variable, right_variable, place):
     end_day = arw.get(xr_dataset.time_coverage_end)
     start_day = end_day.shift(days=-49)
     time_slice = slice(start_day.date(), end_day.shift(days=+1).date())
-    grid_y, grid_x = places.PLACES[place]['NEMO grid ji']
+    grid_y, grid_x = places.PLACES[place]["NEMO grid ji"]
     left_var = (
-        xr_dataset[left_variable].sel(time=time_slice)
+        xr_dataset[left_variable]
+        .sel(time=time_slice)
         .isel(depth=0, gridX=grid_x, gridY=grid_y)
     )
     right_var = (
-        xr_dataset[right_variable].sel(time=time_slice)
+        xr_dataset[right_variable]
+        .sel(time=time_slice)
         .isel(depth=0, gridX=grid_x, gridY=grid_y)
     )
     return SimpleNamespace(
@@ -96,49 +94,41 @@ def _prep_plot_data(xr_dataset, left_variable, right_variable, place):
         left_long_name=xr_dataset[left_variable].long_name,
         left_units=xr_dataset[left_variable].units,
         right_long_name=xr_dataset[right_variable].long_name,
-        right_units=xr_dataset[right_variable].units
+        right_units=xr_dataset[right_variable].units,
     )
 
 
 def _prep_fig_axes(figsize, theme):
     fig, axl = plt.subplots(
-        figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
+        figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
 
-    axl.set_axis_bgcolor(theme.COLOURS['axes']['background'])
+    axl.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     axr = axl.twinx()
-    axr.set_axis_bgcolor(theme.COLOURS['axes']['background'])
+    axr.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
 
     return fig, axl, axr
 
 
 def _plot_timeseries(ax, plot_data, variable, theme):
-    ax.plot(
-        plot_data.time,
-        plot_data,
-        color=theme.COLOURS['time series'][variable]
-    )
+    ax.plot(plot_data.time, plot_data, color=theme.COLOURS["time series"][variable])
     return
 
 
-def _timeseries_axes_labels(
-    axl, axr, left_variable, right_variable, plot_data, theme
-):
+def _timeseries_axes_labels(axl, axr, left_variable, right_variable, plot_data, theme):
     axl.set_xlabel(
-        'Date',
-        color=theme.COLOURS['text']['axis'],
-        fontproperties=theme.FONTS['axis']
+        "Date", color=theme.COLOURS["text"]["axis"], fontproperties=theme.FONTS["axis"]
     )
     axl.set_ylabel(
-        f'{plot_data.left_long_name} [{plot_data.left_units}]',
-        fontproperties=theme.FONTS['axis']
+        f"{plot_data.left_long_name} [{plot_data.left_units}]",
+        fontproperties=theme.FONTS["axis"],
     )
     theme.set_axis_colors(axl)
     axr.set_ylabel(
-        f'{plot_data.right_long_name} [{plot_data.right_units}]',
-        fontproperties=theme.FONTS['axis'],
+        f"{plot_data.right_long_name} [{plot_data.right_units}]",
+        fontproperties=theme.FONTS["axis"],
         rotation=-90,
-        verticalalignment='bottom'
+        verticalalignment="bottom",
     )
     theme.set_axis_colors(axr)
 
@@ -146,19 +136,19 @@ def _timeseries_axes_labels(
         0.5,
         0.95,
         plot_data.left_long_name,
-        horizontalalignment='center',
-        color=theme.COLOURS['time series'][left_variable],
-        fontproperties=theme.FONTS['legend label large'],
-        transform=axl.transAxes
+        horizontalalignment="center",
+        color=theme.COLOURS["time series"][left_variable],
+        fontproperties=theme.FONTS["legend label large"],
+        transform=axl.transAxes,
     )
     axl.text(
         0.5,
         0.9,
         plot_data.right_long_name,
-        horizontalalignment='center',
-        color=theme.COLOURS['time series'][right_variable],
-        fontproperties=theme.FONTS['legend label large'],
-        transform=axl.transAxes
+        horizontalalignment="center",
+        color=theme.COLOURS["time series"][right_variable],
+        fontproperties=theme.FONTS["legend label large"],
+        transform=axl.transAxes,
     )
 
-    axl.grid(axis='x')
+    axl.grid(axis="x")

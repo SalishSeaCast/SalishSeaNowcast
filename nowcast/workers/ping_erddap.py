@@ -20,7 +20,7 @@ from pathlib import Path
 
 from nemo_nowcast import NowcastWorker
 
-NAME = 'ping_erddap'
+NAME = "ping_erddap"
 logger = logging.getLogger(NAME)
 
 
@@ -34,18 +34,18 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'dataset',
+        "dataset",
         choices={
-            'download_weather',
-            'SCVIP-CTD',
-            'SEVIP-CTD',
-            'USDDL-CTD',
-            'TWDP-ferry',
-            'nowcast-green',
-            'nemo-forecast',
-            'wwatch3-forecast',
+            "download_weather",
+            "SCVIP-CTD",
+            "SEVIP-CTD",
+            "USDDL-CTD",
+            "TWDP-ferry",
+            "nowcast-green",
+            "nemo-forecast",
+            "wwatch3-forecast",
         },
-        help='''
+        help="""
         Type of dataset to notify ERDDAP of:
         'download_weather' means atmospheric forcing downloaded & processed,
         'SCVIP-CTD' means ONC SCVIP node CTD T&S observations downloaded &
@@ -59,41 +59,37 @@ def main():
         'nowcast-green' means nowcast green ocean run,
         'nemo-forecast' means updated NEMO rolling forecast,
         'wwatch3-forecast' means updated WaveWatch3 rolling forecast
-        ''',
+        """,
     )
     worker.run(ping_erddap, success, failure)
 
 
 def success(parsed_args):
     logger.info(
-        f'{parsed_args.dataset} ERDDAP dataset flag file(s) created',
-        extra={
-            'dataset': parsed_args.dataset
-        }
+        f"{parsed_args.dataset} ERDDAP dataset flag file(s) created",
+        extra={"dataset": parsed_args.dataset},
     )
-    msg_type = f'success {parsed_args.dataset}'
+    msg_type = f"success {parsed_args.dataset}"
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
-        f'{parsed_args.dataset} ERDDAP dataset flag file(s) creation failed',
-        extra={
-            'dataset': parsed_args.dataset
-        }
+        f"{parsed_args.dataset} ERDDAP dataset flag file(s) creation failed",
+        extra={"dataset": parsed_args.dataset},
     )
-    msg_type = f'failure {parsed_args.dataset}'
+    msg_type = f"failure {parsed_args.dataset}"
     return msg_type
 
 
 def ping_erddap(parsed_args, config, *args):
     dataset = parsed_args.dataset
-    flag_path = Path(config['erddap']['flag dir'])
+    flag_path = Path(config["erddap"]["flag dir"])
     checklist = {dataset: []}
     try:
-        for dataset_id in config['erddap']['datasetIDs'][dataset]:
+        for dataset_id in config["erddap"]["datasetIDs"][dataset]:
             (flag_path / dataset_id).touch()
-            logger.debug(f'{flag_path / dataset_id} touched')
+            logger.debug(f"{flag_path / dataset_id} touched")
             checklist[dataset].append(dataset_id)
     except KeyError:
         # run type is not in datasetIDs dict
@@ -101,5 +97,5 @@ def ping_erddap(parsed_args, config, *args):
     return checklist
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

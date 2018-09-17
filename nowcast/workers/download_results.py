@@ -25,7 +25,7 @@ from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import lib
 
-NAME = 'download_results'
+NAME = "download_results"
 logger = logging.getLogger(NAME)
 
 
@@ -33,21 +33,24 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name',
-        help='Name of the host to download results files from',
+        "host_name", help="Name of the host to download results files from"
     )
     worker.cli.add_argument(
-        'run_type',
+        "run_type",
         choices={
-            'nowcast', 'nowcast-green', 'forecast', 'forecast2', 'hindcast',
-            'nowcast-agrif'
+            "nowcast",
+            "nowcast-green",
+            "forecast",
+            "forecast2",
+            "hindcast",
+            "nowcast-agrif",
         },
-        help='Type of run to download results files from.',
+        help="Type of run to download results files from.",
     )
     worker.cli.add_date_option(
-        '--run-date',
-        default=arrow.now().floor('day'),
-        help='Date of the run to download results files from.'
+        "--run-date",
+        default=arrow.now().floor("day"),
+        help="Date of the run to download results files from.",
     )
     worker.run(download_results, success, failure)
 
@@ -55,28 +58,28 @@ def main():
 def success(parsed_args):
     logger.info(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f'results files from {parsed_args.host_name} downloaded',
+        f"results files from {parsed_args.host_name} downloaded",
         extra={
-            'run_type': parsed_args.run_type,
-            'host_name': parsed_args.host_name,
-            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        }
+            "run_type": parsed_args.run_type,
+            "host_name": parsed_args.host_name,
+            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
+        },
     )
-    msg_type = f'success {parsed_args.run_type}'
+    msg_type = f"success {parsed_args.run_type}"
     return msg_type
 
 
 def failure(parsed_args):
     logger.critical(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f'results files download from {parsed_args.host_name} failed',
+        f"results files download from {parsed_args.host_name} failed",
         extra={
-            'run_type': parsed_args.run_type,
-            'host_name': parsed_args.host_name,
-            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        }
+            "run_type": parsed_args.run_type,
+            "host_name": parsed_args.host_name,
+            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
+        },
     )
-    msg_type = f'failure {parsed_args.run_type}'
+    msg_type = f"failure {parsed_args.run_type}"
     return msg_type
 
 
@@ -88,37 +91,37 @@ def download_results(parsed_args, config, *args):
         try:
             # Hindcast special case 1st due to hindcast host in enabled hosts
             # with empty run types collection to enable forcing uploads
-            host_config = config['run']['hindcast hosts'][host_name]
+            host_config = config["run"]["hindcast hosts"][host_name]
         except KeyError:
-            host_config = config['run']['enabled hosts'][host_name]
+            host_config = config["run"]["enabled hosts"][host_name]
     except KeyError:
-        logger.critical(f'unrecognized host: {host_name}')
+        logger.critical(f"unrecognized host: {host_name}")
         raise WorkerError
-    results_dir = run_date.format('DDMMMYY').lower()
-    run_type_results = Path(host_config['run types'][run_type]['results'])
+    results_dir = run_date.format("DDMMMYY").lower()
+    run_type_results = Path(host_config["run types"][run_type]["results"])
     src_dir = run_type_results / results_dir
-    src = f'{host_name}:{src_dir}'
-    dest = Path(config['results archive'][run_type])
-    logger.info(f'downloading results from {src} to {dest}')
-    cmd = shlex.split(f'scp -pr {src} {dest}')
+    src = f"{host_name}:{src_dir}"
+    dest = Path(config["results archive"][run_type])
+    logger.info(f"downloading results from {src} to {dest}")
+    cmd = shlex.split(f"scp -pr {src} {dest}")
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     results_archive_dir = dest / results_dir
-    for filepath in results_archive_dir.glob('FVCOM_[TUV].nc'):
+    for filepath in results_archive_dir.glob("FVCOM_[TUV].nc"):
         filepath.unlink()
     lib.fix_perms(
         dest / results_dir,
-        mode=lib.FilePerms(user='rwx', group='rwx', other='rx'),
-        grp_name=config['file group']
+        mode=lib.FilePerms(user="rwx", group="rwx", other="rx"),
+        grp_name=config["file group"],
     )
-    for filepath in results_archive_dir.glob('*'):
-        lib.fix_perms(filepath, grp_name=config['file group'])
-    checklist = {run_type: {'run date': run_date.format('YYYY-MM-DD')}}
-    for freq in '1h 1d'.split():
+    for filepath in results_archive_dir.glob("*"):
+        lib.fix_perms(filepath, grp_name=config["file group"])
+    checklist = {run_type: {"run date": run_date.format("YYYY-MM-DD")}}
+    for freq in "1h 1d".split():
         checklist[run_type][freq] = list(
-            map(os.fspath, results_archive_dir.glob(f'SalishSea_{freq}_*.nc'))
+            map(os.fspath, results_archive_dir.glob(f"SalishSea_{freq}_*.nc"))
         )
     return checklist
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

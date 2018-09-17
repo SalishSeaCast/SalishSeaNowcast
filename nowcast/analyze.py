@@ -25,30 +25,26 @@ import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
 
-from salishsea_tools import (
-    nc_tools,
-    tidetools,
-    geo_tools,
-)
+from salishsea_tools import nc_tools, tidetools, geo_tools
 
 from nowcast import figures
 
 # Paths for model results
 paths = {
-    'nowcast': '/results/SalishSea/nowcast/',
-    'forecast': '/results/SalishSea/forecast/',
-    'forecast2': '/results/SalishSea/forecast2/',
+    "nowcast": "/results/SalishSea/nowcast/",
+    "forecast": "/results/SalishSea/forecast/",
+    "forecast2": "/results/SalishSea/forecast2/",
 }
 
 # Colours for plots
 colours = {
-    'nowcast': 'DodgerBlue',
-    'forecast': 'ForestGreen',
-    'forecast2': 'MediumVioletRed',
-    'observed': 'Indigo',
-    'predicted': 'ForestGreen',
-    'model': 'blue',
-    'residual': 'DimGray',
+    "nowcast": "DodgerBlue",
+    "forecast": "ForestGreen",
+    "forecast2": "MediumVioletRed",
+    "observed": "Indigo",
+    "predicted": "ForestGreen",
+    "model": "blue",
+    "residual": "DimGray",
 }
 
 
@@ -76,18 +72,14 @@ def get_filenames(t_orig, t_final, period, grid, model_path):
     """
 
     numdays = (t_final - t_orig).days
-    dates = [
-        t_orig + datetime.timedelta(days=num) for num in range(0, numdays + 1)
-    ]
+    dates = [t_orig + datetime.timedelta(days=num) for num in range(0, numdays + 1)]
     dates.sort()
 
-    allfiles = glob.glob(
-        model_path + '*/SalishSea_' + period + '*_' + grid + '.nc'
-    )
-    sdt = dates[0].strftime('%Y%m%d')
-    edt = dates[-1].strftime('%Y%m%d')
-    sstr = f'SalishSea_{period}_{sdt}_{sdt}_{grid}.nc'
-    estr = f'SalishSea_{period}_{edt}_{edt}_{grid}.nc'
+    allfiles = glob.glob(model_path + "*/SalishSea_" + period + "*_" + grid + ".nc")
+    sdt = dates[0].strftime("%Y%m%d")
+    edt = dates[-1].strftime("%Y%m%d")
+    sstr = f"SalishSea_{period}_{sdt}_{sdt}_{grid}.nc"
+    estr = f"SalishSea_{period}_{edt}_{edt}_{grid}.nc"
 
     files = []
     for filename in allfiles:
@@ -122,15 +114,13 @@ def get_filenames_15(t_orig, t_final, station, model_path):
     """
 
     numdays = (t_final - t_orig).days
-    dates = [
-        t_orig + datetime.timedelta(days=num) for num in range(0, numdays + 1)
-    ]
+    dates = [t_orig + datetime.timedelta(days=num) for num in range(0, numdays + 1)]
     dates.sort()
 
     files = []
     for i in dates:
-        sdt = i.strftime('%d%b%y').lower()
-        filename = f'{model_path}{sdt}/VENUS_{station}_gridded.nc'
+        sdt = i.strftime("%d%b%y").lower()
+        filename = f"{model_path}{sdt}/VENUS_{station}_gridded.nc"
         files.append(filename)
 
     return files
@@ -168,7 +158,7 @@ def combine_files(files, var, kss, jss, iss):
 
     for f in files:
         with nc.Dataset(f) as G:
-            if kss == 'None':
+            if kss == "None":
                 try:  # for variavles with no depht like ssh
                     var_tmp = G.variables[var][..., jss, iss]
                 except IndexError:  # for variables with depth
@@ -189,9 +179,7 @@ def combine_files(files, var, kss, jss, iss):
     return var_ary, time
 
 
-def plot_files(
-    ax, grid_B, files, var, depth, t_orig, t_final, name, label, colour
-):
+def plot_files(ax, grid_B, files, var, depth, t_orig, t_final, name, label, colour):
     """Plots values of  variable over multiple files covering
     a certain period of time.
 
@@ -232,16 +220,14 @@ def plot_files(
     """
 
     # Stations information
-    lat = figures.SITES[name]['lat']
-    lon = figures.SITES[name]['lon']
+    lat = figures.SITES[name]["lat"]
+    lon = figures.SITES[name]["lon"]
 
     # Bathymetry
     bathy, X, Y = tidetools.get_bathy_data(grid_B)
 
     # Get index
-    j, i = geo_tools.find_closest_model_point(
-        lon, lat, X, Y, land_mask=bathy.mask
-    )
+    j, i = geo_tools.find_closest_model_point(lon, lat, X, Y, land_mask=bathy.mask)
 
     # Call function
     var_ary, time = combine_files(files, var, depth, j, i)
@@ -253,7 +239,7 @@ def plot_files(
     ax_start = t_orig
     ax_end = t_final + datetime.timedelta(days=1)
     ax.set_xlim(ax_start, ax_end)
-    hfmt = mdates.DateFormatter('%m/%d %H:%M')
+    hfmt = mdates.DateFormatter("%m/%d %H:%M")
     ax.xaxis.set_major_formatter(hfmt)
 
     return ax
@@ -297,19 +283,27 @@ def compare_ssh_tides(
 
     # Model
     ax = plot_files(
-        ax, grid_B, files, 'sossheig', 'None', t_orig, t_final, name, 'Model',
-        colours['model']
+        ax,
+        grid_B,
+        files,
+        "sossheig",
+        "None",
+        t_orig,
+        t_final,
+        name,
+        "Model",
+        colours["model"],
     )
     # Tides
-    figures.plot_tides(ax, name, PST, MSL, color=colours['predicted'])
+    figures.plot_tides(ax, name, PST, MSL, color=colours["predicted"])
 
     # Figure format
     ax.set_title(
-        f'Modelled Sea Surface Height versus Predicted Tides at {name}: '
-        f'{t_orig:%d-%b-%Y} to {t_final:%d-%b-%Y}'
+        f"Modelled Sea Surface Height versus Predicted Tides at {name}: "
+        f"{t_orig:%d-%b-%Y} to {t_final:%d-%b-%Y}"
     )
     ax.set_ylim([-3.0, 3.0])
-    ax.set_xlabel('[hrs]')
+    ax.set_xlabel("[hrs]")
     ax.legend(loc=2, ncol=2)
     ax.grid()
 
@@ -341,19 +335,16 @@ def create_path(mode, t_orig, file_part):
 
     run_date = t_orig
 
-    if mode == 'nowcast':
-        results_home = paths['nowcast']
-    elif mode == 'forecast':
-        results_home = paths['forecast']
+    if mode == "nowcast":
+        results_home = paths["nowcast"]
+    elif mode == "forecast":
+        results_home = paths["forecast"]
         run_date = run_date + datetime.timedelta(days=-1)
-    elif mode == 'forecast2':
-        results_home = paths['forecast2']
+    elif mode == "forecast2":
+        results_home = paths["forecast2"]
         run_date = run_date + datetime.timedelta(days=-2)
 
-    results_dir = os.path.join(
-        results_home,
-        run_date.strftime('%d%b%y').lower()
-    )
+    results_dir = os.path.join(results_home, run_date.strftime("%d%b%y").lower())
 
     filename = glob.glob(os.path.join(results_dir, file_part))
 
@@ -402,8 +393,8 @@ def verified_runs(t_orig):
     """
 
     runs_list = []
-    for mode in ['nowcast', 'forecast', 'forecast2']:
-        files, run_date = create_path(mode, t_orig, 'SalishSea*grid_T.nc')
+    for mode in ["nowcast", "forecast", "forecast2"]:
+        files, run_date = create_path(mode, t_orig, "SalishSea*grid_T.nc")
         if files:
             runs_list.append(mode)
 
