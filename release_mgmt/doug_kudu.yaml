@@ -1,0 +1,15 @@
+# List of absolute paths to repos that tag_release script will be tag
+# for production releases of NEMO model code and configurations.
+#
+# The repos will be processed in order, so the most active repos should
+# be nearest the top of the list.
+
+repos:
+  - /media/doug/warehouse/MEOPAR/NEMO-3.6-code
+  - /media/doug/warehouse/MEOPAR/SS-run-sets
+  - /media/doug/warehouse/MEOPAR/rivers-climatology
+  - /media/doug/warehouse/MEOPAR/grid
+  - /media/doug/warehouse/MEOPAR/tides
+  - /media/doug/warehouse/MEOPAR/tracers
+  - /media/doug/warehouse/MEOPAR/XIOS-ARCH
+  - /media/doug/warehouse/MEOPAR/XIOS
