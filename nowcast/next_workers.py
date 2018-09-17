@@ -1214,12 +1214,6 @@ def after_download_results(msg, config, checklist):
         if run_type.startswith('forecast'):
             next_workers[msg.type].append(
                 NextWorker(
-                    'nowcast.workers.update_forecast_datasets',
-                    args=['nemo', run_type, '--run-date', run_date]
-                )
-            )
-            next_workers[msg.type].append(
-                NextWorker(
                     'nowcast.workers.make_CHS_currents_file',
                     args=[run_type, '--run-date', run_date]
                 )
@@ -1254,6 +1248,15 @@ def after_make_CHS_currents_file(msg, config, checklist):
         'success forecast': [],
         'success forecast2': [],
     }
+    if msg.type.startswith('success forecast'):
+        run_type = msg.type.split()[1]
+        run_date = msg.payload[run_type]['run date']
+        next_workers[msg.type].append(
+            NextWorker(
+                'nowcast.workers.update_forecast_datasets',
+                args=[run_type, '--run-date', run_date]
+            )
+        )
     return next_workers[msg.type]
 
 

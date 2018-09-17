@@ -1779,33 +1779,6 @@ class TestAfterDownloadResults:
 
     @pytest.mark.parametrize(
         'run_type, run_date', [
-            ('forecast', '2017-11-11'),
-            ('forecast2', '2018-01-24'),
-        ]
-    )
-    def test_success_forecast_launch_update_forecast_datasets(
-        self, run_type, run_date, config, checklist
-    ):
-        workers = next_workers.after_download_results(
-            Message(
-                'download_results',
-                f'success {run_type}',
-                payload={
-                    run_type: {
-                        'run date': run_date
-                    }
-                }
-            ), config, checklist
-        )
-        expected = NextWorker(
-            'nowcast.workers.update_forecast_datasets',
-            args=['nemo', run_type, '--run-date', run_date],
-            host='localhost'
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize(
-        'run_type, run_date', [
             ('nowcast', '2018-09-01'),
             ('forecast', '2018-09-01'),
             ('forecast2', '2018-09-01'),
@@ -1873,8 +1846,6 @@ class TestAfterMakeCHSCurrentsFile:
             'failure forecast',
             'failure forecast2',
             'success nowcast',
-            'success forecast',
-            'success forecast2',
         ]
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1882,6 +1853,33 @@ class TestAfterMakeCHSCurrentsFile:
             Message('make_CHS_currents_file', msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize(
+        'run_type, run_date', [
+            ('forecast', '2018-09-13'),
+            ('forecast2', '2018-09-13'),
+        ]
+    )
+    def test_success_forecast_launch_update_forecast_datasets(
+        self, run_type, run_date, config, checklist
+    ):
+        workers = next_workers.after_make_CHS_currents_file(
+            Message(
+                'make_CHS_currents_file',
+                f'success {run_type}',
+                payload={
+                    run_type: {
+                        'run date': run_date
+                    }
+                }
+            ), config, checklist
+        )
+        expected = NextWorker(
+            'nowcast.workers.update_forecast_datasets',
+            args=[run_type, '--run-date', run_date],
+            host='localhost'
+        )
+        assert expected in workers
 
 
 class TestAfterSplitResults:
