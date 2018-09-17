@@ -24,7 +24,6 @@ channels:
 
 dependencies:
   - arrow
-  - attrs
   - basemap
   - beautifulsoup4
   - bottleneck
@@ -56,6 +55,7 @@ dependencies:
 
   - pip:
     - angles
+    - attrs
     - driftwood
     - f90nml
     - feedgen

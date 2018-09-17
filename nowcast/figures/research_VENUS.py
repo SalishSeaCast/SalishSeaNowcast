@@ -29,75 +29,49 @@ import netCDF4 as nc
 from salishsea_tools import nc_tools, tidetools as tt, viz_tools, geo_tools
 from scipy import interpolate as interp
 
-from nowcast import (
-    analyze,
-    residuals,
-)
+from nowcast import analyze, residuals
 
 # Font format
 title_font = {
-    'fontname': 'Bitstream Vera Sans',
-    'size': '15',
-    'color': 'white',
-    'weight': 'medium'
+    "fontname": "Bitstream Vera Sans",
+    "size": "15",
+    "color": "white",
+    "weight": "medium",
 }
-axis_font = {'fontname': 'Bitstream Vera Sans', 'size': '13', 'color': 'white'}
+axis_font = {"fontname": "Bitstream Vera Sans", "size": "13", "color": "white"}
 
 # Constants defined for the VENUS nodes
 # Lat/lon/depth from the VENUS website. Depth is in meters.
 # i,j are python grid coordinates as returned from
 # geo_tools.find_closest_model_point()
 SITES = {
-    'Vancouver': {
-        'lat': 49.2827,
-        'lon': -123.1207
+    "Vancouver": {"lat": 49.2827, "lon": -123.1207},
+    "VENUS": {
+        "East": {"lat": 49.0419, "lon": -123.3176, "depth": 170, "i": 283, "j": 416},
+        "Central": {"lat": 49.0401, "lon": -123.4261, "depth": 300, "i": 266, "j": 424},
+        "ddl": {
+            "lat": 49.0807167,
+            "lon": -123.3400617,
+            "depth": 150,
+            "i": 284,
+            "j": 425,
+        },
     },
-    'VENUS': {
-        'East': {
-            'lat': 49.0419,
-            'lon': -123.3176,
-            'depth': 170,
-            'i': 283,
-            'j': 416
-        },
-        'Central': {
-            'lat': 49.0401,
-            'lon': -123.4261,
-            'depth': 300,
-            'i': 266,
-            'j': 424
-        },
-        'ddl': {
-            'lat': 49.0807167,
-            'lon': -123.3400617,
-            'depth': 150,
-            'i': 284,
-            'j': 425
-        }
-    }
 }
 
 # Tide correction for amplitude and phase set to September 10th 2014 by nowcast
 # Values for there and other constituents can be found in:
 # /data/dlatorne/MEOPAR/SalishSea/nowcast/08jul15/ocean.output/
 CorrTides = {
-    'K1': {
-        'freq': 15.041069000,
-        'ft': 0.891751,
-        'uvt': 262.636797
-    },
-    'M2': {
-        'freq': 28.984106,
-        'ft': 1.035390,
-        'uvt': 346.114490
-    }
+    "K1": {"freq": 15.041069000, "ft": 0.891751, "uvt": 262.636797},
+    "M2": {"freq": 28.984106, "ft": 1.035390, "uvt": 346.114490},
 }
 
 
 def dateparse(s):
     """Parse the dates from the VENUS files."""
 
-    unaware = datetime.datetime.strptime(s, '%Y-%m-%dT%H:%M:%S.%f')
+    unaware = datetime.datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
     aware = unaware.replace(tzinfo=tz.tzutc())
 
     return aware
@@ -118,35 +92,33 @@ def load_VENUS(station):
     """
 
     # Define location
-    filename = (
-        f'SG-{station}/VSG-Strait_of_Georgia_{station}-VIP-State_of_Ocean.txt'
-    )
+    filename = f"SG-{station}/VSG-Strait_of_Georgia_{station}-VIP-State_of_Ocean.txt"
 
     # Access website
-    url = 'ftp://ftp.neptunecanada.ca/pub/DataProducts/SOO/'
+    url = "ftp://ftp.neptunecanada.ca/pub/DataProducts/SOO/"
 
     # Parse data
     data_file = url + filename
     data = pd.read_csv(
         data_file,
-        delimiter=' ,',
+        delimiter=" ,",
         skiprows=17,
         names=[
-            'date',
-            'pressure',
-            'pflag',
-            'temp',
-            'tflag',
-            'sal',
-            'sflag',
-            'sigmaT',
-            'stflag',
-            'oxygen',
-            'oflag',
+            "date",
+            "pressure",
+            "pflag",
+            "temp",
+            "tflag",
+            "sal",
+            "sflag",
+            "sigmaT",
+            "stflag",
+            "oxygen",
+            "oflag",
         ],
-        parse_dates=['date'],
+        parse_dates=["date"],
         date_parser=dateparse,
-        engine='python'
+        engine="python",
     )
 
     return data
@@ -173,9 +145,9 @@ def plot_VENUS(ax_sal, ax_temp, station, start, end):
     """
 
     data = load_VENUS(station)
-    ax_sal.plot(data.date[:], data.sal, 'r-', label='Observations')
+    ax_sal.plot(data.date[:], data.sal, "r-", label="Observations")
     ax_sal.set_xlim([start, end])
-    ax_temp.plot(data.date[:], data.temp, 'r-', label='Observations')
+    ax_temp.plot(data.date[:], data.temp, "r-", label="Observations")
     ax_temp.set_xlim([start, end])
 
 
@@ -206,11 +178,11 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
 
     # VENUS data
     fig, (ax_sal, ax_temp) = plt.subplots(2, 1, figsize=figsize, sharex=True)
-    fig.patch.set_facecolor('#2B3E50')
+    fig.patch.set_facecolor("#2B3E50")
     fig.autofmt_xdate()
-    lon = SITES['VENUS'][station]['lon']
-    lat = SITES['VENUS'][station]['lat']
-    depth = SITES['VENUS'][station]['depth']
+    lon = SITES["VENUS"][station]["lon"]
+    lat = SITES["VENUS"][station]["lat"]
+    depth = SITES["VENUS"][station]["depth"]
 
     # Plotting observations
     plot_VENUS(ax_sal, ax_temp, station, t_orig, t_end)
@@ -219,9 +191,9 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
     j, i = geo_tools.find_closest_model_point(lon, lat, X, Y)
 
     # Model data
-    sal = grid_T.variables['vosaline'][:, :, j, i]
-    temp = grid_T.variables['votemper'][:, :, j, i]
-    ds = grid_T.variables['deptht']
+    sal = grid_T.variables["vosaline"][:, :, j, i]
+    temp = grid_T.variables["votemper"][:, :, j, i]
+    ds = grid_T.variables["deptht"]
 
     # Interpolating data
     salc = []
@@ -231,27 +203,27 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
         tempc.append(interpolate_depth(temp[ind, :], ds, depth))
 
     # Plot model data
-    ax_sal.plot(t, salc, '-b', label='Model')
-    ax_temp.plot(t, tempc, '-b', label='Model')
+    ax_sal.plot(t, salc, "-b", label="Model")
+    ax_temp.plot(t, tempc, "-b", label="Model")
 
     # Axis
     ax_sal.set_title(f'VENUS {station} - {t[0].strftime("%d-%b-%Y")}')
     ax_sal.set_ylim([29, 32])
-    ax_sal.set_ylabel('Practical Salinity [psu]', **axis_font)
+    ax_sal.set_ylabel("Practical Salinity [psu]", **axis_font)
     ax_sal.legend(loc=0)
     ax_temp.set_ylim([7, 13])
-    ax_temp.set_xlabel('Time [UTC]', **axis_font)
-    ax_temp.set_ylabel('Temperature [deg C]', **axis_font)
-    axis_colors(ax_sal, 'gray')
-    axis_colors(ax_temp, 'gray')
+    ax_temp.set_xlabel("Time [UTC]", **axis_font)
+    ax_temp.set_ylabel("Temperature [deg C]", **axis_font)
+    axis_colors(ax_sal, "gray")
+    axis_colors(ax_temp, "gray")
 
     # Text box
     ax_temp.text(
         0.25,
         -0.3,
-        'Observations from Ocean Networks Canada',
+        "Observations from Ocean Networks Canada",
         transform=ax_temp.transAxes,
-        color='white'
+        color="white",
     )
 
     return fig
@@ -305,12 +277,12 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
 
     :returns: matplotlib figure object instance (fig).
     """
-    u_u = grid.variables['vozocrtx']
-    v_v = grid.variables['vomecrty']
-    w_w = grid.variables['vovecrtz']
-    dep_t = grid.variables['depthv']
-    dep_w = grid.variables['depthw']
-    t = grid.variables['time_counter']
+    u_u = grid.variables["vozocrtx"]
+    v_v = grid.variables["vomecrty"]
+    w_w = grid.variables["vovecrtz"]
+    dep_t = grid.variables["depthv"]
+    dep_w = grid.variables["depthw"]
+    t = grid.variables["time_counter"]
     dt = (t[1] - t[0]) / 3600.
     maxt = dt * t.shape[0]
     t_axis = np.arange(0, maxt, dt)
@@ -320,7 +292,7 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     v_N = v_N[..., 0, 0]
 
     fig, (axu, axv, axw) = plt.subplots(3, 1, figsize=figsize, sharex=True)
-    fig.patch.set_facecolor('#2B3E50')
+    fig.patch.set_facecolor("#2B3E50")
 
     max_array = np.maximum(abs(v_N), abs(u_E))
     max_speed = np.amax(max_array)
@@ -330,48 +302,42 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
 
     # viz_tools.set_aspect(axu)
     timestamp = nc_tools.timestamp(grid, 0)
-    cmap = plt.get_cmap('jet')
-    dep_s = SITES['VENUS'][station]['depth']
+    cmap = plt.get_cmap("jet")
+    dep_s = SITES["VENUS"][station]["depth"]
 
     axu.invert_yaxis()
     mesh = axu.contourf(
-        t_axis,
-        dep_t[:],
-        u_E.transpose(),
-        np.arange(vmin, vmax, step),
-        cmap=cmap
+        t_axis, dep_t[:], u_E.transpose(), np.arange(vmin, vmax, step), cmap=cmap
     )
     cbar = fig.colorbar(mesh, ax=axu)
     axu.set_ylim([dep_s, 0])
     axu.set_xlim([0, maxt])
-    axu.set_ylabel('Depth [m]', **axis_font)
-    axis_colors(axu, 'white')
+    axu.set_ylabel("Depth [m]", **axis_font)
+    axis_colors(axu, "white")
     axu.set_title(
-        f'East/West Velocities at VENUS {station} on '
-        f'{timestamp.format("DD-MMM-YYYY")}', **title_font
+        f"East/West Velocities at VENUS {station} on "
+        f'{timestamp.format("DD-MMM-YYYY")}',
+        **title_font,
     )
-    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
-    cbar.set_label('[m/s]', **axis_font)
+    plt.setp(plt.getp(cbar.ax.axes, "yticklabels"), color="w")
+    cbar.set_label("[m/s]", **axis_font)
 
     axv.invert_yaxis()
     mesh = axv.contourf(
-        t_axis,
-        dep_t[:],
-        v_N.transpose(),
-        np.arange(vmin, vmax, step),
-        cmap=cmap
+        t_axis, dep_t[:], v_N.transpose(), np.arange(vmin, vmax, step), cmap=cmap
     )
     cbar = fig.colorbar(mesh, ax=axv)
     axv.set_ylim([dep_s, 0])
     axv.set_xlim([0, maxt])
-    axv.set_ylabel('Depth [m]', **axis_font)
-    axis_colors(axv, 'white')
+    axv.set_ylabel("Depth [m]", **axis_font)
+    axis_colors(axv, "white")
     axv.set_title(
-        f'North/South Velocities at VENUS {station} on '
-        f'{timestamp.format("DD-MMM-YYYY")}', **title_font
+        f"North/South Velocities at VENUS {station} on "
+        f'{timestamp.format("DD-MMM-YYYY")}',
+        **title_font,
     )
-    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
-    cbar.set_label('[m/s]', **axis_font)
+    plt.setp(plt.getp(cbar.ax.axes, "yticklabels"), color="w")
+    cbar.set_label("[m/s]", **axis_font)
 
     axw.invert_yaxis()
     mesh = axw.contourf(
@@ -379,20 +345,21 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
         dep_w[:],
         w_w[:, :, 1, 1].transpose(),
         np.arange(vmin / 70, vmax / 70, step / 80),
-        cmap=cmap
+        cmap=cmap,
     )
     cbar = fig.colorbar(mesh, ax=axw)
     axw.set_ylim([dep_s, 0])
     axw.set_xlim([0, maxt])
-    axw.set_xlabel('Time [h]', **axis_font)
-    axw.set_ylabel('Depth [m]', **axis_font)
-    axis_colors(axw, 'white')
+    axw.set_xlabel("Time [h]", **axis_font)
+    axw.set_ylabel("Depth [m]", **axis_font)
+    axis_colors(axw, "white")
     axw.set_title(
-        f'Vertical Velocities at VENUS {station} on '
-        f'{timestamp.format("DD-MMM-YYYY")}', **title_font
+        f"Vertical Velocities at VENUS {station} on "
+        f'{timestamp.format("DD-MMM-YYYY")}',
+        **title_font,
     )
-    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
-    cbar.set_label('[m/s]', **axis_font)
+    plt.setp(plt.getp(cbar.ax.axes, "yticklabels"), color="w")
+    cbar.set_label("[m/s]", **axis_font)
 
     return fig
 
@@ -410,102 +377,72 @@ def VENUS_location(grid_B, figsize=(10, 10)):
     :returns: matplotlib figure object instance (fig).
     """
 
-    lats = grid_B.variables['nav_lat'][:]
-    lons = grid_B.variables['nav_lon'][:]
-    bathy = grid_B.variables['Bathymetry'][:]
+    lats = grid_B.variables["nav_lat"][:]
+    lons = grid_B.variables["nav_lon"][:]
+    bathy = grid_B.variables["Bathymetry"][:]
     levels = np.arange(0, 470, 50)
 
     fig, ax = plt.subplots(1, 1, figsize=figsize)
-    fig.patch.set_facecolor('#2B3E50')
-    cmap = plt.get_cmap('winter_r')
-    cmap.set_bad('burlywood')
-    mesh = ax.contourf(lons, lats, bathy, levels, cmap=cmap, extend='both')
+    fig.patch.set_facecolor("#2B3E50")
+    cmap = plt.get_cmap("winter_r")
+    cmap.set_bad("burlywood")
+    mesh = ax.contourf(lons, lats, bathy, levels, cmap=cmap, extend="both")
     cbar = fig.colorbar(mesh)
-    viz_tools.plot_land_mask(ax, grid_B, coords='map', color='burlywood')
-    viz_tools.plot_coastline(ax, grid_B, coords='map')
+    viz_tools.plot_land_mask(ax, grid_B, coords="map", color="burlywood")
+    viz_tools.plot_coastline(ax, grid_B, coords="map")
     viz_tools.set_aspect(ax)
 
-    lon_c = SITES['VENUS']['Central']['lon']
-    lat_c = SITES['VENUS']['Central']['lat']
-    lon_e = SITES['VENUS']['East']['lon']
-    lat_e = SITES['VENUS']['East']['lat']
-    lon_d = SITES['VENUS']['ddl']['lon']
-    lat_d = SITES['VENUS']['ddl']['lat']
-    lon_v = SITES['Vancouver']['lon']
-    lat_v = SITES['Vancouver']['lat']
+    lon_c = SITES["VENUS"]["Central"]["lon"]
+    lat_c = SITES["VENUS"]["Central"]["lat"]
+    lon_e = SITES["VENUS"]["East"]["lon"]
+    lat_e = SITES["VENUS"]["East"]["lat"]
+    lon_d = SITES["VENUS"]["ddl"]["lon"]
+    lat_d = SITES["VENUS"]["ddl"]["lat"]
+    lon_v = SITES["Vancouver"]["lon"]
+    lat_v = SITES["Vancouver"]["lat"]
 
-    ax.plot(
-        lon_c,
-        lat_c,
-        marker='D',
-        color='Black',
-        markersize=10,
-        markeredgewidth=2
-    )
-    bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.8)
+    ax.plot(lon_c, lat_c, marker="D", color="Black", markersize=10, markeredgewidth=2)
+    bbox_args = dict(boxstyle="square", facecolor="white", alpha=0.8)
     ax.annotate(
-        'Central', (lon_c - 0.11, lat_c + 0.04),
+        "Central",
+        (lon_c - 0.11, lat_c + 0.04),
         fontsize=15,
-        color='black',
-        bbox=bbox_args
+        color="black",
+        bbox=bbox_args,
     )
 
-    ax.plot(
-        lon_e,
-        lat_e,
-        marker='D',
-        color='Black',
-        markersize=10,
-        markeredgewidth=2
-    )
-    bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.8)
+    ax.plot(lon_e, lat_e, marker="D", color="Black", markersize=10, markeredgewidth=2)
+    bbox_args = dict(boxstyle="square", facecolor="white", alpha=0.8)
     ax.annotate(
-        'East', (lon_e + 0.04, lat_e + 0.01),
-        fontsize=15,
-        color='black',
-        bbox=bbox_args
+        "East", (lon_e + 0.04, lat_e + 0.01), fontsize=15, color="black", bbox=bbox_args
+    )
+
+    ax.plot(lon_d, lat_d, marker="D", color="Black", markersize=10, markeredgewidth=2)
+    bbox_args = dict(boxstyle="square", facecolor="white", alpha=0.8)
+    ax.annotate(
+        "DDL", (lon_d + 0.01, lat_d + 0.05), fontsize=15, color="black", bbox=bbox_args
     )
 
     ax.plot(
-        lon_d,
-        lat_d,
-        marker='D',
-        color='Black',
-        markersize=10,
-        markeredgewidth=2
+        lon_v, lat_v, marker="D", color="DarkMagenta", markersize=10, markeredgewidth=2
     )
-    bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.8)
+    bbox_args = dict(boxstyle="square", facecolor="white", alpha=0.8)
     ax.annotate(
-        'DDL', (lon_d + 0.01, lat_d + 0.05),
+        "Vancouver",
+        (lon_v - 0.15, lat_v + 0.04),
         fontsize=15,
-        color='black',
-        bbox=bbox_args
-    )
-
-    ax.plot(
-        lon_v,
-        lat_v,
-        marker='D',
-        color='DarkMagenta',
-        markersize=10,
-        markeredgewidth=2
-    )
-    bbox_args = dict(boxstyle='square', facecolor='white', alpha=0.8)
-    ax.annotate(
-        'Vancouver', (lon_v - 0.15, lat_v + 0.04),
-        fontsize=15,
-        color='black',
-        bbox=bbox_args
+        color="black",
+        bbox=bbox_args,
     )
 
     ax.set_xlim([-124.02, -123.02])
     ax.set_ylim([48.5, 49.6])
-    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
-    axis_colors(ax, 'white')
-    ax.set_xlabel('Longitude', **axis_font)
-    ax.set_ylabel('Latitude', **axis_font)
-    ax.set_title('VENUS Node Locations', **title_font)
-    cbar.set_label('Depth [m]', **axis_font)
+    plt.setp(plt.getp(cbar.ax.axes, "yticklabels"), color="w")
+    axis_colors(ax, "white")
+    ax.set_xlabel("Longitude", **axis_font)
+    ax.set_ylabel("Latitude", **axis_font)
+    ax.set_title("VENUS Node Locations", **title_font)
+    cbar.set_label("Depth [m]", **axis_font)
 
     return fig
 
@@ -532,16 +469,14 @@ def load_vel(day, grid, source, station, deprange):
         (ex. [min, max])
     :type deprange: list
     """
-    if source == 'model':
+    if source == "model":
         # Set up model nowcast variables
-        dep = grid.variables['depthv']
-        jm = np.where(
-            np.logical_and(dep[:] > deprange[0], dep[:] < deprange[1])
-        )
+        dep = grid.variables["depthv"]
+        jm = np.where(np.logical_and(dep[:] > deprange[0], dep[:] < deprange[1]))
         dep = dep[jm[0]]
 
-        u_u = grid.variables['vozocrtx'][:, jm[0], :]
-        v_v = grid.variables['vomecrty'][:, jm[0], :]
+        u_u = grid.variables["vozocrtx"][:, jm[0], :]
+        v_v = grid.variables["vomecrty"][:, jm[0], :]
         u_E, v_N = unstag_rot(u_u, v_v)
         u_0 = u_E[..., 0, 0]
         v_0 = v_N[..., 0, 0]
@@ -549,7 +484,7 @@ def load_vel(day, grid, source, station, deprange):
         v = np.ma.masked_values(v_0, 0)
 
     else:
-        timemat = grid['mtime']
+        timemat = grid["mtime"]
         # Find index in matlab datenum values that corresponds with the day of
         # interest.
         comp_date = datetime.datetime(day.year, day.month, day.day)
@@ -557,34 +492,36 @@ def load_vel(day, grid, source, station, deprange):
         # written to compare exact equality of dates formatted like this:
         # datetime.datetime(2016,3,28,0,45,0)
         # This exact comparison behaves poorly on different systems.
-        pytime = np.array([
-            datetime.datetime.fromordinal(int(mattime)) +
-            datetime.timedelta(days=mattime % 1) -
-            datetime.timedelta(days=366) for mattime in timemat[0]
-        ])
+        pytime = np.array(
+            [
+                datetime.datetime.fromordinal(int(mattime))
+                + datetime.timedelta(days=mattime % 1)
+                - datetime.timedelta(days=366)
+                for mattime in timemat[0]
+            ]
+        )
         # Look up indices where pytime spans comp_date
         timeinds = np.where(
             np.logical_and(
-                pytime >= comp_date,
-                pytime < comp_date + datetime.timedelta(days=1)
+                pytime >= comp_date, pytime < comp_date + datetime.timedelta(days=1)
             )
         )
         timeinds = timeinds[0]
 
-        dep = grid['chartdepth'][:][0]
-        if np.logical_and(deprange[0] < 30, station == 'Central'):
+        dep = grid["chartdepth"][:][0]
+        if np.logical_and(deprange[0] < 30, station == "Central"):
             deprangeo = 30
-        elif np.logical_and(deprange[0] < 20, station == 'East'):
+        elif np.logical_and(deprange[0] < 20, station == "East"):
             deprangeo = 20
-        elif np.logical_and(deprange[0] < 15, station == 'ddl'):
+        elif np.logical_and(deprange[0] < 15, station == "ddl"):
             deprangeo = 15
         else:
             deprangeo = deprange[0]
         j = np.where(np.logical_and(dep[:] > deprangeo, dep[:] < deprange[1]))
         dep = dep[j[0]]
         # The velocities are in cm/s we want them in m/s.
-        u0 = grid['utrue'][:][j[0], timeinds[0]:timeinds[-1] + 1] / 100
-        v0 = grid['vtrue'][:][j[0], timeinds[0]:timeinds[-1] + 1] / 100
+        u0 = grid["utrue"][:][j[0], timeinds[0] : timeinds[-1] + 1] / 100
+        v0 = grid["vtrue"][:][j[0], timeinds[0] : timeinds[-1] + 1] / 100
 
         u = np.ma.masked_invalid(u0)
         v = np.ma.masked_invalid(v0)
@@ -617,14 +554,14 @@ def plotADCP(grid_m, grid_o, day, station, profile):
     :return: fig
     """
     # Get grids into unstaggered and masked velocities at the chose depths
-    u_E, v_N, dep_t = load_vel(day, grid_m, 'model', station, profile)
-    u, v, dep = load_vel(day, grid_o, 'observation', station, profile)
+    u_E, v_N, dep_t = load_vel(day, grid_m, "model", station, profile)
+    u, v, dep = load_vel(day, grid_o, "observation", station, profile)
 
     # Begin figure
     fig, ([axmu, axou], [axmv, axov]) = plt.subplots(
         2, 2, figsize=(20, 10), sharex=True
     )
-    fig.patch.set_facecolor('#2B3E50')
+    fig.patch.set_facecolor("#2B3E50")
 
     # Find the absolute maximum value between the model and observational
     # velocities to set the colorbar
@@ -638,18 +575,18 @@ def plotADCP(grid_m, grid_o, day, station, profile):
     step = 0.05
     cs = np.arange(vmin, vmax + step, step)
 
-    cmap = plt.get_cmap('bwr')
+    cmap = plt.get_cmap("bwr")
 
     # Setting the date for title
-    date = day.strftime('%d%b%y')
+    date = day.strftime("%d%b%y")
 
     # Plotting the comparison between the model and the obs velocities
     increment = [0.25, 0.5, 0.25, 0.5]
     velocities = [u_E.transpose(), u, v_N.transpose(), v]
     axes = [axmu, axou, axmv, axov]
     depths = [dep_t, dep, dep_t, dep]
-    names = ['Model', 'Observations', 'Model', 'Observations']
-    direction = ['East/West', 'East/West', 'North/South', 'North/South']
+    names = ["Model", "Observations", "Model", "Observations"]
+    direction = ["East/West", "East/West", "North/South", "North/South"]
 
     for ax, vel, timestep, depth, name, direc in zip(
         axes, velocities, increment, depths, names, direction
@@ -662,24 +599,23 @@ def plotADCP(grid_m, grid_o, day, station, profile):
             depth[:],
             vel,
             cs,
-            cmap=cmap
+            cmap=cmap,
         )
         ax.set_ylim([profile[1], profile[0]])
         ax.set_xlim([0.25, 23])
-        ax.set_ylabel('Depth [m]', **axis_font)
+        ax.set_ylabel("Depth [m]", **axis_font)
 
-        axis_colors(ax, 'gray')
+        axis_colors(ax, "gray")
         ax.set_title(
-            f'{direc} {name} Velocities at VENUS {station} - {date}',
-            **title_font
+            f"{direc} {name} Velocities at VENUS {station} - {date}", **title_font
         )
 
     cbar_ax = fig.add_axes([0.95, 0.2, 0.03, 0.6])
     cbar = fig.colorbar(mesh, cax=cbar_ax)
-    plt.setp(plt.getp(cbar.ax.axes, 'yticklabels'), color='w')
-    cbar.set_label('[m/s]', **axis_font)
-    axmv.set_xlabel('Hour [UTC]', **axis_font)
-    axov.set_xlabel('Hour [UTC]', **axis_font)
+    plt.setp(plt.getp(cbar.ax.axes, "yticklabels"), color="w")
+    cbar.set_label("[m/s]", **axis_font)
+    axmv.set_xlabel("Hour [UTC]", **axis_font)
+    axov.set_xlabel("Hour [UTC]", **axis_font)
 
     return fig
 
@@ -703,45 +639,42 @@ def plottimeavADCP(grid_m, grid_o, day, station):
 
     :return: fig
     """
-    if station == 'Central':
+    if station == "Central":
         profile = [0, 290]
-    elif station == 'East':
+    elif station == "East":
         profile = [0, 150]
     else:
         profile = [0, 150]
 
     # Get grids into unstaggered and masked velocities at the chose depths
-    u_E, v_N, dep_t = load_vel(day, grid_m, 'model', station, profile)
-    u, v, dep = load_vel(day, grid_o, 'observation', station, profile)
+    u_E, v_N, dep_t = load_vel(day, grid_m, "model", station, profile)
+    u, v, dep = load_vel(day, grid_o, "observation", station, profile)
 
     # Begin figure
     fig, ([ax1, ax2]) = plt.subplots(1, 2, figsize=(8, 10), sharex=True)
-    fig.patch.set_facecolor('#2B3E50')
+    fig.patch.set_facecolor("#2B3E50")
 
     # Setting the date for title
-    date = day.strftime('%d%b%y')
+    date = day.strftime("%d%b%y")
 
     velocities = [u_E[:, :-1], v_N[:, :-1]]
     vellast = [u_E[:, -2:], v_N[:, -2:]]
     veloobs = [u, v]
     axes = [ax1, ax2]
-    direction = ['E/W', 'N/S']
+    direction = ["E/W", "N/S"]
 
     for ax, vel, velo, lastvel, direc in zip(
         axes, velocities, veloobs, vellast, direction
     ):
-        ax.plot(np.nanmean(vel, axis=0), dep_t[:-1], label='Model')
-        ax.plot(np.nanmean(velo, axis=1), dep[:], label='Observations')
+        ax.plot(np.nanmean(vel, axis=0), dep_t[:-1], label="Model")
+        ax.plot(np.nanmean(velo, axis=1), dep[:], label="Observations")
         ax.plot(
-            np.nanmean(lastvel, axis=0),
-            dep_t[-2:],
-            '--b',
-            label='Bottom grid cell'
+            np.nanmean(lastvel, axis=0), dep_t[-2:], "--b", label="Bottom grid cell"
         )
-        ax.set_xlabel('Daily averaged velocity [m/s]', **axis_font)
-        ax.set_ylabel('Depth [m]', **axis_font)
-        axis_colors(ax, 'gray')
-        ax.set_title(f'{direc} velocities at VENUS {station}', **title_font)
+        ax.set_xlabel("Daily averaged velocity [m/s]", **axis_font)
+        ax.set_ylabel("Depth [m]", **axis_font)
+        axis_colors(ax, "gray")
+        ax.set_title(f"{direc} velocities at VENUS {station}", **title_font)
         ax.grid()
         ax.set_ylim(profile)
         ax.set_xlim([-0.5, 0.5])
@@ -770,16 +703,16 @@ def plotdepavADCP(grid_m, grid_o, day, station):
 
     :return: fig
     """
-    if station == 'Central':
+    if station == "Central":
         profile = [40, 270]
-    elif station == 'East':
+    elif station == "East":
         profile = [30, 150]
     else:
         profile = [25, 130]
 
     # Get grids into unstaggered and masked velocities at the chose depths
-    u_E, v_N, dep_t = load_vel(day, grid_m, 'model', station, profile)
-    u, v, dep = load_vel(day, grid_o, 'observation', station, profile)
+    u_E, v_N, dep_t = load_vel(day, grid_m, "model", station, profile)
+    u, v, dep = load_vel(day, grid_o, "observation", station, profile)
 
     # Depth averaging center of water column
     uE_av = analyze.depth_average(u_E, dep_t, 1)
@@ -789,45 +722,38 @@ def plotdepavADCP(grid_m, grid_o, day, station):
 
     # Begin figure
     fig, ([ax1, ax2]) = plt.subplots(2, 1, figsize=(15, 10), sharex=True)
-    fig.patch.set_facecolor('#2B3E50')
+    fig.patch.set_facecolor("#2B3E50")
 
     # Setting the date for title
-    date = day.strftime('%d%b%y')
+    date = day.strftime("%d%b%y")
 
     timestep = 0.5
     velocities = [uE_av, vN_av]
     veloobs = [u_av, v_av]
     axes = [ax1, ax2]
-    direction = ['East/West', 'North/South']
+    direction = ["East/West", "North/South"]
 
     for ax, vel, velo, direc in zip(axes, velocities, veloobs, direction):
-        ax.plot(np.arange(0, 24, timestep / 2), vel, label='Model')
-        ax.plot(np.arange(0.25, 24, timestep), velo, label='Observations')
+        ax.plot(np.arange(0, 24, timestep / 2), vel, label="Model")
+        ax.plot(np.arange(0.25, 24, timestep), velo, label="Observations")
         ax.set_xlim([0, 24])
-        ax.set_ylabel('Velocity [m/s]', **axis_font)
-        axis_colors(ax, 'gray')
+        ax.set_ylabel("Velocity [m/s]", **axis_font)
+        axis_colors(ax, "gray")
         ax.set_title(
-            f'Depth Averaged ({profile[0]}-{profile[1]}m) {direc} velocities '
-            f'at VENUS {station} -{date}', **title_font
+            f"Depth Averaged ({profile[0]}-{profile[1]}m) {direc} velocities "
+            f"at VENUS {station} -{date}",
+            **title_font,
         )
         ax.grid()
         ax.set_ylim([-0.6, 0.6])
     ax1.legend(loc=0)
-    ax2.set_xlabel('Hour [UTC]')
+    ax2.set_xlabel("Hour [UTC]")
 
     return fig
 
 
 def plot_ellipses(
-    params,
-    x,
-    y,
-    depth='None',
-    numellips=1,
-    imin=0,
-    imax=398,
-    jmin=0,
-    jmax=898
+    params, x, y, depth="None", numellips=1, imin=0, imax=398, jmin=0, jmax=898
 ):
     """ Plot ellipses on a map in the Salish Sea.
     :arg params: a array containing the parameters (possibly at different
@@ -872,53 +798,51 @@ def plot_ellipses(
 
     for q in np.arange(jmin, jmax):
         for l in np.arange(imin, imax):
-            k[q, l] = q * np.cos(phi * np.pi / 180.
-                                 ) + l * np.sin(phi * np.pi / 180.)
-            m[q, l] = -q * np.sin(phi * np.pi / 180.
-                                  ) + l * np.cos(phi * np.pi / 180.)
+            k[q, l] = q * np.cos(phi * np.pi / 180.) + l * np.sin(phi * np.pi / 180.)
+            m[q, l] = -q * np.sin(phi * np.pi / 180.) + l * np.cos(phi * np.pi / 180.)
 
-    if np.logical_and(numellips == 1, depth == 'None'):
+    if np.logical_and(numellips == 1, depth == "None"):
         if params[1] > 0:
-            thec = 'b'
+            thec = "b"
         else:
-            thec = 'r'
+            thec = "r"
         ellsc1 = Ellipse(
             xy=(m[y, x], k[y, x]),
             width=scale * params[0],
             height=scale * params[1],
             angle=params[2] - 29,
-            color=thec
+            color=thec,
         )
         ax.add_artist(ellsc1)
         ellsc1.set_facecolor(thec)
 
-    elif np.logical_and(numellips > 1, depth == 'None'):
+    elif np.logical_and(numellips > 1, depth == "None"):
         for r in np.arange(0, numellips):
             if params[r, 1] > 0:
-                thec = 'b'
+                thec = "b"
             else:
-                thec = 'r'
+                thec = "r"
             ellsc1 = Ellipse(
                 xy=(m[y[r], x[r]], k[y[r], x[r]]),
                 width=scale * params[r, 0],
                 height=scale * params[r, 1],
                 angle=params[r, 2] - 29,
-                color=thec
+                color=thec,
             )
             ax.add_artist(ellsc1)
             ellsc1.set_facecolor(thec)
 
-    elif np.logical_and(numellips == 1, depth != 'None'):
+    elif np.logical_and(numellips == 1, depth != "None"):
         if params[depth, 2] > 0:
-            thec = 'b'
+            thec = "b"
         else:
-            thec = 'r'
+            thec = "r"
         ellsc1 = Ellipse(
             xy=(m[y, x], k[y, x]),
             width=scale * params[depth, 1],
             height=scale * params[depth, 2],
             angle=params[depth, 3] - 29,
-            color=thec
+            color=thec,
         )
         ax.add_artist(ellsc1)
         ellsc1.set_facecolor(thec)
@@ -926,23 +850,23 @@ def plot_ellipses(
     else:
         for r in np.arange(0, numellips):
             if params[r, depth, 2] > 0:
-                thec = 'b'
+                thec = "b"
             else:
-                thec = 'r'
+                thec = "r"
             ellsc1 = Ellipse(
                 xy=(m[y[r], x[r]], k[y[r], x[r]]),
                 width=scale * params[r, depth, 1],
                 height=scale * params[r, depth, 2],
                 angle=params[r, depth, 3] - 29 + phi,
-                color=thec
+                color=thec,
             )
             ax.add_artist(ellsc1)
             ellsc1.set_facecolor(thec)
 
     grid_B = nc.Dataset(
-        '/data/dlatorne/MEOPAR/NEMO-forcing/grid/bathy_meter_SalishSea2.nc'
+        "/data/dlatorne/MEOPAR/NEMO-forcing/grid/bathy_meter_SalishSea2.nc"
     )
-    bathy = grid_B.variables['Bathymetry'][:, :]
+    bathy = grid_B.variables["Bathymetry"][:, :]
 
     contour_interval = [-0.01, 0.01]
     ax.contourf(
@@ -950,23 +874,24 @@ def plot_ellipses(
         k[jmin:jmax, imin:imax],
         bathy.data[jmin:jmax, imin:imax],
         contour_interval,
-        colors='black'
+        colors="black",
     )
     ax.contour(
         m[jmin:jmax, imin:imax],
         k[jmin:jmax, imin:imax],
-        bathy.data[jmin:jmax, imin:imax], [5],
-        colors='black'
+        bathy.data[jmin:jmax, imin:imax],
+        [5],
+        colors="black",
     )
-    ax.set_title('Tidal ellipse')
-    ax.set_xlabel('x index')
-    ax.set_ylabel('y index')
-    print('red is clockwise')
+    ax.set_title("Tidal ellipse")
+    ax.set_xlabel("x index")
+    ax.set_ylabel("y index")
+    print("red is clockwise")
     return
 
 
 def plot_ellipses_area(
-    params, depth='None', imin=0, imax=398, jmin=0, jmax=898, figsize=(10, 10)
+    params, depth="None", imin=0, imax=398, jmin=0, jmax=898, figsize=(10, 10)
 ):
     """ Plot ellipses on a map in the Salish Sea.
     :arg params: a array containing the parameters (possibly at different
@@ -997,24 +922,22 @@ def plot_ellipses_area(
 
     for q in np.arange(jmin, jmax):
         for l in np.arange(imin, imax):
-            k[q, l] = q * np.cos(phi * np.pi / 180.
-                                 ) + l * np.sin(phi * np.pi / 180.)
-            m[q, l] = -q * np.sin(phi * np.pi / 180.
-                                  ) + l * np.cos(phi * np.pi / 180.)
+            k[q, l] = q * np.cos(phi * np.pi / 180.) + l * np.sin(phi * np.pi / 180.)
+            m[q, l] = -q * np.sin(phi * np.pi / 180.) + l * np.cos(phi * np.pi / 180.)
 
-    if depth == 'None':
+    if depth == "None":
         for x in np.arange(imin, imax):
             for y in np.arange(jmin, jmax):
                 if params[y, x, 1] > 0:
-                    thec = 'b'
+                    thec = "b"
                 else:
-                    thec = 'r'
+                    thec = "r"
                 ellsc = Ellipse(
                     xy=(m[y, x], k[y, x]),
                     width=scale * params[y, x, 0],
                     height=scale * params[y, x, 1],
                     angle=params[y, x, 2] - 29,
-                    color=thec
+                    color=thec,
                 )
                 ax.add_artist(ellsc)
 
@@ -1022,22 +945,22 @@ def plot_ellipses_area(
         for x in np.arange(imin, imax):
             for y in np.arange(jmin, jmax):
                 if params[y, x, depth, 2] > 0:
-                    thec = 'b'
+                    thec = "b"
                 else:
-                    thec = 'r'
+                    thec = "r"
                 ellsc = Ellipse(
                     xy=(m[y, x], k[y, x]),
                     width=scale * params[y, x, depth, 1],
                     height=scale * params[y, x, depth, 2],
                     angle=params[y, x, depth, 3] - 29,
-                    color=thec
+                    color=thec,
                 )
                 ax.add_artist(ellsc)
 
     grid_B = nc.Dataset(
-        '/data/dlatorne/MEOPAR/NEMO-forcing/grid/bathy_meter_SalishSea2.nc'
+        "/data/dlatorne/MEOPAR/NEMO-forcing/grid/bathy_meter_SalishSea2.nc"
     )
-    bathy = grid_B.variables['Bathymetry'][:, :]
+    bathy = grid_B.variables["Bathymetry"][:, :]
 
     contour_interval = [-0.01, 0.01]
     ax.contourf(
@@ -1045,18 +968,19 @@ def plot_ellipses_area(
         k[jmin:jmax, imin:imax],
         bathy.data[jmin:jmax, imin:imax],
         contour_interval,
-        colors='black'
+        colors="black",
     )
     ax.contour(
         m[jmin:jmax, imin:imax],
         k[jmin:jmax, imin:imax],
-        bathy.data[jmin:jmax, imin:imax], [5],
-        colors='black'
+        bathy.data[jmin:jmax, imin:imax],
+        [5],
+        colors="black",
     )
-    ax.set_title('Tidal ellipse', fontsize=20)
-    ax.set_xlabel('x index', fontsize=16)
-    ax.set_ylabel('y index', fontsize=16)
-    print('red is clockwise')
+    ax.set_title("Tidal ellipse", fontsize=20)
+    ax.set_xlabel("x index", fontsize=16)
+    ax.set_ylabel("y index", fontsize=16)
+    print("red is clockwise")
     return fig
 
 
@@ -1102,27 +1026,27 @@ def axis_colors(ax, plot):
     :returns: axis format
     """
 
-    labels_c = 'white'
-    ticks_c = 'white'
-    spines_c = 'white'
+    labels_c = "white"
+    ticks_c = "white"
+    spines_c = "white"
 
-    if plot == 'blue':
-        ax.set_axis_bgcolor('#2B3E50')
-    if plot == 'gray':
-        ax.set_axis_bgcolor('#DBDEE1')
-    if plot == 'white':
-        ax.set_axis_bgcolor('white')
+    if plot == "blue":
+        ax.set_axis_bgcolor("#2B3E50")
+    if plot == "gray":
+        ax.set_axis_bgcolor("#DBDEE1")
+    if plot == "white":
+        ax.set_axis_bgcolor("white")
 
     ax.xaxis.label.set_color(labels_c), ax.yaxis.label.set_color(labels_c)
-    ax.tick_params(axis='x', colors=ticks_c)
-    ax.tick_params(axis='y', colors=ticks_c)
-    ax.spines['bottom'].set_color(spines_c)
-    ax.spines['top'].set_color(spines_c)
-    ax.spines['left'].set_color(spines_c)
-    ax.spines['right'].set_color(spines_c)
-    ax.title.set_color('white')
+    ax.tick_params(axis="x", colors=ticks_c)
+    ax.tick_params(axis="y", colors=ticks_c)
+    ax.spines["bottom"].set_color(spines_c)
+    ax.spines["top"].set_color(spines_c)
+    ax.spines["left"].set_color(spines_c)
+    ax.spines["right"].set_color(spines_c)
+    ax.title.set_color("white")
 
     return ax
 
 
-hfmt = mdates.DateFormatter('%m/%d %H:%M')
+hfmt = mdates.DateFormatter("%m/%d %H:%M")

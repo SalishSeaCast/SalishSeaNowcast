@@ -24,7 +24,7 @@ from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
 
-NAME = 'download_fvcom_results'
+NAME = "download_fvcom_results"
 logger = logging.getLogger(NAME)
 
 
@@ -38,18 +38,17 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        'host_name',
-        help='Name of the host to download results files from',
+        "host_name", help="Name of the host to download results files from"
     )
     worker.cli.add_argument(
-        'run_type',
-        choices={'nowcast', 'forecast'},
-        help='Type of run to download results files from.',
+        "run_type",
+        choices={"nowcast", "forecast"},
+        help="Type of run to download results files from.",
     )
     worker.cli.add_date_option(
-        '--run-date',
-        default=arrow.now().floor('day'),
-        help='Date of the run to download results files from.'
+        "--run-date",
+        default=arrow.now().floor("day"),
+        help="Date of the run to download results files from.",
     )
     worker.run(download_fvcom_results, success, failure)
 
@@ -62,16 +61,16 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f'VHFR FVCOM {parsed_args.run_type} '
+        f"VHFR FVCOM {parsed_args.run_type} "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f'results files from {parsed_args.host_name} downloaded',
+        f"results files from {parsed_args.host_name} downloaded",
         extra={
-            'run_type': parsed_args.run_type,
-            'host_name': parsed_args.host_name,
-            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        }
+            "run_type": parsed_args.run_type,
+            "host_name": parsed_args.host_name,
+            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
+        },
     )
-    msg_type = f'success {parsed_args.run_type}'
+    msg_type = f"success {parsed_args.run_type}"
     return msg_type
 
 
@@ -83,16 +82,16 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'VHFR FVCOM {parsed_args.run_type} '
+        f"VHFR FVCOM {parsed_args.run_type} "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f'results files download from {parsed_args.host_name} failed',
+        f"results files download from {parsed_args.host_name} failed",
         extra={
-            'run_type': parsed_args.run_type,
-            'host_name': parsed_args.host_name,
-            'date': parsed_args.run_date.format('YYYY-MM-DD HH:mm:ss ZZ'),
-        }
+            "run_type": parsed_args.run_type,
+            "host_name": parsed_args.host_name,
+            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
+        },
     )
-    msg_type = f'failure {parsed_args.run_type}'
+    msg_type = f"failure {parsed_args.run_type}"
     return msg_type
 
 
@@ -107,27 +106,23 @@ def download_fvcom_results(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    results_dir = run_date.format('DDMMMYY').lower()
-    run_type_results = Path(
-        config['vhfr fvcom runs']['run types'][run_type]['results']
-    )
-    src = f'{host_name}:{run_type_results / results_dir}'
-    dest = Path(config['vhfr fvcom runs']['results archive'][run_type])
-    cmd = shlex.split(f'scp -Cpr {src} {dest}')
+    results_dir = run_date.format("DDMMMYY").lower()
+    run_type_results = Path(config["vhfr fvcom runs"]["run types"][run_type]["results"])
+    src = f"{host_name}:{run_type_results / results_dir}"
+    dest = Path(config["vhfr fvcom runs"]["results archive"][run_type])
+    cmd = shlex.split(f"scp -Cpr {src} {dest}")
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     results_archive_dir = dest / results_dir
     lib.fix_perms(
         dest / results_dir,
-        mode=lib.FilePerms(user='rwx', group='rwx', other='rx'),
-        grp_name=config['file group']
+        mode=lib.FilePerms(user="rwx", group="rwx", other="rx"),
+        grp_name=config["file group"],
     )
-    for filepath in results_archive_dir.glob('*'):
-        lib.fix_perms(filepath, grp_name=config['file group'])
-    checklist = {
-        run_type: list(map(os.fspath, results_archive_dir.glob('vhfr_*.nc')))
-    }
+    for filepath in results_archive_dir.glob("*"):
+        lib.fix_perms(filepath, grp_name=config["file group"])
+    checklist = {run_type: list(map(os.fspath, results_archive_dir.glob("vhfr_*.nc")))}
     return checklist
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

@@ -27,20 +27,30 @@ class TestToDatetime:
     """
 
     @pytest.mark.parametrize(
-        'datestr, year, isDec, isJan, expected', [
+        "datestr, year, isDec, isJan, expected",
+        [
             (
-                '02/29 00Z', 2016, False, False,
-                datetime(2016, 2, 29, 0, 0, tzinfo=pytz.timezone('UTC'))
+                "02/29 00Z",
+                2016,
+                False,
+                False,
+                datetime(2016, 2, 29, 0, 0, tzinfo=pytz.timezone("UTC")),
             ),
             (
-                '01/01 00Z', 2015, True, False,
-                datetime(2016, 1, 1, 0, 0, tzinfo=pytz.timezone('UTC'))
+                "01/01 00Z",
+                2015,
+                True,
+                False,
+                datetime(2016, 1, 1, 0, 0, tzinfo=pytz.timezone("UTC")),
             ),
             (
-                '12/31 00Z', 2016, False, True,
-                datetime(2015, 12, 31, 0, 0, tzinfo=pytz.timezone('UTC'))
+                "12/31 00Z",
+                2016,
+                False,
+                True,
+                datetime(2015, 12, 31, 0, 0, tzinfo=pytz.timezone("UTC")),
             ),
-        ]
+        ],
     )
     def test_to_datetie(self, datestr, year, isDec, isJan, expected):
         dt = residuals._to_datetime(datestr, year, isDec, isJan)

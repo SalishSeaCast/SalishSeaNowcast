@@ -23,8 +23,8 @@ from nowcast.workers import make_surface_current_tiles
 
 
 @patch(
-    'nowcast.workers.make_surface_current_tiles.NowcastWorker',
-    spec=nemo_nowcast.NowcastWorker
+    "nowcast.workers.make_surface_current_tiles.NowcastWorker",
+    spec=nemo_nowcast.NowcastWorker,
 )
 class TestMain:
     """Unit tests for main() function.
@@ -33,8 +33,8 @@ class TestMain:
     def test_instantiate_worker(self, m_worker):
         make_surface_current_tiles.main()
         args, kwargs = m_worker.call_args
-        assert args == ('make_surface_current_tiles',)
-        assert list(kwargs.keys()) == ['description']
+        assert args == ("make_surface_current_tiles",)
+        assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
         make_surface_current_tiles.main()
@@ -50,7 +50,7 @@ class TestMain:
         )
 
 
-@patch('nowcast.workers.make_surface_current_tiles.logger', autospec=True)
+@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -63,10 +63,10 @@ class TestSuccess:
     def test_success_msg_type(self, m_logger):
         parsed_args = SimpleNamespace()
         msg_type = make_surface_current_tiles.success(parsed_args)
-        assert msg_type == f'success'
+        assert msg_type == f"success"
 
 
-@patch('nowcast.workers.make_surface_current_tiles.logger', autospec=True)
+@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -79,10 +79,10 @@ class TestFailure:
     def test_failure_msg_type(self, m_logger):
         parsed_args = SimpleNamespace()
         msg_type = make_surface_current_tiles.failure(parsed_args)
-        assert msg_type == f'failure'
+        assert msg_type == f"failure"
 
 
-@patch('nowcast.workers.make_surface_current_tiles.logger', autospec=True)
+@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestMakeSurfaceCurrentTiles:
     """Unit tests for make_surface_current_tiles() function.
     """

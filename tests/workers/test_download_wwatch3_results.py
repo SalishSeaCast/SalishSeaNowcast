@@ -14,10 +14,7 @@
 # limitations under the License.
 """Unit tests for SalishSeaCast system download_wwatch3_results worker.
 """
-from unittest.mock import (
-    Mock,
-    patch,
-)
+from unittest.mock import Mock, patch
 
 import arrow
 import nemo_nowcast
@@ -27,8 +24,8 @@ from nowcast.workers import download_wwatch3_results
 
 
 @patch(
-    'nowcast.workers.download_wwatch3_results.NowcastWorker',
-    spec=nemo_nowcast.NowcastWorker
+    "nowcast.workers.download_wwatch3_results.NowcastWorker",
+    spec=nemo_nowcast.NowcastWorker,
 )
 class TestMain:
     """Unit tests for main() function.
@@ -40,8 +37,8 @@ class TestMain:
     def test_instantiate_worker(self, m_worker):
         download_wwatch3_results.main()
         args, kwargs = m_worker.call_args
-        assert args == ('download_wwatch3_results',)
-        assert list(kwargs.keys()) == ['description']
+        assert args == ("download_wwatch3_results",)
+        assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
         download_wwatch3_results.main()
@@ -50,23 +47,23 @@ class TestMain:
     def test_add_host_name_arg(self, m_worker):
         download_wwatch3_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ('host_name',)
-        assert 'help' in kwargs
+        assert args == ("host_name",)
+        assert "help" in kwargs
 
     def test_add_run_type_arg(self, m_worker):
         download_wwatch3_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ('run_type',)
-        expected = {'forecast', 'forecast2'}
-        assert kwargs['choices'] == expected
-        assert 'help' in kwargs
+        assert args == ("run_type",)
+        expected = {"forecast", "forecast2"}
+        assert kwargs["choices"] == expected
+        assert "help" in kwargs
 
     def test_add_run_date_arg(self, m_worker):
         download_wwatch3_results.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ('--run-date',)
-        assert kwargs['default'] == arrow.now().floor('day')
-        assert 'help' in kwargs
+        assert args == ("--run-date",)
+        assert kwargs["default"] == arrow.now().floor("day")
+        assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
         download_wwatch3_results.main()
@@ -79,12 +76,10 @@ class TestMain:
 
 
 @pytest.mark.parametrize(
-    'run_type, host_name', [
-        ('forecast', 'west.cloud-nowcast'),
-        ('forecast2', 'west.cloud-nowcast'),
-    ]
+    "run_type, host_name",
+    [("forecast", "west.cloud-nowcast"), ("forecast2", "west.cloud-nowcast")],
 )
-@patch('nowcast.workers.download_wwatch3_results.logger', autospec=True)
+@patch("nowcast.workers.download_wwatch3_results.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -93,22 +88,20 @@ class TestSuccess:
         parsed_args = Mock(host_name=host_name, run_type=run_type)
         download_wwatch3_results.success(parsed_args)
         assert m_logger.info.called
-        assert m_logger.info.call_args[1]['extra']['run_type'] == run_type
-        assert m_logger.info.call_args[1]['extra']['host_name'] == host_name
+        assert m_logger.info.call_args[1]["extra"]["run_type"] == run_type
+        assert m_logger.info.call_args[1]["extra"]["host_name"] == host_name
 
     def test_success_msg_type(self, m_logger, run_type, host_name):
         parsed_args = Mock(host_name=host_name, run_type=run_type)
         msg_typ = download_wwatch3_results.success(parsed_args)
-        assert msg_typ == 'success {}'.format(run_type)
+        assert msg_typ == "success {}".format(run_type)
 
 
 @pytest.mark.parametrize(
-    'run_type, host_name', [
-        ('forecast', 'west.cloud-nowcast'),
-        ('forecast2', 'west.cloud-nowcast'),
-    ]
+    "run_type, host_name",
+    [("forecast", "west.cloud-nowcast"), ("forecast2", "west.cloud-nowcast")],
 )
-@patch('nowcast.workers.download_wwatch3_results.logger', autospec=True)
+@patch("nowcast.workers.download_wwatch3_results.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -117,11 +110,10 @@ class TestFailure:
         parsed_args = Mock(host_name=host_name, run_type=run_type)
         download_wwatch3_results.failure(parsed_args)
         assert m_logger.critical.called
-        assert m_logger.critical.call_args[1]['extra']['run_type'] == run_type
-        assert m_logger.critical.call_args[1]['extra']['host_name'
-                                                       ] == host_name
+        assert m_logger.critical.call_args[1]["extra"]["run_type"] == run_type
+        assert m_logger.critical.call_args[1]["extra"]["host_name"] == host_name
 
     def test_failure_msg_type(self, m_logger, run_type, host_name):
         parsed_args = Mock(host_name=host_name, run_type=run_type)
         msg_typ = download_wwatch3_results.failure(parsed_args)
-        assert msg_typ == 'failure {}'.format(run_type)
+        assert msg_typ == "failure {}".format(run_type)

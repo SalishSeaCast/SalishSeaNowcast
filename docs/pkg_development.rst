@@ -29,6 +29,9 @@
 .. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
     :target: https://bitbucket.org/salishsea/salishseanowcast/
     :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://black.readthedocs.io/en/stable/
+    :alt: The uncompromising Python code formatter
 .. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
     :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status
@@ -150,21 +153,34 @@ To deactivate the environment use:
 Coding Style
 ============
 
-The :kbd:`SalishSeaNowcast` package uses the `yapf`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
-The project-specific differences from the :command:`yapf` implementation of PEP 8 are defined in the :file:`.style.yapf` in the repository root directory.
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://black.readthedocs.io/en/stable/
+    :alt: The uncompromising Python code formatter
 
-.. _yapf: https://github.com/google/yapf
+The :kbd:`SalishSeaNowcast` package uses the `black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+
+.. _black: https://black.readthedocs.io/en/stable/
 .. _PEP 8: https://www.python.org/dev/peps/pep-0008/
 
-:command:`yapf` is installed as part of the :ref:`SalishSeaNowcastDevelopmentEnvironment` setup.
+:command:`black` is installed as part of the :ref:`SalishSeaNowcastDevelopmentEnvironment` setup.
 
-To run :command:`yapf` on the entire code-base use:
+To run :command:`black` on the entire code-base use:
 
 .. code-block:: bash
 
-    $ yapf --parallel --in-place --recursive nowcast/ tests/ __pkg_metadata__.py setup.py
+    $ cd SalishSeaNowcast
+    $ conda activate salishsea-nowcast
+    (salishsea-nowcast)$ black ./
 
 in the repository root directory.
+The output looks something like::
+
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaNowcast/nowcast/next_workers.py
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaNowcast/nowcast/workers/make_CHS_currents_file.py
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaNowcast/tests/test_make_CHS_currents_file.py
+  reformatted /media/doug/warehouse/MEOPAR/SalishSeaNowcast/tests/test_next_workers.py
+  All done! ✨ 🍰 ✨
+  4 files reformatted, 117 files left unchanged.
 
 
 .. _SalishSeaNowcastBuildingTheDocumentation:

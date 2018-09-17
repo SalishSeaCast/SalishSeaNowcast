@@ -29,7 +29,7 @@ import yaml
 
 from nowcast import ssh_sftp
 
-NAME = 'run_NEMO_hindcast'
+NAME = "run_NEMO_hindcast"
 logger = logging.getLogger(NAME)
 
 
@@ -42,31 +42,27 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
+    worker.cli.add_argument("host_name", help="Name of the host to queue the run on")
     worker.cli.add_argument(
-        'host_name', help='Name of the host to queue the run on'
-    )
-    worker.cli.add_argument(
-        '--full-month',
-        action='store_true',
-        help='''
+        "--full-month",
+        action="store_true",
+        help="""
         Configure the hindcast run to be a calendar month in duration.
         The default run duration is 10 days, or the number of days remaining
         in the calendar month of the run.
-        '''
+        """,
     )
     worker.cli.add_argument(
-        '--prev-run-date',
-        default=None,
-        help='Start date of the previous hindcast run.'
+        "--prev-run-date", default=None, help="Start date of the previous hindcast run."
     )
     worker.cli.add_argument(
-        '--walltime',
+        "--walltime",
         default=None,
-        help='''
+        help="""
         Walltime to request for the hindcast run.
         Defaults to 3 hours (03:00:00) for 10-ish day runs,
         and 8.5 hours (08:30:00) for --full-month runs.
-        '''
+        """,
     )
     worker.run(run_NEMO_hindcast, success, failure)
 
@@ -79,13 +75,10 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f'NEMO hindcast run queued on {parsed_args.host_name}',
-        extra={
-            'run_type': 'hindcast',
-            'host_name': parsed_args.host_name,
-        }
+        f"NEMO hindcast run queued on {parsed_args.host_name}",
+        extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
     )
-    msg_type = 'success'
+    msg_type = "success"
     return msg_type
 
 
@@ -97,13 +90,10 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f'NEMO hindcast run failed to queue on {parsed_args.host_name}',
-        extra={
-            'run_type': 'hindcast',
-            'host_name': parsed_args.host_name,
-        }
+        f"NEMO hindcast run failed to queue on {parsed_args.host_name}",
+        extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
     )
-    msg_type = 'failure'
+    msg_type = "failure"
     return msg_type
 
 
@@ -117,8 +107,9 @@ def run_NEMO_hindcast(parsed_args, config, *args):
     """
     host_name = parsed_args.host_name
     ssh_key = Path(
-        os.environ['HOME'], '.ssh',
-        config['run']['hindcast hosts'][host_name]['ssh key']
+        os.environ["HOME"],
+        ".ssh",
+        config["run"]["hindcast hosts"][host_name]["ssh key"],
     )
     try:
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
@@ -140,45 +131,36 @@ def run_NEMO_hindcast(parsed_args, config, *args):
             if run_date.day != 21:
                 run_days = 10
             else:
-                run_days = (
-                    run_date.shift(months=+1).replace(day=1) - run_date
-                ).days
-        if run_date.naive >= arrow.now().floor('day').naive:
+                run_days = (run_date.shift(months=+1).replace(day=1) - run_date).days
+        if run_date.naive >= arrow.now().floor("day").naive:
             sftp_client.close()
             ssh_client.close()
-            checklist = {
-                'hindcast': {
-                    'host': host_name,
-                    'run id': 'None',
-                }
-            }
+            checklist = {"hindcast": {"host": host_name, "run id": "None"}}
             return checklist
         prev_namelist_info = _get_prev_run_namelist_info(
             ssh_client, sftp_client, host_name, prev_run_date, config
         )
         _edit_namelist_time(
-            sftp_client, host_name, prev_namelist_info, run_date, run_days,
-            config
+            sftp_client, host_name, prev_namelist_info, run_date, run_days, config
         )
-        walltime = (
-            parsed_args.walltime
-            or ('08:30:00' if parsed_args.full_month else '03:00:00')
+        walltime = parsed_args.walltime or (
+            "08:30:00" if parsed_args.full_month else "03:00:00"
         )
         _edit_run_desc(
-            sftp_client, host_name, prev_run_date, prev_namelist_info,
-            run_date, walltime, config
+            sftp_client,
+            host_name,
+            prev_run_date,
+            prev_namelist_info,
+            run_date,
+            walltime,
+            config,
         )
         run_id = f'{run_date.format("DDMMMYY").lower()}hindcast'
         _launch_run(ssh_client, host_name, run_id, prev_job_id, config)
     finally:
         sftp_client.close()
         ssh_client.close()
-    checklist = {
-        'hindcast': {
-            'host': host_name,
-            'run id': run_id,
-        }
-    }
+    checklist = {"hindcast": {"host": host_name, "run id": run_id}}
     return checklist
 
 
@@ -192,27 +174,27 @@ def _get_prev_run_queue_info(ssh_client, host_name, config):
              slurm job id number
     :rtype: 2-tuple (:py:class:`arrow.Arrow`, int)
     """
-    users = config['run']['hindcast hosts'][host_name]['users']
+    users = config["run"]["hindcast hosts"][host_name]["users"]
     stdout = ssh_sftp.ssh_exec_command(
         ssh_client,
         f'/opt/software/slurm/bin/squeue --user {users} --Format "jobid,name" '
-        f'--sort=i', host_name, logger
+        f"--sort=i",
+        host_name,
+        logger,
     )
     if len(stdout.splitlines()) == 1:
-        logger.error(f'no jobs found on {host_name} queue')
+        logger.error(f"no jobs found on {host_name} queue")
         raise WorkerError
     queue_info_lines = stdout.splitlines()[1:]
     queue_info_lines.reverse()
     for queue_info in queue_info_lines:
-        if 'hindcast' in queue_info.strip().split()[1]:
+        if "hindcast" in queue_info.strip().split()[1]:
             job_id, run_id = queue_info.strip().split()
-            logger.info(
-                f'using {run_id} job {job_id} on {host_name} as previous run'
-            )
+            logger.info(f"using {run_id} job {job_id} on {host_name} as previous run")
             job_id = int(job_id)
-            prev_run_date = arrow.get(run_id[:7], 'DDMMMYY')
+            prev_run_date = arrow.get(run_id[:7], "DDMMMYY")
             return prev_run_date, job_id
-    logger.error(f'no hindcast jobs found on {host_name} queue')
+    logger.error(f"no hindcast jobs found on {host_name} queue")
     raise WorkerError
 
 
@@ -231,23 +213,18 @@ def _get_prev_run_namelist_info(
                rdt: time step in seconds
     :rtype: :py:class:`types.SimpleNamespace`
     """
-    scratch_dir = Path(
-        config['run']['hindcast hosts'][host_name]['scratch dir']
-    )
-    dmy = prev_run_date.format('DDMMMYY').lower()
+    scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
+    dmy = prev_run_date.format("DDMMMYY").lower()
     stdout = ssh_sftp.ssh_exec_command(
-        ssh_client, f'ls -d {scratch_dir/dmy}*/namelist_cfg', host_name, logger
+        ssh_client, f"ls -d {scratch_dir/dmy}*/namelist_cfg", host_name, logger
     )
     prev_namelist_cfg = stdout.strip()
-    logger.info(
-        f'found previous run namelist: {host_name}:{prev_namelist_cfg}'
-    )
-    with tempfile.NamedTemporaryFile('wt') as namelist_cfg:
+    logger.info(f"found previous run namelist: {host_name}:{prev_namelist_cfg}")
+    with tempfile.NamedTemporaryFile("wt") as namelist_cfg:
         sftp_client.get(prev_namelist_cfg, namelist_cfg.name)
         namelist = f90nml.read(namelist_cfg.name)
         prev_namelist_info = SimpleNamespace(
-            itend=namelist['namrun']['nn_itend'],
-            rdt=namelist['namdom']['rn_rdt'],
+            itend=namelist["namrun"]["nn_itend"], rdt=namelist["namdom"]["rn_rdt"]
         )
     return prev_namelist_info
 
@@ -272,31 +249,28 @@ def _edit_namelist_time(
         nn_stocklist[0:3] = [
             int(prev_namelist_info.itend + timesteps_per_day * 10),
             int(prev_namelist_info.itend + timesteps_per_day * 20),
-            int(itend)
+            int(itend),
         ]
     patch = {
-        'namrun': {
-            'nn_it000': prev_namelist_info.itend + 1,
-            'nn_itend': int(itend),
-            'nn_date0': int(run_date.format('YYYYMMDD')),
-            'nn_stocklist': nn_stocklist,
+        "namrun": {
+            "nn_it000": prev_namelist_info.itend + 1,
+            "nn_itend": int(itend),
+            "nn_date0": int(run_date.format("YYYYMMDD")),
+            "nn_stocklist": nn_stocklist,
         }
     }
-    run_prep_dir = Path(
-        config['run']['hindcast hosts'][host_name]['run prep dir']
-    )
-    namelist_time_tmpl = f'{run_prep_dir}/namelist.time'
-    sftp_client.get(namelist_time_tmpl, '/tmp/hindcast.namelist.time')
-    logger.debug(f'downloaded {host_name}:{run_prep_dir}/namelist.time')
+    run_prep_dir = Path(config["run"]["hindcast hosts"][host_name]["run prep dir"])
+    namelist_time_tmpl = f"{run_prep_dir}/namelist.time"
+    sftp_client.get(namelist_time_tmpl, "/tmp/hindcast.namelist.time")
+    logger.debug(f"downloaded {host_name}:{run_prep_dir}/namelist.time")
     f90nml.patch(
-        '/tmp/hindcast.namelist.time', patch,
-        '/tmp/patched_hindcast.namelist.time'
+        "/tmp/hindcast.namelist.time", patch, "/tmp/patched_hindcast.namelist.time"
     )
-    logger.debug('patched namelist.time')
+    logger.debug("patched namelist.time")
     sftp_client.put(
-        '/tmp/patched_hindcast.namelist.time', f'{run_prep_dir}/namelist.time'
+        "/tmp/patched_hindcast.namelist.time", f"{run_prep_dir}/namelist.time"
     )
-    logger.debug(f'uploaded new {host_name}:{run_prep_dir}/namelist.time')
+    logger.debug(f"uploaded new {host_name}:{run_prep_dir}/namelist.time")
 
 
 def _edit_run_desc(
@@ -307,7 +281,7 @@ def _edit_run_desc(
     run_date,
     walltime,
     config,
-    yaml_tmpl=Path('/tmp/hindcast_template.yaml')
+    yaml_tmpl=Path("/tmp/hindcast_template.yaml"),
 ):
     """
     :param :py:class:`paramiko.sftp_client.SFTPClient` sftp_client:
@@ -319,37 +293,30 @@ def _edit_run_desc(
     :param :py:class:`nemo_nowcast.Config` config:
     :param :py:class:`pathlib.Path` yaml_tmpl:
     """
-    run_prep_dir = Path(
-        config['run']['hindcast hosts'][host_name]['run prep dir']
-    )
-    sftp_client.get(f'{run_prep_dir}/hindcast_template.yaml', f'{yaml_tmpl}')
-    with yaml_tmpl.open('rt') as run_desc_tmpl:
+    run_prep_dir = Path(config["run"]["hindcast hosts"][host_name]["run prep dir"])
+    sftp_client.get(f"{run_prep_dir}/hindcast_template.yaml", f"{yaml_tmpl}")
+    with yaml_tmpl.open("rt") as run_desc_tmpl:
         run_desc = yaml.safe_load(run_desc_tmpl)
-    logger.debug(f'downloaded {host_name}:{run_prep_dir}/{yaml_tmpl.name}')
+    logger.debug(f"downloaded {host_name}:{run_prep_dir}/{yaml_tmpl.name}")
     run_id = f'{run_date.format("DDMMMYY").lower()}hindcast'
-    run_desc['run_id'] = run_id
-    logger.debug(f'set run_id to {run_id}')
-    run_desc['walltime'] = walltime
-    logger.debug(f'set walltime to {walltime}')
-    scratch_dir = Path(
-        config['run']['hindcast hosts'][host_name]['scratch dir']
-    )
-    prev_run_dir = scratch_dir / (prev_run_date.format('DDMMMYY').lower())
-    restart_file = (
-        f'{prev_run_dir}/SalishSea_{prev_namelist_info.itend:08d}_restart.nc'
-    )
-    run_desc['restart']['restart.nc'] = restart_file
-    logger.debug(f'set restart.nc to {restart_file}')
+    run_desc["run_id"] = run_id
+    logger.debug(f"set run_id to {run_id}")
+    run_desc["walltime"] = walltime
+    logger.debug(f"set walltime to {walltime}")
+    scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
+    prev_run_dir = scratch_dir / (prev_run_date.format("DDMMMYY").lower())
+    restart_file = f"{prev_run_dir}/SalishSea_{prev_namelist_info.itend:08d}_restart.nc"
+    run_desc["restart"]["restart.nc"] = restart_file
+    logger.debug(f"set restart.nc to {restart_file}")
     restart_trc_file = (
-        f'{prev_run_dir}/'
-        f'SalishSea_{prev_namelist_info.itend:08d}_restart_trc.nc'
+        f"{prev_run_dir}/" f"SalishSea_{prev_namelist_info.itend:08d}_restart_trc.nc"
     )
-    run_desc['restart']['restart_trc.nc'] = restart_trc_file
-    logger.debug(f'set restart_trc.nc to {restart_trc_file}')
-    with yaml_tmpl.open('wt') as run_desc_tmpl:
+    run_desc["restart"]["restart_trc.nc"] = restart_trc_file
+    logger.debug(f"set restart_trc.nc to {restart_trc_file}")
+    with yaml_tmpl.open("wt") as run_desc_tmpl:
         yaml.safe_dump(run_desc, run_desc_tmpl, default_flow_style=False)
-    sftp_client.put(f'{yaml_tmpl}', f'{run_prep_dir}/{run_id}.yaml')
-    logger.debug(f'uploaded {host_name}:{run_prep_dir}/{run_id}.yaml')
+    sftp_client.put(f"{yaml_tmpl}", f"{run_prep_dir}/{run_id}.yaml")
+    logger.debug(f"uploaded {host_name}:{run_prep_dir}/{run_id}.yaml")
 
 
 def _launch_run(ssh_client, host_name, run_id, prev_job_id, config):
@@ -360,26 +327,22 @@ def _launch_run(ssh_client, host_name, run_id, prev_job_id, config):
     :param int or None prev_job_id:
     :param :py:class:`nemo_nowcast.Config` config:
     """
-    salishsea_cmd = config['run']['hindcast hosts'][host_name]['salishsea cmd']
-    run_prep_dir = Path(
-        config['run']['hindcast hosts'][host_name]['run prep dir']
-    )
-    run_desc = run_prep_dir / f'{run_id}.yaml'
-    scratch_dir = Path(
-        config['run']['hindcast hosts'][host_name]['scratch dir']
-    )
+    salishsea_cmd = config["run"]["hindcast hosts"][host_name]["salishsea cmd"]
+    run_prep_dir = Path(config["run"]["hindcast hosts"][host_name]["run prep dir"])
+    run_desc = run_prep_dir / f"{run_id}.yaml"
+    scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
     results_dir = scratch_dir / run_id[:7]
-    cmd = f'{salishsea_cmd} run {run_desc} {results_dir}'
+    cmd = f"{salishsea_cmd} run {run_desc} {results_dir}"
     if prev_job_id:
-        cmd = f'{cmd} --waitjob {prev_job_id} --nocheck-initial-conditions'
+        cmd = f"{cmd} --waitjob {prev_job_id} --nocheck-initial-conditions"
     try:
         ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
     except ssh_sftp.SSHCommandError as exc:
         for line in exc.stderr.splitlines():
             logger.error(line)
         raise WorkerError
-    logger.info(f'{run_id} run submitted to scheduler on {host_name}')
+    logger.info(f"{run_id} run submitted to scheduler on {host_name}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

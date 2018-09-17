@@ -14,7 +14,7 @@
 # limitations under the License.
 """SalishSeaNowcast -- Salish Sea NEMO model nowcast system
 """
-PROJECT = 'SalishSeaNowcast'
-DESCRIPTION = 'Salish Sea NEMO model nowcast system'
-VERSION = '3.3.dev0'
-DEV_STATUS = '5 - Produciton'
+PROJECT = "SalishSeaNowcast"
+DESCRIPTION = "Salish Sea NEMO model nowcast system"
+VERSION = "3.3.dev0"
+DEV_STATUS = "5 - Produciton"

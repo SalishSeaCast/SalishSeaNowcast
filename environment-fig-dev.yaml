@@ -76,4 +76,4 @@ dependencies:
     - zeep
 
     # For coding style
-    - yapf
+    - black

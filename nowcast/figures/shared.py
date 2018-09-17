@@ -75,31 +75,27 @@ def plot_map(
         coastline, lat_range, lon_range, land_patch_min_area, theme
     )
     buffer_ = _render_png_buffer(mapfig)
-    img = matplotlib.image.imread(buffer_, format='anything')
+    img = matplotlib.image.imread(buffer_, format="anything")
     ax.imshow(img, zorder=0, extent=[*lon_range, *lat_range])
     ax.set_xlim(lon_range)
     ax.set_ylim(lat_range)
 
 
-def _make_background_map(
-    coastline, lat_range, lon_range, land_patch_min_area, theme
-):
+def _make_background_map(coastline, lat_range, lon_range, land_patch_min_area, theme):
     fig = Figure(figsize=(15, 15))
     ax = fig.add_subplot(1, 1, 1)
     # Plot coastline
-    coast_lat = coastline['ncst'][:, 1]
-    coast_lon = coastline['ncst'][:, 0]
-    ax.plot(coast_lon, coast_lat, '-k', rasterized=True, markersize=1)
+    coast_lat = coastline["ncst"][:, 1]
+    coast_lon = coastline["ncst"][:, 0]
+    ax.plot(coast_lon, coast_lat, "-k", rasterized=True, markersize=1)
     # Plot land patches
-    mask = coastline['Area'][0] > land_patch_min_area
-    kss = coastline['k'][:, 0][:-1][mask]
-    kee = coastline['k'][:, 0][1:][mask]
+    mask = coastline["Area"][0] > land_patch_min_area
+    kss = coastline["k"][:, 0][:-1][mask]
+    kee = coastline["k"][:, 0][1:][mask]
     for ks, ke in zip(kss, kee):
-        poly = list(zip(coast_lon[ks:ke - 2], coast_lat[ks:ke - 2]))
+        poly = list(zip(coast_lon[ks : ke - 2], coast_lat[ks : ke - 2]))
         ax.add_patch(
-            patches.Polygon(
-                poly, facecolor=theme.COLOURS['land'], rasterized=True
-            )
+            patches.Polygon(poly, facecolor=theme.COLOURS["land"], rasterized=True)
         )
     # Format the axes
     ax.set_frame_on(False)
@@ -107,18 +103,18 @@ def _make_background_map(
     ax.axes.get_xaxis().set_visible(False)
     ax.set_xlim(lon_range)
     ax.set_ylim(lat_range)
-    fig.set_tight_layout({'pad': 0})
+    fig.set_tight_layout({"pad": 0})
     return fig
 
 
 def _render_png_buffer(fig):
     canvas = backend.FigureCanvasAgg(fig)
     buffer = io.BytesIO()
-    canvas.print_figure(buffer, format='png')
+    canvas.print_figure(buffer, format="png")
     return buffer
 
 
-def get_tides(stn_name, path='../../tidal_predictions/'):
+def get_tides(stn_name, path="../../tidal_predictions/"):
     """Return the tidal predictions at the named tide gauge station station.
 
     :arg str stn_name: Name of the tide gauge station.
@@ -133,7 +129,7 @@ def get_tides(stn_name, path='../../tidal_predictions/'):
     :returns: Tidal predictions object with columns time, pred_all, pred_8.
     :rtype: :py:class:`pandas.Dataframe`
     """
-    fname = f'{stn_name}_tidal_prediction_01-Jan-2013_31-Dec-2020.csv'
+    fname = f"{stn_name}_tidal_prediction_01-Jan-2013_31-Dec-2020.csv"
     ttide, _ = stormtools.load_tidal_predictions(os.path.join(path, fname))
     return ttide
 
@@ -157,7 +153,7 @@ def find_ssh_max(tide_gauge_stn, ssh_ts, ttide):
     :type ttide: :py:class:`pandas.DataFrame`
     """
     ssh_corr = correct_model_ssh(*ssh_ts, ttide)
-    max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]['mean sea lvl']
+    max_ssh = np.max(ssh_corr) + PLACES[tide_gauge_stn]["mean sea lvl"]
     max_ssh_time = ssh_ts.time[np.argmax(ssh_corr)]
     return max_ssh, max_ssh_time
 
@@ -187,7 +183,7 @@ def correct_model_ssh(ssh_model, t_model, ttide):
     :returns: Corrected model sea surface height.
     :rtype: :py:class:`numpy.ndarray`
     """
-    difference = np.array(ttide[' pred_noshallow '] - ttide['pred_8'])
+    difference = np.array(ttide[" pred_noshallow "] - ttide["pred_8"])
     corr = interp_to_model_time(t_model, difference, ttide.time)
     corr_model = ssh_model + corr
     return corr_model
@@ -214,16 +210,10 @@ def interp_to_model_time(t_model, values, t_values):
     :rtype: :py:class:`numpy.ndarray`
     """
     epoch = t_model[0]
-    t_values_wrt_epoch = np.array([(t - epoch).total_seconds()
-                                   for t in t_values])
-    t_model_wrt_epoch = np.array([(t - epoch).total_seconds()
-                                  for t in t_model])
+    t_values_wrt_epoch = np.array([(t - epoch).total_seconds() for t in t_values])
+    t_model_wrt_epoch = np.array([(t - epoch).total_seconds() for t in t_model])
     return np.interp(
-        t_model_wrt_epoch,
-        t_values_wrt_epoch,
-        values,
-        left=np.NaN,
-        right=np.NaN,
+        t_model_wrt_epoch, t_values_wrt_epoch, values, left=np.NaN, right=np.NaN
     )
 
 
@@ -260,18 +250,16 @@ def plot_risk_level_marker(
                 example.
     """
     ax.plot(
-        *PLACES[tide_gauge_name]['lon lat'],
+        *PLACES[tide_gauge_name]["lon lat"],
         marker=marker,
         markersize=msize,
         markeredgewidth=2,
         alpha=alpha,
-        color=theme.COLOURS['storm surge risk levels'][risk_level],
+        color=theme.COLOURS["storm surge risk levels"][risk_level],
     )
 
 
-def plot_wind_arrow(
-    ax, lon, lat, u_wind, v_wind, theme, wind_arrow_scale_factor=0.1
-):
+def plot_wind_arrow(ax, lon, lat, u_wind, v_wind, theme, wind_arrow_scale_factor=0.1):
     """Draw a wind arrow on an plot axes.
 
     The axes is assumed to be using lon/lat scales.
@@ -311,8 +299,8 @@ def plot_wind_arrow(
         head_width=0.05,
         head_length=0.1,
         width=0.02,
-        facecolor=theme.COLOURS['wind arrow']['facecolor'],
-        edgecolor=theme.COLOURS['wind arrow']['edgecolor'],
+        facecolor=theme.COLOURS["wind arrow"]["facecolor"],
+        edgecolor=theme.COLOURS["wind arrow"]["edgecolor"],
     )
 
 
@@ -356,24 +344,20 @@ def interpolate_tracer_to_depths(
     """
     try:
         if any(interp_depths > w_depths[tracer_mask == False][0]):
-            raise ValueError(
-                'A requested depth is outside the interpolation range.'
-            )
+            raise ValueError("A requested depth is outside the interpolation range.")
     except TypeError:
         if interp_depths > w_depths[tracer_mask == False][0]:
-            raise ValueError(
-                'A requested depth is outside the interpolation range.'
-            )
+            raise ValueError("A requested depth is outside the interpolation range.")
     depth_interp = scipy.interpolate.interp1d(
         tracer_depths[tracer_mask == True],
         tracer[tracer_mask == True],
-        fill_value='extrapolate',
+        fill_value="extrapolate",
         assume_sorted=True,
     )
     return depth_interp(interp_depths)
 
 
-def localize_time(data_array, time_coord='time', local_datetime=None):
+def localize_time(data_array, time_coord="time", local_datetime=None):
     """Offset :kbd:`data_array` times to account for local time zone
     difference from UTC and add :kbd:`tz_name` attribute to :kbd:`data_array`.
 
@@ -395,12 +379,11 @@ def localize_time(data_array, time_coord='time', local_datetime=None):
     """
     time_values = getattr(data_array, time_coord).values
     if local_datetime is None:
-        local_datetime = arrow.get(str(time_values[0])).to('local')
+        local_datetime = arrow.get(str(time_values[0])).to("local")
     tz_offset = local_datetime.tzinfo.utcoffset(local_datetime.datetime)
     tz_name = local_datetime.tzinfo.tzname(local_datetime.datetime)
-    numpy_offset = (
-        np.timedelta64(tz_offset.days, 'D') +
-        np.timedelta64(tz_offset.seconds, 's')
+    numpy_offset = np.timedelta64(tz_offset.days, "D") + np.timedelta64(
+        tz_offset.seconds, "s"
     )
     data_array[time_coord] = time_values + numpy_offset
-    data_array.attrs['tz_name'] = tz_name
+    data_array.attrs["tz_name"] = tz_name

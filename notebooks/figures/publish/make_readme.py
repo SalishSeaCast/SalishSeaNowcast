@@ -22,10 +22,10 @@ import os
 import re
 
 
-NBVIEWER = 'https://nbviewer.jupyter.org/urls'
-REPO = 'bitbucket.org/salishsea/salishseanowcast/raw/tip'
-REPO_DIR = 'notebooks/figures/publish'
-TITLE_PATTERN = re.compile('#{1,6} ?')
+NBVIEWER = "https://nbviewer.jupyter.org/urls"
+REPO = "bitbucket.org/salishsea/salishseanowcast/raw/tip"
+REPO_DIR = "notebooks/figures/publish"
+TITLE_PATTERN = re.compile("#{1,6} ?")
 
 
 def main():
@@ -40,8 +40,8 @@ Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
 """
-    for fn in glob.glob('*.ipynb'):
-        readme += f'* ##[{fn}]({url}/{fn})  \n    \n'
+    for fn in glob.glob("*.ipynb"):
+        readme += f"* ##[{fn}]({url}/{fn})  \n    \n"
         readme += notebook_description(fn)
     license = f"""
 ##License
@@ -54,35 +54,35 @@ They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
 Please see the LICENSE file for details of the license.
 """
-    with open('README.md', 'wt') as f:
+    with open("README.md", "wt") as f:
         f.writelines(readme)
         f.writelines(license)
 
 
 def notebook_description(fn):
-    description = ''
-    with open(fn, 'rt') as notebook:
+    description = ""
+    with open(fn, "rt") as notebook:
         contents = json.load(notebook)
     try:
-        first_cell = contents['worksheets'][0]['cells'][0]
+        first_cell = contents["worksheets"][0]["cells"][0]
     except KeyError:
-        first_cell = contents['cells'][0]
-    first_cell_type = first_cell['cell_type']
-    if first_cell_type not in 'markdown raw'.split():
+        first_cell = contents["cells"][0]
+    first_cell_type = first_cell["cell_type"]
+    if first_cell_type not in "markdown raw".split():
         return description
-    desc_lines = first_cell['source']
+    desc_lines = first_cell["source"]
     for line in desc_lines:
-        suffix = ''
+        suffix = ""
         if TITLE_PATTERN.match(line):
-            line = TITLE_PATTERN.sub('**', line)
-            suffix = '**'
-        if line.endswith('\n'):
-            description += f'    {line[:-1]}{suffix}  \n'
+            line = TITLE_PATTERN.sub("**", line)
+            suffix = "**"
+        if line.endswith("\n"):
+            description += f"    {line[:-1]}{suffix}  \n"
         else:
-            description += f'    {line}{suffix}  '
-    description += '\n' * 2
+            description += f"    {line}{suffix}  "
+    description += "\n" * 2
     return description
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

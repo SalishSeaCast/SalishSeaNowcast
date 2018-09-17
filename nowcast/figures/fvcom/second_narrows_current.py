@@ -34,10 +34,7 @@ import nowcast.figures.website_theme
 
 
 def make_figure(
-    place,
-    fvcom_stns_dataset,
-    figsize=(16, 9),
-    theme=nowcast.figures.website_theme
+    place, fvcom_stns_dataset, figsize=(16, 9), theme=nowcast.figures.website_theme
 ):
     """Plot sea water current calculated by the VHFR FVCOM model, and the
     observed current measured by a horizontal ADCP on the 2nd Narrows
@@ -75,80 +72,75 @@ def _prep_plot_data(place, fvcom_stns_dataset):
         for name in fvcom_stns_dataset.name_station.values
     ]
     fvcom_ua = fvcom_stns_dataset.ua.isel(station=stations.index(place))
-    fvcom_ua.attrs.update({
-        'long_name': 'u Velocity',
-        'units': 'm/s',
-    })
+    fvcom_ua.attrs.update({"long_name": "u Velocity", "units": "m/s"})
     fvcom_va = fvcom_stns_dataset.va.isel(station=stations.index(place))
     # FVCOM current speed and direction
-    fvcom_speed = numpy.sqrt(fvcom_ua**2 + fvcom_va**2)
-    fvcom_speed.name = 'fvcom_current_speed'
-    fvcom_speed.attrs.update({
-        'long_name': 'Current Speed',
-        'units': 'm/s',
-        'label': 'Model',
-    })
+    fvcom_speed = numpy.sqrt(fvcom_ua ** 2 + fvcom_va ** 2)
+    fvcom_speed.name = "fvcom_current_speed"
+    fvcom_speed.attrs.update(
+        {"long_name": "Current Speed", "units": "m/s", "label": "Model"}
+    )
     direction = numpy.arctan2(fvcom_va, fvcom_ua)
     fvcom_dir = numpy.rad2deg(direction + (direction < 0) * 2 * numpy.pi)
-    fvcom_dir.name = 'fvcom_current_direction'
-    fvcom_dir.attrs.update({
-        'long_name': 'Current To Direction',
-        'units': '°CCW from East',
-        'label': 'Model',
-    })
+    fvcom_dir.name = "fvcom_current_direction"
+    fvcom_dir.attrs.update(
+        {
+            "long_name": "Current To Direction",
+            "units": "°CCW from East",
+            "label": "Model",
+        }
+    )
     shared.localize_time(fvcom_ua)
     shared.localize_time(fvcom_speed)
     shared.localize_time(fvcom_dir)
     return SimpleNamespace(
-        fvcom_ua=fvcom_ua,
-        fvcom_speed=fvcom_speed,
-        fvcom_dir=fvcom_dir,
+        fvcom_ua=fvcom_ua, fvcom_speed=fvcom_speed, fvcom_dir=fvcom_dir
     )
 
 
 def _prep_fig_axes(figsize, theme):
     fig, (ax_speed, ax_dir, ax_u) = plt.subplots(
-        3, 1, figsize=figsize, facecolor=theme.COLOURS['figure']['facecolor']
+        3, 1, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
-    ax_speed = {'mps': ax_speed}
-    ax_speed['knots'] = ax_speed['mps'].twinx()
-    ax_u = {'mps': ax_u}
-    ax_u['knots'] = ax_u['mps'].twinx()
+    ax_speed = {"mps": ax_speed}
+    ax_speed["knots"] = ax_speed["mps"].twinx()
+    ax_u = {"mps": ax_u}
+    ax_u["knots"] = ax_u["mps"].twinx()
     fig.autofmt_xdate()
     return fig, (ax_speed, ax_dir, ax_u)
 
 
 def _plot_current_speed_time_series(ax, plot_data, theme):
     plot_data.fvcom_speed.plot(
-        ax=ax['mps'],
+        ax=ax["mps"],
         linewidth=2,
-        color=theme.COLOURS['time series']['2nd Narrows model current speed'],
-        label=plot_data.fvcom_speed.attrs['label']
+        color=theme.COLOURS["time series"]["2nd Narrows model current speed"],
+        label=plot_data.fvcom_speed.attrs["label"],
     )
 
 
 def _current_speed_axes_labels(ax, plot_data, theme):
-    ax['mps'].set_title(
-        'Current at 2nd Narrows',
-        fontproperties=theme.FONTS['axes title'],
-        color=theme.COLOURS['text']['axes title']
+    ax["mps"].set_title(
+        "Current at 2nd Narrows",
+        fontproperties=theme.FONTS["axes title"],
+        color=theme.COLOURS["text"]["axes title"],
     )
     mps_limits = numpy.array((0, 5))
-    ax['mps'].set_ylabel(
+    ax["mps"].set_ylabel(
         f'{plot_data.fvcom_speed.attrs["long_name"]} '
         f'[{plot_data.fvcom_speed.attrs["units"]}]',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
     )
-    ax['mps'].set_ylim(mps_limits)
-    ax['knots'].set_ylabel(
+    ax["mps"].set_ylim(mps_limits)
+    ax["knots"].set_ylabel(
         f'{plot_data.fvcom_speed.attrs["long_name"]} [knots]',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
     )
-    ax['knots'].set_ylim(unit_conversions.mps_knots(mps_limits))
-    ax['mps'].legend(loc='best')
-    ax['mps'].grid(axis='both')
+    ax["knots"].set_ylim(unit_conversions.mps_knots(mps_limits))
+    ax["mps"].legend(loc="best")
+    ax["mps"].grid(axis="both")
     for k in ax:
         theme.set_axis_colors(ax[k])
 
@@ -157,57 +149,54 @@ def _plot_current_direction_time_series(ax, plot_data, theme):
     plot_data.fvcom_dir.plot(
         ax=ax,
         linewidth=2,
-        color=theme.COLOURS['time series']
-        ['2nd Narrows model current direction'],
-        label=plot_data.fvcom_speed.attrs['label']
+        color=theme.COLOURS["time series"]["2nd Narrows model current direction"],
+        label=plot_data.fvcom_speed.attrs["label"],
     )
 
 
 def _current_direction_axes_labels(ax, plot_data, theme):
     ax.set_ylim(0, 360)
     ax.set_yticks((0, 45, 90, 135, 180, 225, 270, 315, 360))
-    ax.set_yticklabels(('E', 'NE', 'N', 'NW', 'W', 'SW', 'S', 'SE', 'E'))
+    ax.set_yticklabels(("E", "NE", "N", "NW", "W", "SW", "S", "SE", "E"))
     ax.set_ylabel(
         f'{plot_data.fvcom_dir.attrs["long_name"]} ',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
     )
-    ax.legend(loc='best')
-    ax.grid(axis='both')
+    ax.legend(loc="best")
+    ax.grid(axis="both")
     theme.set_axis_colors(ax)
 
 
 def _plot_u_velocity_time_series(ax, plot_data, theme):
     plot_data.fvcom_ua.plot(
-        ax=ax['mps'],
+        ax=ax["mps"],
         linewidth=2,
-        color=theme.COLOURS['time series']['2nd Narrows model current speed'],
+        color=theme.COLOURS["time series"]["2nd Narrows model current speed"],
     )
 
 
 def _u_velocity_axes_labels(ax, plot_data, theme):
-    ax['mps'].set_xlabel(
+    ax["mps"].set_xlabel(
         f'Time [{plot_data.fvcom_ua.attrs["tz_name"]}]',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
     )
-    ax['mps'].xaxis.set_major_formatter(
-        matplotlib.dates.DateFormatter('%d%b %H:%M')
-    )
+    ax["mps"].xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     mps_limits = numpy.array((-4, 4))
-    ax['mps'].set_ylabel(
+    ax["mps"].set_ylabel(
         f'{plot_data.fvcom_ua.attrs["long_name"]} '
         f'[{plot_data.fvcom_ua.attrs["units"]}]',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
     )
-    ax['mps'].set_ylim(mps_limits)
-    ax['knots'].set_ylabel(
+    ax["mps"].set_ylim(mps_limits)
+    ax["knots"].set_ylabel(
         f'{plot_data.fvcom_ua.attrs["long_name"]} [knots]',
-        fontproperties=theme.FONTS['axis'],
-        color=theme.COLOURS['text']['axis']
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
     )
-    ax['knots'].set_ylim(unit_conversions.mps_knots(mps_limits))
-    ax['mps'].grid(axis='both')
+    ax["knots"].set_ylim(unit_conversions.mps_knots(mps_limits))
+    ax["mps"].grid(axis="both")
     for k in ax:
         theme.set_axis_colors(ax[k])

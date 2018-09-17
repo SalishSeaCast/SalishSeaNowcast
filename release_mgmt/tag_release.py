@@ -22,7 +22,7 @@ from pathlib import Path
 import hglib
 import yaml
 
-NAME = 'tag_release'
+NAME = "tag_release"
 logger = logging.getLogger(NAME)
 logging.basicConfig(level=logging.DEBUG)
 
@@ -36,26 +36,26 @@ def main():
 
 def _command_line_interface():
     parser = argparse.ArgumentParser(
-        description='''
+        description="""
         Tag NEMO code and model configuration repos for a production release.
-        '''
+        """
     )
-    parser.prog = f'python -m release_mgmt.{NAME}'
+    parser.prog = f"python -m release_mgmt.{NAME}"
     parser.add_argument(
-        'repos_file',
+        "repos_file",
         type=Path,
-        help='''
+        help="""
         Path/name of YAML file containing the list of repository paths to tag.
         The list is unique for each user and machine combination.
-        '''
+        """,
     )
     parser.add_argument(
-        'tag',
-        help='''
+        "tag",
+        help="""
         Tag to mark the most recently committed repo changesets with.
         Format: PROD-run-type-hypenated-description
         Examples: PROD-hindcast-201806-v2-2017, PROD-nowcast-green-201702v2
-        '''
+        """,
     )
     return parser.parse_args()
 
@@ -65,46 +65,42 @@ def _load_repos_list(repos_file):
     :param pathlib.Path repos_file:
     :rtype: dict
     """
-    with repos_file.open('rt') as f:
-        repos_info =  yaml.safe_load(f)
-    logger.info(f'read list of repos to tag from {repos_file}')
-    return (Path(repo) for repo in repos_info['repos'])
+    with repos_file.open("rt") as f:
+        repos_info = yaml.safe_load(f)
+    logger.info(f"read list of repos to tag from {repos_file}")
+    return (Path(repo) for repo in repos_info["repos"])
 
 
 def _tag_repo(repo, tag):
-    logger.info(f'processing repo: {repo}')
+    logger.info(f"processing repo: {repo}")
     if not repo.exists():
-        logger.error(f'repo does not exist: {repo}')
+        logger.error(f"repo does not exist: {repo}")
         raise SystemExit(2)
     try:
         with hglib.open(repo) as hg:
             parents = hg.parents()
             status = hg.status(
-                modified=True,
-                added=True,
-                removed=True,
-                deleted=True,
-                copies=True
+                modified=True, added=True, removed=True, deleted=True, copies=True
             )
     except hglib.error.ServerError:
-        logger.error(f'unable to find Mercurial repo root in: {repo}')
+        logger.error(f"unable to find Mercurial repo root in: {repo}")
         raise SystemExit(2)
     if status:
-        logger.error(f'uncommitted changes in repo: {repo}')
+        logger.error(f"uncommitted changes in repo: {repo}")
         raise SystemExit(2)
     with hglib.open(repo) as hg:
         incoming_changes = hg.incoming()
         if incoming_changes:
             logger.warning(
-                f'found incoming changes from Bitbucket that you need to '
-                f'deal with in repo: {repo}'
+                f"found incoming changes from Bitbucket that you need to "
+                f"deal with in repo: {repo}"
             )
             raise SystemExit(2)
-        hg.tag(tag.encode(), message=f'Tag production release {tag}.')
-        logger.info(f'added {tag} to repo: {repo}')
+        hg.tag(tag.encode(), message=f"Tag production release {tag}.")
+        logger.info(f"added {tag} to repo: {repo}")
         hg.push()
-        logger.info(f'pushed {tag} tag to Bitbucket from repo: {repo}')
+        logger.info(f"pushed {tag} tag to Bitbucket from repo: {repo}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()  # pragma: no cover

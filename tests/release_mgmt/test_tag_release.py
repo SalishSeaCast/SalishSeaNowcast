@@ -23,11 +23,9 @@ import pytest
 from release_mgmt import tag_release
 
 
-@patch('release_mgmt.tag_release.logger', autospec=True)
-@patch(
-    'release_mgmt.tag_release.Path.exists', return_value=True, autospec=True
-)
-@patch('release_mgmt.tag_release.hglib.open', autospec=True)
+@patch("release_mgmt.tag_release.logger", autospec=True)
+@patch("release_mgmt.tag_release.Path.exists", return_value=True, autospec=True)
+@patch("release_mgmt.tag_release.hglib.open", autospec=True)
 class TestTagRepo:
     """Unit tests for _rag_repo() function.
     """
@@ -35,73 +33,57 @@ class TestTagRepo:
     def test_repo_not_exists(self, m_hg_open, m_exists, m_logger):
         m_exists.return_value = False
         with pytest.raises(SystemExit):
-            tag_release._tag_repo(
-                Path('NEMO-3.6-code'), 'PROD-hindcast-201806-v2-2017'
-            )
-        m_logger.error.assert_called_once_with(
-            'repo does not exist: NEMO-3.6-code'
-        )
+            tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
+        m_logger.error.assert_called_once_with("repo does not exist: NEMO-3.6-code")
 
     def test_no_repo_root(self, m_hg_open, m_exists, m_logger):
         m_hg_open.side_effect = hglib.error.ServerError
         with pytest.raises(SystemExit):
-            tag_release._tag_repo(
-                Path('NEMO-3.6-code'), 'PROD-hindcast-201806-v2-2017'
-            )
+            tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
         m_logger.error.assert_called_once_with(
-            'unable to find Mercurial repo root in: NEMO-3.6-code'
+            "unable to find Mercurial repo root in: NEMO-3.6-code"
         )
 
     def test_uncommitted_changes(self, m_hg_open, m_exists, m_logger):
-        m_hg_open().__enter__ = Mock(name='hg_client')
+        m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_open().__enter__.status.return_value = None
         with pytest.raises(SystemExit):
-            tag_release._tag_repo(
-                Path('NEMO-3.6-code'), 'PROD-hindcast-201806-v2-2017'
-            )
+            tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
         m_logger.error.assert_called_once_with(
-            'uncommitted changes in repo: NEMO-3.6-code'
+            "uncommitted changes in repo: NEMO-3.6-code"
         )
 
     def test_incoming_changes(self, m_hg_open, m_exists, m_logger):
-        m_hg_open().__enter__ = Mock(name='hg_client')
+        m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_open().__enter__().status.return_value = None
-        m_hg_open().__enter__().incoming.return_value = ['changesets']
+        m_hg_open().__enter__().incoming.return_value = ["changesets"]
         with pytest.raises(SystemExit):
-            tag_release._tag_repo(
-                Path('NEMO-3.6-code'), 'PROD-hindcast-201806-v2-2017'
-            )
+            tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
         m_logger.warning.assert_called_once_with(
-            'found incoming changes from Bitbucket that you need to deal '
-            'with in repo: NEMO-3.6-code'
+            "found incoming changes from Bitbucket that you need to deal "
+            "with in repo: NEMO-3.6-code"
         )
 
     def test_hg_tag(self, m_hg_open, m_exists, m_logger):
-        m_hg_client = m_hg_open().__enter__ = Mock(name='hg_client')
+        m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
-        tag_release._tag_repo(
-            Path('NEMO-3.6-code'), 'PROD-hindcast-201806-v2-2017'
-        )
-        expected = 'PROD-hindcast-201806-v2-2017'.encode()
+        tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
+        expected = "PROD-hindcast-201806-v2-2017".encode()
         assert m_hg_client().tag.call_args_list[0][0][0] == expected
-        expected = {
-            'message': 'Tag production release PROD-hindcast-201806-v2-2017.'
-        }
+        expected = {"message": "Tag production release PROD-hindcast-201806-v2-2017."}
         assert m_hg_client().tag.call_args_list[0][1] == expected
         assert m_logger.info.call_args_list[1] == call(
-            'added PROD-hindcast-201806-v2-2017 to repo: NEMO-3.6-code'
+            "added PROD-hindcast-201806-v2-2017 to repo: NEMO-3.6-code"
         )
 
     def test_hg_push(self, m_hg_open, m_exists, m_logger):
-        m_hg_client = m_hg_open().__enter__ = Mock(name='hg_client')
+        m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
-        tag_release._tag_repo(
-            Path('NEMO-3.6-code'), 'PROD-hindcast-201806-v2-2017'
-        )
+        tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
         m_hg_client().push.assert_called_once_with()
         assert m_logger.info.call_args_list[2] == call(
-            'pushed PROD-hindcast-201806-v2-2017 tag to Bitbucket from repo: '
-            'NEMO-3.6-code'
+            "pushed PROD-hindcast-201806-v2-2017 tag to Bitbucket from repo: "
+            "NEMO-3.6-code"
         )
