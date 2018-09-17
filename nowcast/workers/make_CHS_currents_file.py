@@ -268,10 +268,10 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
     }
 
     myds = myds.drop('time_centered')
-    myds = myds.rename({'time_counter': 'time', 'x': 'gridX', 'y': 'gridY'})
+    myds = myds.rename({'x': 'gridX', 'y': 'gridY'})
 
     encoding = {
-        'time': {
+        'time_counter': {
             'units': 'minutes since 1970-01-01 00:00',
             'dtype': float
         },
@@ -300,7 +300,7 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
             'CHS currents file made by nowcast worker: make_CHS_currents_file.py'
     }
 
-    myds.coords['time'].attrs = {
+    myds.coords['time_counter'].attrs = {
         'axis': 'T',
         'comment':
             'time values are UTC at the centre of the intervals over which the '
