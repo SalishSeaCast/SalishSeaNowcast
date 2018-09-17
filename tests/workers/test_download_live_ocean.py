@@ -14,32 +14,34 @@
 # limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast download_live_ocean worker.
 """
-import os
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import arrow
 
 from nowcast.workers import download_live_ocean
 
 
-@patch("nowcast.workers.download_live_ocean.NowcastWorker")
+@patch("nowcast.workers.download_live_ocean.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_live_ocean.main()
         args, kwargs = m_worker.call_args
         assert args == ("download_live_ocean",)
         assert "description" in kwargs
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_live_ocean.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_run_date_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_live_ocean.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ("--run-date",)
@@ -47,6 +49,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_live_ocean.main()
         args, kwargs = m_worker().run.call_args
         expected = (
@@ -57,7 +60,7 @@ class TestMain:
         assert args == expected
 
 
-@patch("nowcast.workers.download_live_ocean.logger")
+@patch("nowcast.workers.download_live_ocean.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -74,7 +77,7 @@ class TestSuccess:
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.download_live_ocean.logger")
+@patch("nowcast.workers.download_live_ocean.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -96,10 +99,11 @@ class TestDownloadLiveOcean:
     """Unit test for download_live_ocean() function.
     """
 
-    @patch("nowcast.workers.download_live_ocean.lib.mkdir")
-    @patch("nowcast.workers.download_live_ocean._get_file")
-    @patch("nowcast.workers.download_live_ocean.nemo_cmd.api.deflate")
-    def test_checklist(self, m_deflate, m_get_file, m_mkdir):
+    @patch("nowcast.workers.download_live_ocean.logger", autospec=True)
+    @patch("nowcast.workers.download_live_ocean.lib.mkdir", spec=True)
+    @patch("nowcast.workers.download_live_ocean._get_file", spec=True)
+    @patch("nowcast.workers.download_live_ocean.nemo_cmd.api.deflate", spec=True)
+    def test_checklist(self, m_deflate, m_get_file, m_mkdir, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2016-12-28"))
         config = {
             "file group": "foo",

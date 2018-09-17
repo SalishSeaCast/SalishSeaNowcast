@@ -22,22 +22,25 @@ import arrow
 from nowcast.workers import make_live_ocean_files
 
 
-@patch("nowcast.workers.make_live_ocean_files.NowcastWorker")
+@patch("nowcast.workers.make_live_ocean_files.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_live_ocean_files.main()
         args, kwargs = m_worker.call_args
         assert args == ("make_live_ocean_files",)
         assert "description" in kwargs
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_live_ocean_files.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_run_date_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_live_ocean_files.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ("--run-date",)
@@ -45,6 +48,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_live_ocean_files.main()
         args, kwargs = m_worker().run.call_args
         expected = (
@@ -55,7 +59,7 @@ class TestMain:
         assert args == expected
 
 
-@patch("nowcast.workers.make_live_ocean_files.logger")
+@patch("nowcast.workers.make_live_ocean_files.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -72,7 +76,7 @@ class TestSuccess:
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.make_live_ocean_files.logger")
+@patch("nowcast.workers.make_live_ocean_files.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -90,12 +94,13 @@ class TestFailure:
         assert msg_type == "failure"
 
 
-@patch("nowcast.workers.make_live_ocean_files.create_LiveOcean_TS_BCs")
+@patch("nowcast.workers.make_live_ocean_files.logger", autospec=True)
+@patch("nowcast.workers.make_live_ocean_files.create_LiveOcean_TS_BCs", spec=True)
 class TestMakeLiveOceanFiles:
     """Unit test for make_live_ocean_files() function.
     """
 
-    def test_checklist(self, m_create_ts):
+    def test_checklist(self, m_create_ts, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-01-30"))
         config = {
             "temperature salinity": {

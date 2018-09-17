@@ -15,30 +15,32 @@
 """Unit tests for Salish Sea NEMO nowcast ping_erddap worker.
 """
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
-import nemo_nowcast
 import pytest
 
 from nowcast.workers import ping_erddap
 
 
-@patch("nowcast.workers.ping_erddap.NowcastWorker", spec=nemo_nowcast.NowcastWorker)
+@patch("nowcast.workers.ping_erddap.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         ping_erddap.main()
         args, kwargs = m_worker.call_args
         assert args == ("ping_erddap",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         ping_erddap.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_dataset_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         ping_erddap.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("dataset",)
@@ -55,6 +57,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         ping_erddap.main()
         args, kwargs = m_worker().run.call_args
         assert args == (

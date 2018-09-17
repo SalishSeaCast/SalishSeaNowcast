@@ -16,36 +16,39 @@
 """
 import subprocess
 from types import SimpleNamespace
-from unittest.mock import patch, Mock, call
+from unittest.mock import call, Mock, patch
 
-import nemo_nowcast
 import pytest
 
 from nowcast.workers import watch_fvcom
 
 
-@patch("nowcast.workers.watch_fvcom.NowcastWorker", spec=nemo_nowcast.NowcastWorker)
+@patch("nowcast.workers.watch_fvcom.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_fvcom.main()
         args, kwargs = m_worker.call_args
         assert args == ("watch_fvcom",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_fvcom.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_host_name_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_fvcom.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("host_name",)
         assert "help" in kwargs
 
     def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_fvcom.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_type",)
@@ -53,6 +56,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_fvcom.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
