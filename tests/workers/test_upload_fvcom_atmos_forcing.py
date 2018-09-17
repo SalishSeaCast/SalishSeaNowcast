@@ -20,37 +20,37 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
-import nemo_nowcast
 import pytest
 
 from nowcast.workers import upload_fvcom_atmos_forcing
 
 
-@patch(
-    "nowcast.workers.upload_fvcom_atmos_forcing.NowcastWorker",
-    spec=nemo_nowcast.NowcastWorker,
-)
+@patch("nowcast.workers.upload_fvcom_atmos_forcing.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         upload_fvcom_atmos_forcing.main()
         args, kwargs = m_worker.call_args
         assert args == ("upload_fvcom_atmos_forcing",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         upload_fvcom_atmos_forcing.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_host_name_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         upload_fvcom_atmos_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("host_name",)
         assert "help" in kwargs
 
     def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         upload_fvcom_atmos_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_type",)
@@ -58,6 +58,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_add_run_date_option(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         upload_fvcom_atmos_forcing.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ("--run-date",)
@@ -65,6 +66,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         upload_fvcom_atmos_forcing.main()
         args, kwargs = m_worker().run.call_args
         assert args == (

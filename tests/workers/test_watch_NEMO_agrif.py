@@ -20,42 +20,45 @@ from unittest.mock import patch, Mock
 
 import arrow
 import nemo_nowcast
-import pytest as pytest
+import pytest
 
 import nowcast.ssh_sftp
 from nowcast.workers import watch_NEMO_agrif
 
 
-@patch(
-    "nowcast.workers.watch_NEMO_agrif.NowcastWorker", spec=nemo_nowcast.NowcastWorker
-)
+@patch("nowcast.workers.watch_NEMO_agrif.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_NEMO_agrif.main()
         args, kwargs = m_worker.call_args
         assert args == ("watch_NEMO_agrif",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_NEMO_agrif.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_host_name_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_NEMO_agrif.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("host_name",)
         assert "help" in kwargs
 
     def test_add_job_id_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_NEMO_agrif.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("job_id",)
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         watch_NEMO_agrif.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
