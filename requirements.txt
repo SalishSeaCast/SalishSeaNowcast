@@ -81,7 +81,7 @@ pyshp==1.2.12
 PySocks==1.6.8
 pytest==3.2.5
 python-dateutil==2.6.1
-python-hglib==2.4
+python-hglib==2.6.1
 pytz==2017.3
 PyYAML==3.12
 pyzmq==16.0.2
