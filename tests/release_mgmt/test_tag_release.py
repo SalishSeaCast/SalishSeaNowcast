@@ -77,6 +77,33 @@ class TestTagRepo:
             "added PROD-hindcast-201806-v2-2017 to repo: NEMO-3.6-code"
         )
 
+    def test_duplicate_tag(self, m_hg_open, m_exists, m_logger):
+        m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
+        m_hg_client().status.return_value = None
+        m_hg_client().incoming.return_value = []
+        m_hg_client().tag.side_effect = hglib.error.CommandError(
+            ("args",),
+            "ret",
+            "out",
+            f"abort: tag 'PROD-hindcast-201806-v2-2017' already exists".encode(),
+        )
+        tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
+        m_logger.warning.assert_called_once_with(
+            "tag 'PROD-hindcast-201806-v2-2017' already exists in repo: NEMO-3.6-code"
+        )
+        assert not m_hg_client.push.called
+
+    def test_hg_tag_error(self, m_hg_open, m_exists, m_logger):
+        m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
+        m_hg_client().status.return_value = None
+        m_hg_client().incoming.return_value = []
+        m_hg_client().tag.side_effect = hglib.error.CommandError(
+            ("args",), "ret", "out", b"err"
+        )
+        with pytest.raises(hglib.error.CommandError):
+            tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
+        assert not m_hg_client.push.called
+
     def test_hg_push(self, m_hg_open, m_exists, m_logger):
         m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_client().status.return_value = None

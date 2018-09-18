@@ -96,7 +96,14 @@ def _tag_repo(repo, tag):
                 f"deal with in repo: {repo}"
             )
             raise SystemExit(2)
-        hg.tag(tag.encode(), message=f"Tag production release {tag}.")
+        try:
+            hg.tag(tag.encode(), message=f"Tag production release {tag}.")
+        except hglib.error.CommandError as exc:
+            if exc.err.decode().startswith(f"abort: tag '{tag}' already exists"):
+                logger.warning(f"tag '{tag}' already exists in repo: {repo}")
+                return
+            else:
+                raise
         logger.info(f"added {tag} to repo: {repo}")
         hg.push()
         logger.info(f"pushed {tag} tag to Bitbucket from repo: {repo}")
