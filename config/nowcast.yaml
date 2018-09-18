@@ -335,8 +335,8 @@ erddap:
       - ubcSSg3DvGridFields1hV17-02
       - ubcSSg3DwGridFields1hV17-02
       - ubcSSgSurfaceTracerFields1hV17-02
-      - ubcSSnNearSurfaceUVelocity20mV17-02
-      - ubcSSnNearSurfaceVVelocity20mV17-02
+      - ubcSSgNearSurfaceUVelocity20mV17-02
+      - ubcSSgNearSurfaceVVelocity20mV17-02
     nemo-forecast:
       - ubcSSfBoundaryBaySSH10mV17-02
       - ubcSSfCampbellRiverSSH10mV17-02
