@@ -78,7 +78,6 @@ def _tag_repo(repo, tag):
         raise SystemExit(2)
     try:
         with hglib.open(repo) as hg:
-            parents = hg.parents()
             status = hg.status(
                 modified=True, added=True, removed=True, deleted=True, copies=True
             )
