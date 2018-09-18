@@ -30,6 +30,7 @@ dependencies:
   - circus
   - cliff
   - cmocean
+  - coloredlogs
   - dask
   - docutils
   - gsw
@@ -51,6 +52,7 @@ dependencies:
   - schedule
   - scipy
   - shapely
+  - verboselogs
   - xarray
 
   # For unit tests

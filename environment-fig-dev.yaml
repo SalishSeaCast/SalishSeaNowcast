@@ -23,6 +23,8 @@ dependencies:
   - basemap
   - beautifulsoup4
   - bottleneck
+  - cmocean
+  - coloredlogs
   - dask
   - docutils
   - gsw
@@ -43,6 +45,7 @@ dependencies:
   - requests
   - scipy
   - shapely
+  - verboselogs
   - xarray
 
   # For figures development
@@ -59,7 +62,6 @@ dependencies:
     - chaussette
     - circus
     - cliff
-    - cmocean
     - driftwood
     - f90nml
     - feedgen

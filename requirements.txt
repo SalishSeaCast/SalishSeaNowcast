@@ -23,6 +23,7 @@ cliff==2.9.1
 cloudpickle==0.5.2
 cmd2==0.7.9
 cmocean==1.2
+coloredlogs==10.0
 coverage==4.4.2
 cryptography==2.1.4
 cycler==0.10.0
@@ -38,6 +39,7 @@ gsw==3.2.0
 h5netcdf==0.5.0
 h5py==2.7.1
 heapdict==1.0.0
+humanfriendly==4.16.1
 idna==2.6
 imagesize==0.7.1
 iowait==0.2
@@ -108,6 +110,7 @@ tornado==4.5.3
 typing==3.6.2
 urllib3==1.22
 utm==0.4.2
+verboselogs==1.7
 xarray==0.10.2
 yapf==0.20.1
 zeep==2.5.0
