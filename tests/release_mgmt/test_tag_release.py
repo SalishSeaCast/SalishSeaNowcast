@@ -73,7 +73,7 @@ class TestTagRepo:
         assert m_hg_client().tag.call_args_list[0][0][0] == expected
         expected = {"message": "Tag production release PROD-hindcast-201806-v2-2017."}
         assert m_hg_client().tag.call_args_list[0][1] == expected
-        assert m_logger.info.call_args_list[1] == call(
+        assert m_logger.success.call_args_list[0] == call(
             "added PROD-hindcast-201806-v2-2017 to repo: NEMO-3.6-code"
         )
 
@@ -110,7 +110,7 @@ class TestTagRepo:
         m_hg_client().incoming.return_value = []
         tag_release._tag_repo(Path("NEMO-3.6-code"), "PROD-hindcast-201806-v2-2017")
         m_hg_client().push.assert_called_once_with()
-        assert m_logger.info.call_args_list[2] == call(
+        assert m_logger.success.call_args_list[1] == call(
             "pushed PROD-hindcast-201806-v2-2017 tag to Bitbucket from repo: "
             "NEMO-3.6-code"
         )

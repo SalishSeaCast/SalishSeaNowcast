@@ -19,12 +19,15 @@ import argparse
 import logging
 from pathlib import Path
 
+import coloredlogs
 import hglib
+import verboselogs
 import yaml
 
 NAME = "tag_release"
+verboselogs.install()
 logger = logging.getLogger(NAME)
-logging.basicConfig(level=logging.DEBUG)
+coloredlogs.install(fmt="%(asctime)s %(hostname)s %(name)s %(levelname)s %(message)s")
 
 
 def main():
@@ -103,9 +106,9 @@ def _tag_repo(repo, tag):
                 return
             else:
                 raise
-        logger.info(f"added {tag} to repo: {repo}")
+        logger.success(f"added {tag} to repo: {repo}")
         hg.push()
-        logger.info(f"pushed {tag} tag to Bitbucket from repo: {repo}")
+        logger.success(f"pushed {tag} tag to Bitbucket from repo: {repo}")
 
 
 if __name__ == "__main__":
