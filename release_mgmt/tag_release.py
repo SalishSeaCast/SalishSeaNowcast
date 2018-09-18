@@ -71,12 +71,12 @@ def _load_repos_list(repos_file):
     with repos_file.open("rt") as f:
         repos_info = yaml.safe_load(f)
     logger.info(f"read list of repos to tag from {repos_file}")
-    return (Path(repo) for repo in repos_info["repos"])
+    return (repo for repo in repos_info["repos"])
 
 
 def _tag_repo(repo, tag):
     logger.info(f"processing repo: {repo}")
-    if not repo.exists():
+    if not Path(repo).exists():
         logger.error(f"repo does not exist: {repo}")
         raise SystemExit(2)
     try:
