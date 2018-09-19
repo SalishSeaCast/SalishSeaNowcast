@@ -112,6 +112,5 @@ urllib3==1.22
 utm==0.4.2
 verboselogs==1.7
 xarray==0.10.2
-yapf==0.20.1
 zeep==2.5.0
 zict==0.1.3
