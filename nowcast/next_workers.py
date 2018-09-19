@@ -1203,7 +1203,7 @@ def after_make_CHS_currents_file(msg, config, checklist):
         next_workers[msg.type].append(
             NextWorker(
                 "nowcast.workers.update_forecast_datasets",
-                args=[run_type, "--run-date", run_date],
+                args=["nemo", run_type, "--run-date", run_date],
             )
         )
     return next_workers[msg.type]

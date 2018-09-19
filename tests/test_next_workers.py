@@ -1712,7 +1712,7 @@ class TestAfterMakeCHSCurrentsFile:
         )
         expected = NextWorker(
             "nowcast.workers.update_forecast_datasets",
-            args=[run_type, "--run-date", run_date],
+            args=["nemo", run_type, "--run-date", run_date],
             host="localhost",
         )
         assert expected in workers
