@@ -600,7 +600,7 @@ Build FVCOM with:
 
     $ cd $HOME/OPP/FVCOM41.git/Configure
     $ ./setup -a UBUNTU-14.04-GCC -c VancouverHarbourV2
-    $ ./build -l –f
+    $ make libs gotm fvcom
 
 
 .. _UpdateFVCOM41:
@@ -618,7 +618,8 @@ Fetch and merge changes from the `FVCOM41 repo on GitLab`_ and do a clean build:
     $ git pull origin master
     $ cd Configure/
     $ ./setup -a UBUNTU-14.04-GCC -c VancouverHarbourV2
-    $ ./build -l –f
+    $ make clean
+    $ make libs gotm fvcom
 
 
 Python Packages
