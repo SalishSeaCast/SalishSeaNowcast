@@ -1,0 +1,15 @@
+# List of absolute paths to repos that tag_release script will be tag
+# for production releases of NEMO model code and configurations.
+#
+# The repos will be processed in order, so the most active repos should
+# be nearest the top of the list.
+
+repos:
+  - /project/6001313/allen/MEOPAR/NEMO-3.6-code
+  - /project/6001313/allen/MEOPAR/SS-run-sets
+  - /project/6001313/allen/MEOPAR/rivers-climatology
+  - /project/6001313/allen/MEOPAR/grid
+  - /project/6001313/allen/MEOPAR/tides
+  - /project/6001313/allen/MEOPAR/tracers
+  - /project/6001313/allen/MEOPAR/XIOS-ARCH
+  - /project/6001313/allen/MEOPAR/XIOS-2
