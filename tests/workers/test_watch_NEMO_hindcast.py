@@ -17,6 +17,9 @@
 from types import SimpleNamespace
 from unittest.mock import patch, Mock
 
+import nemo_nowcast
+import pytest
+
 from nowcast.workers import watch_NEMO_hindcast
 
 
@@ -94,49 +97,45 @@ class TestFailure:
         assert msg_type == f"failure"
 
 
+@patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
+@patch(
+    "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.sftp",
+    return_value=(Mock(name="ssh_client"), Mock(name="sftp_client")),
+    autospec=True,
+)
+@patch(
+    "nowcast.workers.watch_NEMO_hindcast._get_run_id",
+    return_value=("9813234", "01jul18hindcast"),
+    autospec=True,
+)
+@patch(
+    "nowcast.workers.watch_NEMO_hindcast._is_queued", return_value=False, autospec=True
+)
+@patch(
+    "nowcast.workers.watch_NEMO_hindcast._get_tmp_run_dir",
+    return_value="tmp_run_dir",
+    autospec=True,
+)
+@patch(
+    "nowcast.workers.watch_NEMO_hindcast._get_run_info",
+    return_value=SimpleNamespace(),
+    autospec=True,
+)
+@patch(
+    "nowcast.workers.watch_NEMO_hindcast._is_running", return_value=False, autospec=True
+)
 class TestWatchNEMO_Hindcast:
     """Unit test for watch_NEMO_hindcast() function.
     """
 
-    @patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
     @patch(
-        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.sftp",
-        return_value=(Mock(name="ssh_client"), Mock(name="sftp_client")),
+        "nowcast.workers.watch_NEMO_hindcast._get_completion_state",
+        return_value="completed",
         autospec=True,
     )
-    @patch(
-        "nowcast.workers.watch_NEMO_hindcast._get_run_id",
-        return_value=("9813234", "01jul18hindcast"),
-        autospec=True,
-    )
-    @patch(
-        "nowcast.workers.watch_NEMO_hindcast._is_queued",
-        return_value=False,
-        autospec=True,
-    )
-    @patch(
-        "nowcast.workers.watch_NEMO_hindcast._get_tmp_run_dir",
-        return_value="tmp_run_dir",
-        autospec=True,
-    )
-    @patch(
-        "nowcast.workers.watch_NEMO_hindcast._get_run_info",
-        return_value=SimpleNamespace(),
-        autospec=True,
-    )
-    @patch(
-        "nowcast.workers.watch_NEMO_hindcast._is_running",
-        return_value=False,
-        autospec=True,
-    )
-    @patch(
-        "nowcast.workers.watch_NEMO_hindcast._is_completed",
-        return_value=True,
-        autospec=True,
-    )
-    def test_checklist(
+    def test_run_completed(
         self,
-        m_is_completed,
+        m_get_completion_state,
         m_is_running,
         m_get_run_info,
         m_get_tmp_run_dir,
@@ -167,3 +166,33 @@ class TestWatchNEMO_Hindcast:
             }
         }
         assert checklist == expected
+
+    @pytest.mark.parametrize("completion_state", ["cancelled", "aborted"])
+    @patch("nowcast.workers.watch_NEMO_hindcast._get_completion_state", autospec=True)
+    def test_run_cancelled_or_aborted(
+        self,
+        m_get_completion_state,
+        m_is_running,
+        m_get_run_info,
+        m_get_tmp_run_dir,
+        m_is_queued,
+        m_get_run_id,
+        m_sftp,
+        m_logger,
+        completion_state,
+    ):
+        m_get_completion_state.return_value = completion_state
+        parsed_args = SimpleNamespace(host_name="cedar", run_id=None)
+        config = {
+            "run": {
+                "hindcast hosts": {
+                    "cedar": {
+                        "ssh key": "SalishSeaNEMO-nowcast_id_rsa",
+                        "users": "allen,dlatorne",
+                        "scratch dir": "scratch/hindcast",
+                    }
+                }
+            }
+        }
+        with pytest.raises(nemo_nowcast.WorkerError):
+            watch_NEMO_hindcast.watch_NEMO_hindcast(parsed_args, config)
