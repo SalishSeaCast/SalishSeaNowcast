@@ -104,7 +104,14 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
             ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_info
         ):
             time.sleep(60 * 5)
-        while not _is_completed(ssh_client, host_name, users, job_id, run_id):
+        while True:
+            completion_state = _get_completion_state(
+                ssh_client, host_name, users, job_id, run_id
+            )
+            if completion_state == "completed":
+                break
+            if completion_state in {"cancelled", "aborted"}:
+                raise WorkerError
             time.sleep(60)
     finally:
         sftp_client.close()
@@ -114,7 +121,7 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
             "host": host_name,
             "run id": run_id,
             "run date": arrow.get(run_id[:7], "DDMMMYY").format("YYYY-MM-DD"),
-            "completed": True,
+            "completed": completion_state == "completed",
         }
     }
     return checklist
@@ -208,16 +215,45 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
         state = "UNKNOWN"
     if state != "RUNNING":
         return False
+    # Keep checking until we find a time.step file
     try:
-        stdout = ssh_sftp.ssh_exec_command(
+        time_step_stdout = ssh_sftp.ssh_exec_command(
             ssh_client, f"cat {tmp_run_dir}/time.step", host_name, logger
         )
-    except ssh_sftp.SSHCommandError as exc:
+    except ssh_sftp.SSHCommandError:
         logger.info(
-            f"{run_id} on {host_name}: time.step not found; " f"continuing to watch..."
+            f"{run_id} on {host_name}: time.step not found; continuing to watch..."
         )
         return True
-    time_step = int(stdout.splitlines()[0].strip())
+    # Keep checking until we find a ocean.output file
+    try:
+        ocean_output_stdout = ssh_sftp.ssh_exec_command(
+            ssh_client, f"cat {tmp_run_dir}/ocean.output", host_name, logger
+        )
+    except ssh_sftp.SSHCommandError:
+        logger.info(
+            f"{run_id} on {host_name}: ocean.output not found; continuing to watch..."
+        )
+        return True
+    # Cancel run if "E R R O R" in ocean.output
+    error_lines = [
+        line for line in ocean_output_stdout.splitlines() if "E R R O R" in line
+    ]
+    if error_lines:
+        logger.error(
+            f"{run_id} on {host_name}: found {len(error_lines)} E R R O R lines in ocean.output"
+        )
+        scancel_cmd = f"/opt/software/slurm/bin/scancel --user {users}"
+        cmd = f"{scancel_cmd} {job_id}"
+        try:
+            ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
+        except ssh_sftp.SSHCommandError as exc:
+            for line in exc.stderr.splitlines():
+                logger.error(line)
+            raise WorkerError
+        return False
+    # Calculate and log run progress based on value in time.step file
+    time_step = int(time_step_stdout.splitlines()[0].strip())
     model_seconds = (time_step - run_info.it000) * run_info.rdt
     model_time = run_info.date0.replace(seconds=model_seconds).format(
         "YYYY-MM-DD HH:mm:ss UTC"
@@ -230,7 +266,7 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
     return True
 
 
-def _is_completed(ssh_client, host_name, users, job_id, run_id):
+def _get_completion_state(ssh_client, host_name, users, job_id, run_id):
     """
     :param :py:class:`paramiko.client.SSHClient`
     :param users:
@@ -238,8 +274,8 @@ def _is_completed(ssh_client, host_name, users, job_id, run_id):
     :param int job_id:
     :param str run_id:
 
-    :return: Flag indicating whether or not run is in COMPLETED state
-    :rtype: boolean
+    :return: completion state of the run: "unknown", "completed", "cancelled", or "aborted"
+    :rtype: str
     """
     sacct_cmd = f"/opt/software/slurm/bin/sacct --user {users}"
     cmd = f"{sacct_cmd} --job {job_id}.batch --format=state"
@@ -251,14 +287,14 @@ def _is_completed(ssh_client, host_name, users, job_id, run_id):
         raise WorkerError
     if len(stdout.splitlines()) == 2:
         logger.debug(
-            f"{job_id} batch step not found in saact report; " f"continuing to look..."
+            f"{job_id} batch step not found in saact report; continuing to look..."
         )
-        return False
+        return "unknown"
     state = stdout.splitlines()[2].strip()
-    if state != "COMPLETED":
-        return False
     logger.info(f"{run_id} on {host_name}: completed")
-    return True
+    if state in {"COMPLETED", "CANCELLED"}:
+        return state.lower()
+    return "aborted"
 
 
 def _get_queue_info(ssh_client, host_name, users, run_id=None, job_id=None):
