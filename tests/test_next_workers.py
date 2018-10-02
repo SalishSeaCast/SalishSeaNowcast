@@ -1344,19 +1344,35 @@ class TestAfterMakeWW3currentFile:
         )
         assert workers == []
 
-    @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
-    def test_success_launch_run_ww3(self, run_type, config, checklist):
+    def test_success_forecast_launch_run_ww3_nowcast(self, config, checklist):
         workers = next_workers.after_make_ww3_current_file(
             Message(
                 "make_ww3_current_file",
-                f"success {run_type}",
-                {run_type: "current/SoG_current_20170415.nc"},
+                "success forecast",
+                {"forecast": "current/SoG_current_20170415.nc"},
             ),
             config,
             checklist,
         )
         expected = NextWorker(
-            "nowcast.workers.run_ww3", args=["west.cloud", run_type], host="west.cloud"
+            "nowcast.workers.run_ww3", args=["west.cloud", "nowcast"], host="west.cloud"
+        )
+        assert workers[0] == expected
+
+    def test_success_forecast2_launch_run_ww3_forecast2(self, config, checklist):
+        workers = next_workers.after_make_ww3_current_file(
+            Message(
+                "make_ww3_current_file",
+                "success forecast2",
+                {"forecast2": "current/SoG_current_20170415.nc"},
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.run_ww3",
+            args=["west.cloud", "forecast2"],
+            host="west.cloud",
         )
         assert workers[0] == expected
 
@@ -1366,7 +1382,8 @@ class TestAfterRunWW3:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure forecast2", "failure forecast"]
+        "msg_type",
+        ["crash", "failure forecast2", "failure nowcast", "failure forecast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_run_ww3(
@@ -1394,7 +1411,8 @@ class TestAfterWatchWW3:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure forecast2", "failure forecast"]
+        "msg_type",
+        ["crash", "failure forecast2", "failure nowcast", "failure forecast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_ww3(
@@ -1407,9 +1425,9 @@ class TestAfterWatchWW3:
         [
             Message(
                 "watch_ww3",
-                "success forecast",
+                "success forecast2",
                 {
-                    "forecast": {
+                    "forecast2": {
                         "host": "west.cloud",
                         "run date": "2017-12-24",
                         "completed": True,
@@ -1418,9 +1436,20 @@ class TestAfterWatchWW3:
             ),
             Message(
                 "watch_ww3",
-                "success forecast2",
+                "success nowcast",
                 {
-                    "forecast2": {
+                    "nowcast": {
+                        "host": "west.cloud",
+                        "run date": "2018-07-28",
+                        "completed": True,
+                    }
+                },
+            ),
+            Message(
+                "watch_ww3",
+                "success forecast",
+                {
+                    "forecast": {
                         "host": "west.cloud",
                         "run date": "2017-12-24",
                         "completed": True,
@@ -1436,7 +1465,33 @@ class TestAfterWatchWW3:
             "nowcast.workers.download_wwatch3_results",
             args=[
                 msg.payload[run_type]["host"],
-                msg.type.split()[1],
+                run_type,
+                "--run-date",
+                msg.payload[run_type]["run date"],
+            ],
+            host="localhost",
+        )
+        assert expected in workers
+
+    def test_success_nowcast_launch_run_ww3_forecast(self, config, checklist):
+        msg = Message(
+            "watch_ww3",
+            "success nowcast",
+            {
+                "nowcast": {
+                    "host": "west.cloud",
+                    "run date": "2018-07-28",
+                    "completed": True,
+                }
+            },
+        )
+        workers = next_workers.after_watch_ww3(msg, config, checklist)
+        run_type = msg.type.split()[1]
+        expected = NextWorker(
+            "nowcast.workers.run_ww3",
+            args=[
+                msg.payload[run_type]["host"],
+                "forecast",
                 "--run-date",
                 msg.payload[run_type]["run date"],
             ],
@@ -1737,7 +1792,8 @@ class TestAfterDownloadWWatch3Results:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure forecast", "failure forecast2"]
+        "msg_type",
+        ["crash", "failure forecast2", "failure nowcast", "failure forecast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         p_checklist = patch.dict(
@@ -1770,6 +1826,20 @@ class TestAfterDownloadWWatch3Results:
             host="localhost",
         )
         assert expected in workers
+
+    def test_success_nowcast_no_launch_update_forecast_datasets(
+        self, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {"WWATCH3 run": {"nowcast": {"run date": "2018-07-28"}}}
+        )
+        with p_checklist:
+            workers = next_workers.after_download_wwatch3_results(
+                Message("download_wwatch3_results", "success nowcast"),
+                config,
+                checklist,
+            )
+        assert workers == []
 
 
 class TestAfterDownloadFVCOMResults:

@@ -1007,7 +1007,11 @@ def after_make_ww3_current_file(msg, config, checklist):
         run_type = msg.type.split()[1]
         next_workers[msg.type].append(
             NextWorker(
-                "nowcast.workers.run_ww3", args=[host_name, run_type], host=host_name
+                "nowcast.workers.run_ww3",
+                # We make the current files for the period of nowcast+forecast,
+                # but run nowcast then forecast separately
+                args=[host_name, "nowcast" if run_type == "forecast" else run_type],
+                host=host_name,
             )
         )
     return next_workers[msg.type]
@@ -1034,8 +1038,10 @@ def after_run_ww3(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure forecast2": [],
+        "failure nowcast": [],
         "failure forecast": [],
         "success forecast2": [],
+        "success nowcast": [],
         "success forecast": [],
     }
     if msg.type.startswith("success"):
@@ -1067,8 +1073,10 @@ def after_watch_ww3(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure forecast2": [],
+        "failure nowcast": [],
         "failure forecast": [],
         "success forecast2": [],
+        "success nowcast": [],
         "success forecast": [],
     }
     if msg.type.startswith("success"):
@@ -1084,6 +1092,18 @@ def after_watch_ww3(msg, config, checklist):
                 ],
             )
         )
+        if run_type == "nowcast":
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.run_ww3",
+                    args=[
+                        msg.payload[run_type]["host"],
+                        "forecast",
+                        "--run-date",
+                        msg.payload[run_type]["run date"],
+                    ],
+                )
+            )
     return next_workers[msg.type]
 
 
@@ -1250,10 +1270,12 @@ def after_download_wwatch3_results(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "failure forecast": [],
         "failure forecast2": [],
-        "success forecast": [],
+        "failure nowcast": [],
+        "failure forecast": [],
         "success forecast2": [],
+        "success nowcast": [],
+        "success forecast": [],
     }
     if msg.type.startswith("success"):
         run_type = msg.type.split()[1]
