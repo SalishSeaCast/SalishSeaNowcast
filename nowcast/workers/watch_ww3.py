@@ -42,11 +42,12 @@ def main():
     worker.cli.add_argument("host_name", help="Name of the host to monitor the run on")
     worker.cli.add_argument(
         "run_type",
-        choices={"forecast2", "forecast"},
+        choices={"nowcast", "forecast", "forecast2"},
         help="""
         Type of run to monitor:
+        'nowcast' means nowcast run (after NEMO forecast run)
+        'forecast' means updated forecast run (after WaveWatch3 forecast run)
         'forecast2' means preliminary forecast run (after NEMO forecast2 run),
-        'forecast' means updated forecast run (after NEMO forecast run)
         """,
     )
     worker.run(watch_ww3, success, failure)

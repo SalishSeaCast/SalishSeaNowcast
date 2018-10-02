@@ -48,7 +48,7 @@ class TestMain:
         watch_ww3.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_type",)
-        assert kwargs["choices"] == {"forecast2", "forecast"}
+        assert kwargs["choices"] == {"nowcast", "forecast", "forecast2"}
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
