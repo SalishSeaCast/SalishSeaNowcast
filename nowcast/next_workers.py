@@ -1102,6 +1102,7 @@ def after_watch_ww3(msg, config, checklist):
                         "--run-date",
                         msg.payload[run_type]["run date"],
                     ],
+                    host=msg.payload[run_type]["host"],
                 )
             )
     return next_workers[msg.type]

@@ -1495,7 +1495,7 @@ class TestAfterWatchWW3:
                 "--run-date",
                 msg.payload[run_type]["run date"],
             ],
-            host="localhost",
+            host="west.cloud",
         )
         assert expected in workers
 
