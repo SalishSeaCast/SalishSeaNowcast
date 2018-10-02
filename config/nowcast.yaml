@@ -620,11 +620,13 @@ wave forecasts:
   salishsea cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea
   # Directories on compute host where results are stored, keyed by run type
   results:
+    nowcast: /nemoShare/MEOPAR/SalishSea/wwatch3-nowcast/
     forecast: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast/
     forecast2: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/
   # Directories on results server where run results are stored
   # in ddmmmyy/ directories; keyed by run type
   results archive:
+    nowcast: /opp/wwatch3/nowcast/
     forecast: /opp/wwatch3/forecast/
     forecast2: /opp/wwatch3/forecast2/
 
@@ -1124,6 +1126,8 @@ message registry:
       checklist key: WWATCH3 run
       success forecast2: forecast2 WaveWatch3 run started
       failure forecast2: forecast2 WaveWatch3 run failed
+      success nowcast: nowcast WaveWatch3 run started
+      failure nowcast: nowcast WaveWatch3 run failed
       success forecast: forecast WaveWatch3 run started
       failure forecast: forecast WaveWatch3 run failed
       crash: run_ww3 worker crashed
@@ -1133,6 +1137,8 @@ message registry:
       need: wwatch3 run information dict requested
       success forecast2: forecast2 WaveWatch3 run completed
       failure forecast2: forecast2 WaveWatch3 run failed
+      success nowcast: nowcast WaveWatch3 run completed
+      failure nowcast: nowcast WaveWatch3 run failed
       success forecast: forecast WaveWatch3 run completed
       failure forecast: forecast WaveWatch3 run failed
       crash: watch_ww3 worker crashed
@@ -1155,10 +1161,12 @@ message registry:
 
     download_wwatch3_results:
       checklist key: WWATCH3 results files
-      success forecast: WaveWatch3 forecast results files downloaded
-      failure forecast: WaveWatch3 forecast results files download failed
       success forecast2: WaveWatch3 forecast2 results files downloaded
       failure forecast2: WaveWatch3 forecast2 results files download failed
+      success nowcast: WaveWatch3 nowcast results files downloaded
+      failure nowcast: WaveWatch3 nowcast results files download failed
+      success forecast: WaveWatch3 forecast results files downloaded
+      failure forecast: WaveWatch3 forecast results files download failed
       crash: download_wwatch3_results worker crashed
 
     download_fvcom_results:

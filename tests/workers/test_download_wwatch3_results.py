@@ -54,7 +54,7 @@ class TestMain:
         download_wwatch3_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_type",)
-        expected = {"forecast", "forecast2"}
+        expected = {"nowcast", "forecast", "forecast2"}
         assert kwargs["choices"] == expected
         assert "help" in kwargs
 
@@ -79,7 +79,11 @@ class TestMain:
 
 @pytest.mark.parametrize(
     "run_type, host_name",
-    [("forecast", "west.cloud-nowcast"), ("forecast2", "west.cloud-nowcast")],
+    [
+        ("nowcast", "west.cloud-nowcast"),
+        ("forecast", "west.cloud-nowcast"),
+        ("forecast2", "west.cloud-nowcast"),
+    ],
 )
 @patch("nowcast.workers.download_wwatch3_results.logger", autospec=True)
 class TestSuccess:
@@ -101,7 +105,11 @@ class TestSuccess:
 
 @pytest.mark.parametrize(
     "run_type, host_name",
-    [("forecast", "west.cloud-nowcast"), ("forecast2", "west.cloud-nowcast")],
+    [
+        ("nowcast", "west.cloud-nowcast"),
+        ("forecast", "west.cloud-nowcast"),
+        ("forecast2", "west.cloud-nowcast"),
+    ],
 )
 @patch("nowcast.workers.download_wwatch3_results.logger", autospec=True)
 class TestFailure:

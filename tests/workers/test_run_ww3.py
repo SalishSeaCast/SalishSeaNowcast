@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Unit tests for Salish Sea WaveWatch3 forecast run_ww3 worker.
+"""Unit tests for Salish Sea WaveWatch3 nowcast/forecast run_ww3 worker.
 """
 from pathlib import Path
 import subprocess
@@ -33,8 +33,9 @@ def config(scope="function"):
             "wwatch3 exe path": "wwatch3-5.16/exe",
             "salishsea cmd": "salishsea",
             "results": {
-                "forecast2": "wwatch3-forecast2",
+                "nowcast": "wwatch3-nowcast",
                 "forecast": "wwatch3-forecast",
+                "forecast2": "wwatch3-forecast2",
             },
         }
     }
@@ -65,7 +66,7 @@ class TestMain:
         run_ww3.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_type",)
-        assert kwargs["choices"] == {"forecast", "forecast2"}
+        assert kwargs["choices"] == {"nowcast", "forecast", "forecast2"}
         assert "help" in kwargs
 
     def test_add_run_date_option(self, m_worker):
@@ -81,7 +82,7 @@ class TestMain:
         assert args == (run_ww3.run_ww3, run_ww3.success, run_ww3.failure)
 
 
-@pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+@pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 @patch("nowcast.workers.run_ww3.logger")
 class TestSuccess:
     """Unit tests for success() function.
@@ -102,7 +103,7 @@ class TestSuccess:
         assert msg_type == f"success {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+@pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 @patch("nowcast.workers.run_ww3.logger")
 class TestFailure:
     """Unit tests for failure() function.
@@ -128,7 +129,7 @@ class TestRunWW3:
     """Unit tests for run_ww3() function.
     """
 
-    @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+    @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     @patch("nowcast.workers.run_ww3._build_tmp_run_dir")
     @patch("nowcast.workers.run_ww3._write_run_script")
     @patch("nowcast.workers.run_ww3._launch_run", return_value="bash SoGWW3.sh")
@@ -164,7 +165,7 @@ class TestBuildTmpRunDir:
     """Unit tests for _build_tmp_run_dir() function.
     """
 
-    @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+    @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     @patch("nowcast.workers.run_ww3._write_ww3_input_files")
     @patch("nowcast.workers.run_ww3._create_symlinks")
     @patch("nowcast.workers.run_ww3._make_run_dir")
@@ -185,22 +186,23 @@ class TestBuildTmpRunDir:
         assert run_dir_path == Path("wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6")
 
 
+@pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestMakeRunDir:
     """Unit test for _make_run_dir() function.
     """
 
     @patch("nowcast.workers.run_ww3.Path.mkdir")
-    @patch("nowcast.workers.run_ww3.uuid.uuid1")
-    def test_make_run_dir(self, m_uuid1, m_mkdir):
-        m_uuid1.return_value = "a1e00274-11a3-11e7-ad44-80fa5b174bd6"
-        run_dir_path = run_ww3._make_run_dir(Path("/wwatch3-runs"))
+    @patch("nowcast.workers.run_ww3.arrow.now")
+    def test_make_run_dir(self, m_now, m_mkdir, run_type):
+        m_now.return_value = "2018-09-18T17:40:42.123456Z"
+        run_dir_path = run_ww3._make_run_dir(run_type, Path("/wwatch3-runs"))
         m_mkdir.assert_called_once_with(mode=0o775)
         assert run_dir_path == Path(
-            "/wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6"
+            f"/wwatch3-runs/{run_type}_2018-09-18T17:40:42.123456Z"
         )
 
 
-@pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+@pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestWW3PrncWindContents:
     """Unit test for _ww3_prnc_wind_contents() function.
     """
@@ -213,7 +215,7 @@ class TestWW3PrncWindContents:
         assert "'wind/SoG_wind_20170325.nc'" in contents
 
 
-@pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+@pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestWW3PrncCurrentContents:
     """Unit test for _ww3_prnc_current_contents() function.
     """
@@ -227,14 +229,21 @@ class TestWW3PrncCurrentContents:
 
 
 @pytest.mark.parametrize(
-    "run_type, end_time", [("forecast2", "060000"), ("forecast", "120000")]
+    "run_type, run_date, start_date, restart_date, end_date, end_time",
+    [
+        ("nowcast", "2018-09-18", "20180918", "20180919", "20180919", "000000"),
+        ("forecast", "2018-09-18", "20180919", "20180920", "20180920", "120000"),
+        ("forecast2", "2018-09-18", "20180919", "20180920", "20180920", "060000"),
+    ],
 )
 class TestWW3ShelContents:
     """Unit test for _ww3_shel_contents() function.
     """
 
-    def test_ww3_shel_contents(self, run_type, end_time):
-        contents = run_ww3._ww3_shel_contents(arrow.get("2017-03-29"), run_type)
+    def test_ww3_shel_contents(
+        self, run_type, run_date, start_date, restart_date, end_date, end_time
+    ):
+        contents = run_ww3._ww3_shel_contents(arrow.get(run_date), run_type)
         # Forcing/inputs to use
         assert "F F  Water levels w/ homogeneous field data" in contents
         assert "T F  Currents w/ homogeneous field data" in contents
@@ -244,40 +253,47 @@ class TestWW3ShelContents:
         assert "F    Assimilation data : 1-D spectra" in contents
         assert "F    Assimilation data : 2-D spectra." in contents
         # Start/end time
-        assert "20170329 000000  Start time (YYYYMMDD HHmmss)" in contents
-        assert f"20170331 {end_time}  End time (YYYYMMDD HHmmss)" in contents
+        assert f"{start_date} 000000  Start time (YYYYMMDD HHmmss)" in contents
+        assert f"{end_date} {end_time}  End time (YYYYMMDD HHmmss)" in contents
         # Output server mode
         assert "2  dedicated process" in contents
         # Field outputs
-        assert f"20170329 000000 1800 20170331 {end_time}" in contents
+        assert f"{start_date} 000000 1800 {end_date} {end_time}" in contents
         assert "N  by name" in contents
         assert "HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS" in contents
         # Point outputs
-        assert f"20170329 000000 600 20170331 {end_time}" in contents
+        assert f"{start_date} 000000 600 {end_date} {end_time}" in contents
         assert "236.52 48.66 'C46134PatB'" in contents
         assert "236.27 49.34 'C46146HalB'" in contents
         assert "235.01 49.91 'C46131SenS'" in contents
         assert "0.0 0.0 'STOPSTRING'" in contents
         # Along-track output (required placeholder for unused feature)
-        assert f"20170329 000000 0 20170331 {end_time}" in contents
+        assert f"{start_date} 000000 0 {end_date} {end_time}" in contents
         # Restart files
-        assert "20170330 000000 3600 20170330 000000" in contents
+        assert f"{restart_date} 000000 3600 {restart_date} 000000" in contents
         # Boundary data (required placeholder for unused feature)
-        assert f"20170329 000000 0 20170331 {end_time}" in contents
+        assert f"{start_date} 000000 0 {end_date} {end_time}" in contents
         # Separated wave field data (required placeholder for unused feature)
-        assert f"20170329 000000 0 20170331 {end_time}" in contents
+        assert f"{start_date} 000000 0 {end_date} {end_time}" in contents
         # Homogeneous field data (required placeholder for unused feature)
         assert "STP" in contents
 
 
-@pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+@pytest.mark.parametrize(
+    "run_type, run_date, start_date, output_count",
+    [
+        ("nowcast", "2017-03-26", "20170326", 48),
+        ("forecast", "2017-03-26", "20170327", 72),
+        ("forecast2", "2017-03-26", "20170327", 60),
+    ],
+)
 class TestWW3OunfContents:
     """Unit test for _ww3_ounf_contents() function.
     """
 
-    def test_ww3_ounf_contents(self, run_type):
-        contents = run_ww3._ww3_ounf_contents(arrow.get("2017-03-26"), run_type)
-        assert "20170326 000000 1800 120" in contents
+    def test_ww3_ounf_contents(self, run_type, run_date, start_date, output_count):
+        contents = run_ww3._ww3_ounf_contents(arrow.get(run_date), run_type)
+        assert f"{start_date} 000000 1800 {output_count}" in contents
         assert "N  by name" in contents
         assert "HS LM WND CUR FP T02 DIR DP WCH WCC TWO FOC USS" in contents
         assert "4" in contents
@@ -289,14 +305,21 @@ class TestWW3OunfContents:
         assert "1 1000000 1 1000000" in contents
 
 
-@pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+@pytest.mark.parametrize(
+    "run_type, run_date, start_date, output_count",
+    [
+        ("nowcast", "2017-03-26", "20170326", 144),
+        ("forecast", "2017-03-26", "20170327", 216),
+        ("forecast2", "2017-03-26", "20170327", 180),
+    ],
+)
 class TestWW3OunpContents:
     """Unit test for _ww3_ounp_contents() function.
     """
 
-    def test_ww3_ounp_contents(self, run_type):
-        contents = run_ww3._ww3_ounp_contents(arrow.get("2017-03-26"), run_type)
-        assert "20170326 000000 600 360" in contents
+    def test_ww3_ounp_contents(self, run_type, run_date, start_date, output_count):
+        contents = run_ww3._ww3_ounp_contents(arrow.get(run_date), run_type)
+        assert f"{start_date} 000000 600 {output_count}" in contents
         assert "-1" in contents
         assert "SoG_ww3_points_" in contents
         assert "8" in contents
@@ -312,7 +335,7 @@ class TestBuildRunScript:
     """Unit test for _build_run_script() function.
     """
 
-    @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+    @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     def test_top_of_script(self, run_type, config):
         script = run_ww3._build_run_script(
             arrow.get("2017-03-29"),
@@ -332,7 +355,7 @@ class TestDefinitions:
     """Unit test for _definitions() function.
     """
 
-    @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+    @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     def test_definitions(self, run_type, config):
         defns = run_ww3._definitions(
             arrow.get("2017-03-29"),
@@ -387,16 +410,29 @@ class TestExecute:
     """Unit test for _execute() function.
     """
 
-    def test_execute(self):
-        execution = run_ww3._execute(arrow.get("2017-04-20"))
+    @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+    def test_forecast_execute(self, run_type):
+        execution = run_ww3._execute(run_type, arrow.get("2017-04-20"))
         expected = """echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
         ${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\
           >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
         mv log.ww3 ww3_shel.log && \\
         rm current.ww3 wind.ww3 && \\
-        rm current/SalishSea_1h_20170420_20170420_grid_[UV].nc && \\
         rm current/SoG_current_20170420.nc && \\
         rm wind/SoG_wind_20170420.nc
+        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
+        """
+        expected = expected.splitlines()
+        for i, line in enumerate(execution.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+    def test_nowcast_execute(self):
+        execution = run_ww3._execute("nowcast", arrow.get("2017-04-20"))
+        expected = """echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
+        ${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\
+          >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        mv log.ww3 ww3_shel.log && \\
+        rm current.ww3 wind.ww3 && \\
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
         """
         expected = expected.splitlines()
@@ -408,23 +444,48 @@ class TestNetcdfOutput:
     """Unit test for _netcdf_output() function.
     """
 
-    def test_netcdf_output(self):
-        output_to_netcdf = run_ww3._netcdf_output(arrow.get("2017-03-30"))
+    @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
+    def test_forecast_netcdf_output(self, run_type):
+        output_to_netcdf = run_ww3._netcdf_output(arrow.get("2017-03-30"), run_type)
         expected = """echo "Starting netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
         ${WW3_EXE}/ww3_ounf >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
-        ncrcat -4 -L4 -o SoG_ww3_fields_20170330_20170401.nc \\
-          SoG_ww3_fields_20170330.nc SoG_ww3_fields_20170331.nc SoG_ww3_fields_20170401.nc \\
+        ncrcat -4 -L4 -o SoG_ww3_fields_20170331_20170401.nc \\
+          SoG_ww3_fields_20170331.nc SoG_ww3_fields_20170401.nc \\
           >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
-        rm SoG_ww3_fields_20170330.nc SoG_ww3_fields_20170331.nc SoG_ww3_fields_20170401.nc && \\
+        rm SoG_ww3_fields_20170331.nc SoG_ww3_fields_20170401.nc && \\
         rm out_grd.ww3
         echo "Ending netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
         
         echo "Starting netCDF4 points output at $(date)" >>${RESULTS_DIR}/stdout
         ${WW3_EXE}/ww3_ounp >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
-        ncrcat -4 -L4 -o SoG_ww3_points_20170330_20170401.nc \\
-          SoG_ww3_points_20170330_tab.nc SoG_ww3_points_20170331_tab.nc SoG_ww3_points_20170401_tab.nc \\
+        ncrcat -4 -L4 -o SoG_ww3_points_20170331_20170401.nc \\
+          SoG_ww3_points_20170331_tab.nc SoG_ww3_points_20170401_tab.nc \\
           >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
-        rm SoG_ww3_points_20170330_tab.nc SoG_ww3_points_20170331_tab.nc SoG_ww3_points_20170401_tab.nc && \\
+        rm SoG_ww3_points_20170331_tab.nc SoG_ww3_points_20170401_tab.nc && \\
+        rm out_pnt.ww3
+        echo "Ending netCDF4 points output at $(date)" >>${RESULTS_DIR}/stdout
+        """
+        expected = expected.splitlines()
+        for i, line in enumerate(output_to_netcdf.splitlines()):
+            assert line.strip() == expected[i].strip()
+
+    def test_nowcast_netcdf_output(self):
+        output_to_netcdf = run_ww3._netcdf_output(arrow.get("2017-03-30"), "nowcast")
+        expected = """echo "Starting netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
+        ${WW3_EXE}/ww3_ounf >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        ncks -4 -L4 -o SoG_ww3_fields_20170330_20170330.nc \\
+          SoG_ww3_fields_20170330.nc \\
+          >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        rm SoG_ww3_fields_20170330.nc && \\
+        rm out_grd.ww3
+        echo "Ending netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
+
+        echo "Starting netCDF4 points output at $(date)" >>${RESULTS_DIR}/stdout
+        ${WW3_EXE}/ww3_ounp >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        ncks -4 -L4 -o SoG_ww3_points_20170330_20170330.nc \\
+          SoG_ww3_points_20170330_tab.nc \\
+          >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+        rm SoG_ww3_points_20170330_tab.nc && \\
         rm out_pnt.ww3
         echo "Ending netCDF4 points output at $(date)" >>${RESULTS_DIR}/stdout
         """
@@ -453,17 +514,18 @@ class TestCleanup:
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
-@patch("nowcast.workers.run_ww3.subprocess.Popen")
-@patch("nowcast.workers.run_ww3.subprocess.run")
+@patch("nowcast.workers.run_ww3.logger", autospec=True)
+@patch("nowcast.workers.run_ww3.subprocess.Popen", autospec=True)
+@patch("nowcast.workers.run_ww3.subprocess.run", autospec=True)
 class TestLaunchRun:
     """Unit tests for _launch_run() function.
     """
 
-    def test_launch_run(self, m_run, m_popen, run_type):
+    def test_launch_run(self, m_run, m_popen, m_logger, run_type):
         run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "west.cloud")
         m_popen.assert_called_once_with(["bash", "SoGWW3.sh"])
 
-    def test_find_run_process_pid(self, m_run, m_popen, run_type):
+    def test_find_run_process_pid(self, m_run, m_popen, m_logger, run_type):
         run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "west.cloud")
         m_run.assert_called_once_with(
             ["pgrep", "--newest", "--exact", "--full", "bash SoGWW3.sh"],
@@ -472,7 +534,7 @@ class TestLaunchRun:
             universal_newlines=True,
         )
 
-    def test_run_exec_cmd(self, m_run, m_popen, run_type):
+    def test_run_exec_cmd(self, m_run, m_popen, m_logger, run_type):
         m_run.return_value = SimpleNamespace(stdout=43)
         run_exec_cmd = run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "west.cloud")
         assert run_exec_cmd == "bash SoGWW3.sh"
