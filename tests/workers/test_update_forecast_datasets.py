@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Unit tests for Salish Sea NEMO nowcast update_forecast_datasets worker.
+"""Unit tests for SalishSeaCast update_forecast_datasets worker.
 """
 from pathlib import Path
 import shlex
@@ -175,6 +175,7 @@ class TestUpdateForecastDatasets:
             },
             "wave forecasts": {
                 "results archive": {
+                    "nowcast": "opp/wwatch3/nowcast",
                     "forecast": "opp/wwatch3/forecast",
                     "forecast2": "opp/wwatch3/forecast2",
                 }
@@ -236,16 +237,10 @@ class TestAddPastDaysResults:
         )
         config = {
             "results archive": {"nowcast": "results/nowcast-blue/"},
-            "wave forecasts": {"results archive": {"forecast": "opp/wwatch3/forecast"}},
+            "wave forecasts": {"results archive": {"nowcast": "opp/wwatch3/nowcast"}},
         }
         update_forecast_datasets._add_past_days_results(
-            run_date,
-            days_from_past,
-            new_forecast_dir,
-            Path(f"/tmp/{model}_forecast"),
-            model,
-            run_type,
-            config,
+            run_date, days_from_past, new_forecast_dir, model, run_type, config
         )
         expected = [
             call(
@@ -268,14 +263,14 @@ class TestAddPastDaysResults:
                 "forecast",
                 arrow.get("2018-04-11"),
                 5,
-                arrow.get("2018-04-05"),
+                arrow.get("2018-04-06"),
             ),
             (
                 "wwatch3",
                 "forecast2",
                 arrow.get("2018-04-11"),
                 5,
-                arrow.get("2018-04-06"),
+                arrow.get("2018-04-07"),
             ),
         ],
     )
@@ -298,27 +293,21 @@ class TestAddPastDaysResults:
                 "nowcast": "results/nowcast-blue/",
                 "forecast": "results/forecast/",
             },
-            "wave forecasts": {"results archive": {"forecast": "opp/wwatch3/forecast"}},
+            "wave forecasts": {
+                "results archive": {
+                    "nowcast": "opp/wwatch3/nowcast",
+                    "forecast": "opp/wwatch3/forecast",
+                }
+            },
         }
         update_forecast_datasets._add_past_days_results(
-            run_date,
-            days_from_past,
-            new_forecast_dir,
-            Path(f"/tmp/{model}_forecast"),
-            model,
-            run_type,
-            config,
+            run_date, days_from_past, new_forecast_dir, model, run_type, config
         )
         expected = [
             call(
-                Path("/tmp", f"{model}_forecast"),
-                day,
-                new_forecast_dir,
-                day,
-                model,
-                run_type,
+                Path("opp/wwatch3/nowcast"), day, new_forecast_dir, day, model, run_type
             )
-            for day in arrow.Arrow.range("day", first_date, run_date.shift(days=-1))
+            for day in arrow.Arrow.range("day", first_date, run_date)
         ]
         assert m_symlink_results.call_args_list == expected
 
@@ -344,7 +333,7 @@ class TestAddForecastResults:
                 "wwatch3",
                 "forecast",
                 Path(f"opp/wwatch3/forecast/"),
-                arrow.get("2018-04-12"),
+                arrow.get("2018-04-13"),
             ),
         ],
     )

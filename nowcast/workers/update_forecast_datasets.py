@@ -107,13 +107,7 @@ def update_forecast_datasets(parsed_args, config, *args):
         # Temporary forecast results directory doesn't exist, and that's okay
         pass
     _add_past_days_results(
-        run_date,
-        days_from_past,
-        new_forecast_dir,
-        tmp_forecast_results_archive,
-        model,
-        run_type,
-        config,
+        run_date, days_from_past, new_forecast_dir, model, run_type, config
     )
     _add_forecast_results(
         run_date,
@@ -144,92 +138,41 @@ def _create_new_forecast_dir(forecast_dir, model, run_type):
 
 
 def _add_past_days_results(
-    run_date,
-    days_from_past,
-    new_forecast_dir,
-    tmp_forecast_results_archive,
-    model,
-    run_type,
-    config,
+    run_date, days_from_past, new_forecast_dir, model, run_type, config
 ):
-    model_params = {
-        "nemo": {
-            "results archive": Path(config["results archive"]["nowcast"]),
-            "first date": (
-                run_date.shift(days=-days_from_past)
-                if run_type == "forecast"
-                else run_date.shift(days=-(days_from_past - 1))
-            ),
-            "last date": run_date,
-        },
-        "wwatch3": {
-            "results archive": Path(
-                config["wave forecasts"]["results archive"]["forecast"]
-            ),
-            "first date": (
-                run_date.shift(days=-days_from_past - 1)
-                if run_type == "forecast"
-                else run_date.shift(days=-days_from_past)
-            ),
-            "last date": run_date.shift(days=-1),
-        },
-    }
-    results_archive = model_params[model]["results archive"]
-    first_date = model_params[model]["first date"]
-    last_date = model_params[model]["last date"]
-    for day in arrow.Arrow.range("day", first_date, last_date):
-        if model == "nemo":
-            _symlink_results(
-                results_archive, day, new_forecast_dir, day, model, run_type
-            )
-            continue
-        if model == "wwatch3":
-            _extract_1st_forecast_day(tmp_forecast_results_archive, day, model, config)
-            _symlink_results(
-                tmp_forecast_results_archive,
-                day,
-                new_forecast_dir,
-                day,
-                model,
-                run_type,
-            )
-            continue
+    results_archive = (
+        Path(config["results archive"]["nowcast"])
+        if model == "nemo"
+        else Path(config["wave forecasts"]["results archive"]["nowcast"])
+    )
+    first_date = (
+        run_date.shift(days=-days_from_past)
+        if run_type == "forecast"
+        else run_date.shift(days=-(days_from_past - 1))
+    )
+    for day in arrow.Arrow.range("day", first_date, run_date):
+        _symlink_results(results_archive, day, new_forecast_dir, day, model, run_type)
 
 
 def _add_forecast_results(
     run_date, new_forecast_dir, tmp_forecast_results_archive, model, run_type, config
 ):
-    model_params = {
-        "nemo": {
-            "results archive": Path(config["results archive"][run_type]),
-            "forecast date": run_date.shift(days=+1),
-        },
-        "wwatch3": {
-            "results archive": Path(
-                config["wave forecasts"]["results archive"][run_type]
-            ),
-            "forecast date": run_date,
-        },
-    }
-    results_archive = model_params[model]["results archive"]
+    results_archive = (
+        Path(config["results archive"][run_type])
+        if model == "nemo"
+        else Path(config["wave forecasts"]["results archive"][run_type])
+    )
     if run_type == "forecast":
         _symlink_results(
             results_archive,
             run_date,
             new_forecast_dir,
-            model_params[model]["forecast date"],
+            run_date.shift(days=+1),
             model,
             run_type,
         )
         return
-    if model == "wwatch3":
-        # For preliminary WaveWatch3 forecast (run_type == 'forecast2'):
-        # Run for run date covers run date through end of forecast period
-        _symlink_results(
-            results_archive, run_date, new_forecast_dir, run_date, model, run_type
-        )
-        return
-    # For preliminary NEMO forecast (run_type == 'forecast2'):
+    # For preliminary forecast (run_type == 'forecast2'):
     # Use 1st 24h of forecast run for run_date+1.
     _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, config)
     _symlink_results(
