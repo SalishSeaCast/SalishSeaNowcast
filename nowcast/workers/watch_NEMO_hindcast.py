@@ -217,7 +217,7 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
         return False
     # Keep checking until we find a time.step file
     try:
-        time_step_stdout = ssh_sftp.ssh_exec_command(
+        time_step_file = ssh_sftp.ssh_exec_command(
             ssh_client, f"cat {tmp_run_dir}/time.step", host_name, logger
         )
     except ssh_sftp.SSHCommandError:
@@ -227,8 +227,11 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
         return True
     # Keep checking until we find a ocean.output file
     try:
-        ocean_output_stdout = ssh_sftp.ssh_exec_command(
-            ssh_client, f"cat {tmp_run_dir}/ocean.output", host_name, logger
+        ocean_output_errors = ssh_sftp.ssh_exec_command(
+            ssh_client,
+            f"grep 'E R R O R' {tmp_run_dir}/ocean.output",
+            host_name,
+            logger,
         )
     except ssh_sftp.SSHCommandError:
         logger.info(
@@ -236,9 +239,7 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
         )
         return True
     # Cancel run if "E R R O R" in ocean.output
-    error_lines = [
-        line for line in ocean_output_stdout.splitlines() if "E R R O R" in line
-    ]
+    error_lines = ocean_output_errors.splitlines()
     if error_lines:
         logger.error(
             f"{run_id} on {host_name}: found {len(error_lines)} E R R O R lines in ocean.output"
@@ -253,7 +254,7 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
             raise WorkerError
         return False
     # Calculate and log run progress based on value in time.step file
-    time_step = int(time_step_stdout.splitlines()[0].strip())
+    time_step = int(time_step_file.splitlines()[0].strip())
     model_seconds = (time_step - run_info.it000) * run_info.rdt
     model_time = run_info.date0.replace(seconds=model_seconds).format(
         "YYYY-MM-DD HH:mm:ss UTC"
