@@ -242,12 +242,13 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
     error_lines = ocean_output_errors.splitlines()
     if error_lines:
         logger.error(
-            f"{run_id} on {host_name}: found {len(error_lines)} E R R O R lines in ocean.output"
+            f"{run_id} on {host_name}: found {len(error_lines)} E R R O R line(s) "
+            f"in ocean.output"
         )
-        scancel_cmd = f"/opt/software/slurm/bin/scancel --user {users}"
-        cmd = f"{scancel_cmd} {job_id}"
+        cmd = f"/opt/software/slurm/bin/scancel {job_id}"
         try:
             ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
+            logger.info(f"{run_id} on {host_name}: cancelled {job_id}")
         except ssh_sftp.SSHCommandError as exc:
             for line in exc.stderr.splitlines():
                 logger.error(line)
