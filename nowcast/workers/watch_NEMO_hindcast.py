@@ -242,7 +242,7 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
     error_lines = ocean_output_errors.splitlines()
     if error_lines:
         logger.error(
-            f"{run_id} on {host_name}: found {len(error_lines)} E R R O R line(s) "
+            f"{run_id} on {host_name}: found {len(error_lines)} 'E R R O R' line(s) "
             f"in ocean.output"
         )
         cmd = f"/opt/software/slurm/bin/scancel {job_id}"
@@ -253,6 +253,20 @@ def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_i
             for line in exc.stderr.splitlines():
                 logger.error(line)
             raise WorkerError
+        if len(error_lines) == 1:
+            # Exactly 1 "E R R O R" line is usually a symptom of a run that got stuck
+            # because a processor was unable to read from a forcing file but NEMO didn't
+            # bubble the error up to cause the run to fail, so the run will time out
+            # with no further advancement of the time step.
+            # So, we re-queue the run for another try...
+            cmd = f"/opt/software/slurm/bin/sbatch {tmp_run_dir}/SalishSeaNEMO.sh"
+            try:
+                ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
+                logger.info(f"{run_id} on {host_name}: re-queued")
+            except ssh_sftp.SSHCommandError as exc:
+                for line in exc.stderr.splitlines():
+                    logger.error(line)
+                raise WorkerError
         return False
     # Calculate and log run progress based on value in time.step file
     time_step = int(time_step_file.splitlines()[0].strip())
