@@ -54,7 +54,7 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"NEMO hindcast run on {parsed_args.host_name} completed",
+        f"NEMO hindcast run on {parsed_args.host_name} watcher terminated",
         extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
     )
     msg_type = "success"
