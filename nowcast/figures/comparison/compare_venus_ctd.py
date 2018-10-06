@@ -223,20 +223,6 @@ def _prep_fig_axes(figsize, theme):
 
 
 def _plot_salinity_time_series(ax, place, plot_data, theme):
-    ax.plot(
-        [t.datetime for t in plot_data.model_salinity_ts.time],
-        plot_data.model_salinity_ts.var,
-        linewidth=2,
-        label="Model",
-        color=theme.COLOURS["time series"]["VENUS node model salinity"],
-    )
-    ax.plot(
-        [t.datetime for t in plot_data.dev_model_salinity_ts.time],
-        plot_data.dev_model_salinity_ts.var,
-        linewidth=2,
-        label="Dev Model",
-        color=theme.COLOURS["time series"]["VENUS node dev model salinity"],
-    )
     ctd_data = plot_data.ctd_data
     qaqc_mask = ctd_data.salinity.attrs["qaqcFlag"] == 1
     ax.plot(
@@ -245,6 +231,22 @@ def _plot_salinity_time_series(ax, place, plot_data, theme):
         linewidth=2,
         label="Observations",
         color=theme.COLOURS["time series"]["VENUS CTD salinity"],
+    )
+    ax.plot(
+        [t.datetime for t in plot_data.model_salinity_ts.time],
+        plot_data.model_salinity_ts.var,
+        linewidth=2,
+        label="Model",
+        color=theme.COLOURS["time series"]["VENUS node model salinity"],
+        alpha=0.7,
+    )
+    ax.plot(
+        [t.datetime for t in plot_data.dev_model_salinity_ts.time],
+        plot_data.dev_model_salinity_ts.var,
+        linewidth=2,
+        label="Dev Model",
+        color=theme.COLOURS["time series"]["VENUS node dev model salinity"],
+        alpha=0.5,
     )
     _salinity_axis_labels(ax, place, plot_data, theme)
 
@@ -274,12 +276,22 @@ def _salinity_axis_labels(ax, place, plot_data, theme):
 
 
 def _plot_temperature_time_series(ax, plot_data, timezone, theme):
+    ctd_data = plot_data.ctd_data
+    qaqc_mask = ctd_data.salinity.attrs["qaqcFlag"] == 1
+    ax.plot(
+        ctd_data.temperature.sampleTime[qaqc_mask],
+        ctd_data.temperature[qaqc_mask],
+        linewidth=2,
+        label="Observations",
+        color=theme.COLOURS["time series"]["VENUS CTD temperature"],
+    )
     ax.plot(
         [t.datetime for t in plot_data.model_temperature_ts.time],
         plot_data.model_temperature_ts.var,
         linewidth=2,
         label="Model",
         color=theme.COLOURS["time series"]["VENUS node model temperature"],
+        alpha=0.7,
     )
     ax.plot(
         [t.datetime for t in plot_data.dev_model_temperature_ts.time],
@@ -287,13 +299,7 @@ def _plot_temperature_time_series(ax, plot_data, timezone, theme):
         linewidth=2,
         label="Dev Model",
         color=theme.COLOURS["time series"]["VENUS node dev model temperature"],
-    )
-    ax.plot(
-        plot_data.ctd_data.temperature.sampleTime,
-        plot_data.ctd_data.temperature,
-        linewidth=2,
-        label="Observations",
-        color=theme.COLOURS["time series"]["VENUS CTD temperature"],
+        alpha=0.5,
     )
     tzname = plot_data.model_temperature_ts.time[0].datetime.tzname()
     _temperature_axis_labels(ax, timezone, tzname, theme)
