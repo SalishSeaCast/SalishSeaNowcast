@@ -127,15 +127,18 @@ def _prep_fig_axes(figsize, theme):
 def _plot_wave_height_time_series(ax, buoy, plot_data, theme):
     plot_data.obs.wave_height.plot(
         ax=ax,
-        linewidth=2,
+        marker="o",
+        linestyle="None",
         label="ECCC Observed",
-        color=theme.COLOURS["time series"]["obs wave height"],
+        markerfacecolor=theme.COLOURS["time series"]["obs wave height"],
+        markeredgecolor=theme.COLOURS["time series"]["obs wave height"],
     )
     plot_data.wwatch3.wave_height.plot(
         ax=ax,
         linewidth=2,
         label="WaveWatch3",
         color=theme.COLOURS["time series"]["wave height"],
+        alpha=0.8,
     )
     legend = ax.legend(prop=theme.FONTS["legend label small"])
     legend.set_title("Legend", prop=theme.FONTS["legend title small"])
@@ -160,15 +163,18 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
 def _plot_dominant_period_time_series(ax, buoy, plot_data, theme):
     plot_data.obs.dominant_period.plot(
         ax=ax,
-        linewidth=2,
+        marker="o",
+        linestyle="None",
         label="ECCC Observed",
-        color=theme.COLOURS["time series"]["obs wave period"],
+        markerfacecolor=theme.COLOURS["time series"]["obs wave height"],
+        markeredgecolor=theme.COLOURS["time series"]["obs wave height"],
     )
     (1 / plot_data.wwatch3.peak_freq).plot(
         ax=ax,
         linewidth=2,
         label="WaveWatch3",
         color=theme.COLOURS["time series"]["wave period"],
+        alpha=0.8,
     )
     legend = ax.legend(prop=theme.FONTS["legend label small"])
     legend.set_title("Legend", prop=theme.FONTS["legend title small"])
