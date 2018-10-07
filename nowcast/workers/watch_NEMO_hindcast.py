@@ -245,23 +245,15 @@ class _HindcastJob:
         error_lines = ocean_output_errors.splitlines()
         if error_lines:
             logger.error(
-                f"{self.run_id} on {self.host_name}: found {len(error_lines)} 'E R R O R' line(s) "
-                f"in ocean.output"
+                f"{self.run_id} on {self.host_name}: "
+                f"found {len(error_lines)} 'E R R O R' line(s) in ocean.output"
             )
             cmd = f"/opt/software/slurm/bin/scancel {self.job_id}"
             self._ssh_exec_command(
                 cmd, f"{self.run_id} on {self.host_name}: cancelled {self.job_id}"
             )
             if len(error_lines) == 1:
-                # Exactly 1 "E R R O R" line is usually a symptom of a run that got stuck
-                # because a processor was unable to read from a forcing file but NEMO didn't
-                # bubble the error up to cause the run to fail, so the run will time out
-                # with no further advancement of the time step.
-                # So, we re-queue the run for another try...
-                cmd = f"/opt/software/slurm/bin/sbatch {self.tmp_run_dir}/SalishSeaNEMO.sh"
-                self._ssh_exec_command(
-                    cmd, f"{self.run_id} on {self.host_name}: re-queued"
-                )
+                self._handle_stuck_job()
             return False
         return True
 
@@ -295,6 +287,29 @@ class _HindcastJob:
             f"{self.run_id} on {self.host_name}: timestep: "
             f"{time_step} = {model_time}, {fraction_done:.1%} complete"
         )
+
+    def _handle_stuck_job(self):
+        """Exactly 1 "E R R O R" line is usually a symptom of a run that got stuck
+        because a processor was unable to read from a forcing file but NEMO didn't
+        bubble the error up to cause the run to fail, so the run will time out
+        with no further advancement of the time step.
+        So, we re-queue the run for another try, then we re-queue the next hindcast run
+        (if we find its temporary run directory) with a dependency on the re-queued
+        stuck run.
+        """
+        # Re-queue the stuck run and update slurm run id
+        sbatch = f"/opt/software/slurm/bin/sbatch"
+        cmd = f"{sbatch} {self.tmp_run_dir}/SalishSeaNEMO.sh"
+        self._ssh_exec_command(cmd, f"{self.run_id} on {self.host_name}: re-queued")
+        self.get_run_id()
+        # Find next run, and requeue it with afterok dependence on newly queued run
+        cmd = f"ls -dtr {self.scratch_dir}/*hindcast*"
+        stdout = self._ssh_exec_command(cmd)
+        next_tmp_run_dir = Path(stdout.splitlines()[0].strip())
+        next_run_id = next_tmp_run_dir.name[:15]
+        logger.debug(f"found next run tmp run dir: {self.host_name}:{next_tmp_run_dir}")
+        cmd = f"{sbatch} -d afterok:{self.job_id} {next_tmp_run_dir}/SalishSeaNEMO.sh"
+        self._ssh_exec_command(cmd, f"{next_run_id} on {self.host_name}: re-queued")
 
     def get_completion_state(self):
         """Query the slurm resource use records to get the completion state of the
