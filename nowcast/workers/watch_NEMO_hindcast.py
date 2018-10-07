@@ -20,9 +20,9 @@ import os
 from pathlib import Path
 import tempfile
 import time
-from types import SimpleNamespace
 
 import arrow
+import attr
 import f90nml
 from nemo_nowcast import NowcastWorker, WorkerError
 
@@ -95,19 +95,18 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
     try:
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
-        job_id, run_id = _get_run_id(ssh_client, host_name, users, run_id)
-        while _is_queued(ssh_client, host_name, users, job_id, run_id):
+        job = _HindcastJob(
+            ssh_client, sftp_client, host_name, users, scratch_dir, run_id
+        )
+        job.get_run_id()
+        while job.is_queued():
             time.sleep(60 * 5)
-        tmp_run_dir = _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id)
-        run_info = _get_run_info(sftp_client, host_name, tmp_run_dir)
-        while _is_running(
-            ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_info
-        ):
+        job.get_tmp_run_dir()
+        job.get_run_info()
+        while job.is_running():
             time.sleep(60 * 5)
         while True:
-            completion_state = _get_completion_state(
-                ssh_client, host_name, users, job_id, run_id
-            )
+            completion_state = job.get_completion_state()
             if completion_state == "completed":
                 break
             if completion_state in {"cancelled", "aborted"}:
@@ -118,266 +117,265 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
         ssh_client.close()
     checklist = {
         "hindcast": {
-            "host": host_name,
-            "run id": run_id,
-            "run date": arrow.get(run_id[:7], "DDMMMYY").format("YYYY-MM-DD"),
+            "host": job.host_name,
+            "run id": job.run_id,
+            "run date": arrow.get(job.run_id[:7], "DDMMMYY").format("YYYY-MM-DD"),
             "completed": completion_state == "completed",
         }
     }
     return checklist
 
 
-def _get_run_id(ssh_client, host_name, users, run_id):
+@attr.s
+class _HindcastJob:
+    """Interact with the hindcast job on the HPC host.
     """
-    :param :py:class:`paramiko.client.SSHClient`
-    :param str host_name:
-    :param str users:
-    :param str run_id:
 
-    :return: slurm job id number, run id string
-    :rtype: 2-tuple (int, str)
-    """
-    queue_info = _get_queue_info(ssh_client, host_name, users, run_id=run_id)
-    job_id, run_id = queue_info.split()[:2]
-    logger.info(f"watching {run_id} job {job_id} on {host_name}")
-    return job_id, run_id
+    ssh_client = attr.ib()
+    sftp_client = attr.ib()
+    host_name = attr.ib(type=str)
+    users = attr.ib()
+    scratch_dir = attr.ib(type=Path)
+    run_id = attr.ib(default=None, type=str)
+    job_id = attr.ib(default=None, type=str)
+    tmp_run_dir = attr.ib(default=None, type=Path)
+    it000 = attr.ib(default=None, type=int)
+    itend = attr.ib(default=None, type=int)
+    date0 = attr.ib(default=None, type=arrow.Arrow)
+    rdt = attr.ib(default=None, type=float)
 
+    def get_run_id(self):
+        """Query the slurm queue to get the slurm job id, and the salishsea run id
+        of the hindcast run.
+        """
+        queue_info = self._get_queue_info()
+        self.job_id, self.run_id = queue_info.split()[:2]
+        logger.info(f"watching {self.run_id} job {self.job_id} on {self.host_name}")
 
-def _is_queued(ssh_client, host_name, users, job_id, run_id):
-    """
-    :param :py:class:`paramiko.client.SSHClient`
-    :param str host_name:
-    :param str users:
-    :param int job_id:
-    :param str run_id:
+    def is_queued(self):
+        """Query the slurm queue to get the state of the hindcast run.
 
-    :return: Flag indicating whether or not run is queued in PENDING state
-    :rtype: boolean
-    """
-    queue_info = _get_queue_info(ssh_client, host_name, users, job_id=job_id)
-    try:
-        state, reason, start_time = queue_info.split()[2:]
-    except AttributeError:
-        # job has disappeared from the queue; maybe cancelled
-        logger.error(f"{run_id} job {job_id} not found on {host_name} queue")
-        raise WorkerError
-    if state != "PENDING":
-        return False
-    msg = f"{run_id} job {job_id} pending due to {reason.lower()}"
-    if start_time != "N/A":
-        msg = f"{msg}, scheduled for {start_time}"
-    logger.info(msg)
-    return True
-
-
-def _get_tmp_run_dir(ssh_client, host_name, scratch_dir, run_id):
-    """
-    :param :py:class:`paramiko.client.SSHClient`
-    :param str host_name:
-    :param :py:class:`pathlib.Path` scratch_dir:
-    :param str run_id:
-
-    :return: Temporary run directory
-    :rtype: :py:class:`pathlib.Path`
-    """
-    try:
-        stdout = ssh_sftp.ssh_exec_command(
-            ssh_client, f"ls -d {scratch_dir/run_id}*", host_name, logger
-        )
-    except ssh_sftp.SSHCommandError as exc:
-        for line in exc.stderr.splitlines():
-            logger.error(line)
-        raise WorkerError
-    tmp_run_dir = Path(stdout.splitlines()[0].strip())
-    logger.debug(f"found tmp run dir: {host_name}:{tmp_run_dir}")
-    return tmp_run_dir
-
-
-def _is_running(ssh_client, host_name, users, job_id, run_id, tmp_run_dir, run_info):
-    """
-    :param :py:class:`paramiko.client.SSHClient`
-    :param str host_name:
-    :param str users:
-    :param int job_id:
-    :param str run_id:
-    :param :py:class:`pathlib.Path` tmp_run_dir:
-    :param :py:class:`types.SimpleNamespace` run_info:
-
-    :return: Flag indicating whether or not run is in RUNNING state
-    :rtype: boolean
-    """
-    try:
-        queue_info = _get_queue_info(ssh_client, host_name, users, job_id=job_id)
-        state = queue_info.split()[2]
-    except (WorkerError, AttributeError):
-        # job has disappeared from the queue; finished or cancelled
-        logger.info(f"{run_id} job {job_id} not found on {host_name} queue")
-        state = "UNKNOWN"
-    if state != "RUNNING":
-        return False
-    # Keep checking until we find a time.step file
-    try:
-        time_step_file = ssh_sftp.ssh_exec_command(
-            ssh_client, f"cat {tmp_run_dir}/time.step", host_name, logger
-        )
-    except ssh_sftp.SSHCommandError:
-        logger.info(
-            f"{run_id} on {host_name}: time.step not found; continuing to watch..."
-        )
-        return True
-    # Keep checking until we find a ocean.output file
-    try:
-        ocean_output_errors = ssh_sftp.ssh_exec_command(
-            ssh_client,
-            f"grep 'E R R O R' {tmp_run_dir}/ocean.output",
-            host_name,
-            logger,
-        )
-    except ssh_sftp.SSHCommandError:
-        logger.info(
-            f"{run_id} on {host_name}: ocean.output not found; continuing to watch..."
-        )
-        return True
-    # Cancel run if "E R R O R" in ocean.output
-    error_lines = ocean_output_errors.splitlines()
-    if error_lines:
-        logger.error(
-            f"{run_id} on {host_name}: found {len(error_lines)} 'E R R O R' line(s) "
-            f"in ocean.output"
-        )
-        cmd = f"/opt/software/slurm/bin/scancel {job_id}"
+        :return: Flag indicating whether or not run is queued in PENDING state
+        :rtype: boolean
+        """
+        queue_info = self._get_queue_info()
         try:
-            ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
-            logger.info(f"{run_id} on {host_name}: cancelled {job_id}")
+            state, reason, start_time = queue_info.split()[2:]
+        except AttributeError:
+            # job has disappeared from the queue; maybe cancelled
+            logger.error(
+                f"{self.run_id} job {self.job_id} not found on {self.host_name} queue"
+            )
+            raise WorkerError
+        if state != "PENDING":
+            return False
+        msg = f"{self.run_id} job {self.job_id} pending due to {reason.lower()}"
+        if start_time != "N/A":
+            msg = f"{msg}, scheduled for {start_time}"
+        logger.info(msg)
+        return True
+
+    def get_tmp_run_dir(self):
+        """Query the HPC host file system to get the temporary run directory of the
+        hindcast job.
+        """
+        cmd = f"ls -d {self.scratch_dir/self.run_id}*"
+        stdout = self._ssh_exec_command(cmd)
+        self.tmp_run_dir = Path(stdout.splitlines()[0].strip())
+        logger.debug(f"found tmp run dir: {self.host_name}:{self.tmp_run_dir}")
+
+    def get_run_info(self):
+        """Download the hindcast job namelist_cfg file from the HPC host and extract
+        NEMO run parameters from it:
+
+        * it000: starting time step number
+        * itend: ending time step number
+        * date0: calendar date of the start of the run
+        * rdt: baroclinic time step
+        """
+        with tempfile.NamedTemporaryFile("wt") as namelist_cfg:
+            self.sftp_client.get(f"{self.tmp_run_dir}/namelist_cfg", namelist_cfg.name)
+            logger.debug(f"downloaded {self.host_name}:{self.tmp_run_dir}/namelist_cfg")
+            namelist = f90nml.read(namelist_cfg.name)
+            self.it000 = namelist["namrun"]["nn_it000"]
+            self.itend = namelist["namrun"]["nn_itend"]
+            self.date0 = arrow.get(str(namelist["namrun"]["nn_date0"]), "YYYYMMDD")
+            self.rdt = namelist["namdom"]["rn_rdt"]
+
+    def is_running(self):
+        """Query the slurm queue to get the state of the hindcast run.
+
+        While the job is running, report its progress via a log message.
+        If one or more "E R R O R" lines are found in the ocean.output file,
+        cancel the job.
+        If exactly one "E R R O R" line is found, assume that the run got "stuck" and
+        handle it accordingly.
+
+        :return: Flag indicating whether or not run is in RUNNING state
+        :rtype: boolean
+        """
+        if self._get_job_state() != "RUNNING":
+            return False
+        # Keep checking until we find a time.step file
+        try:
+            time_step_file = ssh_sftp.ssh_exec_command(
+                self.ssh_client,
+                f"cat {self.tmp_run_dir}/time.step",
+                self.host_name,
+                logger,
+            )
+        except ssh_sftp.SSHCommandError:
+            logger.info(
+                f"{self.run_id} on {self.host_name}: time.step not found; continuing to watch..."
+            )
+            return True
+        self._report_progress(time_step_file)
+        # grep ocean.output file for "E R R O R" lines
+        try:
+            ocean_output_errors = ssh_sftp.ssh_exec_command(
+                self.ssh_client,
+                f"grep 'E R R O R' {self.tmp_run_dir}/ocean.output",
+                self.host_name,
+                logger,
+            )
+        except ssh_sftp.SSHCommandError:
+            logger.error(f"{self.run_id} on {self.host_name}: ocean.output not found")
+            return False
+        # Cancel run if "E R R O R" in ocean.output
+        error_lines = ocean_output_errors.splitlines()
+        if error_lines:
+            logger.error(
+                f"{self.run_id} on {self.host_name}: found {len(error_lines)} 'E R R O R' line(s) "
+                f"in ocean.output"
+            )
+            cmd = f"/opt/software/slurm/bin/scancel {self.job_id}"
+            self._ssh_exec_command(
+                cmd, f"{self.run_id} on {self.host_name}: cancelled {self.job_id}"
+            )
+            if len(error_lines) == 1:
+                # Exactly 1 "E R R O R" line is usually a symptom of a run that got stuck
+                # because a processor was unable to read from a forcing file but NEMO didn't
+                # bubble the error up to cause the run to fail, so the run will time out
+                # with no further advancement of the time step.
+                # So, we re-queue the run for another try...
+                cmd = f"/opt/software/slurm/bin/sbatch {self.tmp_run_dir}/SalishSeaNEMO.sh"
+                self._ssh_exec_command(
+                    cmd, f"{self.run_id} on {self.host_name}: re-queued"
+                )
+            return False
+        return True
+
+    def _get_job_state(self):
+        """Query the slurm queue to get the state of the hindcast run.
+
+        :return: Run state reported by slurm or "UNKNOWN" if the job is not on the queue.
+        :rtype: str
+        """
+        try:
+            queue_info = self._get_queue_info()
+            state = queue_info.split()[2]
+        except (WorkerError, AttributeError):
+            # job has disappeared from the queue; finished or cancelled
+            logger.info(
+                f"{self.run_id} job {self.job_id} not found on {self.host_name} queue"
+            )
+            state = "UNKNOWN"
+        return state
+
+    def _report_progress(self, time_step_file):
+        """Calculate and log run progress based on value in time.step file.
+        """
+        time_step = int(time_step_file.splitlines()[0].strip())
+        model_seconds = (time_step - self.it000) * self.rdt
+        model_time = self.date0.replace(seconds=model_seconds).format(
+            "YYYY-MM-DD HH:mm:ss UTC"
+        )
+        fraction_done = (time_step - self.it000) / (self.itend - self.it000)
+        logger.info(
+            f"{self.run_id} on {self.host_name}: timestep: "
+            f"{time_step} = {model_time}, {fraction_done:.1%} complete"
+        )
+
+    def get_completion_state(self):
+        """Query the slurm resource use records to get the completion state of the
+        hindcast run.
+
+        :return: Completion state of the run: "unknown", "completed", "cancelled",
+                 or "aborted".
+        :rtype: str
+        """
+        sacct_cmd = f"/opt/software/slurm/bin/sacct --user {self.users}"
+        cmd = f"{sacct_cmd} --job {self.job_id}.batch --format=state"
+        stdout = self._ssh_exec_command(cmd)
+        if len(stdout.splitlines()) == 2:
+            logger.debug(
+                f"{self.job_id} batch step not found in saact report; continuing to look..."
+            )
+            return "unknown"
+        state = stdout.splitlines()[2].strip()
+        logger.info(f"{self.run_id} on {self.host_name}: completed")
+        if state in {"COMPLETED", "CANCELLED"}:
+            return state.lower()
+        return "aborted"
+
+    def _ssh_exec_command(self, cmd, success_msg=""):
+        """Execute cmd on the HPC host, returning its stdout.
+
+        If cmd is successful, and success_msg is provided, log success_msg at the
+        INFO level.
+
+        If cmd fails, log stderr from the HPC host at the ERROR level, and raise
+        WorkerError.
+
+        :param str cmd:
+        :param str success_msg:
+
+        :raise: WorkerError
+
+        :return: Standard output from the executed command.
+        :rtype: str with newline separators
+        """
+        try:
+            stdout = ssh_sftp.ssh_exec_command(
+                self.ssh_client, cmd, self.host_name, logger
+            )
+            if success_msg:
+                logger.info(success_msg)
         except ssh_sftp.SSHCommandError as exc:
             for line in exc.stderr.splitlines():
                 logger.error(line)
             raise WorkerError
-        if len(error_lines) == 1:
-            # Exactly 1 "E R R O R" line is usually a symptom of a run that got stuck
-            # because a processor was unable to read from a forcing file but NEMO didn't
-            # bubble the error up to cause the run to fail, so the run will time out
-            # with no further advancement of the time step.
-            # So, we re-queue the run for another try...
-            cmd = f"/opt/software/slurm/bin/sbatch {tmp_run_dir}/SalishSeaNEMO.sh"
-            try:
-                ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
-                logger.info(f"{run_id} on {host_name}: re-queued")
-            except ssh_sftp.SSHCommandError as exc:
-                for line in exc.stderr.splitlines():
-                    logger.error(line)
+        return stdout
+
+    def _get_queue_info(self):
+        """Query the slurm queue to get the state of the hindcast run.
+
+        :return: None or 1 line of output from slurm squeue command that describes
+                 the run's state
+        :rtype: str
+        """
+        squeue_cmd = f"/opt/software/slurm/bin/squeue --user {self.users}"
+        queue_info_format = '--Format "jobid,name,state,reason,starttime"'
+        cmd = (
+            f"{squeue_cmd} {queue_info_format}"
+            if self.job_id is None
+            else f"{squeue_cmd} --job {self.job_id} {queue_info_format}"
+        )
+        stdout = self._ssh_exec_command(cmd)
+        if len(stdout.splitlines()) == 1:
+            if self.job_id is None:
+                logger.error(f"no jobs found on {self.host_name} queue")
                 raise WorkerError
-        return False
-    # Calculate and log run progress based on value in time.step file
-    time_step = int(time_step_file.splitlines()[0].strip())
-    model_seconds = (time_step - run_info.it000) * run_info.rdt
-    model_time = run_info.date0.replace(seconds=model_seconds).format(
-        "YYYY-MM-DD HH:mm:ss UTC"
-    )
-    fraction_done = (time_step - run_info.it000) / (run_info.itend - run_info.it000)
-    logger.info(
-        f"{run_id} on {host_name}: timestep: "
-        f"{time_step} = {model_time}, {fraction_done:.1%} complete"
-    )
-    return True
-
-
-def _get_completion_state(ssh_client, host_name, users, job_id, run_id):
-    """
-    :param :py:class:`paramiko.client.SSHClient`
-    :param users:
-    :param str host_name:
-    :param int job_id:
-    :param str run_id:
-
-    :return: completion state of the run: "unknown", "completed", "cancelled", or "aborted"
-    :rtype: str
-    """
-    sacct_cmd = f"/opt/software/slurm/bin/sacct --user {users}"
-    cmd = f"{sacct_cmd} --job {job_id}.batch --format=state"
-    try:
-        stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
-    except ssh_sftp.SSHCommandError as exc:
-        for line in exc.stderr.splitlines():
-            logger.error(line)
-        raise WorkerError
-    if len(stdout.splitlines()) == 2:
-        logger.debug(
-            f"{job_id} batch step not found in saact report; continuing to look..."
-        )
-        return "unknown"
-    state = stdout.splitlines()[2].strip()
-    logger.info(f"{run_id} on {host_name}: completed")
-    if state in {"COMPLETED", "CANCELLED"}:
-        return state.lower()
-    return "aborted"
-
-
-def _get_queue_info(ssh_client, host_name, users, run_id=None, job_id=None):
-    """
-    :param :py:class:`paramiko.client.SSHClient`
-    :param str host_name:
-    :param str users:
-    :param str run_id:
-    :param int job_id:
-
-    :return: None or 1 line of output from slurm squeue command that describes
-             the run's state
-    :rtype: str
-    """
-    squeue_cmd = f"/opt/software/slurm/bin/squeue --user {users}"
-    queue_info_format = '--Format "jobid,name,state,reason,starttime"'
-    cmd = (
-        f"{squeue_cmd} {queue_info_format}"
-        if job_id is None
-        else f"{squeue_cmd} --job {job_id} {queue_info_format}"
-    )
-    try:
-        stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
-    except ssh_sftp.SSHCommandError as exc:
-        for line in exc.stderr.splitlines():
-            logger.error(line)
-        raise WorkerError
-    if len(stdout.splitlines()) == 1:
-        if job_id is None:
-            logger.error(f"no jobs found on {host_name} queue")
-            raise WorkerError
-        else:
-            # Various callers handle job id not on queue in difference ways
-            return
-    for queue_info in stdout.splitlines()[1:]:
-        if run_id is not None:
-            if run_id in queue_info.strip().split()[1]:
-                return queue_info.strip()
-        else:
-            if "hindcast" in queue_info.strip().split()[1]:
-                return queue_info.strip()
-
-
-def _get_run_info(sftp_client, host_name, tmp_run_dir):
-    """
-    :param :py:class:`paramiko.sftp_client.SFTPClient` sftp_client:
-    :param str host_name:
-    :param :py:class:`pathlib.Path` tmp_run_dir:
-
-    :return: Namespace of run timing info:
-               it000: 1st time step number
-               itend: last time step number
-               date0: run start date
-               rdt: time step in seconds
-    :rtype: :py:class:`types.SimpleNamespace`
-    """
-    with tempfile.NamedTemporaryFile("wt") as namelist_cfg:
-        sftp_client.get(f"{tmp_run_dir}/namelist_cfg", namelist_cfg.name)
-        logger.debug(f"downloaded {host_name}:{tmp_run_dir}/namelist_cfg")
-        namelist = f90nml.read(namelist_cfg.name)
-        run_info = SimpleNamespace(
-            it000=namelist["namrun"]["nn_it000"],
-            itend=namelist["namrun"]["nn_itend"],
-            date0=arrow.get(str(namelist["namrun"]["nn_date0"]), "YYYYMMDD"),
-            rdt=namelist["namdom"]["rn_rdt"],
-        )
-    return run_info
+            else:
+                # Various callers handle job id not on queue in difference ways
+                return
+        for queue_info in stdout.splitlines()[1:]:
+            if self.run_id is not None:
+                if self.run_id in queue_info.strip().split()[1]:
+                    return queue_info.strip()
+            else:
+                if "hindcast" in queue_info.strip().split()[1]:
+                    return queue_info.strip()
 
 
 if __name__ == "__main__":
