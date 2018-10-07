@@ -18,10 +18,36 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch, Mock
 
+import arrow
 import nemo_nowcast
 import pytest
 
 from nowcast.workers import watch_NEMO_hindcast
+
+
+@pytest.fixture()
+def config(tmpdir):
+    p = tmpdir.join("config.yaml")
+    p.write(
+        """
+        # Items required by the Config instance        
+        checklist file: nowcast_checklist.yaml
+        python: python
+        logging:
+            handlers: []
+
+        # Items for the tests
+        run:
+            hindcast hosts:
+                cedar:
+                    ssh key: SalishSeaNEMO-nowcast_id_rsa
+                    users: allen,dlatorne
+                    scratch dir: scratch/hindcast
+    """
+    )
+    config_ = nemo_nowcast.Config()
+    config_.load(str(p))
+    return config_
 
 
 @patch("nowcast.workers.watch_NEMO_hindcast.NowcastWorker", spec=True)
@@ -109,20 +135,9 @@ class TestWatchNEMO_Hindcast:
     """Unit test for watch_NEMO_hindcast() function.
     """
 
-    def test_run_completed(self, m_job, m_sftp, m_logger):
+    def test_run_completed(self, m_job, m_sftp, m_logger, config):
         parsed_args = SimpleNamespace(host_name="cedar", run_id=None)
-        config = {
-            "run": {
-                "hindcast hosts": {
-                    "cedar": {
-                        "ssh key": "SalishSeaNEMO-nowcast_id_rsa",
-                        "users": "allen,dlatorne",
-                        "scratch dir": "scratch/hindcast",
-                    }
-                }
-            }
-        }
-        m_job().host_name = "cedar"
+        m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "9813234", "01jul18hindcast"
         m_job().is_queued.return_value = False
         m_job().tmp_run_dir = Path("tmp_run_dir")
@@ -131,29 +146,22 @@ class TestWatchNEMO_Hindcast:
         checklist = watch_NEMO_hindcast.watch_NEMO_hindcast(parsed_args, config)
         expected = {
             "hindcast": {
-                "host": "cedar",
-                "run id": "01jul18hindcast",
-                "run date": "2018-07-01",
+                "host": parsed_args.host_name,
+                "run id": m_job().run_id,
+                "run date": arrow.get(m_job().run_id[:7], "DDMMMYY").format(
+                    "YYYY-MM-DD"
+                ),
                 "completed": True,
             }
         }
         assert checklist == expected
 
     @pytest.mark.parametrize("completion_state", ["cancelled", "aborted"])
-    def test_run_cancelled_or_aborted(self, m_job, m_sftp, m_logger, completion_state):
+    def test_run_cancelled_or_aborted(
+        self, m_job, m_sftp, m_logger, completion_state, config
+    ):
         parsed_args = SimpleNamespace(host_name="cedar", run_id=None)
-        config = {
-            "run": {
-                "hindcast hosts": {
-                    "cedar": {
-                        "ssh key": "SalishSeaNEMO-nowcast_id_rsa",
-                        "users": "allen,dlatorne",
-                        "scratch dir": "scratch/hindcast",
-                    }
-                }
-            }
-        }
-        m_job().host_name = "cedar"
+        m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "9813234", "01jul18hindcast"
         m_job().is_queued.return_value = False
         m_job().tmp_run_dir = Path("tmp_run_dir")
