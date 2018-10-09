@@ -201,6 +201,10 @@ class _HindcastJob:
             self.itend = namelist["namrun"]["nn_itend"]
             self.date0 = arrow.get(str(namelist["namrun"]["nn_date0"]), "YYYYMMDD")
             self.rdt = namelist["namdom"]["rn_rdt"]
+        logger.debug(
+            f"{self.run_id} on {self.host_name}: "
+            f"it000={self.it000}, itend={self.itend}, date0={self.date0}, rdt={self.rdt}"
+        )
 
     def is_running(self):
         """Query the slurm queue to get the state of the hindcast run.
@@ -301,6 +305,7 @@ class _HindcastJob:
         sbatch = f"/opt/software/slurm/bin/sbatch"
         cmd = f"{sbatch} {self.tmp_run_dir}/SalishSeaNEMO.sh"
         self._ssh_exec_command(cmd, f"{self.run_id} on {self.host_name}: re-queued")
+        self.job_id = None
         self.get_run_id()
         # Find next run, and requeue it with afterok dependence on newly queued run
         cmd = f"ls -dtr {self.scratch_dir}/*hindcast*"
