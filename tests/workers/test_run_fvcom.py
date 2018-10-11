@@ -542,17 +542,18 @@ class TestExecute:
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@patch("nowcast.workers.run_fvcom.logger", autospec=True)
 @patch("nowcast.workers.run_fvcom.subprocess.Popen", autospec=True)
 @patch("nowcast.workers.run_fvcom.subprocess.run", autospec=True)
 class TestLaunchRunScript:
     """Unit tests for _launch_run_script() function.
     """
 
-    def test_launch_run_script(self, m_run, m_popen, run_type):
+    def test_launch_run_script(self, m_run, m_popen, m_logger, run_type):
         run_fvcom._launch_run_script(run_type, "VHFR_FVCOM.sh", "west.cloud")
         m_popen.assert_called_once_with(["bash", "VHFR_FVCOM.sh"])
 
-    def test_find_run_process_id(self, m_run, m_popen, run_type):
+    def test_find_run_process_id(self, m_run, m_popen, m_logger, run_type):
         run_fvcom._launch_run_script(run_type, "VHFR_FVCOM.sh", "west.cloud")
         m_run.assert_called_once_with(
             ["pgrep", "--newest", "--exact", "--full", "bash VHFR_FVCOM.sh"],
@@ -561,7 +562,7 @@ class TestLaunchRunScript:
             universal_newlines=True,
         )
 
-    def test_run_exec_cmd(self, m_run, m_popen, run_type):
+    def test_run_exec_cmd(self, m_run, m_popen, m_logger, run_type):
         run_exec_cmd = run_fvcom._launch_run_script(
             run_type, "VHFR_FVCOM.sh", "west.cloud"
         )
