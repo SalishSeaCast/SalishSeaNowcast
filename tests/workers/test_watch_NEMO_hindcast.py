@@ -16,12 +16,13 @@
 """
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch, Mock
+from unittest.mock import call, Mock, patch
 
 import arrow
 import nemo_nowcast
 import pytest
 
+import nowcast.ssh_sftp
 from nowcast.workers import watch_NEMO_hindcast
 
 
@@ -169,3 +170,398 @@ class TestWatchNEMO_Hindcast:
         m_job().get_completion_state.return_value = completion_state
         with pytest.raises(nemo_nowcast.WorkerError):
             watch_NEMO_hindcast.watch_NEMO_hindcast(parsed_args, config)
+
+
+@patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
+class TestHindcastJob:
+    """Unit tests for _HindcastJob class."""
+
+    def test_get_run_id(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value="12426878 21dec16hindcast RUNNING None 2018-10-07T14:13:59",
+        )
+        job.get_run_id()
+        assert job.job_id == "12426878"
+        assert job.run_id == "21dec16hindcast"
+        assert m_logger.info.called
+
+    def test_is_queued_job_not_found(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
+        with pytest.raises(nemo_nowcast.WorkerError):
+            job.is_queued()
+        assert m_logger.error.called
+
+    def test_is_queued_not_pending(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value="12426878 21dec16hindcast RUNNING None 2018-10-07T14:13:59",
+        )
+        assert not job.is_queued()
+
+    def test_is_queued_pending_due_to_resources(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value="12426878 21dec16hindcast PENDING resources N/A",
+        )
+        assert job.is_queued()
+        assert m_logger.info.call_args[0][0].endswith("pending due to resources")
+
+    def test_is_queued_pending_and_scheduled(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value="12426878 21dec16hindcast PENDING resources 2018-10-07T14:13:59",
+        )
+        assert job.is_queued()
+        assert m_logger.info.call_args[0][0].endswith(
+            "pending due to resources, scheduled for 2018-10-07T14:13:59"
+        )
+
+    def test_get_tmp_run_dir(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job.run_id = "21dec16hindcast"
+        job._ssh_exec_command = Mock(
+            name="_ssh_exec_command",
+            return_value="/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700",
+        )
+        job.get_tmp_run_dir()
+        assert job.tmp_run_dir == Path(
+            "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700"
+        )
+        assert m_logger.debug.called
+
+    @patch("nowcast.workers.watch_NEMO_hindcast.f90nml.read", autospec=True)
+    def test_get_run_info(self, m_f90nml_read, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job.tmp_run_dir = Path(
+            "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700"
+        )
+        m_f90nml_read.return_value = {
+            "namrun": {
+                "nn_it000": 1658881,
+                "nn_itend": 1682640,
+                "nn_date0": "20161221",
+            },
+            "namdom": {"rn_rdt": 40.0},
+        }
+        job.get_run_info()
+        assert job.it000 == 1658881
+        assert job.itend == 1682640
+        assert job.date0 == arrow.get("2016-12-21")
+        assert job.rdt == 40.0
+        assert m_logger.debug.call_count == 2
+
+    def test_is_running_not_running(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="UNKNOWN")
+        assert not job.is_running()
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=nowcast.ssh_sftp.SSHCommandError("cmd", "stdout", "stderr"),
+        autospec=True,
+    )
+    def test_is_running_no_time_step_file(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
+        assert job.is_running()
+        assert m_logger.info.called
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=[
+            "1658943\n",
+            nowcast.ssh_sftp.SSHCommandError("cmd", "stdout", "stderr"),
+        ],
+        autospec=True,
+    )
+    def test_is_running_no_ocean_output(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
+        job._report_progress = Mock(name="_report_progress")
+        assert not job.is_running()
+        assert m_logger.error.called
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=["1658943\n", "E R R O R\nE R R O R\n"],
+        autospec=True,
+    )
+    def test_is_running_ocean_output_errors_cancel_run(
+        self, m_ssh_exec_cmd, m_logger, config
+    ):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
+        job._report_progress = Mock(name="_report_progress")
+        job._ssh_exec_command = Mock(name="_ssh_exec_command")
+        assert not job.is_running()
+        assert m_logger.error.called
+        job._ssh_exec_command.assert_called_once_with(
+            f"/opt/software/slurm/bin/scancel {job.job_id}",
+            f"{job.run_id} on {job.host_name}: cancelled {job.job_id}",
+        )
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=["1658943\n", "E R R O R\n"],
+        autospec=True,
+    )
+    def test_is_running_handle_stuck_job(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
+        job._report_progress = Mock(name="_report_progress")
+        job._ssh_exec_command = Mock(name="_ssh_exec_command")
+        job._handle_stuck_job = Mock(name="_handle_stuck_job")
+        job.is_queued = Mock(name="is_queued", return_value=False)
+        job.get_tmp_run_dir = Mock(name="get_tmp_run_dir")
+        job.get_run_info = Mock(name="get_run_info")
+        assert job.is_running()
+        assert m_logger.error.called
+        job._ssh_exec_command.assert_called_once_with(
+            f"/opt/software/slurm/bin/scancel {job.job_id}",
+            f"{job.run_id} on {job.host_name}: cancelled {job.job_id}",
+        )
+        assert job._handle_stuck_job.called
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=["1658943\n", ""],
+        autospec=True,
+    )
+    def test_is_running(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
+        job._report_progress = Mock(name="_report_progress")
+        assert job.is_running()
+
+    @pytest.mark.parametrize("exception", [nemo_nowcast.WorkerError, AttributeError])
+    def test_get_job_state_unknown(self, m_logger, exception, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
+        state = job._get_job_state()
+        assert m_logger.info.called
+        assert state == "UNKNOWN"
+
+    def test_get_job_state_running(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value="12426878 21dec16hindcast RUNNING N/A 2018-10-07T14:13:59",
+        )
+        state = job._get_job_state()
+        assert state == "RUNNING"
+
+    def test_report_progress(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job.run_id = "01oct18hindcast"
+        job.it000 = 1658881
+        job.itend = 1682640
+        job.date0 = arrow.get("2016-12-21")
+        job.rdt = 40.0
+        job._report_progress("1658943\n")
+        m_logger.info.assert_called_once_with(
+            f"01oct18hindcast on {job.host_name}: timestep: "
+            f"1658943 = 2016-12-21 00:41:20 UTC, 0.3% complete"
+        )
+
+    def test_handle_stuck_job(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job.run_id = "21dec16hindcast"
+        job.tmp_run_dir = (
+            "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700"
+        )
+        job._ssh_exec_command = Mock(
+            name="_ssh_exec_command",
+            side_effect=[
+                "",
+                "/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700",
+                "",
+            ],
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value="12426878 21dec16hindcast PENDING resources 2018-10-07T14:13:59",
+        )
+        job._handle_stuck_job()
+        assert job._ssh_exec_command.call_args_list == [
+            call(
+                "/opt/software/slurm/bin/sbatch "
+                "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700/SalishSeaNEMO.sh",
+                "21dec16hindcast on cedar: re-queued",
+            ),
+            call(f"ls -dtr {job.scratch_dir}/*hindcast*"),
+            call(
+                "/opt/software/slurm/bin/sbatch -d afterok:12426878 "
+                "/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700/SalishSeaNEMO.sh",
+                "01jan17hindcast on cedar: re-queued",
+            ),
+        ]
+        assert m_logger.debug.called
+
+    def test_get_completion_state_unknown(self, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._ssh_exec_command = Mock(
+            name="_ssh_exec_command", return_value="State\n----------\n"
+        )
+        state = job.get_completion_state()
+        assert state == "unknown"
+        assert m_logger.debug.called
+
+    @pytest.mark.parametrize(
+        "job_state, expected",
+        [
+            ("COMPLETED", "completed"),
+            ("CANCELLED", "cancelled"),
+            ("ABORTED", "aborted"),
+            ("FOO", "aborted"),
+        ],
+    )
+    def test_get_completion_state(self, m_logger, job_state, expected, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job.run_id = "01mar17hindcast"
+        job._ssh_exec_command = Mock(
+            name="_ssh_exec_command", return_value=f"State\n----------\n{job_state}\n"
+        )
+        state = job.get_completion_state()
+        assert state == expected
+        m_logger.info.assert_called_once_with(
+            f"{job.run_id} on {job.host_name}: {job_state}"
+        )
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        return_value="/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700",
+        autospec=True,
+    )
+    def test_ssh_exec_command(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._HindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        stdout = job._ssh_exec_command(f"ls -dtr {job.scratch_dir}/*hindcast*")
+        assert (
+            stdout == "/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700"
+        )
+        assert not m_logger.info.called
