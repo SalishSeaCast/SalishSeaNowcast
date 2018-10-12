@@ -289,7 +289,7 @@ results archive:
   forecast2: /results/SalishSea/forecast2/
   nowcast-green: /results/SalishSea/nowcast-green/
   nowcast-agrif: /results/SalishSea/nowcast-agrif/
-  hindcast: /results/SalishSea/hindcast/
+  hindcast: /results2/SalishSea/hindcast/
 
 
 rolling forecasts:
