@@ -245,20 +245,27 @@ class _HindcastJob:
         except ssh_sftp.SSHCommandError:
             logger.error(f"{self.run_id} on {self.host_name}: ocean.output not found")
             return False
-        # Cancel run if "E R R O R" in ocean.output
         error_lines = ocean_output_errors.splitlines()
-        if error_lines:
-            logger.error(
-                f"{self.run_id} on {self.host_name}: "
-                f"found {len(error_lines)} 'E R R O R' line(s) in ocean.output"
-            )
-            cmd = f"/opt/software/slurm/bin/scancel {self.job_id}"
-            self._ssh_exec_command(
-                cmd, f"{self.run_id} on {self.host_name}: cancelled {self.job_id}"
-            )
-            if len(error_lines) == 1:
-                self._handle_stuck_job()
+        if not error_lines:
+            return True
+        # Cancel run if "E R R O R" in ocean.output
+        logger.error(
+            f"{self.run_id} on {self.host_name}: "
+            f"found {len(error_lines)} 'E R R O R' line(s) in ocean.output"
+        )
+        cmd = f"/opt/software/slurm/bin/scancel {self.job_id}"
+        self._ssh_exec_command(
+            cmd, f"{self.run_id} on {self.host_name}: cancelled {self.job_id}"
+        )
+        if len(error_lines) != 1:
+            # More than 1 "E R R O R" line mean the run failed irrevocably
             return False
+        # Exactly 1 "E R R O R" line means the run is "stuck" and it can be re-queued
+        self._handle_stuck_job()
+        while self.is_queued():
+            time.sleep(60 * 5)
+        self.get_tmp_run_dir()
+        self.get_run_info()
         return True
 
     def _get_job_state(self):
@@ -333,7 +340,7 @@ class _HindcastJob:
             )
             return "unknown"
         state = stdout.splitlines()[2].strip()
-        logger.info(f"{self.run_id} on {self.host_name}: completed")
+        logger.info(f"{self.run_id} on {self.host_name}: {state}")
         if state in {"COMPLETED", "CANCELLED"}:
             return state.lower()
         return "aborted"
@@ -361,11 +368,11 @@ class _HindcastJob:
             )
             if success_msg:
                 logger.info(success_msg)
+            return stdout
         except ssh_sftp.SSHCommandError as exc:
             for line in exc.stderr.splitlines():
                 logger.error(line)
             raise WorkerError
-        return stdout
 
     def _get_queue_info(self):
         """Query the slurm queue to get the state of the hindcast run.
