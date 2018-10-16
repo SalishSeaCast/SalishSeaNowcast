@@ -250,7 +250,7 @@ def _plot_legend(ax, risk_level, text, theme):
 
 
 def _legend_box_hide_frame(ax, theme):
-    ax.set_axis_bgcolor(theme.COLOURS["figure"]["facecolor"])
+    ax.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
     for spine in ax.spines:

@@ -320,7 +320,7 @@ def _plot_info_box(ax, place, plot_data, theme):
 
 
 def _info_box_hide_frame(ax, theme):
-    ax.set_axis_bgcolor(theme.COLOURS["figure"]["facecolor"])
+    ax.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
     for spine in ax.spines:
