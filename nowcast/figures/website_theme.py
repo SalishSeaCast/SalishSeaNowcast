@@ -34,7 +34,10 @@ COLOURS = {
     "figure": {"facecolor": SITE_BACKGROUND_COLOUR},
     "dark land": "#8b7765",
     "land": "burlywood",
-    "marker": {"place": "white", "max ssh": "white"},
+    "marker": {
+        "place": {"facecolor": "white", "edgecolor": "black"},
+        "max ssh": {"facecolor": "white", "edgecolor": "black"},
+    },
     "storm surge risk levels": {
         "extreme risk": "red",
         "moderate risk": "Gold",

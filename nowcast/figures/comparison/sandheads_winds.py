@@ -239,7 +239,8 @@ def _plot_station_map(ax, coastline, theme):
         marker="o",
         markersize=10,
         markeredgewidth=3,
-        color=theme.COLOURS["marker"]["place"],
+        markerfacecolor=theme.COLOURS["marker"]["place"]["facecolor"],
+        markeredgecolor=theme.COLOURS["marker"]["place"]["edgecolor"],
     )
     _station_map_axes_labels(ax, theme)
 
