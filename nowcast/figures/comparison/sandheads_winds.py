@@ -19,8 +19,10 @@ Observations are from Environment and Climate Change Canada data:
 http://climate.weather.gc.ca/
 Model forcing winds are from the Environment and Climate Change Canada
 HRDPS nested model.
-Text below the map acknowledges the sources of the observations and HRDPS
-product.
+Text below the map acknowledges the sources of the observations and HRDPS product.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/TestSandHeadsWinds.ipynb
 """
 from types import SimpleNamespace
 
@@ -189,6 +191,7 @@ def _wind_speed_axes_labels(ax, plot_data, theme):
     ax["mps"].grid(axis="both")
     for k in ax:
         theme.set_axis_colors(ax[k])
+    ax["mps"].set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_wind_direction_time_series(ax, plot_data, theme):
@@ -230,6 +233,7 @@ def _wind_direction_axes_labels(ax, plot_data, theme):
     ax.legend(loc="best")
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_station_map(ax, coastline, theme):
