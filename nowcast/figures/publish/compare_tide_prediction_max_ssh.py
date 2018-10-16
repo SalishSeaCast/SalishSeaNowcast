@@ -258,9 +258,9 @@ def _prep_fig_axes(figsize, theme):
     ax_ssh = {"chart_datum": fig.add_subplot(gs[1, 0])}
     ax_ssh["msl"] = ax_ssh["chart_datum"].twinx()
     for axis in ax_ssh.values():
-        axis.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+        axis.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_res = fig.add_subplot(gs[2, 0])
-    ax_res.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_res.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_map = fig.add_subplot(gs[:, 1])
     fig.autofmt_xdate()
     return fig, (ax_info, ax_ssh, ax_map, ax_res)
@@ -330,7 +330,7 @@ def _plot_info_box(ax_info, place, plot_data, theme):
 
 
 def _info_box_hide_frame(ax_info, theme):
-    ax_info.set_axis_bgcolor(theme.COLOURS["figure"]["facecolor"])
+    ax_info.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax_info.xaxis.set_visible(False)
     ax_info.yaxis.set_visible(False)
     for spine in ax_info.spines:

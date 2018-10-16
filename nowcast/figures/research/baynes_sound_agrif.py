@@ -293,5 +293,5 @@ def _plot_surface_field(ax, ss_var, bs_var, cmap, grids, bs_bathy, theme):
         colors=theme.COLOURS["contour lines"]["Baynes Sound entrance"],
     )
     plt.clabel(isobath, fmt={isobath.levels[0]: f"{isobath.levels[0]:.0f} m"})
-    ax.set_axis_bgcolor(theme.COLOURS["dark land"])
+    ax.set_facecolor(theme.COLOURS["dark land"])
     theme.set_axis_colors(ax)

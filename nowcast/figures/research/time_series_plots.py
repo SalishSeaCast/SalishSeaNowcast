@@ -103,9 +103,9 @@ def _prep_fig_axes(figsize, theme):
         figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
 
-    axl.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    axl.set_facecolor(theme.COLOURS["axes"]["background"])
     axr = axl.twinx()
-    axr.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    axr.set_facecolor(theme.COLOURS["axes"]["background"])
 
     return fig, axl, axr
 

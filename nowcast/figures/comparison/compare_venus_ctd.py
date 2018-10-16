@@ -271,7 +271,7 @@ def _salinity_axis_labels(ax, place, plot_data, theme):
     ax.set_ylim(np.floor(ymin) - 1, np.ceil(ymax) + 1)
     ax.legend(loc="best")
     ax.grid(axis="both")
-    ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
     theme.set_axis_colors(ax)
 
 
@@ -323,7 +323,7 @@ def _temperature_axis_labels(ax, timezone, tzname, theme):
     ax.set_ylim(np.floor(ymin) - 1, np.ceil(ymax) + 1)
     ax.legend(loc="best")
     ax.grid(axis="both")
-    ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
     theme.set_axis_colors(ax)
 
 
