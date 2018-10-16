@@ -34,9 +34,11 @@ The figure is annotated with the calculated maximum sea surface height at the
 tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
 
-Testing notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
 
-Development notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
+Development notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
 """
 from datetime import timedelta
 from pathlib import Path
@@ -493,7 +495,8 @@ def _plot_ssh_map(ax_map, plot_data, place, theme):
         marker="o",
         markersize=10,
         markeredgewidth=3,
-        color=theme.COLOURS["marker"]["place"],
+        markerfacecolor=theme.COLOURS["marker"]["place"]["facecolor"],
+        markeredgecolor=theme.COLOURS["marker"]["place"]["edgecolor"],
     )
     viz_tools.plot_coastline(ax_map, plot_data.bathy)
     viz_tools.plot_land_mask(ax_map, plot_data.bathy, color=theme.COLOURS["land"])
