@@ -30,7 +30,7 @@ dependencies:
   - gsw
   - lxml
   - mako
-  - matplotlib=1.5.3
+  - matplotlib
   - netcdf4
   - numpy
   - pandas
@@ -49,7 +49,7 @@ dependencies:
   - xarray
 
   # For figures development
-  - notebook
+  - jupyterlab
 
   # For documentation
   - sphinx
