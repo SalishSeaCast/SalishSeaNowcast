@@ -375,7 +375,8 @@ def _plot_ssh_time_series(ax_ssh, place, plot_data, theme, ylims=(-1, 6)):
         markersize=10,
         markeredgewidth=3,
         label="Maximum SSH",
-        color=theme.COLOURS["marker"]["max ssh"],
+        markerfacecolor=theme.COLOURS["marker"]["max ssh"]["facecolor"],
+        markeredgecolor=theme.COLOURS["marker"]["max ssh"]["edgecolor"],
     )
     colors = ["Gold", "Red", "DarkRed"]
     labels = ["Maximum tides", "Extreme water", "Historical maximum"]
