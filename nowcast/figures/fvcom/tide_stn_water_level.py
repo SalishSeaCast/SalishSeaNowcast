@@ -212,6 +212,7 @@ def _water_level_time_series_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.set_xlim(plot_data.fvcom_ssh.time.values[0], plot_data.fvcom_ssh.time.values[-1])
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     ax.set_ylabel(
         "Water Level above Chart Datum [m]",
