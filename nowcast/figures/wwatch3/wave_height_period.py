@@ -149,6 +149,10 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
     )
+    ax.set_xlim(
+        plot_data.wwatch3.wave_height.time.values[0],
+        plot_data.wwatch3.wave_height.time.values[-1],
+    )
     ax.set_ylabel(
         "Significant Wave Height [m]",
         fontproperties=theme.FONTS["axis"],
@@ -189,6 +193,10 @@ def _dominant_period_time_series_labels(ax, place, plot_data, theme):
         f'Time [{plot_data.wwatch3.attrs["tz_name"]}]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
+    )
+    ax.set_xlim(
+        plot_data.wwatch3.peak_freq.time.values[0],
+        plot_data.wwatch3.peak_freq.time.values[-1],
     )
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     ax.set_ylabel(
