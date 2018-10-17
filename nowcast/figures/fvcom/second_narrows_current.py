@@ -125,6 +125,9 @@ def _current_speed_axes_labels(ax, plot_data, theme):
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
     )
+    ax["mps"].set_xlim(
+        plot_data.fvcom_speed.time.values[0], plot_data.fvcom_speed.time.values[-1]
+    )
     mps_limits = numpy.array((0, 5))
     ax["mps"].set_ylabel(
         f'{plot_data.fvcom_speed.attrs["long_name"]} '
@@ -156,6 +159,7 @@ def _plot_current_direction_time_series(ax, plot_data, theme):
 
 
 def _current_direction_axes_labels(ax, plot_data, theme):
+    ax.set_xlim(plot_data.fvcom_dir.time.values[0], plot_data.fvcom_dir.time.values[-1])
     ax.set_ylim(0, 360)
     ax.set_yticks((0, 45, 90, 135, 180, 225, 270, 315, 360))
     ax.set_yticklabels(("E", "NE", "N", "NW", "W", "SW", "S", "SE", "E"))
@@ -183,6 +187,9 @@ def _u_velocity_axes_labels(ax, plot_data, theme):
         f'Time [{plot_data.fvcom_ua.attrs["tz_name"]}]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
+    )
+    ax["mps"].set_xlim(
+        plot_data.fvcom_ua.time.values[0], plot_data.fvcom_ua.time.values[-1]
     )
     ax["mps"].xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     mps_limits = numpy.array((-4, 4))
