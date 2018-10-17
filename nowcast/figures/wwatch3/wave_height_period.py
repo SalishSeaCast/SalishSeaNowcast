@@ -18,10 +18,10 @@ and observed wave heights and dominant wave periods from the NOAA NDBC
 https://www.ndbc.noaa.gov/data/realtime2/ web service.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
 """
 from pathlib import Path
 from types import SimpleNamespace
@@ -140,8 +140,6 @@ def _plot_wave_height_time_series(ax, buoy, plot_data, theme):
         color=theme.COLOURS["time series"]["wave height"],
         alpha=0.8,
     )
-    legend = ax.legend(prop=theme.FONTS["legend label small"])
-    legend.set_title("Legend", prop=theme.FONTS["legend title small"])
     _wave_height_time_series_labels(ax, buoy, plot_data, theme)
 
 
@@ -156,8 +154,10 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.legend(loc="best", prop=theme.FONTS["legend label small"])
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_dominant_period_time_series(ax, buoy, plot_data, theme):
@@ -176,8 +176,6 @@ def _plot_dominant_period_time_series(ax, buoy, plot_data, theme):
         color=theme.COLOURS["time series"]["wave period"],
         alpha=0.8,
     )
-    legend = ax.legend(prop=theme.FONTS["legend label small"])
-    legend.set_title("Legend", prop=theme.FONTS["legend title small"])
     _dominant_period_time_series_labels(ax, buoy, plot_data, theme)
 
 
@@ -198,5 +196,7 @@ def _dominant_period_time_series_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.legend(loc="best", prop=theme.FONTS["legend label small"])
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
