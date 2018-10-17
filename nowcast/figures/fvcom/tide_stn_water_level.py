@@ -18,10 +18,10 @@ and predicted and observed water levels from the CHS
 :kbd:`https://ws-shc.qc.dfo-mpo.gc.ca/` water levels web service.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestTideStnWaterLevel.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/fvcom/TestTideStnWaterLevel.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/DevelopTideStnWaterLevel.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/fvcom/DevelopTideStnWaterLevel.ipynb
 """
 from contextlib import suppress
 from datetime import timedelta
@@ -198,8 +198,6 @@ def _plot_water_level_time_series(ax, place, plot_data, theme):
         label="FVCOM",
         color=theme.COLOURS["time series"]["vhfr fvcom ssh"],
     )
-    legend = ax.legend(prop=theme.FONTS["legend label small"])
-    legend.set_title("Legend", prop=theme.FONTS["legend title small"])
     _water_level_time_series_labels(ax, place, plot_data, theme)
 
 
@@ -220,5 +218,7 @@ def _water_level_time_series_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.legend(loc="best", prop=theme.FONTS["legend label small"])
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
