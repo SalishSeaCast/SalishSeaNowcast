@@ -17,10 +17,10 @@ Ironworkers Memorial Crossing bridge calculated by the VHFR FVCOM model,
 the observed current measured by a horizontal ADCP on the bridge piling.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestSecondNarrowsCurrent.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/fvcom/TestSecondNarrowsCurrent.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/DevelopSecondNarrowsCurrent.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/fvcom/DevelopSecondNarrowsCurrent.ipynb
 """
 from types import SimpleNamespace
 
@@ -143,6 +143,7 @@ def _current_speed_axes_labels(ax, plot_data, theme):
     ax["mps"].grid(axis="both")
     for k in ax:
         theme.set_axis_colors(ax[k])
+        ax[k].set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_current_direction_time_series(ax, plot_data, theme):
@@ -166,6 +167,7 @@ def _current_direction_axes_labels(ax, plot_data, theme):
     ax.legend(loc="best")
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_u_velocity_time_series(ax, plot_data, theme):
@@ -200,3 +202,4 @@ def _u_velocity_axes_labels(ax, plot_data, theme):
     ax["mps"].grid(axis="both")
     for k in ax:
         theme.set_axis_colors(ax[k])
+        ax[k].set_facecolor(theme.COLOURS["axes"]["background"])
