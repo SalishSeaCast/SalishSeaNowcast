@@ -416,7 +416,7 @@ and other guidelines.
 
 The first function in the module is the function that will be called by the :py:mod:`nowcast.workers.make_plots` worker to return a :py:class:`matplotlib.figure.Figure` object.
 This function is always named :py:func:`make_figure()`.
-It is also the module's only :ref:`public function <LibraryCodePublicAndPrivate>` function.
+It is also the module's only :ref:`public function <LibraryCodePublicAndPrivate>`.
 
 .. code-block:: python
 
