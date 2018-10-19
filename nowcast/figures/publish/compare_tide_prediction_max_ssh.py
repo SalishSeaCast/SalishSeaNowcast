@@ -257,6 +257,7 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(3, 2, width_ratios=[2, 1])
     gs.update(wspace=0.13, hspace=0.2)
     ax_info = fig.add_subplot(gs[0, 0])
+    ax_info.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax_ssh = {"chart_datum": fig.add_subplot(gs[1, 0])}
     ax_ssh["msl"] = ax_ssh["chart_datum"].twinx()
     for axis in ax_ssh.values():
@@ -332,7 +333,6 @@ def _plot_info_box(ax_info, place, plot_data, theme):
 
 
 def _info_box_hide_frame(ax_info, theme):
-    ax_info.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax_info.xaxis.set_visible(False)
     ax_info.yaxis.set_visible(False)
     for spine in ax_info.spines:

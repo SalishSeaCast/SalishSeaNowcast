@@ -219,6 +219,8 @@ def _prep_fig_axes(figsize, theme):
         facecolor=theme.COLOURS["figure"]["facecolor"],
     )
     fig.autofmt_xdate()
+    ax_sal.set_facecolor(theme.COLOURS["axes"]["background"])
+    ax_temp.set_facecolor(theme.COLOURS["axes"]["background"])
     return fig, (ax_sal, ax_temp)
 
 
@@ -275,7 +277,6 @@ def _salinity_axis_labels(ax, place, plot_data, theme):
     ax.set_ylim(np.floor(ymin) - 1, np.ceil(ymax) + 1)
     ax.legend(loc="best")
     ax.grid(axis="both")
-    ax.set_facecolor(theme.COLOURS["axes"]["background"])
     theme.set_axis_colors(ax)
 
 
@@ -331,7 +332,6 @@ def _temperature_axis_labels(ax, plot_data, timezone, tzname, theme):
     ax.set_ylim(np.floor(ymin) - 1, np.ceil(ymax) + 1)
     ax.legend(loc="best")
     ax.grid(axis="both")
-    ax.set_facecolor(theme.COLOURS["axes"]["background"])
     theme.set_axis_colors(ax)
 
 

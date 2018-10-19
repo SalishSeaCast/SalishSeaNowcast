@@ -120,8 +120,11 @@ def _prep_fig_axes(figsize, theme):
     gs.update(hspace=-0.05, wspace=0.05)
     ax_map = fig.add_subplot(gs[0, :])
     ax_pa_info = fig.add_subplot(gs[1, 0])
+    ax_pa_info.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax_cr_info = fig.add_subplot(gs[1, 1])
+    ax_cr_info.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax_vic_info = fig.add_subplot(gs[1, 2])
+    ax_vic_info.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     return fig, (ax_map, ax_pa_info, ax_cr_info, ax_vic_info)
 
 
@@ -320,7 +323,6 @@ def _plot_info_box(ax, place, plot_data, theme):
 
 
 def _info_box_hide_frame(ax, theme):
-    ax.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax.xaxis.set_visible(False)
     ax.yaxis.set_visible(False)
     for spine in ax.spines:
