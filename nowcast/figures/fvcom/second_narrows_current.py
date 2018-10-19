@@ -103,8 +103,11 @@ def _prep_fig_axes(figsize, theme):
         3, 1, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
     ax_speed = {"mps": ax_speed}
+    ax_speed["mps"].set_facecolor(theme.COLOURS["axes"]["background"])
     ax_speed["knots"] = ax_speed["mps"].twinx()
+    ax_dir.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_u = {"mps": ax_u}
+    ax_u["mps"].set_facecolor(theme.COLOURS["axes"]["background"])
     ax_u["knots"] = ax_u["mps"].twinx()
     fig.autofmt_xdate()
     return fig, (ax_speed, ax_dir, ax_u)
@@ -146,7 +149,6 @@ def _current_speed_axes_labels(ax, plot_data, theme):
     ax["mps"].grid(axis="both")
     for k in ax:
         theme.set_axis_colors(ax[k])
-        ax[k].set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_current_direction_time_series(ax, plot_data, theme):
@@ -171,7 +173,6 @@ def _current_direction_axes_labels(ax, plot_data, theme):
     ax.legend(loc="best")
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
-    ax.set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_u_velocity_time_series(ax, plot_data, theme):
@@ -209,4 +210,3 @@ def _u_velocity_axes_labels(ax, plot_data, theme):
     ax["mps"].grid(axis="both")
     for k in ax:
         theme.set_axis_colors(ax[k])
-        ax[k].set_facecolor(theme.COLOURS["axes"]["background"])

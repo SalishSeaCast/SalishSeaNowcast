@@ -141,9 +141,12 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(2, 2, width_ratios=[1.618, 1])
     gs.update(wspace=0.23, hspace=0.15)
     ax_speed = {"mps": fig.add_subplot(gs[0, 0])}
+    ax_speed["mps"].set_facecolor(theme.COLOURS["axes"]["background"])
     ax_speed["knots"] = ax_speed["mps"].twinx()
     ax_dir = fig.add_subplot(gs[1, 0])
+    ax_dir.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_map = fig.add_subplot(gs[:, 1])
+    ax_map.set_facecolor(theme.COLOURS["axes"]["background"])
     return fig, (ax_speed, ax_dir, ax_map)
 
 
@@ -194,7 +197,6 @@ def _wind_speed_axes_labels(ax, plot_data, theme):
     ax["mps"].grid(axis="both")
     for k in ax:
         theme.set_axis_colors(ax[k])
-    ax["mps"].set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_wind_direction_time_series(ax, plot_data, theme):
@@ -237,7 +239,6 @@ def _wind_direction_axes_labels(ax, plot_data, theme):
     ax.legend(loc="best")
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
-    ax.set_facecolor(theme.COLOURS["axes"]["background"])
 
 
 def _plot_station_map(ax, coastline, theme):

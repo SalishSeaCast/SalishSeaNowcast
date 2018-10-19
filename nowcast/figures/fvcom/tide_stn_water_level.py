@@ -163,6 +163,7 @@ def _prep_fig_axes(figsize, theme):
         1, 1, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
     fig.autofmt_xdate()
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
     return fig, ax
 
 
@@ -222,4 +223,3 @@ def _water_level_time_series_labels(ax, place, plot_data, theme):
     ax.legend(loc="best", prop=theme.FONTS["legend label small"])
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
-    ax.set_facecolor(theme.COLOURS["axes"]["background"])
