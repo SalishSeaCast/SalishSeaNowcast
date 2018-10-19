@@ -537,14 +537,13 @@ The function docstring
     :returns: :py:class:`matplotlib.figure.Figure`
     """
 
-
 includes description and type information for each of the function arguments.
 Those are written using `Sphinx Info Field List markup`_ so that they render nicely in the :ref:`automatically generated module documentation <AutomaticModuleDocumentationGeneration>`.
 
 .. _Sphinx Info Field List markup: http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists
 
 Simple,
-1-word type information can be included in the :kbd:`:arg ...:` role,
+1-word type information can be included in the :kbd:`:param ...:` role,
 for example:
 
 .. code-block:: restructuredtext
@@ -579,8 +578,8 @@ The function code does 4 things:
 
    That function returns:
 
-   * a :py:obj:`matplotlib.figure.Figure` object
-   * a tuple of :py:obj:`matplotlib.axes.Axes` objects,
+   * a :py:class:`matplotlib.figure.Figure` object
+   * a tuple of :py:class:`matplotlib.axes.Axes` objects,
      one for each axes in the figure
 
    The :py:func:`_prep_fig_axes` function accept arguments named :kbd:`figsize` and :kbd:`theme`.
@@ -594,7 +593,7 @@ The function code does 4 things:
         fig, (ax1, ax2, ax2, ax4) = _prep_fig_axes(figsize, theme)
 
 3. For each axes object returned by :py:func:`_prep_fig_axes`,
-   call a module-private function whose name starts with :py:func:`_plot_` to draw all the things on the axes
+   call a module-private function whose name starts with :py:func:`_plot_` is called to draw all the things on the axes:
 
     .. code-block:: python
 
@@ -621,7 +620,7 @@ The function code does 4 things:
    :py:func:`_thalweg_axes_labels`,
    and :py:func:`_surface_axes_labels`.
 
-4. Return the :py:obj:`matplotlib.figure.Figure` object to the :py:mod:`nowcast.workers.make_plots` worker:
+4. Return the :py:class:`matplotlib.figure.Figure` object to the :py:mod:`nowcast.workers.make_plots` worker:
 
     .. code-block:: python
 
@@ -737,7 +736,7 @@ They may accept other arguments as necessary.
 
 The job of the :py:func:`_plot_*` functions is to act on the :py:obj:`matplotlib.axes.Axes` object
 (:kbd:`ax`)
-so they do not return anything.
+so they may or may not return anything.
 
 
 .. _PlotTracerThalweg:
