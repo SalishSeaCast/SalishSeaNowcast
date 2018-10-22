@@ -222,6 +222,16 @@ observations:
     # Destination directory for ONC ferry data netCDF files
     dest dir: /results/observations/ONC/ferries/
 
+  # VFPA real-time HADCP data
+  hadcp data:
+    # Directory where VFPA HADCP data csv files are stored
+    csv dir: /opp/observations/AISDATA/
+    # Destination directory for VFPA HADCP data netCDF files
+    dest dir: /opp/observations/AISDATA/netcdf/
+    # Template for VFPA HADCP data file path
+    # **Must be quoted to project {} characters**
+    filepath template: 'VFPA_2ND_NARROWS_HADCP_2s_{yyyymm}.nc'
+
 
 run types:
   # Keys are run types to execute, values are NEMO configuration name,
@@ -1105,6 +1115,12 @@ message registry:
       success forecast: forecast FVCOM run completed
       failure forecast: forecast FVCOM run failed
       crash: watch_fvcom worker crashed
+
+    get_vfpa_hadcp:
+      checklist key: VFPA HADCP data
+      success: VFPA HADCP data file created
+      failure: VFPA HADCP data file creation failed
+      crash: get_vfpa_hadcp worker crashed
 
     make_ww3_wind_file:
       checklist key: WW3 wind forcing
