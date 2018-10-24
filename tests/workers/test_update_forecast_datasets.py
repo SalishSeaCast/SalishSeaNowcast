@@ -17,12 +17,52 @@
 from pathlib import Path
 import shlex
 from types import SimpleNamespace
-from unittest.mock import patch, call
+from unittest.mock import call, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import update_forecast_datasets
+
+
+@pytest.fixture()
+def config(tmpdir):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    p = tmpdir.join("config.yaml")
+    p.write(
+        """
+        # Items required by the Config instance        
+        checklist file: nowcast_checklist.yaml
+        python: python
+        logging:
+          handlers: []
+
+        # Items for the tests
+        results archive:
+          nowcast: results/nowcast-blue/
+          forecast: results/forecast/
+          forecast2: results/forecast2/
+        
+        rolling forecasts:
+          days from past: 5
+          temporary results archives: "**patch in tests**"
+          nemo:
+            dest dir: rolling-forecasts/nemo/
+          wwatch3:
+            dest dir: rolling-forecasts/wwatch3/
+            
+        wave forecasts:
+          results archive:
+            nowcast: opp/wwatch3/nowcast/
+            forecast: opp/wwatch3/forecast/
+            forecast2: opp/wwatch3/forecast2/
+        """
+    )
+    config_ = nemo_nowcast.Config()
+    config_.load(str(p))
+    return config_
 
 
 @patch("nowcast.workers.update_forecast_datasets.NowcastWorker")
@@ -90,19 +130,13 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
         )
-        update_forecast_datasets.success(parsed_args)
+        msg_type = update_forecast_datasets.success(parsed_args)
         assert m_logger.info.called
         extra_value = m_logger.info.call_args[1]["extra"]["model"]
         assert extra_value == model
         extra_value = m_logger.info.call_args[1]["extra"]["run_type"]
         assert extra_value == run_type
         assert m_logger.info.call_args[1]["extra"]["run_date"] == "2017-11-10"
-
-    def test_success_msg_type(self, m_logger, model, run_type):
-        parsed_args = SimpleNamespace(
-            model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
-        )
-        msg_type = update_forecast_datasets.success(parsed_args)
         assert msg_type == f"success {model} {run_type}"
 
 
@@ -124,7 +158,7 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
         )
-        update_forecast_datasets.failure(parsed_args)
+        msg_type = update_forecast_datasets.failure(parsed_args)
         assert m_logger.critical.called
         extra_value = m_logger.critical.call_args[1]["extra"]["model"]
         assert extra_value == model
@@ -132,12 +166,6 @@ class TestFailure:
         assert extra_value == run_type
         expected = "2017-11-10"
         assert m_logger.critical.call_args[1]["extra"]["run_date"] == expected
-
-    def test_failure_msg_type(self, m_logger, model, run_type):
-        parsed_args = SimpleNamespace(
-            model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
-        )
-        msg_type = update_forecast_datasets.failure(parsed_args)
         assert msg_type == f"failure {model} {run_type}"
 
 
@@ -156,34 +184,20 @@ class TestUpdateForecastDatasets:
     """Unit tests for update_forecast_datasets() function.
     """
 
-    def test_checklist(self, m_ex_1st_fcst_day, m_logger, model, run_type, tmpdir):
+    def test_checklist(
+        self, m_ex_1st_fcst_day, m_logger, model, run_type, config, tmpdir
+    ):
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
         )
         tmp_forecast_results_archive = tmpdir.ensure_dir("tmp")
-        config = {
-            "results archive": {
-                "nowcast": "results/nowcast-blue/",
-                "forecast": "results/forecast/",
-                "forecast2": "results/forecast2/",
-            },
-            "rolling forecasts": {
-                "days from past": 5,
-                "temporary results archives": str(tmp_forecast_results_archive),
-                "nemo": {"dest dir": "rolling-forecasts/nemo/"},
-                "wwatch3": {"dest dir": "rolling-forecasts/wwatch3/"},
-            },
-            "wave forecasts": {
-                "results archive": {
-                    "nowcast": "opp/wwatch3/nowcast",
-                    "forecast": "opp/wwatch3/forecast",
-                    "forecast2": "opp/wwatch3/forecast2",
-                }
-            },
-        }
         forecast_dir = tmpdir.ensure_dir(config["rolling forecasts"][model]["dest dir"])
         with patch.dict(
-            config["rolling forecasts"][model], {"dest dir": str(forecast_dir)}
+            config["rolling forecasts"],
+            {
+                "temporary results archives": str(tmp_forecast_results_archive),
+                model: {"dest dir": str(forecast_dir)},
+            },
         ):
             checklist = update_forecast_datasets.update_forecast_datasets(
                 parsed_args, config
@@ -230,15 +244,12 @@ class TestAddPastDaysResults:
         run_date,
         days_from_past,
         first_date,
+        config,
         tmpdir,
     ):
         new_forecast_dir = Path(
             str(tmpdir.ensure_dir(f"rolling-forecasts/{model}_new"))
         )
-        config = {
-            "results archive": {"nowcast": "results/nowcast-blue/"},
-            "wave forecasts": {"results archive": {"nowcast": "opp/wwatch3/nowcast"}},
-        }
         update_forecast_datasets._add_past_days_results(
             run_date, days_from_past, new_forecast_dir, model, run_type, config
         )
@@ -283,23 +294,12 @@ class TestAddPastDaysResults:
         run_date,
         days_from_past,
         first_date,
+        config,
         tmpdir,
     ):
         new_forecast_dir = Path(
             str(tmpdir.ensure_dir(f"rolling-forecasts/{model}_new"))
         )
-        config = {
-            "results archive": {
-                "nowcast": "results/nowcast-blue/",
-                "forecast": "results/forecast/",
-            },
-            "wave forecasts": {
-                "results archive": {
-                    "nowcast": "opp/wwatch3/nowcast",
-                    "forecast": "opp/wwatch3/forecast",
-                }
-            },
-        }
         update_forecast_datasets._add_past_days_results(
             run_date, days_from_past, new_forecast_dir, model, run_type, config
         )
@@ -346,15 +346,10 @@ class TestAddForecastResults:
         run_type,
         results_archive,
         forecast_date,
+        config,
         tmpdir,
     ):
         new_forecast_dir = Path(str(tmpdir.ensure_dir(f"rolling-forecasts/nemo_new")))
-        config = {
-            "results archive": {run_type: f"results/{run_type}/"},
-            "wave forecasts": {
-                "results archive": {run_type: f"opp/wwatch3/{run_type}"}
-            },
-        }
         update_forecast_datasets._add_forecast_results(
             run_date,
             new_forecast_dir,
@@ -368,7 +363,7 @@ class TestAddForecastResults:
         )
 
     def test_wwatch3_symlink_forecast2_run(
-        self, m_ex_1st_fcst_day, m_symlink_results, tmpdir
+        self, m_ex_1st_fcst_day, m_symlink_results, config, tmpdir
     ):
         run_date = arrow.get("2018-01-24")
         model = "wwatch3"
@@ -376,12 +371,6 @@ class TestAddForecastResults:
         new_forecast_dir = Path(
             str(tmpdir.ensure_dir(f"rolling-forecasts/{model}_new"))
         )
-        config = {
-            "results archive": {run_type: f"results/{run_type}/"},
-            "wave forecasts": {
-                "results archive": {run_type: f"opp/wwatch3/{run_type}"}
-            },
-        }
         update_forecast_datasets._add_forecast_results(
             run_date,
             new_forecast_dir,
@@ -400,18 +389,12 @@ class TestAddForecastResults:
         )
 
     def test_nemo_forecast2_extract_1st_forecast_day(
-        self, m_ex_1st_fcst_day, m_symlink_results, tmpdir
+        self, m_ex_1st_fcst_day, m_symlink_results, config, tmpdir
     ):
         new_forecast_dir = Path(str(tmpdir.ensure_dir(f"rolling-forecasts/nemo_new")))
         run_date = arrow.get("2018-01-24")
         model = "nemo"
         run_type = "forecast2"
-        config = {
-            "results archive": {run_type: f"results/{run_type}/"},
-            "wave forecasts": {
-                "results archive": {run_type: f"opp/wwatch3/{run_type}"}
-            },
-        }
         update_forecast_datasets._add_forecast_results(
             run_date,
             new_forecast_dir,
@@ -425,18 +408,12 @@ class TestAddForecastResults:
         )
 
     def test_nemo_symlink_forecast2_run(
-        self, m_ex_1st_fcst_day, m_symlink_results, tmpdir
+        self, m_ex_1st_fcst_day, m_symlink_results, config, tmpdir
     ):
         new_forecast_dir = Path(str(tmpdir.ensure_dir(f"rolling-forecasts/nemo_new")))
         run_date = arrow.get("2018-01-24")
         model = "nemo"
         run_type = "forecast2"
-        config = {
-            "results archive": {run_type: f"results/{run_type}/"},
-            "wave forecasts": {
-                "results archive": {run_type: f"opp/wwatch3/{run_type}"}
-            },
-        }
         update_forecast_datasets._add_forecast_results(
             run_date,
             new_forecast_dir,
@@ -470,14 +447,10 @@ class TestExtract1stForecastDay:
     """Unit tests for _extract_1st_forecast_day() function.
     """
 
-    def test_create_tmp_forecast_results_archive(self, m_logger, tmpdir):
+    def test_create_tmp_forecast_results_archive(self, m_logger, config, tmpdir):
         tmp_forecast_results_archive = tmpdir.ensure_dir("tmp_nemo_forecast")
         run_date = arrow.get("2018-01-24")
         model = "nemo"
-        config = {
-            "results archive": {"forecast": "forecast"},
-            "wave forecasts": {"results archive": {"forecast": "opp/wwatch3/forecast"}},
-        }
         update_forecast_datasets._extract_1st_forecast_day(
             Path(str(tmp_forecast_results_archive)), run_date, model, config
         )
@@ -485,14 +458,10 @@ class TestExtract1stForecastDay:
 
     @patch("nowcast.workers.update_forecast_datasets.Path.glob")
     @patch("nowcast.workers.update_forecast_datasets.subprocess.run")
-    def test_nemo_ncks_subprocess(self, m_run, m_glob, m_logger, tmpdir):
+    def test_nemo_ncks_subprocess(self, m_run, m_glob, m_logger, config, tmpdir):
         model = "nemo"
         tmp_forecast_results_archive = tmpdir.ensure_dir(f"tmp_{model}_forecast")
         run_date = arrow.get("2018-01-24")
-        config = {
-            "results archive": {"forecast": "forecast"},
-            "wave forecasts": {"results archive": {"forecast": "opp/wwatch3/forecast"}},
-        }
         m_glob.return_value = [
             # A 10min file that we want to operate on
             Path("results/forecast/24jan18/CampbellRiver.nc"),
@@ -530,14 +499,10 @@ class TestExtract1stForecastDay:
 
     @patch("nowcast.workers.update_forecast_datasets.Path.glob")
     @patch("nowcast.workers.update_forecast_datasets.subprocess.run")
-    def test_wwatch3_ncks_subprocess(self, m_run, m_glob, m_logger, tmpdir):
+    def test_wwatch3_ncks_subprocess(self, m_run, m_glob, m_logger, config, tmpdir):
         model = "wwatch3"
         tmp_forecast_results_archive = tmpdir.ensure_dir(f"tmp_{model}_forecast")
         run_date = arrow.get("2018-04-11")
-        config = {
-            "results archive": {"forecast": "forecast"},
-            "wave forecasts": {"results archive": {"forecast": "opp/wwatch3/forecast"}},
-        }
         m_glob.return_value = [
             Path("opp/wwatch3/forecast/11apr18/" "SoG_ww3_fields_20180410_20180412.nc"),
             Path("opp/wwatch3/forecast/11apr18/" "SoG_ww3_points_20180410_20180412.nc"),
