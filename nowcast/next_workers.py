@@ -1352,15 +1352,9 @@ def after_get_vfpa_hadcp(msg, config, checklist):
     """
     next_workers = {"crash": [], "failure": [], "success": []}
     if msg.type.startswith("success"):
-        run_types = checklist["FVCOM run"].keys()
-        for run_type in run_types:
-            run_date = checklist["FVCOM run"][run_type]["run date"]
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=["fvcom", run_type, "publish", "--run-date", run_date],
-                )
-            )
+        next_workers[msg.type].append(
+            NextWorker("nowcast.workers.ping_erddap", args=["VFPA-HADCP"])
+        )
     return next_workers[msg.type]
 
 
@@ -1442,6 +1436,8 @@ def after_ping_erddap(msg, config, checklist):
         "failure USDDL-CTD": [],
         "success TWDP-ferry": [],
         "failure TWDP-ferry": [],
+        "success VFPA-HADCP": [],
+        "failure VFPA-HADCP": [],
         "success nowcast-green": [],
         "failure nowcast-green": [],
         "success nemo-forecast": [],
@@ -1459,6 +1455,16 @@ def after_ping_erddap(msg, config, checklist):
                 args=["wwatch3", run_type, "publish", "--run-date", run_date],
             )
         )
+    if msg.type == "success VFPA-HADCP":
+        run_types = checklist["FVCOM run"].keys()
+        for run_type in run_types:
+            run_date = checklist["FVCOM run"][run_type]["run date"]
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_plots",
+                    args=["fvcom", run_type, "publish", "--run-date", run_date],
+                )
+            )
     return next_workers[msg.type]
 
 

@@ -375,6 +375,8 @@ erddap:
       - ubcSSf3DvGridFields1hV17-02
     wwatch3-forecast:
       - ubcSSf2DWaveFields30mV17-02
+    VFPA-HADCP:
+      - ubcVFPA2ndNarrowsCurrent2sV1
 
 
 figures:
@@ -1230,6 +1232,8 @@ message registry:
       failure USDDL-CTD: ONC USDDL node CTD ERDDAP dataset flag files creation failed
       success TWDP-ferry: ONC Tsawwassen/Duke Pt. ferry ERDDAP dataset flag files created
       failure TWDP-ferry: ONC Tsawwassen/Duke Pt. ferry ERDDAP dataset flag files creation failed
+      success VFPA-HADCP: VFPA 2nd Narrows Rail Bridge HADCP ERDDAP dataset flag files created
+      failure VFPA-HADCP: VFPA 2nd Narrows Rail Bridge HADCP ERDDAP dataset flag files creation failed
       success nowcast-green: nowcast-green ERDDAP dataset flag files created
       failure nowcast-green: nowcast-green ERDDAP dataset flag files creation failed
       success nemo-forecast: NEMO forecast ERDDAP dataset flag files created

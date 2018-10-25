@@ -41,6 +41,7 @@ def main():
             "SEVIP-CTD",
             "USDDL-CTD",
             "TWDP-ferry",
+            "VFPA-HADCP",
             "nowcast-green",
             "nemo-forecast",
             "wwatch3-forecast",
@@ -51,11 +52,12 @@ def main():
         'SCVIP-CTD' means ONC SCVIP node CTD T&S observations downloaded &
         processed,
         'SEVIP-CTD' means ONC SEVIP node CTD T&S observations downloaded &
-        processed
+        processed,
         'USDDL-CTD' means ONC USDDL node CTD T&S observations downloaded &
-        processed
+        processed,
         'TWDP-ferry' means ONC Tsawwassen/Duke Pt. ferry observations 
-        downloaded & processed
+        downloaded & processed,
+        'VFPA-HADCP' means VFPA 2nd Narrows Rail Bridge HADCP observations processed,
         'nowcast-green' means nowcast green ocean run,
         'nemo-forecast' means updated NEMO rolling forecast,
         'wwatch3-forecast' means updated WaveWatch3 rolling forecast
