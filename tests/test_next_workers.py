@@ -1927,9 +1927,7 @@ class TestAfterGetVFPA_HADCP:
                 Message("after_get_vfpa_hadcp", "success"), config, checklist
             )
         expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=["fvcom", run_type, "publish", "--run-date", "2018-10-25"],
-            host="localhost",
+            "nowcast.workers.ping_erddap", args=["VFPA-HADCP"], host="localhost"
         )
         assert expected in workers
 
@@ -2031,6 +2029,7 @@ class TestAfterPingERDDAP:
             "failure SEVIP-CTD",
             "failure USDDL-CTD",
             "failure TWDP-ferry",
+            "failure VFPA-HADCP",
             "failure nowcast-green",
             "failure nemo-forecast",
             "failure wwatch3-forecast",
@@ -2067,6 +2066,29 @@ class TestAfterPingERDDAP:
         expected = NextWorker(
             "nowcast.workers.make_plots",
             args=["wwatch3", run_type, "publish", "--run-date", run_date],
+            host="localhost",
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    def test_success_vfpa_hadcp_launch_make_plots_fvcom(
+        self, run_type, config, checklist
+    ):
+        run_date = "2018-10-25"
+        p_checklist = patch.dict(
+            checklist,
+            {
+                "ERDDAP flag files": {"VFPA-HADCP": []},
+                "FVCOM run": {run_type: {"run date": run_date}},
+            },
+        )
+        with p_checklist:
+            workers = next_workers.after_ping_erddap(
+                Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.make_plots",
+            args=["fvcom", run_type, "publish", "--run-date", run_date],
             host="localhost",
         )
         assert expected in workers
