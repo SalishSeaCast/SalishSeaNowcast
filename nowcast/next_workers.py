@@ -1319,12 +1319,20 @@ def after_download_fvcom_results(msg, config, checklist):
     if msg.type.startswith("success"):
         run_type = msg.type.split()[1]
         run_date = checklist["FVCOM run"][run_type]["run date"]
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.make_plots",
-                args=["fvcom", run_type, "publish", "--run-date", run_date],
+        if run_type == "nowcast":
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_plots",
+                    args=["fvcom", "nowcast", "publish", "--run-date", run_date],
+                )
             )
-        )
+        if run_type == "forecast":
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.update_forecast_datasets",
+                    args=["fvcom", "forecast", "--run-date", run_date],
+                )
+            )
     return next_workers[msg.type]
 
 
@@ -1348,10 +1356,12 @@ def after_update_forecast_datasets(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
+        "failure fvcom forecast": [],
         "failure nemo forecast": [],
         "failure nemo forecast2": [],
         "failure wwatch3 forecast": [],
         "failure wwatch3 forecast2": [],
+        "success fvcom forecast": [],
         "success nemo forecast": [],
         "success nemo forecast2": [],
         "success wwatch3 forecast": [],
@@ -1369,6 +1379,13 @@ def after_update_forecast_datasets(msg, config, checklist):
                 NextWorker(
                     "nowcast.workers.make_plots",
                     args=["nemo", run_type, "publish", "--run-date", run_date],
+                )
+            )
+        if model == "fvcom" and run_type == "forecast":
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_plots",
+                    args=["fvcom", "forecast", "publish", "--run-date", run_date],
                 )
             )
     return next_workers[msg.type]

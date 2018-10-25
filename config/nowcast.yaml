@@ -307,12 +307,17 @@ rolling forecasts:
   days from past: 5
   # Root of directory tree to hold temporary results files
   temporary results archives: /tmp/
+  fvcom:
+    # Destination directory for most recent forecast file symlinks
+    most recent forecast dir: /opp/fvcom/most_recent_forecast/
   nemo:
     # Destination directory for rolling forecast results directories
     dest dir: /results/SalishSea/rolling-forecasts/nemo/
   wwatch3:
     # Destination directory for rolling forecast results directories
     dest dir: /results/SalishSea/rolling-forecasts/wwatch3/
+    # Destination directory for most recent forecast file symlinks
+    most recent forecast dir: /opp/wwatch3/most_recent_forecast/
 
 
 # Notifications to ERDDAP server that datasets have been updated
@@ -1201,6 +1206,8 @@ message registry:
 
     update_forecast_datasets:
      checklist key: update forecast datasets
+     success fvcom forecast: VHFR FVCOM most_recent_forecast files dataset updated from forecast run
+     failure fvcom forecast: VHFR FVCOM most_recent_forecast files dataset update from forecast run failed
      success nemo forecast: NEMO forecast datasets updated from forecast run
      failure nemo forecast: NEMO forecast datasets update from forecast run failed
      success nemo forecast2: NEMO forecast datasets updated from forecast2 run
