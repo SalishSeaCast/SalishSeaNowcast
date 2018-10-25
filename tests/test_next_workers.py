@@ -1855,20 +1855,49 @@ class TestAfterDownloadFVCOMResults:
         )
         assert workers == []
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-    def test_success_launch_make_plots(self, run_type, config, checklist):
+    def test_success_nowcast_launch_make_plots(self, config, checklist):
         p_checklist = patch.dict(
-            checklist, {"FVCOM run": {run_type: {"run date": "2018-02-27"}}}
+            checklist, {"FVCOM run": {"nowcast": {"run date": "2018-02-27"}}}
         )
         with p_checklist:
             workers = next_workers.after_download_fvcom_results(
-                Message("download_fvcom_results", f"success {run_type}"),
-                config,
-                checklist,
+                Message("download_fvcom_results", "success nowcast"), config, checklist
             )
         expected = NextWorker(
             "nowcast.workers.make_plots",
-            args=["fvcom", run_type, "publish", "--run-date", "2018-02-27"],
+            args=["fvcom", "nowcast", "publish", "--run-date", "2018-02-27"],
+            host="localhost",
+        )
+        assert expected in workers
+
+    def test_success_nowcast_no_launch_update_forecast_datasets(
+        self, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {"FVCOM run": {"nowcast": {"run date": "2018-10-25"}}}
+        )
+        with p_checklist:
+            workers = next_workers.after_download_fvcom_results(
+                Message("download_fvcom_results", "success nowcast"), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.update_forecast_datasets",
+            args=["fvcom", "nowcast", "--run-date", "2018-10-25"],
+            host="localhost",
+        )
+        assert expected not in workers
+
+    def test_success_forecast_launch_update_forecast_datasets(self, config, checklist):
+        p_checklist = patch.dict(
+            checklist, {"FVCOM run": {"forecast": {"run date": "2018-10-25"}}}
+        )
+        with p_checklist:
+            workers = next_workers.after_download_fvcom_results(
+                Message("download_fvcom_results", "success forecast"), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.update_forecast_datasets",
+            args=["fvcom", "forecast", "--run-date", "2018-10-25"],
             host="localhost",
         )
         assert expected in workers
@@ -1879,7 +1908,15 @@ class TestAfterUpdateForecastDatasets:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure nemo forecast", "failure nemo forecast2"]
+        "msg_type",
+        [
+            "crash",
+            "failure fvcom forecast",
+            "failure nemo forecast",
+            "failure nemo forecast2",
+            "failure wwatch3 forecast",
+            "failure wwatch3 forecast2",
+        ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_update_forecast_datasets(
@@ -1904,6 +1941,23 @@ class TestAfterUpdateForecastDatasets:
             )
         expected = NextWorker(
             "nowcast.workers.ping_erddap", args=["nemo-forecast"], host="localhost"
+        )
+        assert expected in workers
+
+    def test_success_fvcom_launch_make_plots_forecast_publish(self, config, checklist):
+        p_checklist = patch.dict(
+            checklist, {"FVCOM run": {"forecast": {"run date": "2018-10-25"}}}
+        )
+        with p_checklist:
+            workers = next_workers.after_update_forecast_datasets(
+                Message("update_forecast_datasets", "success fvcom forecast"),
+                config,
+                checklist,
+            )
+        expected = NextWorker(
+            "nowcast.workers.make_plots",
+            args=["fvcom", "forecast", "publish", "--run-date", "2018-10-25"],
+            host="localhost",
         )
         assert expected in workers
 

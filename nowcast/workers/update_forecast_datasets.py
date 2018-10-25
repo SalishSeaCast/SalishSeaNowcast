@@ -41,9 +41,10 @@ def main():
     worker.init_cli()
     worker.cli.add_argument(
         "model",
-        choices={"nemo", "wwatch3"},
+        choices={"fvcom", "nemo", "wwatch3"},
         help="""
         Model to update the rolling forecast datasets for:
+        'fvcom' means the Vancouver Harbour Fraser River (VHFR) FVCOM model,
         'nemo' means the Salish Sea NEMO model,
         'wwatch3' means the Strait of Georgia WaveWatch3(TM) model.
         """,
@@ -93,9 +94,59 @@ def update_forecast_datasets(parsed_args, config, *args):
     model = parsed_args.model
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
+    updated_dirs = []
+    try:
+        most_recent_fcst_dir = Path(
+            config["rolling forecasts"][model]["most recent forecast dir"]
+        )
+        _symlink_most_recent_forecast(
+            run_date, most_recent_fcst_dir, model, run_type, config
+        )
+        updated_dirs.append(os.fspath(most_recent_fcst_dir))
+    except KeyError:
+        # no most recent forecast dir for NEMO, and that's okay
+        pass
+    try:
+        forecast_dir = Path(config["rolling forecasts"][model]["dest dir"])
+        _update_rolling_forecast(run_date, forecast_dir, model, run_type, config)
+        updated_dirs.append(os.fspath(forecast_dir))
+    except KeyError:
+        # no rolling forecast dir for VHFR FVCOM, and that's okay
+        pass
+    checklist = {model: {run_type: updated_dirs}}
+    return checklist
+
+
+def _symlink_most_recent_forecast(
+    run_date, most_recent_fcst_dir, model, run_type, config
+):
+    ddmmmyy = run_date.format("DDMMMYY").lower()
+    logger.info(
+        f"updating {model} most_recent_forecast directory from {run_type}/{ddmmmyy} run"
+    )
+    for f in most_recent_fcst_dir.iterdir():
+        f.unlink()
+    logger.debug(f"deleted previous forecast symlinks from {most_recent_fcst_dir}")
+    runs = {"fvcom": "vhfr fvcom runs", "wwatch3": "wave forecasts"}
+    results_archive = (
+        Path(config["results archive"]["nowcast"])
+        if model == "nemo"
+        else Path(config[runs[model]]["results archive"][run_type])
+    )
+    for f in (results_archive / ddmmmyy).glob("*.nc"):
+        if "restart" not in f.name:
+            (most_recent_fcst_dir / f.name).symlink_to(f)
+    logger.debug(
+        f"symlinked *.nc files from {results_archive/ddmmmyy} in to {most_recent_fcst_dir}"
+    )
+    logger.info(
+        f"updated {model} most_recent_forecast directory from {run_type}/{ddmmmyy} run"
+    )
+
+
+def _update_rolling_forecast(run_date, forecast_dir, model, run_type, config):
     ddmmmyy = run_date.format("DDMMMYY").lower()
     logger.info(f"updating {model} forecast directory for {run_type}/{ddmmmyy} run")
-    forecast_dir = Path(config["rolling forecasts"][model]["dest dir"])
     new_forecast_dir = _create_new_forecast_dir(forecast_dir, model, run_type)
     days_from_past = config["rolling forecasts"]["days from past"]
     tmp_forecast_results_archive = Path(
@@ -123,8 +174,6 @@ def update_forecast_datasets(parsed_args, config, *args):
         f"updated {model} forecast directory for {run_type}/{ddmmmyy} run: "
         f"{forecast_dir}"
     )
-    checklist = {model: {run_type: os.fspath(forecast_dir)}}
-    return checklist
 
 
 def _create_new_forecast_dir(forecast_dir, model, run_type):
@@ -216,6 +265,7 @@ def _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, con
     try:
         day_dir.mkdir(parents=True)
     except FileExistsError:
+        # Day directory exists, and that's okay
         pass
     logger.debug(f"created new {model} temporary forecast directory: {day_dir}")
     results_archive = model_params[model]["results archive"]

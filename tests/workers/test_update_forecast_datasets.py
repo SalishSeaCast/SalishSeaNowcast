@@ -17,7 +17,7 @@
 from pathlib import Path
 import shlex
 from types import SimpleNamespace
-from unittest.mock import call, patch
+from unittest.mock import call, Mock, patch
 
 import arrow
 import nemo_nowcast
@@ -47,17 +47,25 @@ def config(tmpdir):
         
         rolling forecasts:
           days from past: 5
-          temporary results archives: "**patch in tests**"
+          temporary results archives: /tmp/
+          fvcom:
+            most recent forecast dir: opp/fvcom/most_recent_forecast
           nemo:
             dest dir: rolling-forecasts/nemo/
           wwatch3:
             dest dir: rolling-forecasts/wwatch3/
+            most recent forecast dir: opp/wwatch3/most_recent_forecast
             
         wave forecasts:
           results archive:
             nowcast: opp/wwatch3/nowcast/
             forecast: opp/wwatch3/forecast/
             forecast2: opp/wwatch3/forecast2/
+            
+        vhfr fvcom runs:
+          results archive:
+            nowcast: opp/fvcom/nowcast/
+            forecast: opp/fvcom/forecast/
         """
     )
     config_ = nemo_nowcast.Config()
@@ -65,29 +73,50 @@ def config(tmpdir):
     return config_
 
 
-@patch("nowcast.workers.update_forecast_datasets.NowcastWorker")
+@pytest.fixture()
+def prod_config(tmpdir):
+    """:py:class:`nemo_nowcast.Config` instance from production config TAML file to use for
+    testing its contents.
+    """
+    prod_config_ = nemo_nowcast.Config()
+    p_logs_dir = tmpdir.ensure_dir("nowcast_logs")
+    p_env_dir = tmpdir.ensure_dir("nowcast-env")
+    p_environ = patch.dict(
+        nemo_nowcast.config.os.environ,
+        {"NOWCAST_LOGS": str(p_logs_dir), "NOWCAST_ENV": str(p_env_dir)},
+    )
+    with p_environ:
+        prod_config_.load("../../config/nowcast.yaml")
+    return prod_config_
+
+
+@patch("nowcast.workers.update_forecast_datasets.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         update_forecast_datasets.main()
         args, kwargs = m_worker.call_args
         assert args == ("update_forecast_datasets",)
         assert "description" in kwargs
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         update_forecast_datasets.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_model_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         update_forecast_datasets.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("model",)
-        assert kwargs["choices"] == {"nemo", "wwatch3"}
+        assert kwargs["choices"] == {"fvcom", "nemo", "wwatch3"}
         assert "help" in kwargs
 
     def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         update_forecast_datasets.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_type",)
@@ -95,6 +124,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_add_data_date_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         update_forecast_datasets.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ("--run-date",)
@@ -102,6 +132,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         update_forecast_datasets.main()
         args, kwargs = m_worker().run.call_args
         expected = (
@@ -112,16 +143,68 @@ class TestMain:
         assert args == expected
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "update_forecast_datasets" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"][
+            "update_forecast_datasets"
+        ]
+        assert msg_registry["checklist key"] == "update forecast datasets"
+        messages = (
+            "success fvcom forecast",
+            "failure fvcom forecast",
+            "success nemo forecast",
+            "failure nemo forecast",
+            "success nemo forecast2",
+            "failure nemo forecast2",
+            "success wwatch3 forecast",
+            "failure wwatch3 forecast",
+            "success wwatch3 forecast2",
+            "failure wwatch3 forecast2",
+            "crash",
+        )
+        for msg in messages:
+            assert msg in msg_registry
+
+    def test_results_archives(self, prod_config):
+        fvcom_run_types = ("nowcast", "forecast")
+        for run_type in fvcom_run_types:
+            assert run_type in prod_config["vhfr fvcom runs"]["results archive"]
+        nemo_run_types = ("nowcast", "forecast", "forecast2")
+        for run_type in nemo_run_types:
+            assert run_type in prod_config["results archive"]
+        wwatch3_run_types = ("nowcast", "forecast", "forecast2")
+        for run_type in wwatch3_run_types:
+            assert run_type in prod_config["wave forecasts"]["results archive"]
+
+    def test_rolling_foreacsts(self, prod_config):
+        assert prod_config["rolling forecasts"]["days from past"] == 5
+        assert prod_config["rolling forecasts"]["temporary results archives"] == "/tmp/"
+        fvcom = prod_config["rolling forecasts"]["fvcom"]
+        assert fvcom["most recent forecast dir"] == "/opp/fvcom/most_recent_forecast/"
+        nemo = prod_config["rolling forecasts"]["nemo"]
+        assert nemo["dest dir"] == "/results/SalishSea/rolling-forecasts/nemo/"
+        wwatch3 = prod_config["rolling forecasts"]["wwatch3"]
+        assert wwatch3["dest dir"] == "/results/SalishSea/rolling-forecasts/wwatch3/"
+        assert (
+            wwatch3["most recent forecast dir"] == "/opp/wwatch3/most_recent_forecast/"
+        )
+
+
 @pytest.mark.parametrize(
     "model, run_type",
     [
+        ("fvcom", "forecast"),
         ("nemo", "forecast"),
         ("nemo", "forecast2"),
         ("wwatch3", "forecast"),
         ("wwatch3", "forecast2"),
     ],
 )
-@patch("nowcast.workers.update_forecast_datasets.logger")
+@patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -143,13 +226,14 @@ class TestSuccess:
 @pytest.mark.parametrize(
     "model, run_type",
     [
+        ("fvcom", "forecast"),
         ("nemo", "forecast"),
         ("nemo", "forecast2"),
         ("wwatch3", "forecast"),
         ("wwatch3", "forecast2"),
     ],
 )
-@patch("nowcast.workers.update_forecast_datasets.logger")
+@patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -169,47 +253,222 @@ class TestFailure:
         assert msg_type == f"failure {model} {run_type}"
 
 
-@pytest.mark.parametrize(
-    "model, run_type",
-    [
-        ("nemo", "forecast"),
-        ("nemo", "forecast2"),
-        ("wwatch3", "forecast"),
-        ("wwatch3", "forecast2"),
-    ],
+@patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
+@patch(
+    "nowcast.workers.update_forecast_datasets._symlink_most_recent_forecast",
+    autospec=True,
 )
-@patch("nowcast.workers.update_forecast_datasets.logger")
-@patch("nowcast.workers.update_forecast_datasets._extract_1st_forecast_day")
+@patch(
+    "nowcast.workers.update_forecast_datasets._update_rolling_forecast", autospec=True
+)
 class TestUpdateForecastDatasets:
     """Unit tests for update_forecast_datasets() function.
     """
 
-    def test_checklist(
-        self, m_ex_1st_fcst_day, m_logger, model, run_type, config, tmpdir
+    @pytest.mark.parametrize(
+        "model, run_type",
+        [("fvcom", "forecast"), ("wwatch3", "forecast"), ("wwatch3", "forecast2")],
+    )
+    def test_most_recent_forecast_checklist(
+        self, m_upd_rf, m_symlink_mrf, m_logger, model, run_type, config, tmpdir
     ):
         parsed_args = SimpleNamespace(
-            model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
+            model=model, run_type=run_type, run_date=arrow.get("2018-10-24")
         )
         tmp_forecast_results_archive = tmpdir.ensure_dir("tmp")
-        forecast_dir = tmpdir.ensure_dir(config["rolling forecasts"][model]["dest dir"])
+        most_recent_fcst_dir = tmpdir.ensure_dir(
+            config["rolling forecasts"][model]["most recent forecast dir"]
+        )
         with patch.dict(
             config["rolling forecasts"],
             {
                 "temporary results archives": str(tmp_forecast_results_archive),
-                model: {"dest dir": str(forecast_dir)},
+                model: {"most recent forecast dir": str(most_recent_fcst_dir)},
             },
         ):
             checklist = update_forecast_datasets.update_forecast_datasets(
                 parsed_args, config
             )
-        expected = {model: {run_type: str(forecast_dir)}}
+        expected = {model: {run_type: [str(most_recent_fcst_dir)]}}
         assert checklist == expected
+
+    @pytest.mark.parametrize(
+        "model, run_type",
+        [
+            ("nemo", "forecast"),
+            ("nemo", "forecast2"),
+            ("wwatch3", "forecast"),
+            ("wwatch3", "forecast2"),
+        ],
+    )
+    def test_rolling_forecast_checklist(
+        self, m_upd_rf, m_symlink_mrf, m_logger, model, run_type, config, tmpdir
+    ):
+        parsed_args = SimpleNamespace(
+            model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
+        )
+        tmp_forecast_results_archive = tmpdir.ensure_dir("tmp")
+        rolling_fcst_dir = tmpdir.ensure_dir(
+            config["rolling forecasts"][model]["dest dir"]
+        )
+        with patch.dict(
+            config["rolling forecasts"],
+            {
+                "temporary results archives": str(tmp_forecast_results_archive),
+                model: {"dest dir": str(rolling_fcst_dir)},
+            },
+        ):
+            checklist = update_forecast_datasets.update_forecast_datasets(
+                parsed_args, config
+            )
+        expected = {model: {run_type: [str(rolling_fcst_dir)]}}
+        assert checklist == expected
+
+    @pytest.mark.parametrize(
+        "model, run_type", [("wwatch3", "forecast"), ("wwatch3", "forecast2")]
+    )
+    def test_most_recent_and_rolling_forecast_checklist(
+        self, m_upd_rf, m_symlink_mrf, m_logger, model, run_type, config, tmpdir
+    ):
+        parsed_args = SimpleNamespace(
+            model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
+        )
+        tmp_forecast_results_archive = tmpdir.ensure_dir("tmp")
+        most_recent_fcst_dir = tmpdir.ensure_dir(
+            config["rolling forecasts"][model]["most recent forecast dir"]
+        )
+        rolling_fcst_dir = tmpdir.ensure_dir(
+            config["rolling forecasts"][model]["dest dir"]
+        )
+        with patch.dict(
+            config["rolling forecasts"],
+            {
+                "temporary results archives": str(tmp_forecast_results_archive),
+                model: {
+                    "dest dir": str(rolling_fcst_dir),
+                    "most recent forecast dir": str(most_recent_fcst_dir),
+                },
+            },
+        ):
+            checklist = update_forecast_datasets.update_forecast_datasets(
+                parsed_args, config
+            )
+        expected = {
+            model: {run_type: [str(most_recent_fcst_dir), str(rolling_fcst_dir)]}
+        }
+        assert checklist == expected
+
+
+@patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
+class TestSymlinkMostRecentForecast:
+    """Unit tests for _symlink_most_recent_forecast() function.
+    """
+
+    @pytest.mark.parametrize(
+        "model, run_type",
+        [("fvcom", "forecast"), ("wwatch3", "forecast"), ("wwatch3", "forecast2")],
+    )
+    def test_unlink_prev_forecast_files(
+        self, m_logger, model, run_type, config, tmpdir
+    ):
+        parsed_args = SimpleNamespace(
+            model=model, run_type=run_type, run_date=arrow.get("2018-10-25")
+        )
+        most_recent_fcst_dir = tmpdir.ensure_dir(
+            config["rolling forecasts"][model]["most recent forecast dir"]
+        )
+        prev_fcst_files = ("foo.nc", "bar.nc")
+        for f in prev_fcst_files:
+            most_recent_fcst_dir.ensure(f)
+        update_forecast_datasets._symlink_most_recent_forecast(
+            parsed_args.run_date,
+            Path(str(most_recent_fcst_dir)),
+            model,
+            run_type,
+            config,
+        )
+        for f in prev_fcst_files:
+            assert not most_recent_fcst_dir.join(f).check(file=True)
+
+    @pytest.mark.parametrize(
+        "model, run_type",
+        [("fvcom", "forecast"), ("wwatch3", "forecast"), ("wwatch3", "forecast2")],
+    )
+    def test_symlink_new_forecast_files(
+        self, m_logger, model, run_type, config, tmpdir
+    ):
+        parsed_args = SimpleNamespace(
+            model=model, run_type=run_type, run_date=arrow.get("2018-10-25")
+        )
+        most_recent_fcst_dir = tmpdir.ensure_dir(
+            config["rolling forecasts"][model]["most recent forecast dir"]
+        )
+        runs = {"fvcom": "vhfr fvcom runs", "wwatch3": "wave forecasts"}
+        results_archive = tmpdir.ensure_dir(
+            config[runs[model]]["results archive"][run_type]
+        )
+        new_fcst_files = ["foo.nc", "foo_restart.nc", "bar.nc"]
+        for f in new_fcst_files:
+            results_archive.ensure_dir("25oct18").ensure(f)
+        with patch.dict(
+            config[runs[model]]["results archive"], {run_type: str(results_archive)}
+        ):
+            update_forecast_datasets._symlink_most_recent_forecast(
+                parsed_args.run_date,
+                Path(str(most_recent_fcst_dir)),
+                model,
+                run_type,
+                config,
+            )
+        new_fcst_files.remove("foo_restart.nc")
+        for f in new_fcst_files:
+            assert most_recent_fcst_dir.join(f).check(link=True)
+        assert not most_recent_fcst_dir.join("foo_restart.nc").check(link=True)
+
+
+@patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
+class TestUpdateRollingForecast:
+    """Unit tests for _u[pdate_rolling_forecast() function.
+    """
+
+    @pytest.mark.parametrize(
+        "model, run_type",
+        [
+            ("nemo", "forecast"),
+            ("nemo", "forecast2"),
+            ("wwatch3", "forecast"),
+            ("wwatch3", "forecast2"),
+        ],
+    )
+    def test_update_rolling_forecast(self, m_logger, model, run_type, config, tmpdir):
+        parsed_args = SimpleNamespace(
+            model=model, run_type=run_type, run_date=arrow.get("2018-10-25")
+        )
+        tmp_forecast_results_archive = tmpdir.ensure_dir("tmp")
+        rolling_fcst_dir = tmpdir.ensure_dir(
+            config["rolling forecasts"][model]["dest dir"]
+        )
+        with patch.dict(
+            config["rolling forecasts"],
+            {
+                "temporary results archives": str(tmp_forecast_results_archive),
+                model: {"dest dir": str(rolling_fcst_dir)},
+            },
+        ):
+            update_forecast_datasets._update_rolling_forecast(
+                parsed_args.run_date,
+                Path(str(rolling_fcst_dir)),
+                model,
+                run_type,
+                config,
+            )
+        assert rolling_fcst_dir.check(dir=True)
 
 
 @pytest.mark.parametrize(
     "model, run_type", [("nemo", "forecast"), ("nemo", "forecast2")]
 )
-@patch("nowcast.workers.update_forecast_datasets.logger")
+@patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestCreateNewForecastDir:
     """Unit test for _create_new_forecast_dir() function.
     """
@@ -222,8 +481,10 @@ class TestCreateNewForecastDir:
         assert new_forecast_dir == Path(f"{forecast_dir}_new")
 
 
-@patch("nowcast.workers.update_forecast_datasets._symlink_results")
-@patch("nowcast.workers.update_forecast_datasets._extract_1st_forecast_day")
+@patch("nowcast.workers.update_forecast_datasets._symlink_results", autospec=True)
+@patch(
+    "nowcast.workers.update_forecast_datasets._extract_1st_forecast_day", autospec=True
+)
 class TestAddPastDaysResults:
     """Unit test for _add_past_days_results() function.
     """
@@ -313,7 +574,9 @@ class TestAddPastDaysResults:
 
 
 @patch("nowcast.workers.update_forecast_datasets._symlink_results")
-@patch("nowcast.workers.update_forecast_datasets._extract_1st_forecast_day")
+@patch(
+    "nowcast.workers.update_forecast_datasets._extract_1st_forecast_day", autospec=True
+)
 class TestAddForecastResults:
     """Unit tests for _add_forecast_results() function.
     """
@@ -442,7 +705,7 @@ class TestAddForecastResults:
         ]
 
 
-@patch("nowcast.workers.update_forecast_datasets.logger")
+@patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestExtract1stForecastDay:
     """Unit tests for _extract_1st_forecast_day() function.
     """
@@ -456,8 +719,8 @@ class TestExtract1stForecastDay:
         )
         assert Path(str(tmp_forecast_results_archive), "25jan18").exists()
 
-    @patch("nowcast.workers.update_forecast_datasets.Path.glob")
-    @patch("nowcast.workers.update_forecast_datasets.subprocess.run")
+    @patch("nowcast.workers.update_forecast_datasets.Path.glob", autospec=True)
+    @patch("nowcast.workers.update_forecast_datasets.subprocess.run", autospec=True)
     def test_nemo_ncks_subprocess(self, m_run, m_glob, m_logger, config, tmpdir):
         model = "nemo"
         tmp_forecast_results_archive = tmpdir.ensure_dir(f"tmp_{model}_forecast")
@@ -497,8 +760,8 @@ class TestExtract1stForecastDay:
             ),
         ]
 
-    @patch("nowcast.workers.update_forecast_datasets.Path.glob")
-    @patch("nowcast.workers.update_forecast_datasets.subprocess.run")
+    @patch("nowcast.workers.update_forecast_datasets.Path.glob", autospec=True)
+    @patch("nowcast.workers.update_forecast_datasets.subprocess.run", autospec=True)
     def test_wwatch3_ncks_subprocess(self, m_run, m_glob, m_logger, config, tmpdir):
         model = "wwatch3"
         tmp_forecast_results_archive = tmpdir.ensure_dir(f"tmp_{model}_forecast")
@@ -535,7 +798,7 @@ class TestExtract1stForecastDay:
 @pytest.mark.parametrize(
     "model, run_type", [("nemo", "forecast"), ("nemo", "forecast2")]
 )
-@patch("nowcast.workers.update_forecast_datasets.logger")
+@patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestSymlinkResults:
     """Unit tests for _symlink_results() function.
     """
