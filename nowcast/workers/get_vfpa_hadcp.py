@@ -12,7 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""SalishSeaCast worker that 
+"""SalishSeaCast worker that processes VFPA HADCP observations from the 2nd Narrows Rail Bridge
+for a specified UTC day from CSV files into a monthly netCDF file.
+
+The observations are stored as a collection of netCDF-4/HDF5 files that is accessible via
+https://salishsea.eos.ubc.ca/erddap/info/ubcVFPA2ndNarrowsCurrent2sV1/index.html.
+
+Development notebook:
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/default/notebooks/2ndNarrowsHADPCtoERDDAP.ipynb
 """
 import logging
 import os
@@ -195,7 +202,7 @@ def _make_hour_dataset(csv_dir, utc_start_hr, place):
     ds.attrs = {
         "cdm_data_type": "TimeSeries",
         "cdm_timeseries_variables": "speed, direction",
-        "institution": "UCB EOAS &amp; DFO IOS",
+        "institution": "UCB EOAS & DFO IOS",
         "institution_fullname": (
             "Earth, Ocean & Atmospheric Sciences, University of British Columbia, "
             "Fisheries and Oceans Canada, Institute of Ocean Sciences"
@@ -205,7 +212,7 @@ def _make_hour_dataset(csv_dir, utc_start_hr, place):
             "Salish Sea MEOPAR Project Contributors, The University of British Columbia, "
             "and the Vancouver Fraser Port Authority. "
             "They are licensed under the Apache License, Version 2.0. "
-            "http://www.apache.org/licenses/LICENSE-2.0. "
+            "https://www.apache.org/licenses/LICENSE-2.0. "
             "Raw instrument data on which this dataset is based were provided by "
             "Vancouver Fraser Port Authority."
         ),

@@ -1855,17 +1855,20 @@ class TestAfterDownloadFVCOMResults:
         )
         assert workers == []
 
-    def test_success_nowcast_launch_make_plots(self, config, checklist):
+    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    def test_success_launch_get_vfpa_hadcp(self, run_type, config, checklist):
         p_checklist = patch.dict(
-            checklist, {"FVCOM run": {"nowcast": {"run date": "2018-02-27"}}}
+            checklist, {"FVCOM run": {run_type: {"run date": "2018-10-25"}}}
         )
         with p_checklist:
             workers = next_workers.after_download_fvcom_results(
-                Message("download_fvcom_results", "success nowcast"), config, checklist
+                Message("download_fvcom_results", f"success {run_type}"),
+                config,
+                checklist,
             )
         expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=["fvcom", "nowcast", "publish", "--run-date", "2018-02-27"],
+            "nowcast.workers.get_vfpa_hadcp",
+            args=["--data-date", "2018-10-25"],
             host="localhost",
         )
         assert expected in workers
@@ -1898,6 +1901,34 @@ class TestAfterDownloadFVCOMResults:
         expected = NextWorker(
             "nowcast.workers.update_forecast_datasets",
             args=["fvcom", "forecast", "--run-date", "2018-10-25"],
+            host="localhost",
+        )
+        assert expected in workers
+
+
+class TestAfterGetVFPA_HADCP:
+    """Unit tests for the after_get_vfpa_hadcp function.
+    """
+
+    @pytest.mark.parametrize("msg_type", ["crash", "failure"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_get_vfpa_hadcp(
+            Message("after_get_vfpa_hadcp", msg_type), config, checklist
+        )
+        assert workers == []
+
+    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    def test_success_launch_make_plots(self, run_type, config, checklist):
+        p_checklist = patch.dict(
+            checklist, {"FVCOM run": {run_type: {"run date": "2018-10-25"}}}
+        )
+        with p_checklist:
+            workers = next_workers.after_get_vfpa_hadcp(
+                Message("after_get_vfpa_hadcp", "success"), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.make_plots",
+            args=["fvcom", run_type, "publish", "--run-date", "2018-10-25"],
             host="localhost",
         )
         assert expected in workers
@@ -1941,23 +1972,6 @@ class TestAfterUpdateForecastDatasets:
             )
         expected = NextWorker(
             "nowcast.workers.ping_erddap", args=["nemo-forecast"], host="localhost"
-        )
-        assert expected in workers
-
-    def test_success_fvcom_launch_make_plots_forecast_publish(self, config, checklist):
-        p_checklist = patch.dict(
-            checklist, {"FVCOM run": {"forecast": {"run date": "2018-10-25"}}}
-        )
-        with p_checklist:
-            workers = next_workers.after_update_forecast_datasets(
-                Message("update_forecast_datasets", "success fvcom forecast"),
-                config,
-                checklist,
-            )
-        expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=["fvcom", "forecast", "publish", "--run-date", "2018-10-25"],
-            host="localhost",
         )
         assert expected in workers
 

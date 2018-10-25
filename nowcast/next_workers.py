@@ -1319,18 +1319,46 @@ def after_download_fvcom_results(msg, config, checklist):
     if msg.type.startswith("success"):
         run_type = msg.type.split()[1]
         run_date = checklist["FVCOM run"][run_type]["run date"]
-        if run_type == "nowcast":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=["fvcom", "nowcast", "publish", "--run-date", run_date],
-                )
-            )
+        next_workers[msg.type].append(
+            NextWorker("nowcast.workers.get_vfpa_hadcp", args=["--data-date", run_date])
+        )
         if run_type == "forecast":
             next_workers[msg.type].append(
                 NextWorker(
                     "nowcast.workers.update_forecast_datasets",
                     args=["fvcom", "forecast", "--run-date", run_date],
+                )
+            )
+    return next_workers[msg.type]
+
+
+def after_get_vfpa_hadcp(msg, config, checklist):
+    """Calculate the list of workers to launch after the
+    after_get_vfpa_hadcp worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {"crash": [], "failure": [], "success": []}
+    if msg.type.startswith("success"):
+        run_types = checklist["FVCOM run"].keys()
+        for run_type in run_types:
+            run_date = checklist["FVCOM run"][run_type]["run date"]
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_plots",
+                    args=["fvcom", run_type, "publish", "--run-date", run_date],
                 )
             )
     return next_workers[msg.type]
@@ -1379,13 +1407,6 @@ def after_update_forecast_datasets(msg, config, checklist):
                 NextWorker(
                     "nowcast.workers.make_plots",
                     args=["nemo", run_type, "publish", "--run-date", run_date],
-                )
-            )
-        if model == "fvcom" and run_type == "forecast":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=["fvcom", "forecast", "publish", "--run-date", run_date],
                 )
             )
     return next_workers[msg.type]
