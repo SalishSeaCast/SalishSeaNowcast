@@ -389,6 +389,8 @@ figures:
     tide stn ssh time series:
       # **Must be quoted to project {} characters**
       'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10mV17-02'
+    2nd narrows hadcp time series:
+      https://salishsea.eos.ubc.ca/erddap/tabledap/ubcVFPA2ndNarrowsCurrent2sV1
     wwatch3 fields:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02.nc?hs,fp
   # Directory in which to find bathymetry and mesh mask files

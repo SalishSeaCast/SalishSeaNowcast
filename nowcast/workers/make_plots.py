@@ -262,10 +262,12 @@ def make_plots(parsed_args, config, *args):
         nemo_ssh_dataset_url_tmpl = config["figures"]["dataset URLs"][
             "tide stn ssh time series"
         ]
-        fig_functions = _prep_fvcom_publish_fig_functions(
-            fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl
+        obs_hadcp_dataset = xarray.open_dataset(
+            config["figures"]["dataset URLs"]["2nd narrows hadcp time series"]
         )
-
+        fig_functions = _prep_fvcom_publish_fig_functions(
+            fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+        )
     if model == "wwatch3":
         wwatch3_dataset_url = config["figures"]["dataset URLs"]["wwatch3 fields"]
         fig_functions = _prep_wwatch3_publish_fig_functions(wwatch3_dataset_url)
@@ -728,7 +730,9 @@ def _prep_publish_fig_functions(
     return fig_functions
 
 
-def _prep_fvcom_publish_fig_functions(fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl):
+def _prep_fvcom_publish_fig_functions(
+    fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+):
     names = {
         "Calamity Point": "CP_waterlevel",
         "Indian Arm Head": "IAH_waterlevel",
@@ -753,7 +757,7 @@ def _prep_fvcom_publish_fig_functions(fvcom_stns_dataset, nemo_ssh_dataset_url_t
         {
             "2ndNarrows_current": {
                 "function": second_narrows_current.make_figure,
-                "args": ("2nd Narrows", fvcom_stns_dataset),
+                "args": ("2nd Narrows", fvcom_stns_dataset, obs_hadcp_dataset),
             }
         }
     )
