@@ -71,16 +71,16 @@ def _prep_plot_data(place, fvcom_stns_dataset):
         name.decode().strip().split(maxsplit=1)[1]
         for name in fvcom_stns_dataset.name_station.values
     ]
-    fvcom_ua = fvcom_stns_dataset.ua.isel(station=stations.index(place))
-    fvcom_ua.attrs.update({"long_name": "u Velocity", "units": "m/s"})
-    fvcom_va = fvcom_stns_dataset.va.isel(station=stations.index(place))
+    fvcom_u = fvcom_stns_dataset.u.isel(siglay=0, station=stations.index(place))
+    fvcom_u.attrs.update({"long_name": "u Velocity", "units": "m/s"})
+    fvcom_v = fvcom_stns_dataset.v.isel(siglay=0, station=stations.index(place))
     # FVCOM current speed and direction
-    fvcom_speed = numpy.sqrt(fvcom_ua ** 2 + fvcom_va ** 2)
+    fvcom_speed = numpy.sqrt(fvcom_u ** 2 + fvcom_v ** 2)
     fvcom_speed.name = "fvcom_current_speed"
     fvcom_speed.attrs.update(
         {"long_name": "Current Speed", "units": "m/s", "label": "Model"}
     )
-    direction = numpy.arctan2(fvcom_va, fvcom_ua)
+    direction = numpy.arctan2(fvcom_v, fvcom_u)
     fvcom_dir = numpy.rad2deg(direction + (direction < 0) * 2 * numpy.pi)
     fvcom_dir.name = "fvcom_current_direction"
     fvcom_dir.attrs.update(
@@ -90,11 +90,11 @@ def _prep_plot_data(place, fvcom_stns_dataset):
             "label": "Model",
         }
     )
-    shared.localize_time(fvcom_ua)
+    shared.localize_time(fvcom_u)
     shared.localize_time(fvcom_speed)
     shared.localize_time(fvcom_dir)
     return SimpleNamespace(
-        fvcom_ua=fvcom_ua, fvcom_speed=fvcom_speed, fvcom_dir=fvcom_dir
+        fvcom_u=fvcom_u, fvcom_speed=fvcom_speed, fvcom_dir=fvcom_dir
     )
 
 
@@ -169,7 +169,7 @@ def _current_direction_axes_labels(ax, plot_data, theme):
 
 
 def _plot_u_velocity_time_series(ax, plot_data, theme):
-    plot_data.fvcom_ua.plot(
+    plot_data.fvcom_u.plot(
         ax=ax["mps"],
         linewidth=2,
         color=theme.COLOURS["time series"]["2nd Narrows model current speed"],
@@ -178,21 +178,21 @@ def _plot_u_velocity_time_series(ax, plot_data, theme):
 
 def _u_velocity_axes_labels(ax, plot_data, theme):
     ax["mps"].set_xlabel(
-        f'Time [{plot_data.fvcom_ua.attrs["tz_name"]}]',
+        f'Time [{plot_data.fvcom_u.attrs["tz_name"]}]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
     ax["mps"].xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     mps_limits = numpy.array((-4, 4))
     ax["mps"].set_ylabel(
-        f'{plot_data.fvcom_ua.attrs["long_name"]} '
-        f'[{plot_data.fvcom_ua.attrs["units"]}]',
+        f'{plot_data.fvcom_u.attrs["long_name"]} '
+        f'[{plot_data.fvcom_u.attrs["units"]}]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
     ax["mps"].set_ylim(mps_limits)
     ax["knots"].set_ylabel(
-        f'{plot_data.fvcom_ua.attrs["long_name"]} [knots]',
+        f'{plot_data.fvcom_u.attrs["long_name"]} [knots]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
