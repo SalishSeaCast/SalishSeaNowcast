@@ -28,13 +28,18 @@ import matplotlib.dates
 import matplotlib.pyplot as plt
 import numpy
 from salishsea_tools import unit_conversions
+import xarray
 
 from nowcast.figures import shared
 import nowcast.figures.website_theme
 
 
 def make_figure(
-    place, fvcom_stns_dataset, figsize=(16, 9), theme=nowcast.figures.website_theme
+    place,
+    fvcom_stns_dataset,
+    obs_dataset,
+    figsize=(16, 9),
+    theme=nowcast.figures.website_theme,
 ):
     """Plot sea water current calculated by the VHFR FVCOM model, and the
     observed current measured by a horizontal ADCP on the 2nd Narrows
@@ -46,6 +51,9 @@ def make_figure(
                              current time series dataset.
     :type fvcom_stns_dataset: 'py:class:xarray.Dataset`
 
+    :arg obs_dataset: Observed horizontal ADCP station sea water current time series dataset.
+    :type obs_dataset: 'py:class:xarray.Dataset`
+
     :arg 2-tuple figsize: Figure size (width, height) in inches.
 
     :arg theme: Module-like object that defines the style elements for the
@@ -54,7 +62,7 @@ def make_figure(
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
-    plot_data = _prep_plot_data(place, fvcom_stns_dataset)
+    plot_data = _prep_plot_data(place, fvcom_stns_dataset, obs_dataset)
     fig, (ax_speed, ax_dir, ax_u) = _prep_fig_axes(figsize, theme)
     _plot_current_speed_time_series(ax_speed, plot_data, theme)
     _current_speed_axes_labels(ax_speed, plot_data, theme)
@@ -65,8 +73,8 @@ def make_figure(
     return fig
 
 
-def _prep_plot_data(place, fvcom_stns_dataset):
-    # FVCOM vertically averaged velocity component datasets
+def _prep_plot_data(place, fvcom_stns_dataset, obs_dataset):
+    # FVCOM velocity component datasets
     stations = [
         name.decode().strip().split(maxsplit=1)[1]
         for name in fvcom_stns_dataset.name_station.values
@@ -90,11 +98,41 @@ def _prep_plot_data(place, fvcom_stns_dataset):
             "label": "Model",
         }
     )
+    # HADCP observations dataset
+    obs = xarray.Dataset(
+        data_vars={
+            "speed": (
+                {"time": obs_dataset.data_vars["s.time"].size},
+                obs_dataset.data_vars["s.speed"],
+                obs_dataset.data_vars["s.speed"].attrs,
+            ),
+            "direction": (
+                {"time": obs_dataset.data_vars["s.time"].size},
+                obs_dataset.data_vars["s.direction"],
+                obs_dataset.data_vars["s.direction"].attrs,
+            ),
+        },
+        coords={"time": obs_dataset.data_vars["s.time"].values},
+    )
+    fvcom_time_range = slice(
+        str(fvcom_speed.time.values[0]), str(fvcom_speed.time.values[-1])
+    )
+    obs_speed = obs.speed.sel(time=fvcom_time_range)
+    obs_speed.attrs.update({"label": "HADCP Observed"})
+    rad_ccw_from_east = numpy.deg2rad(90 - obs.direction.sel(time=fvcom_time_range))
+    obs_dir = numpy.rad2deg(rad_ccw_from_east + (rad_ccw_from_east < 0) * 2 * numpy.pi)
+    obs_dir.attrs.update({"label": "HADCP Observed"})
     shared.localize_time(fvcom_u)
     shared.localize_time(fvcom_speed)
     shared.localize_time(fvcom_dir)
+    shared.localize_time(obs_speed)
+    shared.localize_time(obs_dir)
     return SimpleNamespace(
-        fvcom_u=fvcom_u, fvcom_speed=fvcom_speed, fvcom_dir=fvcom_dir
+        fvcom_u=fvcom_u,
+        fvcom_speed=fvcom_speed,
+        fvcom_dir=fvcom_dir,
+        obs_speed=obs_speed,
+        obs_dir=obs_dir,
     )
 
 
@@ -111,11 +149,24 @@ def _prep_fig_axes(figsize, theme):
 
 
 def _plot_current_speed_time_series(ax, plot_data, theme):
+    plot_data.obs_speed.plot(
+        ax=ax["mps"],
+        marker=".",
+        linestyle="None",
+        label=plot_data.obs_speed.attrs["label"],
+        markerfacecolor=theme.COLOURS["time series"][
+            "2nd Narrows observed current speed"
+        ],
+        markeredgecolor=theme.COLOURS["time series"][
+            "2nd Narrows observed current speed"
+        ],
+    )
     plot_data.fvcom_speed.plot(
         ax=ax["mps"],
         linewidth=2,
         color=theme.COLOURS["time series"]["2nd Narrows model current speed"],
         label=plot_data.fvcom_speed.attrs["label"],
+        alpha=0.8,
     )
 
 
@@ -146,11 +197,24 @@ def _current_speed_axes_labels(ax, plot_data, theme):
 
 
 def _plot_current_direction_time_series(ax, plot_data, theme):
+    plot_data.obs_dir.plot(
+        ax=ax,
+        marker=".",
+        linestyle="None",
+        label=plot_data.obs_speed.attrs["label"],
+        markerfacecolor=theme.COLOURS["time series"][
+            "2nd Narrows observed current direction"
+        ],
+        markeredgecolor=theme.COLOURS["time series"][
+            "2nd Narrows observed current direction"
+        ],
+    )
     plot_data.fvcom_dir.plot(
         ax=ax,
         linewidth=2,
         color=theme.COLOURS["time series"]["2nd Narrows model current direction"],
         label=plot_data.fvcom_speed.attrs["label"],
+        alpha=0.8,
     )
 
 
