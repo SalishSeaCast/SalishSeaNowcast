@@ -73,23 +73,6 @@ def config(tmpdir):
     return config_
 
 
-@pytest.fixture()
-def prod_config(tmpdir):
-    """:py:class:`nemo_nowcast.Config` instance from production config TAML file to use for
-    testing its contents.
-    """
-    prod_config_ = nemo_nowcast.Config()
-    p_logs_dir = tmpdir.ensure_dir("nowcast_logs")
-    p_env_dir = tmpdir.ensure_dir("nowcast-env")
-    p_environ = patch.dict(
-        nemo_nowcast.config.os.environ,
-        {"NOWCAST_LOGS": str(p_logs_dir), "NOWCAST_ENV": str(p_env_dir)},
-    )
-    with p_environ:
-        prod_config_.load("../../config/nowcast.yaml")
-    return prod_config_
-
-
 @patch("nowcast.workers.update_forecast_datasets.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
