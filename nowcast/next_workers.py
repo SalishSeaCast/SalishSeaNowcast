@@ -1511,18 +1511,37 @@ def after_make_plots(msg, config, checklist):
         "success wwatch3 forecast publish": [],
         "success wwatch3 forecast2 publish": [],
     }
-    if msg.type.startswith("success nemo") and "forecast" in msg.type:
-        _, _, run_type, _ = msg.type.split()
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.make_feeds",
-                args=[
-                    run_type,
-                    "--run-date",
-                    checklist["NEMO run"][run_type]["run date"],
-                ],
+    if msg.type.startswith("success"):
+        _, model, run_type, _ = msg.type.split()
+        if model == "nemo" and "forecast" in run_type:
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_feeds",
+                    args=[
+                        run_type,
+                        "--run-date",
+                        checklist["NEMO run"][run_type]["run date"],
+                    ],
+                )
             )
-        )
+        if model == "fvcom":
+            # Repeat previous day's VHFR FVCOM figures so that they include observations for
+            # all of the nowcast duration, and more of the forecast duration
+            run_date = arrow.get(checklist["FVCOM run"][run_type]["run date"]).shift(
+                days=-1
+            )
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_plots",
+                    args=[
+                        "fvcom",
+                        run_type,
+                        "publish",
+                        "--run-date",
+                        run_date.format("YYYY-MM-DD"),
+                    ],
+                )
+            )
     return next_workers[msg.type]
 
 

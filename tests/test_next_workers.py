@@ -2114,8 +2114,6 @@ class TestAfterMakePlots:
             "success nemo nowcast comparison",
             "success nemo nowcast publish",
             "success nemo nowcast-green research",
-            "success fvcom nowcast publish",
-            "success fvcom forecast publish",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -2131,7 +2129,7 @@ class TestAfterMakePlots:
             ("success nemo forecast2 publish", "forecast2"),
         ],
     )
-    def test_success_forecast_launch_make_feeds(
+    def test_success_nemo_forecast_launch_make_feeds(
         self, msg_type, run_type, config, checklist
     ):
         p_checklist = patch.dict(
@@ -2144,6 +2142,30 @@ class TestAfterMakePlots:
         expected = NextWorker(
             "nowcast.workers.make_feeds",
             args=[run_type, "--run-date", "2016-11-11"],
+            host="localhost",
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize(
+        "msg_type, run_type",
+        [
+            ("success fvcom nowcast publish", "nowcast"),
+            ("success fvcom forecast publish", "forecast"),
+        ],
+    )
+    def test_success_fvcom_launch_make_plots_prev_day(
+        self, msg_type, run_type, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {"FVCOM run": {run_type: {"run date": "2018-11-01"}}}
+        )
+        with p_checklist:
+            workers = next_workers.after_make_plots(
+                Message("make_plots", msg_type), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.make_plots",
+            args=["fvcom", run_type, "publish", "--run-date", "2018-10-31"],
             host="localhost",
         )
         assert expected in workers
