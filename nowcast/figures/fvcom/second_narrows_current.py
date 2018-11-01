@@ -80,7 +80,7 @@ def _prep_plot_data(place, fvcom_stns_dataset, obs_dataset):
         for name in fvcom_stns_dataset.name_station.values
     ]
     fvcom_u = fvcom_stns_dataset.u.isel(siglay=0, station=stations.index(place))
-    fvcom_u.attrs.update({"long_name": "u Velocity", "units": "m/s"})
+    fvcom_u.attrs.update({"long_name": "u Velocity", "units": "m/s", "label": "Model"})
     fvcom_v = fvcom_stns_dataset.v.isel(siglay=0, station=stations.index(place))
     # FVCOM current speed and direction
     fvcom_speed = numpy.sqrt(fvcom_u ** 2 + fvcom_v ** 2)
@@ -117,20 +117,22 @@ def _prep_plot_data(place, fvcom_stns_dataset, obs_dataset):
     fvcom_time_range = slice(
         str(fvcom_speed.time.values[0]), str(fvcom_speed.time.values[-1])
     )
+    obs_u = obs.speed.sel(time=fvcom_time_range) * numpy.sin(
+        numpy.deg2rad(obs.direction.sel(time=fvcom_time_range))
+    )
+    obs_u.attrs.update({"label": "HADCP Observed"})
     obs_speed = obs.speed.sel(time=fvcom_time_range)
     obs_speed.attrs.update({"label": "HADCP Observed"})
     rad_ccw_from_east = numpy.deg2rad(90 - obs.direction.sel(time=fvcom_time_range))
     obs_dir = numpy.rad2deg(rad_ccw_from_east + (rad_ccw_from_east < 0) * 2 * numpy.pi)
     obs_dir.attrs.update({"label": "HADCP Observed"})
-    shared.localize_time(fvcom_u)
-    shared.localize_time(fvcom_speed)
-    shared.localize_time(fvcom_dir)
-    shared.localize_time(obs_speed)
-    shared.localize_time(obs_dir)
+    for array in (fvcom_u, fvcom_speed, fvcom_dir, obs_u, obs_speed, obs_dir):
+        shared.localize_time(array)
     return SimpleNamespace(
         fvcom_u=fvcom_u,
         fvcom_speed=fvcom_speed,
         fvcom_dir=fvcom_dir,
+        obs_u=obs_u,
         obs_speed=obs_speed,
         obs_dir=obs_dir,
     )
@@ -227,16 +229,29 @@ def _current_direction_axes_labels(ax, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
-    ax.legend(loc="best")
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
 
 
 def _plot_u_velocity_time_series(ax, plot_data, theme):
+    plot_data.obs_u.plot(
+        ax=ax["mps"],
+        marker=".",
+        linestyle="None",
+        label=plot_data.obs_u.attrs["label"],
+        markerfacecolor=theme.COLOURS["time series"][
+            "2nd Narrows observed current speed"
+        ],
+        markeredgecolor=theme.COLOURS["time series"][
+            "2nd Narrows observed current speed"
+        ],
+    )
     plot_data.fvcom_u.plot(
         ax=ax["mps"],
         linewidth=2,
         color=theme.COLOURS["time series"]["2nd Narrows model current speed"],
+        label=plot_data.fvcom_u.attrs["label"],
+        alpha=0.8,
     )
 
 
@@ -247,7 +262,7 @@ def _u_velocity_axes_labels(ax, plot_data, theme):
         color=theme.COLOURS["text"]["axis"],
     )
     ax["mps"].xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
-    mps_limits = numpy.array((-4, 4))
+    mps_limits = numpy.array((-5, 5))
     ax["mps"].set_ylabel(
         f'{plot_data.fvcom_u.attrs["long_name"]} '
         f'[{plot_data.fvcom_u.attrs["units"]}]',
