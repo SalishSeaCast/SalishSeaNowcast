@@ -127,7 +127,7 @@ def _prep_fig_axes(figsize, theme):
 def _plot_wave_height_time_series(ax, buoy, plot_data, theme):
     plot_data.obs.wave_height.plot(
         ax=ax,
-        marker="o",
+        marker=".",
         linestyle="None",
         label="ECCC Observed",
         markerfacecolor=theme.COLOURS["time series"]["obs wave height"],
@@ -163,7 +163,7 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
 def _plot_dominant_period_time_series(ax, buoy, plot_data, theme):
     plot_data.obs.dominant_period.plot(
         ax=ax,
-        marker="o",
+        marker=".",
         linestyle="None",
         label="ECCC Observed",
         markerfacecolor=theme.COLOURS["time series"]["obs wave height"],
