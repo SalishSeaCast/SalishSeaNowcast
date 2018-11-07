@@ -144,8 +144,13 @@ def _prep_fig_axes(figsize, theme):
     )
     ax_speed = {"mps": ax_speed}
     ax_speed["knots"] = ax_speed["mps"].twinx()
+    for ax in ax_speed:
+        ax_speed[ax].set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_dir.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     ax_u = {"mps": ax_u}
     ax_u["knots"] = ax_u["mps"].twinx()
+    for ax in ax_u:
+        ax_u[ax].set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     fig.autofmt_xdate()
     return fig, (ax_speed, ax_dir, ax_u)
 
