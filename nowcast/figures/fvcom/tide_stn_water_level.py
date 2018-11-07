@@ -31,6 +31,7 @@ from types import SimpleNamespace
 import arrow
 import matplotlib.dates
 import matplotlib.pyplot as plt
+import numpy
 import requests
 from salishsea_tools import data_tools
 from salishsea_tools.places import PLACES
@@ -72,8 +73,11 @@ def make_figure(
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl)
-    fig, ax = _prep_fig_axes(figsize, theme)
-    _plot_water_level_time_series(ax, place, plot_data, theme)
+    fig, (ax_ssh, ax_res) = _prep_fig_axes(figsize, theme)
+    _plot_water_level_time_series(ax_ssh, place, plot_data, theme)
+    _water_level_time_series_labels(ax_ssh, place, theme)
+    _plot_residual_time_series(ax_res, plot_data, theme)
+    _residual_time_series_labels(ax_res, plot_data, theme)
     return fig
 
 
@@ -85,6 +89,9 @@ def _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl):
             for name in fvcom_ssh_dataset.name_station.values
         ].index(place)
     )
+    # Drop repeated times
+    _, index = numpy.unique(fvcom_ssh.time.values, return_index=True)
+    fvcom_ssh = fvcom_ssh.isel(time=index)
     fvcom_period = slice(str(fvcom_ssh.time.values[0]), str(fvcom_ssh.time.values[-1]))
     # NEMO sea surface height dataset
     try:
@@ -124,9 +131,23 @@ def _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl):
                 )
             }
         )
-    except TypeError:
+        # Residual differences between corrected model and observations and predicted tides
+        fvcom_residual = fvcom_ssh - pred.water_level
+        shared.localize_time(fvcom_residual)
+        try:
+            nemo_residual = nemo_ssh.ssh - pred.water_level
+            shared.localize_time(nemo_residual)
+        except AttributeError:
+            nemo_residual = None
+        obs_15min_avg = (obs_1min.resample("15min").mean())[1:]
+        obs_15min = xarray.Dataset(
+            {"water_level": xarray.DataArray(obs_15min_avg).rename({"dim_0": "time"})}
+        )
+        obs_residual = obs_15min.water_level - pred.water_level
+        shared.localize_time(obs_residual)
+    except (TypeError, IndexError):
         # Invalid tide gauge station number, probably None
-        pred = None
+        pred, fvcom_residual, nemo_residual, obs_residual = None, None, None, None
     # Change dataset times to Pacific time zone
     shared.localize_time(fvcom_ssh)
     with suppress(AttributeError):
@@ -138,7 +159,14 @@ def _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl):
     # Mean sea level
     msl = PLACES[place]["mean sea lvl"]
     return SimpleNamespace(
-        fvcom_ssh=fvcom_ssh, nemo_ssh=nemo_ssh, obs=obs, pred=pred, msl=msl
+        fvcom_ssh=fvcom_ssh,
+        nemo_ssh=nemo_ssh,
+        obs=obs,
+        pred=pred,
+        msl=msl,
+        fvcom_residual=fvcom_residual,
+        nemo_residual=nemo_residual,
+        obs_residual=obs_residual,
     )
 
 
@@ -159,23 +187,16 @@ def _get_nemo_ssh(place, dataset_url_tmpl):
 
 
 def _prep_fig_axes(figsize, theme):
-    fig, ax = plt.subplots(
-        1, 1, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
+    fig, (ax_ssh, ax_res) = plt.subplots(
+        nrows=2, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
+    ax_ssh.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_res.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     fig.autofmt_xdate()
-    return fig, ax
+    return fig, (ax_ssh, ax_res)
 
 
 def _plot_water_level_time_series(ax, place, plot_data, theme):
-    with suppress(AttributeError):
-        # CHS sometimes returns an empty prediction dataset
-        if plot_data.pred.water_level.size:
-            plot_data.pred.water_level.plot(
-                ax=ax,
-                linewidth=2,
-                label="CHS Predicted",
-                color=theme.COLOURS["time series"]["tidal prediction"],
-            )
     with suppress(AttributeError):
         # CHS sometimes returns an empty observations dataset
         if plot_data.obs.water_level.size:
@@ -186,29 +207,95 @@ def _plot_water_level_time_series(ax, place, plot_data, theme):
                 color=theme.COLOURS["time series"]["tide gauge obs"],
             )
     with suppress(AttributeError):
+        # CHS sometimes returns an empty prediction dataset
+        if plot_data.pred.water_level.size:
+            plot_data.pred.water_level.plot(
+                ax=ax,
+                linewidth=2,
+                label="CHS Predicted",
+                color=theme.COLOURS["time series"]["tidal prediction"],
+                alpha=0.8,
+            )
+    with suppress(AttributeError):
         (plot_data.nemo_ssh.ssh + plot_data.msl).plot(
             ax=ax,
             linewidth=2,
             label="NEMO",
             color=theme.COLOURS["time series"]["tide gauge ssh"],
+            alpha=0.8,
         )
     (plot_data.fvcom_ssh + plot_data.msl).plot(
         ax=ax,
         linewidth=2,
         label="FVCOM",
         color=theme.COLOURS["time series"]["vhfr fvcom ssh"],
+        alpha=0.8,
     )
-    legend = ax.legend(prop=theme.FONTS["legend label small"])
-    legend.set_title("Legend", prop=theme.FONTS["legend title small"])
-    _water_level_time_series_labels(ax, place, plot_data, theme)
 
 
-def _water_level_time_series_labels(ax, place, plot_data, theme):
+def _water_level_time_series_labels(ax, place, theme):
     ax.set_title(
         f"Water Level at {place}",
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
     )
+    ax.set_xlabel("")
+    ax.set_ylabel(
+        "Water Level above Chart Datum [m]",
+        fontproperties=theme.FONTS["axis"],
+        color=theme.COLOURS["text"]["axis"],
+    )
+    ax.legend(loc="best", prop=theme.FONTS["legend label small"])
+    ax.grid(axis="both")
+    theme.set_axis_colors(ax)
+
+
+def _plot_residual_time_series(ax, plot_data, theme):
+    with suppress(AttributeError):
+        # CHS sometimes returns an empty observations dataset
+        plot_data.obs_residual.plot(
+            ax=ax,
+            linewidth=2,
+            label="CHS Observed",
+            color=theme.COLOURS["time series"]["tide gauge obs"],
+        )
+    with suppress(TypeError):
+        # No NEMO residual, probably because place is outside NEMO domaain
+        (plot_data.nemo_residual + plot_data.msl).plot(
+            ax=ax,
+            linewidth=2,
+            label="NEMO",
+            color=theme.COLOURS["time series"]["tide gauge ssh"],
+            alpha=0.8,
+        )
+    try:
+        (plot_data.fvcom_residual + plot_data.msl).plot(
+            ax=ax,
+            linewidth=2,
+            label="FVCOM",
+            color=theme.COLOURS["time series"]["vhfr fvcom ssh"],
+            alpha=0.8,
+        )
+    except TypeError:
+        # No FVCOM residual, probably because no predicted water level
+        # Plot invisible values so that we can label the x-axis, and add "Not Available" text
+        ax.plot(
+            plot_data.fvcom_ssh.time,
+            numpy.zeros_like(plot_data.fvcom_ssh),
+            color=theme.COLOURS["axes"]["background"],
+        )
+        ax.text(
+            0.5,
+            0.5,
+            "Not Available",
+            fontproperties=theme.FONTS["axes annotation"],
+            horizontalalignment="center",
+            verticalalignment="center",
+            transform=ax.transAxes,
+        )
+
+
+def _residual_time_series_labels(ax, plot_data, theme):
     ax.set_xlabel(
         f'Time [{plot_data.fvcom_ssh.attrs["tz_name"]}]',
         fontproperties=theme.FONTS["axis"],
@@ -216,7 +303,7 @@ def _water_level_time_series_labels(ax, place, plot_data, theme):
     )
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     ax.set_ylabel(
-        "Water Level above Chart Datum [m]",
+        "Residual [m]",
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
