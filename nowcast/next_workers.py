@@ -1459,11 +1459,25 @@ def after_ping_erddap(msg, config, checklist):
         run_types = checklist["FVCOM run"].keys()
         for run_type in run_types:
             run_date = checklist["FVCOM run"][run_type]["run date"]
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=["fvcom", run_type, "publish", "--run-date", run_date],
-                )
+            next_workers[msg.type].extend(
+                [
+                    NextWorker(
+                        "nowcast.workers.make_plots",
+                        args=["fvcom", run_type, "publish", "--run-date", run_date],
+                    ),
+                    # Repeat previous day's VHFR FVCOM figures so that they include observations for
+                    # all of the nowcast duration, and more of the forecast duration
+                    NextWorker(
+                        "nowcast.workers.make_plots",
+                        args=[
+                            "fvcom",
+                            run_type,
+                            "publish",
+                            "--run-date",
+                            arrow.get(run_date).shift(days=-1).format("YYYY-MM-DD"),
+                        ],
+                    ),
+                ]
             )
     return next_workers[msg.type]
 
@@ -1521,24 +1535,6 @@ def after_make_plots(msg, config, checklist):
                         run_type,
                         "--run-date",
                         checklist["NEMO run"][run_type]["run date"],
-                    ],
-                )
-            )
-        if model == "fvcom":
-            # Repeat previous day's VHFR FVCOM figures so that they include observations for
-            # all of the nowcast duration, and more of the forecast duration
-            run_date = arrow.get(checklist["FVCOM run"][run_type]["run date"]).shift(
-                days=-1
-            )
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=[
-                        "fvcom",
-                        run_type,
-                        "publish",
-                        "--run-date",
-                        run_date.format("YYYY-MM-DD"),
                     ],
                 )
             )
