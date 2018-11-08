@@ -303,7 +303,6 @@ def _rotate_grib_wind(config, fcst_section_hrs):
             cmd.append(outuvrot)
             lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
             os.remove(outuv)
-    os.unlink("wgrib2")
     logger.debug("consolidated and rotated wind components")
 
 
@@ -344,7 +343,6 @@ def _collect_grib_scalars(config, fcst_section_hrs):
             cmd.append(outscalargrid)
             lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
             os.remove(outscalar)
-    os.unlink("wgrib2")
     logger.debug("consolidated and re-gridded scalar variables")
 
 
