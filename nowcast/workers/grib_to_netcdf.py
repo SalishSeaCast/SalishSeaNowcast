@@ -262,12 +262,6 @@ def _rotate_grib_wind(config, fcst_section_hrs):
     GRIBdir = config["weather"]["download"]["GRIB dir"]
     wgrib2 = config["weather"]["wgrib2"]
     grid_defn = config["weather"]["grid_defn.pl"]
-    # grid_defn.pl expects to find wgrib2 in the pwd,
-    # create a symbolic link to keep it happy (if its not already there)
-    try:
-        os.symlink(wgrib2, "wgrib2")
-    except OSError:
-        pass
     for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
@@ -301,7 +295,7 @@ def _rotate_grib_wind(config, fcst_section_hrs):
                 cmd = [wgrib2, fn[0], "-append", "-grib", outuv]
                 lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
             # rotate
-            GRIDspec = subprocess.check_output([grid_defn, outuv])
+            GRIDspec = subprocess.check_output([grid_defn, outuv], cwd=os.path.dirname(wgrib2))
             cmd = [wgrib2, outuv]
             cmd.extend("-new_grid_winds earth".split())
             cmd.append("-new_grid")
@@ -321,9 +315,6 @@ def _collect_grib_scalars(config, fcst_section_hrs):
     GRIBdir = config["weather"]["download"]["GRIB dir"]
     wgrib2 = config["weather"]["wgrib2"]
     grid_defn = config["weather"]["grid_defn.pl"]
-    # grid_defn.pl expects to find wgrib2 in the pwd,
-    # create a symbolic link to keep it happy
-    os.symlink(wgrib2, "wgrib2")
     for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
@@ -346,7 +337,7 @@ def _collect_grib_scalars(config, fcst_section_hrs):
                     cmd = [wgrib2, fn, "-append", "-grib", outscalar]
                     lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
             #  Re-grid
-            GRIDspec = subprocess.check_output([grid_defn, outscalar])
+            GRIDspec = subprocess.check_output([grid_defn, outscalar], cwd=os.path.dirname(wgrib2))
             cmd = [wgrib2, outscalar]
             cmd.append("-new_grid")
             cmd.extend(GRIDspec.split())
