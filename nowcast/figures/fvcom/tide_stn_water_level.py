@@ -74,8 +74,8 @@ def make_figure(
     """
     plot_data = _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl)
     fig, (ax_ssh, ax_res) = _prep_fig_axes(figsize, theme)
-    _plot_water_level_time_series(ax_ssh, place, plot_data, theme)
-    _water_level_time_series_labels(ax_ssh, place, theme)
+    _plot_water_level_time_series(ax_ssh, plot_data, theme)
+    _water_level_time_series_labels(ax_ssh, plot_data, place, theme)
     _plot_residual_time_series(ax_res, plot_data, theme)
     _residual_time_series_labels(ax_res, plot_data, theme)
     return fig
@@ -196,7 +196,7 @@ def _prep_fig_axes(figsize, theme):
     return fig, (ax_ssh, ax_res)
 
 
-def _plot_water_level_time_series(ax, place, plot_data, theme):
+def _plot_water_level_time_series(ax, plot_data, theme):
     with suppress(AttributeError):
         # CHS sometimes returns an empty observations dataset
         if plot_data.obs.water_level.size:
@@ -233,13 +233,14 @@ def _plot_water_level_time_series(ax, place, plot_data, theme):
     )
 
 
-def _water_level_time_series_labels(ax, place, theme):
+def _water_level_time_series_labels(ax, plot_data, place, theme):
     ax.set_title(
         f"Water Level at {place}",
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
     )
     ax.set_xlabel("")
+    ax.set_xlim(plot_data.fvcom_ssh.time.values[0], plot_data.fvcom_ssh.time.values[-1])
     ax.set_ylabel(
         "Water Level above Chart Datum [m]",
         fontproperties=theme.FONTS["axis"],
