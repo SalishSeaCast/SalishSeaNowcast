@@ -62,6 +62,13 @@ def after_download_weather(msg, config, checklist):
             next_workers["success 06"].append(
                 NextWorker("nowcast.workers.get_onc_ferry", args=[ferry])
             )
+        if "hadcp data" in config["observations"]:
+            data_date = arrow.utcnow().shift(days=-1).format("YYYY-MM-DD")
+            next_workers["success 06"].append(
+                NextWorker(
+                    "nowcast.workers.get_vfpa_hadcp", args=["--data-date", data_date]
+                )
+            )
         if "forecast2" in config["run types"]:
             next_workers["success 06"].extend(
                 [
