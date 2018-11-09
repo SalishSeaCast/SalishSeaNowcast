@@ -16,6 +16,7 @@
 """
 from unittest.mock import patch
 
+import arrow
 import pytest
 from nemo_nowcast import Message, NextWorker
 
@@ -32,6 +33,7 @@ def config():
         "observations": {
             "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
             "ferry data": {"ferries": {"TWDP": {}}},
+            "hadcp data": {},
         },
         "run types": {
             "nowcast": {},
@@ -140,6 +142,20 @@ class TestAfterDownloadWeather:
         )
         expected = NextWorker(
             "nowcast.workers.get_onc_ferry", args=[ferry_platform], host="localhost"
+        )
+        assert expected in workers
+
+    def test_success_06_launch_get_vfpa_hadcp_for_prev_day(self, config, checklist):
+        with patch(
+            "nowcast.next_workers.arrow.utcnow", return_value=arrow.get("2018-11-08")
+        ):
+            workers = next_workers.after_download_weather(
+                Message("download_weather", "success 06"), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.get_vfpa_hadcp",
+            args=["--data-date", "2018-11-07"],
+            host="localhost",
         )
         assert expected in workers
 
