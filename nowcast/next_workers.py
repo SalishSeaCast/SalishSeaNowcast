@@ -1456,7 +1456,12 @@ def after_ping_erddap(msg, config, checklist):
             )
         )
     if msg.type == "success VFPA-HADCP":
-        run_types = checklist["FVCOM run"].keys()
+        try:
+            run_types = checklist["FVCOM run"].keys()
+        except KeyError:
+            # "FVCOM run" is only in the checklist after runs.
+            # If it's too early in the day, just return.
+            return next_workers[msg.type]
         for run_type in run_types:
             run_date = checklist["FVCOM run"][run_type]["run date"]
             next_workers[msg.type].extend(

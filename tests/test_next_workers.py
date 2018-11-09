@@ -2093,6 +2093,18 @@ class TestAfterPingERDDAP:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    def test_success_vfpa_hadcp_no_fvcom_run_in_checklist(
+        self, run_type, config, checklist
+    ):
+        run_date = "2018-11-08"
+        p_checklist = patch.dict(checklist, {"ERDDAP flag files": {"VFPA-HADCP": []}})
+        with p_checklist:
+            workers = next_workers.after_ping_erddap(
+                Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
+            )
+        assert workers == []
+
     @pytest.mark.parametrize(
         "msg_type, run_type",
         [
