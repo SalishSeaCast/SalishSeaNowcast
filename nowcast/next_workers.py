@@ -175,18 +175,18 @@ def after_grib_to_netcdf(msg, config, checklist):
         "success nowcast+": [],
         "success forecast2": [],
     }
-    msg_run_type_mapping = {"nowcast+": "nowcast", "forecast2": "forecast2"}
-    if msg.type.startswith("success") and msg.type.endswith("nowcast+"):
-        next_workers["success nowcast+"].append(
-            NextWorker("nowcast.workers.ping_erddap", args=["download_weather"])
-        )
-    for host in config["run"]["enabled hosts"]:
-        if not config["run"]["enabled hosts"][host]["shared storage"]:
-            for msg_suffix, run_type in msg_run_type_mapping.items():
-                if run_type in config["run types"]:
-                    next_workers[f"success {msg_suffix}"].append(
+    if msg.type.startswith("success"):
+        _, run_type = msg.type.split()
+        if run_type == "nowcast+":
+            next_workers["success nowcast+"].append(
+                NextWorker("nowcast.workers.ping_erddap", args=["download_weather"])
+            )
+        if run_type == "forecast2":
+            for host in config["run"]["enabled hosts"]:
+                if not config["run"]["enabled hosts"][host]["shared storage"]:
+                    next_workers[f"success {run_type}"].append(
                         NextWorker(
-                            "nowcast.workers.upload_forcing", args=[host, msg_suffix]
+                            "nowcast.workers.upload_forcing", args=[host, run_type]
                         )
                     )
     return next_workers[msg.type]
@@ -301,6 +301,14 @@ def after_make_live_ocean_files(msg, config, checklist):
     :rtype: list
     """
     next_workers = {"crash": [], "failure": [], "success": []}
+    if msg.type == "success":
+        for host in config["run"]["enabled hosts"]:
+            if not config["run"]["enabled hosts"][host]["shared storage"]:
+                next_workers[msg.type].append(
+                    NextWorker(
+                        "nowcast.workers.upload_forcing", args=[host, "nowcast+"]
+                    )
+                )
     return next_workers[msg.type]
 
 
