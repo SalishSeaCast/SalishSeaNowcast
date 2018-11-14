@@ -15,30 +15,55 @@
 """Unit tests for Salish Sea NEMO nowcast get_onc_ferry worker.
 """
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import get_onc_ferry
 
 
-@patch("nowcast.workers.get_onc_ferry.NowcastWorker")
+@pytest.fixture()
+def config(tmpdir):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    p = tmpdir.join("config.yaml")
+    p.write(
+        """
+        # Items required by the Config instance        
+        checklist file: nowcast_checklist.yaml
+        python: python
+        logging:
+          handlers: []
+
+        # Items for the tests
+        """
+    )
+    config_ = nemo_nowcast.Config()
+    config_.load(str(p))
+    return config_
+
+
+@patch("nowcast.workers.get_onc_ferry.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ferry.main()
         args, kwargs = m_worker.call_args
         assert args == ("get_onc_ferry",)
         assert "description" in kwargs
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ferry.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_onc_station_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ferry.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("ferry_platform",)
@@ -46,6 +71,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_add_data_date_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ferry.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ("--data-date",)
@@ -53,6 +79,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ferry.main()
         args, kwargs = m_worker().run.call_args
         expected = (
@@ -64,53 +91,51 @@ class TestMain:
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
+@patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, ferry_platform):
+    def test_success_log_info(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
-        with patch("nowcast.workers.get_onc_ferry.logger") as m_logger:
-            get_onc_ferry.success(parsed_args)
+        get_onc_ferry.success(parsed_args)
         assert m_logger.info.called
         extra_value = m_logger.info.call_args[1]["extra"]["ferry_platform"]
         assert extra_value == ferry_platform
         assert m_logger.info.call_args[1]["extra"]["data_date"] == "2016-09-09"
 
-    def test_success_msg_type(self, ferry_platform):
+    def test_success_msg_type(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
-        with patch("nowcast.workers.get_onc_ferry.logger") as m_logger:
-            msg_type = get_onc_ferry.success(parsed_args)
+        msg_type = get_onc_ferry.success(parsed_args)
         assert msg_type == "success {}".format(ferry_platform)
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
+@patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_critical(self, ferry_platform):
+    def test_failure_log_critical(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
-        with patch("nowcast.workers.get_onc_ferry.logger") as m_logger:
-            get_onc_ferry.failure(parsed_args)
+        get_onc_ferry.failure(parsed_args)
         assert m_logger.critical.called
         extra_value = m_logger.critical.call_args[1]["extra"]["ferry_platform"]
         assert extra_value == ferry_platform
         extra_value = m_logger.critical.call_args[1]["extra"]["data_date"]
         assert extra_value == "2016-09-09"
 
-    def test_failure_msg_type(self, ferry_platform):
+    def test_failure_msg_type(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
-        with patch("nowcast.workers.get_onc_ferry.logger") as m_logger:
-            msg_type = get_onc_ferry.failure(parsed_args)
+        msg_type = get_onc_ferry.failure(parsed_args)
         assert msg_type == "failure"
 
 

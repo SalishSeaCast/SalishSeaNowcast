@@ -18,9 +18,31 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import get_onc_ctd
+
+
+@pytest.fixture()
+def config(tmpdir):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    p = tmpdir.join("config.yaml")
+    p.write(
+        """
+        # Items required by the Config instance        
+        checklist file: nowcast_checklist.yaml
+        python: python
+        logging:
+          handlers: []
+
+        # Items for the tests
+        """
+    )
+    config_ = nemo_nowcast.Config()
+    config_.load(str(p))
+    return config_
 
 
 @patch("nowcast.workers.get_onc_ctd.NowcastWorker")
@@ -59,53 +81,49 @@ class TestMain:
         assert args == expected
 
 
+@pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
+@patch("nowcast.workers.get_onc_ctd.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
-    def test_success_log_info(self, onc_station):
+    def test_success_log_info(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get("2016-09-09")
         )
-        with patch("nowcast.workers.get_onc_ctd.logger") as m_logger:
-            get_onc_ctd.success(parsed_args)
+        get_onc_ctd.success(parsed_args)
         assert m_logger.info.called
         assert m_logger.info.call_args[1]["extra"]["onc_station"] == onc_station
         assert m_logger.info.call_args[1]["extra"]["data_date"] == "2016-09-09"
 
-    @pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
-    def test_success_msg_type(self, onc_station):
+    def test_success_msg_type(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get("2016-09-09")
         )
-        with patch("nowcast.workers.get_onc_ctd.logger") as m_logger:
-            msg_type = get_onc_ctd.success(parsed_args)
+        msg_type = get_onc_ctd.success(parsed_args)
         assert msg_type == "success {}".format(onc_station)
 
 
+@pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
+@patch("nowcast.workers.get_onc_ctd.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
-    def test_failure_log_critical(self, onc_station):
+    def test_failure_log_critical(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get("2016-09-09")
         )
-        with patch("nowcast.workers.get_onc_ctd.logger") as m_logger:
-            get_onc_ctd.failure(parsed_args)
+        get_onc_ctd.failure(parsed_args)
         assert m_logger.critical.called
         extra_value = m_logger.critical.call_args[1]["extra"]["onc_station"]
         assert extra_value == onc_station
         extra_value = m_logger.critical.call_args[1]["extra"]["data_date"]
         assert extra_value == "2016-09-09"
 
-    @pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
-    def test_failure_msg_type(self, onc_station):
+    def test_failure_msg_type(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get("2016-09-09")
         )
-        with patch("nowcast.workers.get_onc_ctd.logger") as m_logger:
-            msg_type = get_onc_ctd.failure(parsed_args)
+        msg_type = get_onc_ctd.failure(parsed_args)
         assert msg_type == "failure"
