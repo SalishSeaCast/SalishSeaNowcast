@@ -19,9 +19,43 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import download_fvcom_results
+
+
+@pytest.fixture()
+def config(tmpdir):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    p = tmpdir.join("config.yaml")
+    p.write(
+        """
+        # Items required by the Config instance        
+        checklist file: nowcast_checklist.yaml
+        python: python
+        logging:
+          handlers: []
+
+        # Items for the tests
+        file group: allen
+        
+        vhfr fvcom runs:
+          host: west.cloud-nowcast
+          run types:
+            nowcast: 
+              results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast/
+            forecast: 
+              results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
+          results archive:
+            nowcast: /opp/fvcom/nowcast/
+            forecast: /opp/fvcom/forecast/ 
+        """
+    )
+    config_ = nemo_nowcast.Config()
+    config_.load(str(p))
+    return config_
 
 
 @patch("nowcast.workers.download_fvcom_results.NowcastWorker", spec=True)
@@ -139,26 +173,17 @@ class TestDownloadFVCOMResults:
     """Unit tests for download_fvcom_results() function.
     """
 
-    def test_checklist(self, m_fix_perms, m_run_sub, m_logger, run_type, host_name):
+    def test_checklist(
+        self, m_fix_perms, m_run_sub, m_logger, run_type, host_name, config
+    ):
         pass
 
     def test_scp_subprocess(
-        self, m_fix_perms, m_run_sub, m_logger, run_type, host_name
+        self, m_fix_perms, m_run_sub, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2018-02-16")
         )
-        config = {
-            "file group": "allen",
-            "vhfr fvcom runs": {
-                "run types": {
-                    run_type: {
-                        "results": f"/nemoShare/MEOPAR/SalishSea/fvcom-{run_type}/"
-                    }
-                },
-                "results archive": {run_type: f"/opp/fvcom/{run_type}/"},
-            },
-        }
         download_fvcom_results.download_fvcom_results(parsed_args, config)
         m_run_sub.assert_called_once_with(
             shlex.split(
