@@ -27,27 +27,23 @@ from nowcast.workers import watch_NEMO_hindcast
 
 
 @pytest.fixture()
-def config(tmpdir):
-    p = tmpdir.join("config.yaml")
-    p.write(
-        """
-        # Items required by the Config instance        
-        checklist file: nowcast_checklist.yaml
-        python: python
-        logging:
-            handlers: []
-
-        # Items for the tests
-        run:
-            hindcast hosts:
-                cedar:
-                    ssh key: SalishSeaNEMO-nowcast_id_rsa
-                    users: allen,dlatorne
-                    scratch dir: scratch/hindcast
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    )
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+run:
+  hindcast hosts:
+    cedar:
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      users: allen,dlatorne
+      scratch dir: scratch/hindcast
+"""
+        )
     config_ = nemo_nowcast.Config()
-    config_.load(str(p))
+    config_.load(config_file)
     return config_
 
 

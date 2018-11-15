@@ -26,41 +26,35 @@ from nowcast.workers import download_weather
 
 
 @pytest.fixture()
-def config(tmpdir):
+def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    p = tmpdir.join("config.yaml")
-    p.write(
-        """
-        # Items required by the Config instance        
-        checklist file: nowcast_checklist.yaml
-        python: python
-        logging:
-          handlers: []
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+file group: allen
 
-        # Items for the tests
-        file group: allen
-        
-        weather:
-          download:
-            url template: 'http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
-            file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
-            grib variables:
-              - UGRD_TGL_10  # u component of wind velocity at 10m elevation
-              - VGRD_TGL_10  # v component of wind velocity at 10m elevation
-              - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
-              - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
-              - TMP_TGL_2    # air temperature at 2m elevation
-              - SPFH_TGL_2   # specific humidity at 2m elevation
-              - APCP_SFC_0   # accumulated precipitation at ground level
-              - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-              - TCDC_SFC_0   # total cloud in percent
-            forecast duration: 48  # hours
-            GRIB dir: /tmp/
-        """
-    )
+weather:
+  download:
+    url template: 'http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+    file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+    grib variables:
+      - UGRD_TGL_10  # u component of wind velocity at 10m elevation
+      - VGRD_TGL_10  # v component of wind velocity at 10m elevation
+      - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
+      - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+      - TMP_TGL_2    # air temperature at 2m elevation
+      - SPFH_TGL_2   # specific humidity at 2m elevation
+      - APCP_SFC_0   # accumulated precipitation at ground level
+      - PRMSL_MSL_0  # atmospheric pressure at mean sea level
+      - TCDC_SFC_0   # total cloud in percent
+    forecast duration: 48  # hours
+    GRIB dir: /tmp/
+"""
+        )
     config_ = nemo_nowcast.Config()
-    config_.load(str(p))
+    config_.load(config_file)
     return config_
 
 

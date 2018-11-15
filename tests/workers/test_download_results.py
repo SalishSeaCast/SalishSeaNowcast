@@ -29,54 +29,48 @@ from nowcast.workers import download_results
 
 
 @pytest.fixture()
-def config(tmpdir):
+def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    p = tmpdir.join("config.yaml")
-    p.write(
-        """
-        # Items required by the Config instance        
-        checklist file: nowcast_checklist.yaml
-        python: python
-        logging:
-          handlers: []
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+file group: allen
 
-        # Items for the tests
-        file group: allen
+results archive:
+  nowcast: SalishSea/nowcast/
+  forecast: SalishSea/forecast/
+  forecast2: SalishSea/forecast2/
+  nowcast-green: SalishSea/nowcast-green/
+  nowcast-agrif: SalishSea/nowcast-agrif/
+  hindcast: SalishSea/hindcast/
 
-        results archive:
-          nowcast: SalishSea/nowcast/
-          forecast: SalishSea/forecast/
-          forecast2: SalishSea/forecast2/
-          nowcast-green: SalishSea/nowcast-green/
-          nowcast-agrif: SalishSea/nowcast-agrif/
-          hindcast: SalishSea/hindcast/
-
-        run:
-          enabled hosts:
-            west.cloud-nowcast:
-              run types:
-                nowcast:
-                  results: SalishSea/nowcast/
-                forecast:
-                  results: SalishSea/forecast/
-                forecast2:
-                  results: SalishSea/forecast2/
-                nowcast-green:
-                  results: SalishSea/nowcast-green/
-            orcinus-nowcast-agrif:
-              run types:
-                nowcast-agrif:
-                  results: SalishSea/nowcast-agrif/
-          hindcast hosts:
-              cedar-hindcast:
-                run types:
-                  hindcast:
-                    results: SalishSea/hindcast
-        """
-    )
+run:
+  enabled hosts:
+    west.cloud-nowcast:
+      run types:
+        nowcast:
+          results: SalishSea/nowcast/
+        forecast:
+          results: SalishSea/forecast/
+        forecast2:
+          results: SalishSea/forecast2/
+        nowcast-green:
+          results: SalishSea/nowcast-green/
+    orcinus-nowcast-agrif:
+      run types:
+        nowcast-agrif:
+          results: SalishSea/nowcast-agrif/
+  hindcast hosts:
+      cedar-hindcast:
+        run types:
+          hindcast:
+            results: SalishSea/hindcast
+"""
+        )
     config_ = nemo_nowcast.Config()
-    config_.load(str(p))
+    config_.load(config_file)
     return config_
 
 

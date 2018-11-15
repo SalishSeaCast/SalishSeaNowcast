@@ -14,6 +14,7 @@
 # limitations under the License.
 """Unit tests for SalishSeaCast download_fvcom_results worker.
 """
+from pathlib import Path
 import shlex
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -26,35 +27,29 @@ from nowcast.workers import download_fvcom_results
 
 
 @pytest.fixture()
-def config(tmpdir):
+def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    p = tmpdir.join("config.yaml")
-    p.write(
-        """
-        # Items required by the Config instance        
-        checklist file: nowcast_checklist.yaml
-        python: python
-        logging:
-          handlers: []
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+file group: allen
 
-        # Items for the tests
-        file group: allen
-        
-        vhfr fvcom runs:
-          host: west.cloud-nowcast
-          run types:
-            nowcast: 
-              results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast/
-            forecast: 
-              results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
-          results archive:
-            nowcast: /opp/fvcom/nowcast/
-            forecast: /opp/fvcom/forecast/ 
-        """
-    )
+vhfr fvcom runs:
+  host: west.cloud-nowcast
+  run types:
+    nowcast: 
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast/
+    forecast: 
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
+  results archive:
+    nowcast: /opp/fvcom/nowcast/
+    forecast: /opp/fvcom/forecast/ 
+"""
+        )
     config_ = nemo_nowcast.Config()
-    config_.load(str(p))
+    config_.load(config_file)
     return config_
 
 
