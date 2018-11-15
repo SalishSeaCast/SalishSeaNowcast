@@ -25,24 +25,10 @@ from nowcast.workers import get_onc_ferry
 
 
 @pytest.fixture()
-def config(tmpdir):
+def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    p = tmpdir.join("config.yaml")
-    p.write(
-        """
-        # Items required by the Config instance        
-        checklist file: nowcast_checklist.yaml
-        python: python
-        logging:
-          handlers: []
-
-        # Items for the tests
-        """
-    )
-    config_ = nemo_nowcast.Config()
-    config_.load(str(p))
-    return config_
+    return base_config
 
 
 @patch("nowcast.workers.get_onc_ferry.NowcastWorker", spec=True)

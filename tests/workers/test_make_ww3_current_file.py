@@ -20,31 +20,41 @@ from types import SimpleNamespace
 from unittest.mock import call, MagicMock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import make_ww3_current_file
 
 
 @pytest.fixture()
-def config():
-    return {
-        "run types": {"nowcast": {"mesh mask": "mesh_mask_downbyone2.nc"}},
-        "run": {
-            "enabled hosts": {
-                "west.cloud": {
-                    "run types": {
-                        "nowcast": {"results": "/nemoShare/MEOPAR/SalishSea/nowcast/"}
-                    }
-                }
-            }
-        },
-        "wave forecasts": {
-            "run prep dir": "/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs",
-            "grid dir": "grid/",
-            "current file template": "SoG_current_{yyyymmdd}.nc",
-            "NEMO file template": "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc",
-        },
-    }
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+run types:
+  nowcast:
+    mesh mask: mesh_mask201702.nc
+    
+run:
+  enabled hosts:
+    west.cloud:
+      run types:
+        nowcast:
+          results: /nemoShare/MEOPAR/SalishSea/nowcast/
+
+wave forecasts:
+  run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
+  grid dir: grid/
+  current file template: 'SoG_current_{yyyymmdd}.nc'
+  NEMO file template: 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.make_ww3_current_file.NowcastWorker")
@@ -211,7 +221,7 @@ class TestMakeWW3CurrentFile:
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
         make_ww3_current_file.make_ww3_current_file(parsed_args, config)
-        m_open_dataset.assert_called_once_with("grid/mesh_mask_downbyone2.nc")
+        m_open_dataset.assert_called_once_with("grid/mesh_mask201702.nc")
 
     @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
     @patch("nowcast.workers.make_ww3_current_file._calc_forecast_datasets")

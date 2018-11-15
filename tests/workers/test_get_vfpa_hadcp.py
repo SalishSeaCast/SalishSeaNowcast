@@ -14,6 +14,7 @@
 # limitations under the License.
 """Unit tests for SalishSeaCast get_vfpa_hadcp worker.
 """
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -25,28 +26,22 @@ from nowcast.workers import get_vfpa_hadcp
 
 
 @pytest.fixture()
-def config(tmpdir):
+def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    p = tmpdir.join("config.yaml")
-    p.write(
-        """
-        # Items required by the Config instance        
-        checklist file: nowcast_checklist.yaml
-        python: python
-        logging:
-          handlers: []
-
-        # Items for the tests
-        observations:
-          hadcp data:
-            csv dir: opp/obs/AISDATA/
-            dest dir: opp/obs/AISDATA/netcdf/
-            filepath template: 'VFPA_2ND_NARROWS_HADCP_2s_{yyyymm}.nc'
-        """
-    )
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+observations:
+  hadcp data:
+    csv dir: opp/obs/AISDATA/
+    dest dir: opp/obs/AISDATA/netcdf/
+    filepath template: 'VFPA_2ND_NARROWS_HADCP_2s_{yyyymm}.nc'
+"""
+        )
     config_ = nemo_nowcast.Config()
-    config_.load(str(p))
+    config_.load(config_file)
     return config_
 
 
