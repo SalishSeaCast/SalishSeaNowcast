@@ -15,14 +15,40 @@
 """Unit tests for Vancouver Harbour & Fraser River FVCOM
 make_fvcom_atmos_forcing worker.
 """
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import numpy
 import pytest
 
 from nowcast.workers import make_fvcom_atmos_forcing
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+vhfr fvcom runs:
+  fvcom grid:
+    grid file: vhfr_low_v2_utm10_grd.dat
+    utm zone: 10
+  atmospheric forcing:
+    hrdps grib dir: forcing/atmospheric/GEM2.5/GRIB/
+    fvcom atmos dir: forcing/atmospheric/GEM2.5/vhfr-fvcom
+    atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
+    fvcom grid dir: nowcast-sys/FVCOM-VHFR-config/grid/
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.make_fvcom_atmos_forcing.NowcastWorker", spec=True)
@@ -125,25 +151,15 @@ class TestMakeFVCOMAtmosForcing:
     """Unit tests for make_fvcom_atmos_forcing() function.
     """
 
-    config = {
-        "vhfr fvcom runs": {
-            "fvcom grid": {"grid file": "vhfr_low_v2_utm10_grd.dat", "utm zone": 10},
-            "atmospheric forcing": {
-                "hrdps grib dir": "forcing/atmospheric/GEM2.5/GRIB/",
-                "fvcom atmos dir": "forcing/atmospheric/GEM2.5/vhfr-fvcom",
-                "atmos file template": "atmos_{run_type}_{field_type}_{yyyymmdd}.nc",
-                "fvcom grid dir": "nowcast-sys/FVCOM-VHFR-config/grid/",
-            },
-        }
-    }
-
     @pytest.mark.parametrize("run_type", ["nowcast"])
-    def test_checklist(self, m_create_atm_hrdps, m_readMesh, m_logger, run_type):
+    def test_checklist(
+        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, config
+    ):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-03-16")
         )
         checklist = make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(
-            parsed_args, self.config
+            parsed_args, config
         )
         expected = {
             run_type: {
@@ -154,11 +170,13 @@ class TestMakeFVCOMAtmosForcing:
         assert checklist == expected
 
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-    def test_readMesh_V3(self, m_create_atm_hrdps, m_readMesh, m_logger, run_type):
+    def test_readMesh_V3(
+        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, config
+    ):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-03-16")
         )
-        make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(parsed_args, self.config)
+        make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(parsed_args, config)
         m_readMesh.assert_called_once_with(
             "nowcast-sys/FVCOM-VHFR-config/grid/vhfr_low_v2_utm10_grd.dat"
         )
@@ -167,12 +185,12 @@ class TestMakeFVCOMAtmosForcing:
         "run_type, file_date", [("nowcast", "20180316"), ("forecast", "20180317")]
     )
     def test_create_atm_hrdps(
-        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, file_date
+        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, file_date, config
     ):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-03-16")
         )
-        make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(parsed_args, self.config)
+        make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(parsed_args, config)
         assert m_create_atm_hrdps.call_args[0][0] == "wnd"
         numpy.testing.assert_array_equal(
             m_create_atm_hrdps.call_args[0][1], numpy.ones((24476,))

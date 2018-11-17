@@ -19,9 +19,39 @@ from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import make_forcing_links
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+rivers:
+  file templates:
+    short: "RFraserCElse_{:y%Ym%md%d}.nc"
+    long: "RLonFraCElse_{:y%Ym%md%d}.nc"
+  turbidity:
+    file template: "riverTurbDaily2_{:y%Ym%md%d}.nc"
+      
+run:
+  enabled hosts:
+    salish-nowcast:
+      run prep dir: runs/
+      forcing:
+        rivers dir: /results/forcing/rivers/
+        Fraser turbidity dir: /results/forcing/rivers/river_turb/
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.make_forcing_links.NowcastWorker", spec=True)
@@ -151,49 +181,30 @@ class TestMakeRunoffLinks:
     """Unit tests for _make_runoff_links() function.
     """
 
-    config = {
-        "rivers": {
-            "file templates": {
-                "short": "RFraserCElse_{:y%Ym%md%d}.nc",
-                "long": "RLonFraCElse_{:y%Ym%md%d}.nc",
-            },
-            "turbidity": {"file template": "riverTurbDaily2_{:y%Ym%md%d}.nc"},
-        },
-        "run": {
-            "enabled hosts": {
-                "salish-nowcast": {
-                    "run prep dir": "runs/",
-                    "forcing": {
-                        "rivers dir": "/results/forcing/rivers/",
-                        "Fraser turbidity dir": "/results/forcing/rivers/river_turb/",
-                    },
-                }
-            }
-        },
-    }
-
     @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh"])
-    def test_clear_links(self, m_clear_links, m_create_symlink, run_type):
+    def test_clear_links(self, m_clear_links, m_create_symlink, run_type, config):
         run_date = arrow.get("2016-03-11")
         m_sftp_client = Mock(name="sftp_client")
         make_forcing_links._make_runoff_links(
-            m_sftp_client, run_type, run_date, self.config, "salish-nowcast"
+            m_sftp_client, run_type, run_date, config, "salish-nowcast"
         )
         run_prep_dir = Path(
-            self.config["run"]["enabled hosts"]["salish-nowcast"]["run prep dir"]
+            config["run"]["enabled hosts"]["salish-nowcast"]["run prep dir"]
         )
         m_clear_links.assert_called_once_with(
             m_sftp_client,
-            Path(self.config["run"]["enabled hosts"]["salish-nowcast"]["run prep dir"]),
+            Path(config["run"]["enabled hosts"]["salish-nowcast"]["run prep dir"]),
             "rivers",
         )
 
     @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh"])
-    def test_runoff_files_links(self, m_clear_links, m_create_symlink, run_type):
+    def test_runoff_files_links(
+        self, m_clear_links, m_create_symlink, run_type, config
+    ):
         run_date = arrow.get("2016-03-11")
         m_sftp_client = Mock(name="sftp_client")
         make_forcing_links._make_runoff_links(
-            m_sftp_client, run_type, run_date, self.config, "salish-nowcast"
+            m_sftp_client, run_type, run_date, config, "salish-nowcast"
         )
         start = run_date.shift(days=-1)
         end = run_date.shift(days=+2)
@@ -221,11 +232,13 @@ class TestMakeRunoffLinks:
             )
             assert expected in m_create_symlink.call_args_list
 
-    def test_runoff_files_links_turbidity(self, m_clear_links, m_create_symlink):
+    def test_runoff_files_links_turbidity(
+        self, m_clear_links, m_create_symlink, config
+    ):
         run_date = arrow.get("2017-08-12")
         m_sftp_client = Mock(name="sftp_client")
         make_forcing_links._make_runoff_links(
-            m_sftp_client, "nowcast-green", run_date, self.config, "salish-nowcast"
+            m_sftp_client, "nowcast-green", run_date, config, "salish-nowcast"
         )
         start = run_date.shift(days=-1)
         end = run_date.shift(days=+2)

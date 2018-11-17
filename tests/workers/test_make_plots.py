@@ -23,6 +23,13 @@ import pytest
 from nowcast.workers import make_plots
 
 
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    return base_config
+
+
 @patch("nowcast.workers.make_plots.NowcastWorker")
 class TestMain:
     """Unit tests for main() function.
