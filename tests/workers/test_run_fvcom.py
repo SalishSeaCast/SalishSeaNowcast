@@ -21,9 +21,130 @@ from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import run_fvcom
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+vhfr fvcom runs:
+  case name: vhfr_low_v2
+  run prep dir: fvcom-runs/
+
+  fvcom grid:
+    grid dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/
+    grid file: vhfr_low_v2_utm10_grd.dat
+    depths file: vhfr_low_v2_utm10_dep.dat
+    sigma file: vhfr_low_v2_sigma.dat
+    coriolis file: vhfr_low_v2_utm10_cor.dat
+    sponge file: vhfr_low_v2_nospg_spg.dat
+    obc nodes file: vhfr_low_v2_obc.dat
+
+  nemo coupling:
+    # Directory on compute host where FVCOM-NEMO coupling files are stored
+    coupling dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/
+    # File containing FVCOM indices for the NEMO nesting zone
+    fvcom nest indices file: vhfr_low_v2_nesting_indices.txt
+    # File containing nesting zone reference line for weights calculation
+    fvcom nest ref line file: vhfr_low_v2_nesting_innerboundary.txt
+    # NEMO index ranges contained in the boundary files
+    nemo cut i range: [225, 369]
+    nemo cut j range: [340, 561]
+    # Transition zone width [m] over which weights rise from 0 to 1
+    transition zone width: 8500
+    # Transition profile tanh function parameters
+    tanh dl: 2
+    tanh du: 2
+    # NEMO coordinates file
+    nemo coordinates: /nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc
+    # NEMO mesh mask file
+    nemo mesh mask: /nemoShare/MEOPAR/nowcast-sys/grid/mesh_mask201702.nc
+    # NEMO bathymetry file
+    nemo bathymetry: /nemoShare/MEOPAR/nowcast-sys/grid/bathymetry_201702.nc
+    # Template for boundary forcing file names
+    # **Must be quoted to project {} characters**
+    boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
+
+  atmospheric forcing:
+    # Directory on host where make_fccom_atmos_forcing worker runs where HRDPS GRIB files are stored
+    hrdps grib dir: /results/forcing/atmospheric/GEM2.5/GRIB/
+    # Directory on host where make_fccom_atmos_forcing worker runs where FVCOM atmospheric forcing files are stored
+    fvcom atmos dir: /results/forcing/atmospheric/GEM2.5/vhfr-fvcom
+    # Template for atmospheric forcing file names
+    # **Must be quoted to project {} characters**
+    atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
+    # Directory on host where make_fvcom_atmos_forcing worker runs where FVCOM grid files are stored
+    fvcom grid dir: /results/nowcast-sys/FVCOM-VHFR-config/grid/
+
+  # Directory on compute host where FVCOM input files are stored
+  input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
+  # Path and name of file on compute host that defines the tide gauge stations
+  # to produce point outputs at
+  output station timeseries: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vhfr_low_v2_utm10_station.dat
+  namelists:
+    # Name of the namelist file to create by concatenating the list of namelist
+    # section files below
+    # **Must be quoted to project {} characters**
+    '{casename}_run.nml':
+      - namelist.case
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics
+      - namelist.restart
+      - namelist.netcdf
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.physics
+      - namelist.surface
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.rivers
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check
+      - namelist.nesting
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models
+  # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
+  FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
+  # Number of processors
+  number of processors: 64
+  # Location on the compute host of the file that contains IP addresses
+  # and MPI slots specifications.
+  mpi hosts file: ${HOME}/mpi_hosts.fvcom
+  # Path to the FVCOM command processor executable to use in the run script
+  fvc_cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/fvc
+  # Run type specific configurations for the runs that are executed on the
+  # compute host; keyed by run type
+  run types:
+    nowcast:
+      # Directory on compute host where NEMO run results for boundary forcing
+      # are stored
+      nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
+      # Directory on compute host where results are stored
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast/
+    forecast:
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
+      nemo boundary results: /nemoShare/MEOPAR/SalishSea/forecast/
+  # Directories on results server where run results are stored
+  # in ddmmmyy/ directories; keyed by run type
+  results archive:
+    nowcast: /opp/fvcom/nowcast/
+    forecast: /opp/fvcom/forecast/
+  # Name of the results file containing the tide gauge stations sea surface height time series
+  stations dataset filename: vhfr_low_v2_station_timeseries.nc
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @pytest.fixture(scope="function")
