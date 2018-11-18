@@ -2145,35 +2145,6 @@ class TestAfterPingERDDAP:
             )
         assert workers == []
 
-    @pytest.mark.parametrize(
-        "msg_type, run_type",
-        [
-            ("success fvcom nowcast publish", "nowcast"),
-            ("success fvcom forecast publish", "forecast"),
-        ],
-    )
-    def test_success_fvcom_launch_make_plots_prev_day(
-        self, msg_type, run_type, config, checklist
-    ):
-        run_date = "2018-11-01"
-        p_checklist = patch.dict(
-            checklist,
-            {
-                "ERDDAP flag files": {"VFPA-HADCP": []},
-                "FVCOM run": {run_type: {"run date": run_date}},
-            },
-        )
-        with p_checklist:
-            workers = next_workers.after_ping_erddap(
-                Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-            )
-        expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=["fvcom", run_type, "publish", "--run-date", "2018-10-31"],
-            host="localhost",
-        )
-        assert expected in workers
-
 
 class TestAfterMakePlots:
     """Unit tests for the after_make_plots function.

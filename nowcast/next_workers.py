@@ -1484,19 +1484,7 @@ def after_ping_erddap(msg, config, checklist):
                     NextWorker(
                         "nowcast.workers.make_plots",
                         args=["fvcom", run_type, "publish", "--run-date", run_date],
-                    ),
-                    # Repeat previous day's VHFR FVCOM figures so that they include observations for
-                    # all of the nowcast duration, and more of the forecast duration
-                    NextWorker(
-                        "nowcast.workers.make_plots",
-                        args=[
-                            "fvcom",
-                            run_type,
-                            "publish",
-                            "--run-date",
-                            arrow.get(run_date).shift(days=-1).format("YYYY-MM-DD"),
-                        ],
-                    ),
+                    )
                 ]
             )
     return next_workers[msg.type]
