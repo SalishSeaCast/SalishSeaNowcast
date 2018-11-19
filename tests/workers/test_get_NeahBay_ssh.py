@@ -15,9 +15,9 @@
 """Unit tests for Salish Sea NEMO nowcast get_NeahBay_ssh worker.
 """
 import datetime
+from pathlib import Path
 from unittest.mock import Mock, patch
 
-import nemo_nowcast
 import pytest
 import pytz
 
@@ -54,6 +54,14 @@ class TestMain:
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("run_type",)
         assert kwargs["choices"] == {"nowcast", "forecast", "forecast2"}
+        assert "help" in kwargs
+
+    def test_add_text_file_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        get_NeahBay_ssh.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ("--text-file",)
+        assert kwargs["type"] == Path
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
