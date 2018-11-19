@@ -18,6 +18,7 @@ Scrape the NOAA Neah Bay storm surge site for sea surface height
 observations and forecast values,
 and generate the western open boundary ssh files.
 """
+from contextlib import suppress
 import datetime
 import logging
 import os
@@ -27,7 +28,7 @@ import shutil
 from bs4 import BeautifulSoup
 import matplotlib.backends.backend_agg
 import matplotlib.figure
-from nemo_nowcast import get_web_data, NowcastWorker
+from nemo_nowcast import get_web_data, NowcastWorker, WorkerError
 import netCDF4 as nc
 import numpy as np
 import pytz
@@ -61,6 +62,16 @@ def main():
         Type of run to prepare open boundary sea surface height file for.
         """,
     )
+    worker.cli.add_argument(
+        "--text-file",
+        type=Path,
+        help="""
+        File like sshNB_YYYY-MM-DD_HH.txt to process instead of getting data from NOAA web site.
+        **This option is intended for recovery from automation errors and should be used with
+        the --debug option.**
+        Please provide either a file name or an absolute path and file name.
+        """,
+    )
     worker.run(get_NeahBay_ssh, success, failure)
 
 
@@ -89,6 +100,10 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     storm surge website.
     """
     run_type = parsed_args.run_type
+    textfile = parsed_args.text_file
+    ssh_dir = Path(config["ssh"]["ssh dir"])
+    with suppress(AttributeError):
+        textfile = textfile if textfile.is_absolute() else ssh_dir / "txt" / textfile
     coords = Path(config["ssh"]["coordinates"])
     with nc.Dataset(os.fspath(coords)) as coordinates:
         lats = coordinates.variables["nav_lat"][:]
@@ -98,8 +113,11 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     # store the file in the run results directory,
     # and load the data for processing into netCDF4 files
     utc_now = datetime.datetime.now(pytz.timezone("UTC"))
-    textfile = _read_website(config["ssh"]["ssh dir"])
-    lib.fix_perms(textfile, grp_name=config["file group"])
+    if textfile is None:
+        textfile = _read_website(ssh_dir)
+        lib.fix_perms(textfile, grp_name=config["file group"])
+    else:
+        logger.debug(f"observations & predictions table read from {textfile}")
     checklist = {"txt": os.path.basename(textfile)}
     # Store a copy of the text file in the run results directory so that
     # there is definitive record of the sea surface height data that was
@@ -109,7 +127,11 @@ def get_NeahBay_ssh(parsed_args, config, *args):
         config["results archive"][run_type], run_date.strftime("%d%b%y").lower()
     )
     lib.mkdir(results_dir, logger, grp_name=config["file group"], exist_ok=True)
-    shutil.copy2(textfile, results_dir)
+    try:
+        shutil.copy2(textfile, results_dir)
+    except FileNotFoundError:
+        logger.error(f"sea surface height data file not found: {textfile}")
+        raise WorkerError
     # Grab all surge data in the textfile
     dates, sshs, fflags = residuals.NeahBay_forcing_anom(
         textfile,
@@ -160,7 +182,7 @@ def _read_website(save_path):
     """
     html = get_web_data(URL, NAME)
     logger.debug(
-        f"downloaded Neah Bay storm surge observations & predictions " f"from {URL}"
+        f"downloaded Neah Bay storm surge observations & predictions from {URL}"
     )
     # Parse the text table out of the HTML
     soup = BeautifulSoup(html, "html.parser")
@@ -224,7 +246,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
         comment=comment,
         quiet=True,
     )
-    ssh_file.source = textfile
+    ssh_file.source = os.fspath(textfile)
     ssh_file.references = (
         f"https://bitbucket.org/salishsea/tools/src/tip/SalishSeaNowcast/"
         f"nowcast/workers/{NAME}.py"
