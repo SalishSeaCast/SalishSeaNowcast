@@ -73,6 +73,53 @@ class TestMain:
         )
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "grib_to_netcdf" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["grib_to_netcdf"]
+        assert msg_registry["checklist key"] == "weather forcing"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nowcast+",
+            "failure nowcast+",
+            "success forecast2",
+            "failure forecast2",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["grib_to_netcdf"]
+        assert msg in msg_registry
+
+    def test_file_group_item(self, prod_config):
+        assert "file group" in prod_config
+
+    def test_weather_section(self, prod_config):
+        assert "weather" in prod_config
+        weather = prod_config["weather"]
+        assert (
+            weather["download"]["GRIB dir"]
+            == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+        )
+        assert (
+            weather["wgrib2"] == "/data/sallen/MEOPAR/private-tools/grib2/wgrib2/wgrib2"
+        )
+        assert (
+            weather["grid_defn.pl"]
+            == "/results/nowcast-sys/private-tools/PThupaki/grid_defn.pl"
+        )
+        assert weather["ops dir"] == "/results/forcing/atmospheric/GEM2.5/operational/"
+        assert (
+            weather["monitoring image"]
+            == "/results/nowcast-sys/figures/monitoring/wg.png"
+        )
+
+
 @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2"])
 @patch("nowcast.workers.grib_to_netcdf.logger", autospec=True)
 class TestSuccess:
