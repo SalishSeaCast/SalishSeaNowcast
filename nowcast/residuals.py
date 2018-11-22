@@ -513,7 +513,7 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
     ax.plot(time, force["error"], "b", label="Forcing error", lw=2)
     ax.plot(time, model["error"], "g", lw=2, label="Model error")
     ax.set_title("Comparison of {mode} error at" " {name}".format(mode=mode, name=name))
-    ax.set_ylim([-.4, .4])
+    ax.set_ylim([-0.4, 0.4])
     hfmt = mdates.DateFormatter("%m/%d %H:%M")
 
     # Plotting daily mean
@@ -538,7 +538,7 @@ def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
         "Comparison of {mode} daily mean error at"
         " {name}".format(mode=mode, name=name)
     )
-    ax.set_ylim([-.4, .4])
+    ax.set_ylim([-0.4, 0.4])
 
     # Plot tides
     ax = axs[2]

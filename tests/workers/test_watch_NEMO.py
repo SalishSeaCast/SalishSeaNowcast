@@ -183,7 +183,7 @@ class TestWatchNEMO:
         host_name,
     ):
         m_nl2d.return_value = {
-            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20171113}],
+            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113}],
             "namdom": [{"rn_rdt": 40}],
         }
         m_pid_exists.return_value = False
@@ -221,7 +221,7 @@ class TestWatchNEMO:
     ):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         m_nl2d.return_value = {
-            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20171113}],
+            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113}],
             "namdom": [{"rn_rdt": 40}],
         }
         m_pid_exists.side_effect = (True, False)
@@ -266,7 +266,7 @@ class TestWatchNEMO:
                 {
                     "nn_it000": 1,
                     "nn_itend": 2160,
-                    "nn_date0": 20171113,
+                    "nn_date0": 20_171_113,
                     "nn_stocklist": "2160, 0, 0, 0, 0, 0, 0, 0, 0, 0",
                 }
             ],
@@ -306,7 +306,7 @@ class TestWatchNEMO:
         host_name,
     ):
         m_nl2d.return_value = {
-            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20171113}],
+            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113}],
             "namdom": [{"rn_rdt": 40}],
         }
         m_pid_exists.return_value = False
