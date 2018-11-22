@@ -432,7 +432,7 @@ def _plot_residual_time_series(ax_res, plot_data, theme):
     except AttributeError:
         # No observations available
         pass
-    ax_res.legend()
+    ax_res.legend(loc="best")
     _residual_time_series_labels(ax_res, plot_data, theme)
 
 
