@@ -50,8 +50,8 @@ SITES = {
         "East": {"lat": 49.0419, "lon": -123.3176, "depth": 170, "i": 283, "j": 416},
         "Central": {"lat": 49.0401, "lon": -123.4261, "depth": 300, "i": 266, "j": 424},
         "ddl": {
-            "lat": 49.0807167,
-            "lon": -123.3400617,
+            "lat": 49.080_716_7,
+            "lon": -123.340_061_7,
             "depth": 150,
             "i": 284,
             "j": 425,
@@ -63,8 +63,8 @@ SITES = {
 # Values for there and other constituents can be found in:
 # /data/dlatorne/MEOPAR/SalishSea/nowcast/08jul15/ocean.output/
 CorrTides = {
-    "K1": {"freq": 15.041069000, "ft": 0.891751, "uvt": 262.636797},
-    "M2": {"freq": 28.984106, "ft": 1.035390, "uvt": 346.114490},
+    "K1": {"freq": 15.041_069_000, "ft": 0.891_751, "uvt": 262.636_797},
+    "M2": {"freq": 28.984_106, "ft": 1.035_390, "uvt": 346.114_490},
 }
 
 
@@ -283,7 +283,7 @@ def plot_vel_NE_gridded(station, grid, figsize=(14, 10)):
     dep_t = grid.variables["depthv"]
     dep_w = grid.variables["depthw"]
     t = grid.variables["time_counter"]
-    dt = (t[1] - t[0]) / 3600.
+    dt = (t[1] - t[0]) / 3600.0
     maxt = dt * t.shape[0]
     t_axis = np.arange(0, maxt, dt)
 
@@ -798,8 +798,8 @@ def plot_ellipses(
 
     for q in np.arange(jmin, jmax):
         for l in np.arange(imin, imax):
-            k[q, l] = q * np.cos(phi * np.pi / 180.) + l * np.sin(phi * np.pi / 180.)
-            m[q, l] = -q * np.sin(phi * np.pi / 180.) + l * np.cos(phi * np.pi / 180.)
+            k[q, l] = q * np.cos(phi * np.pi / 180.0) + l * np.sin(phi * np.pi / 180.0)
+            m[q, l] = -q * np.sin(phi * np.pi / 180.0) + l * np.cos(phi * np.pi / 180.0)
 
     if np.logical_and(numellips == 1, depth == "None"):
         if params[1] > 0:
@@ -922,8 +922,8 @@ def plot_ellipses_area(
 
     for q in np.arange(jmin, jmax):
         for l in np.arange(imin, imax):
-            k[q, l] = q * np.cos(phi * np.pi / 180.) + l * np.sin(phi * np.pi / 180.)
-            m[q, l] = -q * np.sin(phi * np.pi / 180.) + l * np.cos(phi * np.pi / 180.)
+            k[q, l] = q * np.cos(phi * np.pi / 180.0) + l * np.sin(phi * np.pi / 180.0)
+            m[q, l] = -q * np.sin(phi * np.pi / 180.0) + l * np.cos(phi * np.pi / 180.0)
 
     if depth == "None":
         for x in np.arange(imin, imax):

@@ -62,6 +62,13 @@ def after_download_weather(msg, config, checklist):
             next_workers["success 06"].append(
                 NextWorker("nowcast.workers.get_onc_ferry", args=[ferry])
             )
+        if "hadcp data" in config["observations"]:
+            data_date = arrow.utcnow().shift(days=-1).format("YYYY-MM-DD")
+            next_workers["success 06"].append(
+                NextWorker(
+                    "nowcast.workers.get_vfpa_hadcp", args=["--data-date", data_date]
+                )
+            )
         if "forecast2" in config["run types"]:
             next_workers["success 06"].extend(
                 [
@@ -168,18 +175,18 @@ def after_grib_to_netcdf(msg, config, checklist):
         "success nowcast+": [],
         "success forecast2": [],
     }
-    msg_run_type_mapping = {"nowcast+": "nowcast", "forecast2": "forecast2"}
-    if msg.type.startswith("success") and msg.type.endswith("nowcast+"):
-        next_workers["success nowcast+"].append(
-            NextWorker("nowcast.workers.ping_erddap", args=["download_weather"])
-        )
-    for host in config["run"]["enabled hosts"]:
-        if not config["run"]["enabled hosts"][host]["shared storage"]:
-            for msg_suffix, run_type in msg_run_type_mapping.items():
-                if run_type in config["run types"]:
-                    next_workers[f"success {msg_suffix}"].append(
+    if msg.type.startswith("success"):
+        _, run_type = msg.type.split()
+        if run_type == "nowcast+":
+            next_workers["success nowcast+"].append(
+                NextWorker("nowcast.workers.ping_erddap", args=["download_weather"])
+            )
+        if run_type == "forecast2":
+            for host in config["run"]["enabled hosts"]:
+                if not config["run"]["enabled hosts"][host]["shared storage"]:
+                    next_workers[f"success {run_type}"].append(
                         NextWorker(
-                            "nowcast.workers.upload_forcing", args=[host, msg_suffix]
+                            "nowcast.workers.upload_forcing", args=[host, run_type]
                         )
                     )
     return next_workers[msg.type]
@@ -294,6 +301,14 @@ def after_make_live_ocean_files(msg, config, checklist):
     :rtype: list
     """
     next_workers = {"crash": [], "failure": [], "success": []}
+    if msg.type == "success":
+        for host in config["run"]["enabled hosts"]:
+            if not config["run"]["enabled hosts"][host]["shared storage"]:
+                next_workers[msg.type].append(
+                    NextWorker(
+                        "nowcast.workers.upload_forcing", args=[host, "nowcast+"]
+                    )
+                )
     return next_workers[msg.type]
 
 
@@ -1456,7 +1471,12 @@ def after_ping_erddap(msg, config, checklist):
             )
         )
     if msg.type == "success VFPA-HADCP":
-        run_types = checklist["FVCOM run"].keys()
+        try:
+            run_types = checklist["FVCOM run"].keys()
+        except KeyError:
+            # "FVCOM run" is only in the checklist after runs.
+            # If it's too early in the day, just return.
+            return next_workers[msg.type]
         for run_type in run_types:
             run_date = checklist["FVCOM run"][run_type]["run date"]
             next_workers[msg.type].extend(
@@ -1464,19 +1484,7 @@ def after_ping_erddap(msg, config, checklist):
                     NextWorker(
                         "nowcast.workers.make_plots",
                         args=["fvcom", run_type, "publish", "--run-date", run_date],
-                    ),
-                    # Repeat previous day's VHFR FVCOM figures so that they include observations for
-                    # all of the nowcast duration, and more of the forecast duration
-                    NextWorker(
-                        "nowcast.workers.make_plots",
-                        args=[
-                            "fvcom",
-                            run_type,
-                            "publish",
-                            "--run-date",
-                            arrow.get(run_date).shift(days=-1).format("YYYY-MM-DD"),
-                        ],
-                    ),
+                    )
                 ]
             )
     return next_workers[msg.type]

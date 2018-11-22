@@ -125,7 +125,7 @@ class TestFailure:
 @patch(
     "nowcast.workers.run_NEMO_hindcast._get_prev_run_queue_info",
     autospec=True,
-    return_value=(arrow.get("2018-01-01"), 12345678),
+    return_value=(arrow.get("2018-01-01"), 12_345_678),
 )
 @patch("nowcast.workers.run_NEMO_hindcast._get_prev_run_namelist_info")
 @patch("nowcast.workers.run_NEMO_hindcast._edit_namelist_time", autospec=True)
@@ -236,7 +236,7 @@ class TestRunNEMO_Hindcast:
         parsed_args = SimpleNamespace(
             host_name="cedar", full_month=full_month, prev_run_date=None, walltime=None
         )
-        m_get_prev_run_queue_info.return_value = (prev_run_date, 12345678)
+        m_get_prev_run_queue_info.return_value = (prev_run_date, 12_345_678)
         checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, self.config)
         expected = {"hindcast": {"host": "cedar", "run id": expected_run_id}}
         assert checklist == expected
@@ -379,7 +379,7 @@ class TestGetPrevRunQueueInfo:
             m_ssh_client, "cedar", self.config
         )
         assert prev_run_date == arrow.get("2018-05-01")
-        assert job_id == 12345678
+        assert job_id == 12_345_678
         assert m_logger.info.called
 
     def test_no_prev_hindcast_job_found(self, m_ssh_exec_cmd, m_logger):
@@ -416,7 +416,7 @@ class TestGetPrevRunNamelistInfo:
             autospec=True,
         )
         m_f90nml_read.return_value = {
-            "namrun": {"nn_itend": 2717280},
+            "namrun": {"nn_itend": 2_717_280},
             "namdom": {"rn_rdt": 40.0},
         }
         with p_named_tmp_file as m_named_tmp_file:
@@ -438,7 +438,7 @@ class TestGetPrevRunNamelistInfo:
             m_named_tmp_file().__enter__().name,
         )
         assert m_logger.info.called
-        assert prev_namelist_info == SimpleNamespace(itend=2717280, rdt=40.0)
+        assert prev_namelist_info == SimpleNamespace(itend=2_717_280, rdt=40.0)
 
 
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
@@ -453,7 +453,7 @@ class TestEditNamelistTime:
 
     def test_download_namelist_time(self, m_patch, m_logger):
         m_sftp_client = Mock(name="sftp_client")
-        prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
+        prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
             m_sftp_client,
             "cedar",
@@ -472,56 +472,56 @@ class TestEditNamelistTime:
             (
                 arrow.get("2018-03-01"),
                 31,
-                2784240,
-                [2738880, 2760480, 2784240, 0, 0, 0, 0, 0, 0, 0],
+                2_784_240,
+                [2_738_880, 2_760_480, 2_784_240, 0, 0, 0, 0, 0, 0, 0],
             ),  # 31 day month
             (
                 arrow.get("2018-02-01"),
                 28,
-                2777760,
-                [2738880, 2760480, 2777760, 0, 0, 0, 0, 0, 0, 0],
+                2_777_760,
+                [2_738_880, 2_760_480, 2_777_760, 0, 0, 0, 0, 0, 0, 0],
             ),  # February
             (
                 arrow.get("2016-02-01"),
                 29,
-                2779920,
-                [2738880, 2760480, 2779920, 0, 0, 0, 0, 0, 0, 0],
+                2_779_920,
+                [2_738_880, 2_760_480, 2_779_920, 0, 0, 0, 0, 0, 0, 0],
             ),  # leap year
             (
                 arrow.get("2018-04-01"),
                 30,
-                2782080,
-                [2738880, 2760480, 2782080, 0, 0, 0, 0, 0, 0, 0],
+                2_782_080,
+                [2_738_880, 2_760_480, 2_782_080, 0, 0, 0, 0, 0, 0, 0],
             ),  # 30 day month
             (
                 arrow.get("2018-04-01"),
                 10,
-                2738880,
-                [2738880, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                2_738_880,
+                [2_738_880, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             ),  # 10d run
             (
                 arrow.get("2018-04-11"),
                 10,
-                2738880,
-                [2738880, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                2_738_880,
+                [2_738_880, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             ),  # 10d run
             (
                 arrow.get("2018-02-21"),
                 8,
-                2734560,
-                [2734560, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                2_734_560,
+                [2_734_560, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             ),  # 8d run
             (
                 arrow.get("2016-02-21"),
                 9,
-                2736720,
-                [2736720, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                2_736_720,
+                [2_736_720, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             ),  # 9d run
             (
                 arrow.get("2018-03-21"),
                 11,
-                2741040,
-                [2741040, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                2_741_040,
+                [2_741_040, 0, 0, 0, 0, 0, 0, 0, 0, 0],
             ),  # 11d run
         ],
     )
@@ -529,7 +529,7 @@ class TestEditNamelistTime:
         self, m_patch, m_logger, run_date, run_days, expected_itend, expected_stocklist
     ):
         sftp_client = Mock(name="sftp_client")
-        prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
+        prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
             sftp_client, "cedar", prev_namelist_info, run_date, run_days, self.config
         )
@@ -537,7 +537,7 @@ class TestEditNamelistTime:
             "/tmp/hindcast.namelist.time",
             {
                 "namrun": {
-                    "nn_it000": 2717280 + 1,
+                    "nn_it000": 2_717_280 + 1,
                     "nn_itend": expected_itend,
                     "nn_date0": int(run_date.format("YYYYMMDD")),
                     "nn_stocklist": expected_stocklist,
@@ -548,7 +548,7 @@ class TestEditNamelistTime:
 
     def test_upload_namelist_time(self, m_patch, m_logger):
         m_sftp_client = Mock(name="sftp_client")
-        prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
+        prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
             m_sftp_client,
             "cedar",
@@ -589,7 +589,7 @@ class TestEditRunDesc:
 
     def test_download_run_desc_template(self, m_safe_load, m_logger, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
-        prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
+        prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         yaml_tmpl = tmpdir.ensure("hindcast_tmpl.yaml")
         run_NEMO_hindcast._edit_run_desc(
             m_sftp_client,
@@ -609,7 +609,7 @@ class TestEditRunDesc:
     @patch("nowcast.workers.run_NEMO_hindcast.yaml.safe_dump", autospec=True)
     def test_edit_run_desc(self, m_safe_dump, m_safe_load, m_logger, walltime, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
-        prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
+        prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         yaml_tmpl = tmpdir.ensure("hindcast_tmpl.yaml")
         with patch("nowcast.workers.run_NEMO_hindcast.Path.open") as m_open:
             run_NEMO_hindcast._edit_run_desc(
@@ -637,7 +637,7 @@ class TestEditRunDesc:
 
     def test_upload_run_desc(self, m_safe_load, m_logger, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
-        prev_namelist_info = SimpleNamespace(itend=2717280, rdt=40.0)
+        prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         yaml_tmpl = tmpdir.ensure("hindcast_tmpl.yaml")
         run_NEMO_hindcast._edit_run_desc(
             m_sftp_client,
@@ -694,7 +694,7 @@ class TestLaunchRun:
             m_ssh_client,
             "cedar",
             "01may18hindcast",
-            prev_job_id=12345678,
+            prev_job_id=12_345_678,
             config=self.config,
         )
         m_ssh_exec_cmd.assert_called_once_with(

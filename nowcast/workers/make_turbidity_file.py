@@ -186,7 +186,7 @@ def _interpTurb(tdf2, idate, mthresh):
             for ii in range(1, nint + 1):
                 dd0 = ddlast + ii / 24.0
                 tur0 = tlast + (dd0 - ddlast) / (ddnext - ddlast) * (tnext - tlast)
-                if (dfout.loc[iout]["hDD"] - dd0) < .5 / 24.0:
+                if (dfout.loc[iout]["hDD"] - dd0) < 0.5 / 24.0:
                     dfout.loc[iout, "turbidity"] = tur0
                     iout += 1
                 else:
@@ -202,14 +202,14 @@ def _interpTurb(tdf2, idate, mthresh):
             nint = int(np.round((row["DD"] - ddlast) * 24) - 1)
             for ii in range(1, nint + 1):
                 dd0 = ddlast + ii / 24.0
-                if (dfout.loc[iout]["hDD"] - dd0) < .5 / 24.0:
+                if (dfout.loc[iout]["hDD"] - dd0) < 0.5 / 24.0:
                     iout += 1
                 else:
                     msg = "Anticipated and output hour were consistent"
                     logger.error(msg)
                     raise ValueError(msg)
         # always append current tdf2 row's value
-        if np.abs(dfout.loc[iout]["hDD"] - row["DD"]) < .5 / 24.0:
+        if np.abs(dfout.loc[iout]["hDD"] - row["DD"]) < 0.5 / 24.0:
             dfout.loc[iout, "turbidity"] = row["turbidity"]
         else:
             msg = (

@@ -19,9 +19,43 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import make_CHS_currents_file
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+file group: allen
+
+run types:
+  nowcast:
+    mesh mask: mesh_mask201702.nc
+  forecast:
+    mesh mask: mesh_mask201702.nc
+  forecast2:
+    mesh mask: mesh_mask201702.nc
+    
+results archive:
+  nowcast: nowcast-blue/
+  forecast: forecast/
+  forecast2: forecast2/
+  
+figures:
+  grid dir:
+    nowcast-sys/grid/
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.make_CHS_currents_file.NowcastWorker", spec=True)
@@ -124,29 +158,12 @@ class TestMakeCHSCurrentsFile:
     """Unit tests for make_CHS_currents_function.
     """
 
-    config = {
-        "file group": "sallen",
-        "run types": {
-            "nowcast": {"mesh mask": "mesh_mask201702.nc"},
-            "forecast": {"mesh mask": "mesh_mask201702.nc"},
-            "forecast2": {"mesh mask": "mesh_mask201702.nc"},
-        },
-        "results archive": {
-            "nowcast": "nowcast-blue/",
-            "forecast": "forecast/",
-            "forecast2": "forecast2/",
-        },
-        "figures": {"grid dir": "nowcast-sys/grid/"},
-    }
-
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-    def test_checklist(self, m_fix_perms, m_write_ncdf, m_read_aur, run_type):
+    def test_checklist(self, m_fix_perms, m_write_ncdf, m_read_aur, run_type, config):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-09-01")
         )
-        checklist = make_CHS_currents_file.make_CHS_currents_file(
-            parsed_args, self.config
-        )
+        checklist = make_CHS_currents_file.make_CHS_currents_file(parsed_args, config)
         expected = {run_type: {"filename": m_write_ncdf(), "run date": "2018-09-01"}}
         assert checklist == expected
 
@@ -182,11 +199,12 @@ class TestMakeCHSCurrentsFile:
         results_archive,
         ufile,
         vfile,
+        config,
     ):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-09-01")
         )
-        make_CHS_currents_file.make_CHS_currents_file(parsed_args, self.config)
+        make_CHS_currents_file.make_CHS_currents_file(parsed_args, config)
         m_read_aur.assert_called_once_with(
             Path("nowcast-sys/grid/mesh_mask201702.nc"),
             Path(results_archive) / "01sep18",

@@ -213,7 +213,7 @@ class TestIsRunning:
         m_get_queue_info.return_value = "job_state = UNKNOWN\n"
         ssh_client = Mock(name="ssh_client")
         run_info = SimpleNamespace(
-            it000=2360881, itend=2363040, date0=arrow.get("2018-04-24"), rdt=40
+            it000=2_360_881, itend=2_363_040, date0=arrow.get("2018-04-24"), rdt=40
         )
         is_running = watch_NEMO_agrif._is_running(
             ssh_client,
@@ -242,7 +242,7 @@ class TestIsRunning:
         m_get_queue_info.return_value = queue_info
         ssh_client = Mock(name="ssh_client")
         run_info = SimpleNamespace(
-            it000=2360881, itend=2363040, date0=arrow.get("2018-04-24"), rdt=40
+            it000=2_360_881, itend=2_363_040, date0=arrow.get("2018-04-24"), rdt=40
         )
         is_running = watch_NEMO_agrif._is_running(
             ssh_client,
@@ -270,7 +270,7 @@ class TestIsRunning:
         m_get_queue_info.return_value = "job_state = R\n"
         ssh_client = Mock(name="ssh_client")
         run_info = SimpleNamespace(
-            it000=2360881, itend=2363040, date0=arrow.get("2018-04-24"), rdt=40
+            it000=2_360_881, itend=2_363_040, date0=arrow.get("2018-04-24"), rdt=40
         )
         is_running = watch_NEMO_agrif._is_running(
             ssh_client,
@@ -368,7 +368,11 @@ class TestGetRunInfo:
             autospec=True,
         )
         m_f90nml_read.return_value = {
-            "namrun": {"nn_it000": 2360881, "nn_itend": 2363040, "nn_date0": 20180508},
+            "namrun": {
+                "nn_it000": 2_360_881,
+                "nn_itend": 2_363_040,
+                "nn_date0": 20_180_508,
+            },
             "namdom": {"rn_rdt": 40.0},
         }
         with p_named_tmp_file as m_named_tmp_file:
@@ -381,5 +385,5 @@ class TestGetRunInfo:
         )
         assert m_logger.debug.called
         assert run_info == SimpleNamespace(
-            it000=2360881, itend=2363040, date0=arrow.get("2018-05-08"), rdt=40.0
+            it000=2_360_881, itend=2_363_040, date0=arrow.get("2018-05-08"), rdt=40.0
         )

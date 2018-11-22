@@ -18,8 +18,16 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import arrow
+import pytest
 
 from nowcast.workers import make_turbidity_file
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    return base_config
 
 
 @patch("nowcast.workers.make_turbidity_file.NowcastWorker")

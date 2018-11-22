@@ -194,8 +194,8 @@ def _fraser_correction(
             flux = _calculate_daily_flow(yesterday, afterHope) + fraserflux
             subarea = fraserratio
         elif "Zero" in key:
-            flux = 0.
-            subarea = 1.  # to avoid division by zero
+            flux = 0.0
+            subarea = 1.0  # to avoid division by zero
         else:
             flux = _calculate_daily_flow(yesterday, NonFraser)
             subarea = otherratio
@@ -269,8 +269,8 @@ def _write_file(filepath, yesterday, flow):
         rorunoff = nemo.createVariable(
             "rorunoff", "float32", ("time_counter", "y", "x"), zlib=True
         )
-        rorunoff._Fillvalue = 0.
-        rorunoff._missing_value = 0.
+        rorunoff._Fillvalue = 0.0
+        rorunoff._missing_value = 0.0
         rorunoff._units = "kg m-2 s-1"
         rorunoff[0, :] = flow
 

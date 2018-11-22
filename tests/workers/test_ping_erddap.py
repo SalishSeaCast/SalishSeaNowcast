@@ -14,12 +14,53 @@
 # limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast ping_erddap worker.
 """
+from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import call, Mock, patch
 
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import ping_erddap
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+erddap:
+  flag dir: tmp_flag_dir/
+  datasetIDs:
+    download_weather:
+      - ubcSSaSurfaceAtmosphereFieldsV1
+    SCVIP-CTD:
+      - ubcONCSCVIPCTD15mV1
+    SEVIP-CTD:
+      - ubcONCSEVIPCTD15mV1
+    LSBBL-CTD:
+      - ubcONCLSBBLCTD15mV1
+    USDDL-CTD:
+      - ubcONCUSDDLCTD15mV1
+    TWDP-ferry:
+      - ubcONCTWDP1mV1
+    VFPA-HADCP:
+      - ubcVFPA2ndNarrowsCurrent2sV1
+    nowcast-green:
+      - ubcSSg3DBiologyFields1hV17-02
+      - ubcSSg3DuGridFields1hV17-02
+    nemo-forecast:
+      - ubcSSfSandyCoveSSH10mV17-02
+    wwatch3-forecast:
+      - ubcSSf2DWaveFields30mV17-02
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.ping_erddap.NowcastWorker", spec=True)
@@ -175,46 +216,24 @@ class TestPingErddap:
             "wwatch3-forecast",
         ],
     )
-    def test_ping_erddap(self, m_logger, dataset, tmpdir):
+    def test_ping_erddap(self, m_logger, dataset, tmpdir, config):
         parsed_args = SimpleNamespace(dataset=dataset)
         tmp_flag_dir = tmpdir.ensure_dir("flag")
-        config = {
-            "erddap": {
-                "flag dir": str(tmp_flag_dir),
-                "datasetIDs": {
-                    "download_weather": ["ubcSSaSurfaceAtmosphereFieldsV1"],
-                    "SCVIP-CTD": ["ubcONCSCVIPCTD15mV1"],
-                    "SEVIP-CTD": ["ubcONCSEVIPCTD15mV1"],
-                    "USDDL-CTD": ["ubcONCUSDDLCTD15mV1"],
-                    "TWDP-ferry": ["ubcONCTWDP1mV1"],
-                    "VFPA-HADCP": ["ubcVFPA2ndNarrowsCurrent2sV1"],
-                    "nowcast-green": [
-                        "ubcSSg3DTracerFields1hV1",
-                        "ubcSSg3DuVelocity1hV1",
-                    ],
-                    "nemo-forecast": ["ubcSSfPointAtkinson10mV17-02"],
-                    "wwatch3-forecast": ["ubcSSf2DWaveFields30mV17-02"],
-                },
-            }
-        }
-        checklist = ping_erddap.ping_erddap(parsed_args, config)
+        with patch.dict(config["erddap"], {"flag dir": str(tmp_flag_dir)}):
+            checklist = ping_erddap.ping_erddap(parsed_args, config)
         dataset_ids = config["erddap"]["datasetIDs"][dataset]
         for i, dataset_id in enumerate(dataset_ids):
             assert tmp_flag_dir.join(dataset_id).exists
-            expected = "{} touched".format(tmp_flag_dir.join(dataset_id))
-            m_logger.debug.call_args_list[i] == expected
+            expected = call(f"{tmp_flag_dir.join(dataset_id)} touched")
+            assert m_logger.debug.call_args_list[i] == expected
         expected = {dataset: config["erddap"]["datasetIDs"][dataset]}
         assert checklist == expected
 
-    def test_no_datasetID(self, m_logger, tmpdir):
+    def test_no_datasetID(self, m_logger, tmpdir, config):
         parsed_args = SimpleNamespace(dataset="nowcast-green")
         tmp_flag_dir = tmpdir.ensure_dir("flag")
-        config = {
-            "erddap": {
-                "flag dir": str(tmp_flag_dir),
-                "datasetIDs": {"nemo-forecast": ["ubcSSfPointAtkinson10mV17-02"]},
-            }
-        }
-        checklist = ping_erddap.ping_erddap(parsed_args, config)
+        with patch.dict(config["erddap"], {"flag dir": str(tmp_flag_dir)}):
+            with patch.dict(config["erddap"]["datasetIDs"], {"nowcast-green": []}):
+                checklist = ping_erddap.ping_erddap(parsed_args, config)
         assert not m_logger.debug.called
         assert checklist == {"nowcast-green": []}

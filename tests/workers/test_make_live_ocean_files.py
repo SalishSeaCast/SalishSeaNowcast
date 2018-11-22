@@ -14,12 +14,36 @@
 # limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast make_live_ocean_files worker.
 """
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
+import pytest
 
 from nowcast.workers import make_live_ocean_files
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+temperature salinity:
+  download:
+    dest dir: forcing/LiveOcean/downloaded
+  bc dir: forcing/LiveOcean/boundary_conditions
+  file template: 'LiveOcean_v201712_{:y%Ym%md%d}.nc'
+  mesh mask: grid/mesh_mask201702.nc
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.make_live_ocean_files.NowcastWorker", spec=True)
@@ -100,16 +124,8 @@ class TestMakeLiveOceanFiles:
     """Unit test for make_live_ocean_files() function.
     """
 
-    def test_checklist(self, m_create_ts, m_logger):
+    def test_checklist(self, m_create_ts, m_logger, config):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-01-30"))
-        config = {
-            "temperature salinity": {
-                "download": {"dest dir": "forcing/LiveOcean/downloaded"},
-                "bc dir": "forcing/LiveOcean/boundary_conditions",
-                "file template": "LiveOcean_v201712_{:y%Ym%md%d}.nc",
-                "mesh mask": "grid/mesh_mask201702.nc",
-            }
-        }
         m_create_ts.return_value = ["LiveOcean_v201712_y2017m01d30.nc"]
         checklist = make_live_ocean_files.make_live_ocean_files(parsed_args, config)
         expected = {"temperature & salinity": "LiveOcean_v201712_y2017m01d30.nc"}

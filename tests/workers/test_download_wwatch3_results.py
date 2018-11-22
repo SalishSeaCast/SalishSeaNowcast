@@ -17,17 +17,22 @@
 from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import download_wwatch3_results
 
 
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    return base_config
+
+
 @patch("nowcast.workers.download_wwatch3_results.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
-            def test_init_cli(self, m_worker):
-        download_results.main()
-        m_worker().init_cli.assert_called_once_with()
     """
 
     def test_instantiate_worker(self, m_worker):

@@ -27,49 +27,43 @@ from nowcast.workers import update_forecast_datasets
 
 
 @pytest.fixture()
-def config(tmpdir):
+def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    p = tmpdir.join("config.yaml")
-    p.write(
-        """
-        # Items required by the Config instance        
-        checklist file: nowcast_checklist.yaml
-        python: python
-        logging:
-          handlers: []
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+results archive:
+  nowcast: results/nowcast-blue/
+  forecast: results/forecast/
+  forecast2: results/forecast2/
 
-        # Items for the tests
-        results archive:
-          nowcast: results/nowcast-blue/
-          forecast: results/forecast/
-          forecast2: results/forecast2/
-        
-        rolling forecasts:
-          days from past: 5
-          temporary results archives: /tmp/
-          fvcom:
-            most recent forecast dir: opp/fvcom/most_recent_forecast
-          nemo:
-            dest dir: rolling-forecasts/nemo/
-          wwatch3:
-            dest dir: rolling-forecasts/wwatch3/
-            most recent forecast dir: opp/wwatch3/most_recent_forecast
-            
-        wave forecasts:
-          results archive:
-            nowcast: opp/wwatch3/nowcast/
-            forecast: opp/wwatch3/forecast/
-            forecast2: opp/wwatch3/forecast2/
-            
-        vhfr fvcom runs:
-          results archive:
-            nowcast: opp/fvcom/nowcast/
-            forecast: opp/fvcom/forecast/
-        """
-    )
+rolling forecasts:
+  days from past: 5
+  temporary results archives: /tmp/
+  fvcom:
+    most recent forecast dir: opp/fvcom/most_recent_forecast
+  nemo:
+    dest dir: rolling-forecasts/nemo/
+  wwatch3:
+    dest dir: rolling-forecasts/wwatch3/
+    most recent forecast dir: opp/wwatch3/most_recent_forecast
+    
+wave forecasts:
+  results archive:
+    nowcast: opp/wwatch3/nowcast/
+    forecast: opp/wwatch3/forecast/
+    forecast2: opp/wwatch3/forecast2/
+    
+vhfr fvcom runs:
+  results archive:
+    nowcast: opp/fvcom/nowcast/
+    forecast: opp/fvcom/forecast/
+"""
+        )
     config_ = nemo_nowcast.Config()
-    config_.load(str(p))
+    config_.load(config_file)
     return config_
 
 

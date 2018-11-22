@@ -15,6 +15,15 @@ Descriptions under the links below are from the first cell of the notebooks
       
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
 
+* ##[TestSecondNarrowsCurrent.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestSecondNarrowsCurrent.ipynb)  
+    
+    **Test `second_narrows_current` Module**  
+      
+    Render figure object produced by the `nowcast.figures.fvcom.second_narrows_current` module.  
+    Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.  
+      
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.  
+
 * ##[DevelopTideStnWaterLevel.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/DevelopTideStnWaterLevel.ipynb)  
     
     **Develop `tide_stn_water_level` Figure Module**  

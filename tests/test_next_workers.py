@@ -16,6 +16,7 @@
 """
 from unittest.mock import patch
 
+import arrow
 import pytest
 from nemo_nowcast import Message, NextWorker
 
@@ -32,6 +33,7 @@ def config():
         "observations": {
             "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
             "ferry data": {"ferries": {"TWDP": {}}},
+            "hadcp data": {},
         },
         "run types": {
             "nowcast": {},
@@ -143,6 +145,20 @@ class TestAfterDownloadWeather:
         )
         assert expected in workers
 
+    def test_success_06_launch_get_vfpa_hadcp_for_prev_day(self, config, checklist):
+        with patch(
+            "nowcast.next_workers.arrow.utcnow", return_value=arrow.get("2018-11-08")
+        ):
+            workers = next_workers.after_download_weather(
+                Message("download_weather", "success 06"), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.get_vfpa_hadcp",
+            args=["--data-date", "2018-11-07"],
+            host="localhost",
+        )
+        assert expected in workers
+
     def test_success_12_launch_download_live_ocean(self, config, checklist):
         workers = next_workers.after_download_weather(
             Message("download_weather", "success 12"), config, checklist
@@ -211,19 +227,18 @@ class TestAfterGribToNetcdf:
         )
         assert workers == []
 
-    @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2"])
-    def test_success_launch_upload_forcing(self, run_type, config, checklist):
+    def test_success_forecast2_launch_upload_forcing(self, config, checklist):
         workers = next_workers.after_grib_to_netcdf(
-            Message("grib_to_netcdf", "success {}".format(run_type)), config, checklist
+            Message("grib_to_netcdf", "success forecast2"), config, checklist
         )
         expected = NextWorker(
             "nowcast.workers.upload_forcing",
-            args=["west.cloud", run_type],
+            args=["west.cloud", "forecast2"],
             host="localhost",
         )
         assert expected in workers
 
-    def test_success_forecast2_no_launch_upload_forcing_nowcastp(
+    def test_success_forecast2_shared_storage_no_launch_upload_forcing(
         self, config, checklist
     ):
         workers = next_workers.after_grib_to_netcdf(
@@ -231,7 +246,21 @@ class TestAfterGribToNetcdf:
         )
         not_expected = NextWorker(
             "nowcast.workers.upload_forcing",
-            args=["salish", "nowcast+"],
+            args=["saliish", "forecast2"],
+            host="localhost",
+        )
+        assert not_expected not in workers
+
+    @pytest.mark.parametrize("msg_type", ["success nowcast+", "success forecast2"])
+    def test_success_no_launch_upload_forcing_nowcastp(
+        self, msg_type, config, checklist
+    ):
+        workers = next_workers.after_grib_to_netcdf(
+            Message("grib_to_netcdf", msg_type), config, checklist
+        )
+        not_expected = NextWorker(
+            "nowcast.workers.upload_forcing",
+            args=["west.cloud", "nowcast+"],
             host="localhost",
         )
         assert not_expected not in workers
@@ -326,12 +355,23 @@ class TestAfterMakeLiveOceanFiles:
     """Unit tests for the after_make_live_ocean_files function.
     """
 
-    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_live_ocean_files(
             Message("make_live_ocean_files", msg_type), config, checklist
         )
         assert workers == []
+
+    def test_success_launch_upload_forcing(self, config, checklist):
+        workers = next_workers.after_make_live_ocean_files(
+            Message("make_live_ocean_files", "success"), config, checklist
+        )
+        expected = NextWorker(
+            "nowcast.workers.upload_forcing",
+            args=["west.cloud", "nowcast+"],
+            host="localhost",
+        )
+        assert expected in workers
 
 
 class TestAfterMakeTurbidityFile:
@@ -2093,34 +2133,17 @@ class TestAfterPingERDDAP:
         )
         assert expected in workers
 
-    @pytest.mark.parametrize(
-        "msg_type, run_type",
-        [
-            ("success fvcom nowcast publish", "nowcast"),
-            ("success fvcom forecast publish", "forecast"),
-        ],
-    )
-    def test_success_fvcom_launch_make_plots_prev_day(
-        self, msg_type, run_type, config, checklist
+    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    def test_success_vfpa_hadcp_no_fvcom_run_in_checklist(
+        self, run_type, config, checklist
     ):
-        run_date = "2018-11-01"
-        p_checklist = patch.dict(
-            checklist,
-            {
-                "ERDDAP flag files": {"VFPA-HADCP": []},
-                "FVCOM run": {run_type: {"run date": run_date}},
-            },
-        )
+        run_date = "2018-11-08"
+        p_checklist = patch.dict(checklist, {"ERDDAP flag files": {"VFPA-HADCP": []}})
         with p_checklist:
             workers = next_workers.after_ping_erddap(
                 Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
             )
-        expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=["fvcom", run_type, "publish", "--run-date", "2018-10-31"],
-            host="localhost",
-        )
-        assert expected in workers
+        assert workers == []
 
 
 class TestAfterMakePlots:
