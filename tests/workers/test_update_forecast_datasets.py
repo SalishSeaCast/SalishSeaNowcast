@@ -130,7 +130,10 @@ class TestConfig:
             "update_forecast_datasets"
         ]
         assert msg_registry["checklist key"] == "update forecast datasets"
-        messages = (
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
             "success fvcom forecast",
             "failure fvcom forecast",
             "success nemo forecast",
@@ -142,9 +145,13 @@ class TestConfig:
             "success wwatch3 forecast2",
             "failure wwatch3 forecast2",
             "crash",
-        )
-        for msg in messages:
-            assert msg in msg_registry
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "update_forecast_datasets"
+        ]
+        assert msg in msg_registry
 
     def test_results_archives(self, prod_config):
         fvcom_run_types = ("nowcast", "forecast")

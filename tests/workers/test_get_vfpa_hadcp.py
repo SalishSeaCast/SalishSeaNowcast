@@ -89,8 +89,11 @@ class TestConfig:
         assert "get_vfpa_hadcp" in prod_config["message registry"]["workers"]
         msg_registry = prod_config["message registry"]["workers"]["get_vfpa_hadcp"]
         assert msg_registry["checklist key"] == "VFPA HADCP data"
-        for msg in ("success", "failure", "crash"):
-            assert msg in msg_registry
+
+    @pytest.mark.parametrize("msg", ("success", "failure", "crash"))
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["get_vfpa_hadcp"]
+        assert msg in msg_registry
 
     def test_observations(self, prod_config):
         assert "hadcp data" in prod_config["observations"]
