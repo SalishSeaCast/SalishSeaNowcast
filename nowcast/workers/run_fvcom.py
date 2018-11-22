@@ -186,7 +186,7 @@ def _run_description(run_id, run_date, run_type, run_prep_dir, config):
         },
         "namelist": os.fspath(namelist_path.resolve()),
         ## TODO: Add VCS revision tracking, but need to be able to handle Git
-        ## repos to do so.
+        ##       repos to do so.
     }
     return run_desc
 
