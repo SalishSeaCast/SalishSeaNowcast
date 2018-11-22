@@ -136,7 +136,7 @@ def _ax_labels(ax, plot_data, ylims, theme):
 
 def _attribution_text(ax, theme):
     ax.text(
-        1.,
+        1.0,
         -0.35,
         "Tidal predictions calculated with t_tide: "
         "https://www.eoas.ubc.ca/~rich/#T_Tide\n"
