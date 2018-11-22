@@ -105,7 +105,7 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
 @retry(wait_fixed=2000, stop_max_attempt_number=10)
 def _get_wwatch3_fields(dataset_url):
     ## TODO: This is a work-around because neither netCDF4 nor xarray are able
-    ## to load the dataset directly from the URL due to an OpenDAP issue
+    ##       to load the dataset directly from the URL due to an OpenDAP issue
     dataset_id = dataset_url.rsplit("/", 1)[1].split(".", 1)[0]
     wwatch3_fields_file = Path("/tmp").joinpath(dataset_id).with_suffix(".nc")
     with wwatch3_fields_file.open("wb") as f:

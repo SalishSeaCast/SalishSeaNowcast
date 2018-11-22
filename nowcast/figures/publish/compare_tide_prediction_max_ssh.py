@@ -239,7 +239,7 @@ def _prep_plot_data(
 
 def _get_ssh_forecast(place, dataset_url_tmpl):
     ## TODO: This is a work-around because neither netCDF4 nor xarray are able
-    ## to load the dataset directly from the URL due to an OpenDAP issue
+    ##       to load the dataset directly from the URL due to an OpenDAP issue
     dataset_url = dataset_url_tmpl.format(place=place.replace(" ", ""))
     dataset_id = dataset_url.rsplit("/", 1)[1]
     ssh_file = Path("/tmp").joinpath(dataset_id).with_suffix(".nc")

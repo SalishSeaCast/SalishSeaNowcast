@@ -106,7 +106,7 @@ def watch_ww3(parsed_args, config, tell_manager):
         logger.info(msg)
         time.sleep(POLL_INTERVAL)
         ## TODO: confirm that the run and subsequent results gathering
-        ## completed successfully
+        ##       completed successfully
     return {
         run_type: {
             "host": host_name,
