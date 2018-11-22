@@ -48,6 +48,9 @@ dependencies:
   - verboselogs
   - xarray
 
+  # For coding style
+  - black
+
   # For figures development
   - notebook
 
@@ -76,6 +79,3 @@ dependencies:
     - utm
     - waitress==0.9.0
     - zeep
-
-    # For coding style
-    - black

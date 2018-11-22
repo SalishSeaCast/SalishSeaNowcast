@@ -19,8 +19,33 @@ from types import SimpleNamespace
 from unittest.mock import patch, Mock
 
 import arrow
+import nemo_nowcast
+import pytest
 
 from nowcast.workers import download_live_ocean
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+file group: allen
+
+temperature salinity:
+  download:
+    url: https://pm2.blob.core.windows.net/
+    directory prefix: f
+    file name: 'low_passed_UBC.nc'
+    dest dir: /results/forcing/LiveOcean/downloaded
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.download_live_ocean.NowcastWorker", spec=True)
@@ -103,19 +128,8 @@ class TestDownloadLiveOcean:
     @patch("nowcast.workers.download_live_ocean.lib.mkdir", spec=True)
     @patch("nowcast.workers.download_live_ocean._get_file", spec=True)
     @patch("nowcast.workers.download_live_ocean.nemo_cmd.api.deflate", spec=True)
-    def test_checklist(self, m_deflate, m_get_file, m_mkdir, m_logger):
+    def test_checklist(self, m_deflate, m_get_file, m_mkdir, m_logger, config):
         parsed_args = SimpleNamespace(run_date=arrow.get("2016-12-28"))
-        config = {
-            "file group": "foo",
-            "temperature salinity": {
-                "download": {
-                    "url": "https://pm2.blob.core.windows.net/",
-                    "directory prefix": "f",
-                    "file name": "low_passed_UBC.nc",
-                    "dest dir": "/results/forcing/LiveOcean/downloaded",
-                }
-            },
-        }
         m_get_file.return_value = Path(
             "/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc"
         )

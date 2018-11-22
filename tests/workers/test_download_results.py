@@ -28,6 +28,52 @@ import nowcast.lib
 from nowcast.workers import download_results
 
 
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+file group: allen
+
+results archive:
+  nowcast: SalishSea/nowcast/
+  forecast: SalishSea/forecast/
+  forecast2: SalishSea/forecast2/
+  nowcast-green: SalishSea/nowcast-green/
+  nowcast-agrif: SalishSea/nowcast-agrif/
+  hindcast: SalishSea/hindcast/
+
+run:
+  enabled hosts:
+    west.cloud-nowcast:
+      run types:
+        nowcast:
+          results: SalishSea/nowcast/
+        forecast:
+          results: SalishSea/forecast/
+        forecast2:
+          results: SalishSea/forecast2/
+        nowcast-green:
+          results: SalishSea/nowcast-green/
+    orcinus-nowcast-agrif:
+      run types:
+        nowcast-agrif:
+          results: SalishSea/nowcast-agrif/
+  hindcast hosts:
+      cedar-hindcast:
+        run types:
+          hindcast:
+            results: SalishSea/hindcast
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
+
+
 @patch("nowcast.workers.download_results.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
@@ -160,40 +206,6 @@ class TestDownloadResults:
     """Unit tests for download_results() function.
     """
 
-    config = {
-        "file group": "sallen",
-        "results archive": {
-            "nowcast": "SalishSea/nowcast",
-            "nowcast-green": "SalishSea/nowcast-green",
-            "forecast": "SalishSea/forecast",
-            "forecast2": "SalishSea/forecast2",
-            "nowcast-agrif": "SalishSea/nowcast-agrif",
-            "hindcast": "SalishSea/hindcast",
-        },
-        "run": {
-            "enabled hosts": {
-                "west.cloud-nowcast": {
-                    "run types": {
-                        "nowcast": {"results": "SalishSea/nowcast"},
-                        "nowcast-green": {"results": "SalishSea/nowcast-green"},
-                        "forecast": {"results": "SalishSea/forecast"},
-                        "forecast2": {"results": "SalishSea/forecast2"},
-                    }
-                },
-                "orcinus-nowcast-agrif": {
-                    "run types": {
-                        "nowcast-agrif": {"results": "SalishSea/nowcast-agrif"}
-                    }
-                },
-            },
-            "hindcast hosts": {
-                "cedar-hindcast": {
-                    "run types": {"hindcast": {"results": "SalishSea/hindcast"}}
-                }
-            },
-        },
-    }
-
     @pytest.mark.parametrize(
         "run_type",
         [
@@ -205,7 +217,9 @@ class TestDownloadResults:
             "nowcast-agrif",
         ],
     )
-    def test_unrecognized_host(self, m_fix_perms, m_run_in_subproc, m_logger, run_type):
+    def test_unrecognized_host(
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, config
+    ):
         parsed_args = SimpleNamespace(
             host_name="foo", run_type=run_type, run_date=arrow.get("2018-05-22")
         )
@@ -225,12 +239,12 @@ class TestDownloadResults:
         ],
     )
     def test_scp_subprocess(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
         )
-        download_results.download_results(parsed_args, self.config)
+        download_results.download_results(parsed_args, config)
         m_run_in_subproc.assert_called_once_with(
             shlex.split(
                 f"scp -pr {host_name}:SalishSea/{run_type}/22may18 SalishSea/{run_type}"
@@ -248,7 +262,7 @@ class TestDownloadResults:
         ],
     )
     def test_unlink_fvcom_boundary_files(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
@@ -261,7 +275,7 @@ class TestDownloadResults:
             side_effect=[[m_fvcom_t, m_fvcom_u, m_fvcom_v], [], [], []],
         )
         with p_glob:
-            download_results.download_results(parsed_args, self.config)
+            download_results.download_results(parsed_args, config)
         assert m_fvcom_t.unlink.called
         assert m_fvcom_u.unlink.called
         assert m_fvcom_v.unlink.called
@@ -281,18 +295,25 @@ class TestDownloadResults:
         "nowcast.workers.download_results.lib.FilePerms", autospec=nowcast.lib.FilePerms
     )
     def test_results_dir_fix_perms(
-        self, m_file_perms, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+        self,
+        m_file_perms,
+        m_fix_perms,
+        m_run_in_subproc,
+        m_logger,
+        run_type,
+        host_name,
+        config,
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
         )
-        download_results.download_results(parsed_args, self.config)
+        download_results.download_results(parsed_args, config)
         assert m_fix_perms.call_args_list[0][0] == (
             Path("SalishSea", run_type, "22may18"),
         )
         assert m_fix_perms.call_args_list[0][1] == {
             "mode": m_file_perms(user="rwx", group="rwx", other="rx"),
-            "grp_name": "sallen",
+            "grp_name": "allen",
         }
 
     @pytest.mark.parametrize(
@@ -307,7 +328,7 @@ class TestDownloadResults:
         ],
     )
     def test_results_files_fix_perms(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
@@ -317,9 +338,9 @@ class TestDownloadResults:
             side_effect=[[], [Path("namelist_cfg")], [], []],
         )
         with p_glob:
-            download_results.download_results(parsed_args, self.config)
+            download_results.download_results(parsed_args, config)
         assert m_fix_perms.call_args_list[1][0] == (Path("namelist_cfg"),)
-        assert m_fix_perms.call_args_list[1][1] == {"grp_name": "sallen"}
+        assert m_fix_perms.call_args_list[1][1] == {"grp_name": "allen"}
 
     @pytest.mark.parametrize(
         "run_type, host_name",
@@ -333,7 +354,7 @@ class TestDownloadResults:
         ],
     )
     def test_checklist(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name
+        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
@@ -348,7 +369,7 @@ class TestDownloadResults:
             ],
         )
         with p_glob:
-            checklist = download_results.download_results(parsed_args, self.config)
+            checklist = download_results.download_results(parsed_args, config)
         assert checklist == {
             run_type: {
                 "run date": "2018-05-22",

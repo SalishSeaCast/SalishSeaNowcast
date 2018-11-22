@@ -55,6 +55,9 @@ dependencies:
   - verboselogs
   - xarray
 
+  # For coding style
+  - black
+
   # For unit tests
   - coverage
   - pytest
@@ -81,6 +84,3 @@ dependencies:
 
     # For exception monitoring
     - raven
-
-    # For coding style
-    - black

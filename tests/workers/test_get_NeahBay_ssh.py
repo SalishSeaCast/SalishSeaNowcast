@@ -15,6 +15,7 @@
 """Unit tests for Salish Sea NEMO nowcast get_NeahBay_ssh worker.
 """
 import datetime
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
@@ -23,29 +24,48 @@ import pytz
 from nowcast.workers import get_NeahBay_ssh
 
 
-@patch("nowcast.workers.get_NeahBay_ssh.NowcastWorker")
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    return base_config
+
+
+@patch("nowcast.workers.get_NeahBay_ssh.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_NeahBay_ssh.main()
         args, kwargs = m_worker.call_args
         assert args == ("get_NeahBay_ssh",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_NeahBay_ssh.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_NeahBay_ssh.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("run_type",)
         assert kwargs["choices"] == {"nowcast", "forecast", "forecast2"}
         assert "help" in kwargs
 
+    def test_add_text_file_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        get_NeahBay_ssh.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ("--text-file",)
+        assert kwargs["type"] == Path
+        assert "help" in kwargs
+
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_NeahBay_ssh.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
@@ -55,43 +75,39 @@ class TestMain:
         )
 
 
+@pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
+@patch("nowcast.workers.get_NeahBay_ssh.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-    def test_success_log_info(self, run_type):
+    def test_success_log_info(self, m_logger, run_type):
         parsed_args = Mock(run_type=run_type)
-        with patch("nowcast.workers.get_NeahBay_ssh.logger") as m_logger:
-            get_NeahBay_ssh.success(parsed_args)
+        get_NeahBay_ssh.success(parsed_args)
         assert m_logger.info.called
         assert m_logger.info.call_args[1]["extra"]["run_type"] == run_type
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-    def test_success_msg_type(self, run_type):
+    def test_success_msg_type(self, m_logger, run_type):
         parsed_args = Mock(run_type=run_type)
-        with patch("nowcast.workers.get_NeahBay_ssh.logger"):
-            msg_typ = get_NeahBay_ssh.success(parsed_args)
+        msg_typ = get_NeahBay_ssh.success(parsed_args)
         assert msg_typ == "success {}".format(run_type)
 
 
+@pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
+@patch("nowcast.workers.get_NeahBay_ssh.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-    def test_failure_log_critical(self, run_type):
+    def test_failure_log_critical(self, m_logger, run_type):
         parsed_args = Mock(run_type=run_type)
-        with patch("nowcast.workers.get_NeahBay_ssh.logger") as m_logger:
-            get_NeahBay_ssh.failure(parsed_args)
+        get_NeahBay_ssh.failure(parsed_args)
         assert m_logger.critical.called
         assert m_logger.critical.call_args[1]["extra"]["run_type"] == run_type
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-    def test_failure_msg_type(self, run_type):
+    def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = Mock(run_type=run_type)
-        with patch("nowcast.workers.get_NeahBay_ssh.logger"):
-            msg_typ = get_NeahBay_ssh.failure(parsed_args)
+        msg_typ = get_NeahBay_ssh.failure(parsed_args)
         assert msg_typ == "failure {}".format(run_type)
 
 

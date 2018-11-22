@@ -64,7 +64,9 @@ def make_figure(
     plot_data = _prep_plot_data(buoy, wwatch3_dataset_url)
     fig, (ax_sig_height, ax_peak_freq) = _prep_fig_axes(figsize, theme)
     _plot_wave_height_time_series(ax_sig_height, buoy, plot_data, theme)
+    _wave_height_time_series_labels(ax_sig_height, buoy, theme)
     _plot_dominant_period_time_series(ax_peak_freq, buoy, plot_data, theme)
+    _dominant_period_time_series_labels(ax_peak_freq, buoy, plot_data, theme)
     return fig
 
 
@@ -103,7 +105,7 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
 @retry(wait_fixed=2000, stop_max_attempt_number=10)
 def _get_wwatch3_fields(dataset_url):
     ## TODO: This is a work-around because neither netCDF4 nor xarray are able
-    ## to load the dataset directly from the URL due to an OpenDAP issue
+    ##       to load the dataset directly from the URL due to an OpenDAP issue
     dataset_id = dataset_url.rsplit("/", 1)[1].split(".", 1)[0]
     wwatch3_fields_file = Path("/tmp").joinpath(dataset_id).with_suffix(".nc")
     with wwatch3_fields_file.open("wb") as f:
@@ -120,6 +122,8 @@ def _prep_fig_axes(figsize, theme):
     fig, (ax_sig_height, ax_peak_freq) = plt.subplots(
         2, 1, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
+    ax_sig_height.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_peak_freq.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     fig.autofmt_xdate()
     return fig, (ax_sig_height, ax_peak_freq)
 
@@ -140,12 +144,9 @@ def _plot_wave_height_time_series(ax, buoy, plot_data, theme):
         color=theme.COLOURS["time series"]["wave height"],
         alpha=0.8,
     )
-    legend = ax.legend(prop=theme.FONTS["legend label small"])
-    legend.set_title("Legend", prop=theme.FONTS["legend title small"])
-    _wave_height_time_series_labels(ax, buoy, plot_data, theme)
 
 
-def _wave_height_time_series_labels(ax, place, plot_data, theme):
+def _wave_height_time_series_labels(ax, place, theme):
     ax.set_title(
         f"Significant Wave Height at {place}",
         fontproperties=theme.FONTS["axes title"],
@@ -156,6 +157,7 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.legend(loc="best", prop=theme.FONTS["legend label small"])
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
 
@@ -176,9 +178,6 @@ def _plot_dominant_period_time_series(ax, buoy, plot_data, theme):
         color=theme.COLOURS["time series"]["wave period"],
         alpha=0.8,
     )
-    legend = ax.legend(prop=theme.FONTS["legend label small"])
-    legend.set_title("Legend", prop=theme.FONTS["legend title small"])
-    _dominant_period_time_series_labels(ax, buoy, plot_data, theme)
 
 
 def _dominant_period_time_series_labels(ax, place, plot_data, theme):

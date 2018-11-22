@@ -18,8 +18,16 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import nemo_nowcast
+import pytest
 
 from nowcast.workers import make_surface_current_tiles
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    return base_config
 
 
 @patch(
@@ -87,9 +95,8 @@ class TestMakeSurfaceCurrentTiles:
     """Unit tests for make_surface_current_tiles() function.
     """
 
-    def test_checklist(self, m_logger):
+    def test_checklist(self, m_logger, config):
         parsed_args = SimpleNamespace()
-        config = {}
         checklist = make_surface_current_tiles.make_surface_current_tiles(
             parsed_args, config
         )

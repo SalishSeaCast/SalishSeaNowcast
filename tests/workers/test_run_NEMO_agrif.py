@@ -189,7 +189,7 @@ class TestEditNamelistTimes:
 
     def test_download_namelist_times(self, m_patch, m_logger):
         m_sftp_client = Mock(name="sftp_client")
-        prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
+        prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         run_date = arrow.get("2018-04-30")
         run_NEMO_agrif._edit_namelist_times(
             m_sftp_client, "orcinus", prev_run_namelists_info, run_date, self.config
@@ -207,7 +207,7 @@ class TestEditNamelistTimes:
 
     def test_patch_namelist_times(self, m_patch, m_logger):
         m_sftp_client = Mock(name="sftp_client")
-        prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
+        prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         run_date = arrow.get("2018-04-30")
         run_NEMO_agrif._edit_namelist_times(
             m_sftp_client, "orcinus", prev_run_namelists_info, run_date, self.config
@@ -217,23 +217,23 @@ class TestEditNamelistTimes:
                 "/tmp/nowcast-agrif.namelist.time",
                 {
                     "namrun": {
-                        "nn_it000": 2363041,
-                        "nn_itend": 2365200,
-                        "nn_date0": 20180430,
+                        "nn_it000": 2_363_041,
+                        "nn_itend": 2_365_200,
+                        "nn_date0": 20_180_430,
                     }
                 },
                 "/tmp/patched_nowcast-agrif.namelist.time",
             ),
             call(
                 "/tmp/nowcast-agrif.namelist.time.BS",
-                {"namrun": {"nn_date0": 20180430}},
+                {"namrun": {"nn_date0": 20_180_430}},
                 "/tmp/patched_nowcast-agrif.namelist.time.BS",
             ),
         ]
 
     def test_upload_namelist_times(self, m_patch, m_logger):
         m_sftp_client = Mock(name="sftp_client")
-        prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
+        prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         run_date = arrow.get("2018-04-30")
         run_NEMO_agrif._edit_namelist_times(
             m_sftp_client, "orcinus", prev_run_namelists_info, run_date, self.config
@@ -281,7 +281,7 @@ class TestEditRunDesc:
 
     def test_download_run_desc_template(self, m_safe_load, m_logger, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
-        prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
+        prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         setattr(prev_run_namelists_info, "1_rdt", 20)
         yaml_tmpl = tmpdir.ensure("nowcast-agrif_template.yaml")
         run_NEMO_agrif._edit_run_desc(
@@ -301,7 +301,7 @@ class TestEditRunDesc:
     @patch("nowcast.workers.run_NEMO_agrif.yaml.safe_dump", autospec=True)
     def test_edit_run_desc(self, m_safe_dump, m_safe_load, m_logger, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
-        prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
+        prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         setattr(prev_run_namelists_info, "1_rdt", 20)
         yaml_tmpl = tmpdir.ensure("nowcast-agrif_template.yaml")
         with patch("nowcast.workers.run_NEMO_agrif.Path.open") as m_open:
@@ -332,7 +332,7 @@ class TestEditRunDesc:
 
     def test_upload_run_desc(self, m_safe_load, m_logger, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
-        prev_run_namelists_info = SimpleNamespace(itend=2363040, rdt=40)
+        prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         setattr(prev_run_namelists_info, "1_rdt", 20)
         yaml_tmpl = tmpdir.ensure("nowcast-agrif_template.yaml")
         run_NEMO_agrif._edit_run_desc(

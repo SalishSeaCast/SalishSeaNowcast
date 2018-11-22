@@ -27,27 +27,23 @@ from nowcast.workers import watch_NEMO_hindcast
 
 
 @pytest.fixture()
-def config(tmpdir):
-    p = tmpdir.join("config.yaml")
-    p.write(
-        """
-        # Items required by the Config instance        
-        checklist file: nowcast_checklist.yaml
-        python: python
-        logging:
-            handlers: []
-
-        # Items for the tests
-        run:
-            hindcast hosts:
-                cedar:
-                    ssh key: SalishSeaNEMO-nowcast_id_rsa
-                    users: allen,dlatorne
-                    scratch dir: scratch/hindcast
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    )
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+run:
+  hindcast hosts:
+    cedar:
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      users: allen,dlatorne
+      scratch dir: scratch/hindcast
+"""
+        )
     config_ = nemo_nowcast.Config()
-    config_.load(str(p))
+    config_.load(config_file)
     return config_
 
 
@@ -285,15 +281,15 @@ class TestHindcastJob:
         )
         m_f90nml_read.return_value = {
             "namrun": {
-                "nn_it000": 1658881,
-                "nn_itend": 1682640,
+                "nn_it000": 1_658_881,
+                "nn_itend": 1_682_640,
                 "nn_date0": "20161221",
             },
             "namdom": {"rn_rdt": 40.0},
         }
         job.get_run_info()
-        assert job.it000 == 1658881
-        assert job.itend == 1682640
+        assert job.it000 == 1_658_881
+        assert job.itend == 1_682_640
         assert job.date0 == arrow.get("2016-12-21")
         assert job.rdt == 40.0
         assert m_logger.debug.call_count == 2
@@ -455,8 +451,8 @@ class TestHindcastJob:
             Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
         )
         job.run_id = "01oct18hindcast"
-        job.it000 = 1658881
-        job.itend = 1682640
+        job.it000 = 1_658_881
+        job.itend = 1_682_640
         job.date0 = arrow.get("2016-12-21")
         job.rdt = 40.0
         job._report_progress("1658943\n")

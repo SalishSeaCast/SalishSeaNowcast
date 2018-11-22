@@ -19,41 +19,48 @@ from types import SimpleNamespace
 from unittest.mock import patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import download_weather
 
 
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+file group: allen
+
+weather:
+  download:
+    url template: 'http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+    file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+    grib variables:
+      - UGRD_TGL_10  # u component of wind velocity at 10m elevation
+      - VGRD_TGL_10  # v component of wind velocity at 10m elevation
+      - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
+      - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+      - TMP_TGL_2    # air temperature at 2m elevation
+      - SPFH_TGL_2   # specific humidity at 2m elevation
+      - APCP_SFC_0   # accumulated precipitation at ground level
+      - PRMSL_MSL_0  # atmospheric pressure at mean sea level
+      - TCDC_SFC_0   # total cloud in percent
+    forecast duration: 48  # hours
+    GRIB dir: /tmp/
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
+
+
 @pytest.fixture
 def parsed_args():
     return SimpleNamespace(forecast="06", yesterday=False)
-
-
-@pytest.fixture
-def config():
-    return {
-        "file group": "foo",
-        "weather": {
-            "download": {
-                "url template": "http://dd.beta.weather.gc.ca/model_hrdps/west/grib2/"
-                "{forecast}/{hour}/{filename}",
-                "file template": "CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_"
-                "P{hour}-00.grib2",
-                "grib variables": [
-                    "UGRD_TGL_10",
-                    "VGRD_TGL_10",
-                    "DSWRF_SFC_0",
-                    "DLWRF_SFC_0",
-                    "TMP_TGL_2",
-                    "SPFH_TGL_2",
-                    "APCP_SFC_0",
-                    "PRMSL_MSL_0",
-                ],
-                "forecast duration": 48,
-                "GRIB dir": "/tmp/",
-            }
-        },
-    }
 
 
 @patch("nowcast.workers.download_weather.NowcastWorker")
@@ -156,7 +163,7 @@ class TestGetGrib:
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
             assert args == ("/tmp/20150619/06/00{}".format(hr), m_logger)
-            assert kwargs == {"grp_name": "foo", "exist_ok": False}
+            assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
     @patch("nowcast.workers.download_weather.requests.Session")
     def test_get_grib_variable_file(
@@ -280,7 +287,7 @@ class TestGetFile:
             None,
         )
         url = (
-            "http://dd.beta.weather.gc.ca/model_hrdps/west/grib2/06/001/"
+            "http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/"
             "CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015061906_P001-00.grib2"
         )
         filepath = (

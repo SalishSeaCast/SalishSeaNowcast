@@ -22,6 +22,27 @@ import pytest
 
 
 @pytest.fixture()
+def base_config(tmpdir):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment containing elements
+    required by all unit tests.
+    """
+    p = tmpdir.join("config.yaml")
+    p.write(
+        """
+# Items required by the Config instance        
+checklist file: nowcast_checklist.yaml
+python: python
+logging:
+  handlers: []
+
+"""
+    )
+    config_ = nemo_nowcast.Config()
+    config_.load(str(p))
+    return config_
+
+
+@pytest.fixture()
 def prod_config(tmpdir):
     """:py:class:`nemo_nowcast.Config` instance from production config YAML file to use for
     testing its contents.
