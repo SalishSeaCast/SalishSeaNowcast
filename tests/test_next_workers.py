@@ -29,7 +29,6 @@ def config():
     a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
     """
     return {
-        "temperature salinity": {"matlab host": "salish"},
         "observations": {
             "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
             "ferry data": {"ferries": {"TWDP": {}}},
@@ -346,7 +345,7 @@ class TestAfterDownloadLiveOcean:
         expected = NextWorker(
             "nowcast.workers.make_live_ocean_files",
             args=["--run-date", "2017-02-15"],
-            host="salish",
+            host="localhost",
         )
         assert expected in workers
 

@@ -133,8 +133,6 @@ temperature salinity:
   # Destination directory for daily temperature and salinity boundary conditions
   # files generated from UW Live Ocean forecast
   bc dir: /results/forcing/LiveOcean/boundary_conditions
-  # Host on which to run make_live_ocean_files worker that requires matlab
-  matlab host: salish-nowcast
   # File name template for the daily temperature and salinity boundary
   # conditions files generated from UW Live Ocean forecast
   # **Must be quoted to project {} characters**
