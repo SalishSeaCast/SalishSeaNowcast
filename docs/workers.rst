@@ -328,6 +328,16 @@ Worker Utility Functions
     :members:
 
 
+Special Workers
+---------------
+
+:kbd:`launch_remote_worker`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.workers.launch_remote_worker
+    :members: main
+
+
 :kbd:`next_workers` Module
 ==========================
 
