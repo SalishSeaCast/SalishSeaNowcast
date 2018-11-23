@@ -1295,3 +1295,9 @@ message registry:
       success: log files rotated
       failure: log file rotation failed
       crash: rotate_logs worker crashed
+
+    launch_remote_worker:
+      checklist key: remote worker launch
+      success: remote worker launched
+      failure: remote worker launch failed
+      crash: launch_remote_worker crashed
