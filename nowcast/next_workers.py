@@ -276,7 +276,6 @@ def after_download_live_ocean(msg, config, checklist):
             NextWorker(
                 "nowcast.workers.make_live_ocean_files",
                 args=["--run-date", list(checklist["Live Ocean products"].keys())[0]],
-                host=config["temperature salinity"]["matlab host"],
             )
         )
     return next_workers[msg.type]
