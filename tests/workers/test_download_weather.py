@@ -16,7 +16,7 @@
 """
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import arrow
 import nemo_nowcast
@@ -63,22 +63,25 @@ def parsed_args():
     return SimpleNamespace(forecast="06", yesterday=False)
 
 
-@patch("nowcast.workers.download_weather.NowcastWorker")
+@patch("nowcast.workers.download_weather.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_weather.main()
         args, kwargs = m_worker.call_args
         assert args == ("download_weather",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_weather.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_forecast_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_weather.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("forecast",)
@@ -86,6 +89,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_add_yesterday_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_weather.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("--yesterday",)
@@ -93,6 +97,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         download_weather.main()
         args, kwargs = m_worker().run.call_args
         assert args == (

@@ -15,7 +15,7 @@
 """Unit tests for Salish Sea NEMO nowcast make_runoff_file worker.
 """
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import arrow
 import pytest
@@ -30,22 +30,25 @@ def config(base_config):
     return base_config
 
 
-@patch("nowcast.workers.make_runoff_file.NowcastWorker")
+@patch("nowcast.workers.make_runoff_file.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_runoff_file.main()
         args, kwargs = m_worker.call_args
         assert args == ("make_runoff_file",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_runoff_file.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_run_date_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_runoff_file.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ("--run-date",)
@@ -53,6 +56,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_runoff_file.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
