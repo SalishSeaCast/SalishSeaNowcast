@@ -15,7 +15,7 @@
 """Unit tests for Salish Sea NEMO nowcast get_onc_ctd worker.
 """
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import arrow
 import nemo_nowcast
@@ -31,22 +31,25 @@ def config(base_config):
     return base_config
 
 
-@patch("nowcast.workers.get_onc_ctd.NowcastWorker")
+@patch("nowcast.workers.get_onc_ctd.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ctd.main()
         args, kwargs = m_worker.call_args
         assert args == ("get_onc_ctd",)
         assert "description" in kwargs
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ctd.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_onc_station_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ctd.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("onc_station",)
@@ -54,6 +57,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_add_data_date_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ctd.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
         assert args == ("--data-date",)
@@ -61,6 +65,7 @@ class TestMain:
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         get_onc_ctd.main()
         args, kwargs = m_worker().run.call_args
         expected = (get_onc_ctd.get_onc_ctd, get_onc_ctd.success, get_onc_ctd.failure)

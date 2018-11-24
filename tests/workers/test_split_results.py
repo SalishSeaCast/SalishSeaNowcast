@@ -19,22 +19,25 @@ from unittest.mock import Mock, patch
 from nowcast.workers import split_results
 
 
-@patch("nowcast.workers.split_results.NowcastWorker")
+@patch("nowcast.workers.split_results.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         split_results.main()
         args, kwargs = m_worker.call_args
         assert args == ("split_results",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         split_results.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         split_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("run_type",)
@@ -43,12 +46,14 @@ class TestMain:
         assert "help" in kwargs
 
     def test_add_run_date_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         split_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_date",)
         assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         split_results.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
