@@ -15,7 +15,7 @@
 """Unit tests for SalishSeaCast make_surface_current_tiles worker.
 """
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import nemo_nowcast
 import pytest
@@ -30,25 +30,25 @@ def config(base_config):
     return base_config
 
 
-@patch(
-    "nowcast.workers.make_surface_current_tiles.NowcastWorker",
-    spec=nemo_nowcast.NowcastWorker,
-)
+@patch("nowcast.workers.make_surface_current_tiles.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
     """
 
     def test_instantiate_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_surface_current_tiles.main()
         args, kwargs = m_worker.call_args
         assert args == ("make_surface_current_tiles",)
         assert list(kwargs.keys()) == ["description"]
 
     def test_init_cli(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_surface_current_tiles.main()
         m_worker().init_cli.assert_called_once_with()
 
     def test_run_worker(self, m_worker):
+        m_worker().cli = Mock(name="cli")
         make_surface_current_tiles.main()
         args, kwargs = m_worker().run.call_args
         assert args == (
