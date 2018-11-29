@@ -44,6 +44,7 @@ dependencies:
   - pillow
   - pip
   - pygrib
+  - pypdf2
   - pyproj
   - python=3.6
   - pyyaml

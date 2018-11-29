@@ -44,6 +44,7 @@ dependencies:
   - pip
   - pygrib
   - pyproj
+  - pypdf2
   - python=3.6
   - pyyaml
   - pyzmq
