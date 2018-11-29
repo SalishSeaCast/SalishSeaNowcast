@@ -110,7 +110,7 @@ class TestMain:
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
-@patch("nowcast.workers.make_ww3_current_file.logger")
+@patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -133,7 +133,7 @@ class TestSuccess:
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
-@patch("nowcast.workers.make_ww3_current_file.logger")
+@patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -155,12 +155,12 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
-@patch("nowcast.workers.make_ww3_current_file._create_dataset")
-@patch("nowcast.workers.make_ww3_current_file.viz_tools.unstagger")
-@patch("nowcast.workers.make_ww3_current_file.viz_tools.rotate_vel")
-@patch("nowcast.workers.make_ww3_current_file.xarray.open_mfdataset")
-@patch("nowcast.workers.make_ww3_current_file.xarray.open_dataset")
-@patch("nowcast.workers.make_ww3_current_file.logger")
+@patch("nowcast.workers.make_ww3_current_file._create_dataset", autospec=True)
+@patch("nowcast.workers.make_ww3_current_file.viz_tools.unstagger", autospec=True)
+@patch("nowcast.workers.make_ww3_current_file.viz_tools.rotate_vel", autospec=True)
+@patch("nowcast.workers.make_ww3_current_file.xarray.open_mfdataset", autospec=True)
+@patch("nowcast.workers.make_ww3_current_file.xarray.open_dataset", autospec=True)
+@patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestMakeWW3CurrentFile:
     """Unit tests for make_ww3_current_file() function.
     """
@@ -312,7 +312,7 @@ class TestMakeWW3CurrentFile:
             )
 
 
-@patch("nowcast.workers.make_ww3_current_file.logger")
+@patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestCalcForecastDatasets:
     """Unit tests for _calc_forecast_datasets() function.
     """
@@ -339,8 +339,8 @@ class TestCalcForecastDatasets:
         }
 
 
-@patch("nowcast.workers.make_ww3_current_file.logger")
-@patch("nowcast.workers.make_ww3_current_file.subprocess.run")
+@patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
+@patch("nowcast.workers.make_ww3_current_file.subprocess.run", autospec=True)
 class TestCalcForecast2Datasets:
     """Unit tests for _calc_forecast2_datasets() function.
     """

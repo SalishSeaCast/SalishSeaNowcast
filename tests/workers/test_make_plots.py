@@ -112,7 +112,7 @@ class TestMain:
         ("wwatch3", "forecast2", "publish"),
     ],
 )
-@patch("nowcast.workers.make_plots.logger")
+@patch("nowcast.workers.make_plots.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -151,7 +151,7 @@ class TestSuccess:
         ("wwatch3", "forecast2", "publish"),
     ],
 )
-@patch("nowcast.workers.make_plots.logger")
+@patch("nowcast.workers.make_plots.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """

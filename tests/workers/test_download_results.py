@@ -144,7 +144,7 @@ class TestMain:
         ("nowcast-agrif", "orcinus-nowcast-agrif"),
     ],
 )
-@patch("nowcast.workers.download_results.logger", autospec=logging.Logger)
+@patch("nowcast.workers.download_results.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -177,7 +177,7 @@ class TestSuccess:
         ("nowcast-agrif", "orcinus-nowcast-agrif"),
     ],
 )
-@patch("nowcast.workers.download_results.logger", autospec=logging.Logger)
+@patch("nowcast.workers.download_results.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -291,9 +291,7 @@ class TestDownloadResults:
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
     )
-    @patch(
-        "nowcast.workers.download_results.lib.FilePerms", autospec=nowcast.lib.FilePerms
-    )
+    @patch("nowcast.workers.download_results.lib.FilePerms", autospec=True)
     def test_results_dir_fix_perms(
         self,
         m_file_perms,

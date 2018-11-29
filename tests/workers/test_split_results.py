@@ -63,37 +63,35 @@ class TestMain:
         )
 
 
+@patch("nowcast.workers.split_results.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self):
+    def test_success_log_info(self, m_logger):
         parsed_args = Mock(run_type="hindcast")
-        with patch("nowcast.workers.split_results.logger") as m_logger:
-            split_results.success(parsed_args)
+        split_results.success(parsed_args)
         assert m_logger.info.called
         assert m_logger.info.call_args[1]["extra"]["run_type"] == "hindcast"
 
-    def test_success_msg_type(self):
+    def test_success_msg_type(self, m_logger):
         parsed_args = Mock(run_type="hindcast")
-        with patch("nowcast.workers.split_results.logger"):
-            msg_typ = split_results.success(parsed_args)
+        msg_typ = split_results.success(parsed_args)
         assert msg_typ == "success hindcast"
 
 
+@patch("nowcast.workers.split_results.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_info(self):
+    def test_failure_log_info(self, m_logger):
         parsed_args = Mock(run_type="hindcast")
-        with patch("nowcast.workers.split_results.logger") as m_logger:
-            split_results.failure(parsed_args)
+        split_results.failure(parsed_args)
         assert m_logger.critical.called
         assert m_logger.critical.call_args[1]["extra"]["run_type"] == "hindcast"
 
-    def test_failure_msg_type(self):
+    def test_failure_msg_type(self, m_logger):
         parsed_args = Mock(run_type="hindcast")
-        with patch("nowcast.workers.split_results.logger"):
-            msg_typ = split_results.failure(parsed_args)
+        msg_typ = split_results.failure(parsed_args)
         assert msg_typ == "failure hindcast"

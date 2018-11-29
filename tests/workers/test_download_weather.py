@@ -107,7 +107,7 @@ class TestMain:
         )
 
 
-@patch("nowcast.workers.download_weather.logger")
+@patch("nowcast.workers.download_weather.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -125,7 +125,7 @@ class TestSuccess:
         assert msg_type == "success {forecast}".format(forecast=forecast)
 
 
-@patch("nowcast.workers.download_weather.logger")
+@patch("nowcast.workers.download_weather.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -143,11 +143,15 @@ class TestFailure:
         assert msg_type == "failure {forecast}".format(forecast=forecast)
 
 
-@patch("nowcast.workers.download_weather.logger")
-@patch("nowcast.workers.download_weather._calc_date", return_value="20150619")
-@patch("nowcast.workers.download_weather.lib.mkdir")
-@patch("nowcast.workers.download_weather.lib.fix_perms")
-@patch("nowcast.workers.download_weather._get_file")
+@patch("nowcast.workers.download_weather.logger", autospec=True)
+@patch(
+    "nowcast.workers.download_weather._calc_date",
+    return_value="20150619",
+    autospec=True,
+)
+@patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
+@patch("nowcast.workers.download_weather.lib.fix_perms", autospec=True)
+@patch("nowcast.workers.download_weather._get_file", autospec=True)
 class TestGetGrib:
     """Unit tests for get_grib() function.
     """
@@ -170,7 +174,7 @@ class TestGetGrib:
             assert args == ("/tmp/20150619/06/00{}".format(hr), m_logger)
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
-    @patch("nowcast.workers.download_weather.requests.Session")
+    @patch("nowcast.workers.download_weather.requests.Session", autospec=True)
     def test_get_grib_variable_file(
         self,
         m_session,
@@ -238,6 +242,7 @@ class TestGetGrib:
 @patch(
     "nowcast.workers.download_weather.arrow.utcnow",
     return_value=arrow.get(2015, 6, 18, 19, 3, 42),
+    autospec=True,
 )
 class TestCalcDate:
     """Unit tests for _calc_date() function.
@@ -253,8 +258,8 @@ class TestCalcDate:
         assert date == "20150617"
 
 
-@patch("nowcast.workers.download_weather.logger")
-@patch("nowcast.workers.download_weather.lib.mkdir")
+@patch("nowcast.workers.download_weather.logger", autospec=True)
+@patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
 class TestMkdirs:
     """Unit tests for _mkdirs() function.
     """
@@ -272,9 +277,9 @@ class TestMkdirs:
         assert kwargs == {"grp_name": "foo", "exist_ok": False}
 
 
-@patch("nowcast.workers.download_weather.logger")
-@patch("nowcast.workers.download_weather.get_web_data")
-@patch("nowcast.workers.download_weather.os.stat")
+@patch("nowcast.workers.download_weather.logger", autospec=True)
+@patch("nowcast.workers.download_weather.get_web_data", autospec=True)
+@patch("nowcast.workers.download_weather.os.stat", autospec=True)
 class TestGetFile:
     """Unit tests for _get_file() function.
     """

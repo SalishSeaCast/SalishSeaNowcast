@@ -89,7 +89,7 @@ class TestMain:
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
-@patch("nowcast.workers.run_ww3.logger")
+@patch("nowcast.workers.run_ww3.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -110,7 +110,7 @@ class TestSuccess:
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
-@patch("nowcast.workers.run_ww3.logger")
+@patch("nowcast.workers.run_ww3.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -130,15 +130,19 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
-@patch("nowcast.workers.run_ww3.logger")
+@patch("nowcast.workers.run_ww3.logger", autospec=True)
 class TestRunWW3:
     """Unit tests for run_ww3() function.
     """
 
     @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
-    @patch("nowcast.workers.run_ww3._build_tmp_run_dir")
-    @patch("nowcast.workers.run_ww3._write_run_script")
-    @patch("nowcast.workers.run_ww3._launch_run", return_value="bash SoGWW3.sh")
+    @patch("nowcast.workers.run_ww3._build_tmp_run_dir", autospec=True)
+    @patch("nowcast.workers.run_ww3._write_run_script", autospec=True)
+    @patch(
+        "nowcast.workers.run_ww3._launch_run",
+        return_value="bash SoGWW3.sh",
+        autospec=True,
+    )
     def test_checklist(
         self,
         m_launch_run,
@@ -172,9 +176,9 @@ class TestBuildTmpRunDir:
     """
 
     @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
-    @patch("nowcast.workers.run_ww3._write_ww3_input_files")
-    @patch("nowcast.workers.run_ww3._create_symlinks")
-    @patch("nowcast.workers.run_ww3._make_run_dir")
+    @patch("nowcast.workers.run_ww3._write_ww3_input_files", autospec=True)
+    @patch("nowcast.workers.run_ww3._create_symlinks", autospec=True)
+    @patch("nowcast.workers.run_ww3._make_run_dir", autospec=True)
     def test_run_dir_path(
         self,
         m_make_run_dir,

@@ -66,7 +66,7 @@ class TestMain:
         )
 
 
-@patch("nowcast.workers.make_turbidity_file.logger")
+@patch("nowcast.workers.make_turbidity_file.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -82,7 +82,7 @@ class TestSuccess:
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.make_turbidity_file.logger")
+@patch("nowcast.workers.make_turbidity_file.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
