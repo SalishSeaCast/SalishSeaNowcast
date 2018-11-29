@@ -1270,8 +1270,10 @@ message registry:
 
     make_surface_current_tiles:
       checklist key: surface current tiles
-      success: surface current tile figures produced
-      failure: surface current tile figure production failed
+      success forecast: forecast surface current tile figures produced
+      failure forecast: forecast surface current tile figure production failed
+      success forecast2: forecast2 surface current tile figures produced
+      failure forecast2: forecast2 surface current tile figure production failed
       crash: make_surface_current_tiles worker crashed
 
     make_feeds:
