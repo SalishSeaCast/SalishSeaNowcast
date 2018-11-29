@@ -75,6 +75,36 @@ class TestMain:
         )
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert (
+            "make_surface_current_tiles" in prod_config["message registry"]["workers"]
+        )
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_surface_current_tiles"
+        ]
+        assert msg_registry["checklist key"] == "surface current tiles"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success forecast",
+            "failure forecast",
+            "success forecast2",
+            "failure forecast2",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_surface_current_tiles"
+        ]
+        assert msg in msg_registry
+
+
 @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestSuccess:
