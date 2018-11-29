@@ -17,6 +17,7 @@
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
+import arrow
 import nemo_nowcast
 import pytest
 
@@ -46,6 +47,22 @@ class TestMain:
         m_worker().cli = Mock(name="cli")
         make_surface_current_tiles.main()
         m_worker().init_cli.assert_called_once_with()
+
+    def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        make_surface_current_tiles.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
+        assert args == ("run_type",)
+        assert kwargs["choices"] == {"forecast", "forecast2"}
+        assert "help" in kwargs
+
+    def test_add_run_date_option(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        make_surface_current_tiles.main()
+        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
+        assert args == ("--run-date",)
+        assert kwargs["default"] == arrow.now().floor("day")
+        assert "help" in kwargs
 
     def test_run_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
