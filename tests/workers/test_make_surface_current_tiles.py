@@ -112,10 +112,12 @@ class TestSuccess:
     """
 
     def test_success(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(run_type=run_type)
+        parsed_args = SimpleNamespace(
+            run_type=run_type, run_date=(arrow.get("2018-11-29"))
+        )
         msg_type = make_surface_current_tiles.success(parsed_args)
         m_logger.info.assert_called_once_with(
-            f"{run_type} surface current tile figures completed"
+            f"surface current tile figures for 2018-11-29 {run_type} completed"
         )
         assert msg_type == f"success {run_type}"
 
@@ -127,10 +129,12 @@ class TestFailure:
     """
 
     def test_failure_log_critical(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(run_type=run_type)
+        parsed_args = SimpleNamespace(
+            run_type=run_type, run_date=(arrow.get("2018-11-29"))
+        )
         msg_type = make_surface_current_tiles.failure(parsed_args)
         m_logger.critical.assert_called_once_with(
-            f"{run_type} surface current tile figures production failed"
+            f"surface current tile figures production for 2018-11-29 {run_type} failed"
         )
         assert msg_type == f"failure {run_type}"
 
