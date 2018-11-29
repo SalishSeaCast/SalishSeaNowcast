@@ -19,6 +19,27 @@ The tile specifications and initial code implementation were provided by IOS.
 """
 import logging
 
+import netCDF4 as nc
+import arrow
+import pytz
+import datetime
+import time
+from glob import glob
+from pathlib import Path
+
+import os
+import shlex
+import subprocess
+import multiprocessing
+from queue import Empty
+
+from PyPDF2 import PdfFileMerger
+
+from matplotlib.backend_bases import FigureCanvasBase
+
+from nowcast.figures.publish import surface_current_tiles
+from nowcast.figures.surface_current_domain import tile_coords_dic
+
 from nemo_nowcast import NowcastWorker
 
 NAME = "make_surface_current_tiles"
@@ -34,6 +55,21 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
+    worker.cli.add_argument(
+        "run_type",
+        choices={"forecast", "forecast2"},
+        help="""
+        Type of run to produce plots for:
+        'forecast' means forecast physics-only runs,
+        'forecast2' means forecast2 preliminary forecast physics-only runs.
+        """,
+    )
+    worker.cli.add_date_option(
+        "--run-date",
+        default=arrow.now().floor("day"),
+        help="Date of the run to symlink files for.",
+    )
+
     worker.run(make_surface_current_tiles, success, failure)
 
 
@@ -69,8 +105,283 @@ def make_surface_current_tiles(parsed_args, checklist, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
-    checklist = {}
-    return checklist
+    run_date = parsed_args.run_date
+    dmy = run_date.format("DDMMMYY").lower()
+    dmym1 = run_date.replace(days=-1).format("DDMMMYY").lower()
+    timezone = config["figures"]["timezone"]
+    run_type = parsed_args.run_type  # forecast, forecast2
+
+    results_dir0 = Path(config["results archive"][run_type], dmy)
+
+    if run_type == "forecast":
+        results_dirm1 = Path(config["results archive"]["nowcast"], dmy)
+        results_dirm2 = Path(config["results archive"]["nowcast"], dmym1)
+
+    if run_type == "forecast2":
+        results_dirm1 = Path(config["results archive"]["forecast"], dmy)
+        results_dirm2 = Path(config["results archive"]["nowcast"], dmy)
+
+    grid_dir = Path(config["figures"]["grid dir"])
+    coordf = grid_dir / config["run types"][run_type]["coordinates"]
+    mesh_maskf = grid_dir / config["run types"][run_type]["mesh mask"]
+    bathyf = grid_dir / config["run types"][run_type]["bathymetry"]
+    storage_path = Path(
+        config["figures"]["surface current tiles"]["storage path"], run_type, dmy
+    )
+
+    if not os.path.exists(storage_path):
+        os.makedirs(storage_path)
+
+    # Loop over last 48h and this forecast{,2}
+    for results_dir in [results_dirm2, results_dirm1, results_dir0]:
+
+        u_list = glob(os.fspath(results_dir) + "/SalishSea_1h_*_grid_U.nc")
+        v_list = glob(os.fspath(results_dir) + "/SalishSea_1h_*_grid_V.nc")
+
+        Uf = Path(u_list[0])
+        Vf = Path(v_list[0])
+
+        with nc.Dataset(Uf) as dsU:
+            max_time_index = dsU.dimensions["time_counter"].size
+            units = dsU.variables["time_counter"].units
+            calendar = dsU.variables["time_counter"].calendar
+            sec = dsU.variables["time_counter"][:]
+
+        expansion_factor = 0.1  # 10% overlap for each tile
+
+        num_procs = 6
+        if num_procs == 1:
+            # Single proccessor mode
+            for t_index in range(max_time_index):
+                _callMakeFigure(
+                    t_index,
+                    sec,
+                    units,
+                    calendar,
+                    run_date,
+                    Uf,
+                    Vf,
+                    coordf,
+                    mesh_maskf,
+                    bathyf,
+                    tile_coords_dic,
+                    expansion_factor,
+                    storage_path,
+                )
+        else:
+            # Multiprocessing mode
+            # Add tasks to a joinable queue
+            q = multiprocessing.JoinableQueue()
+            for t_index in range(max_time_index):
+                task = (
+                    t_index,
+                    sec,
+                    units,
+                    calendar,
+                    run_date,
+                    Uf,
+                    Vf,
+                    coordf,
+                    mesh_maskf,
+                    bathyf,
+                    tile_coords_dic,
+                    expansion_factor,
+                    storage_path,
+                )
+                q.put(task)
+            # Spawn a set of worker processes
+            procs = []
+            for i in range(num_procs):
+                p = multiprocessing.Process(target=_process_time_slice, args=(q,))
+                procs.append(p)
+            # Start each one
+            for p in procs:
+                p.start()
+            # Wait until they complete
+            for p in procs:
+                p.join()
+            # Close the queue
+            q.close()
+
+    tile_names = []
+    for t in tile_coords_dic:
+        tile_names += [t]
+
+    _pdfMerger(storage_path, tile_names)
+
+    config = {}
+    return config
+
+
+def _process_time_slice(q):
+    """
+    This is the worker function that gets called when multiprocessing is in used (num_procs > 1).
+    """
+    while True:
+        try:
+            task = q.get_nowait()
+            t_index, sec, units, calendar, run_date, Uf, Vf, coordf, mesh_maskf, bathyf, tile_coords_dic, expansion_factor, storage_path = (
+                task
+            )
+
+            _callMakeFigure(
+                t_index,
+                sec,
+                units,
+                calendar,
+                run_date,
+                Uf,
+                Vf,
+                coordf,
+                mesh_maskf,
+                bathyf,
+                tile_coords_dic,
+                expansion_factor,
+                storage_path,
+            )
+
+            q.task_done()
+
+        except Empty:
+            break
+
+
+def _callMakeFigure(
+    t_index,
+    sec,
+    units,
+    calendar,
+    run_date,
+    Uf,
+    Vf,
+    coordf,
+    mesh_maskf,
+    bathyf,
+    tile_coords_dic,
+    expansion_factor,
+    storage_path,
+):
+    """
+    Calls the make_figure() function in the surface_currents_tiles module for time index t_index.
+    make_figure() function is called once to produce figures with website theme and called again
+    to produce figures in pdf format.
+    """
+    date_stamp = _getTimeFileName(sec[t_index], units, calendar)
+
+    # make website theme version
+    fig_list, tile_names = surface_current_tiles.make_figure(
+        run_date,
+        t_index,
+        Uf,
+        Vf,
+        coordf,
+        mesh_maskf,
+        bathyf,
+        tile_coords_dic,
+        expansion_factor,
+    )
+    _render_figures(fig_list, tile_names, storage_path, date_stamp, "png")
+    del fig_list
+
+    # make pdf version
+    fig_list, tile_names = surface_current_tiles.make_figure(
+        run_date,
+        t_index,
+        Uf,
+        Vf,
+        coordf,
+        mesh_maskf,
+        bathyf,
+        tile_coords_dic,
+        expansion_factor,
+        theme=None,
+    )
+    _render_figures(fig_list, tile_names, storage_path, date_stamp, "pdf")
+    del fig_list
+
+
+def _getTimeFileName(sec, units, calendar):
+    """
+    Constructs UTC timestamp for the figure file name.
+    """
+    dt = nc.num2date(sec, units, calendar=calendar)
+    dt_utc = datetime.datetime.combine(
+        dt.date(), dt.time(), pytz.utc
+    )  # add timezone to utc time
+    fmt = "%Y%m%d_%H%M%S"
+
+    time_utc = dt_utc.strftime(fmt)
+
+    return time_utc
+
+
+def _render_figures(fig_list, tile_names, storage_path, date_stamp, file_type):
+    for fig, name in zip(fig_list, tile_names):
+        ftile = "surface_currents_tile{:02d}_{}_UTC.{}".format(
+            int(name[4:]), date_stamp, file_type
+        )
+        outfile = Path(storage_path, ftile)
+        FigureCanvasBase(fig).print_figure(
+            outfile.as_posix(), facecolor=fig.get_facecolor()
+        )
+        logger.info(f"{outfile.as_posix()} saved")
+
+
+def _pdfMerger(path, allTiles):
+    """
+    For each tile combine the time series of pdf files into one file.
+    Delete the individual pdf files, leaving only the per tile files.
+    Shrink the merged pdf files.
+    """
+    for tile in allTiles:
+
+        file_list = glob(os.fspath(path) + "/surface_currents_" + tile + "*.pdf")
+        file_list_sorted = sorted(file_list)
+        result = os.fspath(path) + "/" + tile + ".pdf"
+        print(result)
+        try:
+            merger = PdfFileMerger()
+
+            for pdf in file_list_sorted:
+                merger.append(pdf)
+
+            merger.write(result)
+            merger.close()
+
+            for pdf in file_list_sorted:
+                os.remove(pdf)
+
+        except:
+            logger.warning("PDF merging failed for tile {}".format(tile))
+
+        # Shrink the merged pdfs.
+        _pdfShrink(Path(result))
+
+
+def _pdfShrink(filename):
+    """
+    Strategy borrowed from make_plots.py to shrink pdf file
+    """
+    logger.debug(f"Starting PDF optimizing for {filename}")
+    tmpfilename = filename.with_suffix(".temp")
+    cmd = f"pdftocairo -pdf {filename} {tmpfilename}"
+    logger.debug(f"running subprocess: {cmd}")
+    try:
+        proc = subprocess.run(
+            shlex.split(cmd),
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        logger.debug(proc.stdout)
+        tmpfilename.rename(filename)
+        logger.info(f"{filename} shrunk")
+    except subprocess.CalledProcessError as e:
+        logger.warning("PDF shrinking failed, proceeding with unshrunk PDF")
+        logger.debug(f"pdftocairo return code: {e.returncode}")
+        if e.output:
+            logger.debug(e.output)
 
 
 if __name__ == "__main__":
