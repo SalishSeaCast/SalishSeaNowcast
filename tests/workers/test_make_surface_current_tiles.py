@@ -75,36 +75,34 @@ class TestMain:
         )
 
 
+@pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
+    """Unit test for success() function.
     """
 
-    def test_success_log_info(self, m_logger):
-        parsed_args = SimpleNamespace()
-        make_surface_current_tiles.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger):
-        parsed_args = SimpleNamespace()
+    def test_success(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(run_type=run_type)
         msg_type = make_surface_current_tiles.success(parsed_args)
-        assert msg_type == f"success"
+        m_logger.info.assert_called_once_with(
+            f"{run_type} surface current tile figures completed"
+        )
+        assert msg_type == f"success {run_type}"
 
 
+@pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
+    """Unit test for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger):
-        parsed_args = SimpleNamespace()
-        make_surface_current_tiles.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger):
-        parsed_args = SimpleNamespace()
+    def test_failure_log_critical(self, m_logger, run_type):
+        parsed_args = SimpleNamespace(run_type=run_type)
         msg_type = make_surface_current_tiles.failure(parsed_args)
-        assert msg_type == f"failure"
+        m_logger.critical.assert_called_once_with(
+            f"{run_type} surface current tile figures production failed"
+        )
+        assert msg_type == f"failure {run_type}"
 
 
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)

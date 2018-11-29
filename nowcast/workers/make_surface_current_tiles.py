@@ -80,8 +80,8 @@ def success(parsed_args):
     :return: Nowcast system message type
     :rtype: str
     """
-    logger.info("surface current tile figures completed")
-    msg_type = f"success"
+    logger.info(f"{parsed_args.run_type} surface current tile figures completed")
+    msg_type = f"success {parsed_args.run_type}"
     return msg_type
 
 
@@ -92,8 +92,10 @@ def failure(parsed_args):
     :return: Nowcast system message type
     :rtype: str
     """
-    logger.critical("surface current tile figures production failed")
-    msg_type = f"failure"
+    logger.critical(
+        f"{parsed_args.run_type} surface current tile figures production failed"
+    )
+    msg_type = f"failure {parsed_args.run_type}"
     return msg_type
 
 
