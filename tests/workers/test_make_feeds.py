@@ -102,7 +102,7 @@ class TestMain:
         assert args == (make_feeds.make_feeds, make_feeds.success, make_feeds.failure)
 
 
-@patch("nowcast.workers.make_feeds.logger")
+@patch("nowcast.workers.make_feeds.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -124,7 +124,7 @@ class TestSuccess:
         assert msg_type == "success {run_type}".format(run_type=run_type)
 
 
-@patch("nowcast.workers.make_feeds.logger")
+@patch("nowcast.workers.make_feeds.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -150,8 +150,8 @@ class TestMakeFeeds:
     """Unit test for make_feeds() function.
     """
 
-    @patch("nowcast.workers.make_feeds._generate_feed")
-    @patch("nowcast.workers.make_feeds._calc_max_ssh_risk")
+    @patch("nowcast.workers.make_feeds._generate_feed", autospec=True)
+    @patch("nowcast.workers.make_feeds._calc_max_ssh_risk", autospec=True)
     def test_checklist(self, m_cmsr, m_gf, config):
         parsed_args = SimpleNamespace(
             run_type="forecast", run_date=arrow.get("2016-11-12")
@@ -170,7 +170,7 @@ class TestGenerateFeed:
     """Unit test for _generate_feed() function.
     """
 
-    @patch("nowcast.workers.make_feeds.arrow.utcnow")
+    @patch("nowcast.workers.make_feeds.arrow.utcnow", autospec=True)
     def test_generate_feed(self, m_utcnow, config):
         m_utcnow.return_value = arrow.get("2016-02-20 11:02:42")
         storm_surge_path = config["figures"]["storm surge info portal path"]
@@ -211,9 +211,9 @@ class TestGenerateFeed:
         assert feed.splitlines()[5:] == expected
 
 
-@patch("nowcast.workers.make_feeds.arrow.now")
-@patch("nowcast.workers.make_feeds._render_entry_content", return_value=b"")
-@patch("nowcast.workers.make_feeds.FeedEntry")
+@patch("nowcast.workers.make_feeds.arrow.now", autospec=True)
+@patch("nowcast.workers.make_feeds._render_entry_content", return_value=b"", spec=True)
+@patch("nowcast.workers.make_feeds.FeedEntry", autospec=True)
 class TestGenerateFeedEntry:
     """Unit tests for _generate_feed_entry() function.
     """
@@ -299,10 +299,10 @@ class TestRenderEntryContent:
     """Unit test for _render_entry_content() function.
     """
 
-    @patch("nowcast.workers.make_feeds._calc_wind_4h_avg")
-    @patch("nowcast.workers.make_feeds.mako.template.Template")
-    @patch("nowcast.workers.make_feeds.os.path.dirname")
-    @patch("nowcast.workers.make_feeds.docutils.core.publish_parts")
+    @patch("nowcast.workers.make_feeds._calc_wind_4h_avg", autospec=True)
+    @patch("nowcast.workers.make_feeds.mako.template.Template", autospec=True)
+    @patch("nowcast.workers.make_feeds.os.path.dirname", autospec=True)
+    @patch("nowcast.workers.make_feeds.docutils.core.publish_parts", spec=True)
     def test_render_entry_content(self, m_pp, m_dirname, m_tmpl, m_cw4a, config):
         max_ssh_info = {
             "max_ssh": 5.0319,
@@ -323,9 +323,9 @@ class TestCalcMaxSshRisk:
     """Unit test for _calc_max_ssh_risk() function.
     """
 
-    @patch("nowcast.workers.make_feeds.stormtools.load_tidal_predictions")
-    @patch("nowcast.workers.make_feeds._calc_max_ssh")
-    @patch("nowcast.workers.make_feeds.stormtools.storm_surge_risk_level")
+    @patch("nowcast.workers.make_feeds.stormtools.load_tidal_predictions", spec=True)
+    @patch("nowcast.workers.make_feeds._calc_max_ssh", autospec=True)
+    @patch("nowcast.workers.make_feeds.stormtools.storm_surge_risk_level", spec=True)
     def test_calc_max_ssh_risk(self, m_ssrl, m_cms, m_ltp, config):
         run_date = arrow.get("2015-12-24").floor("day")
         max_ssh = np.array([5.09])
@@ -348,10 +348,10 @@ class TestCalcMaxSshRisk:
         assert max_ssh_info["risk_level"] == m_ssrl()
 
 
-@patch("nowcast.workers.make_feeds.logger")
-@patch("nowcast.workers.make_feeds.nc.Dataset")
-@patch("nowcast.workers.make_feeds.nc_tools.ssh_timeseries_at_point")
-@patch("nowcast.workers.make_feeds.nowcast.figures.shared.find_ssh_max")
+@patch("nowcast.workers.make_feeds.logger", autospec=True)
+@patch("nowcast.workers.make_feeds.nc.Dataset", autospec=True)
+@patch("nowcast.workers.make_feeds.nc_tools.ssh_timeseries_at_point", autospec=True)
+@patch("nowcast.workers.make_feeds.nowcast.figures.shared.find_ssh_max", autospec=True)
 class TestCalcMaxSsh:
     """Unit test for _calc_max_ssh() function.
     """

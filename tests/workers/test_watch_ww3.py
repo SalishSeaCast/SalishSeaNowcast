@@ -57,7 +57,7 @@ class TestMain:
         assert args == (watch_ww3.watch_ww3, watch_ww3.success, watch_ww3.failure)
 
 
-@patch("nowcast.workers.watch_ww3.logger")
+@patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -84,7 +84,7 @@ class TestSuccess:
         assert msg_type == expected
 
 
-@patch("nowcast.workers.watch_ww3.logger")
+@patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -111,8 +111,8 @@ class TestFailure:
         assert msg_type == expected
 
 
-@patch("nowcast.workers.watch_ww3.logger")
-@patch("nowcast.workers.watch_ww3.subprocess.run")
+@patch("nowcast.workers.watch_ww3.logger", autospec=True)
+@patch("nowcast.workers.watch_ww3.subprocess.run", autospec=True)
 class TestFindRunPid:
     """Unit test for _find_run_pid() function.
     """
@@ -143,22 +143,28 @@ class TestPidExists:
         with pytest.raises(ValueError):
             watch_ww3._pid_exists(0)
 
-    @patch("nowcast.workers.watch_ww3.os.kill", return_value=None)
+    @patch("nowcast.workers.watch_ww3.os.kill", return_value=None, autospec=True)
     def test_pid_exists(self, m_kill):
         pid_exists = watch_ww3._pid_exists(42)
         assert pid_exists
 
-    @patch("nowcast.workers.watch_ww3.os.kill", side_effect=ProcessLookupError)
+    @patch(
+        "nowcast.workers.watch_ww3.os.kill",
+        side_effect=ProcessLookupError,
+        autospec=True,
+    )
     def test_no_such_pid(self, m_kill):
         pid_exists = watch_ww3._pid_exists(42)
         assert not pid_exists
 
-    @patch("nowcast.workers.watch_ww3.os.kill", side_effect=PermissionError)
+    @patch(
+        "nowcast.workers.watch_ww3.os.kill", side_effect=PermissionError, autospec=True
+    )
     def test_pid_permission_error(self, m_kill):
         pid_exists = watch_ww3._pid_exists(42)
         assert pid_exists
 
-    @patch("nowcast.workers.watch_ww3.os.kill", side_effect=OSError)
+    @patch("nowcast.workers.watch_ww3.os.kill", side_effect=OSError, autospec=True)
     def test_oserror(self, m_kill):
         with pytest.raises(OSError):
             watch_ww3._pid_exists(42)

@@ -77,7 +77,7 @@ class TestMain:
         assert args == expected
 
 
-@patch("nowcast.workers.watch_NEMO.logger")
+@patch("nowcast.workers.watch_NEMO.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -113,7 +113,7 @@ class TestSuccess:
         assert msg_type == expected
 
 
-@patch("nowcast.workers.watch_NEMO.logger")
+@patch("nowcast.workers.watch_NEMO.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -159,11 +159,13 @@ class TestFailure:
         ("forecast2", "west.cloud-nowcast"),
     ],
 )
-@patch("nowcast.workers.watch_NEMO.logger")
-@patch("nowcast.workers.watch_NEMO._find_run_pid")
-@patch("nowcast.workers.watch_NEMO._pid_exists")
-@patch("nowcast.workers.watch_NEMO.namelist2dict")
-@patch("nowcast.workers.watch_NEMO._confirm_run_success", return_value=True)
+@patch("nowcast.workers.watch_NEMO.logger", autospec=True)
+@patch("nowcast.workers.watch_NEMO._find_run_pid", autospec=True)
+@patch("nowcast.workers.watch_NEMO._pid_exists", autospec=True)
+@patch("nowcast.workers.watch_NEMO.namelist2dict", autospec=True)
+@patch(
+    "nowcast.workers.watch_NEMO._confirm_run_success", return_value=True, autospec=True
+)
 class TestWatchNEMO:
     """Unit tests for watch_NEMO function.
     """
@@ -346,8 +348,8 @@ class TestWatchNEMO:
         )
 
 
-@patch("nowcast.workers.watch_NEMO.logger")
-@patch("nowcast.workers.watch_NEMO.subprocess.run")
+@patch("nowcast.workers.watch_NEMO.logger", autospec=True)
+@patch("nowcast.workers.watch_NEMO.subprocess.run", autospec=True)
 class TestFindRunPid:
     """Unit tests for _find_run_pid() function.
     """
@@ -391,28 +393,34 @@ class TestPidExists:
         with pytest.raises(ValueError):
             watch_NEMO._pid_exists(0)
 
-    @patch("nowcast.workers.watch_NEMO.os.kill", return_value=None)
+    @patch("nowcast.workers.watch_NEMO.os.kill", return_value=None, autospec=True)
     def test_pid_exists(self, m_kill):
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch("nowcast.workers.watch_NEMO.os.kill", side_effect=ProcessLookupError)
+    @patch(
+        "nowcast.workers.watch_NEMO.os.kill",
+        side_effect=ProcessLookupError,
+        autospec=True,
+    )
     def test_no_such_pid(self, m_kill):
         pid_exists = watch_NEMO._pid_exists(42)
         assert not pid_exists
 
-    @patch("nowcast.workers.watch_NEMO.os.kill", side_effect=PermissionError)
+    @patch(
+        "nowcast.workers.watch_NEMO.os.kill", side_effect=PermissionError, autospec=True
+    )
     def test_pid_permission_error(self, m_kill):
         pid_exists = watch_NEMO._pid_exists(42)
         assert pid_exists
 
-    @patch("nowcast.workers.watch_NEMO.os.kill", side_effect=OSError)
+    @patch("nowcast.workers.watch_NEMO.os.kill", side_effect=OSError, autospec=True)
     def test_oserror(self, m_kill):
         with pytest.raises(OSError):
             watch_NEMO._pid_exists(42)
 
 
-@patch("nowcast.workers.watch_NEMO.logger")
+@patch("nowcast.workers.watch_NEMO.logger", autospec=True)
 class TestConfirmRunSuccess:
     """Unit tests for _confirm_run_success() function.
     """

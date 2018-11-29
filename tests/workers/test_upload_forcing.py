@@ -94,7 +94,7 @@ class TestMain:
 
 
 @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh", "turbidity"])
-@patch("nowcast.workers.upload_forcing.logger")
+@patch("nowcast.workers.upload_forcing.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -115,7 +115,7 @@ class TestSuccess:
 
 
 @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh", "turbidity"])
-@patch("nowcast.workers.upload_forcing.logger")
+@patch("nowcast.workers.upload_forcing.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -138,8 +138,9 @@ class TestFailure:
 @patch(
     "nowcast.workers.upload_forcing.ssh_sftp.upload_file",
     side_effect=[FileNotFoundError, None, FileNotFoundError, None],
+    autospec=True,
 )
-@patch("nowcast.workers.upload_forcing.logger")
+@patch("nowcast.workers.upload_forcing.logger", autospec=True)
 class TestUploadLiveOceanFiles:
     """Unit tests for _upload_live_ocean_files() function.
     """

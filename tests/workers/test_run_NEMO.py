@@ -265,7 +265,7 @@ class TestMain:
         assert args == (run_NEMO.run_NEMO, run_NEMO.success, run_NEMO.failure)
 
 
-@patch("nowcast.workers.run_NEMO.logger")
+@patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
@@ -291,7 +291,7 @@ class TestSuccess:
         assert msg_type == "success {run_type}".format(run_type=run_type)
 
 
-@patch("nowcast.workers.run_NEMO.logger")
+@patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
@@ -443,7 +443,7 @@ class TestRunDescription:
         host_config = config["run"]["enabled hosts"]["west.cloud"]
         p_config = patch.dict(host_config["run types"], nowcast={})
         with p_config:
-            with patch("nowcast.workers.run_NEMO.logger"):
+            with patch("nowcast.workers.run_NEMO.logger", autospec=True):
                 with pytest.raises(run_NEMO.WorkerError):
                     run_NEMO._run_description(
                         run_date, "nowcast", run_id, 2160, "west.cloud", config
