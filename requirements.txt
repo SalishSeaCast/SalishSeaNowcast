@@ -75,6 +75,7 @@ pygrib==2.0.2
 PyNaCl==1.1.2
 pyOpenSSL==17.4.0
 pyparsing==2.2.0
+pypdf2==1.26.0
 pyperclip==1.6.0
 pyproj==1.9.5.1
 pyshp==1.2.12

@@ -635,7 +635,8 @@ The Python packages that the system depends on are installed in a conda environm
         --channel gomss-nowcast --channel conda-forge --channel defaults \
         arrow attrs basemap beautifulsoup4 bottleneck circus cliff cmocean \
         dask docutils gsw lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
-        pillow pip pygrib pyproj python=3.6 pyyaml pyzmq requests schedule scipy shapely xarray
+        pillow pip pygrib pypdf2 pyproj python=3.6 pyyaml pyzmq requests schedule scipy \
+        shapely xarray
     $ source /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install angles driftwood \
         f90nml feedgen python-hglib raven retrying scour utm zeep

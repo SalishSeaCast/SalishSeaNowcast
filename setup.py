@@ -63,6 +63,7 @@ install_requires = [
     "paramiko",
     "pillow",
     "pygrib",
+    "pypdf2",
     "pyproj",
     "python-hglib",
     "raven",
