@@ -97,7 +97,7 @@ def failure(parsed_args):
     return msg_type
 
 
-def make_surface_current_tiles(parsed_args, checklist, *args):
+def make_surface_current_tiles(parsed_args, config, *args):
     """
     :param :py:class:`argparse.Namespace` parsed_args:
     :param :py:class:`nemo_nowcast.Config` config:
@@ -209,8 +209,8 @@ def make_surface_current_tiles(parsed_args, checklist, *args):
 
     _pdfMerger(storage_path, tile_names)
 
-    config = {}
-    return config
+    checklist = {}
+    return checklist
 
 
 def _process_time_slice(q):
