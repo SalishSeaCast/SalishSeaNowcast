@@ -13,6 +13,7 @@
 ..  See the License for the specific language governing permissions and
 ..  limitations under the License.
 
+
 .. _SalishSeaNowcastSystemWorkers:
 
 *********************************
@@ -297,6 +298,13 @@ Workers
     :members: main
 
 
+:kbd:`make_surface_current_tiles`
+---------------------------------
+
+.. automodule:: nowcast.workers.make_surface_current_tiles
+    :members: main
+
+
 :kbd:`make_feeds`
 -----------------
 
@@ -372,6 +380,30 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
     :members:
 
 
+.. _nowcast.figures.surface_current_domain:
+
+:py:mod:`nowcast.figures.surface_current_domain` Module
+-------------------------------------------------------
+
+.. automodule:: nowcast.figures.surface_current_domain
+    :members:
+
+
+.. _nowcast.figures.fvcom:
+
+:py:obj:`nowcast.figures.fvcom`  Figure Modules
+-----------------------------------------------
+
+.. _nowcast.figures.fvcom.tide_stn_water_level:
+
+:py:mod:`nowcast.figures.fvcom.tide_stn_water_level` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.fvcom.tide_stn_water_level
+    :members:
+
+
+
 .. _nowcast.figures.comparison:
 
 :py:obj:`nowcast.figures.comparison`  Figure Modules
@@ -437,6 +469,14 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
     :members:
 
 
+.. _nowcast.figures.publish.surface_current_tiles:
+
+:py:mod:`nowcast.figures.publish.surface_current_tiles` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.publish.surface_current_tiles
+    :members:
+
 
 .. _nowcast.figures.research:
 
@@ -457,20 +497,6 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: nowcast.figures.research.time_series_plots
-    :members:
-
-
-.. _nowcast.figures.fvcom:
-
-:py:obj:`nowcast.figures.fvcom`  Figure Modules
------------------------------------------------
-
-.. _nowcast.figures.fvcom.tide_stn_water_level:
-
-:py:mod:`nowcast.figures.fvcom.tide_stn_water_level` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.tide_stn_water_level
     :members:
 
 
