@@ -20,6 +20,7 @@ The tile specifications and initial code implementation were provided by IOS.
 import datetime
 from glob import glob
 import logging
+import math
 import multiprocessing
 import os
 from pathlib import Path
@@ -63,6 +64,15 @@ def main():
         "--run-date",
         default=arrow.now().floor("day"),
         help="Date of the run to symlink files for.",
+    )
+    worker.cli.add_argument(
+        "--nprocs",
+        type=int,
+        default=math.floor(multiprocessing.cpu_count() / 2),
+        help=(
+            "Maximum number of concurrent figure creation processes allowed. "
+            "Defaults to 1/2 the number of cores detected."
+        ),
     )
 
     worker.run(make_surface_current_tiles, success, failure)
@@ -108,6 +118,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
     """
     run_type = parsed_args.run_type  # forecast, forecast2
     run_date = parsed_args.run_date
+    num_procs = parsed_args.nprocs
     dmy = run_date.format("DDMMMYY").lower()
     dmym1 = run_date.replace(days=-1).format("DDMMMYY").lower()
 
@@ -151,8 +162,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
 
         expansion_factor = 0.1  # 10% overlap for each tile
 
-        ## TODO: Change num_procs to cli option defaulted to 1/2 available cores
-        num_procs = 6
+        logger.debug(f"creating figures using {num_procs} concurrent process(es)")
         if num_procs == 1:
             # Single proccessor mode
             for t_index in range(max_time_index):
