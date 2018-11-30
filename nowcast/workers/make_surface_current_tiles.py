@@ -194,11 +194,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
         # Close the queue
         q.close()
 
-    tile_names = []
-    for t in tile_coords_dic:
-        tile_names += [t]
-
-    _pdfMerger(storage_path, tile_names)
+    _pdfMerger(storage_path, [tile_name for tile_name in tile_coords_dic])
 
     checklist = {}
     return checklist
