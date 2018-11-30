@@ -1411,11 +1411,17 @@ def after_update_forecast_datasets(msg, config, checklist):
             NextWorker("nowcast.workers.ping_erddap", args=[f"{model}-forecast"])
         )
         if model == "nemo":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=["nemo", run_type, "publish", "--run-date", run_date],
-                )
+            next_workers[msg.type].extend(
+                [
+                    NextWorker(
+                        "nowcast.workers.make_plots",
+                        args=["nemo", run_type, "publish", "--run-date", run_date],
+                    ),
+                    NextWorker(
+                        "nowcast.workers.make_surface_current_tiles",
+                        args=[run_type, "--run-date", run_date],
+                    ),
+                ]
             )
     return next_workers[msg.type]
 
