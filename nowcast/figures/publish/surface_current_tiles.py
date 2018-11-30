@@ -197,7 +197,7 @@ def _makeTiles(
         X, Y = coord_xt[::k, ::k].flatten(), coord_yt[::k, ::k].flatten()
         U, V = maskU[::k, ::k].flatten(), maskV[::k, ::k].flatten()
 
-        i = U.mask == False
+        i = numpy.logical_not(U.mask)
         XC, YC, UC, VC = X[i], Y[i], U[i].data, V[i].data
 
         # Add some vectors in the middle of the Atlantic to ensure we get at least one for each arrow size
