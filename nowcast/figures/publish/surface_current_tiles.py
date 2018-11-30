@@ -21,7 +21,7 @@ import datetime
 from matplotlib.figure import Figure
 import netCDF4
 import numpy
-import numpy.ma as ma
+import numpy.ma
 import pytz
 from salishsea_tools import viz_tools
 
@@ -125,8 +125,8 @@ def _prepareVelocity(time, dsU, dsV, dsMask):
 
     # Apply land mask to velocities data
     # Use 1-mask here because masked_array needs 1 for missing values.
-    maskU = ma.masked_array(unstaggerU_rotate, 1 - mask)
-    maskV = ma.masked_array(unstaggerV_rotate, 1 - mask)
+    maskU = numpy.ma.masked_array(unstaggerU_rotate, 1 - mask)
+    maskV = numpy.ma.masked_array(unstaggerV_rotate, 1 - mask)
     return maskU, maskV
 
 
