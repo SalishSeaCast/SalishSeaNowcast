@@ -35,6 +35,7 @@ import netCDF4
 from PyPDF2 import PdfFileMerger
 import pytz
 
+from nowcast import lib
 from nowcast.figures.publish import surface_current_tiles
 from nowcast.figures.surface_current_domain import tile_coords_dic
 
@@ -140,10 +141,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
     storage_path = Path(
         config["figures"]["surface current tiles"]["storage path"], run_type, dmy
     )
-
-    ## TODO: Change to lib.mkdir() to get permissions correct
-    if not os.path.exists(storage_path):
-        os.makedirs(storage_path)
+    lib.mkdir(storage_path, logger, grp_name=config["file group"])
 
     # Loop over last 48h and this forecast{,2}
     for results_dir in [results_dirm2, results_dirm1, results_dir0]:

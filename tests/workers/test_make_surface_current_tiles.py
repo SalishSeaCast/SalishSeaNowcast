@@ -33,6 +33,8 @@ def config(base_config):
     with config_file.open("at") as f:
         f.write(
             """
+file group: allen
+            
 figures:
   grid dir: nowcast-sys/grid/
   surface current tiles:
@@ -145,6 +147,10 @@ class TestConfig:
             "make_surface_current_tiles"
         ]
         assert msg in msg_registry
+
+    def test_file_group(self, prod_config):
+        assert "file group" in prod_config
+        assert prod_config["file group"] == "sallen"
 
     def test_figures_section(self, prod_config):
         assert "figures" in prod_config
