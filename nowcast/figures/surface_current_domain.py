@@ -19,14 +19,13 @@ the figure files in '/results/nowcast-sys/salishsea-site/salishsea_site/static/i
 The domain is divided into different tiles and needs to be re-run if the tiles specification/coordinates are changed.
 """
 
+from pathlib import Path
+
+from matplotlib.backend_bases import FigureCanvasBase
+from matplotlib.figure import Figure
 import netCDF4 as nc
 import numpy as np
-
-from matplotlib.figure import Figure
-from matplotlib.backend_bases import FigureCanvasBase
-from salishsea_tools import nc_tools, viz_tools
-
-from pathlib import Path
+from salishsea_tools import viz_tools
 
 import nowcast.figures.website_theme
 
