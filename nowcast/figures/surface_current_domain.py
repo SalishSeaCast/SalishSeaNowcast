@@ -24,7 +24,7 @@ from pathlib import Path
 from matplotlib.backend_bases import FigureCanvasBase
 from matplotlib.figure import Figure
 import netCDF4
-import numpy as np
+import numpy
 from salishsea_tools import viz_tools
 
 import nowcast.figures.website_theme
@@ -137,7 +137,7 @@ def _makeHTMLmap(fig, ax, htmlmap_path):
             x1, x2, y1, y2 = values[0], values[1], values[2], values[3]
 
             # Transform x,y data into pixel coordinates
-            xy_pixels = ax.transData.transform(np.vstack([[x1, x2], [y1, y2]]).T)
+            xy_pixels = ax.transData.transform(numpy.vstack([[x1, x2], [y1, y2]]).T)
             xpix, ypix = xy_pixels.T
 
             # 0,0 is the lower left coordinate in matplotlib but it's the upper left in HTML
@@ -145,8 +145,11 @@ def _makeHTMLmap(fig, ax, htmlmap_path):
             width, height = FigureCanvasBase(fig).get_width_height()
             ypix = height - ypix
 
-            curline = '    <area shape="rect" coords="{:3d},{:3d},{:3d},{:3d}"  href="JavaScript: regionMap({:2d}); void(0);">\n'.format(
-                int(xpix[0]), int(ypix[0]), int(xpix[1]), int(ypix[1]), i
+            curline = (
+                '    <area shape="rect" coords="{:3d},{:3d},{:3d},{:3d}"  '
+                'href="JavaScript: regionMap({:2d}); void(0);">\n'.format(
+                    int(xpix[0]), int(ypix[0]), int(xpix[1]), int(ypix[1]), i
+                )
             )
             tilemapfile.write(curline)
 

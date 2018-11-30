@@ -20,7 +20,7 @@ import datetime
 
 from matplotlib.figure import Figure
 import netCDF4
-import numpy as np
+import numpy
 import numpy.ma as ma
 import pytz
 from salishsea_tools import viz_tools
@@ -201,15 +201,15 @@ def _makeTiles(
         XC, YC, UC, VC = X[i], Y[i], U[i].data, V[i].data
 
         # Add some vectors in the middle of the Atlantic to ensure we get at least one for each arrow size
-        tempU = np.linspace(0, 5, 50)
-        zeros = np.zeros(tempU.shape)
-        XC = np.concatenate([XC, zeros])
-        YC = np.concatenate([YC, zeros])
-        UC = np.concatenate([UC, tempU])
-        VC = np.concatenate([VC, zeros])
-        SC = np.sqrt(UC ** 2 + VC ** 2)
+        tempU = numpy.linspace(0, 5, 50)
+        zeros = numpy.zeros(tempU.shape)
+        XC = numpy.concatenate([XC, zeros])
+        YC = numpy.concatenate([YC, zeros])
+        UC = numpy.concatenate([UC, tempU])
+        VC = numpy.concatenate([VC, zeros])
+        SC = numpy.sqrt(UC ** 2 + VC ** 2)
         i = SC < 0.05
-        if np.any(i):
+        if numpy.any(i):
             UCC, VCC, XCC, YCC = _cut(UC, VC, XC, YC, i)
             ax.scatter(XCC, YCC, s=2, c="k")
 
@@ -348,7 +348,7 @@ def _drawArrows(arrowparams, positions, UC, VC, XC, YC, SC, ax, theme, FP):
     xpos, ypos = positions
 
     i = (SC >= speed_min) & (SC < speed_max)
-    if np.any(i):
+    if numpy.any(i):
         # Draw the quiver arrows
         UCC, VCC, XCC, YCC = _cut(UC, VC, XC, YC, i)
         q = ax.quiver(
