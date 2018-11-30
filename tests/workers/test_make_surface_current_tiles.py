@@ -14,6 +14,7 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast make_surface_current_tiles worker.
 """
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -28,7 +29,34 @@ from nowcast.workers import make_surface_current_tiles
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    return base_config
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+figures:
+  grid dir: nowcast-sys/grid/
+  surface current tiles:
+    storage path: nowcast-sys/figures/surface_currents/
+
+results archive:
+  nowcast: results/nowcast-blue/
+  forecast: results/forecast/
+  forecast2: results/forecast2/
+  
+run types:
+  forecast:
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
+  forecast2:
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.make_surface_current_tiles.NowcastWorker", spec=True)
@@ -104,6 +132,32 @@ class TestConfig:
         ]
         assert msg in msg_registry
 
+    def test_figures_section(self, prod_config):
+        assert "figures" in prod_config
+        figures = prod_config["figures"]
+        assert figures["grid dir"] == "/results/nowcast-sys/grid/"
+        assert "surface current tiles" in figures
+        tiles = figures["surface current tiles"]
+        assert tiles["storage path"] == "/results/nowcast-sys/figures/surface_currents/"
+
+    def test_results_archive_section(self, prod_config):
+        assert "results archive" in prod_config
+        results_archive = prod_config["results archive"]
+        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue/"
+        assert results_archive["forecast"] == "/results/SalishSea/forecast/"
+        assert results_archive["forecast2"] == "/results/SalishSea/forecast2/"
+
+    @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
+    def test_run_types_section(self, run_type, prod_config):
+        assert "run types" in prod_config
+        run_types = prod_config["run types"]
+        assert (
+            run_types[run_type]["coordinates"]
+            == "coordinates_seagrid_SalishSea201702.nc"
+        )
+        assert run_types[run_type]["bathymetry"] == "bathymetry_201702.nc"
+        assert run_types[run_type]["mesh mask"] == "mesh_mask201702.nc"
+
 
 @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
@@ -139,13 +193,16 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
+@pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestMakeSurfaceCurrentTiles:
     """Unit tests for make_surface_current_tiles() function.
     """
 
-    def test_checklist(self, m_logger, config):
-        parsed_args = SimpleNamespace()
+    def test_checklist(self, m_logger, run_type, config):
+        parsed_args = SimpleNamespace(
+            run_type=run_type, run_date=(arrow.get("2018-11-29"))
+        )
         checklist = make_surface_current_tiles.make_surface_current_tiles(
             parsed_args, config
         )
