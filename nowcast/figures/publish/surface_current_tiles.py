@@ -16,18 +16,14 @@
 Produce surface currents tile figures in both website themed and unthemed style.
 """
 
+import datetime
+
+from matplotlib.figure import Figure
 import netCDF4 as nc
 import numpy as np
 import numpy.ma as ma
 import pytz
-import datetime
-import time as tm
-
-import matplotlib as mpl
-from matplotlib.figure import Figure
-from matplotlib.backend_bases import FigureCanvasBase
-
-from salishsea_tools import nc_tools, viz_tools
+from salishsea_tools import viz_tools
 
 import nowcast.figures.website_theme
 

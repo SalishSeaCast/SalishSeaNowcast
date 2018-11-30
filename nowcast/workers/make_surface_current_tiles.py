@@ -17,29 +17,25 @@ images for the web site from run results.
 
 The tile specifications and initial code implementation were provided by IOS.
 """
-import logging
-
-import netCDF4 as nc
-import arrow
-import pytz
 import datetime
 from glob import glob
-from pathlib import Path
-
+import logging
+import multiprocessing
 import os
+from pathlib import Path
+from queue import Empty
 import shlex
 import subprocess
-import multiprocessing
-from queue import Empty
 
-from PyPDF2 import PdfFileMerger
-
+import arrow
 from matplotlib.backend_bases import FigureCanvasBase
+from nemo_nowcast import NowcastWorker
+import netCDF4 as nc
+from PyPDF2 import PdfFileMerger
+import pytz
 
 from nowcast.figures.publish import surface_current_tiles
 from nowcast.figures.surface_current_domain import tile_coords_dic
-
-from nemo_nowcast import NowcastWorker
 
 NAME = "make_surface_current_tiles"
 logger = logging.getLogger(NAME)
