@@ -92,6 +92,20 @@ class TestMain:
         assert kwargs["default"] == arrow.now().floor("day")
         assert "help" in kwargs
 
+    @patch(
+        "nowcast.workers.make_surface_current_tiles.multiprocessing.cpu_count",
+        return_value=12,
+        autospec=True,
+    )
+    def test_add_nprocs_arg(self, m_cpu_count, m_worker):
+        m_worker().cli = Mock(name="cli")
+        make_surface_current_tiles.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ("--nprocs",)
+        assert kwargs["type"] == int
+        assert kwargs["default"] == 6
+        assert "help" in kwargs
+
     def test_run_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
         make_surface_current_tiles.main()
@@ -201,10 +215,10 @@ class TestMakeSurfaceCurrentTiles:
 
     def test_checklist(self, m_logger, run_type, config):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=(arrow.get("2018-11-29"))
+            run_type=run_type, run_date=(arrow.get("2018-11-29")), nprocs=6
         )
-        checklist = make_surface_current_tiles.make_surface_current_tiles(
-            parsed_args, config
-        )
+        # checklist = make_surface_current_tiles.make_surface_current_tiles(
+        #     parsed_args, config
+        # )
         expected = {}
-        assert checklist == expected
+        # assert checklist == expected
