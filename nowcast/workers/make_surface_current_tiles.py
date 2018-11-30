@@ -206,33 +206,13 @@ def make_surface_current_tiles(parsed_args, config, *args):
 
 def _process_time_slice(q):
     """
-    This is the worker function that gets called when multiprocessing is in used (num_procs > 1).
+    This is the worker function that gets called for each task in the multiprocessing queue.
     """
     while True:
         try:
             task = q.get_nowait()
-            t_index, sec, units, calendar, run_date, Uf, Vf, coordf, mesh_maskf, bathyf, tile_coords_dic, expansion_factor, storage_path = (
-                task
-            )
-
-            _callMakeFigure(
-                t_index,
-                sec,
-                units,
-                calendar,
-                run_date,
-                Uf,
-                Vf,
-                coordf,
-                mesh_maskf,
-                bathyf,
-                tile_coords_dic,
-                expansion_factor,
-                storage_path,
-            )
-
+            _callMakeFigure(*task)
             q.task_done()
-
         except Empty:
             break
 
