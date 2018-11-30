@@ -315,9 +315,9 @@ def _render_figures(fig_list, tile_names, storage_path, date_stamp, file_type):
         )
         outfile = Path(storage_path, ftile)
         FigureCanvasBase(fig).print_figure(
-            outfile.as_posix(), facecolor=fig.get_facecolor()
+            os.fspath(outfile), facecolor=fig.get_facecolor()
         )
-        logger.info(f"{outfile.as_posix()} saved")
+        logger.info(f"{outfile} saved")
 
 
 def _pdfMerger(path, allTiles):
