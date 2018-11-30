@@ -110,11 +110,12 @@ def make_surface_current_tiles(parsed_args, config, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
+    run_type = parsed_args.run_type  # forecast, forecast2
     run_date = parsed_args.run_date
     dmy = run_date.format("DDMMMYY").lower()
     dmym1 = run_date.replace(days=-1).format("DDMMMYY").lower()
-    run_type = parsed_args.run_type  # forecast, forecast2
 
+    ## TODO: Change to get results from ERDDAP rolling forecast
     results_dir0 = Path(config["results archive"][run_type], dmy)
 
     if run_type == "forecast":
@@ -133,6 +134,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
         config["figures"]["surface current tiles"]["storage path"], run_type, dmy
     )
 
+    ## TODO: Change to lib.mkdir() to get permissions correct
     if not os.path.exists(storage_path):
         os.makedirs(storage_path)
 
@@ -153,6 +155,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
 
         expansion_factor = 0.1  # 10% overlap for each tile
 
+        ## TODO: Change num_procs to cli option defaulted to 1/2 available cores
         num_procs = 6
         if num_procs == 1:
             # Single proccessor mode
