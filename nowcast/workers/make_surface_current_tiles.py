@@ -23,7 +23,6 @@ import netCDF4 as nc
 import arrow
 import pytz
 import datetime
-import time
 from glob import glob
 from pathlib import Path
 
@@ -114,7 +113,6 @@ def make_surface_current_tiles(parsed_args, config, *args):
     run_date = parsed_args.run_date
     dmy = run_date.format("DDMMMYY").lower()
     dmym1 = run_date.replace(days=-1).format("DDMMMYY").lower()
-    timezone = config["figures"]["timezone"]
     run_type = parsed_args.run_type  # forecast, forecast2
 
     results_dir0 = Path(config["results archive"][run_type], dmy)
