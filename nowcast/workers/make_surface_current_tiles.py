@@ -163,58 +163,38 @@ def make_surface_current_tiles(parsed_args, config, *args):
         expansion_factor = 0.1  # 10% overlap for each tile
 
         logger.debug(f"creating figures using {num_procs} concurrent process(es)")
-        if num_procs == 1:
-            # Single proccessor mode
-            for t_index in range(max_time_index):
-                _callMakeFigure(
-                    t_index,
-                    sec,
-                    units,
-                    calendar,
-                    run_date,
-                    Uf,
-                    Vf,
-                    coordf,
-                    mesh_maskf,
-                    bathyf,
-                    tile_coords_dic,
-                    expansion_factor,
-                    storage_path,
-                )
-        else:
-            # Multiprocessing mode
-            # Add tasks to a joinable queue
-            q = multiprocessing.JoinableQueue()
-            for t_index in range(max_time_index):
-                task = (
-                    t_index,
-                    sec,
-                    units,
-                    calendar,
-                    run_date,
-                    Uf,
-                    Vf,
-                    coordf,
-                    mesh_maskf,
-                    bathyf,
-                    tile_coords_dic,
-                    expansion_factor,
-                    storage_path,
-                )
-                q.put(task)
-            # Spawn a set of worker processes
-            procs = []
-            for i in range(num_procs):
-                p = multiprocessing.Process(target=_process_time_slice, args=(q,))
-                procs.append(p)
-            # Start each one
-            for p in procs:
-                p.start()
-            # Wait until they complete
-            for p in procs:
-                p.join()
-            # Close the queue
-            q.close()
+        # Add tasks to a joinable queue
+        q = multiprocessing.JoinableQueue()
+        for t_index in range(max_time_index):
+            task = (
+                t_index,
+                sec,
+                units,
+                calendar,
+                run_date,
+                Uf,
+                Vf,
+                coordf,
+                mesh_maskf,
+                bathyf,
+                tile_coords_dic,
+                expansion_factor,
+                storage_path,
+            )
+            q.put(task)
+        # Spawn a set of worker processes
+        procs = []
+        for i in range(num_procs):
+            p = multiprocessing.Process(target=_process_time_slice, args=(q,))
+            procs.append(p)
+        # Start each one
+        for p in procs:
+            p.start()
+        # Wait until they complete
+        for p in procs:
+            p.join()
+        # Close the queue
+        q.close()
 
     tile_names = []
     for t in tile_coords_dic:
