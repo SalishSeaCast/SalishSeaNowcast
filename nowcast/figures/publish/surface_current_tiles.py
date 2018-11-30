@@ -19,7 +19,7 @@ Produce surface currents tile figures in both website themed and unthemed style.
 import datetime
 
 from matplotlib.figure import Figure
-import netCDF4 as nc
+import netCDF4
 import numpy as np
 import numpy.ma as ma
 import pytz
@@ -78,12 +78,12 @@ def make_figure(
     :returns: list of matplotlib Figures and list of names for all figures
     """
 
-    with nc.Dataset(coordf) as dsCoord:
+    with netCDF4.Dataset(coordf) as dsCoord:
         coord_xt, coord_yt = _prepareCoordinates(dsCoord)
 
-    with nc.Dataset(Uf) as dsU, nc.Dataset(Vf) as dsV, nc.Dataset(
+    with netCDF4.Dataset(Uf) as dsU, netCDF4.Dataset(Vf) as dsV, netCDF4.Dataset(
         mesh_maskf
-    ) as dsMask, nc.Dataset(bathyf) as dsBathy:
+    ) as dsMask, netCDF4.Dataset(bathyf) as dsBathy:
         fig_list, tile_list = _makeTiles(
             t_index,
             dsU,
@@ -143,7 +143,7 @@ def _createTileTitle(sec, units, calendar):
     """
     Constructs the time stamp in both UTC and local time for the figure title
     """
-    dt = nc.num2date(sec, units, calendar=calendar)
+    dt = netCDF4.num2date(sec, units, calendar=calendar)
     dt_utc = datetime.datetime.combine(
         dt.date(), dt.time(), pytz.utc
     )  # add timezone to utc time

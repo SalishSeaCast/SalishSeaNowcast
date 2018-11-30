@@ -30,7 +30,7 @@ import subprocess
 import arrow
 from matplotlib.backend_bases import FigureCanvasBase
 from nemo_nowcast import NowcastWorker
-import netCDF4 as nc
+import netCDF4
 from PyPDF2 import PdfFileMerger
 import pytz
 
@@ -143,7 +143,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
         Uf = Path(u_list[0])
         Vf = Path(v_list[0])
 
-        with nc.Dataset(Uf) as dsU:
+        with netCDF4.Dataset(Uf) as dsU:
             max_time_index = dsU.dimensions["time_counter"].size
             units = dsU.variables["time_counter"].units
             calendar = dsU.variables["time_counter"].calendar
@@ -307,7 +307,7 @@ def _getTimeFileName(sec, units, calendar):
     """
     Constructs UTC timestamp for the figure file name.
     """
-    dt = nc.num2date(sec, units, calendar=calendar)
+    dt = netCDF4.num2date(sec, units, calendar=calendar)
     dt_utc = datetime.datetime.combine(
         dt.date(), dt.time(), pytz.utc
     )  # add timezone to utc time
