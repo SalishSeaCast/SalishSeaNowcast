@@ -2035,6 +2035,28 @@ class TestAfterUpdateForecastDatasets:
         assert expected in workers
 
     @pytest.mark.parametrize(
+        "run_type, run_date", [("forecast", "2018-11-30"), ("forecast2", "2018-11-30")]
+    )
+    def test_success_nemo_launch_make_surface_current_tiles(
+        self, run_type, run_date, config, checklist
+    ):
+        p_checklist = patch.dict(
+            checklist, {"NEMO run": {run_type: {"run date": run_date}}}
+        )
+        with p_checklist:
+            workers = next_workers.after_update_forecast_datasets(
+                Message("update_forecast_datasets", f"success nemo {run_type}"),
+                config,
+                checklist,
+            )
+        expected = NextWorker(
+            "nowcast.workers.make_surface_current_tiles",
+            args=[run_type, "--run-date", run_date],
+            host="localhost",
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize(
         "run_type, run_date", [("forecast", "2018-04-12"), ("forecast2", "2018-04-12")]
     )
     def test_success_wwatch3_launch_ping_erddap_wwatch3(
