@@ -23,7 +23,7 @@ from pathlib import Path
 
 from matplotlib.backend_bases import FigureCanvasBase
 from matplotlib.figure import Figure
-import netCDF4 as nc
+import netCDF4
 import numpy as np
 from salishsea_tools import viz_tools
 
@@ -87,14 +87,14 @@ def _make_figure_domain(coordf, bathyf, theme):
             ax
         )  # Makes the x and y numbers and axis lines into near-white
 
-    with nc.Dataset(bathyf) as _dsBathy:
+    with netCDF4.Dataset(bathyf) as _dsBathy:
         viz_tools.plot_land_mask(
             ax, _dsBathy, coords="map", color="burlywood", zorder=-9
         )
         ax.set_rasterization_zorder(-1)
         viz_tools.plot_coastline(ax, _dsBathy, coords="map")
 
-    with nc.Dataset(coordf) as _dsCoord:
+    with netCDF4.Dataset(coordf) as _dsCoord:
         coord_yt = _dsCoord.variables["gphit"][0, :, :]
         viz_tools.set_aspect(ax, coords="map", lats=coord_yt)
 
