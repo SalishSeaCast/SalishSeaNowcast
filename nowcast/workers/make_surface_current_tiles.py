@@ -194,7 +194,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
         # Close the queue
         q.close()
 
-    _pdfMerger(storage_path, [tile_name for tile_name in tile_coords_dic])
+    _pdf_concatenate(storage_path, tile_coords_dic)
 
     checklist = {}
     return checklist
@@ -294,42 +294,32 @@ def _render_figures(fig_list, tile_names, storage_path, date_stamp, file_type):
         logger.info(f"{outfile} saved")
 
 
-def _pdfMerger(path, allTiles):
+def _pdf_concatenate(path, tile_coords_dic):
     """
     For each tile combine the time series of pdf files into one file.
     Delete the individual pdf files, leaving only the per tile files.
     Shrink the merged pdf files.
     """
-    for tile in allTiles:
-
-        file_list = glob(os.fspath(path) + "/surface_currents_" + tile + "*.pdf")
-        file_list_sorted = sorted(file_list)
-        result = os.fspath(path) + "/" + tile + ".pdf"
-        print(result)
-        try:
-            merger = PdfFileMerger()
-
-            for pdf in file_list_sorted:
-                merger.append(pdf)
-
-            merger.write(result)
-            merger.close()
-
-            for pdf in file_list_sorted:
-                os.remove(pdf)
-
-        except:
-            logger.warning("PDF merging failed for tile {}".format(tile))
-
-        # Shrink the merged pdfs.
-        _pdfShrink(Path(result))
+    for tile in tile_coords_dic:
+        result = (path / tile).with_suffix(".pdf")
+        logger.info(f"concatenating {tile} pdf files into: {result}")
+        merger = PdfFileMerger()
+        for pdf in path.glob(f"surface_currents_{tile}*.pdf"):
+            merger.append(os.fspath(pdf))
+            logger.debug(f"added {pdf}")
+            pdf.unlink()
+            logger.debug(f"deleted {pdf}")
+        merger.write(os.fspath(result))
+        logger.info(f"saved {result}")
+        merger.close()
+        _pdf_shrink(result)
 
 
-def _pdfShrink(filename):
+def _pdf_shrink(filename):
     """
     Strategy borrowed from make_plots.py to shrink pdf file
     """
-    logger.debug(f"Starting PDF optimizing for {filename}")
+    logger.info(f"Starting PDF shrinking of: {filename}")
     tmpfilename = filename.with_suffix(".temp")
     cmd = f"pdftocairo -pdf {filename} {tmpfilename}"
     logger.debug(f"running subprocess: {cmd}")
@@ -341,9 +331,10 @@ def _pdfShrink(filename):
             stderr=subprocess.PIPE,
             universal_newlines=True,
         )
-        logger.debug(proc.stdout)
+        if proc.stdout:
+            logger.debug(proc.stdout)
         tmpfilename.rename(filename)
-        logger.info(f"{filename} shrunk")
+        logger.info(f"shrank {filename}")
     except subprocess.CalledProcessError as e:
         logger.warning("PDF shrinking failed, proceeding with unshrunk PDF")
         logger.debug(f"pdftocairo return code: {e.returncode}")
