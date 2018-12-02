@@ -62,6 +62,7 @@ install_requires = [
     "pandas",
     "paramiko",
     "pillow",
+    "poppler",
     "pygrib",
     "pypdf2",
     "pyproj",

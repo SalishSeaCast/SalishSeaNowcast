@@ -42,6 +42,7 @@ dependencies:
   - paramiko
   - pillow
   - pip
+  - poppler
   - pygrib
   - pyproj
   - pypdf2
