@@ -338,7 +338,12 @@ class TestAfterDownloadLiveOcean:
         assert workers == []
 
     def test_success_launch_make_live_ocean_files(self, config, checklist):
-        with patch.dict(checklist, {"Live Ocean products": {"2017-02-15": []}}):
+        # Ensure that run date for make_live_ocean_files is same as most recently downloaded
+        # files in the event that the checklist was not cleared after the previous day's
+        # operations
+        with patch.dict(
+            checklist, {"Live Ocean products": {"2017-02-14": [], "2017-02-15": []}}
+        ):
             workers = next_workers.after_download_live_ocean(
                 Message("download_live_ocean", "success"), config, checklist
             )
