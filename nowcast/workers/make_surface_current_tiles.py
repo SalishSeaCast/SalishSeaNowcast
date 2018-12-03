@@ -304,7 +304,7 @@ def _pdf_concatenate(path, tile_coords_dic):
         result = (path / tile).with_suffix(".pdf")
         logger.info(f"concatenating {tile} pdf files into: {result}")
         merger = PdfFileMerger()
-        for pdf in path.glob(f"surface_currents_{tile}*.pdf"):
+        for pdf in sorted(path.glob(f"surface_currents_{tile}*.pdf")):
             merger.append(os.fspath(pdf))
             logger.debug(f"added {pdf}")
             pdf.unlink()
