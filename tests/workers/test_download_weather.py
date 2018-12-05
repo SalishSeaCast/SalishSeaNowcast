@@ -44,11 +44,14 @@ weather:
       - VGRD_TGL_10  # v component of wind velocity at 10m elevation
       - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
       - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+      - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
       - TMP_TGL_2    # air temperature at 2m elevation
       - SPFH_TGL_2   # specific humidity at 2m elevation
+      - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
       - APCP_SFC_0   # accumulated precipitation at ground level
+      - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
       - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-      - TCDC_SFC_0   # total cloud in percent
+      - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
     forecast duration: 48  # hours
     GRIB dir: /tmp/
 """
@@ -105,6 +108,67 @@ class TestMain:
             download_weather.success,
             download_weather.failure,
         )
+
+
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "download_weather" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["download_weather"]
+        assert msg_registry["checklist key"] == "weather forecast"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success 00",
+            "failure 00",
+            "success 06",
+            "failure 06",
+            "success 12",
+            "failure 12",
+            "success 18",
+            "failure 18",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["download_weather"]
+        assert msg in msg_registry
+
+    def test_file_group(self, prod_config):
+        assert "file group" in prod_config
+        assert prod_config["file group"] == "sallen"
+
+    def test_weather_download_section(self, prod_config):
+        assert "weather" in prod_config
+        assert "download" in prod_config["weather"]
+        download = prod_config["weather"]["download"]
+        assert download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+        assert (
+            download["url template"]
+            == "http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}"
+        )
+        assert (
+            download["file template"]
+            == "CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2"
+        )
+        assert download["forecast duration"] == 48
+        assert download["grib variables"] == [
+            "UGRD_TGL_10",
+            "VGRD_TGL_10",
+            "DSWRF_SFC_0",
+            "DLWRF_SFC_0",
+            "LHTFL_SFC_0",
+            "TMP_TGL_2",
+            "SPFH_TGL_2",
+            "RH_TGL_2",
+            "APCP_SFC_0",
+            "PRATE_SFC_0",
+            "PRMSL_MSL_0",
+            "TCDC_SFC_0",
+        ]
 
 
 @patch("nowcast.workers.download_weather.logger", autospec=True)
