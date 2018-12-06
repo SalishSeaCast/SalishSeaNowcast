@@ -282,6 +282,27 @@ class TestDownloadResults:
         assert m_fvcom_v.unlink.called
         assert m_fvcom_w.unlink.called
 
+    def test_hindcast_not_unlink_fvcom_boundary_files(
+        self, m_fix_perms, m_run_in_subproc, m_logger, config
+    ):
+        parsed_args = SimpleNamespace(
+            host_name="cedar-hindcast",
+            run_type="hindcast",
+            run_date=arrow.get("2018-12-06"),
+        )
+        m_fvcom_t = Mock(name="FVCOM_T.nc")
+        m_fvcom_u = Mock(name="FVCOM_U.nc")
+        m_fvcom_v = Mock(name="FVCOM_V.nc")
+        m_fvcom_w = Mock(name="FVCOM_W.nc")
+        with patch(
+            "nowcast.workers.download_results.Path.glob", side_effect=[[], [], []]
+        ):
+            download_results.download_results(parsed_args, config)
+        assert not m_fvcom_t.unlink.called
+        assert not m_fvcom_u.unlink.called
+        assert not m_fvcom_v.unlink.called
+        assert not m_fvcom_w.unlink.called
+
     @pytest.mark.parametrize(
         "run_type, host_name",
         [
@@ -335,7 +356,9 @@ class TestDownloadResults:
         )
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
-            side_effect=[[], [Path("namelist_cfg")], [], []],
+            side_effect=[[Path("namelist_cfg")], [], []]
+            if run_type == "hindcast"
+            else [[], [Path("namelist_cfg")], [], []],
         )
         with p_glob:
             download_results.download_results(parsed_args, config)
@@ -362,6 +385,12 @@ class TestDownloadResults:
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
             side_effect=[
+                [],
+                [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],
+                [Path("Salishsea_1d_20180522_20180522_grid_T.nc")],
+            ]
+            if run_type == "hindcast"
+            else [
                 [],
                 [],
                 [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],

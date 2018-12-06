@@ -106,8 +106,10 @@ def download_results(parsed_args, config, *args):
     cmd = shlex.split(f"scp -pr {src} {dest}")
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     results_archive_dir = dest / results_dir
-    for filepath in results_archive_dir.glob("FVCOM_[TUVW].nc"):
-        filepath.unlink()
+    if not run_type == "hindcast":
+        # Keep FVCOM boundary slab files from hindcast runs so that we can do FVCOM hindcast runs
+        for filepath in results_archive_dir.glob("FVCOM_[TUVW].nc"):
+            filepath.unlink()
     lib.fix_perms(
         dest / results_dir,
         mode=lib.FilePerms(user="rwx", group="rwx", other="rx"),
