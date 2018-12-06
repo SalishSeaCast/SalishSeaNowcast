@@ -270,15 +270,17 @@ class TestDownloadResults:
         m_fvcom_t = Mock(name="FVCOM_T.nc")
         m_fvcom_u = Mock(name="FVCOM_U.nc")
         m_fvcom_v = Mock(name="FVCOM_V.nc")
+        m_fvcom_w = Mock(name="FVCOM_W.nc")
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
-            side_effect=[[m_fvcom_t, m_fvcom_u, m_fvcom_v], [], [], []],
+            side_effect=[[m_fvcom_t, m_fvcom_u, m_fvcom_v, m_fvcom_w], [], [], []],
         )
         with p_glob:
             download_results.download_results(parsed_args, config)
         assert m_fvcom_t.unlink.called
         assert m_fvcom_u.unlink.called
         assert m_fvcom_v.unlink.called
+        assert m_fvcom_w.unlink.called
 
     @pytest.mark.parametrize(
         "run_type, host_name",
