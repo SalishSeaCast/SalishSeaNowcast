@@ -196,7 +196,17 @@ def make_surface_current_tiles(parsed_args, config, *args):
 
     _pdf_concatenate(storage_path, tile_coords_dic)
 
-    checklist = {}
+    checklist = {
+        run_type: {
+            "run date": run_date,
+            "png": sorted(
+                [os.fspath(f) for f in storage_path.iterdir() if f.suffix == ".png"]
+            ),
+            "pdf": sorted(
+                [os.fspath(f) for f in storage_path.iterdir() if f.suffix == ".pdf"]
+            ),
+        }
+    }
     return checklist
 
 
