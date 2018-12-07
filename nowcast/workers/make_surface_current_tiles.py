@@ -198,7 +198,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
 
     checklist = {
         run_type: {
-            "run date": run_date,
+            "run date": run_date.format("YYYY-MM-DD"),
             "png": sorted(
                 [os.fspath(f) for f in storage_path.iterdir() if f.suffix == ".png"]
             ),
