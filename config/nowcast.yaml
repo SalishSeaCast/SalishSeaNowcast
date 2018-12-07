@@ -718,6 +718,12 @@ vhfr fvcom runs:
     atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
     # Directory on host where make_fvcom_atmos_forcing worker runs where FVCOM grid files are stored
     fvcom grid dir: /results/nowcast-sys/FVCOM-VHFR-config/grid/
+    # Atmospheric forcing field types to generate files for
+    # (ftype parameter values in OPPTools.atm.create_atm_hrdps())
+    field types:
+      - hfx
+      - precip
+      - wnd
 
   # Directory on compute host where FVCOM input files are stored
   input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/

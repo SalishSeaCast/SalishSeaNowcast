@@ -44,6 +44,10 @@ vhfr fvcom runs:
     fvcom atmos dir: forcing/atmospheric/GEM2.5/vhfr-fvcom
     atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
     fvcom grid dir: nowcast-sys/FVCOM-VHFR-config/grid/
+    field types:
+      - hfx
+      - precip
+      - wnd
 """
         )
     config_ = nemo_nowcast.Config()
@@ -172,6 +176,7 @@ class TestConfig:
             atmos_forcing["fvcom grid dir"]
             == "/results/nowcast-sys/FVCOM-VHFR-config/grid/"
         )
+        assert atmos_forcing["field types"] == ["hfx", "precip", "wnd"]
 
     def test_fvcom_grid_section(self, prod_config):
         assert "vhfr fvcom runs" in prod_config
@@ -195,20 +200,24 @@ class TestMakeFVCOMAtmosForcing:
     """Unit tests for make_fvcom_atmos_forcing() function.
     """
 
-    @pytest.mark.parametrize("run_type", ["nowcast"])
+    @pytest.mark.parametrize(
+        "run_type, file_date", [("nowcast", "20181207"), ("forecast", "20181208")]
+    )
     def test_checklist(
-        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, config
+        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, file_date, config
     ):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-03-16")
+            run_type=run_type, run_date=arrow.get("2018-12-07")
         )
         checklist = make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(
             parsed_args, config
         )
         expected = {
             run_type: {
-                "run date": "2018-03-16",
-                "wnd": "forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_nowcast_wnd_20180316.nc",
+                "run date": "2018-12-07",
+                "hfx": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{run_type}_hfx_{file_date}.nc",
+                "precip": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{run_type}_precip_{file_date}.nc",
+                "wnd": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{run_type}_wnd_{file_date}.nc",
             }
         }
         assert checklist == expected
@@ -226,30 +235,41 @@ class TestMakeFVCOMAtmosForcing:
         )
 
     @pytest.mark.parametrize(
-        "run_type, file_date", [("nowcast", "20180316"), ("forecast", "20180317")]
+        "run_type, call_num, field_type, file_date",
+        [
+            ("nowcast", 0, "hfx", "20181207"),
+            ("nowcast", 1, "precip", "20181207"),
+            ("nowcast", 2, "wnd", "20181207"),
+            ("forecast", 0, "hfx", "20181208"),
+            ("forecast", 1, "precip", "20181208"),
+            ("forecast", 2, "wnd", "20181208"),
+        ],
     )
     def test_create_atm_hrdps(
-        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, file_date, config
+        self,
+        m_create_atm_hrdps,
+        m_readMesh,
+        m_logger,
+        run_type,
+        call_num,
+        field_type,
+        file_date,
+        config,
     ):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-03-16")
+            run_type=run_type, run_date=arrow.get("2018-12-07")
         )
         make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(parsed_args, config)
-        assert m_create_atm_hrdps.call_args[0][0] == "wnd"
-        numpy.testing.assert_array_equal(
-            m_create_atm_hrdps.call_args[0][1], numpy.ones((24476,))
-        )
-        numpy.testing.assert_array_equal(
-            m_create_atm_hrdps.call_args[0][2], numpy.ones((24476,))
-        )
-        numpy.testing.assert_array_equal(
-            m_create_atm_hrdps.call_args[0][3], numpy.ones((44157, 2))
-        )
-        assert m_create_atm_hrdps.call_args[1]["utmzone"] == 10
+        call_args = m_create_atm_hrdps.call_args_list[call_num]
+        assert call_args[0][0] == field_type
+        numpy.testing.assert_array_equal(call_args[0][2], numpy.ones((24476,)))
+        numpy.testing.assert_array_equal(call_args[0][1], numpy.ones((24476,)))
+        numpy.testing.assert_array_equal(call_args[0][3], numpy.ones((44157, 2)))
+        assert call_args[1]["utmzone"] == 10
         expected = (
             f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
-            f"atmos_{run_type}_wnd_{file_date}.nc"
+            f"atmos_{run_type}_{field_type}_{file_date}.nc"
         )
-        assert m_create_atm_hrdps.call_args[1]["fname"] == expected
-        expected = "forcing/atmospheric/GEM2.5/GRIB/20180316/"
-        assert m_create_atm_hrdps.call_args[1]["hrdps_folder"] == expected
+        assert call_args[1]["fname"] == expected
+        expected = "forcing/atmospheric/GEM2.5/GRIB/20181207/"
+        assert call_args[1]["hrdps_folder"] == expected
