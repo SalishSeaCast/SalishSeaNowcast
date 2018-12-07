@@ -104,7 +104,7 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
     """
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    atmos_field_type = "wnd"
+    checklist = {run_type: {"run date": run_date.format("YYYY-MM-DD")}}
     logger.info(
         f"Creating VHFR FVCOM atmospheric forcing file for {run_type} run from "
         f'{run_date.format("YYYY-MM-DD")} HRDPS GRIB files'
@@ -134,37 +134,40 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
     time_end_offsets = {"nowcast": timedelta(hours=24), "forecast": timedelta(hours=60)}
     time_end = run_date + time_end_offsets[run_type]
     atmos_file_date = run_date if run_type == "nowcast" else run_date.shift(days=+1)
-    atmos_file = atmos_file_tmpl.format(
-        run_type=run_type,
-        field_type=atmos_field_type,
-        yyyymmdd=atmos_file_date.format("YYYYMMDD"),
-    )
-    logger.debug(
-        f"creating {atmos_field_type} file for {time_start} to {time_end} "
-        f"from {hrdps_grib_dir}"
-    )
-    OPPTools.atm.create_atm_hrdps(
-        atmos_field_type,
-        x,
-        y,
-        tri,
-        utmzone=config["vhfr fvcom runs"]["fvcom grid"]["utm zone"],
-        tlim=tuple(
-            map(time.mktime, (time_start.naive.timetuple(), time_end.naive.timetuple()))
-        ),
-        fname=os.fspath(fvcom_atmos_dir / atmos_file),
-        hrdps_folder=f"{hrdps_grib_dir}/",
-    )
-    logger.debug(
-        f"Stored VHFR FVCOM atmospheric forcing {atmos_field_type} file: "
-        f"{fvcom_atmos_dir/atmos_file}"
-    )
-    checklist = {
-        run_type: {
-            "run date": run_date.format("YYYY-MM-DD"),
-            atmos_field_type: os.fspath(fvcom_atmos_dir / atmos_file),
-        }
-    }
+    for atmos_field_type in config["vhfr fvcom runs"]["atmospheric forcing"][
+        "field types"
+    ]:
+        atmos_file = atmos_file_tmpl.format(
+            run_type=run_type,
+            field_type=atmos_field_type,
+            yyyymmdd=atmos_file_date.format("YYYYMMDD"),
+        )
+        logger.debug(
+            f"creating {atmos_field_type} file for {time_start} to {time_end} "
+            f"from {hrdps_grib_dir}"
+        )
+        OPPTools.atm.create_atm_hrdps(
+            atmos_field_type,
+            x,
+            y,
+            tri,
+            utmzone=config["vhfr fvcom runs"]["fvcom grid"]["utm zone"],
+            tlim=tuple(
+                map(
+                    time.mktime,
+                    (time_start.naive.timetuple(), time_end.naive.timetuple()),
+                )
+            ),
+            fname=os.fspath(fvcom_atmos_dir / atmos_file),
+            hrdps_folder=f"{hrdps_grib_dir}/",
+        )
+        logger.debug(
+            f"Stored VHFR FVCOM atmospheric forcing {atmos_field_type} file: "
+            f"{fvcom_atmos_dir/atmos_file}"
+        )
+        checklist[run_type].update(
+            {atmos_field_type: os.fspath(fvcom_atmos_dir / atmos_file)}
+        )
     return checklist
 
 
