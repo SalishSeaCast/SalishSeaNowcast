@@ -406,3 +406,34 @@ class TestDownloadResults:
                 "1d": ["Salishsea_1d_20180522_20180522_grid_T.nc"],
             }
         }
+
+    def test_checklist_agrif(self, m_fix_perms, m_run_in_subproc, m_logger, config):
+        parsed_args = SimpleNamespace(
+            host_name="orcinus-nowcast-agrif",
+            run_type="nowcast-agrif",
+            run_date=arrow.get("2018-12-07"),
+        )
+        p_glob = patch(
+            "nowcast.workers.download_results.Path.glob",
+            side_effect=[
+                [],
+                [],
+                [Path("1_Salishsea_1h_20180522_20180522_grid_T.nc")],
+                [
+                    Path("1_Salishsea_1d_20180522_20180522_grid_T.nc"),
+                    Path("Salishsea_1d_20180522_20180522_grid_T.nc"),
+                ],
+            ],
+        )
+        with p_glob:
+            checklist = download_results.download_results(parsed_args, config)
+        assert checklist == {
+            "nowcast-agrif": {
+                "run date": "2018-12-07",
+                "1h": ["1_Salishsea_1h_20180522_20180522_grid_T.nc"],
+                "1d": [
+                    "1_Salishsea_1d_20180522_20180522_grid_T.nc",
+                    "Salishsea_1d_20180522_20180522_grid_T.nc",
+                ],
+            }
+        }
