@@ -182,7 +182,7 @@ class TestConfig:
         assert "vhfr fvcom runs" in prod_config
         assert "fvcom grid" in prod_config["vhfr fvcom runs"]
         fvcom_grid = prod_config["vhfr fvcom runs"]["fvcom grid"]
-        assert fvcom_grid["grid file"] == "vhfr_low_v2_utm10_grd.dat"
+        assert fvcom_grid["grid file"] == "vh_x2_grd.dat"
         assert fvcom_grid["utm zone"] == 10
 
 
