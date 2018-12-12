@@ -14,8 +14,7 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast tag_release script.
 """
-from pathlib import Path
-from unittest.mock import call, Mock, patch
+from unittest.mock import Mock, call, patch
 
 import hglib
 import pytest
@@ -68,6 +67,7 @@ class TestTagRepo:
         m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
+        m_hg_client().tags.return_value = [(b"tip", 9, b"ff71fb7feaa6", False)]
         tag_release._tag_repo("NEMO-3.6-code", "PROD-hindcast-201806-v2-2017")
         expected = "PROD-hindcast-201806-v2-2017".encode()
         assert m_hg_client().tag.call_args_list[0][0][0] == expected
@@ -81,12 +81,10 @@ class TestTagRepo:
         m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
-        m_hg_client().tag.side_effect = hglib.error.CommandError(
-            ("args",),
-            "ret",
-            "out",
-            f"abort: tag 'PROD-hindcast-201806-v2-2017' already exists".encode(),
-        )
+        m_hg_client().tags.return_value = [
+            (b"tip", 9, b"ff71fb7feaa6", False),
+            (b"PROD-hindcast-201806-v2-2017", 7, b"3541bdb39959", False),
+        ]
         tag_release._tag_repo("NEMO-3.6-code", "PROD-hindcast-201806-v2-2017")
         m_logger.warning.assert_called_once_with(
             "tag 'PROD-hindcast-201806-v2-2017' already exists in repo: NEMO-3.6-code"
@@ -97,6 +95,7 @@ class TestTagRepo:
         m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
+        m_hg_client().tags.return_value = [(b"tip", 9, b"ff71fb7feaa6", False)]
         m_hg_client().tag.side_effect = hglib.error.CommandError(
             ("args",), "ret", "out", b"err"
         )
@@ -108,6 +107,7 @@ class TestTagRepo:
         m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
+        m_hg_client().tags.return_value = [(b"tip", 9, b"ff71fb7feaa6", False)]
         tag_release._tag_repo("NEMO-3.6-code", "PROD-hindcast-201806-v2-2017")
         m_hg_client().push.assert_called_once_with()
         assert m_logger.success.call_args_list[1] == call(
