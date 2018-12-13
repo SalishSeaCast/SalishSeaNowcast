@@ -235,14 +235,50 @@ class TestMakeFVCOMAtmosForcing:
         )
 
     @pytest.mark.parametrize(
-        "run_type, call_num, field_type, file_date",
+        "run_type, call_num, field_type, file_date, tlims",
         [
-            ("nowcast", 0, "hfx", "20181207"),
-            ("nowcast", 1, "precip", "20181207"),
-            ("nowcast", 2, "wnd", "20181207"),
-            ("forecast", 0, "hfx", "20181208"),
-            ("forecast", 1, "precip", "20181208"),
-            ("forecast", 2, "wnd", "20181208"),
+            (
+                "nowcast",
+                0,
+                "hfx",
+                "20181207",
+                ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
+            ),
+            (
+                "nowcast",
+                1,
+                "precip",
+                "20181207",
+                ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
+            ),
+            (
+                "nowcast",
+                2,
+                "wnd",
+                "20181207",
+                ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
+            ),
+            (
+                "forecast",
+                0,
+                "hfx",
+                "20181208",
+                ("2018-12-08 00:00:00", "2018-12-09 12:00:00"),
+            ),
+            (
+                "forecast",
+                1,
+                "precip",
+                "20181208",
+                ("2018-12-08 00:00:00", "2018-12-09 12:00:00"),
+            ),
+            (
+                "forecast",
+                2,
+                "wnd",
+                "20181208",
+                ("2018-12-08 00:00:00", "2018-12-09 12:00:00"),
+            ),
         ],
     )
     def test_create_atm_hrdps(
@@ -254,6 +290,7 @@ class TestMakeFVCOMAtmosForcing:
         call_num,
         field_type,
         file_date,
+        tlims,
         config,
     ):
         parsed_args = SimpleNamespace(
@@ -266,10 +303,14 @@ class TestMakeFVCOMAtmosForcing:
         numpy.testing.assert_array_equal(call_args[0][1], numpy.ones((24476,)))
         numpy.testing.assert_array_equal(call_args[0][3], numpy.ones((44157, 2)))
         assert call_args[1]["utmzone"] == 10
+        assert call_args[1]["tlim"] == tlims
         expected = (
             f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
             f"atmos_{run_type}_{field_type}_{file_date}.nc"
         )
         assert call_args[1]["fname"] == expected
-        expected = "forcing/atmospheric/GEM2.5/GRIB/20181207/"
+        expected = [
+            "forcing/atmospheric/GEM2.5/GRIB/20181206/",
+            "forcing/atmospheric/GEM2.5/GRIB/20181207/",
+        ]
         assert call_args[1]["hrdps_folder"] == expected
