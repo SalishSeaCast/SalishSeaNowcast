@@ -2290,3 +2290,15 @@ class TestAfterRotateLogs:
             Message("rotate_logs", msg_type), config, checklist
         )
         assert workers == []
+
+
+class TestAfterLaunchRemoteWorker:
+    """Unit tests for the after_launch_remote_worker function.
+    """
+
+    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_launch_remote_worker(
+            Message("launch_remote_worker", msg_type), config, checklist
+        )
+        assert workers == []
