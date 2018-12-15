@@ -219,6 +219,7 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
         run_prep_dir
         / "namelist.case": {
             "nml_case": {
+                "casename": casename,
                 "start_date": start_date.format("YYYY-MM-DD HH:mm:ss.00"),
                 "end_date": (
                     (start_date + run_durations[run_type]).format(
@@ -314,7 +315,6 @@ def _prep_fvcom_input_dir(run_date, run_type, config):
     )
     (fvcom_input_dir / output_timeseries_file.name).symlink_to(output_timeseries_file)
     logger.debug(f"symlinked {output_timeseries_file} file into {fvcom_input_dir}")
-    results_dir = Path(config["vhfr fvcom runs"]["run types"][run_type]["results"])
     casename = config["vhfr fvcom runs"]["case name"]
     restart_dir = Path(config["vhfr fvcom runs"]["run types"]["nowcast"]["results"])
     restart_file_date = run_date.shift(days=-1) if run_type == "nowcast" else run_date

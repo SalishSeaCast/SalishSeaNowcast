@@ -36,17 +36,17 @@ def config(base_config):
         f.write(
             """
 vhfr fvcom runs:
-  case name: vhfr_low_v2
+  case name: vh_x2
   run prep dir: fvcom-runs/
 
   fvcom grid:
     grid dir: FVCOM-VHFR-config/grid/
-    grid file: vhfr_low_v2_utm10_grd.dat
-    depths file: vhfr_low_v2_utm10_dep.dat
-    sigma file: vhfr_low_v2_sigma.dat
-    coriolis file: vhfr_low_v2_utm10_cor.dat
-    sponge file: vhfr_low_v2_nospg_spg.dat
-    obc nodes file: vhfr_low_v2_obc.dat
+    grid file: vh_x2_grd.dat
+    depths file: vh_x2_dep.dat
+    sigma file: vh_x2_sigma.dat
+    coriolis file: vh_x2_utm10_cor.dat
+    sponge file: vh_x2_nospg_spg.dat
+    obc nodes file: vh_x2_obc.dat
 
   nemo coupling:
     boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
@@ -55,7 +55,7 @@ vhfr fvcom runs:
     atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
 
   input dir: fvcom-runs/input/
-  output station timeseries: FVCOM-VHFR-config/output/vhfr_low_v2_utm10_station.dat
+  output station timeseries: FVCOM-VHFR-config/output/vh_x2_utm10_station.dat
   namelists:
     '{casename}_run.nml':
       - namelist.case
@@ -251,7 +251,7 @@ class TestRunDescription:
         run_id = f"11dec17fvcom-{run_type}"
         fvcom_repo_dir = Path(str(tmpdir.ensure_dir("FVCOM41")))
         run_prep_dir = Path(str(tmpdir.ensure_dir("fvcom-runs")))
-        m_mk_nml.return_value = Path(str(run_prep_dir), "vhfr_low_v2_run.nml")
+        m_mk_nml.return_value = Path(str(run_prep_dir), "vh_x2_run.nml")
         p_config = patch.dict(
             config["vhfr fvcom runs"],
             {"run prep dir": run_prep_dir, "FVCOM exe path": fvcom_repo_dir},
@@ -262,14 +262,14 @@ class TestRunDescription:
             )
         expected = {
             "run_id": run_id,
-            "casename": "vhfr_low_v2",
+            "casename": "vh_x2",
             "nproc": 64,
             "paths": {
                 "FVCOM": os.fspath(fvcom_repo_dir),
                 "runs directory": os.fspath(run_prep_dir),
                 "input": os.fspath(run_prep_dir / "input"),
             },
-            "namelist": os.fspath(run_prep_dir / "vhfr_low_v2_run.nml"),
+            "namelist": os.fspath(run_prep_dir / "vh_x2_run.nml"),
         }
         assert run_desc == expected
 
@@ -282,7 +282,7 @@ class TestEditNamelists:
 
     def test_edit_namelists_nowcast(self, m_patch_nml, m_logger, config):
         run_fvcom._edit_namelists(
-            "vhfr_low_v2",
+            config["vhfr fvcom runs"]["case name"],
             arrow.get("2018-01-15"),
             "nowcast",
             Path("run_prep_dir"),
@@ -293,6 +293,7 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.case"),
                 {
                     "nml_case": {
+                        "casename": config["vhfr fvcom runs"]["case name"],
                         "start_date": "2018-01-15 00:00:00.00",
                         "end_date": "2018-01-16 00:00:00.00",
                     }
@@ -323,7 +324,7 @@ class TestEditNamelists:
 
     def test_edit_namelists_forecast(self, m_patch_nml, m_logger, config):
         run_fvcom._edit_namelists(
-            "vhfr_low_v2",
+            config["vhfr fvcom runs"]["case name"],
             arrow.get("2018-01-15"),
             "forecast",
             Path("run_prep_dir"),
@@ -334,6 +335,7 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.case"),
                 {
                     "nml_case": {
+                        "casename": config["vhfr fvcom runs"]["case name"],
                         "start_date": "2018-01-16 00:00:00.00",
                         "end_date": "2018-01-17 12:00:00.00",
                     }
@@ -377,7 +379,7 @@ class TestAssembleNamelist:
         run_prep_dir = Path(str(tmpdir.ensure_dir("fvcom-runs")))
         tmpdir.ensure("fvcom-runs", "namelist.case")
         namelist_path = run_fvcom._assemble_namelist(
-            "vhfr_low_v2", run_type, run_prep_dir, config
+            "vh_x2", run_type, run_prep_dir, config
         )
         assert namelist_path.exists()
 
@@ -394,18 +396,14 @@ class TestPrepFVCOM_InputDir:
         with patch("nowcast.workers.run_fvcom.Path.symlink_to") as m_link:
             run_fvcom._prep_fvcom_input_dir(arrow.get("2018-01-18"), run_type, config)
         assert m_link.call_args_list == [
-            call(Path("FVCOM-VHFR-config/grid/vhfr_low_v2_utm10_grd.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vhfr_low_v2_utm10_dep.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vhfr_low_v2_sigma.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vhfr_low_v2_utm10_cor.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vhfr_low_v2_nospg_spg.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vhfr_low_v2_obc.dat")),
-            call(Path("FVCOM-VHFR-config/output/vhfr_low_v2_utm10_station.dat")),
-            call(
-                Path(
-                    f"SalishSea/fvcom-nowcast/{restart_date}/vhfr_low_v2_restart_0001.nc"
-                )
-            ),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_grd.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_dep.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_sigma.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_utm10_cor.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_nospg_spg.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_obc.dat")),
+            call(Path("FVCOM-VHFR-config/output/vh_x2_utm10_station.dat")),
+            call(Path(f"SalishSea/fvcom-nowcast/{restart_date}/vh_x2_restart_0001.nc")),
         ]
 
 
@@ -464,7 +462,7 @@ class TestBuildScript:
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
         ${{MPIRUN}} -np 64 --bind-to-core ./fvcom \
---casename=vhfr_low_v2 --logfile=./fvcom.log \
+--casename=vh_x2 --logfile=./fvcom.log \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
@@ -535,7 +533,7 @@ class TestExecute:
 
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
         ${MPIRUN} -np 64 --bind-to-core ./fvcom \
---casename=vhfr_low_v2 --logfile=./fvcom.log \
+--casename=vh_x2 --logfile=./fvcom.log \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
