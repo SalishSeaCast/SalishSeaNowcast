@@ -68,10 +68,16 @@ class TestTagRepo:
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
         m_hg_client().tags.return_value = [(b"tip", 9, b"ff71fb7feaa6", False)]
+        m_hg_client().config.return_value = [
+            (b"ui", b"username", b"Tom Dickson <tom@example.com>")
+        ]
         tag_release._tag_repo("NEMO-3.6-code", "PROD-hindcast-201806-v2-2017")
         expected = "PROD-hindcast-201806-v2-2017".encode()
         assert m_hg_client().tag.call_args_list[0][0][0] == expected
-        expected = {"message": "Tag production release PROD-hindcast-201806-v2-2017."}
+        expected = {
+            "message": "Tag production release PROD-hindcast-201806-v2-2017.",
+            "user": "SalishSeaNowcast.release_mgmt.tag_release for Tom Dickson <tom@example.com>",
+        }
         assert m_hg_client().tag.call_args_list[0][1] == expected
         assert m_logger.success.call_args_list[0] == call(
             "added PROD-hindcast-201806-v2-2017 to repo: NEMO-3.6-code"
@@ -91,11 +97,42 @@ class TestTagRepo:
         )
         assert not m_hg_client.push.called
 
+    def test_tip_is_tagging_commit(self, m_hg_open, m_exists, m_logger):
+        m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
+        m_hg_client().status.return_value = None
+        m_hg_client().incoming.return_value = []
+        m_hg_client().tags.return_value = [
+            (b"tip", 9, b"ff71fb7feaa6", False),
+            (b"PROD-hindcast-201806-v2-2017", 7, b"3541bdb39959", False),
+        ]
+        m_hg_client().config.return_value = [
+            (b"ui", b"username", b"Tom Dickson <tom@example.com>")
+        ]
+        m_hg_client().tip().author = b"SalishSeaNowcast.release_mgmt.tag_release"
+        m_hg_client().tip().desc = (
+            b"Tag production release PROD-hindcast-201806-v2-2017."
+        )
+        tag_release._tag_repo("NEMO-3.6-code", "PROD-hindcast-201806-v3-2017")
+        expected = "PROD-hindcast-201806-v3-2017".encode()
+        assert m_hg_client().tag.call_args_list[0][0][0] == expected
+        expected = {
+            "rev": "PROD-hindcast-201806-v2-2017",
+            "message": "Tag production release PROD-hindcast-201806-v3-2017.",
+            "user": "SalishSeaNowcast.release_mgmt.tag_release for Tom Dickson <tom@example.com>",
+        }
+        assert m_hg_client().tag.call_args_list[0][1] == expected
+        assert m_logger.success.call_args_list[0] == call(
+            "added PROD-hindcast-201806-v3-2017 to repo: NEMO-3.6-code"
+        )
+
     def test_hg_tag_error(self, m_hg_open, m_exists, m_logger):
         m_hg_client = m_hg_open().__enter__ = Mock(name="hg_client")
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
         m_hg_client().tags.return_value = [(b"tip", 9, b"ff71fb7feaa6", False)]
+        m_hg_client().config.return_value = [
+            (b"ui", b"username", b"Tom Dickson <tom@example.com>")
+        ]
         m_hg_client().tag.side_effect = hglib.error.CommandError(
             ("args",), "ret", "out", b"err"
         )
@@ -108,6 +145,9 @@ class TestTagRepo:
         m_hg_client().status.return_value = None
         m_hg_client().incoming.return_value = []
         m_hg_client().tags.return_value = [(b"tip", 9, b"ff71fb7feaa6", False)]
+        m_hg_client().config.return_value = [
+            (b"ui", b"username", b"Tom Dickson <tom@example.com>")
+        ]
         tag_release._tag_repo("NEMO-3.6-code", "PROD-hindcast-201806-v2-2017")
         m_hg_client().push.assert_called_once_with()
         assert m_logger.success.call_args_list[1] == call(

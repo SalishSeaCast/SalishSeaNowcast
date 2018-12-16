@@ -25,6 +25,7 @@ import verboselogs
 import yaml
 
 NAME = "tag_release"
+COMMIT_AUTHOR = f"SalishSeaNowcast.release_mgmt.{NAME}"
 verboselogs.install()
 logger = logging.getLogger(NAME)
 coloredlogs.install(fmt="%(asctime)s %(hostname)s %(name)s %(levelname)s %(message)s")
@@ -99,10 +100,37 @@ def _tag_repo(repo, tag):
             )
             raise SystemExit(2)
         tags = hg.tags()
-        if tag in [tag[0].decode() for tag in tags]:
+        if tag in [existing_tag[0].decode() for existing_tag in tags]:
             logger.warning(f"tag '{tag}' already exists in repo: {repo}")
             return
-        hg.tag(tag.encode(), message=f"Tag production release {tag}.")
+        for _, key, value in hg.config("ui".encode()):
+            if key.decode() == "username":
+                username = value.decode()
+                break
+        for existing_tag in tags[1:]:
+            if existing_tag[0].decode().startswith("PROD-"):
+                prev_prod_tag_name = existing_tag[0].decode()
+                tip_rev = hg.tip()
+                if all(
+                    (
+                        tip_rev.author.decode().startswith(COMMIT_AUTHOR),
+                        tip_rev.desc.decode()
+                        == f"Tag production release {prev_prod_tag_name}.",
+                    )
+                ):
+                    hg.tag(
+                        tag.encode(),
+                        rev=prev_prod_tag_name,
+                        message=f"Tag production release {tag}.",
+                        user=f"{COMMIT_AUTHOR} for {username}",
+                    )
+                    break
+        else:
+            hg.tag(
+                tag.encode(),
+                message=f"Tag production release {tag}.",
+                user=f"{COMMIT_AUTHOR} for {username}",
+            )
         logger.success(f"added {tag} to repo: {repo}")
         hg.push()
         logger.success(f"pushed {tag} tag to Bitbucket from repo: {repo}")
