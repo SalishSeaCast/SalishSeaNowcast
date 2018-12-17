@@ -736,7 +736,7 @@ vhfr fvcom runs:
     # **Must be quoted to project {} characters**
     '{casename}_run.nml':
       - namelist.case
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart.baroclinic
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics
       - namelist.restart
@@ -751,7 +751,7 @@ vhfr fvcom runs:
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check
       - namelist.nesting
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries.baroclinic
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models
   # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
   FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
@@ -772,8 +772,8 @@ vhfr fvcom runs:
       # Directory on compute host where results are stored
       results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
     forecast:
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
       nemo boundary results: /nemoShare/MEOPAR/SalishSea/forecast/
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
   # Directories on results server where run results are stored
   # in ddmmmyy/ directories; keyed by run type
   results archive:
@@ -1118,8 +1118,8 @@ message registry:
     run_fvcom:
       checklist key: FVCOM run
       success nowcast: nowcast FVCOM run started
-      success forecast: forecast FVCOM run started
       failure nowcast: nowcast FVCOM run failed
+      success forecast: forecast FVCOM run started
       failure forecast: forecast FVCOM run failed
       crash: run_fvcom worker crashed
 

@@ -121,6 +121,171 @@ class TestMain:
         assert args == (run_fvcom.run_fvcom, run_fvcom.success, run_fvcom.failure)
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "run_fvcom" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["run_fvcom"]
+        assert msg_registry["checklist key"] == "FVCOM run"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["run_fvcom"]
+        assert msg in msg_registry
+
+    def test_vhfr_fvcom_runs_section(self, prod_config):
+        assert "vhfr fvcom runs" in prod_config
+        vhfr_fvcom_runs = prod_config["vhfr fvcom runs"]
+        assert vhfr_fvcom_runs["host"] == "west.cloud-nowcast"
+        assert vhfr_fvcom_runs["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
+        assert vhfr_fvcom_runs["case name"] == "vh_x2"
+        assert (
+            vhfr_fvcom_runs["run prep dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/"
+        )
+        assert "fvcom grid" in vhfr_fvcom_runs
+        assert "nemo coupling" in vhfr_fvcom_runs
+        assert "atmospheric forcing" in vhfr_fvcom_runs
+        assert (
+            vhfr_fvcom_runs["input dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/"
+        )
+        assert (
+            vhfr_fvcom_runs["output station timeseries"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_x2_station.txt"
+        )
+        assert "namelists" in vhfr_fvcom_runs
+        assert (
+            vhfr_fvcom_runs["FVCOM exe path"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM41/"
+        )
+        assert vhfr_fvcom_runs["number of processors"] == 64
+        assert vhfr_fvcom_runs["mpi hosts file"] == "${HOME}/mpi_hosts.fvcom"
+        assert (
+            vhfr_fvcom_runs["fvc_cmd"]
+            == "/nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/fvc"
+        )
+        assert "run types" in vhfr_fvcom_runs
+        assert "results archive" in vhfr_fvcom_runs
+        assert (
+            vhfr_fvcom_runs["stations dataset filename"]
+            == "vhfr_x2_station_timeseries.nc"
+        )
+
+    def test_fvcom_grid_section(self, prod_config):
+        fvcom_grid = prod_config["vhfr fvcom runs"]["fvcom grid"]
+        assert (
+            fvcom_grid["grid dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/"
+        )
+        assert fvcom_grid["grid file"] == "vh_x2_grd.dat"
+        assert fvcom_grid["utm zone"] == 10
+        assert fvcom_grid["depths file"] == "vh_x2_dep.dat"
+        assert fvcom_grid["sigma file"] == "vh_x2_sigma.dat"
+        assert fvcom_grid["coriolis file"] == "vh_x2_cor.dat"
+        assert fvcom_grid["sponge file"] == "vh_x2_nospg_spg.dat"
+        assert fvcom_grid["obc nodes file"] == "vh_x2_obc.dat"
+
+    def test_nemo_coupling_section(self, prod_config):
+        nemo_coupling = prod_config["vhfr fvcom runs"]["nemo coupling"]
+        assert (
+            nemo_coupling["coupling dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/"
+        )
+        assert nemo_coupling["fvcom nest indices file"] == "vh_x2_nesting_indices.txt"
+        assert (
+            nemo_coupling["fvcom nest ref line file"]
+            == "vh_x2_nesting_innerboundary.txt"
+        )
+        assert nemo_coupling["nemo cut i range"] == [225, 369]
+        assert nemo_coupling["nemo cut j range"] == [340, 561]
+        assert nemo_coupling["transition zone width"] == 8500
+        assert nemo_coupling["tanh dl"] == 2
+        assert nemo_coupling["tanh du"] == 2
+        assert (
+            nemo_coupling["nemo coordinates"]
+            == "/nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc"
+        )
+        assert (
+            nemo_coupling["nemo bathymetry"]
+            == "/nemoShare/MEOPAR/nowcast-sys/grid/bathymetry_201702.nc"
+        )
+        assert (
+            nemo_coupling["boundary file template"]
+            == "bdy_{run_type}_brcl_{yyyymmdd}.nc"
+        )
+
+    def test_atmospheric_forcing_section(self, prod_config):
+        atmos_forcing = prod_config["vhfr fvcom runs"]["atmospheric forcing"]
+        assert (
+            atmos_forcing["hrdps grib dir"]
+            == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+        )
+        assert (
+            atmos_forcing["fvcom atmos dir"]
+            == "/results/forcing/atmospheric/GEM2.5/vhfr-fvcom"
+        )
+        assert (
+            atmos_forcing["atmos file template"]
+            == "atmos_{run_type}_{field_type}_{yyyymmdd}.nc"
+        )
+        assert (
+            atmos_forcing["fvcom grid dir"]
+            == "/results/nowcast-sys/FVCOM-VHFR-config/grid/"
+        )
+        assert atmos_forcing["field types"] == ["hfx", "precip", "wnd"]
+
+    def test_namelists_section(self, prod_config):
+        namelists = prod_config["vhfr fvcom runs"]["namelists"]["{casename}_run.nml"]
+        assert namelists == [
+            "namelist.case",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart.baroclinic",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics",
+            "namelist.restart",
+            "namelist.netcdf",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.physics.baroclinic",
+            "namelist.surface",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.rivers",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc.baroclinic",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid.baroclinic",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check",
+            "namelist.nesting",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries.baroclinic",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models",
+        ]
+
+    def test_run_types_section(self, prod_config):
+        run_types = prod_config["vhfr fvcom runs"]["run types"]
+        assert run_types["nowcast"] == {
+            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/",
+        }
+        assert run_types["forecast"] == {
+            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/forecast/",
+            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/",
+        }
+
+    def test_results_archive_section(self, prod_config):
+        results_archive = prod_config["vhfr fvcom runs"]["results archive"]
+        assert results_archive["nowcast"] == "/opp/fvcom/nowcast-x2/"
+        assert results_archive["forecast"] == "/opp/fvcom/forecast-x2/"
+
+
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestSuccess:
@@ -293,7 +458,7 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.case"),
                 {
                     "nml_case": {
-                        "casename": config["vhfr fvcom runs"]["case name"],
+                        "case_title": config["vhfr fvcom runs"]["case name"],
                         "start_date": "2018-01-15 00:00:00.00",
                         "end_date": "2018-01-16 00:00:00.00",
                     }
@@ -335,7 +500,7 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.case"),
                 {
                     "nml_case": {
-                        "casename": config["vhfr fvcom runs"]["case name"],
+                        "case_title": config["vhfr fvcom runs"]["case name"],
                         "start_date": "2018-01-16 00:00:00.00",
                         "end_date": "2018-01-17 12:00:00.00",
                     }
