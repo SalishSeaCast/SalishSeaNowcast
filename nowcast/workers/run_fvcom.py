@@ -219,7 +219,7 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
         run_prep_dir
         / "namelist.case": {
             "nml_case": {
-                "casename": casename,
+                "case_title": casename,
                 "start_date": start_date.format("YYYY-MM-DD HH:mm:ss.00"),
                 "end_date": (
                     (start_date + run_durations[run_type]).format(
