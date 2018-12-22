@@ -270,15 +270,38 @@ class TestDownloadResults:
         m_fvcom_t = Mock(name="FVCOM_T.nc")
         m_fvcom_u = Mock(name="FVCOM_U.nc")
         m_fvcom_v = Mock(name="FVCOM_V.nc")
+        m_fvcom_w = Mock(name="FVCOM_W.nc")
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
-            side_effect=[[m_fvcom_t, m_fvcom_u, m_fvcom_v], [], [], []],
+            side_effect=[[m_fvcom_t, m_fvcom_u, m_fvcom_v, m_fvcom_w], [], [], []],
         )
         with p_glob:
             download_results.download_results(parsed_args, config)
         assert m_fvcom_t.unlink.called
         assert m_fvcom_u.unlink.called
         assert m_fvcom_v.unlink.called
+        assert m_fvcom_w.unlink.called
+
+    def test_hindcast_not_unlink_fvcom_boundary_files(
+        self, m_fix_perms, m_run_in_subproc, m_logger, config
+    ):
+        parsed_args = SimpleNamespace(
+            host_name="cedar-hindcast",
+            run_type="hindcast",
+            run_date=arrow.get("2018-12-06"),
+        )
+        m_fvcom_t = Mock(name="FVCOM_T.nc")
+        m_fvcom_u = Mock(name="FVCOM_U.nc")
+        m_fvcom_v = Mock(name="FVCOM_V.nc")
+        m_fvcom_w = Mock(name="FVCOM_W.nc")
+        with patch(
+            "nowcast.workers.download_results.Path.glob", side_effect=[[], [], []]
+        ):
+            download_results.download_results(parsed_args, config)
+        assert not m_fvcom_t.unlink.called
+        assert not m_fvcom_u.unlink.called
+        assert not m_fvcom_v.unlink.called
+        assert not m_fvcom_w.unlink.called
 
     @pytest.mark.parametrize(
         "run_type, host_name",
@@ -333,7 +356,9 @@ class TestDownloadResults:
         )
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
-            side_effect=[[], [Path("namelist_cfg")], [], []],
+            side_effect=[[Path("namelist_cfg")], [], []]
+            if run_type == "hindcast"
+            else [[], [Path("namelist_cfg")], [], []],
         )
         with p_glob:
             download_results.download_results(parsed_args, config)
@@ -361,6 +386,12 @@ class TestDownloadResults:
             "nowcast.workers.download_results.Path.glob",
             side_effect=[
                 [],
+                [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],
+                [Path("Salishsea_1d_20180522_20180522_grid_T.nc")],
+            ]
+            if run_type == "hindcast"
+            else [
+                [],
                 [],
                 [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],
                 [Path("Salishsea_1d_20180522_20180522_grid_T.nc")],
@@ -373,5 +404,36 @@ class TestDownloadResults:
                 "run date": "2018-05-22",
                 "1h": ["Salishsea_1h_20180522_20180522_grid_T.nc"],
                 "1d": ["Salishsea_1d_20180522_20180522_grid_T.nc"],
+            }
+        }
+
+    def test_checklist_agrif(self, m_fix_perms, m_run_in_subproc, m_logger, config):
+        parsed_args = SimpleNamespace(
+            host_name="orcinus-nowcast-agrif",
+            run_type="nowcast-agrif",
+            run_date=arrow.get("2018-12-07"),
+        )
+        p_glob = patch(
+            "nowcast.workers.download_results.Path.glob",
+            side_effect=[
+                [],
+                [],
+                [Path("1_Salishsea_1h_20180522_20180522_grid_T.nc")],
+                [
+                    Path("1_Salishsea_1d_20180522_20180522_grid_T.nc"),
+                    Path("Salishsea_1d_20180522_20180522_grid_T.nc"),
+                ],
+            ],
+        )
+        with p_glob:
+            checklist = download_results.download_results(parsed_args, config)
+        assert checklist == {
+            "nowcast-agrif": {
+                "run date": "2018-12-07",
+                "1h": ["1_Salishsea_1h_20180522_20180522_grid_T.nc"],
+                "1d": [
+                    "1_Salishsea_1d_20180522_20180522_grid_T.nc",
+                    "Salishsea_1d_20180522_20180522_grid_T.nc",
+                ],
             }
         }

@@ -275,7 +275,7 @@ def after_download_live_ocean(msg, config, checklist):
         next_workers["success"].append(
             NextWorker(
                 "nowcast.workers.make_live_ocean_files",
-                args=["--run-date", list(checklist["Live Ocean products"].keys())[0]],
+                args=["--run-date", list(checklist["Live Ocean products"].keys())[-1]],
             )
         )
     return next_workers[msg.type]
@@ -1633,6 +1633,28 @@ def after_rotate_logs(msg, config, checklist):
     """Calculate the list of workers to launch after the rotate_logs worker
     ends, but it is an empty list because rotate_logs is the last worker in
     the daily automation cycle.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`collections.namedtuple`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    return []
+
+
+def after_launch_remote_worker(msg, config, checklist):
+    """Calculate the list of workers to launch after the launch_remote_worker worker
+    ends, but it is an empty list because launch_remote_worker is a maintenance tool
+    that is outside the flow of automation.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`collections.namedtuple`

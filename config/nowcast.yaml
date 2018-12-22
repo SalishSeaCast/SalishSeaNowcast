@@ -49,11 +49,14 @@ weather:
       - VGRD_TGL_10  # v component of wind velocity at 10m elevation
       - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
       - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+      - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
       - TMP_TGL_2    # air temperature at 2m elevation
       - SPFH_TGL_2   # specific humidity at 2m elevation
+      - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
       - APCP_SFC_0   # accumulated precipitation at ground level
+      - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
       - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-      - TCDC_SFC_0   # total cloud in percent
+      - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
     # ECCC HRDPS west domain forecast duration
     forecast duration: 48  # hours
     # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
@@ -245,7 +248,7 @@ run types:
     duration: 1  # day
     restart from: nowcast-green
   nowcast-dev:
-    config name: SalishSea
+    config name: SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
