@@ -248,7 +248,7 @@ run types:
     duration: 1  # day
     restart from: nowcast-green
   nowcast-dev:
-    config name: SalishSea
+    config name: SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
