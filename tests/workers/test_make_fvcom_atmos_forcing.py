@@ -105,15 +105,9 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-03-15")
         )
-        make_fvcom_atmos_forcing.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-03-15")
-        )
         msg_type = make_fvcom_atmos_forcing.success(parsed_args)
         assert msg_type == f"success {run_type}"
+        assert m_logger.info.called
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
@@ -126,15 +120,65 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-03-15")
         )
-        make_fvcom_atmos_forcing.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-03-15")
-        )
         msg_type = make_fvcom_atmos_forcing.failure(parsed_args)
         assert msg_type == f"failure {run_type}"
+        assert m_logger.critical.called
+
+
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "make_fvcom_atmos_forcing" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_fvcom_atmos_forcing"
+        ]
+        assert msg_registry["checklist key"] == "FVCOM atmospheric forcing"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_fvcom_atmos_forcing"
+        ]
+        assert msg in msg_registry
+
+    def test_atmospheric_forcing_section(self, prod_config):
+        assert "vhfr fvcom runs" in prod_config
+        assert "atmospheric forcing" in prod_config["vhfr fvcom runs"]
+        atmos_forcing = prod_config["vhfr fvcom runs"]["atmospheric forcing"]
+        assert (
+            atmos_forcing["hrdps grib dir"]
+            == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+        )
+        assert (
+            atmos_forcing["fvcom atmos dir"]
+            == "/results/forcing/atmospheric/GEM2.5/vhfr-fvcom"
+        )
+        assert (
+            atmos_forcing["atmos file template"]
+            == "atmos_{run_type}_{field_type}_{yyyymmdd}.nc"
+        )
+        assert (
+            atmos_forcing["fvcom grid dir"]
+            == "/results/nowcast-sys/FVCOM-VHFR-config/grid/"
+        )
+
+    def test_fvcom_grid_section(self, prod_config):
+        assert "vhfr fvcom runs" in prod_config
+        assert "fvcom grid" in prod_config["vhfr fvcom runs"]
+        fvcom_grid = prod_config["vhfr fvcom runs"]["fvcom grid"]
+        assert fvcom_grid["grid file"] == "vhfr_low_v2_utm10_grd.dat"
+        assert fvcom_grid["utm zone"] == 10
 
 
 @patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)

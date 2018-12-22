@@ -338,7 +338,12 @@ class TestAfterDownloadLiveOcean:
         assert workers == []
 
     def test_success_launch_make_live_ocean_files(self, config, checklist):
-        with patch.dict(checklist, {"Live Ocean products": {"2017-02-15": []}}):
+        # Ensure that run date for make_live_ocean_files is same as most recently downloaded
+        # files in the event that the checklist was not cleared after the previous day's
+        # operations
+        with patch.dict(
+            checklist, {"Live Ocean products": {"2017-02-14": [], "2017-02-15": []}}
+        ):
             workers = next_workers.after_download_live_ocean(
                 Message("download_live_ocean", "success"), config, checklist
             )
@@ -2283,5 +2288,17 @@ class TestAfterRotateLogs:
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_rotate_logs(
             Message("rotate_logs", msg_type), config, checklist
+        )
+        assert workers == []
+
+
+class TestAfterLaunchRemoteWorker:
+    """Unit tests for the after_launch_remote_worker function.
+    """
+
+    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_launch_remote_worker(
+            Message("launch_remote_worker", msg_type), config, checklist
         )
         assert workers == []
