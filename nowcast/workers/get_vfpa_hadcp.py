@@ -102,19 +102,25 @@ def get_vfpa_hadcp(parsed_args, config, *args):
         yyyymm=parsed_args.data_date.format("YYYYMM")
     )
     # Process 1st hour to create new month netcdf file, or extend existing one
-    ds = _make_hour_dataset(csv_dir, data_date, place)
-    if not nc_filepath.exists():
-        action = "created"
-        _write_netcdf(ds, nc_filepath)
-        logger.info(f"created {nc_filepath}")
-    else:
-        action = "extended"
-        with xarray.open_dataset(nc_filepath) as stored_ds:
-            extended_ds = xarray.concat((stored_ds, ds), dim="time")
-        _write_netcdf(extended_ds, nc_filepath)
-        logger.debug(
-            f"extended {nc_filepath} with {data_date.format('YYYY-MM-DD HH:mm')} hour"
-        )
+    try:
+        ds = _make_hour_dataset(csv_dir, data_date, place)
+        if not nc_filepath.exists():
+            action = "created"
+            _write_netcdf(ds, nc_filepath)
+            logger.info(f"created {nc_filepath}")
+        else:
+            action = "extended"
+            with xarray.open_dataset(nc_filepath) as stored_ds:
+                extended_ds = xarray.concat((stored_ds, ds), dim="time")
+            _write_netcdf(extended_ds, nc_filepath)
+            logger.debug(
+                f"extended {nc_filepath} with {data_date.format('YYYY-MM-DD HH:mm')} hour"
+            )
+    except ValueError:
+        # Skip missing hour
+        action = "missing data"
+        logger.debug(f"no data for {data_date.format('YYYY-MM-DD HH:mm')} hour")
+        pass
     # Process remaining day hours to extend netcdf file
     end_hr = (
         data_date.shift(days=+1)
@@ -129,8 +135,9 @@ def get_vfpa_hadcp(parsed_args, config, *args):
             with xarray.open_dataset(nc_filepath) as stored_ds:
                 ds = _make_hour_dataset(csv_dir, hr, place)
                 extended_ds = xarray.concat((stored_ds, ds), dim="time")
-        except FileNotFoundError:
+        except (ValueError, FileNotFoundError):
             # Skip missing hour
+            logger.debug(f"no data for {hr.format('YYYY-MM-DD HH:mm')} hour")
             continue
         _write_netcdf(extended_ds, nc_filepath)
         logger.debug(
