@@ -158,3 +158,23 @@ class TestGetVFPA_HADCP:
             "UTC date": "2018-10-21",
         }
         assert checklist == expected
+
+    @pytest.mark.parametrize("ds_exists", (True, False))
+    @patch("nowcast.workers.get_vfpa_hadcp.xarray", autospec=True)
+    def test_checklist_missing_data(
+        self, m_xarray, m_mk_hr_ds, m_logger, ds_exists, config
+    ):
+        parsed_args = SimpleNamespace(data_date=arrow.get("2018-12-23"))
+        m_mk_hr_ds.side_effect = ValueError
+        p_exists = patch(
+            "nowcast.workers.get_vfpa_hadcp.Path.exists",
+            return_value=ds_exists,
+            autospec=True,
+        )
+        with p_exists:
+            checklist = get_vfpa_hadcp.get_vfpa_hadcp(parsed_args, config)
+        expected = {
+            "missing data": "opp/obs/AISDATA/netcdf/VFPA_2ND_NARROWS_HADCP_2s_201812.nc",
+            "UTC date": "2018-12-23",
+        }
+        assert checklist == expected
