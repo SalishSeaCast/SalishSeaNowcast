@@ -51,9 +51,14 @@ def after_download_weather(msg, config, checklist):
         "success 18": [],
     }
     if msg.type.startswith("success") and msg.type.endswith("06"):
-        next_workers["success 06"].append(
-            NextWorker("nowcast.workers.make_runoff_file")
-        )
+        data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
+        for river_name in config["rivers"]["stations"]:
+            next_workers["success 06"].append(
+                NextWorker(
+                    "nowcast.workers.collect_river_data",
+                    args=[river_name, "--data-date", data_date],
+                )
+            )
         for stn in config["observations"]["ctd data"]["stations"]:
             next_workers["success 06"].append(
                 NextWorker("nowcast.workers.get_onc_ctd", args=[stn])
@@ -84,6 +89,30 @@ def after_download_weather(msg, config, checklist):
                 NextWorker("nowcast.workers.download_live_ocean"),
             ]
         )
+    return next_workers[msg.type]
+
+
+def after_collect_river_data(msg, config, checklist):
+    """Calculate the list of workers to launch after the collect_river_data
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {"crash": [], "failure": [], "success": []}
+    if msg.type == "success" and checklist["river data"]["river name"] == "Fraser":
+        next_workers["success"].append(NextWorker("nowcast.workers.make_runoff_file"))
     return next_workers[msg.type]
 
 
