@@ -74,6 +74,13 @@ Workers
     :members: main
 
 
+:kbd:`collect_river_data`
+-------------------------
+
+.. automodule:: nowcast.workers.collect_river_data
+    :members: main
+
+
 :kbd:`make_runoff_file`
 -----------------------
 

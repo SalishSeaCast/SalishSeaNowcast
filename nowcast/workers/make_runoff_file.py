@@ -118,7 +118,7 @@ def make_runoff_file(parsed_args, config, *args):
 def _get_fraser_at_hope(config):
     """Read daily average discharge data for Fraser at Hope from ECget file.
     """
-    filename = Path(config["rivers"]["ECget Fraser flow"])
+    filename = Path(config["rivers"]["SOG river files"]["Fraser"])
     fraserflow = np.loadtxt(os.fspath(filename))
     logger.debug(f"read Fraser at Hope data from {filename}")
     return fraserflow

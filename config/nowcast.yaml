@@ -76,8 +76,22 @@ weather:
 
 
 rivers:
-  # File containing daily average Fraser river flow at Hope
-  ECget Fraser flow: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
+  # Directory where ECCC datamart hydrometric CSV files are stored
+  datamart dir: /results/forcing/rivers/datamart/
+  # ECCC datamart hydrometric CSV file name template
+  # **Must be quoted to protect {} characters**
+  csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
+  # Mapping of river names and ECCC station ids for which daily average discharges are
+  # calculated and stored
+  stations:
+    # River name (camel-case): ECCC station id
+    Fraser: 08MF005
+    Englishman: 08HB002
+  # Files containing daily average river discharges
+  SOG river files:
+    # River name (camel-case): SOG-forcing river flow file path
+    Fraser: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
+    Englishman: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow
   # File that describes Fraser River climatology separation from measured
   # flow at Hope
   Fraser climatology: /results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
@@ -101,7 +115,7 @@ rivers:
     # Destination directory for Fraser River turbidity forcing file
     forcing dir: /results/forcing/rivers/river_turb/
     # Template for the turbidity forcing file names
-    # **Must be quoted to project {} characters**
+    # **Must be quoted to protect {} characters**
     file template: 'riverTurbDaily2_{:y%Ym%md%d}.nc'
 
 
@@ -938,6 +952,12 @@ message registry:
       success 18: 18 weather forecast ready
       failure 18: 18 weather forecast download failed
       crash: download_weather worker crashed
+
+    collect_river_data:
+      checklist key: river data
+      success: river data collection succeeded
+      failure: river data collection failed
+      crash: collect_river_data worker crashed
 
     make_runoff_file:
       checklist key: rivers forcing
