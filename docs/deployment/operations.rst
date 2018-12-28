@@ -46,6 +46,17 @@ Start the nowcast system with:
 
 :command:`circusd` monitors the long-running processes and restarts them if they crash or are shutdown accidentally.
 
+Start the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_ with:
+
+.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst#documentation
+.. _ECCC MSC datamart service: https://dd.weather.gc.ca/
+
+.. code-block:: bash
+
+    $ source activate /results/nowcast-sys/sarracenia-env
+    (/results/nowcast-sys/sarracenia-env)$ sr_subscribe start /results/nowcast-sys/SalishSeaNowcast/sarracenia/hydrometric.conf
+    (/results/nowcast-sys/sarracenia-env)$ sr_subscribe start /results/nowcast-sys/SalishSeaNowcast/sarracenia/hrdps-west.conf
+
 
 System Management
 =================
@@ -79,3 +90,7 @@ A few that are useful:
 * :kbd:`quit` to stop all of the processes and shutdown :command:`circusd`
 
 Use :kbd:`ctrl-c` to exit from :command:`circusctl`.
+
+`sr_subscribe`_ is the command-line interface for interacting with the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
+
+.. _sr_subscribe: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst

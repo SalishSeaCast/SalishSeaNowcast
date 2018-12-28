@@ -100,7 +100,9 @@ Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
 Python Packages
 ===============
 
-The Python packages that the system depends on are installed in a conda environment with:
+The Python packages that the system depends on are installed in conda environments.
+
+For the :kbd:`SalishSeaNowcast` automation system:
 
 .. code-block:: bash
 
@@ -122,6 +124,23 @@ The Python packages that the system depends on are installed in a conda environm
     (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO-Cmd/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaCmd/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaNowcast/
+
+For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_:
+
+.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst#documentation
+.. _ECCC MSC datamart service: https://dd.weather.gc.ca/
+
+.. code-block:: bash
+
+    $ cd /results/nowcast-sys/
+    $ conda update conda
+    $ conda create \
+        --prefix /results/nowcast-sys/sarracenia-env \
+        --channel conda-forge \
+        python=3 appdirs watchdog netifaces humanize psutil paramiko
+    $ source activate /results/nowcast-sys/sarracenia-env
+    (/results/nowcast-sys/sarracenia-env)$ pip install amqplib metpx-sarracenia
+    (/results/nowcast-sys/sarracenia-env)$ sr_subscribe edit credentials.conf  # initialize datamart credentials
 
 
 Environment Variables
@@ -184,6 +203,17 @@ The hosts and their :file:`runs` directories presently in use are:
 
 * :kbd:`orcinus`
     :file:`/home/sallen/MEOPAR/nowcast/`
+
+
+ECCC MSC Datamart Mirror Directories
+====================================
+
+Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and rivers hydrometric files maintained by the `sarracenia client`_:
+
+.. code-block:: bash
+
+    $ mkdir -p /results/forcing/rivers/datamart
+    $ mkdir -p /results/forcing/atmospheric/GEM2.5/GRIB/datamart
 
 
 Static Web Pages Directory
