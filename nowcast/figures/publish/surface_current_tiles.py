@@ -78,29 +78,30 @@ def make_figure(
     :returns: list of matplotlib Figures and list of names for all figures
     """
 
-    with netCDF4.Dataset(coordf) as dsCoord:
-        coord_xt, coord_yt = _prepareCoordinates(dsCoord)
-
-    with netCDF4.Dataset(Uf) as dsU, netCDF4.Dataset(Vf) as dsV, netCDF4.Dataset(
-        mesh_maskf
-    ) as dsMask, netCDF4.Dataset(bathyf) as dsBathy:
+    # fmt: off
+    with \
+    netCDF4.Dataset(Uf) as dsU, \
+    netCDF4.Dataset(Vf) as dsV, \
+    netCDF4.Dataset(coordf) as dsCoord, \
+    netCDF4.Dataset(mesh_maskf) as dsMask, \
+    netCDF4.Dataset(bathyf) as dsBathy:
         fig_list, tile_list = _makeTiles(
             t_index,
             dsU,
             dsV,
+            dsCoord,
             dsMask,
-            coord_xt,
-            coord_yt,
             dsBathy,
             theme,
             tile_coords_dic,
             expansion_factor,
         )
+    # fmt: on
 
     return fig_list, tile_list
 
 
-def _prepareVelocity(time, dsU, dsV, dsMask):
+def _prepareVelocity(time, dsU, dsV, dsCoord, dsMask):
     """
     Load the velocities and unstagger, rotate and mask them.
     """
@@ -115,8 +116,8 @@ def _prepareVelocity(time, dsU, dsV, dsMask):
     unstaggerU, unstaggerV = viz_tools.unstagger(u, v)
 
     # Rotate the velocities from grid coordinates to east-north
-    unstaggerU_rotate, unstaggerV_rotate = viz_tools.rotate_vel(
-        unstaggerU, unstaggerV, origin="grid"
+    unstaggerU_rotate, unstaggerV_rotate = viz_tools.rotate_vel2(
+        unstaggerU, unstaggerV, dsCoord, origin="grid"
     )
 
     # Load land mask (0 for land, 1 for water)
@@ -161,9 +162,8 @@ def _makeTiles(
     t_index,
     dsU,
     dsV,
+    dsCoord,
     dsMask,
-    coord_xt,
-    coord_yt,
     dsBathy,
     theme,
     tile_coords_dic,
@@ -174,7 +174,8 @@ def _makeTiles(
     """
     units = dsU.variables["time_counter"].units
     calendar = dsU.variables["time_counter"].calendar
-    maskU, maskV = _prepareVelocity(t_index, dsU, dsV, dsMask)
+    maskU, maskV = _prepareVelocity(t_index, dsU, dsV, dsCoord, dsMask)
+    coord_xt, coord_yt = _prepareCoordinates(dsCoord)
 
     k = 3
 
