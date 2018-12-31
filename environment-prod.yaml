@@ -53,6 +53,7 @@ dependencies:
   - schedule
   - scipy
   - shapely
+  - watchdog
   - xarray
 
   - pip:

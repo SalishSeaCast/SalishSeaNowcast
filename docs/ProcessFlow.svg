@@ -29,8 +29,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.51858411"
-     inkscape:cx="502.7086"
-     inkscape:cy="787.72178"
+     inkscape:cx="502.70861"
+     inkscape:cy="787.72182"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -54,7 +54,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -216,69 +216,25 @@
          sodipodi:nodetypes="ccccc" />
     </g>
     <g
-       id="g5542"
-       transform="translate(-205.25456,-200.52525)">
+       id="g1275">
       <rect
-         y="203.49947"
-         x="487.69348"
+         y="2.974216"
+         x="282.43893"
          height="38.775974"
          width="189.03337"
          id="rect6644"
          style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#41c300;fill-opacity:1;fill-rule:nonzero;stroke:#2a80b8;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.47843137;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" />
       <text
          id="text6646"
-         y="227.17746"
-         x="582.22974"
+         y="26.65221"
+         x="376.97519"
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
          xml:space="preserve"><tspan
            id="tspan6648"
-           y="227.17746"
-           x="582.22974"
+           y="26.65221"
+           x="376.97519"
            sodipodi:role="line"
-           style="font-size:15px;line-height:1.25">download_weather<tspan
-   id="tspan6650"
-   y="227.17746"
-   x="582.22974" /></tspan></text>
-    </g>
-    <g
-       transform="translate(45.78825,-60.000005)"
-       id="g3590">
-      <path
-         style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.11141906px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         d="m 236.47016,82.47729 -23.15845,-7.60791 7.36104,7.7493 -7.22693,7.23623 z"
-         id="path3592"
-         inkscape:connector-curvature="0"
-         sodipodi:nodetypes="ccccc" />
-      <path
-         inkscape:connector-curvature="0"
-         id="path3594"
-         d="m 233.60183,82.652169 c -65.04824,0 -65.04824,0 -65.04824,0"
-         style="fill:none;fill-rule:evenodd;stroke:#000000;stroke-width:2.00000024;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:6.00000036, 6.00000036;stroke-dashoffset:0;stroke-opacity:1" />
-    </g>
-    <g
-       id="g5562"
-       transform="translate(45.46103,-60.000004)">
-      <rect
-         style="color:#000000;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;mix-blend-mode:normal;color-interpolation:sRGB;color-interpolation-filters:linearRGB;solid-color:#000000;solid-opacity:1;fill:#e9967a;fill-opacity:1;fill-rule:nonzero;stroke:#2a80b8;stroke-width:0;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:0.47843137;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate"
-         id="rect6664"
-         width="87.279861"
-         height="38.775974"
-         x="81.600952"
-         y="62.97422" />
-      <text
-         id="text6666"
-         y="87.612206"
-         x="125.17046"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;line-height:0%;font-family:'Source Code Pro';-inkscape-font-specification:'Source Code Pro';text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-         xml:space="preserve"><tspan
-           id="tspan6668"
-           y="87.612206"
-           x="125.17046"
-           sodipodi:role="line"
-           style="font-size:15px;line-height:1.25"><tspan
-             id="tspan6670"
-             y="87.612206"
-             x="125.17046">scheduler</tspan></tspan></text>
+           style="font-size:15px;line-height:1.25">collect_weather</tspan></text>
     </g>
     <g
        id="g4257"
