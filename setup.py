@@ -73,6 +73,7 @@ install_requires = [
     "scour",
     "shapely",
     "utm",
+    "watchdog",
     "xarray",
     "zeep",
     # 'NEMO_Nowcast',  # use pip install --editable NEMO_Nowcast/
