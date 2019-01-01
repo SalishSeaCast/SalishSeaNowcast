@@ -311,7 +311,7 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
     if run_type == "nowcast-green":
         namelist_top_sections = (
             "namelist_top_restart",
-            "namelist_top_TracersDefAndBdy",
+            "namelist_top_TracerDefAndBdy",
             "namelist_top_physics",
         )
         namelists["namelist_top_cfg"] = [
