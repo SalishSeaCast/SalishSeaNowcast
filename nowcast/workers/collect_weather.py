@@ -89,7 +89,7 @@ def collect_weather(parsed_args, config, *args):
     :rtype: dict
     """
     forecast = parsed_args.forecast
-    forecast_date = arrow.utcnow().shift(hours=-int(forecast)).format("YYYYMMDD")
+    forecast_date = arrow.utcnow().shift(hours=-int(forecast) + 4).format("YYYYMMDD")
     datamart_dir = Path(config["weather"]["download"]["datamart dir"])
     grib_dir = Path(config["weather"]["download"]["GRIB dir"])
     grp_name = config["file group"]
