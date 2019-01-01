@@ -361,14 +361,14 @@ erddap:
     TWDP-ferry:
       - ubcONCTWDP1mV1
     nowcast-green:
-      - ubcSSg3DBiologyFields1hV17-02
-      - ubcSSg3DTracerFields1hV17-02
-      - ubcSSg3DuGridFields1hV17-02
-      - ubcSSg3DvGridFields1hV17-02
-      - ubcSSg3DwGridFields1hV17-02
-      - ubcSSgSurfaceTracerFields1hV17-02
-      - ubcSSgNearSurfaceUVelocity20mV17-02
-      - ubcSSgNearSurfaceVVelocity20mV17-02
+      - ubcSSg3DBiologyFields1hV18-06
+      - ubcSSg3DTracerFields1hV18-06
+      - ubcSSg3DuGridFields1hV18-06
+      - ubcSSg3DvGridFields1hV18-06
+      - ubcSSg3DwGridFields1hV18-06
+      - ubcSSgSurfaceTracerFields1hV18-06
+      - ubcSSgNearSurfaceUVelocity20mV18-06
+      - ubcSSgNearSurfaceVVelocity20mV18-06
     nemo-forecast:
       - ubcSSfBoundaryBaySSH10mV17-02
       - ubcSSfCampbellRiverSSH10mV17-02
