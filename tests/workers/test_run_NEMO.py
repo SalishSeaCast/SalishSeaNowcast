@@ -946,7 +946,7 @@ class TestRunDescription:
             )
         expected = [
             str(tmp_run_sets.join("namelist_top_restart")),
-            str(tmp_run_sets.join("namelist_top_TracersDefAndBdy")),
+            str(tmp_run_sets.join("namelist_top_TracerDefAndBdy")),
             str(tmp_run_sets.join("namelist_top_physics")),
         ]
         assert run_desc["namelists"]["namelist_top_cfg"] == expected
