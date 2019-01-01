@@ -256,7 +256,7 @@ run types:
   # Note that forecast requires a nowcast to have been completed,
   # and forecast2 requires a forecast to have been completed.
   nowcast:
-    config name: SalishSea
+    config name: SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -272,7 +272,7 @@ run types:
     duration: 1  # day
     restart from: nowcast-green
   nowcast-green:
-    config name:  SMELT
+    config name:  SalishSeaCast
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -289,7 +289,7 @@ run types:
     duration: 1  # day
     restart from: nowcast-agrif
   forecast:
-    config name:  SalishSea
+    config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -297,7 +297,7 @@ run types:
     duration: 1.5  # days
     restart from: nowcast
   forecast2:
-    config name:  SalishSea
+    config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -310,13 +310,13 @@ results archive:
   # Keys are run types.
   # Values are directories on results server where run results are stored
   # in ddmmmyy/ directories.
-  nowcast: /results/SalishSea/nowcast-blue/
-  nowcast-dev: /results/SalishSea/nowcast-dev/
-  forecast: /results/SalishSea/forecast/
-  forecast2: /results/SalishSea/forecast2/
-  nowcast-green: /results/SalishSea/nowcast-green/
-  nowcast-agrif: /results/SalishSea/nowcast-agrif/
-  hindcast: /results2/SalishSea/hindcast/
+  nowcast: /results/SalishSea/nowcast-blue.201806/
+  nowcast-dev: /results/SalishSea/nowcast-dev.201806/
+  forecast: /results/SalishSea/forecast.201806/
+  forecast2: /results/SalishSea/forecast2.201806/
+  nowcast-green: /results2/SalishSea/nowcast-green.201806/
+  nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
+  hindcast: /results/SalishSea/hindcast.201812/
 
 
 rolling forecasts:

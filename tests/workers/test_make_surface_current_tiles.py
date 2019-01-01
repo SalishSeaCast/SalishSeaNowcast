@@ -41,9 +41,9 @@ figures:
     storage path: nowcast-sys/figures/surface_currents/
 
 results archive:
-  nowcast: results/nowcast-blue/
-  forecast: results/forecast/
-  forecast2: results/forecast2/
+  nowcast: results/nowcast-blue.201806/
+  forecast: results/forecast.201806/
+  forecast2: results/forecast2.201806/
   
 run types:
   forecast:
@@ -163,9 +163,9 @@ class TestConfig:
     def test_results_archive_section(self, prod_config):
         assert "results archive" in prod_config
         results_archive = prod_config["results archive"]
-        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue/"
-        assert results_archive["forecast"] == "/results/SalishSea/forecast/"
-        assert results_archive["forecast2"] == "/results/SalishSea/forecast2/"
+        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201806/"
+        assert results_archive["forecast"] == "/results/SalishSea/forecast.201806/"
+        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201806/"
 
     @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
     def test_run_types_section(self, run_type, prod_config):
