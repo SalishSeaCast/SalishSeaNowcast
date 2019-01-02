@@ -612,7 +612,7 @@ run:
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: allen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
-      scratch dir: /scratch/dlatorne/hindcast
+      scratch dir: /scratch/dlatorne/hindcast_v201812
       # Directory on compute host where files (e.g. namelist.time) necessary to prepare
       # the NEMO runs are stored
       run prep dir: /home/dlatorne/project/SalishSea/hindcast-sys/runs
@@ -624,7 +624,7 @@ run:
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /scratch/dlatorne/hindcast
+          results: /scratch/dlatorne/hindcast_v201812
 
 
 # Strait of Georgia WaveWatch3 model runs
