@@ -303,6 +303,39 @@ def _render_figures(fig_list, tile_names, storage_path, date_stamp, file_type):
         )
         logger.info(f"{outfile} saved")
 
+        if file_type == "png":
+            _apply_pngquant(outfile, 16)
+
+
+def _apply_pngquant(outfile, level):
+    """
+    Run lossy compression (pngquant) on png frames to reduce their size.
+    The argument "level" specifies the number of colours to include in the
+    palette. For surface current tiles, 16 is a good choice, and this reduces
+    frame size by about a factor of 5.
+    """
+    logger.debug(f"starting pngquant compression ({level} bits) for {outfile.name}")
+    tmpfilename = outfile.with_suffix(".pngquant")
+    cmd = f"pngquant --ext .pngquant {level} {outfile}"
+    logger.debug(f"running subprocess: {cmd}")
+    try:
+        proc = subprocess.run(
+            shlex.split(cmd),
+            check=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+    except subprocess.CalledProcessError as e:
+        logger.warning("pngquant compression failed, proceeding with original frame")
+        logger.debug(f"pngquant return code: {e.returncode}")
+        if e.output:
+            logger.debug(e.output)
+        return
+    logger.debug(proc.stdout)
+    tmpfilename.rename(outfile)
+    logger.info(f"{outfile.name} palette compression succeeded")
+
 
 def _pdf_concatenate(path, tile_coords_dic):
     """
