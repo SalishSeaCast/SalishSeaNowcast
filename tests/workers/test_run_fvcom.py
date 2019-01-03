@@ -252,7 +252,7 @@ class TestConfig:
             "namelist.case",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart.baroclinic",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics.baroclinic",
             "namelist.restart",
             "namelist.netcdf",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.physics.baroclinic",
