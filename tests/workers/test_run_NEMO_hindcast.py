@@ -297,28 +297,28 @@ class TestRunNEMO_Hindcast:
                 arrow.get("2018-07-01"),
                 None,
                 arrow.get("2018-08-01"),
-                "08:30:00",
+                "12:00:00",
             ),  # default
             (
                 True,
                 arrow.get("2018-07-01"),
-                "12:00:00",
+                "15:00:00",
                 arrow.get("2018-08-01"),
-                "12:00:00",
+                "15:00:00",
             ),
             (
                 False,
                 arrow.get("2018-07-01"),
                 None,
                 arrow.get("2018-07-11"),
-                "03:00:00",
+                "06:00:00",
             ),  # default
             (
                 False,
                 arrow.get("2018-07-01"),
-                "06:00:00",
+                "09:00:00",
                 arrow.get("2018-07-11"),
-                "06:00:00",
+                "09:00:00",
             ),
         ],
     )
@@ -683,7 +683,8 @@ class TestLaunchRun:
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            "bin/salishsea run runs/01may18hindcast.yaml scratch/01may18",
+            "bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
+            "--deflate --max-deflate-jobs 48",
             "cedar",
             m_logger,
         )
@@ -700,6 +701,7 @@ class TestLaunchRun:
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
             "bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
+            "--deflate --max-deflate-jobs 48 "
             "--waitjob 12345678 --nocheck-initial-conditions",
             "cedar",
             m_logger,
