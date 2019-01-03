@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -196,7 +196,17 @@ def make_surface_current_tiles(parsed_args, config, *args):
 
     _pdf_concatenate(storage_path, tile_coords_dic)
 
-    checklist = {}
+    checklist = {
+        run_type: {
+            "run date": run_date.format("YYYY-MM-DD"),
+            "png": sorted(
+                [os.fspath(f) for f in storage_path.iterdir() if f.suffix == ".png"]
+            ),
+            "pdf": sorted(
+                [os.fspath(f) for f in storage_path.iterdir() if f.suffix == ".pdf"]
+            ),
+        }
+    }
     return checklist
 
 
@@ -304,7 +314,7 @@ def _pdf_concatenate(path, tile_coords_dic):
         result = (path / tile).with_suffix(".pdf")
         logger.info(f"concatenating {tile} pdf files into: {result}")
         merger = PdfFileMerger()
-        for pdf in path.glob(f"surface_currents_{tile}*.pdf"):
+        for pdf in sorted(path.glob(f"surface_currents_{tile}*.pdf")):
             merger.append(os.fspath(pdf))
             logger.debug(f"added {pdf}")
             pdf.unlink()

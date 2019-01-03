@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,9 +51,14 @@ def after_download_weather(msg, config, checklist):
         "success 18": [],
     }
     if msg.type.startswith("success") and msg.type.endswith("06"):
-        next_workers["success 06"].append(
-            NextWorker("nowcast.workers.make_runoff_file")
-        )
+        data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
+        for river_name in config["rivers"]["stations"]:
+            next_workers["success 06"].append(
+                NextWorker(
+                    "nowcast.workers.collect_river_data",
+                    args=[river_name, "--data-date", data_date],
+                )
+            )
         for stn in config["observations"]["ctd data"]["stations"]:
             next_workers["success 06"].append(
                 NextWorker("nowcast.workers.get_onc_ctd", args=[stn])
@@ -84,6 +89,114 @@ def after_download_weather(msg, config, checklist):
                 NextWorker("nowcast.workers.download_live_ocean"),
             ]
         )
+    return next_workers[msg.type]
+
+
+def after_collect_weather(msg, config, checklist):
+    """Calculate the list of workers to launch after the collect_weather worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        "crash": [],
+        "failure 00": [],
+        "failure 06": [],
+        "failure 12": [],
+        "failure 18": [],
+        "success 00": [],
+        "success 06": [],
+        "success 12": [],
+        "success 18": [],
+    }
+    if msg.type.startswith("success") and msg.type.endswith("06"):
+        data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
+        for river_name in config["rivers"]["stations"]:
+            next_workers["success 06"].append(
+                NextWorker(
+                    "nowcast.workers.collect_river_data",
+                    args=[river_name, "--data-date", data_date],
+                )
+            )
+        for stn in config["observations"]["ctd data"]["stations"]:
+            next_workers["success 06"].append(
+                NextWorker("nowcast.workers.get_onc_ctd", args=[stn])
+            )
+        for ferry in config["observations"]["ferry data"]["ferries"]:
+            next_workers["success 06"].append(
+                NextWorker("nowcast.workers.get_onc_ferry", args=[ferry])
+            )
+        if "hadcp data" in config["observations"]:
+            data_date = arrow.utcnow().shift(days=-1).format("YYYY-MM-DD")
+            next_workers["success 06"].append(
+                NextWorker(
+                    "nowcast.workers.get_vfpa_hadcp", args=["--data-date", data_date]
+                )
+            )
+        if "forecast2" in config["run types"]:
+            next_workers["success 06"].extend(
+                [
+                    NextWorker("nowcast.workers.get_NeahBay_ssh", args=["forecast2"]),
+                    NextWorker("nowcast.workers.grib_to_netcdf", args=["forecast2"]),
+                ]
+            )
+    if msg.type.endswith("00"):
+        next_workers["success 00"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["06"])
+        )
+    if msg.type.endswith("06"):
+        next_workers["success 06"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["12"])
+        )
+    if msg.type.endswith("12"):
+        next_workers["success 12"].extend(
+            [
+                NextWorker("nowcast.workers.get_NeahBay_ssh", args=["nowcast"]),
+                NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
+                NextWorker("nowcast.workers.download_live_ocean"),
+                NextWorker("nowcast.workers.collect_weather", args=["18"]),
+            ]
+        )
+    if msg.type.endswith("18"):
+        next_workers["success 18"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["00"])
+        )
+    return next_workers[msg.type]
+
+
+def after_collect_river_data(msg, config, checklist):
+    """Calculate the list of workers to launch after the collect_river_data
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {"crash": [], "failure": [], "success": []}
+    if msg.type == "success" and checklist["river data"]["river name"] == "Fraser":
+        next_workers["success"].append(NextWorker("nowcast.workers.make_runoff_file"))
     return next_workers[msg.type]
 
 
@@ -179,7 +292,7 @@ def after_grib_to_netcdf(msg, config, checklist):
         _, run_type = msg.type.split()
         if run_type == "nowcast+":
             next_workers["success nowcast+"].append(
-                NextWorker("nowcast.workers.ping_erddap", args=["download_weather"])
+                NextWorker("nowcast.workers.ping_erddap", args=["weather"])
             )
         if run_type == "forecast2":
             for host in config["run"]["enabled hosts"]:
@@ -1633,6 +1746,28 @@ def after_rotate_logs(msg, config, checklist):
     """Calculate the list of workers to launch after the rotate_logs worker
     ends, but it is an empty list because rotate_logs is the last worker in
     the daily automation cycle.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`collections.namedtuple`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    return []
+
+
+def after_launch_remote_worker(msg, config, checklist):
+    """Calculate the list of workers to launch after the launch_remote_worker worker
+    ends, but it is an empty list because launch_remote_worker is a maintenance tool
+    that is outside the flow of automation.
 
     :arg msg: Nowcast system message.
     :type msg: :py:class:`collections.namedtuple`

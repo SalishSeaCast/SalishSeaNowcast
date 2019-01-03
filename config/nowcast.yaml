@@ -37,6 +37,8 @@ scheduled workers:
 
 weather:
   download:
+    # Directory where ECCC datamart hrdps/weat/ mirror files are stored
+    datamart dir: /results/forcing/atmospheric/GEM2.5/GRIB/datamart/
     # URL from which to download ECCC HRDPS west domain forecast fields files
     # **Must be quoted to project {} characters**
     url template: 'http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
@@ -76,8 +78,22 @@ weather:
 
 
 rivers:
-  # File containing daily average Fraser river flow at Hope
-  ECget Fraser flow: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
+  # Directory where ECCC datamart hydrometric CSV files are stored
+  datamart dir: /results/forcing/rivers/datamart/
+  # ECCC datamart hydrometric CSV file name template
+  # **Must be quoted to protect {} characters**
+  csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
+  # Mapping of river names and ECCC station ids for which daily average discharges are
+  # calculated and stored
+  stations:
+    # River name (camel-case): ECCC station id
+    Fraser: 08MF005
+    Englishman: 08HB002
+  # Files containing daily average river discharges
+  SOG river files:
+    # River name (camel-case): SOG-forcing river flow file path
+    Fraser: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
+    Englishman: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow
   # File that describes Fraser River climatology separation from measured
   # flow at Hope
   Fraser climatology: /results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
@@ -101,7 +117,7 @@ rivers:
     # Destination directory for Fraser River turbidity forcing file
     forcing dir: /results/forcing/rivers/river_turb/
     # Template for the turbidity forcing file names
-    # **Must be quoted to project {} characters**
+    # **Must be quoted to protect {} characters**
     file template: 'riverTurbDaily2_{:y%Ym%md%d}.nc'
 
 
@@ -240,7 +256,7 @@ run types:
   # Note that forecast requires a nowcast to have been completed,
   # and forecast2 requires a forecast to have been completed.
   nowcast:
-    config name: SalishSea
+    config name: SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -248,7 +264,7 @@ run types:
     duration: 1  # day
     restart from: nowcast-green
   nowcast-dev:
-    config name: SalishSea
+    config name: SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -256,7 +272,7 @@ run types:
     duration: 1  # day
     restart from: nowcast-green
   nowcast-green:
-    config name:  SMELT
+    config name:  SalishSeaCast
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -273,7 +289,7 @@ run types:
     duration: 1  # day
     restart from: nowcast-agrif
   forecast:
-    config name:  SalishSea
+    config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -281,7 +297,7 @@ run types:
     duration: 1.5  # days
     restart from: nowcast
   forecast2:
-    config name:  SalishSea
+    config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
@@ -294,13 +310,13 @@ results archive:
   # Keys are run types.
   # Values are directories on results server where run results are stored
   # in ddmmmyy/ directories.
-  nowcast: /results/SalishSea/nowcast-blue/
-  nowcast-dev: /results/SalishSea/nowcast-dev/
-  forecast: /results/SalishSea/forecast/
-  forecast2: /results/SalishSea/forecast2/
-  nowcast-green: /results/SalishSea/nowcast-green/
-  nowcast-agrif: /results/SalishSea/nowcast-agrif/
-  hindcast: /results2/SalishSea/hindcast/
+  nowcast: /results/SalishSea/nowcast-blue.201806/
+  nowcast-dev: /results/SalishSea/nowcast-dev.201806/
+  forecast: /results/SalishSea/forecast.201806/
+  forecast2: /results/SalishSea/forecast2.201806/
+  nowcast-green: /results2/SalishSea/nowcast-green.201806/
+  nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
+  hindcast: /results/SalishSea/hindcast.201812/
 
 
 rolling forecasts:
@@ -329,7 +345,7 @@ erddap:
   datasetIDs:
     # Keys are types of datasets that have been updated
     # Must match dataset command-line argument in ping_erddap worker
-    download_weather:
+    weather:
       # List of ERDDAP dataset ids to create flag files for to signal updates
       # to ERDDAP server
       - ubcSSaSurfaceAtmosphereFieldsV1
@@ -345,14 +361,14 @@ erddap:
     TWDP-ferry:
       - ubcONCTWDP1mV1
     nowcast-green:
-      - ubcSSg3DBiologyFields1hV17-02
-      - ubcSSg3DTracerFields1hV17-02
-      - ubcSSg3DuGridFields1hV17-02
-      - ubcSSg3DvGridFields1hV17-02
-      - ubcSSg3DwGridFields1hV17-02
-      - ubcSSgSurfaceTracerFields1hV17-02
-      - ubcSSgNearSurfaceUVelocity20mV17-02
-      - ubcSSgNearSurfaceVVelocity20mV17-02
+      - ubcSSg3DBiologyFields1hV18-06
+      - ubcSSg3DTracerFields1hV18-06
+      - ubcSSg3DuGridFields1hV18-06
+      - ubcSSg3DvGridFields1hV18-06
+      - ubcSSg3DwGridFields1hV18-06
+      - ubcSSgSurfaceTracerFields1hV18-06
+      - ubcSSgNearSurfaceUVelocity20mV18-06
+      - ubcSSgNearSurfaceVVelocity20mV18-06
     nemo-forecast:
       - ubcSSfBoundaryBaySSH10mV17-02
       - ubcSSfCampbellRiverSSH10mV17-02
@@ -596,7 +612,7 @@ run:
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: allen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
-      scratch dir: /scratch/dlatorne/hindcast
+      scratch dir: /scratch/dlatorne/hindcast_v201812
       # Directory on compute host where files (e.g. namelist.time) necessary to prepare
       # the NEMO runs are stored
       run prep dir: /home/dlatorne/project/SalishSea/hindcast-sys/runs
@@ -608,7 +624,7 @@ run:
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /scratch/dlatorne/hindcast
+          results: /scratch/dlatorne/hindcast_v201812
 
 
 # Strait of Georgia WaveWatch3 model runs
@@ -873,7 +889,13 @@ logging:
         propagate: False
         handlers:
           - checklist
+      watchdog:
+        # File system monitoring library used by collect_weather worker
+        qualname: watchdog
+        level: WARNING
+        formatter: simple
       zeep:
+        # SOAP client library used to access CHS real-time water levels service
         qualname: zeep
         level: WARNING
         formatter: simple
@@ -944,6 +966,28 @@ message registry:
       success 18: 18 weather forecast ready
       failure 18: 18 weather forecast download failed
       crash: download_weather worker crashed
+
+    # Worker module name
+    collect_weather:
+      # The key in the system checklist that the manager maintains that is to
+      # be used to hold message payload information provided by the worker
+      checklist key: weather forecast
+      # Message types that the worker can send and their meanings
+      success 00: 00 weather forecast ready
+      failure 00: 00 weather forecast collection failed
+      success 06: 06 weather forecast ready
+      failure 06: 06 weather forecast collection failed
+      success 12: 12 weather forecast ready
+      failure 12: 12 weather forecast collection failed
+      success 18: 18 weather forecast ready
+      failure 18: 18 weather forecast collection failed
+      crash: collect_weather worker crashed
+
+    collect_river_data:
+      checklist key: river data
+      success: river data collection succeeded
+      failure: river data collection failed
+      crash: collect_river_data worker crashed
 
     make_runoff_file:
       checklist key: rivers forcing

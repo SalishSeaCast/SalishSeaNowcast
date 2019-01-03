@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -60,8 +60,8 @@ def main():
         default=None,
         help="""
         Walltime to request for the hindcast run.
-        Defaults to 3 hours (03:00:00) for 10-ish day runs,
-        and 8.5 hours (08:30:00) for --full-month runs.
+        Defaults to 6 hours (06:00:00) for 10-ish day runs,
+        and 12 hours (12:00:00) for --full-month runs.
         """,
     )
     worker.run(run_NEMO_hindcast, success, failure)
@@ -144,7 +144,7 @@ def run_NEMO_hindcast(parsed_args, config, *args):
             sftp_client, host_name, prev_namelist_info, run_date, run_days, config
         )
         walltime = parsed_args.walltime or (
-            "08:30:00" if parsed_args.full_month else "03:00:00"
+            "12:00:00" if parsed_args.full_month else "06:00:00"
         )
         _edit_run_desc(
             sftp_client,
@@ -332,7 +332,7 @@ def _launch_run(ssh_client, host_name, run_id, prev_job_id, config):
     run_desc = run_prep_dir / f"{run_id}.yaml"
     scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
     results_dir = scratch_dir / run_id[:7]
-    cmd = f"{salishsea_cmd} run {run_desc} {results_dir}"
+    cmd = f"{salishsea_cmd} run {run_desc} {results_dir} --deflate"
     if prev_job_id:
         cmd = f"{cmd} --waitjob {prev_job_id} --nocheck-initial-conditions"
     try:

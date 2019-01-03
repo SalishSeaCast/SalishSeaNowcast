@@ -43,6 +43,7 @@ dependencies:
   - paramiko
   - pillow
   - pip
+  - poppler
   - pygrib
   - pypdf2
   - pyproj
@@ -54,6 +55,7 @@ dependencies:
   - scipy
   - shapely
   - verboselogs
+  - watchdog
   - xarray
 
   # For coding style
