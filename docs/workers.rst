@@ -1,4 +1,4 @@
-..  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+..  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 ..  and The University of British Columbia
 ..
 ..  Licensed under the Apache License, Version 2.0 (the "License");
@@ -71,6 +71,13 @@ Workers
 -----------------------
 
 .. automodule:: nowcast.workers.download_weather
+    :members: main
+
+
+:kbd:`collect_river_data`
+-------------------------
+
+.. automodule:: nowcast.workers.collect_river_data
     :members: main
 
 

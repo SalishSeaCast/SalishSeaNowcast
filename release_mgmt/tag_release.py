@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,7 @@ import verboselogs
 import yaml
 
 NAME = "tag_release"
+COMMIT_AUTHOR = f"SalishSeaNowcast.release_mgmt.{NAME}"
 verboselogs.install()
 logger = logging.getLogger(NAME)
 coloredlogs.install(fmt="%(asctime)s %(hostname)s %(name)s %(levelname)s %(message)s")
@@ -98,14 +99,38 @@ def _tag_repo(repo, tag):
                 f"deal with in repo: {repo}"
             )
             raise SystemExit(2)
-        try:
-            hg.tag(tag.encode(), message=f"Tag production release {tag}.")
-        except hglib.error.CommandError as exc:
-            if exc.err.decode().startswith(f"abort: tag '{tag}' already exists"):
-                logger.warning(f"tag '{tag}' already exists in repo: {repo}")
-                return
-            else:
-                raise
+        tags = hg.tags()
+        if tag in [existing_tag[0].decode() for existing_tag in tags]:
+            logger.warning(f"tag '{tag}' already exists in repo: {repo}")
+            return
+        for _, key, value in hg.config("ui".encode()):
+            if key.decode() == "username":
+                username = value.decode()
+                break
+        for existing_tag in tags[1:]:
+            if existing_tag[0].decode().startswith("PROD-"):
+                prev_prod_tag_name = existing_tag[0].decode()
+                tip_rev = hg.tip()
+                if all(
+                    (
+                        tip_rev.author.decode().startswith(COMMIT_AUTHOR),
+                        tip_rev.desc.decode()
+                        == f"Tag production release {prev_prod_tag_name}.",
+                    )
+                ):
+                    hg.tag(
+                        tag.encode(),
+                        rev=prev_prod_tag_name,
+                        message=f"Tag production release {tag}.",
+                        user=f"{COMMIT_AUTHOR} for {username}",
+                    )
+                    break
+        else:
+            hg.tag(
+                tag.encode(),
+                message=f"Tag production release {tag}.",
+                user=f"{COMMIT_AUTHOR} for {username}",
+            )
         logger.success(f"added {tag} to repo: {repo}")
         hg.push()
         logger.success(f"pushed {tag} tag to Bitbucket from repo: {repo}")

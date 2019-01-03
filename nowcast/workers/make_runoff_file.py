@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -118,7 +118,7 @@ def make_runoff_file(parsed_args, config, *args):
 def _get_fraser_at_hope(config):
     """Read daily average discharge data for Fraser at Hope from ECget file.
     """
-    filename = Path(config["rivers"]["ECget Fraser flow"])
+    filename = Path(config["rivers"]["SOG river files"]["Fraser"])
     fraserflow = np.loadtxt(os.fspath(filename))
     logger.debug(f"read Fraser at Hope data from {filename}")
     return fraserflow
