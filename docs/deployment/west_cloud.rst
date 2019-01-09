@@ -750,3 +750,22 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
   * Symlinks :file:`ww3_prnc_current.inp` as :file:`ww3_prnc.inp`
   * Runs :program:`ww3_prnc` to produce the wwatch3 current forcing files for the run.
     The output of :program:`ww3_prnc` is stored in the run's :file:`stdout` file.
+
+
+FVCOM Runs Directory
+======================
+
+Create an :file:`fvcom-runs/` directory for the VHFR FVCOM runs and populate it with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ mkdir fvcom-runs
+    $ chmod g+ws fvcom-runs
+    $ cd fvcom-runs/
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.case.template namelist.case
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.nesting.template namelist.nesting
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.netcdf.template namelist.netcdf
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.physics.template namelist.physics
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.restart.template namelist.restart
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.surface.template namelist.surface
