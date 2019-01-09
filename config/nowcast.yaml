@@ -316,7 +316,7 @@ results archive:
   forecast2: /results/SalishSea/forecast2.201806/
   nowcast-green: /results2/SalishSea/nowcast-green.201806/
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
-  hindcast: /results/SalishSea/hindcast.201812/
+  hindcast: /results2/SalishSea/hindcast.201812_annex/
 
 
 rolling forecasts:
