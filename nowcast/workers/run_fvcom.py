@@ -205,12 +205,16 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
     atmos_file_tmpl = config["vhfr fvcom runs"]["atmospheric forcing"][
         "atmos file template"
     ]
-    atmos_field_type = "wnd"
-    atmos_file = atmos_file_tmpl.format(
-        run_type=run_type,
-        field_type=atmos_field_type,
-        yyyymmdd=start_date.format("YYYYMMDD"),
-    )
+    atmos_files = {
+        field_type: atmos_file_tmpl.format(
+            run_type=run_type,
+            field_type=field_type,
+            yyyymmdd=start_date.format("YYYYMMDD"),
+        )
+        for field_type in config["vhfr fvcom runs"]["atmospheric forcing"][
+            "field types"
+        ]
+    }
     bdy_file_tmpl = config["vhfr fvcom runs"]["nemo coupling"]["boundary file template"]
     bdy_file = bdy_file_tmpl.format(
         run_type=run_type, yyyymmdd=start_date.format("YYYYMMDD")
@@ -244,7 +248,17 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
             }
         },
         run_prep_dir
-        / "namelist.surface": {"nml_surface_forcing": {"wind_file": atmos_file}},
+        / "namelist.physics": {
+            "nml_heating_calculated": {"heating_calculate_file": atmos_files["hfx"]}
+        },
+        run_prep_dir
+        / "namelist.surface": {
+            "nml_surface_forcing": {
+                "wind_file": atmos_files["wnd"],
+                "precipitation_file": atmos_files["precip"],
+                "airpressure_file": atmos_files["precip"],
+            }
+        },
         run_prep_dir
         / "namelist.nesting": {"nml_nesting": {"nesting_file_name": bdy_file}},
     }
