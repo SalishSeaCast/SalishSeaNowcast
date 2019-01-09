@@ -53,6 +53,10 @@ vhfr fvcom runs:
 
   atmospheric forcing:
     atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
+    field types:
+      - hfx
+      - precip
+      - wnd
 
   input dir: fvcom-runs/input/
   output station timeseries: FVCOM-VHFR-config/output/vh_x2_utm10_station.dat
@@ -250,22 +254,22 @@ class TestConfig:
         namelists = prod_config["vhfr fvcom runs"]["namelists"]["{casename}_run.nml"]
         assert namelists == [
             "namelist.case",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart.baroclinic",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics.baroclinic",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics",
             "namelist.restart",
             "namelist.netcdf",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.physics.baroclinic",
+            "namelist.physics",
             "namelist.surface",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.rivers",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc.baroclinic",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid.baroclinic",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check",
             "namelist.nesting",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries.baroclinic",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models",
         ]
 
@@ -478,8 +482,22 @@ class TestEditNamelists:
                 },
             ),
             call(
+                Path("run_prep_dir/namelist.physics"),
+                {
+                    "nml_heating_calculated": {
+                        "heating_calculate_file": "atmos_nowcast_hfx_20180115.nc"
+                    }
+                },
+            ),
+            call(
                 Path("run_prep_dir/namelist.surface"),
-                {"nml_surface_forcing": {"wind_file": "atmos_nowcast_wnd_20180115.nc"}},
+                {
+                    "nml_surface_forcing": {
+                        "wind_file": "atmos_nowcast_wnd_20180115.nc",
+                        "precipitation_file": "atmos_nowcast_precip_20180115.nc",
+                        "airpressure_file": "atmos_nowcast_precip_20180115.nc",
+                    }
+                },
             ),
             call(
                 Path("run_prep_dir/namelist.nesting"),
@@ -520,10 +538,20 @@ class TestEditNamelists:
                 },
             ),
             call(
+                Path("run_prep_dir/namelist.physics"),
+                {
+                    "nml_heating_calculated": {
+                        "heating_calculate_file": "atmos_forecast_hfx_20180116.nc"
+                    }
+                },
+            ),
+            call(
                 Path("run_prep_dir/namelist.surface"),
                 {
                     "nml_surface_forcing": {
-                        "wind_file": "atmos_forecast_wnd_20180116.nc"
+                        "wind_file": "atmos_forecast_wnd_20180116.nc",
+                        "precipitation_file": "atmos_forecast_precip_20180116.nc",
+                        "airpressure_file": "atmos_forecast_precip_20180116.nc",
                     }
                 },
             ),
