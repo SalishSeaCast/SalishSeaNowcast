@@ -49,7 +49,7 @@ vhfr fvcom runs:
     obc nodes file: vh_x2_obc.dat
 
   nemo coupling:
-    boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
+    boundary file template: 'bdy_{run_type}_brcl_{yyyymmdd}.nc'
 
   atmospheric forcing:
     atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
@@ -495,13 +495,13 @@ class TestEditNamelists:
                     "nml_surface_forcing": {
                         "wind_file": "atmos_nowcast_wnd_20180115.nc",
                         "precipitation_file": "atmos_nowcast_precip_20180115.nc",
-                        "airpressure_file": "atmos_nowcast_precip_20180115.nc",
+                        "airpressure_file": "atmos_nowcast_hfx_20180115.nc",
                     }
                 },
             ),
             call(
                 Path("run_prep_dir/namelist.nesting"),
-                {"nml_nesting": {"nesting_file_name": "bdy_nowcast_btrp_20180115.nc"}},
+                {"nml_nesting": {"nesting_file_name": "bdy_nowcast_brcl_20180115.nc"}},
             ),
         ]
 
@@ -551,13 +551,13 @@ class TestEditNamelists:
                     "nml_surface_forcing": {
                         "wind_file": "atmos_forecast_wnd_20180116.nc",
                         "precipitation_file": "atmos_forecast_precip_20180116.nc",
-                        "airpressure_file": "atmos_forecast_precip_20180116.nc",
+                        "airpressure_file": "atmos_forecast_hfx_20180116.nc",
                     }
                 },
             ),
             call(
                 Path("run_prep_dir/namelist.nesting"),
-                {"nml_nesting": {"nesting_file_name": "bdy_forecast_btrp_20180116.nc"}},
+                {"nml_nesting": {"nesting_file_name": "bdy_forecast_brcl_20180116.nc"}},
             ),
         ]
 

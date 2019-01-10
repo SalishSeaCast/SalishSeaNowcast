@@ -256,7 +256,7 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
             "nml_surface_forcing": {
                 "wind_file": atmos_files["wnd"],
                 "precipitation_file": atmos_files["precip"],
-                "airpressure_file": atmos_files["precip"],
+                "airpressure_file": atmos_files["hfx"],
             }
         },
         run_prep_dir
