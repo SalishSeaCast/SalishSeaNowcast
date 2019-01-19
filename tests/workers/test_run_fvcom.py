@@ -184,7 +184,7 @@ class TestConfig:
         assert "results archive" in vhfr_fvcom_runs
         assert (
             vhfr_fvcom_runs["stations dataset filename"]
-            == "vhfr_x2_station_timeseries.nc"
+            == "vh_x2_station_timeseries.nc"
         )
 
     def test_fvcom_grid_section(self, prod_config):

@@ -245,9 +245,7 @@ def make_plots(parsed_args, config, *args):
                 config["vhfr fvcom runs"]["results archive"]["forecast"], dmy
             )
             forecast_dataset_path = forecast_results_dir / fvcom_stns_dataset_filename
-            fvcom_stns_dataset_path = Path(
-                "/tmp/vhfr_low_v2_station_timeseries_forecast.nc"
-            )
+            fvcom_stns_dataset_path = Path("/tmp", fvcom_stns_dataset_filename)
             cmd = (
                 f"ncrcat -O {nowcast_dataset_path} {forecast_dataset_path} "
                 f"-o {fvcom_stns_dataset_path}"
