@@ -1073,7 +1073,7 @@ def after_watch_fvcom(msg, config, checklist):
                 ],
             )
         )
-        if run_type == "forecast":
+        if run_type == "nowcast":
             next_workers[msg.type].append(
                 NextWorker(
                     "nowcast.workers.make_fvcom_boundary",
