@@ -1528,15 +1528,15 @@ class TestAfterWatchFVCOM:
         )
         assert expected in workers
 
-    def test_success_forecast_launch_make_fvcom_boundary(self, config, checklist):
+    def test_success_nowcast_launch_make_fvcom_boundary(self, config, checklist):
         workers = next_workers.after_watch_fvcom(
             Message(
                 "watch_fvcom",
-                "success forecast",
+                "success nowcast",
                 {
-                    "forecast": {
+                    "nowcast": {
                         "host": "west.cloud",
-                        "run date": "2018-02-16",
+                        "run date": "2019-01-18",
                         "completed": True,
                     }
                 },
