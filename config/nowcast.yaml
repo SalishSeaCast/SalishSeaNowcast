@@ -796,7 +796,7 @@ vhfr fvcom runs:
     nowcast: /opp/fvcom/nowcast-x2/
     forecast: /opp/fvcom/forecast-x2/
   # Name of the results file containing the tide gauge stations sea surface height time series
-  stations dataset filename: vhfr_x2_station_timeseries.nc
+  stations dataset filename: vh_x2_station_timeseries.nc
 
 
 # Distributed logging system configuration
