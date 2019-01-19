@@ -1023,7 +1023,7 @@ class TestAfterWatchNEMO:
         )
         assert workers[1] == expected
 
-    def test_success_forecast_launch_make_fvcom_boundary(self, config, checklist):
+    def test_success_forecast_no_launch_make_fvcom_boundary(self, config, checklist):
         workers = next_workers.after_watch_NEMO(
             Message(
                 "watch_NEMO",
@@ -1044,7 +1044,7 @@ class TestAfterWatchNEMO:
             args=["west.cloud", "forecast"],
             host="west.cloud",
         )
-        assert expected in workers
+        assert expected not in workers
 
     def test_success_forecast2_launch_make_ww3_wind_file_forecast2(
         self, config, checklist
@@ -1477,7 +1477,9 @@ class TestAfterWatchFVCOM:
     """Unit tests for the after_watch_fvcom function.
     """
 
-    @pytest.mark.parametrize("msg_type", ["crash", "failure nowcast"])
+    @pytest.mark.parametrize(
+        "msg_type", ["crash", "failure nowcast", "failure forecast"]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_fvcom(
             Message("watch_fvcom", msg_type), config, checklist
@@ -1497,7 +1499,18 @@ class TestAfterWatchFVCOM:
                         "completed": True,
                     }
                 },
-            )
+            ),
+            Message(
+                "watch_fvcom",
+                "success forecast",
+                {
+                    "forecast": {
+                        "host": "west.cloud",
+                        "run date": "2018-02-16",
+                        "completed": True,
+                    }
+                },
+            ),
         ],
     )
     def test_success_launch_download_fvcom_results(self, msg, config, checklist):
@@ -1512,6 +1525,29 @@ class TestAfterWatchFVCOM:
                 msg.payload[run_type]["run date"],
             ],
             host="localhost",
+        )
+        assert expected in workers
+
+    def test_success_forecast_launch_make_fvcom_boundary(self, config, checklist):
+        workers = next_workers.after_watch_fvcom(
+            Message(
+                "watch_fvcom",
+                "success forecast",
+                {
+                    "forecast": {
+                        "host": "west.cloud",
+                        "run date": "2018-02-16",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_fvcom_boundary",
+            args=["west.cloud", "forecast"],
+            host="west.cloud",
         )
         assert expected in workers
 
