@@ -39,11 +39,13 @@ rivers:
   datamart dir: forcing/rivers/datamart/
   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
   stations:
-    Fraser: 08MF005
+    Capilano: 08GA010
     Englishman: 08HB002
+    Fraser: 08MF005
   SOG river files:
-    Fraser: SOG-projects/SOG-forcing/ECget/Fraser_flow
+    Capilano: /opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow
     Englishman: SOG-projects/SOG-forcing/ECget/Englishman_flow
+    Fraser: SOG-projects/SOG-forcing/ECget/Fraser_flow
 """
         )
     config_ = nemo_nowcast.Config()
@@ -112,14 +114,22 @@ class TestConfig:
         rivers = prod_config["rivers"]
         assert rivers["datamart dir"] == "/results/forcing/rivers/datamart/"
         assert rivers["csv file template"] == "BC_{stn_id}_hourly_hydrometric.csv"
-        assert rivers["stations"] == {"Fraser": "08MF005", "Englishman": "08HB002"}
+        assert rivers["stations"] == {
+            "Capilano": "08GA010",
+            "Englishman": "08HB002",
+            "Fraser": "08MF005",
+        }
         assert (
-            rivers["SOG river files"]["Fraser"]
-            == "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow"
+            rivers["SOG river files"]["Capilano"]
+            == "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow"
         )
         assert (
             rivers["SOG river files"]["Englishman"]
             == "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow"
+        )
+        assert (
+            rivers["SOG river files"]["Fraser"]
+            == "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow"
         )
 
 
