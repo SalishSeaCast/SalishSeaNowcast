@@ -36,156 +36,46 @@ def config(base_config):
         f.write(
             """
 vhfr fvcom runs:
-  case name: vhfr_low_v2
+  case name: vh_x2
   run prep dir: fvcom-runs/
 
   fvcom grid:
-    grid dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/
-    grid file: vhfr_low_v2_utm10_grd.dat
-    depths file: vhfr_low_v2_utm10_dep.dat
-    sigma file: vhfr_low_v2_sigma.dat
-    coriolis file: vhfr_low_v2_utm10_cor.dat
-    sponge file: vhfr_low_v2_nospg_spg.dat
-    obc nodes file: vhfr_low_v2_obc.dat
+    grid dir: FVCOM-VHFR-config/grid/
+    grid file: vh_x2_grd.dat
+    depths file: vh_x2_dep.dat
+    sigma file: vh_x2_sigma.dat
+    coriolis file: vh_x2_utm10_cor.dat
+    sponge file: vh_x2_nospg_spg.dat
+    obc nodes file: vh_x2_obc.dat
 
   nemo coupling:
-    # Directory on compute host where FVCOM-NEMO coupling files are stored
-    coupling dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/
-    # File containing FVCOM indices for the NEMO nesting zone
-    fvcom nest indices file: vhfr_low_v2_nesting_indices.txt
-    # File containing nesting zone reference line for weights calculation
-    fvcom nest ref line file: vhfr_low_v2_nesting_innerboundary.txt
-    # NEMO index ranges contained in the boundary files
-    nemo cut i range: [225, 369]
-    nemo cut j range: [340, 561]
-    # Transition zone width [m] over which weights rise from 0 to 1
-    transition zone width: 8500
-    # Transition profile tanh function parameters
-    tanh dl: 2
-    tanh du: 2
-    # NEMO coordinates file
-    nemo coordinates: /nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc
-    # NEMO mesh mask file
-    nemo mesh mask: /nemoShare/MEOPAR/nowcast-sys/grid/mesh_mask201702.nc
-    # NEMO bathymetry file
-    nemo bathymetry: /nemoShare/MEOPAR/nowcast-sys/grid/bathymetry_201702.nc
-    # Template for boundary forcing file names
-    # **Must be quoted to project {} characters**
-    boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
+    boundary file template: 'bdy_{run_type}_brcl_{yyyymmdd}.nc'
 
   atmospheric forcing:
-    # Directory on host where make_fccom_atmos_forcing worker runs where HRDPS GRIB files are stored
-    hrdps grib dir: /results/forcing/atmospheric/GEM2.5/GRIB/
-    # Directory on host where make_fccom_atmos_forcing worker runs where FVCOM atmospheric forcing files are stored
-    fvcom atmos dir: /results/forcing/atmospheric/GEM2.5/vhfr-fvcom
-    # Template for atmospheric forcing file names
-    # **Must be quoted to project {} characters**
     atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
-    # Directory on host where make_fvcom_atmos_forcing worker runs where FVCOM grid files are stored
-    fvcom grid dir: /results/nowcast-sys/FVCOM-VHFR-config/grid/
+    field types:
+      - hfx
+      - precip
+      - wnd
 
-  # Directory on compute host where FVCOM input files are stored
-  input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
-  # Path and name of file on compute host that defines the tide gauge stations
-  # to produce point outputs at
-  output station timeseries: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vhfr_low_v2_utm10_station.dat
+  input dir: fvcom-runs/input/
+  output station timeseries: FVCOM-VHFR-config/output/vh_x2_utm10_station.dat
   namelists:
-    # Name of the namelist file to create by concatenating the list of namelist
-    # section files below
-    # **Must be quoted to project {} characters**
     '{casename}_run.nml':
       - namelist.case
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics
-      - namelist.restart
-      - namelist.netcdf
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.physics
-      - namelist.surface
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.rivers
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check
-      - namelist.nesting
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models
-  # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
-  FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
-  # Number of processors
   number of processors: 64
-  # Location on the compute host of the file that contains IP addresses
-  # and MPI slots specifications.
   mpi hosts file: ${HOME}/mpi_hosts.fvcom
-  # Path to the FVCOM command processor executable to use in the run script
-  fvc_cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/fvc
-  # Run type specific configurations for the runs that are executed on the
-  # compute host; keyed by run type
+  fvc_cmd: bin/fvc
   run types:
     nowcast:
-      # Directory on compute host where NEMO run results for boundary forcing
-      # are stored
-      nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
-      # Directory on compute host where results are stored
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast/
+      results: SalishSea/fvcom-nowcast/
     forecast:
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
-      nemo boundary results: /nemoShare/MEOPAR/SalishSea/forecast/
-  # Directories on results server where run results are stored
-  # in ddmmmyy/ directories; keyed by run type
-  results archive:
-    nowcast: /opp/fvcom/nowcast/
-    forecast: /opp/fvcom/forecast/
-  # Name of the results file containing the tide gauge stations sea surface height time series
-  stations dataset filename: vhfr_low_v2_station_timeseries.nc
+      results: fvcom-forecast/
 """
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_
-
-
-@pytest.fixture(scope="function")
-def config():
-    """
-    nowcast.yaml config object section for FVCOM VHFR runs.
-
-    :return: :py:class:`nemo_nowcast.Config`-like dict
-    :rtype: dict
-    """
-    return {
-        "vhfr fvcom runs": {
-            "case name": "vhfr_low_v2",
-            "run prep dir": "fvcom-runs/",
-            "fvcom grid": {
-                "grid dir": "VHFR-FVCOM-config/grid/",
-                "grid file": "vhfr_low_v2_utm10_grd.dat",
-                "depths file": "vhfr_low_v2_utm10_dep.dat",
-                "sigma file": "vhfr_low_v2_sigma.dat",
-                "coriolis file": "vhfr_low_v2_utm10_cor.dat",
-                "sponge file": "vhfr_low_v2_nospg_spg.dat",
-                "obc nodes file": "vhfr_low_v2_obc.dat",
-            },
-            "nemo coupling": {
-                "boundary file template": "bdy_{run_type}_btrp_{yyyymmdd}.nc"
-            },
-            "atmospheric forcing": {
-                "atmos file template": "atmos_{run_type}_{field_type}_{yyyymmdd}.nc"
-            },
-            "input dir": "fvcom-runs/input/",
-            "output station timeseries": "VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat",
-            "namelists": {"{casename}_run.nml": ["namelist.case"]},
-            "number of processors": 32,
-            "mpi hosts file": "${HOME}/mpi_hosts.fvcom",
-            "fvc_cmd": "bin/fvc",
-            "run types": {
-                "nowcast": {"results": "SalishSea/fvcom-nowcast/"},
-                "forecast": {"results": "SalishSea/fvcom-forecast/"},
-            },
-        }
-    }
 
 
 @patch("nowcast.workers.run_fvcom.NowcastWorker", spec=True)
@@ -233,6 +123,171 @@ class TestMain:
         run_fvcom.main()
         args, kwargs = m_worker().run.call_args
         assert args == (run_fvcom.run_fvcom, run_fvcom.success, run_fvcom.failure)
+
+
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "run_fvcom" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["run_fvcom"]
+        assert msg_registry["checklist key"] == "FVCOM run"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["run_fvcom"]
+        assert msg in msg_registry
+
+    def test_vhfr_fvcom_runs_section(self, prod_config):
+        assert "vhfr fvcom runs" in prod_config
+        vhfr_fvcom_runs = prod_config["vhfr fvcom runs"]
+        assert vhfr_fvcom_runs["host"] == "west.cloud-nowcast"
+        assert vhfr_fvcom_runs["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
+        assert vhfr_fvcom_runs["case name"] == "vh_x2"
+        assert (
+            vhfr_fvcom_runs["run prep dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/"
+        )
+        assert "fvcom grid" in vhfr_fvcom_runs
+        assert "nemo coupling" in vhfr_fvcom_runs
+        assert "atmospheric forcing" in vhfr_fvcom_runs
+        assert (
+            vhfr_fvcom_runs["input dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/"
+        )
+        assert (
+            vhfr_fvcom_runs["output station timeseries"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_x2_station.txt"
+        )
+        assert "namelists" in vhfr_fvcom_runs
+        assert (
+            vhfr_fvcom_runs["FVCOM exe path"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM41/"
+        )
+        assert vhfr_fvcom_runs["number of processors"] == 64
+        assert vhfr_fvcom_runs["mpi hosts file"] == "${HOME}/mpi_hosts.fvcom"
+        assert (
+            vhfr_fvcom_runs["fvc_cmd"]
+            == "/nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/fvc"
+        )
+        assert "run types" in vhfr_fvcom_runs
+        assert "results archive" in vhfr_fvcom_runs
+        assert (
+            vhfr_fvcom_runs["stations dataset filename"]
+            == "vh_x2_station_timeseries.nc"
+        )
+
+    def test_fvcom_grid_section(self, prod_config):
+        fvcom_grid = prod_config["vhfr fvcom runs"]["fvcom grid"]
+        assert (
+            fvcom_grid["grid dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/"
+        )
+        assert fvcom_grid["grid file"] == "vh_x2_grd.dat"
+        assert fvcom_grid["utm zone"] == 10
+        assert fvcom_grid["depths file"] == "vh_x2_dep.dat"
+        assert fvcom_grid["sigma file"] == "vh_x2_sigma.dat"
+        assert fvcom_grid["coriolis file"] == "vh_x2_cor.dat"
+        assert fvcom_grid["sponge file"] == "vh_x2_nospg_spg.dat"
+        assert fvcom_grid["obc nodes file"] == "vh_x2_obc.dat"
+
+    def test_nemo_coupling_section(self, prod_config):
+        nemo_coupling = prod_config["vhfr fvcom runs"]["nemo coupling"]
+        assert (
+            nemo_coupling["coupling dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/"
+        )
+        assert nemo_coupling["fvcom nest indices file"] == "vh_x2_nesting_indices.txt"
+        assert (
+            nemo_coupling["fvcom nest ref line file"]
+            == "vh_x2_nesting_innerboundary.txt"
+        )
+        assert nemo_coupling["nemo cut i range"] == [225, 369]
+        assert nemo_coupling["nemo cut j range"] == [340, 561]
+        assert nemo_coupling["transition zone width"] == 8500
+        assert nemo_coupling["tanh dl"] == 2
+        assert nemo_coupling["tanh du"] == 2
+        assert (
+            nemo_coupling["nemo coordinates"]
+            == "/nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc"
+        )
+        assert (
+            nemo_coupling["nemo bathymetry"]
+            == "/nemoShare/MEOPAR/nowcast-sys/grid/bathymetry_201702.nc"
+        )
+        assert (
+            nemo_coupling["boundary file template"]
+            == "bdy_{run_type}_brcl_{yyyymmdd}.nc"
+        )
+
+    def test_atmospheric_forcing_section(self, prod_config):
+        atmos_forcing = prod_config["vhfr fvcom runs"]["atmospheric forcing"]
+        assert (
+            atmos_forcing["hrdps grib dir"]
+            == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+        )
+        assert (
+            atmos_forcing["fvcom atmos dir"]
+            == "/results/forcing/atmospheric/GEM2.5/vhfr-fvcom"
+        )
+        assert (
+            atmos_forcing["atmos file template"]
+            == "atmos_{run_type}_{field_type}_{yyyymmdd}.nc"
+        )
+        assert (
+            atmos_forcing["fvcom grid dir"]
+            == "/results/nowcast-sys/FVCOM-VHFR-config/grid/"
+        )
+        assert atmos_forcing["field types"] == ["hfx", "precip", "wnd"]
+
+    def test_namelists_section(self, prod_config):
+        namelists = prod_config["vhfr fvcom runs"]["namelists"]["{casename}_run.nml"]
+        assert namelists == [
+            "namelist.case",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics",
+            "namelist.restart",
+            "namelist.netcdf",
+            "namelist.physics",
+            "namelist.surface",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.rivers",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check",
+            "namelist.nesting",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models",
+        ]
+
+    def test_run_types_section(self, prod_config):
+        run_types = prod_config["vhfr fvcom runs"]["run types"]
+        assert run_types["nowcast"] == {
+            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/",
+        }
+        assert run_types["forecast"] == {
+            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/forecast/",
+            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/",
+        }
+
+    def test_results_archive_section(self, prod_config):
+        results_archive = prod_config["vhfr fvcom runs"]["results archive"]
+        assert results_archive["nowcast"] == "/opp/fvcom/nowcast-x2/"
+        assert results_archive["forecast"] == "/opp/fvcom/forecast-x2/"
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
@@ -365,7 +420,7 @@ class TestRunDescription:
         run_id = f"11dec17fvcom-{run_type}"
         fvcom_repo_dir = Path(str(tmpdir.ensure_dir("FVCOM41")))
         run_prep_dir = Path(str(tmpdir.ensure_dir("fvcom-runs")))
-        m_mk_nml.return_value = Path(str(run_prep_dir), "vhfr_low_v2_run.nml")
+        m_mk_nml.return_value = Path(str(run_prep_dir), "vh_x2_run.nml")
         p_config = patch.dict(
             config["vhfr fvcom runs"],
             {"run prep dir": run_prep_dir, "FVCOM exe path": fvcom_repo_dir},
@@ -376,14 +431,14 @@ class TestRunDescription:
             )
         expected = {
             "run_id": run_id,
-            "casename": "vhfr_low_v2",
-            "nproc": 32,
+            "casename": "vh_x2",
+            "nproc": 64,
             "paths": {
                 "FVCOM": os.fspath(fvcom_repo_dir),
                 "runs directory": os.fspath(run_prep_dir),
                 "input": os.fspath(run_prep_dir / "input"),
             },
-            "namelist": os.fspath(run_prep_dir / "vhfr_low_v2_run.nml"),
+            "namelist": os.fspath(run_prep_dir / "vh_x2_run.nml"),
         }
         assert run_desc == expected
 
@@ -396,7 +451,7 @@ class TestEditNamelists:
 
     def test_edit_namelists_nowcast(self, m_patch_nml, m_logger, config):
         run_fvcom._edit_namelists(
-            "vhfr_low_v2",
+            config["vhfr fvcom runs"]["case name"],
             arrow.get("2018-01-15"),
             "nowcast",
             Path("run_prep_dir"),
@@ -407,6 +462,7 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.case"),
                 {
                     "nml_case": {
+                        "case_title": config["vhfr fvcom runs"]["case name"],
                         "start_date": "2018-01-15 00:00:00.00",
                         "end_date": "2018-01-16 00:00:00.00",
                     }
@@ -426,18 +482,32 @@ class TestEditNamelists:
                 },
             ),
             call(
+                Path("run_prep_dir/namelist.physics"),
+                {
+                    "nml_heating_calculated": {
+                        "heating_calculate_file": "atmos_nowcast_hfx_20180115.nc"
+                    }
+                },
+            ),
+            call(
                 Path("run_prep_dir/namelist.surface"),
-                {"nml_surface_forcing": {"wind_file": "atmos_nowcast_wnd_20180115.nc"}},
+                {
+                    "nml_surface_forcing": {
+                        "wind_file": "atmos_nowcast_wnd_20180115.nc",
+                        "precipitation_file": "atmos_nowcast_precip_20180115.nc",
+                        "airpressure_file": "atmos_nowcast_hfx_20180115.nc",
+                    }
+                },
             ),
             call(
                 Path("run_prep_dir/namelist.nesting"),
-                {"nml_nesting": {"nesting_file_name": "bdy_nowcast_btrp_20180115.nc"}},
+                {"nml_nesting": {"nesting_file_name": "bdy_nowcast_brcl_20180115.nc"}},
             ),
         ]
 
     def test_edit_namelists_forecast(self, m_patch_nml, m_logger, config):
         run_fvcom._edit_namelists(
-            "vhfr_low_v2",
+            config["vhfr fvcom runs"]["case name"],
             arrow.get("2018-01-15"),
             "forecast",
             Path("run_prep_dir"),
@@ -448,6 +518,7 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.case"),
                 {
                     "nml_case": {
+                        "case_title": config["vhfr fvcom runs"]["case name"],
                         "start_date": "2018-01-16 00:00:00.00",
                         "end_date": "2018-01-17 12:00:00.00",
                     }
@@ -467,16 +538,26 @@ class TestEditNamelists:
                 },
             ),
             call(
+                Path("run_prep_dir/namelist.physics"),
+                {
+                    "nml_heating_calculated": {
+                        "heating_calculate_file": "atmos_forecast_hfx_20180116.nc"
+                    }
+                },
+            ),
+            call(
                 Path("run_prep_dir/namelist.surface"),
                 {
                     "nml_surface_forcing": {
-                        "wind_file": "atmos_forecast_wnd_20180116.nc"
+                        "wind_file": "atmos_forecast_wnd_20180116.nc",
+                        "precipitation_file": "atmos_forecast_precip_20180116.nc",
+                        "airpressure_file": "atmos_forecast_hfx_20180116.nc",
                     }
                 },
             ),
             call(
                 Path("run_prep_dir/namelist.nesting"),
-                {"nml_nesting": {"nesting_file_name": "bdy_forecast_btrp_20180116.nc"}},
+                {"nml_nesting": {"nesting_file_name": "bdy_forecast_brcl_20180116.nc"}},
             ),
         ]
 
@@ -491,7 +572,7 @@ class TestAssembleNamelist:
         run_prep_dir = Path(str(tmpdir.ensure_dir("fvcom-runs")))
         tmpdir.ensure("fvcom-runs", "namelist.case")
         namelist_path = run_fvcom._assemble_namelist(
-            "vhfr_low_v2", run_type, run_prep_dir, config
+            "vh_x2", run_type, run_prep_dir, config
         )
         assert namelist_path.exists()
 
@@ -508,18 +589,14 @@ class TestPrepFVCOM_InputDir:
         with patch("nowcast.workers.run_fvcom.Path.symlink_to") as m_link:
             run_fvcom._prep_fvcom_input_dir(arrow.get("2018-01-18"), run_type, config)
         assert m_link.call_args_list == [
-            call(Path("VHFR-FVCOM-config/grid/vhfr_low_v2_utm10_grd.dat")),
-            call(Path("VHFR-FVCOM-config/grid/vhfr_low_v2_utm10_dep.dat")),
-            call(Path("VHFR-FVCOM-config/grid/vhfr_low_v2_sigma.dat")),
-            call(Path("VHFR-FVCOM-config/grid/vhfr_low_v2_utm10_cor.dat")),
-            call(Path("VHFR-FVCOM-config/grid/vhfr_low_v2_nospg_spg.dat")),
-            call(Path("VHFR-FVCOM-config/grid/vhfr_low_v2_obc.dat")),
-            call(Path("VHFR-FVCOM-config/output/vhfr_low_v2_utm10_station.dat")),
-            call(
-                Path(
-                    f"SalishSea/fvcom-nowcast/{restart_date}/vhfr_low_v2_restart_0001.nc"
-                )
-            ),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_grd.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_dep.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_sigma.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_utm10_cor.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_nospg_spg.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_obc.dat")),
+            call(Path("FVCOM-VHFR-config/output/vh_x2_utm10_station.dat")),
+            call(Path(f"SalishSea/fvcom-nowcast/{restart_date}/vh_x2_restart_0001.nc")),
         ]
 
 
@@ -577,8 +654,8 @@ class TestBuildScript:
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 32 --bind-to-core ./fvcom \
---casename=vhfr_low_v2 --logfile=./fvcom.log \
+        ${{MPIRUN}} -np 64 --bind-to-core ./fvcom \
+--casename=vh_x2 --logfile=./fvcom.log \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
@@ -648,8 +725,8 @@ class TestExecute:
         echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 32 --bind-to-core ./fvcom \
---casename=vhfr_low_v2 --logfile=./fvcom.log \
+        ${MPIRUN} -np 64 --bind-to-core ./fvcom \
+--casename=vh_x2 --logfile=./fvcom.log \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
