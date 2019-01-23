@@ -110,7 +110,14 @@ def upload_fvcom_atmos_forcing(parsed_args, config, *args):
     host_name = parsed_args.host_name
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    atmos_field_type = "wnd"
+    checklist = {
+        host_name: {
+            parsed_args.run_type: {
+                "run date": f'{parsed_args.run_date.format("YYYY-MM-DD")}',
+                "files": [],
+            }
+        }
+    }
     logger.info(
         f"Uploading VHFR FVCOM atmospheric forcing file for "
         f'{run_date.format("YYYY-MM-DD")} run to {host_name}'
@@ -122,35 +129,31 @@ def upload_fvcom_atmos_forcing(parsed_args, config, *args):
         "atmos file template"
     ]
     atmos_file_date = run_date if run_type == "nowcast" else run_date.shift(days=+1)
-    atmos_file = atmos_file_tmpl.format(
-        run_type=run_type,
-        field_type=atmos_field_type,
-        yyyymmdd=atmos_file_date.format("YYYYMMDD"),
-    )
-    fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"])
-    ssh_key = Path(os.environ["HOME"], ".ssh", config["vhfr fvcom runs"]["ssh key"])
-    ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
-    ssh_sftp.upload_file(
-        sftp_client,
-        host_name,
-        fvcom_atmos_dir / atmos_file,
-        fvcom_input_dir / atmos_file,
-        logger,
-    )
-    sftp_client.close()
-    ssh_client.close()
-    logger.debug(
-        f"Uploaded {fvcom_atmos_dir/atmos_file} to "
-        f"{host_name}:{fvcom_input_dir/atmos_file}"
-    )
-    checklist = {
-        host_name: {
-            parsed_args.run_type: {
-                "run date": f'{parsed_args.run_date.format("YYYY-MM-DD")}',
-                "file": atmos_file,
-            }
-        }
-    }
+    for atmos_field_type in config["vhfr fvcom runs"]["atmospheric forcing"][
+        "field types"
+    ]:
+        atmos_file = atmos_file_tmpl.format(
+            run_type=run_type,
+            field_type=atmos_field_type,
+            yyyymmdd=atmos_file_date.format("YYYYMMDD"),
+        )
+        fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"])
+        ssh_key = Path(os.environ["HOME"], ".ssh", config["vhfr fvcom runs"]["ssh key"])
+        ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
+        ssh_sftp.upload_file(
+            sftp_client,
+            host_name,
+            fvcom_atmos_dir / atmos_file,
+            fvcom_input_dir / atmos_file,
+            logger,
+        )
+        sftp_client.close()
+        ssh_client.close()
+        logger.debug(
+            f"Uploaded {fvcom_atmos_dir/atmos_file} to "
+            f"{host_name}:{fvcom_input_dir/atmos_file}"
+        )
+        checklist[host_name][parsed_args.run_type]["files"].append(atmos_file)
     return checklist
 
 

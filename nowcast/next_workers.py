@@ -663,7 +663,7 @@ def after_watch_NEMO(msg, config, checklist):
         run_type = msg.type.split()[1]
         wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[1]
         if run_type == "nowcast":
-            next_workers["success nowcast"].extend(
+            next_workers[msg.type].extend(
                 [
                     NextWorker("nowcast.workers.get_NeahBay_ssh", args=["forecast"]),
                     NextWorker(
@@ -676,7 +676,7 @@ def after_watch_NEMO(msg, config, checklist):
         if run_type == "forecast":
             if wave_forecast_after == "forecast":
                 host_name = config["wave forecasts"]["host"]
-                next_workers["success forecast"].extend(
+                next_workers[msg.type].extend(
                     [
                         NextWorker(
                             "nowcast.workers.make_ww3_wind_file",
@@ -691,23 +691,16 @@ def after_watch_NEMO(msg, config, checklist):
                     ]
                 )
             else:
-                next_workers["success forecast"].append(
+                next_workers[msg.type].append(
                     NextWorker(
                         "nowcast.workers.make_turbidity_file",
                         args=["--run-date", msg.payload[run_type]["run date"]],
                     )
                 )
-            next_workers["success forecast"].append(
-                NextWorker(
-                    "nowcast.workers.make_fvcom_boundary",
-                    args=[(config["vhfr fvcom runs"]["host"]), "forecast"],
-                    host=(config["vhfr fvcom runs"]["host"]),
-                )
-            )
         if run_type == "nowcast-green":
             if wave_forecast_after == "nowcast-green":
                 host_name = config["wave forecasts"]["host"]
-                next_workers["success nowcast-green"].extend(
+                next_workers[msg.type].extend(
                     [
                         NextWorker(
                             "nowcast.workers.make_ww3_wind_file",
@@ -724,7 +717,7 @@ def after_watch_NEMO(msg, config, checklist):
             for host in config["run"]["enabled hosts"]:
                 run_types = config["run"]["enabled hosts"][host]["run types"]
                 if "nowcast-dev" in run_types:
-                    next_workers["success nowcast-green"].append(
+                    next_workers[msg.type].append(
                         NextWorker(
                             "nowcast.workers.make_forcing_links",
                             args=[host, "nowcast+", "--shared-storage"],
@@ -732,7 +725,7 @@ def after_watch_NEMO(msg, config, checklist):
                     )
         if run_type == "forecast2":
             host_name = config["wave forecasts"]["host"]
-            next_workers["success forecast2"].extend(
+            next_workers[msg.type].extend(
                 [
                     NextWorker(
                         "nowcast.workers.make_ww3_wind_file",
@@ -1080,6 +1073,14 @@ def after_watch_fvcom(msg, config, checklist):
                 ],
             )
         )
+        if run_type == "nowcast":
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_fvcom_boundary",
+                    args=[(config["vhfr fvcom runs"]["host"]), "forecast"],
+                    host=(config["vhfr fvcom runs"]["host"]),
+                )
+            )
     return next_workers[msg.type]
 
 
