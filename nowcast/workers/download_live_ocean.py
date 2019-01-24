@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -101,7 +101,7 @@ def _get_file(url, filename, dest_dir, session):
     :type dest_dir: :class:`pathlib.Path`
     """
     filepath = dest_dir / filename
-    get_web_data(url, NAME, filepath, session)
+    get_web_data(url, NAME, filepath, session, wait_exponential_max=10800)
     size = filepath.stat().st_size
     logger.debug(
         f"downloaded {size} bytes from {url}", extra={"url": url, "dest_dir": dest_dir}

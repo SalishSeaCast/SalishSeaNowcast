@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -205,12 +205,16 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
     atmos_file_tmpl = config["vhfr fvcom runs"]["atmospheric forcing"][
         "atmos file template"
     ]
-    atmos_field_type = "wnd"
-    atmos_file = atmos_file_tmpl.format(
-        run_type=run_type,
-        field_type=atmos_field_type,
-        yyyymmdd=start_date.format("YYYYMMDD"),
-    )
+    atmos_files = {
+        field_type: atmos_file_tmpl.format(
+            run_type=run_type,
+            field_type=field_type,
+            yyyymmdd=start_date.format("YYYYMMDD"),
+        )
+        for field_type in config["vhfr fvcom runs"]["atmospheric forcing"][
+            "field types"
+        ]
+    }
     bdy_file_tmpl = config["vhfr fvcom runs"]["nemo coupling"]["boundary file template"]
     bdy_file = bdy_file_tmpl.format(
         run_type=run_type, yyyymmdd=start_date.format("YYYYMMDD")
@@ -219,6 +223,7 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
         run_prep_dir
         / "namelist.case": {
             "nml_case": {
+                "case_title": casename,
                 "start_date": start_date.format("YYYY-MM-DD HH:mm:ss.00"),
                 "end_date": (
                     (start_date + run_durations[run_type]).format(
@@ -243,7 +248,17 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
             }
         },
         run_prep_dir
-        / "namelist.surface": {"nml_surface_forcing": {"wind_file": atmos_file}},
+        / "namelist.physics": {
+            "nml_heating_calculated": {"heating_calculate_file": atmos_files["hfx"]}
+        },
+        run_prep_dir
+        / "namelist.surface": {
+            "nml_surface_forcing": {
+                "wind_file": atmos_files["wnd"],
+                "precipitation_file": atmos_files["precip"],
+                "airpressure_file": atmos_files["hfx"],
+            }
+        },
         run_prep_dir
         / "namelist.nesting": {"nml_nesting": {"nesting_file_name": bdy_file}},
     }
@@ -314,7 +329,6 @@ def _prep_fvcom_input_dir(run_date, run_type, config):
     )
     (fvcom_input_dir / output_timeseries_file.name).symlink_to(output_timeseries_file)
     logger.debug(f"symlinked {output_timeseries_file} file into {fvcom_input_dir}")
-    results_dir = Path(config["vhfr fvcom runs"]["run types"][run_type]["results"])
     casename = config["vhfr fvcom runs"]["case name"]
     restart_dir = Path(config["vhfr fvcom runs"]["run types"]["nowcast"]["results"])
     restart_file_date = run_date.shift(days=-1) if run_type == "nowcast" else run_date
