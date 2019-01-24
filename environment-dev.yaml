@@ -55,6 +55,7 @@ dependencies:
   - scipy
   - shapely
   - verboselogs
+  - watchdog
   - xarray
 
   # For coding style

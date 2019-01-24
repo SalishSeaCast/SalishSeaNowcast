@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -195,7 +195,7 @@ def make_plots(parsed_args, config, *args):
             )
         if run_type == "nowcast-green" and plot_type == "research":
             fig_functions = _prep_nowcast_green_research_fig_functions(
-                bathy, mesh_mask, results_dir, run_date
+                config, bathy, mesh_mask, results_dir, run_date
             )
         if run_type == "nowcast-agrif" and plot_type == "research":
             fig_functions = _prep_nowcast_agrif_research_fig_functions(
@@ -245,9 +245,7 @@ def make_plots(parsed_args, config, *args):
                 config["vhfr fvcom runs"]["results archive"]["forecast"], dmy
             )
             forecast_dataset_path = forecast_results_dir / fvcom_stns_dataset_filename
-            fvcom_stns_dataset_path = Path(
-                "/tmp/vhfr_low_v2_station_timeseries_forecast.nc"
-            )
+            fvcom_stns_dataset_path = Path("/tmp", fvcom_stns_dataset_filename)
             cmd = (
                 f"ncrcat -O {nowcast_dataset_path} {forecast_dataset_path} "
                 f"-o {fvcom_stns_dataset_path}"
@@ -368,7 +366,9 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir, run_date
     return fig_functions
 
 
-def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir, run_date):
+def _prep_nowcast_green_research_fig_functions(
+    config, bathy, mesh_mask, results_dir, run_date
+):
     yyyymmdd = run_date.format("YYYYMMDD")
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
     ptrc_T_hr = _results_dataset("1h", "ptrc_T", results_dir)
@@ -492,10 +492,10 @@ def _prep_nowcast_green_research_fig_functions(bathy, mesh_mask, results_dir, ru
         )
     place = "S3"
     phys_dataset = xarray.open_dataset(
-        "https://salishsea.eos.ubc.ca/erddap/griddap" "/ubcSSg3DTracerFields1hV17-02"
+        config["figures"]["dataset URLs"]["3d tracer fields"]
     )
     bio_dataset = xarray.open_dataset(
-        "https://salishsea.eos.ubc.ca/erddap/griddap" "/ubcSSg3DBiologyFields1hV17-02"
+        config["figures"]["dataset URLs"]["3d biology fields"]
     )
     fig_functions.update(
         {

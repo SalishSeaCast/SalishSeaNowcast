@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -57,7 +57,7 @@ vhfr fvcom runs:
     nemo coordinates: grid/coordinates_seagrid_SalishSea201702.nc
     nemo mesh mask: grid/mesh_mask201702.nc
     nemo bathymetry: grid/bathymetry_201702.nc
-    boundary file template: 'bdy_{run_type}_btrp_{yyyymmdd}.nc'
+    boundary file template: 'bdy_{run_type}_brcl_{yyyymmdd}.nc'
 
   input dir: fvcom-runs/input/
 
@@ -134,15 +134,9 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-11-29")
         )
-        make_fvcom_boundary.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-11-29")
-        )
         msg_type = make_fvcom_boundary.success(parsed_args)
         assert msg_type == f"success {run_type}"
+        assert m_logger.info.called
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
@@ -155,15 +149,94 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-11-29")
         )
-        make_fvcom_boundary.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-11-29")
-        )
         msg_type = make_fvcom_boundary.failure(parsed_args)
         assert msg_type == f"failure {run_type}"
+        assert m_logger.critical.called
+
+
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "make_fvcom_boundary" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["make_fvcom_boundary"]
+        assert msg_registry["checklist key"] == "FVCOM boundary conditions"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["make_fvcom_boundary"]
+        assert msg in msg_registry
+
+    def test_input_dir(self, prod_config):
+        assert (
+            prod_config["vhfr fvcom runs"]["input dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/"
+        )
+
+    def test_nemo_coupling_section(self, prod_config):
+        nemo_coupling = prod_config["vhfr fvcom runs"]["nemo coupling"]
+        assert (
+            nemo_coupling["boundary file template"]
+            == "bdy_{run_type}_brcl_{yyyymmdd}.nc"
+        )
+        assert (
+            nemo_coupling["coupling dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/"
+        )
+        assert nemo_coupling["fvcom nest indices file"] == "vh_x2_nesting_indices.txt"
+        assert (
+            nemo_coupling["fvcom nest ref line file"]
+            == "vh_x2_nesting_innerboundary.txt"
+        )
+        assert (
+            nemo_coupling["nemo coordinates"]
+            == "/nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc"
+        )
+        assert (
+            nemo_coupling["nemo mesh mask"]
+            == "/nemoShare/MEOPAR/nowcast-sys/grid/mesh_mask201702.nc"
+        )
+        assert (
+            nemo_coupling["nemo bathymetry"]
+            == "/nemoShare/MEOPAR/nowcast-sys/grid/bathymetry_201702.nc"
+        )
+        assert nemo_coupling["nemo cut i range"] == [225, 369]
+        assert nemo_coupling["nemo cut j range"] == [340, 561]
+        assert nemo_coupling["transition zone width"] == 8500
+        assert nemo_coupling["tanh dl"] == 2
+        assert nemo_coupling["tanh du"] == 2
+
+    def test_fvcom_grid_section(self, prod_config):
+        fvcom_grid = prod_config["vhfr fvcom runs"]["fvcom grid"]
+        assert (
+            fvcom_grid["grid dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/"
+        )
+        assert fvcom_grid["grid file"] == "vh_x2_grd.dat"
+        assert fvcom_grid["depths file"] == "vh_x2_dep.dat"
+        assert fvcom_grid["sigma file"] == "vh_x2_sigma.dat"
+        assert fvcom_grid["utm zone"] == 10
+
+    def test_run_types_section(self, prod_config):
+        run_types = prod_config["vhfr fvcom runs"]["run types"]
+        assert (
+            run_types["nowcast"]["nemo boundary results"]
+            == "/nemoShare/MEOPAR/SalishSea/nowcast/"
+        )
+        assert (
+            run_types["forecast"]["nemo boundary results"]
+            == "/nemoShare/MEOPAR/SalishSea/forecast/"
+        )
 
 
 @patch("nowcast.workers.make_fvcom_boundary.logger", autospec=True)
@@ -212,7 +285,7 @@ class TestMakeFVCOMBoundary:
             run_type: {
                 "run date": "2018-01-08",
                 "open boundary file": os.fspath(
-                    input_dir / f"bdy_{run_type}_btrp_{file_date}.nc"
+                    input_dir / f"bdy_{run_type}_brcl_{file_date}.nc"
                 ),
             }
         }
@@ -311,7 +384,7 @@ class TestMakeFVCOMBoundary:
         m_mk_nest_file2.assert_called_once_with(
             fout=os.fspath(
                 input_dir
-                / f'bdy_{run_type}_btrp_{arrow.get(time_start).format("YYYYMMDD")}.nc'
+                / f'bdy_{run_type}_brcl_{arrow.get(time_start).format("YYYYMMDD")}.nc'
             ),
             x="x",
             y="y",
@@ -337,6 +410,17 @@ class TestMakeFVCOMBoundary:
             nemo_file_list=nemo_file_list,
             time_start=time_start,
             time_end=time_end,
-            ua_name="ubarotropic",
-            va_name="vbarotropic",
+            opt="BRCL",
+            gdept_0="gdept_0",
+            gdepw_0="gdepw_0",
+            gdepu="gdepu",
+            gdepv="gdepv",
+            tmask="tmask",
+            umask="umask",
+            vmask="vmask",
+            u_name="uvelocity",
+            v_name="vvelocity",
+            w_name="wvelocity",
+            t_name="cons_temp",
+            s_name="ref_salinity",
         )

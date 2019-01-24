@@ -1,4 +1,4 @@
-..  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+..  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 ..  and The University of British Columbia
 ..
 ..  Licensed under the Apache License, Version 2.0 (the "License");
@@ -636,7 +636,7 @@ The Python packages that the system depends on are installed in a conda environm
         arrow attrs basemap beautifulsoup4 bottleneck circus cliff cmocean \
         dask docutils gsw lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
         pillow pip poppler pygrib pypdf2 pyproj python=3.6 pyyaml pyzmq requests \
-        schedule scipy shapely xarray
+        schedule scipy shapely watchdog xarray
     $ source /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install angles driftwood \
         f90nml feedgen python-hglib raven retrying scour utm zeep
@@ -750,3 +750,22 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
   * Symlinks :file:`ww3_prnc_current.inp` as :file:`ww3_prnc.inp`
   * Runs :program:`ww3_prnc` to produce the wwatch3 current forcing files for the run.
     The output of :program:`ww3_prnc` is stored in the run's :file:`stdout` file.
+
+
+FVCOM Runs Directory
+======================
+
+Create an :file:`fvcom-runs/` directory for the VHFR FVCOM runs and populate it with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ mkdir fvcom-runs
+    $ chmod g+ws fvcom-runs
+    $ cd fvcom-runs/
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.case.template namelist.case
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.nesting.template namelist.nesting
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.netcdf.template namelist.netcdf
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.physics.template namelist.physics
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.restart.template namelist.restart
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.surface.template namelist.surface
