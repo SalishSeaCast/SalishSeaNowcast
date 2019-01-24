@@ -29,7 +29,13 @@ def config():
     a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
     """
     return {
-        "rivers": {"stations": {"Fraser": "08MF005", "Englishman": "08HB002"}},
+        "rivers": {
+            "stations": {
+                "Capilano": "08GA010",
+                "Englishman": "08HB002",
+                "Fraser": "08MF005",
+            }
+        },
         "observations": {
             "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
             "ferry data": {"ferries": {"TWDP": {}}},
@@ -110,12 +116,17 @@ class TestAfterDownloadWeather:
         expected = [
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Fraser", "--data-date", "2018-12-26"],
+                ["Capilano", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.collect_river_data",
                 ["Englishman", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
         ]
@@ -229,12 +240,17 @@ class TestAfterCollectWeather:
         expected = [
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Fraser", "--data-date", "2018-12-26"],
+                ["Capilano", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.collect_river_data",
                 ["Englishman", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
         ]
