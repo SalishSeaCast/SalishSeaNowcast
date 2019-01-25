@@ -103,15 +103,12 @@ rivers:
   rivers dir: /results/forcing/rivers/
   # Monthly climatology
   monthly climatology:
-    long: /results/nowcast-sys/rivers-climatology/rivers_month_extended.nc
     b201702: /results/nowcast-sys/rivers-climatology/rivers_month_201702.nc
   # Templates for the runoff forcing file names
   # **Must be quoted to project {} characters**
   file templates:
-    long: 'RLonFraCElse_{:y%Ym%md%d}.nc'
     b201702: 'R201702DFraCElse_{:y%Ym%md%d}.nc'
   prop_dict modules:
-    long: salishsea_tools.river_downbyone2
     b201702: salishsea_tools.river_201702
   turbidity:
     # File containing hourly real-time Fraser River water quality buoy turbidity data
