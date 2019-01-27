@@ -120,38 +120,8 @@ def after_collect_weather(msg, config, checklist):
         "success 06": [],
         "success 12": [],
         "success 18": [],
+        msg.type: after_download_weather(msg, config, checklist)
     }
-    if msg.type.startswith("success") and msg.type.endswith("06"):
-        data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
-        for river_name in config["rivers"]["stations"]:
-            next_workers["success 06"].append(
-                NextWorker(
-                    "nowcast.workers.collect_river_data",
-                    args=[river_name, "--data-date", data_date],
-                )
-            )
-        for stn in config["observations"]["ctd data"]["stations"]:
-            next_workers["success 06"].append(
-                NextWorker("nowcast.workers.get_onc_ctd", args=[stn])
-            )
-        for ferry in config["observations"]["ferry data"]["ferries"]:
-            next_workers["success 06"].append(
-                NextWorker("nowcast.workers.get_onc_ferry", args=[ferry])
-            )
-        if "hadcp data" in config["observations"]:
-            data_date = arrow.utcnow().shift(days=-1).format("YYYY-MM-DD")
-            next_workers["success 06"].append(
-                NextWorker(
-                    "nowcast.workers.get_vfpa_hadcp", args=["--data-date", data_date]
-                )
-            )
-        if "forecast2" in config["run types"]:
-            next_workers["success 06"].extend(
-                [
-                    NextWorker("nowcast.workers.get_NeahBay_ssh", args=["forecast2"]),
-                    NextWorker("nowcast.workers.grib_to_netcdf", args=["forecast2"]),
-                ]
-            )
     if msg.type.endswith("00"):
         next_workers["success 00"].append(
             NextWorker("nowcast.workers.collect_weather", args=["06"])
@@ -161,13 +131,8 @@ def after_collect_weather(msg, config, checklist):
             NextWorker("nowcast.workers.collect_weather", args=["12"])
         )
     if msg.type.endswith("12"):
-        next_workers["success 12"].extend(
-            [
-                NextWorker("nowcast.workers.get_NeahBay_ssh", args=["nowcast"]),
-                NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
-                NextWorker("nowcast.workers.download_live_ocean"),
-                NextWorker("nowcast.workers.collect_weather", args=["18"]),
-            ]
+        next_workers["success 12"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["18"]),
         )
     if msg.type.endswith("18"):
         next_workers["success 18"].append(
