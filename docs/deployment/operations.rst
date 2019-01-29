@@ -34,10 +34,14 @@ the message broker,
 the manager,
 and the log_aggregator,
 are managed by the `circus`_ process manager tool.
+So is the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_ with:
+
+.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst#documentation
+.. _ECCC MSC datamart service: https://dd.weather.gc.ca/
 
 .. _circus: https://circus.readthedocs.io/en/latest/
 
-Start the nowcast system with:
+Start the nowcast system and sarracenia client with:
 
 .. code-block:: bash
 
@@ -45,17 +49,6 @@ Start the nowcast system with:
     (/results/nowcast-sys/nowcast-env)$ circusd --daemon $NOWCAST_CONFIG/circus.ini
 
 :command:`circusd` monitors the long-running processes and restarts them if they crash or are shutdown accidentally.
-
-Start the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_ with:
-
-.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst#documentation
-.. _ECCC MSC datamart service: https://dd.weather.gc.ca/
-
-.. code-block:: bash
-
-    $ source activate /results/nowcast-sys/sarracenia-env
-    (/results/nowcast-sys/sarracenia-env)$ sr_subscribe start /results/nowcast-sys/SalishSeaNowcast/sarracenia/hydrometric.conf
-    (/results/nowcast-sys/sarracenia-env)$ sr_subscribe start /results/nowcast-sys/SalishSeaNowcast/sarracenia/hrdps-west.conf
 
 
 System Management
