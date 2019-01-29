@@ -120,7 +120,7 @@ def after_collect_weather(msg, config, checklist):
         "success 06": [],
         "success 12": [],
         "success 18": [],
-        msg.type: after_download_weather(msg, config, checklist)
+        msg.type: after_download_weather(msg, config, checklist),
     }
     if msg.type.endswith("00"):
         next_workers["success 00"].append(
@@ -132,7 +132,7 @@ def after_collect_weather(msg, config, checklist):
         )
     if msg.type.endswith("12"):
         next_workers["success 12"].append(
-            NextWorker("nowcast.workers.collect_weather", args=["18"]),
+            NextWorker("nowcast.workers.collect_weather", args=["18"])
         )
     if msg.type.endswith("18"):
         next_workers["success 18"].append(
