@@ -159,6 +159,8 @@ Add the following files to the :file:`/results/nowcast-sys/nowcast-env` environm
     export NOWCAST_YAML=/results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
     export NOWCAST_LOGS=/results/nowcast-sys/logs/nowcast
     export ONC_USER_TOKEN=a_valid_ONC_data_API_user_token
+    export SARRACENIA_ENV=/results/nowcast-sys/sarracenia-env
+    export SARRACENIA_CONFIG=/results/nowcast-sys/SalishSeaNowcast/sarracenia
     export SENTRY_DSN=a_valid_sentry_dsn_url
     EOF
 
@@ -173,6 +175,31 @@ and :command:`unset` them when it is deactivated.
     unset NOWCAST_YAML
     unset NOWCAST_LOGS
     unset ONC_USER_TOKEN
+    unset SARRCENIA_ENV
+    unset SARRACENIA_CONFIG
+    unset SENTRY_DSN
+    EOF
+
+Add the following files to the :file:`/results/nowcast-sys/sarracenia-env` environment to automatically :command:`export` the environment variables required by the sarracenia client when the environment is activated:
+
+.. code-block:: bash
+
+    $ cd /results/nowcast-sys/sarracenia-env
+    $ mkdir -p etc/conda/activate.d
+    $ cat << EOF > etc/conda/activate.d/envvars.sh
+    export SARRACENIA_ENV=/results/nowcast-sys/sarracenia-env
+    export SARRACENIA_CONFIG=/results/nowcast-sys/SalishSeaNowcast/sarracenia
+    export SENTRY_DSN=a_valid_sentry_dsn_url
+    EOF
+
+and :command:`unset` them when it is deactivated.
+
+.. code-block:: bash
+
+    $ mkdir -p etc/conda/deactivate.d
+    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
+    unset SARRCENIA_ENV
+    unset SARRACENIA_CONFIG
     unset SENTRY_DSN
     EOF
 
