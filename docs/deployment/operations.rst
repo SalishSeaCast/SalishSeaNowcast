@@ -32,7 +32,7 @@ Cold Start
 The long-running processes in the nowcast system framework,
 the message broker,
 the manager,
-and the scheduler,
+and the log_aggregator,
 are managed by the `circus`_ process manager tool.
 
 .. _circus: https://circus.readthedocs.io/en/latest/
@@ -78,11 +78,11 @@ A few that are useful:
 * :kbd:`list` to get a comma-separated list of the processes that :command:`circusd` is managing
 * :kbd:`status` to see their status
 * :kbd:`stop` to stop a process;
-  e.g. :kbd:`stop scheduler`
+  e.g. :kbd:`stop manager`
 * :kbd:`start` to start a stopped process;
-  e.g. :kbd:`start scheduler`
+  e.g. :kbd:`start manager`
 * :kbd:`restart` to stop and restart a process;
-  e.g. :kbd:`restart scheduler`
+  e.g. :kbd:`restart manager`
 * :kbd:`signal hup` to send a :kbd:`HUP` signal to a process,
   which will cause it to reload its configuration from the :envvar:`NOWCAST_YAML` file that the process was started with;
   e.g. :kbd:`signal hup manager`.

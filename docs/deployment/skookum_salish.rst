@@ -114,10 +114,10 @@ For the :kbd:`SalishSeaNowcast` automation system:
         arrow attrs basemap beautifulsoup4 bottleneck circus cliff cmocean \
         dask docutils gsw lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
         pillow pip poppler pygrib pypdf2 pyproj python=3.6 pyyaml pyzmq requests \
-        schedule scipy shapely watchdog xarray
+        scipy shapely watchdog xarray
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ pip install angles driftwood \
-        f90nml feedgen python-hglib raven retrying scour utm zeep
+        f90nml feedgen python-hglib raven retrying schedule scour utm zeep
     (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable moad_tools/
     (/results/nowcast-sys/nowcast-env)$ pip install --editable tools/SalishSeaTools/

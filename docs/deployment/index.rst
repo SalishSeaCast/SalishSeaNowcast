@@ -26,7 +26,6 @@ The production deployment uses 3 systems:
 
 #. The :py:mod:`nemo_nowcast.message_broker`,
    :py:mod:`nemo_nowcast.manager`,
-   :py:mod:`nemo_nowcast.scheduler`,
    :py:mod:`nemo_nowcast.log_aggregator`,
    most of the pre- and post-processing workers run on the :ref:`SalishSeaModelResultsServer`, :kbd:`skookum`, where the deployment is in the :file:`/results/nowcast-sys/` directory tree.
 

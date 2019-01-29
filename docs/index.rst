@@ -58,9 +58,9 @@ Computing resources to run the NEMO model are provided by `Ocean Networks Canada
 .. _Westgrid: https://www.westgrid.ca/
 
 The system consists of long-running message broker,
-scheduler,
+log aggregator,
 and manager processes.
-A collection of worker processes are launched by the manager or the scheduler to do particular jobs and terminate when that job is finished.
+A collection of worker processes are launched by the manager to do particular jobs and terminate when that job is finished.
 Please see :ref:`nemonowcast:FrameworkArchitecture` for a description of the system architecture.
 The workers are implemented in Python modules in the :ref:`nowcast.workers <SalishSeaNowcastSystemWorkers>` and :ref:`nemo_nowcast.workers <nemonowcast:NEMO_NowcastBuiltinWorkers>` namespaces.
 
@@ -76,8 +76,6 @@ The system workflow looks like:
     Work flow of preparation for and execution of the daily runs.
 
 The green boxes in the figure above are :ref:`SalishSeaNowcastSystemWorkers`.
-
-The :ref:`Scheduler` is a long-running process that periodically checks the system clock and launches workers when their scheduled time to run is reached.
 
 
 Contents

@@ -50,7 +50,6 @@ dependencies:
   - pyyaml
   - pyzmq
   - requests
-  - schedule
   - scipy
   - shapely
   - watchdog
@@ -65,6 +64,7 @@ dependencies:
     - python-hglib
     - raven
     - retrying
+    - schedule
     - scour
     - utm
     - zeep

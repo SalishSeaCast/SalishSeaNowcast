@@ -51,7 +51,6 @@ dependencies:
   - pyyaml
   - pyzmq
   - requests
-  - schedule
   - scipy
   - shapely
   - verboselogs
@@ -81,6 +80,7 @@ dependencies:
     - feedgen
     - python-hglib
     - retrying
+    - schedule
     - scour
     - utm
     - zeep

@@ -290,7 +290,6 @@ The output looks something like::
   (line   23) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseanowcast-repo
   (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.message_broker
   (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.log_aggregator
-  (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.scheduler
   (line   43) ok        http://www.oceannetworks.ca/
   (line   43) ok        https://www.westgrid.ca/support/systems/arbutus
   (line   43) ok        https://en.wikipedia.org/wiki/Ceph_(software)
@@ -373,7 +372,6 @@ The output looks something like::
   (line   55) ok        https://www.westgrid.ca/
   (line   23) ok        https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html
   (line   61) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/index.html#frameworkarchitecture
-  (line   81) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/scheduler.html#scheduler
   (line   61) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo-nowcastbuiltinworkers
   (line  113) ok        http://www.apache.org/licenses/LICENSE-2.0
   (line  109) ok        https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
