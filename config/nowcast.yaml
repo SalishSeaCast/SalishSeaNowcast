@@ -10,31 +10,6 @@ python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python
 file group: sallen
 
 
-# Workers scheduled to run at specific times
-scheduled workers:
-  # Worker module name (fully qualified, dotted notation)
-  - nowcast.workers.download_weather:
-      # Time period for worker launch repetition
-      every: day
-      # Time at which to launch the worker
-      # (quotes are required to ensure that time is interpreted as a string)
-      at: '04:15'
-      # Optional command-line options for the worker
-      # (quotes are necessary to force interpretation as a string)
-      cmd line opts: '06'
-  - nowcast.workers.download_weather:
-      every: day
-      at: '10:30'
-      cmd line opts: '12'
-  - nowcast.workers.download_weather:
-      every: day
-      at: '17:00'
-      cmd line opts: '18'
-  - nowcast.workers.download_weather:
-      every: day
-      at: '23:00'
-      cmd line opts: '00'
-
 weather:
   download:
     # Directory where ECCC datamart hrdps/weat/ mirror files are stored
@@ -922,8 +897,7 @@ zmq:
     logging:
       message_broker: 5560
       manager: 5561
-      scheduler: 5562
-      workers: [5563, 5564, 5565, 5566, 5567, 5568, 5569, 5570, 5571, 5572, 5573, 5574, 5575, 5576, 5577, 5578, 5579]
+      workers: [5562, 5564, 5565, 5566, 5567, 5568, 5569, 5570, 5571, 5572, 5573, 5574, 5575, 5576, 5577, 5578, 5579]
     # **host:port pairs in lists must be quoted to protect : characters**
       run_NEMO: ['salish.eos.ubc.ca:5556', '206.12.48.112:5556']
       watch_NEMO: ['salish.eos.ubc.ca:5557', '206.12.48.112:5557']
