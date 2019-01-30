@@ -163,10 +163,10 @@ class TestRunNEMO_Hindcast:
         parsed_args = SimpleNamespace(
             host_name="cedar",
             full_month=full_month,
-            prev_run_date=arrow.get("2018-06-01"),
+            prev_run_date=arrow.get("2019-01-11"),
         )
         with patch("nowcast.workers.run_NEMO_hindcast.arrow.now") as m_now:
-            m_now.return_value = arrow.get("2018-06-08")
+            m_now.return_value = arrow.get("2019-01-30")
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, self.config)
         expected = {"hindcast": {"host": "cedar", "run id": "None"}}
         assert checklist == expected

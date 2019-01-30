@@ -132,7 +132,10 @@ def run_NEMO_hindcast(parsed_args, config, *args):
                 run_days = 10
             else:
                 run_days = (run_date.shift(months=+1).replace(day=1) - run_date).days
-        if run_date.naive >= arrow.now().floor("day").naive:
+        if run_date.shift(days=+run_days).naive >= arrow.now().floor("day").naive:
+            logger.info(
+                f"not launching {run_date.format('YYYY-MM-DD')} run because it extends beyond today"
+            )
             sftp_client.close()
             ssh_client.close()
             checklist = {"hindcast": {"host": host_name, "run id": "None"}}
