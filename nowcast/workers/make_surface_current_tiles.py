@@ -331,7 +331,8 @@ def _pdf_shrink(filename):
     """
     logger.info(f"Starting PDF shrinking of: {filename}")
     tmpfilename = filename.with_suffix(".temp")
-    cmd = f"pdftocairo -pdf {filename} {tmpfilename}"
+    pdftocairo = Path(os.environ["NOWCAST_ENV"], "bin", "pdftocairo")
+    cmd = f"{pdftocairo} -pdf {filename} {tmpfilename}"
     logger.debug(f"running subprocess: {cmd}")
     try:
         proc = subprocess.run(

@@ -828,7 +828,8 @@ def _render_figures(
         if fig_save_format is "svg":
             logger.debug(f"starting SVG scouring of {filename}")
             tmpfilename = filename.with_suffix(".scour")
-            cmd = f"scour {filename} {tmpfilename}"
+            scour = Path(os.environ["NOWCAST_ENV"], "bin", "scour")
+            cmd = f"{scour} {filename} {tmpfilename}"
             logger.debug(f"running subprocess: {cmd}")
             try:
                 proc = subprocess.run(
