@@ -20,7 +20,6 @@ from datetime import timedelta
 import logging
 import os
 from pathlib import Path
-import time
 
 import arrow
 from nemo_nowcast import NowcastWorker
