@@ -261,7 +261,7 @@ class TestConfig:
             "namelist.netcdf",
             "namelist.physics",
             "namelist.surface",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.rivers",
+            "namelist.rivers",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater",

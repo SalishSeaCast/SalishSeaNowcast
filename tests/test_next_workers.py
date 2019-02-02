@@ -962,6 +962,29 @@ class TestAfterWatchNEMO:
         )
         assert expected in workers
 
+    def test_success_nowcast_launch_make_fvcom_rivers_forcing(self, config, checklist):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                "watch_NEMO",
+                "success nowcast",
+                {
+                    "nowcast": {
+                        "host": "west.cloud",
+                        "run date": "2018-02-01",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_fvcom_rivers_forcing",
+            args=["west.cloud", "nowcast"],
+            host="west.cloud",
+        )
+        assert expected in workers
+
     def test_success_forecast_launch_make_turbidity_file(self, config, checklist):
         workers = next_workers.after_watch_NEMO(
             Message(
@@ -1562,6 +1585,29 @@ class TestAfterWatchFVCOM:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
+            args=["west.cloud", "forecast"],
+            host="west.cloud",
+        )
+        assert expected in workers
+
+    def test_success_nowcast_launch_make_fvcom_rivers_forcing(self, config, checklist):
+        workers = next_workers.after_watch_fvcom(
+            Message(
+                "watch_fvcom",
+                "success nowcast",
+                {
+                    "nowcast": {
+                        "host": "west.cloud",
+                        "run date": "2019-02-01",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_fvcom_rivers_forcing",
             args=["west.cloud", "forecast"],
             host="west.cloud",
         )

@@ -676,6 +676,8 @@ vhfr fvcom runs:
     sponge file: vh_x2_nospg_spg.dat
     # Open boundaries nodes list file
     obc nodes file: vh_x2_obc.dat
+    # Fraser River nodes list file
+    fraser nodes file: vh_x2_river_nodes_fraser.txt
 
   nemo coupling:
     # Directory on compute host where FVCOM-NEMO coupling files are stored
@@ -719,6 +721,18 @@ vhfr fvcom runs:
       - precip
       - wnd
 
+  rivers forcing:
+    # Directory on compute host where NEMO runoff forcing files are stored
+    nemo rivers dir: /nemoShare/MEOPAR/rivers/
+    # Template for NEMO runoff forcing file names
+    # **Must be quoted to project {} characters**
+    runoff file template: 'R201702DFraCElse_{yyyymmdd}.nc'
+    # File containing monthly average conservative temperature clmatologies for NEMO runoff forcing
+    temperature climatology: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc
+    # Template for rivers forcing file names
+    # **Must be quoted to project {} characters**
+    rivers file template: 'rivers_{run_type}_{yyyymmdd}.nc'
+
   # Directory on compute host where FVCOM input files are stored
   input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
   # Path and name of file on compute host that defines the tide gauge stations
@@ -737,7 +751,7 @@ vhfr fvcom runs:
       - namelist.netcdf
       - namelist.physics
       - namelist.surface
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.rivers
+      - namelist.rivers
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater
@@ -1119,6 +1133,14 @@ message registry:
       failure nowcast: nowcast FVCOM boundary condition file creation failed
       failure forecast: forecast FVCOM boundary condition file creation failed
       crash: make_fvcom_boundary worker crashed
+
+    make_fvcom_rivers_forcing:
+      checklist key: FVCOM rivers forcing
+      success nowcast: nowcast FVCOM rivers forcing file created
+      failure nowcast: nowcast FVCOM rivers forcing file creation failed
+      success forecast: forecast FVCOM rivers forcing file created
+      failure forecast: forecast FVCOM rivers forcing file creation failed
+      crash: make_fvcom_atmos_forcing worker crashed
 
     make_fvcom_atmos_forcing:
       checklist key: FVCOM atmospheric forcing
