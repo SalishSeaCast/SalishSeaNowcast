@@ -246,7 +246,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
         t_name="cons_temp",
         s_name="ref_salinity",
     )
-    logger.debug(f"Stored VHFR FVCOM open boundary file: {fvcom_input_dir/bdy_file}")
+    logger.info(f"Stored VHFR FVCOM open boundary file: {fvcom_input_dir/bdy_file}")
     checklist = {
         run_type: {
             "run date": run_date.format("YYYY-MM-DD"),

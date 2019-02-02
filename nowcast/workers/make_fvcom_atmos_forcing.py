@@ -161,7 +161,7 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
             fname=os.fspath(fvcom_atmos_dir / atmos_file),
             hrdps_folder=[f"{hrdps_grib_dir}/" for hrdps_grib_dir in hrdps_grib_dirs],
         )
-        logger.debug(
+        logger.info(
             f"Stored VHFR FVCOM atmospheric forcing {atmos_field_type} file: "
             f"{fvcom_atmos_dir/atmos_file}"
         )
