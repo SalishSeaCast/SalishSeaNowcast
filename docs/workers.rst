@@ -185,6 +185,13 @@ Workers
     :members: main
 
 
+:kbd:`make_fvcom_rivers_forcing`
+--------------------------------
+
+.. automodule:: nowcast.workers.make_fvcom_rivers_forcing
+    :members: main
+
+
 :kbd:`make_fvcom_atmos_forcing`
 -------------------------------
 
