@@ -899,6 +899,22 @@ logging:
        - sentry
 
 
+slack notifications:
+  # Environment variable is which the slack channel incoming webhook URL is stored
+  SLACK_SSC_DAILY_PROGRESS:
+    # List of workers for which notifications will be sent on completion
+    - collect_weather
+    - watch_NEMO
+    - watch_NEMO_hindcast
+    - watch_NEMO_agrif
+    - watch_fvcom
+    - watch_ww3
+  # Website URL that shows automation log; included in slack message if present
+  website log url: https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
+  # Website URL that shows automation checklist; included in slack message if present
+  website checklist url: https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast_checklist.yaml
+
+
 # Message system
 zmq:
   host: skookum.eos.ubc.ca
