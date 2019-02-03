@@ -904,6 +904,7 @@ slack notifications:
   SLACK_SSC_DAILY_PROGRESS:
     # List of workers for which notifications will be sent on completion
     - collect_weather
+    - download_live_ocean
     - watch_NEMO
     - watch_NEMO_hindcast
     - watch_NEMO_agrif
