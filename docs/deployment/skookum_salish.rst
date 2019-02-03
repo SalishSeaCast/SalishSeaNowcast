@@ -162,6 +162,7 @@ Add the following files to the :file:`/results/nowcast-sys/nowcast-env` environm
     export SARRACENIA_ENV=/results/nowcast-sys/sarracenia-env
     export SARRACENIA_CONFIG=/results/nowcast-sys/SalishSeaNowcast/sarracenia
     export SENTRY_DSN=a_valid_sentry_dsn_url
+    export SLACK_SSC_DAILY_PROGRESS=a_valid_slack_incoming_webhook_url
     EOF
 
 and :command:`unset` them when it is deactivated.
@@ -178,6 +179,7 @@ and :command:`unset` them when it is deactivated.
     unset SARRCENIA_ENV
     unset SARRACENIA_CONFIG
     unset SENTRY_DSN
+    unset SLACK_SSC_DAILY_PROGRESS
     EOF
 
 Add the following files to the :file:`/results/nowcast-sys/sarracenia-env` environment to automatically :command:`export` the environment variables required by the sarracenia client when the environment is activated:
