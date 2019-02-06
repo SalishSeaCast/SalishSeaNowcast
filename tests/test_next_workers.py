@@ -962,29 +962,6 @@ class TestAfterWatchNEMO:
         )
         assert expected in workers
 
-    def test_success_nowcast_launch_make_fvcom_rivers_forcing(self, config, checklist):
-        workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success nowcast",
-                {
-                    "nowcast": {
-                        "host": "west.cloud",
-                        "run date": "2018-02-01",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_rivers_forcing",
-            args=["west.cloud", "nowcast"],
-            host="west.cloud",
-        )
-        assert expected in workers
-
     def test_success_forecast_launch_make_turbidity_file(self, config, checklist):
         workers = next_workers.after_watch_NEMO(
             Message(
@@ -1421,6 +1398,31 @@ class TestAfterMakeFVCOMBoundary:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    def test_success_launch_make_fvcom_rivers_forcing(
+        self, run_type, config, checklist
+    ):
+        workers = next_workers.after_make_fvcom_boundary(
+            Message(
+                "make_fvcom_boundary",
+                f"success {run_type}",
+                payload={
+                    run_type: {
+                        "run date": "2019-02-06",
+                        "open boundary file": "input/bdy_nowcast_btrp_20180316.nc",
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_fvcom_rivers_forcing",
+            args=["west.cloud", run_type, "--run-date", "2019-02-06"],
+            host="west.cloud",
+        )
+        assert expected in workers
+
 
 class TestAfterMakeFVCOMAtmosForcing:
     """Unit tests for the after_make_fvcom_atmos_forcing function.
@@ -1585,29 +1587,6 @@ class TestAfterWatchFVCOM:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["west.cloud", "forecast"],
-            host="west.cloud",
-        )
-        assert expected in workers
-
-    def test_success_nowcast_launch_make_fvcom_rivers_forcing(self, config, checklist):
-        workers = next_workers.after_watch_fvcom(
-            Message(
-                "watch_fvcom",
-                "success nowcast",
-                {
-                    "nowcast": {
-                        "host": "west.cloud",
-                        "run date": "2019-02-01",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_rivers_forcing",
             args=["west.cloud", "forecast"],
             host="west.cloud",
         )
