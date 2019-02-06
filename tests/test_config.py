@@ -116,8 +116,9 @@ class Test0mqMessageSystem:
             "run_ww3": "206.12.48.112:5572",
             "watch_ww3": "206.12.48.112:5573",
             "make_fvcom_boundary": "206.12.48.112:5580",
-            "run_fvcom": "206.12.48.112:5581",
-            "watch_fvcom": "206.12.48.112:5582",
+            "make_fvcom_rivers_forcing": "206.12.48.112:5581",
+            "run_fvcom": "206.12.48.112:5582",
+            "watch_fvcom": "206.12.48.112:5583",
         }
 
 
