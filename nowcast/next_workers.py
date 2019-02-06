@@ -636,11 +636,6 @@ def after_watch_NEMO(msg, config, checklist):
                         args=[(config["vhfr fvcom runs"]["host"]), "nowcast"],
                         host=(config["vhfr fvcom runs"]["host"]),
                     ),
-                    NextWorker(
-                        "nowcast.workers.make_fvcom_rivers_forcing",
-                        args=[(config["vhfr fvcom runs"]["host"]), "nowcast"],
-                        host=(config["vhfr fvcom runs"]["host"]),
-                    ),
                 ]
             )
         if run_type == "forecast":
@@ -884,12 +879,24 @@ def after_make_fvcom_boundary(msg, config, checklist):
         host_name = config["vhfr fvcom runs"]["host"]
         run_type = msg.type.split()[1]
         run_date = msg.payload[run_type]["run date"]
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.make_fvcom_atmos_forcing",
-                args=[run_type, "--run-date", run_date],
-                host="localhost",
-            )
+        next_workers[msg.type].extend(
+            [
+                NextWorker(
+                    "nowcast.workers.make_fvcom_atmos_forcing",
+                    args=[run_type, "--run-date", run_date],
+                    host="localhost",
+                ),
+                NextWorker(
+                    "nowcast.workers.make_fvcom_rivers_forcing",
+                    args=[
+                        (config["vhfr fvcom runs"]["host"]),
+                        run_type,
+                        "--run-date",
+                        run_date,
+                    ],
+                    host=(config["vhfr fvcom runs"]["host"]),
+                ),
+            ]
         )
     return next_workers[msg.type]
 
@@ -1044,19 +1051,12 @@ def after_watch_fvcom(msg, config, checklist):
             )
         )
         if run_type == "nowcast":
-            next_workers[msg.type].extend(
-                [
-                    NextWorker(
-                        "nowcast.workers.make_fvcom_boundary",
-                        args=[(config["vhfr fvcom runs"]["host"]), "forecast"],
-                        host=(config["vhfr fvcom runs"]["host"]),
-                    ),
-                    NextWorker(
-                        "nowcast.workers.make_fvcom_rivers_forcing",
-                        args=[(config["vhfr fvcom runs"]["host"]), "forecast"],
-                        host=(config["vhfr fvcom runs"]["host"]),
-                    ),
-                ]
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_fvcom_boundary",
+                    args=[(config["vhfr fvcom runs"]["host"]), "forecast"],
+                    host=(config["vhfr fvcom runs"]["host"]),
+                )
             )
     return next_workers[msg.type]
 
