@@ -13,7 +13,7 @@ file group: sallen
 weather:
   download:
     # Directory where ECCC datamart hrdps/weat/ mirror files are stored
-    datamart dir: /results/forcing/atmospheric/GEM2.5/GRIB/datamart/
+    datamart dir: /SalishSeaCast/datamart/hrdps-west/
     # URL from which to download ECCC HRDPS west domain forecast fields files
     # **Must be quoted to project {} characters**
     url template: 'http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
@@ -54,7 +54,7 @@ weather:
 
 rivers:
   # Directory where ECCC datamart hydrometric CSV files are stored
-  datamart dir: /results/forcing/rivers/datamart/
+  datamart dir: /SalishSeaCast/datamart/hydrometric/
   # ECCC datamart hydrometric CSV file name template
   # **Must be quoted to protect {} characters**
   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
