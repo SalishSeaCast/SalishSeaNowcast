@@ -54,11 +54,13 @@ def main():
     worker.init_cli()
     worker.cli.add_argument(
         "run_type",
-        choices={"forecast", "forecast2"},
+        choices={"nowcast-green", "forecast", "forecast2"},
         help="""
         Type of run to produce plots for:
         'forecast' means forecast physics-only runs,
-        'forecast2' means forecast2 preliminary forecast physics-only runs.
+        'forecast2' means forecast2 preliminary forecast physics-only runs,
+        'nowcast-green' means nowcast-green run-of-record runs 
+        (primarily used to generate tiles for a past date from archival run results)
         """,
     )
     worker.cli.add_date_option(
@@ -117,14 +119,29 @@ def make_surface_current_tiles(parsed_args, config, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
-    run_type = parsed_args.run_type  # forecast, forecast2
+    run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     num_procs = parsed_args.nprocs
     dmy = run_date.format("DDMMMYY").lower()
     dmym1 = run_date.replace(days=-1).format("DDMMMYY").lower()
-
-    ## TODO: Change to get results from ERDDAP rolling forecast
-    results_dir0 = Path(config["results archive"][run_type], dmy)
+    ## TODO: Change to get results from ERDDAP rolling forecast for run_type == forecast*
+    results_dir0 = (
+        Path(
+            config["results archive"]["nowcast-green"],
+            run_date.shift(days=+2).format("DDMMMYY").lower(),
+        )
+        if run_type == "nowcast-green"
+        else Path(config["results archive"][run_type], dmy)
+    )
+    if run_type == "nowcast-green":
+        results_dirm1 = Path(
+            config["results archive"]["nowcast-green"],
+            run_date.shift(days=+1).format("DDMMMYY").lower(),
+        )
+        results_dirm2 = Path(
+            config["results archive"]["nowcast-green"],
+            run_date.format("DDMMMYY").lower(),
+        )
 
     if run_type == "forecast":
         results_dirm1 = Path(config["results archive"]["nowcast"], dmy)
