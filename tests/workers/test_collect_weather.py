@@ -38,7 +38,7 @@ file group: allen
 
 weather:
   download:
-    datamart dir: forcing/atmospheric/GEM2.5/GRIB/datamart
+    datamart dir: datamart/hrdps-west/
     GRIB dir: forcing/atmospheric/GEM2.5/GRIB/
     forecast duration: 48
     file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
@@ -131,10 +131,7 @@ class TestConfig:
 
     def test_weather_section(self, prod_config):
         weather_download = prod_config["weather"]["download"]
-        assert (
-            weather_download["datamart dir"]
-            == "/results/forcing/atmospheric/GEM2.5/GRIB/datamart/"
-        )
+        assert weather_download["datamart dir"] == "/SalishSeaCast/datamart/hrdps-west/"
         assert (
             weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
         )

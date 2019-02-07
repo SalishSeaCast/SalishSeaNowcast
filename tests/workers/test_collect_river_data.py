@@ -36,7 +36,7 @@ def config(base_config):
         f.write(
             """
 rivers:
-  datamart dir: forcing/rivers/datamart/
+  datamart dir: datamart/hydrometric/
   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
   stations:
     Capilano: 08GA010
@@ -112,7 +112,7 @@ class TestConfig:
 
     def test_rivers_sections(self, prod_config):
         rivers = prod_config["rivers"]
-        assert rivers["datamart dir"] == "/results/forcing/rivers/datamart/"
+        assert rivers["datamart dir"] == "/SalishSeaCast/datamart/hydrometric/"
         assert rivers["csv file template"] == "BC_{stn_id}_hourly_hydrometric.csv"
         assert rivers["stations"] == {
             "Capilano": "08GA010",
