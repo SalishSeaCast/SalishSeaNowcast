@@ -1424,6 +1424,27 @@ class TestAfterMakeFVCOMBoundary:
         assert expected in workers
 
 
+class TestAfterMakeFVCOMRiversForcing:
+    """Unit tests for the after_make_fvcom_rivers_forcing function.
+    """
+
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "crash",
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+        ],
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_fvcom_rivers_forcing(
+            Message("make_fvcom_rivers_forcing", msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterMakeFVCOMAtmosForcing:
     """Unit tests for the after_make_fvcom_atmos_forcing function.
     """
