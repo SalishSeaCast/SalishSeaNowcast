@@ -42,10 +42,15 @@ figures:
 
 results archive:
   nowcast: results/nowcast-blue.201806/
+  nowcast-green: results/nowcast-green.201806/
   forecast: results/forecast.201806/
   forecast2: results/forecast2.201806/
   
 run types:
+  nowcast-green:
+    coordinates: coordinates_seagrid_SalishSea201702.nc
+    bathymetry: bathymetry_201702.nc
+    mesh mask: mesh_mask201702.nc
   forecast:
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
@@ -83,7 +88,7 @@ class TestMain:
         make_surface_current_tiles.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
         assert args == ("run_type",)
-        assert kwargs["choices"] == {"forecast", "forecast2"}
+        assert kwargs["choices"] == {"nowcast-green", "forecast", "forecast2"}
         assert "help" in kwargs
 
     def test_add_run_date_option(self, m_worker):
@@ -135,6 +140,8 @@ class TestConfig:
     @pytest.mark.parametrize(
         "msg",
         (
+            "success nowcast-green",
+            "failure nowcast-green",
             "success forecast",
             "failure forecast",
             "success forecast2",
@@ -164,10 +171,14 @@ class TestConfig:
         assert "results archive" in prod_config
         results_archive = prod_config["results archive"]
         assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201806/"
+        assert (
+            results_archive["nowcast-green"]
+            == "/results2/SalishSea/nowcast-green.201806/"
+        )
         assert results_archive["forecast"] == "/results/SalishSea/forecast.201806/"
         assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201806/"
 
-    @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
+    @pytest.mark.parametrize("run_type", ["nowcast-green", "forecast", "forecast2"])
     def test_run_types_section(self, run_type, prod_config):
         assert "run types" in prod_config
         run_types = prod_config["run types"]
@@ -179,7 +190,7 @@ class TestConfig:
         assert run_types[run_type]["mesh mask"] == "mesh_mask201702.nc"
 
 
-@pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
+@pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function.
@@ -196,7 +207,7 @@ class TestSuccess:
         assert msg_type == f"success {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
+@pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function.
@@ -213,7 +224,7 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
+@pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestMakeSurfaceCurrentTiles:
     """Unit tests for make_surface_current_tiles() function.
