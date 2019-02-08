@@ -157,7 +157,7 @@ def _prep_fig_axes(figsize, theme):
 
 def _plot_current_speed_time_series(ax, plot_data, theme):
     plot_data.obs_speed.plot(
-        ax=ax["mps"],
+        ax=ax["knots"],
         marker=".",
         linestyle="None",
         label=plot_data.obs_speed.attrs["label"],
@@ -240,7 +240,7 @@ def _current_direction_axes_labels(ax, plot_data, theme):
 
 def _plot_u_velocity_time_series(ax, plot_data, theme):
     plot_data.obs_u.plot(
-        ax=ax["mps"],
+        ax=ax["knots"],
         marker=".",
         linestyle="None",
         label=plot_data.obs_u.attrs["label"],
