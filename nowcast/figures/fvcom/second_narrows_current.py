@@ -103,7 +103,7 @@ def _prep_plot_data(place, fvcom_stns_dataset, obs_dataset):
         data_vars={
             "speed": (
                 {"time": obs_dataset.data_vars["s.time"].size},
-                obs_dataset.data_vars["s.speed"],
+                unit_conversions.knots_mps(obs_dataset.data_vars["s.speed"]),
                 obs_dataset.data_vars["s.speed"].attrs,
             ),
             "direction": (
@@ -142,22 +142,16 @@ def _prep_fig_axes(figsize, theme):
     fig, (ax_speed, ax_dir, ax_u) = plt.subplots(
         3, 1, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
-    ax_speed = {"mps": ax_speed}
-    ax_speed["knots"] = ax_speed["mps"].twinx()
-    for ax in ax_speed:
-        ax_speed[ax].set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_speed.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     ax_dir.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
-    ax_u = {"mps": ax_u}
-    ax_u["knots"] = ax_u["mps"].twinx()
-    for ax in ax_u:
-        ax_u[ax].set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_u.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     fig.autofmt_xdate()
     return fig, (ax_speed, ax_dir, ax_u)
 
 
 def _plot_current_speed_time_series(ax, plot_data, theme):
     plot_data.obs_speed.plot(
-        ax=ax["knots"],
+        ax=ax,
         marker=".",
         linestyle="None",
         label=plot_data.obs_speed.attrs["label"],
@@ -169,7 +163,7 @@ def _plot_current_speed_time_series(ax, plot_data, theme):
         ],
     )
     plot_data.fvcom_speed.plot(
-        ax=ax["mps"],
+        ax=ax,
         linewidth=2,
         color=theme.COLOURS["time series"]["2nd Narrows model current speed"],
         label=plot_data.fvcom_speed.attrs["label"],
@@ -178,29 +172,22 @@ def _plot_current_speed_time_series(ax, plot_data, theme):
 
 
 def _current_speed_axes_labels(ax, plot_data, theme):
-    ax["mps"].set_title(
+    ax.set_title(
         "Current at 2nd Narrows",
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
     )
     mps_limits = numpy.array((0, 5))
-    ax["mps"].set_ylabel(
+    ax.set_ylabel(
         f'{plot_data.fvcom_speed.attrs["long_name"]} '
         f'[{plot_data.fvcom_speed.attrs["units"]}]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
-    ax["mps"].set_ylim(mps_limits)
-    ax["knots"].set_ylabel(
-        f'{plot_data.fvcom_speed.attrs["long_name"]} [knots]',
-        fontproperties=theme.FONTS["axis"],
-        color=theme.COLOURS["text"]["axis"],
-    )
-    ax["knots"].set_ylim(unit_conversions.mps_knots(mps_limits))
-    ax["mps"].legend(loc="best")
-    ax["mps"].grid(axis="both")
-    for k in ax:
-        theme.set_axis_colors(ax[k])
+    ax.set_ylim(mps_limits)
+    ax.legend(loc="best")
+    ax.grid(axis="both")
+    theme.set_axis_colors(ax)
 
 
 def _plot_current_direction_time_series(ax, plot_data, theme):
@@ -240,7 +227,7 @@ def _current_direction_axes_labels(ax, plot_data, theme):
 
 def _plot_u_velocity_time_series(ax, plot_data, theme):
     plot_data.obs_u.plot(
-        ax=ax["knots"],
+        ax=ax,
         marker=".",
         linestyle="None",
         label=plot_data.obs_u.attrs["label"],
@@ -252,7 +239,7 @@ def _plot_u_velocity_time_series(ax, plot_data, theme):
         ],
     )
     plot_data.fvcom_u.plot(
-        ax=ax["mps"],
+        ax=ax,
         linewidth=2,
         color=theme.COLOURS["time series"]["2nd Narrows model current speed"],
         label=plot_data.fvcom_u.attrs["label"],
@@ -261,26 +248,19 @@ def _plot_u_velocity_time_series(ax, plot_data, theme):
 
 
 def _u_velocity_axes_labels(ax, plot_data, theme):
-    ax["mps"].set_xlabel(
+    ax.set_xlabel(
         f'Time [{plot_data.fvcom_u.attrs["tz_name"]}]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
-    ax["mps"].xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
+    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     mps_limits = numpy.array((-5, 5))
-    ax["mps"].set_ylabel(
+    ax.set_ylabel(
         f'{plot_data.fvcom_u.attrs["long_name"]} '
         f'[{plot_data.fvcom_u.attrs["units"]}]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
-    ax["mps"].set_ylim(mps_limits)
-    ax["knots"].set_ylabel(
-        f'{plot_data.fvcom_u.attrs["long_name"]} [knots]',
-        fontproperties=theme.FONTS["axis"],
-        color=theme.COLOURS["text"]["axis"],
-    )
-    ax["knots"].set_ylim(unit_conversions.mps_knots(mps_limits))
-    ax["mps"].grid(axis="both")
-    for k in ax:
-        theme.set_axis_colors(ax[k])
+    ax.set_ylim(mps_limits)
+    ax.grid(axis="both")
+    theme.set_axis_colors(ax)
