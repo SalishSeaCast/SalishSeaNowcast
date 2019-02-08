@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -302,11 +302,31 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
         "namelist.vertical",
         "namelist.compute",
     )
-    for namelist in namelist_sections:
-        namelists["namelist_cfg"].append(os.fspath((run_sets_dir / namelist).resolve()))
+    namelists["namelist_cfg"].extend(
+        [
+            os.fspath((run_sets_dir / namelist).resolve())
+            for namelist in namelist_sections
+        ]
+    )
     if run_type == "nowcast-green":
-        for namelist in ("namelist_top_cfg", "namelist_smelt_cfg"):
-            namelists[namelist] = [os.fspath((run_sets_dir / namelist).resolve())]
+        namelist_top_sections = (
+            "namelist_top_restart",
+            "namelist_top_TracerDefAndBdy",
+            "namelist_top_physics",
+        )
+        namelists["namelist_top_cfg"] = [
+            os.fspath((run_sets_dir / namelist).resolve())
+            for namelist in namelist_top_sections
+        ]
+        namelist_smelt_sections = (
+            "namelist_smelt_biology",
+            "namelist_smelt_rivers",
+            "namelist_smelt_skog",
+        )
+        namelists["namelist_smelt_cfg"] = [
+            os.fspath((run_sets_dir / namelist).resolve())
+            for namelist in namelist_smelt_sections
+        ]
     nemo_config_name = config["run types"][run_type]["config name"]
     run_desc = salishsea_cmd.api.run_description(
         run_id=run_id,

@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -36,14 +36,16 @@ def config(base_config):
         f.write(
             """
 rivers:
-  datamart dir: forcing/rivers/datamart/
+  datamart dir: datamart/hydrometric/
   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
   stations:
-    Fraser: 08MF005
+    Capilano: 08GA010
     Englishman: 08HB002
+    Fraser: 08MF005
   SOG river files:
-    Fraser: SOG-projects/SOG-forcing/ECget/Fraser_flow
+    Capilano: /opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow
     Englishman: SOG-projects/SOG-forcing/ECget/Englishman_flow
+    Fraser: SOG-projects/SOG-forcing/ECget/Fraser_flow
 """
         )
     config_ = nemo_nowcast.Config()
@@ -110,16 +112,24 @@ class TestConfig:
 
     def test_rivers_sections(self, prod_config):
         rivers = prod_config["rivers"]
-        assert rivers["datamart dir"] == "/results/forcing/rivers/datamart/"
+        assert rivers["datamart dir"] == "/SalishSeaCast/datamart/hydrometric/"
         assert rivers["csv file template"] == "BC_{stn_id}_hourly_hydrometric.csv"
-        assert rivers["stations"] == {"Fraser": "08MF005", "Englishman": "08HB002"}
+        assert rivers["stations"] == {
+            "Capilano": "08GA010",
+            "Englishman": "08HB002",
+            "Fraser": "08MF005",
+        }
         assert (
-            rivers["SOG river files"]["Fraser"]
-            == "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow"
+            rivers["SOG river files"]["Capilano"]
+            == "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow"
         )
         assert (
             rivers["SOG river files"]["Englishman"]
             == "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow"
+        )
+        assert (
+            rivers["SOG river files"]["Fraser"]
+            == "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow"
         )
 
 

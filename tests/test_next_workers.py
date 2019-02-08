@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,7 +29,13 @@ def config():
     a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
     """
     return {
-        "rivers": {"stations": {"Fraser": "08MF005", "Englishman": "08HB002"}},
+        "rivers": {
+            "stations": {
+                "Capilano": "08GA010",
+                "Englishman": "08HB002",
+                "Fraser": "08MF005",
+            }
+        },
         "observations": {
             "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
             "ferry data": {"ferries": {"TWDP": {}}},
@@ -110,12 +116,17 @@ class TestAfterDownloadWeather:
         expected = [
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Fraser", "--data-date", "2018-12-26"],
+                ["Capilano", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.collect_river_data",
                 ["Englishman", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
         ]
@@ -179,6 +190,130 @@ class TestAfterDownloadWeather:
     def test_success_12_launch_download_live_ocean(self, config, checklist):
         workers = next_workers.after_download_weather(
             Message("download_weather", "success 12"), config, checklist
+        )
+        expected = NextWorker(
+            "nowcast.workers.download_live_ocean", [], host="localhost"
+        )
+        assert expected in workers
+
+
+class TestAfterCollectWeather:
+    """Unit tests for the after_collect_weather function.
+    """
+
+    @pytest.mark.parametrize(
+        "msg_type", ["crash", "failure 00", "failure 06", "failure 12", "failure 18"]
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", msg_type), config, checklist
+        )
+        assert workers == []
+
+    @pytest.mark.parametrize(
+        "msg_type, args",
+        (
+            ("success 00", ["06"]),
+            ("success 06", ["12"]),
+            ("success 12", ["18"]),
+            ("success 18", ["00"]),
+        ),
+    )
+    def test_success_launch_next_forecast_collect_weather(
+        self, msg_type, args, config, checklist
+    ):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", msg_type), config, checklist
+        )
+        expected = NextWorker("nowcast.workers.collect_weather", args, host="localhost")
+        assert expected in workers
+
+    def test_success_06_launch_collect_river_data(self, config, checklist):
+        with patch(
+            "nowcast.workers.collect_river_data.arrow.now",
+            return_value=arrow.get("2018-12-27"),
+            autospec=True,
+        ):
+            workers = next_workers.after_collect_weather(
+                Message("collect_weather", "success 06"), config, checklist
+            )
+        expected = [
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["Capilano", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["Englishman", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["Fraser", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
+        ]
+        for next_worker in expected:
+            assert next_worker in workers
+
+    @pytest.mark.parametrize(
+        "msg_type, args", [("success 06", ["forecast2"]), ("success 12", ["nowcast"])]
+    )
+    def test_success_launch_get_NeahBay_ssh(self, msg_type, args, config, checklist):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", msg_type), config, checklist
+        )
+        expected = NextWorker("nowcast.workers.get_NeahBay_ssh", args, host="localhost")
+        assert expected in workers
+
+    @pytest.mark.parametrize(
+        "msg_type, args", [("success 06", ["forecast2"]), ("success 12", ["nowcast+"])]
+    )
+    def test_success_launch_grib_to_netcdf(self, msg_type, args, config, checklist):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", msg_type), config, checklist
+        )
+        expected = NextWorker("nowcast.workers.grib_to_netcdf", args, host="localhost")
+        assert expected in workers
+
+    @pytest.mark.parametrize("ctd_stn", ["SCVIP", "SEVIP", "USDDL"])
+    def test_success_06_launch_get_onc_ctd(self, ctd_stn, config, checklist):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", "success 06"), config, checklist
+        )
+        expected = NextWorker(
+            "nowcast.workers.get_onc_ctd", args=[ctd_stn], host="localhost"
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize("ferry_platform", ["TWDP"])
+    def test_success_06_launch_get_onc_ferry(self, ferry_platform, config, checklist):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", "success 06"), config, checklist
+        )
+        expected = NextWorker(
+            "nowcast.workers.get_onc_ferry", args=[ferry_platform], host="localhost"
+        )
+        assert expected in workers
+
+    def test_success_06_launch_get_vfpa_hadcp_for_prev_day(self, config, checklist):
+        with patch(
+            "nowcast.next_workers.arrow.utcnow", return_value=arrow.get("2018-11-08")
+        ):
+            workers = next_workers.after_collect_weather(
+                Message("collect_weather", "success 06"), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.get_vfpa_hadcp",
+            args=["--data-date", "2018-11-07"],
+            host="localhost",
+        )
+        assert expected in workers
+
+    def test_success_12_launch_download_live_ocean(self, config, checklist):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", "success 12"), config, checklist
         )
         expected = NextWorker(
             "nowcast.workers.download_live_ocean", [], host="localhost"
@@ -309,14 +444,12 @@ class TestAfterGribToNetcdf:
         )
         assert not_expected not in workers
 
-    def test_success_nowcastp_launch_ping_erddap_download_weather(
-        self, config, checklist
-    ):
+    def test_success_nowcastp_launch_ping_erddap_weather(self, config, checklist):
         workers = next_workers.after_grib_to_netcdf(
             Message("grib_to_netcdf", "success nowcast+"), config, checklist
         )
         expected = NextWorker(
-            "nowcast.workers.ping_erddap", args=["download_weather"], host="localhost"
+            "nowcast.workers.ping_erddap", args=["weather"], host="localhost"
         )
         assert expected in workers
 
@@ -906,7 +1039,7 @@ class TestAfterWatchNEMO:
         )
         assert workers[1] == expected
 
-    def test_success_forecast_launch_make_fvcom_boundary(self, config, checklist):
+    def test_success_forecast_no_launch_make_fvcom_boundary(self, config, checklist):
         workers = next_workers.after_watch_NEMO(
             Message(
                 "watch_NEMO",
@@ -927,7 +1060,7 @@ class TestAfterWatchNEMO:
             args=["west.cloud", "forecast"],
             host="west.cloud",
         )
-        assert expected in workers
+        assert expected not in workers
 
     def test_success_forecast2_launch_make_ww3_wind_file_forecast2(
         self, config, checklist
@@ -1265,6 +1398,52 @@ class TestAfterMakeFVCOMBoundary:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    def test_success_launch_make_fvcom_rivers_forcing(
+        self, run_type, config, checklist
+    ):
+        workers = next_workers.after_make_fvcom_boundary(
+            Message(
+                "make_fvcom_boundary",
+                f"success {run_type}",
+                payload={
+                    run_type: {
+                        "run date": "2019-02-06",
+                        "open boundary file": "input/bdy_nowcast_btrp_20180316.nc",
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_fvcom_rivers_forcing",
+            args=["west.cloud", run_type, "--run-date", "2019-02-06"],
+            host="west.cloud",
+        )
+        assert expected in workers
+
+
+class TestAfterMakeFVCOMRiversForcing:
+    """Unit tests for the after_make_fvcom_rivers_forcing function.
+    """
+
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "crash",
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+        ],
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_fvcom_rivers_forcing(
+            Message("make_fvcom_rivers_forcing", msg_type), config, checklist
+        )
+        assert workers == []
+
 
 class TestAfterMakeFVCOMAtmosForcing:
     """Unit tests for the after_make_fvcom_atmos_forcing function.
@@ -1360,7 +1539,9 @@ class TestAfterWatchFVCOM:
     """Unit tests for the after_watch_fvcom function.
     """
 
-    @pytest.mark.parametrize("msg_type", ["crash", "failure nowcast"])
+    @pytest.mark.parametrize(
+        "msg_type", ["crash", "failure nowcast", "failure forecast"]
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_fvcom(
             Message("watch_fvcom", msg_type), config, checklist
@@ -1380,7 +1561,18 @@ class TestAfterWatchFVCOM:
                         "completed": True,
                     }
                 },
-            )
+            ),
+            Message(
+                "watch_fvcom",
+                "success forecast",
+                {
+                    "forecast": {
+                        "host": "west.cloud",
+                        "run date": "2018-02-16",
+                        "completed": True,
+                    }
+                },
+            ),
         ],
     )
     def test_success_launch_download_fvcom_results(self, msg, config, checklist):
@@ -1395,6 +1587,29 @@ class TestAfterWatchFVCOM:
                 msg.payload[run_type]["run date"],
             ],
             host="localhost",
+        )
+        assert expected in workers
+
+    def test_success_nowcast_launch_make_fvcom_boundary(self, config, checklist):
+        workers = next_workers.after_watch_fvcom(
+            Message(
+                "watch_fvcom",
+                "success nowcast",
+                {
+                    "nowcast": {
+                        "host": "west.cloud",
+                        "run date": "2019-01-18",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_fvcom_boundary",
+            args=["west.cloud", "forecast"],
+            host="west.cloud",
         )
         assert expected in workers
 

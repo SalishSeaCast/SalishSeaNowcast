@@ -1,4 +1,4 @@
-..  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+..  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 ..  and The University of British Columbia
 ..
 ..  Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,12 +32,16 @@ Cold Start
 The long-running processes in the nowcast system framework,
 the message broker,
 the manager,
-and the scheduler,
+and the log_aggregator,
 are managed by the `circus`_ process manager tool.
+So is the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_ with:
+
+.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst#documentation
+.. _ECCC MSC datamart service: https://dd.weather.gc.ca/
 
 .. _circus: https://circus.readthedocs.io/en/latest/
 
-Start the nowcast system with:
+Start the nowcast system and sarracenia client with:
 
 .. code-block:: bash
 
@@ -67,11 +71,11 @@ A few that are useful:
 * :kbd:`list` to get a comma-separated list of the processes that :command:`circusd` is managing
 * :kbd:`status` to see their status
 * :kbd:`stop` to stop a process;
-  e.g. :kbd:`stop scheduler`
+  e.g. :kbd:`stop manager`
 * :kbd:`start` to start a stopped process;
-  e.g. :kbd:`start scheduler`
+  e.g. :kbd:`start manager`
 * :kbd:`restart` to stop and restart a process;
-  e.g. :kbd:`restart scheduler`
+  e.g. :kbd:`restart manager`
 * :kbd:`signal hup` to send a :kbd:`HUP` signal to a process,
   which will cause it to reload its configuration from the :envvar:`NOWCAST_YAML` file that the process was started with;
   e.g. :kbd:`signal hup manager`.
@@ -79,3 +83,7 @@ A few that are useful:
 * :kbd:`quit` to stop all of the processes and shutdown :command:`circusd`
 
 Use :kbd:`ctrl-c` to exit from :command:`circusctl`.
+
+`sr_subscribe`_ is the command-line interface for interacting with the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
+
+.. _sr_subscribe: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst

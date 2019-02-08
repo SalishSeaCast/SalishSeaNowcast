@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -177,7 +177,7 @@ def _make_hour_dataset(csv_dir, utc_start_hr, place):
     var_attrs = {
         "speed": {
             "name": "speed",
-            "units": "m/s",
+            "units": "kts",
             "ioos_category": "currents",
             "standard_name": "sea_water_speed",
             "long_name": "Current Speed",
@@ -215,7 +215,7 @@ def _make_hour_dataset(csv_dir, utc_start_hr, place):
             "Fisheries and Oceans Canada, Institute of Ocean Sciences"
         ),
         "license": (
-            "The Salish Sea MEOPAR observation datasets are copyright 2013-2018 by the "
+            "The Salish Sea MEOPAR observation datasets are Copyright 2013-2019 by the "
             "Salish Sea MEOPAR Project Contributors, The University of British Columbia, "
             "and the Vancouver Fraser Port Authority. "
             "They are licensed under the Apache License, Version 2.0. "

@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -163,10 +163,10 @@ class TestRunNEMO_Hindcast:
         parsed_args = SimpleNamespace(
             host_name="cedar",
             full_month=full_month,
-            prev_run_date=arrow.get("2018-06-01"),
+            prev_run_date=arrow.get("2019-01-11"),
         )
         with patch("nowcast.workers.run_NEMO_hindcast.arrow.now") as m_now:
-            m_now.return_value = arrow.get("2018-06-08")
+            m_now.return_value = arrow.get("2019-01-30")
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, self.config)
         expected = {"hindcast": {"host": "cedar", "run id": "None"}}
         assert checklist == expected
@@ -297,28 +297,28 @@ class TestRunNEMO_Hindcast:
                 arrow.get("2018-07-01"),
                 None,
                 arrow.get("2018-08-01"),
-                "08:30:00",
+                "12:00:00",
             ),  # default
             (
                 True,
                 arrow.get("2018-07-01"),
-                "12:00:00",
+                "15:00:00",
                 arrow.get("2018-08-01"),
-                "12:00:00",
+                "15:00:00",
             ),
             (
                 False,
                 arrow.get("2018-07-01"),
                 None,
                 arrow.get("2018-07-11"),
-                "03:00:00",
+                "06:00:00",
             ),  # default
             (
                 False,
                 arrow.get("2018-07-01"),
-                "06:00:00",
+                "09:00:00",
                 arrow.get("2018-07-11"),
-                "06:00:00",
+                "09:00:00",
             ),
         ],
     )
@@ -683,7 +683,8 @@ class TestLaunchRun:
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            "bin/salishsea run runs/01may18hindcast.yaml scratch/01may18",
+            "bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
+            "--deflate --max-deflate-jobs 48",
             "cedar",
             m_logger,
         )
@@ -700,6 +701,7 @@ class TestLaunchRun:
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
             "bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
+            "--deflate --max-deflate-jobs 48 "
             "--waitjob 12345678 --nocheck-initial-conditions",
             "cedar",
             m_logger,

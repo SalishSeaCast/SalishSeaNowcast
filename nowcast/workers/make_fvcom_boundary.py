@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -232,10 +232,21 @@ def make_fvcom_boundary(parsed_args, config, *args):
         nemo_file_list=nemo_files_list,
         time_start=time_start.format("YYYY-MM-DD HH:mm:ss"),
         time_end=time_end.format("YYYY-MM-DD HH:mm:ss"),
-        ua_name="ubarotropic",
-        va_name="vbarotropic",
+        opt="BRCL",
+        gdept_0=gdept_0,
+        gdepw_0=gdepw_0,
+        gdepu=gdepu,
+        gdepv=gdepv,
+        tmask=tmask,
+        umask=umask,
+        vmask=vmask,
+        u_name="uvelocity",
+        v_name="vvelocity",
+        w_name="wvelocity",
+        t_name="cons_temp",
+        s_name="ref_salinity",
     )
-    logger.debug(f"Stored VHFR FVCOM open boundary file: {fvcom_input_dir/bdy_file}")
+    logger.info(f"Stored VHFR FVCOM open boundary file: {fvcom_input_dir/bdy_file}")
     checklist = {
         run_type: {
             "run date": run_date.format("YYYY-MM-DD"),

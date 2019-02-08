@@ -1,4 +1,4 @@
-..  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+..  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 ..  and The University of British Columbia
 ..
 ..  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,6 @@ The production deployment uses 3 systems:
 
 #. The :py:mod:`nemo_nowcast.message_broker`,
    :py:mod:`nemo_nowcast.manager`,
-   :py:mod:`nemo_nowcast.scheduler`,
    :py:mod:`nemo_nowcast.log_aggregator`,
    most of the pre- and post-processing workers run on the :ref:`SalishSeaModelResultsServer`, :kbd:`skookum`, where the deployment is in the :file:`/results/nowcast-sys/` directory tree.
 

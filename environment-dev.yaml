@@ -51,10 +51,10 @@ dependencies:
   - pyyaml
   - pyzmq
   - requests
-  - schedule
   - scipy
   - shapely
   - verboselogs
+  - watchdog
   - xarray
 
   # For coding style
@@ -80,6 +80,7 @@ dependencies:
     - feedgen
     - python-hglib
     - retrying
+    - schedule
     - scour
     - utm
     - zeep
