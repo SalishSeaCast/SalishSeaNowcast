@@ -1,4 +1,4 @@
-..  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+..  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 ..  and The University of British Columbia
 ..
 ..  Licensed under the Apache License, Version 2.0 (the "License");
@@ -290,7 +290,6 @@ The output looks something like::
   (line   23) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseanowcast-repo
   (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.message_broker
   (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.log_aggregator
-  (line   28) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.scheduler
   (line   43) ok        http://www.oceannetworks.ca/
   (line   43) ok        https://www.westgrid.ca/support/systems/arbutus
   (line   43) ok        https://en.wikipedia.org/wiki/Ceph_(software)
@@ -373,7 +372,6 @@ The output looks something like::
   (line   55) ok        https://www.westgrid.ca/
   (line   23) ok        https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html
   (line   61) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/index.html#frameworkarchitecture
-  (line   81) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/scheduler.html#scheduler
   (line   61) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo-nowcastbuiltinworkers
   (line  113) ok        http://www.apache.org/licenses/LICENSE-2.0
   (line  109) ok        https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
@@ -569,7 +567,7 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2018 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+The Salish Sea NEMO model nowcast system code and documentation are Copyright 2013-2019 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
 
 .. _Salish Sea MEOPAR Project Contributors: https://bitbucket.org/salishsea/docs/src/tip/CONTRIBUTORS.rst
 

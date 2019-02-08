@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -88,6 +88,55 @@ def after_download_weather(msg, config, checklist):
                 NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
                 NextWorker("nowcast.workers.download_live_ocean"),
             ]
+        )
+    return next_workers[msg.type]
+
+
+def after_collect_weather(msg, config, checklist):
+    """Calculate the list of workers to launch after the collect_weather worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        "crash": [],
+        "failure 00": [],
+        "failure 06": [],
+        "failure 12": [],
+        "failure 18": [],
+        "success 00": [],
+        "success 06": [],
+        "success 12": [],
+        "success 18": [],
+        msg.type: after_download_weather(msg, config, checklist),
+    }
+    if msg.type.endswith("00"):
+        next_workers["success 00"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["06"])
+        )
+    if msg.type.endswith("06"):
+        next_workers["success 06"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["12"])
+        )
+    if msg.type.endswith("12"):
+        next_workers["success 12"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["18"])
+        )
+    if msg.type.endswith("18"):
+        next_workers["success 18"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["00"])
         )
     return next_workers[msg.type]
 
@@ -208,7 +257,7 @@ def after_grib_to_netcdf(msg, config, checklist):
         _, run_type = msg.type.split()
         if run_type == "nowcast+":
             next_workers["success nowcast+"].append(
-                NextWorker("nowcast.workers.ping_erddap", args=["download_weather"])
+                NextWorker("nowcast.workers.ping_erddap", args=["weather"])
             )
         if run_type == "forecast2":
             for host in config["run"]["enabled hosts"]:
@@ -579,7 +628,7 @@ def after_watch_NEMO(msg, config, checklist):
         run_type = msg.type.split()[1]
         wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[1]
         if run_type == "nowcast":
-            next_workers["success nowcast"].extend(
+            next_workers[msg.type].extend(
                 [
                     NextWorker("nowcast.workers.get_NeahBay_ssh", args=["forecast"]),
                     NextWorker(
@@ -592,7 +641,7 @@ def after_watch_NEMO(msg, config, checklist):
         if run_type == "forecast":
             if wave_forecast_after == "forecast":
                 host_name = config["wave forecasts"]["host"]
-                next_workers["success forecast"].extend(
+                next_workers[msg.type].extend(
                     [
                         NextWorker(
                             "nowcast.workers.make_ww3_wind_file",
@@ -607,23 +656,16 @@ def after_watch_NEMO(msg, config, checklist):
                     ]
                 )
             else:
-                next_workers["success forecast"].append(
+                next_workers[msg.type].append(
                     NextWorker(
                         "nowcast.workers.make_turbidity_file",
                         args=["--run-date", msg.payload[run_type]["run date"]],
                     )
                 )
-            next_workers["success forecast"].append(
-                NextWorker(
-                    "nowcast.workers.make_fvcom_boundary",
-                    args=[(config["vhfr fvcom runs"]["host"]), "forecast"],
-                    host=(config["vhfr fvcom runs"]["host"]),
-                )
-            )
         if run_type == "nowcast-green":
             if wave_forecast_after == "nowcast-green":
                 host_name = config["wave forecasts"]["host"]
-                next_workers["success nowcast-green"].extend(
+                next_workers[msg.type].extend(
                     [
                         NextWorker(
                             "nowcast.workers.make_ww3_wind_file",
@@ -640,7 +682,7 @@ def after_watch_NEMO(msg, config, checklist):
             for host in config["run"]["enabled hosts"]:
                 run_types = config["run"]["enabled hosts"][host]["run types"]
                 if "nowcast-dev" in run_types:
-                    next_workers["success nowcast-green"].append(
+                    next_workers[msg.type].append(
                         NextWorker(
                             "nowcast.workers.make_forcing_links",
                             args=[host, "nowcast+", "--shared-storage"],
@@ -648,7 +690,7 @@ def after_watch_NEMO(msg, config, checklist):
                     )
         if run_type == "forecast2":
             host_name = config["wave forecasts"]["host"]
-            next_workers["success forecast2"].extend(
+            next_workers[msg.type].extend(
                 [
                     NextWorker(
                         "nowcast.workers.make_ww3_wind_file",
@@ -837,14 +879,54 @@ def after_make_fvcom_boundary(msg, config, checklist):
         host_name = config["vhfr fvcom runs"]["host"]
         run_type = msg.type.split()[1]
         run_date = msg.payload[run_type]["run date"]
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.make_fvcom_atmos_forcing",
-                args=[run_type, "--run-date", run_date],
-                host="localhost",
-            )
+        next_workers[msg.type].extend(
+            [
+                NextWorker(
+                    "nowcast.workers.make_fvcom_atmos_forcing",
+                    args=[run_type, "--run-date", run_date],
+                    host="localhost",
+                ),
+                NextWorker(
+                    "nowcast.workers.make_fvcom_rivers_forcing",
+                    args=[
+                        (config["vhfr fvcom runs"]["host"]),
+                        run_type,
+                        "--run-date",
+                        run_date,
+                    ],
+                    host=(config["vhfr fvcom runs"]["host"]),
+                ),
+            ]
         )
     return next_workers[msg.type]
+
+
+def after_make_fvcom_rivers_forcing(msg, config, checklist):
+    """Calculate the list of workers to launch after the
+    after_make_fvcom_rivers_forcing worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        "crash": [],
+        "failure nowcast": [],
+        "failure forecast": [],
+        "success nowcast": [],
+        "success forecast": [],
+    }
+    return []
 
 
 def after_make_fvcom_atmos_forcing(msg, config, checklist):
@@ -996,6 +1078,14 @@ def after_watch_fvcom(msg, config, checklist):
                 ],
             )
         )
+        if run_type == "nowcast":
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_fvcom_boundary",
+                    args=[(config["vhfr fvcom runs"]["host"]), "forecast"],
+                    host=(config["vhfr fvcom runs"]["host"]),
+                )
+            )
     return next_workers[msg.type]
 
 

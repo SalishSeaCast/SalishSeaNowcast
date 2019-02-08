@@ -1,4 +1,4 @@
-..  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+..  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 ..  and The University of British Columbia
 ..
 ..  Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,11 +31,6 @@ The green,
 pink,
 and blue boxes in the figure above are the workers described below.
 
-The :ref:`nemonowcast:Scheduler` is a long-running process that periodically checks the system clock and launches workers when their scheduled time to run is reached.
-It is,
-however,
-only used to launch the :py:mod:`nowcast.workers.download_weather` worker.
-
 The other workers are launched and coordinated by the :ref:`nemonowcast:SystemManager`,
 another long-running process that keeps track of the state of the nowcast system.
 The workers and manager communicate by using the :ref:`nemonowcast:MessagingSystem` to pass messages back and forth.
@@ -49,7 +44,7 @@ Please see :ref:`nemonowcast:FrameworkArchitecture` for a more detailed descript
 The process flow in the diagram above is somewhat idealized.
 For example:
 
-* The :py:mod:`~nowcast.workers.download_weather` worker is launched four times daily,
+* The :py:mod:`~nowcast.workers.collect_weather` worker is launched four times daily,
   to get the hour 00, 06, 12, and 18 UTC forecast products.
 * The :py:mod:`~nowcast.workers.make_runoff_file` worker is only launched after the 06 forecast download finishes because the river runoff forcing is based on daily average discharge values and climatology.
 * The :py:mod:`~nowcast.workers.grib_to_netcdf` worker is only launched after the 06 and 12 forecast downloads finish to prepare the atmospheric forcing files that will be used by the preliminary forecast run,
@@ -187,6 +182,13 @@ Workers
 --------------------------
 
 .. automodule:: nowcast.workers.make_fvcom_boundary
+    :members: main
+
+
+:kbd:`make_fvcom_rivers_forcing`
+--------------------------------
+
+.. automodule:: nowcast.workers.make_fvcom_rivers_forcing
     :members: main
 
 

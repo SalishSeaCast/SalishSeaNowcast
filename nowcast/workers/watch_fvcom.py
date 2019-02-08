@@ -1,4 +1,4 @@
-#  Copyright 2013-2018 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,7 +27,7 @@ from nemo_nowcast import NowcastWorker
 NAME = "watch_fvcom"
 logger = logging.getLogger(NAME)
 
-POLL_INTERVAL = 3 * 60  # seconds
+POLL_INTERVAL = 5 * 60  # seconds
 
 
 def main():
