@@ -177,7 +177,7 @@ def _make_hour_dataset(csv_dir, utc_start_hr, place):
     var_attrs = {
         "speed": {
             "name": "speed",
-            "units": "m/s",
+            "units": "kts",
             "ioos_category": "currents",
             "standard_name": "sea_water_speed",
             "long_name": "Current Speed",
