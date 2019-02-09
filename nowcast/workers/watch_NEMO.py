@@ -94,7 +94,7 @@ def watch_NEMO(parsed_args, config, tell_manager):
             with (run_dir / "time.step").open("rt") as f:
                 time_step = int(f.read().strip())
             model_seconds = (time_step - it000) * rdt
-            model_time = date0.replace(seconds=model_seconds).format(
+            model_time = date0.shift(seconds=model_seconds).format(
                 "YYYY-MM-DD HH:mm:ss UTC"
             )
             fraction_done = (time_step - it000) / (itend - it000)
