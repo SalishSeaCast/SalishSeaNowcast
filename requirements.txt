@@ -7,6 +7,7 @@ appdirs==1.4.3
 argh==0.26.2
 arrow==0.10.0
 asn1crypto==0.22.0
+atomicwrites==1.3.0
 attrs==18.2.0
 Babel==2.5.1
 basemap==1.1.0
@@ -58,8 +59,8 @@ mkl-random==1.0.1
 -e moad_tools==1.0.dev0
 more-itertools==4.1.0
 msgpack-python==0.5.1
--e NEMO-Cmd==1.3.dev0
--e NEMO-Nowcast==18.1.dev0
+-e NEMO-Cmd==19.1.dev0
+-e NEMO-Nowcast==19.2.dev0
 netCDF4==1.3.1
 numpy==1.13.3
 olefile==0.44
@@ -71,7 +72,7 @@ partd==0.3.8
 pathtools==0.1.2
 pbr==3.1.1
 Pillow==5.2.0
-pluggy==0.6.0
+pluggy==0.8.1
 prettytable==0.7.2
 psutil==5.4.0
 py==1.5.2
@@ -87,7 +88,7 @@ pyperclip==1.6.0
 pyproj==1.9.5.1
 pyshp==1.2.12
 PySocks==1.6.8
-pytest==3.2.5
+pytest==4.2.0
 python-dateutil==2.6.1
 python-hglib==2.6.1
 pytz==2017.3
