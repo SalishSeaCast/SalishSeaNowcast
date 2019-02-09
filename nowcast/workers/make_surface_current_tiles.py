@@ -349,7 +349,8 @@ def _apply_pngquant(outfile, level):
         if e.output:
             logger.debug(e.output)
         return
-    logger.debug(proc.stdout)
+    if proc.stdout:
+        logger.debug(proc.stdout)
     tmpfilename.rename(outfile)
     logger.info(f"{outfile.name} palette compression succeeded")
 
