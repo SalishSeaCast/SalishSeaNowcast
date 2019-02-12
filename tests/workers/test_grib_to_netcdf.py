@@ -14,6 +14,7 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast grib_to_netcdf worker.
 """
+from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
@@ -111,7 +112,7 @@ class TestConfig:
         )
         assert (
             weather["grid_defn.pl"]
-            == "/results/nowcast-sys/private-tools/PThupaki/grid_defn.pl"
+            == "/SalishSeaCast/private-tools/PThupaki/grid_defn.pl"
         )
         assert weather["ops dir"] == "/results/forcing/atmospheric/GEM2.5/operational/"
         assert (
@@ -127,13 +128,17 @@ class TestSuccess:
     """
 
     def test_success_log_info(self, m_logger, run_type):
-        parsed_args = Mock(run_type=run_type)
+        parsed_args = SimpleNamespace(
+            run_type=run_type, run_date=arrow.get("2019-02-11")
+        )
         grib_to_netcdf.success(parsed_args)
         assert m_logger.info.called
         assert m_logger.info.call_args[1]["extra"]["run_type"] == run_type
 
     def test_success_msg_type(self, m_logger, run_type):
-        parsed_args = Mock(run_type=run_type)
+        parsed_args = SimpleNamespace(
+            run_type=run_type, run_date=arrow.get("2019-02-11")
+        )
         msg_type = grib_to_netcdf.success(parsed_args)
         assert msg_type == "success {}".format(run_type)
 
@@ -145,13 +150,16 @@ class TestFailure:
     """
 
     def test_failure_log_critical(self, m_logger, run_type):
-        parsed_args = Mock(run_type=run_type)
+        parsed_args = SimpleNamespace(
+            run_type=run_type, run_date=arrow.get("2019-02-11")
+        )
         grib_to_netcdf.failure(parsed_args)
         assert m_logger.critical.called
         assert m_logger.critical.call_args[1]["extra"]["run_type"] == run_type
 
-    @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2"])
     def test_failure_msg_type(self, m_logger, run_type):
-        parsed_args = Mock(run_type=run_type)
+        parsed_args = SimpleNamespace(
+            run_type=run_type, run_date=arrow.get("2019-02-11")
+        )
         msg_type = grib_to_netcdf.failure(parsed_args)
         assert msg_type == "failure {}".format(run_type)
