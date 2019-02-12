@@ -41,7 +41,7 @@ weather:
   # Location of wgrib2 executable
   wgrib2: /data/sallen/MEOPAR/private-tools/grib2/wgrib2/wgrib2
   # Location of Pramod Thupaki's grid_defn.pl script
-  grid_defn.pl: /results/nowcast-sys/private-tools/PThupaki/grid_defn.pl
+  grid_defn.pl: /SalishSeaCast/private-tools/PThupaki/grid_defn.pl
   # Destination directory for NEMO forcing files generated from GRIB2 files
   ops dir: /results/forcing/atmospheric/GEM2.5/operational/
   # Template for the atmospheric forcing file name
@@ -73,12 +73,12 @@ rivers:
     Fraser: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
   # File that describes Fraser River climatology separation from measured
   # flow at Hope
-  Fraser climatology: /results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
+  Fraser climatology: /SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
   # Monthly climatology
   monthly climatology:
-    b201702: /results/nowcast-sys/rivers-climatology/rivers_month_201702.nc
+    b201702: /SalishSeaCast/rivers-climatology/rivers_month_201702.nc
   # Templates for the runoff forcing file names
   # **Must be quoted to project {} characters**
   file templates:
@@ -97,9 +97,9 @@ rivers:
 
 ssh:
   # Coordinates file to get lats/lons from
-  coordinates: /results/nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc
+  coordinates: /SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc
   # Directory containing tidal predication file for sea surface height correction
-  tidal predictions: /results/nowcast-sys/SalishSeaNowcast/tidal_predictions/
+  tidal predictions: /SalishSeaCast/SalishSeaNowcast/tidal_predictions/
   # Name of Neah Bay hourly prediction file
   # **Must be quoted because of space**
   neah bay hourly: 'Neah Bay_1h_tidal_prediction_01-Jan-2013_31-Dec-2020.csv'
@@ -131,7 +131,7 @@ temperature salinity:
   # **Must be quoted to project {} characters**
   file template: 'LiveOcean_v201712_{:y%Ym%md%d}.nc'
   # Mesh mask from which to get grid parameters for boundary conditions files
-  mesh mask: /results/nowcast-sys/grid/mesh_mask201702.nc
+  mesh mask: /SalishSeaCast/grid/mesh_mask201702.nc
 
 
 observations:
@@ -258,7 +258,7 @@ run types:
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
-    sub-grid bathymetry: /results/nowcast-sys/grid/subgrids/BaynesSound/bathymetry_201702_BS.nc
+    sub-grid bathymetry: /SalishSeaCast/grid/subgrids/BaynesSound/bathymetry_201702_BS.nc
     land processor elimination: False
     duration: 1  # day
     restart from: nowcast-agrif
@@ -389,7 +389,7 @@ figures:
     wwatch3 fields:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02.nc?hs,fp
   # Directory in which to find bathymetry and mesh mask files
-  grid dir: /results/nowcast-sys/grid/
+  grid dir: /SalishSeaCast/grid/
   # Pacific Now-West coastline polygons file
   coastline: /ocean/rich/more/mmapbase/bcgeo/PNW.mat
   # Timezone to use in model results figures
@@ -521,12 +521,12 @@ run:
       shared storage: True
       make forcing links: True
       ssh key: SalishSeaNEMO-nowcast_id_rsa
-      envvars: /results/nowcast-sys/nowcast-env/etc/conda/activate.d/envvars.sh
-      python: /results/nowcast-sys/nowcast-env/bin/python
-      config file: /results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
-      run prep dir: /results/nowcast-sys/runs/
-      grid dir: /results/nowcast-sys/grid/
-      salishsea_cmd: /results/nowcast-sys/nowcast-env/bin/salishsea
+      envvars: /SalishSeaCast/nowcast-env/etc/conda/activate.d/envvars.sh
+      python: /SalishSeaCast/nowcast-env/bin/python
+      config file: /SalishSeaCast/SalishSeaNowcast/config/nowcast.yaml
+      run prep dir: /SalishSeaCast/runs/
+      grid dir: /SalishSeaCast/grid/
+      salishsea_cmd: /SalishSeaCast/nowcast-env/bin/salishsea
       job exec cmd: qsub
       # Optional email address to which to send notifications of the beginning
       # and end of execution of the run, as well as notification of abnormal
@@ -534,7 +534,7 @@ run:
       email: sallen@eos.ubc.ca
       run types:
         nowcast-dev:
-          run sets dir: /results/nowcast-sys/SS-run-sets/v201702/nowcast-dev/
+          run sets dir: /SalishSeaCast/SS-run-sets/v201702/nowcast-dev/
           mpi decomposition: 1x7
           walltime: 23:30:00
           results: /results/SalishSea/nowcast-dev.201806/
@@ -544,7 +544,7 @@ run:
         ssh dir: /results/forcing/sshNeahBay/
         bc dir: /results/forcing/LiveOcean/boundary_conditions/
         rivers dir: /results/forcing/rivers/
-        bottom friction mask: /results/nowcast-sys/grid/jetty_mask_bathy201702.nc
+        bottom friction mask: /SalishSeaCast/grid/jetty_mask_bathy201702.nc
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
 
     orcinus-nowcast-agrif:
@@ -713,7 +713,7 @@ vhfr fvcom runs:
     # **Must be quoted to project {} characters**
     atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
     # Directory on host where make_fvcom_atmos_forcing worker runs where FVCOM grid files are stored
-    fvcom grid dir: /results/nowcast-sys/FVCOM-VHFR-config/grid/
+    fvcom grid dir: /SalishSeaCast/FVCOM-VHFR-config/grid/
     # Atmospheric forcing field types to generate files for
     # (ftype parameter values in OPPTools.atm.create_atm_hrdps())
     field types:

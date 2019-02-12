@@ -81,16 +81,16 @@ That can be accomplished as follows:
    .. code-block:: bash
 
        $ ssh skookum
-       skookum$ source activate /results/nowcast-sys/nowcast-env
-       (/results/nowcast-sys/nowcast-env)skookum$ cd /home/dlatorne/public_html/MEOPAR/nowcast/
+       skookum$ source activate /SalishSeaCast/nowcast-env
+       (/SalishSeaCast/nowcast-env)skookum$ cd /home/dlatorne/public_html/MEOPAR/nowcast/
 
    .. note::
-      If :command:`source activate /results/nowcast-sys/nowcast-env` fails because it can't find :command:`activate`,
+      If :command:`source activate /SalishSeaCast/nowcast-env` fails because it can't find :command:`activate`,
       you may be able to use:
 
       .. code-block:: bash
 
-          skookum$ source /results/nowcast-sys/nowcast-env/bin/activate /results/nowcast-sys/nowcast-env
+          skookum$ source /SalishSeaCast/nowcast-env/bin/activate /SalishSeaCast/nowcast-env
 
       as a work-around.
 
@@ -99,7 +99,7 @@ That can be accomplished as follows:
 
    .. code-block:: bash
 
-       (/results/nowcast-sys/nowcast-env)skookum$ python -m nowcast.workers.download_weather $NOWCAST_YAML 12 --debug
+       (/SalishSeaCast/nowcast-env)skookum$ python -m nowcast.workers.download_weather $NOWCAST_YAML 12 --debug
 
    The command above downloads the 12 forecast.
    The :kbd:`--debug` flag causes the logging output of the worker to be displayed on the screen (so that you can see what is going on) instead of being written to a file.

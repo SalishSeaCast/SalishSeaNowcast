@@ -10,7 +10,7 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: simple
-    filename: /results/nowcast-sys/logs/nowcast/circus.log
+    filename: /SalishSeaCast/logs/nowcast/circus.log
     maxBytes: 100000
     backupCount: 3
   sentry:

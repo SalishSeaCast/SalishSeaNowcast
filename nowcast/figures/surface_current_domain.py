@@ -14,7 +14,7 @@
 # limitations under the License.
 """
 This standalone code produces the surface current tiled domain figure in both website themed and unthemed style and saves
-the figure files in '/results/nowcast-sys/salishsea-site/salishsea_site/static/img/'. 
+the figure files in '/SalishSeaCast/salishsea-site/salishsea_site/static/img/'.
 
 The domain is divided into different tiles and needs to be re-run if the tiles specification/coordinates are changed.
 """
@@ -192,7 +192,8 @@ tile_coords_dic = {
 }
 
 if __name__ == "__main__":
-    root_dir = Path("/results/nowcast-sys/")
+    ## TODO: Can these paths be moved into nowcast.yaml config file?
+    root_dir = Path("/SalishSeaCast/")
     coordf = root_dir / "grid/coordinates_seagrid_SalishSea201702.nc"
     bathyf = root_dir / "grid/bathymetry_201702.nc"
 
