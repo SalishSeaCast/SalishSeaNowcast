@@ -179,7 +179,8 @@ def _plot_tracer_thalweg(ax, plot_data, bathy, mesh_mask, cmap, clevels):
         mesh_mask,
         clevels=clevels,
         cmap=cmap,
-        thalweg_file="/results/nowcast-sys/tools/bathymetry/thalweg_working" ".txt",
+        ## TODO: Can this path be moved into nowcast.yaml config file?
+        thalweg_file="/SalishSeaCast/tools/bathymetry/thalweg_working" ".txt",
         cbar_args={"fraction": 0.030, "pad": 0.04, "aspect": 45},
     )
     return cbar

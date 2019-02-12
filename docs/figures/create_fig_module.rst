@@ -218,8 +218,7 @@ and then we'll look at each section in detail.
     def _plot_tracer_thalweg(ax, plot_data, bathy, mesh_mask, cmap, clevels):
         cbar = vis.contour_thalweg(
             ax, plot_data.tracer_hr, bathy, mesh_mask, clevels=clevels, cmap=cmap,
-            thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working'
-                         '.txt',
+            thalweg_file='/SalishSeaCast/tools/bathymetry/thalweg_working.txt',
             cbar_args={'fraction': 0.030, 'pad': 0.04, 'aspect': 45}
         )
         return cbar
@@ -750,8 +749,7 @@ The :py:func:`_plot_tracer_thalweg` function in our example plots colour contour
       def _plot_tracer_thalweg(ax, plot_data, bathy, mesh_mask, cmap, clevels):
           cbar = vis.contour_thalweg(
               ax, plot_data.tracer_hr, bathy, mesh_mask, clevels=clevels, cmap=cmap,
-              thalweg_file='/results/nowcast-sys/tools/bathymetry/thalweg_working'
-                           '.txt',
+              thalweg_file='/SalishSeaCast/tools/bathymetry/thalweg_working.txt',
               cbar_args={'fraction': 0.030, 'pad': 0.04, 'aspect': 45}
           )
           return cbar

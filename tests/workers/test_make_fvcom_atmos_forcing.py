@@ -173,8 +173,7 @@ class TestConfig:
             == "atmos_{run_type}_{field_type}_{yyyymmdd}.nc"
         )
         assert (
-            atmos_forcing["fvcom grid dir"]
-            == "/results/nowcast-sys/FVCOM-VHFR-config/grid/"
+            atmos_forcing["fvcom grid dir"] == "/SalishSeaCast/FVCOM-VHFR-config/grid/"
         )
         assert atmos_forcing["field types"] == ["hfx", "precip", "wnd"]
 

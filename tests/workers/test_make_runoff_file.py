@@ -106,7 +106,7 @@ class TestConfig:
         assert rivers["file templates"]["b201702"] == "R201702DFraCElse_{:y%Ym%md%d}.nc"
         assert (
             rivers["monthly climatology"]["b201702"]
-            == "/results/nowcast-sys/rivers-climatology/rivers_month_201702.nc"
+            == "/SalishSeaCast/rivers-climatology/rivers_month_201702.nc"
         )
         assert rivers["rivers dir"] == "/results/forcing/rivers/"
         assert rivers["prop_dict modules"]["b201702"] == "salishsea_tools.river_201702"
@@ -116,7 +116,7 @@ class TestConfig:
         )
         assert (
             rivers["Fraser climatology"]
-            == "/results/nowcast-sys/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml"
+            == "/SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml"
         )
 
 

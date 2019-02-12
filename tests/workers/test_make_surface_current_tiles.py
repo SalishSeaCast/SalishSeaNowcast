@@ -162,7 +162,7 @@ class TestConfig:
     def test_figures_section(self, prod_config):
         assert "figures" in prod_config
         figures = prod_config["figures"]
-        assert figures["grid dir"] == "/results/nowcast-sys/grid/"
+        assert figures["grid dir"] == "/SalishSeaCast/grid/"
         assert "surface current tiles" in figures
         tiles = figures["surface current tiles"]
         assert tiles["storage path"] == "/results/nowcast-sys/figures/surface_currents/"

@@ -27,16 +27,15 @@ The production deployment uses 3 systems:
 #. The :py:mod:`nemo_nowcast.message_broker`,
    :py:mod:`nemo_nowcast.manager`,
    :py:mod:`nemo_nowcast.log_aggregator`,
-   most of the pre- and post-processing workers run on the :ref:`SalishSeaModelResultsServer`, :kbd:`skookum`, where the deployment is in the :file:`/results/nowcast-sys/` directory tree.
+   most of the pre- and post-processing workers run on the :ref:`SalishSeaModelResultsServer`, :kbd:`skookum`, where the deployment is in the :file:`/SalishSeaCast/` directory tree.
 
 #. The development compute server,
    :kbd:`salish`,
    is used to run the daily development model run,
-   :kbd:`nowcast-dev` NEMO-3.6 model run,
-   and the :py:mod:`nowcast.workers.make_live_ocean_files` worker that relies on Matlab.
+   :kbd:`nowcast-dev` NEMO-3.6 model run.
    :kbd:`salish` and :kbd:`skookum` share storage via NFS mounts,
    so,
-   :kbd:`salish` uses the same deployment is in the :file:`/results/nowcast-sys/` directory tree.
+   :kbd:`salish` uses the same deployment in the :file:`/SalishSeaCast/` directory tree.
 
 #. The daily
    :kbd:`forecast2`
