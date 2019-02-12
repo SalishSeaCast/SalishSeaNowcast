@@ -105,9 +105,9 @@ class TestDepthAverage:
         [
             # In all cases, 40 is the length of the depth axis
             # Cell 4 case - 0 array with shape (40,1)
-            (np.zeros((linear_depths().shape[0], 1)), 0, np.zeros((1,))),
+            (np.zeros((40, 1)), 0, np.zeros((1,))),
             # Cell 6 case - ones array with shape (40, 1)
-            (np.ones((linear_depths().shape[0], 1)), 0, np.ones((1,))),
+            (np.ones((40, 1)), 0, np.ones((1,))),
         ],
     )
     # Parametrization args go between self and fixture
@@ -120,13 +120,13 @@ class TestDepthAverage:
         [
             # In all cases, 40 is the length of the depth axis
             # Cell 7 case - ones array with shape (10, 40)
-            (np.ones((10, linear_depths().shape[0])), 1, np.ones((10,))),
+            (np.ones((10, 40)), 1, np.ones((10,))),
             # Cell 8 case - ones array with shape (10, 40, 11)
-            (np.ones((10, linear_depths().shape[0], 11)), 1, np.ones((10, 11))),
+            (np.ones((10, 40, 11)), 1, np.ones((10, 11))),
             # Cell 9 case - ones array with shape (1, 40, 2, 3)
-            (np.ones((1, linear_depths().shape[0], 2, 3)), 1, np.ones((1, 2, 3))),
+            (np.ones((1, 40, 2, 3)), 1, np.ones((1, 2, 3))),
             # Cell 10 case - ones array with shape (1, 2, 40)
-            (np.ones((1, 2, linear_depths().shape[0])), 2, np.ones((1, 2))),
+            (np.ones((1, 2, 40)), 2, np.ones((1, 2))),
         ],
     )
     def test_multi_dim_array(self, var, depth_axis, expected, linear_depths):
@@ -170,9 +170,9 @@ class TestDepthAverage:
         [
             # In all cases, 40 is the length of the depth axis
             # Cell 14 case - zeros array with shape (40, 1)
-            (np.zeros((nonuniform_depths().shape[0], 1)), 0, np.zeros((1,))),
+            (np.zeros((40, 1)), 0, np.zeros((1,))),
             # Cell 15 case - ones array with shape (40, 1)
-            (np.ones((nonuniform_depths().shape[0], 1)), 0, np.ones((1,))),
+            (np.ones((40, 1)), 0, np.ones((1,))),
         ],
     )
     def test_nonuniform_grid_spacing(
@@ -190,9 +190,9 @@ class TestDepthAverage:
         [
             # In all cases, 40 is the length of the depth axis
             # Cell 19 case - masked array with shape (40,1)
-            (np.zeros((nonuniform_depths().shape[0], 1)), 0, np.zeros((1,))),
+            (np.zeros((40, 1)), 0, np.zeros((1,))),
             # Cell 20 case - masked array with shape (3, 40)
-            (np.zeros((3, nonuniform_depths().shape[0])), 1, np.zeros((3,))),
+            (np.zeros((3, 40)), 1, np.zeros((3,))),
         ],
     )
     def test_masking_fullmask(self, var, depth_axis, expected, nonuniform_depths):
