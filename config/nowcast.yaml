@@ -381,7 +381,7 @@ figures:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1
     tide stn ssh time series:
       # **Must be quoted to project {} characters**
-      'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10mV17-02'
+      'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10mV18-06'
     3d tracer fields:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV18-06
     3d biology fields:
@@ -416,8 +416,8 @@ figures:
   # Surface current tile figures
   surface current tiles:
     # Rolling forecast u and v velocity fields ERDDAP dataset URLs
-    u field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DuGridFields1hV17-02
-    v field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DvGridFields1hV17-02
+    u field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DuGridFields1hV18-06
+    v field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DvGridFields1hV18-06
     # Directory tree behind the https://salishsea.eos.ubc.ca/nowcast-sys/figures/
     # static web server that tile files are to be stored in and requested from
     storage path: /results/nowcast-sys/figures/surface_currents/
