@@ -1,17 +1,17 @@
-# Copyright 2013-2018 The Salish Sea MEOPAR Contributors
-# and The University of British Columbia
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#    https://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Copyright 2013-2019 The Salish Sea MEOPAR contributors
+#  and The University of British Columbia
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 
 """Produce image-loop figures showing vertical transects for variables from
 the VHFR FVCOM model domain along several thalweg transects.
@@ -111,7 +111,7 @@ def _prep_plot_data(place, fvcom_results_dataset, time_index, varname):
               5468046.238, 5468964.879, 5469615.060, 5472405.130, 5475485.044,
               5477079.703, 5478077.966, 5479284.985]
         clim = {'salinity':(24, 29), "temp": (5.5, 9), 'tangential velocity': (-0.75, 0.75)}        
-        
+
     # fmt: on
     xt, yt = numpy.array(xt), numpy.array(yt)
     vmin, vmax = clim[varname]
