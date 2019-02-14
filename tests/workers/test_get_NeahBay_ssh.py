@@ -75,6 +75,53 @@ class TestMain:
         )
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "get_NeahBay_ssh" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["get_NeahBay_ssh"]
+        assert msg_registry["checklist key"] == "Neah Bay ssh"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "success forecast2",
+            "failure forecast2",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["get_NeahBay_ssh"]
+        assert msg in msg_registry
+
+    def test_ssh_sections(self, prod_config):
+        ssh = prod_config["ssh"]
+        assert (
+            ssh["coordinates"]
+            == "/SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc"
+        )
+        assert (
+            ssh["tidal predictions"]
+            == "/SalishSeaCast/SalishSeaNowcast/tidal_predictions/"
+        )
+        assert (
+            ssh["neah bay hourly"]
+            == "Neah Bay_1h_tidal_prediction_01-Jan-2013_31-Dec-2020.csv"
+        )
+        assert ssh["ssh dir"] == "/results/forcing/sshNeahBay/"
+        assert ssh["file template"] == "ssh_{:y%Ym%md%d}.nc"
+        assert (
+            ssh["monitoring image"]
+            == "/results/nowcast-sys/figures/monitoring/NBssh.png"
+        )
+
+
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
 @patch("nowcast.workers.get_NeahBay_ssh.logger", autospec=True)
 class TestSuccess:
