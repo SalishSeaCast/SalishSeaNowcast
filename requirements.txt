@@ -88,7 +88,7 @@ pyperclip==1.6.0
 pyproj==1.9.5.1
 pyshp==1.2.12
 PySocks==1.6.8
-pytest==4.2.0
+pytest==4.2.1
 python-dateutil==2.6.1
 python-hglib==2.6.1
 pytz==2017.3
