@@ -34,9 +34,11 @@ The figure is annotated with the calculated maximum sea surface height at the
 tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
 
-Testing notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
 
-Development notebook for this module is https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
+Development notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
 """
 from datetime import timedelta
 from pathlib import Path
@@ -255,12 +257,13 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(3, 2, width_ratios=[2, 1])
     gs.update(wspace=0.13, hspace=0.2)
     ax_info = fig.add_subplot(gs[0, 0])
+    ax_info.set_facecolor(theme.COLOURS["figure"]["facecolor"])
     ax_ssh = {"chart_datum": fig.add_subplot(gs[1, 0])}
     ax_ssh["msl"] = ax_ssh["chart_datum"].twinx()
     for axis in ax_ssh.values():
-        axis.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+        axis.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_res = fig.add_subplot(gs[2, 0])
-    ax_res.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_res.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_map = fig.add_subplot(gs[:, 1])
     fig.autofmt_xdate()
     return fig, (ax_info, ax_ssh, ax_map, ax_res)
@@ -330,7 +333,6 @@ def _plot_info_box(ax_info, place, plot_data, theme):
 
 
 def _info_box_hide_frame(ax_info, theme):
-    ax_info.set_axis_bgcolor(theme.COLOURS["figure"]["facecolor"])
     ax_info.xaxis.set_visible(False)
     ax_info.yaxis.set_visible(False)
     for spine in ax_info.spines:
@@ -375,7 +377,8 @@ def _plot_ssh_time_series(ax_ssh, place, plot_data, theme, ylims=(-1, 6)):
         markersize=10,
         markeredgewidth=3,
         label="Maximum SSH",
-        color=theme.COLOURS["marker"]["max ssh"],
+        markerfacecolor=theme.COLOURS["marker"]["max ssh"]["facecolor"],
+        markeredgecolor=theme.COLOURS["marker"]["max ssh"]["edgecolor"],
     )
     colors = ["Gold", "Red", "DarkRed"]
     labels = ["Maximum tides", "Extreme water", "Historical maximum"]
@@ -492,7 +495,8 @@ def _plot_ssh_map(ax_map, plot_data, place, theme):
         marker="o",
         markersize=10,
         markeredgewidth=3,
-        color=theme.COLOURS["marker"]["place"],
+        markerfacecolor=theme.COLOURS["marker"]["place"]["facecolor"],
+        markeredgecolor=theme.COLOURS["marker"]["place"]["edgecolor"],
     )
     viz_tools.plot_coastline(ax_map, plot_data.bathy)
     viz_tools.plot_land_mask(ax_map, plot_data.bathy, color=theme.COLOURS["land"])
