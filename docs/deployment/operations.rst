@@ -34,7 +34,7 @@ the message broker,
 the manager,
 and the log_aggregator,
 are managed by the `circus`_ process manager tool.
-So is the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_ with:
+So is the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
 
 .. _sarracenia client: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst#documentation
 .. _ECCC MSC datamart service: https://dd.weather.gc.ca/
@@ -47,6 +47,14 @@ Start the nowcast system and sarracenia client with:
 
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ circusd --daemon $NOWCAST_CONFIG/circus.ini
+
+The https://salishsea.eos.ubc.ca website app is also managed by `circus`_.
+Start it with:
+
+.. code-block:: bash
+
+    $ source activate /SalishSeaCast/salishsea-site-env
+    (/SalishSeaCast/salishsea-site-env)$ circusd --daemon $SALISHSEA_SITE/circus-prod.ini
 
 :command:`circusd` monitors the long-running processes and restarts them if they crash or are shutdown accidentally.
 
@@ -87,3 +95,10 @@ Use :kbd:`ctrl-c` to exit from :command:`circusctl`.
 `sr_subscribe`_ is the command-line interface for interacting with the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
 
 .. _sr_subscribe: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst
+
+`circusctl`_ for the https://salishsea.eos.ubc.ca website app operates on port :kbd:`7777`:
+
+.. code-block:: bash
+
+    $ source activate /SalishSeaCast/salishsea-site-env
+    (/SalishSeaCast/salishsea-site-env)$ circusctl --endpoint tcp://127.0.0.1:7777
