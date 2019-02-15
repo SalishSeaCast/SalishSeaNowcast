@@ -22,11 +22,11 @@
 Mercurial Repositories
 ======================
 
-Clone the following repos into :file:`/results/nowcast-sys/`:
+Clone the following repos into :file:`/SalishSeaCast/`:
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/
+    $ cd /SalishSeaCast/
     $ hg clone ssh://hg@bitbucket.org/salishsea/grid grid
     $ hg clone ssh://hg@bitbucket.org/UBC_MOAD/moad_tools moad_tools
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
@@ -48,19 +48,20 @@ Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
 
 .. code-block:: bash
 
+    $ mkdir -p /SalishSeaCast/private-tools/grib2/wgrib2/
     $ cp --preserve=timestamps \
         /ocean/sallen/allen/research/MEOPAR/private-tools/grib2/wgrib2/wgrib2 \
-        /results/nowcast-sys/private-tools/grib2/wgrib2/
+        /SalishSeaCast/private-tools/grib2/wgrib2/
 
 
 Git Repositories
 ================
 
-Clone the following repos into :file:`/results/nowcast-sys/`:
+Clone the following repos into :file:`/SalishSeaCast/`:
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/
+    $ cd /SalishSeaCast/
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
 
@@ -72,7 +73,7 @@ Symlink the XIOS-2 build configuration files for :kbd:`salish` from the :file:`X
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/XIOS-2/arch
+    $ cd /SalishSeaCast/XIOS-2/arch
     $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_SALISH.fcm
     $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_SALISH.path
 
@@ -80,7 +81,7 @@ Symlink the XIOS-2 build configuration files for :kbd:`salish` from the :file:`X
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/XIOS-2
+    $ cd /SalishSeaCast/XIOS-2
     $ ./make_xios --arch GCC_SALISH --netcdf_lib netcdf4_seq --job 8
 
 
@@ -91,10 +92,10 @@ Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/nowcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
-    $ ./makenemo -m GCC_SALISH -n SalishSea -j8
-    $ cd /results/nowcast-sys/nowcast-sys/NEMO-3.6-code/NEMOGCM/TOOLS/
-    $ ./maketools -m GCC_SALISH -n REBUILD_NEMO
+    $ cd /SalishSeaCast/nowcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
+    $ XIOS_HOME=/SalishSeaCast/XIOS-2 ./makenemo -m GCC_SALISH -n SalishSeaCast -j8
+    $ cd /SalishSeaCast/nowcast-sys/NEMO-3.6-code/NEMOGCM/TOOLS/
+    $ XIOS_HOME=/SalishSeaCast/XIOS-2 ./maketools -m GCC_SALISH -n REBUILD_NEMO
 
 
 Python Packages
@@ -102,29 +103,29 @@ Python Packages
 
 The Python packages that the system depends on are installed in conda environments.
 
-For the :kbd:`SalishSeaNowcast` automation system:
+For the :kbd:`SalishSeaCast` automation system:
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/
+    $ cd /SalishSeaCast/
     $ conda update conda
     $ conda create \
-        --prefix /results/nowcast-sys/nowcast-env \
-        --channel gomss-nowcast --channel conda-forge --channel defaults \
+        --prefix /SalishSeaCast/nowcast-env \
+        --channel conda-forge --channel defaults --channel gomss-nowcast \
         arrow attrs basemap beautifulsoup4 bottleneck circus cliff cmocean \
         dask docutils gsw lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
-        pillow pip poppler pygrib pypdf2 pyproj python=3.6 pyyaml pyzmq requests \
-        scipy shapely watchdog xarray
-    $ source activate /results/nowcast-sys/nowcast-env
-    (/results/nowcast-sys/nowcast-env)$ pip install angles driftwood \
-        f90nml feedgen python-hglib raven retrying schedule scour utm zeep
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO_Nowcast/
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable moad_tools/
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable tools/SalishSeaTools/
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable OPPTools/
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable NEMO-Cmd/
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaCmd/
-    (/results/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaNowcast/
+        pillow pip poppler pygrib pypdf2 pyproj python=3.6 pyyaml pyzmq \
+        requests scipy shapely watchdog xarray
+    $ source activate /SalishSeaCast/nowcast-env
+    (/SalishSeaCast/nowcast-env)$ pip install angles driftwood \
+        f90nml feedgen python-hglib raven retrying schedule scour tables utm zeep
+    (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO_Nowcast/
+    (/SalishSeaCast/nowcast-env)$ pip install --editable moad_tools/
+    (/SalishSeaCast/nowcast-env)$ pip install --editable tools/SalishSeaTools/
+    (/SalishSeaCast/nowcast-env)$ pip install --editable OPPTools/
+    (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO-Cmd/
+    (/SalishSeaCast/nowcast-env)$ pip install --editable SalishSeaCmd/
+    (/SalishSeaCast/nowcast-env)$ pip install --editable SalishSeaNowcast/
 
 For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_:
 
@@ -133,34 +134,52 @@ For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files 
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/
+    $ cd /SalishSeaCast/
     $ conda update conda
     $ conda create \
-        --prefix /results/nowcast-sys/sarracenia-env \
+        --prefix /SalishSeaCast/sarracenia-env \
         --channel conda-forge \
         python=3 appdirs watchdog netifaces humanize psutil paramiko
-    $ source activate /results/nowcast-sys/sarracenia-env
-    (/results/nowcast-sys/sarracenia-env)$ pip install amqplib metpx-sarracenia
-    (/results/nowcast-sys/sarracenia-env)$ sr_subscribe edit credentials.conf  # initialize datamart credentials
+    $ source activate /SalishSeaCast/sarracenia-env
+    (/SalishSeaCast/sarracenia-env)$ pip install amqplib metpx-sarracenia
+    (/SalishSeaCast/sarracenia-env)$ sr_subscribe edit credentials.conf  # initialize datamart credentials
+
+For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.ca/:
+
+.. _salishsea-site web app: https://bitbucket.org/salishsea/salishsea-site
+
+.. code-block:: bash
+
+    $ cd /SalishSeaCast
+    $ conda update conda
+    $ conda create \
+        --prefix /SalishSeaCast/salishsea-site-env \
+        --channel conda-forge \
+        python=3 pyyaml requests "pyzmq<17.0,>=13.1.0"
+    $ source activate /SalishSeaCast/salishsea-site-env
+    (/SalishSeaCast/salishsea-site-env) $ pip install \
+        arrow attrs chaussette circus pyramid pyramid_crow pyramid_mako \
+        "waitress==0.9.0"
+    (/SalishSeaCast/salishsea-site-env) $ pip install --editable salishsea-site/
 
 
 Environment Variables
 =====================
 
-Add the following files to the :file:`/results/nowcast-sys/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
+Add the following files to the :file:`/SalishSeaCast/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/nowcast-env
+    $ cd /SalishSeaCast/nowcast-env
     $ mkdir -p etc/conda/activate.d
     $ cat << EOF > etc/conda/activate.d/envvars.sh
-    export NOWCAST_ENV=/results/nowcast-sys/nowcast-env
-    export NOWCAST_CONFIG=/results/nowcast-sys/SalishSeaNowcast/config
-    export NOWCAST_YAML=/results/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
-    export NOWCAST_LOGS=/results/nowcast-sys/logs/nowcast
+    export NOWCAST_ENV=/SalishSeaCast/nowcast-env
+    export NOWCAST_CONFIG=/SalishSeaCast/SalishSeaNowcast/config
+    export NOWCAST_YAML=/SalishSeaCast/SalishSeaNowcast/config/nowcast.yaml
+    export NOWCAST_LOGS=/SalishSeaCast/logs/nowcast
     export ONC_USER_TOKEN=a_valid_ONC_data_API_user_token
-    export SARRACENIA_ENV=/results/nowcast-sys/sarracenia-env
-    export SARRACENIA_CONFIG=/results/nowcast-sys/SalishSeaNowcast/sarracenia
+    export SARRACENIA_ENV=/SalishSeaCast/sarracenia-env
+    export SARRACENIA_CONFIG=/SalishSeaCast/SalishSeaNowcast/sarracenia
     export SENTRY_DSN=a_valid_sentry_dsn_url
     export SLACK_SSC_DAILY_PROGRESS=a_valid_slack_incoming_webhook_url
     EOF
@@ -182,15 +201,15 @@ and :command:`unset` them when it is deactivated.
     unset SLACK_SSC_DAILY_PROGRESS
     EOF
 
-Add the following files to the :file:`/results/nowcast-sys/sarracenia-env` environment to automatically :command:`export` the environment variables required by the sarracenia client when the environment is activated:
+Add the following files to the :file:`/SalishSeaCast/sarracenia-env` environment to automatically :command:`export` the environment variables required by the sarracenia client when the environment is activated:
 
 .. code-block:: bash
 
-    $ cd /results/nowcast-sys/sarracenia-env
+    $ cd /SalishSeaCast/sarracenia-env
     $ mkdir -p etc/conda/activate.d
     $ cat << EOF > etc/conda/activate.d/envvars.sh
-    export SARRACENIA_ENV=/results/nowcast-sys/sarracenia-env
-    export SARRACENIA_CONFIG=/results/nowcast-sys/SalishSeaNowcast/sarracenia
+    export SARRACENIA_ENV=/SalishSeaCast/sarracenia-env
+    export SARRACENIA_CONFIG=/SalishSeaCast/SalishSeaNowcast/sarracenia
     export SENTRY_DSN=a_valid_sentry_dsn_url
     EOF
 
@@ -202,6 +221,31 @@ and :command:`unset` them when it is deactivated.
     $ cat << EOF > etc/conda/deactivate.d/envvars.sh
     unset SARRCENIA_ENV
     unset SARRACENIA_CONFIG
+    unset SENTRY_DSN
+    EOF
+
+Add the following files to the :file:`/SalishSeaCast/salishsea-site-env` environment to automatically :command:`export` the environment variables required by the https://salishsea.eos.ubc.ca website app when the environment is activated:
+
+.. code-block:: bash
+
+    $ cd /SalishSeaCast/salishsea-site-env
+    $ mkdir -p etc/conda/activate.d
+    $ cat << EOF > etc/conda/activate.d/envvars.sh
+    export SALISHSEA_SITE_ENV=/SalishSeaCast/salishsea-site-env
+    export SALISHSEA_SITE=/SalishSeaCast/salishsea-site
+    export NOWCAST_LOGS=/SalishSeaCast/logs/nowcast
+    export SENTRY_DSN=a_valid_sentry_dsn_url
+    EOF
+
+and :command:`unset` them when it is deactivated.
+
+.. code-block:: bash
+
+    $ mkdir -p etc/conda/deactivate.d
+    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
+    unset SALISHSEA_SITE_ENV
+    unset SALISHSEA_SITE
+    unset NOWCAST_LOGS
     unset SENTRY_DSN
     EOF
 
@@ -218,15 +262,15 @@ On the hosts where the nowcast system NEMO runs will be executed create a :file:
     $ mkdir -p LiveOcean NEMO-atmos rivers ssh
     $ chmod -R g+s LiveOcean NEMO-atmos rivers ssh
     $ cp ../SS-run-sets/v201702/nowcast-green/namelist.time_nowcast_template namelist.time
-
-The above :command:`ln -s` commands assume that there is a clone of the :ref:`SS-run-sets-repo` beside the directory where the links are being created.
-If the clone of the :ref:`SS-run-sets-repo` is elsewhere,
-adjust the link paths accordingly.
+    $ ln -s ../grid
+    $ ln -s ../rivers-climatology
+    $ ln -s ../tides
+    $ ln -s ../tracers
 
 The hosts and their :file:`runs` directories presently in use are:
 
 * :kbd:`salish`
-    :file:`/results/nowcast-sys/runs/`
+    :file:`/SalishSeaCast/runs/`
 
 * :kbd:`west.cloud`
     See :ref:`WestCloudNowcastRunsDirectory`
@@ -242,8 +286,8 @@ Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and
 
 .. code-block:: bash
 
-    $ mkdir -p /results/forcing/rivers/datamart
-    $ mkdir -p /results/forcing/atmospheric/GEM2.5/GRIB/datamart
+    $ mkdir -p /SalishSeaCast/datamart/hrdps-west
+    $ mkdir -p /SalishSeaCast/datamart/hydrometric
 
 
 Static Web Pages Directory
@@ -258,7 +302,7 @@ Static Web Pages Directory
     $ mkdir -p $HOME/public_html/MEOPAR/nowcast/www
     $ chmod -R g+s $HOME/public_html/MEOPAR/nowcast
     $ cd $HOME/public_html/MEOPAR/nowcast
-    $ ln -s /results/nowcast-sys/tools/SalishSeaNowcast/nowcast.yaml
+    $ ln -s /SalishSeaCast/tools/SalishSeaNowcast/nowcast.yaml
     $ cd $HOME/public_html/MEOPAR/nowcast/www/
-    $ ln -s /results/nowcast-sys/tools/SalishSeaNowcast/www/templates
+    $ ln -s /SalishSeaCast/tools/SalishSeaNowcast/www/templates
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site
