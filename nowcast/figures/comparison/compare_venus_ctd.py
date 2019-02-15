@@ -219,6 +219,8 @@ def _prep_fig_axes(figsize, theme):
         facecolor=theme.COLOURS["figure"]["facecolor"],
     )
     fig.autofmt_xdate()
+    ax_sal.set_facecolor(theme.COLOURS["axes"]["background"])
+    ax_temp.set_facecolor(theme.COLOURS["axes"]["background"])
     return fig, (ax_sal, ax_temp)
 
 
@@ -262,6 +264,10 @@ def _salinity_axis_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
     )
+    ax.set_xlim(
+        plot_data.model_salinity_ts.time[0].datetime,
+        plot_data.model_salinity_ts.time[-1].datetime,
+    )
     ax.set_ylabel(
         "Salinity [g/kg]",
         fontproperties=theme.FONTS["axis"],
@@ -271,7 +277,6 @@ def _salinity_axis_labels(ax, place, plot_data, theme):
     ax.set_ylim(np.floor(ymin) - 1, np.ceil(ymax) + 1)
     ax.legend(loc="best")
     ax.grid(axis="both")
-    ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     theme.set_axis_colors(ax)
 
 
@@ -302,14 +307,18 @@ def _plot_temperature_time_series(ax, plot_data, timezone, theme):
         alpha=0.5,
     )
     tzname = plot_data.model_temperature_ts.time[0].datetime.tzname()
-    _temperature_axis_labels(ax, timezone, tzname, theme)
+    _temperature_axis_labels(ax, plot_data, timezone, tzname, theme)
 
 
-def _temperature_axis_labels(ax, timezone, tzname, theme):
+def _temperature_axis_labels(ax, plot_data, timezone, tzname, theme):
     ax.set_xlabel(
         f"Date and Time [{tzname}]",
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
+    )
+    ax.set_xlim(
+        plot_data.model_temperature_ts.time[0].datetime,
+        plot_data.model_temperature_ts.time[-1].datetime,
     )
     ax.xaxis.set_major_formatter(
         DateFormatter("%d-%b %H:%M", tz=pytz.timezone(timezone))
@@ -323,14 +332,13 @@ def _temperature_axis_labels(ax, timezone, tzname, theme):
     ax.set_ylim(np.floor(ymin) - 1, np.ceil(ymax) + 1)
     ax.legend(loc="best")
     ax.grid(axis="both")
-    ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
     theme.set_axis_colors(ax)
 
 
 def _attribution_text(ax, theme):
     ax.text(
         1,
-        -0.3,
+        -0.35,
         "Observations from Ocean Networks Canada",
         horizontalalignment="right",
         verticalalignment="top",

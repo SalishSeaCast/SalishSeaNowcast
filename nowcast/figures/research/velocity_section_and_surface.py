@@ -182,7 +182,7 @@ def _prep_fig_axes(figsize, theme, sections=(450,), pos=((0.1, 0.95),)):
         ):
             ax.spines[axis].set_visible(False)
             ax.tick_params(which="both", top="off", right="off", direction="out")
-            ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+            ax.set_facecolor(theme.COLOURS["axes"]["background"])
             theme.set_axis_colors(ax)
         ax_section[str(section[0])][0].tick_params(
             which="both", labelbottom="off", bottom="off"

@@ -96,7 +96,7 @@ def salinity_ferry_route(
     nemo_a, nemo_b = nemo_sal_route(grid_T_hr, bathy, route_name, sal_obs)
 
     fig, axs = plt.subplots(1, 2, figsize=figsize)
-    axs[1].set_axis_bgcolor("burlywood")
+    axs[1].set_facecolor("burlywood")
     viz_tools.set_aspect(axs[1], coords="map", lats=lats)
     cmap = plt.get_cmap("plasma")
     axs[1].set_xlim(-124.5, -122.5)
