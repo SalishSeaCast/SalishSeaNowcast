@@ -21,6 +21,9 @@ and include all tide constituents.
 The figure also shows the time period of the model results around which it
 is centred.
 Text below the tidal cycle graph acknowledges the use of :program:`ttide`.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
 """
 from collections import namedtuple
 
@@ -63,6 +66,7 @@ def make_figure(
     plot_data = _prep_plot_data(grid_T_hr, timezone, tidal_predictions)
     fig, ax = _prep_fig_axes(figsize, theme)
     _plot_tide_cycle(ax, plot_data, theme)
+    _ax_labels(ax, plot_data, theme)
     _attribution_text(ax, theme)
     return fig
 
@@ -104,14 +108,9 @@ def _plot_tide_cycle(ax, plot_data, theme, ylims=(-3, 3)):
         linewidth=2,
         color=theme.COLOURS["time series"]["datetime line"],
     )
-    ax.set_xlim(
-        plot_data.results_t_start.shift(weeks=-2).datetime,
-        plot_data.results_t_end.shift(weeks=2).datetime,
-    )
-    _ax_labels(ax, plot_data, ylims, theme)
 
 
-def _ax_labels(ax, plot_data, ylims, theme):
+def _ax_labels(ax, plot_data, theme):
     t_end = plot_data.results_t_end
     ax.set_title(
         f'Tidal Predictions at Point Atkinson: {t_end.format("DD-MMM-YYYY")}',
@@ -123,13 +122,17 @@ def _ax_labels(ax, plot_data, ylims, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.set_xlim(
+        plot_data.results_t_start.shift(weeks=-2).datetime,
+        plot_data.results_t_end.shift(weeks=2).datetime,
+    )
     ax.xaxis.set_major_formatter(DateFormatter("%d-%b-%Y"))
     ax.set_ylabel(
         "Sea Surface Height [m]",
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
-    ax.set_ylim(ylims)
+    ax.set_ylim(-3, 3)
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
 
