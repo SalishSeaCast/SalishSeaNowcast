@@ -23,6 +23,9 @@ The figure is a thumbnail version of the figure produced by
 :py:mod:`nowcast.figures.publish.storm_surge_alerts`.
 It is intended primarily for use on the Salish Sea Storm Surge Information
 Portal page https://salishsea.eos.ubc.ca/storm-surge/.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
 """
 from collections import namedtuple
 
