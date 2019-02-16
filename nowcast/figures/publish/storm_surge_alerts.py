@@ -21,6 +21,9 @@ at each location.
 Text below the map provides quantitative information about the maximum water
 level, when it occurs, and the 4 hr averaged wind speed, as well as
 acknowledgement of data sources.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
 """
 from collections import namedtuple
 
