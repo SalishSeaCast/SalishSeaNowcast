@@ -35,10 +35,10 @@ tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
 """
 from datetime import timedelta
 from pathlib import Path
@@ -403,10 +403,11 @@ def _ssh_time_series_labels(ax_ssh, place, plot_data, ylims, theme):
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
     )
-    ax_ssh["chart_datum"].grid(axis="both")
     ax_ssh["chart_datum"].set_xlim(
         plot_data.ssh_forecast.time.values[0], plot_data.ssh_forecast.time.values[-1]
     )
+    ax_ssh["chart_datum"].set_xlabel("")
+    ax_ssh["chart_datum"].grid(axis="both")
     ax_ssh["msl"].set_ylim((ylims[0] - plot_data.msl, ylims[1] - plot_data.msl))
     ylabels = ("Water Level above \n Chart Datum [m]", "Water Level wrt MSL [m]")
     for axis, ylabel in zip(ax_ssh.values(), ylabels):
@@ -435,7 +436,6 @@ def _plot_residual_time_series(ax_res, plot_data, theme):
     except AttributeError:
         # No observations available
         pass
-    ax_res.legend(loc="best")
     _residual_time_series_labels(ax_res, plot_data, theme)
 
 
@@ -448,6 +448,10 @@ def _residual_time_series_labels(
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax_res.set_xlim(
+        plot_data.model_residual.time.values[0],
+        plot_data.model_residual.time.values[-1],
+    )
     ax_res.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     ax_res.set_ylabel(
         "Residual [m]",
@@ -457,6 +461,7 @@ def _residual_time_series_labels(
     ax_res.set_ylim(ylims)
     ax_res.set_yticks(yticks)
     ax_res.grid(axis="both")
+    ax_res.legend(loc="best", prop=theme.FONTS["legend label small"])
     theme.set_axis_colors(ax_res)
 
 
