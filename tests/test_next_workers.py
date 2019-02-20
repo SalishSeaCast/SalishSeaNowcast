@@ -957,7 +957,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["west.cloud", "nowcast"],
+            args=["west.cloud", "x2", "nowcast"],
             host="west.cloud",
         )
         assert expected in workers
@@ -1057,7 +1057,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["west.cloud", "forecast"],
+            args=["west.cloud", "x2", "forecast"],
             host="west.cloud",
         )
         assert expected not in workers
@@ -1369,7 +1369,8 @@ class TestAfterMakeFVCOMBoundary:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure nowcast", "failure forecast"]
+        "msg_type",
+        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_fvcom_boundary(
@@ -1377,15 +1378,21 @@ class TestAfterMakeFVCOMBoundary:
         )
         assert workers == []
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-    def test_success_launch_make_fvcom_atmos_forcing(self, run_type, config, checklist):
+    @pytest.mark.parametrize(
+        "model_config, run_type",
+        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+    )
+    def test_success_launch_make_fvcom_atmos_forcing(
+        self, model_config, run_type, config, checklist
+    ):
 
         msg = Message(
             "make_fvcom_boundary",
-            f"success {run_type}",
+            f"success {model_config} {run_type}",
             payload={
                 run_type: {
                     "run date": "2018-03-16",
+                    "model config": model_config,
                     "open boundary file": "input/bdy_nowcast_btrp_20180316.nc",
                 }
             },
@@ -1398,14 +1405,17 @@ class TestAfterMakeFVCOMBoundary:
         )
         assert expected in workers
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    @pytest.mark.parametrize(
+        "model_config, run_type",
+        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+    )
     def test_success_launch_make_fvcom_rivers_forcing(
-        self, run_type, config, checklist
+        self, model_config, run_type, config, checklist
     ):
         workers = next_workers.after_make_fvcom_boundary(
             Message(
                 "make_fvcom_boundary",
-                f"success {run_type}",
+                f"success {model_config} {run_type}",
                 payload={
                     run_type: {
                         "run date": "2019-02-06",
@@ -1590,7 +1600,9 @@ class TestAfterWatchFVCOM:
         )
         assert expected in workers
 
-    def test_success_nowcast_launch_make_fvcom_boundary(self, config, checklist):
+    def test_success_nowcast_launch_make_fvcom_boundary_x2_forecast(
+        self, config, checklist
+    ):
         workers = next_workers.after_watch_fvcom(
             Message(
                 "watch_fvcom",
@@ -1608,7 +1620,7 @@ class TestAfterWatchFVCOM:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["west.cloud", "forecast"],
+            args=["west.cloud", "x2", "forecast"],
             host="west.cloud",
         )
         assert expected in workers

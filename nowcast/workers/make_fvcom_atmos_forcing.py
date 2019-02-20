@@ -114,7 +114,7 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
         "atmos file template"
     ]
     grid_dir = Path(config["vhfr fvcom runs"]["atmospheric forcing"]["fvcom grid dir"])
-    fvcom_grid_file = Path(config["vhfr fvcom runs"]["fvcom grid"]["grid file"])
+    fvcom_grid_file = Path(config["vhfr fvcom runs"]["fvcom grid"]["x2"]["grid file"])
     tri, nodes = OPPTools.fvcomToolbox.readMesh_V3(
         os.fspath(grid_dir / fvcom_grid_file)
     )

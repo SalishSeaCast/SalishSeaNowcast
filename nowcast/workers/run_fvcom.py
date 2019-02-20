@@ -207,7 +207,7 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
     }
     bdy_file_tmpl = config["vhfr fvcom runs"]["nemo coupling"]["boundary file template"]
     bdy_file = bdy_file_tmpl.format(
-        run_type=run_type, yyyymmdd=start_date.format("YYYYMMDD")
+        model_config="x2", run_type=run_type, yyyymmdd=start_date.format("YYYYMMDD")
     )
     patches = {
         run_prep_dir
@@ -311,7 +311,7 @@ def _prep_fvcom_input_dir(run_date, run_type, config):
         "sponge file",
         "obc nodes file",
     ):
-        f = Path(config["vhfr fvcom runs"]["fvcom grid"][grid_file])
+        f = Path(config["vhfr fvcom runs"]["fvcom grid"]["x2"][grid_file])
         (fvcom_input_dir / f).symlink_to(grid_dir / f)
     logger.debug(f"symlinked {grid_dir} files into {fvcom_input_dir}")
     output_timeseries_file = Path(
