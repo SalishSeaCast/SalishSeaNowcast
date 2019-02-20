@@ -41,15 +41,23 @@ vhfr fvcom runs:
 
   fvcom grid:
     grid dir: FVCOM-VHFR-config/grid/
-    grid file: vh_x2_grd.dat
-    depths file: vh_x2_dep.dat
-    sigma file: vh_x2_sigma.dat
-    coriolis file: vh_x2_utm10_cor.dat
-    sponge file: vh_x2_nospg_spg.dat
-    obc nodes file: vh_x2_obc.dat
+    x2:
+      grid file: vh_x2_grd.dat
+      depths file: vh_x2_dep.dat
+      sigma file: vh_x2_sigma.dat
+      coriolis file: vh_x2_cor.dat
+      sponge file: vh_x2_nospg_spg.dat
+      obc nodes file: vh_x2_obc.dat
+    r12:
+      grid file: vh_r12_grd.dat
+      depths file: vh_r12_smp3_dep.dat
+      sigma file: vh_r12_sigma.dat
+      coriolis file: vh_r1x2_cor.dat
+      sponge file: vh_r1x2_nospg_spg.dat
+      obc nodes file: vh_r1x2_obc.dat
 
   nemo coupling:
-    boundary file template: 'bdy_{run_type}_brcl_{yyyymmdd}.nc'
+    boundary file template: 'bdy_{model_config}_{run_type}_brcl_{yyyymmdd}.nc'
 
   atmospheric forcing:
     atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
@@ -59,7 +67,7 @@ vhfr fvcom runs:
       - wnd
 
   input dir: fvcom-runs/input/
-  output station timeseries: FVCOM-VHFR-config/output/vh_x2_utm10_station.dat
+  output station timeseries: FVCOM-VHFR-config/output/vh_x2_station.dat
   namelists:
     '{casename}_run.nml':
       - namelist.case
@@ -193,41 +201,26 @@ class TestConfig:
             fvcom_grid["grid dir"]
             == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/"
         )
-        assert fvcom_grid["grid file"] == "vh_x2_grd.dat"
-        assert fvcom_grid["utm zone"] == 10
-        assert fvcom_grid["depths file"] == "vh_x2_dep.dat"
-        assert fvcom_grid["sigma file"] == "vh_x2_sigma.dat"
-        assert fvcom_grid["coriolis file"] == "vh_x2_cor.dat"
-        assert fvcom_grid["sponge file"] == "vh_x2_nospg_spg.dat"
-        assert fvcom_grid["obc nodes file"] == "vh_x2_obc.dat"
+        x2_grid = fvcom_grid["x2"]
+        assert x2_grid["grid file"] == "vh_x2_grd.dat"
+        assert x2_grid["depths file"] == "vh_x2_dep.dat"
+        assert x2_grid["sigma file"] == "vh_x2_sigma.dat"
+        assert x2_grid["coriolis file"] == "vh_x2_cor.dat"
+        assert x2_grid["sponge file"] == "vh_x2_nospg_spg.dat"
+        assert x2_grid["obc nodes file"] == "vh_x2_obc.dat"
+        r12_grid = fvcom_grid["r12"]
+        assert r12_grid["grid file"] == "vh_r12_grd.dat"
+        assert r12_grid["depths file"] == "vh_r12_smp3_dep.dat"
+        assert r12_grid["sigma file"] == "vh_r12_sigma.dat"
+        assert r12_grid["coriolis file"] == "vh_r12_cor.dat"
+        assert r12_grid["sponge file"] == "vh_r12_nospg_spg.dat"
+        assert r12_grid["obc nodes file"] == "vh_r12_obc.dat"
 
     def test_nemo_coupling_section(self, prod_config):
         nemo_coupling = prod_config["vhfr fvcom runs"]["nemo coupling"]
         assert (
-            nemo_coupling["coupling dir"]
-            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/"
-        )
-        assert nemo_coupling["fvcom nest indices file"] == "vh_x2_nesting_indices.txt"
-        assert (
-            nemo_coupling["fvcom nest ref line file"]
-            == "vh_x2_nesting_innerboundary.txt"
-        )
-        assert nemo_coupling["nemo cut i range"] == [225, 369]
-        assert nemo_coupling["nemo cut j range"] == [340, 561]
-        assert nemo_coupling["transition zone width"] == 8500
-        assert nemo_coupling["tanh dl"] == 2
-        assert nemo_coupling["tanh du"] == 2
-        assert (
-            nemo_coupling["nemo coordinates"]
-            == "/nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc"
-        )
-        assert (
-            nemo_coupling["nemo bathymetry"]
-            == "/nemoShare/MEOPAR/nowcast-sys/grid/bathymetry_201702.nc"
-        )
-        assert (
             nemo_coupling["boundary file template"]
-            == "bdy_{run_type}_brcl_{yyyymmdd}.nc"
+            == "bdy_{model_config}_{run_type}_brcl_{yyyymmdd}.nc"
         )
 
     def test_atmospheric_forcing_section(self, prod_config):
@@ -488,7 +481,11 @@ class TestEditNamelists:
             ),
             call(
                 Path("run_prep_dir/namelist.nesting"),
-                {"nml_nesting": {"nesting_file_name": "bdy_nowcast_brcl_20180115.nc"}},
+                {
+                    "nml_nesting": {
+                        "nesting_file_name": "bdy_x2_nowcast_brcl_20180115.nc"
+                    }
+                },
             ),
         ]
 
@@ -544,7 +541,11 @@ class TestEditNamelists:
             ),
             call(
                 Path("run_prep_dir/namelist.nesting"),
-                {"nml_nesting": {"nesting_file_name": "bdy_forecast_brcl_20180116.nc"}},
+                {
+                    "nml_nesting": {
+                        "nesting_file_name": "bdy_x2_forecast_brcl_20180116.nc"
+                    }
+                },
             ),
         ]
 
@@ -579,10 +580,10 @@ class TestPrepFVCOM_InputDir:
             call(Path("FVCOM-VHFR-config/grid/vh_x2_grd.dat")),
             call(Path("FVCOM-VHFR-config/grid/vh_x2_dep.dat")),
             call(Path("FVCOM-VHFR-config/grid/vh_x2_sigma.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vh_x2_utm10_cor.dat")),
+            call(Path("FVCOM-VHFR-config/grid/vh_x2_cor.dat")),
             call(Path("FVCOM-VHFR-config/grid/vh_x2_nospg_spg.dat")),
             call(Path("FVCOM-VHFR-config/grid/vh_x2_obc.dat")),
-            call(Path("FVCOM-VHFR-config/output/vh_x2_utm10_station.dat")),
+            call(Path("FVCOM-VHFR-config/output/vh_x2_station.dat")),
             call(Path(f"SalishSea/fvcom-nowcast/{restart_date}/vh_x2_restart_0001.nc")),
         ]
 

@@ -43,6 +43,15 @@ def main():
         "host_name", help="Name of the host to make boundary files on"
     )
     worker.cli.add_argument(
+        "model_config",
+        choices={"r12", "x2"},
+        help="""
+        Model configuration to make boundary file for:
+        'r12' means the r12 resolution
+        'x2' means the x2 resolution
+        """,
+    )
+    worker.cli.add_argument(
         "run_type",
         choices={"nowcast", "forecast"},
         help="""
@@ -68,11 +77,11 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"FVCOM {parsed_args.run_type} run boundary condition file for "
-        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"created on {parsed_args.host_name}"
+        f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run boundary condition "
+        f'file for {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f"created on {parsed_args.host_name}",
     )
-    msg_type = f"success {parsed_args.run_type}"
+    msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -84,11 +93,11 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"FVCOM {parsed_args.run_type} run boundary condition file creation"
-        f' for {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"failed on {parsed_args.host_name}"
+        f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run boundary condition "
+        f'file creation for {parsed_args.run_date.format("YYYY-MM-DD")} '
+        f"failed on {parsed_args.host_name}",
     )
-    msg_type = f"failure {parsed_args.run_type}"
+    msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -100,10 +109,11 @@ def make_fvcom_boundary(parsed_args, config, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
+    model_config = parsed_args.model_config
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     logger.info(
-        f"Creating VHFR FVCOM open boundary file for {run_type} run from "
+        f"Creating VHFR FVCOM open boundary file for {model_config} {run_type} run from "
         f'{run_date.format("YYYY-MM-DD")} NEMO run'
     )
     fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"])
@@ -115,15 +125,25 @@ def make_fvcom_boundary(parsed_args, config, *args):
     fvcom_input_dir.mkdir()
     bdy_file_tmpl = config["vhfr fvcom runs"]["nemo coupling"]["boundary file template"]
     grid_dir = Path(config["vhfr fvcom runs"]["fvcom grid"]["grid dir"])
-    fvcom_grid_file = Path(config["vhfr fvcom runs"]["fvcom grid"]["grid file"])
-    fvcom_depths_file = Path(config["vhfr fvcom runs"]["fvcom grid"]["depths file"])
-    fvcom_sigma_file = Path(config["vhfr fvcom runs"]["fvcom grid"]["sigma file"])
+    fvcom_grid_file = Path(
+        config["vhfr fvcom runs"]["fvcom grid"][model_config]["grid file"]
+    )
+    fvcom_depths_file = Path(
+        config["vhfr fvcom runs"]["fvcom grid"][model_config]["depths file"]
+    )
+    fvcom_sigma_file = Path(
+        config["vhfr fvcom runs"]["fvcom grid"][model_config]["sigma file"]
+    )
     coupling_dir = Path(config["vhfr fvcom runs"]["nemo coupling"]["coupling dir"])
     fvcom_nest_indices_file = Path(
-        config["vhfr fvcom runs"]["nemo coupling"]["fvcom nest indices file"]
+        config["vhfr fvcom runs"]["nemo coupling"][model_config][
+            "fvcom nest indices file"
+        ]
     )
     fvcom_nest_ref_line_file = Path(
-        config["vhfr fvcom runs"]["nemo coupling"]["fvcom nest ref line file"]
+        config["vhfr fvcom runs"]["nemo coupling"][model_config][
+            "fvcom nest ref line file"
+        ]
     )
     (
         x,
@@ -194,7 +214,9 @@ def make_fvcom_boundary(parsed_args, config, *args):
         )
     bdy_file_date = run_date if run_type == "nowcast" else run_date.shift(days=+1)
     bdy_file = bdy_file_tmpl.format(
-        run_type=run_type, yyyymmdd=bdy_file_date.format("YYYYMMDD")
+        model_config=model_config,
+        run_type=run_type,
+        yyyymmdd=bdy_file_date.format("YYYYMMDD"),
     )
     OPPTools.nesting.make_type3_nesting_file2(
         fout=os.fspath(fvcom_input_dir / bdy_file),
@@ -240,6 +262,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
     checklist = {
         run_type: {
             "run date": run_date.format("YYYY-MM-DD"),
+            "model config": model_config,
             "open boundary file": os.fspath(fvcom_input_dir / bdy_file),
         }
     }

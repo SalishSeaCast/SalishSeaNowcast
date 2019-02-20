@@ -633,7 +633,7 @@ def after_watch_NEMO(msg, config, checklist):
                     NextWorker("nowcast.workers.get_NeahBay_ssh", args=["forecast"]),
                     NextWorker(
                         "nowcast.workers.make_fvcom_boundary",
-                        args=[(config["vhfr fvcom runs"]["host"]), "nowcast"],
+                        args=[(config["vhfr fvcom runs"]["host"]), "x2", "nowcast"],
                         host=(config["vhfr fvcom runs"]["host"]),
                     ),
                 ]
@@ -870,14 +870,16 @@ def after_make_fvcom_boundary(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "failure nowcast": [],
-        "failure forecast": [],
-        "success nowcast": [],
-        "success forecast": [],
+        "failure x2 nowcast": [],
+        "failure x2 forecast": [],
+        "failure r12 nowcast": [],
+        "success x2 nowcast": [],
+        "success x2 forecast": [],
+        "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
         host_name = config["vhfr fvcom runs"]["host"]
-        run_type = msg.type.split()[1]
+        run_type = msg.type.split()[2]
         run_date = msg.payload[run_type]["run date"]
         next_workers[msg.type].extend(
             [
@@ -1082,7 +1084,7 @@ def after_watch_fvcom(msg, config, checklist):
             next_workers[msg.type].append(
                 NextWorker(
                     "nowcast.workers.make_fvcom_boundary",
-                    args=[(config["vhfr fvcom runs"]["host"]), "forecast"],
+                    args=[(config["vhfr fvcom runs"]["host"]), "x2", "forecast"],
                     host=(config["vhfr fvcom runs"]["host"]),
                 )
             )

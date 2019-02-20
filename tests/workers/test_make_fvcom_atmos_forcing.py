@@ -37,8 +37,9 @@ def config(base_config):
             """
 vhfr fvcom runs:
   fvcom grid:
-    grid file: vhfr_low_v2_utm10_grd.dat
     utm zone: 10
+    x2:
+      grid file: vhfr_low_v2_utm10_grd.dat
   atmospheric forcing:
     hrdps grib dir: forcing/atmospheric/GEM2.5/GRIB/
     fvcom atmos dir: forcing/atmospheric/GEM2.5/vhfr-fvcom
@@ -181,8 +182,8 @@ class TestConfig:
         assert "vhfr fvcom runs" in prod_config
         assert "fvcom grid" in prod_config["vhfr fvcom runs"]
         fvcom_grid = prod_config["vhfr fvcom runs"]["fvcom grid"]
-        assert fvcom_grid["grid file"] == "vh_x2_grd.dat"
         assert fvcom_grid["utm zone"] == 10
+        assert fvcom_grid["x2"]["grid file"] == "vh_x2_grd.dat"
 
 
 @patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)
