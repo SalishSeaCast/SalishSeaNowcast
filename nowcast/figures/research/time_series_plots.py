@@ -20,11 +20,18 @@
   - temperature and salinity
 
 over the last 2 months at a time series site.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTimeSeriesPlots.ipynb
+
+Development notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb
 """
 
 from types import SimpleNamespace
 
 import arrow as arw
+import matplotlib.dates
 import matplotlib.pyplot as plt
 from salishsea_tools import places
 
@@ -119,6 +126,8 @@ def _timeseries_axes_labels(axl, axr, left_variable, right_variable, plot_data, 
     axl.set_xlabel(
         "Date", color=theme.COLOURS["text"]["axis"], fontproperties=theme.FONTS["axis"]
     )
+    axl.set_xlim(plot_data.left_var.time.values[0], plot_data.left_var.time.values[-1])
+    axl.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d %b %Y"))
     axl.set_ylabel(
         f"{plot_data.left_long_name} [{plot_data.left_units}]",
         fontproperties=theme.FONTS["axis"],
@@ -127,8 +136,6 @@ def _timeseries_axes_labels(axl, axr, left_variable, right_variable, plot_data, 
     axr.set_ylabel(
         f"{plot_data.right_long_name} [{plot_data.right_units}]",
         fontproperties=theme.FONTS["axis"],
-        rotation=-90,
-        verticalalignment="bottom",
     )
     theme.set_axis_colors(axr)
 
