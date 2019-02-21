@@ -728,7 +728,7 @@ vhfr fvcom runs:
     fvcom atmos dir: /results/forcing/atmospheric/GEM2.5/vhfr-fvcom
     # Template for atmospheric forcing file names
     # **Must be quoted to project {} characters**
-    atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
+    atmos file template: 'atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc'
     # Directory on host where make_fvcom_atmos_forcing worker runs where FVCOM grid files are stored
     fvcom grid dir: /SalishSeaCast/FVCOM-VHFR-config/grid/
     # Atmospheric forcing field types to generate files for
@@ -1182,18 +1182,22 @@ message registry:
 
     make_fvcom_atmos_forcing:
       checklist key: FVCOM atmospheric forcing
-      success nowcast: nowcast FVCOM atmospheric forcing file created
-      failure nowcast: nowcast FVCOM atmospheric forcing file creation failed
-      success forecast: forecast FVCOM atmospheric forcing file created
-      failure forecast: forecast FVCOM atmospheric forcing file creation failed
+      success x2 nowcast: x2 configuration nowcast FVCOM atmospheric forcing file created
+      failure x2 nowcast: x2 configuration nowcast FVCOM atmospheric forcing file creation failed
+      success x2 forecast: x2 configuration forecast FVCOM atmospheric forcing file created
+      failure x2 forecast: x2 configuration forecast FVCOM atmospheric forcing file creation failed
+      success r12 nowcast: r12 configuration nowcast FVCOM atmospheric forcing file created
+      failure r12 nowcast: r12 configuration nowcast FVCOM atmospheric forcing file creation failed
       crash: make_fvcom_atmos_forcing worker crashed
 
     upload_fvcom_atmos_forcing:
       checklist key: FVCOM atmospheric forcing upload
-      success nowcast: FVCOM nowcast atmospheric forcing file uploaded
-      failure nowcast: FVCOM nowcast atmospheric forcing file upload failed
-      success forecast: FVCOM forecast atmospheric forcing file uploaded
-      failure forecast: FVCOM forecast atmospheric forcing file upload failed
+      success x2 nowcast: FVCOM x2 configuration nowcast atmospheric forcing file uploaded
+      failure x2 nowcast: FVCOM x2 configuration nowcast atmospheric forcing file upload failed
+      success x2 forecast: FVCOM x2 configuration forecast atmospheric forcing file uploaded
+      failure x2 forecast: FVCOM x2 configuration forecast atmospheric forcing file upload failed
+      success r12 nowcast: FVCOM r12 configuration nowcast atmospheric forcing file uploaded
+      failure r12 nowcast: FVCOM r12 configuration nowcast atmospheric forcing file upload failed
       crash: upload_fvcom_atmos_forcing worker crashed
 
     run_fvcom:

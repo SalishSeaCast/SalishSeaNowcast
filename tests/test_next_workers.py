@@ -1400,7 +1400,7 @@ class TestAfterMakeFVCOMBoundary:
         workers = next_workers.after_make_fvcom_boundary(msg, config, checklist)
         expected = NextWorker(
             "nowcast.workers.make_fvcom_atmos_forcing",
-            args=[run_type, "--run-date", "2018-03-16"],
+            args=[model_config, run_type, "--run-date", "2018-03-16"],
             host="localhost",
         )
         assert expected in workers
@@ -1443,10 +1443,12 @@ class TestAfterMakeFVCOMRiversForcing:
         "msg_type",
         [
             "crash",
-            "success nowcast",
-            "failure nowcast",
-            "success forecast",
-            "failure forecast",
+            "success x2 nowcast",
+            "failure x2 nowcast",
+            "success x2 forecast",
+            "failure x2 forecast",
+            "success r12 nowcast",
+            "failure r12 nowcast",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1461,7 +1463,8 @@ class TestAfterMakeFVCOMAtmosForcing:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure nowcast", "failure forecast"]
+        "msg_type",
+        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_fvcom_atmos_forcing(
@@ -1469,19 +1472,24 @@ class TestAfterMakeFVCOMAtmosForcing:
         )
         assert workers == []
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    @pytest.mark.parametrize(
+        "model_config, run_type",
+        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+    )
     def test_success_launch_upload_fvcom_atmos_forcing(
-        self, run_type, config, checklist
+        self, model_config, run_type, config, checklist
     ):
         msg = Message(
             "make_fvcom_atmos_forcing",
-            f"success {run_type}",
-            payload={run_type: {"run date": "2018-04-04"}},
+            f"success {model_config} {run_type}",
+            payload={
+                run_type: {"run date": "2018-04-04", "model config": model_config}
+            },
         )
         workers = next_workers.after_make_fvcom_atmos_forcing(msg, config, checklist)
         expected = NextWorker(
             "nowcast.workers.upload_fvcom_atmos_forcing",
-            args=["west.cloud", run_type, "--run-date", "2018-04-04"],
+            args=["west.cloud", model_config, run_type, "--run-date", "2018-04-04"],
             host="localhost",
         )
         assert expected in workers
@@ -1492,7 +1500,8 @@ class TestAfterUploadFVCOMAtmosForcing:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure nowcast", "failure forecast"]
+        "msg_type",
+        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_upload_fvcom_atmos_forcing(
@@ -1500,12 +1509,19 @@ class TestAfterUploadFVCOMAtmosForcing:
         )
         assert workers == []
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-    def test_success_launch_run_fvcom(self, run_type, config, checklist):
+    @pytest.mark.parametrize(
+        "model_config, run_type",
+        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+    )
+    def test_success_launch_run_fvcom(self, model_config, run_type, config, checklist):
         msg = Message(
             "upload_fvcom_atmos_forcing",
-            f"success {run_type}",
-            payload={"west.cloud": {run_type: {"run date": "2018-04-04"}}},
+            f"success {model_config} {run_type}",
+            payload={
+                "west.cloud": {
+                    run_type: {"run date": "2018-04-04", "model config": model_config}
+                }
+            },
         )
         workers = next_workers.after_upload_fvcom_atmos_forcing(msg, config, checklist)
         expected = NextWorker(

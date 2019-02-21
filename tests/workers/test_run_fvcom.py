@@ -235,7 +235,7 @@ class TestConfig:
         )
         assert (
             atmos_forcing["atmos file template"]
-            == "atmos_{run_type}_{field_type}_{yyyymmdd}.nc"
+            == "atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc"
         )
         assert (
             atmos_forcing["fvcom grid dir"] == "/SalishSeaCast/FVCOM-VHFR-config/grid/"

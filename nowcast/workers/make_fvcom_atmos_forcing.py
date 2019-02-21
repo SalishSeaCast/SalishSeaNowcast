@@ -39,6 +39,15 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
+        "model_config",
+        choices={"r12", "x2"},
+        help="""
+        Model configuration to make atmospheric forcing file for:
+        'r12' means the r12 resolution
+        'x2' means the x2 resolution
+        """,
+    )
+    worker.cli.add_argument(
         "run_type",
         choices={"nowcast", "forecast"},
         help="""
@@ -63,10 +72,10 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"FVCOM {parsed_args.run_type} run atmospheric forcing file for "
+        f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run atmospheric forcing file for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} created'
     )
-    msg_type = f"success {parsed_args.run_type}"
+    msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -78,10 +87,10 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"FVCOM {parsed_args.run_type} run atmospheric forcing file creation "
-        f'for {parsed_args.run_date.format("YYYY-MM-DD")} failed'
+        f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run atmospheric forcing file "
+        f'creation for {parsed_args.run_date.format("YYYY-MM-DD")} failed'
     )
-    msg_type = f"failure {parsed_args.run_type}"
+    msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -93,11 +102,17 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
+    model_config = parsed_args.model_config
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    checklist = {run_type: {"run date": run_date.format("YYYY-MM-DD")}}
+    checklist = {
+        run_type: {
+            "run date": run_date.format("YYYY-MM-DD"),
+            "model config": model_config,
+        }
+    }
     logger.info(
-        f"Creating VHFR FVCOM atmospheric forcing file for {run_type} run from "
+        f"Creating VHFR FVCOM atmospheric forcing file for {model_config} {run_type} run from "
         f'{run_date.format("YYYY-MM-DD")} HRDPS GRIB files'
     )
     hrdps_gribs = Path(
@@ -114,7 +129,9 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
         "atmos file template"
     ]
     grid_dir = Path(config["vhfr fvcom runs"]["atmospheric forcing"]["fvcom grid dir"])
-    fvcom_grid_file = Path(config["vhfr fvcom runs"]["fvcom grid"]["x2"]["grid file"])
+    fvcom_grid_file = Path(
+        config["vhfr fvcom runs"]["fvcom grid"][model_config]["grid file"]
+    )
     tri, nodes = OPPTools.fvcomToolbox.readMesh_V3(
         os.fspath(grid_dir / fvcom_grid_file)
     )
@@ -132,6 +149,7 @@ def make_fvcom_atmos_forcing(parsed_args, config, *args):
         "field types"
     ]:
         atmos_file = atmos_file_tmpl.format(
+            model_config=model_config,
             run_type=run_type,
             field_type=atmos_field_type,
             yyyymmdd=atmos_file_date.format("YYYYMMDD"),
