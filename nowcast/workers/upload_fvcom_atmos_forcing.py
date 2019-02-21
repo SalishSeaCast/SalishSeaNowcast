@@ -41,10 +41,19 @@ def main():
         "host_name", help="Name of the host to upload atmospheric forcing files to"
     )
     worker.cli.add_argument(
+        "model_config",
+        choices={"r12", "x2"},
+        help="""
+        Model configuration to upload atmospheric forcing files for:
+        'r12' means the r12 resolution
+        'x2' means the x2 resolution
+        """,
+    )
+    worker.cli.add_argument(
         "run_type",
         choices={"nowcast", "forecast"},
         help="""
-        Type of run to upload atmospheric forcing file for:
+        Type of run to upload atmospheric forcing files for:
         'nowcast' means run for present UTC day (after NEMO nowcast run),
         'forecast' means updated forecast run (next 36h UTC, after NEMO forecast run)
         """,
@@ -65,11 +74,10 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"FVCOM run atmospheric forcing file for "
-        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"uploaded to {parsed_args.host_name}"
+        f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run atmospheric forcing files "
+        f'for {parsed_args.run_date.format("YYYY-MM-DD")} uploaded to {parsed_args.host_name}'
     )
-    msg_type = f"success {parsed_args.run_type}"
+    msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -81,11 +89,11 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"FVCOM run atmospheric forcing file upload for "
-        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+        f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run atmospheric forcing files "
+        f'upload for {parsed_args.run_date.format("YYYY-MM-DD")} '
         f"failed on {parsed_args.host_name}"
     )
-    msg_type = f"failure {parsed_args.run_type}"
+    msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -98,19 +106,22 @@ def upload_fvcom_atmos_forcing(parsed_args, config, *args):
     :rtype: dict
     """
     host_name = parsed_args.host_name
+    model_config = parsed_args.model_config
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     checklist = {
         host_name: {
             parsed_args.run_type: {
                 "run date": f'{parsed_args.run_date.format("YYYY-MM-DD")}',
+                "model config": model_config,
                 "files": [],
             }
         }
     }
     logger.info(
-        f"Uploading VHFR FVCOM atmospheric forcing file for "
-        f'{run_date.format("YYYY-MM-DD")} run to {host_name}'
+        f"Uploading VHFR FVCOM atmospheric forcing files for "
+        f'{run_date.format("YYYY-MM-DD")} {parsed_args.model_config} {parsed_args.run_type} '
+        f"run to {host_name}"
     )
     fvcom_atmos_dir = Path(
         config["vhfr fvcom runs"]["atmospheric forcing"]["fvcom atmos dir"]
@@ -123,6 +134,7 @@ def upload_fvcom_atmos_forcing(parsed_args, config, *args):
         "field types"
     ]:
         atmos_file = atmos_file_tmpl.format(
+            model_config=model_config,
             run_type=run_type,
             field_type=atmos_field_type,
             yyyymmdd=atmos_file_date.format("YYYYMMDD"),

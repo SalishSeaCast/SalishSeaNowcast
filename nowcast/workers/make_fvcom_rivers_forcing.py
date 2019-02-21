@@ -79,7 +79,7 @@ def success(parsed_args):
     logger.info(
         f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run rivers forcing file for "
         f"{parsed_args.run_date.format('YYYY-MM-DD')} "
-        f"created on {parsed_args.host_name}",
+        f"created on {parsed_args.host_name}"
     )
     msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
@@ -95,7 +95,7 @@ def failure(parsed_args):
     logger.critical(
         f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run rivers forcing file creation "
         f"for {parsed_args.run_date.format('YYYY-MM-DD')} "
-        f"failed on {parsed_args.host_name}",
+        f"failed on {parsed_args.host_name}"
     )
     msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type

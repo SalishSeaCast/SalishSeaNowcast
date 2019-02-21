@@ -39,7 +39,7 @@ vhfr fvcom runs:
   ssh key: SalishSeaNEMO-nowcast_id_rsa
   atmospheric forcing:
     fvcom atmos dir: forcing/atmospheric/GEM2.5/vhfr-fvcom
-    atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
+    atmos file template: 'atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc'
     field types:
       - hfx
       - precip
@@ -76,10 +76,18 @@ class TestMain:
         assert args == ("host_name",)
         assert "help" in kwargs
 
-    def test_add_run_type_arg(self, m_worker):
+    def test_add_model_config_arg(self, m_worker):
         m_worker().cli = Mock(name="cli")
         upload_fvcom_atmos_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ("model_config",)
+        assert kwargs["choices"] == {"r12", "x2"}
+        assert "help" in kwargs
+
+    def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        upload_fvcom_atmos_forcing.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ("run_type",)
         assert kwargs["choices"] == {"nowcast", "forecast"}
         assert "help" in kwargs
@@ -103,36 +111,6 @@ class TestMain:
         )
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-@patch("nowcast.workers.upload_fvcom_atmos_forcing.logger", autospec=True)
-class TestSuccess:
-    """Unit tests for success() function.
-    """
-
-    def test_success(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2018-04-04")
-        )
-        msg_type = upload_fvcom_atmos_forcing.success(parsed_args)
-        assert msg_type == f"success {run_type}"
-        assert m_logger.info.called
-
-
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-@patch("nowcast.workers.upload_fvcom_atmos_forcing.logger", autospec=True)
-class TestFailure:
-    """Unit tests for failure() function.
-    """
-
-    def test_failure(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2018-04-04")
-        )
-        msg_type = upload_fvcom_atmos_forcing.failure(parsed_args)
-        assert m_logger.critical.called
-        assert msg_type == f"failure {run_type}"
-
-
 class TestConfig:
     """Unit tests for production YAML config file elements related to worker.
     """
@@ -149,10 +127,12 @@ class TestConfig:
     @pytest.mark.parametrize(
         "msg",
         (
-            "success nowcast",
-            "failure nowcast",
-            "success forecast",
-            "failure forecast",
+            "success x2 nowcast",
+            "failure x2 nowcast",
+            "success x2 forecast",
+            "failure x2 forecast",
+            "success r12 nowcast",
+            "failure r12 nowcast",
             "crash",
         ),
     )
@@ -172,7 +152,7 @@ class TestConfig:
         )
         assert (
             atmos_forcing["atmos file template"]
-            == "atmos_{run_type}_{field_type}_{yyyymmdd}.nc"
+            == "atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc"
         )
         assert atmos_forcing["field types"] == ["hfx", "precip", "wnd"]
 
@@ -189,7 +169,54 @@ class TestConfig:
 
 
 @pytest.mark.parametrize(
-    "run_type, file_date", [("nowcast", "20181207"), ("forecast", "20181208")]
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
+@patch("nowcast.workers.upload_fvcom_atmos_forcing.logger", autospec=True)
+class TestSuccess:
+    """Unit tests for success() function.
+    """
+
+    def test_success_log_info(self, m_logger, model_config, run_type):
+        parsed_args = SimpleNamespace(
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-04-04"),
+        )
+        msg_type = upload_fvcom_atmos_forcing.success(parsed_args)
+        assert msg_type == f"success {model_config} {run_type}"
+        assert m_logger.info.called
+
+
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
+@patch("nowcast.workers.upload_fvcom_atmos_forcing.logger", autospec=True)
+class TestFailure:
+    """Unit tests for failure() function.
+    """
+
+    def test_failure_log_critical(self, m_logger, model_config, run_type):
+        parsed_args = SimpleNamespace(
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-04-04"),
+        )
+        msg_type = upload_fvcom_atmos_forcing.failure(parsed_args)
+        assert m_logger.critical.called
+        assert msg_type == f"failure {model_config} {run_type}"
+
+
+@pytest.mark.parametrize(
+    "model_config, run_type, run_date, atmos_file_date",
+    (
+        ("x2", "nowcast", arrow.get("2018-12-07"), "20181207"),
+        ("x2", "forecast", arrow.get("2018-12-07"), "20181208"),
+        ("r12", "nowcast", arrow.get("2019-02-21"), "20190221"),
+    ),
 )
 @patch("nowcast.workers.upload_fvcom_atmos_forcing.ssh_sftp.sftp", autospec=True)
 @patch("nowcast.workers.upload_fvcom_atmos_forcing.ssh_sftp.upload_file", autospec=True)
@@ -199,11 +226,22 @@ class TestUploadFVCOMAtmosForcing:
     """
 
     def test_checklist(
-        self, m_logger, m_upload_file, m_sftp, run_type, file_date, config
+        self,
+        m_logger,
+        m_upload_file,
+        m_sftp,
+        model_config,
+        run_type,
+        run_date,
+        atmos_file_date,
+        config,
     ):
         m_sftp.return_value = (Mock(name="ssh_client"), Mock(name="sftp_client"))
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2018-12-07")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=run_date,
         )
         checklist = upload_fvcom_atmos_forcing.upload_fvcom_atmos_forcing(
             parsed_args, config
@@ -211,11 +249,12 @@ class TestUploadFVCOMAtmosForcing:
         expected = {
             "west.cloud": {
                 run_type: {
-                    "run date": "2018-12-07",
+                    "run date": run_date.format("YYYY-MM-DD"),
+                    "model config": model_config,
                     "files": [
-                        f"atmos_{run_type}_hfx_{file_date}.nc",
-                        f"atmos_{run_type}_precip_{file_date}.nc",
-                        f"atmos_{run_type}_wnd_{file_date}.nc",
+                        f"atmos_{model_config}_{run_type}_hfx_{atmos_file_date}.nc",
+                        f"atmos_{model_config}_{run_type}_precip_{atmos_file_date}.nc",
+                        f"atmos_{model_config}_{run_type}_wnd_{atmos_file_date}.nc",
                     ],
                 }
             }
@@ -223,12 +262,23 @@ class TestUploadFVCOMAtmosForcing:
         assert checklist == expected
 
     def test_upload_file(
-        self, m_logger, m_upload_file, m_sftp, run_type, file_date, config
+        self,
+        m_logger,
+        m_upload_file,
+        m_sftp,
+        model_config,
+        run_type,
+        run_date,
+        atmos_file_date,
+        config,
     ):
         m_sftp_client = Mock(name="sftp_client")
         m_sftp.return_value = (Mock(name="ssh_client"), m_sftp_client)
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2018-12-07")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=run_date,
         )
         upload_fvcom_atmos_forcing.upload_fvcom_atmos_forcing(parsed_args, config)
         assert m_upload_file.call_args_list == [
@@ -237,9 +287,11 @@ class TestUploadFVCOMAtmosForcing:
                 "west.cloud",
                 Path(
                     f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
-                    f"atmos_{run_type}_hfx_{file_date}.nc"
+                    f"atmos_{model_config}_{run_type}_hfx_{atmos_file_date}.nc"
                 ),
-                Path(f"fvcom-runs/input/atmos_{run_type}_hfx_{file_date}.nc"),
+                Path(
+                    f"fvcom-runs/input/atmos_{model_config}_{run_type}_hfx_{atmos_file_date}.nc"
+                ),
                 m_logger,
             ),
             call(
@@ -247,9 +299,11 @@ class TestUploadFVCOMAtmosForcing:
                 "west.cloud",
                 Path(
                     f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
-                    f"atmos_{run_type}_precip_{file_date}.nc"
+                    f"atmos_{model_config}_{run_type}_precip_{atmos_file_date}.nc"
                 ),
-                Path(f"fvcom-runs/input/atmos_{run_type}_precip_{file_date}.nc"),
+                Path(
+                    f"fvcom-runs/input/atmos_{model_config}_{run_type}_precip_{atmos_file_date}.nc"
+                ),
                 m_logger,
             ),
             call(
@@ -257,9 +311,11 @@ class TestUploadFVCOMAtmosForcing:
                 "west.cloud",
                 Path(
                     f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
-                    f"atmos_{run_type}_wnd_{file_date}.nc"
+                    f"atmos_{model_config}_{run_type}_wnd_{atmos_file_date}.nc"
                 ),
-                Path(f"fvcom-runs/input/atmos_{run_type}_wnd_{file_date}.nc"),
+                Path(
+                    f"fvcom-runs/input/atmos_{model_config}_{run_type}_wnd_{atmos_file_date}.nc"
+                ),
                 m_logger,
             ),
         ]

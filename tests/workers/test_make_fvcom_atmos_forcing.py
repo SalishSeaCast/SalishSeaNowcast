@@ -39,11 +39,13 @@ vhfr fvcom runs:
   fvcom grid:
     utm zone: 10
     x2:
-      grid file: vhfr_low_v2_utm10_grd.dat
+      grid file: vhfr_x2_grd.dat
+    r12:
+      grid file: vhfr_r12_grd.dat
   atmospheric forcing:
     hrdps grib dir: forcing/atmospheric/GEM2.5/GRIB/
     fvcom atmos dir: forcing/atmospheric/GEM2.5/vhfr-fvcom
-    atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
+    atmos file template: 'atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc'
     fvcom grid dir: nowcast-sys/FVCOM-VHFR-config/grid/
     field types:
       - hfx
@@ -73,10 +75,18 @@ class TestMain:
         make_fvcom_atmos_forcing.main()
         m_worker().init_cli.assert_called_once_with()
 
-    def test_add_run_type_arg(self, m_worker):
+    def test_add_model_config_arg(self, m_worker):
         m_worker().cli = Mock(name="cli")
         make_fvcom_atmos_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[0]
+        assert args == ("model_config",)
+        assert kwargs["choices"] == {"r12", "x2"}
+        assert "help" in kwargs
+
+    def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        make_fvcom_atmos_forcing.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_type",)
         assert kwargs["choices"] == {"nowcast", "forecast"}
         assert "help" in kwargs
@@ -100,36 +110,6 @@ class TestMain:
         )
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-@patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)
-class TestSuccess:
-    """Unit tests for success() function.
-    """
-
-    def test_success(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-03-15")
-        )
-        msg_type = make_fvcom_atmos_forcing.success(parsed_args)
-        assert msg_type == f"success {run_type}"
-        assert m_logger.info.called
-
-
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-@patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)
-class TestFailure:
-    """Unit tests for failure() function.
-    """
-
-    def test_failure(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-03-15")
-        )
-        msg_type = make_fvcom_atmos_forcing.failure(parsed_args)
-        assert msg_type == f"failure {run_type}"
-        assert m_logger.critical.called
-
-
 class TestConfig:
     """Unit tests for production YAML config file elements related to worker.
     """
@@ -144,10 +124,12 @@ class TestConfig:
     @pytest.mark.parametrize(
         "msg",
         (
-            "success nowcast",
-            "failure nowcast",
-            "success forecast",
-            "failure forecast",
+            "success x2 nowcast",
+            "failure x2 nowcast",
+            "success x2 forecast",
+            "failure x2 forecast",
+            "success r12 nowcast",
+            "failure r12 nowcast",
             "crash",
         ),
     )
@@ -171,7 +153,7 @@ class TestConfig:
         )
         assert (
             atmos_forcing["atmos file template"]
-            == "atmos_{run_type}_{field_type}_{yyyymmdd}.nc"
+            == "atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc"
         )
         assert (
             atmos_forcing["fvcom grid dir"] == "/SalishSeaCast/FVCOM-VHFR-config/grid/"
@@ -183,7 +165,50 @@ class TestConfig:
         assert "fvcom grid" in prod_config["vhfr fvcom runs"]
         fvcom_grid = prod_config["vhfr fvcom runs"]["fvcom grid"]
         assert fvcom_grid["utm zone"] == 10
-        assert fvcom_grid["x2"]["grid file"] == "vh_x2_grd.dat"
+        x2_fvcom_grid = fvcom_grid["x2"]
+        assert x2_fvcom_grid["grid file"] == "vh_x2_grd.dat"
+        r12_fvcom_grid = fvcom_grid["r12"]
+        assert r12_fvcom_grid["grid file"] == "vh_r12_grd.dat"
+
+
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
+@patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)
+class TestSuccess:
+    """Unit tests for success() function.
+    """
+
+    def test_success_log_info(self, m_logger, model_config, run_type):
+        parsed_args = SimpleNamespace(
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-03-15"),
+        )
+        msg_type = make_fvcom_atmos_forcing.success(parsed_args)
+        assert msg_type == f"success {model_config} {run_type}"
+        assert m_logger.info.called
+
+
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
+@patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)
+class TestFailure:
+    """Unit tests for failure() function.
+    """
+
+    def test_failure_log_critical(self, m_logger, model_config, run_type):
+        parsed_args = SimpleNamespace(
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-03-15"),
+        )
+        msg_type = make_fvcom_atmos_forcing.failure(parsed_args)
+        assert msg_type == f"failure {model_config} {run_type}"
+        assert m_logger.critical.called
 
 
 @patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)
@@ -201,43 +226,63 @@ class TestMakeFVCOMAtmosForcing:
     """
 
     @pytest.mark.parametrize(
-        "run_type, file_date", [("nowcast", "20181207"), ("forecast", "20181208")]
+        "model_config, run_type, run_date, atmos_file_date",
+        (
+            ("x2", "nowcast", arrow.get("2018-12-07"), "20181207"),
+            ("x2", "forecast", arrow.get("2018-12-07"), "20181208"),
+            ("r12", "nowcast", arrow.get("2019-02-20"), "20190220"),
+        ),
     )
     def test_checklist(
-        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, file_date, config
+        self,
+        m_create_atm_hrdps,
+        m_readMesh,
+        m_logger,
+        model_config,
+        run_type,
+        run_date,
+        atmos_file_date,
+        config,
     ):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-12-07")
+            model_config=model_config, run_type=run_type, run_date=run_date
         )
         checklist = make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(
             parsed_args, config
         )
         expected = {
             run_type: {
-                "run date": "2018-12-07",
-                "hfx": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{run_type}_hfx_{file_date}.nc",
-                "precip": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{run_type}_precip_{file_date}.nc",
-                "wnd": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{run_type}_wnd_{file_date}.nc",
+                "run date": run_date.format("YYYY-MM-DD"),
+                "model config": model_config,
+                "hfx": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{model_config}_{run_type}_hfx_{atmos_file_date}.nc",
+                "precip": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{model_config}_{run_type}_precip_{atmos_file_date}.nc",
+                "wnd": f"forcing/atmospheric/GEM2.5/vhfr-fvcom/atmos_{model_config}_{run_type}_wnd_{atmos_file_date}.nc",
             }
         }
         assert checklist == expected
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    @pytest.mark.parametrize(
+        "model_config, run_type",
+        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+    )
     def test_readMesh_V3(
-        self, m_create_atm_hrdps, m_readMesh, m_logger, run_type, config
+        self, m_create_atm_hrdps, m_readMesh, m_logger, model_config, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-03-16")
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-03-16"),
         )
         make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(parsed_args, config)
         m_readMesh.assert_called_once_with(
-            "nowcast-sys/FVCOM-VHFR-config/grid/vhfr_low_v2_utm10_grd.dat"
+            f"nowcast-sys/FVCOM-VHFR-config/grid/vhfr_{model_config}_grd.dat"
         )
 
     @pytest.mark.parametrize(
-        "run_type, call_num, field_type, file_date, tlims",
+        "model_config, run_type, call_num, field_type, file_date, tlims",
         [
             (
+                "x2",
                 "nowcast",
                 0,
                 "hfx",
@@ -245,6 +290,7 @@ class TestMakeFVCOMAtmosForcing:
                 ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
             ),
             (
+                "x2",
                 "nowcast",
                 1,
                 "precip",
@@ -252,6 +298,7 @@ class TestMakeFVCOMAtmosForcing:
                 ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
             ),
             (
+                "x2",
                 "nowcast",
                 2,
                 "wnd",
@@ -259,6 +306,7 @@ class TestMakeFVCOMAtmosForcing:
                 ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
             ),
             (
+                "x2",
                 "forecast",
                 0,
                 "hfx",
@@ -266,6 +314,7 @@ class TestMakeFVCOMAtmosForcing:
                 ("2018-12-08 00:00:00", "2018-12-09 12:00:00"),
             ),
             (
+                "x2",
                 "forecast",
                 1,
                 "precip",
@@ -273,11 +322,36 @@ class TestMakeFVCOMAtmosForcing:
                 ("2018-12-08 00:00:00", "2018-12-09 12:00:00"),
             ),
             (
+                "x2",
                 "forecast",
                 2,
                 "wnd",
                 "20181208",
                 ("2018-12-08 00:00:00", "2018-12-09 12:00:00"),
+            ),
+            (
+                "r12",
+                "nowcast",
+                0,
+                "hfx",
+                "20181207",
+                ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
+            ),
+            (
+                "r12",
+                "nowcast",
+                1,
+                "precip",
+                "20181207",
+                ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
+            ),
+            (
+                "r12",
+                "nowcast",
+                2,
+                "wnd",
+                "20181207",
+                ("2018-12-07 00:00:00", "2018-12-08 00:00:00"),
             ),
         ],
     )
@@ -286,6 +360,7 @@ class TestMakeFVCOMAtmosForcing:
         m_create_atm_hrdps,
         m_readMesh,
         m_logger,
+        model_config,
         run_type,
         call_num,
         field_type,
@@ -294,7 +369,9 @@ class TestMakeFVCOMAtmosForcing:
         config,
     ):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-12-07")
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-12-07"),
         )
         make_fvcom_atmos_forcing.make_fvcom_atmos_forcing(parsed_args, config)
         call_args = m_create_atm_hrdps.call_args_list[call_num]
@@ -306,7 +383,7 @@ class TestMakeFVCOMAtmosForcing:
         assert call_args[1]["tlim"] == tlims
         expected = (
             f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
-            f"atmos_{run_type}_{field_type}_{file_date}.nc"
+            f"atmos_{model_config}_{run_type}_{field_type}_{file_date}.nc"
         )
         assert call_args[1]["fname"] == expected
         expected = [
