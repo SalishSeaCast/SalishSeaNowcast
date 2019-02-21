@@ -680,6 +680,8 @@ vhfr fvcom runs:
       sponge file: vh_x2_nospg_spg.dat
       # Open boundaries nodes list file
       obc nodes file: vh_x2_obc.dat
+      # Fraser River nodes list file
+      fraser nodes file: vh_x2_river_nodes_fraser.txt
     r12:
       grid file: vh_r12_grd.dat
       depths file: vh_r12_smp3_dep.dat
@@ -688,8 +690,6 @@ vhfr fvcom runs:
       sponge file: vh_r12_nospg_spg.dat
       obc nodes file: vh_r12_obc.dat
       fraser nodes file: vh_r12_river_nodes_fraser.txt
-    # Fraser River nodes list file
-    fraser nodes file: vh_x2_river_nodes_fraser.txt
 
   nemo coupling:
     # Directory on compute host where FVCOM-NEMO coupling files are stored
@@ -748,7 +748,7 @@ vhfr fvcom runs:
     temperature climatology: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc
     # Template for rivers forcing file names
     # **Must be quoted to project {} characters**
-    rivers file template: 'rivers_{run_type}_{yyyymmdd}.nc'
+    rivers file template: 'rivers_{model_config}_{run_type}_{yyyymmdd}.nc'
 
   # Directory on compute host where FVCOM input files are stored
   input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
@@ -1172,10 +1172,12 @@ message registry:
 
     make_fvcom_rivers_forcing:
       checklist key: FVCOM rivers forcing
-      success nowcast: nowcast FVCOM rivers forcing file created
-      failure nowcast: nowcast FVCOM rivers forcing file creation failed
-      success forecast: forecast FVCOM rivers forcing file created
-      failure forecast: forecast FVCOM rivers forcing file creation failed
+      success x2 nowcast: x2 configuration nowcast FVCOM rivers forcing file created
+      failure x2 nowcast: x2 configuration nowcast FVCOM rivers forcing file creation failed
+      success x2 forecast: x2 configuration forecast FVCOM rivers forcing file created
+      failure x2 forecast: x2 configuration forecast FVCOM rivers forcing file creation failed
+      success r12 nowcast: r12 configuration nowcast FVCOM rivers forcing file created
+      failure r12 nowcast: r12 configuration nowcast FVCOM rivers forcing file creation failed
       crash: make_fvcom_atmos_forcing worker crashed
 
     make_fvcom_atmos_forcing:
