@@ -1393,7 +1393,7 @@ class TestAfterMakeFVCOMBoundary:
                 run_type: {
                     "run date": "2018-03-16",
                     "model config": model_config,
-                    "open boundary file": "input/bdy_nowcast_btrp_20180316.nc",
+                    "open boundary file": f"input/bdy_{model_config}_nowcast_btrp_20180316.nc",
                 }
             },
         )
@@ -1419,7 +1419,8 @@ class TestAfterMakeFVCOMBoundary:
                 payload={
                     run_type: {
                         "run date": "2019-02-06",
-                        "open boundary file": "input/bdy_nowcast_btrp_20180316.nc",
+                        "model config": model_config,
+                        "open boundary file": f"input/bdy_{model_config}_nowcast_btrp_20180316.nc",
                     }
                 },
             ),
@@ -1428,7 +1429,7 @@ class TestAfterMakeFVCOMBoundary:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_rivers_forcing",
-            args=["west.cloud", run_type, "--run-date", "2019-02-06"],
+            args=["west.cloud", model_config, run_type, "--run-date", "2019-02-06"],
             host="west.cloud",
         )
         assert expected in workers

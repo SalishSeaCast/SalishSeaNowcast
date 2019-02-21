@@ -37,14 +37,17 @@ def config(base_config):
 vhfr fvcom runs:
   fvcom grid:
     grid dir: FVCOM-VHFR-config/grid/
-    fraser nodes file: vh_x2_river_nodes_fraser.txt
+    x2:
+      fraser nodes file: vh_x2_river_nodes_fraser.txt
+    r12:
+      fraser nodes file: vh_r12_river_nodes_fraser.txt
   nemo coupling:
     nemo coordinates: grid/coordinates_seagrid_SalishSea201702.nc
   rivers forcing:
     nemo rivers dir: rivers/
     runoff file template: R201702DFraCElse_{yyyymmdd}.nc
     temperature climatology: rivers-climatology/rivers_ConsTemp_month.nc
-    rivers file template: 'rivers_{run_type}_{yyyymmdd}.nc'
+    rivers file template: 'rivers_{model_config}_{run_type}_{yyyymmdd}.nc'
   input dir: fvcom-runs/input/
 """
         )
@@ -77,10 +80,18 @@ class TestMain:
         assert args == ("host_name",)
         assert "help" in kwargs
 
-    def test_add_run_type_arg(self, m_worker):
+    def test_add_model_config_arg(self, m_worker):
         m_worker().cli = Mock(name="cli")
         make_fvcom_rivers_forcing.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ("model_config",)
+        assert kwargs["choices"] == {"r12", "x2"}
+        assert "help" in kwargs
+
+    def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        make_fvcom_rivers_forcing.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ("run_type",)
         assert kwargs["choices"] == {"nowcast", "forecast"}
         assert "help" in kwargs
@@ -118,10 +129,12 @@ class TestConfig:
     @pytest.mark.parametrize(
         "msg",
         (
-            "success nowcast",
-            "failure nowcast",
-            "success forecast",
-            "failure forecast",
+            "success x2 nowcast",
+            "failure x2 nowcast",
+            "success x2 forecast",
+            "failure x2 forecast",
+            "success r12 nowcast",
+            "failure r12 nowcast",
             "crash",
         ),
     )
@@ -137,7 +150,10 @@ class TestConfig:
             fvcom_grid["grid dir"]
             == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/"
         )
-        assert fvcom_grid["fraser nodes file"] == "vh_x2_river_nodes_fraser.txt"
+        x2_fvcom_grid = fvcom_grid["x2"]
+        assert x2_fvcom_grid["fraser nodes file"] == "vh_x2_river_nodes_fraser.txt"
+        r12_fvcom_grid = fvcom_grid["r12"]
+        assert r12_fvcom_grid["fraser nodes file"] == "vh_r12_river_nodes_fraser.txt"
 
     def test_nemo_coupling_section(self, prod_config):
         nemo_coupling = prod_config["vhfr fvcom runs"]["nemo coupling"]
@@ -157,7 +173,8 @@ class TestConfig:
             == "/nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc"
         )
         assert (
-            rivers_forcing["rivers file template"] == "rivers_{run_type}_{yyyymmdd}.nc"
+            rivers_forcing["rivers file template"]
+            == "rivers_{model_config}_{run_type}_{yyyymmdd}.nc"
         )
 
     def test_input_dir(self, prod_config):
@@ -173,33 +190,45 @@ class TestConfig:
         )
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
 @patch("nowcast.workers.make_fvcom_rivers_forcing.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, run_type):
+    def test_success_log_info(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2019-01-30")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2019-01-30"),
         )
         msg_type = make_fvcom_rivers_forcing.success(parsed_args)
-        assert msg_type == f"success {run_type}"
+        assert msg_type == f"success {model_config} {run_type}"
         assert m_logger.info.called
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
 @patch("nowcast.workers.make_fvcom_rivers_forcing.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure_log_error(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2019-01-30")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2019-01-30"),
         )
         msg_type = make_fvcom_rivers_forcing.failure(parsed_args)
-        assert msg_type == f"failure {run_type}"
+        assert msg_type == f"failure {model_config} {run_type}"
         assert m_logger.critical.called
 
 
@@ -222,10 +251,11 @@ class TestMakeFVCOMRiversForcing:
     """
 
     @pytest.mark.parametrize(
-        "run_type, run_date, river_file_date",
+        "model_config, run_type, run_date, river_file_date",
         (
-            ("nowcast", arrow.get("2019-01-30"), "20190130"),
-            ("forecast", arrow.get("2019-01-30"), "20190131"),
+            ("x2", "nowcast", arrow.get("2019-01-30"), "20190130"),
+            ("x2", "forecast", arrow.get("2019-01-30"), "20190131"),
+            ("r12", "nowcast", arrow.get("2019-02-20"), "20190220"),
         ),
     )
     def test_checklist(
@@ -236,13 +266,17 @@ class TestMakeFVCOMRiversForcing:
         m_genfromtxt,
         m_nemo_fraser,
         m_logger,
+        model_config,
         run_type,
         run_date,
         river_file_date,
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=run_date
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=run_date,
         )
         m_nemo_fraser.return_value = (
             numpy.array(
@@ -257,24 +291,34 @@ class TestMakeFVCOMRiversForcing:
         assert checklist == {
             run_type: {
                 "run date": run_date.format("YYYY-MM-DD"),
-                "rivers forcing file": f"fvcom-runs/input/rivers_{run_type}_{river_file_date}.nc",
+                "model config": model_config,
+                "rivers forcing file": f"fvcom-runs/input/rivers_{model_config}_{run_type}_{river_file_date}.nc",
             }
         }
 
     @pytest.mark.parametrize(
-        "run_type, run_date, time_start, time_end",
+        "model_config, run_type, run_date, time_start, time_end",
         (
             (
+                "x2",
                 "nowcast",
                 arrow.get("2019-01-30"),
                 arrow.get("2019-01-30 00:00:00"),
                 arrow.get("2019-01-31 00:00:00"),
             ),
             (
+                "x2",
                 "forecast",
                 arrow.get("2019-01-30"),
                 arrow.get("2019-01-31 00:00:00"),
                 arrow.get("2019-02-01 12:00:00"),
+            ),
+            (
+                "r12",
+                "nowcast",
+                arrow.get("2019-02-20"),
+                arrow.get("2019-02-20 00:00:00"),
+                arrow.get("2019-02-21 00:00:00"),
             ),
         ),
     )
@@ -286,6 +330,7 @@ class TestMakeFVCOMRiversForcing:
         m_genfromtxt,
         m_nemo_fraser,
         m_logger,
+        model_config,
         run_type,
         run_date,
         time_start,
@@ -293,7 +338,10 @@ class TestMakeFVCOMRiversForcing:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=run_date
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=run_date,
         )
         m_nemo_fraser.return_value = (
             numpy.array(
@@ -317,10 +365,11 @@ class TestMakeFVCOMRiversForcing:
         )
 
     @pytest.mark.parametrize(
-        "run_type, run_date, river_file_date",
+        "model_config, run_type, run_date, river_file_date",
         (
-            ("nowcast", arrow.get("2019-01-30"), "20190130"),
-            ("forecast", arrow.get("2019-01-30"), "20190131"),
+            ("x2", "nowcast", arrow.get("2019-01-30"), "20190130"),
+            ("x2", "forecast", arrow.get("2019-01-30"), "20190131"),
+            ("r12", "nowcast", arrow.get("2019-02-20"), "20190220"),
         ),
     )
     def test_generate_riv_call(
@@ -331,13 +380,17 @@ class TestMakeFVCOMRiversForcing:
         m_genfromtxt,
         m_nemo_fraser,
         m_logger,
+        model_config,
         run_type,
         run_date,
         river_file_date,
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=run_date
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=run_date,
         )
         m_nemo_fraser.return_value = (
             numpy.array(
@@ -348,7 +401,7 @@ class TestMakeFVCOMRiversForcing:
         )
         make_fvcom_rivers_forcing.make_fvcom_rivers_forcing(parsed_args, config)
         m_gen_riv.assert_called_once_with(
-            f"fvcom-runs/input/rivers_{run_type}_{river_file_date}.nc",
+            f"fvcom-runs/input/rivers_{model_config}_{run_type}_{river_file_date}.nc",
             [
                 run_date.shift(hours=-12).format("YYYY-MM-DD HH:mm:ss"),
                 run_date.shift(days=+1).format("YYYY-MM-DD HH:mm:ss"),

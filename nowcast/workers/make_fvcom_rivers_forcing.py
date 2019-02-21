@@ -43,6 +43,15 @@ def main():
         "host_name", help="Name of the host to make rivers forcing files on"
     )
     worker.cli.add_argument(
+        "model_config",
+        choices={"r12", "x2"},
+        help="""
+        Model configuration to make rivers forcing file for:
+        'r12' means the r12 resolution
+        'x2' means the x2 resolution
+        """,
+    )
+    worker.cli.add_argument(
         "run_type",
         choices={"nowcast", "forecast"},
         help="""
@@ -68,11 +77,11 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"FVCOM {parsed_args.run_type} run rivers forcing file for "
+        f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run rivers forcing file for "
         f"{parsed_args.run_date.format('YYYY-MM-DD')} "
-        f"created on {parsed_args.host_name}"
+        f"created on {parsed_args.host_name}",
     )
-    msg_type = f"success {parsed_args.run_type}"
+    msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -84,11 +93,11 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"FVCOM {parsed_args.run_type} run rivers forcing file creation "
+        f"FVCOM {parsed_args.model_config} {parsed_args.run_type} run rivers forcing file creation "
         f"for {parsed_args.run_date.format('YYYY-MM-DD')} "
-        f"failed on {parsed_args.host_name}"
+        f"failed on {parsed_args.host_name}",
     )
-    msg_type = f"failure {parsed_args.run_type}"
+    msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -100,10 +109,11 @@ def make_fvcom_rivers_forcing(parsed_args, config, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
+    model_config = parsed_args.model_config
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     logger.info(
-        f"Creating VHFR FVCOM rivers forcing file for {run_type} run from "
+        f"Creating VHFR FVCOM rivers forcing file for {model_config} {run_type} run from "
         f'{run_date.format("YYYY-MM-DD")} NEMO runoff forcing files'
     )
     time_start_offsets = {
@@ -138,7 +148,8 @@ def make_fvcom_rivers_forcing(parsed_args, config, *args):
     )
     grid_dir = Path(config["vhfr fvcom runs"]["fvcom grid"]["grid dir"])
     fraser_nodes_file = (
-        grid_dir / config["vhfr fvcom runs"]["fvcom grid"]["fraser nodes file"]
+        grid_dir
+        / config["vhfr fvcom runs"]["fvcom grid"][model_config]["fraser nodes file"]
     )
     river_nodes = numpy.genfromtxt(fraser_nodes_file, dtype=int)
     fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"])
@@ -147,7 +158,9 @@ def make_fvcom_rivers_forcing(parsed_args, config, *args):
     ]
     rivers_file_date = run_date if run_type == "nowcast" else run_date.shift(days=+1)
     rivers_file = rivers_file_tmpl.format(
-        run_type=run_type, yyyymmdd=rivers_file_date.format("YYYYMMDD")
+        model_config=model_config,
+        run_type=run_type,
+        yyyymmdd=rivers_file_date.format("YYYYMMDD"),
     )
     OPPTools.fvcomToolbox.generate_riv(
         os.fspath(fvcom_input_dir / rivers_file),
@@ -162,6 +175,7 @@ def make_fvcom_rivers_forcing(parsed_args, config, *args):
     checklist = {
         run_type: {
             "run date": run_date.format("YYYY-MM-DD"),
+            "model config": model_config,
             "rivers forcing file": os.fspath(fvcom_input_dir / rivers_file),
         }
     }

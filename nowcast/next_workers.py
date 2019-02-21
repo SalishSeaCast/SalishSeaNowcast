@@ -880,6 +880,7 @@ def after_make_fvcom_boundary(msg, config, checklist):
     if msg.type.startswith("success"):
         host_name = config["vhfr fvcom runs"]["host"]
         run_type = msg.type.split()[2]
+        model_config = msg.payload[run_type]["model config"]
         run_date = msg.payload[run_type]["run date"]
         next_workers[msg.type].extend(
             [
@@ -892,6 +893,7 @@ def after_make_fvcom_boundary(msg, config, checklist):
                     "nowcast.workers.make_fvcom_rivers_forcing",
                     args=[
                         (config["vhfr fvcom runs"]["host"]),
+                        model_config,
                         run_type,
                         "--run-date",
                         run_date,
