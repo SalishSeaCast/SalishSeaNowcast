@@ -15,6 +15,9 @@
 """Produce a figure that compares salinity at 1.5m depth model results to
 salinity observations from the ONC instrument package aboard a BC Ferries
 vessel.
+
+Testing notebook for this module is
+http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
 """
 from collections import namedtuple
 
