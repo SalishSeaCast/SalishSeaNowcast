@@ -16,6 +16,9 @@
 along a section of the domain thalweg,
 and on the surface for a section of the domain that excludes Puget Sound 
 in the south and Johnstone Strait in the north.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurfaceHourly.ipynb
 """
 from types import SimpleNamespace
 
