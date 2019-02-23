@@ -70,10 +70,7 @@ def success(parsed_args):
     model = parsed_args.model
     run_type = parsed_args.run_type
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
-    logger.info(
-        f"{model} {ymd} {run_type} rolling forecast datasets updated",
-        extra={"run_date": ymd, "model": model, "run_type": run_type},
-    )
+    logger.info(f"{model} {ymd} {run_type} rolling forecast datasets updated")
     msg_type = f"success {model} {run_type}"
     return msg_type
 
@@ -82,10 +79,7 @@ def failure(parsed_args):
     model = parsed_args.model
     run_type = parsed_args.run_type
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
-    logger.critical(
-        f"{model} {ymd} {run_type} rolling forecast datasets update failed",
-        extra={"run_date": ymd, "model": model, "run_type": run_type},
-    )
+    logger.critical(f"{model} {ymd} {run_type} rolling forecast datasets update failed")
     msg_type = f"failure {model} {run_type}"
     return msg_type
 

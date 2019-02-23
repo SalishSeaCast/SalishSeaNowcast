@@ -65,30 +65,21 @@ def main():
 
 def success(parsed_args):
     ymd = parsed_args.data_date.format("YYYY-MM-DD")
-    logger.info(
-        f"{ymd} ONC {parsed_args.onc_station} CTD T&S file created",
-        extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
-    )
+    logger.info(f"{ymd} ONC {parsed_args.onc_station} CTD T&S file created")
     msg_type = f"success {parsed_args.onc_station}"
     return msg_type
 
 
 def failure(parsed_args):
     ymd = parsed_args.data_date.format("YYYY-MM-DD")
-    logger.critical(
-        f"{ymd} ONC {parsed_args.onc_station} CTD T&S file creation failed",
-        extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
-    )
+    logger.critical(f"{ymd} ONC {parsed_args.onc_station} CTD T&S file creation failed")
     msg_type = "failure"
     return msg_type
 
 
 def get_onc_ctd(parsed_args, config, *args):
     ymd = parsed_args.data_date.format("YYYY-MM-DD")
-    logger.info(
-        f"requesting ONC {parsed_args.onc_station} CTD T&S data for {ymd}",
-        extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
-    )
+    logger.info(f"requesting ONC {parsed_args.onc_station} CTD T&S data for {ymd}")
     TOKEN = os.environ["ONC_USER_TOKEN"]
     onc_data = data_tools.get_onc_data(
         "scalardata",
@@ -102,31 +93,22 @@ def get_onc_ctd(parsed_args, config, *args):
     try:
         ctd_data = data_tools.onc_json_to_dataset(onc_data)
     except TypeError:
-        logger.error(
-            f"No ONC {parsed_args.onc_station} CTD T&S data for {ymd}",
-            extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
-        )
+        logger.error(f"No ONC {parsed_args.onc_station} CTD T&S data for {ymd}")
         raise WorkerError
     logger.debug(
-        f"ONC {parsed_args.onc_station} CTD T&S data for {ymd} received and " f"parsed",
-        extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
+        f"ONC {parsed_args.onc_station} CTD T&S data for {ymd} received and " f"parsed"
     )
     logger.debug(
         f"filtering ONC {parsed_args.onc_station} temperature data for {ymd} "
-        f"to exlude qaqcFlag!=1",
-        extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
+        f"to exlude qaqcFlag!=1"
     )
     temperature = _qaqc_filter(ctd_data, "temperature")
     logger.debug(
         f"filtering ONC {parsed_args.onc_station} salinity data for {ymd} "
-        f"to exlude qaqcFlag!=1",
-        extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
+        f"to exlude qaqcFlag!=1"
     )
     salinity = _qaqc_filter(ctd_data, "salinity")
-    logger.debug(
-        f"creating ONC {parsed_args.onc_station} CTD T&S dataset for {ymd}",
-        extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
-    )
+    logger.debug(f"creating ONC {parsed_args.onc_station} CTD T&S dataset for {ymd}")
     ds = _create_dataset(parsed_args.onc_station, temperature, salinity)
     dest_dir = Path(config["observations"]["ctd data"]["dest dir"])
     filepath_tmpl = config["observations"]["ctd data"]["filepath template"]
@@ -136,8 +118,7 @@ def get_onc_ctd(parsed_args, config, *args):
     )
     logger.debug(
         f"storing ONC {parsed_args.onc_station} CTD T&S dataset "
-        f"for {ymd} as {nc_filepath}",
-        extra={"data_date": ymd, "onc_station": parsed_args.onc_station},
+        f"for {ymd} as {nc_filepath}"
     )
     encoding = {
         var: {"dtype": "int64", "_FillValue": 0}

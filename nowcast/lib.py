@@ -20,7 +20,6 @@ import logging.handlers
 import os
 import subprocess
 
-from driftwood.formatters import JSONFormatter
 from nemo_nowcast import WorkerError
 from nemo_nowcast.fileutils import FilePerms
 
@@ -54,16 +53,6 @@ def configure_logging(config, logger, debug, email=True):
         config["logging"]["message_format"],
         datefmt=config["logging"]["datetime_format"],
     )
-    json_formatter = JSONFormatter(
-        extra_attrs=[
-            "forecast",
-            "date",
-            "run_type",
-            "host_name",
-            "plot_type",
-            "page_type",
-        ]
-    )
     for level, filename in config["logging"]["log_files"].items():
         # Text log files
         log_file = os.path.join(os.path.dirname(config["config_file"]), filename)
@@ -77,15 +66,6 @@ def configure_logging(config, logger, debug, email=True):
         handler.setLevel(getattr(logging, level.upper()))
         handler.setFormatter(text_formatter)
         logger.addHandler(handler)
-        if not debug:
-            # JSON log files
-            log_file = f"{log_file}.json"
-            handler = logging.handlers.TimedRotatingFileHandler(
-                log_file, when="d", interval=30, backupCount=120
-            )
-            handler.setLevel(getattr(logging, level.upper()))
-            handler.setFormatter(json_formatter)
-            logger.addHandler(handler)
     if not debug and email:
         # Email notifications
         level = config["logging"]["email"]["level"]

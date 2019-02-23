@@ -78,8 +78,6 @@ todo_include_todos = True
 autodoc_mock_imports = [
     "bs4",
     "cmocean",
-    "driftwood",
-    "driftwood.formatters",
     "f90nml",
     "feedgen",
     "feedgen.entry",

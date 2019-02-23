@@ -54,10 +54,7 @@ def main():
 
 def success(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
-    logger.info(
-        f"{ymd} Live Ocean file for Salish Sea western boundary downloaded",
-        extra={"run_date": ymd},
-    )
+    logger.info(f"{ymd} Live Ocean file for Salish Sea western boundary downloaded")
     msg_type = "success"
     return msg_type
 
@@ -65,8 +62,7 @@ def success(parsed_args):
 def failure(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
-        f"{ymd} Live Ocean file for Salish Sea western boundary download " f"failed",
-        extra={"run_date": ymd},
+        f"{ymd} Live Ocean file for Salish Sea western boundary download " f"failed"
     )
     msg_type = "failure"
     return msg_type
@@ -103,9 +99,7 @@ def _get_file(url, filename, dest_dir, session):
     filepath = dest_dir / filename
     get_web_data(url, NAME, filepath, session, wait_exponential_max=10800)
     size = filepath.stat().st_size
-    logger.debug(
-        f"downloaded {size} bytes from {url}", extra={"url": url, "dest_dir": dest_dir}
-    )
+    logger.debug(f"downloaded {size} bytes from {url}")
     return filepath
 
 

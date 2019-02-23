@@ -120,8 +120,6 @@ class TestSuccess:
         )
         download_fvcom_results.success(parsed_args)
         assert m_logger.info.called
-        assert m_logger.info.call_args[1]["extra"]["run_type"] == run_type
-        assert m_logger.info.call_args[1]["extra"]["host_name"] == host_name
 
     def test_success_msg_type(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
@@ -146,8 +144,6 @@ class TestFailure:
         )
         download_fvcom_results.failure(parsed_args)
         assert m_logger.critical.called
-        assert m_logger.critical.call_args[1]["extra"]["run_type"] == run_type
-        assert m_logger.critical.call_args[1]["extra"]["host_name"] == host_name
 
     def test_failure_msg_type(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(

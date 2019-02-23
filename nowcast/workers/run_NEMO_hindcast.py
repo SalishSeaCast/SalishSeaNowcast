@@ -74,10 +74,7 @@ def success(parsed_args):
     :return: Nowcast system message type
     :rtype: str
     """
-    logger.info(
-        f"NEMO hindcast run queued on {parsed_args.host_name}",
-        extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
-    )
+    logger.info(f"NEMO hindcast run queued on {parsed_args.host_name}")
     msg_type = "success"
     return msg_type
 
@@ -89,10 +86,7 @@ def failure(parsed_args):
     :return: Nowcast system message type
     :rtype: str
     """
-    logger.critical(
-        f"NEMO hindcast run failed to queue on {parsed_args.host_name}",
-        extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
-    )
+    logger.critical(f"NEMO hindcast run failed to queue on {parsed_args.host_name}")
     msg_type = "failure"
     return msg_type
 

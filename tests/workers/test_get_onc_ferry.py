@@ -88,9 +88,6 @@ class TestSuccess:
         )
         get_onc_ferry.success(parsed_args)
         assert m_logger.info.called
-        extra_value = m_logger.info.call_args[1]["extra"]["ferry_platform"]
-        assert extra_value == ferry_platform
-        assert m_logger.info.call_args[1]["extra"]["data_date"] == "2016-09-09"
 
     def test_success_msg_type(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(
@@ -112,10 +109,6 @@ class TestFailure:
         )
         get_onc_ferry.failure(parsed_args)
         assert m_logger.critical.called
-        extra_value = m_logger.critical.call_args[1]["extra"]["ferry_platform"]
-        assert extra_value == ferry_platform
-        extra_value = m_logger.critical.call_args[1]["extra"]["data_date"]
-        assert extra_value == "2016-09-09"
 
     def test_failure_msg_type(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(

@@ -55,8 +55,7 @@ def main():
 
 def success(parsed_args):
     logger.info(
-        "{0.run_type} WWATCH3 run on {0.host_name} completed".format(parsed_args),
-        extra={"run_type": parsed_args.run_type, "host_name": parsed_args.host_name},
+        "{0.run_type} WWATCH3 run on {0.host_name} completed".format(parsed_args)
     )
     msg_type = "success {.run_type}".format(parsed_args)
     return msg_type
@@ -64,8 +63,7 @@ def success(parsed_args):
 
 def failure(parsed_args):
     logger.critical(
-        "{0.run_type} WWATCH3 run on {0.host_name} failed".format(parsed_args),
-        extra={"run_type": parsed_args.run_type, "host_name": parsed_args.host_name},
+        "{0.run_type} WWATCH3 run on {0.host_name} failed".format(parsed_args)
     )
     msg_type = "failure {.run_type}".format(parsed_args)
     return msg_type

@@ -58,11 +58,7 @@ def main():
 def success(parsed_args):
     logger.info(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"results files split into daily directories",
-        extra={
-            "run_type": parsed_args.run_type,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"results files split into daily directories"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -71,11 +67,7 @@ def success(parsed_args):
 def failure(parsed_args):
     logger.critical(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"results files splitting failed",
-        extra={
-            "run_type": parsed_args.run_type,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"results files splitting failed"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type
@@ -86,8 +78,7 @@ def split_results(parsed_args, config, *args):
     run_date = parsed_args.run_date
     logger.info(
         f'splitting {run_date.format("YYYY-MM-DD")} {run_type} '
-        f"results files into daily directories",
-        extra={"run_type": run_type, "date": run_date.format("YYYY-MM-DD HH:mm:ss ZZ")},
+        f"results files into daily directories"
     )
     results_dir = run_date.format("DDMMMYY").lower()
     run_type_results = Path(config["results archive"][run_type])

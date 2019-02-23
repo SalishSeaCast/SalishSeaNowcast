@@ -56,15 +56,14 @@ def success(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
         f"{ymd} runoff file creation from Fraser at Hope and climatology "
-        f"elsewhere complete",
-        extra={"run_date": ymd},
+        f"elsewhere complete"
     )
     return "success"
 
 
 def failure(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
-    logger.critical(f"{ymd} runoff file creation failed", extra={"run_date": ymd})
+    logger.critical(f"{ymd} runoff file creation failed")
     return "failure"
 
 

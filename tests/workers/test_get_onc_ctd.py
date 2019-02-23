@@ -84,8 +84,6 @@ class TestSuccess:
         )
         get_onc_ctd.success(parsed_args)
         assert m_logger.info.called
-        assert m_logger.info.call_args[1]["extra"]["onc_station"] == onc_station
-        assert m_logger.info.call_args[1]["extra"]["data_date"] == "2016-09-09"
 
     def test_success_msg_type(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(
@@ -107,10 +105,6 @@ class TestFailure:
         )
         get_onc_ctd.failure(parsed_args)
         assert m_logger.critical.called
-        extra_value = m_logger.critical.call_args[1]["extra"]["onc_station"]
-        assert extra_value == onc_station
-        extra_value = m_logger.critical.call_args[1]["extra"]["data_date"]
-        assert extra_value == "2016-09-09"
 
     def test_failure_msg_type(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(

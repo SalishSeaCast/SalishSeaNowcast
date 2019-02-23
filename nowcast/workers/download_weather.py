@@ -58,10 +58,7 @@ def success(parsed_args):
         ymd = arrow.now().floor("day").shift(days=-1).format("YYYY-MM-DD")
     else:
         ymd = arrow.now().floor("day").format("YYYY-MM-DD")
-    logger.info(
-        f"{ymd} weather forecast {parsed_args.forecast} downloads complete",
-        extra={"forecast_date": ymd, "forecast": parsed_args.forecast},
-    )
+    logger.info(f"{ymd} weather forecast {parsed_args.forecast} downloads complete")
     msg_type = f"success {parsed_args.forecast}"
     return msg_type
 
@@ -71,10 +68,7 @@ def failure(parsed_args):
         ymd = arrow.now().floor("day").shift(days=-1).format("YYYY-MM-DD")
     else:
         ymd = arrow.now().floor("day").format("YYYY-MM-DD")
-    logger.critical(
-        f"{ymd} weather forecast {parsed_args.forecast} downloads failed",
-        extra={"forecast_date": ymd, "forecast": parsed_args.forecast},
-    )
+    logger.critical(f"{ymd} weather forecast {parsed_args.forecast} downloads failed")
     msg_type = f"failure {parsed_args.forecast}"
     return msg_type
 
@@ -82,10 +76,7 @@ def failure(parsed_args):
 def get_grib(parsed_args, config, *args):
     forecast = parsed_args.forecast
     date = _calc_date(parsed_args, forecast)
-    logger.info(
-        f"downloading {forecast} forecast GRIB2 files for {date}",
-        extra={"forecast": parsed_args.forecast},
-    )
+    logger.info(f"downloading {forecast} forecast GRIB2 files for {date}")
     dest_dir_root = config["weather"]["download"]["GRIB dir"]
     grp_name = config["file group"]
     _mkdirs(dest_dir_root, date, forecast, grp_name)
@@ -149,13 +140,9 @@ def _get_file(
         file_url, NAME, Path(filepath), session=session, wait_exponential_max=9000
     )
     size = os.stat(filepath).st_size
-    logger.debug(
-        f"downloaded {size} bytes from {file_url}", extra={"forecast": forecast}
-    )
+    logger.debug(f"downloaded {size} bytes from {file_url}")
     if size == 0:
-        logger.critical(
-            f"Problem, 0 size file {file_url}", extra={"forecast": forecast}
-        )
+        logger.critical(f"Problem, 0 size file {file_url}")
         raise WorkerError
     return filepath
 

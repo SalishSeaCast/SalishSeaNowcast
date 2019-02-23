@@ -199,11 +199,6 @@ class TestSuccess:
         )
         msg_type = update_forecast_datasets.success(parsed_args)
         assert m_logger.info.called
-        extra_value = m_logger.info.call_args[1]["extra"]["model"]
-        assert extra_value == model
-        extra_value = m_logger.info.call_args[1]["extra"]["run_type"]
-        assert extra_value == run_type
-        assert m_logger.info.call_args[1]["extra"]["run_date"] == "2017-11-10"
         assert msg_type == f"success {model} {run_type}"
 
 
@@ -228,12 +223,6 @@ class TestFailure:
         )
         msg_type = update_forecast_datasets.failure(parsed_args)
         assert m_logger.critical.called
-        extra_value = m_logger.critical.call_args[1]["extra"]["model"]
-        assert extra_value == model
-        extra_value = m_logger.critical.call_args[1]["extra"]["run_type"]
-        assert extra_value == run_type
-        expected = "2017-11-10"
-        assert m_logger.critical.call_args[1]["extra"]["run_date"] == expected
         assert msg_type == f"failure {model} {run_type}"
 
 

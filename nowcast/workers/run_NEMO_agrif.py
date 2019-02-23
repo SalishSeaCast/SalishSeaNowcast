@@ -69,12 +69,7 @@ def success(parsed_args):
     logger.info(
         f"NEMO nowcast-agrif run for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"queued on {parsed_args.host_name}",
-        extra={
-            "run_type": "nowcast-agrif",
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"queued on {parsed_args.host_name}"
     )
     msg_type = "success"
     return msg_type
@@ -90,12 +85,7 @@ def failure(parsed_args):
     logger.critical(
         f"NEMO nowcast-agrif run for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"failed to queue on {parsed_args.host_name}",
-        extra={
-            "run_type": "nowcast-agrif",
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"failed to queue on {parsed_args.host_name}"
     )
     msg_type = "failure"
     return msg_type

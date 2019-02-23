@@ -117,8 +117,6 @@ class TestSuccess:
         )
         make_ww3_wind_file.success(parsed_args)
         assert m_logger.info.called
-        expected = "2017-04-07 00:00:00 +00:00"
-        assert m_logger.info.call_args[1]["extra"]["run_date"] == expected
 
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -140,8 +138,6 @@ class TestFailure:
         )
         make_ww3_wind_file.failure(parsed_args)
         assert m_logger.critical.called
-        expected = "2017-04-07 00:00:00 +00:00"
-        assert m_logger.critical.call_args[1]["extra"]["run_date"] == expected
 
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
