@@ -76,12 +76,7 @@ def main():
 def success(parsed_args):
     logger.info(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"forcing file links on {parsed_args.host_name} created",
-        extra={
-            "run_type": parsed_args.run_type,
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"forcing file links on {parsed_args.host_name} created"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -90,12 +85,7 @@ def success(parsed_args):
 def failure(parsed_args):
     logger.critical(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"forcing file links creation on {parsed_args.host_name} failed",
-        extra={
-            "run_type": parsed_args.run_type,
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"forcing file links creation on {parsed_args.host_name} failed"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type

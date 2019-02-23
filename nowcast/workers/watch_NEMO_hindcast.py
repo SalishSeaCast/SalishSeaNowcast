@@ -53,10 +53,7 @@ def success(parsed_args):
     :return: Nowcast system message type
     :rtype: str
     """
-    logger.info(
-        f"NEMO hindcast run on {parsed_args.host_name} watcher terminated",
-        extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
-    )
+    logger.info(f"NEMO hindcast run on {parsed_args.host_name} watcher terminated")
     msg_type = "success"
     return msg_type
 
@@ -68,10 +65,7 @@ def failure(parsed_args):
     :return: Nowcast system message type
     :rtype: str
     """
-    logger.critical(
-        f"NEMO hindcast run on {parsed_args.host_name} watcher failed",
-        extra={"run_type": "hindcast", "host_name": parsed_args.host_name},
-    )
+    logger.critical(f"NEMO hindcast run on {parsed_args.host_name} watcher failed")
     msg_type = "failure"
     return msg_type
 

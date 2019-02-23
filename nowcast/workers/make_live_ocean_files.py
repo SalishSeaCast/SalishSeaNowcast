@@ -49,10 +49,7 @@ def main():
 
 def success(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
-    logger.info(
-        f"{ymd} Live Ocean western boundary conditions files created",
-        extra={"run_date": ymd},
-    )
+    logger.info(f"{ymd} Live Ocean western boundary conditions files created")
     msg_type = "success"
     return msg_type
 
@@ -60,8 +57,7 @@ def success(parsed_args):
 def failure(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
-        f"{ymd} Live Ocean western boundary conditions files preparation " f"failed",
-        extra={"run_date": ymd},
+        f"{ymd} Live Ocean western boundary conditions files preparation " f"failed"
     )
     msg_type = "failure"
     return msg_type

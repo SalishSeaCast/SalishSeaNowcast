@@ -51,12 +51,7 @@ def main():
 def success(parsed_args):
     logger.info(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"results files from {parsed_args.host_name} downloaded",
-        extra={
-            "run_type": parsed_args.run_type,
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"results files from {parsed_args.host_name} downloaded"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -65,12 +60,7 @@ def success(parsed_args):
 def failure(parsed_args):
     logger.critical(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"results files download from {parsed_args.host_name} failed",
-        extra={
-            "run_type": parsed_args.run_type,
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"results files download from {parsed_args.host_name} failed"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type

@@ -68,10 +68,7 @@ def main():
 
 def success(parsed_args):
     ymd = parsed_args.data_date.format("YYYY-MM-DD")
-    logger.info(
-        f"{ymd} ONC {parsed_args.ferry_platform} ferry data file created",
-        extra={"data_date": ymd, "ferry_platform": parsed_args.ferry_platform},
-    )
+    logger.info(f"{ymd} ONC {parsed_args.ferry_platform} ferry data file created")
     msg_type = f"success {parsed_args.ferry_platform}"
     return msg_type
 
@@ -79,8 +76,7 @@ def success(parsed_args):
 def failure(parsed_args):
     ymd = parsed_args.data_date.format("YYYY-MM-DD")
     logger.critical(
-        f"{ymd} ONC {parsed_args.ferry_platform} ferry data file creation " f"failed",
-        extra={"data_date": ymd, "ferry_platform": parsed_args.ferry_platform},
+        f"{ymd} ONC {parsed_args.ferry_platform} ferry data file creation " f"failed"
     )
     msg_type = "failure"
     return msg_type
@@ -96,10 +92,7 @@ def get_onc_ferry(parsed_args, config, *args):
     try:
         nav_data = _get_nav_data(ferry_platform, ymd, location_config)
     except TypeError:
-        logger.error(
-            f"No nav data for {ferry_platform} so no dataset for {ymd}",
-            extra={"data_date": ymd, "ferry_platform": ferry_platform},
-        )
+        logger.error(f"No nav data for {ferry_platform} so no dataset for {ymd}")
         raise WorkerError
     (
         data_arrays.longitude,
@@ -122,10 +115,7 @@ def get_onc_ferry(parsed_args, config, *args):
     nc_filepath = dest_dir / filepath_tmpl.format(
         ferry_platform=ferry_platform, yyyymmdd=parsed_args.data_date.format("YYYYMMDD")
     )
-    logger.debug(
-        f"storing ONC {ferry_platform} dataset for {ymd} as {nc_filepath}",
-        extra={"data_date": ymd, "ferry_platform": parsed_args.ferry_platform},
-    )
+    logger.debug(f"storing ONC {ferry_platform} dataset for {ymd} as {nc_filepath}")
     encoding = {
         var: {"dtype": "int32", "_FillValue": 0}
         for var in dataset.data_vars
@@ -142,14 +132,7 @@ def _get_nav_data(ferry_platform, ymd, location_config):
     for station in location_config["stations"]:
         device_category = location_config["device category"]
         sensors = ",".join(location_config["sensors"])
-        logger.info(
-            f"requesting ONC {station} {device_category} data for {ymd}",
-            extra={
-                "data_date": ymd,
-                "ferry_platform": ferry_platform,
-                "device_category": device_category,
-            },
-        )
+        logger.info(f"requesting ONC {station} {device_category} data for {ymd}")
         try:
             onc_data = data_tools.get_onc_data(
                 "scalardata",
@@ -165,27 +148,12 @@ def _get_nav_data(ferry_platform, ymd, location_config):
                 f"request for ONC {station} {device_category} data for {ymd} "
                 f"failed: {e}"
             )
-            logger.error(
-                msg,
-                extra={
-                    "data_date": ymd,
-                    "ferry_platform": ferry_platform,
-                    "station": station,
-                    "device_category": device_category,
-                    "sensors": sensors,
-                },
-            )
+            logger.error(msg)
             raise WorkerError(msg)
         try:
             nav_data = data_tools.onc_json_to_dataset(onc_data)
             logger.debug(
-                f"ONC {station} {device_category} data for {ymd} received and parsed",
-                extra={
-                    "data_date": ymd,
-                    "ferry_platform": ferry_platform,
-                    "station": station,
-                    "device_category": device_category,
-                },
+                f"ONC {station} {device_category} data for {ymd} received and parsed"
             )
             return nav_data
         except TypeError:
@@ -195,14 +163,7 @@ def _get_nav_data(ferry_platform, ymd, location_config):
         f"no valid nav data found from ONC ferry nav station devices "
         f'{location_config["stations"]} for {ymd} '
     )
-    logger.error(
-        msg,
-        extra={
-            "data_date": ymd,
-            "ferry_platform": ferry_platform,
-            "stations": location_config["stations"],
-        },
-    )
+    logger.error(msg)
     raise WorkerError(msg)
 
 
@@ -277,14 +238,7 @@ def _calc_crossing_numbers(on_crossing_mask):
 
 def _get_water_data(ferry_platform, device_category, ymd, devices_config):
     sensors = ",".join(devices_config[device_category]["sensors"].values())
-    logger.info(
-        f"requesting ONC {ferry_platform} {device_category} data for {ymd}",
-        extra={
-            "data_date": ymd,
-            "ferry_platform": ferry_platform,
-            "device_category": device_category,
-        },
-    )
+    logger.info(f"requesting ONC {ferry_platform} {device_category} data for {ymd}")
     try:
         onc_data = data_tools.get_onc_data(
             "scalardata",
@@ -301,12 +255,7 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
         else:
             logger.error(
                 f"request for ONC {ferry_platform} {device_category} data "
-                f"for {ymd} failed: {e}",
-                extra={
-                    "data_date": ymd,
-                    "ferry_platform": ferry_platform,
-                    "device_category": device_category,
-                },
+                f"for {ymd} failed: {e}"
             )
             raise WorkerError
     try:
@@ -314,13 +263,7 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
     except TypeError:
         return _empty_device_data(ferry_platform, device_category, ymd, sensors)
     logger.debug(
-        f"ONC {ferry_platform} {device_category} data for {ymd} "
-        f"received and parsed",
-        extra={
-            "data_date": ymd,
-            "ferry_platform": ferry_platform,
-            "device_category": device_category,
-        },
+        f"ONC {ferry_platform} {device_category} data for {ymd} " f"received and parsed"
     )
     return device_data
 
@@ -330,12 +273,7 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
     # empty DataArray
     logger.warning(
         f"No ONC {ferry_platform} {device_category} data for {ymd}; "
-        f"substituting empty dataset",
-        extra={
-            "data_date": ymd,
-            "ferry_platform": ferry_platform,
-            "device_category": device_category,
-        },
+        f"substituting empty dataset"
     )
     onc_units = {
         "temperature": "C",
@@ -376,13 +314,7 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
     for sensor, onc_sensor in devices_config[device]["sensors"].items():
         logger.debug(
             f"filtering ONC {ferry_platform} {device} {onc_sensor} data "
-            f"for {ymd} to exlude qaqcFlag!=1",
-            extra={
-                "data_date": ymd,
-                "ferry_platform": ferry_platform,
-                "device_category": device,
-                "onc_sensor": onc_sensor,
-            },
+            f"for {ymd} to exlude qaqcFlag!=1"
         )
         onc_data = getattr(device_data, onc_sensor)
         not_nan_mask = numpy.logical_not(numpy.isnan(onc_data.values))
@@ -426,13 +358,7 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
                 logger.warning(
                     f"ONC {ferry_platform} {array.device_category} "
                     f"{array.name} data for {ymd} contains no qaqcFlag==1 "
-                    f"values; substituting NaNs",
-                    extra={
-                        "data_date": ymd,
-                        "ferry_platform": ferry_platform,
-                        "device_category": array.device_category,
-                        "sensor": array.name,
-                    },
+                    f"values; substituting NaNs"
                 )
                 nan_values = numpy.empty_like(data_vars["longitude"].values)
                 nan_values[:] = numpy.nan

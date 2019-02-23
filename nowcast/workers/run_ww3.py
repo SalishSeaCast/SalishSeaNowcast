@@ -69,12 +69,7 @@ def success(parsed_args):
     logger.info(
         f"{parsed_args.run_type} WaveWatch3 run for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"on {parsed_args.host_name} started",
-        extra={
-            "run_type": parsed_args.run_type,
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"on {parsed_args.host_name} started"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -90,12 +85,7 @@ def failure(parsed_args):
     logger.critical(
         f"{parsed_args.run_type} WaveWatch3 run for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"on {parsed_args.host_name} failed",
-        extra={
-            "run_type": parsed_args.run_type,
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"on {parsed_args.host_name} failed"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type

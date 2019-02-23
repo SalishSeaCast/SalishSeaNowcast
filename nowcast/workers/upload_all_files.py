@@ -56,15 +56,13 @@ def main():
             parsed_args.host_name, parsed_args.run_date, config
         )
         logger.info(
-            "Nowcast ALL files upload to {0.host_name} completed".format(parsed_args),
-            extra={"host_name": parsed_args.host_name, "date": parsed_args.run_date},
+            "Nowcast ALL files upload to {0.host_name} completed".format(parsed_args)
         )
         # Exchange success messages with the nowcast manager process
         lib.tell_manager(worker_name, "success", config, logger, socket, checklist)
     except WorkerError:
         logger.critical(
-            "Nowcast ALL files upload to {0.host_name} failed".format(parsed_args),
-            extra={"host_name": parsed_args.host_name, "date": parsed_args.run_date},
+            "Nowcast ALL files upload to {0.host_name} failed".format(parsed_args)
         )
         # Exchange failure messages with the nowcast manager process
         lib.tell_manager(worker_name, "failure", config, logger, socket)
@@ -120,10 +118,7 @@ def upload_all_files(host_name, run_date, config):
             # forecast file
             fcst = os.path.join(config["ssh"]["ssh_dir"], "fcst", filename)
             os.symlink(fcst, localpath)
-            logger.warning(
-                "ssh obs file not found; created symlink to {}".format(fcst),
-                extra={"host_name": host_name, "date": run_date},
-            )
+            logger.warning("ssh obs file not found; created symlink to {}".format(fcst))
             upload_file(sftp_client, host_name, localpath, remotepath)
     # Rivers runoff
     for tmpl in config["rivers"]["file templates"].values():

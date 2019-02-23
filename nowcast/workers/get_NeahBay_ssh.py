@@ -78,8 +78,7 @@ def main():
 def success(parsed_args):
     logger.info(
         f"Neah Bay sea surface height web scraping and open boundary file "
-        f"creation for {parsed_args.run_type} complete",
-        extra={"run_type": parsed_args.run_type},
+        f"creation for {parsed_args.run_type} complete"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -88,8 +87,7 @@ def success(parsed_args):
 def failure(parsed_args):
     logger.critical(
         f"Neah Bay sea surface height web scraping and open boundary file "
-        f"creation for {parsed_args.run_type} failed",
-        extra={"run_type": parsed_args.run_type},
+        f"creation for {parsed_args.run_type} failed"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type
@@ -108,7 +106,7 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     with nc.Dataset(os.fspath(coords)) as coordinates:
         lats = coordinates.variables["nav_lat"][:]
         lons = coordinates.variables["nav_lon"][:]
-    logger.debug(f"loaded lats & lons from {coords}", extra={"run_type": run_type})
+    logger.debug(f"loaded lats & lons from {coords}")
     # Scrape the surge data from the website into a text file,
     # store the file in the run results directory,
     # and load the data for processing into netCDF4 files

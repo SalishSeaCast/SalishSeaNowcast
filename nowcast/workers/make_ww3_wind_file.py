@@ -61,11 +61,7 @@ def success(parsed_args):
         f"wwatch3 wind forcing file created "
         f"on {parsed_args.host_name} "
         f'for {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"{parsed_args.run_type} run",
-        extra={
-            "run_type": parsed_args.run_type,
-            "run_date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"{parsed_args.run_type} run"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -76,11 +72,7 @@ def failure(parsed_args):
         f"wwatch3 wind forcing file creation failed "
         f"on {parsed_args.host_name} "
         f'for {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"{parsed_args.run_type} run",
-        extra={
-            "run_type": parsed_args.run_type,
-            "run_date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"{parsed_args.run_type} run"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type

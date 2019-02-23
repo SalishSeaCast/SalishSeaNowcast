@@ -65,12 +65,7 @@ def main():
 def success(parsed_args):
     logger.info(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"forcing files upload to {parsed_args.host_name} completed",
-        extra={
-            "run_type": parsed_args.run_type,
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"forcing files upload to {parsed_args.host_name} completed"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -79,12 +74,7 @@ def success(parsed_args):
 def failure(parsed_args):
     logger.critical(
         f'{parsed_args.run_type} {parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"forcing files upload to {parsed_args.host_name} failed",
-        extra={
-            "run_type": parsed_args.run_type,
-            "host_name": parsed_args.host_name,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"forcing files upload to {parsed_args.host_name} failed"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type
@@ -155,14 +145,7 @@ def _upload_ssh_files(sftp_client, run_type, run_date, config, host_name, host_c
             # forecast file
             fcst = Path(config["ssh"]["ssh dir"], "fcst", filename)
             fcst.symlink_to(localpath)
-            logger.warning(
-                f"ssh obs file not found; created symlink to {fcst}",
-                extra={
-                    "run_type": run_type,
-                    "host_name": host_name,
-                    "date": run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-                },
-            )
+            logger.warning(f"ssh obs file not found; created symlink to {fcst}")
             ssh_sftp.upload_file(sftp_client, host_name, localpath, remotepath, logger)
 
 
@@ -190,12 +173,7 @@ def _upload_fraser_turbidity_file(
             pass
         logger.critical(
             f"Fraser River turbidity forcing file not found; "
-            f"created symlink to {localpath.with_name(prev_day_fn)}",
-            extra={
-                "run_type": "turbidity",
-                "host_name": host_name,
-                "date": run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-            },
+            f"created symlink to {localpath.with_name(prev_day_fn)}"
         )
         ssh_sftp.upload_file(sftp_client, host_name, localpath, remotepath, logger)
 
@@ -254,11 +232,6 @@ def _upload_live_ocean_files(
             logging_level,
             f"LiveOcean boundary conditions file not found; "
             f"created symlink to {localpath.with_name(prev_day_fn)}",
-            extra={
-                "run_type": run_type,
-                "host_name": host_name,
-                "date": run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-            },
         )
         ssh_sftp.upload_file(sftp_client, host_name, localpath, remotepath, logger)
 

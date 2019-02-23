@@ -132,7 +132,6 @@ class TestSuccess:
         parsed_args = Mock(run_type=run_type)
         get_NeahBay_ssh.success(parsed_args)
         assert m_logger.info.called
-        assert m_logger.info.call_args[1]["extra"]["run_type"] == run_type
 
     def test_success_msg_type(self, m_logger, run_type):
         parsed_args = Mock(run_type=run_type)
@@ -150,7 +149,6 @@ class TestFailure:
         parsed_args = Mock(run_type=run_type)
         get_NeahBay_ssh.failure(parsed_args)
         assert m_logger.critical.called
-        assert m_logger.critical.call_args[1]["extra"]["run_type"] == run_type
 
     def test_failure_msg_type(self, m_logger, run_type):
         parsed_args = Mock(run_type=run_type)

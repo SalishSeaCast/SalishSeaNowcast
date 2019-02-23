@@ -49,7 +49,6 @@ install_requires = [
     "cmocean",
     "dask",
     "docutils",
-    "driftwood",
     "f90nml",
     "feedgen",
     "gsw",

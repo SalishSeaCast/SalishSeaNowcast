@@ -60,8 +60,7 @@ def success(parsed_args):
     """
     logger.info(
         f"{parsed_args.run_type} FVCOM VH-FR run "
-        f"on {parsed_args.host_name} completed",
-        extra={"run_type": parsed_args.run_type, "host_name": parsed_args.host_name},
+        f"on {parsed_args.host_name} completed"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -75,8 +74,7 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"{parsed_args.run_type} FVCOM VH-FR run " f"on {parsed_args.host_name} failed",
-        extra={"run_type": parsed_args.run_type, "host_name": parsed_args.host_name},
+        f"{parsed_args.run_type} FVCOM VH-FR run " f"on {parsed_args.host_name} failed"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type

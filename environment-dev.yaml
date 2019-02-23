@@ -75,7 +75,6 @@ dependencies:
   - pip:
     - angles
     - attrs
-    - driftwood
     - f90nml
     - feedgen
     - python-hglib

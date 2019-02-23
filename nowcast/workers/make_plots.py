@@ -131,13 +131,7 @@ def success(parsed_args):
     logger.info(
         f"{parsed_args.model} {parsed_args.plot_type} plots for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"{parsed_args.run_type} completed",
-        extra={
-            "model": parsed_args.model,
-            "run_type": parsed_args.run_type,
-            "plot_type": parsed_args.plot_type,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"{parsed_args.run_type} completed"
     )
     msg_type = (
         f"success {parsed_args.model} {parsed_args.run_type} "
@@ -150,13 +144,7 @@ def failure(parsed_args):
     logger.critical(
         f"{parsed_args.model} {parsed_args.plot_type} plots failed for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} {parsed_args.run_type} '
-        f"failed",
-        extra={
-            "model": parsed_args.model,
-            "run_type": parsed_args.run_type,
-            "plot_type": parsed_args.plot_type,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"failed"
     )
     msg_type = (
         f"failure {parsed_args.model} {parsed_args.run_type} "

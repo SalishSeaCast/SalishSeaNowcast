@@ -94,7 +94,6 @@ class TestSuccess:
         parsed_args = SimpleNamespace(run_date=arrow.get("2016-11-24"))
         download_live_ocean.success(parsed_args)
         assert m_logger.info.called
-        assert m_logger.info.call_args[1]["extra"]["run_date"] == "2016-11-24"
 
     def test_success_msg_type(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2016-11-24"))
@@ -111,8 +110,6 @@ class TestFailure:
         parsed_args = SimpleNamespace(run_date=arrow.get("2016-11-24"))
         download_live_ocean.failure(parsed_args)
         assert m_logger.critical.called
-        expected = "2016-11-24"
-        assert m_logger.critical.call_args[1]["extra"]["run_date"] == expected
 
     def test_failure_msg_type(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2016-11-24"))

@@ -54,12 +54,7 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"NEMO AGRIF run {parsed_args.job_id} on {parsed_args.host_name} " f"completed",
-        extra={
-            "run_type": "hindcast",
-            "host_name": parsed_args.host_name,
-            "job_id": parsed_args.job_id,
-        },
+        f"NEMO AGRIF run {parsed_args.job_id} on {parsed_args.host_name} " f"completed"
     )
     msg_type = "success"
     return msg_type
@@ -74,12 +69,7 @@ def failure(parsed_args):
     """
     logger.critical(
         f"NEMO AGRIF run {parsed_args.job_id} on {parsed_args.host_name} "
-        f"watcher failed",
-        extra={
-            "run_type": "hindcast",
-            "host_name": parsed_args.host_name,
-            "job_id": parsed_args.job_id,
-        },
+        f"watcher failed"
     )
     msg_type = "failure"
     return msg_type

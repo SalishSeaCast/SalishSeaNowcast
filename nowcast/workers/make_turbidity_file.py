@@ -59,8 +59,7 @@ def success(parsed_args):
     """
     logger.info(
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"Fraser River turbidity file creation complete",
-        extra={"date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ")},
+        f"Fraser River turbidity file creation complete"
     )
     return "success"
 
@@ -74,8 +73,7 @@ def failure(parsed_args):
     """
     logger.critical(
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"Fraser River turbidity file creation failed",
-        extra={"date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ")},
+        f"Fraser River turbidity file creation failed"
     )
     return "failure"
 

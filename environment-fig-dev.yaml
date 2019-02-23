@@ -68,7 +68,6 @@ dependencies:
     - chaussette
     - circus
     - cliff
-    - driftwood
     - f90nml
     - feedgen
     - pyramid

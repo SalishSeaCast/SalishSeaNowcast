@@ -76,10 +76,7 @@ def main():
 
 def success(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
-    logger.info(
-        f"{ymd} NEMO-atmos forcing file for {parsed_args.run_type} created",
-        extra={"run_date": ymd, "run_type": parsed_args.run_type},
-    )
+    logger.info(f"{ymd} NEMO-atmos forcing file for {parsed_args.run_type} created")
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
 
@@ -87,8 +84,7 @@ def success(parsed_args):
 def failure(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
-        f"{ymd} NEMO-atmos forcing file creation for {parsed_args.run_type} " f"failed",
-        extra={"run_date": ymd, "run_type": parsed_args.run_type},
+        f"{ymd} NEMO-atmos forcing file creation for {parsed_args.run_type} " f"failed"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type

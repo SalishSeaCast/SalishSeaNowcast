@@ -67,12 +67,7 @@ def success(parsed_args):
     logger.info(
         f"FVCOM run atmospheric forcing file for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"uploaded to {parsed_args.host_name}",
-        extra={
-            "host_name": parsed_args.host_name,
-            "run_type": parsed_args.run_type,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"uploaded to {parsed_args.host_name}"
     )
     msg_type = f"success {parsed_args.run_type}"
     return msg_type
@@ -88,12 +83,7 @@ def failure(parsed_args):
     logger.critical(
         f"FVCOM run atmospheric forcing file upload for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"failed on {parsed_args.host_name}",
-        extra={
-            "host_name": parsed_args.host_name,
-            "run_type": parsed_args.run_type,
-            "date": parsed_args.run_date.format("YYYY-MM-DD HH:mm:ss ZZ"),
-        },
+        f"failed on {parsed_args.host_name}"
     )
     msg_type = f"failure {parsed_args.run_type}"
     return msg_type
