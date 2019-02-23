@@ -122,31 +122,23 @@ class TestConfig:
 
 @patch("nowcast.workers.make_runoff_file.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
+    """Unit test for success() function.
     """
 
-    def test_success_log_info(self, m_logger):
+    def test_success(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-05-17"))
-        make_runoff_file.success(parsed_args)
+        msg_type = make_runoff_file.success(parsed_args)
         assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger):
-        parsed_args = SimpleNamespace(run_date=arrow.get("2017-05-17"))
-        msg_typ = make_runoff_file.success(parsed_args)
-        assert msg_typ == "success"
+        assert msg_type == "success"
 
 
 @patch("nowcast.workers.make_runoff_file.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
+    """Unit test for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger):
+    def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-05-17"))
-        make_runoff_file.failure(parsed_args)
+        msg_type = make_runoff_file.failure(parsed_args)
         assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger):
-        parsed_args = SimpleNamespace(run_date=arrow.get("2017-05-17"))
-        msg_typ = make_runoff_file.failure(parsed_args)
-        assert msg_typ == "failure"
+        assert msg_type == "failure"

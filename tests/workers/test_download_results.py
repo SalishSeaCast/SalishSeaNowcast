@@ -149,19 +149,13 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, run_type, host_name):
+    def test_success(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2017-12-24")
         )
-        download_results.success(parsed_args)
+        msg_type = download_results.success(parsed_args)
         assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, run_type, host_name):
-        parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2017-12-24")
-        )
-        msg_typ = download_results.success(parsed_args)
-        assert msg_typ == "success {}".format(run_type)
+        assert msg_type == "success {}".format(run_type)
 
 
 @pytest.mark.parametrize(
@@ -180,19 +174,13 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger, run_type, host_name):
+    def test_failure(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2017-12-24")
         )
-        download_results.failure(parsed_args)
+        msg_type = download_results.failure(parsed_args)
         assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, run_type, host_name):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, host_name=host_name, run_date=arrow.get("2017-12-24")
-        )
-        msg_typ = download_results.failure(parsed_args)
-        assert msg_typ == "failure {}".format(run_type)
+        assert msg_type == "failure {}".format(run_type)
 
 
 @patch("nowcast.workers.download_results.logger", autospec=True)

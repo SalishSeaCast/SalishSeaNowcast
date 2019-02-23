@@ -82,19 +82,13 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, ferry_platform):
-        parsed_args = SimpleNamespace(
-            ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
-        )
-        get_onc_ferry.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, ferry_platform):
+    def test_success(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
         msg_type = get_onc_ferry.success(parsed_args)
-        assert msg_type == "success {}".format(ferry_platform)
+        assert m_logger.info.called
+        assert msg_type == f"success {ferry_platform}"
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
@@ -103,19 +97,13 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger, ferry_platform):
-        parsed_args = SimpleNamespace(
-            ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
-        )
-        get_onc_ferry.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, ferry_platform):
+    def test_failure(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
         msg_type = get_onc_ferry.failure(parsed_args)
-        assert msg_type == "failure"
+        assert m_logger.critical.called
+        assert msg_type == f"failure {ferry_platform}"
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])

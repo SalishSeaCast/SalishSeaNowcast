@@ -138,7 +138,7 @@ class TestSuccess:
     """Unit test for success() function.
     """
 
-    def test_success_log_info(self, m_logger):
+    def test_success(self, m_logger):
         parsed_args = SimpleNamespace(
             river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
@@ -155,7 +155,7 @@ class TestFailure:
     """Unit test for failure() function.
     """
 
-    def test_failure_log_critical_file_creation(self, m_logger):
+    def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(
             river_name="Fraser", data_date=arrow.get("2018-12-26")
         )

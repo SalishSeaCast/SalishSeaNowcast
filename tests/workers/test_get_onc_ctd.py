@@ -78,18 +78,12 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, onc_station):
-        parsed_args = SimpleNamespace(
-            onc_station=onc_station, data_date=arrow.get("2016-09-09")
-        )
-        get_onc_ctd.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, onc_station):
+    def test_success(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get("2016-09-09")
         )
         msg_type = get_onc_ctd.success(parsed_args)
+        assert m_logger.info.called
         assert msg_type == "success {}".format(onc_station)
 
 
@@ -99,16 +93,10 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger, onc_station):
-        parsed_args = SimpleNamespace(
-            onc_station=onc_station, data_date=arrow.get("2016-09-09")
-        )
-        get_onc_ctd.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, onc_station):
+    def test_failure(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get("2016-09-09")
         )
         msg_type = get_onc_ctd.failure(parsed_args)
+        assert m_logger.critical.called
         assert msg_type == "failure"

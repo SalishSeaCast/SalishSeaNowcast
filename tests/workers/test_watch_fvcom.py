@@ -72,14 +72,10 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(host_name="west.cloud", run_type=run_type)
-        watch_fvcom.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, run_type):
+    def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(host_name="west.cloud", run_type=run_type)
         msg_type = watch_fvcom.success(parsed_args)
+        assert m_logger.info.called
         assert msg_type == f"success {run_type}"
 
 
@@ -89,14 +85,10 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_error(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(host_name="west.cloud", run_type=run_type)
-        watch_fvcom.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, run_type):
+    def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(host_name="west.cloud", run_type=run_type)
         msg_type = watch_fvcom.failure(parsed_args)
+        assert m_logger.critical.called
         assert msg_type == f"failure {run_type}"
 
 

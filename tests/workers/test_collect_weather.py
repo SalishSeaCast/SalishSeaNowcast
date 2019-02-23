@@ -173,10 +173,10 @@ class TestConfig:
 )
 @patch("nowcast.workers.collect_weather.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
+    """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, forecast, utcnow, forecast_date):
+    def test_success(self, m_logger, forecast, utcnow, forecast_date):
         parsed_args = SimpleNamespace(forecast=forecast)
         p_now = patch(
             "nowcast.workers.collect_weather.arrow.utcnow",
@@ -202,10 +202,10 @@ class TestSuccess:
 )
 @patch("nowcast.workers.collect_weather.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
+    """Unit tests for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger, forecast, utcnow, forecast_date):
+    def test_failure(self, m_logger, forecast, utcnow, forecast_date):
         parsed_args = SimpleNamespace(forecast=forecast)
         p_now = patch(
             "nowcast.workers.collect_weather.arrow.utcnow",

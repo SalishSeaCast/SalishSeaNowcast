@@ -86,67 +86,39 @@ class TestSuccess:
         "run_type, host_name",
         [
             ("nowcast", "west.cloud-nowcast"),
-            ("nowcast-green", "west.cloug-nowcast"),
-            ("nowcast-dev", "salish-nowcast"),
-            ("forecast", "west.cloud-nowcast"),
-            ("forecast2", "west.cloud-nowcast"),
-        ],
-    )
-    def test_success_log_info(self, m_logger, run_type, host_name):
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        watch_NEMO.success(parsed_args)
-        assert m_logger.info.called
-
-    @pytest.mark.parametrize(
-        "run_type, host_name, expected",
-        [
-            ("nowcast", "west.cloud-nowcast", "success nowcast"),
-            ("nowcast-green", "west.cloud-nowcast", "success nowcast-green"),
-            ("nowcast-dev", "salish-nowcast", "success nowcast-dev"),
-            ("forecast", "west.cloud-nowcast", "success forecast"),
-            ("forecast2", "west.cloud-nowcast", "success forecast2"),
-        ],
-    )
-    def test_success_msg_type(self, m_logger, run_type, host_name, expected):
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        msg_type = watch_NEMO.success(parsed_args)
-        assert msg_type == expected
-
-
-@patch("nowcast.workers.watch_NEMO.logger", autospec=True)
-class TestFailure:
-    """Unit tests for failure() function.
-    """
-
-    @pytest.mark.parametrize(
-        "run_type, host_name",
-        [
-            ("nowcast", "west.cloud-nowcast"),
             ("nowcast-green", "west.cloud-nowcast"),
             ("nowcast-dev", "salish-nowcast"),
             ("forecast", "west.cloud-nowcast"),
             ("forecast2", "west.cloud-nowcast"),
         ],
     )
-    def test_failure_log_critical(self, m_logger, run_type, host_name):
+    def test_success(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        watch_NEMO.failure(parsed_args)
-        assert m_logger.critical.called
+        msg_type = watch_NEMO.success(parsed_args)
+        assert m_logger.info.called
+        assert msg_type == f"success {run_type}"
 
-    @pytest.mark.parametrize(
-        "run_type, host_name, expected",
-        [
-            ("nowcast", "west.cloud-nowcast", "failure nowcast"),
-            ("nowcast-green", "west.cloud-nowcast", "failure nowcast-green"),
-            ("nowcast-dev", "salish-nowcast", "failure nowcast-dev"),
-            ("forecast", "west.cloud-nowcast", "failure forecast"),
-            ("forecast2", "west.cloud-nowcast", "failure forecast2"),
-        ],
-    )
-    def test_failure_msg_type(self, m_logger, run_type, host_name, expected):
+
+@pytest.mark.parametrize(
+    "run_type, host_name",
+    [
+        ("nowcast", "west.cloud-nowcast"),
+        ("nowcast-green", "west.cloud-nowcast"),
+        ("nowcast-dev", "salish-nowcast"),
+        ("forecast", "west.cloud-nowcast"),
+        ("forecast2", "west.cloud-nowcast"),
+    ],
+)
+@patch("nowcast.workers.watch_NEMO.logger", autospec=True)
+class TestFailure:
+    """Unit tests for failure() function.
+    """
+
+    def test_failure(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         msg_type = watch_NEMO.failure(parsed_args)
-        assert msg_type == expected
+        assert m_logger.critical.called
+        assert msg_type == f"failure {run_type}"
 
 
 @pytest.mark.parametrize(

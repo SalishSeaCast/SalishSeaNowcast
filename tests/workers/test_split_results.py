@@ -65,31 +65,23 @@ class TestMain:
 
 @patch("nowcast.workers.split_results.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
+    """Unit test for success() function.
     """
 
-    def test_success_log_info(self, m_logger):
+    def test_success(self, m_logger):
         parsed_args = Mock(run_type="hindcast")
-        split_results.success(parsed_args)
+        msg_type = split_results.success(parsed_args)
         assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger):
-        parsed_args = Mock(run_type="hindcast")
-        msg_typ = split_results.success(parsed_args)
-        assert msg_typ == "success hindcast"
+        assert msg_type == "success hindcast"
 
 
 @patch("nowcast.workers.split_results.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
+    """Unit test for failure() function.
     """
 
-    def test_failure_log_info(self, m_logger):
+    def test_failure(self, m_logger):
         parsed_args = Mock(run_type="hindcast")
-        split_results.failure(parsed_args)
+        msg_type = split_results.failure(parsed_args)
         assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger):
-        parsed_args = Mock(run_type="hindcast")
-        msg_typ = split_results.failure(parsed_args)
-        assert msg_typ == "failure hindcast"
+        assert msg_type == "failure hindcast"
