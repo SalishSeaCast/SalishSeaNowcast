@@ -171,40 +171,30 @@ class TestConfig:
         ]
 
 
+@pytest.mark.parametrize("forecast", ["00", "06", "12", "18"])
 @patch("nowcast.workers.download_weather.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize("forecast", ["00", "06", "12", "18"])
-    def test_success_log_info(self, m_logger, forecast, parsed_args):
-        parsed_args.forecast = forecast
-        download_weather.success(parsed_args)
-        assert m_logger.info.called
-
-    @pytest.mark.parametrize("forecast", ["00", "06", "12", "18"])
-    def test_success_msg_type(self, m_logger, forecast, parsed_args):
+    def test_success(self, m_logger, forecast, parsed_args):
         parsed_args.forecast = forecast
         msg_type = download_weather.success(parsed_args)
-        assert msg_type == "success {forecast}".format(forecast=forecast)
+        assert m_logger.info.called
+        assert msg_type == f"success {forecast}"
 
 
+@pytest.mark.parametrize("forecast", ["00", "06", "12", "18"])
 @patch("nowcast.workers.download_weather.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize("forecast", ["00", "06", "12", "18"])
-    def test_failure_log_critical(self, m_logger, forecast, parsed_args):
-        parsed_args.forecast = forecast
-        download_weather.failure(parsed_args)
-        assert m_logger.critical.called
-
-    @pytest.mark.parametrize("forecast", ["00", "06", "12", "18"])
-    def test_failure_msg_type(self, m_logger, forecast, parsed_args):
+    def test_failure(self, m_logger, forecast, parsed_args):
         parsed_args.forecast = forecast
         msg_type = download_weather.failure(parsed_args)
-        assert msg_type == "failure {forecast}".format(forecast=forecast)
+        assert m_logger.critical.called
+        assert msg_type == f"failure {forecast}"
 
 
 @patch("nowcast.workers.download_weather.logger", autospec=True)
@@ -349,7 +339,7 @@ class TestGetFile:
     """
 
     def test_get_web_data(self, m_stat, m_get_web_data, m_logger, config):
-        m_stat().st_size = 123456
+        m_stat().st_size = 123_456
         download_weather._get_file(
             config["weather"]["download"]["url template"],
             config["weather"]["download"]["file template"],

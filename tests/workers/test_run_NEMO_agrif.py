@@ -78,41 +78,29 @@ class TestMain:
 
 @patch("nowcast.workers.run_NEMO_agrif.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
+    """Unit test for success() function.
     """
 
-    def test_success_log_info(self, m_logger):
-        parsed_args = SimpleNamespace(
-            host_name="orcinus", run_date=arrow.get("2018-04-30")
-        )
-        run_NEMO_agrif.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger):
+    def test_success(self, m_logger):
         parsed_args = SimpleNamespace(
             host_name="orcinus", run_date=arrow.get("2018-04-30")
         )
         msg_type = run_NEMO_agrif.success(parsed_args)
+        assert m_logger.info.called
         assert msg_type == f"success"
 
 
 @patch("nowcast.workers.run_NEMO_agrif.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
+    """Unit test for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger):
-        parsed_args = SimpleNamespace(
-            host_name="orcinus", run_date=arrow.get("2018-04-30")
-        )
-        run_NEMO_agrif.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger):
+    def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(
             host_name="orcinus", run_date=arrow.get("2018-04-30")
         )
         msg_type = run_NEMO_agrif.failure(parsed_args)
+        assert m_logger.critical.called
         assert msg_type == f"failure"
 
 

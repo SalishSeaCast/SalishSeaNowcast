@@ -109,92 +109,56 @@ class TestMain:
         )
 
 
+@pytest.mark.parametrize(
+    "dataset",
+    [
+        "download_weather",
+        "SCVIP-CTD",
+        "SEVIP-CTD",
+        "USDDL-CTD",
+        "TWDP-ferry",
+        "VFPA-HADCP",
+        "nowcast-green",
+        "nemo-forecast",
+        "wwatch3-forecast",
+    ],
+)
 @patch("nowcast.workers.ping_erddap.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize(
-        "dataset",
-        [
-            "download_weather",
-            "SCVIP-CTD",
-            "SEVIP-CTD",
-            "USDDL-CTD",
-            "TWDP-ferry",
-            "VFPA-HADCP",
-            "nowcast-green",
-            "nemo-forecast",
-            "wwatch3-forecast",
-        ],
-    )
-    def test_success_log_info(self, m_logger, dataset):
-        parsed_args = SimpleNamespace(dataset=dataset)
-        ping_erddap.success(parsed_args)
-        assert m_logger.info.called
-
-    @pytest.mark.parametrize(
-        "dataset, expected",
-        [
-            ("download_weather", "success download_weather"),
-            ("SCVIP-CTD", "success SCVIP-CTD"),
-            ("SEVIP-CTD", "success SEVIP-CTD"),
-            ("USDDL-CTD", "success USDDL-CTD"),
-            ("TWDP-ferry", "success TWDP-ferry"),
-            ("VFPA-HADCP", "success VFPA-HADCP"),
-            ("nowcast-green", "success nowcast-green"),
-            ("nemo-forecast", "success nemo-forecast"),
-            ("wwatch3-forecast", "success wwatch3-forecast"),
-        ],
-    )
-    def test_success_msg_type(self, m_logger, dataset, expected):
+    def test_success(self, m_logger, dataset):
         parsed_args = SimpleNamespace(dataset=dataset)
         msg_type = ping_erddap.success(parsed_args)
-        assert msg_type == expected
+        assert m_logger.info.called
+        assert msg_type == f"success {dataset}"
 
 
+@pytest.mark.parametrize(
+    "dataset",
+    [
+        "download_weather",
+        "SCVIP-CTD",
+        "SEVIP-CTD",
+        "USDDL-CTD",
+        "TWDP-ferry",
+        "VFPA-HADCP",
+        "nowcast-green",
+        "nemo-forecast",
+        "wwatch3-forecast",
+    ],
+)
 @patch("nowcast.workers.ping_erddap.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize(
-        "dataset",
-        [
-            "download_weather",
-            "SCVIP-CTD",
-            "SEVIP-CTD",
-            "USDDL-CTD",
-            "TWDP-ferry",
-            "VFPA-HADCP",
-            "nowcast-green",
-            "nemo-forecast",
-            "wwatch3-forecast",
-        ],
-    )
-    def test_failure_log_error(self, m_logger, dataset):
-        parsed_args = SimpleNamespace(dataset=dataset)
-        ping_erddap.failure(parsed_args)
-        assert m_logger.critical.called
-
-    @pytest.mark.parametrize(
-        "dataset, expected",
-        [
-            ("download_weather", "failure download_weather"),
-            ("SCVIP-CTD", "failure SCVIP-CTD"),
-            ("SEVIP-CTD", "failure SEVIP-CTD"),
-            ("USDDL-CTD", "failure USDDL-CTD"),
-            ("TWDP-ferry", "failure TWDP-ferry"),
-            ("VFPA-HADCP", "failure VFPA-HADCP"),
-            ("nowcast-green", "failure nowcast-green"),
-            ("nemo-forecast", "failure nemo-forecast"),
-            ("wwatch3-forecast", "failure wwatch3-forecast"),
-        ],
-    )
-    def test_failure_msg_type(self, m_logger, dataset, expected):
+    def test_failure(self, m_logger, dataset):
         parsed_args = SimpleNamespace(dataset=dataset)
         msg_type = ping_erddap.failure(parsed_args)
-        assert msg_type == expected
+        assert m_logger.critical.called
+        assert msg_type == f"failure {dataset}"
 
 
 @patch("nowcast.workers.ping_erddap.logger", autospec=True)

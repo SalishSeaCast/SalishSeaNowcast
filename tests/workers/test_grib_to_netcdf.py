@@ -127,18 +127,12 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2019-02-11")
-        )
-        grib_to_netcdf.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, run_type):
+    def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2019-02-11")
         )
         msg_type = grib_to_netcdf.success(parsed_args)
+        assert m_logger.info.called
         assert msg_type == "success {}".format(run_type)
 
 
@@ -148,16 +142,10 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2019-02-11")
-        )
-        grib_to_netcdf.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, run_type):
+    def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2019-02-11")
         )
         msg_type = grib_to_netcdf.failure(parsed_args)
+        assert m_logger.critical.called
         assert msg_type == "failure {}".format(run_type)

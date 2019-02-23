@@ -265,56 +265,38 @@ class TestMain:
         assert args == (run_NEMO.run_NEMO, run_NEMO.success, run_NEMO.failure)
 
 
+@pytest.mark.parametrize(
+    "run_type", ["nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"]
+)
 @patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize(
-        "run_type", ["nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"]
-    )
-    def test_success_log_info(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2015-12-28")
-        )
-        run_NEMO.success(parsed_args)
-        assert m_logger.info.called
-
-    @pytest.mark.parametrize(
-        "run_type", ["nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"]
-    )
-    def test_success_msg_type(self, m_logger, run_type):
+    def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name="west.cloud", run_type=run_type, run_date=arrow.get("2015-12-28")
         )
         msg_type = run_NEMO.success(parsed_args)
-        assert msg_type == "success {run_type}".format(run_type=run_type)
+        assert m_logger.info.called
+        assert msg_type == f"success {run_type}"
 
 
+@pytest.mark.parametrize(
+    "run_type", ["nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"]
+)
 @patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize(
-        "run_type", ["nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"]
-    )
-    def test_failure_log_error(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2015-12-28")
-        )
-        run_NEMO.failure(parsed_args)
-        assert m_logger.critical.called
-
-    @pytest.mark.parametrize(
-        "run_type", ["nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"]
-    )
-    def test_failure_msg_type(self, m_logger, run_type):
+    def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             host_name="west.cloud", run_type=run_type, run_date=arrow.get("2015-12-28")
         )
         msg_type = run_NEMO.failure(parsed_args)
-        assert msg_type == "failure {run_type}".format(run_type=run_type)
+        assert m_logger.critical.called
+        assert msg_type == f"failure {run_type}"
 
 
 class TestCalcNewNamelistLines:

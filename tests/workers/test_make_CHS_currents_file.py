@@ -108,18 +108,12 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
-        make_CHS_currents_file.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, run_type):
+    def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-09-01")
         )
         msg_type = make_CHS_currents_file.success(parsed_args)
+        assert m_logger.info.called
         assert msg_type == f"success {run_type}"
 
 
@@ -129,18 +123,12 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
-        make_CHS_currents_file.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, run_type):
+    def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-09-01")
         )
         msg_type = make_CHS_currents_file.failure(parsed_args)
+        assert m_logger.critical.called
         assert msg_type == f"failure {run_type}"
 
 

@@ -57,58 +57,36 @@ class TestMain:
         assert args == (watch_ww3.watch_ww3, watch_ww3.success, watch_ww3.failure)
 
 
+@pytest.mark.parametrize(
+    "run_type, host_name",
+    [("forecast2", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
+)
 @patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    @pytest.mark.parametrize(
-        "run_type, host_name",
-        [("forecast2", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
-    )
-    def test_success_log_info(self, m_logger, run_type, host_name):
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        watch_ww3.success(parsed_args)
-        assert m_logger.info.called
-
-    @pytest.mark.parametrize(
-        "run_type, host_name, expected",
-        [
-            ("forecast2", "west.cloud-nowcast", "success forecast2"),
-            ("forecast", "west.cloud-nowcast", "success forecast"),
-        ],
-    )
-    def test_success_msg_type(self, m_logger, run_type, host_name, expected):
+    def test_success(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         msg_type = watch_ww3.success(parsed_args)
-        assert msg_type == expected
+        assert m_logger.info.called
+        assert msg_type == f"success {run_type}"
 
 
+@pytest.mark.parametrize(
+    "run_type, host_name",
+    [("forecast2", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
+)
 @patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    @pytest.mark.parametrize(
-        "run_type, host_name",
-        [("forecast2", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
-    )
-    def test_failure_log_critical(self, m_logger, run_type, host_name):
-        parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
-        watch_ww3.failure(parsed_args)
-        assert m_logger.critical.called
-
-    @pytest.mark.parametrize(
-        "run_type, host_name, expected",
-        [
-            ("forecast2", "west.cloud-nowcast", "failure forecast2"),
-            ("forecast", "west.cloud-nowcast", "failure forecast"),
-        ],
-    )
-    def test_failure_msg_type(self, m_logger, run_type, host_name, expected):
+    def test_failure(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
         msg_type = watch_ww3.failure(parsed_args)
-        assert msg_type == expected
+        assert m_logger.critical.called
+        assert msg_type == f"failure {run_type}"
 
 
 @patch("nowcast.workers.watch_ww3.logger", autospec=True)

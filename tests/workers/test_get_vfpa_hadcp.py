@@ -108,7 +108,7 @@ class TestSuccess:
     """Unit test for success() function.
     """
 
-    def test_success_log_info(self, m_logger):
+    def test_success(self, m_logger):
         parsed_args = SimpleNamespace(data_date=arrow.get("2018-10-01"))
         msg_type = get_vfpa_hadcp.success(parsed_args)
         m_logger.info.assert_called_once_with(
@@ -122,7 +122,7 @@ class TestFailure:
     """Unit test for failure() function.
     """
 
-    def test_failure_log_critical_file_creation(self, m_logger):
+    def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(data_date=arrow.get("2018-10-01"))
         msg_type = get_vfpa_hadcp.failure(parsed_args)
         m_logger.critical.assert_called_once_with(

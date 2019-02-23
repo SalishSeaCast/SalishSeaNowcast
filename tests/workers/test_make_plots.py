@@ -117,17 +117,7 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, model, run_type, plot_type):
-        parsed_args = SimpleNamespace(
-            model=model,
-            run_type=run_type,
-            plot_type=plot_type,
-            run_date=arrow.get("2017-01-02"),
-        )
-        make_plots.success(parsed_args)
-        assert m_logger.info.called
-
-    def test_success_msg_type(self, m_logger, model, run_type, plot_type):
+    def test_success(self, m_logger, model, run_type, plot_type):
         parsed_args = SimpleNamespace(
             model=model,
             run_type=run_type,
@@ -135,6 +125,7 @@ class TestSuccess:
             run_date=arrow.get("2017-01-02"),
         )
         msg_type = make_plots.success(parsed_args)
+        assert m_logger.info.called
         assert msg_type == f"success {model} {run_type} {plot_type}"
 
 
@@ -156,17 +147,7 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_error(self, m_logger, model, run_type, plot_type):
-        parsed_args = SimpleNamespace(
-            model=model,
-            run_type=run_type,
-            plot_type=plot_type,
-            run_date=arrow.get("2017-01-02"),
-        )
-        make_plots.failure(parsed_args)
-        assert m_logger.critical.called
-
-    def test_failure_msg_type(self, m_logger, model, run_type, plot_type):
+    def test_failure(self, m_logger, model, run_type, plot_type):
         parsed_args = SimpleNamespace(
             model=model,
             run_type=run_type,
@@ -174,4 +155,5 @@ class TestFailure:
             run_date=arrow.get("2017-01-02"),
         )
         msg_type = make_plots.failure(parsed_args)
+        assert m_logger.critical.called
         assert msg_type == f"failure {model} {run_type} {plot_type}"

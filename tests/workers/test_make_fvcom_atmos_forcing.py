@@ -105,7 +105,7 @@ class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success_log_info(self, m_logger, run_type):
+    def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-03-15")
         )
@@ -120,7 +120,7 @@ class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure_log_critical(self, m_logger, run_type):
+    def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-03-15")
         )
