@@ -1031,11 +1031,11 @@ def axis_colors(ax, plot):
     spines_c = "white"
 
     if plot == "blue":
-        ax.set_axis_bgcolor("#2B3E50")
+        ax.set_facecolor("#2B3E50")
     if plot == "gray":
-        ax.set_axis_bgcolor("#DBDEE1")
+        ax.set_facecolor("#DBDEE1")
     if plot == "white":
-        ax.set_axis_bgcolor("white")
+        ax.set_facecolor("white")
 
     ax.xaxis.label.set_color(labels_c), ax.yaxis.label.set_color(labels_c)
     ax.tick_params(axis="x", colors=ticks_c)

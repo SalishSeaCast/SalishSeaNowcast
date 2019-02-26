@@ -19,8 +19,10 @@ Observations are from Environment and Climate Change Canada data:
 http://climate.weather.gc.ca/
 Model forcing winds are from the Environment and Climate Change Canada
 HRDPS nested model.
-Text below the map acknowledges the sources of the observations and HRDPS
-product.
+Text below the map acknowledges the sources of the observations and HRDPS product.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/TestSandHeadsWinds.ipynb
 """
 from types import SimpleNamespace
 
@@ -139,9 +141,12 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(2, 2, width_ratios=[1.618, 1])
     gs.update(wspace=0.23, hspace=0.15)
     ax_speed = {"mps": fig.add_subplot(gs[0, 0])}
+    ax_speed["mps"].set_facecolor(theme.COLOURS["axes"]["background"])
     ax_speed["knots"] = ax_speed["mps"].twinx()
     ax_dir = fig.add_subplot(gs[1, 0])
+    ax_dir.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_map = fig.add_subplot(gs[:, 1])
+    ax_map.set_facecolor(theme.COLOURS["axes"]["background"])
     return fig, (ax_speed, ax_dir, ax_map)
 
 
@@ -170,6 +175,9 @@ def _wind_speed_axes_labels(ax, plot_data, theme):
         "Winds at Sand Heads",
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
+    )
+    ax["mps"].set_xlim(
+        plot_data.hrdps_speed.time.values[0], plot_data.hrdps_speed.time.values[-1]
     )
     mps_limits = numpy.array((0, 20))
     ax["mps"].set_ylabel(
@@ -218,6 +226,7 @@ def _wind_direction_axes_labels(ax, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.set_xlim(plot_data.hrdps_dir.time.values[0], plot_data.hrdps_dir.time.values[-1])
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     ax.set_ylim(0, 360)
     ax.set_yticks((0, 45, 90, 135, 180, 225, 270, 315, 360))
@@ -239,7 +248,8 @@ def _plot_station_map(ax, coastline, theme):
         marker="o",
         markersize=10,
         markeredgewidth=3,
-        color=theme.COLOURS["marker"]["place"],
+        markerfacecolor=theme.COLOURS["marker"]["place"]["facecolor"],
+        markeredgecolor=theme.COLOURS["marker"]["place"]["edgecolor"],
     )
     _station_map_axes_labels(ax, theme)
 
