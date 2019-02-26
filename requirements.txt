@@ -89,6 +89,7 @@ pyproj==1.9.6
 pyshp==2.1.0
 PySocks==1.6.8
 pytest==4.3.0
+pytest-randomly=1.2.3
 python-dateutil==2.8.0
 python-hglib==2.6.1
 pytz==2018.9
