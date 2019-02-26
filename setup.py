@@ -19,7 +19,8 @@ from setuptools import find_packages, setup
 import __pkg_metadata__
 
 python_classifiers = [
-    f"Programming Language :: Python :: {py_version}" for py_version in ["3", "3.6"]
+    f"Programming Language :: Python :: {py_version}"
+    for py_version in ["3", "3.6", "3.7"]
 ]
 other_classifiers = [
     "Development Status :: " + __pkg_metadata__.DEV_STATUS,
@@ -62,10 +63,11 @@ install_requires = [
     "pandas",
     "paramiko",
     "pillow",
-    "poppler",
+    # "poppler",  # pip doesn't recognize poppler pkg installed by conda
     "pygrib",
     "pypdf2",
     "pyproj",
+    "tables",  # pytables
     "python-hglib",
     "raven",
     "retrying",
@@ -78,9 +80,11 @@ install_requires = [
     "zeep",
     # 'NEMO_Nowcast',  # use pip install --editable NEMO_Nowcast/
     # 'moad_tools',  # use pip install --editable moad_tools
-    # 'SalishSeaTools',  # use pip install --editable SalishSeaTools/
+    # 'SalishSeaTools',  # use pip install --editable tools/SalishSeaTools/
+    # 'OPPTools',  # use pip install --editable OPPTools/
     # 'NEMO-Cmd',  # use pip install --editable NEMO-Cmd/
     # 'SalishSeaCmd',  # use pip install --editable SalishSeaCmd/
+    # 'FVCOM-Cmd',  # use pip install --editable FVCOM-Cmd/
     # 'SalishSeaNowcast',  # use pip install -e SalishSeaNowcast/
 ]
 

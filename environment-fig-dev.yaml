@@ -30,7 +30,7 @@ dependencies:
   - gsw
   - lxml
   - mako
-  - matplotlib
+  - matplotlib>=3
   - netcdf4
   - numpy
   - pandas
@@ -41,9 +41,10 @@ dependencies:
   - pygrib
   - pypdf2
   - pyproj
+  - pytables
   - python=3.6
   - pyyaml
-  - pyzmq
+  - "pyzmq<17.0,>=13.1.0"
   - requests
   - scipy
   - shapely
