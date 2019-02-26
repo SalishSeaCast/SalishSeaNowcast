@@ -16,6 +16,12 @@
 along a section of the domain thalweg,
 and on the surface for a section of the domain that excludes Puget Sound 
 in the south and Johnstone Strait in the north.
+
+Development notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopVelocitySectionAndSurfaceModule.ipynb
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestVelocitySectionAndSurface.ipynb
 """
 from types import SimpleNamespace
 
@@ -181,11 +187,11 @@ def _prep_fig_axes(figsize, theme, sections=(450,), pos=((0.1, 0.95),)):
             ax_section[str(section[0])], [0, 1], ["bottom", "top"]
         ):
             ax.spines[axis].set_visible(False)
-            ax.tick_params(which="both", top="off", right="off", direction="out")
-            ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+            ax.tick_params(which="both", top=False, right=False, direction="out")
+            ax.set_facecolor(theme.COLOURS["axes"]["background"])
             theme.set_axis_colors(ax)
         ax_section[str(section[0])][0].tick_params(
-            which="both", labelbottom="off", bottom="off"
+            which="both", labelbottom=False, bottom=False
         )
 
     # Make Surface

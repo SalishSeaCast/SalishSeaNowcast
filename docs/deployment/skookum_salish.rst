@@ -113,8 +113,8 @@ For the :kbd:`SalishSeaCast` automation system:
         --prefix /SalishSeaCast/nowcast-env \
         --channel conda-forge --channel defaults --channel gomss-nowcast \
         arrow attrs basemap beautifulsoup4 bottleneck circus cliff cmocean \
-        dask docutils gsw lxml mako matplotlib=1.5.3 netcdf4 numpy pandas paramiko \
-        pillow pip poppler pygrib pypdf2 pyproj python=3.6 pyyaml pyzmq \
+        dask docutils gsw lxml mako matplotlib>=3 netcdf4 numpy pandas paramiko \
+        pillow pip poppler pygrib pypdf2 pyproj python=3.7 pyyaml pyzmq \
         requests scipy shapely watchdog xarray
     $ source activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ pip install angles driftwood \
@@ -125,6 +125,7 @@ For the :kbd:`SalishSeaCast` automation system:
     (/SalishSeaCast/nowcast-env)$ pip install --editable OPPTools/
     (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO-Cmd/
     (/SalishSeaCast/nowcast-env)$ pip install --editable SalishSeaCmd/
+    (/SalishSeaCast/nowcast-env)$ pip install --editable FVCOM-Cmd/
     (/SalishSeaCast/nowcast-env)$ pip install --editable SalishSeaNowcast/
 
 For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_:

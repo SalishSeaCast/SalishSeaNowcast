@@ -8,7 +8,7 @@ channels:
   - gomss-nowcast
 
 dependencies:
-  - matplotlib=1.5.3
+  - matplotlib>=3
   - nemo_nowcast
   - python=3.6
   - retrying

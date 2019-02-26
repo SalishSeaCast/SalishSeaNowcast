@@ -190,8 +190,8 @@ def _prep_fig_axes(figsize, theme):
     fig, (ax_ssh, ax_res) = plt.subplots(
         nrows=2, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
-    ax_ssh.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
-    ax_res.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_ssh.set_facecolor(theme.COLOURS["axes"]["background"])
+    ax_res.set_facecolor(theme.COLOURS["axes"]["background"])
     fig.autofmt_xdate()
     return fig, (ax_ssh, ax_res)
 
@@ -302,11 +302,13 @@ def _residual_time_series_labels(ax, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.set_xlim(plot_data.fvcom_ssh.time.values[0], plot_data.fvcom_ssh.time.values[-1])
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     ax.set_ylabel(
         "Residual [m]",
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.legend(loc="best", prop=theme.FONTS["legend label small"])
     ax.grid(axis="both")
     theme.set_axis_colors(ax)

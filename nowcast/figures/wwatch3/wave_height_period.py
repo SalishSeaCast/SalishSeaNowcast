@@ -122,8 +122,8 @@ def _prep_fig_axes(figsize, theme):
     fig, (ax_sig_height, ax_peak_freq) = plt.subplots(
         2, 1, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
-    ax_sig_height.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
-    ax_peak_freq.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_sig_height.set_facecolor(theme.COLOURS["axes"]["background"])
+    ax_peak_freq.set_facecolor(theme.COLOURS["axes"]["background"])
     fig.autofmt_xdate()
     return fig, (ax_sig_height, ax_peak_freq)
 
@@ -146,11 +146,15 @@ def _plot_wave_height_time_series(ax, buoy, plot_data, theme):
     )
 
 
-def _wave_height_time_series_labels(ax, place, theme):
+def _wave_height_time_series_labels(ax, place, plot_data, theme):
     ax.set_title(
         f"Significant Wave Height at {place}",
         fontproperties=theme.FONTS["axes title"],
         color=theme.COLOURS["text"]["axes title"],
+    )
+    ax.set_xlim(
+        plot_data.wwatch3.wave_height.time.values[0],
+        plot_data.wwatch3.wave_height.time.values[-1],
     )
     ax.set_ylabel(
         "Significant Wave Height [m]",
@@ -191,11 +195,16 @@ def _dominant_period_time_series_labels(ax, place, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.set_xlim(
+        plot_data.wwatch3.peak_freq.time.values[0],
+        plot_data.wwatch3.peak_freq.time.values[-1],
+    )
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     ax.set_ylabel(
         "Dominant Wave Period [s]",
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
+    ax.legend(loc="best", prop=theme.FONTS["legend label small"])
     ax.grid(axis="both")
     theme.set_axis_colors(ax)

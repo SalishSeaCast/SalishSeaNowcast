@@ -16,6 +16,9 @@
 along a section of the domain thalweg,
 and on the surface for a section of the domain that excludes Puget Sound 
 in the south and Johnstone Strait in the north.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurfaceHourly.ipynb
 """
 from types import SimpleNamespace
 
@@ -145,10 +148,10 @@ def _prep_fig_axes(figsize, theme):
     gs = gridspec.GridSpec(1, 2, width_ratios=[1.4, 1])
 
     ax_thalweg = fig.add_subplot(gs[0])
-    ax_thalweg.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_thalweg.set_facecolor(theme.COLOURS["axes"]["background"])
 
     ax_surface = fig.add_subplot(gs[1])
-    ax_surface.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_surface.set_facecolor(theme.COLOURS["axes"]["background"])
 
     return fig, (ax_thalweg, ax_surface)
 
@@ -242,6 +245,6 @@ def _surface_axes_labels(ax, tracer_var, depth_integrated, clevels, cbar, theme)
         color=theme.COLOURS["text"]["axis"],
         fontproperties=theme.FONTS["axis"],
     )
-    ax.set_axis_bgcolor("burlywood")
+    ax.set_facecolor("burlywood")
     viz_tools.set_aspect(ax)
     theme.set_axis_colors(ax)
