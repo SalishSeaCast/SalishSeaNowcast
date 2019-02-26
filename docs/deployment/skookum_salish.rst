@@ -117,8 +117,8 @@ For the :kbd:`SalishSeaCast` automation system:
         pillow pip poppler pygrib pypdf2 pyproj python=3.7 pyyaml pyzmq \
         requests scipy shapely watchdog xarray
     $ source activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ pip install angles driftwood \
-        f90nml feedgen python-hglib raven retrying schedule scour tables utm zeep
+    (/SalishSeaCast/nowcast-env)$ pip install angles f90nml feedgen \
+        python-hglib raven retrying schedule scour tables utm zeep
     (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/SalishSeaCast/nowcast-env)$ pip install --editable moad_tools/
     (/SalishSeaCast/nowcast-env)$ pip install --editable tools/SalishSeaTools/
