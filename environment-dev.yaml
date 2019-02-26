@@ -64,6 +64,7 @@ dependencies:
   # For unit tests
   - coverage
   - pytest
+  - pytest-randomly
 
   # For documentation
   - sphinx
