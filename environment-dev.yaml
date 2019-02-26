@@ -36,7 +36,7 @@ dependencies:
   - gsw
   - lxml
   - mako
-  - matplotlib=1.5.3
+  - matplotlib>=3
   - netcdf4
   - numpy
   - pandas
@@ -47,7 +47,8 @@ dependencies:
   - pygrib
   - pypdf2
   - pyproj
-  - python=3.6
+  - pytables
+  - python=3.7
   - pyyaml
   - pyzmq
   - requests
