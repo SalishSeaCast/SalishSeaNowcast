@@ -71,10 +71,12 @@ vhfr fvcom runs:
   input dir: fvcom-runs/input/
 
   run types:
-    nowcast:
+    nowcast x2:
       nemo boundary results: SalishSea/nowcast/
-    forecast:
+    forecast x2:
       nemo boundary results: SalishSea/forecast/
+    nowcast r12:
+      nemo boundary results: SalishSea/nowcast/
 """
         )
     config_ = nemo_nowcast.Config()
@@ -235,12 +237,16 @@ class TestConfig:
     def test_run_types_section(self, prod_config):
         run_types = prod_config["vhfr fvcom runs"]["run types"]
         assert (
-            run_types["nowcast"]["nemo boundary results"]
+            run_types["nowcast x2"]["nemo boundary results"]
             == "/nemoShare/MEOPAR/SalishSea/nowcast/"
         )
         assert (
-            run_types["forecast"]["nemo boundary results"]
+            run_types["forecast x2"]["nemo boundary results"]
             == "/nemoShare/MEOPAR/SalishSea/forecast/"
+        )
+        assert (
+            run_types["nowcast r12"]["nemo boundary results"]
+            == "/nemoShare/MEOPAR/SalishSea/nowcast/"
         )
 
 

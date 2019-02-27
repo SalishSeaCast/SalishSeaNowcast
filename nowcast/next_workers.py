@@ -1006,11 +1006,12 @@ def after_upload_fvcom_atmos_forcing(msg, config, checklist):
     if msg.type.startswith("success"):
         host_name = config["vhfr fvcom runs"]["host"]
         run_type = msg.type.split()[2]
+        model_config = msg.payload[host_name][run_type]["model config"]
         run_date = msg.payload[host_name][run_type]["run date"]
         next_workers[msg.type].append(
             NextWorker(
                 "nowcast.workers.run_fvcom",
-                args=[host_name, run_type, "--run-date", run_date],
+                args=[host_name, model_config, run_type, "--run-date", run_date],
                 host=host_name,
             )
         )
@@ -1037,13 +1038,15 @@ def after_run_fvcom(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "failure nowcast": [],
-        "failure forecast": [],
-        "success nowcast": [],
-        "success forecast": [],
+        "failure x2 nowcast": [],
+        "failure x2 forecast": [],
+        "failure r12 nowcast": [],
+        "success x2 nowcast": [],
+        "success x2 forecast": [],
+        "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
-        run_type = msg.type.split()[1]
+        run_type = msg.type.split()[2]
         host = msg.payload[run_type]["host"]
         next_workers[msg.type].append(
             NextWorker("nowcast.workers.watch_fvcom", args=[host, run_type], host=host)

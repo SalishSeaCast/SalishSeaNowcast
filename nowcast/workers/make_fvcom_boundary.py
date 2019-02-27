@@ -192,12 +192,16 @@ def make_fvcom_boundary(parsed_args, config, *args):
     time_end = run_date + time_end_offsets[run_type]
     nemo_files_list = [
         os.path.join(
-            config["vhfr fvcom runs"]["run types"]["nowcast"]["nemo boundary results"],
+            config["vhfr fvcom runs"]["run types"][f"nowcast {model_config}"][
+                "nemo boundary results"
+            ],
             run_date.shift(days=-1).format("DDMMMYY").lower(),
             "FVCOM_T.nc",
         ),
         os.path.join(
-            config["vhfr fvcom runs"]["run types"]["nowcast"]["nemo boundary results"],
+            config["vhfr fvcom runs"]["run types"][f"nowcast {model_config}"][
+                "nemo boundary results"
+            ],
             run_date.format("DDMMMYY").lower(),
             "FVCOM_T.nc",
         ),
@@ -205,7 +209,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
     if run_type == "forecast":
         nemo_files_list.append(
             os.path.join(
-                config["vhfr fvcom runs"]["run types"]["forecast"][
+                config["vhfr fvcom runs"]["run types"][f"forecast {model_config}"][
                     "nemo boundary results"
                 ],
                 run_date.format("DDMMMYY").lower(),
