@@ -17,13 +17,13 @@ bokeh==1.0.4
 Bottleneck==1.2.1
 cached-property==1.5.1
 certifi==2018.11.29
-cffi==1.12.1
+cffi==1.12.2
 cftime==1.0.3.4
 chardet==3.0.4
-circus==0.14.0
+circus==0.15.0
 Click==7.0
 cliff==2.14.0
-cloudpickle==0.7.0
+cloudpickle==0.8.0
 cmd2==0.9.7
 cmocean==2.0
 colorama==0.4.1
@@ -32,9 +32,9 @@ coverage==4.5.2
 cryptography==2.5
 cycler==0.10.0
 cytoolz==0.9.0.1
-dask==1.1.1
+dask==1.1.2
 defusedxml==0.5.0
-distributed==1.25.3
+distributed==1.26.0
 docutils==0.14
 f90nml==1.0.2
 feedgen==0.7.0
@@ -44,17 +44,14 @@ heapdict==1.0.0
 humanfriendly==4.18
 idna==2.8
 imagesize==1.1.0
-iowait==0.2
 isodate==0.6.0
 Jinja2==2.10
 kiwisolver==1.0.1
 locket==0.2.0
 lxml==4.3.1
 Mako==1.0.7
-MarkupSafe==1.1.0
-matplotlib==3.0.2
-mkl-fft==1.0.10
-mkl-random==1.0.2
+MarkupSafe==1.1.1
+matplotlib==3.0.3
 -e moad_tools==1.0.dev0
 more-itertools==4.3.0
 msgpack==0.6.1
@@ -62,7 +59,7 @@ msgpack==0.6.1
 -e NEMO-Nowcast==19.2.dev0
 netCDF4==1.4.2
 numexpr==2.6.9
-numpy==1.15.4
+numpy==1.16.2
 olefile==0.46
 -e OPPTools==0.1.0
 packaging==19.0
@@ -72,7 +69,7 @@ partd==0.3.9
 pathtools==0.1.2
 pbr==5.1.2
 Pillow==5.4.1
-pluggy==0.8.1
+pluggy==0.9.0
 prettytable==0.7.2
 psutil==5.5.1
 py==1.8.0
@@ -94,7 +91,7 @@ python-dateutil==2.8.0
 python-hglib==2.6.1
 pytz==2018.9
 PyYAML==3.13
-pyzmq==18.0.0
+pyzmq==16.0.4
 raven==6.10.0
 requests==2.21.0
 requests-toolbelt==0.9.1
@@ -118,7 +115,7 @@ tables==3.4.4
 tblib==1.3.2
 toml==0.10.0
 toolz==0.9.0
-tornado==5.1.1
+tornado==4.5.3
 urllib3==1.24.1
 utm==0.4.2
 verboselogs==1.7

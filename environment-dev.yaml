@@ -27,7 +27,6 @@ dependencies:
   - basemap
   - beautifulsoup4
   - bottleneck
-  - circus
   - cliff
   - cmocean
   - coloredlogs
@@ -50,7 +49,6 @@ dependencies:
   - pytables
   - python=3.7
   - pyyaml
-  - pyzmq
   - requests
   - scipy
   - shapely
@@ -64,7 +62,6 @@ dependencies:
   # For unit tests
   - coverage
   - pytest
-  - pytest-randomly
 
   # For documentation
   - sphinx
@@ -77,6 +74,7 @@ dependencies:
   - pip:
     - angles
     - attrs
+    - circus
     - f90nml
     - feedgen
     - python-hglib
@@ -85,6 +83,9 @@ dependencies:
     - scour
     - utm
     - zeep
+
+    # For unit tests
+    - pytest-randomly
 
     # For exception monitoring
     - raven

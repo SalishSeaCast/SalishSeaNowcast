@@ -44,7 +44,6 @@ dependencies:
   - pytables
   - python=3.6
   - pyyaml
-  - "pyzmq<17.0,>=13.1.0"
   - requests
   - scipy
   - shapely
