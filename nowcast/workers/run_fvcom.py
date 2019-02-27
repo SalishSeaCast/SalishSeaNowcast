@@ -85,7 +85,6 @@ def success(parsed_args):
         f"{parsed_args.model_config} {parsed_args.run_type} FVCOM VH-FR run for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f"on {parsed_args.host_name} started"
-            "model_config": parsed_args.model_config,
     )
     msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
@@ -102,7 +101,6 @@ def failure(parsed_args):
         f"{parsed_args.model_config} {parsed_args.run_type} FVCOM VH-FR run for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f"on {parsed_args.host_name} failed"
-            "model_config": {parsed_args.model_config},
     )
     msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
