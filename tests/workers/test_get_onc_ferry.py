@@ -91,19 +91,16 @@ class TestSuccess:
         assert msg_type == f"success {ferry_platform}"
 
 
-@pytest.mark.parametrize("ferry_platform", ["TWDP"])
 @patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, ferry_platform):
-        parsed_args = SimpleNamespace(
-            ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
-        )
+    def test_failure(self, m_logger):
+        parsed_args = SimpleNamespace(data_date=arrow.get("2016-09-09"))
         msg_type = get_onc_ferry.failure(parsed_args)
         assert m_logger.critical.called
-        assert msg_type == f"failure {ferry_platform}"
+        assert msg_type == f"failure"
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
