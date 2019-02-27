@@ -1526,7 +1526,7 @@ class TestAfterUploadFVCOMAtmosForcing:
         workers = next_workers.after_upload_fvcom_atmos_forcing(msg, config, checklist)
         expected = NextWorker(
             "nowcast.workers.run_fvcom",
-            args=["west.cloud", run_type, "--run-date", "2018-04-04"],
+            args=["west.cloud", model_config, run_type, "--run-date", "2018-04-04"],
             host="west.cloud",
         )
         assert expected in workers
@@ -1537,7 +1537,8 @@ class TestAfterRunFVCOM:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure nowcast", "failure forecast"]
+        "msg_type",
+        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_run_fvcom(
@@ -1546,20 +1547,27 @@ class TestAfterRunFVCOM:
         assert workers == []
 
     @pytest.mark.parametrize(
-        "msg_type, host",
-        [("success nowcast", "west.cloud"), ("success forecast", "west.cloud")],
+        "model_config, run_type",
+        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
     )
-    def test_success_launch_watch_fvcom(self, msg_type, host, config, checklist):
-        run_type = msg_type.split()[1]
+    def test_success_launch_watch_fvcom(
+        self, model_config, run_type, config, checklist
+    ):
         workers = next_workers.after_run_fvcom(
-            Message("run_fvcom", msg_type, {run_type: {"host": host}}),
+            Message(
+                "run_fvcom",
+                f"success {model_config} {run_type}",
+                {run_type: {"host": "west.cloud"}},
+            ),
             config,
             checklist,
         )
         expected = NextWorker(
-            "nowcast.workers.watch_fvcom", args=[host, run_type], host=host
+            "nowcast.workers.watch_fvcom",
+            args=["west.cloud", run_type],
+            host="west.cloud",
         )
-        assert workers[0] == expected
+        assert workers == [expected]
 
 
 class TestAfterWatchFVCOM:

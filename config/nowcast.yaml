@@ -656,7 +656,9 @@ vhfr fvcom runs:
   # The key-pair is assumed to be stored in $HOME/.ssh/.
   ssh key: SalishSeaNEMO-nowcast_id_rsa
   # FVCOM case name
-  case name: vh_x2
+  case name:
+    x2: vh_x2
+    r12: vh_r12
   # Directory on compute host where files and directories necessary to
   # prepare and execute the fvcom runs are stored
   run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/
@@ -754,14 +756,16 @@ vhfr fvcom runs:
   input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
   # Path and name of file on compute host that defines the tide gauge stations
   # to produce point outputs at
-  output station timeseries: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_x2_station.txt
+  output station timeseries:
+    x2: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_x2_station.txt
+    r12: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_r12_station.txt
   namelists:
     # Name of the namelist file to create by concatenating the list of namelist
     # section files below
     # **Must be quoted to project {} characters**
     '{casename}_run.nml':
       - namelist.case
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart
+      - namelist.startup.hotstart
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics
       - namelist.restart
@@ -769,14 +773,14 @@ vhfr fvcom runs:
       - namelist.physics
       - namelist.surface
       - namelist.rivers
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid
+      - namelist.obc
+      - namelist.grid
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check
       - namelist.nesting
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries
+      - namelist.station_timeseries
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models
   # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
   FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
@@ -790,22 +794,28 @@ vhfr fvcom runs:
   # Run type specific configurations for the runs that are executed on the
   # compute host; keyed by run type
   run types:
-    nowcast:
+    nowcast x2:
       # Directory on compute host where NEMO run results for boundary forcing
       # are stored
       nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
       # Directory on compute host where results are stored
       results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
-    forecast:
+    forecast x2:
       nemo boundary results: /nemoShare/MEOPAR/SalishSea/forecast/
       results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
+    nowcast r12:
+        nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
+        results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/
   # Directories on results server where run results are stored
   # in ddmmmyy/ directories; keyed by run type
   results archive:
-    nowcast: /opp/fvcom/nowcast-x2/
-    forecast: /opp/fvcom/forecast-x2/
+    nowcast x2: /opp/fvcom/nowcast-x2/
+    forecast x2: /opp/fvcom/forecast-x2/
+    nowcast r12: /opp/fvcom/nowcast-r12/
   # Name of the results file containing the tide gauge stations sea surface height time series
-  stations dataset filename: vh_x2_station_timeseries.nc
+  stations dataset filename:
+    x2: vh_x2_station_timeseries.nc
+    r12: vh_r12_station_timeseries.nc
 
 
 # Distributed logging system configuration
@@ -1202,10 +1212,12 @@ message registry:
 
     run_fvcom:
       checklist key: FVCOM run
-      success nowcast: nowcast FVCOM run started
-      failure nowcast: nowcast FVCOM run failed
-      success forecast: forecast FVCOM run started
-      failure forecast: forecast FVCOM run failed
+      success x2 nowcast: x2 configuration nowcast FVCOM run started
+      failure x2 nowcast: x2 configuration nowcast FVCOM run failed
+      success x2 forecast: x2 configuration forecast FVCOM run started
+      failure x2 forecast: x2 configuration forecast FVCOM run failed
+      success r12 nowcast: r12 configuration nowcast FVCOM run started
+      failure r12 nowcast: r12 configuration nowcast FVCOM run failed
       crash: run_fvcom worker crashed
 
     watch_fvcom:

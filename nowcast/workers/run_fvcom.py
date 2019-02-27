@@ -48,6 +48,15 @@ def main():
     worker.init_cli()
     worker.cli.add_argument("host_name", help="Name of the host to execute the run on")
     worker.cli.add_argument(
+        "model_config",
+        choices={"r12", "x2"},
+        help="""
+        Model configuration of run to execute:
+        'r12' means the r12 resolution
+        'x2' means the x2 resolution
+        """,
+    )
+    worker.cli.add_argument(
         "run_type",
         choices={"nowcast", "forecast"},
         help="""
@@ -73,11 +82,12 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"{parsed_args.run_type} FVCOM VH-FR run for "
+        f"{parsed_args.model_config} {parsed_args.run_type} FVCOM VH-FR run for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f"on {parsed_args.host_name} started"
+            "model_config": parsed_args.model_config,
     )
-    msg_type = f"success {parsed_args.run_type}"
+    msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -89,11 +99,12 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"{parsed_args.run_type} FVCOM VH-FR run for "
+        f"{parsed_args.model_config} {parsed_args.run_type} FVCOM VH-FR run for "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f"on {parsed_args.host_name} failed"
+            "model_config": {parsed_args.model_config},
     )
-    msg_type = f"failure {parsed_args.run_type}"
+    msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -106,16 +117,17 @@ def run_fvcom(parsed_args, config, *args):
     :rtype: dict
     """
     host_name = parsed_args.host_name
+    model_config = parsed_args.model_config
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    run_desc_file_path = _create_run_desc_file(run_date, run_type, config)
+    run_desc_file_path = _create_run_desc_file(run_date, model_config, run_type, config)
     tmp_run_dir = fvcom_cmd.api.prepare(run_desc_file_path)
     logger.debug(f"{run_type}: temporary run directory: {tmp_run_dir}")
     ## TODO: It would be nice if prepare() copied YAML file to tmp run dir
     shutil.copy2(run_desc_file_path, tmp_run_dir / run_desc_file_path.name)
-    _prep_fvcom_input_dir(run_date, run_type, config)
+    _prep_fvcom_input_dir(run_date, model_config, run_type, config)
     run_script_path = _create_run_script(
-        run_date, run_type, tmp_run_dir, run_desc_file_path, config
+        run_date, model_config, run_type, tmp_run_dir, run_desc_file_path, config
     )
     run_desc_file_path.unlink()
     run_exec_cmd = _launch_run_script(run_type, run_script_path, host_name)
@@ -124,14 +136,16 @@ def run_fvcom(parsed_args, config, *args):
             "host": host_name,
             "run dir": os.fspath(tmp_run_dir),
             "run exec cmd": run_exec_cmd,
+            "model config": model_config,
             "run date": run_date.format("YYYY-MM-DD"),
         }
     }
 
 
-def _create_run_desc_file(run_date, run_type, config):
+def _create_run_desc_file(run_date, model_config, run_type, config):
     """
     :param :py:class:`arrow.Arrow` run_date:
+    :param str model_config:
     :param str run_type:
     :param :py:class:`nemo_nowcast.Config` config:
 
@@ -139,9 +153,11 @@ def _create_run_desc_file(run_date, run_type, config):
     :rtype: :py:class:`pathlib.Path`
     """
     ddmmmyy = run_date.format("DDMMMYY").lower()
-    run_id = f"{ddmmmyy}fvcom-{run_type}"
+    run_id = f"{ddmmmyy}fvcom-{model_config}-{run_type}"
     run_prep_dir = Path(config["vhfr fvcom runs"]["run prep dir"])
-    run_desc = _run_description(run_id, run_date, run_type, run_prep_dir, config)
+    run_desc = _run_description(
+        run_id, run_date, model_config, run_type, run_prep_dir, config
+    )
     run_desc_file_path = run_prep_dir / f"{run_id}.yaml"
     with run_desc_file_path.open("wt") as f:
         yaml.dump(run_desc, f, default_flow_style=False)
@@ -149,10 +165,11 @@ def _create_run_desc_file(run_date, run_type, config):
     return run_desc_file_path
 
 
-def _run_description(run_id, run_date, run_type, run_prep_dir, config):
+def _run_description(run_id, run_date, model_config, run_type, run_prep_dir, config):
     """
     :param str run_id:
     :param :py:class:`arrow.Arrow` run_date:
+    :param str model_config:
     :param str run_type:
     :param :py:class:`pathlib.Path` run_prep_dir:
     :param :py:class:`nemo_nowcast.Config` config:
@@ -160,8 +177,8 @@ def _run_description(run_id, run_date, run_type, run_prep_dir, config):
     :return: Run description
     :rtype dict:
     """
-    casename = config["vhfr fvcom runs"]["case name"]
-    _edit_namelists(casename, run_date, run_type, run_prep_dir, config)
+    casename = config["vhfr fvcom runs"]["case name"][model_config]
+    _edit_namelists(casename, run_date, model_config, run_type, run_prep_dir, config)
     namelist_path = _assemble_namelist(casename, run_type, run_prep_dir, config)
     run_desc = {
         "run_id": run_id,
@@ -181,10 +198,11 @@ def _run_description(run_id, run_date, run_type, run_prep_dir, config):
     return run_desc
 
 
-def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
+def _edit_namelists(casename, run_date, model_config, run_type, run_prep_dir, config):
     """
     :param str casename:
     :param :py:class:`arrow.Arrow` run_date:
+    :param str model_config:
     :param str run_type:
     :param :py:class:`pathlib.Path` run_prep_dir:
     :param :py:class:`nemo_nowcast.Config` config:
@@ -197,6 +215,7 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
     ]
     atmos_files = {
         field_type: atmos_file_tmpl.format(
+            model_config=model_config,
             run_type=run_type,
             field_type=field_type,
             yyyymmdd=start_date.format("YYYYMMDD"),
@@ -205,9 +224,21 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
             "field types"
         ]
     }
+    rivers_file_tmpl = config["vhfr fvcom runs"]["rivers forcing"][
+        "rivers file template"
+    ]
+    rivers_file = Path(
+        rivers_file_tmpl.format(
+            model_config=model_config,
+            run_type=run_type,
+            yyyymmdd=start_date.format("YYYYMMDD"),
+        )
+    ).with_suffix(".nc_riv.nml")
     bdy_file_tmpl = config["vhfr fvcom runs"]["nemo coupling"]["boundary file template"]
     bdy_file = bdy_file_tmpl.format(
-        model_config="x2", run_type=run_type, yyyymmdd=start_date.format("YYYYMMDD")
+        model_config=model_config,
+        run_type=run_type,
+        yyyymmdd=start_date.format("YYYYMMDD"),
     )
     patches = {
         run_prep_dir
@@ -221,6 +252,10 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
                     )
                 ),
             }
+        },
+        run_prep_dir
+        / "namelist.startup.hotstart": {
+            "nml_startup": {"startup_file": f"vh_{model_config}_restart_0001.nc"}
         },
         run_prep_dir
         / "namelist.restart": {
@@ -250,7 +285,47 @@ def _edit_namelists(casename, run_date, run_type, run_prep_dir, config):
             }
         },
         run_prep_dir
+        / "namelist.rivers": {
+            "nml_river_type": {"river_info_file": os.fspath(rivers_file)}
+        },
+        run_prep_dir
+        / "namelist.obc": {
+            "nml_open_boundary_control": {
+                "obc_node_list_file": config["vhfr fvcom runs"]["fvcom grid"][
+                    model_config
+                ]["obc nodes file"]
+            }
+        },
+        run_prep_dir
+        / "namelist.grid": {
+            "nml_grid_coordinates": {
+                "grid_file": config["vhfr fvcom runs"]["fvcom grid"][model_config][
+                    "grid file"
+                ],
+                "sigma_levels_file": config["vhfr fvcom runs"]["fvcom grid"][
+                    model_config
+                ]["sigma file"],
+                "depth_file": config["vhfr fvcom runs"]["fvcom grid"][model_config][
+                    "depths file"
+                ],
+                "coriolis_file": config["vhfr fvcom runs"]["fvcom grid"][model_config][
+                    "coriolis file"
+                ],
+                "sponge_file": config["vhfr fvcom runs"]["fvcom grid"][model_config][
+                    "sponge file"
+                ],
+            }
+        },
+        run_prep_dir
         / "namelist.nesting": {"nml_nesting": {"nesting_file_name": bdy_file}},
+        run_prep_dir
+        / "namelist.station_timeseries": {
+            "nml_station_timeseries": {
+                "station_file": Path(
+                    config["vhfr fvcom runs"]["output station timeseries"][model_config]
+                ).name
+            }
+        },
     }
     for namelist_path, patch in patches.items():
         _patch_namelist(namelist_path, patch)
@@ -295,9 +370,10 @@ def _assemble_namelist(casename, run_type, run_prep_dir, config):
     return run_prep_dir / namelist_file
 
 
-def _prep_fvcom_input_dir(run_date, run_type, config):
+def _prep_fvcom_input_dir(run_date, model_config, run_type, config):
     """
     :param :py:class:`arrow.Arrow` run_date:
+    :param str model_config:
     :param str run_type:
     :param :py:class:`nemo_nowcast.Config` config:
     """
@@ -311,16 +387,18 @@ def _prep_fvcom_input_dir(run_date, run_type, config):
         "sponge file",
         "obc nodes file",
     ):
-        f = Path(config["vhfr fvcom runs"]["fvcom grid"]["x2"][grid_file])
+        f = Path(config["vhfr fvcom runs"]["fvcom grid"][model_config][grid_file])
         (fvcom_input_dir / f).symlink_to(grid_dir / f)
     logger.debug(f"symlinked {grid_dir} files into {fvcom_input_dir}")
     output_timeseries_file = Path(
-        config["vhfr fvcom runs"]["output station timeseries"]
+        config["vhfr fvcom runs"]["output station timeseries"][model_config]
     )
     (fvcom_input_dir / output_timeseries_file.name).symlink_to(output_timeseries_file)
     logger.debug(f"symlinked {output_timeseries_file} file into {fvcom_input_dir}")
-    casename = config["vhfr fvcom runs"]["case name"]
-    restart_dir = Path(config["vhfr fvcom runs"]["run types"]["nowcast"]["results"])
+    casename = config["vhfr fvcom runs"]["case name"][model_config]
+    restart_dir = Path(
+        config["vhfr fvcom runs"]["run types"][f"nowcast {model_config}"]["results"]
+    )
     restart_file_date = run_date.shift(days=-1) if run_type == "nowcast" else run_date
     restart_file = (
         restart_dir
@@ -331,9 +409,12 @@ def _prep_fvcom_input_dir(run_date, run_type, config):
     logger.debug(f"symlinked {restart_file} file into {fvcom_input_dir}")
 
 
-def _create_run_script(run_date, run_type, tmp_run_dir, run_desc_file_path, config):
+def _create_run_script(
+    run_date, model_config, run_type, tmp_run_dir, run_desc_file_path, config
+):
     """
     :param :py:class:`arrow.Arrow` run_date:
+    :param str model_config:
     :param str run_type:
     :param :py:class:`pathlib.Path` tmp_run_dir:
     :param :py:class:`pathlib.Path` run_desc_file_path:
@@ -342,10 +423,12 @@ def _create_run_script(run_date, run_type, tmp_run_dir, run_desc_file_path, conf
     :return: Run script file path
     :rtype: :py:class:`pathlib.Path`
     """
-    results_dir = Path(config["vhfr fvcom runs"]["run types"][run_type]["results"])
+    results_dir = Path(
+        config["vhfr fvcom runs"]["run types"][f"{run_type} {model_config}"]["results"]
+    )
     ddmmmyy = run_date.format("DDMMMYY").lower()
     script = _build_script(
-        tmp_run_dir, run_desc_file_path, results_dir / ddmmmyy, config
+        tmp_run_dir, run_desc_file_path, results_dir / ddmmmyy, model_config, config
     )
     run_script_path = tmp_run_dir / "VHFR_FVCOM.sh"
     with run_script_path.open("wt") as f:
@@ -355,11 +438,12 @@ def _create_run_script(run_date, run_type, tmp_run_dir, run_desc_file_path, conf
     return run_script_path
 
 
-def _build_script(tmp_run_dir, run_desc_file_path, results_dir, config):
+def _build_script(tmp_run_dir, run_desc_file_path, results_dir, model_config, config):
     """
     :param :py:class:`pathlib.Path` tmp_run_dir:
     :param :py:class:`pathlib.Path` run_desc_file_path:
     :param :py:class:`pathlib.Path` results_dir:
+    :param str model_config:
     :param :py:class:`nemo_nowcast.Config` config:
 
     :return: Run script
@@ -378,7 +462,7 @@ def _build_script(tmp_run_dir, run_desc_file_path, results_dir, config):
                 defns=_definitions(
                     run_desc, tmp_run_dir, run_desc_file_path, results_dir, config
                 ),
-                execute=_execute(config),
+                execute=_execute(model_config, config),
                 fix_permissions=_fix_permissions(),
                 cleanup=_cleanup(),
             ),
@@ -416,8 +500,9 @@ def _definitions(run_desc, tmp_run_dir, run_desc_file_path, results_dir, config)
     return defns
 
 
-def _execute(config):
+def _execute(model_config, config):
     """
+    :param str model_config:
     :param :py:class:`nemo_nowcast.Config` config:
 
     :return: Run script model execution commands
@@ -426,7 +511,7 @@ def _execute(config):
     mpirun = (
         f'${{MPIRUN}} -np {config["vhfr fvcom runs"]["number of processors"]} '
         f"--bind-to-core ./fvcom "
-        f'--casename={config["vhfr fvcom runs"]["case name"]} '
+        f'--casename={config["vhfr fvcom runs"]["case name"][model_config]} '
         f"--logfile=./fvcom.log"
     )
     script = (

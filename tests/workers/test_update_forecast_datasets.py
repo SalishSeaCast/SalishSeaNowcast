@@ -58,8 +58,8 @@ wave forecasts:
     
 vhfr fvcom runs:
   results archive:
-    nowcast: opp/fvcom/nowcast/
-    forecast: opp/fvcom/forecast/
+    nowcast x2: opp/fvcom/nowcast x2/
+    forecast x2: opp/fvcom/forecast x2/
 """
         )
     config_ = nemo_nowcast.Config()
@@ -154,7 +154,7 @@ class TestConfig:
         assert msg in msg_registry
 
     def test_results_archives(self, prod_config):
-        fvcom_run_types = ("nowcast", "forecast")
+        fvcom_run_types = ("nowcast x2", "forecast x2")
         for run_type in fvcom_run_types:
             assert run_type in prod_config["vhfr fvcom runs"]["results archive"]
         nemo_run_types = ("nowcast", "forecast", "forecast2")
@@ -377,14 +377,16 @@ class TestSymlinkMostRecentForecast:
             config["rolling forecasts"][model]["most recent forecast dir"]
         )
         runs = {"fvcom": "vhfr fvcom runs", "wwatch3": "wave forecasts"}
+        results_archive_run_type_key = "forecast x2" if model == "fvcom" else run_type
         results_archive = tmpdir.ensure_dir(
-            config[runs[model]]["results archive"][run_type]
+            config[runs[model]]["results archive"][results_archive_run_type_key]
         )
         new_fcst_files = ["foo.nc", "foo_restart.nc", "bar.nc"]
         for f in new_fcst_files:
             results_archive.ensure_dir("25oct18").ensure(f)
         with patch.dict(
-            config[runs[model]]["results archive"], {run_type: str(results_archive)}
+            config[runs[model]]["results archive"],
+            {results_archive_run_type_key: str(results_archive)},
         ):
             update_forecast_datasets._symlink_most_recent_forecast(
                 parsed_args.run_date,

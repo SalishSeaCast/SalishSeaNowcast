@@ -122,11 +122,11 @@ def _symlink_most_recent_forecast(
         f.unlink()
     logger.debug(f"deleted previous forecast symlinks from {most_recent_fcst_dir}")
     runs = {"fvcom": "vhfr fvcom runs", "wwatch3": "wave forecasts"}
-    results_archive = (
-        Path(config["results archive"]["nowcast"])
-        if model == "nemo"
-        else Path(config[runs[model]]["results archive"][run_type])
-    )
+    results_archive = {
+        "nemo": Path(config["results archive"]["nowcast"]),
+        "fvcom": Path(config[runs["fvcom"]]["results archive"]["forecast x2"]),
+        "wwatch3": Path(config[runs["wwatch3"]]["results archive"][run_type]),
+    }[model]
     for f in (results_archive / ddmmmyy).glob("*.nc"):
         if "restart" not in f.name:
             (most_recent_fcst_dir / f.name).symlink_to(f)

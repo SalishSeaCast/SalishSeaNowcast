@@ -36,7 +36,9 @@ def config(base_config):
         f.write(
             """
 vhfr fvcom runs:
-  case name: vh_x2
+  case name: 
+    x2: vh_x2
+    r12: vh_r12
   run prep dir: fvcom-runs/
 
   fvcom grid:
@@ -52,33 +54,52 @@ vhfr fvcom runs:
       grid file: vh_r12_grd.dat
       depths file: vh_r12_smp3_dep.dat
       sigma file: vh_r12_sigma.dat
-      coriolis file: vh_r1x2_cor.dat
-      sponge file: vh_r1x2_nospg_spg.dat
-      obc nodes file: vh_r1x2_obc.dat
+      coriolis file: vh_r12_cor.dat
+      sponge file: vh_r12_nospg_spg.dat
+      obc nodes file: vh_r12_obc.dat
 
   nemo coupling:
     boundary file template: 'bdy_{model_config}_{run_type}_brcl_{yyyymmdd}.nc'
 
   atmospheric forcing:
-    atmos file template: 'atmos_{run_type}_{field_type}_{yyyymmdd}.nc'
+    atmos file template: 'atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc'
     field types:
       - hfx
       - precip
       - wnd
 
+  rivers forcing:
+    rivers file template: 'rivers_{model_config}_{run_type}_{yyyymmdd}.nc'
+
   input dir: fvcom-runs/input/
-  output station timeseries: FVCOM-VHFR-config/output/vh_x2_station.dat
+  output station timeseries: 
+    x2:
+      FVCOM-VHFR-config/output/vh_x2_station.txt
+    r12:
+      FVCOM-VHFR-config/output/vh_r12_station.txt
   namelists:
     '{casename}_run.nml':
       - namelist.case
+      - namelist.startup.hotstart
+      - namelist.restart
+      - namelist.netcdf
+      - namelist.physics
+      - namelist.surface
+      - namelist.rivers
+      - namelist.obc
+      - namelist.grid
+      - namelist.nesting
+      - namelist.station_timeseries
   number of processors: 64
   mpi hosts file: ${HOME}/mpi_hosts.fvcom
   fvc_cmd: bin/fvc
   run types:
-    nowcast:
-      results: SalishSea/fvcom-nowcast/
-    forecast:
-      results: fvcom-forecast/
+    nowcast x2:
+      results: SalishSea/fvcom-nowcast-x2/
+    forecast x2:
+      results: SalishSea/fvcom-forecast-x2/
+    nowcast r12:
+      results: SalishSea/fvcom-nowcast-r12/
 """
         )
     config_ = nemo_nowcast.Config()
@@ -110,10 +131,18 @@ class TestMain:
         assert args == ("host_name",)
         assert "help" in kwargs
 
-    def test_add_run_type_arg(self, m_worker):
+    def test_add_model_config_arg(self, m_worker):
         m_worker().cli = Mock(name="cli")
         run_fvcom.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ("model_config",)
+        assert kwargs["choices"] == {"r12", "x2"}
+        assert "help" in kwargs
+
+    def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        run_fvcom.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ("run_type",)
         assert kwargs["choices"] == {"nowcast", "forecast"}
         assert "help" in kwargs
@@ -145,10 +174,12 @@ class TestConfig:
     @pytest.mark.parametrize(
         "msg",
         (
-            "success nowcast",
-            "failure nowcast",
-            "success forecast",
-            "failure forecast",
+            "success x2 nowcast",
+            "failure x2 nowcast",
+            "success x2 forecast",
+            "failure x2 forecast",
+            "success r12 nowcast",
+            "failure r12 nowcast",
             "crash",
         ),
     )
@@ -161,7 +192,8 @@ class TestConfig:
         vhfr_fvcom_runs = prod_config["vhfr fvcom runs"]
         assert vhfr_fvcom_runs["host"] == "west.cloud-nowcast"
         assert vhfr_fvcom_runs["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
-        assert vhfr_fvcom_runs["case name"] == "vh_x2"
+        assert vhfr_fvcom_runs["case name"]["x2"] == "vh_x2"
+        assert vhfr_fvcom_runs["case name"]["r12"] == "vh_r12"
         assert (
             vhfr_fvcom_runs["run prep dir"]
             == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/"
@@ -174,8 +206,12 @@ class TestConfig:
             == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/"
         )
         assert (
-            vhfr_fvcom_runs["output station timeseries"]
+            vhfr_fvcom_runs["output station timeseries"]["x2"]
             == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_x2_station.txt"
+        )
+        assert (
+            vhfr_fvcom_runs["output station timeseries"]["r12"]
+            == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_r12_station.txt"
         )
         assert "namelists" in vhfr_fvcom_runs
         assert (
@@ -191,8 +227,12 @@ class TestConfig:
         assert "run types" in vhfr_fvcom_runs
         assert "results archive" in vhfr_fvcom_runs
         assert (
-            vhfr_fvcom_runs["stations dataset filename"]
+            vhfr_fvcom_runs["stations dataset filename"]["x2"]
             == "vh_x2_station_timeseries.nc"
+        )
+        assert (
+            vhfr_fvcom_runs["stations dataset filename"]["r12"]
+            == "vh_r12_station_timeseries.nc"
         )
 
     def test_fvcom_grid_section(self, prod_config):
@@ -242,11 +282,18 @@ class TestConfig:
         )
         assert atmos_forcing["field types"] == ["hfx", "precip", "wnd"]
 
+    def test_rivers_forcing_section(self, prod_config):
+        rivers_forcing = prod_config["vhfr fvcom runs"]["rivers forcing"]
+        assert (
+            rivers_forcing["rivers file template"]
+            == "rivers_{model_config}_{run_type}_{yyyymmdd}.nc"
+        )
+
     def test_namelists_section(self, prod_config):
         namelists = prod_config["vhfr fvcom runs"]["namelists"]["{casename}_run.nml"]
         assert namelists == [
             "namelist.case",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.startup.hotstart",
+            "namelist.startup.hotstart",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics",
             "namelist.restart",
@@ -254,65 +301,89 @@ class TestConfig:
             "namelist.physics",
             "namelist.surface",
             "namelist.rivers",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.obc",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.grid",
+            "namelist.obc",
+            "namelist.grid",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check",
             "namelist.nesting",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.station_timeseries",
+            "namelist.station_timeseries",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models",
         ]
 
     def test_run_types_section(self, prod_config):
         run_types = prod_config["vhfr fvcom runs"]["run types"]
-        assert run_types["nowcast"] == {
+        assert run_types["nowcast x2"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/",
         }
-        assert run_types["forecast"] == {
+        assert run_types["forecast x2"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/forecast/",
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/",
+        }
+        assert run_types["nowcast r12"] == {
+            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/",
         }
 
     def test_results_archive_section(self, prod_config):
         results_archive = prod_config["vhfr fvcom runs"]["results archive"]
-        assert results_archive["nowcast"] == "/opp/fvcom/nowcast-x2/"
-        assert results_archive["forecast"] == "/opp/fvcom/forecast-x2/"
+        assert results_archive["nowcast x2"] == "/opp/fvcom/nowcast-x2/"
+        assert results_archive["forecast x2"] == "/opp/fvcom/forecast-x2/"
+        assert results_archive["nowcast r12"] == "/opp/fvcom/nowcast-r12/"
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-11-29")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2017-11-29"),
         )
         msg_type = run_fvcom.success(parsed_args)
+        assert msg_type == f"success {model_config} {run_type}"
         assert m_logger.info.called
-        assert msg_type == f"success {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-11-29")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2017-11-29"),
         )
         msg_type = run_fvcom.failure(parsed_args)
+        assert msg_type == f"failure {model_config} {run_type}"
         assert m_logger.critical.called
-        assert msg_type == f"failure {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type, run_date",
+    (
+        ("x2", "nowcast", arrow.get("2017-11-29")),
+        ("x2", "forecast", arrow.get("2017-11-29")),
+        ("r12", "nowcast", arrow.get("2019-02-21")),
+    ),
+)
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 @patch("nowcast.workers.run_fvcom._create_run_desc_file")
 @patch("nowcast.workers.run_fvcom.fvcom_cmd.api.prepare")
@@ -333,15 +404,18 @@ class TestRunFVCOM:
         m_prep,
         m_crdf,
         m_logger,
+        model_config,
         run_type,
+        run_date,
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-11-29")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=run_date,
         )
-        tmp_run_dir = (
-            f"/fvcom-runs/29nov17vhfr-{run_type}_2017-11-29T183043.555919-0700"
-        )
+        tmp_run_dir = f"fvcom-runs/{run_date.format('DDMMMYY').lower()}vhfr-{run_type}_{run_date.format('YYYY-MM-DD')}T183043.555919-0700"
         m_prep.return_value = tmp_run_dir
         checklist = run_fvcom.run_fvcom(parsed_args, config)
         expected = {
@@ -349,13 +423,21 @@ class TestRunFVCOM:
                 "host": "west.cloud",
                 "run dir": tmp_run_dir,
                 "run exec cmd": m_launch(),
-                "run date": "2017-11-29",
+                "model config": model_config,
+                "run date": run_date.format("YYYY-MM-DD"),
             }
         }
         assert checklist == expected
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type, run_date",
+    (
+        ("x2", "nowcast", arrow.get("2017-12-11")),
+        ("x2", "forecast", arrow.get("2017-12-11")),
+        ("r12", "nowcast", arrow.get("2019-02-21")),
+    ),
+)
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 @patch("nowcast.workers.run_fvcom.yaml.dump", autospec=True)
 @patch("nowcast.workers.run_fvcom._run_description")
@@ -364,31 +446,53 @@ class TestCreateRunDescFile:
     """
 
     def test_run_desc_file_path(
-        self, m_run_desc, m_yaml_dump, m_logger, run_type, config
+        self,
+        m_run_desc,
+        m_yaml_dump,
+        m_logger,
+        model_config,
+        run_type,
+        run_date,
+        config,
     ):
-        run_date = arrow.get("2017-12-11")
         with patch("nowcast.workers.run_fvcom.Path.open") as m_open:
             run_desc_file_path = run_fvcom._create_run_desc_file(
-                run_date, run_type, config
+                run_date, model_config, run_type, config
             )
-        expected = Path(f"fvcom-runs/11dec17fvcom-{run_type}.yaml")
+        expected = Path(
+            f"fvcom-runs/{run_date.format('DDMMMYY').lower()}fvcom-{model_config}-{run_type}.yaml"
+        )
         assert run_desc_file_path == expected
 
     def test_run_desc_yaml_dump(
-        self, m_run_desc, m_yaml_dump, m_logger, run_type, config, tmpdir
+        self,
+        m_run_desc,
+        m_yaml_dump,
+        m_logger,
+        model_config,
+        run_type,
+        run_date,
+        config,
+        tmpdir,
     ):
-        run_date = arrow.get("2017-12-12")
         run_prep_dir = Path(str(tmpdir.ensure_dir("nowcast-sys/fvcom-runs")))
         with patch("nowcast.workers.run_fvcom.Path.open") as m_open:
             run_desc_file_path = run_fvcom._create_run_desc_file(
-                run_date, run_type, config
+                run_date, model_config, run_type, config
             )
             m_yaml_dump.assert_called_once_with(
                 m_run_desc(), m_open().__enter__(), default_flow_style=False
             )
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type, run_date",
+    (
+        ("x2", "nowcast", arrow.get("2017-12-11")),
+        ("x2", "forecast", arrow.get("2017-12-11")),
+        ("r12", "nowcast", arrow.get("2019-02-21")),
+    ),
+)
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 @patch("nowcast.workers.run_fvcom._edit_namelists")
 @patch("nowcast.workers.run_fvcom._assemble_namelist")
@@ -396,29 +500,39 @@ class TestRunDescription:
     """Unit test for _run_description() function.
     """
 
-    def test_run_desc(self, m_mk_nml, m_edit_nml, m_logger, run_type, config, tmpdir):
-        run_id = f"11dec17fvcom-{run_type}"
+    def test_run_desc(
+        self,
+        m_mk_nml,
+        m_edit_nml,
+        m_logger,
+        model_config,
+        run_type,
+        run_date,
+        config,
+        tmpdir,
+    ):
+        run_id = f"{run_date.format('DDMMMYY').lower()}fvcom-{run_type}"
         fvcom_repo_dir = Path(str(tmpdir.ensure_dir("FVCOM41")))
         run_prep_dir = Path(str(tmpdir.ensure_dir("fvcom-runs")))
-        m_mk_nml.return_value = Path(str(run_prep_dir), "vh_x2_run.nml")
+        m_mk_nml.return_value = Path(str(run_prep_dir), f"vh_{model_config}_run.nml")
         p_config = patch.dict(
             config["vhfr fvcom runs"],
             {"run prep dir": run_prep_dir, "FVCOM exe path": fvcom_repo_dir},
         )
         with p_config:
             run_desc = run_fvcom._run_description(
-                run_id, arrow.get("2017-12-11"), run_type, run_prep_dir, config
+                run_id, run_date, model_config, run_type, run_prep_dir, config
             )
         expected = {
             "run_id": run_id,
-            "casename": "vh_x2",
+            "casename": config["vhfr fvcom runs"]["case name"][model_config],
             "nproc": 64,
             "paths": {
                 "FVCOM": os.fspath(fvcom_repo_dir),
                 "runs directory": os.fspath(run_prep_dir),
                 "input": os.fspath(run_prep_dir / "input"),
             },
-            "namelist": os.fspath(run_prep_dir / "vh_x2_run.nml"),
+            "namelist": os.fspath(run_prep_dir / f"vh_{model_config}_run.nml"),
         }
         assert run_desc == expected
 
@@ -429,11 +543,21 @@ class TestEditNamelists:
     """Unit test for _edit_namelists() function.
     """
 
-    def test_edit_namelists_nowcast(self, m_patch_nml, m_logger, config):
+    @pytest.mark.parametrize(
+        "model_config, run_type, run_date",
+        (
+            ("x2", "nowcast", arrow.get("2018-01-15")),
+            ("r12", "nowcast", arrow.get("2019-02-21")),
+        ),
+    )
+    def test_edit_namelists_nowcast(
+        self, m_patch_nml, m_logger, model_config, run_type, run_date, config
+    ):
         run_fvcom._edit_namelists(
-            config["vhfr fvcom runs"]["case name"],
-            arrow.get("2018-01-15"),
-            "nowcast",
+            config["vhfr fvcom runs"]["case name"][model_config],
+            run_date,
+            model_config,
+            run_type,
             Path("run_prep_dir"),
             config,
         )
@@ -442,21 +566,31 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.case"),
                 {
                     "nml_case": {
-                        "case_title": config["vhfr fvcom runs"]["case name"],
-                        "start_date": "2018-01-15 00:00:00.00",
-                        "end_date": "2018-01-16 00:00:00.00",
+                        "case_title": config["vhfr fvcom runs"]["case name"][
+                            model_config
+                        ],
+                        "start_date": f"{run_date.format('YYYY-MM-DD')} 00:00:00.00",
+                        "end_date": f"{run_date.shift(days=+1).format('YYYY-MM-DD')} 00:00:00.00",
                     }
                 },
             ),
             call(
+                Path("run_prep_dir/namelist.startup.hotstart"),
+                {"nml_startup": {"startup_file": f"vh_{model_config}_restart_0001.nc"}},
+            ),
+            call(
                 Path("run_prep_dir/namelist.restart"),
-                {"nml_restart": {"rst_first_out": "2018-01-16 00:00:00.00"}},
+                {
+                    "nml_restart": {
+                        "rst_first_out": f"{run_date.shift(days=+1).format('YYYY-MM-DD')} 00:00:00.00"
+                    }
+                },
             ),
             call(
                 Path("run_prep_dir/namelist.netcdf"),
                 {
                     "nml_netcdf": {
-                        "nc_first_out": "2018-01-15 01:00:00.00",
+                        "nc_first_out": f"{run_date.format('YYYY-MM-DD')} 01:00:00.00",
                         "nc_output_stack": 24,
                     }
                 },
@@ -465,7 +599,7 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.physics"),
                 {
                     "nml_heating_calculated": {
-                        "heating_calculate_file": "atmos_nowcast_hfx_20180115.nc"
+                        "heating_calculate_file": f"atmos_{model_config}_{run_type}_hfx_{run_date.format('YYYYMMDD')}.nc"
                     }
                 },
             ),
@@ -473,9 +607,49 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.surface"),
                 {
                     "nml_surface_forcing": {
-                        "wind_file": "atmos_nowcast_wnd_20180115.nc",
-                        "precipitation_file": "atmos_nowcast_precip_20180115.nc",
-                        "airpressure_file": "atmos_nowcast_hfx_20180115.nc",
+                        "wind_file": f"atmos_{model_config}_{run_type}_wnd_{run_date.format('YYYYMMDD')}.nc",
+                        "precipitation_file": f"atmos_{model_config}_{run_type}_precip_{run_date.format('YYYYMMDD')}.nc",
+                        "airpressure_file": f"atmos_{model_config}_{run_type}_hfx_{run_date.format('YYYYMMDD')}.nc",
+                    }
+                },
+            ),
+            call(
+                Path("run_prep_dir/namelist.rivers"),
+                {
+                    "nml_river_type": {
+                        "river_info_file": f"rivers_{model_config}_{run_type}_{run_date.format('YYYYMMDD')}.nc_riv.nml"
+                    }
+                },
+            ),
+            call(
+                Path("run_prep_dir/namelist.obc"),
+                {
+                    "nml_open_boundary_control": {
+                        "obc_node_list_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["obc nodes file"]
+                    }
+                },
+            ),
+            call(
+                Path("run_prep_dir/namelist.grid"),
+                {
+                    "nml_grid_coordinates": {
+                        "grid_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["grid file"],
+                        "sigma_levels_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["sigma file"],
+                        "depth_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["depths file"],
+                        "coriolis_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["coriolis file"],
+                        "sponge_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["sponge file"],
                     }
                 },
             ),
@@ -483,17 +657,32 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.nesting"),
                 {
                     "nml_nesting": {
-                        "nesting_file_name": "bdy_x2_nowcast_brcl_20180115.nc"
+                        "nesting_file_name": f"bdy_{model_config}_{run_type}_brcl_{run_date.format('YYYYMMDD')}.nc"
+                    }
+                },
+            ),
+            call(
+                Path("run_prep_dir/namelist.station_timeseries"),
+                {
+                    "nml_station_timeseries": {
+                        "station_file": f"vh_{model_config}_station.txt"
                     }
                 },
             ),
         ]
 
-    def test_edit_namelists_forecast(self, m_patch_nml, m_logger, config):
+    @pytest.mark.parametrize(
+        "model_config, run_type, run_date",
+        (("x2", "forecast", arrow.get("2018-01-15")),),
+    )
+    def test_edit_namelists_forecast(
+        self, m_patch_nml, m_logger, model_config, run_type, run_date, config
+    ):
         run_fvcom._edit_namelists(
-            config["vhfr fvcom runs"]["case name"],
-            arrow.get("2018-01-15"),
-            "forecast",
+            config["vhfr fvcom runs"]["case name"][model_config],
+            run_date,
+            model_config,
+            run_type,
             Path("run_prep_dir"),
             config,
         )
@@ -502,21 +691,31 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.case"),
                 {
                     "nml_case": {
-                        "case_title": config["vhfr fvcom runs"]["case name"],
-                        "start_date": "2018-01-16 00:00:00.00",
-                        "end_date": "2018-01-17 12:00:00.00",
+                        "case_title": config["vhfr fvcom runs"]["case name"][
+                            model_config
+                        ],
+                        "start_date": f"{run_date.shift(days=+1).format('YYYY-MM-DD')} 00:00:00.00",
+                        "end_date": f"{run_date.shift(days=+2).format('YYYY-MM-DD')} 12:00:00.00",
                     }
                 },
             ),
             call(
+                Path("run_prep_dir/namelist.startup.hotstart"),
+                {"nml_startup": {"startup_file": f"vh_{model_config}_restart_0001.nc"}},
+            ),
+            call(
                 Path("run_prep_dir/namelist.restart"),
-                {"nml_restart": {"rst_first_out": "2018-01-17 00:00:00.00"}},
+                {
+                    "nml_restart": {
+                        "rst_first_out": f"{run_date.shift(days=+2).format('YYYY-MM-DD')} 00:00:00.00"
+                    }
+                },
             ),
             call(
                 Path("run_prep_dir/namelist.netcdf"),
                 {
                     "nml_netcdf": {
-                        "nc_first_out": "2018-01-16 01:00:00.00",
+                        "nc_first_out": f"{run_date.shift(days=+1).format('YYYY-MM-DD')} 01:00:00.00",
                         "nc_output_stack": 36,
                     }
                 },
@@ -525,7 +724,7 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.physics"),
                 {
                     "nml_heating_calculated": {
-                        "heating_calculate_file": "atmos_forecast_hfx_20180116.nc"
+                        "heating_calculate_file": f"atmos_{model_config}_{run_type}_hfx_{run_date.shift(days=+1).format('YYYYMMDD')}.nc"
                     }
                 },
             ),
@@ -533,9 +732,49 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.surface"),
                 {
                     "nml_surface_forcing": {
-                        "wind_file": "atmos_forecast_wnd_20180116.nc",
-                        "precipitation_file": "atmos_forecast_precip_20180116.nc",
-                        "airpressure_file": "atmos_forecast_hfx_20180116.nc",
+                        "wind_file": f"atmos_{model_config}_{run_type}_wnd_{run_date.shift(days=+1).format('YYYYMMDD')}.nc",
+                        "precipitation_file": f"atmos_{model_config}_{run_type}_precip_{run_date.shift(days=+1).format('YYYYMMDD')}.nc",
+                        "airpressure_file": f"atmos_{model_config}_{run_type}_hfx_{run_date.shift(days=+1).format('YYYYMMDD')}.nc",
+                    }
+                },
+            ),
+            call(
+                Path("run_prep_dir/namelist.rivers"),
+                {
+                    "nml_river_type": {
+                        "river_info_file": f"rivers_{model_config}_{run_type}_{run_date.shift(days=+1).format('YYYYMMDD')}.nc_riv.nml"
+                    }
+                },
+            ),
+            call(
+                Path("run_prep_dir/namelist.obc"),
+                {
+                    "nml_open_boundary_control": {
+                        "obc_node_list_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["obc nodes file"]
+                    }
+                },
+            ),
+            call(
+                Path("run_prep_dir/namelist.grid"),
+                {
+                    "nml_grid_coordinates": {
+                        "grid_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["grid file"],
+                        "sigma_levels_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["sigma file"],
+                        "depth_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["depths file"],
+                        "coriolis_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["coriolis file"],
+                        "sponge_file": config["vhfr fvcom runs"]["fvcom grid"][
+                            model_config
+                        ]["sponge file"],
                     }
                 },
             ),
@@ -543,96 +782,152 @@ class TestEditNamelists:
                 Path("run_prep_dir/namelist.nesting"),
                 {
                     "nml_nesting": {
-                        "nesting_file_name": "bdy_x2_forecast_brcl_20180116.nc"
+                        "nesting_file_name": f"bdy_{model_config}_{run_type}_brcl_{run_date.shift(days=+1).format('YYYYMMDD')}.nc"
+                    }
+                },
+            ),
+            call(
+                Path("run_prep_dir/namelist.station_timeseries"),
+                {
+                    "nml_station_timeseries": {
+                        "station_file": f"vh_{model_config}_station.txt"
                     }
                 },
             ),
         ]
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "casename, run_type",
+    (("vh_x2", "nowcast"), ("vh_x2", "forecast"), ("vh_r12", "nowcast")),
+)
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestAssembleNamelist:
     """Unit test for _assemble_namelist() function.
     """
 
-    def test_assemble_namelist(self, m_logger, run_type, config, tmpdir):
+    def test_assemble_namelist(self, m_logger, casename, run_type, config, tmpdir):
         run_prep_dir = Path(str(tmpdir.ensure_dir("fvcom-runs")))
-        tmpdir.ensure("fvcom-runs", "namelist.case")
+        for namelist in config["vhfr fvcom runs"]["namelists"]["{casename}_run.nml"]:
+            tmpdir.ensure("fvcom-runs", namelist)
         namelist_path = run_fvcom._assemble_namelist(
-            "vh_x2", run_type, run_prep_dir, config
+            casename, run_type, run_prep_dir, config
         )
         assert namelist_path.exists()
 
 
 @pytest.mark.parametrize(
-    "run_type, restart_date", [("nowcast", "17jan18"), ("forecast", "18jan18")]
+    "model_config, run_type, run_date, restart_date, depths_filename",
+    (
+        ("x2", "nowcast", arrow.get("2018-01-18"), "17jan18", "vh_x2_dep.dat"),
+        ("x2", "forecast", arrow.get("2018-01-18"), "18jan18", "vh_x2_dep.dat"),
+        ("r12", "nowcast", arrow.get("2019-02-21"), "20feb19", "vh_r12_smp3_dep.dat"),
+    ),
 )
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestPrepFVCOM_InputDir:
     """Unit test for _prep_fvcom_input_dir() function.
     """
 
-    def test_prep_fvcom_input_dir(self, m_logger, run_type, restart_date, config):
+    def test_prep_fvcom_input_dir(
+        self,
+        m_logger,
+        model_config,
+        run_type,
+        run_date,
+        restart_date,
+        depths_filename,
+        config,
+    ):
         with patch("nowcast.workers.run_fvcom.Path.symlink_to") as m_link:
-            run_fvcom._prep_fvcom_input_dir(arrow.get("2018-01-18"), run_type, config)
+            run_fvcom._prep_fvcom_input_dir(run_date, model_config, run_type, config)
         assert m_link.call_args_list == [
-            call(Path("FVCOM-VHFR-config/grid/vh_x2_grd.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vh_x2_dep.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vh_x2_sigma.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vh_x2_cor.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vh_x2_nospg_spg.dat")),
-            call(Path("FVCOM-VHFR-config/grid/vh_x2_obc.dat")),
-            call(Path("FVCOM-VHFR-config/output/vh_x2_station.dat")),
-            call(Path(f"SalishSea/fvcom-nowcast/{restart_date}/vh_x2_restart_0001.nc")),
+            call(Path(f"FVCOM-VHFR-config/grid/vh_{model_config}_grd.dat")),
+            call(Path(f"FVCOM-VHFR-config/grid/{depths_filename}")),
+            call(Path(f"FVCOM-VHFR-config/grid/vh_{model_config}_sigma.dat")),
+            call(Path(f"FVCOM-VHFR-config/grid/vh_{model_config}_cor.dat")),
+            call(Path(f"FVCOM-VHFR-config/grid/vh_{model_config}_nospg_spg.dat")),
+            call(Path(f"FVCOM-VHFR-config/grid/vh_{model_config}_obc.dat")),
+            call(Path(f"FVCOM-VHFR-config/output/vh_{model_config}_station.txt")),
+            call(
+                Path(
+                    f"SalishSea/fvcom-nowcast-{model_config}/{restart_date}/vh_{model_config}_restart_0001.nc"
+                )
+            ),
         ]
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type, run_date",
+    (
+        ("x2", "nowcast", arrow.get("2017-12-20")),
+        ("x2", "forecast", arrow.get("2017-12-20")),
+        ("r12", "nowcast", arrow.get("2019-02-21")),
+    ),
+)
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 @patch("nowcast.workers.run_fvcom._build_script", return_value="script", autospec=True)
 class TestCreateRunScript:
     """Unit tests for _create_run_script() function.
     """
 
-    def test_run_script_path(self, m_bld_script, m_logger, run_type, config, tmpdir):
+    def test_run_script_path(
+        self, m_bld_script, m_logger, model_config, run_type, run_date, config, tmpdir
+    ):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
+        ddmmmyy = run_date.format("DDMMMYY").lower()
+        run_id = f"{ddmmmyy}fvcom-{model_config}-{run_type}"
         run_script_path = run_fvcom._create_run_script(
-            arrow.get("2017-12-20"),
+            run_date,
+            model_config,
             run_type,
             Path(str(tmp_run_dir)),
-            Path(f"20dec17fvcom-{run_type}.yaml"),
+            Path(f"{run_id}.yaml"),
             config,
         )
         expected = Path(str(tmp_run_dir.join("VHFR_FVCOM.sh")))
         assert run_script_path == expected
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type, run_date",
+    (
+        ("x2", "nowcast", arrow.get("2017-12-11")),
+        ("x2", "forecast", arrow.get("2017-12-11")),
+        ("r12", "nowcast", arrow.get("2019-02-21")),
+    ),
+)
 @patch("nowcast.workers.run_fvcom.yaml.load", autospec=True)
 class TestBuildScript:
     """Unit tests for _build_script() function.
     """
 
-    def test_script(self, m_yaml_load, run_type, config, tmpdir):
+    def test_script(
+        self, m_yaml_load, model_config, run_type, run_date, config, tmpdir
+    ):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        run_desc_file_path = tmp_run_dir.ensure(f"20dec17fvcom-{run_type}.yaml")
-        m_yaml_load.return_value = {"run_id": f"20dec17fvcom-{run_type}"}
+        ddmmmyy = run_date.format("DDMMMYY").lower()
+        run_id = f"{ddmmmyy}fvcom-{model_config}-{run_type}"
+        run_desc_file_path = tmp_run_dir.ensure(f"{run_id}.yaml")
+        m_yaml_load.return_value = {"run_id": run_id}
         results_dir = tmpdir.ensure_dir(
-            config["vhfr fvcom runs"]["run types"][run_type]["results"]
+            config["vhfr fvcom runs"]["run types"][f"{run_type} {model_config}"][
+                "results"
+            ]
         )
         script = run_fvcom._build_script(
             Path(str(tmp_run_dir)),
             Path(str(run_desc_file_path)),
-            Path(str(results_dir)) / "20dec17",
+            Path(str(results_dir)) / ddmmmyy,
+            model_config,
             config,
         )
-        expected = """#!/bin/bash
+        expected = f"""#!/bin/bash
 
-        RUN_ID="20dec17fvcom-{run_type}"
-        RUN_DESC="20dec17fvcom-{run_type}.yaml"
+        RUN_ID="{run_id}"
+        RUN_DESC="{run_id}.yaml"
         WORK_DIR="{tmp_run_dir}"
-        RESULTS_DIR="{results_dir}"
+        RESULTS_DIR="{results_dir}/{ddmmmyy}"
         MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts.fvcom"
         GATHER="bin/fvc gather"
         
@@ -643,7 +938,7 @@ class TestBuildScript:
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
         ${{MPIRUN}} -np 64 --bind-to-core ./fvcom \
---casename=vh_x2 --logfile=./fvcom.log \
+--casename=vh_{model_config} --logfile=./fvcom.log \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
@@ -659,11 +954,7 @@ class TestBuildScript:
         echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
         rmdir $(pwd)
         echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
-        """.format(
-            run_type=run_type,
-            tmp_run_dir=tmp_run_dir,
-            results_dir=results_dir / "20dec17",
-        )
+        """
         script = script.splitlines()
         for i, line in enumerate(expected.splitlines()[:-1]):
             assert script[i].strip() == line.strip()
@@ -700,27 +991,30 @@ class TestDefinitions:
             assert defns[i].strip() == line.strip()
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
 class TestExecute:
     """Unit tests for _execute() function.
     """
 
-    def test_execute(self, run_type, config):
-        script = run_fvcom._execute(config)
-        expected = """mkdir -p ${RESULTS_DIR}
+    def test_execute(self, model_config, run_type, config):
+        script = run_fvcom._execute(model_config, config)
+        expected = f"""mkdir -p ${{RESULTS_DIR}}
 
-        cd ${WORK_DIR}
-        echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
+        cd ${{WORK_DIR}}
+        echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
-        echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 64 --bind-to-core ./fvcom \
---casename=vh_x2 --logfile=./fvcom.log \
->>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
-        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
+        echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{MPIRUN}} -np 64 --bind-to-core ./fvcom \
+--casename=vh_{model_config} --logfile=./fvcom.log \
+>>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+        echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
-        echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
-        ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
-        echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
+        echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
+        echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
         """
         script = script.splitlines()
         for i, line in enumerate(expected.splitlines()[:-1]):
