@@ -23,6 +23,13 @@ import pytest
 from nowcast.workers import watch_fvcom
 
 
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    return base_config
+
+
 @patch("nowcast.workers.watch_fvcom.NowcastWorker", spec=True)
 class TestMain:
     """Unit tests for main() function.
@@ -47,10 +54,18 @@ class TestMain:
         assert args == ("host_name",)
         assert "help" in kwargs
 
-    def test_add_run_type_arg(self, m_worker):
+    def test_add_model_config_arg(self, m_worker):
         m_worker().cli = Mock(name="cli")
         watch_fvcom.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ("model_config",)
+        assert kwargs["choices"] == {"r12", "x2"}
+        assert "help" in kwargs
+
+    def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        watch_fvcom.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ("run_type",)
         assert kwargs["choices"] == {"nowcast", "forecast"}
         assert "help" in kwargs
@@ -66,30 +81,106 @@ class TestMain:
         )
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "watch_fvcom" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["watch_fvcom"]
+        assert msg_registry["checklist key"] == "FVCOM run"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "need",
+            "success x2 nowcast",
+            "failure x2 nowcast",
+            "success x2 forecast",
+            "failure x2 forecast",
+            "success r12 nowcast",
+            "failure r12 nowcast",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["watch_fvcom"]
+        assert msg in msg_registry
+
+
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
 @patch("nowcast.workers.watch_fvcom.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(host_name="west.cloud", run_type=run_type)
+    def test_success(self, m_logger, model_config, run_type):
+        parsed_args = SimpleNamespace(
+            host_name="west.cloud", model_config=model_config, run_type=run_type
+        )
         msg_type = watch_fvcom.success(parsed_args)
         assert m_logger.info.called
-        assert msg_type == f"success {run_type}"
+        assert msg_type == f"success {model_config} {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
 @patch("nowcast.workers.watch_fvcom.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(host_name="west.cloud", run_type=run_type)
+    def test_failure(self, m_logger, model_config, run_type):
+        parsed_args = SimpleNamespace(
+            host_name="west.cloud", model_config=model_config, run_type=run_type
+        )
         msg_type = watch_fvcom.failure(parsed_args)
         assert m_logger.critical.called
-        assert msg_type == f"failure {run_type}"
+        assert msg_type == f"failure {model_config} {run_type}"
+
+
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
+@patch("nowcast.workers.watch_fvcom.logger", autospec=True)
+@patch("nowcast.workers.watch_fvcom._find_run_pid", return_value=43, autospec=True)
+@patch("nowcast.workers.watch_fvcom._pid_exists", return_value=False, autospec=True)
+class TestWatchFVCOM:
+    """Uni tests for watch_fvcom() function.
+    """
+
+    def test_checklist(
+        self, m_find_run_pid, m_pid_exists, m_logger, model_config, run_type, config
+    ):
+        parsed_args = SimpleNamespace(
+            host_name="west.cloud", model_config=model_config, run_type=run_type
+        )
+        tell_manager = Mock(name="tell_manager")
+        tell_manager().payload = {
+            run_type: {
+                "host": "west.cloud",
+                "run dir": "tmp_run_dir",
+                "run exec cmd": "bash VHFR_FVCOM.sh",
+                "model config": model_config,
+                "run date": "2019-02-27",
+            }
+        }
+        checklist = watch_fvcom.watch_fvcom(parsed_args, config, tell_manager)
+        expected = {
+            run_type: {
+                "host": "west.cloud",
+                "model config": model_config,
+                "run date": "2019-02-27",
+                "completed": True,
+            }
+        }
+        assert checklist == expected
 
 
 @patch("nowcast.workers.watch_fvcom.logger", autospec=True)

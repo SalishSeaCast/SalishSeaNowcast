@@ -1223,10 +1223,12 @@ message registry:
     watch_fvcom:
       checklist key: FVCOM run
       need: FVCOM run information dict requested
-      success nowcast: nowcast FVCOM run completed
-      failure nowcast: nowcast FVCOM run failed
-      success forecast: forecast FVCOM run completed
-      failure forecast: forecast FVCOM run failed
+      success x2 nowcast: x2 configuration nowcast FVCOM run completed
+      failure x2 nowcast: x2 configuration nowcast FVCOM run failed
+      success x2 forecast: x2 configuration forecast FVCOM run completed
+      failure x2 forecast: x2 configuration forecast FVCOM run failed
+      success r12 nowcast: r12 configuration nowcast FVCOM run completed
+      failure r12 nowcast: r12 configuration nowcast FVCOM run failed
       crash: watch_fvcom worker crashed
 
     get_vfpa_hadcp:
