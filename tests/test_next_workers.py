@@ -1557,14 +1557,14 @@ class TestAfterRunFVCOM:
             Message(
                 "run_fvcom",
                 f"success {model_config} {run_type}",
-                {run_type: {"host": "west.cloud"}},
+                {run_type: {"host": "west.cloud", "model config": model_config}},
             ),
             config,
             checklist,
         )
         expected = NextWorker(
             "nowcast.workers.watch_fvcom",
-            args=["west.cloud", run_type],
+            args=["west.cloud", model_config, run_type],
             host="west.cloud",
         )
         assert workers == [expected]

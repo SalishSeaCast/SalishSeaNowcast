@@ -41,11 +41,21 @@ def main():
     worker.init_cli()
     worker.cli.add_argument("host_name", help="Name of the host to monitor the run on")
     worker.cli.add_argument(
+        "model_config",
+        choices={"r12", "x2"},
+        help="""
+        Model configuration to monitor run for for:
+        'r12' means the r12 resolution
+        'x2' means the x2 resolution
+        """,
+    )
+    worker.cli.add_argument(
         "run_type",
         choices={"nowcast", "forecast"},
         help="""
         Type of run to monitor:
         'nowcast' means nowcast run (after NEMO nowcast run)
+        'forecast' means updated forecast run (next 36h UTC, after NEMO forecast run)
         """,
     )
     worker.run(watch_fvcom, success, failure)
@@ -59,10 +69,10 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"{parsed_args.run_type} FVCOM VH-FR run "
+        f"{parsed_args.model_config} {parsed_args.run_type} FVCOM VH-FR run "
         f"on {parsed_args.host_name} completed"
     )
-    msg_type = f"success {parsed_args.run_type}"
+    msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -74,9 +84,10 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"{parsed_args.run_type} FVCOM VH-FR run " f"on {parsed_args.host_name} failed"
+        f"{parsed_args.model_config} {parsed_args.run_type} FVCOM VH-FR run on "
+        f"{parsed_args.host_name} failed"
     )
-    msg_type = f"failure {parsed_args.run_type}"
+    msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -90,6 +101,7 @@ def watch_fvcom(parsed_args, config, tell_manager):
     :rtype: dict
     """
     host_name = parsed_args.host_name
+    model_config = parsed_args.model_config
     run_type = parsed_args.run_type
     run_info = tell_manager("need", "FVCOM run").payload
     pid = _find_run_pid(run_info[run_type])
@@ -107,7 +119,7 @@ def watch_fvcom(parsed_args, config, tell_manager):
                         line.strip().strip("!").split(maxsplit=3)
                     )
                     msg = (
-                        f"{run_type} on {host_name}: timestep: "
+                        f"{model_config} {run_type} on {host_name}: timestep: "
                         f'{time_step} = {model_time[:-7].replace("T", " ")} '
                         f"UTC estimated time to finish: {time_to_finish}"
                     )
@@ -115,7 +127,7 @@ def watch_fvcom(parsed_args, config, tell_manager):
             else:
                 # fvcom.log file found, but no run status line found
                 msg = (
-                    f"{run_type} on {host_name}: no run progress found in "
+                    f"{model_config} {run_type} on {host_name}: no run progress found in "
                     f"fvcom.log ; continuing to watch..."
                 )
         except FileNotFoundError:
@@ -123,7 +135,7 @@ def watch_fvcom(parsed_args, config, tell_manager):
             # hasn't been created yet, or has finished and it has been
             # moved to the results directory
             msg = (
-                f"{run_type} on {host_name}: fvcom.log not found; "
+                f"{model_config} {run_type} on {host_name}: fvcom.log not found; "
                 f"continuing to watch..."
             )
         logger.info(msg)
@@ -131,6 +143,7 @@ def watch_fvcom(parsed_args, config, tell_manager):
     return {
         run_type: {
             "host": host_name,
+            "model config": model_config,
             "run date": run_info[run_type]["run date"],
             "completed": True,
         }

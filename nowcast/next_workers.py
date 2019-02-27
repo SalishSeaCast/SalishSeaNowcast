@@ -1047,9 +1047,14 @@ def after_run_fvcom(msg, config, checklist):
     }
     if msg.type.startswith("success"):
         run_type = msg.type.split()[2]
-        host = msg.payload[run_type]["host"]
+        host_name = msg.payload[run_type]["host"]
+        model_config = msg.payload[run_type]["model config"]
         next_workers[msg.type].append(
-            NextWorker("nowcast.workers.watch_fvcom", args=[host, run_type], host=host)
+            NextWorker(
+                "nowcast.workers.watch_fvcom",
+                args=[host_name, model_config, run_type],
+                host=host_name,
+            )
         )
     return next_workers[msg.type]
 
