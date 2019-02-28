@@ -67,7 +67,7 @@ def make_figure(
 def _prep_fig_axes(figsize, theme):
     fig = plt.figure(figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"])
     ax = fig.add_subplot(1, 1, 1)
-    ax.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax.set_facecolor(theme.COLOURS["axes"]["background"])
     return fig, ax
 
 
