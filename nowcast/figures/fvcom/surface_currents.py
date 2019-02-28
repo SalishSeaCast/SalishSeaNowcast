@@ -15,6 +15,9 @@
 
 """Produce image-loop figures showing surface current vectors on a heatmap of
 speed for several regions of interest within the VHFR FVCOM model domain.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestSurfaceCurrents.ipynb
 """
 
 from types import SimpleNamespace
