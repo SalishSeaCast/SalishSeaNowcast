@@ -142,9 +142,9 @@ def _prep_fig_axes(figsize, theme):
     fig, (ax_speed, ax_dir, ax_u) = plt.subplots(
         3, 1, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
     )
-    ax_speed.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
-    ax_dir.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
-    ax_u.set_axis_bgcolor(theme.COLOURS["axes"]["background"])
+    ax_speed.set_facecolor(theme.COLOURS["axes"]["background"])
+    ax_dir.set_facecolor(theme.COLOURS["axes"]["background"])
+    ax_u.set_facecolor(theme.COLOURS["axes"]["background"])
     fig.autofmt_xdate()
     return fig, (ax_speed, ax_dir, ax_u)
 
@@ -257,7 +257,7 @@ def _u_velocity_axes_labels(ax, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
-    ax.set_xlim(plot_data.fvcom_ua.time.values[0], plot_data.fvcom_ua.time.values[-1])
+    ax.set_xlim(plot_data.fvcom_u.time.values[0], plot_data.fvcom_u.time.values[-1])
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     mps_limits = numpy.array((-5, 5))
     ax.set_ylabel(
