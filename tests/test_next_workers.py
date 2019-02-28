@@ -1575,7 +1575,8 @@ class TestAfterWatchFVCOM:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure nowcast", "failure forecast"]
+        "msg_type",
+        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_fvcom(
@@ -1584,43 +1585,30 @@ class TestAfterWatchFVCOM:
         assert workers == []
 
     @pytest.mark.parametrize(
-        "msg",
-        [
-            Message(
-                "watch_fvcom",
-                "success nowcast",
-                {
-                    "nowcast": {
-                        "host": "west.cloud",
-                        "run date": "2018-02-16",
-                        "completed": True,
-                    }
-                },
-            ),
-            Message(
-                "watch_fvcom",
-                "success forecast",
-                {
-                    "forecast": {
-                        "host": "west.cloud",
-                        "run date": "2018-02-16",
-                        "completed": True,
-                    }
-                },
-            ),
-        ],
+        "model_config, run_type",
+        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
     )
-    def test_success_launch_download_fvcom_results(self, msg, config, checklist):
-        workers = next_workers.after_watch_fvcom(msg, config, checklist)
-        run_type = msg.type.split()[1]
+    def test_success_launch_download_fvcom_results(
+        self, model_config, run_type, config, checklist
+    ):
+        workers = next_workers.after_watch_fvcom(
+            Message(
+                "watch_fvcom",
+                f"success {model_config} {run_type}",
+                {
+                    run_type: {
+                        "host": "west.cloud",
+                        "model config": model_config,
+                        "run date": "2019-02-27",
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.download_fvcom_results",
-            args=[
-                msg.payload[run_type]["host"],
-                msg.type.split()[1],
-                "--run-date",
-                msg.payload[run_type]["run date"],
-            ],
+            args=["west.cloud", model_config, run_type, "--run-date", "2019-02-27"],
             host="localhost",
         )
         assert expected in workers
@@ -1631,10 +1619,11 @@ class TestAfterWatchFVCOM:
         workers = next_workers.after_watch_fvcom(
             Message(
                 "watch_fvcom",
-                "success nowcast",
+                "success x2 nowcast",
                 {
                     "nowcast": {
                         "host": "west.cloud",
+                        "model config": "x2",
                         "run date": "2019-01-18",
                         "completed": True,
                     }

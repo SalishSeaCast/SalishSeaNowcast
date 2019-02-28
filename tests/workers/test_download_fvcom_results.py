@@ -37,15 +37,18 @@ def config(base_config):
 file group: allen
 
 vhfr fvcom runs:
-  host: west.cloud-nowcast
+  host: west.cloud
   run types:
-    nowcast: 
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast/
-    forecast: 
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast/
+    nowcast x2: 
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
+    forecast x2: 
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
+    nowcast r12: 
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/
   results archive:
-    nowcast: /opp/fvcom/nowcast/
-    forecast: /opp/fvcom/forecast/ 
+    nowcast x2: /opp/fvcom/nowcast-x2/
+    forecast x2: /opp/fvcom/forecast-x2/ 
+    nowcast r12: /opp/fvcom/nowcast-r12/
 """
         )
     config_ = nemo_nowcast.Config()
@@ -77,10 +80,18 @@ class TestMain:
         assert args == ("host_name",)
         assert "help" in kwargs
 
-    def test_add_run_type_arg(self, m_worker):
+    def test_add_model_config_arg(self, m_worker):
         m_worker().cli = Mock(name="cli")
         download_fvcom_results.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
+        assert args == ("model_config",)
+        assert kwargs["choices"] == {"r12", "x2"}
+        assert "help" in kwargs
+
+    def test_add_run_type_arg(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        download_fvcom_results.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
         assert args == ("run_type",)
         expected = {"nowcast", "forecast"}
         assert kwargs["choices"] == expected
@@ -105,45 +116,102 @@ class TestMain:
         )
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "download_fvcom_results" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"][
+            "download_fvcom_results"
+        ]
+        assert msg_registry["checklist key"] == "VHFR FVCOM results files"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success x2 nowcast",
+            "failure x2 nowcast",
+            "success x2 forecast",
+            "failure x2 forecast",
+            "success r12 nowcast",
+            "failure r12 nowcast",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "download_fvcom_results"
+        ]
+        assert msg in msg_registry
+
+    def test_run_types_section(self, prod_config):
+        run_types = prod_config["vhfr fvcom runs"]["run types"]
+        assert run_types["nowcast x2"] == {
+            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/",
+        }
+        assert run_types["forecast x2"] == {
+            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/forecast/",
+            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/",
+        }
+        assert run_types["nowcast r12"] == {
+            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/",
+        }
+
+    def test_results_archive_section(self, prod_config):
+        results_archive = prod_config["vhfr fvcom runs"]["results archive"]
+        assert results_archive["nowcast x2"] == "/opp/fvcom/nowcast-x2/"
+        assert results_archive["forecast x2"] == "/opp/fvcom/forecast-x2/"
+        assert results_archive["nowcast r12"] == "/opp/fvcom/nowcast-r12/"
+
+
 @pytest.mark.parametrize(
-    "run_type, host_name",
-    [("nowcast", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
 )
 @patch("nowcast.workers.download_fvcom_results.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, run_type, host_name):
+    def test_success(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2018-02-16")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-02-16"),
         )
         msg_type = download_fvcom_results.success(parsed_args)
         assert m_logger.info.called
-        assert msg_type == f"success {run_type}"
+        assert msg_type == f"success {model_config} {run_type}"
 
 
 @pytest.mark.parametrize(
-    "run_type, host_name",
-    [("nowcast", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
 )
 @patch("nowcast.workers.download_fvcom_results.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, run_type, host_name):
+    def test_failure(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2018-02-16")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-02-16"),
         )
         msg_type = download_fvcom_results.failure(parsed_args)
         assert m_logger.critical.called
-        assert msg_type == f"failure {run_type}"
+        assert msg_type == f"failure {model_config} {run_type}"
 
 
 @pytest.mark.parametrize(
-    "run_type, host_name",
-    [("nowcast", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
 )
 @patch("nowcast.workers.download_fvcom_results.logger", autospec=True)
 @patch("nowcast.workers.download_fvcom_results.lib.run_in_subprocess", autospec=True)
@@ -153,22 +221,33 @@ class TestDownloadFVCOMResults:
     """
 
     def test_checklist(
-        self, m_fix_perms, m_run_sub, m_logger, run_type, host_name, config
-    ):
-        pass
-
-    def test_scp_subprocess(
-        self, m_fix_perms, m_run_sub, m_logger, run_type, host_name, config
+        self, m_fix_perms, m_run_sub, m_logger, model_config, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2018-02-16")
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-02-16"),
+        )
+        checklist = download_fvcom_results.download_fvcom_results(parsed_args, config)
+        expected = {run_type: {"model config": model_config, "files": []}}
+        assert checklist == expected
+
+    def test_scp_subprocess(
+        self, m_fix_perms, m_run_sub, m_logger, model_config, run_type, config
+    ):
+        parsed_args = SimpleNamespace(
+            host_name="west.cloud",
+            model_config=model_config,
+            run_type=run_type,
+            run_date=arrow.get("2018-02-16"),
         )
         download_fvcom_results.download_fvcom_results(parsed_args, config)
         m_run_sub.assert_called_once_with(
             shlex.split(
                 f"scp -Cpr "
-                f"{host_name}:/nemoShare/MEOPAR/SalishSea/fvcom-{run_type}/16feb18 "
-                f"/opp/fvcom/{run_type}"
+                f"west.cloud:/nemoShare/MEOPAR/SalishSea/fvcom-{run_type}-{model_config}/16feb18 "
+                f"/opp/fvcom/{run_type}-{model_config}"
             ),
             m_logger.debug,
             m_logger.error,

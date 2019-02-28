@@ -41,6 +41,15 @@ def main():
         "host_name", help="Name of the host to download results files from"
     )
     worker.cli.add_argument(
+        "model_config",
+        choices={"r12", "x2"},
+        help="""
+        Model configuration to download results files from:
+        'r12' means the r12 resolution
+        'x2' means the x2 resolution
+        """,
+    )
+    worker.cli.add_argument(
         "run_type",
         choices={"nowcast", "forecast"},
         help="Type of run to download results files from.",
@@ -61,11 +70,11 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"VHFR FVCOM {parsed_args.run_type} "
+        f"VHFR FVCOM {parsed_args.model_config} {parsed_args.run_type} "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f"results files from {parsed_args.host_name} downloaded"
     )
-    msg_type = f"success {parsed_args.run_type}"
+    msg_type = f"success {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -77,11 +86,11 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"VHFR FVCOM {parsed_args.run_type} "
+        f"VHFR FVCOM {parsed_args.model_config} {parsed_args.run_type} "
         f'{parsed_args.run_date.format("YYYY-MM-DD")} '
         f"results files download from {parsed_args.host_name} failed"
     )
-    msg_type = f"failure {parsed_args.run_type}"
+    msg_type = f"failure {parsed_args.model_config} {parsed_args.run_type}"
     return msg_type
 
 
@@ -94,12 +103,17 @@ def download_fvcom_results(parsed_args, config, *args):
     :rtype: dict
     """
     host_name = parsed_args.host_name
+    model_config = parsed_args.model_config
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     results_dir = run_date.format("DDMMMYY").lower()
-    run_type_results = Path(config["vhfr fvcom runs"]["run types"][run_type]["results"])
+    run_type_results = Path(
+        config["vhfr fvcom runs"]["run types"][f"{run_type} {model_config}"]["results"]
+    )
     src = f"{host_name}:{run_type_results / results_dir}"
-    dest = Path(config["vhfr fvcom runs"]["results archive"][run_type])
+    dest = Path(
+        config["vhfr fvcom runs"]["results archive"][f"{run_type} {model_config}"]
+    )
     cmd = shlex.split(f"scp -Cpr {src} {dest}")
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
     results_archive_dir = dest / results_dir
@@ -110,7 +124,12 @@ def download_fvcom_results(parsed_args, config, *args):
     )
     for filepath in results_archive_dir.glob("*"):
         lib.fix_perms(filepath, grp_name=config["file group"])
-    checklist = {run_type: list(map(os.fspath, results_archive_dir.glob("vhfr_*.nc")))}
+    checklist = {
+        run_type: {
+            "model config": model_config,
+            "files": list(map(os.fspath, results_archive_dir.glob("vh*.nc"))),
+        }
+    }
     return checklist
 
 

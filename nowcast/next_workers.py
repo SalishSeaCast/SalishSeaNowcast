@@ -1079,25 +1079,29 @@ def after_watch_fvcom(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "failure nowcast": [],
-        "failure forecast": [],
-        "success nowcast": [],
-        "success forecast": [],
+        "failure x2 nowcast": [],
+        "failure x2 forecast": [],
+        "failure r12 nowcast": [],
+        "success x2 nowcast": [],
+        "success x2 forecast": [],
+        "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
-        run_type = msg.type.split()[1]
+        run_type = msg.type.split()[2]
+        model_config = msg.payload[run_type]["model config"]
         next_workers[msg.type].append(
             NextWorker(
                 "nowcast.workers.download_fvcom_results",
                 args=[
                     msg.payload[run_type]["host"],
+                    model_config,
                     run_type,
                     "--run-date",
                     msg.payload[run_type]["run date"],
                 ],
             )
         )
-        if run_type == "nowcast":
+        if run_type == "nowcast" and model_config == "x2":
             next_workers[msg.type].append(
                 NextWorker(
                     "nowcast.workers.make_fvcom_boundary",

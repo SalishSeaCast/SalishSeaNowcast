@@ -1302,10 +1302,12 @@ message registry:
 
     download_fvcom_results:
       checklist key: VHFR FVCOM results files
-      success nowcast: VHFR FVCOM nowcast results files downloaded
-      failure nowcast: VHFR FVCOM nowcast results files download failed
-      success forecast: VHFR FVCOM forecast results files downloaded
-      failure forecast: VHFR FVCOM forecast results files download failed
+      success x2 nowcast: VHFR FVCOM x2 configuration nowcast results files downloaded
+      failure x2 nowcast: VHFR FVCOM x2 configuration nowcast results files download failed
+      success x2 forecast: VHFR FVCOM x2 configuration forecast results files downloaded
+      failure x2 forecast: VHFR FVCOM x2 configuration forecast results files download failed
+      success r12 nowcast: VHFR FVCOM r12 configuration nowcast results files downloaded
+      failure r12 nowcast: VHFR FVCOM r12 configuration nowcast results files download failed
       crash: download_fvcom_results worker crashed
 
     split_results:
