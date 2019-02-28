@@ -15,6 +15,9 @@
 
 """Produce image-loop figures showing vertical transects for variables from
 the VHFR FVCOM model domain along several thalweg transects.
+
+Testing notebook for this module is
+https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestThalwegTransect.ipynb
 """
 
 from types import SimpleNamespace
