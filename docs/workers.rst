@@ -402,6 +402,24 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 :py:obj:`nowcast.figures.fvcom`  Figure Modules
 -----------------------------------------------
 
+.. _nowcast.figures.fvcom.surface_currents:
+
+:py:mod:`nowcast.figures.fvcom.surface_currents` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.fvcom.surface_currents
+    :members:
+
+
+.. _nowcast.figures.fvcom.thalweg_transect:
+
+:py:mod:`nowcast.figures.fvcom.thalweg_transect` Module
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.figures.fvcom.thalweg_transect
+    :members:
+
+
 .. _nowcast.figures.fvcom.tide_stn_water_level:
 
 :py:mod:`nowcast.figures.fvcom.tide_stn_water_level` Module
@@ -520,4 +538,3 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 
 .. automodule:: nowcast.figures.wwatch3.wave_height_period
     :members:
-

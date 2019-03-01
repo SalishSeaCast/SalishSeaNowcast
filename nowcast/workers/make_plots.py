@@ -52,7 +52,12 @@ from nowcast.figures.publish import (
     storm_surge_alerts_thumbnail,
     compare_tide_prediction_max_ssh,
 )
-from nowcast.figures.fvcom import second_narrows_current, tide_stn_water_level
+from nowcast.figures.fvcom import (
+    second_narrows_current,
+    tide_stn_water_level,
+    surface_currents,
+    thalweg_transect,
+)
 from nowcast.figures.wwatch3 import wave_height_period
 
 # Legacy figures code
@@ -244,6 +249,7 @@ def make_plots(parsed_args, config, *args):
             f"{fvcom_stns_dataset_path} /tmp/{fvcom_stns_dataset_path.name}"
         )
         subprocess.check_output(shlex.split(cmd))
+        fvcom_results_dataset = nc.Dataset(results_dir / "vh_x2_0001.nc")
         fvcom_stns_dataset = xarray.open_dataset(f"/tmp/{fvcom_stns_dataset_path.name}")
         nemo_ssh_dataset_url_tmpl = config["figures"]["dataset URLs"][
             "tide stn ssh time series"
@@ -252,7 +258,11 @@ def make_plots(parsed_args, config, *args):
             config["figures"]["dataset URLs"]["2nd narrows hadcp time series"]
         )
         fig_functions = _prep_fvcom_publish_fig_functions(
-            fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+            fvcom_stns_dataset,
+            nemo_ssh_dataset_url_tmpl,
+            obs_hadcp_dataset,
+            fvcom_results_dataset,
+            run_date,
         )
     if model == "wwatch3":
         wwatch3_dataset_url = config["figures"]["dataset URLs"]["wwatch3 fields"]
@@ -719,8 +729,13 @@ def _prep_publish_fig_functions(
 
 
 def _prep_fvcom_publish_fig_functions(
-    fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+    fvcom_stns_dataset,
+    nemo_ssh_dataset_url_tmpl,
+    obs_hadcp_dataset,
+    fvcom_results_dataset,
+    run_date,
 ):
+    fig_functions = {}
     names = {
         "Calamity Point": "CP_waterlevel",
         "Indian Arm Head": "IAH_waterlevel",
@@ -731,7 +746,6 @@ def _prep_fvcom_publish_fig_functions(
         "Vancouver Harbour": "VH_waterlevel",
         "Woodwards Landing": "WL_waterlevel",
     }
-    fig_functions = {}
     for place, svg_root in names.items():
         fig_functions.update(
             {
@@ -749,6 +763,49 @@ def _prep_fvcom_publish_fig_functions(
             }
         }
     )
+    names = {
+        "English Bay": "EnglishBay_surface_currents",
+        "Vancouver Harbour": "VancouverHarbour_surface_currents",
+        "Indian Arm": "IndianArm_surface_currents",
+    }
+    for place, svg_root in names.items():
+        for time_index in range(24):
+            hr = time_index + 1
+            yyyymmdd = run_date.shift(hours=hr).format("YYYYMMDD")
+            hhmmss = run_date.shift(hours=hr).format("HHmmss")
+            fig_functions.update(
+                {
+                    f"{svg_root}_{yyyymmdd}_{hhmmss}_UTC": {
+                        "function": surface_currents.make_figure,
+                        "args": (place, time_index, fvcom_results_dataset),
+                        "format": "png",
+                        "image loop": True,
+                    }
+                }
+            )
+    names = {
+        "Vancouver Harbour": "VancouverHarbour_thalweg",
+        "Port Moody": "PortMoody_thalweg",
+        "Indian Arm": "IndianArm_thalweg",
+    }
+    for place, svg_root in names.items():
+        for time_index in range(24):
+            hr = time_index + 1
+            yyyymmdd = run_date.shift(hours=hr).format("YYYYMMDD")
+            hhmmss = run_date.shift(hours=hr).format("HHmmss")
+            for varname in ["salinity", "temp", "tangential velocity"]:
+                fvarname = varname.replace(" ", "_")
+                fig_functions.update(
+                    {
+                        f"{svg_root}_{fvarname}_{yyyymmdd}_{hhmmss}_UTC": {
+                            "function": thalweg_transect.make_figure,
+                            "args": (place, time_index, fvcom_results_dataset, varname),
+                            "format": "png",
+                            "image loop": True,
+                        }
+                    }
+                )
+
     return fig_functions
 
 
@@ -783,6 +840,7 @@ def _render_figures(
             test_figure = any(
                 (
                     svg_name == test_figure_id,
+                    image_loop_figure and svg_name.startswith(test_figure_id),
                     fig_func.__module__.endswith(f"{plot_type}.{test_figure_id}"),
                 )
             )
