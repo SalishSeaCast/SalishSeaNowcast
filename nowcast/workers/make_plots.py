@@ -263,8 +263,7 @@ def make_plots(parsed_args, config, *args):
             f"{fvcom_stns_dataset_path} /tmp/{fvcom_stns_dataset_path.name}"
         )
         subprocess.check_output(shlex.split(cmd))
-        casename = config["vhfr fvcom runs"]["case name"]
-        fvcom_results_dataset = _fvcom_results_dataset(casename, results_dir)
+        fvcom_results_dataset = nc.Dataset(results_dir / "vh_x2_0001.nc")
         fvcom_stns_dataset = xarray.open_dataset(f"/tmp/{fvcom_stns_dataset_path.name}")
         nemo_ssh_dataset_url_tmpl = config["figures"]["dataset URLs"][
             "tide stn ssh time series"
@@ -308,14 +307,6 @@ def _results_dataset_gridded(station, results_dir):
     filepaths = glob(
         os.path.join(results_dir, filename_pattern.format(station=station))
     )
-    return nc.Dataset(filepaths[0])
-
-
-def _fvcom_results_dataset(grid, results_dir):
-    """Return the FVCOM results dataset from results_dir for grid 'grid'.
-    """
-    filename_pattern = "{grid}_0001.nc"
-    filepaths = glob(os.path.join(results_dir, filename_pattern.format(grid=grid)))
     return nc.Dataset(filepaths[0])
 
 
@@ -756,6 +747,7 @@ def _prep_fvcom_publish_fig_functions(
     fvcom_results_dataset,
     run_date,
 ):
+    fig_functions = {}
     names = {
         "Calamity Point": "CP_waterlevel",
         "Indian Arm Head": "IAH_waterlevel",
@@ -766,7 +758,6 @@ def _prep_fvcom_publish_fig_functions(
         "Vancouver Harbour": "VH_waterlevel",
         "Woodwards Landing": "WL_waterlevel",
     }
-    fig_functions = {}
     for place, svg_root in names.items():
         fig_functions.update(
             {
