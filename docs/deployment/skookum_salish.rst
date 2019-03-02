@@ -109,23 +109,16 @@ For the :kbd:`SalishSeaCast` automation system:
 
     $ cd /SalishSeaCast/
     $ conda update conda
-    $ conda create \
+    $ conda env create \
         --prefix /SalishSeaCast/nowcast-env \
-        --channel conda-forge --channel defaults --channel gomss-nowcast \
-        arrow attrs basemap beautifulsoup4 bottleneck circus cliff cmocean \
-        dask docutils gsw lxml mako matplotlib>=3 netcdf4 numpy pandas paramiko \
-        pillow pip poppler pygrib pypdf2 pyproj python=3.7 pyyaml pyzmq \
-        requests scipy shapely watchdog xarray
+        -f SalishSeaNowcast/environment-prod.yaml
     $ source activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ pip install angles f90nml feedgen \
-        python-hglib raven retrying schedule scour tables utm zeep
     (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/SalishSeaCast/nowcast-env)$ pip install --editable moad_tools/
     (/SalishSeaCast/nowcast-env)$ pip install --editable tools/SalishSeaTools/
     (/SalishSeaCast/nowcast-env)$ pip install --editable OPPTools/
     (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO-Cmd/
     (/SalishSeaCast/nowcast-env)$ pip install --editable SalishSeaCmd/
-    (/SalishSeaCast/nowcast-env)$ pip install --editable FVCOM-Cmd/
     (/SalishSeaCast/nowcast-env)$ pip install --editable SalishSeaNowcast/
 
 For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_:
@@ -156,7 +149,7 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
     $ conda create \
         --prefix /SalishSeaCast/salishsea-site-env \
         --channel conda-forge \
-        python=3 pyyaml requests "pyzmq<17.0,>=13.1.0"
+        python=3 pyyaml requests
     $ source activate /SalishSeaCast/salishsea-site-env
     (/SalishSeaCast/salishsea-site-env) $ pip install \
         arrow attrs chaussette circus pyramid pyramid_crow pyramid_mako \
