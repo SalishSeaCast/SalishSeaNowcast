@@ -632,14 +632,8 @@ The Python packages that the system depends on are installed in a conda environm
     $ conda update conda
     $ conda create \
         --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
-        --channel gomss-nowcast --channel conda-forge --channel defaults \
-        arrow attrs basemap beautifulsoup4 bottleneck circus cliff cmocean \
-        dask docutils gsw lxml mako matplotlib>=3 netcdf4 numpy pandas paramiko \
-        pillow pip poppler pygrib pypdf2 pyproj python=3.7 pyyaml pyzmq requests \
-        scipy shapely watchdog xarray
+        -f SalishSeaNowcast/environment-prod.yaml
     $ source /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install angles f90nml \
-        feedgen python-hglib raven retrying schedule scour utm zeep
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable moad_tools/
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
