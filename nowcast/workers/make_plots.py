@@ -226,16 +226,16 @@ def make_plots(parsed_args, config, *args):
         ]
         if run_type == "nowcast":
             results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"][run_type], dmy
+                config["vhfr fvcom runs"]["results archive"]["nowcast x2"], dmy
             )
             fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
         else:
             nowcast_results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"]["nowcast"], dmy
+                config["vhfr fvcom runs"]["results archive"]["nowcast x2"], dmy
             )
             nowcast_dataset_path = nowcast_results_dir / fvcom_stns_dataset_filename
             forecast_results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"]["forecast"], dmy
+                config["vhfr fvcom runs"]["results archive"]["forecast x2"], dmy
             )
             forecast_dataset_path = forecast_results_dir / fvcom_stns_dataset_filename
             fvcom_stns_dataset_path = Path("/tmp", fvcom_stns_dataset_filename)
