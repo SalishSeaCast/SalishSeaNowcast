@@ -1467,13 +1467,15 @@ def after_download_fvcom_results(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "failure nowcast": [],
-        "failure forecast": [],
-        "success nowcast": [],
-        "success forecast": [],
+        "failure x2 nowcast": [],
+        "failure x2 forecast": [],
+        "failure r12 nowcast": [],
+        "success x2 nowcast": [],
+        "success x2 forecast": [],
+        "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
-        run_type = msg.type.split()[1]
+        run_type = msg.type.split()[2]
         run_date = checklist["FVCOM run"][run_type]["run date"]
         next_workers[msg.type].append(
             NextWorker("nowcast.workers.get_vfpa_hadcp", args=["--data-date", run_date])
