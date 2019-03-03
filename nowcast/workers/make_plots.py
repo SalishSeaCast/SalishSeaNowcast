@@ -223,12 +223,13 @@ def make_plots(parsed_args, config, *args):
     if model == "fvcom":
         fvcom_stns_dataset_filename = config["vhfr fvcom runs"][
             "stations dataset filename"
-        ]
+        ]["x2"]
         if run_type == "nowcast":
             results_dir = Path(
                 config["vhfr fvcom runs"]["results archive"]["nowcast x2"], dmy
             )
             fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
+            fvcom_results_dataset = nc.Dataset(results_dir / "vh_x2_0001.nc")
         else:
             nowcast_results_dir = Path(
                 config["vhfr fvcom runs"]["results archive"]["nowcast x2"], dmy
@@ -244,12 +245,18 @@ def make_plots(parsed_args, config, *args):
                 f"-o {fvcom_stns_dataset_path}"
             )
             subprocess.check_output(shlex.split(cmd))
+            cmd = (
+                f"ncrcat -O {nowcast_results_dir / 'vh_x2_0001.nc'} "
+                f"{forecast_results_dir /'vh_x2_0001.nc'} "
+                f"-o /tmp/vh_x2_0001.nc"
+            )
+            subprocess.check_output(shlex.split(cmd))
+            fvcom_results_dataset = nc.Dataset("/tmp/vh_x2_0001.nc")
         cmd = (
             f"ncrename -O -v siglay,sigma_layer -v siglev,sigma_level "
             f"{fvcom_stns_dataset_path} /tmp/{fvcom_stns_dataset_path.name}"
         )
         subprocess.check_output(shlex.split(cmd))
-        fvcom_results_dataset = nc.Dataset(results_dir / "vh_x2_0001.nc")
         fvcom_stns_dataset = xarray.open_dataset(f"/tmp/{fvcom_stns_dataset_path.name}")
         nemo_ssh_dataset_url_tmpl = config["figures"]["dataset URLs"][
             "tide stn ssh time series"
