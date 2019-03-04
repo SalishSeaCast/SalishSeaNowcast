@@ -148,7 +148,7 @@ class TestConfig:
         assert download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
         assert (
             download["url template"]
-            == "http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}"
+            == "https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}"
         )
         assert (
             download["file template"]
