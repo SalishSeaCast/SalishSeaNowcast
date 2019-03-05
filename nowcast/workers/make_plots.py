@@ -291,6 +291,7 @@ def make_plots(parsed_args, config, *args):
             obs_hadcp_dataset,
             fvcom_results_dataset,
             run_date,
+            24 if run_type == "nowcast" else 60,
         )
     if model == "wwatch3":
         wwatch3_dataset_url = config["figures"]["dataset URLs"]["wwatch3 fields"]
@@ -762,6 +763,7 @@ def _prep_fvcom_publish_fig_functions(
     obs_hadcp_dataset,
     fvcom_results_dataset,
     run_date,
+    run_duration,
 ):
     fig_functions = {}
     names = {
@@ -797,7 +799,7 @@ def _prep_fvcom_publish_fig_functions(
         "Indian Arm": "IndianArm_surface_currents",
     }
     for place, svg_root in names.items():
-        for time_index in range(24):
+        for time_index in range(run_duration):
             hr = time_index + 1
             yyyymmdd = run_date.shift(hours=hr).format("YYYYMMDD")
             hhmmss = run_date.shift(hours=hr).format("HHmmss")
@@ -817,7 +819,7 @@ def _prep_fvcom_publish_fig_functions(
         "Indian Arm": "IndianArm_thalweg",
     }
     for place, svg_root in names.items():
-        for time_index in range(24):
+        for time_index in range(run_duration):
             hr = time_index + 1
             yyyymmdd = run_date.shift(hours=hr).format("YYYYMMDD")
             hhmmss = run_date.shift(hours=hr).format("HHmmss")
