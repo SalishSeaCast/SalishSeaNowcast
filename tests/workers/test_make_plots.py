@@ -64,8 +64,11 @@ class TestMain:
             "nowcast",
             "nowcast-green",
             "nowcast-agrif",
+            "nowcast-x2",
+            "nowcast-r12",
             "forecast",
             "forecast2",
+            "forecast-x2",
         }
         assert "help" in kwargs
 
@@ -99,15 +102,63 @@ class TestMain:
         assert args == (make_plots.make_plots, make_plots.success, make_plots.failure)
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "make_plots" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["make_plots"]
+        assert msg_registry["checklist key"] == "plots"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nemo nowcast publish",
+            "success nemo nowcast research",
+            "success nemo nowcast comparison",
+            "failure nemo nowcast publish",
+            "failure nemo nowcast research",
+            "failure nemo nowcast comparison",
+            "success nemo nowcast-green research",
+            "failure nemo nowcast-green research",
+            "success nemo nowcast-agrif research",
+            "failure nemo nowcast-agrif research",
+            "success nemo forecast publish",
+            "failure nemo forecast publish",
+            "success nemo forecast2 publish",
+            "failure nemo forecast2 publish",
+            "success fvcom nowcast-x2 publish",
+            "failure fvcom nowcast-x2 publish",
+            "success fvcom forecast-x2 publish",
+            "failure fvcom forecast-x2 publish",
+            "success fvcom nowcast-r12 publish",
+            "failure fvcom nowcast-r12 publish",
+            "success wwatch3 forecast publish",
+            "failure wwatch3 forecast publish",
+            "success wwatch3 forecast2 publish",
+            "failure wwatch3 forecast2 publish",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["make_plots"]
+        assert msg in msg_registry
+
+
 @pytest.mark.parametrize(
     "model, run_type, plot_type",
     [
         ("nemo", "nowcast", "publish"),
         ("nemo", "nowcast", "research"),
         ("nemo", "nowcast", "comparison"),
+        ("nemo", "nowcast-green", "research"),
+        ("nemo", "nowcast-agrif", "research"),
         ("nemo", "forecast", "publish"),
         ("nemo", "forecast2", "publish"),
-        ("fvcom", "nowcast", "publish"),
+        ("fvcom", "nowcast-x2", "publish"),
+        ("fvcom", "forecast-x2", "publish"),
+        ("fvcom", "nowcast-r12", "publish"),
         ("wwatch3", "forecast", "publish"),
         ("wwatch3", "forecast2", "publish"),
     ],
@@ -135,9 +186,13 @@ class TestSuccess:
         ("nemo", "nowcast", "publish"),
         ("nemo", "nowcast", "research"),
         ("nemo", "nowcast", "comparison"),
+        ("nemo", "nowcast-green", "research"),
+        ("nemo", "nowcast-agrif", "research"),
         ("nemo", "forecast", "publish"),
         ("nemo", "forecast2", "publish"),
-        ("fvcom", "nowcast", "publish"),
+        ("fvcom", "nowcast-x2", "publish"),
+        ("fvcom", "forecast-x2", "publish"),
+        ("fvcom", "nowcast-r12", "publish"),
         ("wwatch3", "forecast", "publish"),
         ("wwatch3", "forecast2", "publish"),
     ],

@@ -1628,11 +1628,18 @@ def after_ping_erddap(msg, config, checklist):
             return next_workers[msg.type]
         for run_type in run_types:
             run_date = checklist["FVCOM run"][run_type]["run date"]
+            model_config = checklist["FVCOM run"][run_type]["model config"]
             next_workers[msg.type].extend(
                 [
                     NextWorker(
                         "nowcast.workers.make_plots",
-                        args=["fvcom", run_type, "publish", "--run-date", run_date],
+                        args=[
+                            "fvcom",
+                            f"{run_type}-{model_config}",
+                            "publish",
+                            "--run-date",
+                            run_date,
+                        ],
                     )
                 ]
             )
@@ -1666,8 +1673,9 @@ def after_make_plots(msg, config, checklist):
         "failure nemo nowcast-agrif research": [],
         "failure nemo forecast publish": [],
         "failure nemo forecast2 publish": [],
-        "failure fvcom nowcast publish": [],
-        "failure fvcom forecast publish": [],
+        "failure fvcom nowcast-x2 publish": [],
+        "failure fvcom forecast-x2 publish": [],
+        "failure fvcom nowcast-r12 publish": [],
         "failure wwatch3 forecast publish": [],
         "failure wwatch3 forecast2 publish": [],
         "success nemo nowcast research": [],
@@ -1677,8 +1685,9 @@ def after_make_plots(msg, config, checklist):
         "success nemo nowcast-agrif research": [],
         "success nemo forecast publish": [],
         "success nemo forecast2 publish": [],
-        "success fvcom nowcast publish": [],
-        "success fvcom forecast publish": [],
+        "success fvcom nowcast-x2 publish": [],
+        "success fvcom forecast-x2 publish": [],
+        "success fvcom nowcast-r12 publish": [],
         "success wwatch3 forecast publish": [],
         "success wwatch3 forecast2 publish": [],
     }
