@@ -88,14 +88,26 @@ def main():
     )
     worker.cli.add_argument(
         "run_type",
-        choices={"nowcast", "nowcast-green", "nowcast-agrif", "forecast", "forecast2"},
+        choices={
+            "nowcast",
+            "nowcast-green",
+            "nowcast-agrif",
+            "nowcast-x2",
+            "nowcast-r12",
+            "forecast",
+            "forecast2",
+            "forecast-x2",
+        },
         help="""
         Type of run to produce plots for:
-        'nowcast' means nowcast physics-only runs,
-        'nowcast-green' means nowcast-green physics/biology runs
-        'nowcast-agrif' means nowcast-green physics/biology runs with AGRIF sub-grid(s)
-        'forecast' means forecast physics-only runs,
-        'forecast2' means forecast2 preliminary forecast physics-only runs.
+        'nowcast' means NEMO nowcast physics-only run, or wwatch3 nowcast run,
+        'nowcast-green' means NEMO nowcast-green physics/biology run,
+        'nowcast-agrif' means NEMO nowcast-green physics/biology runs with AGRIF sub-grid(s),
+        'nowcast-x2' means VHFR FVCOM x2 configuration nowcast run,
+        'nowcast-r12' means VHFR FVCOM r12 configuration nowcast run,
+        'forecast' means NEMO forecast physics-only runs, or wwatch3 forecast run,
+        'forecast2' means NEMO preliminary forecast physics-only runs, or wwatch3 preliminary forecast run,
+        'forecast-x2' means VHFR FVCOM x2 configuration forecast run,
         """,
     )
     worker.cli.add_argument(
@@ -221,22 +233,31 @@ def make_plots(parsed_args, config, *args):
             )
 
     if model == "fvcom":
+        run_type, model_config = run_type.split("-")
+        fvcom_results_dataset_filename = f"vh_{model_config}_0001.nc"
         fvcom_stns_dataset_filename = config["vhfr fvcom runs"][
             "stations dataset filename"
-        ]["x2"]
+        ][model_config]
         if run_type == "nowcast":
             results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"]["nowcast x2"], dmy
+                config["vhfr fvcom runs"]["results archive"][f"nowcast {model_config}"],
+                dmy,
             )
             fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
-            fvcom_results_dataset = nc.Dataset(results_dir / "vh_x2_0001.nc")
+            fvcom_results_dataset = nc.Dataset(
+                results_dir / fvcom_results_dataset_filename
+            )
         else:
             nowcast_results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"]["nowcast x2"], dmy
+                config["vhfr fvcom runs"]["results archive"][f"nowcast {model_config}"],
+                dmy,
             )
             nowcast_dataset_path = nowcast_results_dir / fvcom_stns_dataset_filename
             forecast_results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"]["forecast x2"], dmy
+                config["vhfr fvcom runs"]["results archive"][
+                    f"forecast {model_config}"
+                ],
+                dmy,
             )
             forecast_dataset_path = forecast_results_dir / fvcom_stns_dataset_filename
             fvcom_stns_dataset_path = Path("/tmp", fvcom_stns_dataset_filename)
@@ -246,12 +267,12 @@ def make_plots(parsed_args, config, *args):
             )
             subprocess.check_output(shlex.split(cmd))
             cmd = (
-                f"ncrcat -O {nowcast_results_dir / 'vh_x2_0001.nc'} "
-                f"{forecast_results_dir /'vh_x2_0001.nc'} "
-                f"-o /tmp/vh_x2_0001.nc"
+                f"ncrcat -O {nowcast_results_dir / fvcom_results_dataset_filename} "
+                f"{forecast_results_dir / fvcom_results_dataset_filename} "
+                f"-o /tmp/{fvcom_results_dataset_filename}"
             )
             subprocess.check_output(shlex.split(cmd))
-            fvcom_results_dataset = nc.Dataset("/tmp/vh_x2_0001.nc")
+            fvcom_results_dataset = nc.Dataset(f"/tmp/{fvcom_results_dataset_filename}")
         cmd = (
             f"ncrename -O -v siglay,sigma_layer -v siglev,sigma_level "
             f"{fvcom_stns_dataset_path} /tmp/{fvcom_stns_dataset_path.name}"

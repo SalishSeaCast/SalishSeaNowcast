@@ -2431,16 +2431,21 @@ class TestAfterPingERDDAP:
         )
         assert expected in workers
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    @pytest.mark.parametrize(
+        "model_config, run_type",
+        (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+    )
     def test_success_vfpa_hadcp_launch_make_plots_fvcom(
-        self, run_type, config, checklist
+        self, model_config, run_type, config, checklist
     ):
         run_date = "2018-10-25"
         p_checklist = patch.dict(
             checklist,
             {
                 "ERDDAP flag files": {"VFPA-HADCP": []},
-                "FVCOM run": {run_type: {"run date": run_date}},
+                "FVCOM run": {
+                    run_type: {"model config": model_config, "run date": run_date}
+                },
             },
         )
         with p_checklist:
@@ -2449,14 +2454,23 @@ class TestAfterPingERDDAP:
             )
         expected = NextWorker(
             "nowcast.workers.make_plots",
-            args=["fvcom", run_type, "publish", "--run-date", run_date],
+            args=[
+                "fvcom",
+                f"{run_type}-{model_config}",
+                "publish",
+                "--run-date",
+                run_date,
+            ],
             host="localhost",
         )
         assert expected in workers
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+    @pytest.mark.parametrize(
+        "model_config, run_type",
+        (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+    )
     def test_success_vfpa_hadcp_no_fvcom_run_in_checklist(
-        self, run_type, config, checklist
+        self, model_config, run_type, config, checklist
     ):
         run_date = "2018-11-08"
         p_checklist = patch.dict(checklist, {"ERDDAP flag files": {"VFPA-HADCP": []}})
@@ -2479,14 +2493,24 @@ class TestAfterMakePlots:
             "failure nemo nowcast comparison",
             "failure nemo nowcast publish",
             "failure nemo nowcast-green research",
+            "failure nemo nowcast-agrif research",
             "failure nemo forecast publish",
             "failure nemo forecast2 publish",
-            "failure fvcom nowcast publish",
-            "failure fvcom forecast publish",
+            "failure fvcom nowcast-x2 publish",
+            "failure fvcom forecast-x2 publish",
+            "failure fvcom nowcast-r12 publish",
+            "failure wwatch3 forecast publish",
+            "failure wwatch3 forecast2 publish",
             "success nemo nowcast research",
             "success nemo nowcast comparison",
             "success nemo nowcast publish",
             "success nemo nowcast-green research",
+            "success nemo nowcast-agrif research",
+            "success fvcom nowcast-x2 publish",
+            "success fvcom forecast-x2 publish",
+            "success fvcom nowcast-r12 publish",
+            "success wwatch3 forecast publish",
+            "success wwatch3 forecast2 publish",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):

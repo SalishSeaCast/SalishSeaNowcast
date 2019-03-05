@@ -1368,10 +1368,12 @@ message registry:
       failure nemo forecast publish: nemo forecast publish plots failed
       success nemo forecast2 publish: nemo forecast2 publish plots produced
       failure nemo forecast2 publish: nemo forecast2 publish plots failed
-      success fvcom nowcast publish: fvcom nowcast publish plots produced
-      failure fvcom nowcast publish: fvcom nowcast publish plots failed
-      success fvcom forecast publish: fvcom forecast publish plots produced
-      failure fvcom forecast publish: fvcom forecast publish plots failed
+      success fvcom nowcast-x2 publish: fvcom x2 configuration nowcast publish plots produced
+      failure fvcom nowcast-x2 publish: fvcom x2 configuration nowcast publish plots failed
+      success fvcom forecast-x2 publish: fvcom x2 configuration forecast publish plots produced
+      failure fvcom forecast-x2 publish: fvcom x2 configuration forecast publish plots failed
+      success fvcom nowcast-r12 publish: fvcom r12 configuration nowcast publish plots produced
+      failure fvcom nowcast-r12 publish: fvcom r12 configuration nowcast publish plots failed
       success wwatch3 forecast publish: wwatch3 forecast publish plots produced
       failure wwatch3 forecast publish: wwatch3 forecast publish plots failed
       success wwatch3 forecast2 publish: wwatch3 forecast2 publish plots produced
