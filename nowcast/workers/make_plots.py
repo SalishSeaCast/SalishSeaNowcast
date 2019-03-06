@@ -52,12 +52,8 @@ from nowcast.figures.publish import (
     storm_surge_alerts_thumbnail,
     compare_tide_prediction_max_ssh,
 )
-from nowcast.figures.fvcom import (
-    second_narrows_current,
-    tide_stn_water_level,
-    surface_currents,
-    thalweg_transect,
-)
+from figures.fvcom.research import thalweg_transect, surface_currents
+from figures.fvcom.publish import second_narrows_current, tide_stn_water_level
 from nowcast.figures.wwatch3 import wave_height_period
 
 # Legacy figures code
@@ -243,56 +239,68 @@ def make_plots(parsed_args, config, *args):
                 config["vhfr fvcom runs"]["results archive"][f"nowcast {model_config}"],
                 dmy,
             )
-            fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
-            fvcom_results_dataset = nc.Dataset(
-                results_dir / fvcom_results_dataset_filename
-            )
+            if plot_type == "publish":
+                fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
+            if plot_type == "research":
+                fvcom_results_dataset = nc.Dataset(
+                    results_dir / fvcom_results_dataset_filename
+                )
         else:
             nowcast_results_dir = Path(
                 config["vhfr fvcom runs"]["results archive"][f"nowcast {model_config}"],
                 dmy,
             )
-            nowcast_dataset_path = nowcast_results_dir / fvcom_stns_dataset_filename
             forecast_results_dir = Path(
                 config["vhfr fvcom runs"]["results archive"][
                     f"forecast {model_config}"
                 ],
                 dmy,
             )
-            forecast_dataset_path = forecast_results_dir / fvcom_stns_dataset_filename
-            fvcom_stns_dataset_path = Path("/tmp", fvcom_stns_dataset_filename)
+            if plot_type == "publish":
+                nowcast_dataset_path = nowcast_results_dir / fvcom_stns_dataset_filename
+                forecast_dataset_path = (
+                    forecast_results_dir / fvcom_stns_dataset_filename
+                )
+                fvcom_stns_dataset_path = Path("/tmp", fvcom_stns_dataset_filename)
+                cmd = (
+                    f"ncrcat -O {nowcast_dataset_path} {forecast_dataset_path} "
+                    f"-o {fvcom_stns_dataset_path}"
+                )
+                subprocess.check_output(shlex.split(cmd))
+            if plot_type == "research":
+                cmd = (
+                    f"ncrcat -O {nowcast_results_dir / fvcom_results_dataset_filename} "
+                    f"{forecast_results_dir / fvcom_results_dataset_filename} "
+                    f"-o /tmp/{fvcom_results_dataset_filename}"
+                )
+                subprocess.check_output(shlex.split(cmd))
+                fvcom_results_dataset = nc.Dataset(
+                    f"/tmp/{fvcom_results_dataset_filename}"
+                )
+        if plot_type == "publish":
             cmd = (
-                f"ncrcat -O {nowcast_dataset_path} {forecast_dataset_path} "
-                f"-o {fvcom_stns_dataset_path}"
+                f"ncrename -O -v siglay,sigma_layer -v siglev,sigma_level "
+                f"{fvcom_stns_dataset_path} /tmp/{fvcom_stns_dataset_path.name}"
             )
             subprocess.check_output(shlex.split(cmd))
-            cmd = (
-                f"ncrcat -O {nowcast_results_dir / fvcom_results_dataset_filename} "
-                f"{forecast_results_dir / fvcom_results_dataset_filename} "
-                f"-o /tmp/{fvcom_results_dataset_filename}"
+            fvcom_stns_dataset = xarray.open_dataset(
+                f"/tmp/{fvcom_stns_dataset_path.name}"
             )
-            subprocess.check_output(shlex.split(cmd))
-            fvcom_results_dataset = nc.Dataset(f"/tmp/{fvcom_results_dataset_filename}")
-        cmd = (
-            f"ncrename -O -v siglay,sigma_layer -v siglev,sigma_level "
-            f"{fvcom_stns_dataset_path} /tmp/{fvcom_stns_dataset_path.name}"
-        )
-        subprocess.check_output(shlex.split(cmd))
-        fvcom_stns_dataset = xarray.open_dataset(f"/tmp/{fvcom_stns_dataset_path.name}")
-        nemo_ssh_dataset_url_tmpl = config["figures"]["dataset URLs"][
-            "tide stn ssh time series"
-        ]
-        obs_hadcp_dataset = xarray.open_dataset(
-            config["figures"]["dataset URLs"]["2nd narrows hadcp time series"]
-        )
-        fig_functions = _prep_fvcom_publish_fig_functions(
-            fvcom_stns_dataset,
-            nemo_ssh_dataset_url_tmpl,
-            obs_hadcp_dataset,
-            fvcom_results_dataset,
-            run_date,
-            24 if run_type == "nowcast" else 60,
-        )
+            nemo_ssh_dataset_url_tmpl = config["figures"]["dataset URLs"][
+                "tide stn ssh time series"
+            ]
+            obs_hadcp_dataset = xarray.open_dataset(
+                config["figures"]["dataset URLs"]["2nd narrows hadcp time series"]
+            )
+            fig_functions = _prep_fvcom_publish_fig_functions(
+                fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+            )
+        if plot_type == "research":
+            fig_functions = _prep_fvcom_research_fig_functions(
+                fvcom_results_dataset,
+                run_date,
+                run_duration=24 if run_type == "nowcast" else 60,
+            )
     if model == "wwatch3":
         wwatch3_dataset_url = config["figures"]["dataset URLs"]["wwatch3 fields"]
         fig_functions = _prep_wwatch3_publish_fig_functions(wwatch3_dataset_url)
@@ -758,12 +766,7 @@ def _prep_publish_fig_functions(
 
 
 def _prep_fvcom_publish_fig_functions(
-    fvcom_stns_dataset,
-    nemo_ssh_dataset_url_tmpl,
-    obs_hadcp_dataset,
-    fvcom_results_dataset,
-    run_date,
-    run_duration,
+    fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
 ):
     fig_functions = {}
     names = {
@@ -793,6 +796,11 @@ def _prep_fvcom_publish_fig_functions(
             }
         }
     )
+    return fig_functions
+
+
+def _prep_fvcom_research_fig_functions(fvcom_results_dataset, run_date, run_duration):
+    fig_functions = {}
     names = {
         "English Bay": "EnglishBay_surface_currents",
         "Vancouver Harbour": "VancouverHarbour_surface_currents",
@@ -835,7 +843,6 @@ def _prep_fvcom_publish_fig_functions(
                         }
                     }
                 )
-
     return fig_functions
 
 

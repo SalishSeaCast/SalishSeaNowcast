@@ -1374,6 +1374,12 @@ message registry:
       failure fvcom forecast-x2 publish: fvcom x2 configuration forecast publish plots failed
       success fvcom nowcast-r12 publish: fvcom r12 configuration nowcast publish plots produced
       failure fvcom nowcast-r12 publish: fvcom r12 configuration nowcast publish plots failed
+      success fvcom nowcast-x2 research: fvcom x2 configuration nowcast research plots produced
+      failure fvcom nowcast-x2 research: fvcom x2 configuration nowcast research plots failed
+      success fvcom forecast-x2 research: fvcom x2 configuration forecast research plots produced
+      failure fvcom forecast-x2 research: fvcom x2 configuration forecast research plots failed
+      success fvcom nowcast-r12 research: fvcom r12 configuration nowcast research plots produced
+      failure fvcom nowcast-r12 research: fvcom r12 configuration nowcast research plots failed
       success wwatch3 forecast publish: wwatch3 forecast publish plots produced
       failure wwatch3 forecast publish: wwatch3 forecast publish plots failed
       success wwatch3 forecast2 publish: wwatch3 forecast2 publish plots produced

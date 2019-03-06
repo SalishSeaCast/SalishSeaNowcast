@@ -126,7 +126,9 @@ def download_fvcom_results(parsed_args, config, *args):
         lib.fix_perms(filepath, grp_name=config["file group"])
     checklist = {
         run_type: {
+            "host": host_name,
             "model config": model_config,
+            "run date": run_date.format("YYYY-MM-DD"),
             "files": list(map(os.fspath, results_archive_dir.glob("vh*.nc"))),
         }
     }

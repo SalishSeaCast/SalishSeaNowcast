@@ -230,7 +230,14 @@ class TestDownloadFVCOMResults:
             run_date=arrow.get("2018-02-16"),
         )
         checklist = download_fvcom_results.download_fvcom_results(parsed_args, config)
-        expected = {run_type: {"model config": model_config, "files": []}}
+        expected = {
+            run_type: {
+                "host": "west.cloud",
+                "model config": model_config,
+                "run date": "2018-02-16",
+                "files": [],
+            }
+        }
         assert checklist == expected
 
     def test_scp_subprocess(
