@@ -52,8 +52,8 @@ from nowcast.figures.publish import (
     storm_surge_alerts_thumbnail,
     compare_tide_prediction_max_ssh,
 )
-from figures.fvcom.research import thalweg_transect, surface_currents
-from figures.fvcom.publish import second_narrows_current, tide_stn_water_level
+from nowcast.figures.fvcom.research import thalweg_transect, surface_currents
+from nowcast.figures.fvcom.publish import second_narrows_current, tide_stn_water_level
 from nowcast.figures.wwatch3 import wave_height_period
 
 # Legacy figures code
