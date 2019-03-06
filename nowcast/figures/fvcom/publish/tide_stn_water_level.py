@@ -309,6 +309,10 @@ def _residual_time_series_labels(ax, plot_data, theme):
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
-    ax.legend(loc="best", prop=theme.FONTS["legend label small"])
+    _, legend_labels = ax.get_legend_handles_labels()
+    if legend_labels:
+        # Don't try to draw a legend if there is no labels because doing so results in
+        # WARNING:matplotlib.legend:No handles with labels found to put in legend.
+        ax.legend(loc="best", prop=theme.FONTS["legend label small"])
     ax.grid(axis="both")
     theme.set_axis_colors(ax)
