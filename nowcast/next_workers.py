@@ -1476,9 +1476,24 @@ def after_download_fvcom_results(msg, config, checklist):
     }
     if msg.type.startswith("success"):
         run_type = msg.type.split()[2]
-        run_date = checklist["FVCOM run"][run_type]["run date"]
-        next_workers[msg.type].append(
-            NextWorker("nowcast.workers.get_vfpa_hadcp", args=["--data-date", run_date])
+        run_date = msg.payload[run_type]["run date"]
+        model_config = msg.payload[run_type]["model config"]
+        next_workers[msg.type].extend(
+            [
+                NextWorker(
+                    "nowcast.workers.get_vfpa_hadcp", args=["--data-date", run_date]
+                ),
+                NextWorker(
+                    "nowcast.workers.make_plots",
+                    args=[
+                        "fvcom",
+                        f"{run_type}-{model_config}",
+                        "research",
+                        "--run-date",
+                        run_date,
+                    ],
+                ),
+            ]
         )
         if run_type == "forecast":
             next_workers[msg.type].append(

@@ -2193,15 +2193,21 @@ class TestAfterDownloadFVCOMResults:
     def test_success_launch_get_vfpa_hadcp(
         self, model_config, run_type, config, checklist
     ):
-        p_checklist = patch.dict(
-            checklist, {"FVCOM run": {run_type: {"run date": "2018-10-25"}}}
+        workers = next_workers.after_download_fvcom_results(
+            Message(
+                "download_fvcom_results",
+                f"success {model_config} {run_type}",
+                {
+                    run_type: {
+                        "host": "west.cloud",
+                        "model config": model_config,
+                        "run date": "2018-10-25",
+                    }
+                },
+            ),
+            config,
+            checklist,
         )
-        with p_checklist:
-            workers = next_workers.after_download_fvcom_results(
-                Message("download_fvcom_results", f"success {model_config} {run_type}"),
-                config,
-                checklist,
-            )
         expected = NextWorker(
             "nowcast.workers.get_vfpa_hadcp",
             args=["--data-date", "2018-10-25"],
@@ -2209,17 +2215,63 @@ class TestAfterDownloadFVCOMResults:
         )
         assert expected in workers
 
-    @pytest.mark.parametrize("msg_type", ("success x2 nowcast", "success r12 nowcast"))
-    def test_success_nowcast_no_launch_update_forecast_datasets(
-        self, msg_type, config, checklist
+    @pytest.mark.parametrize(
+        "model_config, run_type",
+        (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+    )
+    def test_success_vfpa_hadcp_launch_make_plots_fvcom_research(
+        self, model_config, run_type, config, checklist
     ):
-        p_checklist = patch.dict(
-            checklist, {"FVCOM run": {"nowcast": {"run date": "2018-10-25"}}}
+        run_date = "2018-10-25"
+        workers = next_workers.after_download_fvcom_results(
+            Message(
+                "download_fvcom_results",
+                f"success {model_config} {run_type}",
+                {
+                    run_type: {
+                        "host": "west.cloud",
+                        "model config": model_config,
+                        "run date": run_date,
+                    }
+                },
+            ),
+            config,
+            checklist,
         )
-        with p_checklist:
-            workers = next_workers.after_download_fvcom_results(
-                Message("download_fvcom_results", msg_type), config, checklist
-            )
+        expected = NextWorker(
+            "nowcast.workers.make_plots",
+            args=[
+                "fvcom",
+                f"{run_type}-{model_config}",
+                "research",
+                "--run-date",
+                run_date,
+            ],
+            host="localhost",
+        )
+        assert expected in workers
+
+    @pytest.mark.parametrize(
+        "model_config, run_type", (("x2", "nowcast"), ("r12", "nowcast"))
+    )
+    def test_success_nowcast_no_launch_update_forecast_datasets(
+        self, model_config, run_type, config, checklist
+    ):
+        workers = next_workers.after_download_fvcom_results(
+            Message(
+                "download_fvcom_results",
+                f"success {model_config} {run_type}",
+                {
+                    run_type: {
+                        "host": "west.cloud",
+                        "model config": model_config,
+                        "run date": "2018-10-25",
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.update_forecast_datasets",
             args=["fvcom", "nowcast", "--run-date", "2018-10-25"],
@@ -2233,7 +2285,17 @@ class TestAfterDownloadFVCOMResults:
         )
         with p_checklist:
             workers = next_workers.after_download_fvcom_results(
-                Message("download_fvcom_results", "success x2 forecast"),
+                Message(
+                    "download_fvcom_results",
+                    "success x2 forecast",
+                    {
+                        "forecast": {
+                            "host": "west.cloud",
+                            "model config": "x2",
+                            "run date": "2018-10-25",
+                        }
+                    },
+                ),
                 config,
                 checklist,
             )
@@ -2435,7 +2497,7 @@ class TestAfterPingERDDAP:
         "model_config, run_type",
         (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
     )
-    def test_success_vfpa_hadcp_launch_make_plots_fvcom(
+    def test_success_vfpa_hadcp_launch_make_plots_fvcom_publish(
         self, model_config, run_type, config, checklist
     ):
         run_date = "2018-10-25"

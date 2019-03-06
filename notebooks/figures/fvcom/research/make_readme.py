@@ -23,7 +23,7 @@ import re
 
 NBVIEWER = "https://nbviewer.jupyter.org/urls"
 REPO = "bitbucket.org/salishsea/salishseanowcast/raw/tip"
-REPO_DIR = "notebooks/figures/fvcom"
+REPO_DIR = "notebooks/figures/fvcom/research"
 TITLE_PATTERN = re.compile("#{1,6} ?")
 
 
