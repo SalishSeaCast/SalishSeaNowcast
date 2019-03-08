@@ -767,7 +767,7 @@ vhfr fvcom runs:
       - namelist.case
       - namelist.startup.hotstart
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics
+      - namelist.numerics
       - namelist.restart
       - namelist.netcdf
       - namelist.physics
@@ -798,14 +798,18 @@ vhfr fvcom runs:
       # Directory on compute host where NEMO run results for boundary forcing
       # are stored
       nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
+      # Integration time step [seconds]
+      time step: 0.5
       # Directory on compute host where results are stored
       results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
     forecast x2:
       nemo boundary results: /nemoShare/MEOPAR/SalishSea/forecast/
+      time step: 0.5
       results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
     nowcast r12:
-        nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
-        results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/
+      nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
+      time step: 0.2
+      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/
   # Directories on results server where run results are stored
   # in ddmmmyy/ directories; keyed by run type
   results archive:
