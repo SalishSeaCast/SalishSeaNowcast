@@ -81,6 +81,7 @@ vhfr fvcom runs:
     '{casename}_run.nml':
       - namelist.case
       - namelist.startup.hotstart
+      - namelist.numerics
       - namelist.restart
       - namelist.netcdf
       - namelist.physics
@@ -95,10 +96,13 @@ vhfr fvcom runs:
   fvc_cmd: bin/fvc
   run types:
     nowcast x2:
+      time step: 0.5
       results: SalishSea/fvcom-nowcast-x2/
     forecast x2:
+      time step: 0.5
       results: SalishSea/fvcom-forecast-x2/
     nowcast r12:
+      time step: 0.2
       results: SalishSea/fvcom-nowcast-r12/
 """
         )
@@ -295,7 +299,7 @@ class TestConfig:
             "namelist.case",
             "namelist.startup.hotstart",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io",
-            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.numerics",
+            "namelist.numerics",
             "namelist.restart",
             "namelist.netcdf",
             "namelist.physics",
@@ -316,14 +320,17 @@ class TestConfig:
         run_types = prod_config["vhfr fvcom runs"]["run types"]
         assert run_types["nowcast x2"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "time step": 0.5,
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/",
         }
         assert run_types["forecast x2"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/forecast/",
+            "time step": 0.5,
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/",
         }
         assert run_types["nowcast r12"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "time step": 0.2,
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/",
         }
 
@@ -544,14 +551,14 @@ class TestEditNamelists:
     """
 
     @pytest.mark.parametrize(
-        "model_config, run_type, run_date",
+        "model_config, run_type, run_date, time_step",
         (
-            ("x2", "nowcast", arrow.get("2018-01-15")),
-            ("r12", "nowcast", arrow.get("2019-02-21")),
+            ("x2", "nowcast", arrow.get("2018-01-15"), 0.5),
+            ("r12", "nowcast", arrow.get("2019-02-21"), 0.2),
         ),
     )
     def test_edit_namelists_nowcast(
-        self, m_patch_nml, m_logger, model_config, run_type, run_date, config
+        self, m_patch_nml, m_logger, model_config, run_type, run_date, time_step, config
     ):
         run_fvcom._edit_namelists(
             config["vhfr fvcom runs"]["case name"][model_config],
@@ -577,6 +584,10 @@ class TestEditNamelists:
             call(
                 Path("run_prep_dir/namelist.startup.hotstart"),
                 {"nml_startup": {"startup_file": f"vh_{model_config}_restart_0001.nc"}},
+            ),
+            call(
+                Path("run_prep_dir/namelist.numerics"),
+                {"nml_integration": {"extstep_seconds": time_step}},
             ),
             call(
                 Path("run_prep_dir/namelist.restart"),
@@ -672,11 +683,11 @@ class TestEditNamelists:
         ]
 
     @pytest.mark.parametrize(
-        "model_config, run_type, run_date",
-        (("x2", "forecast", arrow.get("2018-01-15")),),
+        "model_config, run_type, run_date, time_step",
+        (("x2", "forecast", arrow.get("2018-01-15"), 0.5),),
     )
     def test_edit_namelists_forecast(
-        self, m_patch_nml, m_logger, model_config, run_type, run_date, config
+        self, m_patch_nml, m_logger, model_config, run_type, run_date, time_step, config
     ):
         run_fvcom._edit_namelists(
             config["vhfr fvcom runs"]["case name"][model_config],
@@ -702,6 +713,10 @@ class TestEditNamelists:
             call(
                 Path("run_prep_dir/namelist.startup.hotstart"),
                 {"nml_startup": {"startup_file": f"vh_{model_config}_restart_0001.nc"}},
+            ),
+            call(
+                Path("run_prep_dir/namelist.numerics"),
+                {"nml_integration": {"extstep_seconds": time_step}},
             ),
             call(
                 Path("run_prep_dir/namelist.restart"),

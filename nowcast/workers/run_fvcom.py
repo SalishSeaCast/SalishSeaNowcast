@@ -238,6 +238,9 @@ def _edit_namelists(casename, run_date, model_config, run_type, run_prep_dir, co
         run_type=run_type,
         yyyymmdd=start_date.format("YYYYMMDD"),
     )
+    time_step = config["vhfr fvcom runs"]["run types"][f"{run_type} {model_config}"][
+        "time step"
+    ]
     patches = {
         run_prep_dir
         / "namelist.case": {
@@ -255,6 +258,8 @@ def _edit_namelists(casename, run_date, model_config, run_type, run_prep_dir, co
         / "namelist.startup.hotstart": {
             "nml_startup": {"startup_file": f"vh_{model_config}_restart_0001.nc"}
         },
+        run_prep_dir
+        / "namelist.numerics": {"nml_integration": {"extstep_seconds": time_step}},
         run_prep_dir
         / "namelist.restart": {
             "nml_restart": {
