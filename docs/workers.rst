@@ -60,6 +60,15 @@ please read the code in the :py:mod:`nowcast.next_workers` module.
 Workers
 =======
 
+.. _CollectWeatherWorker:
+
+:kbd:`collect_weather`
+-----------------------
+
+.. automodule:: nowcast.workers.collect_weather
+    :members: main
+
+
 .. _DownloadWeatherWorker:
 
 :kbd:`download_weather`
@@ -92,12 +101,16 @@ Workers
     :members: main
 
 
+.. _GribToNetcdfWorker:
+
 :kbd:`grib_to_netcdf`
 ---------------------
 
 .. automodule:: nowcast.workers.grib_to_netcdf
     :members: main
 
+
+.. _DownloadLiveOceanWorker:
 
 :kbd:`download_live_ocean`
 --------------------------
@@ -106,12 +119,16 @@ Workers
     :members: main
 
 
+.._MakeLiveOceanFilesWorker:
+
 :kbd:`make_live_ocean_files`
 ----------------------------
 
 .. automodule:: nowcast.workers.make_live_ocean_files
     :members: main
 
+
+.. _UploadForcingWorker:
 
 :kbd:`upload_forcing`
 ---------------------
