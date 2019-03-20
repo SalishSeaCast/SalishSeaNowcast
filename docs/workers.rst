@@ -119,7 +119,7 @@ Workers
     :members: main
 
 
-.._MakeLiveOceanFilesWorker:
+.. _MakeLiveOceanFilesWorker:
 
 :kbd:`make_live_ocean_files`
 ----------------------------
