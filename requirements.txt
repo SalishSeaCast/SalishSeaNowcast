@@ -16,7 +16,7 @@ black==18.9b0
 bokeh==1.0.4
 Bottleneck==1.2.1
 cached-property==1.5.1
-certifi==2018.11.29
+certifi==2019.3.9
 cffi==1.12.2
 cftime==1.0.3.4
 chardet==3.0.4
@@ -29,7 +29,7 @@ cmocean==2.0
 colorama==0.4.1
 coloredlogs==10.0
 coverage==4.5.2
-cryptography==2.5
+cryptography==2.6.1
 cycler==0.10.0
 cytoolz==0.9.0.1
 dask==1.1.3
