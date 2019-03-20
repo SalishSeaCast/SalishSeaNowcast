@@ -104,12 +104,18 @@ class TestAfterDownloadWeather:
         )
         assert workers == []
 
-    def test_success_06_launch_collect_river_data(self, config, checklist):
-        with patch(
-            "nowcast.workers.collect_river_data.arrow.now",
+    def test_success_06(self, config, checklist):
+        p_now = patch(
+            "nowcast.next_workers.arrow.now",
             return_value=arrow.get("2018-12-27"),
             autospec=True,
-        ):
+        )
+        p_utcnow = patch(
+            "nowcast.next_workers.arrow.utcnow",
+            return_value=arrow.get("2018-12-27"),
+            autospec=True,
+        )
+        with p_now, p_utcnow:
             workers = next_workers.after_download_weather(
                 Message("download_weather", "success 06"), config, checklist
             )
@@ -129,72 +135,43 @@ class TestAfterDownloadWeather:
                 ["Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
+            NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
+            NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
+            NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
+            NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
+            NextWorker(
+                "nowcast.workers.get_vfpa_hadcp",
+                ["--data-date", "2018-12-26"],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.get_NeahBay_ssh", ["forecast2"], host="localhost"
+            ),
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
+            ),
         ]
+        assert len(workers) == len(expected)
         for next_worker in expected:
             assert next_worker in workers
 
-    @pytest.mark.parametrize(
-        "msg_type, args", [("success 06", ["forecast2"]), ("success 12", ["nowcast"])]
-    )
-    def test_success_launch_get_NeahBay_ssh(self, msg_type, args, config, checklist):
-        workers = next_workers.after_download_weather(
-            Message("download_weather", msg_type), config, checklist
-        )
-        expected = NextWorker("nowcast.workers.get_NeahBay_ssh", args, host="localhost")
-        assert expected in workers
-
-    @pytest.mark.parametrize(
-        "msg_type, args", [("success 06", ["forecast2"]), ("success 12", ["nowcast+"])]
-    )
-    def test_success_launch_grib_to_netcdf(self, msg_type, args, config, checklist):
-        workers = next_workers.after_download_weather(
-            Message("download_weather", msg_type), config, checklist
-        )
-        expected = NextWorker("nowcast.workers.grib_to_netcdf", args, host="localhost")
-        assert expected in workers
-
-    @pytest.mark.parametrize("ctd_stn", ["SCVIP", "SEVIP", "USDDL"])
-    def test_success_06_launch_get_onc_ctd(self, ctd_stn, config, checklist):
-        workers = next_workers.after_download_weather(
-            Message("download_weather", "success 06"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.get_onc_ctd", args=[ctd_stn], host="localhost"
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize("ferry_platform", ["TWDP"])
-    def test_success_06_launch_get_onc_ferry(self, ferry_platform, config, checklist):
-        workers = next_workers.after_download_weather(
-            Message("download_weather", "success 06"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.get_onc_ferry", args=[ferry_platform], host="localhost"
-        )
-        assert expected in workers
-
-    def test_success_06_launch_get_vfpa_hadcp_for_prev_day(self, config, checklist):
-        with patch(
-            "nowcast.next_workers.arrow.utcnow", return_value=arrow.get("2018-11-08")
-        ):
-            workers = next_workers.after_download_weather(
-                Message("download_weather", "success 06"), config, checklist
-            )
-        expected = NextWorker(
-            "nowcast.workers.get_vfpa_hadcp",
-            args=["--data-date", "2018-11-07"],
-            host="localhost",
-        )
-        assert expected in workers
-
-    def test_success_12_launch_download_live_ocean(self, config, checklist):
-        workers = next_workers.after_download_weather(
+    def test_success_12(self, config, checklist):
+        workers, race_condition_workers = next_workers.after_download_weather(
             Message("download_weather", "success 12"), config, checklist
         )
-        expected = NextWorker(
-            "nowcast.workers.download_live_ocean", [], host="localhost"
-        )
-        assert expected in workers
+        expected = [
+            NextWorker(
+                "nowcast.workers.get_NeahBay_ssh", ["nowcast"], host="localhost"
+            ),
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
+            ),
+            NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
+        ]
+        assert len(workers) == len(expected)
+        for next_worker in expected:
+            assert next_worker in workers
+        assert race_condition_workers == {"grib_to_netcdf", "make_live_ocean_files"}
 
 
 class TestAfterCollectWeather:
@@ -210,32 +187,20 @@ class TestAfterCollectWeather:
         )
         assert workers == []
 
-    @pytest.mark.parametrize(
-        "msg_type, args",
-        (
-            ("success 00", ["06"]),
-            ("success 06", ["12"]),
-            ("success 12", ["18"]),
-            ("success 18", ["00"]),
-        ),
-    )
-    def test_success_launch_next_forecast_collect_weather(
-        self, msg_type, args, config, checklist
-    ):
-        workers = next_workers.after_collect_weather(
-            Message("collect_weather", msg_type), config, checklist
-        )
-        expected = NextWorker("nowcast.workers.collect_weather", args, host="localhost")
-        assert expected in workers
-
-    def test_success_06_launch_collect_river_data(self, config, checklist):
-        with patch(
-            "nowcast.workers.collect_river_data.arrow.now",
+    def test_success_06(self, config, checklist):
+        p_now = patch(
+            "nowcast.next_workers.arrow.now",
             return_value=arrow.get("2018-12-27"),
             autospec=True,
-        ):
+        )
+        p_utcnow = patch(
+            "nowcast.next_workers.arrow.utcnow",
+            return_value=arrow.get("2018-12-27"),
+            autospec=True,
+        )
+        with p_now, p_utcnow:
             workers = next_workers.after_collect_weather(
-                Message("collect_weather", "success 06"), config, checklist
+                Message("download_weather", "success 06"), config, checklist
             )
         expected = [
             NextWorker(
@@ -253,71 +218,56 @@ class TestAfterCollectWeather:
                 ["Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
+            NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
+            NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
+            NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
+            NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
+            NextWorker(
+                "nowcast.workers.get_vfpa_hadcp",
+                ["--data-date", "2018-12-26"],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.get_NeahBay_ssh", ["forecast2"], host="localhost"
+            ),
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
+            ),
+            NextWorker("nowcast.workers.collect_weather", ["12"], host="localhost"),
         ]
+        assert len(workers) == len(expected)
         for next_worker in expected:
             assert next_worker in workers
 
+    def test_success_12(self, config, checklist):
+        workers, race_condition_workers = next_workers.after_collect_weather(
+            Message("download_weather", "success 12"), config, checklist
+        )
+        expected = [
+            NextWorker(
+                "nowcast.workers.get_NeahBay_ssh", ["nowcast"], host="localhost"
+            ),
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
+            ),
+            NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
+            NextWorker("nowcast.workers.collect_weather", ["18"], host="localhost"),
+        ]
+        assert len(workers) == len(expected)
+        for next_worker in expected:
+            assert next_worker in workers
+        assert race_condition_workers == {"grib_to_netcdf", "make_live_ocean_files"}
+
     @pytest.mark.parametrize(
-        "msg_type, args", [("success 06", ["forecast2"]), ("success 12", ["nowcast"])]
+        "msg_type, args", (("success 00", ["06"]), ("success 18", ["00"]))
     )
-    def test_success_launch_get_NeahBay_ssh(self, msg_type, args, config, checklist):
+    def test_success_launch_next_forecast_collect_weather(
+        self, msg_type, args, config, checklist
+    ):
         workers = next_workers.after_collect_weather(
             Message("collect_weather", msg_type), config, checklist
         )
-        expected = NextWorker("nowcast.workers.get_NeahBay_ssh", args, host="localhost")
-        assert expected in workers
-
-    @pytest.mark.parametrize(
-        "msg_type, args", [("success 06", ["forecast2"]), ("success 12", ["nowcast+"])]
-    )
-    def test_success_launch_grib_to_netcdf(self, msg_type, args, config, checklist):
-        workers = next_workers.after_collect_weather(
-            Message("collect_weather", msg_type), config, checklist
-        )
-        expected = NextWorker("nowcast.workers.grib_to_netcdf", args, host="localhost")
-        assert expected in workers
-
-    @pytest.mark.parametrize("ctd_stn", ["SCVIP", "SEVIP", "USDDL"])
-    def test_success_06_launch_get_onc_ctd(self, ctd_stn, config, checklist):
-        workers = next_workers.after_collect_weather(
-            Message("collect_weather", "success 06"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.get_onc_ctd", args=[ctd_stn], host="localhost"
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize("ferry_platform", ["TWDP"])
-    def test_success_06_launch_get_onc_ferry(self, ferry_platform, config, checklist):
-        workers = next_workers.after_collect_weather(
-            Message("collect_weather", "success 06"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.get_onc_ferry", args=[ferry_platform], host="localhost"
-        )
-        assert expected in workers
-
-    def test_success_06_launch_get_vfpa_hadcp_for_prev_day(self, config, checklist):
-        with patch(
-            "nowcast.next_workers.arrow.utcnow", return_value=arrow.get("2018-11-08")
-        ):
-            workers = next_workers.after_collect_weather(
-                Message("collect_weather", "success 06"), config, checklist
-            )
-        expected = NextWorker(
-            "nowcast.workers.get_vfpa_hadcp",
-            args=["--data-date", "2018-11-07"],
-            host="localhost",
-        )
-        assert expected in workers
-
-    def test_success_12_launch_download_live_ocean(self, config, checklist):
-        workers = next_workers.after_collect_weather(
-            Message("collect_weather", "success 12"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.download_live_ocean", [], host="localhost"
-        )
+        expected = NextWorker("nowcast.workers.collect_weather", args, host="localhost")
         assert expected in workers
 
 
