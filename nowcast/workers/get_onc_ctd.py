@@ -96,7 +96,7 @@ def get_onc_ctd(parsed_args, config, *args):
         logger.error(f"No ONC {parsed_args.onc_station} CTD T&S data for {ymd}")
         raise WorkerError
     logger.debug(
-        f"ONC {parsed_args.onc_station} CTD T&S data for {ymd} received and " f"parsed"
+        f"ONC {parsed_args.onc_station} CTD T&S data for {ymd} received and parsed"
     )
     logger.debug(
         f"filtering ONC {parsed_args.onc_station} temperature data for {ymd} "
