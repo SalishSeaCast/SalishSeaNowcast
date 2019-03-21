@@ -63,7 +63,7 @@ numpy==1.16.2
 olefile==0.46
 -e OPPTools==0.1.0
 packaging==19.0
-pandas==0.24.1
+pandas==0.24.2
 paramiko==2.4.2
 partd==0.3.9
 pathtools==0.1.2
@@ -121,6 +121,6 @@ utm==0.4.2
 verboselogs==1.7
 watchdog==0.8.3
 wcwidth==0.1.7
-xarray==0.11.3
+xarray==0.12
 zeep==3.2.0
 zict==0.1.3
