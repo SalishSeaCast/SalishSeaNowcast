@@ -149,14 +149,17 @@ class TestConfig:
         run_types = prod_config["vhfr fvcom runs"]["run types"]
         assert run_types["nowcast x2"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "time step": 0.5,
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/",
         }
         assert run_types["forecast x2"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/forecast/",
+            "time step": 0.5,
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/",
         }
         assert run_types["nowcast r12"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            "time step": 0.2,
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/",
         }
 
