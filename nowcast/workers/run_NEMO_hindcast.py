@@ -306,7 +306,7 @@ def _edit_run_desc(
     run_desc["restart"]["restart.nc"] = restart_file
     logger.debug(f"set restart.nc to {restart_file}")
     restart_trc_file = (
-        f"{prev_run_dir}/" f"SalishSea_{prev_namelist_info.itend:08d}_restart_trc.nc"
+        f"{prev_run_dir}/SalishSea_{prev_namelist_info.itend:08d}_restart_trc.nc"
     )
     run_desc["restart"]["restart_trc.nc"] = restart_trc_file
     logger.debug(f"set restart_trc.nc to {restart_trc_file}")

@@ -955,7 +955,7 @@ def _calc_figure(fig_func, args, kwargs):
     except FileNotFoundError as e:
         if fig_func.__name__.endswith("salinity_ferry_route"):
             logger.warning(
-                f"{args[3]} ferry route salinity comparison figure " f"failed: {e}"
+                f"{args[3]} ferry route salinity comparison figure failed: {e}"
             )
         else:
             logger.error(

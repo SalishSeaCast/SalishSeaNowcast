@@ -261,7 +261,7 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
     except TypeError:
         return _empty_device_data(ferry_platform, device_category, ymd, sensors)
     logger.debug(
-        f"ONC {ferry_platform} {device_category} data for {ymd} " f"received and parsed"
+        f"ONC {ferry_platform} {device_category} data for {ymd} received and parsed"
     )
     return device_data
 

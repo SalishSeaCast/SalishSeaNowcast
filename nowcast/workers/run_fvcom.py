@@ -576,7 +576,7 @@ def _launch_run_script(run_type, run_script_path, host_name):
     logger.info(f"{run_type}: launching {run_script_path} on {host_name}")
     run_exec_cmd = f"bash {run_script_path}"
     logger.debug(
-        f"{run_type}: running command in subprocess: " f"{shlex.split(run_exec_cmd)}"
+        f"{run_type}: running command in subprocess: {shlex.split(run_exec_cmd)}"
     )
     subprocess.Popen(shlex.split(run_exec_cmd))
     run_process_pid = None

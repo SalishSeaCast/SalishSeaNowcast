@@ -236,7 +236,7 @@ def _edit_run_desc(
     scratch_dir = Path(config["run"]["enabled hosts"][host_name]["scratch dir"])
     prev_run_dir = scratch_dir / (run_date.shift(days=-1).format("DDMMMYY").lower())
     restart_file = (
-        f"{prev_run_dir}/" f"SalishSea_{prev_run_namelists_info.itend:08d}_restart.nc"
+        f"{prev_run_dir}/SalishSea_{prev_run_namelists_info.itend:08d}_restart.nc"
     )
     run_desc["restart"]["restart.nc"] = restart_file
     logger.debug(f"set restart.nc to {restart_file}")
@@ -252,7 +252,7 @@ def _edit_run_desc(
             * prev_run_namelists_info.rdt
             / getattr(prev_run_namelists_info, f"{i}_rdt")
         )
-        restart_file = f"{prev_run_dir}/" f"{i}_SalishSea_{itend:08d}_restart.nc"
+        restart_file = f"{prev_run_dir}/{i}_SalishSea_{itend:08d}_restart.nc"
         run_desc["restart"][f"AGRIF_{i}"]["restart.nc"] = restart_file
         logger.debug(f"set AGRIF_{i} restart.nc to {restart_file}")
         restart_trc_file = f"{prev_run_dir}/{i}_SalishSea_{itend:08d}_restart_trc.nc"

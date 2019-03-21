@@ -54,7 +54,7 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"NEMO AGRIF run {parsed_args.job_id} on {parsed_args.host_name} " f"completed"
+        f"NEMO AGRIF run {parsed_args.job_id} on {parsed_args.host_name} completed"
     )
     msg_type = "success"
     return msg_type
@@ -181,7 +181,7 @@ def _is_running(ssh_client, host_name, job_id, run_id, tmp_run_dir, run_info):
         # hasn't been created yet, or has finished and it has been
         # moved to the results directory
         logger.info(
-            f"{run_id} on {host_name}: time.step not found; " f"continuing to watch..."
+            f"{run_id} on {host_name}: time.step not found; continuing to watch..."
         )
         return True
     time_step = int(stdout.splitlines()[0].strip())

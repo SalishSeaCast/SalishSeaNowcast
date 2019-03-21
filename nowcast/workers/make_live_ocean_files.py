@@ -57,7 +57,7 @@ def success(parsed_args):
 def failure(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
-        f"{ymd} Live Ocean western boundary conditions files preparation " f"failed"
+        f"{ymd} Live Ocean western boundary conditions files preparation failed"
     )
     msg_type = "failure"
     return msg_type
@@ -66,7 +66,7 @@ def failure(parsed_args):
 def make_live_ocean_files(parsed_args, config, *args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
-        f"Creating T&S western boundary conditions file from {ymd} Live " f"Ocean run"
+        f"Creating T&S western boundary conditions file from {ymd} Live Ocean run"
     )
     bc_dir = Path(config["temperature salinity"]["bc dir"])
     file_template = config["temperature salinity"]["file template"]

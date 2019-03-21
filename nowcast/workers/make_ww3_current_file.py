@@ -202,7 +202,7 @@ def _create_dataset(time, lats, lons, u_current, v_current, datasets):
             "history": f'[{now.format("YYYY-MM-DD HH:mm:ss")}] '
             f"created by SalishSeaNowcast "
             f"make_ww3_current_file worker",
-            "source": f"UBC SalishSeaCast NEMO results datasets: " f"{datasets}",
+            "source": f"UBC SalishSeaCast NEMO results datasets: {datasets}",
         },
     )
     return ds

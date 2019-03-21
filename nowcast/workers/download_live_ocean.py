@@ -62,7 +62,7 @@ def success(parsed_args):
 def failure(parsed_args):
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
-        f"{ymd} Live Ocean file for Salish Sea western boundary download " f"failed"
+        f"{ymd} Live Ocean file for Salish Sea western boundary download failed"
     )
     msg_type = "failure"
     return msg_type
