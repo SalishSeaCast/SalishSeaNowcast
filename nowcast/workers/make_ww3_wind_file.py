@@ -41,11 +41,12 @@ def main():
     )
     worker.cli.add_argument(
         "run_type",
-        choices={"forecast2", "forecast"},
+        choices={"forecast2", "forecast", "nowcast"},
         help="""
         Type of run to create wind file for:
         'forecast2' means preliminary forecast run (after NEMO forecast2 run),
-        'forecast' means updated forecast run (after NEMO forecast run)
+        'forecast' means updated forecast run (after NEMO forecast run),
+        'nowcast' means updated 1 day only (for hindcast runs)
         """,
     )
     worker.cli.add_date_option(
@@ -88,22 +89,23 @@ def make_ww3_wind_file(parsed_args, config, *args):
     hrdps_dir = Path(host_config["forcing"]["weather dir"])
     hrdps_file_tmpl = config["weather"]["file template"]
     datasets = []
-    if run_type == "forecast":
+    if run_type in {"nowcast", "forecast"}:
         hrdps_file = hrdps_dir / hrdps_file_tmpl.format(run_date.datetime)
-        datasets.append(os.fspath(hrdps_file))
+        datasets.append(hrdps_file)
         logger.debug(f"dataset: {hrdps_file}")
+    if run_type == "forecast":
         day_range = arrow.Arrow.range(
             "day", run_date.shift(days=+1), run_date.shift(days=+2)
         )
         for day in day_range:
             hrdps_file = (hrdps_dir / "fcst") / hrdps_file_tmpl.format(day.datetime)
-            datasets.append(os.fspath(hrdps_file))
+            datasets.append(hrdps_file)
             logger.debug(f"dataset: {hrdps_file}")
-    else:
+    if run_type == "forecast2":
         day_range = arrow.Arrow.range("day", run_date, run_date.shift(days=+2))
         for day in day_range:
             hrdps_file = (hrdps_dir / "fcst") / hrdps_file_tmpl.format(day.datetime)
-            datasets.append(os.fspath(hrdps_file))
+            datasets.append(hrdps_file)
             logger.debug(f"dataset: {hrdps_file}")
     dest_dir = Path(config["wave forecasts"]["run prep dir"], "wind")
     filepath_tmpl = config["wave forecasts"]["wind file template"]
@@ -138,8 +140,8 @@ def _create_dataset(time, lats, lons, u_wind, v_wind, datasets):
             "creation_date": str(now),
             "history": f'[{now.format("YYYY-MM-DD HH:mm:ss")}] '
             f"created by SalishSeaNowcast make_ww3_wind_file worker",
-            "source": f"EC HRDPS via UBC SalishSeaCast NEMO forcing datasets: "
-            f"{datasets}",
+            "source": f"ECCC HRDPS via UBC SalishSeaCast NEMO forcing datasets: "
+            f"{[os.fspath(dataset) for dataset in datasets]}",
         },
     )
     del ds.u_wind.attrs["coordinates"]
