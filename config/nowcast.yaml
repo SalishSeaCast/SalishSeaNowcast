@@ -1247,6 +1247,8 @@ message registry:
       failure forecast2: WaveWatch3 wind forcing file creation for forecast2 run failed
       success forecast: WaveWatch3 wind forcing file for forecast run ready
       failure forecast: WaveWatch3 wind forcing file creation for forecast run failed
+      success nowcast: WaveWatch3 wind forcing file for nowcast/hindcast run ready
+      failure nowcast: WaveWatch3 wind forcing file creation for nowcast/hindcast run failed
       crash: make_ww3_wind_files worker crashed
 
     make_ww3_current_file:

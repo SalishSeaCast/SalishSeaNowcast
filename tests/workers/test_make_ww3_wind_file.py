@@ -82,7 +82,7 @@ class TestMain:
         make_ww3_wind_file.main()
         args, kwargs = m_worker().cli.add_argument.call_args_list[1]
         assert args == ("run_type",)
-        assert kwargs["choices"] == {"forecast", "forecast2"}
+        assert kwargs["choices"] == {"nowcast", "forecast", "forecast2"}
         assert "help" in kwargs
 
     def test_add_run_date_option(self, m_worker):
@@ -121,6 +121,8 @@ class TestConfig:
             "failure forecast2",
             "success forecast",
             "failure forecast",
+            "success nowcast",
+            "failure nowcast",
             "crash",
         ),
     )
@@ -205,6 +207,20 @@ class TestMakeWW3WindFile:
             "SoG_wind_20170407.nc"
         }
 
+    def test_nowcast_dataset(
+        self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset, config
+    ):
+        parsed_args = SimpleNamespace(
+            host_name="west.cloud", run_type="nowcast", run_date=arrow.get("2019-03-24")
+        )
+        make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
+        m_open_dataset.assert_called_once_with(
+            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc")
+        )
+        m_open_mfdataset.assert_called_once_with(
+            [Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc")]
+        )
+
     def test_forecast_datasets(
         self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset, config
     ):
@@ -215,13 +231,13 @@ class TestMakeWW3WindFile:
         )
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
         m_open_dataset.assert_called_once_with(
-            "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc"
+            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc")
         )
         m_open_mfdataset.assert_called_once_with(
             [
-                "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc",
-                "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d08.nc",
-                "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d09.nc",
+                Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc"),
+                Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d08.nc"),
+                Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d09.nc"),
             ]
         )
 
@@ -235,12 +251,12 @@ class TestMakeWW3WindFile:
         )
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
         m_open_dataset.assert_called_once_with(
-            "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc"
+            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc")
         )
         m_open_mfdataset.assert_called_once_with(
             [
-                "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc",
-                "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d08.nc",
-                "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d09.nc",
+                Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc"),
+                Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d08.nc"),
+                Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d09.nc"),
             ]
         )
