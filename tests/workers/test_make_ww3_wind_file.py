@@ -105,6 +105,49 @@ class TestMain:
         assert args == expected
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "make_ww3_wind_file" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["make_ww3_wind_file"]
+        assert msg_registry["checklist key"] == "WW3 wind forcing"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success forecast2",
+            "failure forecast2",
+            "success forecast",
+            "failure forecast",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["make_ww3_wind_file"]
+        assert msg in msg_registry
+
+    def test_host_config_section(self, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["west.cloud-nowcast"]
+        assert (
+            host_config["forcing"]["weather dir"]
+            == "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"
+        )
+
+    def test_weather_section(self, prod_config):
+        weather = prod_config["weather"]
+        assert weather["file template"] == "ops_{:y%Ym%md%d}.nc"
+
+    def test_wave_forecasts_section(self, prod_config):
+        wave_forecasts = prod_config["wave forecasts"]
+        assert (
+            wave_forecasts["run prep dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs"
+        )
+        assert wave_forecasts["wind file template"] == "SoG_wind_{yyyymmdd}.nc"
+
+
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
 @patch("nowcast.workers.make_ww3_wind_file.logger", autospec=True)
 class TestSuccess:
