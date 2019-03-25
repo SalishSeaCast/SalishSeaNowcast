@@ -1257,6 +1257,8 @@ message registry:
       failure forecast2: WaveWatch3 currents forcing file creation for forecast2 run failed
       success forecast: WaveWatch3 currents forcing file for forecast run ready
       failure forecast: WaveWatch3 currents forcing file creation for forecast run failed
+      success nowcast: WaveWatch3 currents forcing file for nowcast/hindcast run ready
+      failure nowcast: WaveWatch3 currents forcing file creation for nowcast/hindcast run failed
       crash: make_ww3_current_files worker crashed
 
     run_ww3:
