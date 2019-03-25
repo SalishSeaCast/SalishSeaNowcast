@@ -109,6 +109,60 @@ class TestMain:
         assert args == expected
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "make_ww3_current_file" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_ww3_current_file"
+        ]
+        assert msg_registry["checklist key"] == "WW3 currents forcing"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success forecast2",
+            "failure forecast2",
+            "success forecast",
+            "failure forecast",
+            "success nowcast",
+            "failure nowcast",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_ww3_current_file"
+        ]
+        assert msg in msg_registry
+
+    def test_host_config_section(self, prod_config):
+        host_config = prod_config["run"]["enabled hosts"]["west.cloud-nowcast"]
+        assert (
+            host_config["run types"]["nowcast"]["results"]
+            == "/nemoShare/MEOPAR/SalishSea/nowcast/"
+        )
+
+    def test_wave_forecasts_section(self, prod_config):
+        wave_forecasts = prod_config["wave forecasts"]
+        assert wave_forecasts["grid dir"] == "/nemoShare/MEOPAR/nowcast-sys/grid/"
+        assert (
+            wave_forecasts["NEMO file template"]
+            == "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc"
+        )
+        assert (
+            wave_forecasts["run prep dir"]
+            == "/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs"
+        )
+        assert wave_forecasts["current file template"] == "SoG_current_{yyyymmdd}.nc"
+
+    def test_run_types_section(self, prod_config):
+        run_types = prod_config["run types"]
+        assert run_types["nowcast"]["mesh mask"] == "mesh_mask201702.nc"
+
+
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
 @patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestSuccess:
