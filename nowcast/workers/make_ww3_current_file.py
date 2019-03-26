@@ -44,11 +44,12 @@ def main():
     )
     worker.cli.add_argument(
         "run_type",
-        choices={"forecast2", "forecast"},
+        choices={"forecast2", "forecast", "nowcast"},
         help="""
         Type of run to create the currents file for:
         'forecast2' means preliminary forecast run (after NEMO forecast2 run),
-        'forecast' means updated forecast run (after NEMO forecast run)
+        'forecast' means updated forecast run (after NEMO forecast run),
+        'nowcast' means updated 1 day only (for hindcast runs)
         """,
     )
     worker.cli.add_date_option(
@@ -95,9 +96,11 @@ def make_ww3_current_file(parsed_args, config, *args):
     dest_dir = Path(config["wave forecasts"]["run prep dir"], "current")
     filepath_tmpl = config["wave forecasts"]["current file template"]
     nc_filepath = dest_dir / filepath_tmpl.format(yyyymmdd=run_date.format("YYYYMMDD"))
+    if run_type in {"nowcast", "forecast"}:
+        datasets = _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl)
     if run_type == "forecast":
-        datasets = _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl)
-    else:
+        datasets.update(_calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl))
+    if run_type == "forecast2":
         datasets = _calc_forecast2_datasets(
             run_date, nemo_dir, nemo_file_tmpl, dest_dir
         )
@@ -132,6 +135,19 @@ def make_ww3_current_file(parsed_args, config, *args):
     return checklist
 
 
+def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl):
+    datasets = {"u": [], "v": []}
+    dmy = run_date.format("DDMMMYY").lower()
+    s_yyyymmdd = e_yyyymmdd = run_date.format("YYYYMMDD")
+    for grid in datasets:
+        nowcast_file = (nemo_dir / f"nowcast/{dmy}") / nemo_file_tmpl.format(
+            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+        )
+        datasets[grid].append(nowcast_file)
+        logger.debug(f"{grid} dataset: {nowcast_file}")
+    return datasets
+
+
 def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
     datasets = {"u": [], "v": []}
     dmy = run_date.format("DDMMMYY").lower()
@@ -140,7 +156,7 @@ def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
         nowcast_file = (nemo_dir / f"nowcast/{dmy}") / nemo_file_tmpl.format(
             s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
         )
-        datasets[grid].append(os.fspath(nowcast_file))
+        datasets[grid].append(nowcast_file)
         logger.debug(f"{grid} dataset: {nowcast_file}")
     s_yyyymmdd = run_date.shift(days=+1).format("YYYYMMDD")
     e_yyyymmdd = run_date.shift(days=+2).format("YYYYMMDD")
@@ -148,7 +164,7 @@ def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
         forecast_file = (nemo_dir / f"forecast/{dmy}") / nemo_file_tmpl.format(
             s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
         )
-        datasets[grid].append(os.fspath(forecast_file))
+        datasets[grid].append(forecast_file)
         logger.debug(f"{grid} dataset: {forecast_file}")
     return datasets
 
@@ -172,7 +188,7 @@ def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl, dest_dir):
         logger.debug(f"running {cmd} in subprocess")
         subprocess.run(shlex.split(cmd))
         logger.debug(f"extracted 1st 24h of {forecast_file} to {forecast_file_24h}")
-        datasets[grid].append(os.fspath(forecast_file_24h))
+        datasets[grid].append(forecast_file_24h)
         logger.debug(f"{grid} dataset: {forecast_file_24h}")
     s_yyyymmdd = run_date.shift(days=+1).format("YYYYMMDD")
     e_yyyymmdd = run_date.shift(days=+2).format("YYYYMMDD")
@@ -180,7 +196,7 @@ def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl, dest_dir):
         forecast2_file = (nemo_dir / f"forecast2/{dmy}") / nemo_file_tmpl.format(
             s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
         )
-        datasets[grid].append(os.fspath(forecast2_file))
+        datasets[grid].append(forecast2_file)
         logger.debug(f"{grid} dataset: {forecast2_file}")
     return datasets
 
