@@ -1,0 +1,276 @@
+# System configuration file for SalishSeaCast WWatch3 hindcasts
+
+# System status checklist file
+checklist file: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast_checklist.yaml
+
+# Python interpreter in environment with all dependencies installed
+python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python
+
+# Filesystem group name to use for ownership of newly created files
+file group: sallen
+
+
+weather:
+  # Template for the atmospheric forcing file name
+  # **Must be quoted to project {} characters**
+  file template: 'ops_{:y%Ym%md%d}.nc'
+
+
+run types:
+  # Keys are run types to execute, values are NEMO configuration name,
+  # bathymetry, and mesh mask to use.
+  # Note that forecast requires a nowcast to have been completed,
+  # and forecast2 requires a forecast to have been completed.
+  nowcast:
+    mesh mask: mesh_mask201702.nc
+
+
+run:
+  enabled hosts:
+    # Compute host name where daily runs are executed under automation
+    localhost:
+      # Run type specific configurations for the runs that are executed on the
+      # compute host; keyed by run type
+      run types:
+        nowcast:
+          # Directory on compute host where results are stored
+          results: /results2/SalishSea/nowcast-green.201806/
+      forcing:
+        # Directory on compute host where atmospheric forcing files are stored
+        weather dir: /results/forcing/atmospheric/GEM2.5/operational/
+
+
+# Strait of Georgia WaveWatch3 model runs
+wave forecasts:
+  # Compute host to run wave forecast on
+  host: cedar-hindcast
+  # NEMO run to run wwatch3 forecast run after
+  # User 'after forecast' during storm surge season and 'after nowcast-green`
+  # the rest of the year
+  run when: after nowcast-green
+  # Directory on compute host where files (e.g. ww3_*.inp,  mod_def.ww3) and
+  # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
+  # are stored
+  # **or**
+  # Directory where wind and current forcing datasets are stored during pre-hindcast
+  # generation of those files on salish
+  run prep dir: /opp/forcing/wwatch3/
+  # Directory in which to find mesh mask file
+  grid dir: /SalishSeaCast/grid/
+  # Template for wind forcing file names
+  # **Must be quoted to project {} characters**
+  wind file template: 'SoG_wind_{yyyymmdd}.nc'
+  # Template for ocean current forcing file names
+  # **Must be quoted to project {} characters**
+  current file template: 'SoG_current_{yyyymmdd}.nc'
+  # Template for NEMO hourly results file name
+  # **Must be quoted to project {} characters**
+  NEMO file template: 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
+  # Path to the wwatch3 executables directory
+  wwatch3 exe path: /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe
+  # Path to the salishsea command processor executable to use in the run script
+  salishsea cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea
+  # Directories on compute host where results are stored, keyed by run type
+  results:
+    nowcast: /nemoShare/MEOPAR/SalishSea/wwatch3-nowcast/
+    forecast: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast/
+    forecast2: /nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/
+  # Directories on results server where run results are stored
+  # in ddmmmyy/ directories; keyed by run type
+  results archive:
+    nowcast: /opp/wwatch3/nowcast/
+    forecast: /opp/wwatch3/forecast/
+    forecast2: /opp/wwatch3/forecast2/
+
+
+# Distributed logging system configuration
+logging:
+  aggregator:
+    version: 1
+    disable_existing_loggers: False
+    formatters:
+      simple:
+        format: '%(asctime)s %(levelname)s [%(logger_name)s] %(message)s'
+    handlers:
+      info_text:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.log
+        backupCount: 7
+      debug_text:
+        class: logging.handlers.RotatingFileHandler
+        level: DEBUG
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.debug.log
+        backupCount: 7
+      sentry:
+        class: raven.handlers.logging.SentryHandler
+        level: ERROR
+        # dsn will be obtained from SENTRY_DSN environment variable
+      email:
+        class: logging.handlers.SMTPHandler
+        level: CRITICAL
+        formatter: simple
+        subject: 'CRITICAL Message from Salish Sea Nowcast System'
+        mailhost: localhost
+        fromaddr: salishsea_nowcast@eoas.ubc.ca
+        toaddrs:
+          - dlatornell@eoas.ubc.ca
+          - sallen@eoas.ubc.ca
+    root:
+      level: DEBUG
+      handlers:
+       - info_text
+       - debug_text
+       - sentry
+       - email
+
+  publisher:
+    version: 1
+    disable_existing_loggers: False
+    formatters:
+      simple:
+        format: '%(asctime)s %(levelname)s [%(name)s] %(message)s'
+    handlers:
+      console:
+        class: logging.StreamHandler
+        # Level 100 disables console logging.
+        # Use worker --debug flag to enable console logging.
+        level: 100
+        formatter: simple
+        stream: ext://sys.stdout
+      zmq_pub:
+        class: zmq.log.handlers.PUBHandler
+        level: DEBUG
+        formatter: simple
+      sentry:
+        class: raven.handlers.logging.SentryHandler
+        level: ERROR
+        # dsn will be obtained from SENTRY_DSN environment variable
+      wgrib2_text:
+        class: logging.FileHandler
+        level: DEBUG
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
+        mode: w
+      checklist:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
+        backupCount: 7
+    loggers:
+      wgrib2:
+        qualname: wgrib2
+        level: DEBUG
+        propagate: False
+        handlers:
+          - wgrib2_text
+      checklist:
+        qualname: checklist
+        level: INFO
+        propagate: False
+        handlers:
+          - checklist
+      watchdog:
+        # File system monitoring library used by collect_weather worker
+        qualname: watchdog
+        level: WARNING
+        formatter: simple
+      zeep:
+        # SOAP client library used to access CHS real-time water levels service
+        qualname: zeep
+        level: WARNING
+        formatter: simple
+    root:
+      level: DEBUG
+      handlers:
+       - console
+       - zmq_pub
+       - sentry
+
+
+# Message system
+zmq:
+  host: skookum.eos.ubc.ca
+  ports:
+    # traffic between manager and message broker
+    manager: 5554
+    # traffic between workers and message broker
+    workers: 5555
+    # pub/sub logging traffic for log aggregator
+    logging:
+      message_broker: 5560
+      manager: 5561
+      workers: [5562, 5564, 5565, 5566, 5567, 5568, 5569, 5570, 5571, 5572, 5573, 5574, 5575, 5576, 5577, 5578, 5579]
+    # **host:port pairs in lists must be quoted to protect : characters**
+      run_NEMO: ['salish.eos.ubc.ca:5556', '206.12.48.112:5556']
+      watch_NEMO: ['salish.eos.ubc.ca:5557', '206.12.48.112:5557']
+      make_ww3_wind_file: '206.12.48.112:5570'
+      make_ww3_current_file: '206.12.48.112:5571'
+      run_ww3: '206.12.48.112:5572'
+      watch_ww3: '206.12.48.112:5573'
+      make_fvcom_boundary: '206.12.48.112:5580'
+      make_fvcom_rivers_forcing: '206.12.48.112:5581'
+      run_fvcom: '206.12.48.112:5582'
+      watch_fvcom: '206.12.48.112:5583'
+
+
+message registry:
+  # Message types that the manager process can send and their meanings
+  # Don't change this section without making corresponding changes in
+  # the nemo_nowcast.manager module of the NEMO_Nowcast package.
+  manager:
+    ack: message acknowledged
+    checklist cleared: system checklist cleared
+    unregistered worker: ERROR - message received from unregistered worker
+    unregistered message type: ERROR - unregistered message type received from worker
+    no after_worker function: ERROR - after_worker function not found in next_workers module
+
+  # Module from which to load :py:func:`after_<worker_name>` functions
+  # that provide lists of workers to launch when :kbd:`worker_name` finishes.
+  # Use fully qualified, dotted notation.
+  next workers module: nowcast.next_workers
+
+  workers:
+    make_ww3_wind_file:
+      checklist key: WW3 wind forcing
+      success forecast2: WaveWatch3 wind forcing file for forecast2 run ready
+      failure forecast2: WaveWatch3 wind forcing file creation for forecast2 run failed
+      success forecast: WaveWatch3 wind forcing file for forecast run ready
+      failure forecast: WaveWatch3 wind forcing file creation for forecast run failed
+      success nowcast: WaveWatch3 wind forcing file for nowcast/hindcast run ready
+      failure nowcast: WaveWatch3 wind forcing file creation for nowcast/hindcast run failed
+      crash: make_ww3_wind_files worker crashed
+
+    make_ww3_current_file:
+      checklist key: WW3 currents forcing
+      success forecast2: WaveWatch3 currents forcing file for forecast2 run ready
+      failure forecast2: WaveWatch3 currents forcing file creation for forecast2 run failed
+      success forecast: WaveWatch3 currents forcing file for forecast run ready
+      failure forecast: WaveWatch3 currents forcing file creation for forecast run failed
+      success nowcast: WaveWatch3 currents forcing file for nowcast/hindcast run ready
+      failure nowcast: WaveWatch3 currents forcing file creation for nowcast/hindcast run failed
+      crash: make_ww3_current_files worker crashed
+
+    run_ww3:
+      checklist key: WWATCH3 run
+      success forecast2: forecast2 WaveWatch3 run started
+      failure forecast2: forecast2 WaveWatch3 run failed
+      success nowcast: nowcast WaveWatch3 run started
+      failure nowcast: nowcast WaveWatch3 run failed
+      success forecast: forecast WaveWatch3 run started
+      failure forecast: forecast WaveWatch3 run failed
+      crash: run_ww3 worker crashed
+
+    watch_ww3:
+      checklist key: WWATCH3 run
+      need: wwatch3 run information dict requested
+      success forecast2: forecast2 WaveWatch3 run completed
+      failure forecast2: forecast2 WaveWatch3 run failed
+      success nowcast: nowcast WaveWatch3 run completed
+      failure nowcast: nowcast WaveWatch3 run failed
+      success forecast: forecast WaveWatch3 run completed
+      failure forecast: forecast WaveWatch3 run failed
+      crash: watch_ww3 worker crashed
