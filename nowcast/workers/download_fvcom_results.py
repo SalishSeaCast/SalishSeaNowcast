@@ -12,7 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that 
+"""SalishSeaCast worker that downloads the results files
+from a FVCOM Vancouver Harbour and Fraser River (VHFR) model run on the
+cloud facility to archival storage.
 """
 import logging
 import os
