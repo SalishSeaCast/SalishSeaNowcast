@@ -30,7 +30,7 @@ author = "Salish Sea MEOPAR Project Contributors and The University of British C
 copyright_years = (
     "2013"
     if datetime.date.today().year == 2013
-    else "2016-{this_year:%Y}".format(this_year=datetime.date.today())
+    else "2013-{this_year:%Y}".format(this_year=datetime.date.today())
 )
 copyright = "{copyright_years}, {author}".format(
     copyright_years=copyright_years, author=author
