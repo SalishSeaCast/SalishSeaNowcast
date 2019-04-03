@@ -41,14 +41,19 @@ vhfr fvcom runs:
       fraser nodes file: vh_x2_river_nodes_fraser.txt
     r12:
       fraser nodes file: vh_r12_river_nodes_fraser.txt
+      
   nemo coupling:
     nemo coordinates: grid/coordinates_seagrid_SalishSea201702.nc
+    
   rivers forcing:
     nemo rivers dir: rivers/
     runoff file template: R201702DFraCElse_{yyyymmdd}.nc
     temperature climatology: rivers-climatology/rivers_ConsTemp_month.nc
     rivers file template: 'rivers_{model_config}_{run_type}_{yyyymmdd}.nc'
-  input dir: fvcom-runs/input/
+
+  input dir:
+   x2: fvcom-runs/input.x2/
+   r12: fvcom-runs/input.r12/
 """
         )
     config_ = nemo_nowcast.Config()
@@ -178,10 +183,9 @@ class TestConfig:
         )
 
     def test_input_dir(self, prod_config):
-        assert (
-            prod_config["vhfr fvcom runs"]["input dir"]
-            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/"
-        )
+        input_dir = prod_config["vhfr fvcom runs"]["input dir"]
+        assert input_dir["x2"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.x2/"
+        assert input_dir["r12"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.r12/"
 
     def test_namelist_rivers(self, prod_config):
         assert (
@@ -292,7 +296,7 @@ class TestMakeFVCOMRiversForcing:
             run_type: {
                 "run date": run_date.format("YYYY-MM-DD"),
                 "model config": model_config,
-                "rivers forcing file": f"fvcom-runs/input/rivers_{model_config}_{run_type}_{river_file_date}.nc",
+                "rivers forcing file": f"fvcom-runs/input.{model_config}/rivers_{model_config}_{run_type}_{river_file_date}.nc",
             }
         }
 
@@ -401,7 +405,7 @@ class TestMakeFVCOMRiversForcing:
         )
         make_fvcom_rivers_forcing.make_fvcom_rivers_forcing(parsed_args, config)
         m_gen_riv.assert_called_once_with(
-            f"fvcom-runs/input/rivers_{model_config}_{run_type}_{river_file_date}.nc",
+            f"fvcom-runs/input.{model_config}/rivers_{model_config}_{run_type}_{river_file_date}.nc",
             [
                 run_date.shift(hours=-12).format("YYYY-MM-DD HH:mm:ss"),
                 run_date.shift(days=+1).format("YYYY-MM-DD HH:mm:ss"),

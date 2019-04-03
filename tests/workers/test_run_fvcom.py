@@ -71,12 +71,16 @@ vhfr fvcom runs:
   rivers forcing:
     rivers file template: 'rivers_{model_config}_{run_type}_{yyyymmdd}.nc'
 
-  input dir: fvcom-runs/input/
+  input dir:
+   x2: fvcom-runs/input.x2/
+   r12: fvcom-runs/input.r12/
+
   output station timeseries: 
     x2:
       FVCOM-VHFR-config/output/vh_x2_station.txt
     r12:
       FVCOM-VHFR-config/output/vh_r12_station.txt
+      
   namelists:
     '{casename}_run.nml':
       - namelist.case
@@ -91,9 +95,17 @@ vhfr fvcom runs:
       - namelist.grid
       - namelist.nesting
       - namelist.station_timeseries
-  number of processors: 64
-  mpi hosts file: ${HOME}/mpi_hosts.fvcom
+      
+  number of processors:
+   x2: 28
+   r12: 84
+  
+  mpi hosts file:
+   x2: ${HOME}/mpi_hosts.fvcom.x2
+   r12: ${HOME}/mpi_hosts.fvcom.r12
+  
   fvc_cmd: bin/fvc
+  
   run types:
     nowcast x2:
       time step: 0.5
@@ -205,10 +217,9 @@ class TestConfig:
         assert "fvcom grid" in vhfr_fvcom_runs
         assert "nemo coupling" in vhfr_fvcom_runs
         assert "atmospheric forcing" in vhfr_fvcom_runs
-        assert (
-            vhfr_fvcom_runs["input dir"]
-            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/"
-        )
+        input_dir = prod_config["vhfr fvcom runs"]["input dir"]
+        assert input_dir["x2"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.x2/"
+        assert input_dir["r12"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.r12/"
         assert (
             vhfr_fvcom_runs["output station timeseries"]["x2"]
             == "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_x2_station.txt"
@@ -222,8 +233,10 @@ class TestConfig:
             vhfr_fvcom_runs["FVCOM exe path"]
             == "/nemoShare/MEOPAR/nowcast-sys/FVCOM41/"
         )
-        assert vhfr_fvcom_runs["number of processors"] == 64
-        assert vhfr_fvcom_runs["mpi hosts file"] == "${HOME}/mpi_hosts.fvcom"
+        assert vhfr_fvcom_runs["number of processors"]["x2"] == 28
+        assert vhfr_fvcom_runs["number of processors"]["r12"] == 84
+        assert vhfr_fvcom_runs["mpi hosts file"]["x2"] == "${HOME}/mpi_hosts.fvcom.x2"
+        assert vhfr_fvcom_runs["mpi hosts file"]["r12"] == "${HOME}/mpi_hosts.fvcom.r12"
         assert (
             vhfr_fvcom_runs["fvc_cmd"]
             == "/nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/fvc"
@@ -533,11 +546,11 @@ class TestRunDescription:
         expected = {
             "run_id": run_id,
             "casename": config["vhfr fvcom runs"]["case name"][model_config],
-            "nproc": 64,
+            "nproc": config["vhfr fvcom runs"]["number of processors"][model_config],
             "paths": {
                 "FVCOM": os.fspath(fvcom_repo_dir),
                 "runs directory": os.fspath(run_prep_dir),
-                "input": os.fspath(run_prep_dir / "input"),
+                "input": os.fspath(run_prep_dir / f"input.{model_config}"),
             },
             "namelist": os.fspath(run_prep_dir / f"vh_{model_config}_run.nml"),
         }
@@ -930,6 +943,7 @@ class TestBuildScript:
                 "results"
             ]
         )
+        n_processors = config["vhfr fvcom runs"]["number of processors"][model_config]
         script = run_fvcom._build_script(
             Path(str(tmp_run_dir)),
             Path(str(run_desc_file_path)),
@@ -943,7 +957,7 @@ class TestBuildScript:
         RUN_DESC="{run_id}.yaml"
         WORK_DIR="{tmp_run_dir}"
         RESULTS_DIR="{results_dir}/{ddmmmyy}"
-        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts.fvcom"
+        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts.fvcom.{model_config}"
         GATHER="bin/fvc gather"
         
         mkdir -p ${{RESULTS_DIR}}
@@ -952,7 +966,7 @@ class TestBuildScript:
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 64 --bind-to-core ./fvcom \
+        ${{MPIRUN}} -np {n_processors} --bind-to-core ./fvcom \
 --casename=vh_{model_config} --logfile=./fvcom.log \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
@@ -975,12 +989,15 @@ class TestBuildScript:
             assert script[i].strip() == line.strip()
 
 
-@pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
+@pytest.mark.parametrize(
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+)
 class TestDefinitions:
     """Unit tests for _definitions() function.
     """
 
-    def test_definitions(self, run_type, config, tmpdir):
+    def test_definitions(self, model_config, run_type, config, tmpdir):
         run_desc_file_path = tmpdir.ensure(f"21dec17fvcom-{run_type}.yaml")
         run_desc = {"run_id": f"21dec17fvcom-{run_type}"}
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
@@ -990,17 +1007,16 @@ class TestDefinitions:
             Path(str(tmp_run_dir)),
             Path(str(run_desc_file_path)),
             Path(str(results_dir)),
+            model_config,
             config,
         )
-        expected = """RUN_ID="21dec17fvcom-{run_type}"
+        expected = f"""RUN_ID="21dec17fvcom-{run_type}"
         RUN_DESC="21dec17fvcom-{run_type}.yaml"
         WORK_DIR="{tmp_run_dir}"
         RESULTS_DIR="{results_dir}"
-        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts.fvcom"
+        MPIRUN="mpirun --hostfile {config["vhfr fvcom runs"]["mpi hosts file"][model_config]}"
         GATHER="bin/fvc gather"
-        """.format(
-            run_type=run_type, tmp_run_dir=tmp_run_dir, results_dir=results_dir
-        )
+        """
         defns = defns.splitlines()
         for i, line in enumerate(expected.splitlines()[:-1]):
             assert defns[i].strip() == line.strip()
@@ -1016,13 +1032,14 @@ class TestExecute:
 
     def test_execute(self, model_config, run_type, config):
         script = run_fvcom._execute(model_config, config)
+        n_processors = config["vhfr fvcom runs"]["number of processors"][model_config]
         expected = f"""mkdir -p ${{RESULTS_DIR}}
 
         cd ${{WORK_DIR}}
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 64 --bind-to-core ./fvcom \
+        ${{MPIRUN}} -np {n_processors} --bind-to-core ./fvcom \
 --casename=vh_{model_config} --logfile=./fvcom.log \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout

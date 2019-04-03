@@ -139,7 +139,7 @@ def upload_fvcom_atmos_forcing(parsed_args, config, *args):
             field_type=atmos_field_type,
             yyyymmdd=atmos_file_date.format("YYYYMMDD"),
         )
-        fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"])
+        fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"][model_config])
         ssh_key = Path(os.environ["HOME"], ".ssh", config["vhfr fvcom runs"]["ssh key"])
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
         ssh_sftp.upload_file(

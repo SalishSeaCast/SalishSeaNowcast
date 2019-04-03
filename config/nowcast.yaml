@@ -753,7 +753,9 @@ vhfr fvcom runs:
     rivers file template: 'rivers_{model_config}_{run_type}_{yyyymmdd}.nc'
 
   # Directory on compute host where FVCOM input files are stored
-  input dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/
+  input dir:
+    x2: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.x2/
+    r12: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.r12/
   # Path and name of file on compute host that defines the tide gauge stations
   # to produce point outputs at
   output station timeseries:
@@ -785,10 +787,14 @@ vhfr fvcom runs:
   # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
   FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
   # Number of processors
-  number of processors: 28
+  number of processors:
+    x2: 28
+    r12: 84
   # Location on the compute host of the file that contains IP addresses
   # and MPI slots specifications.
-  mpi hosts file: ${HOME}/mpi_hosts.fvcom
+  mpi hosts file:
+    x2: ${HOME}/mpi_hosts.fvcom.x2
+    r12: ${HOME}/mpi_hosts.fvcom.r12
   # Path to the FVCOM command processor executable to use in the run script
   fvc_cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/fvc
   # Run type specific configurations for the runs that are executed on the
