@@ -758,8 +758,12 @@ Create an :file:`fvcom-runs/` directory for the VHFR FVCOM runs and populate it 
     $ chmod g+ws fvcom-runs
     $ cd fvcom-runs/
     $ cp ../FVCOM-VHFR-config/namelists/namelist.case.template namelist.case
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.grid.template namelist.grid
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.nesting.template namelist.nesting
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.netcdf.template namelist.netcdf
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.numerics.template namelist.numerics
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.obc.template namelist.obc
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.physics.template namelist.physics
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.restart.template namelist.restart
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.rivers.template namelist.rivers
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.startup.hoststart.template namelist.startup.hoststart
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.surface.template namelist.surface
