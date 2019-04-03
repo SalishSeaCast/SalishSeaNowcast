@@ -68,7 +68,9 @@ vhfr fvcom runs:
     nemo bathymetry: grid/bathymetry_201702.nc
     boundary file template: 'bdy_{model_config}_{run_type}_brcl_{yyyymmdd}.nc'
 
-  input dir: fvcom-runs/input/
+  input dir:
+   x2: fvcom-runs/input.x2/
+   r12: fvcom-runs/input.r12/
 
   run types:
     nowcast x2:
@@ -169,10 +171,9 @@ class TestConfig:
         assert msg in msg_registry
 
     def test_input_dir(self, prod_config):
-        assert (
-            prod_config["vhfr fvcom runs"]["input dir"]
-            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/"
-        )
+        input_dir = prod_config["vhfr fvcom runs"]["input dir"]
+        assert input_dir["x2"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.x2/"
+        assert input_dir["r12"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.r12/"
 
     def test_nemo_coupling_section(self, prod_config):
         nemo_coupling = prod_config["vhfr fvcom runs"]["nemo coupling"]
@@ -342,7 +343,7 @@ class TestMakeFVCOMBoundary:
         )
         with patch("nowcast.workers.make_fvcom_boundary.Path.mkdir"):
             checklist = make_fvcom_boundary.make_fvcom_boundary(parsed_args, config)
-        input_dir = Path(config["vhfr fvcom runs"]["input dir"])
+        input_dir = Path(config["vhfr fvcom runs"]["input dir"][model_config])
         expected = {
             run_type: {
                 "run date": "2018-01-08",
@@ -484,7 +485,7 @@ class TestMakeFVCOMBoundary:
         )
         with patch("nowcast.workers.make_fvcom_boundary.Path.mkdir"):
             make_fvcom_boundary.make_fvcom_boundary(parsed_args, config)
-        input_dir = Path(config["vhfr fvcom runs"]["input dir"])
+        input_dir = Path(config["vhfr fvcom runs"]["input dir"][model_config])
         m_mk_nest_file2.assert_called_once_with(
             fout=os.fspath(
                 input_dir

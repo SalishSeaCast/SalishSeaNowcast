@@ -181,13 +181,13 @@ def _run_description(run_id, run_date, model_config, run_type, run_prep_dir, con
     run_desc = {
         "run_id": run_id,
         "casename": casename,
-        "nproc": config["vhfr fvcom runs"]["number of processors"],
+        "nproc": config["vhfr fvcom runs"]["number of processors"][model_config],
         "paths": {
             "FVCOM": os.fspath(
                 Path(config["vhfr fvcom runs"]["FVCOM exe path"]).resolve()
             ),
             "runs directory": os.fspath(run_prep_dir.resolve()),
-            "input": os.fspath((run_prep_dir / "input").resolve()),
+            "input": os.fspath((run_prep_dir / f"input.{model_config}").resolve()),
         },
         "namelist": os.fspath(namelist_path.resolve()),
         ## TODO: Add VCS revision tracking, but need to be able to handle Git
@@ -380,7 +380,7 @@ def _prep_fvcom_input_dir(run_date, model_config, run_type, config):
     :param str run_type:
     :param :py:class:`nemo_nowcast.Config` config:
     """
-    fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"])
+    fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"][model_config])
     grid_dir = Path(config["vhfr fvcom runs"]["fvcom grid"]["grid dir"])
     for grid_file in (
         "grid file",
@@ -463,7 +463,12 @@ def _build_script(tmp_run_dir, run_desc_file_path, results_dir, model_config, co
             "{fix_permissions}\n"
             "{cleanup}".format(
                 defns=_definitions(
-                    run_desc, tmp_run_dir, run_desc_file_path, results_dir, config
+                    run_desc,
+                    tmp_run_dir,
+                    run_desc_file_path,
+                    results_dir,
+                    model_config,
+                    config,
                 ),
                 execute=_execute(model_config, config),
                 fix_permissions=_fix_permissions(),
@@ -474,31 +479,30 @@ def _build_script(tmp_run_dir, run_desc_file_path, results_dir, model_config, co
     return script
 
 
-def _definitions(run_desc, tmp_run_dir, run_desc_file_path, results_dir, config):
+def _definitions(
+    run_desc, tmp_run_dir, run_desc_file_path, results_dir, model_config, config
+):
     """
     :param dict run_desc:
     :param :py:class:`pathlib.Path` tmp_run_dir:
     :param :py:class:`pathlib.Path` run_desc_file_path:
     :param :py:class:`pathlib.Path` results_dir:
+    :param str model_config:
     :param :py:class:`nemo_nowcast.Config` config:
 
     :return: Run script definitions
     :rtype: str
     """
+    run_id = run_desc["run_id"]
+    fvc_cmd = config["vhfr fvcom runs"]["fvc_cmd"]
+    mpi_hosts_file = config["vhfr fvcom runs"]["mpi hosts file"][model_config]
     defns = (
-        'RUN_ID="{run_id}"\n'
-        'RUN_DESC="{run_desc_file}"\n'
-        'WORK_DIR="{run_dir}"\n'
-        'RESULTS_DIR="{results_dir}"\n'
-        'MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts.fvcom"\n'
-        'GATHER="{fvc_cmd} gather"\n'
-    ).format(
-        run_id=run_desc["run_id"],
-        run_desc_file=run_desc_file_path.name,
-        run_dir=tmp_run_dir,
-        results_dir=results_dir,
-        mpirun=f'mpirun --hostfile {config["vhfr fvcom runs"]["mpi hosts file"]}',
-        fvc_cmd=config["vhfr fvcom runs"]["fvc_cmd"],
+        f'RUN_ID="{run_id}"\n'
+        f'RUN_DESC="{run_desc_file_path.name}"\n'
+        f'WORK_DIR="{tmp_run_dir}"\n'
+        f'RESULTS_DIR="{results_dir}"\n'
+        f'MPIRUN="mpirun --hostfile {mpi_hosts_file}"\n'
+        f'GATHER="{fvc_cmd} gather"\n'
     )
     return defns
 
@@ -512,7 +516,7 @@ def _execute(model_config, config):
     :rtype: str
     """
     mpirun = (
-        f'${{MPIRUN}} -np {config["vhfr fvcom runs"]["number of processors"]} '
+        f'${{MPIRUN}} -np {config["vhfr fvcom runs"]["number of processors"][model_config]} '
         f"--bind-to-core ./fvcom "
         f'--casename={config["vhfr fvcom runs"]["case name"][model_config]} '
         f"--logfile=./fvcom.log"

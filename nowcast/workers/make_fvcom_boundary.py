@@ -116,7 +116,7 @@ def make_fvcom_boundary(parsed_args, config, *args):
         f"Creating VHFR FVCOM open boundary file for {model_config} {run_type} run from "
         f'{run_date.format("YYYY-MM-DD")} NEMO run'
     )
-    fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"])
+    fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"][model_config])
     try:
         shutil.rmtree(fvcom_input_dir)
     except FileNotFoundError:

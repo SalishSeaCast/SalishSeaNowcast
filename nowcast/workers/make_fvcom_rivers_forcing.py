@@ -152,7 +152,7 @@ def make_fvcom_rivers_forcing(parsed_args, config, *args):
         / config["vhfr fvcom runs"]["fvcom grid"][model_config]["fraser nodes file"]
     )
     river_nodes = numpy.genfromtxt(fraser_nodes_file, dtype=int)
-    fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"])
+    fvcom_input_dir = Path(config["vhfr fvcom runs"]["input dir"][model_config])
     rivers_file_tmpl = config["vhfr fvcom runs"]["rivers forcing"][
         "rivers file template"
     ]

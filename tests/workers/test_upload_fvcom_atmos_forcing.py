@@ -37,6 +37,7 @@ def config(base_config):
 vhfr fvcom runs:
   host: west.cloud
   ssh key: SalishSeaNEMO-nowcast_id_rsa
+  
   atmospheric forcing:
     fvcom atmos dir: forcing/atmospheric/GEM2.5/vhfr-fvcom
     atmos file template: 'atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc'
@@ -44,7 +45,10 @@ vhfr fvcom runs:
       - hfx
       - precip
       - wnd
-  input dir: fvcom-runs/input
+
+  input dir:
+   x2: fvcom-runs/input.x2/
+   r12: fvcom-runs/input.r12/
 """
         )
     config_ = nemo_nowcast.Config()
@@ -157,10 +161,9 @@ class TestConfig:
         assert atmos_forcing["field types"] == ["hfx", "precip", "wnd"]
 
     def test_input_dir(self, prod_config):
-        assert (
-            prod_config["vhfr fvcom runs"]["input dir"]
-            == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input/"
-        )
+        input_dir = prod_config["vhfr fvcom runs"]["input dir"]
+        assert input_dir["x2"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.x2/"
+        assert input_dir["r12"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.r12/"
 
     def test_ssh_key(self, prod_config):
         assert (
@@ -290,7 +293,7 @@ class TestUploadFVCOMAtmosForcing:
                     f"atmos_{model_config}_{run_type}_hfx_{atmos_file_date}.nc"
                 ),
                 Path(
-                    f"fvcom-runs/input/atmos_{model_config}_{run_type}_hfx_{atmos_file_date}.nc"
+                    f"fvcom-runs/input.{model_config}/atmos_{model_config}_{run_type}_hfx_{atmos_file_date}.nc"
                 ),
                 m_logger,
             ),
@@ -302,7 +305,7 @@ class TestUploadFVCOMAtmosForcing:
                     f"atmos_{model_config}_{run_type}_precip_{atmos_file_date}.nc"
                 ),
                 Path(
-                    f"fvcom-runs/input/atmos_{model_config}_{run_type}_precip_{atmos_file_date}.nc"
+                    f"fvcom-runs/input.{model_config}/atmos_{model_config}_{run_type}_precip_{atmos_file_date}.nc"
                 ),
                 m_logger,
             ),
@@ -314,7 +317,7 @@ class TestUploadFVCOMAtmosForcing:
                     f"atmos_{model_config}_{run_type}_wnd_{atmos_file_date}.nc"
                 ),
                 Path(
-                    f"fvcom-runs/input/atmos_{model_config}_{run_type}_wnd_{atmos_file_date}.nc"
+                    f"fvcom-runs/input.{model_config}/atmos_{model_config}_{run_type}_wnd_{atmos_file_date}.nc"
                 ),
                 m_logger,
             ),
