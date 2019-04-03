@@ -423,6 +423,63 @@ e.g.
     The :file:`/nemoShare/MEOPAR` shared storage must be remounted any time a compute node is rebooted or if the :kbd:`west.cloud` system administrators move it from one hypervisor to another.
 
 
+MPI Hosts Mappings
+==================
+
+Once all of the compute node VMs have been launched so that we know their IP addresses,
+create MPI hosts mapping files for NEMO/WAVEWATCH VMs and FVCOM VMs:
+
+* :file:`$HOME/mpi_hosts` for NEMO/WAVEWATCH VMs containing::
+
+    192.168.1.54 slots=7 max-slots=8
+    192.168.1.80 slots=7 max-slots=8
+    192.168.1.58 slots=7 max-slots=8
+    192.168.1.59 slots=7 max-slots=8
+    192.168.1.60 slots=7 max-slots=8
+    192.168.1.61 slots=7 max-slots=8
+    192.168.1.62 slots=7 max-slots=8
+    192.168.1.63 slots=7 max-slots=8
+    192.168.1.64 slots=7 max-slots=8
+    192.168.1.65 slots=7 max-slots=8
+    192.168.1.66 slots=7 max-slots=8
+    192.168.1.67 slots=7 max-slots=8
+    192.168.1.77 slots=7 max-slots=8
+    192.168.1.69 slots=7 max-slots=8
+    192.168.1.78 slots=7 max-slots=8
+    192.168.1.79 slots=7 max-slots=8
+    192.168.1.81 slots=7 max-slots=8
+
+* :file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for :kbd:`x2` model configuration runs containing::
+
+    192.168.1.86 slots=7 max-slots=8
+    192.168.1.85 slots=7 max-slots=8
+    192.168.1.87 slots=7 max-slots=8
+    192.168.1.88 slots=7 max-slots=8
+
+* :file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for :kbd:`r12` model configuration runs containing::
+
+    192.168.1.89 slots=7 max-slots=8
+    192.168.1.90 slots=7 max-slots=8
+    192.168.1.91 slots=7 max-slots=8
+    192.168.1.92 slots=7 max-slots=8
+    192.168.1.93 slots=7 max-slots=8
+    192.168.1.94 slots=7 max-slots=8
+    192.168.1.95 slots=7 max-slots=8
+    192.168.1.96 slots=7 max-slots=8
+    192.168.1.97 slots=7 max-slots=8
+    192.168.1.98 slots=7 max-slots=8
+    192.168.1.99 slots=7 max-slots=8
+    192.168.1.100 slots=7 max-slots=8
+
+Use the appropriate IP addresses in the files.
+Note that the head node is not included in any of the mapping files;
+it is reserved for running :program:`xios_server.exe` for NEMO runs.
+
+The :kbd:`slots=7 max-slots=8` directives in these files tell :command:`mpirun` that there are 8 cores per VM but we want to run (at most) 7 MPI processes per VM.
+This is done to leave 1 core per VM free for software defined networking processes, etc.
+Profiling and scaling analysis has shown that this is significantly more efficient than running MPI processes on all cores of the VMs.
+
+
 Mercurial Repositories
 ======================
 
