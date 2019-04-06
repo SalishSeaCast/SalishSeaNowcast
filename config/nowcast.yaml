@@ -63,6 +63,7 @@ rivers:
   stations:
     # River name (camel-case): ECCC station id
     Capilano: 08GA010
+    ChilliwackVedder: 08MH001
     ClowhomClowhomLake: 08GB013
     Englishman: 08HB002
     Fraser: 08MF005
@@ -77,6 +78,7 @@ rivers:
   SOG river files:
     # River name (camel-case): SOG-forcing river flow file path
     Capilano: /opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow
+    ChilliwackVedder: /results/forcing/rivers/observations/Chilliwack_Vedder_flow
     ClowhomClowhomLake: /results/forcing/rivers/observations/Clowhom_ClowhomLake_flow
     Englishman: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow
     Fraser: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
