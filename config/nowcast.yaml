@@ -63,14 +63,28 @@ rivers:
   stations:
     # River name (camel-case): ECCC station id
     Capilano: 08GA010
+    Clowhom: 08GB013
     Englishman: 08HB002
     Fraser: 08MF005
+    Homathko: 08GD004
+    Salmon: 08HD006
+    Squamish: 08GA022
+    Theodosia_Scotty : 08GC008
+    Theodosia_Bypass : 08GC006
+    Theodosia_Diversion : 08GC005
   # Files containing daily average river discharges
   SOG river files:
     # River name (camel-case): SOG-forcing river flow file path
     Capilano: /opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow
+    Clowhom: /results/forcing/rivers/observations/Clowhom_flow
     Englishman: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow
     Fraser: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
+    Homathko: /results/forcing/rivers/observations/Homathko_flow
+    Salmon: /results/forcing/rivers/observations/Salmon_flow
+    Squamish: /results/forcing/rivers/observations/Squamish_flow
+    Theodosia_Scotty: /results/forcing/rivers/observations/Theodosia_Scotty_flow
+    Theodosia_Bypass: /results/forcing/rivers/observations/Theodosia_Bypass_flow
+    Theodosia_Diversion: /results/forcing/rivers/observations/Theodosia_Diversion_flow
   # File that describes Fraser River climatology separation from measured
   # flow at Hope
   Fraser climatology: /SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
