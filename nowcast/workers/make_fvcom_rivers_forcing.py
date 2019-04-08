@@ -169,7 +169,9 @@ def make_fvcom_rivers_forcing(parsed_args, config, *args):
         OPPTools.river.discharge_split(discharge, len(river_nodes)),
         numpy.tile(temperature[:, None], len(river_nodes)),
         rivName="fraser",
-        namelist_file=os.fspath(fvcom_input_dir.parent / "namelist.rivers"),
+        namelist_file=os.fspath(
+            fvcom_input_dir.parent / f"namelist.rivers.{model_config}"
+        ),
     )
     logger.info(f"Stored VHFR FVCOM rivers forcing file: {fvcom_input_dir/rivers_file}")
     checklist = {

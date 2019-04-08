@@ -782,8 +782,7 @@ vhfr fvcom runs:
   namelists:
     # Name of the namelist file to create by concatenating the list of namelist
     # section files below
-    # **Must be quoted to project {} characters**
-    '{casename}_run.nml':
+    vh_x2_run.nml:
       - namelist.case
       - namelist.startup.hotstart
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
@@ -792,7 +791,26 @@ vhfr fvcom runs:
       - namelist.netcdf
       - namelist.physics
       - namelist.surface
-      - namelist.rivers
+      - namelist.rivers.x2
+      - namelist.obc
+      - namelist.grid
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check
+      - namelist.nesting
+      - namelist.station_timeseries
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models
+    vh_r12_run.nml:
+      - namelist.case
+      - namelist.startup.hotstart
+      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
+      - namelist.numerics
+      - namelist.restart
+      - namelist.netcdf
+      - namelist.physics
+      - namelist.surface
+      - namelist.rivers.r12
       - namelist.obc
       - namelist.grid
       - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater

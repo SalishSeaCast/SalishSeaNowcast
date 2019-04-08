@@ -845,6 +845,7 @@ Create an :file:`fvcom-runs/` directory for the VHFR FVCOM runs and populate it 
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.numerics.template namelist.numerics
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.obc.template namelist.obc
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.physics.template namelist.physics
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.rivers.template namelist.rivers
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.rivers.template namelist.rivers.x2
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.rivers.template namelist.rivers.r12
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.startup.hoststart.template namelist.startup.hoststart
     $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.surface.template namelist.surface
