@@ -128,7 +128,7 @@ Use the :guilabel:`Compute > Access & Security > Security Groups > Manage Rules`
 
 * :command:`ssh`
 * :command:`ping`
-* ZeroMQ distributed logging subscription
+* ZeroMQ distributed logging subscriptions
 
 access to the image instances.
 
@@ -145,13 +145,37 @@ access to the image instances.
 * Remote: CIDR
 * CIDR: 0.0.0.0/0
 
-ZeroMQ distributed logging subscription Rule:
+ZeroMQ distributed logging subscription Rules:
 
-* Rule: Custom TCP
-* Direction: Ingress
-* Port range: 5556 - 5557
-* Remote: CIDR
-* CIDR: 142.103.36.0/24
+* For :py:mod:`~nowcast.workers.run_NEMO` and :py:mod:`~nowcast.workers.watch_NEMO`:
+
+  * Rule: Custom TCP
+  * Direction: Ingress
+  * Port range: 5556 - 5557
+  * Remote: CIDR
+  * CIDR: 142.103.36.0/24
+
+* For :py:mod:`~nowcast.workers.make_ww3_wind_file`,
+  :py:mod:`~nowcast.workers.make_ww3_current_file`,
+  :py:mod:`~nowcast.workers.run_ww3`,
+  and :py:mod:`~nowcast.workers.watch_ww3`:
+
+  * Rule: Custom TCP
+  * Direction: Ingress
+  * Port range: 5570 - 5573
+  * Remote: CIDR
+  * CIDR: 142.103.36.0/24
+
+* For :py:mod:`~nowcast.workers.make_fvcom_boundary`,
+  :py:mod:`~nowcast.workers.make_fvcom_rivers_forcing`,
+  :py:mod:`~nowcast.workers.run_fvcom`,
+  and :py:mod:`~nowcast.workers.watch_fvcom`:
+
+  * Rule: Custom TCP
+  * Direction: Ingress
+  * Port range: 5580 - 5587
+  * Remote: CIDR
+  * CIDR: 142.103.36.0/24
 
 
 Instances
