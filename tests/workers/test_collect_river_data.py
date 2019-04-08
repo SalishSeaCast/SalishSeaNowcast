@@ -116,21 +116,32 @@ class TestConfig:
         assert rivers["csv file template"] == "BC_{stn_id}_hourly_hydrometric.csv"
         assert rivers["stations"] == {
             "Capilano": "08GA010",
+            "ChilliwackVedder": "08MH001",
+            "ClowhomClowhomLake": "08GB013",
             "Englishman": "08HB002",
             "Fraser": "08MF005",
+            "HomathkoMouth": "08GD004",
+            "SalmonSayward": "08HD006",
+            "SanJuanPortRenfrew": "08HA010",
+            "SquamishBrackendale": "08GA022",
+            "TheodosiaScotty": "08GC008",
+            "TheodosiaBypass": "08GC006",
+            "TheodosiaDiversion": "08GC005",
         }
-        assert (
-            rivers["SOG river files"]["Capilano"]
-            == "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow"
-        )
-        assert (
-            rivers["SOG river files"]["Englishman"]
-            == "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow"
-        )
-        assert (
-            rivers["SOG river files"]["Fraser"]
-            == "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow"
-        )
+        assert rivers["SOG river files"] == {
+            "Capilano": "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow",
+            "ChilliwackVedder": "/results/forcing/rivers/observations/Chilliwack_Vedder_flow",
+            "ClowhomClowhomLake": "/results/forcing/rivers/observations/Clowhom_ClowhomLake_flow",
+            "Englishman": "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow",
+            "Fraser": "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow",
+            "HomathkoMouth": "/results/forcing/rivers/observations/Homathko_Mouth_flow",
+            "SalmonSayward": "/results/forcing/rivers/observations/Salmon_Sayward_flow",
+            "SanJuanPortRenfrew": "/results/forcing/rivers/observations/SanJuan_PortRenfrew_flow",
+            "SquamishBrackendale": "/results/forcing/rivers/observations/Squamish_Brackendale_flow",
+            "TheodosiaScotty": "/results/forcing/rivers/observations/Theodosia_Scotty_flow",
+            "TheodosiaBypass": "/results/forcing/rivers/observations/Theodosia_Bypass_flow",
+            "TheodosiaDiversion": "/results/forcing/rivers/observations/Theodosia_Diversion_flow",
+        }
 
 
 @patch("nowcast.workers.collect_river_data.logger", autospec=True)

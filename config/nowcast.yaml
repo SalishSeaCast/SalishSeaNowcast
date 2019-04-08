@@ -71,9 +71,9 @@ rivers:
     SalmonSayward: 08HD006
     SanJuanPortRenfrew: 08HA010
     SquamishBrackendale: 08GA022
-    TheodosiaScotty : 08GC008
-    TheodosiaBypass : 08GC006
-    TheodosiaDiversion : 08GC005
+    TheodosiaScotty: 08GC008
+    TheodosiaBypass: 08GC006
+    TheodosiaDiversion: 08GC005
   # Files containing daily average river discharges
   SOG river files:
     # River name (camel-case): SOG-forcing river flow file path
