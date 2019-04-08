@@ -82,7 +82,7 @@ vhfr fvcom runs:
       FVCOM-VHFR-config/output/vh_r12_station.txt
       
   namelists:
-    '{casename}_run.nml':
+    'vh_x2_run.nml':
       - namelist.case
       - namelist.startup.hotstart
       - namelist.numerics
@@ -90,7 +90,20 @@ vhfr fvcom runs:
       - namelist.netcdf
       - namelist.physics
       - namelist.surface
-      - namelist.rivers
+      - namelist.rivers.x2
+      - namelist.obc
+      - namelist.grid
+      - namelist.nesting
+      - namelist.station_timeseries
+    'vh_r12_run.nml':
+      - namelist.case
+      - namelist.startup.hotstart
+      - namelist.numerics
+      - namelist.restart
+      - namelist.netcdf
+      - namelist.physics
+      - namelist.surface
+      - namelist.rivers.r12
       - namelist.obc
       - namelist.grid
       - namelist.nesting
@@ -307,7 +320,7 @@ class TestConfig:
         )
 
     def test_namelists_section(self, prod_config):
-        namelists = prod_config["vhfr fvcom runs"]["namelists"]["{casename}_run.nml"]
+        namelists = prod_config["vhfr fvcom runs"]["namelists"]["vh_x2_run.nml"]
         assert namelists == [
             "namelist.case",
             "namelist.startup.hotstart",
@@ -317,7 +330,28 @@ class TestConfig:
             "namelist.netcdf",
             "namelist.physics",
             "namelist.surface",
-            "namelist.rivers",
+            "namelist.rivers.x2",
+            "namelist.obc",
+            "namelist.grid",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check",
+            "namelist.nesting",
+            "namelist.station_timeseries",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models",
+        ]
+        namelists = prod_config["vhfr fvcom runs"]["namelists"]["vh_r12_run.nml"]
+        assert namelists == [
+            "namelist.case",
+            "namelist.startup.hotstart",
+            "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io",
+            "namelist.numerics",
+            "namelist.restart",
+            "namelist.netcdf",
+            "namelist.physics",
+            "namelist.surface",
+            "namelist.rivers.r12",
             "namelist.obc",
             "namelist.grid",
             "/nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater",
@@ -638,7 +672,7 @@ class TestEditNamelists:
                 },
             ),
             call(
-                Path("run_prep_dir/namelist.rivers"),
+                Path(f"run_prep_dir/namelist.rivers.{model_config}"),
                 {
                     "nml_river_type": {
                         "river_info_file": f"rivers_{model_config}_{run_type}_{run_date.format('YYYYMMDD')}.nc_riv.nml"
@@ -767,7 +801,7 @@ class TestEditNamelists:
                 },
             ),
             call(
-                Path("run_prep_dir/namelist.rivers"),
+                Path(f"run_prep_dir/namelist.rivers.{model_config}"),
                 {
                     "nml_river_type": {
                         "river_info_file": f"rivers_{model_config}_{run_type}_{run_date.shift(days=+1).format('YYYYMMDD')}.nc_riv.nml"
@@ -826,20 +860,22 @@ class TestEditNamelists:
 
 
 @pytest.mark.parametrize(
-    "casename, run_type",
-    (("vh_x2", "nowcast"), ("vh_x2", "forecast"), ("vh_r12", "nowcast")),
+    "model_config, run_type",
+    (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
 )
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestAssembleNamelist:
     """Unit test for _assemble_namelist() function.
     """
 
-    def test_assemble_namelist(self, m_logger, casename, run_type, config, tmpdir):
+    def test_assemble_namelist(self, m_logger, model_config, run_type, config, tmpdir):
         run_prep_dir = Path(str(tmpdir.ensure_dir("fvcom-runs")))
-        for namelist in config["vhfr fvcom runs"]["namelists"]["{casename}_run.nml"]:
+        for namelist in config["vhfr fvcom runs"]["namelists"][
+            f"vh_{model_config}_run.nml"
+        ]:
             tmpdir.ensure("fvcom-runs", namelist)
         namelist_path = run_fvcom._assemble_namelist(
-            casename, run_type, run_prep_dir, config
+            f"vh_{model_config}", run_type, run_prep_dir, config
         )
         assert namelist_path.exists()
 

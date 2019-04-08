@@ -288,7 +288,7 @@ def _edit_namelists(casename, run_date, model_config, run_type, run_prep_dir, co
             }
         },
         run_prep_dir
-        / "namelist.rivers": {
+        / f"namelist.rivers.{model_config}": {
             "nml_river_type": {"river_info_file": os.fspath(rivers_file)}
         },
         run_prep_dir
@@ -358,9 +358,8 @@ def _assemble_namelist(casename, run_type, run_prep_dir, config):
     :return: Namelist file path
     :rtype: :py:class:`pathlib.Path`
     """
-    namelist_file_tmpl = list(config["vhfr fvcom runs"]["namelists"].keys())[0]
-    namelist_files = config["vhfr fvcom runs"]["namelists"][namelist_file_tmpl]
-    namelist_file = namelist_file_tmpl.format(casename=casename)
+    namelist_file = f"{casename}_run.nml"
+    namelist_files = config["vhfr fvcom runs"]["namelists"][namelist_file]
     with (run_prep_dir / namelist_file).open("wt") as namelist:
         for nml in namelist_files:
             nml_path = Path(nml)

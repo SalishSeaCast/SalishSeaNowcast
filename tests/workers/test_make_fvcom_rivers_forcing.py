@@ -187,10 +187,11 @@ class TestConfig:
         assert input_dir["x2"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.x2/"
         assert input_dir["r12"] == "/nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.r12/"
 
-    def test_namelist_rivers(self, prod_config):
+    @pytest.mark.parametrize("model_config", ("x2", "r12"))
+    def test_namelist_rivers(self, model_config, prod_config):
         assert (
-            "namelist.rivers"
-            in prod_config["vhfr fvcom runs"]["namelists"]["{casename}_run.nml"]
+            f"namelist.rivers.{model_config}"
+            in prod_config["vhfr fvcom runs"]["namelists"][f"vh_{model_config}_run.nml"]
         )
 
 
@@ -413,6 +414,6 @@ class TestMakeFVCOMRiversForcing:
             m_genfromtxt(),
             m_q_split(),
             m_tile(),
-            namelist_file="fvcom-runs/namelist.rivers",
+            namelist_file=f"fvcom-runs/namelist.rivers.{model_config}",
             rivName="fraser",
         )
