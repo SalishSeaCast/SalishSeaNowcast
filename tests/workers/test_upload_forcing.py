@@ -15,31 +15,39 @@
 """Unit tests for Salish Sea NEMO nowcast upload_forcing worker.
 """
 import logging
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import upload_forcing
 
 
-@pytest.fixture
-def config():
-    """Nowcast system config dict data structure;
-    a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
-    return {
-        "temperature salinity": {
-            "bc dir": "/results/forcing/LiveOcean/modified",
-            "file template": "single_LO_{:y%Ym%md%d}.nc",
-        },
-        "run": {
-            "enabled hosts": {
-                "west.cloud": {"forcing": {"bc dir": "/nemoShare/MEOPAR/LiveOcean/"}}
-            }
-        },
-    }
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            """
+temperature salinity:
+    bc dir: /results/forcing/LiveOcean/modified
+    file template: 'single_LO_{:y%Ym%md%d}.nc'
+    
+run:
+    enabled hosts:
+        west.cloud:
+            forcing:
+                bc dir: /nemoShare/MEOPAR/LiveOcean/
+"""
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.upload_forcing.NowcastWorker", spec=True)
@@ -91,6 +99,142 @@ class TestMain:
             upload_forcing.success,
             upload_forcing.failure,
         )
+
+
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "upload_forcing" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["upload_forcing"]
+        assert msg_registry["checklist key"] == "forcing upload"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nowcast+",
+            "failure nowcast+",
+            "success forecast2",
+            "failure forecast2",
+            "success ssh",
+            "failure ssh",
+            "success turbidity",
+            "failure turbidity",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["upload_forcing"]
+        assert msg in msg_registry
+
+    def test_enabled_hosts(self, prod_config):
+        enabled_hosts = list(prod_config["run"]["enabled hosts"].keys())
+        assert enabled_hosts == [
+            "west.cloud-nowcast",
+            "salish-nowcast",
+            "orcinus-nowcast-agrif",
+            "beluga-hindcast",
+            "cedar-hindcast",
+        ]
+
+    def test_ssh_keys(self, prod_config):
+        for host in prod_config["run"]["enabled hosts"]:
+            ssh_key = prod_config["run"]["enabled hosts"][host]["ssh key"]
+            assert ssh_key == "SalishSeaNEMO-nowcast_id_rsa"
+
+    @pytest.mark.parametrize(
+        "host, expected",
+        (
+            ("west.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
+            ("salish-nowcast", "/results/forcing/sshNeahBay/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/sshNeahBay/"),
+            ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
+            ("cedar-hindcast", "/project/6001313/SalishSea/forcing/sshNeahBay/"),
+        ),
+    )
+    def test_ssh_uploads(self, host, expected, prod_config):
+        assert prod_config["ssh"]["ssh dir"] == "/results/forcing/sshNeahBay/"
+        host_config = prod_config["run"]["enabled hosts"][host]
+        assert host_config["forcing"]["ssh dir"] == expected
+
+    @pytest.mark.parametrize(
+        "host, expected",
+        (
+            ("west.cloud-nowcast", "/nemoShare/MEOPAR/rivers/river_turb/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/river_turb/"),
+            (
+                "beluga-hindcast",
+                "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
+            ),
+            ("cedar-hindcast", "/project/6001313/SalishSea/forcing/rivers/river_turb/"),
+        ),
+    )
+    def test_fraser_turbidity_uploads(self, host, expected, prod_config):
+        turbidity = prod_config["rivers"]["turbidity"]
+        assert turbidity["file template"] == "riverTurbDaily2_{:y%Ym%md%d}.nc"
+        assert turbidity["forcing dir"] == "/results/forcing/rivers/river_turb/"
+        host_config = prod_config["run"]["enabled hosts"][host]
+        assert host_config["forcing"]["Fraser turbidity dir"] == expected
+
+    @pytest.mark.parametrize(
+        "host, expected",
+        (
+            ("west.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
+            ("salish-nowcast", "/results/forcing/rivers/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
+            ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/rivers/"),
+            ("cedar-hindcast", "/project/6001313/SalishSea/forcing/rivers/"),
+        ),
+    )
+    def test_river_runoff_uploads(self, host, expected, prod_config):
+        rivers = prod_config["rivers"]
+        assert rivers["file templates"] == {
+            "b201702": "R201702DFraCElse_{:y%Ym%md%d}.nc"
+        }
+        assert rivers["rivers dir"] == "/results/forcing/rivers/"
+        host_config = prod_config["run"]["enabled hosts"][host]
+        assert host_config["forcing"]["rivers dir"] == expected
+
+    @pytest.mark.parametrize(
+        "host, expected",
+        (
+            ("west.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
+            ("salish-nowcast", "/results/forcing/atmospheric/GEM2.5/operational/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
+            (
+                "beluga-hindcast",
+                "/project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/",
+            ),
+            (
+                "cedar-hindcast",
+                "/project/6001313/SalishSea/forcing/atmospheric/GEM2.5/operational/",
+            ),
+        ),
+    )
+    def test_weather_uploads(self, host, expected, prod_config):
+        weather = prod_config["weather"]
+        assert weather["file template"] == "ops_{:y%Ym%md%d}.nc"
+        assert weather["ops dir"] == "/results/forcing/atmospheric/GEM2.5/operational/"
+        host_config = prod_config["run"]["enabled hosts"][host]
+        assert host_config["forcing"]["weather dir"] == expected
+
+    @pytest.mark.parametrize(
+        "host, expected",
+        (
+            ("west.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
+            ("salish-nowcast", "/results/forcing/LiveOcean/boundary_conditions/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/LiveOcean/"),
+            ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
+            ("cedar-hindcast", "/project/6001313/SalishSea/forcing/LiveOcean/"),
+        ),
+    )
+    def test_live_ocean_uploads(self, host, expected, prod_config):
+        live_ocean = prod_config["temperature salinity"]
+        assert live_ocean["file template"] == "LiveOcean_v201712_{:y%Ym%md%d}.nc"
+        assert live_ocean["bc dir"] == "/results/forcing/LiveOcean/boundary_conditions"
+        host_config = prod_config["run"]["enabled hosts"][host]
+        assert host_config["forcing"]["bc dir"] == expected
 
 
 @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh", "turbidity"])
