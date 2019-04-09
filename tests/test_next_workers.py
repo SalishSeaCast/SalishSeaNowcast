@@ -889,7 +889,9 @@ class TestAfterWatchNEMO:
         )
         assert workers[0] == expected
 
-    def test_success_nowcast_launch_make_fvcom_boundary(self, config, checklist):
+    def test_success_nowcast_launch_make_fvcom_boundary_x2_nowcast(
+        self, config, checklist
+    ):
         workers = next_workers.after_watch_NEMO(
             Message(
                 "watch_NEMO",
@@ -908,6 +910,31 @@ class TestAfterWatchNEMO:
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
             args=["west.cloud", "x2", "nowcast"],
+            host="west.cloud",
+        )
+        assert expected in workers
+
+    def test_success_nowcast_launch_make_fvcom_boundary_r12_nowcast(
+        self, config, checklist
+    ):
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                "watch_NEMO",
+                "success nowcast",
+                {
+                    "nowcast": {
+                        "host": "west.cloud",
+                        "run date": "2019-04-03",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_fvcom_boundary",
+            args=["west.cloud", "r12", "nowcast"],
             host="west.cloud",
         )
         assert expected in workers
