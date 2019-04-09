@@ -585,6 +585,20 @@ run:
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
 
+    beluga-hindcast:
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      shared storage: False
+      make forcing links: False
+      # Empty collection of run types because all we want to do is upload daily forcing
+      # files
+      run types: {}
+      forcing:
+        ssh dir: /project/def-allen/SalishSea/forcing/sshNeahBay/
+        bc dir: /project/def-allen/SalishSea/forcing/LiveOcean/
+        rivers dir: /project/def-allen/SalishSea/forcing/rivers/
+        Fraser turbidity dir: /project/def-allen/SalishSea/forcing/rivers/river_turb/
+        weather dir: /project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/
+
     cedar-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False
@@ -594,10 +608,10 @@ run:
       run types: {}
       forcing:
         ssh dir: /project/6001313/SalishSea/forcing/sshNeahBay/
-        bc dir: /project/6001313/SalishSea/forcing/LiveOcean
-        rivers dir: /project/6001313/SalishSea/forcing/rivers
-        Fraser turbidity dir: /project/6001313/SalishSea/forcing/rivers/river_turb
-        weather dir: /project/6001313/SalishSea/forcing/atmospheric/GEM2.5/operational
+        bc dir: /project/6001313/SalishSea/forcing/LiveOcean/
+        rivers dir: /project/6001313/SalishSea/forcing/rivers/
+        Fraser turbidity dir: /project/6001313/SalishSea/forcing/rivers/river_turb/
+        weather dir: /project/6001313/SalishSea/forcing/atmospheric/GEM2.5/operational/
 
 
   hindcast hosts:
