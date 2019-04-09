@@ -649,6 +649,11 @@ def after_watch_NEMO(msg, config, checklist):
                         args=[(config["vhfr fvcom runs"]["host"]), "x2", "nowcast"],
                         host=(config["vhfr fvcom runs"]["host"]),
                     ),
+                    NextWorker(
+                        "nowcast.workers.make_fvcom_boundary",
+                        args=[(config["vhfr fvcom runs"]["host"]), "r12", "nowcast"],
+                        host=(config["vhfr fvcom runs"]["host"]),
+                    ),
                 ]
             )
         if run_type == "forecast":
