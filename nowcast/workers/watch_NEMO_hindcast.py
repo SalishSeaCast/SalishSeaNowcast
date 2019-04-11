@@ -284,7 +284,7 @@ class _HindcastJob:
         """
         time_step = int(time_step_file.splitlines()[0].strip())
         model_seconds = (time_step - self.it000) * self.rdt
-        model_time = self.date0.replace(seconds=model_seconds).format(
+        model_time = self.date0.shift(seconds=model_seconds).format(
             "YYYY-MM-DD HH:mm:ss UTC"
         )
         fraction_done = (time_step - self.it000) / (self.itend - self.it000)
