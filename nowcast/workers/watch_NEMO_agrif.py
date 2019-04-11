@@ -186,7 +186,7 @@ def _is_running(ssh_client, host_name, job_id, run_id, tmp_run_dir, run_info):
         return True
     time_step = int(stdout.splitlines()[0].strip())
     model_seconds = (time_step - run_info.it000) * run_info.rdt
-    model_time = run_info.date0.replace(seconds=model_seconds).format(
+    model_time = run_info.date0.shift(seconds=model_seconds).format(
         "YYYY-MM-DD HH:mm:ss UTC"
     )
     fraction_done = (time_step - run_info.it000) / (run_info.itend - run_info.it000)

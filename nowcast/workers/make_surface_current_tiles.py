@@ -123,7 +123,7 @@ def make_surface_current_tiles(parsed_args, config, *args):
     run_date = parsed_args.run_date
     num_procs = parsed_args.nprocs
     dmy = run_date.format("DDMMMYY").lower()
-    dmym1 = run_date.replace(days=-1).format("DDMMMYY").lower()
+    dmym1 = run_date.shift(days=-1).format("DDMMMYY").lower()
     ## TODO: Change to get results from ERDDAP rolling forecast for run_type == forecast*
     results_dir0 = (
         Path(
