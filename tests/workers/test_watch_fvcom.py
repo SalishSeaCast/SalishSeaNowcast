@@ -163,7 +163,7 @@ class TestWatchFVCOM:
         )
         tell_manager = Mock(name="tell_manager")
         tell_manager().payload = {
-            run_type: {
+            f"{model_config} {run_type}": {
                 "host": "west.cloud",
                 "run dir": "tmp_run_dir",
                 "run exec cmd": "bash VHFR_FVCOM.sh",
@@ -173,7 +173,7 @@ class TestWatchFVCOM:
         }
         checklist = watch_fvcom.watch_fvcom(parsed_args, config, tell_manager)
         expected = {
-            run_type: {
+            f"{model_config} {run_type}": {
                 "host": "west.cloud",
                 "model config": model_config,
                 "run date": "2019-02-27",
