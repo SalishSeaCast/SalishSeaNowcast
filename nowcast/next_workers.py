@@ -1064,9 +1064,8 @@ def after_run_fvcom(msg, config, checklist):
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
-        run_type = msg.type.split()[2]
-        host_name = msg.payload[run_type]["host"]
-        model_config = msg.payload[run_type]["model config"]
+        _, model_config, run_type = msg.type.split()
+        host_name = msg.payload[f"{model_config} {run_type}"]["host"]
         next_workers[msg.type].append(
             NextWorker(
                 "nowcast.workers.watch_fvcom",
@@ -1105,17 +1104,16 @@ def after_watch_fvcom(msg, config, checklist):
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
-        run_type = msg.type.split()[2]
-        model_config = msg.payload[run_type]["model config"]
+        _, model_config, run_type = msg.type.split()
         next_workers[msg.type].append(
             NextWorker(
                 "nowcast.workers.download_fvcom_results",
                 args=[
-                    msg.payload[run_type]["host"],
+                    msg.payload[f"{model_config} {run_type}"]["host"],
                     model_config,
                     run_type,
                     "--run-date",
-                    msg.payload[run_type]["run date"],
+                    msg.payload[f"{model_config} {run_type}"]["run date"],
                 ],
             )
         )
