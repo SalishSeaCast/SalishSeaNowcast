@@ -1534,7 +1534,12 @@ class TestAfterRunFVCOM:
             Message(
                 "run_fvcom",
                 f"success {model_config} {run_type}",
-                {run_type: {"host": "west.cloud", "model config": model_config}},
+                {
+                    f"{model_config} {run_type}": {
+                        "host": "west.cloud",
+                        "model config": model_config,
+                    }
+                },
             ),
             config,
             checklist,
@@ -1573,7 +1578,7 @@ class TestAfterWatchFVCOM:
                 "watch_fvcom",
                 f"success {model_config} {run_type}",
                 {
-                    run_type: {
+                    f"{model_config} {run_type}": {
                         "host": "west.cloud",
                         "model config": model_config,
                         "run date": "2019-02-27",
@@ -1598,7 +1603,7 @@ class TestAfterWatchFVCOM:
                 "watch_fvcom",
                 "success x2 nowcast",
                 {
-                    "nowcast": {
+                    "x2 nowcast": {
                         "host": "west.cloud",
                         "model config": "x2",
                         "run date": "2019-01-18",
