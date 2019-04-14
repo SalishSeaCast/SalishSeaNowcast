@@ -473,7 +473,7 @@ class TestRunFVCOM:
         m_prep.return_value = tmp_run_dir
         checklist = run_fvcom.run_fvcom(parsed_args, config)
         expected = {
-            run_type: {
+            f"{model_config} {run_type}": {
                 "host": "west.cloud",
                 "run dir": tmp_run_dir,
                 "run exec cmd": m_launch(),

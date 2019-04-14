@@ -104,9 +104,9 @@ def watch_fvcom(parsed_args, config, tell_manager):
     model_config = parsed_args.model_config
     run_type = parsed_args.run_type
     run_info = tell_manager("need", "FVCOM run").payload
-    pid = _find_run_pid(run_info[run_type])
+    pid = _find_run_pid(run_info[f"{model_config} {run_type}"])
     logger.debug(f"{run_type} on {host_name}: run pid: {pid}")
-    run_dir = Path(run_info[run_type]["run dir"])
+    run_dir = Path(run_info[f"{model_config} {run_type}"]["run dir"])
     # Watch for the run process to end
     while _pid_exists(pid):
         try:
@@ -141,10 +141,10 @@ def watch_fvcom(parsed_args, config, tell_manager):
         logger.info(msg)
         time.sleep(POLL_INTERVAL)
     return {
-        run_type: {
+        f"{model_config} {run_type}": {
             "host": host_name,
             "model config": model_config,
-            "run date": run_info[run_type]["run date"],
+            "run date": run_info[f"{model_config} {run_type}"]["run date"],
             "completed": True,
         }
     }

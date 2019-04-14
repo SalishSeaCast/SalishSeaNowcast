@@ -130,7 +130,7 @@ def run_fvcom(parsed_args, config, *args):
     run_desc_file_path.unlink()
     run_exec_cmd = _launch_run_script(run_type, run_script_path, host_name)
     return {
-        run_type: {
+        f"{model_config} {run_type}": {
             "host": host_name,
             "run dir": os.fspath(tmp_run_dir),
             "run exec cmd": run_exec_cmd,
