@@ -133,10 +133,11 @@ class TestConfig:
         assert enabled_hosts == [
             "west.cloud-nowcast",
             "salish-nowcast",
-            "optimum-hindcast",
             "orcinus-nowcast-agrif",
             "beluga-hindcast",
             "cedar-hindcast",
+            "graham-hindcast",
+            "optimum-hindcast",
         ]
 
     def test_ssh_keys(self, prod_config):
@@ -156,6 +157,7 @@ class TestConfig:
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/sshNeahBay/"),
             ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
             ("cedar-hindcast", "/project/6001313/SalishSea/forcing/sshNeahBay/"),
+            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
     def test_ssh_uploads(self, host, expected, prod_config):
@@ -195,6 +197,7 @@ class TestConfig:
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
             ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/rivers/"),
             ("cedar-hindcast", "/project/6001313/SalishSea/forcing/rivers/"),
+            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/rivers/"),
         ),
     )
     def test_river_runoff_uploads(self, host, expected, prod_config):
@@ -224,6 +227,10 @@ class TestConfig:
                 "cedar-hindcast",
                 "/project/6001313/SalishSea/forcing/atmospheric/GEM2.5/operational/",
             ),
+            (
+                "graham-hindcast",
+                "/project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/",
+            ),
         ),
     )
     def test_weather_uploads(self, host, expected, prod_config):
@@ -245,6 +252,7 @@ class TestConfig:
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/LiveOcean/"),
             ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
             ("cedar-hindcast", "/project/6001313/SalishSea/forcing/LiveOcean/"),
+            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
         ),
     )
     def test_live_ocean_uploads(self, host, expected, prod_config):
