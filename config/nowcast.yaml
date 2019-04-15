@@ -567,20 +567,6 @@ run:
         bottom friction mask: /SalishSeaCast/grid/jetty_mask_bathy201702.nc
         weather dir: /results/forcing/atmospheric/GEM2.5/operational/
 
-    optimum-hindcast:
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
-      shared storage: False
-      make forcing links: False
-      # Empty collection of run types because all we want to do is upload daily forcing
-      # files
-      run types: {}
-      forcing:
-        ssh dir: /data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/
-        bc dir: /data/sallen/shared/SalishSeaCast/forcing/LiveOcean/
-        rivers dir: /data/sallen/shared/SalishSeaCast/forcing/rivers/
-        Fraser turbidity dir: /data/sallen/shared/SalishSeaCast/forcing/rivers/river_turb/
-        weather dir: /data/sallen/shared/SalishSeaCast/forcing/atmospheric/GEM2.5/operational/
-
     orcinus-nowcast-agrif:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False
@@ -626,6 +612,34 @@ run:
         rivers dir: /project/6001313/SalishSea/forcing/rivers/
         Fraser turbidity dir: /project/6001313/SalishSea/forcing/rivers/river_turb/
         weather dir: /project/6001313/SalishSea/forcing/atmospheric/GEM2.5/operational/
+
+    graham-hindcast:
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      shared storage: False
+      make forcing links: False
+      # Empty collection of run types because all we want to do is upload daily forcing
+      # files
+      run types: {}
+      forcing:
+        ssh dir: /project/def-allen/SalishSea/forcing/sshNeahBay/
+        bc dir: /project/def-allen/SalishSea/forcing/LiveOcean/
+        rivers dir: /project/def-allen/SalishSea/forcing/rivers/
+        Fraser turbidity dir: /project/def-allen/SalishSea/forcing/rivers/river_turb/
+        weather dir: /project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/
+
+    optimum-hindcast:
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      shared storage: False
+      make forcing links: False
+      # Empty collection of run types because all we want to do is upload daily forcing
+      # files
+      run types: {}
+      forcing:
+        ssh dir: /data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/
+        bc dir: /data/sallen/shared/SalishSeaCast/forcing/LiveOcean/
+        rivers dir: /data/sallen/shared/SalishSeaCast/forcing/rivers/
+        Fraser turbidity dir: /data/sallen/shared/SalishSeaCast/forcing/rivers/river_turb/
+        weather dir: /data/sallen/shared/SalishSeaCast/forcing/atmospheric/GEM2.5/operational/
 
 
   hindcast hosts:
