@@ -1150,7 +1150,7 @@ def after_make_ww3_wind_file(msg, config, checklist):
 
 
 def after_make_ww3_current_file(msg, config, checklist):
-    """Calculate the list of workers to launch after the 
+    """Calculate the list of workers to launch after the
     after_make_ww3_current_file worker ends.
 
     :arg msg: Nowcast system message.
@@ -1190,7 +1190,7 @@ def after_make_ww3_current_file(msg, config, checklist):
 
 
 def after_run_ww3(msg, config, checklist):
-    """Calculate the list of workers to launch after the after_run_ww3 worker 
+    """Calculate the list of workers to launch after the after_run_ww3 worker
     ends.
 
     :arg msg: Nowcast system message.
@@ -1581,7 +1581,11 @@ def after_update_forecast_datasets(msg, config, checklist):
     if msg.type.startswith("success"):
         model = msg.type.split()[1]
         run_type = msg.type.split()[2]
-        run_date = checklist[f"{model.upper()} run"][run_type]["run date"]
+        try:
+            run_date = checklist[f"{model.upper()} run"][run_type]["run date"]
+        except KeyError:
+            # FVCOM run has model config prefixed to run type
+            run_date = checklist[f"{model.upper()} run"][f"x2 {run_type}"]["run date"]
         next_workers[msg.type].append(
             NextWorker("nowcast.workers.ping_erddap", args=[f"{model}-forecast"])
         )

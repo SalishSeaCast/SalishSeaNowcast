@@ -2356,6 +2356,21 @@ class TestAfterUpdateForecastDatasets:
         )
         assert expected in workers
 
+    def test_success_fvcom_launch_ping_erddap_fvcom_forecast(self, config, checklist):
+        p_checklist = patch.dict(
+            checklist, {"FVCOM run": {"x2 forecast": {"run date": "2019-04-15"}}}
+        )
+        with p_checklist:
+            workers = next_workers.after_update_forecast_datasets(
+                Message("update_forecast_datasets", f"success fvcom forecast"),
+                config,
+                checklist,
+            )
+        expected = NextWorker(
+            "nowcast.workers.ping_erddap", args=["fvcom-forecast"], host="localhost"
+        )
+        assert expected in workers
+
     @pytest.mark.parametrize(
         "run_type, run_date", [("forecast", "2018-01-26"), ("forecast2", "2018-01-26")]
     )
