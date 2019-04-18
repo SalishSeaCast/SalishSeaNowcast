@@ -43,7 +43,7 @@ from nowcast.figures import shared
 
 def make_figure(
     place,
-    fvcom_ssh_dataset,
+    fvcom_ssh_datasets,
     nemo_ssh_dataset_url_tmpl,
     figsize=(16, 9),
     theme=nowcast.figures.website_theme,
@@ -56,9 +56,11 @@ def make_figure(
     :arg str place: Tide gauge station name;
                     must be a key in :py:obj:`salishsea_tools.places.PLACES`.
 
-    :arg fvcom_ssh_dataset: VHFR FVCOM model tide gauge station sea surface
-                            height time series dataset.
-    :type fvcom_ssh_dataset: 'py:class:xarray.Dataset`
+    :arg fvcom_ssh_datasets: Dictionary of VHFR FVCOM model tide gauge station
+                             sea surface height time series of
+                             py:class:`xarray.Dataset` objects keyed by model
+                             model configuration (:kbd:`x2`, :kbd:`r12`).
+    :type fvcom_ssh_datasets: :py:class:`dict`
 
     :arg str nemo_ssh_dataset_url_tmpl: ERDDAP URL template for SalishSeaCast
                                         NEMO model tide gauge station
@@ -72,7 +74,7 @@ def make_figure(
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
-    plot_data = _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl)
+    plot_data = _prep_plot_data(place, fvcom_ssh_datasets, nemo_ssh_dataset_url_tmpl)
     fig, (ax_ssh, ax_res) = _prep_fig_axes(figsize, theme)
     _plot_water_level_time_series(ax_ssh, plot_data, theme)
     _water_level_time_series_labels(ax_ssh, plot_data, place, theme)
@@ -81,18 +83,22 @@ def make_figure(
     return fig
 
 
-def _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl):
-    # FVCOM sea surface height dataset
-    fvcom_ssh = fvcom_ssh_dataset.zeta.isel(
-        station=[
-            name.decode().strip().split(maxsplit=1)[1]
-            for name in fvcom_ssh_dataset.name_station.values
-        ].index(place)
+def _prep_plot_data(place, fvcom_ssh_datasets, nemo_ssh_dataset_url_tmpl):
+    # FVCOM sea surface height dataset(s)
+    fvcom_sshs = {}
+    for model_config, fvcom_ssh_dataset in fvcom_ssh_datasets.items():
+        fvcom_sshs[model_config] = fvcom_ssh_dataset.zeta.isel(
+            station=[
+                name.decode().strip().split(maxsplit=1)[1]
+                for name in fvcom_ssh_dataset.name_station.values
+            ].index(place)
+        )
+        # Drop repeated times
+        _, index = numpy.unique(fvcom_sshs[model_config].time.values, return_index=True)
+        fvcom_sshs[model_config] = fvcom_sshs[model_config].isel(time=index)
+    fvcom_period = slice(
+        str(fvcom_sshs["x2"].time.values[0]), str(fvcom_sshs["x2"].time.values[-1])
     )
-    # Drop repeated times
-    _, index = numpy.unique(fvcom_ssh.time.values, return_index=True)
-    fvcom_ssh = fvcom_ssh.isel(time=index)
-    fvcom_period = slice(str(fvcom_ssh.time.values[0]), str(fvcom_ssh.time.values[-1]))
     # NEMO sea surface height dataset
     try:
         nemo_ssh = _get_nemo_ssh(place, nemo_ssh_dataset_url_tmpl).sel(
@@ -132,8 +138,10 @@ def _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl):
             }
         )
         # Residual differences between corrected model and observations and predicted tides
-        fvcom_residual = fvcom_ssh - pred.water_level
-        shared.localize_time(fvcom_residual)
+        fvcom_residuals = {}
+        for model_config, fvcom_ssh in fvcom_sshs.items():
+            fvcom_residuals[model_config] = fvcom_ssh - pred.water_level
+            shared.localize_time(fvcom_residuals[model_config])
         try:
             nemo_residual = nemo_ssh.ssh - pred.water_level
             shared.localize_time(nemo_residual)
@@ -147,9 +155,10 @@ def _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl):
         shared.localize_time(obs_residual)
     except (TypeError, IndexError):
         # Invalid tide gauge station number, probably None
-        pred, fvcom_residual, nemo_residual, obs_residual = None, None, None, None
+        pred, fvcom_residuals, nemo_residual, obs_residual = None, None, None, None
     # Change dataset times to Pacific time zone
-    shared.localize_time(fvcom_ssh)
+    for fvcom_ssh in fvcom_sshs.values():
+        shared.localize_time(fvcom_ssh)
     with suppress(AttributeError):
         shared.localize_time(nemo_ssh)
     with suppress(IndexError, AttributeError):
@@ -159,12 +168,12 @@ def _prep_plot_data(place, fvcom_ssh_dataset, nemo_ssh_dataset_url_tmpl):
     # Mean sea level
     msl = PLACES[place]["mean sea lvl"]
     return SimpleNamespace(
-        fvcom_ssh=fvcom_ssh,
+        fvcom_sshs=fvcom_sshs,
         nemo_ssh=nemo_ssh,
         obs=obs,
         pred=pred,
         msl=msl,
-        fvcom_residual=fvcom_residual,
+        fvcom_residuals=fvcom_residuals,
         nemo_residual=nemo_residual,
         obs_residual=obs_residual,
     )
@@ -224,13 +233,14 @@ def _plot_water_level_time_series(ax, plot_data, theme):
             color=theme.COLOURS["time series"]["tide gauge ssh"],
             alpha=0.8,
         )
-    (plot_data.fvcom_ssh + plot_data.msl).plot(
-        ax=ax,
-        linewidth=2,
-        label="FVCOM",
-        color=theme.COLOURS["time series"]["vhfr fvcom ssh"],
-        alpha=0.8,
-    )
+    for model_config, fvcom_ssh in plot_data.fvcom_sshs.items():
+        (fvcom_ssh + plot_data.msl).plot(
+            ax=ax,
+            linewidth=2,
+            label=f"FVCOM {model_config.upper()}",
+            color=theme.COLOURS["time series"]["vhfr fvcom ssh"][model_config],
+            alpha=0.8,
+        )
 
 
 def _water_level_time_series_labels(ax, plot_data, place, theme):
@@ -240,7 +250,10 @@ def _water_level_time_series_labels(ax, plot_data, place, theme):
         color=theme.COLOURS["text"]["axes title"],
     )
     ax.set_xlabel("")
-    ax.set_xlim(plot_data.fvcom_ssh.time.values[0], plot_data.fvcom_ssh.time.values[-1])
+    ax.set_xlim(
+        plot_data.fvcom_sshs["x2"].time.values[0],
+        plot_data.fvcom_sshs["x2"].time.values[-1],
+    )
     ax.set_ylabel(
         "Water Level above Chart Datum [m]",
         fontproperties=theme.FONTS["axis"],
@@ -270,19 +283,20 @@ def _plot_residual_time_series(ax, plot_data, theme):
             alpha=0.8,
         )
     try:
-        (plot_data.fvcom_residual + plot_data.msl).plot(
-            ax=ax,
-            linewidth=2,
-            label="FVCOM",
-            color=theme.COLOURS["time series"]["vhfr fvcom ssh"],
-            alpha=0.8,
-        )
-    except TypeError:
+        for model_config, fvcom_residual in plot_data.fvcom_residuals.items():
+            (fvcom_residual + plot_data.msl).plot(
+                ax=ax,
+                linewidth=2,
+                label=f"FVCOM {model_config.upper()}",
+                color=theme.COLOURS["time series"]["vhfr fvcom ssh"][model_config],
+                alpha=0.8,
+            )
+    except AttributeError:
         # No FVCOM residual, probably because no predicted water level
         # Plot invisible values so that we can label the x-axis, and add "Not Available" text
         ax.plot(
-            plot_data.fvcom_ssh.time,
-            numpy.zeros_like(plot_data.fvcom_ssh),
+            plot_data.fvcom_sshs["x2"].time,
+            numpy.zeros_like(plot_data.fvcom_sshs["x2"]),
             color=theme.COLOURS["axes"]["background"],
         )
         ax.text(
@@ -298,11 +312,14 @@ def _plot_residual_time_series(ax, plot_data, theme):
 
 def _residual_time_series_labels(ax, plot_data, theme):
     ax.set_xlabel(
-        f'Time [{plot_data.fvcom_ssh.attrs["tz_name"]}]',
+        f'Time [{plot_data.fvcom_sshs["x2"].attrs["tz_name"]}]',
         fontproperties=theme.FONTS["axis"],
         color=theme.COLOURS["text"]["axis"],
     )
-    ax.set_xlim(plot_data.fvcom_ssh.time.values[0], plot_data.fvcom_ssh.time.values[-1])
+    ax.set_xlim(
+        plot_data.fvcom_sshs["x2"].time.values[0],
+        plot_data.fvcom_sshs["x2"].time.values[-1],
+    )
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%d%b %H:%M"))
     ax.set_ylabel(
         "Residual [m]",
