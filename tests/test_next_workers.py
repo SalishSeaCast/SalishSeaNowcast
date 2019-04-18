@@ -2503,7 +2503,10 @@ class TestAfterPingERDDAP:
             {
                 "ERDDAP flag files": {"VFPA-HADCP": []},
                 "FVCOM run": {
-                    run_type: {"model config": model_config, "run date": run_date}
+                    f"{model_config} {run_type}": {
+                        "model config": model_config,
+                        "run date": run_date,
+                    }
                 },
             },
         )
