@@ -231,21 +231,31 @@ def make_plots(parsed_args, config, *args):
     if model == "fvcom":
         run_type, model_config = run_type.split("-")
         fvcom_results_dataset_filename = f"vh_{model_config}_0001.nc"
-        fvcom_stns_dataset_filename = config["vhfr fvcom runs"][
-            "stations dataset filename"
-        ][model_config]
+        fvcom_stns_datasets = {}
         if run_type == "nowcast":
-            results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"][f"nowcast {model_config}"],
-                dmy,
-            )
-            if plot_type == "publish":
-                fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
+            model_configs = ("x2", "r12") if model_config == "r12" else ("x2",)
+            for mdl_cfg in model_configs:
+                fvcom_stns_dataset_filename = config["vhfr fvcom runs"][
+                    "stations dataset filename"
+                ][mdl_cfg]
+                results_dir = Path(
+                    config["vhfr fvcom runs"]["results archive"][f"nowcast {mdl_cfg}"],
+                    dmy,
+                )
+                if plot_type == "publish":
+                    fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
+                    _rename_fvcom_vars(fvcom_stns_dataset_path)
+                    fvcom_stns_datasets[mdl_cfg] = xarray.open_dataset(
+                        f"/tmp/{fvcom_stns_dataset_path.name}"
+                    )
             if plot_type == "research":
                 fvcom_results_dataset = nc.Dataset(
                     results_dir / fvcom_results_dataset_filename
                 )
         else:
+            fvcom_stns_dataset_filename = config["vhfr fvcom runs"][
+                "stations dataset filename"
+            ][model_config]
             nowcast_results_dir = Path(
                 config["vhfr fvcom runs"]["results archive"][f"nowcast {model_config}"],
                 dmy,
@@ -267,6 +277,10 @@ def make_plots(parsed_args, config, *args):
                     f"-o {fvcom_stns_dataset_path}"
                 )
                 subprocess.check_output(shlex.split(cmd))
+                _rename_fvcom_vars(fvcom_stns_dataset_path)
+                fvcom_stns_datasets[model_config] = xarray.open_dataset(
+                    f"/tmp/{fvcom_stns_dataset_path.name}"
+                )
             if plot_type == "research":
                 cmd = (
                     f"ncrcat -O {nowcast_results_dir / fvcom_results_dataset_filename} "
@@ -278,14 +292,6 @@ def make_plots(parsed_args, config, *args):
                     f"/tmp/{fvcom_results_dataset_filename}"
                 )
         if plot_type == "publish":
-            cmd = (
-                f"ncrename -O -v siglay,sigma_layer -v siglev,sigma_level "
-                f"{fvcom_stns_dataset_path} /tmp/{fvcom_stns_dataset_path.name}"
-            )
-            subprocess.check_output(shlex.split(cmd))
-            fvcom_stns_dataset = xarray.open_dataset(
-                f"/tmp/{fvcom_stns_dataset_path.name}"
-            )
             nemo_ssh_dataset_url_tmpl = config["figures"]["dataset URLs"][
                 "tide stn ssh time series"
             ]
@@ -293,7 +299,7 @@ def make_plots(parsed_args, config, *args):
                 config["figures"]["dataset URLs"]["2nd narrows hadcp time series"]
             )
             fig_functions = _prep_fvcom_publish_fig_functions(
-                fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+                fvcom_stns_datasets, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
             )
         if plot_type == "research":
             fig_functions = _prep_fvcom_research_fig_functions(
@@ -309,6 +315,14 @@ def make_plots(parsed_args, config, *args):
         config, model, run_type, plot_type, dmy, fig_functions, test_figure_id
     )
     return checklist
+
+
+def _rename_fvcom_vars(fvcom_dataset_path):
+    cmd = (
+        f"ncrename -O -v siglay,sigma_layer -v siglev,sigma_level "
+        f"{fvcom_dataset_path} /tmp/{fvcom_dataset_path.name}"
+    )
+    subprocess.check_output(shlex.split(cmd))
 
 
 def _results_dataset(period, grid, results_dir):

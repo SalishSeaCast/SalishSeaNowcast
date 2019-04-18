@@ -85,7 +85,7 @@ COLOURS = {
         "VENUS node model temperature": "blue",
         "VENUS node dev model temperature": "magenta",
         "VENUS CTD temperature": "green",
-        "vhfr fvcom ssh": "magenta",
+        "vhfr fvcom ssh": {"x2": "magenta", "r12": "purple"},
         "wave height": "blue",
         "obs wave height": "green",
         "wave period": "blue",
