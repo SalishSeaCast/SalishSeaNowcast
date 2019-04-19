@@ -407,7 +407,11 @@ def _build_script(run_dir, run_type, run_desc_filepath, results_dir, host_name, 
                 script,
                 "{pbs_common}".format(
                     pbs_common=salishsea_cmd.run._pbs_directives(
-                        run_desc, nemo_processors + xios_processors, email, results_dir
+                        run_desc,
+                        nemo_processors + xios_processors,
+                        email,
+                        results_dir,
+                        stderr_stdout=False,
                     )
                 ),
             )
