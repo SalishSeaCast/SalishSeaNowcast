@@ -1147,9 +1147,6 @@ class TestBuildScript:
         # email when the job [b]egins and [e]nds, or is [a]borted
         #PBS -m bea
         #PBS -M somebody@example.com
-        # stdout and stderr file paths/names
-        #PBS -o {results_dir}/13may17/stdout
-        #PBS -e {results_dir}/13may17/stderr
 
         RUN_ID="13may17nowcast"
         RUN_DESC="13may17.yaml"
