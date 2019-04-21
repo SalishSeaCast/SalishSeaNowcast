@@ -107,9 +107,7 @@ class TestConfig:
             weather["download"]["GRIB dir"]
             == "/results/forcing/atmospheric/GEM2.5/GRIB/"
         )
-        assert (
-            weather["wgrib2"] == "/data/sallen/MEOPAR/private-tools/grib2/wgrib2/wgrib2"
-        )
+        assert weather["wgrib2"] == "/SalishSeaCast/private-tools/grib2/wgrib2/wgrib2"
         assert (
             weather["grid_defn.pl"]
             == "/SalishSeaCast/private-tools/PThupaki/grid_defn.pl"
