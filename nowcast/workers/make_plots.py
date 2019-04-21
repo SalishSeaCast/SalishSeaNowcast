@@ -780,7 +780,7 @@ def _prep_publish_fig_functions(
 
 
 def _prep_fvcom_publish_fig_functions(
-    fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+    fvcom_stns_datasets, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
 ):
     fig_functions = {}
     names = {
@@ -798,7 +798,7 @@ def _prep_fvcom_publish_fig_functions(
             {
                 svg_root: {
                     "function": tide_stn_water_level.make_figure,
-                    "args": (place, fvcom_stns_dataset, nemo_ssh_dataset_url_tmpl),
+                    "args": (place, fvcom_stns_datasets, nemo_ssh_dataset_url_tmpl),
                 }
             }
         )
@@ -806,7 +806,7 @@ def _prep_fvcom_publish_fig_functions(
         {
             "2ndNarrows_current": {
                 "function": second_narrows_current.make_figure,
-                "args": ("2nd Narrows", fvcom_stns_dataset, obs_hadcp_dataset),
+                "args": ("2nd Narrows", fvcom_stns_datasets, obs_hadcp_dataset),
             }
         }
     )
@@ -1013,7 +1013,6 @@ def _render_storm_surge_alerts_thumbnail(
     config, run_type, plot_type, dmy, fig, svg_name, fig_save_format, test_figure
 ):
     """Undated storm surge alerts thumbnail for storm-surge/index.html page
-    :param fig_save_format: 
     """
     now = arrow.now()
     today_dmy = now.format("DDMMMYY").lower()
