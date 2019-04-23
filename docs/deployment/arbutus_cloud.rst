@@ -1,0 +1,566 @@
+..  Copyright 2013-2019 The Salish Sea MEOPAR contributors
+..  and The University of British Columbia
+..
+..  Licensed under the Apache License, Version 2.0 (the "License");
+..  you may not use this file except in compliance with the License.
+..  You may obtain a copy of the License at
+..
+..     https://www.apache.org/licenses/LICENSE-2.0
+..
+..  Unless required by applicable law or agreed to in writing, software
+..  distributed under the License is distributed on an "AS IS" BASIS,
+..  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+..  See the License for the specific language governing permissions and
+..  limitations under the License.
+
+.. _ArbutusCloudDeployment:
+
+*******************************
+:kbd:`arbutus.cloud` Deployment
+*******************************
+
+In April 2019 the `Ocean Networks Canada`_ private cloud computing facility was migrated from :kbd:`west.cloud` to the Compute Canada `arbutus.cloud`_.
+:kbd:`arbutus.cloud` runs on `OpenStack Queens`_ release.
+
+.. _Ocean Networks Canada: http://www.oceannetworks.ca/
+.. _arbutus.cloud: https://www.westgrid.ca/support/systems/arbutus
+.. _OpenStack Queens: https://www.openstack.org/software/queens/
+
+The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
+The :kbd:`arbutus.cloud` dashboard is at https://arbutus.cloud.computecanada.ca/.
+
+.. _OpenStack dashboard: https://docs.openstack.org/horizon/queens/user/
+
+Authentication and authorization for :kbd:`arbutus.cloud` is managed by `computecanada`_,
+so those are the userid/password that are required to log in to the dashboard.
+
+.. _computecanada: https://www.computecanada.ca/
+
+
+Web Interface
+=============
+
+Initial setup was done via the https://arbutus.cloud.computecanada.ca/ web interface with guidance from the
+`Compute Canada Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
+
+.. _Compute Canada Cloud Quickstart Guide: https://docs.computecanada.ca/wiki/Cloud_Quick_Start
+.. _OpenStack End User Guide: https://docs.openstack.org/queens/user/
+
+The project (aka tenant) name for the SalishSeaCast system is :kbd:`rrg-allen`.
+
+
+Network
+-------
+
+The network configuration was done for us by Compute Canada.
+It's configuration can be inspected via the :guilabel:`Network` section of the web interface.
+The subnet of the VMs is :kbd:`rrg-allen-network` and it routes to the publich network via the :kbd:`rrg-allen-router`.
+There is 1 floating IP address available for assignment to provide access from the public network to a VM.
+
+
+.. _AccessAndSecurity:
+
+Access & Security
+-----------------
+
+Generate an ssh key pair on a Linux or OS/X system using the command:
+
+.. code-block:: bash
+
+    $ cd $HOME/.ssh/
+    $ ssh -t rsa -b 4096 -f ~/.ssh/arbutus.cloud_id_rsa -C <yourname>-arbutus.cloud
+
+Assign a strong passphrase to the key pair when prompted.
+Passphraseless keys have their place,
+but they are a bad idea for general use.
+
+Import the public key into the web interface via the :guilabel:`Compute > Key Pairs > Import Key Pair` button.
+
+Use the :guilabel:`Compute > Network > Security Groups > Manage Rules` button associated with the :guilabel:`default` security group to add security rules to allow:
+
+* :command:`ssh`
+* :command:`ping`
+* ZeroMQ distributed logging subscriptions
+
+access to the image instances.
+
+:command:`ssh` Rule:
+
+* Rule: SSH
+* Remote: CIDR
+* CIDR: 0.0.0.0/0
+
+:command:`ping` Rule:
+
+* Rule: ALL ICMP
+* Direction: Ingress
+* Remote: CIDR
+* CIDR: 0.0.0.0/0
+
+ZeroMQ distributed logging subscription Rules:
+
+* For :py:mod:`~nowcast.workers.run_NEMO` and :py:mod:`~nowcast.workers.watch_NEMO`:
+
+  * Rule: Custom TCP
+  * Direction: Ingress
+  * Port range: 5556 - 5557
+  * Remote: CIDR
+  * CIDR: 142.103.36.0/24
+
+* For :py:mod:`~nowcast.workers.make_ww3_wind_file`,
+  :py:mod:`~nowcast.workers.make_ww3_current_file`,
+  :py:mod:`~nowcast.workers.run_ww3`,
+  and :py:mod:`~nowcast.workers.watch_ww3`:
+
+  * Rule: Custom TCP
+  * Direction: Ingress
+  * Port range: 5570 - 5573
+  * Remote: CIDR
+  * CIDR: 142.103.36.0/24
+
+* For :py:mod:`~nowcast.workers.make_fvcom_boundary`,
+  :py:mod:`~nowcast.workers.make_fvcom_rivers_forcing`,
+  :py:mod:`~nowcast.workers.run_fvcom`,
+  and :py:mod:`~nowcast.workers.watch_fvcom`:
+
+  * Rule: Custom TCP
+  * Direction: Ingress
+  * Port range: 5580 - 5587
+  * Remote: CIDR
+  * CIDR: 142.103.36.0/24
+
+
+.. _HeadNodeInstance:
+
+Head Node Instance
+------------------
+
+Use the :guilabel:`Compute > Instances` section of the web interface to manage instances.
+
+To launch an instance to use as the head node use the :guilabel:`Launch Instance` button.
+On the :guilabel:`Details` tab set the following parameters:
+
+* Instance Name: :kbd:`nowcast0`
+* Description: :kbd:`SalishSeaCast system head node`
+* Availability Zone: :kbd:`Any Availability Zone`
+* Count: :kbd:`1`
+
+On the :guilabel:`Source` tab set the following parameters:
+
+* Select Boot Source: :kbd:`Image`
+* Create New Volume: :kbd:`No`
+* Image: :kbd:`Ubuntu-18.04-Bionic-x64-2018-09`
+
+.. note::
+    We have to use the :kbd:`Ubuntu-18.04-Bionic-x64-2018-09` image,
+    not the :kbd:`Ubuntu-18.04-Bionic-minimal-x64-2018-08` image because the latter does not include the kernel elements required for the head node to run the NFS server service.
+
+On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c8-60gb-90`
+
+On the :guilabel:`Network` tab confirm that :kbd:`rrg-allen-network` is selected.
+
+On the :guilabel:`Security Groups` tab confirm that :kbd:`default` is selected.
+
+On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :ref:`AccessAndSecurity` section above is selected.
+
+.. note::
+
+    If only 1 key pair has been imported it will be used by default.
+    If there is more than 1 key pair available,
+    one must be selected.
+    Only 1 key can be loaded automatically into an instance on launch.
+    Additional public keys can be loaded once an instance is running.
+
+Click the :guilabel:`Launch` button to launch the instance.
+
+Once the instance is running use the :guilabel:`More > Associate Floating IP` menu item to associate a public IP address with the instance.
+
+
+.. _ComputeNodeInstance:
+
+Compute Node Instance
+---------------------
+
+Use the :guilabel:`Compute > Instances` section of the web interface to manage instances.
+
+To launch an instance to use as a compute node template use the :guilabel:`Launch Instance` button.
+On the :guilabel:`Details` tab set the following parameters:
+
+* Instance Name: :kbd:`nowcast1`
+* Description: :kbd:`SalishSeaCast system compute node`
+* Availability Zone: :kbd:`Any Availability Zone`
+* Count: :kbd:`1`
+
+On the :guilabel:`Source` tab set the following parameters:
+
+* Select Boot Source: :kbd:`Image`
+* Create New Volume: :kbd:`No`
+* Image: :kbd:`Ubuntu-18.04-Bionic-minimal-x64-2018-08`
+
+On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c8-15gb-90`
+
+On the :guilabel:`Network` tab confirm that :kbd:`rrg-allen-network` is selected.
+
+On the :guilabel:`Security Groups` tab confirm that :kbd:`default` is selected.
+
+On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :ref:`AccessAndSecurity` section above is selected.
+
+.. note::
+
+    If only 1 key pair has been imported it will be used by default.
+    If there is more than 1 key pair available,
+    one must be selected.
+    Only 1 key can be loaded automatically into an instance on launch.
+    Additional public keys can be loaded once an instance is running.
+
+Click the :guilabel:`Launch` button to launch the instance.
+
+
+.. _PersistentSharedStorage:
+
+Persistent Shared Storage
+-------------------------
+
+Use the :guilabel:`Volumes > Volumes` section of the web interface to manage the persistent shared storage volume.
+
+To create a persistent shared storage volume that will be mounted on all instances use the :guilabel:`Create Volume` button and fill in the dialog with the following parameters:
+
+* Volume Name: :kbd:`nemoShare`
+* Description: :kbd:`SalishSeaCast system shared persistent storage`
+* Volume Source: :kbd:`No source, empty volume`
+* Type: :kbd:`Default`
+* Size (GB): :kbd:`1024`
+* Availability Zone: :kbd:`nova`
+
+Use :guilabel:`Actions > Manage Attachments` to attach the volume to the :kbd:`nowcast0` :ref:`HeadNodeInstance`.
+
+
+
+:command:`ssh` Access
+=====================
+
+Log in to the publicly accessible head node instance with the command:
+
+.. code-block:: bash
+
+    $ ssh -i $HOME/.ssh/arbutus.cloud_id_rsa ubuntu@<ip-address>
+
+The first time you connect to an instance you will be prompted to accept its RSA host key fingerprint.
+You can verify the fingerprint by looking for the :kbd:`SSH HOST KEY FINGERPRINT` section in the instance log in the :guilabel:`Instances > nowcast0 > Log` tab.
+If you have previously associated a different instance with the IP address you may receive a message about host key verification failure and potential man-in-the-middle attacks.
+To resolve the issue delete the prior host key from your :file:`$HOME/.ssh/known_hosts` file.
+The message will tell you what line it is on.
+
+You will also be prompted for the pasphrase that you assigned to the ssh key pair when you created it.
+On Linux and OS/X authenticating the ssh key with your pasphrase has the side-effect of adding it to the :command:`ssh-agent` instance that was started when you logged into the system.
+You can add the key to the agent yourself with the command:
+
+.. code-block:: bash
+
+    $ ssh-add $HOME/.ssh/arbutus.cloud_id_rsa
+
+You can list the keys that the agent is managing for you with:
+
+.. code-block:: bash
+
+    $ ssh-add -l
+
+You can simplify logins to the instance by adding the following lines to your :file:`$HOME/.ssh/config` file::
+
+  Host west.cloud
+      Hostname        <ip-address>
+      User            ubuntu
+      IdentityFile    ~/.ssh/arbutus.cloud_id_rsa
+      ForwardAgent    yes
+
+With that in place you should be able to connect to the instance with:
+
+.. code-block:: bash
+
+    $ ssh arbutus.cloud
+
+
+Provisioning and Configuration
+==============================
+
+Head Node
+---------
+
+Fetch and apply any available updates on the :kbd:`nowcast0` :ref:`HeadNodeInstance` that you launched above with:
+
+.. code-block:: bash
+
+    $ sudo apt update
+    $ sudo apt upgrade
+    $ sudo apt auto-remove
+
+Set the timezone with:
+
+.. code-block:: bash
+
+    $ sudo timedatectl set-timezone America/Vancouver
+
+Confirm the date,
+time,
+time zone,
+and that the :kbd:`systemd-timesyncd.service` is activate with:
+
+.. code-block:: bash
+
+    $ timedatectl status
+
+Provision the :ref:`HeadNodeInstance` with the following packages:
+
+.. code-block:: bash
+
+    $ sudo apt update
+    $ sudo apt install -y mercurial git
+    $ sudo apt install -y gfortran
+    $ sudo apt install -y libopenmpi2 libopenmpi-dev openmpi-bin
+    $ sudo apt install -y libnetcdf-dev libnetcdff-dev netcdf-bin
+    $ sudo apt install -y nco
+    $ sudo apt install -y liburi-perl m4
+    $ sudo apt install -y make ksh mg
+    $ sudo apt install -y python3-pip python3-dev
+    $ sudo apt install -y nfs-common nfs-kernel-server
+
+Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/` and append it to the :file:`authorized_keys` file:
+
+.. code-block:: bash
+
+    # on a system where they key pair is stored
+    $ ssh-copy-id -f -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud
+
+The nowcast operations key pair could have been used as the default key pair in the OpenStack web interface,
+but using a key pair with a passphrase there allows for more flexibility:
+in particular,
+the possibility of revoking the passphrase-less key pair without loosing access to the instances.
+
+Add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
+and export environment variables to enable wwatch3 to use netCDF4:
+
+.. code-block:: bash
+
+    # Add wwatch3 bin/ and exe/ paths to PATH if they exist
+    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
+        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin:$PATH"
+    fi
+    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe" ] ; then
+        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe:$PATH"
+    fi
+
+    # Enable wwatch3 to use netCDF4
+    export WWATCH3_NETCDF=NC4
+    export NETCDF_CONFIG=$(which nc-config)
+
+Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` default to prompting for confirmation:
+
+.. code-block:: bash
+
+    alias rm="rm -i"
+
+
+Shared Persistent Storage
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Confirm that the :ref:`PersistentSharedStorage` volume is attached on :kbd:`vdc` with:
+
+.. code-block:: bash
+
+    $ sudo lsblk -f
+
+The expected output is like::
+
+  NAME    FSTYPE LABEL           UUID                                 MOUNTPOINT
+  vda
+  ├─vda1  ext4   cloudimg-rootfs 5e99de08-0334-45c0-82a2-7938eb21ac53 /
+  ├─vda14
+  └─vda15 vfat   UEFI            B60C-5465                            /boot/efi
+  vdb     ext4   ephemeral0      5f16e568-7cff-4a88-a51c-b3c0bd50803c /mnt
+  vdc
+
+
+Format the volume with an `ext4` file system and confirm:
+
+.. code-block:: bash
+
+    $ sudo mkfs.ext4 /dev/vdc
+    $ sudo lsblk -f
+
+The expected output is like::
+
+  NAME    FSTYPE LABEL           UUID                                 MOUNTPOINT
+  vda
+  ├─vda1  ext4   cloudimg-rootfs 5e99de08-0334-45c0-82a2-7938eb21ac53 /
+  ├─vda14
+  └─vda15 vfat   UEFI            B60C-5465                            /boot/efi
+  vdb     ext4   ephemeral0      5f16e568-7cff-4a88-a51c-b3c0bd50803c /mnt
+  vdc     ext4                   381a0eb2-9429-42b2-9be0-1ddb53087f94
+
+Create the :file:`/nemoShare/` mount point,
+mount the volume,
+and set the owner and group:
+
+.. code-block:: bash
+
+    $ sudo mkdir /nemoShare
+    $ sudo mount /dev/vdc /nemoShare
+    $ sudo chown ubuntu:ubuntu /nemoShare
+
+Add the following line to :file:`/etc/fstab` to mount the volume automatically when the :ref:`HeadNodeInstance` is rebooted::
+
+  /dev/vdc        /nemoShare  ext4  defaults  0 2
+
+Set up the NFS server service to provide access to the shared storage on the compute nodes.
+
+Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
+
+.. code-block:: bash
+
+    $ sudo mkdir /share
+    $ sudo mount --bind /nemoShare/MEOPAR /share
+
+Add the following line to :file:`/etc/fstab`::
+
+  /nemoShare/MEOPAR   /share  none  bind  0  0
+
+Add the following line to :file:`/etc/exports`::
+
+  /share        192.168.238.0/24(rw,no_subtree_check)
+
+Restart the NFS service:
+
+  .. code-block:: bash
+
+    $ sudo systemctl start nfs-kernel-server.service
+
+
+
+Compute Node Template
+---------------------
+
+Fetch and apply any available updates on the :kbd:`nowcast1` :ref:`ComputeNodeInstance` that you launched above with:
+
+.. code-block:: bash
+
+    $ sudo apt update
+    $ sudo apt upgrade
+    $ sudo apt auto-remove
+
+Set the timezone with:
+
+.. code-block:: bash
+
+    $ sudo timedatectl set-timezone America/Vancouver
+
+Confirm the date,
+time,
+time zone,
+and that the :kbd:`systemd-timesyncd.service` is activate with:
+
+.. code-block:: bash
+
+    $ timedatectl status
+
+Provision the :ref:`HeadNodeInstance` with the following packages:
+
+.. code-block:: bash
+
+    $ sudo apt update
+    $ sudo apt install -y gfortran
+    $ sudo apt install -y libopenmpi2 libopenmpi-dev openmpi-bin
+    $ sudo apt install -y libnetcdf-dev libnetcdff-dev netcdf-bin
+    $ sudo apt install -y nco
+    $ sudo apt install -y mg
+    $ sudo apt install -y nfs-common
+
+Add code to :file:`$HOME/.profile` to add wwatch3 :file:`bin/` and :file:`exe/` paths to :envvar:`PATH` if they exist,
+and export environment variables to enable wwatch3 to use netCDF4:
+
+.. code-block:: bash
+
+    # Add wwatch3 bin/ and exe/ paths to PATH if they exist
+    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin" ] ; then
+        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/bin:$PATH"
+    fi
+    if [ -d "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe" ] ; then
+        PATH="/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe:$PATH"
+    fi
+
+    # Enable wwatch3 to use netCDF4
+    export WWATCH3_NETCDF=NC4
+    export NETCDF_CONFIG=$(which nc-config)
+
+Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` default to prompting for confirmation:
+
+.. code-block:: bash
+
+    alias rm="rm -i"
+
+Capture a snapshot image of the instance to use to as the boot image for the other compute nodes using the :guilabel:`Create Snapshot` button on the :guilabel:`Compute > Instances` page.
+Use a name like :kbd:`nowcast-compute-node-v0` for the image.
+
+
+Hosts Mappings
+==============
+
+Head Node :file:`.ssh/config`
+-----------------------------
+
+**TODO**
+
+
+MPI Hosts Mappings
+------------------
+
+**TODO**
+
+
+Mercurial Repositories
+======================
+
+Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ hg clone ssh://hg@bitbucket.org/mdunphy/fvcom-cmd FVCOM-Cmd
+    $ hg clone ssh://hg@bitbucket.org/salishsea/grid grid
+    $ hg clone ssh://hg@bitbucket.org/UBC_MOAD/moad_tools moad_tools
+    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
+    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-cmd NEMO-Cmd
+    $ hg clone ssh://hg@bitbucket.org/43ravens/nemo_nowcast NEMO_Nowcast
+    $ hg clone ssh://hg@bitbucket.org/salishsea/rivers-climatology rivers-climatology
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseanowcast SalishSeaNowcast
+    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseawaves SalishSeaWaves
+    $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tides tides
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tracers tracers
+    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
+    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-arch XIOS-ARCH
+
+
+Git Repositories
+================
+
+Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
+    $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
+
+
+Managing Compute Nodes
+======================
+
+.. code-block:: bash
+
+    for n in {2..4}; do echo nowcast${n}; ssh nowcast${n} "sudo hostnamectl set-hostname nowcast${n}"; done
+
+    for n in {1..4}; do echo nowcast${n}; ssh nowcast${n} "sudo mount -t nfs -o vers=3 192.168.238.9:/share /nemoShare/MEOPAR"; done
+
+    for n in {1..4}; do echo nowcast${n}; ssh nowcast${n} "mountpoint /nemoShare/MEOPAR"; done

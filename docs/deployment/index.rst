@@ -64,6 +64,7 @@ and it operation.
 
    skookum_salish
    west_cloud
+   arbutus_cloud
    operations
 
 In May 2018 production runs of a :kbd:`nowcast-green` configuration with AGRIF sub-grids for Baynes Sound and Haro Strait were added to the system.

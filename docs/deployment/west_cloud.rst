@@ -190,7 +190,7 @@ On the :guilabel:`Details` tab set the following parameters:
 * Instance Name: nowcast-head-node
 * Flavor: nemo-c8-15gb-90
 * Instance Count: 1
-* Instance Boot Soure: Boot from image
+* Instance Boot Source: Boot from image
 * Image Name: ubuntu-server-14.04-amd64
 
 On the :guilabel:`Access & Security` tab set the following parameters:
@@ -413,7 +413,7 @@ Add the following line to :file:`/etc/fstab`::
 
   /nemoShare/MEOPAR   /export/MEOPAR  none  bind  0  0
 
-Add the following 2 line2 to :file:`/etc/exports`::
+Add the following 2 lines to :file:`/etc/exports`::
 
   /export        192.168.1.0/24(rw,fsid=0,insecure,no_subtree_check,async)
   /export/MEOPAR 192.168.1.0/24(rw,nohide,insecure,no_subtree_check,async)
