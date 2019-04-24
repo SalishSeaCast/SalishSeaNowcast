@@ -504,14 +504,87 @@ Use a name like :kbd:`nowcast-compute-node-v0` for the image.
 Hosts Mappings
 ==============
 
+Once all of the compute node VMs have been launched so that we know their IP addresses,
+create an :file:`.ssh/config` file,
+and MPI hosts mapping files for NEMO/WAVEWATCH VMs and FVCOM VMs on the head node.
+
 Head Node :file:`.ssh/config`
 -----------------------------
 
-**TODO**
+::
+
+  Host *
+       StrictHostKeyChecking no
+
+  # Head node and XIOS host
+  Host nowcast0
+    HostName 192.168.238.9
+
+  # NEMO compute nodes
+  Host nowcast1
+    HostName 192.168.238.10
+  Host nowcast2
+    HostName 192.168.238.14
+  Host nowcast3
+   HostName 192.168.238.16
+  Host nowcast4
+    HostName 192.168.238.5
+  Host nowcast5
+    HostName 192.168.238.17
+  Host nowcast6
+    HostName 192.168.238.13
+  Host nowcast7
+    HostName 192.168.238.6
+  Host nowcast8
+    HostName 192.168.238.4
+  Host nowcast9
+    HostName 192.168.238.7
+  Host nowcast10
+    HostName 192.168.238.12
+  Host nowcast11
+    HostName 192.168.238.11
+  Host nowcast12
+    HostName 192.168.238.22
+  Host nowcast13
+    HostName 192.168.238.20
+  Host nowcast14
+    HostName 192.168.238.8
+  Host nowcast15
+    HostName 192.168.238.24
+  Host nowcast16
+    HostName 192.168.238.18
+  Host nowcast17
+    HostName 192.168.238.15
 
 
 MPI Hosts Mappings
 ------------------
+
+:file:`$HOME/mpi_hosts` for NEMO/WAVEWATCH VMs containing::
+
+  192.168.238.10 slots=7 max-slots=8
+  192.168.238.14 slots=7 max-slots=8
+  192.168.238.16 slots=7 max-slots=8
+  192.168.238.5 slots=7 max-slots=8
+  192.168.238.17 slots=7 max-slots=8
+  192.168.238.13 slots=7 max-slots=8
+  192.168.238.6 slots=7 max-slots=8
+  192.168.238.4 slots=7 max-slots=8
+  192.168.238.7 slots=7 max-slots=8
+  192.168.238.12 slots=7 max-slots=8
+  192.168.238.11 slots=7 max-slots=8
+  192.168.238.22 slots=7 max-slots=8
+  192.168.238.20 slots=7 max-slots=8
+  192.168.238.8 slots=7 max-slots=8
+  192.168.238.24 slots=7 max-slots=8
+  192.168.238.18 slots=7 max-slots=8
+  192.168.238.15 slots=7 max-slots=8
+
+:file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for :kbd:`x2` model configuration runs containing::
+
+**TODO**
+
+:file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for :kbd:`r12` model configuration runs containing::
 
 **TODO**
 
@@ -552,6 +625,68 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
+
+
+Build XIOS-2
+============
+
+Symlink the XIOS-2 build configuration files for :kbd:`arbutus.cloud` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS-2/arch
+    $ ln -s ../../XIOS-ARCH/COMPUTECANADA/arch-GCC_ARBUTUS.fcm
+    $ ln -s ../../XIOS-ARCH/COMPUTECANADA/arch-GCC_ARBUTUS.path
+
+Build XIOS-2 with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/XIOS-2
+    $ ./make_xios --arch GCC_ARBUTUS --netcdf_lib netcdf4_seq --job 8
+
+
+Build NEMO-3.6
+==============
+
+Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/CONFIG
+    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./makenemo -m GCC_ARBUTUS -n SalishSeaCast -j8
+    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./makenemo -m GCC_ARBUTUS -n SalishSeaCast_Blue -j8
+    $ cd /nemoShare/MEOPAR/nowcast-sys/NEMO-3.6-code/NEMOGCM/TOOLS/
+    $ XIOS_HOME=/nemoShare/MEOPAR/nowcast-sys/XIOS-2 ./maketools -m GCC_ARBUTUS -n REBUILD_NEMO
+
+
+Python Packages
+===============
+
+Install the `Miniconda`_ environment and package manager:
+
+.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ curl -LO https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+    $ bash Miniconda3-latest-Linux-x86_64.sh
+
+Answer :file:`/nemoShare/MEOPAR/nowcast-sys/miniconda3` when the installer asks for an installation location.
+
+Answer no when the install asks :guilabel:`Do you wish the installer to initialize Miniconda3 by running conda init? [yes|no]`.
+
+The Python packages that the system depends on are installed in a conda environment with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ conda update conda
+    $ conda env create \
+        --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
+        -f SalishSeaNowcast/environment-prod.yaml
+
 
 
 Managing Compute Nodes

@@ -711,10 +711,10 @@ The Python packages that the system depends on are installed in a conda environm
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ conda update conda
-    $ conda create \
+    $ conda env create \
         --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
         -f SalishSeaNowcast/environment-prod.yaml
-    $ source /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env/
+    $ source /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nowcast-env/
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable moad_tools/
     (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
