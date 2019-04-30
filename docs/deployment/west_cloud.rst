@@ -715,14 +715,14 @@ The Python packages that the system depends on are installed in a conda environm
         --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
         -f SalishSeaNowcast/environment-prod.yaml
     $ source /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/activate /nemoShare/MEOPAR/nowcast-sys/nowcast-env/
-    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO_Nowcast/
-    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable moad_tools/
-    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable tools/SalishSeaTools/
-    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable OPPTools/
-    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable NEMO-Cmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaCmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable FVCOM-Cmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nemo_nowcast-env)$ pip install --editable SalishSeaNowcast/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install --editable NEMO_Nowcast/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install --editable moad_tools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install --editable tools/SalishSeaTools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install --editable OPPTools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install --editable NEMO-Cmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaCmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install --editable FVCOM-Cmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ pip install --editable SalishSeaNowcast/
 
 
 Environment Variables

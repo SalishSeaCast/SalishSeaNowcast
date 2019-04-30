@@ -470,7 +470,6 @@ Provision the :ref:`HeadNodeInstance` with the following packages:
     $ sudo apt install -y gfortran
     $ sudo apt install -y libopenmpi2 libopenmpi-dev openmpi-bin
     $ sudo apt install -y libnetcdf-dev libnetcdff-dev netcdf-bin
-    $ sudo apt install -y nco
     $ sudo apt install -y mg
     $ sudo apt install -y nfs-common
 
@@ -496,6 +495,15 @@ Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` de
 .. code-block:: bash
 
     alias rm="rm -i"
+
+Create the :file:`/nemoShare/` mount point,
+and set the owner and group:
+
+.. code-block:: bash
+
+    $ sudo mkdir -p /nemoShare/MEOPAR
+    $ sudo chown ubuntu:ubuntu /nemoShare/ /nemoShare/MEOPAR/
+
 
 Capture a snapshot image of the instance to use to as the boot image for the other compute nodes using the :guilabel:`Create Snapshot` button on the :guilabel:`Compute > Instances` page.
 Use a name like :kbd:`nowcast-compute-node-v0` for the image.
@@ -686,6 +694,69 @@ The Python packages that the system depends on are installed in a conda environm
     $ conda env create \
         --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
         -f SalishSeaNowcast/environment-prod.yaml
+    $ source /nemoShare/MEOPAR/nowcast-sys/miniconda3/bin/activate /nemoShare/MEOPAR/nowcast-sys/nowcast-env/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO_Nowcast/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable moad_tools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable tools/SalishSeaTools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable OPPTools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO-Cmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaCmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable FVCOM-Cmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaNowcast/
+
+
+Environment Variables
+=====================
+
+Add the following files to the :file:`/nemoShare/MEOPAR/nowcast-sys/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/nowcast-env
+    $ mkdir -p etc/conda/activate.d
+    $ cat << EOF > etc/conda/activate.d/envvars.sh
+    export NOWCAST_ENV=/nemoShare/MEOPAR/nowcast-sys/nowcast-env
+    export NOWCAST_CONFIG=/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config
+    export NOWCAST_YAML=/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
+    export NOWCAST_LOGS=/nemoShare/MEOPAR/nowcast-sys/logs/nowcast
+    export SENTRY_DSN=a_valid_sentry_dsn_url
+    EOF
+
+and :command:`unset` them when it is deactivated.
+
+.. code-block:: bash
+
+    $ mkdir -p etc/conda/deactivate.d
+    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
+    unset NOWCAST_ENV
+    unset NOWCAST_CONFIG
+    unset NOWCAST_YAML
+    unset NOWCAST_LOGS
+    unset SENTRY_DSN
+    EOF
+
+
+.. _ArbutusCloudNEMORunsDirectory:
+
+NEMO Runs Directory
+===================
+
+Create a :file:`runs/` directory for the NEMO runs and populate it with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ mkdir runs
+    $ chmod g+ws runs
+    $ cd runs/
+    $ mkdir -p LiveOcean NEMO-atmos rivers ssh
+    $ chmod -R g+s LiveOcean NEMO-atmos rivers ssh
+    $ ln -s ../grid
+    $ ln -s ../rivers-climatology
+    $ ln -s ../tides
+    $ ln -s ../tracers
+
+    $ cp ../SS-run-sets/v201702/nowcast-green/namelist.time_nowcast_template namelist.time
 
 
 
@@ -696,6 +767,6 @@ Managing Compute Nodes
 
     for n in {2..4}; do echo nowcast${n}; ssh nowcast${n} "sudo hostnamectl set-hostname nowcast${n}"; done
 
-    for n in {1..4}; do echo nowcast${n}; ssh nowcast${n} "sudo mount -t nfs -o vers=3 192.168.238.9:/share /nemoShare/MEOPAR"; done
+    for n in {1..4}; do echo nowcast${n}; ssh nowcast${n} "sudo mount -t nfs -o proto=tcp,port=2049 192.168.238.9:/share /nemoShare/MEOPAR"; done
 
     for n in {1..4}; do echo nowcast${n}; ssh nowcast${n} "mountpoint /nemoShare/MEOPAR"; done
