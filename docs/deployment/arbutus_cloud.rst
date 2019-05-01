@@ -763,10 +763,29 @@ Create a :file:`runs/` directory for the NEMO runs and populate it with:
 Managing Compute Nodes
 ======================
 
+Here are some useful bash loop one-liners for operating on collections of compute nodes.
+
+If compute node instances are group-launched,
+their hostnames can be set with:
+
 .. code-block:: bash
 
-    for n in {2..4}; do echo nowcast${n}; ssh nowcast${n} "sudo hostnamectl set-hostname nowcast${n}"; done
+    for n in {1..17}; do echo nowcast${n}; ssh nowcast${n} "sudo hostnamectl set-hostname nowcast${n}"; done
 
-    for n in {1..4}; do echo nowcast${n}; ssh nowcast${n} "sudo mount -t nfs -o proto=tcp,port=2049 192.168.238.9:/share /nemoShare/MEOPAR"; done
+Mount shared storage via NFS from head node:
 
-    for n in {1..4}; do echo nowcast${n}; ssh nowcast${n} "mountpoint /nemoShare/MEOPAR"; done
+.. code-block:: bash
+
+    for n in {1..17}; do echo nowcast${n}; ssh nowcast${n} "sudo mount -t nfs -o proto=tcp,port=2049 192.168.238.9:/MEOPAR /nemoShare/MEOPAR"; done
+
+Confirm whether or not :file:`/nemoShare/MEOPAR/` is a mount point:
+
+.. code-block:: bash
+
+    for n in {1..17}; do echo nowcast${n}; ssh nowcast${n} "mountpoint /nemoShare/MEOPAR"; done
+
+Confirm that :file:`/nemoShare/MEOPAR/` has the shared storage mounts:
+
+.. code-block:: bash
+
+    for n in {1..17}; do echo nowcast${n}; ssh nowcast${n} "ls -l /nemoShare/MEOPAR"; done
