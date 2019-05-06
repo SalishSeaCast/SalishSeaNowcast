@@ -574,7 +574,7 @@ Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
     $ ./maketools -m GCC_NOWCAST_REBUILD_NEMO -n REBUILD_NEMO
 
 
-.. _BuildWaveWatch3:
+.. _WestCloudBuildWaveWatch3:
 
 Build WAVEWATCH III :sup:`®`
 ============================
