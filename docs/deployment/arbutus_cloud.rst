@@ -320,7 +320,7 @@ Provision the :ref:`HeadNodeInstance` with the following packages:
     $ sudo apt install -y libnetcdf-dev libnetcdff-dev netcdf-bin
     $ sudo apt install -y nco
     $ sudo apt install -y liburi-perl m4
-    $ sudo apt install -y make ksh mg
+    $ sudo apt install -y make cmake ksh mg
     $ sudo apt install -y python3-pip python3-dev
     $ sudo apt install -y nfs-common nfs-kernel-server
 
@@ -631,8 +631,9 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ git clone git@gitlab.com:mdunphy/FVCOM41.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
-    $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
+    $ git clone git@gitlab.com:mdunphy/OPPTools.git
 
 
 Build XIOS-2
@@ -744,6 +745,39 @@ Build the suite of wwatch3 programs with:
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/work
     $ w3_make
+
+
+.. _ArbutusCloudBuildFVCOM41:
+
+Build FVCOM-4.1
+===============
+
+Build FVCOM with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/FVCOM41/Configure
+    $ ./setup -c VancouverHarbourX2 -a UBUNTU-18.04-GCC
+    $ make libs gotm fvcom
+
+
+.. _ArbutusCloudUpdateFVCOM41:
+
+Update FVCOM-4.1
+----------------
+
+Fetch and merge changes from the `FVCOM41 repo on GitLab`_ and do a clean build:
+
+.. _FVCOM41 repo on GitLab: https://gitlab.com/mdunphy/FVCOM41
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
+    $ git pull origin master
+    $ cd Configure/
+    $ ./setup -c VancouverHarbourX2 -a UBUNTU-18.04-GCC
+    $ make clean
+    $ make libs gotm fvcom
 
 
 Python Packages
@@ -889,6 +923,32 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
   * Symlinks :file:`ww3_prnc_current.inp` as :file:`ww3_prnc.inp`
   * Runs :program:`ww3_prnc` to produce the wwatch3 current forcing files for the run.
     The output of :program:`ww3_prnc` is stored in the run's :file:`stdout` file.
+
+
+FVCOM Runs Directory
+======================
+
+Create an :file:`fvcom-runs/` directory for the VHFR FVCOM runs and populate it with:
+
+.. code-block:: bash
+
+    $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ mkdir fvcom-runs
+    $ chmod g+ws fvcom-runs
+    $ cd fvcom-runs/
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.case.template namelist.case
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.grid.template namelist.grid
+    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.nesting.template namelist.nesting
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.netcdf.template namelist.netcdf
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.numerics.template namelist.numerics
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.obc.template namelist.obc
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.physics.template namelist.physics
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.restart.template namelist.restart
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.rivers.template namelist.rivers.x2
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.rivers.template namelist.rivers.r12
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.startup.hotstart.template namelist.startup.hotstart
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.station_timeseries.template namelist.station_timeseries
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.surface.template namelist.surface
 
 
 
