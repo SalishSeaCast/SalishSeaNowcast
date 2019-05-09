@@ -651,7 +651,7 @@ Build the suite of wwatch3 programs with:
     $ w3_make
 
 
-.. _BuildFVCOM41:
+.. _WestCloudBuildFVCOM41:
 
 Build FVCOM-4.1
 ===============
@@ -683,7 +683,7 @@ Build FVCOM with:
     $ make libs gotm fvcom
 
 
-.. _UpdateFVCOM41:
+.. _WestCloudUpdateFVCOM41:
 
 Update FVCOM-4.1
 ----------------
@@ -840,12 +840,14 @@ Create an :file:`fvcom-runs/` directory for the VHFR FVCOM runs and populate it 
     $ cd fvcom-runs/
     $ cp ../FVCOM-VHFR-config/namelists/namelist.case.template namelist.case
     $ cp ../FVCOM-VHFR-config/namelists/namelist.grid.template namelist.grid
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.nesting.template namelist.nesting
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.netcdf.template namelist.netcdf
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.numerics.template namelist.numerics
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.obc.template namelist.obc
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.physics.template namelist.physics
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.rivers.template namelist.rivers.x2
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.rivers.template namelist.rivers.r12
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.startup.hoststart.template namelist.startup.hoststart
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.surface.template namelist.surface
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.nesting.template namelist.nesting
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.netcdf.template namelist.netcdf
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.numerics.template namelist.numerics
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.obc.template namelist.obc
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.physics.template namelist.physics
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.restart.template namelist.restart
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.rivers.template namelist.rivers.x2
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.rivers.template namelist.rivers.r12
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.startup.hotstart.template namelist.startup.hotstart
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.station_timeseries.template namelist.station_timeseries
+    $ cp ../FVCOM-VHFR-config/namelists/namelist.surface.template namelist.surface
