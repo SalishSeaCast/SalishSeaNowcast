@@ -585,6 +585,20 @@ run:
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
 
+    arbutus.cloud-prep:
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      shared storage: False
+      make forcing links: False
+      # Empty collection of run types because all we want to do is upload daily forcing
+      # files
+      run types: {}
+      forcing:
+        ssh dir: /nemoShare/MEOPAR/sshNeahBay/
+        bc dir: /nemoShare/MEOPAR/LiveOcean/
+        rivers dir: /nemoShare/MEOPAR/rivers/
+        Fraser turbidity dir: /nemoShare/MEOPAR/rivers/river_turb/
+        weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
+
     beluga-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False

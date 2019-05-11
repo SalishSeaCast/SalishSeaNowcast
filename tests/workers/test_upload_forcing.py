@@ -134,6 +134,7 @@ class TestConfig:
             "west.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
+            "arbutus.cloud-prep",
             "beluga-hindcast",
             "cedar-hindcast",
             "graham-hindcast",
@@ -148,6 +149,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
+            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/sshNeahBay/"),
             ("west.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
             ("salish-nowcast", "/results/forcing/sshNeahBay/"),
             (
@@ -168,6 +170,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
+            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/rivers/river_turb/"),
             ("west.cloud-nowcast", "/nemoShare/MEOPAR/rivers/river_turb/"),
             (
                 "optimum-hindcast",
@@ -191,6 +194,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
+            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/rivers/"),
             ("west.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
             ("salish-nowcast", "/results/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
@@ -212,6 +216,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
+            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             ("west.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             ("salish-nowcast", "/results/forcing/atmospheric/GEM2.5/operational/"),
             (
@@ -243,6 +248,7 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
+            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/LiveOcean/"),
             ("west.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
             ("salish-nowcast", "/results/forcing/LiveOcean/boundary_conditions/"),
             (
