@@ -452,7 +452,7 @@ def _build_script(tmp_run_dir, run_desc_file_path, results_dir, model_config, co
     :rtype: str
     """
     with run_desc_file_path.open("rt") as f:
-        run_desc = yaml.load(f)
+        run_desc = yaml.safe_load(f)
     script = "#!/bin/bash\n"
     script = "\n".join(
         (
