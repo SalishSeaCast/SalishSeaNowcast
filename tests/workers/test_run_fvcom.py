@@ -493,7 +493,7 @@ class TestRunFVCOM:
     ),
 )
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
-@patch("nowcast.workers.run_fvcom.yaml.dump", autospec=True)
+@patch("nowcast.workers.run_fvcom.yaml.safe_dump", autospec=True)
 @patch("nowcast.workers.run_fvcom._run_description")
 class TestCreateRunDescFile:
     """Unit tests for _create_fun_desc_file() function.

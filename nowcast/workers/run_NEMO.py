@@ -156,7 +156,7 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
     )
     run_desc_filepath = run_prep_dir / f"{run_id}.yaml"
     with run_desc_filepath.open("wt") as f:
-        yaml.dump(run_desc, f, default_flow_style=False)
+        yaml.safe_dump(run_desc, f, default_flow_style=False)
     logger.debug(f"{run_type}: run description file: {run_desc_filepath}")
     return run_desc_filepath
 
