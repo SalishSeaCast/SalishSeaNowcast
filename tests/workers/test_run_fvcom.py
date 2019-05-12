@@ -961,7 +961,7 @@ class TestCreateRunScript:
         ("r12", "nowcast", arrow.get("2019-02-21")),
     ),
 )
-@patch("nowcast.workers.run_fvcom.yaml.load", autospec=True)
+@patch("nowcast.workers.run_fvcom.yaml.safe_load", autospec=True)
 class TestBuildScript:
     """Unit tests for _build_script() function.
     """
