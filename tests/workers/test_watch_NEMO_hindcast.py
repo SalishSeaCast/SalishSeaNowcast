@@ -89,6 +89,42 @@ class TestMain:
         )
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "watch_NEMO_hindcast" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["watch_NEMO_hindcast"]
+        assert msg_registry["checklist key"] == "NEMO run"
+
+    @pytest.mark.parametrize("msg", ("success", "failure", "crash"))
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["watch_NEMO_hindcast"]
+        assert msg in msg_registry
+
+    def test_run_hindcast_hosts_section(self, prod_config):
+        run_hindcast_hosts = prod_config["run"]["hindcast hosts"]
+        assert (
+            run_hindcast_hosts["cedar-hindcast"]["ssh key"]
+            == "SalishSeaNEMO-nowcast_id_rsa"
+        )
+        assert run_hindcast_hosts["cedar-hindcast"]["users"] == "allen,dlatorne"
+        assert (
+            run_hindcast_hosts["cedar-hindcast"]["scratch dir"]
+            == "/scratch/dlatorne/hindcast_v201812"
+        )
+        assert (
+            run_hindcast_hosts["optimum-hindcast"]["ssh key"]
+            == "SalishSeaNEMO-nowcast_id_rsa"
+        )
+        assert run_hindcast_hosts["optimum-hindcast"]["users"] == "sallen,dlatorne"
+        assert (
+            run_hindcast_hosts["optimum-hindcast"]["scratch dir"]
+            == "/scratch/sallen/dlatorne/hindcast_v201812"
+        )
+
+
 @patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function.
