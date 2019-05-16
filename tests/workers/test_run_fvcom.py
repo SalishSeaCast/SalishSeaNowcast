@@ -17,6 +17,7 @@
 import os
 from pathlib import Path
 import subprocess
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
@@ -987,42 +988,46 @@ class TestBuildScript:
             model_config,
             config,
         )
-        expected = f"""#!/bin/bash
+        expected = textwrap.dedent(
+            f"""\
+            #!/bin/bash
 
-        RUN_ID="{run_id}"
-        RUN_DESC="{run_id}.yaml"
-        WORK_DIR="{tmp_run_dir}"
-        RESULTS_DIR="{results_dir}/{ddmmmyy}"
-        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts.fvcom.{model_config}"
-        GATHER="bin/fvc gather"
-        
-        mkdir -p ${{RESULTS_DIR}}
-
-        cd ${{WORK_DIR}}
-        echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
-
-        echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np {n_processors} --bind-to-core ./fvcom \
---casename=vh_{model_config} --logfile=./fvcom.log \
->>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
-        echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
-
-        echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
-        echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-        
-        chmod g+rwx ${{RESULTS_DIR}}
-        chmod g+rw ${{RESULTS_DIR}}/*
-        chmod o+rx ${{RESULTS_DIR}}
-        chmod o+r ${{RESULTS_DIR}}/*
-
-        echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
-        rmdir $(pwd)
-        echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
-        """
-        script = script.splitlines()
-        for i, line in enumerate(expected.splitlines()[:-1]):
-            assert script[i].strip() == line.strip()
+            RUN_ID="{run_id}"
+            RUN_DESC="{run_id}.yaml"
+            WORK_DIR="{tmp_run_dir}"
+            RESULTS_DIR="{results_dir}/{ddmmmyy}"
+            MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts.fvcom.{model_config}"
+            GATHER="bin/fvc gather"
+            
+            mkdir -p ${{RESULTS_DIR}}
+    
+            cd ${{WORK_DIR}}
+            echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
+    
+            echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{MPIRUN}} -np {n_processors} --bind-to-core ./fvcom \\
+              --casename=vh_{model_config} --logfile=./fvcom.log \\
+              >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+            echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
+            
+            /bin/rm -f --verbose ${{WORK_DIR}}/.fvcomtestfile
+            /bin/rmdir --verbose ${{WORK_DIR}}/output
+    
+            echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
+            echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
+            
+            chmod g+rwx ${{RESULTS_DIR}}
+            chmod g+rw ${{RESULTS_DIR}}/*
+            chmod o+rx ${{RESULTS_DIR}}
+            chmod o+r ${{RESULTS_DIR}}/*
+    
+            echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
+            rmdir $(pwd)
+            echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
+            """
+        )
+        assert script == expected
 
 
 @pytest.mark.parametrize(
@@ -1069,24 +1074,28 @@ class TestExecute:
     def test_execute(self, model_config, run_type, config):
         script = run_fvcom._execute(model_config, config)
         n_processors = config["vhfr fvcom runs"]["number of processors"][model_config]
-        expected = f"""mkdir -p ${{RESULTS_DIR}}
+        expected = textwrap.dedent(
+            f"""\
+            mkdir -p ${{RESULTS_DIR}}
 
-        cd ${{WORK_DIR}}
-        echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
+            cd ${{WORK_DIR}}
+            echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
-        echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np {n_processors} --bind-to-core ./fvcom \
---casename=vh_{model_config} --logfile=./fvcom.log \
->>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
-        echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
+            echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{MPIRUN}} -np {n_processors} --bind-to-core ./fvcom \\
+              --casename=vh_{model_config} --logfile=./fvcom.log \\
+              >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+            echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
+            
+            /bin/rm -f --verbose ${{WORK_DIR}}/.fvcomtestfile
+            /bin/rmdir --verbose ${{WORK_DIR}}/output
 
-        echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
-        echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-        """
-        script = script.splitlines()
-        for i, line in enumerate(expected.splitlines()[:-1]):
-            assert script[i].strip() == line.strip()
+            echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+            ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
+            echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
+            """
+        )
+        assert script == expected
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
