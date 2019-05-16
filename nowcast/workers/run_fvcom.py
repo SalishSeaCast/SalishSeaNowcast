@@ -24,6 +24,7 @@ import shlex
 import shutil
 import subprocess
 import tempfile
+import textwrap
 
 import arrow
 import f90nml
@@ -514,27 +515,28 @@ def _execute(model_config, config):
     :return: Run script model execution commands
     :rtype: str
     """
-    mpirun = (
-        f'${{MPIRUN}} -np {config["vhfr fvcom runs"]["number of processors"][model_config]} '
-        f"--bind-to-core ./fvcom "
-        f'--casename={config["vhfr fvcom runs"]["case name"][model_config]} '
-        f"--logfile=./fvcom.log"
-    )
-    script = (
-        "mkdir -p ${RESULTS_DIR}\n"
-        "\n"
-        "cd ${WORK_DIR}\n"
-        'echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout\n'
-        "\n"
-        'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
-    )
-    script += f"{mpirun} >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr\n"
-    script += (
-        'echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout\n'
-        "\n"
-        'echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout\n'
-        "${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout\n"
-        'echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout\n'
+    n_processors = config["vhfr fvcom runs"]["number of processors"][model_config]
+    casename = config["vhfr fvcom runs"]["case name"][model_config]
+    script = textwrap.dedent(
+        f"""\
+        mkdir -p ${{RESULTS_DIR}}
+        
+        cd ${{WORK_DIR}}
+        echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
+        
+        echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{MPIRUN}} -np {n_processors} --bind-to-core ./fvcom \\
+          --casename={casename} --logfile=./fvcom.log \\
+          >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
+        echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
+            
+        /bin/rm -f --verbose ${{WORK_DIR}}/.fvcomtestfile
+        /bin/rmdir --verbose ${{WORK_DIR}}/output
+        
+        echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
+        ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
+        echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
+        """
     )
     return script
 
