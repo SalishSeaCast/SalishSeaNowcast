@@ -229,10 +229,10 @@ def make_plots(parsed_args, config, *args):
             )
 
     if model == "fvcom":
-        run_type, model_config = run_type.split("-")
+        _, model_config = run_type.split("-")
         fvcom_results_dataset_filename = f"vh_{model_config}_0001.nc"
         fvcom_stns_datasets = {}
-        if run_type == "nowcast":
+        if run_type.startswith("nowcast"):
             model_configs = ("x2", "r12") if model_config == "r12" else ("x2",)
             for mdl_cfg in model_configs:
                 fvcom_stns_dataset_filename = config["vhfr fvcom runs"][
@@ -305,7 +305,7 @@ def make_plots(parsed_args, config, *args):
             fig_functions = _prep_fvcom_research_fig_functions(
                 fvcom_results_dataset,
                 run_date,
-                run_duration=24 if run_type == "nowcast" else 60,
+                run_duration=24 if run_type.startswith("nowcast") else 60,
             )
     if model == "wwatch3":
         wwatch3_dataset_url = config["figures"]["dataset URLs"]["wwatch3 fields"]
