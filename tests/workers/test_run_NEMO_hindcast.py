@@ -111,6 +111,38 @@ class TestMain:
         )
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "run_NEMO_hindcast" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["run_NEMO_hindcast"]
+        assert msg_registry["checklist key"] == "NEMO run"
+
+    @pytest.mark.parametrize("msg", ("success", "failure", "crash"))
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["run_NEMO_hindcast"]
+        assert msg in msg_registry
+
+    def test_optimum_hindcast_section(self, prod_config):
+        optimum_hindcast = prod_config["run"]["hindcast hosts"]["optimum-hindcast"]
+        assert optimum_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
+        assert optimum_hindcast["users"] == "sallen,dlatorne"
+        assert (
+            optimum_hindcast["scratch dir"]
+            == "/scratch/sallen/dlatorne/hindcast_v201812"
+        )
+        assert (
+            optimum_hindcast["run prep dir"]
+            == "/home/sallen/dlatorne/SalishSeaCast/hindcast-sys/runs"
+        )
+        assert (
+            optimum_hindcast["salishsea cmd"]
+            == "/home/sallen/dlatorne/.conda/envs/salishseacast/bin/salishsea"
+        )
+
+
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function.
