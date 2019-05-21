@@ -896,7 +896,6 @@ def after_make_fvcom_boundary(msg, config, checklist):
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
-        host_name = config["vhfr fvcom runs"]["host"]
         run_type = msg.type.split()[2]
         model_config = msg.payload[run_type]["model config"]
         run_date = msg.payload[run_type]["run date"]
@@ -1663,6 +1662,8 @@ def after_ping_erddap(msg, config, checklist):
             return next_workers[msg.type]
         for key in keys:
             model_config, run_type = key.split()
+            if not "completed" in checklist["FVCOM run"][f"{model_config} {run_type}"]:
+                continue
             run_date = checklist["FVCOM run"][f"{model_config} {run_type}"]["run date"]
             next_workers[msg.type].extend(
                 [
