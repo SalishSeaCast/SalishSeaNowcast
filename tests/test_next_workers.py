@@ -2504,6 +2504,7 @@ class TestAfterPingERDDAP:
                 "ERDDAP flag files": {"VFPA-HADCP": []},
                 "FVCOM run": {
                     f"{model_config} {run_type}": {
+                        "completed": True,
                         "model config": model_config,
                         "run date": run_date,
                     }
@@ -2541,6 +2542,54 @@ class TestAfterPingERDDAP:
                 Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
             )
         assert workers == []
+
+    @pytest.mark.parametrize(
+        "model_config, run_type", (("x2", "nowcast"), ("x2", "forecast"))
+    )
+    def test_success_vfpa_hadcp_not_complete_run_no_launch_make_plots_fvcom_publish(
+        self, model_config, run_type, config, checklist
+    ):
+        run_date = "2018-10-25"
+        p_checklist = patch.dict(
+            checklist,
+            {
+                "ERDDAP flag files": {"VFPA-HADCP": []},
+                "FVCOM run": {
+                    f"{model_config} {run_type}": {
+                        "completed": True,
+                        "model config": model_config,
+                        "run date": run_date,
+                    },
+                    "r12 nowcast": {
+                        "model config": "R12",
+                        "run date": run_date,
+                        "run exec cmd": "bash VHFR_FVCOM.sh",
+                    },
+                },
+            },
+        )
+        with p_checklist:
+            workers = next_workers.after_ping_erddap(
+                Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
+            )
+        expected = NextWorker(
+            "nowcast.workers.make_plots",
+            args=[
+                "fvcom",
+                f"{run_type}-{model_config}",
+                "publish",
+                "--run-date",
+                run_date,
+            ],
+            host="localhost",
+        )
+        assert expected in workers
+        not_expected = NextWorker(
+            "nowcast.workers.make_plots",
+            args=["fvcom", "nowcast-r12", "publish", "--run-date", run_date],
+            host="localhost",
+        )
+        assert not_expected not in workers
 
 
 class TestAfterMakePlots:
