@@ -673,6 +673,8 @@ run:
       # Path to the salishsea command processor executable to use in the run
       # script
       salishsea cmd: /home/dlatorne/project/SalishSea/hindcast-sys/hindcast-env/bin/salishsea
+      # Options to use with the salishsea command
+      salishsea options: "--deflate --max-deflate-jobs 48"
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
       run types:
@@ -694,6 +696,8 @@ run:
       # Path to the salishsea command processor executable to use in the run
       # script
       salishsea cmd: /home/sallen/dlatorne/.conda/envs/salishseacast/bin/salishsea
+      # Options to use with the salishsea command
+      salishsea options: ""
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
       run types:
