@@ -168,30 +168,33 @@ class TestConfig:
         assert optimum_hindcast["salishsea options"] == ""
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function.
     """
 
-    def test_success(self, m_logger):
-        parsed_args = SimpleNamespace(host_name="cedar")
+    def test_success(self, m_logger, host_name):
+        parsed_args = SimpleNamespace(host_name=host_name)
         msg_type = run_NEMO_hindcast.success(parsed_args)
         assert m_logger.info.called
         assert msg_type == f"success"
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function.
     """
 
-    def test_failure(self, m_logger):
-        parsed_args = SimpleNamespace(host_name="cedar")
+    def test_failure(self, m_logger, host_name):
+        parsed_args = SimpleNamespace(host_name=host_name)
         msg_type = run_NEMO_hindcast.failure(parsed_args)
         assert m_logger.critical.called
         assert msg_type == f"failure"
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch(
     "nowcast.workers.watch_NEMO_agrif.ssh_sftp.sftp",
@@ -220,18 +223,19 @@ class TestRunNEMO_Hindcast:
         m_get_prev_run_queue_info,
         m_sftp,
         m_logger,
+        host_name,
         full_month,
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="cedar",
+            host_name=host_name,
             full_month=full_month,
             prev_run_date=arrow.get("2019-01-11"),
         )
         with patch("nowcast.workers.run_NEMO_hindcast.arrow.now") as m_now:
             m_now.return_value = arrow.get("2019-01-30")
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
-        expected = {"hindcast": {"host": "cedar", "run id": "None"}}
+        expected = {"hindcast": {"host": host_name, "run id": "None"}}
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -256,19 +260,20 @@ class TestRunNEMO_Hindcast:
         m_get_prev_run_queue_info,
         m_sftp,
         m_logger,
+        host_name,
         full_month,
         prev_run_date,
         expected_run_id,
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="cedar",
+            host_name=host_name,
             full_month=full_month,
             prev_run_date=prev_run_date,
             walltime=None,
         )
         checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
-        expected = {"hindcast": {"host": "cedar", "run id": expected_run_id}}
+        expected = {"hindcast": {"host": host_name, "run id": expected_run_id}}
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -293,17 +298,21 @@ class TestRunNEMO_Hindcast:
         m_get_prev_run_queue_info,
         m_sftp,
         m_logger,
+        host_name,
         full_month,
         prev_run_date,
         expected_run_id,
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="cedar", full_month=full_month, prev_run_date=None, walltime=None
+            host_name=host_name,
+            full_month=full_month,
+            prev_run_date=None,
+            walltime=None,
         )
         m_get_prev_run_queue_info.return_value = (prev_run_date, 12_345_678)
         checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
-        expected = {"hindcast": {"host": "cedar", "run id": expected_run_id}}
+        expected = {"hindcast": {"host": host_name, "run id": expected_run_id}}
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -333,6 +342,7 @@ class TestRunNEMO_Hindcast:
         m_get_prev_run_queue_info,
         m_sftp,
         m_logger,
+        host_name,
         full_month,
         prev_run_date,
         expected_run_date,
@@ -340,7 +350,7 @@ class TestRunNEMO_Hindcast:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="cedar",
+            host_name=host_name,
             full_month=full_month,
             prev_run_date=prev_run_date,
             walltime=None,
@@ -348,7 +358,7 @@ class TestRunNEMO_Hindcast:
         run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
         m_edit_namelist_time.assert_called_once_with(
             m_sftp()[1],
-            "cedar",
+            host_name,
             m_get_prev_run_namelist_info(),
             expected_run_date,
             expected_run_days,
@@ -397,6 +407,7 @@ class TestRunNEMO_Hindcast:
         m_get_prev_run_queue_info,
         m_sftp,
         m_logger,
+        host_name,
         full_month,
         prev_run_date,
         walltime,
@@ -405,7 +416,7 @@ class TestRunNEMO_Hindcast:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="cedar",
+            host_name=host_name,
             full_month=full_month,
             prev_run_date=prev_run_date,
             walltime=walltime,
@@ -413,7 +424,7 @@ class TestRunNEMO_Hindcast:
         run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
         m_edit_run_desc.assert_called_once_with(
             m_sftp()[1],
-            "cedar",
+            host_name,
             prev_run_date,
             m_get_prev_run_namelist_info(),
             expected_run_date,
@@ -422,37 +433,41 @@ class TestRunNEMO_Hindcast:
         )
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
 class TestGetPrevRunQueueInfo:
     """Unit tests for _get_prev_run_queue_info() function.
     """
 
-    def test_no_job_found_on_queue(self, m_ssh_exec_cmd, m_logger, config):
+    def test_no_job_found_on_queue(self, m_ssh_exec_cmd, m_logger, host_name, config):
         m_ssh_exec_cmd.return_value = "header\n"
         m_ssh_client = Mock(name="ssh_client")
         with pytest.raises(nemo_nowcast.WorkerError):
-            run_NEMO_hindcast._get_prev_run_queue_info(m_ssh_client, "cedar", config)
+            run_NEMO_hindcast._get_prev_run_queue_info(m_ssh_client, host_name, config)
         assert m_logger.error.called
 
-    def test_found_prev_hindcast_job(self, m_ssh_exec_cmd, m_logger, config):
+    def test_found_prev_hindcast_job(self, m_ssh_exec_cmd, m_logger, host_name, config):
         m_ssh_exec_cmd.return_value = "header\n" "12345678 01may18hindcast\n"
         m_ssh_client = Mock(name="ssh_client")
         prev_run_date, job_id = run_NEMO_hindcast._get_prev_run_queue_info(
-            m_ssh_client, "cedar", config
+            m_ssh_client, host_name, config
         )
         assert prev_run_date == arrow.get("2018-05-01")
         assert job_id == 12_345_678
         assert m_logger.info.called
 
-    def test_no_prev_hindcast_job_found(self, m_ssh_exec_cmd, m_logger, config):
+    def test_no_prev_hindcast_job_found(
+        self, m_ssh_exec_cmd, m_logger, host_name, config
+    ):
         m_ssh_exec_cmd.return_value = "header\n" "12345678 07may18nowcast-agrif\n"
         m_ssh_client = Mock(name="ssh_client")
         with pytest.raises(nemo_nowcast.WorkerError):
-            run_NEMO_hindcast._get_prev_run_queue_info(m_ssh_client, "cedar", config)
+            run_NEMO_hindcast._get_prev_run_queue_info(m_ssh_client, host_name, config)
         assert m_logger.error.called
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.f90nml.read", autospec=True)
@@ -461,7 +476,7 @@ class TestGetPrevRunNamelistInfo:
     """
 
     def test_get_prev_run_namelist_info(
-        self, m_f90nml_read, m_ssh_exec_cmd, m_logger, config
+        self, m_f90nml_read, m_ssh_exec_cmd, m_logger, host_name, config
     ):
         m_ssh_client = Mock(name="ssh_client")
         m_sftp_client = Mock(name="sftp_client")
@@ -476,10 +491,10 @@ class TestGetPrevRunNamelistInfo:
         }
         with p_named_tmp_file as m_named_tmp_file:
             prev_namelist_info = run_NEMO_hindcast._get_prev_run_namelist_info(
-                m_ssh_client, m_sftp_client, "cedar", arrow.get("2018-05-01"), config
+                m_ssh_client, m_sftp_client, host_name, arrow.get("2018-05-01"), config
             )
         m_ssh_exec_cmd.assert_called_once_with(
-            m_ssh_client, "ls -d scratch/01may18*/namelist_cfg", "cedar", m_logger
+            m_ssh_client, "ls -d scratch/01may18*/namelist_cfg", host_name, m_logger
         )
         m_sftp_client.get.assert_called_once_with(
             "scratch/01may18hindcast_xxx/namelist_cfg",
@@ -489,18 +504,19 @@ class TestGetPrevRunNamelistInfo:
         assert prev_namelist_info == SimpleNamespace(itend=2_717_280, rdt=40.0)
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.f90nml.patch", autospec=True)
 class TestEditNamelistTime:
     """Unit tests for _edit_namelist_time() function.
     """
 
-    def test_download_namelist_time(self, m_patch, m_logger, config):
+    def test_download_namelist_time(self, m_patch, m_logger, host_name, config):
         m_sftp_client = Mock(name="sftp_client")
         prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
             m_sftp_client,
-            "cedar",
+            host_name,
             prev_namelist_info,
             arrow.get("2018-02-01"),
             28,
@@ -573,6 +589,7 @@ class TestEditNamelistTime:
         self,
         m_patch,
         m_logger,
+        host_name,
         run_date,
         run_days,
         expected_itend,
@@ -582,7 +599,7 @@ class TestEditNamelistTime:
         sftp_client = Mock(name="sftp_client")
         prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
-            sftp_client, "cedar", prev_namelist_info, run_date, run_days, config
+            sftp_client, host_name, prev_namelist_info, run_date, run_days, config
         )
         m_patch.assert_called_once_with(
             "/tmp/hindcast.namelist.time",
@@ -597,12 +614,12 @@ class TestEditNamelistTime:
             "/tmp/patched_hindcast.namelist.time",
         )
 
-    def test_upload_namelist_time(self, m_patch, m_logger, config):
+    def test_upload_namelist_time(self, m_patch, m_logger, host_name, config):
         m_sftp_client = Mock(name="sftp_client")
         prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         run_NEMO_hindcast._edit_namelist_time(
             m_sftp_client,
-            "cedar",
+            host_name,
             prev_namelist_info,
             arrow.get("2018-02-01"),
             28,
@@ -613,6 +630,7 @@ class TestEditNamelistTime:
         )
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch(
     "nowcast.workers.run_NEMO_agrif.yaml.safe_load",
@@ -627,13 +645,15 @@ class TestEditRunDesc:
     """Unit tests for _edit_run_desc() function.
     """
 
-    def test_download_run_desc_template(self, m_safe_load, m_logger, tmpdir, config):
+    def test_download_run_desc_template(
+        self, m_safe_load, m_logger, host_name, tmpdir, config
+    ):
         m_sftp_client = Mock(name="sftp_client")
         prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         yaml_tmpl = tmpdir.ensure("hindcast_tmpl.yaml")
         run_NEMO_hindcast._edit_run_desc(
             m_sftp_client,
-            "cedar",
+            host_name,
             arrow.get("2018-01-01"),
             prev_namelist_info,
             arrow.get("2018-02-01"),
@@ -648,7 +668,7 @@ class TestEditRunDesc:
     @pytest.mark.parametrize("walltime", ["03:00:00", "08:30:00", "12:00:00"])
     @patch("nowcast.workers.run_NEMO_hindcast.yaml.safe_dump", autospec=True)
     def test_edit_run_desc(
-        self, m_safe_dump, m_safe_load, m_logger, walltime, tmpdir, config
+        self, m_safe_dump, m_safe_load, m_logger, walltime, host_name, tmpdir, config
     ):
         m_sftp_client = Mock(name="sftp_client")
         prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
@@ -656,7 +676,7 @@ class TestEditRunDesc:
         with patch("nowcast.workers.run_NEMO_hindcast.Path.open") as m_open:
             run_NEMO_hindcast._edit_run_desc(
                 m_sftp_client,
-                "cedar",
+                host_name,
                 arrow.get("2018-05-01"),
                 prev_namelist_info,
                 arrow.get("2018-06-01"),
@@ -677,13 +697,13 @@ class TestEditRunDesc:
             default_flow_style=False,
         )
 
-    def test_upload_run_desc(self, m_safe_load, m_logger, tmpdir, config):
+    def test_upload_run_desc(self, m_safe_load, m_logger, host_name, tmpdir, config):
         m_sftp_client = Mock(name="sftp_client")
         prev_namelist_info = SimpleNamespace(itend=2_717_280, rdt=40.0)
         yaml_tmpl = tmpdir.ensure("hindcast_tmpl.yaml")
         run_NEMO_hindcast._edit_run_desc(
             m_sftp_client,
-            "cedar",
+            host_name,
             arrow.get("2018-01-01"),
             prev_namelist_info,
             arrow.get("2018-02-01"),
