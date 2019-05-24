@@ -43,16 +43,18 @@ def config(base_config):
                         users: allen,dlatorne
                         scratch dir: scratch/
                         run prep dir: runs/
-                        salishsea cmd: bin/salishsea
-                        salishsea options: --deflate --max-deflate-jobs 48
+                        salishsea cmd:
+                            executable: bin/salishsea
+                            run options: --deflate --max-deflate-jobs 48
 
                     optimum:
                         ssh key: SalishSeaNEMO-nowcast_id_rsa
                         users: sallen,dlatorne
                         scratch dir: scratch/
                         run prep dir: runs/
-                        salishsea cmd: bin/salishsea
-                        salishsea options: ""
+                        salishsea cmd:
+                            executable: bin/salishsea
+                            run options: ""
             """
             )
         )
@@ -144,10 +146,13 @@ class TestConfig:
             == "/home/dlatorne/project/SalishSea/hindcast-sys/runs"
         )
         assert (
-            cedar_hindcast["salishsea cmd"]
+            cedar_hindcast["salishsea cmd"]["executable"]
             == "/home/dlatorne/project/SalishSea/hindcast-sys/hindcast-env/bin/salishsea"
         )
-        assert cedar_hindcast["salishsea options"] == "--deflate --max-deflate-jobs 48"
+        assert (
+            cedar_hindcast["salishsea cmd"]["run options"]
+            == "--deflate --max-deflate-jobs 48"
+        )
 
     def test_optimum_hindcast_section(self, prod_config):
         optimum_hindcast = prod_config["run"]["hindcast hosts"]["optimum-hindcast"]
@@ -162,10 +167,10 @@ class TestConfig:
             == "/home/sallen/dlatorne/SalishSeaCast/hindcast-sys/runs"
         )
         assert (
-            optimum_hindcast["salishsea cmd"]
+            optimum_hindcast["salishsea cmd"]["executable"]
             == "/home/sallen/dlatorne/.conda/envs/salishseacast/bin/salishsea"
         )
-        assert optimum_hindcast["salishsea options"] == ""
+        assert optimum_hindcast["salishsea cmd"]["run options"] == ""
 
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
