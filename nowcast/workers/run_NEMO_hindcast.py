@@ -324,15 +324,17 @@ def _launch_run(ssh_client, host_name, run_id, prev_job_id, config):
     :param int or None prev_job_id:
     :param :py:class:`nemo_nowcast.Config` config:
     """
-    salishsea_cmd = config["run"]["hindcast hosts"][host_name]["salishsea cmd"]
-    salishsea_options = config["run"]["hindcast hosts"][host_name]["salishsea options"]
+    salishsea_cmd = config["run"]["hindcast hosts"][host_name]["salishsea cmd"][
+        "executable"
+    ]
+    run_options = config["run"]["hindcast hosts"][host_name]["salishsea cmd"][
+        "run options"
+    ]
     run_prep_dir = Path(config["run"]["hindcast hosts"][host_name]["run prep dir"])
     run_desc = run_prep_dir / f"{run_id}.yaml"
     scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
     results_dir = scratch_dir / run_id[:7]
-    cmd = (
-        f"{salishsea_cmd} run {run_desc} {results_dir} {salishsea_options}"
-    )
+    cmd = f"{salishsea_cmd} run {run_desc} {results_dir} {run_options}"
     if prev_job_id:
         cmd = f"{cmd} --waitjob {prev_job_id} --nocheck-initial-conditions"
     try:
