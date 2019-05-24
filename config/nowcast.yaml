@@ -676,6 +676,8 @@ run:
         # Command-line options to use with the salishsea run command
         # (use an empty string; i.e. "" for no options)
         run options: --deflate --max-deflate-jobs 48
+        # Environment variables to set for salishsea run command on hindcast host
+        envvars:
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
       run types:
@@ -702,6 +704,11 @@ run:
         # Command-line options to use with the salishsea run command
         # (use an empty string; i.e. "" for no options)
         run options: ""
+        # Environment variables to set for salishsea run command on hindcast host
+        envvars:
+          PATH: $PATH:$HOME/bin
+          FORCING: /data/sallen/shared
+          PROJECT: /home/sallen/dlatorne
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
       run types:

@@ -46,6 +46,7 @@ def config(base_config):
                         salishsea cmd:
                             executable: bin/salishsea
                             run options: --deflate --max-deflate-jobs 48
+                            envvars:
 
                     optimum:
                         ssh key: SalishSeaNEMO-nowcast_id_rsa
@@ -55,6 +56,11 @@ def config(base_config):
                         salishsea cmd:
                             executable: bin/salishsea
                             run options: ""
+                            envvars:
+                                PATH: $PATH:$HOME/bin
+                                FORCING: /shared
+                                PROJECT: /home
+                                
             """
             )
         )
@@ -153,6 +159,7 @@ class TestConfig:
             cedar_hindcast["salishsea cmd"]["run options"]
             == "--deflate --max-deflate-jobs 48"
         )
+        assert cedar_hindcast["salishsea cmd"]["envvars"] is None
 
     def test_optimum_hindcast_section(self, prod_config):
         optimum_hindcast = prod_config["run"]["hindcast hosts"]["optimum-hindcast"]
@@ -171,6 +178,11 @@ class TestConfig:
             == "/home/sallen/dlatorne/.conda/envs/salishseacast/bin/salishsea"
         )
         assert optimum_hindcast["salishsea cmd"]["run options"] == ""
+        assert optimum_hindcast["salishsea cmd"]["envvars"] == {
+            "PATH": "$PATH:$HOME/bin",
+            "FORCING": "/data/sallen/shared",
+            "PROJECT": "/home/sallen/dlatorne",
+        }
 
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
@@ -722,8 +734,15 @@ class TestEditRunDesc:
 
 
 @pytest.mark.parametrize(
-    "host_name, run_opts",
-    (("cedar", "--deflate --max-deflate-jobs 48"), ("optimum", "")),
+    "host_name, run_opts, envvars",
+    (
+        ("cedar", "--deflate --max-deflate-jobs 48", ""),
+        (
+            "optimum",
+            "",
+            "export PATH=$PATH:$HOME/bin; export FORCING=/shared; export PROJECT=/home; ",
+        ),
+    ),
 )
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
@@ -731,21 +750,23 @@ class TestLaunchRun:
     """Unit tests for _launch_run() function.
     """
 
-    def test_launch_run(self, m_ssh_exec_cmd, m_logger, host_name, run_opts, config):
+    def test_launch_run(
+        self, m_ssh_exec_cmd, m_logger, host_name, run_opts, envvars, config
+    ):
         m_ssh_client = Mock(name="ssh_client")
         run_NEMO_hindcast._launch_run(
             m_ssh_client, host_name, "01may18hindcast", prev_job_id=None, config=config
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            f"bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
+            f"{envvars}bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
             f"{run_opts}",
             host_name,
             m_logger,
         )
 
     def test_launch_run_with_prev_job_id(
-        self, m_ssh_exec_cmd, m_logger, host_name, run_opts, config
+        self, m_ssh_exec_cmd, m_logger, host_name, run_opts, envvars, config
     ):
         m_ssh_client = Mock(name="ssh_client")
         run_NEMO_hindcast._launch_run(
@@ -757,14 +778,16 @@ class TestLaunchRun:
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            f"bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
+            f"{envvars}bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
             f"{run_opts} "
             f"--waitjob 12345678 --nocheck-initial-conditions",
             host_name,
             m_logger,
         )
 
-    def test_ssh_error(self, m_ssh_exec_cmd, m_logger, host_name, run_opts, config):
+    def test_ssh_error(
+        self, m_ssh_exec_cmd, m_logger, host_name, run_opts, envvars, config
+    ):
         m_ssh_client = Mock(name="ssh_client")
         m_ssh_exec_cmd.side_effect = nowcast.ssh_sftp.SSHCommandError(
             "cmd", "stdout", "stderr"
