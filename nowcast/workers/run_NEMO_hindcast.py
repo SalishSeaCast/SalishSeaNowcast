@@ -324,17 +324,23 @@ def _launch_run(ssh_client, host_name, run_id, prev_job_id, config):
     :param int or None prev_job_id:
     :param :py:class:`nemo_nowcast.Config` config:
     """
-    salishsea_cmd = config["run"]["hindcast hosts"][host_name]["salishsea cmd"][
-        "executable"
-    ]
-    run_options = config["run"]["hindcast hosts"][host_name]["salishsea cmd"][
-        "run options"
-    ]
+    salishsea_cmd = config["run"]["hindcast hosts"][host_name]["salishsea cmd"]
+    salishsea_exec = salishsea_cmd["executable"]
+    run_options = salishsea_cmd["run options"]
+    run_envvars = salishsea_cmd.get("envvars", {})
+    salishsea_prefix = (
+        "; ".join(f"export {key}={value}" for key, value in run_envvars.items())
+        if run_envvars
+        else ""
+    )
+    salishsea_exec = (
+        f"{salishsea_prefix}; {salishsea_exec}" if salishsea_prefix else salishsea_exec
+    )
     run_prep_dir = Path(config["run"]["hindcast hosts"][host_name]["run prep dir"])
     run_desc = run_prep_dir / f"{run_id}.yaml"
     scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
     results_dir = scratch_dir / run_id[:7]
-    cmd = f"{salishsea_cmd} run {run_desc} {results_dir} {run_options}"
+    cmd = f"{salishsea_exec} run {run_desc} {results_dir} {run_options}"
     if prev_job_id:
         cmd = f"{cmd} --waitjob {prev_job_id} --nocheck-initial-conditions"
     try:
