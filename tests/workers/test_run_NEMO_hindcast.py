@@ -44,6 +44,15 @@ def config(base_config):
                         scratch dir: scratch/
                         run prep dir: runs/
                         salishsea cmd: bin/salishsea
+                        salishsea options: --deflate --max-deflate-jobs 48
+
+                    optimum:
+                        ssh key: SalishSeaNEMO-nowcast_id_rsa
+                        users: sallen,dlatorne
+                        scratch dir: scratch/
+                        run prep dir: runs/
+                        salishsea cmd: bin/salishsea
+                        salishsea options: ""
             """
             )
         )
@@ -125,6 +134,21 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["run_NEMO_hindcast"]
         assert msg in msg_registry
 
+    def test_cedar_hindcast_section(self, prod_config):
+        cedar_hindcast = prod_config["run"]["hindcast hosts"]["cedar-hindcast"]
+        assert cedar_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
+        assert cedar_hindcast["users"] == "allen,dlatorne"
+        assert cedar_hindcast["scratch dir"] == "/scratch/dlatorne/hindcast_v201812"
+        assert (
+            cedar_hindcast["run prep dir"]
+            == "/home/dlatorne/project/SalishSea/hindcast-sys/runs"
+        )
+        assert (
+            cedar_hindcast["salishsea cmd"]
+            == "/home/dlatorne/project/SalishSea/hindcast-sys/hindcast-env/bin/salishsea"
+        )
+        assert cedar_hindcast["salishsea options"] == "--deflate --max-deflate-jobs 48"
+
     def test_optimum_hindcast_section(self, prod_config):
         optimum_hindcast = prod_config["run"]["hindcast hosts"]["optimum-hindcast"]
         assert optimum_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
@@ -141,6 +165,7 @@ class TestConfig:
             optimum_hindcast["salishsea cmd"]
             == "/home/sallen/dlatorne/.conda/envs/salishseacast/bin/salishsea"
         )
+        assert optimum_hindcast["salishsea options"] == ""
 
 
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
@@ -671,44 +696,50 @@ class TestEditRunDesc:
         )
 
 
+@pytest.mark.parametrize(
+    "host_name, run_opts",
+    (("cedar", "--deflate --max-deflate-jobs 48"), ("optimum", "")),
+)
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
 class TestLaunchRun:
     """Unit tests for _launch_run() function.
     """
 
-    def test_launch_run(self, m_ssh_exec_cmd, m_logger, config):
+    def test_launch_run(self, m_ssh_exec_cmd, m_logger, host_name, run_opts, config):
         m_ssh_client = Mock(name="ssh_client")
         run_NEMO_hindcast._launch_run(
-            m_ssh_client, "cedar", "01may18hindcast", prev_job_id=None, config=config
+            m_ssh_client, host_name, "01may18hindcast", prev_job_id=None, config=config
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            "bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
-            "--deflate --max-deflate-jobs 48",
-            "cedar",
+            f"bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
+            f"{run_opts}",
+            host_name,
             m_logger,
         )
 
-    def test_launch_run_with_prev_job_id(self, m_ssh_exec_cmd, m_logger, config):
+    def test_launch_run_with_prev_job_id(
+        self, m_ssh_exec_cmd, m_logger, host_name, run_opts, config
+    ):
         m_ssh_client = Mock(name="ssh_client")
         run_NEMO_hindcast._launch_run(
             m_ssh_client,
-            "cedar",
+            host_name,
             "01may18hindcast",
             prev_job_id=12_345_678,
             config=config,
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            "bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
-            "--deflate --max-deflate-jobs 48 "
-            "--waitjob 12345678 --nocheck-initial-conditions",
-            "cedar",
+            f"bin/salishsea run runs/01may18hindcast.yaml scratch/01may18 "
+            f"{run_opts} "
+            f"--waitjob 12345678 --nocheck-initial-conditions",
+            host_name,
             m_logger,
         )
 
-    def test_ssh_error(self, m_ssh_exec_cmd, m_logger, config):
+    def test_ssh_error(self, m_ssh_exec_cmd, m_logger, host_name, run_opts, config):
         m_ssh_client = Mock(name="ssh_client")
         m_ssh_exec_cmd.side_effect = nowcast.ssh_sftp.SSHCommandError(
             "cmd", "stdout", "stderr"
@@ -716,7 +747,7 @@ class TestLaunchRun:
         with pytest.raises(nemo_nowcast.WorkerError):
             run_NEMO_hindcast._launch_run(
                 m_ssh_client,
-                "cedar",
+                host_name,
                 "01may18hindcast",
                 prev_job_id=None,
                 config=config,
