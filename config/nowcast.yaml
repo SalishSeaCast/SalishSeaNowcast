@@ -673,14 +673,17 @@ run:
       # Path to the salishsea command processor executable to use in the run
       # script
       salishsea cmd: /home/dlatorne/project/SalishSea/hindcast-sys/hindcast-env/bin/salishsea
-      # Options to use with the salishsea command
-      salishsea options: "--deflate --max-deflate-jobs 48"
+      # Command-line options to use with the salishsea run command
+      # (use an empty string; i.e. "" for no options)
+      salishsea options: --deflate --max-deflate-jobs 48
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
       run types:
         hindcast:
           # Directory on compute host where results are stored
           results: /scratch/dlatorne/hindcast_v201812
+
+
     optimum-hindcast:
       # Passphrase-less deployment key used by automation for authentication
       # on the host.
@@ -696,7 +699,8 @@ run:
       # Path to the salishsea command processor executable to use in the run
       # script
       salishsea cmd: /home/sallen/dlatorne/.conda/envs/salishseacast/bin/salishsea
-      # Options to use with the salishsea command
+      # Command-line options to use with the salishsea run command
+      # (use an empty string; i.e. "" for no options)
       salishsea options: ""
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
