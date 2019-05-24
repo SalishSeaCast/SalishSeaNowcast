@@ -326,8 +326,8 @@ def _launch_run(ssh_client, host_name, run_id, prev_job_id, config):
     """
     salishsea_cmd = config["run"]["hindcast hosts"][host_name]["salishsea cmd"]
     salishsea_exec = salishsea_cmd["executable"]
-    run_options = salishsea_cmd["run options"]
-    run_envvars = salishsea_cmd.get("envvars", {})
+    run_options = salishsea_cmd["run options"] or ""
+    run_envvars = salishsea_cmd["envvars"] or {}
     salishsea_prefix = (
         "; ".join(f"export {key}={value}" for key, value in run_envvars.items())
         if run_envvars
