@@ -55,7 +55,7 @@ def config(base_config):
                         run prep dir: runs/
                         salishsea cmd:
                             executable: bin/salishsea
-                            run options: ""
+                            run options:
                             envvars:
                                 PATH: $PATH:$HOME/bin
                                 FORCING: /shared
@@ -177,7 +177,7 @@ class TestConfig:
             optimum_hindcast["salishsea cmd"]["executable"]
             == "/home/sallen/dlatorne/.conda/envs/salishseacast/bin/salishsea"
         )
-        assert optimum_hindcast["salishsea cmd"]["run options"] == ""
+        assert optimum_hindcast["salishsea cmd"]["run options"] is None
         assert optimum_hindcast["salishsea cmd"]["envvars"] == {
             "PATH": "$PATH:$HOME/bin",
             "FORCING": "/data/sallen/shared",
