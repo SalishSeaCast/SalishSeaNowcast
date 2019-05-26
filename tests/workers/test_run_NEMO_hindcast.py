@@ -40,6 +40,7 @@ def config(base_config):
                 hindcast hosts:
                     cedar:
                         ssh key: SalishSeaNEMO-nowcast_id_rsa
+                        queue info cmd: /opt/software/slurm/bin/squeue
                         users: allen,dlatorne
                         scratch dir: scratch/
                         run prep dir: runs/
@@ -50,6 +51,7 @@ def config(base_config):
 
                     optimum:
                         ssh key: SalishSeaNEMO-nowcast_id_rsa
+                        queue info cmd: /usr/bin/qstat
                         users: sallen,dlatorne
                         scratch dir: scratch/
                         run prep dir: runs/
@@ -145,6 +147,7 @@ class TestConfig:
     def test_cedar_hindcast_section(self, prod_config):
         cedar_hindcast = prod_config["run"]["hindcast hosts"]["cedar-hindcast"]
         assert cedar_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
+        assert cedar_hindcast["queue info cmd"] == "/opt/software/slurm/bin/squeue"
         assert cedar_hindcast["users"] == "allen,dlatorne"
         assert cedar_hindcast["scratch dir"] == "/scratch/dlatorne/hindcast_v201812"
         assert (
@@ -164,6 +167,7 @@ class TestConfig:
     def test_optimum_hindcast_section(self, prod_config):
         optimum_hindcast = prod_config["run"]["hindcast hosts"]["optimum-hindcast"]
         assert optimum_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
+        assert optimum_hindcast["queue info cmd"] == "/usr/bin/qstat"
         assert optimum_hindcast["users"] == "sallen,dlatorne"
         assert (
             optimum_hindcast["scratch dir"]
@@ -452,20 +456,17 @@ class TestRunNEMO_Hindcast:
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
-@patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
+@patch("nowcast.workers.run_NEMO_hindcast._get_qstat_queue_info", autospec=True)
+@patch("nowcast.workers.run_NEMO_hindcast._get_squeue_queue_info", autospec=True)
 class TestGetPrevRunQueueInfo:
     """Unit tests for _get_prev_run_queue_info() function.
     """
 
-    def test_no_job_found_on_queue(self, m_ssh_exec_cmd, m_logger, host_name, config):
-        m_ssh_exec_cmd.return_value = "header\n"
-        m_ssh_client = Mock(name="ssh_client")
-        with pytest.raises(nemo_nowcast.WorkerError):
-            run_NEMO_hindcast._get_prev_run_queue_info(m_ssh_client, host_name, config)
-        assert m_logger.error.called
-
-    def test_found_prev_hindcast_job(self, m_ssh_exec_cmd, m_logger, host_name, config):
-        m_ssh_exec_cmd.return_value = "header\n" "12345678 01may18hindcast\n"
+    def test_found_prev_hindcast_job(
+        self, m_squeue_info, m_qstat_info, m_logger, host_name, config
+    ):
+        m_qstat_info.return_value = ["12345678 01may18hindcast"]
+        m_squeue_info.return_value = ["12345678 01may18hindcast"]
         m_ssh_client = Mock(name="ssh_client")
         prev_run_date, job_id = run_NEMO_hindcast._get_prev_run_queue_info(
             m_ssh_client, host_name, config
@@ -475,13 +476,79 @@ class TestGetPrevRunQueueInfo:
         assert m_logger.info.called
 
     def test_no_prev_hindcast_job_found(
-        self, m_ssh_exec_cmd, m_logger, host_name, config
+        self, m_squeue_info, m_qstat_info, m_logger, host_name, config
     ):
-        m_ssh_exec_cmd.return_value = "header\n" "12345678 07may18nowcast-agrif\n"
+        m_qstat_info.return_value = ["12345678 07may18nowcast-agrif"]
+        m_squeue_info.return_value = ["12345678 07may18nowcast-agrif"]
         m_ssh_client = Mock(name="ssh_client")
         with pytest.raises(nemo_nowcast.WorkerError):
             run_NEMO_hindcast._get_prev_run_queue_info(m_ssh_client, host_name, config)
         assert m_logger.error.called
+
+
+@patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
+@patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
+class TestGetQstatQueueInfo:
+    """Unit tests for _get_qstat_queue_info() function.
+    """
+
+    def test_no_job_found_on_queue(self, m_ssh_exec_cmd, m_logger, config):
+        m_ssh_exec_cmd.return_value = "\n".join(f"header{i}" for i in range(5))
+        m_ssh_client = Mock(name="ssh_client")
+        with pytest.raises(nemo_nowcast.WorkerError):
+            run_NEMO_hindcast._get_qstat_queue_info(
+                m_ssh_client, "optimum", "/usr/bin/qstat", "sallen,dlatorne"
+            )
+        assert m_logger.error.called
+
+    def test_queue_info_lines(self, m_ssh_exec_cmd, m_logger, config):
+        qstat_return = "\n".join(f"header{i}" for i in range(5))
+        qstat_return = (
+            f"{qstat_return}\n"
+            f"12345678.admin foo bar 15may19hindcast\n"
+            f"12345679.admin foo bar 25may19hindcast\n"
+        )
+        m_ssh_exec_cmd.return_value = qstat_return
+        m_ssh_client = Mock(name="ssh_client")
+        queue_info_lines = run_NEMO_hindcast._get_qstat_queue_info(
+            m_ssh_client, "optimum", "/usr/bin/qstat", "sallen,dlatorne"
+        )
+        assert queue_info_lines == [
+            "12345679 25may19hindcast",
+            "12345678 15may19hindcast",
+        ]
+
+
+@patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
+@patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
+class TestGetSqueueQueueInfo:
+    """Unit tests for _get_squeue_queue_info() function.
+    """
+
+    def test_no_job_found_on_queue(self, m_ssh_exec_cmd, m_logger, config):
+        m_ssh_exec_cmd.return_value = "header\n"
+        m_ssh_client = Mock(name="ssh_client")
+        with pytest.raises(nemo_nowcast.WorkerError):
+            run_NEMO_hindcast._get_squeue_queue_info(
+                m_ssh_client,
+                "optimum",
+                "/opt/software/slurm/bin/squeue",
+                "allen,dlatorne",
+            )
+        assert m_logger.error.called
+
+    def test_queue_info_lines(self, m_ssh_exec_cmd, m_logger, config):
+        m_ssh_exec_cmd.return_value = (
+            "header\n12345678 15may19hindcast\n12345679 25may19hindcast\n"
+        )
+        m_ssh_client = Mock(name="ssh_client")
+        queue_info_lines = run_NEMO_hindcast._get_squeue_queue_info(
+            m_ssh_client, "optimum", "/opt/software/slurm/bin/squeue", "allen,dlatorne"
+        )
+        assert queue_info_lines == [
+            "12345679 25may19hindcast",
+            "12345678 15may19hindcast",
+        ]
 
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))

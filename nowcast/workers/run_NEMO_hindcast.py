@@ -171,19 +171,13 @@ def _get_prev_run_queue_info(ssh_client, host_name, config):
              slurm job id number
     :rtype: 2-tuple (:py:class:`arrow.Arrow`, int)
     """
+    queue_info_cmd = config["run"]["hindcast hosts"][host_name]["queue info cmd"]
+    queue_info_func = {
+        "/usr/bin/qstat": _get_qstat_queue_info,
+        "/opt/software/slurm/bin/squeue": _get_squeue_queue_info,
+    }[queue_info_cmd]
     users = config["run"]["hindcast hosts"][host_name]["users"]
-    stdout = ssh_sftp.ssh_exec_command(
-        ssh_client,
-        f'/opt/software/slurm/bin/squeue --user {users} --Format "jobid,name" '
-        f"--sort=i",
-        host_name,
-        logger,
-    )
-    if len(stdout.splitlines()) == 1:
-        logger.error(f"no jobs found on {host_name} queue")
-        raise WorkerError
-    queue_info_lines = stdout.splitlines()[1:]
-    queue_info_lines.reverse()
+    queue_info_lines = queue_info_func(ssh_client, host_name, queue_info_cmd, users)
     for queue_info in queue_info_lines:
         if "hindcast" in queue_info.strip().split()[1]:
             job_id, run_id = queue_info.strip().split()
@@ -193,6 +187,55 @@ def _get_prev_run_queue_info(ssh_client, host_name, config):
             return prev_run_date, job_id
     logger.error(f"no hindcast jobs found on {host_name} queue")
     raise WorkerError
+
+
+def _get_qstat_queue_info(ssh_client, host_name, queue_info_cmd, users):
+    """
+    :param :py:class:`paramiko.client.SSHClient`
+    :param str host_name:
+    :param str queue_info_cmd:
+    :param str users:
+
+    :return: Lines from queue info cmd output showing job ids and run ids for users
+    :rtype: list
+    """
+    stdout = ssh_sftp.ssh_exec_command(
+        ssh_client, f"{queue_info_cmd} -u {users}", host_name, logger
+    )
+    if len(stdout.splitlines()) == 5:
+        logger.error(f"no jobs found on {host_name} queue")
+        raise WorkerError
+    queue_info_lines = stdout.splitlines()[5:]
+    queue_info_lines.reverse()
+    queue_info_lines = [
+        f"{line.split()[0].split('.')[0]} {line.split()[3]}"
+        for line in queue_info_lines
+    ]
+    return queue_info_lines
+
+
+def _get_squeue_queue_info(ssh_client, host_name, queue_info_cmd, users):
+    """
+    :param :py:class:`paramiko.client.SSHClient`
+    :param str host_name:
+    :param stgr queue_info_cmd:
+    :param str users:
+
+    :return: Lines from queue info cmd output showing job ids and run ids for users
+    :rtype: list
+    """
+    stdout = ssh_sftp.ssh_exec_command(
+        ssh_client,
+        f'{queue_info_cmd} --user {users} --Format "jobid,name" --sort=i',
+        host_name,
+        logger,
+    )
+    if len(stdout.splitlines()) == 1:
+        logger.error(f"no jobs found on {host_name} queue")
+        raise WorkerError
+    queue_info_lines = stdout.splitlines()[1:]
+    queue_info_lines.reverse()
+    return queue_info_lines
 
 
 def _get_prev_run_namelist_info(
