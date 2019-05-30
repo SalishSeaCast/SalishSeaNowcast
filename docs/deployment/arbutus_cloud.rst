@@ -431,8 +431,8 @@ Add the following line to :file:`/etc/fstab`::
 
 Add the following lines to :file:`/etc/exports`::
 
-  /export        192.168.1.0/24(rw,fsid=0,insecure,no_subtree_check,async)
-  /export/MEOPAR 192.168.1.0/24(rw,nohide,insecure,no_subtree_check,async)
+  /export        192.168.1.238/24(rw,fsid=0,insecure,no_subtree_check,async)
+  /export/MEOPAR 192.168.1.238/24(rw,nohide,insecure,no_subtree_check,async)
 
 Restart the NFS service:
 
@@ -962,7 +962,6 @@ Create an :file:`fvcom-runs/` directory for the VHFR FVCOM runs and populate it 
     $ cp ../FVCOM-VHFR-config/namelists/namelist.startup.hotstart.template namelist.startup.hotstart
     $ cp ../FVCOM-VHFR-config/namelists/namelist.station_timeseries.template namelist.station_timeseries
     $ cp ../FVCOM-VHFR-config/namelists/namelist.surface.template namelist.surface
-
 
 
 Managing Compute Nodes
