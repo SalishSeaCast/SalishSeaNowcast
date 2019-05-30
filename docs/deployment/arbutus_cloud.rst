@@ -416,26 +416,23 @@ and set the owner and group:
     $ sudo mount /dev/vdc /nemoShare
     $ sudo chown ubuntu:ubuntu /nemoShare
 
-Add the following line to :file:`/etc/fstab` to mount the volume automatically when the :ref:`HeadNodeInstance` is rebooted::
-
-  /dev/vdc        /nemoShare  ext4  defaults  0 2
-
 Set up the NFS server service to provide access to the shared storage on the compute nodes.
 
 Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
 
 .. code-block:: bash
 
-    $ sudo mkdir /share
-    $ sudo mount --bind /nemoShare/MEOPAR /share
+    $ sudo mkdir -p /export/MEOPAR
+    $ sudo mount --bind /nemoShare/MEOPAR /export/MEOPAR
 
 Add the following line to :file:`/etc/fstab`::
 
-  /nemoShare/MEOPAR   /share  none  bind  0  0
+  /nemoShare/MEOPAR   /export/MEOPAR  none  bind  0  0
 
-Add the following line to :file:`/etc/exports`::
+Add the following lines to :file:`/etc/exports`::
 
-  /share        192.168.238.0/24(rw,no_subtree_check)
+  /export        192.168.1.0/24(rw,fsid=0,insecure,no_subtree_check,async)
+  /export/MEOPAR 192.168.1.0/24(rw,nohide,insecure,no_subtree_check,async)
 
 Restart the NFS service:
 
@@ -992,7 +989,7 @@ Mount shared storage via NFS from head node:
     do
       echo nowcast${n}
       ssh nowcast${n} \
-        "sudo mount -t nfs -o proto=tcp,port=2049 192.168.238.9:/MEOPAR /nemoShare/MEOPAR"
+        "sudo mount -t nfs -o proto=tcp,port=2049 192.168.238.14:/MEOPAR /nemoShare/MEOPAR"
     done
 
 Confirm whether or not :file:`/nemoShare/MEOPAR/` is a mount point:
