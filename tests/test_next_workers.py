@@ -37,7 +37,9 @@ def config():
             }
         },
         "observations": {
-            "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
+            "ctd data": {"stations": ["SCVIP", "SEVIP"]},
+            #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
+            # "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
             "ferry data": {"ferries": {"TWDP": {}}},
             "hadcp data": {},
         },
@@ -137,7 +139,8 @@ class TestAfterDownloadWeather:
             ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
-            NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
+            #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
+            # NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
             NextWorker(
                 "nowcast.workers.get_vfpa_hadcp",
@@ -220,7 +223,8 @@ class TestAfterCollectWeather:
             ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
-            NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
+            #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
+            # NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
             NextWorker(
                 "nowcast.workers.get_vfpa_hadcp",
@@ -415,7 +419,9 @@ class TestAfterGetONC_CTD:
         )
         assert workers == []
 
-    @pytest.mark.parametrize("ctd_stn", ["SCVIP", "SEVIP", "USDDL"])
+    @pytest.mark.parametrize("ctd_stn", ["SCVIP", "SEVIP"])
+    #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
+    # @pytest.mark.parametrize("ctd_stn", ["SCVIP", "SEVIP", "USDDL"])
     def test_success_launch_ping_erddap(self, ctd_stn, config, checklist):
         workers = next_workers.after_get_onc_ctd(
             Message("get_onc_ctd", "success {}".format(ctd_stn)), config, checklist
