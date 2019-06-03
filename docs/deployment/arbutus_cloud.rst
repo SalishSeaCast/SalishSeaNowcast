@@ -422,8 +422,8 @@ Add the following line to :file:`/etc/fstab`::
 
 Add the following lines to :file:`/etc/exports`::
 
-  /export        192.168.1.238/24(rw,fsid=0,insecure,no_subtree_check,async)
-  /export/MEOPAR 192.168.1.238/24(rw,nohide,insecure,no_subtree_check,async)
+  /export        192.168.238.0/24(rw,fsid=0,insecure,no_subtree_check,async)
+  /export/MEOPAR 192.168.238.0/24(rw,nohide,insecure,no_subtree_check,async)
 
 Restart the NFS service:
 
