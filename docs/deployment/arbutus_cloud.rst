@@ -359,15 +359,6 @@ Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` de
 
     alias rm="rm -i"
 
-Create storage space for OpenMPI shared memory backing file on instance ephemeral storage:
-
-.. code-block:: bash
-
-    $ sudo mkdir -p /mnt/openmpi_tmp
-    $ sudo chmod 777 /mnt/openmpi_tmp
-
-Use :kbd:`--mca orte_tmpdir_base /mnt/openmpi_tmp` in :command:`mpirun` commands to ensure that OpenMPI uses that storage rather than :file:`/tmp` because the :file:`/` file system is very nearly full.
-
 
 Shared Persistent Storage
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -508,15 +499,6 @@ and set the owner and group:
 
     $ sudo mkdir -p /nemoShare/MEOPAR
     $ sudo chown ubuntu:ubuntu /nemoShare/ /nemoShare/MEOPAR/
-
-Create storage space for OpenMPI shared memory backing file on instance ephemeral storage:
-
-.. code-block:: bash
-
-    $ sudo mkdir -p /mnt/openmpi_tmp
-    $ sudo chmod 777 /mnt/openmpi_tmp
-
-Use :kbd:`--mca orte_tmpdir_base /mnt/openmpi_tmp` in :command:`mpirun` commands to ensure that OpenMPI uses that storage rather than :file:`/tmp` because the :file:`/` file system is very nearly full.
 
 Capture a snapshot image of the instance to use to as the boot image for the other compute nodes using the :guilabel:`Create Snapshot` button on the :guilabel:`Compute > Instances` page.
 Use a name like :kbd:`nowcast-compute-node-v0` for the image.
