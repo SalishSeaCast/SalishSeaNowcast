@@ -143,11 +143,6 @@ class TestAfterDownloadWeather:
             # NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
             NextWorker(
-                "nowcast.workers.get_vfpa_hadcp",
-                ["--data-date", "2018-12-26"],
-                host="localhost",
-            ),
-            NextWorker(
                 "nowcast.workers.get_NeahBay_ssh", ["forecast2"], host="localhost"
             ),
             NextWorker(
@@ -226,11 +221,6 @@ class TestAfterCollectWeather:
             #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
             # NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.get_vfpa_hadcp",
-                ["--data-date", "2018-12-26"],
-                host="localhost",
-            ),
             NextWorker(
                 "nowcast.workers.get_NeahBay_ssh", ["forecast2"], host="localhost"
             ),
