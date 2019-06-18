@@ -587,7 +587,7 @@ run:
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
 
-    arbutus.cloud-prep:
+    west.cloud-maint:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False
       make forcing links: False
