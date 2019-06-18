@@ -724,7 +724,7 @@ run:
 # Strait of Georgia WaveWatch3 model runs
 wave forecasts:
   # Compute host to run wave forecast on
-  host: west.cloud-nowcast
+  host: arbutus.cloud-nowcast
   # NEMO run to run wwatch3 forecast run after
   # User 'after forecast' during storm surge season and 'after nowcast-green`
   # the rest of the year
