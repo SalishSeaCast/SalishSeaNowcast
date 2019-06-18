@@ -764,7 +764,7 @@ wave forecasts:
 # Vancouver Harbour & Fraser River FVCOM model runs
 vhfr fvcom runs:
   # Compute host to run VHFR FVCOM model on
-  host: west.cloud-nowcast
+  host: arbutus.cloud-nowcast
   # Passphrase-less deployment key used by automation for authentication
   # on the host.
   # The key-pair is assumed to be stored in $HOME/.ssh/.
@@ -920,8 +920,8 @@ vhfr fvcom runs:
   FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
   # Number of processors
   number of processors:
-    x2: 28
-    r12: 84
+    x2: 30
+    r12: 75
   # Location on the compute host of the file that contains IP addresses
   # and MPI slots specifications.
   mpi hosts file:
