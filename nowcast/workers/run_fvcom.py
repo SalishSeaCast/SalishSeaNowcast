@@ -501,7 +501,7 @@ def _definitions(
         f'RUN_DESC="{run_desc_file_path.name}"\n'
         f'WORK_DIR="{tmp_run_dir}"\n'
         f'RESULTS_DIR="{results_dir}"\n'
-        f'MPIRUN="mpirun --hostfile {mpi_hosts_file}"\n'
+        f'MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile {mpi_hosts_file}"\n'
         f'GATHER="{fvc_cmd} gather"\n'
     )
     return defns
@@ -525,7 +525,7 @@ def _execute(model_config, config):
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
         
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np {n_processors} --bind-to-core ./fvcom \\
+        ${{MPIRUN}} -np {n_processors} --bind-to none ./fvcom \\
           --casename={casename} --logfile=./fvcom.log \\
           >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
