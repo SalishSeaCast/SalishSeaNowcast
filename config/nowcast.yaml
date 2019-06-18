@@ -461,7 +461,7 @@ storm surge feeds:
 run:
   enabled hosts:
     # Compute host name where daily runs are executed under automation
-    west.cloud-nowcast:
+    arbutus.cloud-nowcast:
       # Does the host share storage with the machine where the nowcast manager
       # is running?
       shared storage: False
@@ -478,7 +478,7 @@ run:
       mpi hosts file: ${HOME}/mpi_hosts
       # IP address of the machine to run XIOS on.
       # Only required for runs on ONC west.cloud cluster.
-      xios host: 192.168.1.53
+      xios host: 192.168.238.14
       # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
       # the host
@@ -504,23 +504,23 @@ run:
       # compute host; keyed by run type
       run types:
         nowcast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201702/nowcast-blue/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201812/nowcast-blue/
           # How is the domain to be distributed over the processors in the
           # i (longitude) and j (latitude) directions?
-          mpi decomposition: 9x19
+          mpi decomposition: 11x18
           # Directory on compute host where results are stored
           results: /nemoShare/MEOPAR/SalishSea/nowcast/
         forecast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201702/forecast/
-          mpi decomposition: 9x19
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201812/forecast/
+          mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/forecast/
         forecast2:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201702/forecast2/
-          mpi decomposition: 9x19
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201812/forecast2/
+          mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/forecast2/
         nowcast-green:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201702/nowcast-green/
-          mpi decomposition: 9x19
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201812/nowcast-green/
+          mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forcing:
         # Directory on compute host where Neah Bay sea surface height forcing files
