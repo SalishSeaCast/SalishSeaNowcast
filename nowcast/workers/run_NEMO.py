@@ -112,8 +112,12 @@ def run_NEMO(parsed_args, config, tell_manager):
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
     if not run_type.startswith("nowcast"):
-        run_info = tell_manager("need", "NEMO run").payload
-        run_date = arrow.get(run_info["nowcast"]["run date"])
+        try:
+            run_info = tell_manager("need", "NEMO run").payload
+            run_date = arrow.get(run_info["nowcast"]["run date"])
+        except AttributeError:
+            # nowcast run date is unavailable, so use run date from command-line
+            pass
     run_desc_filepath = _create_run_desc_file(run_date, run_type, host_name, config)
     run_dir = Path(salishsea_cmd.api.prepare(run_desc_filepath))
     logger.debug(f"{run_type}: temporary run directory: {run_dir}")
