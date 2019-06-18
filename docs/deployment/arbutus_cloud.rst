@@ -521,43 +521,41 @@ Head Node :file:`.ssh/config`
 
   # Head node and XIOS host
   Host nowcast0
-    HostName 192.168.238.9
+    HostName 192.168.238.14
 
   # NEMO compute nodes
   Host nowcast1
     HostName 192.168.238.10
   Host nowcast2
-    HostName 192.168.238.14
-  Host nowcast3
-   HostName 192.168.238.16
-  Host nowcast4
-    HostName 192.168.238.5
-  Host nowcast5
-    HostName 192.168.238.17
-  Host nowcast6
     HostName 192.168.238.13
-  Host nowcast7
+  Host nowcast3
+   HostName 192.168.238.8
+  Host nowcast4
+    HostName 192.168.238.16
+  Host nowcast5
+    HostName 192.168.238.5
+  Host nowcast6
     HostName 192.168.238.6
-  Host nowcast8
-    HostName 192.168.238.4
-  Host nowcast9
-    HostName 192.168.238.7
-  Host nowcast10
-    HostName 192.168.238.12
-  Host nowcast11
-    HostName 192.168.238.11
-  Host nowcast12
-    HostName 192.168.238.22
-  Host nowcast13
-    HostName 192.168.238.20
-  Host nowcast14
-    HostName 192.168.238.8
-  Host nowcast15
-    HostName 192.168.238.24
-  Host nowcast16
+  Host nowcast7
     HostName 192.168.238.18
-  Host nowcast17
+  Host nowcast8
     HostName 192.168.238.15
+
+  # FVCOM compute nodes
+  Host fvcom0
+    HostName 192.168.238.12
+  Host fvcom1
+    HostName 192.168.238.7
+  Host fvcom2
+    HostName 192.168.238.20
+  Host fvcom3
+    HostName 192.168.238.11
+  Host fvcom4
+    HostName 192.168.238.9
+  Host fvcom5
+    HostName 192.168.238.28
+  Host fvcom6
+    HostName 192.168.238.27
 
 
 MPI Hosts Mappings
@@ -565,31 +563,27 @@ MPI Hosts Mappings
 
 :file:`$HOME/mpi_hosts` for NEMO/WAVEWATCH VMs containing::
 
-  192.168.238.10 slots=7 max-slots=8
-  192.168.238.14 slots=7 max-slots=8
-  192.168.238.16 slots=7 max-slots=8
-  192.168.238.5 slots=7 max-slots=8
-  192.168.238.17 slots=7 max-slots=8
-  192.168.238.13 slots=7 max-slots=8
-  192.168.238.6 slots=7 max-slots=8
-  192.168.238.4 slots=7 max-slots=8
-  192.168.238.7 slots=7 max-slots=8
-  192.168.238.12 slots=7 max-slots=8
-  192.168.238.11 slots=7 max-slots=8
-  192.168.238.22 slots=7 max-slots=8
-  192.168.238.20 slots=7 max-slots=8
-  192.168.238.8 slots=7 max-slots=8
-  192.168.238.24 slots=7 max-slots=8
-  192.168.238.18 slots=7 max-slots=8
-  192.168.238.15 slots=7 max-slots=8
+  192.168.238.10 slots=15 max-slots=16
+  192.168.238.13 slots=15 max-slots=16
+  192.168.238.8  slots=15 max-slots=16
+  192.168.238.16 slots=15 max-slots=16
+  192.168.238.5  slots=15 max-slots=16
+  192.168.238.6  slots=15 max-slots=16
+  192.168.238.18 slots=15 max-slots=16
+  192.168.238.15 slots=15 max-slots=16
 
 :file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for :kbd:`x2` model configuration runs containing::
 
-**TODO**
+  192.168.238.12 slots=15 max-slots=16
+  192.168.238.7  slots=15 max-slots=16
 
 :file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for :kbd:`r12` model configuration runs containing::
 
-**TODO**
+  192.168.238.20 slots=15 max-slots=16
+  192.168.238.11 slots=15 max-slots=16
+  192.168.238.9  slots=15 max-slots=16
+  192.168.238.28 slots=15 max-slots=16
+  192.168.238.27 slots=15 max-slots=16
 
 
 Mercurial Repositories
