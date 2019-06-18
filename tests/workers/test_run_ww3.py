@@ -366,14 +366,13 @@ class TestDefinitions:
         WORK_DIR="wwatch3-runs/tmp_run_dir"
         RESULTS_DIR="wwatch3-{run_type}/29mar17"
         WW3_EXE="wwatch3-5.16/exe"
-        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"
+        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts"
         GATHER="salishsea gather"
         """
 
         expected = expected.splitlines()
         for i, line in enumerate(defns.splitlines()):
-            pass
-        assert line.strip() == expected[i].strip()
+            assert line.strip() == expected[i].strip()
 
 
 class TestPrepare:
@@ -412,7 +411,7 @@ class TestExecute:
     def test_forecast_execute(self, run_type):
         execution = run_ww3._execute(run_type, arrow.get("2017-04-20"))
         expected = """echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\
+        ${MPIRUN} -np 120 --bind-to none ${WW3_EXE}/ww3_shel \\
           >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
         mv log.ww3 ww3_shel.log && \\
         rm current.ww3 wind.ww3 && \\
@@ -427,7 +426,7 @@ class TestExecute:
     def test_nowcast_execute(self):
         execution = run_ww3._execute("nowcast", arrow.get("2017-04-20"))
         expected = """echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\
+        ${MPIRUN} -np 120 --bind-to none ${WW3_EXE}/ww3_shel \\
           >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
         mv log.ww3 ww3_shel.log && \\
         rm current.ww3 wind.ww3 && \\

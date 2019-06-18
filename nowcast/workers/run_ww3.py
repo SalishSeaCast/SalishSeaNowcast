@@ -93,9 +93,9 @@ def failure(parsed_args):
 
 def run_ww3(parsed_args, config, *args):
     """
-    :param :py:class:`argparse.Namespace` parsed_args: 
+    :param :py:class:`argparse.Namespace` parsed_args:
     :param :py:class:`nemo_nowcast.Config` config:
-    
+
     :return: Nowcast system checklist items
     :rtype: dict
     """
@@ -124,7 +124,7 @@ def _build_tmp_run_dir(run_date, run_type, config):
     :param :py:class:`arrow.Arrow` run_date:
     :param str run_type:
     :param :py:class:`nemo_nowcast.Config` config:
-    
+
     :return: Temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
@@ -139,7 +139,7 @@ def _make_run_dir(run_type, run_prep_dir):
     """
     :param str run_type:
     :param :py:class:`pathlib.Path` run_prep_dir:
-    
+
     :return: Temporary run directory
     :rtype: :py:class:`pathlib.Path`
     """
@@ -170,7 +170,7 @@ def _create_symlinks(run_date, run_type, run_prep_path, run_dir_path, config):
 def _write_ww3_input_files(run_date, run_type, run_dir_path):
     """
     :param :py:class:`arrow.Arrow` run_date:
-    :param str run_type: 
+    :param str run_type:
     :param :py:class:`pathlib.Path` run_dir_path:
     """
     ww3_input_files = {
@@ -190,10 +190,10 @@ def _write_ww3_input_files(run_date, run_type, run_dir_path):
 def _ww3_prnc_wind_contents(run_date, run_type):
     """
     :param :py:class:`arrow.Arrow` run_date:
-    :param str run_type: 
-    
+    :param str run_type:
+
     :return: ww3_prnc_wind.inp file contents
-    :rtype: str 
+    :rtype: str
     """
     start_date = run_date.format("YYYYMMDD")
     contents = f"""$ WAVEWATCH III NETCDF Field preprocessor input \
@@ -219,10 +219,10 @@ $ File is produced by make_ww3_wind_file worker
 def _ww3_prnc_current_contents(run_date, run_type):
     """
     :param :py:class:`arrow.Arrow` run_date:
-    :param str run_type: 
-    
+    :param str run_type:
+
     :return: ww3_prnc_current.inp file contents
-    :rtype: str 
+    :rtype: str
     """
     start_date = run_date.format("YYYYMMDD")
     contents = f"""$ WAVEWATCH III NETCDF Field preprocessor input \
@@ -249,9 +249,9 @@ def _ww3_shel_contents(run_date, run_type):
     """
     :param :py:class:`arrow.Arrow` run_date:
     :param str run_type:
-    
+
     :return: ww3_shel.inp file contents
-    :rtype: str 
+    :rtype: str
     """
     start_date = (
         run_date.format("YYYYMMDD")
@@ -324,10 +324,10 @@ $ Homogeneous field data (required placeholder for unused feature)
 def _ww3_ounf_contents(run_date, run_type):
     """
     :param run_date: :py:class:`arrow.Arrow`
-    :param str run_type: 
-    
+    :param str run_type:
+
     :return: ww3_ounf.inp file contents
-    :rtype: str 
+    :rtype: str
     """
     start_date = (
         run_date.format("YYYYMMDD")
@@ -369,11 +369,11 @@ $
 
 def _ww3_ounp_contents(run_date, run_type):
     """
-    :param str run_type: 
+    :param str run_type:
     :param run_date: :py:class:`arrow.Arrow`
 
     :return: ww3_ounp.inp file contents
-    :rtype: str 
+    :rtype: str
     """
     start_date = (
         run_date.format("YYYYMMDD")
@@ -413,14 +413,14 @@ $ WMO standard output
 
 def _build_run_script(run_date, run_type, run_dir_path, results_path, config):
     """
-    :param :py:class:`arrow.Arrow` run_date: 
-    :param str run_type: 
-    :param :py:class:`pathlib.Path` run_dir_path: 
-    :param :py:class:`pathlib.Path` results_path: 
-    :param :py:class:`nemo_nowcast.Config` config: 
-    
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
+    :param :py:class:`pathlib.Path` run_dir_path:
+    :param :py:class:`pathlib.Path` results_path:
+    :param :py:class:`nemo_nowcast.Config` config:
+
     :return: wwatch3 run set-up and execution script
-    :rtype: str 
+    :rtype: str
     """
     script = (
         "#!/bin/bash\n"
@@ -450,14 +450,14 @@ def _build_run_script(run_date, run_type, run_dir_path, results_path, config):
 
 def _definitions(run_date, run_type, run_dir_path, results_path, config):
     """
-    :param :py:class:`arrow.Arrow` run_date: 
-    :param str run_type: 
-    :param :py:class:`pathlib.Path` run_dir_path: 
-    :param :py:class:`pathlib.Path` results_path: 
-    :param :py:class:`nemo_nowcast.Config` config: 
-    
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
+    :param :py:class:`pathlib.Path` run_dir_path:
+    :param :py:class:`pathlib.Path` results_path:
+    :param :py:class:`nemo_nowcast.Config` config:
+
     :return: Definitions section of wwatch3 run set-up and execution script
-    :rtype: str 
+    :rtype: str
     """
     ddmmmyy = run_date.format("DDMMMYY").lower()
     wwatch3_exe_path = config["wave forecasts"]["wwatch3 exe path"]
@@ -467,7 +467,7 @@ def _definitions(run_date, run_type, run_dir_path, results_path, config):
         f'WORK_DIR="{run_dir_path}"\n'
         f'RESULTS_DIR="{results_path/ddmmmyy}"\n'
         f'WW3_EXE="{wwatch3_exe_path}"\n'
-        f'MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"\n'
+        f'MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts"\n'
         f'GATHER="{salishsea_cmd} gather"\n'
     )
     return defns
@@ -476,7 +476,7 @@ def _definitions(run_date, run_type, run_dir_path, results_path, config):
 def _prepare():
     """
     :return: Preparations section of wwatch3 run set-up and execution script
-    :rtype: str 
+    :rtype: str
     """
     preparations = (
         "mkdir -p ${RESULTS_DIR}\n"
@@ -511,12 +511,12 @@ def _execute(run_type, run_date):
     :param :py:class:`arrow.Arrow` run_date:
 
     :return: Execution section of wwatch3 run set-up and execution script
-    :rtype: str 
+    :rtype: str
     """
     start_date = run_date.format("YYYYMMDD")
     execution = (
         'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
-        "${MPIRUN} -np 85 --bind-to-core ${WW3_EXE}/ww3_shel \\\n"
+        "${MPIRUN} -np 120 --bind-to none ${WW3_EXE}/ww3_shel \\\n"
         "  >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n"
         "mv log.ww3 ww3_shel.log && \\\n"
         "rm current.ww3 wind.ww3 && \\\n"
@@ -534,10 +534,10 @@ def _netcdf_output(run_date, run_type):
     """
     :param str run_type:
     :param :py:class:`arrow.Arrow` run_date:
-    
-    :return: netCDF output files section of wwatch3 run set-up and execution 
+
+    :return: netCDF output files section of wwatch3 run set-up and execution
              script
-    :rtype: str 
+    :rtype: str
     """
     start_date = run_date if run_type == "nowcast" else run_date.shift(days=+1)
     start_yyyymmdd = start_date.format("YYYYMMDD")
@@ -581,7 +581,7 @@ def _netcdf_output(run_date, run_type):
 def _cleanup():
     """
     :return: clean-up section of wwatch3 run set-up and execution script
-    :rtype: str 
+    :rtype: str
     """
     cleanup = (
         'echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout\n'
@@ -597,10 +597,10 @@ def _cleanup():
 
 def _write_run_script(run_type, script, run_dir_path):
     """
-    :param str run_type: 
-    :param str script: 
-    :param :py:class:`pathlib.Path` run_dir_path: 
-    
+    :param str run_type:
+    :param str script:
+    :param :py:class:`pathlib.Path` run_dir_path:
+
     :return: wwatch3 run set-up and execution script path
     :rtype: :py:class:`pathlib.Path`
     """
@@ -614,10 +614,10 @@ def _write_run_script(run_type, script, run_dir_path):
 
 def _launch_run(run_type, run_script_path, host_name):
     """
-    :param str run_type: 
-    :param :py:class:`pathlib.Path` run_script_path: 
+    :param str run_type:
+    :param :py:class:`pathlib.Path` run_script_path:
     :param str host_name:
-     
+
     :return: wwatch3 run set-up and execution command
     :rtype: str
     """
