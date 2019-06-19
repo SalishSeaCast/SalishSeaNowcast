@@ -451,7 +451,7 @@ def _definitions(
     host_config = config["run"]["enabled hosts"][host_name]
     mpirun = "mpirun"
     if host_config.get("mpi hosts file") is not None:
-        mpirun = f'mpirun --hostfile {host_config["mpi hosts file"]}'
+        mpirun = f'mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile {host_config["mpi hosts file"]}'
     defns = (
         'RUN_ID="{run_id}"\n'
         'RUN_DESC="{run_desc_file}"\n'
@@ -473,13 +473,13 @@ def _definitions(
 
 def _execute(nemo_processors, xios_processors, xios_host):
     mpirun = (
-        f"${{MPIRUN}} -np {nemo_processors} --bind-to-core ./nemo.exe : "
-        f"-np {xios_processors} --bind-to-core ./xios_server.exe"
+        f"${{MPIRUN}} -np {nemo_processors} --bind-to core ./nemo.exe : "
+        f"-np {xios_processors} --bind-to core ./xios_server.exe"
     )
     if xios_host is not None:
         mpirun = (
-            f"${{MPIRUN}} -np {nemo_processors} --bind-to-core ./nemo.exe : "
-            f"-host {xios_host} -np {xios_processors} --bind-to-core "
+            f"${{MPIRUN}} -np {nemo_processors} --bind-to none ./nemo.exe : "
+            f"-host {xios_host} -np {xios_processors} --bind-to none "
             f"./xios_server.exe"
         )
     script = (

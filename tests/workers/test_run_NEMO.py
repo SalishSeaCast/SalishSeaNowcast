@@ -80,6 +80,7 @@ def config(scope="function"):
             "enabled hosts": {
                 "west.cloud": {
                     "mpi hosts file": "${HOME}/mpi_hosts",
+                    "xios host": "192.168.238.14",
                     "run prep dir": "nowcast-sys/runs/",
                     "grid dir": "nowcast-sys/grid/",
                     "salishsea_cmd": "bin/salishsea",
@@ -1043,7 +1044,7 @@ class TestBuildScript:
     )
     @patch("nowcast.workers.run_NEMO.nemo_cmd.prepare.load_run_desc")
     @patch(
-        "nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors", return_value=112
+        "nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors", return_value=119
     )
     def test_script_west_cloud(self, m_gnp, m_lrd, run_type, config, tmpdir):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
@@ -1053,7 +1054,7 @@ class TestBuildScript:
         p_config = patch.dict(config, [("results archive", str(results_dir))])
         m_lrd.return_value = {
             "run_id": "13may17nowcast",
-            "MPI decomposition": "9x19",
+            "MPI decomposition": "11x18",
             "output": {"XIOS servers": 1},
         }
         with p_config:
@@ -1071,7 +1072,7 @@ class TestBuildScript:
         RUN_DESC="13may17.yaml"
         WORK_DIR="{tmp_run_dir}"
         RESULTS_DIR="{results_dir}"
-        MPIRUN="mpirun --hostfile ${{HOME}}/mpi_hosts"
+        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts"
         COMBINE="bin/salishsea combine"
         GATHER="bin/salishsea gather"
 
@@ -1081,8 +1082,8 @@ class TestBuildScript:
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 112 --bind-to-core ./nemo.exe : \
--np 1 --bind-to-core ./xios_server.exe \
+        ${{MPIRUN}} -np 119 --bind-to none ./nemo.exe : \
+-host 192.168.238.14 -np 1 --bind-to none ./xios_server.exe \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
@@ -1162,8 +1163,8 @@ class TestBuildScript:
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 7 --bind-to-core ./nemo.exe : \
--np 1 --bind-to-core ./xios_server.exe \
+        ${{MPIRUN}} -np 7 --bind-to core ./nemo.exe : \
+-np 1 --bind-to core ./xios_server.exe \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
@@ -1248,7 +1249,7 @@ class TestDefinitions:
         RUN_DESC="03dec16.yaml"
         WORK_DIR="tmp_run_dir"
         RESULTS_DIR="results_dir"
-        MPIRUN="mpirun --hostfile ${HOME}/mpi_hosts"
+        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${HOME}/mpi_hosts"
         COMBINE="bin/salishsea combine"
         GATHER="bin/salishsea gather"
         """
@@ -1271,8 +1272,8 @@ class TestExecute:
         echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 15 --bind-to-core ./nemo.exe : \
--np 1 --bind-to-core ./xios_server.exe \
+        ${MPIRUN} -np 15 --bind-to core ./nemo.exe : \
+-np 1 --bind-to core ./xios_server.exe \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
@@ -1298,8 +1299,8 @@ class TestExecute:
         echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 15 --bind-to-core ./nemo.exe : \
--host 192.168.1.79 -np 1 --bind-to-core ./xios_server.exe \
+        ${MPIRUN} -np 15 --bind-to none ./nemo.exe : \
+-host 192.168.1.79 -np 1 --bind-to none ./xios_server.exe \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
