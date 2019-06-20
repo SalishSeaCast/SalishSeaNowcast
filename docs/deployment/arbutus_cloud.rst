@@ -195,7 +195,7 @@ On the :guilabel:`Source` tab set the following parameters:
 
 * Select Boot Source: :kbd:`Image`
 * Create New Volume: :kbd:`No`
-* Image: :kbd:`Ubuntu-18.04-Bionic-minimal-x64-2018-08`
+* Image: :kbd:`Ubuntu-18.04-Bionic-x64-2018-09`
 
 On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c16-60gb-90-numa-test`
 
