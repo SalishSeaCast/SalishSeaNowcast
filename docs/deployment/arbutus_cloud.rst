@@ -155,7 +155,7 @@ On the :guilabel:`Source` tab set the following parameters:
     We have to use the :kbd:`Ubuntu-18.04-Bionic-x64-2018-09` image,
     not the :kbd:`Ubuntu-18.04-Bionic-minimal-x64-2018-08` image because the latter does not include the kernel elements required for the head node to run the NFS server service.
 
-On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c8-60gb-90`
+On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c16-60gb-90-numa-test`
 
 On the :guilabel:`Network` tab confirm that :kbd:`rrg-allen-network` is selected.
 
@@ -197,7 +197,7 @@ On the :guilabel:`Source` tab set the following parameters:
 * Create New Volume: :kbd:`No`
 * Image: :kbd:`Ubuntu-18.04-Bionic-minimal-x64-2018-08`
 
-On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c8-15gb-90`
+On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c16-60gb-90-numa-test`
 
 On the :guilabel:`Network` tab confirm that :kbd:`rrg-allen-network` is selected.
 
