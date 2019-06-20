@@ -235,7 +235,6 @@ To create a persistent shared storage volume that will be mounted on all instanc
 Use :guilabel:`Actions > Manage Attachments` to attach the volume to the :kbd:`nowcast0` :ref:`HeadNodeInstance`.
 
 
-
 :command:`ssh` Access
 =====================
 
@@ -324,12 +323,20 @@ Provision the :ref:`HeadNodeInstance` with the following packages:
     $ sudo apt install -y python3-pip python3-dev
     $ sudo apt install -y nfs-common nfs-kernel-server
 
-Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/` and append it to the :file:`authorized_keys` file:
+Copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` pm the head node:
 
 .. code-block:: bash
 
     # on a system where they key pair is stored
     $ ssh-copy-id -f -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud
+
+Copy the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/` as :file:`id_rsa` and :file:`id_rsa.pub` for :command:`mpirun` to use for communication with the compute instances:
+
+.. code-block:: bash
+
+    # on a system where they key pair is stored
+    $ scp $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud:.ssh/id_rsa
+    $ scp $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa.pub arbutus.cloud:.ssh/id_rsa.pub
 
 The nowcast operations key pair could have been used as the default key pair in the OpenStack web interface,
 but using a key pair with a passphrase there allows for more flexibility:
@@ -500,8 +507,16 @@ and set the owner and group:
     $ sudo mkdir -p /nemoShare/MEOPAR
     $ sudo chown ubuntu:ubuntu /nemoShare/ /nemoShare/MEOPAR/
 
+From the head node,
+copy the public key of the passphrase-less ssh key pair that will be used for nowcast cloud operations into :file:`$HOME/.ssh/authorized_keys` on the compute node:
+
+.. code-block:: bash
+
+    # on nowcast0
+    $ ssh-copy-id -f -i $HOME/.ssh/id_rsa nowcast1
+
 Capture a snapshot image of the instance to use to as the boot image for the other compute nodes using the :guilabel:`Create Snapshot` button on the :guilabel:`Compute > Instances` page.
-Use a name like :kbd:`nowcast-compute-node-v0` for the image.
+Use a name like :kbd:`nowcast-c16-60g-numa-compute-v0` for the image.
 
 
 Hosts Mappings
