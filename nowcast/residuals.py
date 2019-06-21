@@ -701,7 +701,7 @@ def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
     return fig
 
 
-def NeahBay_forcing_anom(textfile, run_date, tide_file):
+def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False):
     """Calculate the Neah Bay forcing anomaly for the data stored in textfile.
 
     :arg textfile: the textfile containing forecast/observations
@@ -717,31 +717,41 @@ def NeahBay_forcing_anom(textfile, run_date, tide_file):
     The dates, surges and a flag specifying if each point was a forecast
     """
 
-    data = _load_surge_data(textfile)
-    dates = np.array(data.date.values)
-    # Check if today is Jan or Dec
-    isDec, isJan = False, False
-    if run_date.month == 1:
-        isJan = True
-    if run_date.month == 12:
-        isDec = True
-    for i in range(dates.shape[0]):
-        dates[i] = _to_datetime(dates[i], run_date.year, isDec, isJan)
-    surge, forecast_flag = _calculate_forcing_surge(data, dates, tide_file)
+    data = _load_surge_data(textfile, archive)
+    if archive:
+        data.Date =pd.to_datetime(data['Date'] + ' ' + data['Time'], utc=True) 
+        dates = data.Date.array
+    else:
+        dates = np.array(data.date.values)
+        # Check if today is Jan or Dec
+        isDec, isJan = False, False
+        if run_date.month == 1:
+            isJan = True
+        if run_date.month == 12:
+            isDec = True
+        for i in range(dates.shape[0]):
+            dates[i] = _to_datetime(dates[i], run_date.year, isDec, isJan)
+    surge, forecast_flag = _calculate_forcing_surge(
+                                data, dates, tide_file, archive)
     return dates, surge, forecast_flag
 
 
-def _load_surge_data(filename):
+def _load_surge_data(filename, archive=False):
     """Load the storm surge observations & predictions table from filename
     and return is as a Pandas DataFrame.
     """
-    col_names = "date surge tide obs fcst anom comment".split()
-    data = pd.read_csv(filename, skiprows=3, names=col_names, comment="#")
+    if archive:
+        col_names = "Date Time Predicted Preliminary obs".split()
+        data = pd.read_csv(filename, skiprows=1, names=col_names)
+    else:
+        col_names = "date surge tide obs fcst anom comment".split()
+        data = pd.read_csv(filename, skiprows=3, names=col_names, comment="#")
+
     data = data.dropna(how="all")
     return data
 
 
-def _calculate_forcing_surge(data, dates, tide_file):
+def _calculate_forcing_surge(data, dates, tide_file, archive=False):
     """Given Neah Bay water levels stored in data, calculate the sea surface
     height anomaly by removing tides.
 
@@ -755,10 +765,13 @@ def _calculate_forcing_surge(data, dates, tide_file):
     ttide, _ = stormtools.load_tidal_predictions(tide_file)
     for d in dates:
         # Convert datetime to string for comparing with times in data
-        daystr = d.strftime("%m/%d %HZ")
         tide = ttide.pred_all[ttide.time == d].item()
-        obs = data.obs[data.date == daystr].item()
-        fcst = data.fcst[data.date == daystr].item()
+        if archive:
+            obs = data.obs[data.Date == d].item()
+        else:
+            daystr = d.strftime("%m/%d %HZ")
+            obs = data.obs[data.date == daystr].item()
+            fcst = data.fcst[data.date == daystr].item()
         if obs == 99.90:
             # Fall daylight savings
             if fcst == 99.90:
