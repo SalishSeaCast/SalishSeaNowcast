@@ -421,6 +421,7 @@ def _prep_nowcast_green_research_fig_functions(
     yyyymmdd = run_date.format("YYYYMMDD")
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
     ptrc_T_hr = _results_dataset("1h", "ptrc_T", results_dir)
+    turb_T_hr = _results_dataset("1h", "turb_T", results_dir)
     fig_functions = {}
     image_loops = {
         "salinity": {"nemo var": "vosaline", "cmap": cmocean.cm.haline},
@@ -505,11 +506,6 @@ def _prep_nowcast_green_research_fig_functions(
             "cmap": cmocean.cm.algae,
             "depth integrated": True,
         },
-        "Fraser_tracer": {
-            "nemo var": "Fraser_tracer",
-            "cmap": cmocean.cm.turbid,
-            "depth integrated": False,
-        },
     }
     for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = tracer_thalweg_and_surface_hourly.clevels(
@@ -524,6 +520,41 @@ def _prep_nowcast_green_research_fig_functions(
                     "args": (
                         hr,
                         ptrc_T_hr.variables[params["nemo var"]],
+                        bathy,
+                        mesh_mask,
+                        clevels_thalweg,
+                        clevels_surface,
+                    ),
+                    "kwargs": {
+                        "cmap": params["cmap"],
+                        "depth_integrated": params["depth integrated"],
+                    },
+                    "format": "png",
+                    "image loop": True,
+                }
+                for hr in range(24)
+            }
+        )
+    image_loops = {
+        "Fraser_tracer": {
+            "nemo var": "Fraser_tracer",
+            "cmap": cmocean.cm.turbid,
+            "depth integrated": False,
+        },
+    }
+    for tracer, params in image_loops.items():
+        clevels_thalweg, clevels_surface = tracer_thalweg_and_surface_hourly.clevels(
+            turb_T_hr.variables[params["nemo var"]],
+            mesh_mask,
+            depth_integrated=params["depth integrated"],
+        )
+        fig_functions.update(
+            {
+                f"{tracer}_thalweg_and_surface_{yyyymmdd}_{hr:02d}3000_UTC": {
+                    "function": tracer_thalweg_and_surface_hourly.make_figure,
+                    "args": (
+                        hr,
+                        turb_T_hr.variables[params["nemo var"]],
                         bathy,
                         mesh_mask,
                         clevels_thalweg,
