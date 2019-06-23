@@ -74,10 +74,8 @@ def main():
     )
     worker.cli.add_argument(
         "--archive",
-        type=str,
-        help="""
-        text-file is archive type
-        """,
+        action="store_true",
+        help="text-file is archive type",
     )
     worker.run(get_NeahBay_ssh, success, failure)
 
@@ -106,10 +104,6 @@ def get_NeahBay_ssh(parsed_args, config, *args):
     """
     run_type = parsed_args.run_type
     textfile = parsed_args.text_file
-    if parsed_args.archive == 'True':
-        archive = True
-    else:
-        archive = False
     ssh_dir = Path(config["ssh"]["ssh dir"])
     with suppress(AttributeError):
         textfile = textfile if textfile.is_absolute() else ssh_dir / "txt" / textfile
@@ -148,7 +142,7 @@ def get_NeahBay_ssh(parsed_args, config, *args):
         os.path.join(
             config["ssh"]["tidal predictions"], config["ssh"]["neah bay hourly"]
         ),
-        archive,
+        parsed_args.archive,
     )
     # Identify days with full ssh information
     dates_full = _list_full_days(dates, sshs, fflags)
