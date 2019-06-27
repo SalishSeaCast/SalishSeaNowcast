@@ -365,6 +365,9 @@ erddap:
       - ubcSSgSurfaceTracerFields1hV18-06
       - ubcSSgNearSurfaceUVelocity20mV18-06
       - ubcSSgNearSurfaceVVelocity20mV18-06
+      # V18-12
+      - ubcSSg3DBiologyFields1hV18-12
+      - ubcSSg3DTracerFields1hV18-12
     nemo-forecast:
       # tide gauge station water levels
       - ubcSSfBoundaryBaySSH10mV18-06
