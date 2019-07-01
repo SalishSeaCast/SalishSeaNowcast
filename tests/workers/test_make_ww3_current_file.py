@@ -261,7 +261,9 @@ class TestMakeWW3CurrentFile:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-04-12")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2017-04-12"),
         )
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
@@ -295,7 +297,9 @@ class TestMakeWW3CurrentFile:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-04-18")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2017-04-18"),
         )
         m_unstagger.return_value = (MagicMock(), MagicMock())
         m_rotate_vel.return_value = (MagicMock(), MagicMock())
