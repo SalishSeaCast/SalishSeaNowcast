@@ -16,6 +16,7 @@
 """
 import logging
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -33,17 +34,19 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-temperature salinity:
-    bc dir: /results/forcing/LiveOcean/modified
-    file template: 'single_LO_{:y%Ym%md%d}.nc'
-    
-run:
-    enabled hosts:
-        west.cloud:
-            forcing:
-                bc dir: /nemoShare/MEOPAR/LiveOcean/
-"""
+            textwrap.dedent(
+                """\
+                temperature salinity:
+                    bc dir: /results/forcing/LiveOcean/modified
+                    file template: 'single_LO_{:y%Ym%md%d}.nc'
+                    
+                run:
+                    enabled hosts:
+                        arbutus.cloud:
+                            forcing:
+                                bc dir: /nemoShare/MEOPAR/LiveOcean/
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
@@ -131,10 +134,10 @@ class TestConfig:
     def test_enabled_hosts(self, prod_config):
         enabled_hosts = list(prod_config["run"]["enabled hosts"].keys())
         assert enabled_hosts == [
-            "west.cloud-nowcast",
+            "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "arbutus.cloud-prep",
+            "west.cloud-maint",
             "beluga-hindcast",
             "cedar-hindcast",
             "graham-hindcast",
@@ -149,8 +152,8 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
-            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/sshNeahBay/"),
-            ("west.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
+            ("west.cloud-maint", "/nemoShare/MEOPAR/sshNeahBay/"),
             ("salish-nowcast", "/results/forcing/sshNeahBay/"),
             (
                 "optimum-hindcast",
@@ -170,8 +173,8 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
-            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/rivers/river_turb/"),
-            ("west.cloud-nowcast", "/nemoShare/MEOPAR/rivers/river_turb/"),
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/river_turb/"),
+            ("west.cloud-maint", "/nemoShare/MEOPAR/rivers/river_turb/"),
             (
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/rivers/river_turb/",
@@ -194,8 +197,8 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
-            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/rivers/"),
-            ("west.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
+            ("west.cloud-maint", "/nemoShare/MEOPAR/rivers/"),
             ("salish-nowcast", "/results/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
@@ -216,8 +219,8 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
-            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
-            ("west.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
+            ("west.cloud-maint", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             ("salish-nowcast", "/results/forcing/atmospheric/GEM2.5/operational/"),
             (
                 "optimum-hindcast",
@@ -248,8 +251,8 @@ class TestConfig:
     @pytest.mark.parametrize(
         "host, expected",
         (
-            ("arbutus.cloud-prep", "/nemoShare/MEOPAR/LiveOcean/"),
-            ("west.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
+            ("west.cloud-maint", "/nemoShare/MEOPAR/LiveOcean/"),
             ("salish-nowcast", "/results/forcing/LiveOcean/boundary_conditions/"),
             (
                 "optimum-hindcast",
@@ -318,10 +321,10 @@ class TestUploadLiveOceanFiles:
     ):
         sftp_client = Mock(namd="sftp_client")
         run_date = arrow.get("2017-09-03")
-        host_config = config["run"]["enabled hosts"]["west.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         with patch("nowcast.workers.upload_forcing.Path.symlink_to"):
             upload_forcing._upload_live_ocean_files(
-                sftp_client, run_type, run_date, config, "west.cloud", host_config
+                sftp_client, run_type, run_date, config, "arbutus.cloud", host_config
             )
         if logging_level is None:
             assert not m_logger.log.called

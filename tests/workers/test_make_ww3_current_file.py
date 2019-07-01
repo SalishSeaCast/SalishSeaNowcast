@@ -16,6 +16,7 @@
 worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import call, MagicMock, Mock, patch
 
@@ -33,24 +34,26 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-run types:
-  nowcast:
-    mesh mask: mesh_mask201702.nc
-    
-run:
-  enabled hosts:
-    west.cloud:
-      run types:
-        nowcast:
-          results: /nemoShare/MEOPAR/SalishSea/nowcast/
-
-wave forecasts:
-  run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
-  grid dir: grid/
-  current file template: 'SoG_current_{yyyymmdd}.nc'
-  NEMO file template: 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
-"""
+            textwrap.dedent(
+                """\
+                run types:
+                  nowcast:
+                    mesh mask: mesh_mask201702.nc
+                    
+                run:
+                  enabled hosts:
+                    arbutus.cloud:
+                      run types:
+                        nowcast:
+                          results: /nemoShare/MEOPAR/SalishSea/nowcast/
+                
+                wave forecasts:
+                  run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
+                  grid dir: grid/
+                  current file template: 'SoG_current_{yyyymmdd}.nc'
+                  NEMO file template: 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
@@ -139,7 +142,7 @@ class TestConfig:
         assert msg in msg_registry
 
     def test_host_config_section(self, prod_config):
-        host_config = prod_config["run"]["enabled hosts"]["west.cloud-nowcast"]
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
         assert (
             host_config["run types"]["nowcast"]["results"]
             == "/nemoShare/MEOPAR/SalishSea/nowcast/"

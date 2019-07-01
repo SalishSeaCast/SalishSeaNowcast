@@ -16,6 +16,7 @@
 worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -33,20 +34,22 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-weather:
-  file template: 'ops_{:y%Ym%md%d}.nc'
-
-run:
-  enabled hosts:
-    west.cloud:
-      forcing:
-        weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
-        
-wave forecasts:
-  run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
-  wind file template: 'SoG_wind_{yyyymmdd}.nc'
-"""
+            textwrap.dedent(
+                """\
+                weather:
+                  file template: 'ops_{:y%Ym%md%d}.nc'
+                
+                run:
+                  enabled hosts:
+                    arbutus.cloud:
+                      forcing:
+                        weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
+                        
+                wave forecasts:
+                  run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
+                  wind file template: 'SoG_wind_{yyyymmdd}.nc'
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
@@ -131,7 +134,7 @@ class TestConfig:
         assert msg in msg_registry
 
     def test_host_config_section(self, prod_config):
-        host_config = prod_config["run"]["enabled hosts"]["west.cloud-nowcast"]
+        host_config = prod_config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
         assert (
             host_config["forcing"]["weather dir"]
             == "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"
@@ -199,7 +202,9 @@ class TestMakeWW3WindFile:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-04-07")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2017-04-07"),
         )
         checklist = make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
         assert checklist == {
@@ -211,7 +216,9 @@ class TestMakeWW3WindFile:
         self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset, config
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type="nowcast", run_date=arrow.get("2019-03-24")
+            host_name="arbutus.cloud",
+            run_type="nowcast",
+            run_date=arrow.get("2019-03-24"),
         )
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
         m_open_dataset.assert_called_once_with(
@@ -225,7 +232,7 @@ class TestMakeWW3WindFile:
         self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset, config
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             run_type="forecast",
             run_date=arrow.get("2017-04-07"),
         )
@@ -245,7 +252,7 @@ class TestMakeWW3WindFile:
         self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset, config
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             run_type="forecast2",
             run_date=arrow.get("2017-04-07"),
         )
