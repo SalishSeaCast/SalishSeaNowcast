@@ -540,7 +540,7 @@ def _prep_nowcast_green_research_fig_functions(
             "nemo var": "Fraser_tracer",
             "cmap": cmocean.cm.turbid,
             "depth integrated": False,
-        },
+        }
     }
     for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = tracer_thalweg_and_surface_hourly.clevels(

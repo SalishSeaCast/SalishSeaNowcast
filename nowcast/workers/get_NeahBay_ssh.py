@@ -73,9 +73,7 @@ def main():
         """,
     )
     worker.cli.add_argument(
-        "--archive",
-        action="store_true",
-        help="text-file is archive type",
+        "--archive", action="store_true", help="text-file is archive type"
     )
     worker.run(get_NeahBay_ssh, success, failure)
 
