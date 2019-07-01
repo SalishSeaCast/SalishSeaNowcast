@@ -719,7 +719,7 @@ def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False):
 
     data = _load_surge_data(textfile, archive)
     if archive:
-        data.Date =pd.to_datetime(data['Date'] + ' ' + data['Time'], utc=True) 
+        data.Date = pd.to_datetime(data["Date"] + " " + data["Time"], utc=True)
         dates = data.Date.array
     else:
         dates = np.array(data.date.values)
@@ -731,8 +731,7 @@ def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False):
             isDec = True
         for i in range(dates.shape[0]):
             dates[i] = _to_datetime(dates[i], run_date.year, isDec, isJan)
-    surge, forecast_flag = _calculate_forcing_surge(
-                                data, dates, tide_file, archive)
+    surge, forecast_flag = _calculate_forcing_surge(data, dates, tide_file, archive)
     return dates, surge, forecast_flag
 
 
