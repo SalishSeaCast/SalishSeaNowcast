@@ -15,6 +15,7 @@
 """Unit tests for SalishSeaCast make_CHS_currents_file worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -32,26 +33,28 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-file group: allen
-
-run types:
-  nowcast:
-    mesh mask: mesh_mask201702.nc
-  forecast:
-    mesh mask: mesh_mask201702.nc
-  forecast2:
-    mesh mask: mesh_mask201702.nc
-    
-results archive:
-  nowcast: nowcast-blue/
-  forecast: forecast/
-  forecast2: forecast2/
-  
-figures:
-  grid dir:
-    nowcast-sys/grid/
-"""
+            textwrap.dedent(
+                """\
+                file group: allen
+                
+                run types:
+                  nowcast:
+                    mesh mask: mesh_mask201702.nc
+                  forecast:
+                    mesh mask: mesh_mask201702.nc
+                  forecast2:
+                    mesh mask: mesh_mask201702.nc
+                    
+                results archive:
+                  nowcast: nowcast-blue/
+                  forecast: forecast/
+                  forecast2: forecast2/
+                  
+                figures:
+                  grid dir:
+                    nowcast-sys/grid/
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
@@ -100,6 +103,55 @@ class TestMain:
             make_CHS_currents_file.success,
             make_CHS_currents_file.failure,
         )
+
+
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "make_CHS_currents_file" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_CHS_currents_file"
+        ]
+        assert msg_registry["checklist key"] == "CHS currents file"
+
+    @pytest.mark.parametrize(
+        "msg",
+        (
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "success forecast2",
+            "failure forecast2",
+            "crash",
+        ),
+    )
+    def test_message_types(self, msg, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_CHS_currents_file"
+        ]
+        assert msg in msg_registry
+
+    def test_figures_section(self, prod_config):
+        figures = prod_config["figures"]
+        assert figures["grid dir"] == "/SalishSeaCast/grid/"
+
+    def test_run_types_section(self, prod_config):
+        run_types = prod_config["run types"]
+        assert run_types["nowcast"]["mesh mask"] == "mesh_mask201702.nc"
+        assert run_types["forecast"]["mesh mask"] == "mesh_mask201702.nc"
+        assert run_types["forecast2"]["mesh mask"] == "mesh_mask201702.nc"
+
+    def test_results_archive_section(self, prod_config):
+        results_archive = prod_config["results archive"]
+        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201806/"
+        assert results_archive["forecast"] == "/results/SalishSea/forecast.201806/"
+        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201806/"
+
+    def test_file_group(self, prod_config):
+        assert prod_config["file group"] == "sallen"
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
