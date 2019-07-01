@@ -391,6 +391,8 @@ erddap:
       - ubcSSf3DuGridFields1hV18-06
       - ubcSSf3DvGridFields1hV18-06
       - ubcSSfSurfaceTracerFields1hV18-06
+      # unversioned datasets
+      - ubcSSfDepthAvgdCurrents1h
     wwatch3-forecast:
       - ubcSSf2DWaveFields30mV17-02
     VFPA-HADCP:
