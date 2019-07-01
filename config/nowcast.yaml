@@ -304,13 +304,13 @@ results archive:
   # Keys are run types.
   # Values are directories on results server where run results are stored
   # in ddmmmyy/ directories.
-  nowcast: /results/SalishSea/nowcast-blue.201806/
+  nowcast: /results/SalishSea/nowcast-blue.201812/
   nowcast-dev: /results/SalishSea/nowcast-dev.201806/
-  forecast: /results/SalishSea/forecast.201806/
-  forecast2: /results/SalishSea/forecast2.201806/
-  nowcast-green: /results2/SalishSea/nowcast-green.201806/
+  forecast: /results/SalishSea/forecast.201812/
+  forecast2: /results/SalishSea/forecast2.201812/
+  nowcast-green: /results2/SalishSea/nowcast-green.201812/
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
-  hindcast: /results2/SalishSea/hindcast.201812_annex/
+  hindcast: /results/SalishSea/hindcast.201905/
 
 
 rolling forecasts:
@@ -568,7 +568,7 @@ run:
           walltime: 23:30:00
           results: /results/SalishSea/nowcast-dev.201806/
         nowcast-green:
-          results: /results2/SalishSea/nowcast-green.201806/
+          results: /results2/SalishSea/nowcast-green.201812/
       forcing:
         ssh dir: /results/forcing/sshNeahBay/
         bc dir: /results/forcing/LiveOcean/boundary_conditions/

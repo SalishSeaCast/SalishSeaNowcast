@@ -146,9 +146,9 @@ class TestConfig:
 
     def test_results_archive_section(self, prod_config):
         results_archive = prod_config["results archive"]
-        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201806/"
-        assert results_archive["forecast"] == "/results/SalishSea/forecast.201806/"
-        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201806/"
+        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201812/"
+        assert results_archive["forecast"] == "/results/SalishSea/forecast.201812/"
+        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201812/"
 
     def test_file_group(self, prod_config):
         assert prod_config["file group"] == "sallen"
