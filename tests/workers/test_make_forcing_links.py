@@ -15,6 +15,7 @@
 """Unit tests for Salish Sea NEMO nowcast make_forcing_links worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
@@ -32,22 +33,24 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-rivers:
-  file templates:
-    short: "RFraserCElse_{:y%Ym%md%d}.nc"
-    long: "RLonFraCElse_{:y%Ym%md%d}.nc"
-  turbidity:
-    file template: "riverTurbDaily2_{:y%Ym%md%d}.nc"
-      
-run:
-  enabled hosts:
-    salish-nowcast:
-      run prep dir: runs/
-      forcing:
-        rivers dir: /results/forcing/rivers/
-        Fraser turbidity dir: /results/forcing/rivers/river_turb/
-"""
+            textwrap.dedent(
+                """\
+                rivers:
+                  file templates:
+                    short: "RFraserCElse_{:y%Ym%md%d}.nc"
+                    long: "RLonFraCElse_{:y%Ym%md%d}.nc"
+                  turbidity:
+                    file template: "riverTurbDaily2_{:y%Ym%md%d}.nc"
+                      
+                run:
+                  enabled hosts:
+                    salish-nowcast:
+                      run prep dir: runs/
+                      forcing:
+                        rivers dir: /results/forcing/rivers/
+                        Fraser turbidity dir: /results/forcing/rivers/river_turb/
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)

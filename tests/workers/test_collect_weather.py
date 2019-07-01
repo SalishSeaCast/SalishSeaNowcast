@@ -16,6 +16,7 @@
 """
 import os
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -33,29 +34,31 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-file group: allen
-
-weather:
-  download:
-    datamart dir: datamart/hrdps-west/
-    GRIB dir: forcing/atmospheric/GEM2.5/GRIB/
-    forecast duration: 48
-    file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
-    grib variables:
-      - UGRD_TGL_10  # u component of wind velocity at 10m elevation
-      - VGRD_TGL_10  # v component of wind velocity at 10m elevation
-      - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
-      - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
-      - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
-      - TMP_TGL_2    # air temperature at 2m elevation
-      - SPFH_TGL_2   # specific humidity at 2m elevation
-      - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
-      - APCP_SFC_0   # accumulated precipitation at ground level
-      - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
-      - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-      - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
-"""
+            textwrap.dedent(
+                """\
+                file group: allen
+                
+                weather:
+                  download:
+                    datamart dir: datamart/hrdps-west/
+                    GRIB dir: forcing/atmospheric/GEM2.5/GRIB/
+                    forecast duration: 48
+                    file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+                    grib variables:
+                      - UGRD_TGL_10  # u component of wind velocity at 10m elevation
+                      - VGRD_TGL_10  # v component of wind velocity at 10m elevation
+                      - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
+                      - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+                      - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
+                      - TMP_TGL_2    # air temperature at 2m elevation
+                      - SPFH_TGL_2   # specific humidity at 2m elevation
+                      - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
+                      - APCP_SFC_0   # accumulated precipitation at ground level
+                      - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
+                      - PRMSL_MSL_0  # atmospheric pressure at mean sea level
+                      - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)

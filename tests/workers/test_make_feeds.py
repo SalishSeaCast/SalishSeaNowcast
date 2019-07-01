@@ -18,6 +18,7 @@ from collections import namedtuple
 import datetime
 import os
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -37,25 +38,27 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-ssh:
-  tidal predictions: tidal_predictions/
-results archive:
-  forecast: /results/SalishSea/forecast/
-figures:
-  storage path: /results/nowcast-sys/figures/
-  storm surge info portal path: storm-surge/
-storm surge feeds:
-  storage path: atom
-  domain: salishsea.eos.ubc.ca
-  feed entry template: storm_surge_advisory.mako
-  feeds:
-    pmv.xml:
-      title: SalishSeaCast for Port Metro Vancouver
-      city: Vancouver
-      tide gauge stn: Point Atkinson
-      tidal predictions: Point Atkinson_tidal_prediction_01-Jan-2013_31-Dec-2020.csv
-"""
+            textwrap.dedent(
+                """\
+                ssh:
+                  tidal predictions: tidal_predictions/
+                results archive:
+                  forecast: /results/SalishSea/forecast/
+                figures:
+                  storage path: /results/nowcast-sys/figures/
+                  storm surge info portal path: storm-surge/
+                storm surge feeds:
+                  storage path: atom
+                  domain: salishsea.eos.ubc.ca
+                  feed entry template: storm_surge_advisory.mako
+                  feeds:
+                    pmv.xml:
+                      title: SalishSeaCast for Port Metro Vancouver
+                      city: Vancouver
+                      tide gauge stn: Point Atkinson
+                      tidal predictions: Point Atkinson_tidal_prediction_01-Jan-2013_31-Dec-2020.csv
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)

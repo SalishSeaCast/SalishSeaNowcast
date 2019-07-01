@@ -15,6 +15,7 @@
 """Unit tests for SalishSeaCast collect_river_data worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -34,19 +35,21 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-rivers:
-  datamart dir: datamart/hydrometric/
-  csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
-  stations:
-    Capilano: 08GA010
-    Englishman: 08HB002
-    Fraser: 08MF005
-  SOG river files:
-    Capilano: /opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow
-    Englishman: SOG-projects/SOG-forcing/ECget/Englishman_flow
-    Fraser: SOG-projects/SOG-forcing/ECget/Fraser_flow
-"""
+            textwrap.dedent(
+                """\
+                rivers:
+                  datamart dir: datamart/hydrometric/
+                  csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
+                  stations:
+                    Capilano: 08GA010
+                    Englishman: 08HB002
+                    Fraser: 08MF005
+                  SOG river files:
+                    Capilano: /opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow
+                    Englishman: SOG-projects/SOG-forcing/ECget/Englishman_flow
+                    Fraser: SOG-projects/SOG-forcing/ECget/Fraser_flow
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)

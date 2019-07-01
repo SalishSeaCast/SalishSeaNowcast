@@ -15,6 +15,7 @@
 """Unit tests for SalishSeaCast get_vfpa_hadcp worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -32,13 +33,15 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-observations:
-  hadcp data:
-    csv dir: opp/obs/AISDATA/
-    dest dir: opp/obs/AISDATA/netcdf/
-    filepath template: 'VFPA_2ND_NARROWS_HADCP_2s_{yyyymm}.nc'
-"""
+            textwrap.dedent(
+                """\
+                observations:
+                  hadcp data:
+                    csv dir: opp/obs/AISDATA/
+                    dest dir: opp/obs/AISDATA/netcdf/
+                    filepath template: 'VFPA_2ND_NARROWS_HADCP_2s_{yyyymm}.nc'
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)

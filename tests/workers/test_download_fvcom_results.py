@@ -16,6 +16,7 @@
 """
 from pathlib import Path
 import shlex
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -33,23 +34,25 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-file group: allen
-
-vhfr fvcom runs:
-  host: west.cloud
-  run types:
-    nowcast x2: 
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
-    forecast x2: 
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
-    nowcast r12: 
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/
-  results archive:
-    nowcast x2: /opp/fvcom/nowcast-x2/
-    forecast x2: /opp/fvcom/forecast-x2/ 
-    nowcast r12: /opp/fvcom/nowcast-r12/
-"""
+            textwrap.dedent(
+                """\
+                file group: allen
+                
+                vhfr fvcom runs:
+                  host: west.cloud
+                  run types:
+                    nowcast x2: 
+                      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
+                    forecast x2: 
+                      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
+                    nowcast r12: 
+                      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/
+                  results archive:
+                    nowcast x2: /opp/fvcom/nowcast-x2/
+                    forecast x2: /opp/fvcom/forecast-x2/ 
+                    nowcast r12: /opp/fvcom/nowcast-r12/
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)

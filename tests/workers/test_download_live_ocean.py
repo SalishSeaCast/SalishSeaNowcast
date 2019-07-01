@@ -15,6 +15,7 @@
 """Unit tests for Salish Sea NEMO nowcast download_live_ocean worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import patch, Mock
 
@@ -32,16 +33,18 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-file group: allen
-
-temperature salinity:
-  download:
-    url: https://pm2.blob.core.windows.net/
-    directory prefix: f
-    file name: 'low_passed_UBC.nc'
-    dest dir: /results/forcing/LiveOcean/downloaded
-"""
+            textwrap.dedent(
+                """\
+                file group: allen
+                
+                temperature salinity:
+                  download:
+                    url: https://pm2.blob.core.windows.net/
+                    directory prefix: f
+                    file name: 'low_passed_UBC.nc'
+                    dest dir: /results/forcing/LiveOcean/downloaded
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
