@@ -17,6 +17,7 @@
 import logging
 from pathlib import Path
 import shlex
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -35,39 +36,41 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-file group: allen
-
-results archive:
-  nowcast: SalishSea/nowcast/
-  forecast: SalishSea/forecast/
-  forecast2: SalishSea/forecast2/
-  nowcast-green: SalishSea/nowcast-green/
-  nowcast-agrif: SalishSea/nowcast-agrif/
-  hindcast: SalishSea/hindcast/
-
-run:
-  enabled hosts:
-    west.cloud-nowcast:
-      run types:
-        nowcast:
-          results: SalishSea/nowcast/
-        forecast:
-          results: SalishSea/forecast/
-        forecast2:
-          results: SalishSea/forecast2/
-        nowcast-green:
-          results: SalishSea/nowcast-green/
-    orcinus-nowcast-agrif:
-      run types:
-        nowcast-agrif:
-          results: SalishSea/nowcast-agrif/
-  hindcast hosts:
-      cedar-hindcast:
-        run types:
-          hindcast:
-            results: SalishSea/hindcast
-"""
+            textwrap.dedent(
+                """\
+                file group: allen
+                
+                results archive:
+                  nowcast: SalishSea/nowcast/
+                  forecast: SalishSea/forecast/
+                  forecast2: SalishSea/forecast2/
+                  nowcast-green: SalishSea/nowcast-green/
+                  nowcast-agrif: SalishSea/nowcast-agrif/
+                  hindcast: SalishSea/hindcast/
+                
+                run:
+                  enabled hosts:
+                    west.cloud-nowcast:
+                      run types:
+                        nowcast:
+                          results: SalishSea/nowcast/
+                        forecast:
+                          results: SalishSea/forecast/
+                        forecast2:
+                          results: SalishSea/forecast2/
+                        nowcast-green:
+                          results: SalishSea/nowcast-green/
+                    orcinus-nowcast-agrif:
+                      run types:
+                        nowcast-agrif:
+                          results: SalishSea/nowcast-agrif/
+                  hindcast hosts:
+                      cedar-hindcast:
+                        run types:
+                          hindcast:
+                            results: SalishSea/hindcast
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
