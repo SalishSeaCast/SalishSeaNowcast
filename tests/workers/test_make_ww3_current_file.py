@@ -174,7 +174,9 @@ class TestSuccess:
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-04-07")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2017-04-07"),
         )
         msg_type = make_ww3_current_file.success(parsed_args)
         assert m_logger.info.called
@@ -189,7 +191,9 @@ class TestFailure:
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-04-07")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2017-04-07"),
         )
         msg_type = make_ww3_current_file.failure(parsed_args)
         assert m_logger.critical.called

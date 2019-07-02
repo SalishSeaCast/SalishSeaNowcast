@@ -78,7 +78,7 @@ def config(scope="function"):
         },
         "run": {
             "enabled hosts": {
-                "west.cloud": {
+                "arbutus.cloud": {
                     "mpi hosts file": "${HOME}/mpi_hosts",
                     "xios host": "192.168.238.14",
                     "run prep dir": "nowcast-sys/runs/",
@@ -276,7 +276,9 @@ class TestSuccess:
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2015-12-28")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2015-12-28"),
         )
         msg_type = run_NEMO.success(parsed_args)
         assert m_logger.info.called
@@ -293,7 +295,9 @@ class TestFailure:
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2015-12-28")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2015-12-28"),
         )
         msg_type = run_NEMO.failure(parsed_args)
         assert m_logger.critical.called
@@ -423,23 +427,23 @@ class TestRunDescription:
         run_date = arrow.get("2015-12-30")
         dmy = run_date.format("DDMMMYY").lower()
         run_id = "{dmy}{run_type}".format(dmy=dmy, run_type="nowcast")
-        host_config = config["run"]["enabled hosts"]["west.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         p_config = patch.dict(host_config["run types"], nowcast={})
         with p_config:
             with patch("nowcast.workers.run_NEMO.logger", autospec=True):
                 with pytest.raises(run_NEMO.WorkerError):
                     run_NEMO._run_description(
-                        run_date, "nowcast", run_id, 2160, "west.cloud", config
+                        run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
                     )
 
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("west.cloud", "nowcast", "SalishSea"),
-            ("west.cloud", "nowcast-green", "SOG"),
+            ("arbutus.cloud", "nowcast", "SalishSea"),
+            ("arbutus.cloud", "nowcast-green", "SOG"),
             ("salish-nowcast", "nowcast-dev", "SalishSea"),
-            ("west.cloud", "forecast", "SalishSea"),
-            ("west.cloud", "forecast2", "SalishSea"),
+            ("arbutus.cloud", "forecast", "SalishSea"),
+            ("arbutus.cloud", "forecast2", "SalishSea"),
         ],
     )
     def test_config_name(
@@ -464,11 +468,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("west.cloud", "nowcast", "04jan16nowcast"),
-            ("west.cloud", "nowcast-green", "04jan16nowcast-green"),
+            ("arbutus.cloud", "nowcast", "04jan16nowcast"),
+            ("arbutus.cloud", "nowcast-green", "04jan16nowcast-green"),
             ("salish-nowcast", "nowcast-dev", "04jan16nowcast-dev"),
-            ("west.cloud", "forecast", "04jan16forecast"),
-            ("west.cloud", "forecast2", "04jan16forecast2"),
+            ("arbutus.cloud", "forecast", "04jan16forecast"),
+            ("arbutus.cloud", "forecast2", "04jan16forecast2"),
         ],
     )
     def test_run_id(
@@ -493,11 +497,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("west.cloud", "nowcast", "9x19"),
-            ("west.cloud", "nowcast-green", "9x19"),
+            ("arbutus.cloud", "nowcast", "9x19"),
+            ("arbutus.cloud", "nowcast-green", "9x19"),
             ("salish-nowcast", "nowcast-dev", "1x7"),
-            ("west.cloud", "forecast", "9x19"),
-            ("west.cloud", "forecast2", "9x19"),
+            ("arbutus.cloud", "forecast", "9x19"),
+            ("arbutus.cloud", "forecast2", "9x19"),
         ],
     )
     def test_mpi_decomposition(
@@ -522,11 +526,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("west.cloud", "nowcast", None),
-            ("west.cloud", "nowcast-green", None),
+            ("arbutus.cloud", "nowcast", None),
+            ("arbutus.cloud", "nowcast-green", None),
             ("salish-nowcast", "nowcast-dev", "23:30:00"),
-            ("west.cloud", "forecast", None),
-            ("west.cloud", "forecast2", None),
+            ("arbutus.cloud", "forecast", None),
+            ("arbutus.cloud", "forecast2", None),
         ],
     )
     def test_walltime(
@@ -560,7 +564,7 @@ class TestRunDescription:
     ):
         dmy = run_date.format("DDMMMYY").lower()
         run_id = "{dmy}{run_type}".format(dmy=dmy, run_type=run_type)
-        host_config = config["run"]["enabled hosts"]["west.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         p_config_results = patch.dict(
             host_config["run types"][run_type],
             results=str(tmp_results["results"][run_type]),
@@ -569,7 +573,7 @@ class TestRunDescription:
         p_config_run_prep = patch.dict(host_config, {"run prep dir": str(tmp_run_prep)})
         with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
-                run_date, run_type, run_id, 2160, "west.cloud", config
+                run_date, run_type, run_id, 2160, "arbutus.cloud", config
             )
         assert run_desc["paths"][path] == tmp_run_prep.join("..", expected)
         assert run_desc["paths"]["forcing"] == tmp_run_prep
@@ -577,11 +581,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, path",
         [
-            ("west.cloud", "nowcast", "runs directory"),
-            ("west.cloud", "nowcast-green", "runs directory"),
+            ("arbutus.cloud", "nowcast", "runs directory"),
+            ("arbutus.cloud", "nowcast-green", "runs directory"),
             ("salish-nowcast", "nowcast-dev", "runs directory"),
-            ("west.cloud", "forecast", "runs directory"),
-            ("west.cloud", "forecast2", "runs directory"),
+            ("arbutus.cloud", "forecast", "runs directory"),
+            ("arbutus.cloud", "forecast2", "runs directory"),
         ],
     )
     def test_runs_dir_path(
@@ -606,12 +610,12 @@ class TestRunDescription:
         "host_name, run_type, expected",
         [
             (
-                "west.cloud",
+                "arbutus.cloud",
                 "nowcast",
                 "nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc",
             ),
             (
-                "west.cloud",
+                "arbutus.cloud",
                 "nowcast-green",
                 "nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc",
             ),
@@ -621,12 +625,12 @@ class TestRunDescription:
                 "nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc",
             ),
             (
-                "west.cloud",
+                "arbutus.cloud",
                 "forecast",
                 "nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc",
             ),
             (
-                "west.cloud",
+                "arbutus.cloud",
                 "forecast2",
                 "nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc",
             ),
@@ -654,11 +658,15 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("west.cloud", "nowcast", "nowcast-sys/grid/bathy_downonegrid2.nc"),
-            ("west.cloud", "nowcast-green", "nowcast-sys/grid/bathy_downonegrid2.nc"),
+            ("arbutus.cloud", "nowcast", "nowcast-sys/grid/bathy_downonegrid2.nc"),
+            (
+                "arbutus.cloud",
+                "nowcast-green",
+                "nowcast-sys/grid/bathy_downonegrid2.nc",
+            ),
             ("salish-nowcast", "nowcast-dev", "nowcast-sys/grid/bathymetry_201702.nc"),
-            ("west.cloud", "forecast", "nowcast-sys/grid/bathy_downonegrid2.nc"),
-            ("west.cloud", "forecast2", "nowcast-sys/grid/bathy_downonegrid2.nc"),
+            ("arbutus.cloud", "forecast", "nowcast-sys/grid/bathy_downonegrid2.nc"),
+            ("arbutus.cloud", "forecast2", "nowcast-sys/grid/bathy_downonegrid2.nc"),
         ],
     )
     def test_grid_bathymetry(
@@ -683,8 +691,12 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("west.cloud", "nowcast", "nowcast-sys/grid/bathy_downonegrid2.csv"),
-            ("west.cloud", "nowcast-green", "nowcast-sys/grid/bathy_downonegrid2.csv"),
+            ("arbutus.cloud", "nowcast", "nowcast-sys/grid/bathy_downonegrid2.csv"),
+            (
+                "arbutus.cloud",
+                "nowcast-green",
+                "nowcast-sys/grid/bathy_downonegrid2.csv",
+            ),
             ("salish-nowcast", "nowcast-dev", False),
         ],
     )
@@ -710,22 +722,27 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, link_name, expected",
         [
-            ("west.cloud", "nowcast", "NEMO-atmos", "NEMO-atmos"),
-            ("west.cloud", "nowcast", "ssh", "ssh"),
-            ("west.cloud", "nowcast", "tides", "tides"),
-            ("west.cloud", "nowcast", "tracers", "tracers"),
-            ("west.cloud", "nowcast", "LiveOcean", "LiveOcean"),
-            ("west.cloud", "nowcast", "rivers", "rivers"),
-            ("west.cloud", "nowcast", "grid", "grid"),
-            ("west.cloud", "nowcast", "rivers-climatology", "rivers-climatology"),
-            ("west.cloud", "nowcast-green", "NEMO-atmos", "NEMO-atmos"),
-            ("west.cloud", "nowcast-green", "ssh", "ssh"),
-            ("west.cloud", "nowcast-green", "tides", "tides"),
-            ("west.cloud", "nowcast-green", "tracers", "tracers"),
-            ("west.cloud", "nowcast-green", "LiveOcean", "LiveOcean"),
-            ("west.cloud", "nowcast-green", "rivers", "rivers"),
-            ("west.cloud", "nowcast-green", "grid", "grid"),
-            ("west.cloud", "nowcast-green", "rivers-climatology", "rivers-climatology"),
+            ("arbutus.cloud", "nowcast", "NEMO-atmos", "NEMO-atmos"),
+            ("arbutus.cloud", "nowcast", "ssh", "ssh"),
+            ("arbutus.cloud", "nowcast", "tides", "tides"),
+            ("arbutus.cloud", "nowcast", "tracers", "tracers"),
+            ("arbutus.cloud", "nowcast", "LiveOcean", "LiveOcean"),
+            ("arbutus.cloud", "nowcast", "rivers", "rivers"),
+            ("arbutus.cloud", "nowcast", "grid", "grid"),
+            ("arbutus.cloud", "nowcast", "rivers-climatology", "rivers-climatology"),
+            ("arbutus.cloud", "nowcast-green", "NEMO-atmos", "NEMO-atmos"),
+            ("arbutus.cloud", "nowcast-green", "ssh", "ssh"),
+            ("arbutus.cloud", "nowcast-green", "tides", "tides"),
+            ("arbutus.cloud", "nowcast-green", "tracers", "tracers"),
+            ("arbutus.cloud", "nowcast-green", "LiveOcean", "LiveOcean"),
+            ("arbutus.cloud", "nowcast-green", "rivers", "rivers"),
+            ("arbutus.cloud", "nowcast-green", "grid", "grid"),
+            (
+                "arbutus.cloud",
+                "nowcast-green",
+                "rivers-climatology",
+                "rivers-climatology",
+            ),
             ("salish-nowcast", "nowcast-dev", "NEMO-atmos", "NEMO-atmos"),
             ("salish-nowcast", "nowcast-dev", "ssh", "ssh"),
             ("salish-nowcast", "nowcast-dev", "tides", "tides"),
@@ -739,22 +756,22 @@ class TestRunDescription:
                 "rivers-climatology",
                 "rivers-climatology",
             ),
-            ("west.cloud", "forecast", "NEMO-atmos", "NEMO-atmos"),
-            ("west.cloud", "forecast", "ssh", "ssh"),
-            ("west.cloud", "forecast", "tides", "tides"),
-            ("west.cloud", "forecast", "tracers", "tracers"),
-            ("west.cloud", "forecast", "LiveOcean", "LiveOcean"),
-            ("west.cloud", "forecast", "rivers", "rivers"),
-            ("west.cloud", "forecast", "grid", "grid"),
-            ("west.cloud", "forecast", "rivers-climatology", "rivers-climatology"),
-            ("west.cloud", "forecast2", "NEMO-atmos", "NEMO-atmos"),
-            ("west.cloud", "forecast2", "ssh", "ssh"),
-            ("west.cloud", "forecast2", "tides", "tides"),
-            ("west.cloud", "forecast2", "tracers", "tracers"),
-            ("west.cloud", "forecast2", "LiveOcean", "LiveOcean"),
-            ("west.cloud", "forecast2", "rivers", "rivers"),
-            ("west.cloud", "forecast2", "grid", "grid"),
-            ("west.cloud", "forecast2", "rivers-climatology", "rivers-climatology"),
+            ("arbutus.cloud", "forecast", "NEMO-atmos", "NEMO-atmos"),
+            ("arbutus.cloud", "forecast", "ssh", "ssh"),
+            ("arbutus.cloud", "forecast", "tides", "tides"),
+            ("arbutus.cloud", "forecast", "tracers", "tracers"),
+            ("arbutus.cloud", "forecast", "LiveOcean", "LiveOcean"),
+            ("arbutus.cloud", "forecast", "rivers", "rivers"),
+            ("arbutus.cloud", "forecast", "grid", "grid"),
+            ("arbutus.cloud", "forecast", "rivers-climatology", "rivers-climatology"),
+            ("arbutus.cloud", "forecast2", "NEMO-atmos", "NEMO-atmos"),
+            ("arbutus.cloud", "forecast2", "ssh", "ssh"),
+            ("arbutus.cloud", "forecast2", "tides", "tides"),
+            ("arbutus.cloud", "forecast2", "tracers", "tracers"),
+            ("arbutus.cloud", "forecast2", "LiveOcean", "LiveOcean"),
+            ("arbutus.cloud", "forecast2", "rivers", "rivers"),
+            ("arbutus.cloud", "forecast2", "grid", "grid"),
+            ("arbutus.cloud", "forecast2", "rivers-climatology", "rivers-climatology"),
         ],
     )
     def test_forcing_links(
@@ -787,11 +804,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type",
         [
-            ("west.cloud", "nowcast"),
-            ("west.cloud", "forecast"),
-            ("west.cloud", "nowcast-green"),
+            ("arbutus.cloud", "nowcast"),
+            ("arbutus.cloud", "forecast"),
+            ("arbutus.cloud", "nowcast-green"),
             ("salish-nowcast", "nowcast-dev"),
-            ("west.cloud", "forecast2"),
+            ("arbutus.cloud", "forecast2"),
         ],
     )
     def test_bottom_friction_mask_link(
@@ -817,13 +834,13 @@ class TestRunDescription:
         "host_name, run_type, link_name, expected",
         [
             (
-                "west.cloud",
+                "arbutus.cloud",
                 "nowcast",
                 "restart.nc",
                 "03jan16/SalishSea_00002160_restart.nc",
             ),
             (
-                "west.cloud",
+                "arbutus.cloud",
                 "nowcast-green",
                 "restart_trc.nc",
                 "03jan16/SalishSea_00002160_restart_trc.nc",
@@ -862,11 +879,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type",
         [
-            ("west.cloud", "nowcast"),
-            ("west.cloud", "nowcast-green"),
+            ("arbutus.cloud", "nowcast"),
+            ("arbutus.cloud", "nowcast-green"),
             ("salish-nowcast", "nowcast-dev"),
-            ("west.cloud", "forecast"),
-            ("west.cloud", "forecast2"),
+            ("arbutus.cloud", "forecast"),
+            ("arbutus.cloud", "forecast2"),
         ],
     )
     def test_namelists(
@@ -909,14 +926,14 @@ class TestRunDescription:
     def test_namelists_nowcast_green(self, config, run_date, tmp_results, tmpdir):
         dmy = run_date.format("DDMMMYY").lower()
         run_id = "{dmy}nowcast".format(dmy=dmy)
-        host_config = config["run"]["enabled hosts"]["west.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         p_config_results = patch.dict(
             host_config["run types"]["nowcast-green"],
             results=str(tmp_results["results"]["nowcast-green"]),
         )
         tmp_run_prep = tmp_results["run prep dir"]
         p_config_run_prep = patch.dict(host_config, {"run prep dir": str(tmp_run_prep)})
-        run_type_config = config["run"]["enabled hosts"]["west.cloud"]["run types"][
+        run_type_config = config["run"]["enabled hosts"]["arbutus.cloud"]["run types"][
             "nowcast-green"
         ]
         tmp_run_sets = tmpdir.ensure_dir(run_type_config["run sets dir"])
@@ -925,7 +942,7 @@ class TestRunDescription:
         )
         with p_config_results, p_config_run_prep, p_config_run_sets_dir:
             run_desc = run_NEMO._run_description(
-                run_date, "nowcast-green", run_id, 2160, "west.cloud", config
+                run_date, "nowcast-green", run_id, 2160, "arbutus.cloud", config
             )
         expected = [
             str(tmp_run_sets.join("namelist_top_restart")),
@@ -943,7 +960,7 @@ class TestRunDescription:
     def test_output_nowcast(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format("DDMMMYY").lower()
         run_id = "{dmy}nowcast".format(dmy=dmy)
-        host_config = config["run"]["enabled hosts"]["west.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         p_config_results = patch.dict(
             host_config["run types"]["nowcast"],
             results=str(tmp_results["results"]["nowcast"]),
@@ -955,7 +972,7 @@ class TestRunDescription:
         )
         with p_config_results, p_config_run_sets_dir:
             run_desc = run_NEMO._run_description(
-                run_date, "nowcast", run_id, 2160, "west.cloud", config
+                run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
             )
         assert run_desc["output"]["iodefs"] == tmp_run_sets.join("iodef.xml")
         assert run_desc["output"]["domaindefs"] == tmp_run_sets.join("domain_def.xml")
@@ -968,7 +985,7 @@ class TestRunDescription:
     def test_output_nowcast_xios2(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format("DDMMMYY").lower()
         run_id = "{dmy}nowcast".format(dmy=dmy)
-        host_config = config["run"]["enabled hosts"]["west.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         p_config_results = patch.dict(
             host_config["run types"]["nowcast"],
             results=str(tmp_results["results"]["nowcast"]),
@@ -981,14 +998,14 @@ class TestRunDescription:
         )
         with p_config_results, p_config_run_sets_dir:
             run_desc = run_NEMO._run_description(
-                run_date, "nowcast", run_id, 2160, "west.cloud", config
+                run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
             )
         assert run_desc["output"]["filedefs"] == str(tmp_run_sets.join("file_def.xml"))
 
     def test_vc_revisions(self, config, run_date, tmpdir, tmp_results):
         dmy = run_date.format("DDMMMYY").lower()
         run_id = "{dmy}nowcast".format(dmy=dmy)
-        host_config = config["run"]["enabled hosts"]["west.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         p_config_results = patch.dict(
             host_config["run types"]["nowcast"],
             results=str(tmp_results["results"]["nowcast"]),
@@ -997,7 +1014,7 @@ class TestRunDescription:
         p_config_run_prep = patch.dict(host_config, {"run prep dir": str(tmp_run_prep)})
         with p_config_results, p_config_run_prep:
             run_desc = run_NEMO._run_description(
-                run_date, "nowcast", run_id, 2160, "west.cloud", config
+                run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
             )
         assert run_desc["vcs revisions"]["hg"] == [
             str(tmp_run_prep.join("..", "grid")),
@@ -1028,7 +1045,7 @@ class TestCreateRunScript:
             run_type,
             Path(str(tmp_run_dir)),
             "30nov16.yaml",
-            "west.cloud",
+            "arbutus.cloud",
             config,
         )
         expected = Path(str(tmp_run_dir.join("SalishSeaNEMO.sh")))
@@ -1049,7 +1066,7 @@ class TestBuildScript:
     def test_script_west_cloud(self, m_gnp, m_lrd, run_type, config, tmpdir):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         run_desc_file = tmpdir.ensure("13may17.yaml")
-        host_config = config["run"]["enabled hosts"]["west.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         results_dir = tmpdir.ensure_dir(host_config["run types"][run_type]["results"])
         p_config = patch.dict(config, [("results archive", str(results_dir))])
         m_lrd.return_value = {
@@ -1063,7 +1080,7 @@ class TestBuildScript:
                 run_type,
                 Path(str(run_desc_file)),
                 Path(str(results_dir)) / "13may17",
-                "west.cloud",
+                "arbutus.cloud",
                 config,
             )
         expected = """#!/bin/bash
@@ -1242,7 +1259,7 @@ class TestDefinitions:
             run_desc_filepath,
             run_dir,
             results_dir,
-            "west.cloud",
+            "arbutus.cloud",
             config,
         )
         expected = """RUN_ID="03dec16nowcast"
@@ -1327,10 +1344,10 @@ class TestLaunchRun:
     @pytest.mark.parametrize(
         "run_type, host",
         [
-            ("nowcast", "west.cloud"),
-            ("nowcast-green", "west.cloud"),
-            ("forecast", "west.cloud"),
-            ("forecast2", "west.cloud"),
+            ("nowcast", "arbutus.cloud"),
+            ("nowcast-green", "arbutus.cloud"),
+            ("forecast", "arbutus.cloud"),
+            ("forecast2", "arbutus.cloud"),
         ],
     )
     def test_bash_launch_run_script(
@@ -1354,10 +1371,10 @@ class TestLaunchRun:
     @pytest.mark.parametrize(
         "run_type, host",
         [
-            ("nowcast", "west.cloud"),
-            ("nowcast-green", "west.cloud"),
-            ("forecast", "west.cloud"),
-            ("forecast2", "west.cloud"),
+            ("nowcast", "arbutus.cloud"),
+            ("nowcast-green", "arbutus.cloud"),
+            ("forecast", "arbutus.cloud"),
+            ("forecast2", "arbutus.cloud"),
         ],
     )
     def test_find_bash_run_process_pid(
@@ -1390,10 +1407,10 @@ class TestLaunchRun:
     @pytest.mark.parametrize(
         "run_type, host",
         [
-            ("nowcast", "west.cloud"),
-            ("nowcast-green", "west.cloud"),
-            ("forecast", "west.cloud"),
-            ("forecast2", "west.cloud"),
+            ("nowcast", "arbutus.cloud"),
+            ("nowcast-green", "arbutus.cloud"),
+            ("forecast", "arbutus.cloud"),
+            ("forecast2", "arbutus.cloud"),
         ],
     )
     def test_bash_run(self, m_run, m_popen, m_logger, run_type, host, config):

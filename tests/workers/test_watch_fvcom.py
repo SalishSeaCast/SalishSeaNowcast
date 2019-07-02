@@ -119,7 +119,7 @@ class TestSuccess:
 
     def test_success(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", model_config=model_config, run_type=run_type
+            host_name="arbutus.cloud", model_config=model_config, run_type=run_type
         )
         msg_type = watch_fvcom.success(parsed_args)
         assert m_logger.info.called
@@ -137,7 +137,7 @@ class TestFailure:
 
     def test_failure(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", model_config=model_config, run_type=run_type
+            host_name="arbutus.cloud", model_config=model_config, run_type=run_type
         )
         msg_type = watch_fvcom.failure(parsed_args)
         assert m_logger.critical.called
@@ -159,12 +159,12 @@ class TestWatchFVCOM:
         self, m_find_run_pid, m_pid_exists, m_logger, model_config, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", model_config=model_config, run_type=run_type
+            host_name="arbutus.cloud", model_config=model_config, run_type=run_type
         )
         tell_manager = Mock(name="tell_manager")
         tell_manager().payload = {
             f"{model_config} {run_type}": {
-                "host": "west.cloud",
+                "host": "arbutus.cloud",
                 "run dir": "tmp_run_dir",
                 "run exec cmd": "bash VHFR_FVCOM.sh",
                 "model config": model_config,
@@ -174,7 +174,7 @@ class TestWatchFVCOM:
         checklist = watch_fvcom.watch_fvcom(parsed_args, config, tell_manager)
         expected = {
             f"{model_config} {run_type}": {
-                "host": "west.cloud",
+                "host": "arbutus.cloud",
                 "model config": model_config,
                 "run date": "2019-02-27",
                 "completed": True,

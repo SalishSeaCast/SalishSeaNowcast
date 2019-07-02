@@ -39,7 +39,7 @@ def config(base_config):
                 file group: allen
                 
                 vhfr fvcom runs:
-                  host: west.cloud
+                  host: arbutus.cloud
                   run types:
                     nowcast x2: 
                       results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
@@ -184,7 +184,7 @@ class TestSuccess:
 
     def test_success(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-02-16"),
@@ -205,7 +205,7 @@ class TestFailure:
 
     def test_failure(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-02-16"),
@@ -230,7 +230,7 @@ class TestDownloadFVCOMResults:
         self, m_fix_perms, m_run_sub, m_logger, model_config, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-02-16"),
@@ -238,7 +238,7 @@ class TestDownloadFVCOMResults:
         checklist = download_fvcom_results.download_fvcom_results(parsed_args, config)
         expected = {
             run_type: {
-                "host": "west.cloud",
+                "host": "arbutus.cloud",
                 "model config": model_config,
                 "run date": "2018-02-16",
                 "files": [],
@@ -250,7 +250,7 @@ class TestDownloadFVCOMResults:
         self, m_fix_perms, m_run_sub, m_logger, model_config, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-02-16"),
@@ -259,7 +259,7 @@ class TestDownloadFVCOMResults:
         m_run_sub.assert_called_once_with(
             shlex.split(
                 f"scp -Cpr "
-                f"west.cloud:/nemoShare/MEOPAR/SalishSea/fvcom-{run_type}-{model_config}/16feb18 "
+                f"arbutus.cloud:/nemoShare/MEOPAR/SalishSea/fvcom-{run_type}-{model_config}/16feb18 "
                 f"/opp/fvcom/{run_type}-{model_config}"
             ),
             m_logger.debug,

@@ -50,7 +50,7 @@ def config(base_config):
                 
                 run:
                   enabled hosts:
-                    west.cloud-nowcast:
+                    arbutus.cloud-nowcast:
                       run types:
                         nowcast:
                           results: SalishSea/nowcast/
@@ -139,10 +139,10 @@ class TestMain:
 @pytest.mark.parametrize(
     "run_type, host_name",
     [
-        ("nowcast", "west.cloud-nowcast"),
-        ("nowcast-green", "west.cloud-nowcast"),
-        ("forecast", "west.cloud-nowcast"),
-        ("forecast2", "west.cloud-nowcast"),
+        ("nowcast", "arbutus.cloud-nowcast"),
+        ("nowcast-green", "arbutus.cloud-nowcast"),
+        ("forecast", "arbutus.cloud-nowcast"),
+        ("forecast2", "arbutus.cloud-nowcast"),
         ("hindcast", "cedar-hindcast"),
         ("nowcast-agrif", "orcinus-nowcast-agrif"),
     ],
@@ -164,10 +164,10 @@ class TestSuccess:
 @pytest.mark.parametrize(
     "run_type, host_name",
     [
-        ("nowcast", "west.cloud-nowcast"),
-        ("nowcast-green", "west.cloud-nowcast"),
-        ("forecast", "west.cloud-nowcast"),
-        ("forecast2", "west.cloud-nowcast"),
+        ("nowcast", "arbutus.cloud-nowcast"),
+        ("nowcast-green", "arbutus.cloud-nowcast"),
+        ("forecast", "arbutus.cloud-nowcast"),
+        ("forecast2", "arbutus.cloud-nowcast"),
         ("hindcast", "cedar-hindcast"),
         ("nowcast-agrif", "orcinus-nowcast-agrif"),
     ],
@@ -217,10 +217,10 @@ class TestDownloadResults:
     @pytest.mark.parametrize(
         "run_type, host_name",
         [
-            ("nowcast", "west.cloud-nowcast"),
-            ("nowcast-green", "west.cloud-nowcast"),
-            ("forecast", "west.cloud-nowcast"),
-            ("forecast2", "west.cloud-nowcast"),
+            ("nowcast", "arbutus.cloud-nowcast"),
+            ("nowcast-green", "arbutus.cloud-nowcast"),
+            ("forecast", "arbutus.cloud-nowcast"),
+            ("forecast2", "arbutus.cloud-nowcast"),
             ("hindcast", "cedar-hindcast"),
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
@@ -243,9 +243,9 @@ class TestDownloadResults:
     @pytest.mark.parametrize(
         "run_type, host_name",
         [
-            ("nowcast", "west.cloud-nowcast"),
-            ("forecast", "west.cloud-nowcast"),
-            ("forecast2", "west.cloud-nowcast"),
+            ("nowcast", "arbutus.cloud-nowcast"),
+            ("forecast", "arbutus.cloud-nowcast"),
+            ("forecast2", "arbutus.cloud-nowcast"),
         ],
     )
     def test_unlink_fvcom_boundary_files(
@@ -293,10 +293,10 @@ class TestDownloadResults:
     @pytest.mark.parametrize(
         "run_type, host_name",
         [
-            ("nowcast", "west.cloud-nowcast"),
-            ("nowcast-green", "west.cloud-nowcast"),
-            ("forecast", "west.cloud-nowcast"),
-            ("forecast2", "west.cloud-nowcast"),
+            ("nowcast", "arbutus.cloud-nowcast"),
+            ("nowcast-green", "arbutus.cloud-nowcast"),
+            ("forecast", "arbutus.cloud-nowcast"),
+            ("forecast2", "arbutus.cloud-nowcast"),
             ("hindcast", "cedar-hindcast"),
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
@@ -327,10 +327,10 @@ class TestDownloadResults:
     @pytest.mark.parametrize(
         "run_type, host_name",
         [
-            ("nowcast", "west.cloud-nowcast"),
-            ("nowcast-green", "west.cloud-nowcast"),
-            ("forecast", "west.cloud-nowcast"),
-            ("forecast2", "west.cloud-nowcast"),
+            ("nowcast", "arbutus.cloud-nowcast"),
+            ("nowcast-green", "arbutus.cloud-nowcast"),
+            ("forecast", "arbutus.cloud-nowcast"),
+            ("forecast2", "arbutus.cloud-nowcast"),
             ("hindcast", "cedar-hindcast"),
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
@@ -355,10 +355,10 @@ class TestDownloadResults:
     @pytest.mark.parametrize(
         "run_type, host_name",
         [
-            ("nowcast", "west.cloud-nowcast"),
-            ("nowcast-green", "west.cloud-nowcast"),
-            ("forecast", "west.cloud-nowcast"),
-            ("forecast2", "west.cloud-nowcast"),
+            ("nowcast", "arbutus.cloud-nowcast"),
+            ("nowcast-green", "arbutus.cloud-nowcast"),
+            ("forecast", "arbutus.cloud-nowcast"),
+            ("forecast2", "arbutus.cloud-nowcast"),
             ("hindcast", "cedar-hindcast"),
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
