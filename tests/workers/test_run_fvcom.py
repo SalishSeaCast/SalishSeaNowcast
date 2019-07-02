@@ -400,7 +400,7 @@ class TestSuccess:
 
     def test_success(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2017-11-29"),
@@ -421,7 +421,7 @@ class TestFailure:
 
     def test_failure(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2017-11-29"),
@@ -465,7 +465,7 @@ class TestRunFVCOM:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=run_date,
@@ -475,7 +475,7 @@ class TestRunFVCOM:
         checklist = run_fvcom.run_fvcom(parsed_args, config)
         expected = {
             f"{model_config} {run_type}": {
-                "host": "west.cloud",
+                "host": "arbutus.cloud",
                 "run dir": tmp_run_dir,
                 "run exec cmd": m_launch(),
                 "model config": model_config,
@@ -1107,11 +1107,11 @@ class TestLaunchRunScript:
     """
 
     def test_launch_run_script(self, m_run, m_popen, m_logger, run_type):
-        run_fvcom._launch_run_script(run_type, "VHFR_FVCOM.sh", "west.cloud")
+        run_fvcom._launch_run_script(run_type, "VHFR_FVCOM.sh", "arbutus.cloud")
         m_popen.assert_called_once_with(["bash", "VHFR_FVCOM.sh"])
 
     def test_find_run_process_id(self, m_run, m_popen, m_logger, run_type):
-        run_fvcom._launch_run_script(run_type, "VHFR_FVCOM.sh", "west.cloud")
+        run_fvcom._launch_run_script(run_type, "VHFR_FVCOM.sh", "arbutus.cloud")
         m_run.assert_called_once_with(
             ["pgrep", "--newest", "--exact", "--full", "bash VHFR_FVCOM.sh"],
             stdout=subprocess.PIPE,
@@ -1121,6 +1121,6 @@ class TestLaunchRunScript:
 
     def test_run_exec_cmd(self, m_run, m_popen, m_logger, run_type):
         run_exec_cmd = run_fvcom._launch_run_script(
-            run_type, "VHFR_FVCOM.sh", "west.cloud"
+            run_type, "VHFR_FVCOM.sh", "arbutus.cloud"
         )
         assert run_exec_cmd == "bash VHFR_FVCOM.sh"

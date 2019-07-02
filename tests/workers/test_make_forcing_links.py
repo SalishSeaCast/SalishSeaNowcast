@@ -132,7 +132,7 @@ class TestSuccess:
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             run_type=run_type,
             shared_storaage=False,
             run_date=arrow.get("2017-01-04"),
@@ -150,7 +150,7 @@ class TestFailure:
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             run_type=run_type,
             shared_storaage=False,
             run_date=arrow.get("2017-01-04"),

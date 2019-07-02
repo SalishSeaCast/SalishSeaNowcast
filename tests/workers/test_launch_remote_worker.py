@@ -104,11 +104,11 @@ class TestSuccess:
 
     def test_success(self, m_logger):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", remote_worker="foo", worker_args=[]
+            host_name="arbutus.cloud", remote_worker="foo", worker_args=[]
         )
         msg_type = launch_remote_worker.success(parsed_args)
         m_logger.info.assert_called_once_with(
-            "remote worker launched on west.cloud: foo"
+            "remote worker launched on arbutus.cloud: foo"
         )
         assert msg_type == "success"
 
@@ -120,11 +120,11 @@ class TestFailure:
 
     def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", remote_worker="foo", worker_args=""
+            host_name="arbutus.cloud", remote_worker="foo", worker_args=""
         )
         msg_type = launch_remote_worker.failure(parsed_args)
         m_logger.critical.assert_called_once_with(
-            "remote worker launch on west.cloud failed: foo"
+            "remote worker launch on arbutus.cloud failed: foo"
         )
         assert msg_type == "failure"
 
@@ -144,13 +144,13 @@ class TestLaunchRemoteWorker:
     )
     def test_checklist(self, m_next_wkr, m_logger, remote_worker, exp_remote_wkr):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             remote_worker=remote_worker,
             worker_args="nowcast --run-date 2018-11-23",
         )
         checklist = launch_remote_worker.launch_remote_worker(parsed_args, config)
         expected = {
-            "host name": "west.cloud",
+            "host name": "arbutus.cloud",
             "remote worker": exp_remote_wkr,
             "worker args": ["nowcast", "--run-date", "2018-11-23"],
         }
@@ -158,7 +158,7 @@ class TestLaunchRemoteWorker:
 
     def test_launch_remote_worker(self, m_next_wkr, m_logger, config):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", remote_worker="foo", worker_args=""
+            host_name="arbutus.cloud", remote_worker="foo", worker_args=""
         )
         launch_remote_worker.launch_remote_worker(parsed_args, config)
         m_next_wkr().launch.assert_called_once_with(config, m_logger.name)

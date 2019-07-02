@@ -35,7 +35,7 @@ def config(base_config):
         f.write(
             """
 vhfr fvcom runs:
-  host: west.cloud
+  host: arbutus.cloud
   ssh key: SalishSeaNEMO-nowcast_id_rsa
   
   atmospheric forcing:
@@ -182,7 +182,7 @@ class TestSuccess:
 
     def test_success_log_info(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-04-04"),
@@ -203,7 +203,7 @@ class TestFailure:
 
     def test_failure_log_critical(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-04-04"),
@@ -241,7 +241,7 @@ class TestUploadFVCOMAtmosForcing:
     ):
         m_sftp.return_value = (Mock(name="ssh_client"), Mock(name="sftp_client"))
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=run_date,
@@ -250,7 +250,7 @@ class TestUploadFVCOMAtmosForcing:
             parsed_args, config
         )
         expected = {
-            "west.cloud": {
+            "arbutus.cloud": {
                 run_type: {
                     "run date": run_date.format("YYYY-MM-DD"),
                     "model config": model_config,
@@ -278,7 +278,7 @@ class TestUploadFVCOMAtmosForcing:
         m_sftp_client = Mock(name="sftp_client")
         m_sftp.return_value = (Mock(name="ssh_client"), m_sftp_client)
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=run_date,
@@ -287,7 +287,7 @@ class TestUploadFVCOMAtmosForcing:
         assert m_upload_file.call_args_list == [
             call(
                 m_sftp_client,
-                "west.cloud",
+                "arbutus.cloud",
                 Path(
                     f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
                     f"atmos_{model_config}_{run_type}_hfx_{atmos_file_date}.nc"
@@ -299,7 +299,7 @@ class TestUploadFVCOMAtmosForcing:
             ),
             call(
                 m_sftp_client,
-                "west.cloud",
+                "arbutus.cloud",
                 Path(
                     f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
                     f"atmos_{model_config}_{run_type}_precip_{atmos_file_date}.nc"
@@ -311,7 +311,7 @@ class TestUploadFVCOMAtmosForcing:
             ),
             call(
                 m_sftp_client,
-                "west.cloud",
+                "arbutus.cloud",
                 Path(
                     f"forcing/atmospheric/GEM2.5/vhfr-fvcom/"
                     f"atmos_{model_config}_{run_type}_wnd_{atmos_file_date}.nc"

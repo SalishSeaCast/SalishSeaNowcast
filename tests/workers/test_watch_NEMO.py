@@ -85,11 +85,11 @@ class TestSuccess:
     @pytest.mark.parametrize(
         "run_type, host_name",
         [
-            ("nowcast", "west.cloud-nowcast"),
-            ("nowcast-green", "west.cloud-nowcast"),
+            ("nowcast", "arbutus.cloud-nowcast"),
+            ("nowcast-green", "arbutus.cloud-nowcast"),
             ("nowcast-dev", "salish-nowcast"),
-            ("forecast", "west.cloud-nowcast"),
-            ("forecast2", "west.cloud-nowcast"),
+            ("forecast", "arbutus.cloud-nowcast"),
+            ("forecast2", "arbutus.cloud-nowcast"),
         ],
     )
     def test_success(self, m_logger, run_type, host_name):
@@ -102,11 +102,11 @@ class TestSuccess:
 @pytest.mark.parametrize(
     "run_type, host_name",
     [
-        ("nowcast", "west.cloud-nowcast"),
-        ("nowcast-green", "west.cloud-nowcast"),
+        ("nowcast", "arbutus.cloud-nowcast"),
+        ("nowcast-green", "arbutus.cloud-nowcast"),
         ("nowcast-dev", "salish-nowcast"),
-        ("forecast", "west.cloud-nowcast"),
-        ("forecast2", "west.cloud-nowcast"),
+        ("forecast", "arbutus.cloud-nowcast"),
+        ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
 @patch("nowcast.workers.watch_NEMO.logger", autospec=True)
@@ -124,11 +124,11 @@ class TestFailure:
 @pytest.mark.parametrize(
     "run_type, host_name",
     [
-        ("nowcast", "west.cloud-nowcast"),
-        ("nowcast-green", "west.cloud-nowcast"),
+        ("nowcast", "arbutus.cloud-nowcast"),
+        ("nowcast-green", "arbutus.cloud-nowcast"),
         ("nowcast-dev", "salish-nowcast"),
-        ("forecast", "west.cloud-nowcast"),
-        ("forecast2", "west.cloud-nowcast"),
+        ("forecast", "arbutus.cloud-nowcast"),
+        ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
 @patch("nowcast.workers.watch_NEMO.logger", autospec=True)
@@ -400,7 +400,7 @@ class TestConfirmRunSuccess:
     config = {
         "run": {
             "enabled hosts": {
-                "west.cloud": {
+                "arbutus.cloud": {
                     "run types": {
                         "nowcast": {"results": "SalishSea/nowcast-blue/"},
                         "nowcast-green": {"results": "SalishSea/nowcast-green/"},
@@ -429,7 +429,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open().__enter__().read.return_value = f"{itend}\n"
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     run_type,
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -455,7 +455,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open().__enter__().read.return_value = f"{itend}\n"
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     run_type,
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -483,7 +483,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open().__enter__().read.return_value = f"{itend}\n"
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     "nowcast",
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -509,7 +509,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open.side_effect = FileNotFoundError
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     run_type,
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -536,7 +536,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open().__enter__().read.return_value = "43\n"
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     "nowcast",
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -562,7 +562,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open().__enter__().read.return_value = f"{itend}\n"
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     run_type,
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -581,7 +581,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open().__enter__().read.return_value = "2160\n"
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     "nowcast-green",
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -609,7 +609,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open.side_effect = FileNotFoundError
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     run_type,
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -637,7 +637,7 @@ class TestConfirmRunSuccess:
                 m_open().__enter__().read.return_value = f"{itend}\n"
                 m_open().__enter__().__iter__.return_value = ["foo E R R O R bar\n"]
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     run_type,
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -663,7 +663,7 @@ class TestConfirmRunSuccess:
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
                 m_open.side_effect = FileNotFoundError
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     run_type,
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -694,7 +694,7 @@ class TestConfirmRunSuccess:
                     "it : 43 ssh2: NaN Umax: 0.2450101238E+01\n",
                 )
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     run_type,
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -715,7 +715,7 @@ class TestConfirmRunSuccess:
                     "43  NaN\n",
                 )
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     "nowcast-green",
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),
@@ -732,7 +732,7 @@ class TestConfirmRunSuccess:
                 m_open().__enter__().read.return_value = "2160\n"
                 m_open.side_effect = FileNotFoundError
                 run_succeeded = watch_NEMO._confirm_run_success(
-                    "west.cloud",
+                    "arbutus.cloud",
                     "nowcast-green",
                     arrow.get("2017-11-16"),
                     Path("tmp_run_dir"),

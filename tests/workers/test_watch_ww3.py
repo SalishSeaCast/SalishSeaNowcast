@@ -59,7 +59,7 @@ class TestMain:
 
 @pytest.mark.parametrize(
     "run_type, host_name",
-    [("forecast2", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
+    [("forecast2", "arbutus.cloud-nowcast"), ("forecast", "arbutus.cloud-nowcast")],
 )
 @patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestSuccess:
@@ -75,7 +75,7 @@ class TestSuccess:
 
 @pytest.mark.parametrize(
     "run_type, host_name",
-    [("forecast2", "west.cloud-nowcast"), ("forecast", "west.cloud-nowcast")],
+    [("forecast2", "arbutus.cloud-nowcast"), ("forecast", "arbutus.cloud-nowcast")],
 )
 @patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestFailure:

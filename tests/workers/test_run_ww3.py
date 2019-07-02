@@ -96,7 +96,9 @@ class TestSuccess:
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-03-25")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2017-03-25"),
         )
         msg_type = run_ww3.success(parsed_args)
         assert m_logger.info.called
@@ -111,7 +113,9 @@ class TestFailure:
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-03-25")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2017-03-25"),
         )
         msg_type = run_ww3.failure(parsed_args)
         assert m_logger.critical.called
@@ -141,7 +145,9 @@ class TestRunWW3:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud", run_type=run_type, run_date=arrow.get("2017-03-25")
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2017-03-25"),
         )
         m_create_tmp_run_dir.return_value = Path(
             "/wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6"
@@ -150,7 +156,7 @@ class TestRunWW3:
         checklist = run_ww3.run_ww3(parsed_args, config)
         expected = {
             run_type: {
-                "host": "west.cloud",
+                "host": "arbutus.cloud",
                 "run dir": "/wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6",
                 "run exec cmd": "bash SoGWW3.sh",
                 "run date": "2017-03-25",
@@ -519,11 +525,11 @@ class TestLaunchRun:
     """
 
     def test_launch_run(self, m_run, m_popen, m_logger, run_type):
-        run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "west.cloud")
+        run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "arbutus.cloud")
         m_popen.assert_called_once_with(["bash", "SoGWW3.sh"])
 
     def test_find_run_process_pid(self, m_run, m_popen, m_logger, run_type):
-        run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "west.cloud")
+        run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "arbutus.cloud")
         m_run.assert_called_once_with(
             ["pgrep", "--newest", "--exact", "--full", "bash SoGWW3.sh"],
             stdout=subprocess.PIPE,
@@ -533,5 +539,5 @@ class TestLaunchRun:
 
     def test_run_exec_cmd(self, m_run, m_popen, m_logger, run_type):
         m_run.return_value = SimpleNamespace(stdout=43)
-        run_exec_cmd = run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "west.cloud")
+        run_exec_cmd = run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "arbutus.cloud")
         assert run_exec_cmd == "bash SoGWW3.sh"

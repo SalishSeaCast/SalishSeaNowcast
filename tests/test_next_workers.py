@@ -53,7 +53,7 @@ def config():
         },
         "run": {
             "enabled hosts": {
-                "west.cloud": {
+                "arbutus.cloud": {
                     "shared storage": False,
                     "make forcing links": True,
                     "run types": ["nowcast", "forecast", "forecast2", "nowcast-green"],
@@ -71,8 +71,8 @@ def config():
             },
             "hindcast hosts": {"cedar": {}},
         },
-        "wave forecasts": {"host": "west.cloud", "run when": "after nowcast-green"},
-        "vhfr fvcom runs": {"host": "west.cloud"},
+        "wave forecasts": {"host": "arbutus.cloud", "run when": "after nowcast-green"},
+        "vhfr fvcom runs": {"host": "arbutus.cloud"},
     }
 
 
@@ -331,7 +331,7 @@ class TestAfterGetNeahBaySsh:
         )
         expected = NextWorker(
             "nowcast.workers.upload_forcing",
-            args=["west.cloud", "ssh"],
+            args=["arbutus.cloud", "ssh"],
             host="localhost",
         )
         assert expected in workers
@@ -356,7 +356,7 @@ class TestAfterGribToNetcdf:
         )
         expected = NextWorker(
             "nowcast.workers.upload_forcing",
-            args=["west.cloud", "forecast2"],
+            args=["arbutus.cloud", "forecast2"],
             host="localhost",
         )
         assert expected in workers
@@ -383,7 +383,7 @@ class TestAfterGribToNetcdf:
         )
         not_expected = NextWorker(
             "nowcast.workers.upload_forcing",
-            args=["west.cloud", "nowcast+"],
+            args=["arbutus.cloud", "nowcast+"],
             host="localhost",
         )
         assert not_expected not in workers
@@ -496,7 +496,7 @@ class TestAfterMakeLiveOceanFiles:
         )
         expected = NextWorker(
             "nowcast.workers.upload_forcing",
-            args=["west.cloud", "nowcast+"],
+            args=["arbutus.cloud", "nowcast+"],
             host="localhost",
         )
         assert expected in workers
@@ -513,7 +513,7 @@ class TestAfterMakeTurbidityFile:
         )
         assert workers == []
 
-    @pytest.mark.parametrize("host_name", ["west.cloud", "orcinus"])
+    @pytest.mark.parametrize("host_name", ["arbutus.cloud", "orcinus"])
     def test_success_launch_upload_forcing(self, host_name, config, checklist):
         workers = next_workers.after_make_turbidity_file(
             Message("make_turbidity_file", "success"), config, checklist
@@ -570,7 +570,7 @@ class TestAfterUploadForcing:
             {
                 "run": {
                     "enabled hosts": {
-                        "west.cloud": {
+                        "arbutus.cloud": {
                             "run types": "nowcast-agrif",
                             "make forcing links": True,
                         }
@@ -583,14 +583,14 @@ class TestAfterUploadForcing:
                 Message(
                     "upload_forcing",
                     f"success {run_type}",
-                    {"west.cloud": f"2016-10-11 {run_type}"},
+                    {"arbutus.cloud": f"2016-10-11 {run_type}"},
                 ),
                 config,
                 checklist,
             )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
-            args=["west.cloud", run_type],
+            args=["arbutus.cloud", run_type],
             host="localhost",
         )
         assert expected in workers
@@ -631,14 +631,14 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 "success turbidity",
-                {"west.cloud": "2017-08-10 turbidity"},
+                {"arbutus.cloud": "2017-08-10 turbidity"},
             ),
             config,
             checklist,
         )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
-            args=["west.cloud", "nowcast-green"],
+            args=["arbutus.cloud", "nowcast-green"],
             host="localhost",
         )
         assert expected in workers
@@ -734,13 +734,13 @@ class TestAfterMakeForcingLinks:
         [
             (
                 "success nowcast+",
-                ["west.cloud", "nowcast", "--run-date", "2016-10-23"],
-                "west.cloud",
+                ["arbutus.cloud", "nowcast", "--run-date", "2016-10-23"],
+                "arbutus.cloud",
             ),
             (
                 "success nowcast-green",
-                ["west.cloud", "nowcast-green", "--run-date", "2016-10-23"],
-                "west.cloud",
+                ["arbutus.cloud", "nowcast-green", "--run-date", "2016-10-23"],
+                "arbutus.cloud",
             ),
             (
                 "success nowcast+",
@@ -749,13 +749,13 @@ class TestAfterMakeForcingLinks:
             ),
             (
                 "success ssh",
-                ["west.cloud", "forecast", "--run-date", "2016-10-23"],
-                "west.cloud",
+                ["arbutus.cloud", "forecast", "--run-date", "2016-10-23"],
+                "arbutus.cloud",
             ),
             (
                 "success forecast2",
-                ["west.cloud", "forecast2", "--run-date", "2016-10-23"],
-                "west.cloud",
+                ["arbutus.cloud", "forecast2", "--run-date", "2016-10-23"],
+                "arbutus.cloud",
             ),
         ],
     )
@@ -825,11 +825,11 @@ class TestAfterRunNEMO:
     @pytest.mark.parametrize(
         "msg_type, host",
         [
-            ("success nowcast", "west.cloud"),
-            ("success nowcast-green", "west.cloud"),
+            ("success nowcast", "arbutus.cloud"),
+            ("success nowcast-green", "arbutus.cloud"),
             ("success nowcast-dev", "salish"),
-            ("success forecast", "west.cloud"),
-            ("success forecast2", "west.cloud"),
+            ("success forecast", "arbutus.cloud"),
+            ("success forecast2", "arbutus.cloud"),
         ],
     )
     def test_success_launch_watch_NEMO(self, msg_type, host, config, checklist):
@@ -871,7 +871,7 @@ class TestAfterWatchNEMO:
                 "success nowcast",
                 {
                     "nowcast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2016-10-16",
                         "completed": True,
                     }
@@ -894,7 +894,7 @@ class TestAfterWatchNEMO:
                 "success nowcast",
                 {
                     "nowcast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2018-01-20",
                         "completed": True,
                     }
@@ -905,8 +905,8 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["west.cloud", "x2", "nowcast"],
-            host="west.cloud",
+            args=["arbutus.cloud", "x2", "nowcast"],
+            host="arbutus.cloud",
         )
         assert expected in workers
 
@@ -919,7 +919,7 @@ class TestAfterWatchNEMO:
                 "success nowcast",
                 {
                     "nowcast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2019-04-03",
                         "completed": True,
                     }
@@ -930,8 +930,8 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["west.cloud", "r12", "nowcast"],
-            host="west.cloud",
+            args=["arbutus.cloud", "r12", "nowcast"],
+            host="arbutus.cloud",
         )
         assert expected in workers
 
@@ -942,7 +942,7 @@ class TestAfterWatchNEMO:
                 "success forecast",
                 {
                     "forecast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2017-08-10",
                         "completed": True,
                     }
@@ -969,7 +969,7 @@ class TestAfterWatchNEMO:
                     "success forecast",
                     {
                         "forecast": {
-                            "host": "west.cloud",
+                            "host": "arbutus.cloud",
                             "run date": "2017-04-14",
                             "completed": True,
                         }
@@ -980,8 +980,8 @@ class TestAfterWatchNEMO:
             )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["west.cloud", "forecast"],
-            host="west.cloud",
+            args=["arbutus.cloud", "forecast"],
+            host="arbutus.cloud",
         )
         assert workers[0] == expected
 
@@ -996,7 +996,7 @@ class TestAfterWatchNEMO:
                     "success forecast",
                     {
                         "forecast": {
-                            "host": "west.cloud",
+                            "host": "arbutus.cloud",
                             "run date": "2017-04-14",
                             "completed": True,
                         }
@@ -1007,8 +1007,8 @@ class TestAfterWatchNEMO:
             )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["west.cloud", "forecast"],
-            host="west.cloud",
+            args=["arbutus.cloud", "forecast"],
+            host="arbutus.cloud",
         )
         assert workers[1] == expected
 
@@ -1019,7 +1019,7 @@ class TestAfterWatchNEMO:
                 "success forecast",
                 {
                     "forecast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2018-01-20",
                         "completed": True,
                     }
@@ -1030,8 +1030,8 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["west.cloud", "x2", "forecast"],
-            host="west.cloud",
+            args=["arbutus.cloud", "x2", "forecast"],
+            host="arbutus.cloud",
         )
         assert expected not in workers
 
@@ -1044,7 +1044,7 @@ class TestAfterWatchNEMO:
                 "success forecast2",
                 {
                     "forecast2": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2017-04-14",
                         "completed": True,
                     }
@@ -1055,8 +1055,8 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["west.cloud", "forecast2"],
-            host="west.cloud",
+            args=["arbutus.cloud", "forecast2"],
+            host="arbutus.cloud",
         )
         assert workers[0] == expected
 
@@ -1069,7 +1069,7 @@ class TestAfterWatchNEMO:
                 "success forecast2",
                 {
                     "forecast2": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2017-04-14",
                         "completed": True,
                     }
@@ -1080,8 +1080,8 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["west.cloud", "forecast2"],
-            host="west.cloud",
+            args=["arbutus.cloud", "forecast2"],
+            host="arbutus.cloud",
         )
         assert workers[1] == expected
 
@@ -1098,7 +1098,7 @@ class TestAfterWatchNEMO:
                     "success nowcast-green",
                     {
                         "nowcast-green": {
-                            "host": "west.cloud",
+                            "host": "arbutus.cloud",
                             "run date": "2017-04-14",
                             "completed": True,
                         }
@@ -1109,8 +1109,8 @@ class TestAfterWatchNEMO:
             )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["west.cloud", "forecast"],
-            host="west.cloud",
+            args=["arbutus.cloud", "forecast"],
+            host="arbutus.cloud",
         )
         assert workers[0] == expected
 
@@ -1127,7 +1127,7 @@ class TestAfterWatchNEMO:
                     "success nowcast-green",
                     {
                         "nowcast-green": {
-                            "host": "west.cloud",
+                            "host": "arbutus.cloud",
                             "run date": "2017-04-14",
                             "completed": True,
                         }
@@ -1138,8 +1138,8 @@ class TestAfterWatchNEMO:
             )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["west.cloud", "forecast"],
-            host="west.cloud",
+            args=["arbutus.cloud", "forecast"],
+            host="arbutus.cloud",
         )
         assert workers[1] == expected
 
@@ -1152,7 +1152,7 @@ class TestAfterWatchNEMO:
                 "success nowcast-green",
                 {
                     "nowcast-green": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2017-05-31",
                         "completed": True,
                     }
@@ -1176,7 +1176,7 @@ class TestAfterWatchNEMO:
                 "success nowcast",
                 {
                     "nowcast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2016-10-15",
                         "completed": True,
                     }
@@ -1187,7 +1187,7 @@ class TestAfterWatchNEMO:
                 "success forecast",
                 {
                     "forecast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2016-10-15",
                         "completed": True,
                     }
@@ -1198,7 +1198,7 @@ class TestAfterWatchNEMO:
                 "success nowcast-green",
                 {
                     "nowcast-green": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2016-10-15",
                         "completed": True,
                     }
@@ -1209,7 +1209,7 @@ class TestAfterWatchNEMO:
                 "success forecast2",
                 {
                     "forecast2": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2016-10-15",
                         "completed": True,
                     }
@@ -1402,8 +1402,8 @@ class TestAfterMakeFVCOMBoundary:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_rivers_forcing",
-            args=["west.cloud", model_config, run_type, "--run-date", "2019-02-06"],
-            host="west.cloud",
+            args=["arbutus.cloud", model_config, run_type, "--run-date", "2019-02-06"],
+            host="arbutus.cloud",
         )
         assert expected in workers
 
@@ -1462,7 +1462,7 @@ class TestAfterMakeFVCOMAtmosForcing:
         workers = next_workers.after_make_fvcom_atmos_forcing(msg, config, checklist)
         expected = NextWorker(
             "nowcast.workers.upload_fvcom_atmos_forcing",
-            args=["west.cloud", model_config, run_type, "--run-date", "2018-04-04"],
+            args=["arbutus.cloud", model_config, run_type, "--run-date", "2018-04-04"],
             host="localhost",
         )
         assert expected in workers
@@ -1491,7 +1491,7 @@ class TestAfterUploadFVCOMAtmosForcing:
             "upload_fvcom_atmos_forcing",
             f"success {model_config} {run_type}",
             payload={
-                "west.cloud": {
+                "arbutus.cloud": {
                     run_type: {"run date": "2018-04-04", "model config": model_config}
                 }
             },
@@ -1499,8 +1499,8 @@ class TestAfterUploadFVCOMAtmosForcing:
         workers = next_workers.after_upload_fvcom_atmos_forcing(msg, config, checklist)
         expected = NextWorker(
             "nowcast.workers.run_fvcom",
-            args=["west.cloud", model_config, run_type, "--run-date", "2018-04-04"],
-            host="west.cloud",
+            args=["arbutus.cloud", model_config, run_type, "--run-date", "2018-04-04"],
+            host="arbutus.cloud",
         )
         assert expected in workers
 
@@ -1532,7 +1532,7 @@ class TestAfterRunFVCOM:
                 f"success {model_config} {run_type}",
                 {
                     f"{model_config} {run_type}": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "model config": model_config,
                     }
                 },
@@ -1542,8 +1542,8 @@ class TestAfterRunFVCOM:
         )
         expected = NextWorker(
             "nowcast.workers.watch_fvcom",
-            args=["west.cloud", model_config, run_type],
-            host="west.cloud",
+            args=["arbutus.cloud", model_config, run_type],
+            host="arbutus.cloud",
         )
         assert workers == [expected]
 
@@ -1575,7 +1575,7 @@ class TestAfterWatchFVCOM:
                 f"success {model_config} {run_type}",
                 {
                     f"{model_config} {run_type}": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "model config": model_config,
                         "run date": "2019-02-27",
                     }
@@ -1586,7 +1586,7 @@ class TestAfterWatchFVCOM:
         )
         expected = NextWorker(
             "nowcast.workers.download_fvcom_results",
-            args=["west.cloud", model_config, run_type, "--run-date", "2019-02-27"],
+            args=["arbutus.cloud", model_config, run_type, "--run-date", "2019-02-27"],
             host="localhost",
         )
         assert expected in workers
@@ -1600,7 +1600,7 @@ class TestAfterWatchFVCOM:
                 "success x2 nowcast",
                 {
                     "x2 nowcast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "model config": "x2",
                         "run date": "2019-01-18",
                         "completed": True,
@@ -1612,8 +1612,8 @@ class TestAfterWatchFVCOM:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["west.cloud", "x2", "forecast"],
-            host="west.cloud",
+            args=["arbutus.cloud", "x2", "forecast"],
+            host="arbutus.cloud",
         )
         assert expected in workers
 
@@ -1663,7 +1663,9 @@ class TestAfterMakeWW3currentFile:
             checklist,
         )
         expected = NextWorker(
-            "nowcast.workers.run_ww3", args=["west.cloud", "nowcast"], host="west.cloud"
+            "nowcast.workers.run_ww3",
+            args=["arbutus.cloud", "nowcast"],
+            host="arbutus.cloud",
         )
         assert workers[0] == expected
 
@@ -1679,8 +1681,8 @@ class TestAfterMakeWW3currentFile:
         )
         expected = NextWorker(
             "nowcast.workers.run_ww3",
-            args=["west.cloud", "forecast2"],
-            host="west.cloud",
+            args=["arbutus.cloud", "forecast2"],
+            host="arbutus.cloud",
         )
         assert workers[0] == expected
 
@@ -1701,7 +1703,7 @@ class TestAfterRunWW3:
 
     @pytest.mark.parametrize(
         "msg_type, host",
-        [("success forecast2", "west.cloud"), ("success forecast", "west.cloud")],
+        [("success forecast2", "arbutus.cloud"), ("success forecast", "arbutus.cloud")],
     )
     def test_success_launch_watch_ww3(self, msg_type, host, config, checklist):
         run_type = msg_type.split()[1]
@@ -1736,7 +1738,7 @@ class TestAfterWatchWW3:
                 "success forecast2",
                 {
                     "forecast2": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2017-12-24",
                         "completed": True,
                     }
@@ -1747,7 +1749,7 @@ class TestAfterWatchWW3:
                 "success nowcast",
                 {
                     "nowcast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2018-07-28",
                         "completed": True,
                     }
@@ -1758,7 +1760,7 @@ class TestAfterWatchWW3:
                 "success forecast",
                 {
                     "forecast": {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "run date": "2017-12-24",
                         "completed": True,
                     }
@@ -1787,7 +1789,7 @@ class TestAfterWatchWW3:
             "success nowcast",
             {
                 "nowcast": {
-                    "host": "west.cloud",
+                    "host": "arbutus.cloud",
                     "run date": "2018-07-28",
                     "completed": True,
                 }
@@ -1803,7 +1805,7 @@ class TestAfterWatchWW3:
                 "--run-date",
                 msg.payload[run_type]["run date"],
             ],
-            host="west.cloud",
+            host="arbutus.cloud",
         )
         assert expected in workers
 
@@ -2177,7 +2179,7 @@ class TestAfterDownloadFVCOMResults:
                 f"success {model_config} {run_type}",
                 {
                     run_type: {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "model config": model_config,
                         "run date": "2018-10-25",
                     }
@@ -2207,7 +2209,7 @@ class TestAfterDownloadFVCOMResults:
                 f"success {model_config} {run_type}",
                 {
                     run_type: {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "model config": model_config,
                         "run date": run_date,
                     }
@@ -2241,7 +2243,7 @@ class TestAfterDownloadFVCOMResults:
                 f"success {model_config} {run_type}",
                 {
                     run_type: {
-                        "host": "west.cloud",
+                        "host": "arbutus.cloud",
                         "model config": model_config,
                         "run date": "2018-10-25",
                     }
@@ -2268,7 +2270,7 @@ class TestAfterDownloadFVCOMResults:
                     "success x2 forecast",
                     {
                         "forecast": {
-                            "host": "west.cloud",
+                            "host": "arbutus.cloud",
                             "model config": "x2",
                             "run date": "2018-10-25",
                         }

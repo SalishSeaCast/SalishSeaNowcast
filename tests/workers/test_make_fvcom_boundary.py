@@ -262,7 +262,7 @@ class TestSuccess:
 
     def test_success_log_info(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2017-11-29"),
@@ -283,7 +283,7 @@ class TestFailure:
 
     def test_failure_log_error(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2017-11-29"),
@@ -336,7 +336,7 @@ class TestMakeFVCOMBoundary:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-01-08"),
@@ -375,7 +375,7 @@ class TestMakeFVCOMBoundary:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-01-08"),
@@ -409,7 +409,7 @@ class TestMakeFVCOMBoundary:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get("2018-04-25"),
@@ -478,7 +478,7 @@ class TestMakeFVCOMBoundary:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name="west.cloud",
+            host_name="arbutus.cloud",
             model_config=model_config,
             run_type=run_type,
             run_date=arrow.get(run_date),
