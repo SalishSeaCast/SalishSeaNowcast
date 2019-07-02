@@ -357,17 +357,14 @@ erddap:
     TWDP-ferry:
       - ubcONCTWDP1mV1
     nowcast-green:
-      - ubcSSg3DBiologyFields1hV18-06
-      - ubcSSg3DTracerFields1hV18-06
-      - ubcSSg3DuGridFields1hV18-06
-      - ubcSSg3DvGridFields1hV18-06
-      - ubcSSg3DwGridFields1hV18-06
-      - ubcSSgSurfaceTracerFields1hV18-06
-      - ubcSSgNearSurfaceUVelocity20mV18-06
-      - ubcSSgNearSurfaceVVelocity20mV18-06
-      # V18-12
       - ubcSSg3DBiologyFields1hV18-12
       - ubcSSg3DTracerFields1hV18-12
+      - ubcSSg3DuGridFields1hV18-12
+      - ubcSSg3DvGridFields1hV18-12
+      - ubcSSg3DwGridFields1hV18-12
+      - ubcSSgSurfaceTracerFields1hV18-12
+      - ubcSSgNearSurfaceUVelocity20mV18-12
+      - ubcSSgNearSurfaceVVelocity20mV18-12
     nemo-forecast:
       # tide gauge station water levels
       - ubcSSfBoundaryBaySSH10m
@@ -410,9 +407,9 @@ figures:
       # **Must be quoted to project {} characters**
       'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10m'
     3d tracer fields:
-      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV18-06
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV18-12
     3d biology fields:
-      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV18-06
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV18-12
     2nd narrows hadcp time series:
       https://salishsea.eos.ubc.ca/erddap/tabledap/ubcVFPA2ndNarrowsCurrent2sV1
     wwatch3 fields:
@@ -443,8 +440,8 @@ figures:
   # Surface current tile figures
   surface current tiles:
     # Rolling forecast u and v velocity fields ERDDAP dataset URLs
-    u field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DuGridFields1hV18-06
-    v field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DvGridFields1hV18-06
+    u field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DuGridFields1hV18-12
+    v field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DvGridFields1hV18-12
     # Directory tree behind the https://salishsea.eos.ubc.ca/nowcast-sys/figures/
     # static web server that tile files are to be stored in and requested from
     storage path: /results/nowcast-sys/figures/surface_currents/
