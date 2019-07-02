@@ -370,29 +370,29 @@ erddap:
       - ubcSSg3DTracerFields1hV18-12
     nemo-forecast:
       # tide gauge station water levels
-      - ubcSSfBoundaryBaySSH10mV18-06
-      - ubcSSfCampbellRiverSSH10mV18-06
-      - ubcSSfCherryPointSSH10mV18-06
-      - ubcSSfFridayHarborSSH10mV18-06
-      - ubcSSfHalfmoonBaySSH10mV18-06
-      - ubcSSfNanaimoSSH10mV18-06
-      - ubcSSfNeahBaySSH10mV18-06
-      - ubcSSfNewWestminsterSSH10mV18-06
-      - ubcSSfPatriciaBaySSH10mV18-06
-      - ubcSSfPointAtkinsonSSH10mV18-06
-      - ubcSSfPortRenfrewSSH10mV18-06
-      - ubcSSfSandHeadsSSH10mV18-06
-      - ubcSSfSandyCoveSSH10mV18-06
-      - ubcSSfSquamishSSH10mV18-06
-      - ubcSSfVictoriaSSH10mV18-06
-      - ubcSSfWoodwardsLandingSSH10mV18-06
+      - ubcSSfBoundaryBaySSH10m
+      - ubcSSfCampbellRiverSSH10m
+      - ubcSSfCherryPointSSH10m
+      - ubcSSfFridayHarborSSH10m
+      - ubcSSfHalfmoonBaySSH10m
+      - ubcSSfNanaimoSSH10m
+      - ubcSSfNeahBaySSH10m
+      - ubcSSfNewWestminsterSSH10m
+      - ubcSSfPatriciaBaySSH10m
+      - ubcSSfPointAtkinsonSSH10m
+      - ubcSSfPortRenfrewSSH10m
+      - ubcSSfSandHeadsSSH10m
+      - ubcSSfSandyCoveSSH10m
+      - ubcSSfSquamishSSH10m
+      - ubcSSfVictoriaSSH10m
+      - ubcSSfWoodwardsLandingSSH10m
       # currents and tracers
-      - ubcSSfDepthAvgdCurrents1hV18-06
-      - ubcSSf3DuGridFields1hV18-06
-      - ubcSSf3DvGridFields1hV18-06
-      - ubcSSfSurfaceTracerFields1hV18-06
-      # unversioned datasets
       - ubcSSfDepthAvgdCurrents1h
+      - ubcSSf3DuGridFields1h
+      - ubcSSf3DvGridFields1h
+      - ubcSSfSurfaceTracerFields1h
+      # V18-06 pending okay to remove from CHS
+      - ubcSSfDepthAvgdCurrents1hV18-06
     wwatch3-forecast:
       - ubcSSf2DWaveFields30mV17-02
     VFPA-HADCP:
@@ -408,7 +408,7 @@ figures:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1
     tide stn ssh time series:
       # **Must be quoted to project {} characters**
-      'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10mV18-06'
+      'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10m'
     3d tracer fields:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV18-06
     3d biology fields:
