@@ -137,7 +137,6 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "west.cloud-maint",
             "beluga-hindcast",
             "cedar-hindcast",
             "graham-hindcast",
@@ -153,7 +152,6 @@ class TestConfig:
         "host, expected",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
-            ("west.cloud-maint", "/nemoShare/MEOPAR/sshNeahBay/"),
             ("salish-nowcast", "/results/forcing/sshNeahBay/"),
             (
                 "optimum-hindcast",
@@ -174,7 +172,6 @@ class TestConfig:
         "host, expected",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/river_turb/"),
-            ("west.cloud-maint", "/nemoShare/MEOPAR/rivers/river_turb/"),
             (
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/rivers/river_turb/",
@@ -198,7 +195,6 @@ class TestConfig:
         "host, expected",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
-            ("west.cloud-maint", "/nemoShare/MEOPAR/rivers/"),
             ("salish-nowcast", "/results/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
@@ -220,7 +216,6 @@ class TestConfig:
         "host, expected",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
-            ("west.cloud-maint", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             ("salish-nowcast", "/results/forcing/atmospheric/GEM2.5/operational/"),
             (
                 "optimum-hindcast",
@@ -252,7 +247,6 @@ class TestConfig:
         "host, expected",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
-            ("west.cloud-maint", "/nemoShare/MEOPAR/LiveOcean/"),
             ("salish-nowcast", "/results/forcing/LiveOcean/boundary_conditions/"),
             (
                 "optimum-hindcast",
