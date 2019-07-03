@@ -478,10 +478,10 @@ run:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       # Location on the compute host of the file that contains IP addresses
       # and MPI slots specifications.
-      # Only required for runs on ONC west.cloud cluster.
+      # Only required for runs on cloud hosts.
       mpi hosts file: ${HOME}/mpi_hosts
       # IP address of the machine to run XIOS on.
-      # Only required for runs on ONC west.cloud cluster.
+      # Only required for runs on cloud hosts.
       xios host: 192.168.238.14
       # Location of bash script that sets nowcast system environment variables.
       # The script will be sourced as a prefix to worker launch commands on
@@ -590,20 +590,6 @@ run:
         rivers dir: /home/sallen/MEOPAR/rivers/
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
-
-    west.cloud-maint:
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
-      shared storage: False
-      make forcing links: False
-      # Empty collection of run types because all we want to do is upload daily forcing
-      # files
-      run types: {}
-      forcing:
-        ssh dir: /nemoShare/MEOPAR/sshNeahBay/
-        bc dir: /nemoShare/MEOPAR/LiveOcean/
-        rivers dir: /nemoShare/MEOPAR/rivers/
-        Fraser turbidity dir: /nemoShare/MEOPAR/rivers/river_turb/
-        weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
 
     beluga-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
