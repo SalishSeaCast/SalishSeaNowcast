@@ -149,7 +149,7 @@ class TestConfig:
         assert cedar_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
         assert cedar_hindcast["queue info cmd"] == "/opt/software/slurm/bin/squeue"
         assert cedar_hindcast["users"] == "allen,dlatorne"
-        assert cedar_hindcast["scratch dir"] == "/scratch/dlatorne/spinup.201905"
+        assert cedar_hindcast["scratch dir"] == "/scratch/dlatorne/hindcast_v201905"
         assert (
             cedar_hindcast["run prep dir"]
             == "/home/dlatorne/project/SalishSea/hindcast-sys/runs"
@@ -170,7 +170,8 @@ class TestConfig:
         assert optimum_hindcast["queue info cmd"] == "/usr/bin/qstat"
         assert optimum_hindcast["users"] == "sallen,dlatorne"
         assert (
-            optimum_hindcast["scratch dir"] == "/scratch/sallen/dlatorne/spinup.201905"
+            optimum_hindcast["scratch dir"]
+            == "/scratch/sallen/dlatorne/hindcast_v201905"
         )
         assert (
             optimum_hindcast["run prep dir"]
