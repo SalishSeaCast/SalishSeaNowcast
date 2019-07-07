@@ -87,9 +87,13 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
     )
     users = config["run"]["hindcast hosts"][host_name]["users"]
     scratch_dir = Path(config["run"]["hindcast hosts"][host_name]["scratch dir"])
+    hpc_job_classes = {"qstat": _QstatHindcastJob, "squeue": _SqueueHindcastJob}
+    queue_info_cmd = config["run"]["hindcast hosts"][host_name][
+        "queue info cmd"
+    ].rsplit("/", 1)[-1]
     try:
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
-        job = _HindcastJob(
+        job = hpc_job_classes[queue_info_cmd](
             ssh_client, sftp_client, host_name, users, scratch_dir, run_id
         )
         job.get_run_id()
@@ -121,8 +125,8 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
 
 
 @attr.s
-class _HindcastJob:
-    """Interact with the hindcast job on the HPC host.
+class _QstatHindcastJob:
+    """Interact with the hindcast job on an HPC host that uses :command:`qstat`.
     """
 
     ssh_client = attr.ib()
@@ -139,7 +143,235 @@ class _HindcastJob:
     rdt = attr.ib(default=None, type=float)
 
     def get_run_id(self):
-        """Query the slurm queue to get the slurm job id, and the salishsea run id
+        """Query the queue manager to get the job id, and the salishsea run id
+        of the hindcast run.
+        """
+        queue_info = self._get_queue_info()
+        self.job_id, _, _, self.run_id = queue_info.split()[:4]
+        self.job_id = self.job_id.rsplit(".", 2)[0]
+        logger.info(f"watching {self.run_id} job {self.job_id} on {self.host_name}")
+
+    def is_queued(self):
+        """Query the queue manager to get the state of the hindcast run.
+
+        :return: Flag indicating whether or not run is queued
+        :rtype: boolean
+        """
+        queue_info = self._get_queue_info()
+        try:
+            state = queue_info.split()[9]
+        except AttributeError:
+            # job has disappeared from the queue; maybe cancelled
+            logger.error(
+                f"{self.run_id} job {self.job_id} not found on {self.host_name} queue"
+            )
+            raise WorkerError
+        if state != "Q":
+            return False
+        logger.info(f"{self.run_id} job {self.job_id} is queued")
+        return True
+
+    def get_tmp_run_dir(self):
+        """Query the HPC host file system to get the temporary run directory of the
+        hindcast job.
+        """
+        cmd = f"ls -d {self.scratch_dir/self.run_id}*"
+        stdout = self._ssh_exec_command(cmd)
+        self.tmp_run_dir = Path(stdout.splitlines()[0].strip())
+        logger.debug(f"found tmp run dir: {self.host_name}:{self.tmp_run_dir}")
+
+    def get_run_info(self):
+        """Download the hindcast job namelist_cfg file from the HPC host and extract
+        NEMO run parameters from it:
+
+        * it000: starting time step number
+        * itend: ending time step number
+        * date0: calendar date of the start of the run
+        * rdt: baroclinic time step
+        """
+        with tempfile.NamedTemporaryFile("wt") as namelist_cfg:
+            self.sftp_client.get(f"{self.tmp_run_dir}/namelist_cfg", namelist_cfg.name)
+            logger.debug(f"downloaded {self.host_name}:{self.tmp_run_dir}/namelist_cfg")
+            namelist = f90nml.read(namelist_cfg.name)
+            self.it000 = namelist["namrun"]["nn_it000"]
+            self.itend = namelist["namrun"]["nn_itend"]
+            self.date0 = arrow.get(str(namelist["namrun"]["nn_date0"]), "YYYYMMDD")
+            self.rdt = namelist["namdom"]["rn_rdt"]
+        logger.debug(
+            f"{self.run_id} on {self.host_name}: "
+            f"it000={self.it000}, itend={self.itend}, date0={self.date0}, rdt={self.rdt}"
+        )
+
+    def is_running(self):
+        """Query the queue manager to get the state of the hindcast run.
+
+        While the job is running, report its progress via a log message.
+        If one or more "E R R O R" lines are found in the ocean.output file,
+        cancel the job.
+
+        :return: Flag indicating whether or not run is in R state
+        :rtype: boolean
+        """
+        if self._get_job_state() != "R":
+            return False
+        # Keep checking until we find a time.step file
+        try:
+            time_step_file = ssh_sftp.ssh_exec_command(
+                self.ssh_client,
+                f"cat {self.tmp_run_dir}/time.step",
+                self.host_name,
+                logger,
+            )
+        except ssh_sftp.SSHCommandError:
+            logger.info(
+                f"{self.run_id} on {self.host_name}: time.step not found; continuing to watch..."
+            )
+            return True
+        self._report_progress(time_step_file)
+        # grep ocean.output file for "E R R O R" lines
+        try:
+            ocean_output_errors = ssh_sftp.ssh_exec_command(
+                self.ssh_client,
+                f"grep 'E R R O R' {self.tmp_run_dir}/ocean.output",
+                self.host_name,
+                logger,
+            )
+        except ssh_sftp.SSHCommandError:
+            logger.error(f"{self.run_id} on {self.host_name}: ocean.output not found")
+            return False
+        error_lines = ocean_output_errors.splitlines()
+        if not error_lines:
+            return True
+        # Cancel run if "E R R O R" in ocean.output
+        logger.error(
+            f"{self.run_id} on {self.host_name}: "
+            f"found {len(error_lines)} 'E R R O R' line(s) in ocean.output"
+        )
+        cmd = f"/usr/bin/qdel {self.job_id}"
+        self._ssh_exec_command(
+            cmd, f"{self.run_id} on {self.host_name}: cancelled {self.job_id}"
+        )
+        return False
+
+    def _get_job_state(self):
+        """Query the queue manger to get the state of the hindcast run.
+
+        :return: Run state reported by queue manager or "UNKNOWN" if the job is not on the queue.
+        :rtype: str
+        """
+        try:
+            queue_info = self._get_queue_info()
+            state = queue_info.split()[9]
+        except (WorkerError, AttributeError):
+            # job has disappeared from the queue; finished or cancelled
+            logger.info(
+                f"{self.run_id} job {self.job_id} not found on {self.host_name} queue"
+            )
+            state = "UNKNOWN"
+        return state
+
+    def _report_progress(self, time_step_file):
+        """Calculate and log run progress based on value in time.step file.
+        """
+        time_step = int(time_step_file.splitlines()[0].strip())
+        model_seconds = (time_step - self.it000) * self.rdt
+        model_time = self.date0.shift(seconds=model_seconds).format(
+            "YYYY-MM-DD HH:mm:ss UTC"
+        )
+        fraction_done = (time_step - self.it000) / (self.itend - self.it000)
+        logger.info(
+            f"{self.run_id} on {self.host_name}: timestep: "
+            f"{time_step} = {model_time}, {fraction_done:.1%} complete"
+        )
+
+    def get_completion_state(self):
+        """TORQUE/MOAB doesn't provide a way to query resource use records for the completion
+        state of the hindcast run, so the best we can do is assume that it completed.
+
+        :return: Completion state of the run: "completed"
+        :rtype: str
+        """
+        return "completed"
+
+    def _ssh_exec_command(self, cmd, success_msg=""):
+        """Execute cmd on the HPC host, returning its stdout.
+
+        If cmd is successful, and success_msg is provided, log success_msg at the
+        INFO level.
+
+        If cmd fails, log stderr from the HPC host at the ERROR level, and raise
+        WorkerError.
+
+        :param str cmd:
+        :param str success_msg:
+
+        :raise: WorkerError
+
+        :return: Standard output from the executed command.
+        :rtype: str with newline separators
+        """
+        try:
+            stdout = ssh_sftp.ssh_exec_command(
+                self.ssh_client, cmd, self.host_name, logger
+            )
+            if success_msg:
+                logger.info(success_msg)
+            return stdout
+        except ssh_sftp.SSHCommandError as exc:
+            for line in exc.stderr.splitlines():
+                logger.error(line)
+            raise WorkerError
+
+    def _get_queue_info(self):
+        """Query the queue manager to get the state of the hindcast run.
+
+        :return: None or 1 line of output from queue info command that describes
+                 the run's state
+        :rtype: str
+        """
+        squeue_cmd = "/usr/bin/qstat -a"
+        cmd = (
+            f"{squeue_cmd} -u {self.users}"
+            if self.job_id is None
+            else f"{squeue_cmd} {self.job_id}"
+        )
+        stdout = self._ssh_exec_command(cmd)
+        if not stdout:
+            if self.job_id is None:
+                logger.error(f"no jobs found on {self.host_name} queue")
+                raise WorkerError
+            else:
+                # Various callers handle job id not on queue in difference ways
+                return
+        for queue_info in stdout.splitlines()[5:]:
+            if self.run_id is not None:
+                if self.run_id == queue_info.strip().split()[3]:
+                    return queue_info.strip()
+            else:
+                if "hindcast" in queue_info.strip().split()[3]:
+                    return queue_info.strip()
+
+
+@attr.s
+class _SqueueHindcastJob:
+    """Interact with the hindcast job on an HPC host that uses :command:`squeue`.
+    """
+
+    ssh_client = attr.ib()
+    sftp_client = attr.ib()
+    host_name = attr.ib(type=str)
+    users = attr.ib()
+    scratch_dir = attr.ib(type=Path)
+    run_id = attr.ib(default=None, type=str)
+    job_id = attr.ib(default=None, type=str)
+    tmp_run_dir = attr.ib(default=None, type=Path)
+    it000 = attr.ib(default=None, type=int)
+    itend = attr.ib(default=None, type=int)
+    date0 = attr.ib(default=None, type=arrow.Arrow)
+    rdt = attr.ib(default=None, type=float)
+
+    def get_run_id(self):
+        """Query the queue manager to get the job id, and the salishsea run id
         of the hindcast run.
         """
         queue_info = self._get_queue_info()
@@ -147,7 +379,7 @@ class _HindcastJob:
         logger.info(f"watching {self.run_id} job {self.job_id} on {self.host_name}")
 
     def is_queued(self):
-        """Query the slurm queue to get the state of the hindcast run.
+        """Query the queue manager to get the state of the hindcast run.
 
         :return: Flag indicating whether or not run is queued in PENDING state
         :rtype: boolean
@@ -201,7 +433,7 @@ class _HindcastJob:
         )
 
     def is_running(self):
-        """Query the slurm queue to get the state of the hindcast run.
+        """Query the queue manager to get the state of the hindcast run.
 
         While the job is running, report its progress via a log message.
         If one or more "E R R O R" lines are found in the ocean.output file,
@@ -263,9 +495,9 @@ class _HindcastJob:
         return True
 
     def _get_job_state(self):
-        """Query the slurm queue to get the state of the hindcast run.
+        """Query the queue manager to get the state of the hindcast run.
 
-        :return: Run state reported by slurm or "UNKNOWN" if the job is not on the queue.
+        :return: Run state reported by queue manager or "UNKNOWN" if the job is not on the queue.
         :rtype: str
         """
         try:
@@ -369,9 +601,9 @@ class _HindcastJob:
             raise WorkerError
 
     def _get_queue_info(self):
-        """Query the slurm queue to get the state of the hindcast run.
+        """Query the queue manager to get the state of the hindcast run.
 
-        :return: None or 1 line of output from slurm squeue command that describes
+        :return: None or 1 line of output from queue info command that describes
                  the run's state
         :rtype: str
         """

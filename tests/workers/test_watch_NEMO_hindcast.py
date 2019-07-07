@@ -15,6 +15,7 @@
 """Unit tests for SalishSeaCast watch_NEMO_hindcast worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
@@ -33,14 +34,23 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-run:
-  hindcast hosts:
-    cedar:
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
-      users: allen,dlatorne
-      scratch dir: scratch/hindcast
-"""
+            textwrap.dedent(
+                """\
+                run:
+                  hindcast hosts:
+                    cedar:
+                      ssh key: SalishSeaNEMO-nowcast_id_rsa
+                      queue info cmd: /opt/software/slurm/bin/squeue
+                      users: allen,dlatorne
+                      scratch dir: scratch/hindcast
+                
+                    optimum:
+                      ssh key: SalishSeaNEMO-nowcast_id_rsa
+                      queue info cmd: /usr/bin/qstat
+                      users: sallen,dlatorne
+                      scratch dir: scratch/hindcast
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
@@ -109,41 +119,51 @@ class TestConfig:
             run_hindcast_hosts["cedar-hindcast"]["ssh key"]
             == "SalishSeaNEMO-nowcast_id_rsa"
         )
+        assert (
+            run_hindcast_hosts["cedar-hindcast"]["queue info cmd"]
+            == "/opt/software/slurm/bin/squeue"
+        )
         assert run_hindcast_hosts["cedar-hindcast"]["users"] == "allen,dlatorne"
         assert (
             run_hindcast_hosts["cedar-hindcast"]["scratch dir"]
-            == "/scratch/dlatorne/hindcast_v201812"
+            == "/scratch/dlatorne/hindcast.201905"
         )
+
         assert (
             run_hindcast_hosts["optimum-hindcast"]["ssh key"]
             == "SalishSeaNEMO-nowcast_id_rsa"
         )
+        assert (
+            run_hindcast_hosts["optimum-hindcast"]["queue info cmd"] == "/usr/bin/qstat"
+        )
         assert run_hindcast_hosts["optimum-hindcast"]["users"] == "sallen,dlatorne"
         assert (
             run_hindcast_hosts["optimum-hindcast"]["scratch dir"]
-            == "/scratch/sallen/dlatorne/hindcast_v201812"
+            == "/scratch/sallen/dlatorne/hindcast.201905"
         )
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function.
     """
 
-    def test_success(self, m_logger):
-        parsed_args = SimpleNamespace(host_name="cedar")
+    def test_success(self, m_logger, host_name):
+        parsed_args = SimpleNamespace(host_name=host_name)
         msg_type = watch_NEMO_hindcast.success(parsed_args)
         assert m_logger.info.called
         assert msg_type == f"success"
 
 
+@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function.
     """
 
-    def test_failure(self, m_logger):
-        parsed_args = SimpleNamespace(host_name="cedar")
+    def test_failure(self, m_logger, host_name):
+        parsed_args = SimpleNamespace(host_name=host_name)
         msg_type = watch_NEMO_hindcast.failure(parsed_args)
         assert m_logger.critical.called
         assert msg_type == f"failure"
@@ -155,12 +175,12 @@ class TestFailure:
     return_value=(Mock(name="ssh_client"), Mock(name="sftp_client")),
     autospec=True,
 )
-@patch("nowcast.workers.watch_NEMO_hindcast._HindcastJob", spec=True)
 class TestWatchNEMO_Hindcast:
     """Unit test for watch_NEMO_hindcast() function.
     """
 
-    def test_run_completed(self, m_job, m_sftp, m_logger, config):
+    @patch("nowcast.workers.watch_NEMO_hindcast._SqueueHindcastJob", spec=True)
+    def test_squeue_run_completed(self, m_job, m_sftp, m_logger, config):
         parsed_args = SimpleNamespace(host_name="cedar", run_id=None)
         m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "9813234", "01jul18hindcast"
@@ -181,7 +201,30 @@ class TestWatchNEMO_Hindcast:
         }
         assert checklist == expected
 
+    @patch("nowcast.workers.watch_NEMO_hindcast._QstatHindcastJob", spec=True)
+    def test_qstat_run_completed(self, m_job, m_sftp, m_logger, config):
+        parsed_args = SimpleNamespace(host_name="optimum", run_id=None)
+        m_job().host_name = parsed_args.host_name
+        m_job().job_id, m_job().run_id = "62990.admin", "01jul18hindcast"
+        m_job().is_queued.return_value = False
+        m_job().tmp_run_dir = Path("tmp_run_dir")
+        m_job().is_running.return_value = False
+        m_job().get_completion_state.return_value = "completed"
+        checklist = watch_NEMO_hindcast.watch_NEMO_hindcast(parsed_args, config)
+        expected = {
+            "hindcast": {
+                "host": parsed_args.host_name,
+                "run id": m_job().run_id,
+                "run date": arrow.get(m_job().run_id[:7], "DDMMMYY").format(
+                    "YYYY-MM-DD"
+                ),
+                "completed": True,
+            }
+        }
+        assert checklist == expected
+
     @pytest.mark.parametrize("completion_state", ["cancelled", "aborted"])
+    @patch("nowcast.workers.watch_NEMO_hindcast._SqueueHindcastJob", spec=True)
     def test_run_cancelled_or_aborted(
         self, m_job, m_sftp, m_logger, completion_state, config
     ):
@@ -197,11 +240,267 @@ class TestWatchNEMO_Hindcast:
 
 
 @patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
-class TestHindcastJob:
-    """Unit tests for _HindcastJob class."""
+class TestQstatHindcastJob:
+    """Unit tests for _SqueueHindcastJob class."""
 
     def test_get_run_id(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value=(
+                "62991.admin.default.do dlatorne mpi 01jan13hindcast 22390 14 280 -- 06:00:00 R 00:20:53"
+            ),
+        )
+        job.get_run_id()
+        assert job.job_id == "62991.admin"
+        assert job.run_id == "01jan13hindcast"
+        assert m_logger.info.called
+
+    def test_is_queued_job_not_found(self, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
+        with pytest.raises(nemo_nowcast.WorkerError):
+            job.is_queued()
+        assert m_logger.error.called
+
+    def test_is_queued(self, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value=(
+                "62991.admin.default.do dlatorne mpi 01jan13hindcast 22390 14 280 -- 06:00:00 Q 00:20:53"
+            ),
+        )
+        assert job.is_queued()
+        assert m_logger.info.called
+
+    def test_get_tmp_run_dir(self, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job.run_id = "21dec16hindcast"
+        job._ssh_exec_command = Mock(
+            name="_ssh_exec_command",
+            return_value="/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700",
+        )
+        job.get_tmp_run_dir()
+        assert job.tmp_run_dir == Path(
+            "/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700"
+        )
+        assert m_logger.debug.called
+
+    @patch("nowcast.workers.watch_NEMO_hindcast.f90nml.read", autospec=True)
+    def test_get_run_info(self, m_f90nml_read, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job.tmp_run_dir = Path(
+            "/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700"
+        )
+        m_f90nml_read.return_value = {
+            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": "20130101"},
+            "namdom": {"rn_rdt": 40.0},
+        }
+        job.get_run_info()
+        assert job.it000 == 1
+        assert job.itend == 2160
+        assert job.date0 == arrow.get("2013-01-01")
+        assert job.rdt == 40.0
+        assert m_logger.debug.call_count == 2
+
+    def test_is_running_not_running(self, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="UNKNOWN")
+        assert not job.is_running()
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=nowcast.ssh_sftp.SSHCommandError("cmd", "stdout", "stderr"),
+        autospec=True,
+    )
+    def test_is_running_no_time_step_file(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="R")
+        assert job.is_running()
+        assert m_logger.info.called
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=[
+            "1\n",
+            nowcast.ssh_sftp.SSHCommandError("cmd", "stdout", "stderr"),
+        ],
+        autospec=True,
+    )
+    def test_is_running_no_ocean_output(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="R")
+        job._report_progress = Mock(name="_report_progress")
+        assert not job.is_running()
+        assert m_logger.error.called
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=["1\n", "E R R O R\nE R R O R\n"],
+        autospec=True,
+    )
+    def test_is_running_ocean_output_errors_cancel_run(
+        self, m_ssh_exec_cmd, m_logger, config
+    ):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="R")
+        job._report_progress = Mock(name="_report_progress")
+        job._ssh_exec_command = Mock(name="_ssh_exec_command")
+        assert not job.is_running()
+        assert m_logger.error.called
+        job._ssh_exec_command.assert_called_once_with(
+            f"/usr/bin/qdel {job.job_id}",
+            f"{job.run_id} on {job.host_name}: cancelled {job.job_id}",
+        )
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        side_effect=["1\n", ""],
+        autospec=True,
+    )
+    def test_is_running(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "cedoptimumar",
+            config["run"]["hindcast hosts"]["cedar"]["users"],
+            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+        )
+        job._get_job_state = Mock(name="_get_job_state", return_value="R")
+        job._report_progress = Mock(name="_report_progress")
+        assert job.is_running()
+
+    @pytest.mark.parametrize("exception", [nemo_nowcast.WorkerError, AttributeError])
+    def test_get_job_state_unknown(self, m_logger, exception, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
+        state = job._get_job_state()
+        assert m_logger.info.called
+        assert state == "UNKNOWN"
+
+    def test_get_job_state_running(self, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job._get_queue_info = Mock(
+            name="_get_queue_info",
+            return_value=(
+                "62991.admin.default.do dlatorne mpi 01jan13hindcast 22390 14 280 -- 06:00:00 R 00:20:53"
+            ),
+        )
+        state = job._get_job_state()
+        assert state == "R"
+
+    def test_report_progress(self, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job.run_id = "11jan13hindcast"
+        job.it000 = 21601
+        job.itend = 43200
+        job.date0 = arrow.get("2013-01-11")
+        job.rdt = 40.0
+        job._report_progress("29697\n")
+        m_logger.info.assert_called_once_with(
+            f"11jan13hindcast on {job.host_name}: timestep: "
+            f"29697 = 2013-01-14 17:57:20 UTC, 37.5% complete"
+        )
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
+        return_value="/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700",
+        autospec=True,
+    )
+    def test_ssh_exec_command(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        stdout = job._ssh_exec_command(f"ls -dtr {job.scratch_dir}/*hindcast*")
+        assert (
+            stdout == "/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700"
+        )
+        assert not m_logger.info.called
+
+
+@patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
+class TestSqueueHindcastJob:
+    """Unit tests for _SqueueHindcastJob class."""
+
+    def test_get_run_id(self, m_logger, config):
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -218,7 +517,7 @@ class TestHindcastJob:
         assert m_logger.info.called
 
     def test_is_queued_job_not_found(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -231,7 +530,7 @@ class TestHindcastJob:
         assert m_logger.error.called
 
     def test_is_queued_not_pending(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -245,7 +544,7 @@ class TestHindcastJob:
         assert not job.is_queued()
 
     def test_is_queued_pending_due_to_resources(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -260,7 +559,7 @@ class TestHindcastJob:
         assert m_logger.info.call_args[0][0].endswith("pending due to resources")
 
     def test_is_queued_pending_and_scheduled(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -277,7 +576,7 @@ class TestHindcastJob:
         )
 
     def test_get_tmp_run_dir(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -297,7 +596,7 @@ class TestHindcastJob:
 
     @patch("nowcast.workers.watch_NEMO_hindcast.f90nml.read", autospec=True)
     def test_get_run_info(self, m_f90nml_read, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -323,7 +622,7 @@ class TestHindcastJob:
         assert m_logger.debug.call_count == 2
 
     def test_is_running_not_running(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -339,7 +638,7 @@ class TestHindcastJob:
         autospec=True,
     )
     def test_is_running_no_time_step_file(self, m_ssh_exec_cmd, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -359,7 +658,7 @@ class TestHindcastJob:
         autospec=True,
     )
     def test_is_running_no_ocean_output(self, m_ssh_exec_cmd, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -379,7 +678,7 @@ class TestHindcastJob:
     def test_is_running_ocean_output_errors_cancel_run(
         self, m_ssh_exec_cmd, m_logger, config
     ):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -402,7 +701,7 @@ class TestHindcastJob:
         autospec=True,
     )
     def test_is_running_handle_stuck_job(self, m_ssh_exec_cmd, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -430,7 +729,7 @@ class TestHindcastJob:
         autospec=True,
     )
     def test_is_running(self, m_ssh_exec_cmd, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -443,7 +742,7 @@ class TestHindcastJob:
 
     @pytest.mark.parametrize("exception", [nemo_nowcast.WorkerError, AttributeError])
     def test_get_job_state_unknown(self, m_logger, exception, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -456,7 +755,7 @@ class TestHindcastJob:
         assert state == "UNKNOWN"
 
     def test_get_job_state_running(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -471,7 +770,7 @@ class TestHindcastJob:
         assert state == "RUNNING"
 
     def test_report_progress(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -490,7 +789,7 @@ class TestHindcastJob:
         )
 
     def test_handle_stuck_job(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -530,7 +829,7 @@ class TestHindcastJob:
         assert m_logger.debug.called
 
     def test_get_completion_state_unknown(self, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -554,7 +853,7 @@ class TestHindcastJob:
         ],
     )
     def test_get_completion_state(self, m_logger, job_state, expected, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
@@ -577,7 +876,7 @@ class TestHindcastJob:
         autospec=True,
     )
     def test_ssh_exec_command(self, m_ssh_exec_cmd, m_logger, config):
-        job = watch_NEMO_hindcast._HindcastJob(
+        job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
