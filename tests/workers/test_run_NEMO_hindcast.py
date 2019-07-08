@@ -234,8 +234,7 @@ class TestRunNEMO_Hindcast:
     """Unit tests for run_NEMO_hindcast() function.
     """
 
-    @pytest.mark.parametrize("full_month", [True, False])
-    def test_checklist_run_date_in_future(
+    def test_checklist_full_month_run_date_in_future(
         self,
         m_launch_run,
         m_edit_run_desc,
@@ -245,18 +244,41 @@ class TestRunNEMO_Hindcast:
         m_sftp,
         m_logger,
         host_name,
-        full_month,
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name=host_name,
-            full_month=full_month,
-            prev_run_date=arrow.get("2019-01-11"),
+            host_name=host_name, full_month=True, prev_run_date=arrow.get("2019-01-11")
         )
         with patch("nowcast.workers.run_NEMO_hindcast.arrow.now") as m_now:
             m_now.return_value = arrow.get("2019-01-30")
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
+        assert not m_launch_run.called
         expected = {"hindcast": {"host": host_name, "run id": "None"}}
+        assert checklist == expected
+
+    def test_checklist_not_full_month_run_date_in_future(
+        self,
+        m_launch_run,
+        m_edit_run_desc,
+        m_edit_namelist_time,
+        m_get_prev_run_namelist_info,
+        m_get_prev_run_queue_info,
+        m_sftp,
+        m_logger,
+        host_name,
+        config,
+    ):
+        parsed_args = SimpleNamespace(
+            host_name=host_name,
+            full_month=False,
+            prev_run_date=arrow.get("2019-01-11"),
+            walltime=None,
+        )
+        with patch("nowcast.workers.run_NEMO_hindcast.arrow.now") as m_now:
+            m_now.return_value = arrow.get("2019-01-30")
+            checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
+        assert m_launch_run.called
+        expected = {"hindcast": {"host": host_name, "run id": "21jan19hindcast"}}
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -394,7 +416,7 @@ class TestRunNEMO_Hindcast:
                 arrow.get("2018-07-01"),
                 None,
                 arrow.get("2018-08-01"),
-                "12:00:00",
+                "30:00:00",
             ),  # default
             (
                 True,
@@ -408,7 +430,7 @@ class TestRunNEMO_Hindcast:
                 arrow.get("2018-07-01"),
                 None,
                 arrow.get("2018-07-11"),
-                "06:00:00",
+                "10:00:00",
             ),  # default
             (
                 False,

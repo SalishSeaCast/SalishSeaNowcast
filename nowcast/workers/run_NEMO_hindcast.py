@@ -126,22 +126,33 @@ def run_NEMO_hindcast(parsed_args, config, *args):
                 run_days = 10
             else:
                 run_days = (run_date.shift(months=+1).replace(day=1) - run_date).days
-        if run_date.shift(days=+run_days).naive >= arrow.now().floor("day").naive:
-            logger.info(
-                f"not launching {run_date.format('YYYY-MM-DD')} run because it extends beyond today"
-            )
-            sftp_client.close()
-            ssh_client.close()
-            checklist = {"hindcast": {"host": host_name, "run id": "None"}}
-            return checklist
+        if run_date.shift(days=+(run_days - 1)).naive > arrow.now().floor("day").naive:
+            if parsed_args.full_month:
+                logger.info(
+                    f"not launching {run_date.format('YYYY-MM-DD')} run because it extends beyond today"
+                )
+                sftp_client.close()
+                ssh_client.close()
+                checklist = {"hindcast": {"host": host_name, "run id": "None"}}
+                return checklist
+            else:
+                run_days = (
+                    arrow.now().floor("day").naive - run_date.shift(days=-1).naive
+                ).days
+                logger.info(
+                    f"launching {run_date.format('YYYY-MM-DD')} run  for {run_days} days to end of today"
+                )
+
         prev_namelist_info = _get_prev_run_namelist_info(
             ssh_client, sftp_client, host_name, prev_run_date, config
         )
         _edit_namelist_time(
             sftp_client, host_name, prev_namelist_info, run_date, run_days, config
         )
-        walltime = parsed_args.walltime or (
-            "12:00:00" if parsed_args.full_month else "06:00:00"
+        walltime = (
+            parsed_args.walltime or "30:00:00"
+            if parsed_args.full_month
+            else parsed_args.walltime or "10:00:00"
         )
         _edit_run_desc(
             sftp_client,
