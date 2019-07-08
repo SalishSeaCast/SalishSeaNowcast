@@ -193,7 +193,6 @@ def _get_prev_run_queue_info(ssh_client, host_name, config):
         if "hindcast" in queue_info.strip().split()[1]:
             job_id, run_id = queue_info.strip().split()
             logger.info(f"using {run_id} job {job_id} on {host_name} as previous run")
-            job_id = int(job_id)
             prev_run_date = arrow.get(run_id[:7], "DDMMMYY")
             return prev_run_date, job_id
     logger.error(f"no hindcast jobs found on {host_name} queue")
@@ -219,7 +218,7 @@ def _get_qstat_queue_info(ssh_client, host_name, queue_info_cmd, users):
     queue_info_lines = stdout.splitlines()[5:]
     queue_info_lines.reverse()
     queue_info_lines = [
-        f"{line.split()[0].split('.')[0]} {line.split()[3]}"
+        f"{line.split()[0].rsplit('.', 2)[0]} {line.split()[3]}"
         for line in queue_info_lines
     ]
     return queue_info_lines

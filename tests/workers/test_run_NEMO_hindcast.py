@@ -475,7 +475,6 @@ class TestRunNEMO_Hindcast:
         )
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast._get_qstat_queue_info", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast._get_squeue_queue_info", autospec=True)
@@ -483,23 +482,35 @@ class TestGetPrevRunQueueInfo:
     """Unit tests for _get_prev_run_queue_info() function.
     """
 
-    def test_found_prev_hindcast_job(
-        self, m_squeue_info, m_qstat_info, m_logger, host_name, config
+    def test_found_prev_hindcast_job_squeue(
+        self, m_squeue_info, m_qstat_info, m_logger, config
     ):
-        m_qstat_info.return_value = ["12345678 01may18hindcast"]
         m_squeue_info.return_value = ["12345678 01may18hindcast"]
         m_ssh_client = Mock(name="ssh_client")
         prev_run_date, job_id = run_NEMO_hindcast._get_prev_run_queue_info(
-            m_ssh_client, host_name, config
+            m_ssh_client, "cedar", config
         )
         assert prev_run_date == arrow.get("2018-05-01")
-        assert job_id == 12_345_678
+        assert job_id == "12345678"
         assert m_logger.info.called
 
+    def test_found_prev_hindcast_job_qstat(
+        self, m_squeue_info, m_qstat_info, m_logger, config
+    ):
+        m_qstat_info.return_value = ["12345678.admin 01may18hindcast"]
+        m_ssh_client = Mock(name="ssh_client")
+        prev_run_date, job_id = run_NEMO_hindcast._get_prev_run_queue_info(
+            m_ssh_client, "optimum", config
+        )
+        assert prev_run_date == arrow.get("2018-05-01")
+        assert job_id == "12345678.admin"
+        assert m_logger.info.called
+
+    @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
     def test_no_prev_hindcast_job_found(
         self, m_squeue_info, m_qstat_info, m_logger, host_name, config
     ):
-        m_qstat_info.return_value = ["12345678 07may18nowcast-agrif"]
+        m_qstat_info.return_value = ["12345678.admin 07may18nowcast-agrif"]
         m_squeue_info.return_value = ["12345678 07may18nowcast-agrif"]
         m_ssh_client = Mock(name="ssh_client")
         with pytest.raises(nemo_nowcast.WorkerError):
