@@ -415,7 +415,7 @@ class TestRunNEMO_Hindcast:
                 arrow.get("2018-07-01"),
                 None,
                 arrow.get("2018-08-01"),
-                "30:00:00",
+                108_000,
             ),  # default
             (
                 True,
@@ -438,6 +438,7 @@ class TestRunNEMO_Hindcast:
                 arrow.get("2018-07-11"),
                 "09:00:00",
             ),
+            (False, arrow.get("2019-07-01"), 86400, arrow.get("2019-07-11"), 86400),
         ],
     )
     def test_edit_run_desc_walltime(

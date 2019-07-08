@@ -60,8 +60,9 @@ def main():
         default=None,
         help="""
         Walltime to request for the hindcast run.
-        Defaults to 6 hours (06:00:00) for 10-ish day runs,
-        and 12 hours (12:00:00) for --full-month runs.
+        Defaults to 10 hours (10:00:00) for 10-ish day runs,
+        and 30 hours (30:00:00) for --full-month runs.
+        **IMPORTANT: Use seconds for walltime values greater than 23:59:59**
         """,
     )
     worker.run(run_NEMO_hindcast, success, failure)
@@ -150,7 +151,8 @@ def run_NEMO_hindcast(parsed_args, config, *args):
             sftp_client, host_name, prev_namelist_info, run_date, run_days, config
         )
         walltime = (
-            parsed_args.walltime or "30:00:00"
+            # NOTE: values >23:59:59 must be in seconds
+            parsed_args.walltime or 30 * 60 * 60
             if parsed_args.full_month
             else parsed_args.walltime or "10:00:00"
         )
