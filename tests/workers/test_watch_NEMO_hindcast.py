@@ -494,6 +494,153 @@ class TestQstatHindcastJob:
         )
         assert not m_logger.info.called
 
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
+    )
+    def test_get_queue_info_no_job_id_no_jobs(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        m_ssh_exec_cmd.return_value = ""
+        with pytest.raises(nemo_nowcast.WorkerError):
+            job._get_queue_info()
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
+    )
+    def test_get_queue_info_job_id_no_jobs(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job.job_id = "62991.admin"
+        m_ssh_exec_cmd.return_value = ""
+        queue_info = job._get_queue_info()
+        assert queue_info is None
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
+    )
+    def test_get_queue_info_run_id(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job.run_id = "01jan13hindcast"
+        m_ssh_exec_cmd.return_value = textwrap.dedent(
+            """\
+            
+            admin.default.domain: 
+                                                                                              Req'd    Req'd       Elap
+            Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
+            ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
+            62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53
+            """
+        )
+        queue_info = job._get_queue_info()
+        assert (
+            queue_info
+            == "62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53"
+        )
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
+    )
+    def test_get_queue_info_run_id_ignore_completed(
+        self, m_ssh_exec_cmd, m_logger, config
+    ):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        job.run_id = "11jan13hindcast"
+        m_ssh_exec_cmd.return_value = textwrap.dedent(
+            """\
+            
+            admin.default.domain: 
+                                                                                              Req'd    Req'd       Elap
+            Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
+            ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
+            62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     10:00:00  C      --
+            62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53
+            """
+        )
+        queue_info = job._get_queue_info()
+        assert (
+            queue_info
+            == "62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53"
+        )
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
+    )
+    def test_get_queue_info_no_run_id(self, m_ssh_exec_cmd, m_logger, config):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        m_ssh_exec_cmd.return_value = textwrap.dedent(
+            """\
+
+            admin.default.domain: 
+                                                                                              Req'd    Req'd       Elap
+            Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
+            ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
+            62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53
+            """
+        )
+        queue_info = job._get_queue_info()
+        assert (
+            queue_info
+            == "62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53"
+        )
+
+    @patch(
+        "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
+    )
+    def test_get_queue_info_no_run_id_ignore_completed(
+        self, m_ssh_exec_cmd, m_logger, config
+    ):
+        job = watch_NEMO_hindcast._QstatHindcastJob(
+            Mock(name="ssh_client"),
+            Mock(name="sftp_client"),
+            "optimum",
+            config["run"]["hindcast hosts"]["optimum"]["users"],
+            Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+        )
+        m_ssh_exec_cmd.return_value = textwrap.dedent(
+            """\
+
+            admin.default.domain: 
+                                                                                              Req'd    Req'd       Elap
+            Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
+            ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
+            62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     10:00:00  C      --
+            62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53
+            """
+        )
+        queue_info = job._get_queue_info()
+        assert (
+            queue_info
+            == "62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53"
+        )
+
 
 @patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestSqueueHindcastJob:

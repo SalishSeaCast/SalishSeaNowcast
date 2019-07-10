@@ -344,11 +344,15 @@ class _QstatHindcastJob:
                 # Various callers handle job id not on queue in difference ways
                 return
         for queue_info in stdout.splitlines()[5:]:
+            queue_info_parts = queue_info.strip().split()
+            run_id, state = queue_info_parts[3], queue_info_parts[9]
+            if state == "C":
+                continue
             if self.run_id is not None:
-                if self.run_id == queue_info.strip().split()[3]:
+                if self.run_id == run_id:
                     return queue_info.strip()
             else:
-                if "hindcast" in queue_info.strip().split()[3]:
+                if "hindcast" in run_id:
                     return queue_info.strip()
 
 
