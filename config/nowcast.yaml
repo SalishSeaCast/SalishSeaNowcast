@@ -1040,6 +1040,11 @@ logging:
         propagate: False
         handlers:
           - checklist
+      paramiko:
+        # ssh/sftp client library used by various workers
+        qualname: paramiko
+        level: WARNING
+        formatter: simple
       watchdog:
         # File system monitoring library used by collect_weather worker
         qualname: watchdog
