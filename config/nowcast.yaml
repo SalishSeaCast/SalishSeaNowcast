@@ -1040,6 +1040,11 @@ logging:
         propagate: False
         handlers:
           - checklist
+      matplotlib:
+        # matplotlib library used by figure modules
+        qualname: matplotlib
+        level: WARNING
+        formatter: simple
       paramiko:
         # ssh/sftp client library used by various workers
         qualname: paramiko
