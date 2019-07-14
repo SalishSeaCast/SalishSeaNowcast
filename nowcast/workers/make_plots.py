@@ -102,7 +102,8 @@ def main():
         'nowcast-x2' means VHFR FVCOM x2 configuration nowcast run,
         'nowcast-r12' means VHFR FVCOM r12 configuration nowcast run,
         'forecast' means NEMO forecast physics-only runs, or wwatch3 forecast run,
-        'forecast2' means NEMO preliminary forecast physics-only runs, or wwatch3 preliminary forecast run,
+        'forecast2' means NEMO preliminary forecast physics-only runs, or wwatch3 preliminary 
+        forecast run,
         'forecast-x2' means VHFR FVCOM x2 configuration forecast run,
         """,
     )
@@ -393,7 +394,8 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir, run_date
             }
         )
         logger.info(
-            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue research render list"
+            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} "
+            f"NEMO nowcast-blue research render list"
         )
     fig_functions.update(
         {
@@ -428,7 +430,8 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir, run_date
     for fig_func in fig_functions:
         if fig_func.startswith("Currents"):
             logger.info(
-                f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue research render list"
+                f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue "
+                f"research render list"
             )
     return fig_functions
 
@@ -472,7 +475,8 @@ def _prep_nowcast_green_research_fig_functions(
             }
         )
     logger.info(
-        f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research render list"
+        f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO "
+        f"nowcast-green research render list"
     )
     image_loops = {
         "nitrate": {
@@ -560,7 +564,8 @@ def _prep_nowcast_green_research_fig_functions(
             }
         )
         logger.info(
-            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research render list"
+            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO "
+            f"nowcast-green research render list"
         )
     image_loops = {
         "Fraser_tracer": {
@@ -598,7 +603,8 @@ def _prep_nowcast_green_research_fig_functions(
             }
         )
         logger.info(
-            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research render list"
+            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO "
+            f"nowcast-green research render list"
         )
     place = "S3"
     phys_dataset = xarray.open_dataset(
@@ -630,7 +636,8 @@ def _prep_nowcast_green_research_fig_functions(
     for fig_func in fig_functions:
         if fig_func.endswith("timeseries"):
             logger.info(
-                f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research render list"
+                f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO "
+                f"nowcast-green research render list"
             )
     return fig_functions
 
@@ -659,7 +666,8 @@ def _prep_nowcast_agrif_research_fig_functions(config, agrif_results_dir, run_da
         }
     }
     logger.info(
-        f"added baynes_sound_surface figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-agrif research render list"
+        f"added baynes_sound_surface figure to {run_date.format('YYYY-MM-DD')} NEMO "
+        f"nowcast-agrif research render list"
     )
     return fig_functions
 
@@ -775,7 +783,8 @@ def _prep_comparison_fig_functions(
     }
     for fig_func in fig_functions:
         logger.info(
-            f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue comparison render list"
+            f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue "
+            f"comparison render list"
         )
     return fig_functions
 
@@ -910,7 +919,8 @@ def _prep_fvcom_publish_fig_functions(
         }
     )
     logger.info(
-        f"added 2ndNarrows_current figure to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} publish render list"
+        f"added 2ndNarrows_current figure to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} "
+        f"publish render list"
     )
     return fig_functions
 
@@ -943,7 +953,8 @@ def _prep_fvcom_research_fig_functions(
                 }
             )
         logger.info(
-            f"added {svg_root} figures to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} research render list"
+            f"added {svg_root} figures to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} "
+            f"research render list"
         )
     names = {
         "Vancouver Harbour": "VancouverHarbour_thalweg",
@@ -968,7 +979,8 @@ def _prep_fvcom_research_fig_functions(
                     }
                 )
         logger.info(
-            f"added {svg_root} figures to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} research render list"
+            f"added {svg_root} figures to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} "
+            f"research render list"
         )
     return fig_functions
 
@@ -989,7 +1001,8 @@ def _prep_wwatch3_publish_fig_functions(wwatch3_dataset_url, run_type, run_date)
             }
         )
         logger.info(
-            f"added {buoy} figure to {run_date.format('YYYY-MM-DD')} WaveWatch3 {run_type} publish render list"
+            f"added {buoy} figure to {run_date.format('YYYY-MM-DD')} WaveWatch3 {run_type} "
+            f"publish render list"
         )
     return fig_functions
 
