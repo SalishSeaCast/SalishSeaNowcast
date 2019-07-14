@@ -299,17 +299,24 @@ def make_plots(parsed_args, config, *args):
                 config["figures"]["dataset URLs"]["2nd narrows hadcp time series"]
             )
             fig_functions = _prep_fvcom_publish_fig_functions(
-                fvcom_stns_datasets, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+                fvcom_stns_datasets,
+                nemo_ssh_dataset_url_tmpl,
+                obs_hadcp_dataset,
+                run_type,
+                run_date,
             )
         if plot_type == "research":
             fig_functions = _prep_fvcom_research_fig_functions(
                 fvcom_results_dataset,
+                run_type,
                 run_date,
                 run_duration=24 if run_type.startswith("nowcast") else 60,
             )
     if model == "wwatch3":
         wwatch3_dataset_url = config["figures"]["dataset URLs"]["wwatch3 fields"]
-        fig_functions = _prep_wwatch3_publish_fig_functions(wwatch3_dataset_url)
+        fig_functions = _prep_wwatch3_publish_fig_functions(
+            wwatch3_dataset_url, run_type, run_date
+        )
 
     checklist = _render_figures(
         config, model, run_type, plot_type, dmy, fig_functions, test_figure_id
@@ -348,6 +355,9 @@ def _results_dataset_gridded(station, results_dir):
 
 
 def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir, run_date):
+    logger.info(
+        f"preparing render list for {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue research figures"
+    )
     yyyymmdd = run_date.format("YYYYMMDD")
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
     grid_U_hr = _results_dataset("1h", "grid_U", results_dir)
@@ -382,6 +392,9 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir, run_date
                 for hr in range(24)
             }
         )
+        logger.info(
+            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue research render list"
+        )
     fig_functions.update(
         {
             "Currents_sections_and_surface": {
@@ -412,12 +425,20 @@ def _prep_nowcast_research_fig_functions(bathy, mesh_mask, results_dir, run_date
             },
         }
     )
+    for fig_func in fig_functions:
+        if fig_func.startswith("Currents"):
+            logger.info(
+                f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue research render list"
+            )
     return fig_functions
 
 
 def _prep_nowcast_green_research_fig_functions(
     config, bathy, mesh_mask, results_dir, run_date
 ):
+    logger.info(
+        f"preparing render list for {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research figures"
+    )
     yyyymmdd = run_date.format("YYYYMMDD")
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
     ptrc_T_hr = _results_dataset("1h", "ptrc_T", results_dir)
@@ -450,6 +471,9 @@ def _prep_nowcast_green_research_fig_functions(
                 for hr in range(24)
             }
         )
+    logger.info(
+        f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research render list"
+    )
     image_loops = {
         "nitrate": {
             "nemo var": "nitrate",
@@ -535,6 +559,9 @@ def _prep_nowcast_green_research_fig_functions(
                 for hr in range(24)
             }
         )
+        logger.info(
+            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research render list"
+        )
     image_loops = {
         "Fraser_tracer": {
             "nemo var": "Fraser_tracer",
@@ -570,6 +597,9 @@ def _prep_nowcast_green_research_fig_functions(
                 for hr in range(24)
             }
         )
+        logger.info(
+            f"added {tracer}_thalweg_and_surface figures to {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research render list"
+        )
     place = "S3"
     phys_dataset = xarray.open_dataset(
         config["figures"]["dataset URLs"]["3d tracer fields"]
@@ -597,10 +627,18 @@ def _prep_nowcast_green_research_fig_functions(
             },
         }
     )
+    for fig_func in fig_functions:
+        if fig_func.endswith("timeseries"):
+            logger.info(
+                f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-green research render list"
+            )
     return fig_functions
 
 
 def _prep_nowcast_agrif_research_fig_functions(config, agrif_results_dir, run_date):
+    logger.info(
+        f"preparing render list for {run_date.format('YYYY-MM-DD')} NEMO nowcast-agrif research figures"
+    )
     yyyymmdd = run_date.format("YYYYMMDD")
     ss_tracers_path = agrif_results_dir / "BaynesSoundSurface_grid_T.nc"
     bs_phys_path = agrif_results_dir / f"1_SalishSea_1h_{yyyymmdd}_{yyyymmdd}_grid_T.nc"
@@ -620,6 +658,9 @@ def _prep_nowcast_agrif_research_fig_functions(config, agrif_results_dir, run_da
             ),
         }
     }
+    logger.info(
+        f"added baynes_sound_surface figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-agrif research render list"
+    )
     return fig_functions
 
 
@@ -636,6 +677,9 @@ def _prep_comparison_fig_functions(
     dmy,
     timezone,
 ):
+    logger.info(
+        f"preparing render list for {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue comparison figures"
+    )
     hrdps_dataset_url = config["figures"]["dataset URLs"]["HRDPS fields"]
     ferry_data_dir = config["observations"]["ferry data"]
     dev_results_dir = os.path.join(dev_results_home, dmy)
@@ -729,12 +773,19 @@ def _prep_comparison_fig_functions(
             "args": (grid_ddl, grid_obs_ddl, adcp_datetime, "ddl"),
         },
     }
+    for fig_func in fig_functions:
+        logger.info(
+            f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue comparison render list"
+        )
     return fig_functions
 
 
 def _prep_publish_fig_functions(
     config, bathy, coastline, weather_path, results_dir, run_type, run_date, timezone
 ):
+    logger.info(
+        f"preparing render list for {run_date.format('YYYY-MM-DD')} NEMO {run_type} publish figures"
+    )
     ssh_fcst_dataset_url_tmpl = config["figures"]["dataset URLs"][
         "tide stn ssh time series"
     ]
@@ -790,6 +841,10 @@ def _prep_publish_fig_functions(
             "args": (grid_T_hr, tidal_predictions, timezone),
         },
     }
+    for fig_func in fig_functions:
+        logger.info(
+            f"added {fig_func} figure to {run_date.format('YYYY-MM-DD')} NEMO {run_type} publish render list"
+        )
     for place, svg_root in names.items():
         fig_functions.update(
             {
@@ -807,12 +862,22 @@ def _prep_publish_fig_functions(
                 }
             }
         )
+        logger.info(
+            f"added {place} figure to {run_date.format('YYYY-MM-DD')} NEMO {run_type} publish render list"
+        )
     return fig_functions
 
 
 def _prep_fvcom_publish_fig_functions(
-    fvcom_stns_datasets, nemo_ssh_dataset_url_tmpl, obs_hadcp_dataset
+    fvcom_stns_datasets,
+    nemo_ssh_dataset_url_tmpl,
+    obs_hadcp_dataset,
+    run_type,
+    run_date,
 ):
+    logger.info(
+        f"preparing render list for {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} publish figures"
+    )
     fig_functions = {}
     names = {
         "Calamity Point": "CP_waterlevel",
@@ -833,6 +898,9 @@ def _prep_fvcom_publish_fig_functions(
                 }
             }
         )
+        logger.info(
+            f"added {place} figure to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} publish render list"
+        )
     fig_functions.update(
         {
             "2ndNarrows_current": {
@@ -841,10 +909,18 @@ def _prep_fvcom_publish_fig_functions(
             }
         }
     )
+    logger.info(
+        f"added 2ndNarrows_current figure to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} publish render list"
+    )
     return fig_functions
 
 
-def _prep_fvcom_research_fig_functions(fvcom_results_dataset, run_date, run_duration):
+def _prep_fvcom_research_fig_functions(
+    fvcom_results_dataset, run_type, run_date, run_duration
+):
+    logger.info(
+        f"preparing render list for {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} research figures"
+    )
     fig_functions = {}
     names = {
         "English Bay": "EnglishBay_surface_currents",
@@ -866,6 +942,9 @@ def _prep_fvcom_research_fig_functions(fvcom_results_dataset, run_date, run_dura
                     }
                 }
             )
+        logger.info(
+            f"added {svg_root} figures to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} research render list"
+        )
     names = {
         "Vancouver Harbour": "VancouverHarbour_thalweg",
         "Port Moody": "PortMoody_thalweg",
@@ -888,10 +967,16 @@ def _prep_fvcom_research_fig_functions(fvcom_results_dataset, run_date, run_dura
                         }
                     }
                 )
+        logger.info(
+            f"added {svg_root} figures to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} research render list"
+        )
     return fig_functions
 
 
-def _prep_wwatch3_publish_fig_functions(wwatch3_dataset_url):
+def _prep_wwatch3_publish_fig_functions(wwatch3_dataset_url, run_type, run_date):
+    logger.info(
+        f"preparing render list for {run_date.format('YYYY-MM-DD')} WaveWatch3 {run_type} publish figures"
+    )
     buoys = {"Halibut Bank": "HB_waves", "Sentry Shoal": "SS_waves"}
     fig_functions = {}
     for buoy, svg_root in buoys.items():
@@ -903,12 +988,16 @@ def _prep_wwatch3_publish_fig_functions(wwatch3_dataset_url):
                 }
             }
         )
+        logger.info(
+            f"added {buoy} figure to {run_date.format('YYYY-MM-DD')} WaveWatch3 {run_type} publish render list"
+        )
     return fig_functions
 
 
 def _render_figures(
     config, model, run_type, plot_type, dmy, fig_functions, test_figure_id
 ):
+    logger.info(f"starting to render {model} {run_type} {plot_type} {dmy} figures")
     checklist = {}
     fig_files = []
     for svg_name, func in fig_functions.items():
@@ -951,7 +1040,7 @@ def _render_figures(
         fig.savefig(
             os.fspath(filename), facecolor=fig.get_facecolor(), bbox_inches="tight"
         )
-        logger.info(f"{filename} saved")
+        logger.debug(f"{filename} saved")
         matplotlib.pyplot.close(fig)
         if fig_save_format is "svg":
             logger.debug(f"starting SVG scouring of {filename}")
@@ -975,7 +1064,7 @@ def _render_figures(
                 continue
             logger.debug(proc.stdout)
             tmpfilename.rename(filename)
-            logger.info(f"{filename} scoured")
+            logger.debug(f"{filename} scoured")
         lib.fix_perms(filename, grp_name=config["file group"])
         fig_files.append(os.fspath(filename))
         fig_path = _render_storm_surge_alerts_thumbnail(
@@ -991,6 +1080,7 @@ def _render_figures(
         if checklist is not None:
             checklist["storm surge alerts thumbnail"] = fig_path
     checklist[f"{model} {run_type} {plot_type}"] = fig_files
+    logger.info(f"finished rendering {model} {run_type} {plot_type} {dmy} figures")
     return checklist
 
 
@@ -1078,7 +1168,7 @@ def _render_storm_surge_alerts_thumbnail(
         os.fspath(undated_thumbnail), facecolor=fig.get_facecolor(), bbox_inches="tight"
     )
     lib.fix_perms(undated_thumbnail, grp_name=config["file group"])
-    logger.info(f"{undated_thumbnail} saved")
+    logger.debug(f"{undated_thumbnail} saved")
     return os.fspath(undated_thumbnail)
 
 
