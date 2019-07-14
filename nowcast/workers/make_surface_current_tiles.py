@@ -161,6 +161,10 @@ def make_surface_current_tiles(parsed_args, config, *args):
     lib.mkdir(storage_path, logger, grp_name=config["file group"])
 
     # Loop over last 48h and this forecast{,2}
+    logger.info(
+        f"starting rendering of tiles for {run_date.format('YYYY-MM-DD')} {run_type} "
+        f"in {num_procs} processes into {storage_path}"
+    )
     for results_dir in [results_dirm2, results_dirm1, results_dir0]:
 
         u_list = glob(os.fspath(results_dir) + "/SalishSea_1h_*_grid_U.nc")
@@ -224,6 +228,10 @@ def make_surface_current_tiles(parsed_args, config, *args):
             ),
         }
     }
+    logger.info(
+        f"finished rendering of tiles for {run_date.format('YYYY-MM-DD')} {run_type} "
+        f"into {storage_path}"
+    )
     return checklist
 
 
@@ -318,7 +326,7 @@ def _render_figures(fig_list, tile_names, storage_path, date_stamp, file_type):
         FigureCanvasBase(fig).print_figure(
             os.fspath(outfile), facecolor=fig.get_facecolor()
         )
-        logger.info(f"{outfile} saved")
+        logger.debug(f"{outfile} saved")
 
         if file_type == "png":
             _apply_pngquant(outfile, 16)
@@ -352,7 +360,7 @@ def _apply_pngquant(outfile, level):
     if proc.stdout:
         logger.debug(proc.stdout)
     tmpfilename.rename(outfile)
-    logger.info(f"{outfile.name} palette compression succeeded")
+    logger.debug(f"{outfile.name} palette compression succeeded")
 
 
 def _pdf_concatenate(path, tile_coords_dic):
@@ -361,9 +369,10 @@ def _pdf_concatenate(path, tile_coords_dic):
     Delete the individual pdf files, leaving only the per tile files.
     Shrink the merged pdf files.
     """
+    logger.info(f"starting PDF concatenation and shrinking of tiles in {path}")
     for tile in tile_coords_dic:
         result = (path / tile).with_suffix(".pdf")
-        logger.info(f"concatenating {tile} pdf files into: {result}")
+        logger.debug(f"concatenating {tile} pdf files into: {result}")
         merger = PdfFileMerger()
         for pdf in sorted(path.glob(f"surface_currents_{tile}*.pdf")):
             merger.append(os.fspath(pdf))
@@ -371,16 +380,17 @@ def _pdf_concatenate(path, tile_coords_dic):
             pdf.unlink()
             logger.debug(f"deleted {pdf}")
         merger.write(os.fspath(result))
-        logger.info(f"saved {result}")
+        logger.debug(f"saved {result}")
         merger.close()
         _pdf_shrink(result)
+    logger.info(f"finished PDF concatenation and shrinking of tiles in {path}")
 
 
 def _pdf_shrink(filename):
     """
     Strategy borrowed from make_plots.py to shrink pdf file
     """
-    logger.info(f"Starting PDF shrinking of: {filename}")
+    logger.debug(f"starting PDF shrinking of: {filename}")
     tmpfilename = filename.with_suffix(".temp")
     pdftocairo = Path(os.environ["NOWCAST_ENV"], "bin", "pdftocairo")
     cmd = f"{pdftocairo} -pdf {filename} {tmpfilename}"
@@ -396,7 +406,7 @@ def _pdf_shrink(filename):
         if proc.stdout:
             logger.debug(proc.stdout)
         tmpfilename.rename(filename)
-        logger.info(f"shrank {filename}")
+        logger.debug(f"shrank {filename}")
     except subprocess.CalledProcessError as e:
         logger.warning("PDF shrinking failed, proceeding with unshrunk PDF")
         logger.debug(f"pdftocairo return code: {e.returncode}")
