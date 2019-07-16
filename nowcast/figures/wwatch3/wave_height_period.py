@@ -98,7 +98,11 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
     )
     # Change dataset times to Pacific time zone
     shared.localize_time(wwatch3)
-    shared.localize_time(obs)
+    try:
+        shared.localize_time(obs)
+    except IndexError:
+        # No observations available, but we still want to plot the model results
+        pass
     return SimpleNamespace(wwatch3=wwatch3, obs=obs)
 
 
