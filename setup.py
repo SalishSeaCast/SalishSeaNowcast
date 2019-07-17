@@ -46,7 +46,7 @@ install_requires = [
     "basemap",
     "beautifulsoup4",
     "bottleneck",
-    "circus=0.15",
+    "circus==0.15",
     "cliff",
     "cmocean",
     "dask",
