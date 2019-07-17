@@ -27,6 +27,7 @@ dependencies:
   - basemap
   - beautifulsoup4
   - bottleneck
+  - circus=0.15
   - cliff
   - cmocean
   - dask
@@ -46,7 +47,7 @@ dependencies:
   - pyproj
   - pypdf2
   - pytables
-  - python=3.7
+  - python=3.6
   - pyyaml
   - requests
   - scipy
@@ -57,7 +58,6 @@ dependencies:
   - pip:
     - angles
     - attrs
-    - circus
     - f90nml
     - feedgen
     - python-hglib
