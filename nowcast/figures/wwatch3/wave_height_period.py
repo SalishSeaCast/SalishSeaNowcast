@@ -23,6 +23,7 @@ https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/t
 Development notebook for this module is
 https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
 """
+from contextlib import suppress
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -102,7 +103,7 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
         shared.localize_time(obs)
     except IndexError:
         # No observations available, but we still want to plot the model results
-        pass
+        obs = None
     return SimpleNamespace(wwatch3=wwatch3, obs=obs)
 
 
@@ -133,14 +134,15 @@ def _prep_fig_axes(figsize, theme):
 
 
 def _plot_wave_height_time_series(ax, buoy, plot_data, theme):
-    plot_data.obs.wave_height.plot(
-        ax=ax,
-        marker=".",
-        linestyle="None",
-        label="ECCC Observed",
-        markerfacecolor=theme.COLOURS["time series"]["obs wave height"],
-        markeredgecolor=theme.COLOURS["time series"]["obs wave height"],
-    )
+    with suppress(AttributeError):
+        plot_data.obs.wave_height.plot(
+            ax=ax,
+            marker=".",
+            linestyle="None",
+            label="ECCC Observed",
+            markerfacecolor=theme.COLOURS["time series"]["obs wave height"],
+            markeredgecolor=theme.COLOURS["time series"]["obs wave height"],
+        )
     plot_data.wwatch3.wave_height.plot(
         ax=ax,
         linewidth=2,
@@ -171,14 +173,15 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
 
 
 def _plot_dominant_period_time_series(ax, buoy, plot_data, theme):
-    plot_data.obs.dominant_period.plot(
-        ax=ax,
-        marker=".",
-        linestyle="None",
-        label="ECCC Observed",
-        markerfacecolor=theme.COLOURS["time series"]["obs wave height"],
-        markeredgecolor=theme.COLOURS["time series"]["obs wave height"],
-    )
+    with suppress(AttributeError):
+        plot_data.obs.dominant_period.plot(
+            ax=ax,
+            marker=".",
+            linestyle="None",
+            label="ECCC Observed",
+            markerfacecolor=theme.COLOURS["time series"]["obs wave height"],
+            markeredgecolor=theme.COLOURS["time series"]["obs wave height"],
+        )
     (1 / plot_data.wwatch3.peak_freq).plot(
         ax=ax,
         linewidth=2,
