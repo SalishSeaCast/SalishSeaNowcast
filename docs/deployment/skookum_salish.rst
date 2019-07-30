@@ -148,12 +148,8 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
     $ conda update conda
     $ conda create \
         --prefix /SalishSeaCast/salishsea-site-env \
-        --channel conda-forge \
-        python=3 pyyaml requests
+        -f salishsea-site/environment-prod.yaml
     $ source activate /SalishSeaCast/salishsea-site-env
-    (/SalishSeaCast/salishsea-site-env) $ pip install \
-        arrow attrs chaussette circus pyramid pyramid_crow pyramid_mako \
-        "waitress==0.9.0"
     (/SalishSeaCast/salishsea-site-env) $ pip install --editable salishsea-site/
 
 
@@ -227,6 +223,7 @@ Add the following files to the :file:`/SalishSeaCast/salishsea-site-env` environ
     $ cat << EOF > etc/conda/activate.d/envvars.sh
     export SALISHSEA_SITE_ENV=/SalishSeaCast/salishsea-site-env
     export SALISHSEA_SITE=/SalishSeaCast/salishsea-site
+    export SALISHSEA_SITE_LOGS=/SalishSeaCast/logs/salishsea-site
     export NOWCAST_LOGS=/SalishSeaCast/logs/nowcast
     export SENTRY_DSN=a_valid_sentry_dsn_url
     EOF
@@ -239,6 +236,7 @@ and :command:`unset` them when it is deactivated.
     $ cat << EOF > etc/conda/deactivate.d/envvars.sh
     unset SALISHSEA_SITE_ENV
     unset SALISHSEA_SITE
+    unset SALISHSEA_SITE_LOGS
     unset NOWCAST_LOGS
     unset SENTRY_DSN
     EOF
@@ -266,8 +264,8 @@ The hosts and their :file:`runs` directories presently in use are:
 * :kbd:`salish`
     :file:`/SalishSeaCast/runs/`
 
-* :kbd:`west.cloud`
-    See :ref:`WestCloudNowcastRunsDirectory`
+* :kbd:`arbutus.cloud`
+    See :ref:`ArbutusCloudNEMORunsDirectory`
 
 * :kbd:`orcinus`
     :file:`/home/sallen/MEOPAR/nowcast/`
@@ -284,19 +282,64 @@ Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and
     $ mkdir -p /SalishSeaCast/datamart/hydrometric
 
 
-Static Web Pages Directory
-==========================
+Static Web Site Assets Directories
+==================================
 
-.. TODO::
-    This is fuzzy until the web page builder workers are ported.
-    Progress on the salish sea site Pyramid app also plays a roll in this.
+A collection of static file assets for the `salishsea-site web app`_ are stored in the :file:`/results/nowcast-sys/figures/` tree.
+Create the that directory,
+and the directories for results visualization figures from the NEMO model runs with:
 
 .. code-block:: bash
 
-    $ mkdir -p $HOME/public_html/MEOPAR/nowcast/www
-    $ chmod -R g+s $HOME/public_html/MEOPAR/nowcast
-    $ cd $HOME/public_html/MEOPAR/nowcast
-    $ ln -s /SalishSeaCast/tools/SalishSeaNowcast/nowcast.yaml
-    $ cd $HOME/public_html/MEOPAR/nowcast/www/
-    $ ln -s /SalishSeaCast/tools/SalishSeaNowcast/www/templates
-    $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site
+    $ mkdir -p /results/nowcast-sys/figures
+    $ chmod g+ws /results/nowcast-sys/figures
+    $ mkdir -p /results/nowcast-sys/figures/forecast
+    $ mkdir -p /results/nowcast-sys/figures/forecast2
+    $ mkdir -p /results/nowcast-sys/figures/nowcast
+    $ mkdir -p /results/nowcast-sys/figures/nowcast-agrif
+    $ mkdir -p /results/nowcast-sys/figures/nowcast-green
+    $ mkdir -p /results/nowcast-sys/figures/surface_currents/forecast
+    $ mkdir -p /results/nowcast-sys/figures/surface_currents/forecast2
+
+Create directories for results visualization figures from the FVCOM Vancouver Harbour and Lower Fraser River model runs with:
+
+.. code-block:: bash
+
+    $ mkdir -p /results/nowcast-sys/figures/fvcom/forecast-x2
+    $ mkdir -p /results/nowcast-sys/figures/fvcom/nowcast-r12
+    $ mkdir -p /results/nowcast-sys/figures/fvcom/nowcast-x2
+
+Create directories for results visualization figures from the WaveWatch III® Strait of Georgia amd Juan de Fuca Strait wave model runs with:
+
+.. code-block:: bash
+
+    $ mkdir -p /results/nowcast-sys/figures/wwatch3/forecast
+    $ mkdir -p /results/nowcast-sys/figures/wwatch3/forecast2
+
+Create a directory for visualization figures generated during preparation of the forcing files for the NEMO model runs with:
+
+.. code-block:: bash
+
+    $ mkdir -p /results/nowcast-sys/figures/monitoring
+
+Create a directory for storm surge alert ATOM feed with:
+
+.. code-block:: bash
+
+    $ mkdir -p /results/nowcast-sys/figures/storm-surge/atom
+
+Finally,
+create a directory and symlinks for the images used on the index page of https://salishsea.eos.ubc.ca/ with:
+
+.. code-block:: bash
+
+    $ mkdir -p /results/nowcast-sys/figures/salishsea-site/static/img/index_page
+    $ cd /results/nowcast-sys/figures/salishsea-site/static/img/index_page
+    $ ln -s /SalishSeaCast/salishsea-site/salishsea_site/static/img/index_page/about_project.svg
+    $ ln -s /SalishSeaCast/salishsea-site/salishsea_site/static/img/index_page/biology.svg
+    $ ln -s /SalishSeaCast/salishsea-site/salishsea_site/static/img/index_page/currents_and_physics.svg
+    $ ln -s /SalishSeaCast/salishsea-site/salishsea_site/static/img/index_page/diatom_bloom_forecast.svg
+    $ ln -s /SalishSeaCast/salishsea-site/salishsea_site/static/img/index_page/storm_surge_forecast.svg
+    $ ln -s /SalishSeaCast/salishsea-site/salishsea_site/static/img/index_page/storm_surge_nowcast.svg
+
+    $ mkdir -p /results/nowcast-sys/figures/bloomcast
