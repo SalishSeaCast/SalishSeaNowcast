@@ -18,16 +18,15 @@
 name: nowcast-env
 
 channels:
-  - gomss-nowcast
   - conda-forge
   - defaults
+  - gomss-nowcast
 
 dependencies:
   - arrow
   - basemap
   - beautifulsoup4
   - bottleneck
-  - circus=0.15
   - cliff
   - cmocean
   - dask
@@ -47,11 +46,13 @@ dependencies:
   - pyproj
   - pypdf2
   - pytables
-  - python=3.6
+  - python=3.7
   - pyyaml
+  - pyzmq
   - requests
   - scipy
   - shapely
+  - supervisor
   - watchdog
   - xarray
 

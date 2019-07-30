@@ -66,8 +66,6 @@ dependencies:
   - pip:
     - angles
     - attrs
-    - chaussette
-    - circus
     - f90nml
     - feedgen
     - pyramid
@@ -78,6 +76,7 @@ dependencies:
     - retrying
     - schedule
     - scour
+    - supervisor
     - utm
-    - waitress==0.9.0
+    - waitress
     - zeep
