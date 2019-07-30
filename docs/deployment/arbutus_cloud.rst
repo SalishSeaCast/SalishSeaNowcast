@@ -266,7 +266,7 @@ You can list the keys that the agent is managing for you with:
 
 You can simplify logins to the instance by adding the following lines to your :file:`$HOME/.ssh/config` file::
 
-  Host west.cloud
+  Host arbutus.cloud
       Hostname        <ip-address>
       User            ubuntu
       IdentityFile    ~/.ssh/arbutus.cloud_id_rsa
