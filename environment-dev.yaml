@@ -18,16 +18,15 @@
 name: salishsea-nowcast
 
 channels:
-  - gomss-nowcast
   - conda-forge
   - defaults
+  - gomss-nowcast
 
 dependencies:
   - arrow
   - basemap
   - beautifulsoup4
   - bottleneck
-  - circus=0.15
   - cliff
   - cmocean
   - coloredlogs
@@ -48,11 +47,13 @@ dependencies:
   - pypdf2
   - pyproj
   - pytables
-  - python=3.6
+  - python=3.7
   - pyyaml
+  - pyzmq
   - requests
   - scipy
   - shapely
+  - supervisor
   - verboselogs
   - watchdog
   - xarray
