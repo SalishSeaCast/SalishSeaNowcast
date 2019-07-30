@@ -42,28 +42,41 @@ The production deployment uses 3 systems:
    (preliminary forecast),
    :kbd:`nowcast`,
    :kbd:`forecast`,
-   and :kbd:`nowcast-green` NEMO-3.6 model runs are computed on a cluster of virtual machines on the `Ocean Networks Canada`_ private cloud computing facility known as :kbd:`west.cloud` that is part of the Compute Canada `arbutus`_ cluster.
-   The shared storage for those VMs is provided by an NFS-mounted volume of ::kbd:`west.cloud` `Ceph object storage`_.
+   and :kbd:`nowcast-green` NEMO-3.6 model runs are computed on a cluster of virtual machines provided by `Ocean Networks Canada`_ on the Compute Canada `arbutus.cloud`_ cluster.
+   The shared storage for those VMs is provided by an NFS-mounted volume of ::kbd:`arbutus.cloud` `Ceph object storage`_.
    The nowcast deployment is in the :file:`/nemoShare/MEOPAR/nowcast-sys/` directory tree.
 
    In April 2017,
-   daily :kbd:`wwatch3-forecast2`
-   (preliminary wave forecast),
-   and :kbd:`wwatch3-forecast` WaveWatch III® v5.16 wave model runs were added to the computations on the ONC cloud.
-   They are executed after the :kbd:`forecast2` and :kbd:`forecast` NEMO-3.6 runs.
+   daily :kbd:`wwatch3-nowcast`,
+   daily :kbd:`wwatch3-forecast`,
+   and :kbd:`wwatch3-forecast2`
+   (preliminary wave forecast)
+   WaveWatch III® v5.16 wave model runs for the Strait of Georgia and Juan de Fuca Strait were added to the computations on :kbd:`arbutus.cloud`.
+   The :kbd:`wwatch3-nowcast` and :kbd:`wwatch3-forecast` runs are executed in sequence after the daily :kbd:`nowcast-green` NEMO-3.6 runs.
+   The :kbd:`wwatch3-forecast2` runs are executed after the daily :kbd:`forecast2` NEMO-3.6 runs.
 
-   .. _Ocean Networks Canada: http://www.oceannetworks.ca/
-   .. _arbutus: https://www.westgrid.ca/support/systems/arbutus
+   In January 2018,
+   daily :kbd:`fvcom-nowcast`
+   and :kbd:`fvcom-forecast` FVCOM v4.1-beta model runs for Vancouver Harbour and the Lower Fraser River were added to the computations on the :kbd:`arbutus.cloud`.
+   They are executed in sequence after the daily :kbd:`nowcast` NEMO-3.6 runs.
+   In January 2019,
+   the resolution of the Vancouver Harbour and Lower Fraser River FVCOM v4.1-beta model was increased.
+   Those runs are designated :kbd:`fvcom-nowcast-x2` and :kbd:`fvcom-forecast-x2`.
+   In March 2019,
+   an even higher resolution Vancouver Harbour and Lower Fraser River model configuration was added to the system,
+   running daily nowcast runs as :kbd:`fvcom-nowcast-r12`.
+
+   .. _Ocean Networks Canada: https://www.oceannetworks.ca/
+   .. _arbutus.cloud: https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud_.28arbutus.cloud.computecanada.ca.29
    .. _Ceph object storage: https://en.wikipedia.org/wiki/Ceph_(software)
 
-These sections describe the setup of the nowcast system on :kbd:`skookum`/:kbd:`salish` and :kbd:`west.cloud`,
+These sections describe the setup of the nowcast system on :kbd:`skookum`/:kbd:`salish` and :kbd:`arbutus.cloud`,
 and it operation.
 
 .. toctree::
    :maxdepth: 2
 
    skookum_salish
-   west_cloud
    arbutus_cloud
    operations
 
