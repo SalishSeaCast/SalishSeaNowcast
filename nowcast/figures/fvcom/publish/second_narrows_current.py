@@ -27,6 +27,7 @@ from types import SimpleNamespace
 import matplotlib.dates
 import matplotlib.pyplot as plt
 import numpy
+from pandas.plotting import register_matplotlib_converters
 from salishsea_tools import unit_conversions
 import xarray
 
@@ -168,6 +169,7 @@ def _prep_fig_axes(figsize, theme):
     ax_speed.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_dir.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_u.set_facecolor(theme.COLOURS["axes"]["background"])
+    register_matplotlib_converters()
     fig.autofmt_xdate()
     return fig, (ax_speed, ax_dir, ax_u)
 

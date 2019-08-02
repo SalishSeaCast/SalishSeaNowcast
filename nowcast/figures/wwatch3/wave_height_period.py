@@ -31,6 +31,7 @@ import matplotlib.dates
 import matplotlib.pyplot as plt
 import moad_tools.observations
 import moad_tools.places
+from pandas.plotting import register_matplotlib_converters
 import requests
 from retrying import retry
 import xarray
@@ -129,6 +130,7 @@ def _prep_fig_axes(figsize, theme):
     )
     ax_sig_height.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_peak_freq.set_facecolor(theme.COLOURS["axes"]["background"])
+    register_matplotlib_converters()
     fig.autofmt_xdate()
     return fig, (ax_sig_height, ax_peak_freq)
 
