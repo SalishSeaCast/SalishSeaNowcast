@@ -32,6 +32,7 @@ import arrow
 import matplotlib.dates
 import matplotlib.pyplot as plt
 import numpy
+from pandas.plotting import register_matplotlib_converters
 import requests
 from salishsea_tools import data_tools
 from salishsea_tools.places import PLACES
@@ -201,6 +202,7 @@ def _prep_fig_axes(figsize, theme):
     )
     ax_ssh.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_res.set_facecolor(theme.COLOURS["axes"]["background"])
+    register_matplotlib_converters()
     fig.autofmt_xdate()
     return fig, (ax_ssh, ax_res)
 

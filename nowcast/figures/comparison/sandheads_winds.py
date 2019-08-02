@@ -31,6 +31,7 @@ import numpy
 import xarray
 from matplotlib import gridspec
 import matplotlib.dates
+from pandas.plotting import register_matplotlib_converters
 from salishsea_tools import stormtools, unit_conversions
 from salishsea_tools.places import PLACES
 
@@ -147,6 +148,7 @@ def _prep_fig_axes(figsize, theme):
     ax_dir.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_map = fig.add_subplot(gs[:, 1])
     ax_map.set_facecolor(theme.COLOURS["axes"]["background"])
+    register_matplotlib_converters()
     return fig, (ax_speed, ax_dir, ax_map)
 
 

@@ -51,6 +51,7 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import NullFormatter
 import netCDF4
 import numpy
+from pandas.plotting import register_matplotlib_converters
 import requests
 import xarray
 
@@ -265,6 +266,7 @@ def _prep_fig_axes(figsize, theme):
     ax_res = fig.add_subplot(gs[2, 0])
     ax_res.set_facecolor(theme.COLOURS["axes"]["background"])
     ax_map = fig.add_subplot(gs[:, 1])
+    register_matplotlib_converters()
     fig.autofmt_xdate()
     return fig, (ax_info, ax_ssh, ax_map, ax_res)
 
