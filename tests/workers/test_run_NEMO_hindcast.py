@@ -270,27 +270,29 @@ class TestRunNEMO_Hindcast:
         parsed_args = SimpleNamespace(
             host_name=host_name,
             full_month=False,
-            prev_run_date=arrow.get("2019-01-11"),
+            prev_run_date=arrow.get("2019-08-06"),
             walltime=None,
         )
         with patch("nowcast.workers.run_NEMO_hindcast.arrow.now") as m_now:
-            m_now.return_value = arrow.get("2019-01-30")
+            m_now.return_value = arrow.get("2019-08-15")
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
         assert m_launch_run.called
-        expected = {"hindcast": {"host": host_name, "run id": "21jan19hindcast"}}
+        expected = {"hindcast": {"host": host_name, "run id": "11aug19hindcast"}}
         assert checklist == expected
 
     @pytest.mark.parametrize(
         "full_month, prev_run_date, expected_run_id",
         [
             (True, arrow.get("2018-01-01"), "01feb18hindcast"),
-            (False, arrow.get("2018-07-01"), "11jul18hindcast"),
-            (False, arrow.get("2018-07-11"), "21jul18hindcast"),
-            (False, arrow.get("2018-07-21"), "01aug18hindcast"),  # 31 day mo
-            (False, arrow.get("2018-06-21"), "01jul18hindcast"),  # 30 day mo
-            (False, arrow.get("2018-02-21"), "01mar18hindcast"),  # feb
-            (False, arrow.get("2016-02-21"), "01mar16hindcast"),  # leap year
-            (False, arrow.get("2017-12-21"), "01jan18hindcast"),  # year end
+            (False, arrow.get("2019-07-01"), "06jul19hindcast"),
+            (False, arrow.get("2019-07-06"), "11jul19hindcast"),
+            (False, arrow.get("2019-07-11"), "16jul19hindcast"),
+            (False, arrow.get("2019-07-16"), "21jul19hindcast"),
+            (False, arrow.get("2019-07-26"), "01aug19hindcast"),  # 31 day mo
+            (False, arrow.get("2019-06-26"), "01jul19hindcast"),  # 30 day mo
+            (False, arrow.get("2019-02-26"), "01mar19hindcast"),  # feb
+            (False, arrow.get("2016-02-26"), "01mar16hindcast"),  # leap year
+            (False, arrow.get("2017-12-26"), "01jan18hindcast"),  # year end
         ],
     )
     def test_checklist_with_prev_run_date(
@@ -322,13 +324,15 @@ class TestRunNEMO_Hindcast:
         "full_month, prev_run_date, expected_run_id",
         [
             (True, arrow.get("2018-01-01"), "01feb18hindcast"),
-            (False, arrow.get("2018-07-01"), "11jul18hindcast"),
-            (False, arrow.get("2018-07-11"), "21jul18hindcast"),
-            (False, arrow.get("2018-07-21"), "01aug18hindcast"),  # 31 day mo
-            (False, arrow.get("2018-06-21"), "01jul18hindcast"),  # 30 day mo
-            (False, arrow.get("2018-02-21"), "01mar18hindcast"),  # feb
-            (False, arrow.get("2016-02-21"), "01mar16hindcast"),  # leap year
-            (False, arrow.get("2017-12-21"), "01jan18hindcast"),  # year end
+            (False, arrow.get("2019-07-01"), "06jul19hindcast"),
+            (False, arrow.get("2019-07-06"), "11jul19hindcast"),
+            (False, arrow.get("2019-07-11"), "16jul19hindcast"),
+            (False, arrow.get("2019-07-16"), "21jul19hindcast"),
+            (False, arrow.get("2019-07-26"), "01aug19hindcast"),  # 31 day mo
+            (False, arrow.get("2019-06-26"), "01jul19hindcast"),  # 30 day mo
+            (False, arrow.get("2019-02-26"), "01mar19hindcast"),  # feb
+            (False, arrow.get("2016-02-26"), "01mar16hindcast"),  # leap year
+            (False, arrow.get("2017-12-26"), "01jan18hindcast"),  # year end
         ],
     )
     def test_checklist_without_prev_run_date(
@@ -364,15 +368,15 @@ class TestRunNEMO_Hindcast:
             (True, arrow.get("2016-01-01"), arrow.get("2016-02-01"), 29),  # 29d run
             (True, arrow.get("2018-02-01"), arrow.get("2018-03-01"), 31),  # 31d run
             (True, arrow.get("2018-03-01"), arrow.get("2018-04-01"), 30),  # 30d run
-            (False, arrow.get("2018-07-01"), arrow.get("2018-07-11"), 10),  # 10d run
-            (False, arrow.get("2018-07-11"), arrow.get("2018-07-21"), 11),  # 11d run
-            (False, arrow.get("2018-02-11"), arrow.get("2018-02-21"), 8),  # 8d run
-            (False, arrow.get("2016-02-11"), arrow.get("2016-02-21"), 9),  # 9d run
-            (False, arrow.get("2018-07-21"), arrow.get("2018-08-01"), 10),  # 31 day mo
-            (False, arrow.get("2018-06-21"), arrow.get("2018-07-01"), 10),  # 30 day mo
-            (False, arrow.get("2018-02-21"), arrow.get("2018-03-01"), 10),  # feb
-            (False, arrow.get("2016-02-21"), arrow.get("2016-03-01"), 10),  # leap year
-            (False, arrow.get("2017-12-21"), arrow.get("2018-01-01"), 10),  # year end
+            (False, arrow.get("2019-07-01"), arrow.get("2019-07-06"), 5),  # 5d run
+            (False, arrow.get("2019-07-21"), arrow.get("2019-07-26"), 6),  # 6d run
+            (False, arrow.get("2019-02-21"), arrow.get("2019-02-26"), 3),  # 3d run
+            (False, arrow.get("2016-02-21"), arrow.get("2016-02-26"), 4),  # 4d run
+            (False, arrow.get("2019-07-26"), arrow.get("2019-08-01"), 5),  # 31 day mo
+            (False, arrow.get("2019-06-26"), arrow.get("2019-07-01"), 5),  # 30 day mo
+            (False, arrow.get("2019-02-26"), arrow.get("2019-03-01"), 5),  # feb
+            (False, arrow.get("2016-02-26"), arrow.get("2016-03-01"), 5),  # leap year
+            (False, arrow.get("2017-12-26"), arrow.get("2018-01-01"), 5),  # year end
         ],
     )
     def test_edit_namelist_time_run_date(
@@ -428,17 +432,17 @@ class TestRunNEMO_Hindcast:
                 False,
                 arrow.get("2018-07-01"),
                 None,
-                arrow.get("2018-07-11"),
+                arrow.get("2018-07-06"),
                 "10:00:00",
             ),  # default
             (
                 False,
                 arrow.get("2018-07-01"),
                 "09:00:00",
-                arrow.get("2018-07-11"),
+                arrow.get("2018-07-06"),
                 "09:00:00",
             ),
-            (False, arrow.get("2019-07-01"), 86400, arrow.get("2019-07-11"), 86400),
+            (False, arrow.get("2019-07-01"), 86400, arrow.get("2019-07-06"), 86400),
         ],
     )
     def test_edit_run_desc_walltime(

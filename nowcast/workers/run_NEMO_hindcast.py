@@ -109,6 +109,8 @@ def run_NEMO_hindcast(parsed_args, config, *args):
     try:
         ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
         if parsed_args.prev_run_date is None:
+            # Assume that there is at least one job already queued or running
+            # and get its run date from the queue manager
             prev_run_date, prev_job_id = _get_prev_run_queue_info(
                 ssh_client, host_name, config
             )
@@ -116,18 +118,21 @@ def run_NEMO_hindcast(parsed_args, config, *args):
             prev_run_date = arrow.get(parsed_args.prev_run_date)
             prev_job_id = None
         if parsed_args.full_month:
+            # Calculate run date and number of run days for a full month run
             run_date = prev_run_date.shift(months=+1)
             run_days = (run_date.shift(months=+1) - run_date).days
         else:
-            if prev_run_date.day != 21:
-                run_date = prev_run_date.shift(days=+10)
+            # Calculate run date and number of run days for a 5 day run
+            if prev_run_date.day != 26:
+                run_date = prev_run_date.shift(days=+5)
             else:
                 run_date = prev_run_date.shift(months=+1).replace(day=1)
-            if run_date.day != 21:
-                run_days = 10
+            if run_date.day != 26:
+                run_days = 5
             else:
                 run_days = (run_date.shift(months=+1).replace(day=1) - run_date).days
         if run_date.shift(days=+(run_days - 1)).naive > arrow.now().floor("day").naive:
+            # Don't try to run into the future - this is a hindcast!!
             if parsed_args.full_month:
                 logger.info(
                     f"not launching {run_date.format('YYYY-MM-DD')} run because it extends beyond today"
@@ -141,9 +146,8 @@ def run_NEMO_hindcast(parsed_args, config, *args):
                     arrow.now().floor("day").naive - run_date.shift(days=-1).naive
                 ).days
                 logger.info(
-                    f"launching {run_date.format('YYYY-MM-DD')} run  for {run_days} days to end of today"
+                    f"launching {run_date.format('YYYY-MM-DD')} run for {run_days} days to end of today"
                 )
-
         prev_namelist_info = _get_prev_run_namelist_info(
             ssh_client, sftp_client, host_name, prev_run_date, config
         )
