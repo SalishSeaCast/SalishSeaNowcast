@@ -210,6 +210,43 @@ class TestMakeWW3CurrentFile:
     """Unit tests for make_ww3_current_file() function.
     """
 
+    @pytest.mark.parametrize("run_type", ("forecast2", "forecast", "nowcast"))
+    @patch(
+        "nowcast.workers.make_ww3_current_file._calc_nowcast_datasets", autospec=True
+    )
+    @patch(
+        "nowcast.workers.make_ww3_current_file._calc_forecast_datasets", autospec=True
+    )
+    @patch(
+        "nowcast.workers.make_ww3_current_file._calc_forecast2_datasets", autospec=True
+    )
+    def test_checklist(
+        self,
+        m_calc_fcst2_datasets,
+        m_calc_fcst_datasets,
+        m_calc_ncst_datasets,
+        m_logger,
+        m_open_dataset,
+        m_open_mfdataset,
+        m_rotate_vel,
+        m_unstagger,
+        m_create_dataset,
+        run_type,
+        config,
+    ):
+        parsed_args = SimpleNamespace(
+            host_name="arbutus.cloud",
+            run_type=run_type,
+            run_date=arrow.get("2019-08-05"),
+        )
+        m_unstagger.return_value = (MagicMock(), MagicMock())
+        m_rotate_vel.return_value = (MagicMock(), MagicMock())
+        checklist = make_ww3_current_file.make_ww3_current_file(parsed_args, config)
+        assert checklist == {
+            run_type: "/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/SoG_current_20190805.nc",
+            "run date": "2019-08-05",
+        }
+
     @pytest.mark.parametrize(
         "run_type, expected_call",
         [
@@ -249,7 +286,7 @@ class TestMakeWW3CurrentFile:
     @patch(
         "nowcast.workers.make_ww3_current_file._calc_forecast2_datasets", autospec=True
     )
-    def test_checklist(
+    def test_calc_datasets_call(
         self,
         m_calc_fcst2_datasets,
         m_calc_fcst_datasets,
@@ -279,10 +316,6 @@ class TestMakeWW3CurrentFile:
         }
         assert func_mocks[run_type].call_count == 1
         assert func_mocks[run_type].call_args_list[0] == expected_call
-        assert checklist == {
-            run_type: "/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/current/"
-            "SoG_current_20170412.nc"
-        }
 
     @pytest.mark.parametrize("run_type", ["forecast2", "forecast", "nowcast"])
     @patch("nowcast.workers.make_ww3_current_file._calc_forecast_datasets")

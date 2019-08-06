@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """Salish Sea WaveWatch3 forecast worker that produces the hourly
-ocean currents forcing file for a prelim-forecast or forecast run 
+ocean currents forcing file for a prelim-forecast or forecast run
 """
 import logging
 import os
@@ -131,7 +131,10 @@ def make_ww3_current_file(parsed_args, config, *args):
                 )
                 ds.to_netcdf(os.fspath(nc_filepath))
     logger.debug(f"stored currents forcing file: {nc_filepath}")
-    checklist = {run_type: os.fspath(nc_filepath)}
+    checklist = {
+        run_type: os.fspath(nc_filepath),
+        "run date": run_date.format("YYYY-MM-DD"),
+    }
     return checklist
 
 
