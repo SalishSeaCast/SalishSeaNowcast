@@ -1657,14 +1657,17 @@ class TestAfterMakeWW3currentFile:
             Message(
                 "make_ww3_current_file",
                 "success forecast",
-                {"forecast": "current/SoG_current_20170415.nc"},
+                {
+                    "forecast": "current/SoG_current_20190805.nc",
+                    "run date": "2019-08-05",
+                },
             ),
             config,
             checklist,
         )
         expected = NextWorker(
             "nowcast.workers.run_ww3",
-            args=["arbutus.cloud", "nowcast"],
+            args=["arbutus.cloud", "nowcast", "--run-date", "2019-08-05"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1674,14 +1677,17 @@ class TestAfterMakeWW3currentFile:
             Message(
                 "make_ww3_current_file",
                 "success forecast2",
-                {"forecast2": "current/SoG_current_20170415.nc"},
+                {
+                    "forecast2": "current/SoG_current_20190805.nc",
+                    "run date": "2019-08-05",
+                },
             ),
             config,
             checklist,
         )
         expected = NextWorker(
             "nowcast.workers.run_ww3",
-            args=["arbutus.cloud", "forecast2"],
+            args=["arbutus.cloud", "forecast2", "--run-date", "2019-08-05"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected

@@ -1173,7 +1173,12 @@ def after_make_ww3_current_file(msg, config, checklist):
                 "nowcast.workers.run_ww3",
                 # We make the current files for the period of nowcast+forecast,
                 # but run nowcast then forecast separately
-                args=[host_name, "nowcast" if run_type == "forecast" else run_type],
+                args=[
+                    host_name,
+                    "nowcast" if run_type == "forecast" else run_type,
+                    "--run-date",
+                    msg.payload["run date"],
+                ],
                 host=host_name,
             )
         )
