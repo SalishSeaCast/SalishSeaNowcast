@@ -293,7 +293,7 @@ class _QstatHindcastJob:
         """
         return "completed"
 
-    def _ssh_exec_command(self, cmd, success_msg=""):
+    def _ssh_exec_command(self, cmd, success_msg="", accept_stderr=""):
         """Execute cmd on the HPC host, returning its stdout.
 
         If cmd is successful, and success_msg is provided, log success_msg at the
@@ -319,6 +319,8 @@ class _QstatHindcastJob:
             return stdout
         except ssh_sftp.SSHCommandError as exc:
             for line in exc.stderr.splitlines():
+                if line.startswith(accept_stderr):
+                    return exc.stdout
                 logger.error(line)
             raise WorkerError
 
@@ -335,7 +337,7 @@ class _QstatHindcastJob:
             if self.job_id is None
             else f"{squeue_cmd} {self.job_id}"
         )
-        stdout = self._ssh_exec_command(cmd)
+        stdout = self._ssh_exec_command(cmd, accept_stderr="qstat: Unknown Job Id")
         if not stdout:
             if self.job_id is None:
                 logger.error(f"no jobs found on {self.host_name} queue")
