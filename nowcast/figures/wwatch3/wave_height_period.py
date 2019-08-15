@@ -91,18 +91,22 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
     wwatch3_period = slice(
         str(wwatch3_fields.time.values[0]), str(wwatch3_fields.time.values[-1])
     )
-    obs = moad_tools.observations.get_ndbc_buoy(buoy)
-    obs = xarray.Dataset(
-        {
-            "wave_height": obs.loc[wwatch3_period, "WVHT [m]"],
-            "dominant_period": obs.loc[wwatch3_period, "DPD [sec]"],
-        }
-    )
+    try:
+        obs = moad_tools.observations.get_ndbc_buoy(buoy)
+        obs = xarray.Dataset(
+            {
+                "wave_height": obs.loc[wwatch3_period, "WVHT [m]"],
+                "dominant_period": obs.loc[wwatch3_period, "DPD [sec]"],
+            }
+        )
+    except ValueError:
+        # No observations available, but we still want to plot the model results
+        obs = None
     # Change dataset times to Pacific time zone
     shared.localize_time(wwatch3)
     try:
         shared.localize_time(obs)
-    except IndexError:
+    except (IndexError, AttributeError):
         # No observations available, but we still want to plot the model results
         obs = None
     return SimpleNamespace(wwatch3=wwatch3, obs=obs)
