@@ -1158,13 +1158,13 @@ class TestBuildScript:
         
         #PBS -N 13may17nowcast
         #PBS -S /bin/bash
-        #PBS -l procs=8
-        # memory per processor
-        #PBS -l pmem=2000mb
         #PBS -l walltime=23:30:00
         # email when the job [b]egins and [e]nds, or is [a]borted
         #PBS -m bea
         #PBS -M somebody@example.com
+        #PBS -l procs=8
+        # memory per processor
+        #PBS -l pmem=2000mb
 
         RUN_ID="13may17nowcast"
         RUN_DESC="13may17.yaml"
