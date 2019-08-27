@@ -15,6 +15,7 @@
 """Unit tests for Salish Sea NEMO nowcast make_live_ocean_files worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -32,14 +33,17 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-temperature salinity:
-  download:
-    dest dir: forcing/LiveOcean/downloaded
-  bc dir: forcing/LiveOcean/boundary_conditions
-  file template: 'LiveOcean_v201712_{:y%Ym%md%d}.nc'
-  mesh mask: grid/mesh_mask201702.nc
-"""
+            textwrap.dedent(
+                """\
+                temperature salinity:
+                  download:
+                    dest dir: forcing/LiveOcean/downloaded
+                  bc dir: forcing/LiveOcean/boundary_conditions
+                  file template: 'LiveOcean_v201712_{:y%Ym%md%d}.nc'
+                  mesh mask: grid/mesh_mask201702.nc
+                  parameter_set: v201702
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
@@ -108,12 +112,16 @@ class TestFailure:
 
 
 @patch("nowcast.workers.make_live_ocean_files.logger", autospec=True)
+@patch(
+    "nowcast.workers.make_live_ocean_files.LiveOcean_parameters.set_parameters",
+    autospec=True,
+)
 @patch("nowcast.workers.make_live_ocean_files.create_LiveOcean_TS_BCs", spec=True)
 class TestMakeLiveOceanFiles:
     """Unit test for make_live_ocean_files() function.
     """
 
-    def test_checklist(self, m_create_ts, m_logger, config):
+    def test_checklist(self, m_create_ts, m_set_params, m_logger, config):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-01-30"))
         m_create_ts.return_value = ["LiveOcean_v201712_y2017m01d30.nc"]
         checklist = make_live_ocean_files.make_live_ocean_files(parsed_args, config)
