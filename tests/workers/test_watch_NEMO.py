@@ -134,7 +134,7 @@ class TestFailure:
 @patch("nowcast.workers.watch_NEMO.logger", autospec=True)
 @patch("nowcast.workers.watch_NEMO._find_run_pid", autospec=True)
 @patch("nowcast.workers.watch_NEMO._pid_exists", autospec=True)
-@patch("nowcast.workers.watch_NEMO.namelist2dict", autospec=True)
+@patch("nowcast.workers.watch_NEMO.f90nml.read", autospec=True)
 @patch(
     "nowcast.workers.watch_NEMO._confirm_run_success", return_value=True, autospec=True
 )
@@ -155,16 +155,16 @@ class TestWatchNEMO:
     def test_checklist(
         self,
         m_confirm,
-        m_nl2d,
+        m_nml_read,
         m_pid_exists,
         m_find_run_pid,
         m_logger,
         run_type,
         host_name,
     ):
-        m_nl2d.return_value = {
-            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113}],
-            "namdom": [{"rn_rdt": 40}],
+        m_nml_read.return_value = {
+            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
+            "namdom": {"rn_rdt": 40},
         }
         m_pid_exists.return_value = False
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
@@ -191,7 +191,7 @@ class TestWatchNEMO:
     def test_time_step_not_found(
         self,
         m_confirm,
-        m_nl2d,
+        m_nml_read,
         m_pid_exists,
         m_find_run_pid,
         m_logger,
@@ -200,9 +200,9 @@ class TestWatchNEMO:
         tmpdir,
     ):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        m_nl2d.return_value = {
-            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113}],
-            "namdom": [{"rn_rdt": 40}],
+        m_nml_read.return_value = {
+            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
+            "namdom": {"rn_rdt": 40},
         }
         m_pid_exists.side_effect = (True, False)
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
@@ -230,7 +230,7 @@ class TestWatchNEMO:
     def test_time_step_found(
         self,
         m_confirm,
-        m_nl2d,
+        m_nml_read,
         m_pid_exists,
         m_find_run_pid,
         m_logger,
@@ -241,16 +241,14 @@ class TestWatchNEMO:
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         time_step = tmp_run_dir.ensure("time.step")
         time_step.write("1081\n")
-        m_nl2d.return_value = {
-            "namrun": [
-                {
-                    "nn_it000": 1,
-                    "nn_itend": 2160,
-                    "nn_date0": 20_171_113,
-                    "nn_stocklist": "2160, 0, 0, 0, 0, 0, 0, 0, 0, 0",
-                }
-            ],
-            "namdom": [{"rn_rdt": 40}],
+        m_nml_read.return_value = {
+            "namrun": {
+                "nn_it000": 1,
+                "nn_itend": 2160,
+                "nn_date0": 20_171_113,
+                "nn_stocklist": "2160, 0, 0, 0, 0, 0, 0, 0, 0, 0",
+            },
+            "namdom": {"rn_rdt": 40},
         }
         m_pid_exists.side_effect = (True, False)
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
@@ -278,16 +276,16 @@ class TestWatchNEMO:
     def test_confirm_run_success(
         self,
         m_confirm,
-        m_nl2d,
+        m_nml_read,
         m_pid_exists,
         m_find_run_pid,
         m_logger,
         run_type,
         host_name,
     ):
-        m_nl2d.return_value = {
-            "namrun": [{"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113}],
-            "namdom": [{"rn_rdt": 40}],
+        m_nml_read.return_value = {
+            "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
+            "namdom": {"rn_rdt": 40},
         }
         m_pid_exists.return_value = False
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)

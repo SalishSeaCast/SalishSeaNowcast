@@ -24,9 +24,9 @@ import shlex
 import subprocess
 
 import arrow
+import f90nml
 from nemo_nowcast import NowcastWorker, WorkerError
 import nemo_cmd.prepare
-from nemo_cmd.namelist import namelist2dict
 import salishsea_cmd.api
 import salishsea_cmd.run
 import yaml
@@ -177,11 +177,12 @@ def _update_time_namelist(run_date, run_type, run_duration, host_config, run_pre
     prev_run_type, date_offset = prev_runs[run_type]
     results_dir = Path(host_config["run types"][prev_run_type]["results"])
     dmy = run_date.shift(days=date_offset).format("DDMMMYY").lower()
-    prev_run_namelist = namelist2dict(os.fspath(results_dir / dmy / "namelist_cfg"))
-    prev_it000 = prev_run_namelist["namrun"][0]["nn_it000"]
-    rdt = prev_run_namelist["namdom"][0]["rn_rdt"]
+    prev_run_namelist = f90nml.read(results_dir / dmy / "namelist_cfg")
+    prev_it000 = prev_run_namelist["namrun"]["nn_it000"]
+    rdt = prev_run_namelist["namdom"]["rn_rdt"]
     timesteps_per_day = 86400 / rdt
     namelist_time = run_prep_dir / "namelist.time"
+    ## TODO: Refactor to use f90nml.patch()
     with namelist_time.open("rt") as f:
         lines = f.readlines()
     new_lines, restart_timestep = _calc_new_namelist_lines(

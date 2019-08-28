@@ -23,8 +23,8 @@ import subprocess
 import time
 
 import arrow
+import f90nml
 from nemo_nowcast import NowcastWorker
-from nemo_cmd.namelist import namelist2dict
 
 NAME = "watch_NEMO"
 logger = logging.getLogger(NAME)
@@ -77,11 +77,11 @@ def watch_NEMO(parsed_args, config, tell_manager):
     logger.debug(f"{run_type} on {host_name}: run pid: {pid}")
     # Get run time steps and date info from namelist
     run_dir = Path(run_info[run_type]["run dir"])
-    namelist = namelist2dict(os.fspath(run_dir / "namelist_cfg"))
-    it000 = namelist["namrun"][0]["nn_it000"]
-    itend = namelist["namrun"][0]["nn_itend"]
-    date0 = arrow.get(str(namelist["namrun"][0]["nn_date0"]), "YYYYMMDD")
-    rdt = namelist["namdom"][0]["rn_rdt"]
+    namelist = f90nml.read(run_dir / "namelist_cfg")
+    it000 = namelist["namrun"]["nn_it000"]
+    itend = namelist["namrun"]["nn_itend"]
+    date0 = arrow.get(str(namelist["namrun"]["nn_date0"]), "YYYYMMDD")
+    rdt = namelist["namdom"]["rn_rdt"]
     # Watch for the run process to end
     while _pid_exists(pid):
         try:
