@@ -111,7 +111,7 @@ For the :kbd:`SalishSeaCast` automation system:
     $ conda update conda
     $ conda env create \
         --prefix /SalishSeaCast/nowcast-env \
-        -f SalishSeaNowcast/environment-prod.yaml
+        -f SalishSeaNowcast/env/environment-prod.yaml
     $ source activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO_Nowcast/
     (/SalishSeaCast/nowcast-env)$ pip install --editable moad_tools/
@@ -148,7 +148,7 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
     $ conda update conda
     $ conda create \
         --prefix /SalishSeaCast/salishsea-site-env \
-        -f salishsea-site/environment-prod.yaml
+        -f salishsea-site/env/environment-prod.yaml
     $ source activate /SalishSeaCast/salishsea-site-env
     (/SalishSeaCast/salishsea-site-env) $ pip install --editable salishsea-site/
 

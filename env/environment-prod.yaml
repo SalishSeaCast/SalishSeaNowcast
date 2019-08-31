@@ -1,23 +1,26 @@
-# conda environment description file for SalishSeaCast web site figures
-# development environment
+# conda environment description file for SalishSeaNowcast package
+# production deployment environment
 #
-# Create a conda environment for web site figures development and testing with:
+# Create a conda environment for production deployment
+# of the Salish Sea Nowcast system with:
 #
-#    $ conda env create -f SalishSeaNowcast/environment-fig-dev.yaml
-#    $ source activate nowcast-fig-dev
+#    $ conda env create -f SalishSeaNowcast/env/environment-prod.yaml
+#    $ source activate nowcast-env
 #    $ pip install --editable NEMO_Nowcast/
 #    $ pip install --editable moad_tools/
 #    $ pip install --editable tools/SalishSeaTools/
+#    $ pip install --editable OPPTools/
 #    $ pip install --editable NEMO-Cmd/
 #    $ pip install --editable SalishSeaCmd/
+#    $ pip install --editable FVCOM-Cmd/
 #    $ pip install --editable SalishSeaNowcast/
-#    $ pip install --editable salishsea-site/
 
-name: nowcast-fig-dev
+name: nowcast-env
 
 channels:
   - conda-forge
   - defaults
+  - gomss-nowcast
 
 dependencies:
   - arrow
@@ -26,7 +29,6 @@ dependencies:
   - bottleneck
   - cliff
   - cmocean
-  - coloredlogs
   - dask
   - docutils
   - gsw
@@ -41,42 +43,28 @@ dependencies:
   - pip
   - poppler
   - pygrib
-  - pypdf2
   - pyproj
+  - pypdf2
   - pytables
   - python=3.7
   - pyyaml
+  - pyzmq
   - requests
   - scipy
   - shapely
-  - verboselogs
+  - supervisor
   - watchdog
   - xarray
-
-  # For coding style
-  - black
-
-  # For figures development
-  - jupyterlab
-
-  # For documentation
-  - sphinx
-  - sphinx_rtd_theme
 
   - pip:
     - angles
     - attrs
     - f90nml
     - feedgen
-    - pyramid
-    - pyramid_crow
-    - pyramid_debugtoolbar
-    - pyramid_mako
     - python-hglib
+    - raven
     - retrying
     - schedule
     - scour
-    - supervisor
     - utm
-    - waitress
     - zeep
