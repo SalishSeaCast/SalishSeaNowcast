@@ -38,10 +38,10 @@ try:
 except IOError:
     long_description = ""
 install_requires = [
-    # see environment-prod.yaml for conda environment production installation
-    # see environment-dev.yaml for conda environment dev installation
-    # see requirements.txt for package versions used during recent development
-    # see environment-rtd.yaml for conda environment used for readthedocs build
+    # see env/environment-prod.yaml for conda environment production installation
+    # see env/environment-dev.yaml for conda environment dev installation
+    # see env/requirements.txt for package versions used during recent development
+    # see env/environment-rtd.yaml for conda environment used for readthedocs build
     "angles",
     "basemap",
     "beautifulsoup4",

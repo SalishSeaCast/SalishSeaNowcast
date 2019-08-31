@@ -129,7 +129,7 @@ The commands below assume that they are cloned beside your :kbd:`SalishSeaNowcas
 .. code-block:: bash
 
     $ cd SalishSeaNowcast
-    $ conda env create -f environment-dev.yaml
+    $ conda env create -f env/environment-dev.yaml
     $ source activate salishsea-nowcast
     (salishsea-nowcast)$ pip install --editable ../NEMO_Nowcast
     (salishsea-nowcast)$ pip install --editable ../tools/SalishSeaTools
