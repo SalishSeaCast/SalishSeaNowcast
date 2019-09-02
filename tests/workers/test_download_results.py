@@ -14,7 +14,6 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast download_results worker.
 """
-import logging
 from pathlib import Path
 import shlex
 import textwrap
@@ -25,7 +24,6 @@ import arrow
 import nemo_nowcast
 import pytest
 
-import nowcast.lib
 from nowcast.workers import download_results
 
 
