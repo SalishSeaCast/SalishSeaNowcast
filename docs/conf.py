@@ -101,6 +101,7 @@ autodoc_mock_imports = [
     "OPPTools",
     "pandas",
     "paramiko",
+    "PyPDF2",
     "salishsea_cmd",
     "salishsea_cmd.api",
     "salishsea_tools",
@@ -113,6 +114,7 @@ autodoc_mock_imports = [
     "scipy.interpolate",
     "scipy.io",
     "shapely",
+    "watchdog",
     "xarray",
 ]
 
