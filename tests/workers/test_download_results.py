@@ -134,6 +134,151 @@ class TestMain:
         )
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "download_results" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["download_results"]
+        assert msg_registry["checklist key"] == "results files"
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success nowcast",
+            "failure nowcast",
+            "success nowcast-green",
+            "failure nowcast-green",
+            "success forecast",
+            "failure forecast",
+            "success forecast2",
+            "failure forecast2",
+            "success hindcast",
+            "failure hindcast",
+            "success nowcast-agrif",
+            "failure nowcast-agrif",
+            "crash",
+        ]
+
+    def test_hindcast_hosts(self, prod_config):
+        assert list(prod_config["run"]["hindcast hosts"].keys()) == [
+            "cedar-hindcast",
+            "optimum-hindcast",
+        ]
+
+    def test_enabled_hosts(self, prod_config):
+        assert list(prod_config["run"]["enabled hosts"].keys()) == [
+            "arbutus.cloud-nowcast",
+            "salish-nowcast",
+            "orcinus-nowcast-agrif",
+            "beluga-hindcast",
+            "cedar-hindcast",
+            "graham-hindcast",
+            "optimum-hindcast",
+        ]
+
+    @pytest.mark.parametrize(
+        "host, run_types",
+        (
+            (
+                "arbutus.cloud-nowcast",
+                ["nowcast", "forecast", "forecast2", "nowcast-green"],
+            ),
+            ("salish-nowcast", ["nowcast-dev", "nowcast-green"]),
+            ("orcinus-nowcast-agrif", ["nowcast-agrif"]),
+            ("beluga-hindcast", []),
+            ("cedar-hindcast", []),
+            ("graham-hindcast", []),
+            ("optimum-hindcast", []),
+        ),
+    )
+    def test_enabled_host_run_types(self, host, run_types, prod_config):
+        assert list(prod_config["run"]["enabled hosts"][host]["run types"]) == run_types
+
+    @pytest.mark.parametrize(
+        "host_group, host, run_type, results_dir",
+        (
+            (
+                "enabled hosts",
+                "arbutus.cloud-nowcast",
+                "nowcast",
+                "/nemoShare/MEOPAR/SalishSea/nowcast/",
+            ),
+            (
+                "enabled hosts",
+                "arbutus.cloud-nowcast",
+                "forecast",
+                "/nemoShare/MEOPAR/SalishSea/forecast/",
+            ),
+            (
+                "enabled hosts",
+                "arbutus.cloud-nowcast",
+                "forecast2",
+                "/nemoShare/MEOPAR/SalishSea/forecast2/",
+            ),
+            (
+                "enabled hosts",
+                "arbutus.cloud-nowcast",
+                "nowcast-green",
+                "/nemoShare/MEOPAR/SalishSea/nowcast-green/",
+            ),
+            (
+                "enabled hosts",
+                "salish-nowcast",
+                "nowcast-dev",
+                "/results/SalishSea/nowcast-dev.201806/",
+            ),
+            (
+                "enabled hosts",
+                "salish-nowcast",
+                "nowcast-green",
+                "/results2/SalishSea/nowcast-green.201812/",
+            ),
+            (
+                "enabled hosts",
+                "orcinus-nowcast-agrif",
+                "nowcast-agrif",
+                "/global/scratch/dlatorne/nowcast-agrif/",
+            ),
+            (
+                "hindcast hosts",
+                "cedar-hindcast",
+                "hindcast",
+                "/scratch/dlatorne/spinup.201905/",
+            ),
+            (
+                "hindcast hosts",
+                "optimum-hindcast",
+                "hindcast",
+                "/scratch/sallen/dlatorne/spinup.201905/",
+            ),
+        ),
+    )
+    def test_run_type_results_dir(
+        self, host_group, host, run_type, results_dir, prod_config
+    ):
+        assert (
+            prod_config["run"][host_group][host]["run types"][run_type]["results"]
+            == results_dir
+        )
+
+    def test_results_archive(self, prod_config):
+        archives = {
+            "nowcast": "/results/SalishSea/nowcast-blue.201812/",
+            "nowcast-dev": "/results/SalishSea/nowcast-dev.201806/",
+            "forecast": "/results/SalishSea/forecast.201812/",
+            "forecast2": "/results/SalishSea/forecast2.201812/",
+            "nowcast-green": "/results2/SalishSea/nowcast-green.201812/",
+            "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
+            "hindcast": "/results/SalishSea/spinup.201905/",
+        }
+        assert prod_config["results archive"].keys() == archives.keys()
+        for run_type, results_dir in archives.items():
+            assert prod_config["results archive"][run_type] == results_dir
+
+    def test_file_group(self, prod_config):
+        assert prod_config["file group"] == "sallen"
+
+
 @pytest.mark.parametrize(
     "run_type, host_name",
     [
