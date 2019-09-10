@@ -39,7 +39,12 @@ class TestSlackNotifications:
 
     def test_daily_progress_channel_envvar(self, prod_config):
         slack_notifications = prod_config["slack notifications"]
-        assert "SLACK_SSC_DAILY_PROGRESS" in slack_notifications
+        assert list(slack_notifications.keys()) == [
+            "SLACK_SSC_DAILY_PROGRESS",
+            "SLACK_SSC_HINDCAST_PROGRESS",
+            "website log url",
+            "website checklist url",
+        ]
 
     def test_daily_progress_channel_workers(self, prod_config):
         slack_notifications = prod_config["slack notifications"]
@@ -47,12 +52,16 @@ class TestSlackNotifications:
             "collect_weather",
             "download_live_ocean",
             "watch_NEMO",
-            "watch_NEMO_hindcast",
             "watch_NEMO_agrif",
             "watch_fvcom",
             "watch_ww3",
         ]
         assert slack_notifications["SLACK_SSC_DAILY_PROGRESS"] == expected
+
+    def test_hindcast_progress_channel_workers(self, prod_config):
+        slack_notifications = prod_config["slack notifications"]
+        expected = ["watch_NEMO_hindcast"]
+        assert slack_notifications["SLACK_SSC_HINDCAST_PROGRESS"] == expected
 
     def test_website_log_url(self, prod_config):
         slack_notifications = prod_config["slack notifications"]
