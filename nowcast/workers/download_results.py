@@ -139,7 +139,7 @@ def _tidy_dest_host(run_type, dest_host, dest_path, results_dir, config):
     ssh_key = Path(
         os.environ["HOME"], ".ssh", config["run"]["enabled hosts"][dest_host]["ssh key"]
     )
-    ssh_client, sftp_client = ssh_sftp.sftp(dest_host, os.fspath(ssh_key))
+    ssh_client, sftp_client = ssh_sftp.sftp(dest_host, ssh_key)
     with contextlib.ExitStack() as stack:
         [stack.enter_context(client) for client in (ssh_client, sftp_client)]
         results_archive_dir = dest_path / results_dir

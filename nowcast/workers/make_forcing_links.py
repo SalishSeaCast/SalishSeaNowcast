@@ -99,7 +99,7 @@ def make_forcing_links(parsed_args, config, *args):
     ssh_key = Path(
         os.environ["HOME"], ".ssh", config["run"]["enabled hosts"][host_name]["ssh key"]
     )
-    ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
+    ssh_client, sftp_client = ssh_sftp.sftp(host_name, ssh_key)
     _make_NeahBay_ssh_links(sftp_client, run_date, config, host_name, shared_storage)
     if run_type == "ssh":
         sftp_client.close()

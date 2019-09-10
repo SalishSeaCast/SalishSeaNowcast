@@ -90,7 +90,7 @@ def watch_NEMO_agrif(parsed_args, config, *args):
     )
     scratch_dir = Path(config["run"]["enabled hosts"][host_name]["scratch dir"])
     try:
-        ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
+        ssh_client, sftp_client = ssh_sftp.sftp(host_name, ssh_key)
         run_id = _get_run_id(ssh_client, host_name, job_id)
         while _is_queued(ssh_client, host_name, job_id, run_id):
             time.sleep(60)

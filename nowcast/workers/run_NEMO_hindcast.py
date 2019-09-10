@@ -107,7 +107,7 @@ def run_NEMO_hindcast(parsed_args, config, *args):
         config["run"]["hindcast hosts"][host_name]["ssh key"],
     )
     try:
-        ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
+        ssh_client, sftp_client = ssh_sftp.sftp(host_name, ssh_key)
         if parsed_args.prev_run_date is None:
             # Assume that there is at least one job already queued or running
             # and get its run date from the queue manager
