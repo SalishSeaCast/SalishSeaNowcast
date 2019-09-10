@@ -15,6 +15,7 @@
 """Salish Sea NEMO nowcast worker that downloads the results files
 from a run on the HPC/cloud facility to archival storage.
 """
+import contextlib
 import logging
 import os
 from pathlib import Path
@@ -23,7 +24,7 @@ import shlex
 import arrow
 from nemo_nowcast import NowcastWorker, WorkerError
 
-from nowcast import lib
+from nowcast import lib, ssh_sftp
 
 NAME = "download_results"
 logger = logging.getLogger(NAME)
@@ -46,6 +47,11 @@ def main():
             "nowcast-agrif",
         },
         help="Type of run to download results files from.",
+    )
+    worker.cli.add_argument(
+        "--dest-host",
+        default="localhost",
+        help="Name of the host to download results files to. Default is :kbd:`localhost`.",
     )
     worker.cli.add_date_option(
         "--run-date",
@@ -75,8 +81,9 @@ def failure(parsed_args):
 
 def download_results(parsed_args, config, *args):
     host_name = parsed_args.host_name
-    run_date = parsed_args.run_date
     run_type = parsed_args.run_type
+    dest_host = parsed_args.dest_host
+    run_date = parsed_args.run_date
     try:
         try:
             # Hindcast special case 1st due to hindcast host in enabled hosts
@@ -91,28 +98,61 @@ def download_results(parsed_args, config, *args):
     run_type_results = Path(host_config["run types"][run_type]["results"])
     src_dir = run_type_results / results_dir
     src = f"{host_name}:{src_dir}"
-    dest = Path(config["results archive"][run_type])
+    try:
+        dest = Path(config["results archive"][run_type])
+    except TypeError:
+        dest_path = Path(config["results archive"][run_type][dest_host])
+        dest = dest_path if dest_host == "localhost" else f"{dest_host}:{dest_path}"
     logger.info(f"downloading results from {src} to {dest}")
     cmd = shlex.split(f"scp -pr {src} {dest}")
     lib.run_in_subprocess(cmd, logger.debug, logger.error)
+    checklist = {run_type: {"run date": run_date.format("YYYY-MM-DD")}}
+    if dest_host == "localhost":
+        results_archive_dir = _tidy_localhost(run_type, dest, results_dir, config)
+        for freq in "1h 1d".split():
+            checklist[run_type][freq] = list(
+                map(os.fspath, results_archive_dir.glob(f"*SalishSea_{freq}_*.nc"))
+            )
+    else:
+        _tidy_dest_host(run_type, dest_host, dest_path, results_dir, config)
+        checklist[run_type]["destination"] = dest
+    return checklist
+
+
+def _tidy_localhost(run_type, dest, results_dir, config):
     results_archive_dir = dest / results_dir
     if not run_type == "hindcast":
         # Keep FVCOM boundary slab files from hindcast runs so that we can do FVCOM hindcast runs
         for filepath in results_archive_dir.glob("FVCOM_[TUVW].nc"):
             filepath.unlink()
     lib.fix_perms(
-        dest / results_dir,
+        results_archive_dir,
         mode=lib.FilePerms(user="rwx", group="rwx", other="rx"),
         grp_name=config["file group"],
     )
     for filepath in results_archive_dir.glob("*"):
         lib.fix_perms(filepath, grp_name=config["file group"])
-    checklist = {run_type: {"run date": run_date.format("YYYY-MM-DD")}}
-    for freq in "1h 1d".split():
-        checklist[run_type][freq] = list(
-            map(os.fspath, results_archive_dir.glob(f"*SalishSea_{freq}_*.nc"))
-        )
-    return checklist
+    return results_archive_dir
+
+
+def _tidy_dest_host(run_type, dest_host, dest_path, results_dir, config):
+    ssh_key = Path(
+        os.environ["HOME"], ".ssh", config["run"]["enabled hosts"][dest_host]["ssh key"]
+    )
+    ssh_client, sftp_client = ssh_sftp.sftp(dest_host, os.fspath(ssh_key))
+    with contextlib.ExitStack() as stack:
+        [stack.enter_context(client) for client in (ssh_client, sftp_client)]
+        results_archive_dir = dest_path / results_dir
+        if not run_type == "hindcast":
+            # Keep FVCOM boundary slab files from hindcast runs so that we can do FVCOM hindcast runs
+            fvcom_bdy_slabs = ("FVCOM_T.nc", "FVCOM_U.nc", "FVCOM_V.nc", "FVCOM_W.nc")
+            fvcom_bdy_files = [
+                f
+                for f in sftp_client.listdir(results_archive_dir)
+                if Path(f).name in fvcom_bdy_slabs
+            ]
+            for f in fvcom_bdy_files:
+                sftp_client.unlink(f)
 
 
 if __name__ == "__main__":

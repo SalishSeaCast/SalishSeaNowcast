@@ -310,7 +310,9 @@ results archive:
   forecast2: /results/SalishSea/forecast2.201812/
   nowcast-green: /results2/SalishSea/nowcast-green.201812/
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
-  hindcast: /results/SalishSea/hindcast.201905/
+  hindcast:
+    localhost: /results/SalishSea/hindcast.201905/
+    beluga-hindcast: /nearline/rrg-allen/SalishSea/hindcast_long.201905/
 
 
 rolling forecasts:
@@ -708,6 +710,20 @@ run:
         hindcast:
           # Directory on compute host where results are stored
           results: /scratch/sallen/dlatorne/hindcast.201905/
+
+    sockeye-hindcast:
+      ssh key: SalishSeaNEMO-nowcast_id_rsa
+      queue info cmd: /cm/shared/apps/pbspro-ce/18.1.2/bin/qstat
+      users: sallen,dlatorne
+      scratch dir: /scratch/sallen1/hindcast_v201905_long/
+      run prep dir: /project/dri-allen/MEOPAR/hindcast-sys/runs/
+      salishsea cmd:
+        executable: /home/dlatorne/.local/bin/salishsea
+        run options:
+        envvars:
+      run types:
+        hindcast:
+          results: /scratch/sallen1/hindcast_v201905_long/
 
 
 # Strait of Georgia WaveWatch3 model runs

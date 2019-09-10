@@ -44,7 +44,9 @@ def config(base_config):
                   forecast2: SalishSea/forecast2/
                   nowcast-green: SalishSea/nowcast-green/
                   nowcast-agrif: SalishSea/nowcast-agrif/
-                  hindcast: SalishSea/hindcast/
+                  hindcast: 
+                    localhost: SalishSea/hindcast/
+                    beluga-hindcast: nearline/SalishSea/hindcast/
                 
                 run:
                   enabled hosts:
@@ -62,8 +64,19 @@ def config(base_config):
                       run types:
                         nowcast-agrif:
                           results: SalishSea/nowcast-agrif/
+                    beluga-hindcast:
+                      ssh key: SalishSeaNEMO-nowcast_id_rsa
+                          
                   hindcast hosts:
                       cedar-hindcast:
+                        run types:
+                          hindcast:
+                            results: SalishSea/hindcast
+                      optimum-hindcast:
+                        run types:
+                          hindcast:
+                            results: SalishSea/hindcast
+                      sockeye-hindcast:
                         run types:
                           hindcast:
                             results: SalishSea/hindcast
@@ -115,7 +128,15 @@ class TestMain:
         assert kwargs["choices"] == expected
         assert "help" in kwargs
 
-    def test_add_run_date_arg(self, m_worker):
+    def test_add_dest_host_option(self, m_worker):
+        m_worker().cli = Mock(name="cli")
+        download_results.main()
+        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
+        assert args == ("--dest-host",)
+        assert kwargs["default"] == "localhost"
+        assert "help" in kwargs
+
+    def test_add_run_date_option(self, m_worker):
         m_worker().cli = Mock(name="cli")
         download_results.main()
         args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
@@ -163,6 +184,7 @@ class TestConfig:
         assert list(prod_config["run"]["hindcast hosts"].keys()) == [
             "cedar-hindcast",
             "optimum-hindcast",
+            "sockeye-hindcast",
         ]
 
     def test_enabled_hosts(self, prod_config):
@@ -269,7 +291,10 @@ class TestConfig:
             "forecast2": "/results/SalishSea/forecast2.201812/",
             "nowcast-green": "/results2/SalishSea/nowcast-green.201812/",
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
-            "hindcast": "/results/SalishSea/spinup.201905/",
+            "hindcast": {
+                "localhost": "/results/SalishSea/spinup.201905/",
+                "beluga-hindcast": "/nearline/rrg-allen/SalishSea/hindcast_long.201905/",
+            },
         }
         assert prod_config["results archive"].keys() == archives.keys()
         for run_type, results_dir in archives.items():
@@ -351,7 +376,10 @@ class TestDownloadResults:
         self, m_fix_perms, m_run_in_subproc, m_logger, run_type, config
     ):
         parsed_args = SimpleNamespace(
-            host_name="foo", run_type=run_type, run_date=arrow.get("2018-05-22")
+            host_name="foo",
+            run_type=run_type,
+            dest_host="localhost",
+            run_date=arrow.get("2018-05-22"),
         )
         config = {}
         with pytest.raises(nemo_nowcast.WorkerError):
@@ -368,16 +396,37 @@ class TestDownloadResults:
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
     )
-    def test_scp_subprocess(
+    def test_scp_to_localhost_subprocess(
         self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
+            host_name=host_name,
+            run_type=run_type,
+            dest_host="localhost",
+            run_date=arrow.get("2018-05-22"),
         )
         download_results.download_results(parsed_args, config)
         m_run_in_subproc.assert_called_once_with(
             shlex.split(
                 f"scp -pr {host_name}:SalishSea/{run_type}/22may18 SalishSea/{run_type}"
+            ),
+            m_logger.debug,
+            m_logger.error,
+        )
+
+    def test_scp_to_dest_host_subprocess(
+        self, m_fix_perms, m_run_in_subproc, m_logger, config
+    ):
+        parsed_args = SimpleNamespace(
+            host_name="sockeye-hindcast",
+            run_type="hindcast",
+            dest_host="beluga-hindcast",
+            run_date=arrow.get("2019-09-03"),
+        )
+        download_results.download_results(parsed_args, config)
+        m_run_in_subproc.assert_called_once_with(
+            shlex.split(
+                "scp -pr sockeye-hindcast:SalishSea/hindcast/03sep19 beluga-hindcast:nearline/SalishSea/hindcast"
             ),
             m_logger.debug,
             m_logger.error,
@@ -395,7 +444,10 @@ class TestDownloadResults:
         self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
+            host_name=host_name,
+            run_type=run_type,
+            dest_host="localhost",
+            run_date=arrow.get("2018-05-22"),
         )
         m_fvcom_t = Mock(name="FVCOM_T.nc")
         m_fvcom_u = Mock(name="FVCOM_U.nc")
@@ -412,13 +464,18 @@ class TestDownloadResults:
         assert m_fvcom_v.unlink.called
         assert m_fvcom_w.unlink.called
 
+    @pytest.mark.parametrize(
+        "host_name, dest_host",
+        (("optimum-hindcast", "localhost"), ("sockeye-hindcast", "beluga-hindcast")),
+    )
     def test_hindcast_not_unlink_fvcom_boundary_files(
-        self, m_fix_perms, m_run_in_subproc, m_logger, config
+        self, m_fix_perms, m_run_in_subproc, m_logger, host_name, dest_host, config
     ):
         parsed_args = SimpleNamespace(
-            host_name="cedar-hindcast",
+            host_name=host_name,
             run_type="hindcast",
-            run_date=arrow.get("2018-12-06"),
+            dest_host=dest_host,
+            run_date=arrow.get("2019-09-03"),
         )
         m_fvcom_t = Mock(name="FVCOM_T.nc")
         m_fvcom_u = Mock(name="FVCOM_U.nc")
@@ -456,7 +513,10 @@ class TestDownloadResults:
         config,
     ):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
+            host_name=host_name,
+            run_type=run_type,
+            dest_host="localhost",
+            run_date=arrow.get("2018-05-22"),
         )
         download_results.download_results(parsed_args, config)
         assert m_fix_perms.call_args_list[0][0] == (
@@ -482,7 +542,10 @@ class TestDownloadResults:
         self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
+            host_name=host_name,
+            run_type=run_type,
+            dest_host="localhost",
+            run_date=arrow.get("2018-05-22"),
         )
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
@@ -510,7 +573,10 @@ class TestDownloadResults:
         self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2018-05-22")
+            host_name=host_name,
+            run_type=run_type,
+            dest_host="localhost",
+            run_date=arrow.get("2018-05-22"),
         )
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
@@ -541,6 +607,7 @@ class TestDownloadResults:
         parsed_args = SimpleNamespace(
             host_name="orcinus-nowcast-agrif",
             run_type="nowcast-agrif",
+            dest_host="localhost",
             run_date=arrow.get("2018-12-07"),
         )
         p_glob = patch(
