@@ -92,7 +92,7 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
         "queue info cmd"
     ].rsplit("/", 1)[-1]
     try:
-        ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
+        ssh_client, sftp_client = ssh_sftp.sftp(host_name, ssh_key)
         job = hpc_job_classes[queue_info_cmd](
             ssh_client, sftp_client, host_name, users, scratch_dir, run_id
         )

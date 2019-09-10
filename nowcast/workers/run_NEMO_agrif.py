@@ -106,7 +106,7 @@ def run_NEMO_agrif(parsed_args, config, *args):
     )
     run_id = f'{run_date.format("DDMMMYY").lower()}nowcast-agrif'
     try:
-        ssh_client, sftp_client = ssh_sftp.sftp(host_name, os.fspath(ssh_key))
+        ssh_client, sftp_client = ssh_sftp.sftp(host_name, ssh_key)
         prev_run_namelists_info = _get_prev_run_namelists_info(
             sftp_client, host_name, run_date.shift(days=-1), config
         )
