@@ -1087,13 +1087,16 @@ slack notifications:
   # Environment variable is which the slack channel incoming webhook URL is stored
   SLACK_SSC_DAILY_PROGRESS:
     # List of workers for which notifications will be sent on completion
+    # to #ssc-daily-progress channel
     - collect_weather
     - download_live_ocean
     - watch_NEMO
-    - watch_NEMO_hindcast
     - watch_NEMO_agrif
     - watch_fvcom
     - watch_ww3
+  SLACK_SSC_HINDCAST_PROGRESS:
+    # notifications will be sent to #ssc-hindcast-progress channel
+    - watch_NEMO_hindcast
   # Website URL that shows automation log; included in slack message if present
   website log url: https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
   # Website URL that shows automation checklist; included in slack message if present
