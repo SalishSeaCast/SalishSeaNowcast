@@ -310,7 +310,7 @@ results archive:
   forecast2: /results/SalishSea/forecast2.201812/
   nowcast-green: /results2/SalishSea/nowcast-green.201812/
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
-  hindcast: /results/SalishSea/spinup.201905/
+  hindcast: /results/SalishSea/hindcast.201905/
 
 
 rolling forecasts:
@@ -660,7 +660,7 @@ run:
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: allen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
-      scratch dir: /scratch/dlatorne/spinup.201905
+      scratch dir: /scratch/dlatorne/hindcast.201905
       # Directory on compute host where files (e.g. namelist.time) necessary to prepare
       # the NEMO runs are stored
       run prep dir: /home/dlatorne/project/SalishSea/hindcast-sys/runs
@@ -676,7 +676,7 @@ run:
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /scratch/dlatorne/spinup.201905/
+          results: /scratch/dlatorne/hindcast.201905/
 
     optimum-hindcast:
       # Passphrase-less deployment key used by automation for authentication
@@ -688,7 +688,7 @@ run:
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: sallen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
-      scratch dir: /scratch/sallen/dlatorne/spinup.201905
+      scratch dir: /scratch/sallen/dlatorne/hindcast.201905
       # Directory on compute host where files (e.g. namelist.time) necessary to prepare
       # the NEMO runs are stored
       run prep dir: /home/sallen/dlatorne/SalishSeaCast/hindcast-sys/runs
@@ -707,7 +707,7 @@ run:
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /scratch/sallen/dlatorne/spinup.201905/
+          results: /scratch/sallen/dlatorne/hindcast.201905/
 
 
 # Strait of Georgia WaveWatch3 model runs
