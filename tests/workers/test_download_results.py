@@ -265,13 +265,13 @@ class TestConfig:
                 "hindcast hosts",
                 "cedar-hindcast",
                 "hindcast",
-                "/scratch/dlatorne/spinup.201905/",
+                "/scratch/dlatorne/hindcast.201905/",
             ),
             (
                 "hindcast hosts",
                 "optimum-hindcast",
                 "hindcast",
-                "/scratch/sallen/dlatorne/spinup.201905/",
+                "/scratch/sallen/dlatorne/hindcast.201905/",
             ),
         ),
     )
@@ -292,7 +292,7 @@ class TestConfig:
             "nowcast-green": "/results2/SalishSea/nowcast-green.201812/",
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
-                "localhost": "/results/SalishSea/spinup.201905/",
+                "localhost": "/results/SalishSea/hindcast.201905/",
                 "beluga-hindcast": "/nearline/rrg-allen/SalishSea/hindcast_long.201905/",
             },
         }
