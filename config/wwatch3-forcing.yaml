@@ -1,0 +1,106 @@
+# System configuration file for WWatch3 forcing file generation using
+# SalishSeaCast automation system
+
+# System status checklist file
+## HACK! This file isn't created when running in --debug mode, but the path has to be here
+checklist file: /tmp/nowcast_checklist.yaml
+
+# Python interpreter in environment with all dependencies installed
+python: $(NOWCAST.ENV.CONDA_PREFIX)/bin/python
+
+
+weather:
+  # Template for the atmospheric forcing file name
+  # **Must be quoted to project {} characters**
+  file template: 'ops_{:y%Ym%md%d}.nc'
+
+
+# Strait of Georgia WaveWatch3 model
+wave forecasts:
+  # Directory on compute host where files (e.g. ww3_*.inp,  mod_def.ww3) and
+  # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
+  # are stored
+  # **Hacked for forcing file generation to also be where files are stored**
+  run prep dir: /data/MIDOSS/forcing/wwatch3/
+  # Directory in which to find mesh mask file
+  grid dir: /SalishSeaCast/grid/
+  # Template for wind forcing file names
+  # **Must be quoted to project {} characters**
+  wind file template: 'SoG_wind_{yyyymmdd}.nc'
+  # Template for ocean current forcing file names
+  # **Must be quoted to project {} characters**
+  current file template: 'SoG_current_{yyyymmdd}.nc'
+  # Template for NEMO hourly results file name
+  # **Must be quoted to project {} characters**
+  NEMO file template: 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
+
+
+run types:
+  # Keys are run types to execute, values are NEMO configuration name,
+  # bathymetry, and mesh mask to use.
+  nowcast:
+    mesh mask: mesh_mask201702.nc
+
+
+run:
+  enabled hosts:
+    # Compute host name where daily runs are executed under automation
+    salish:
+      # Run type specific configurations for the runs that are executed on the
+      # compute host; keyed by run type
+      run types:
+        ## **Nasty hack because make_ww3_current_file as nowcast hard-coded,
+        ## **but we want to use nowcast-green
+        nowcast:
+          results: /results2/SalishSea/nowcast-green.201812/
+      forcing:
+        # Directory on compute host where atmospheric forcing files are stored
+        weather dir: /results/forcing/atmospheric/GEM2.5/operational/
+
+
+# Logging system configuration
+logging:
+  version: 1
+  disable_existing_loggers: False
+  formatters:
+    simple:
+      format: '%(asctime)s %(levelname)s [%(name)s] %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      # Level 100 disables console logging.
+      # Use worker --debug flag to enable console logging.
+      level: 100
+      formatter: simple
+      stream: ext://sys.stdout
+  root:
+    level: DEBUG
+    handlers:
+     - console
+
+
+message registry:
+  workers:
+    # Worker module name
+    make_ww3_wind_file:
+      # The key in the system checklist that the manager maintains that is to
+      # be used to hold message payload information provided by the worker
+      checklist key: WW3 wind forcing
+      # Message types that the worker can send and their meanings
+      success forecast2: WaveWatch3 wind forcing file for forecast2 run ready
+      failure forecast2: WaveWatch3 wind forcing file creation for forecast2 run failed
+      success forecast: WaveWatch3 wind forcing file for forecast run ready
+      failure forecast: WaveWatch3 wind forcing file creation for forecast run failed
+      success nowcast: WaveWatch3 wind forcing file for nowcast/hindcast run ready
+      failure nowcast: WaveWatch3 wind forcing file creation for nowcast/hindcast run failed
+      crash: make_ww3_wind_files worker crashed
+
+    make_ww3_current_file:
+      checklist key: WW3 currents forcing
+      success forecast2: WaveWatch3 currents forcing file for forecast2 run ready
+      failure forecast2: WaveWatch3 currents forcing file creation for forecast2 run failed
+      success forecast: WaveWatch3 currents forcing file for forecast run ready
+      failure forecast: WaveWatch3 currents forcing file creation for forecast run failed
+      success nowcast: WaveWatch3 currents forcing file for nowcast/hindcast run ready
+      failure nowcast: WaveWatch3 currents forcing file creation for nowcast/hindcast run failed
+      crash: make_ww3_current_files worker crashed
