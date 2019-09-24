@@ -237,12 +237,16 @@ Workers
     :members: main
 
 
+.. _MakeWW3WindFile-Worker:
+
 :kbd:`make_ww3_wind_file`
 -------------------------
 
 .. automodule:: nowcast.workers.make_ww3_wind_file
     :members: main
 
+
+.. _MakeWW3CurrentFile-Worker:
 
 :kbd:`make_ww3_current_file`
 ----------------------------
