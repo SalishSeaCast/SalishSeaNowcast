@@ -143,7 +143,7 @@ To deactivate the environment use:
 
 .. code-block:: bash
 
-    (salishsea-nowcast)$ source deactivate
+    (salishsea-nowcast)$ conda deactivate
 
 
 .. _SalishSeaNowcastCodingStyle:
