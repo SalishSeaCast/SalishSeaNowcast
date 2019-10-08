@@ -76,6 +76,7 @@ def watch_ww3(parsed_args, config, tell_manager):
     pid = _find_run_pid(run_info[run_type])
     logger.debug(f"{run_type} on {host_name}: run pid: {pid}")
     run_dir = Path(run_info[run_type]["run dir"])
+    expected_time_steps = {"nowcast": 432, "forecast": 648, "foreacst2": 540}
     # Watch for the run process to end
     while _pid_exists(pid):
         try:
@@ -88,7 +89,7 @@ def watch_ww3(parsed_args, config, tell_manager):
                     break
                 except ValueError:
                     continue
-            fraction_done = time_step / 1080
+            fraction_done = time_step / expected_time_steps[run_type]
             msg = (
                 f"{run_type} on {host_name}: timestep: {time_step}, "
                 f"{fraction_done:.1%} complete"
