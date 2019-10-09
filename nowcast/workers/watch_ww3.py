@@ -76,7 +76,7 @@ def watch_ww3(parsed_args, config, tell_manager):
     pid = _find_run_pid(run_info[run_type])
     logger.debug(f"{run_type} on {host_name}: run pid: {pid}")
     run_dir = Path(run_info[run_type]["run dir"])
-    expected_time_steps = {"nowcast": 432, "forecast": 648, "foreacst2": 540}
+    expected_time_steps = {"nowcast": 432, "forecast": 648, "forecast2": 540}
     # Watch for the run process to end
     while _pid_exists(pid):
         try:
