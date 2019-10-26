@@ -29,6 +29,7 @@ dependencies:
   - coloredlogs
   - dask
   - docutils
+  - gitpython
   - gsw
   - lxml
   - mako

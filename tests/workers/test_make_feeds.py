@@ -192,7 +192,7 @@ class TestGenerateFeed:
             '  <link href="https://salishsea.eos.ubc.ca/storm-surge/'
             'forecast.html" rel="related" type="text/html"/>',
             '  <generator uri="http://lkiesow.github.io/python-feedgen" '
-            'version="0.7.0">python-feedgen</generator>',
+            'version="0.8.0">python-feedgen</generator>',
             "  <rights>Copyright 2015-2016, Salish Sea MEOPAR Project Contributors "
             "and The University of British Columbia</rights>",
             "</feed>",
