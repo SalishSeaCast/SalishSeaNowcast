@@ -311,7 +311,7 @@ results archive:
   nowcast-green: /results2/SalishSea/nowcast-green.201812/
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
   hindcast:
-    localhost: /results/SalishSea/hindcast.201905/
+    localhost: /results2/SalishSea/hindcast.201905/
     beluga-hindcast: /nearline/rrg-allen/SalishSea/hindcast_long.201905/
 
 
