@@ -139,7 +139,7 @@ class TestConfig:
         assert run_hindcast_hosts["optimum-hindcast"]["users"] == "sallen,dlatorne"
         assert (
             run_hindcast_hosts["optimum-hindcast"]["scratch dir"]
-            == "/scratch/sallen/dlatorne/hindcast.201905"
+            == "/scratch/sallen/dlatorne/hindcast_v201905_long"
         )
 
 
