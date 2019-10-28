@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea nowcast worker that splits downloaded results of multi-day runs
+"""SalishSeaCast worker that splits downloaded results of multi-day runs
 (e.g. hindcast runs) into daily results directories.
 The results files are renamed so that they look like they came from a
 single day run so that ERDDAP will accept them.
@@ -53,6 +53,7 @@ def main():
         ),
     )
     worker.run(split_results, success, failure)
+    return worker
 
 
 def success(parsed_args):

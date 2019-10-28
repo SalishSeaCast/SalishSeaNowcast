@@ -14,74 +14,86 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast split_results worker.
 """
-from unittest.mock import Mock, patch
+import logging
+from types import SimpleNamespace
+
+import arrow
+import attr
+import nemo_nowcast
+import pytest
 
 from nowcast.workers import split_results
 
 
-@patch("nowcast.workers.split_results.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(monkeypatch):
+    @attr.s
+    class MockWorker:
+        name = attr.ib()
+        description = attr.ib()
+        package = attr.ib(default="nowcast.workers")
+        cli = attr.ib(default=None)
+
+        def init_cli(self):
+            pass
+
+        def run(self, *args):
+            pass
+
+    monkeypatch.setattr(MockWorker, "init_cli", nemo_nowcast.NowcastWorker.init_cli)
+    monkeypatch.setattr(split_results, "NowcastWorker", MockWorker)
+
+
 class TestMain:
     """Unit tests for main() function.
     """
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        split_results.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("split_results",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        split_results.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        split_results.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("run_type",)
-        expected = {"hindcast"}
-        assert kwargs["choices"] == expected
-        assert "help" in kwargs
-
-    def test_add_run_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        split_results.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_date",)
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        split_results.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            split_results.split_results,
-            split_results.success,
-            split_results.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = split_results.main()
+        assert worker.name == "split_results"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that splits downloaded results of multi-day runs"
         )
 
+    def test_add_run_type_arg(self, mock_worker):
+        worker = split_results.main()
+        assert worker.cli.parser._actions[3].dest == "run_type"
+        assert worker.cli.parser._actions[3].choices == {"hindcast"}
+        assert worker.cli.parser._actions[3].help
 
-@patch("nowcast.workers.split_results.logger", autospec=True)
+    def test_add_run_date_arg(self, mock_worker):
+        worker = split_results.main()
+        assert worker.cli.parser._actions[4].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface._arrow_date
+        assert worker.cli.parser._actions[4].type == expected
+        assert worker.cli.parser._actions[4].help
+
+
 class TestSuccess:
     """Unit test for success() function.
     """
 
-    def test_success(self, m_logger):
-        parsed_args = Mock(run_type="hindcast")
+    def test_success(self, caplog):
+        parsed_args = SimpleNamespace(
+            run_type="hindcast", run_date=arrow.get("2019-10-27")
+        )
+        caplog.set_level(logging.INFO)
         msg_type = split_results.success(parsed_args)
-        assert m_logger.info.called
+        assert caplog.records[0].levelname == "INFO"
+        assert "results files split into daily directories" in caplog.messages[0]
         assert msg_type == "success hindcast"
 
 
-@patch("nowcast.workers.split_results.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function.
     """
 
-    def test_failure(self, m_logger):
-        parsed_args = Mock(run_type="hindcast")
+    def test_failure(self, caplog):
+        parsed_args = SimpleNamespace(
+            run_type="hindcast", run_date=arrow.get("2019-10-27")
+        )
+        caplog.set_level(logging.CRITICAL)
         msg_type = split_results.failure(parsed_args)
-        assert m_logger.critical.called
+        assert caplog.records[0].levelname == "CRITICAL"
+        assert "results files splitting failed" in caplog.messages[0]
         assert msg_type == "failure hindcast"
