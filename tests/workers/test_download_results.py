@@ -163,6 +163,9 @@ class TestConfig:
         assert "download_results" in prod_config["message registry"]["workers"]
         msg_registry = prod_config["message registry"]["workers"]["download_results"]
         assert msg_registry["checklist key"] == "results files"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["download_results"]
         assert list(msg_registry.keys()) == [
             "checklist key",
             "success nowcast",
@@ -271,7 +274,7 @@ class TestConfig:
                 "hindcast hosts",
                 "optimum-hindcast",
                 "hindcast",
-                "/scratch/sallen/dlatorne/hindcast.201905/",
+                "/scratch/sallen/dlatorne/hindcast_v201905_long/",
             ),
         ),
     )
