@@ -15,6 +15,7 @@
 """Unit tests for Salish Sea NEMO nowcast split_results worker.
 """
 import logging
+import os
 from types import SimpleNamespace
 
 import arrow
@@ -69,6 +70,42 @@ class TestMain:
         assert worker.cli.parser._actions[4].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "split_results" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["split_results"]
+        assert msg_registry["checklist key"] == "results splitting"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["split_results"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success hindcast",
+            "failure hindcast",
+            "crash",
+        ]
+
+    def test_results_archive(self, prod_config):
+        archives = {
+            "nowcast": "/results/SalishSea/nowcast-blue.201812/",
+            "nowcast-dev": "/results/SalishSea/nowcast-dev.201806/",
+            "forecast": "/results/SalishSea/forecast.201812/",
+            "forecast2": "/results/SalishSea/forecast2.201812/",
+            "nowcast-green": "/results2/SalishSea/nowcast-green.201812/",
+            "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
+            "hindcast": {
+                "localhost": "/results2/SalishSea/hindcast.201905/",
+                "beluga-hindcast": "/nearline/rrg-allen/SalishSea/hindcast_long.201905/",
+            },
+        }
+        assert prod_config["results archive"].keys() == archives.keys()
+        for run_type, results_dir in archives.items():
+            assert prod_config["results archive"][run_type] == results_dir
+
+
 class TestSuccess:
     """Unit test for success() function.
     """
@@ -97,3 +134,137 @@ class TestFailure:
         assert caplog.records[0].levelname == "CRITICAL"
         assert "results files splitting failed" in caplog.messages[0]
         assert msg_type == "failure hindcast"
+
+
+class TestSplitResults:
+    """Integration test for split_reults() function.
+    """
+
+    def test_checklist(self, caplog, tmp_path, monkeypatch):
+        run_type_results = tmp_path / "hindcast.201905"
+        run_type_results.mkdir()
+        config = {
+            "results archive": {"hindcast": {"localhost": os.fspath(run_type_results)}}
+        }
+
+        results_dir = run_type_results / "01jan07"
+        results_dir.mkdir()
+        nc_files = [
+            results_dir / "SalishSea_1h_20070101_20070102_grid_T_20070101-20070101.nc",
+            results_dir / "SalishSea_1h_20070101_20070102_grid_T_20070102-20070102.nc",
+        ]
+        for nc_file in nc_files:
+            nc_file.write_bytes(b"")
+        restart_file = results_dir / "SalishSea_01587600_restart.nc"
+        restart_file.write_bytes(b"")
+
+        def mock_glob(path, pattern):
+            if pattern == "*.nc":
+                for glob in nc_files + [restart_file]:
+                    yield glob
+            else:
+                yield restart_file
+
+        monkeypatch.setattr(split_results.Path, "glob", mock_glob)
+
+        run_type = "hindcast"
+        run_date = arrow.get("2007-01-01")
+        parsed_args = SimpleNamespace(run_type=run_type, run_date=run_date)
+
+        caplog.set_level(logging.INFO)
+        checklist = split_results.split_results(parsed_args, config)
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f'splitting {run_date.format("YYYY-MM-DD")} {run_type} '
+            f"results files into daily directories"
+        )
+        assert caplog.messages[0] == expected
+        assert checklist == {"2007-01-01", "2007-01-02"}
+        assert (
+            tmp_path
+            / run_type_results
+            / "01jan07"
+            / "SalishSea_1h_20070101_20070101_grid_T.nc"
+        ).exists()
+        assert (
+            tmp_path / run_type_results / "02jan07" / "SalishSea_01587600_restart.nc"
+        ).exists()
+
+
+class TestMkDestDir:
+    """Unit test for _mk_dest_dir() function.
+    """
+
+    def test_mk_dest_dir(self, tmp_path):
+        run_type_results = tmp_path / "hindcast.201905"
+        run_type_results.mkdir()
+        date = arrow.get("2019-10-28")
+        dest_dir = split_results._mk_dest_dir(run_type_results, date)
+        assert dest_dir == run_type_results / "28oct19"
+        assert dest_dir.exists()
+
+
+class TestMoveResultsNcFile:
+    """Unit tests for _move_results_nc_file() function.
+    """
+
+    def test_move_nemo_grid_nc_file(self, caplog, tmp_path):
+        run_type_results = tmp_path / "hindcast.201905"
+        run_type_results.mkdir()
+        results_dir = run_type_results / "01jan07"
+        results_dir.mkdir()
+        nc_file = (
+            results_dir / "SalishSea_1h_20070101_20070331_grid_T_20070102-20070102.nc"
+        )
+        nc_file.write_bytes(b"")
+        dest_dir = run_type_results / "02jan07"
+        dest_dir.mkdir()
+
+        caplog.set_level(logging.DEBUG)
+
+        split_results._move_results_nc_file(nc_file, dest_dir, arrow.get("2007-01-02"))
+        assert (dest_dir / "SalishSea_1h_20070102_20070102_grid_T.nc").exists()
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"moved {nc_file} to {dest_dir / 'SalishSea_1h_20070102_20070102_grid_T.nc'}"
+        assert caplog.messages[0] == expected
+
+    def test_move_other_nc_file(self, caplog, tmp_path):
+        run_type_results = tmp_path / "hindcast.201905"
+        run_type_results.mkdir()
+        results_dir = run_type_results / "01jan07"
+        results_dir.mkdir()
+        nc_file = results_dir / "FVCOM_T_20070101-20070101.nc"
+        nc_file.write_bytes(b"")
+        dest_dir = run_type_results / "02jan07"
+        dest_dir.mkdir()
+
+        caplog.set_level(logging.DEBUG)
+
+        split_results._move_results_nc_file(nc_file, dest_dir, arrow.get("2007-01-02"))
+        assert (dest_dir / "FVCOM_T.nc").exists()
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"moved {nc_file} to {dest_dir / 'FVCOM_T.nc'}"
+        assert caplog.messages[0] == expected
+
+
+class TestMoveRestartFile:
+    """Unit tests for _move_results_nc_file() function.
+    """
+
+    def test_move_restart_file(self, caplog, tmp_path):
+        run_type_results = tmp_path / "hindcast.201905"
+        run_type_results.mkdir()
+        results_dir = run_type_results / "01jan07"
+        results_dir.mkdir()
+        restart_file = results_dir / "SalishSea_01587600_restart.nc"
+        restart_file.write_bytes(b"")
+        dest_dir = run_type_results / "31mar07"
+        dest_dir.mkdir()
+
+        caplog.set_level(logging.DEBUG)
+
+        split_results._move_restart_file(restart_file, dest_dir)
+        assert (dest_dir / "SalishSea_01587600_restart.nc").exists()
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"moved {restart_file} to {dest_dir}"
+        assert caplog.messages[0] == expected
