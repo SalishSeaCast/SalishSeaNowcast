@@ -88,35 +88,30 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.download_results.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(download_results, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function.
     """
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_results.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("download_results",)
-        assert list(kwargs.keys()) == ["description"]
+    def test_instantiate_worker(self, mock_worker):
+        worker = download_results.main()
+        assert worker.name == "download_results"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that downloads the results files from a run"
+        )
 
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_results.main()
-        m_worker().init_cli.assert_called_once_with()
+    def test_add_host_name_arg(self, mock_worker):
+        worker = download_results.main()
+        assert worker.cli.parser._actions[3].dest == "host_name"
+        assert worker.cli.parser._actions[3].help
 
-    def test_add_host_name_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_results.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("host_name",)
-        assert "help" in kwargs
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_results.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_type",)
+    def test_add_run_type_arg(self, mock_worker):
+        worker = download_results.main()
+        assert worker.cli.parser._actions[4].dest == "run_type"
         expected = {
             "nowcast",
             "nowcast-green",
@@ -125,34 +120,22 @@ class TestMain:
             "hindcast",
             "nowcast-agrif",
         }
-        assert kwargs["choices"] == expected
-        assert "help" in kwargs
+        assert worker.cli.parser._actions[4].choices == expected
+        assert worker.cli.parser._actions[4].help
 
-    def test_add_dest_host_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_results.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
-        assert args == ("--dest-host",)
-        assert kwargs["default"] == "localhost"
-        assert "help" in kwargs
+    def test_add_dest_host_option(self, mock_worker):
+        worker = download_results.main()
+        assert worker.cli.parser._actions[5].dest == "dest_host"
+        assert worker.cli.parser._actions[5].default == "localhost"
+        assert worker.cli.parser._actions[5].help
 
-    def test_add_run_date_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_results.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_results.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            download_results.download_results,
-            download_results.success,
-            download_results.failure,
-        )
+    def test_add_run_date_option(self, mock_worker):
+        worker = download_results.main()
+        assert worker.cli.parser._actions[6].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface._arrow_date
+        assert worker.cli.parser._actions[6].type == expected
+        assert worker.cli.parser._actions[6].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[6].help
 
 
 class TestConfig:
