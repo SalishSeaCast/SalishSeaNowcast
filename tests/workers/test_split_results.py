@@ -19,7 +19,6 @@ import os
 from types import SimpleNamespace
 
 import arrow
-import attr
 import nemo_nowcast
 import pytest
 
@@ -27,22 +26,8 @@ from nowcast.workers import split_results
 
 
 @pytest.fixture
-def mock_worker(monkeypatch):
-    @attr.s
-    class MockWorker:
-        name = attr.ib()
-        description = attr.ib()
-        package = attr.ib(default="nowcast.workers")
-        cli = attr.ib(default=None)
-
-        def init_cli(self):
-            pass
-
-        def run(self, *args):
-            pass
-
-    monkeypatch.setattr(MockWorker, "init_cli", nemo_nowcast.NowcastWorker.init_cli)
-    monkeypatch.setattr(split_results, "NowcastWorker", MockWorker)
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(split_results, "NowcastWorker", mock_nowcast_worker)
 
 
 class TestMain:
@@ -67,6 +52,7 @@ class TestMain:
         assert worker.cli.parser._actions[4].dest == "run_date"
         expected = nemo_nowcast.cli.CommandLineInterface._arrow_date
         assert worker.cli.parser._actions[4].type == expected
+        assert worker.cli.parser._actions[4].default == None
         assert worker.cli.parser._actions[4].help
 
 

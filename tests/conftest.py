@@ -17,6 +17,7 @@
 from pathlib import Path
 from unittest.mock import patch
 
+import attr
 import nemo_nowcast
 import pytest
 
@@ -58,3 +59,29 @@ def prod_config(tmpdir):
     with p_environ:
         prod_config_.load(prod_config_file)
     return prod_config_
+
+
+@pytest.fixture
+def mock_nowcast_worker(monkeypatch):
+    """Mock of :py:class:`nemo_nowcast.NowcastWorker` class for testing worker main()
+    functions, especially their CLIs.
+    """
+
+    @attr.s
+    class MockNowcastWorker:
+
+        name = attr.ib()
+        description = attr.ib()
+        package = attr.ib(default="nowcast.workers")
+        cli = attr.ib(default=None)
+
+        def init_cli(self):
+            pass
+
+        def run(self, *args):
+            pass
+
+    monkeypatch.setattr(
+        MockNowcastWorker, "init_cli", nemo_nowcast.NowcastWorker.init_cli
+    )
+    return MockNowcastWorker
