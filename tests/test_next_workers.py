@@ -14,8 +14,6 @@
 #  limitations under the License.
 """Unit tests for nowcast.next_workers module.
 """
-from unittest.mock import patch
-
 import arrow
 import pytest
 from nemo_nowcast import Message, NextWorker
@@ -37,9 +35,7 @@ def config():
             }
         },
         "observations": {
-            "ctd data": {"stations": ["SCVIP", "SEVIP"]},
-            #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
-            # "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
+            "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
             "ferry data": {"ferries": {"TWDP": {}}},
             "hadcp data": {},
         },
@@ -106,21 +102,20 @@ class TestAfterDownloadWeather:
         )
         assert workers == []
 
-    def test_success_06(self, config, checklist):
-        p_now = patch(
-            "nowcast.next_workers.arrow.now",
-            return_value=arrow.get("2018-12-27"),
-            autospec=True,
+    def test_success_06(self, config, checklist, monkeypatch):
+        def mock_now():
+            return arrow.get("2018-12-27")
+
+        monkeypatch.setattr(next_workers.arrow, "now", mock_now)
+
+        def mock_utcnow():
+            return arrow.get("2018-12-27")
+
+        monkeypatch.setattr(next_workers.arrow, "utcnow", mock_utcnow)
+
+        workers = next_workers.after_download_weather(
+            Message("download_weather", "success 06"), config, checklist
         )
-        p_utcnow = patch(
-            "nowcast.next_workers.arrow.utcnow",
-            return_value=arrow.get("2018-12-27"),
-            autospec=True,
-        )
-        with p_now, p_utcnow:
-            workers = next_workers.after_download_weather(
-                Message("download_weather", "success 06"), config, checklist
-            )
         expected = [
             NextWorker(
                 "nowcast.workers.collect_river_data",
@@ -139,8 +134,7 @@ class TestAfterDownloadWeather:
             ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
-            #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
-            # NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
+            NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
             NextWorker(
                 "nowcast.workers.get_NeahBay_ssh", ["forecast2"], host="localhost"
@@ -185,21 +179,20 @@ class TestAfterCollectWeather:
         )
         assert workers == []
 
-    def test_success_06(self, config, checklist):
-        p_now = patch(
-            "nowcast.next_workers.arrow.now",
-            return_value=arrow.get("2018-12-27"),
-            autospec=True,
+    def test_success_06(self, config, checklist, monkeypatch):
+        def mock_now():
+            return arrow.get("2018-12-27")
+
+        monkeypatch.setattr(next_workers.arrow, "now", mock_now)
+
+        def mock_utcnow():
+            return arrow.get("2018-12-27")
+
+        monkeypatch.setattr(next_workers.arrow, "utcnow", mock_utcnow)
+
+        workers = next_workers.after_collect_weather(
+            Message("download_weather", "success 06"), config, checklist
         )
-        p_utcnow = patch(
-            "nowcast.next_workers.arrow.utcnow",
-            return_value=arrow.get("2018-12-27"),
-            autospec=True,
-        )
-        with p_now, p_utcnow:
-            workers = next_workers.after_collect_weather(
-                Message("download_weather", "success 06"), config, checklist
-            )
         expected = [
             NextWorker(
                 "nowcast.workers.collect_river_data",
@@ -218,8 +211,7 @@ class TestAfterCollectWeather:
             ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
-            #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
-            # NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
+            NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
             NextWorker(
                 "nowcast.workers.get_NeahBay_ssh", ["forecast2"], host="localhost"
@@ -276,19 +268,23 @@ class TestAfterCollectRiverData:
         )
         assert workers == []
 
-    def test_success_Fraser_launch_make_runoff_file(self, config, checklist):
-        with patch.dict(checklist, {"river data": {"river name": "Fraser"}}):
-            workers = next_workers.after_collect_river_data(
-                Message("collect_river_data", "success"), config, checklist
-            )
+    def test_success_Fraser_launch_make_runoff_file(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(checklist, "river data", {"river name": "Fraser"})
+        workers = next_workers.after_collect_river_data(
+            Message("collect_river_data", "success"), config, checklist
+        )
         expected = NextWorker("nowcast.workers.make_runoff_file", [], host="localhost")
         assert expected in workers
 
-    def test_success_Englishman_no_launch_make_runoff_file(self, config, checklist):
-        with patch.dict(checklist, {"river data": {"river name": "Englishman"}}):
-            workers = next_workers.after_collect_river_data(
-                Message("collect_river_data", "success"), config, checklist
-            )
+    def test_success_Englishman_no_launch_make_runoff_file(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(checklist, "river data", {"river name": "Englishman"})
+        workers = next_workers.after_collect_river_data(
+            Message("collect_river_data", "success"), config, checklist
+        )
         assert workers == []
 
 
@@ -461,16 +457,16 @@ class TestAfterDownloadLiveOcean:
         )
         assert workers == []
 
-    def test_success_launch_make_live_ocean_files(self, config, checklist):
+    def test_success_launch_make_live_ocean_files(self, config, checklist, monkeypatch):
         # Ensure that run date for make_live_ocean_files is same as most recently downloaded
         # files in the event that the checklist was not cleared after the previous day's
         # operations
-        with patch.dict(
-            checklist, {"Live Ocean products": {"2017-02-14": [], "2017-02-15": []}}
-        ):
-            workers = next_workers.after_download_live_ocean(
-                Message("download_live_ocean", "success"), config, checklist
-            )
+        monkeypatch.setitem(
+            checklist, "Live Ocean products", {"2017-02-14": [], "2017-02-15": []}
+        )
+        workers = next_workers.after_download_live_ocean(
+            Message("download_live_ocean", "success"), config, checklist
+        )
         expected = NextWorker(
             "nowcast.workers.make_live_ocean_files",
             args=["--run-date", "2017-02-15"],
@@ -564,30 +560,30 @@ class TestAfterUploadForcing:
         assert workers == []
 
     @pytest.mark.parametrize("run_type", ["nowcast+", "ssh", "forecast2"])
-    def test_success_launch_make_forcing_links(self, run_type, config, checklist):
-        p_config = patch.dict(
+    def test_success_launch_make_forcing_links(
+        self, run_type, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(
             config,
+            "run",
             {
-                "run": {
-                    "enabled hosts": {
-                        "arbutus.cloud": {
-                            "run types": "nowcast-agrif",
-                            "make forcing links": True,
-                        }
+                "enabled hosts": {
+                    "arbutus.cloud": {
+                        "run types": "nowcast-agrif",
+                        "make forcing links": True,
                     }
                 }
             },
         )
-        with p_config:
-            workers = next_workers.after_upload_forcing(
-                Message(
-                    "upload_forcing",
-                    f"success {run_type}",
-                    {"arbutus.cloud": f"2016-10-11 {run_type}"},
-                ),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_upload_forcing(
+            Message(
+                "upload_forcing",
+                f"success {run_type}",
+                {"arbutus.cloud": f"2016-10-11 {run_type}"},
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
             args=["arbutus.cloud", run_type],
@@ -596,27 +592,27 @@ class TestAfterUploadForcing:
         assert expected in workers
 
     @pytest.mark.parametrize("run_type", ["nowcast+", "ssh", "forecast2"])
-    def test_success_no_launch_make_forcing_links(self, run_type, config, checklist):
-        p_config = patch.dict(
+    def test_success_no_launch_make_forcing_links(
+        self, run_type, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(
             config,
+            "run",
             {
-                "run": {
-                    "enabled hosts": {
-                        "cedar-hindcast": {"run types": {}, "make forcing links": False}
-                    }
+                "enabled hosts": {
+                    "cedar-hindcast": {"run types": {}, "make forcing links": False}
                 }
             },
         )
-        with p_config:
-            workers = next_workers.after_upload_forcing(
-                Message(
-                    "upload_forcing",
-                    f"success {run_type}",
-                    {"cedar-hindcast": f"2018-04-03 {run_type}"},
-                ),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_upload_forcing(
+            Message(
+                "upload_forcing",
+                f"success {run_type}",
+                {"cedar-hindcast": f"2018-04-03 {run_type}"},
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
             args=["cedar-hindcast", run_type],
@@ -644,31 +640,29 @@ class TestAfterUploadForcing:
         assert expected in workers
 
     def test_success_turbidity_no_launch_make_forcing_links_agrif(
-        self, config, checklist
+        self, config, checklist, monkeypatch
     ):
-        p_config = patch.dict(
+        monkeypatch.setitem(
             config,
+            "run",
             {
-                "run": {
-                    "enabled hosts": {
-                        "orcinus": {
-                            "run types": "nowcast-agrif",
-                            "make forcing links": False,
-                        }
+                "enabled hosts": {
+                    "orcinus": {
+                        "run types": "nowcast-agrif",
+                        "make forcing links": False,
                     }
                 }
             },
         )
-        with p_config:
-            workers = next_workers.after_upload_forcing(
-                Message(
-                    "upload_forcing",
-                    "success turbidity",
-                    {"orcinus": "2018-04-03 turbidity"},
-                ),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_upload_forcing(
+            Message(
+                "upload_forcing",
+                "success turbidity",
+                {"orcinus": "2018-04-03 turbidity"},
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
             args=["orcinus", "nowcast-agrif"],
@@ -676,30 +670,30 @@ class TestAfterUploadForcing:
         )
         assert expected not in workers
 
-    def test_success_turbidity_launch_make_forcing_links_agrif(self, config, checklist):
-        p_config = patch.dict(
+    def test_success_turbidity_launch_make_forcing_links_agrif(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(
             config,
+            "run",
             {
-                "run": {
-                    "enabled hosts": {
-                        "orcinus": {
-                            "run types": "nowcast-agrif",
-                            "make forcing links": True,
-                        }
+                "enabled hosts": {
+                    "orcinus": {
+                        "run types": "nowcast-agrif",
+                        "make forcing links": True,
                     }
                 }
             },
         )
-        with p_config:
-            workers = next_workers.after_upload_forcing(
-                Message(
-                    "upload_forcing",
-                    "success turbidity",
-                    {"orcinus": "2018-04-03 turbidity"},
-                ),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_upload_forcing(
+            Message(
+                "upload_forcing",
+                "success turbidity",
+                {"orcinus": "2018-04-03 turbidity"},
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
             args=["orcinus", "nowcast-agrif"],
@@ -760,17 +754,16 @@ class TestAfterMakeForcingLinks:
         ],
     )
     def test_success_launch_run_NEMO(
-        self, msg_type, args, host_name, config, checklist
+        self, msg_type, args, host_name, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"forcing links": {args[0]: {"links": "", "run date": args[-1]}}}
+        monkeypatch.setitem(
+            checklist, "forcing links", {args[0]: {"links": "", "run date": args[-1]}}
         )
-        with p_checklist:
-            workers = next_workers.after_make_forcing_links(
-                Message("make_forcing_links", msg_type, payload={args[0]: ""}),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_make_forcing_links(
+            Message("make_forcing_links", msg_type, payload={args[0]: ""}),
+            config,
+            checklist,
+        )
         expected = NextWorker("nowcast.workers.run_NEMO", args=args, host=host_name)
         assert expected in workers
 
@@ -784,17 +777,16 @@ class TestAfterMakeForcingLinks:
         ],
     )
     def test_success_nowcast_agrif_launch_run_NEMO_agrif(
-        self, msg_type, args, config, checklist
+        self, msg_type, args, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"forcing links": {args[0]: {"links": "", "run date": args[-1]}}}
+        monkeypatch.setitem(
+            checklist, "forcing links", {args[0]: {"links": "", "run date": args[-1]}}
         )
-        with p_checklist:
-            workers = next_workers.after_make_forcing_links(
-                Message("make_forcing_links", msg_type, payload={args[0]: ""}),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_make_forcing_links(
+            Message("make_forcing_links", msg_type, payload={args[0]: ""}),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.run_NEMO_agrif", args=args, host="localhost"
         )
@@ -959,25 +951,24 @@ class TestAfterWatchNEMO:
         assert workers[0] == expected
 
     def test_success_forecast_launch_make_ww3_wind_file_forecast(
-        self, config, checklist
+        self, config, checklist, monkeypatch
     ):
-        p_config = patch.dict(config["wave forecasts"], {"run when": "after forecast"})
-        with p_config:
-            workers = next_workers.after_watch_NEMO(
-                Message(
-                    "watch_NEMO",
-                    "success forecast",
-                    {
-                        "forecast": {
-                            "host": "arbutus.cloud",
-                            "run date": "2017-04-14",
-                            "completed": True,
-                        }
-                    },
-                ),
-                config,
-                checklist,
-            )
+        monkeypatch.setitem(config["wave forecasts"], "run when", "after forecast")
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                "watch_NEMO",
+                "success forecast",
+                {
+                    "forecast": {
+                        "host": "arbutus.cloud",
+                        "run date": "2017-04-14",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
             args=["arbutus.cloud", "forecast"],
@@ -986,25 +977,24 @@ class TestAfterWatchNEMO:
         assert workers[0] == expected
 
     def test_success_forecast_launch_make_ww3_current_file_forecast(
-        self, config, checklist
+        self, config, checklist, monkeypatch
     ):
-        p_config = patch.dict(config["wave forecasts"], {"run when": "after forecast"})
-        with p_config:
-            workers = next_workers.after_watch_NEMO(
-                Message(
-                    "watch_NEMO",
-                    "success forecast",
-                    {
-                        "forecast": {
-                            "host": "arbutus.cloud",
-                            "run date": "2017-04-14",
-                            "completed": True,
-                        }
-                    },
-                ),
-                config,
-                checklist,
-            )
+        monkeypatch.setitem(config["wave forecasts"], "run when", "after forecast")
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                "watch_NEMO",
+                "success forecast",
+                {
+                    "forecast": {
+                        "host": "arbutus.cloud",
+                        "run date": "2017-04-14",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
             args=["arbutus.cloud", "forecast"],
@@ -1086,27 +1076,24 @@ class TestAfterWatchNEMO:
         assert workers[1] == expected
 
     def test_success_nowcast_green_launch_make_ww3_wind_file_forecast(
-        self, config, checklist
+        self, config, checklist, monkeypatch
     ):
-        p_config = patch.dict(
-            config["wave forecasts"], {"run when": "after nowcast-green"}
+        monkeypatch.setitem(config["wave forecasts"], "run when", "after nowcast-green")
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                "watch_NEMO",
+                "success nowcast-green",
+                {
+                    "nowcast-green": {
+                        "host": "arbutus.cloud",
+                        "run date": "2017-04-14",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
         )
-        with p_config:
-            workers = next_workers.after_watch_NEMO(
-                Message(
-                    "watch_NEMO",
-                    "success nowcast-green",
-                    {
-                        "nowcast-green": {
-                            "host": "arbutus.cloud",
-                            "run date": "2017-04-14",
-                            "completed": True,
-                        }
-                    },
-                ),
-                config,
-                checklist,
-            )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
             args=["arbutus.cloud", "forecast"],
@@ -1115,27 +1102,24 @@ class TestAfterWatchNEMO:
         assert workers[0] == expected
 
     def test_success_nowcast_green_launch_make_ww3_current_file_forecast(
-        self, config, checklist
+        self, config, checklist, monkeypatch
     ):
-        p_config = patch.dict(
-            config["wave forecasts"], {"run when": "after nowcast-green"}
+        monkeypatch.setitem(config["wave forecasts"], "run when", "after nowcast-green")
+        workers = next_workers.after_watch_NEMO(
+            Message(
+                "watch_NEMO",
+                "success nowcast-green",
+                {
+                    "nowcast-green": {
+                        "host": "arbutus.cloud",
+                        "run date": "2017-04-14",
+                        "completed": True,
+                    }
+                },
+            ),
+            config,
+            checklist,
         )
-        with p_config:
-            workers = next_workers.after_watch_NEMO(
-                Message(
-                    "watch_NEMO",
-                    "success nowcast-green",
-                    {
-                        "nowcast-green": {
-                            "host": "arbutus.cloud",
-                            "run date": "2017-04-14",
-                            "completed": True,
-                        }
-                    },
-                ),
-                config,
-                checklist,
-            )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
             args=["arbutus.cloud", "forecast"],
@@ -2024,20 +2008,21 @@ class TestAfterDownloadResults:
         )
         assert expected in workers
 
-    def test_success_hindcast_launch_split_results(self, config, checklist):
-        p_checklist = patch.dict(
-            checklist, {"NEMO run": {"hindcast": {"run id": "11mar18hindcast"}}}
+    def test_success_hindcast_launch_split_results(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(
+            checklist, "NEMO run", {"hindcast": {"run id": "11mar18hindcast"}}
         )
-        with p_checklist:
-            workers = next_workers.after_download_results(
-                Message(
-                    "download_results",
-                    f"success hindcast",
-                    payload={"hindcast": {"run date": "2018-03-11"}},
-                ),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_download_results(
+            Message(
+                "download_results",
+                f"success hindcast",
+                payload={"hindcast": {"run date": "2018-03-11"}},
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.split_results",
             args=["hindcast", "2018-03-11"],
@@ -2111,31 +2096,29 @@ class TestAfterDownloadWWatch3Results:
         "msg_type",
         ["crash", "failure forecast2", "failure nowcast", "failure forecast"],
     )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        p_checklist = patch.dict(
-            checklist, {"WWATCH3 run": {"forecast": {"run date": "2017-12-24"}}}
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist, monkeypatch):
+        monkeypatch.setitem(
+            checklist, "WWATCH3 run", {"forecast": {"run date": "2017-12-24"}}
         )
-        with p_checklist:
-            workers = next_workers.after_download_wwatch3_results(
-                Message("download_wwatch3_results", msg_type), config, checklist
-            )
+        workers = next_workers.after_download_wwatch3_results(
+            Message("download_wwatch3_results", msg_type), config, checklist
+        )
         assert workers == []
 
     @pytest.mark.parametrize(
         "run_type, run_date", [("forecast", "2018-04-11"), ("forecast2", "2018-04-11")]
     )
     def test_success_forecast_launch_update_forecast_datasets(
-        self, run_type, run_date, config, checklist
+        self, run_type, run_date, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"WWATCH3 run": {run_type: {"run date": run_date}}}
+        monkeypatch.setitem(
+            checklist, "WWATCH3 run", {run_type: {"run date": run_date}}
         )
-        with p_checklist:
-            workers = next_workers.after_download_wwatch3_results(
-                Message("download_wwatch3_results", f"success {run_type}"),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_download_wwatch3_results(
+            Message("download_wwatch3_results", f"success {run_type}"),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.update_forecast_datasets",
             args=["wwatch3", run_type, "--run-date", run_date],
@@ -2144,17 +2127,14 @@ class TestAfterDownloadWWatch3Results:
         assert expected in workers
 
     def test_success_nowcast_no_launch_update_forecast_datasets(
-        self, config, checklist
+        self, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"WWATCH3 run": {"nowcast": {"run date": "2018-07-28"}}}
+        monkeypatch.setitem(
+            checklist, "WWATCH3 run", {"nowcast": {"run date": "2018-07-28"}}
         )
-        with p_checklist:
-            workers = next_workers.after_download_wwatch3_results(
-                Message("download_wwatch3_results", "success nowcast"),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_download_wwatch3_results(
+            Message("download_wwatch3_results", "success nowcast"), config, checklist
+        )
         assert workers == []
 
 
@@ -2265,26 +2245,27 @@ class TestAfterDownloadFVCOMResults:
         )
         assert expected not in workers
 
-    def test_success_forecast_launch_update_forecast_datasets(self, config, checklist):
-        p_checklist = patch.dict(
-            checklist, {"FVCOM run": {"forecast": {"run date": "2018-10-25"}}}
+    def test_success_forecast_launch_update_forecast_datasets(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(
+            checklist, "FVCOM run", {"forecast": {"run date": "2018-10-25"}}
         )
-        with p_checklist:
-            workers = next_workers.after_download_fvcom_results(
-                Message(
-                    "download_fvcom_results",
-                    "success x2 forecast",
-                    {
-                        "forecast": {
-                            "host": "arbutus.cloud",
-                            "model config": "x2",
-                            "run date": "2018-10-25",
-                        }
-                    },
-                ),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_download_fvcom_results(
+            Message(
+                "download_fvcom_results",
+                "success x2 forecast",
+                {
+                    "forecast": {
+                        "host": "arbutus.cloud",
+                        "model config": "x2",
+                        "run date": "2018-10-25",
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.update_forecast_datasets",
             args=["fvcom", "forecast", "--run-date", "2018-10-25"],
@@ -2305,14 +2286,13 @@ class TestAfterGetVFPA_HADCP:
         assert workers == []
 
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-    def test_success_launch_make_plots(self, run_type, config, checklist):
-        p_checklist = patch.dict(
-            checklist, {"FVCOM run": {run_type: {"run date": "2018-10-25"}}}
+    def test_success_launch_make_plots(self, run_type, config, checklist, monkeypatch):
+        monkeypatch.setitem(
+            checklist, "FVCOM run", {run_type: {"run date": "2018-10-25"}}
         )
-        with p_checklist:
-            workers = next_workers.after_get_vfpa_hadcp(
-                Message("after_get_vfpa_hadcp", "success"), config, checklist
-            )
+        workers = next_workers.after_get_vfpa_hadcp(
+            Message("after_get_vfpa_hadcp", "success"), config, checklist
+        )
         expected = NextWorker(
             "nowcast.workers.ping_erddap", args=["VFPA-HADCP"], host="localhost"
         )
@@ -2344,32 +2324,30 @@ class TestAfterUpdateForecastDatasets:
         "run_type, run_date", [("forecast", "2018-01-26"), ("forecast2", "2018-01-26")]
     )
     def test_success_nemo_launch_ping_erddap_nemo_forecast(
-        self, run_type, run_date, config, checklist
+        self, run_type, run_date, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"NEMO run": {run_type: {"run date": run_date}}}
+        monkeypatch.setitem(checklist, "NEMO run", {run_type: {"run date": run_date}})
+        workers = next_workers.after_update_forecast_datasets(
+            Message("update_forecast_datasets", f"success nemo {run_type}"),
+            config,
+            checklist,
         )
-        with p_checklist:
-            workers = next_workers.after_update_forecast_datasets(
-                Message("update_forecast_datasets", f"success nemo {run_type}"),
-                config,
-                checklist,
-            )
         expected = NextWorker(
             "nowcast.workers.ping_erddap", args=["nemo-forecast"], host="localhost"
         )
         assert expected in workers
 
-    def test_success_fvcom_launch_ping_erddap_fvcom_forecast(self, config, checklist):
-        p_checklist = patch.dict(
-            checklist, {"FVCOM run": {"x2 forecast": {"run date": "2019-04-15"}}}
+    def test_success_fvcom_launch_ping_erddap_fvcom_forecast(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(
+            checklist, "FVCOM run", {"x2 forecast": {"run date": "2019-04-15"}}
         )
-        with p_checklist:
-            workers = next_workers.after_update_forecast_datasets(
-                Message("update_forecast_datasets", f"success fvcom forecast"),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_update_forecast_datasets(
+            Message("update_forecast_datasets", f"success fvcom forecast"),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.ping_erddap", args=["fvcom-forecast"], host="localhost"
         )
@@ -2379,17 +2357,14 @@ class TestAfterUpdateForecastDatasets:
         "run_type, run_date", [("forecast", "2018-01-26"), ("forecast2", "2018-01-26")]
     )
     def test_success_nemo_launch_make_plots_forecast_publish(
-        self, run_type, run_date, config, checklist
+        self, run_type, run_date, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"NEMO run": {run_type: {"run date": run_date}}}
+        monkeypatch.setitem(checklist, "NEMO run", {run_type: {"run date": run_date}})
+        workers = next_workers.after_update_forecast_datasets(
+            Message("update_forecast_datasets", f"success nemo {run_type}"),
+            config,
+            checklist,
         )
-        with p_checklist:
-            workers = next_workers.after_update_forecast_datasets(
-                Message("update_forecast_datasets", f"success nemo {run_type}"),
-                config,
-                checklist,
-            )
         expected = NextWorker(
             "nowcast.workers.make_plots",
             args=["nemo", run_type, "publish", "--run-date", run_date],
@@ -2401,17 +2376,14 @@ class TestAfterUpdateForecastDatasets:
         "run_type, run_date", [("forecast", "2018-11-30"), ("forecast2", "2018-11-30")]
     )
     def test_success_nemo_launch_make_surface_current_tiles(
-        self, run_type, run_date, config, checklist
+        self, run_type, run_date, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"NEMO run": {run_type: {"run date": run_date}}}
+        monkeypatch.setitem(checklist, "NEMO run", {run_type: {"run date": run_date}})
+        workers = next_workers.after_update_forecast_datasets(
+            Message("update_forecast_datasets", f"success nemo {run_type}"),
+            config,
+            checklist,
         )
-        with p_checklist:
-            workers = next_workers.after_update_forecast_datasets(
-                Message("update_forecast_datasets", f"success nemo {run_type}"),
-                config,
-                checklist,
-            )
         expected = NextWorker(
             "nowcast.workers.make_surface_current_tiles",
             args=[run_type, "--run-date", run_date],
@@ -2423,17 +2395,16 @@ class TestAfterUpdateForecastDatasets:
         "run_type, run_date", [("forecast", "2018-04-12"), ("forecast2", "2018-04-12")]
     )
     def test_success_wwatch3_launch_ping_erddap_wwatch3(
-        self, run_type, run_date, config, checklist
+        self, run_type, run_date, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"WWATCH3 run": {run_type: {"run date": run_date}}}
+        monkeypatch.setitem(
+            checklist, "WWATCH3 run", {run_type: {"run date": run_date}}
         )
-        with p_checklist:
-            workers = next_workers.after_update_forecast_datasets(
-                Message("update_forecast_datasets", f"success wwatch3 {run_type}"),
-                config,
-                checklist,
-            )
+        workers = next_workers.after_update_forecast_datasets(
+            Message("update_forecast_datasets", f"success wwatch3 {run_type}"),
+            config,
+            checklist,
+        )
         expected = NextWorker(
             "nowcast.workers.ping_erddap", args=["wwatch3-forecast"], host="localhost"
         )
@@ -2473,20 +2444,16 @@ class TestAfterPingERDDAP:
 
     @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
     def test_success_wwatch3_launch_make_plots_wwatch3(
-        self, run_type, config, checklist
+        self, run_type, config, checklist, monkeypatch
     ):
         run_date = "2018-05-13"
-        p_checklist = patch.dict(
-            checklist,
-            {
-                "ERDDAP flag files": {"wwatch3 - forecast": []},
-                "WWATCH3 run": {run_type: {"run date": run_date}},
-            },
+        monkeypatch.setitem(checklist, "ERDDAP flag files", {"wwatch3 - forecast": []})
+        monkeypatch.setitem(
+            checklist, "WWATCH3 run", {run_type: {"run date": run_date}}
         )
-        with p_checklist:
-            workers = next_workers.after_ping_erddap(
-                Message("ping_erddap", f"success wwatch3-forecast"), config, checklist
-            )
+        workers = next_workers.after_ping_erddap(
+            Message("ping_erddap", f"success wwatch3-forecast"), config, checklist
+        )
         expected = NextWorker(
             "nowcast.workers.make_plots",
             args=["wwatch3", run_type, "publish", "--run-date", run_date],
@@ -2499,26 +2466,24 @@ class TestAfterPingERDDAP:
         (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
     )
     def test_success_vfpa_hadcp_launch_make_plots_fvcom_publish(
-        self, model_config, run_type, config, checklist
+        self, model_config, run_type, config, checklist, monkeypatch
     ):
         run_date = "2018-10-25"
-        p_checklist = patch.dict(
+        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
+        monkeypatch.setitem(
             checklist,
+            "FVCOM run",
             {
-                "ERDDAP flag files": {"VFPA-HADCP": []},
-                "FVCOM run": {
-                    f"{model_config} {run_type}": {
-                        "completed": True,
-                        "model config": model_config,
-                        "run date": run_date,
-                    }
-                },
+                f"{model_config} {run_type}": {
+                    "completed": True,
+                    "model config": model_config,
+                    "run date": run_date,
+                }
             },
         )
-        with p_checklist:
-            workers = next_workers.after_ping_erddap(
-                Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-            )
+        workers = next_workers.after_ping_erddap(
+            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
+        )
         expected = NextWorker(
             "nowcast.workers.make_plots",
             args=[
@@ -2537,45 +2502,45 @@ class TestAfterPingERDDAP:
         (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
     )
     def test_success_vfpa_hadcp_no_fvcom_run_in_checklist(
-        self, model_config, run_type, config, checklist
+        self, model_config, run_type, config, checklist, monkeypatch
     ):
-        run_date = "2018-11-08"
-        p_checklist = patch.dict(checklist, {"ERDDAP flag files": {"VFPA-HADCP": []}})
-        with p_checklist:
-            workers = next_workers.after_ping_erddap(
-                Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-            )
+        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
+        workers = next_workers.after_ping_erddap(
+            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
+        )
         assert workers == []
 
     @pytest.mark.parametrize(
         "model_config, run_type", (("x2", "nowcast"), ("x2", "forecast"))
     )
     def test_success_vfpa_hadcp_not_complete_run_no_launch_make_plots_fvcom_publish(
-        self, model_config, run_type, config, checklist
+        self, model_config, run_type, config, checklist, monkeypatch
     ):
         run_date = "2018-10-25"
-        p_checklist = patch.dict(
+        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
+        monkeypatch.setitem(
             checklist,
+            "FVCOM run",
             {
-                "ERDDAP flag files": {"VFPA-HADCP": []},
-                "FVCOM run": {
-                    f"{model_config} {run_type}": {
-                        "completed": True,
-                        "model config": model_config,
-                        "run date": run_date,
-                    },
-                    "r12 nowcast": {
-                        "model config": "R12",
-                        "run date": run_date,
-                        "run exec cmd": "bash VHFR_FVCOM.sh",
-                    },
-                },
+                f"{model_config} {run_type}": {
+                    "completed": True,
+                    "model config": model_config,
+                    "run date": run_date,
+                }
             },
         )
-        with p_checklist:
-            workers = next_workers.after_ping_erddap(
-                Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-            )
+        monkeypatch.setitem(
+            checklist,
+            "r12 nowcast",
+            {
+                "model config": "R12",
+                "run date": run_date,
+                "run exec cmd": "bash VHFR_FVCOM.sh",
+            },
+        )
+        workers = next_workers.after_ping_erddap(
+            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
+        )
         expected = NextWorker(
             "nowcast.workers.make_plots",
             args=[
@@ -2648,15 +2613,14 @@ class TestAfterMakePlots:
         ],
     )
     def test_success_nemo_forecast_launch_make_feeds(
-        self, msg_type, run_type, config, checklist
+        self, msg_type, run_type, config, checklist, monkeypatch
     ):
-        p_checklist = patch.dict(
-            checklist, {"NEMO run": {run_type: {"run date": "2016-11-11"}}}
+        monkeypatch.setitem(
+            checklist, "NEMO run", {run_type: {"run date": "2016-11-11"}}
         )
-        with p_checklist:
-            workers = next_workers.after_make_plots(
-                Message("make_plots", msg_type), config, checklist
-            )
+        workers = next_workers.after_make_plots(
+            Message("make_plots", msg_type), config, checklist
+        )
         expected = NextWorker(
             "nowcast.workers.make_feeds",
             args=[run_type, "--run-date", "2016-11-11"],
