@@ -14,6 +14,7 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast download_results worker.
 """
+import logging
 from pathlib import Path
 import shlex
 import textwrap
@@ -301,17 +302,18 @@ class TestConfig:
         ("nowcast-agrif", "orcinus-nowcast-agrif"),
     ],
 )
-@patch("nowcast.workers.download_results.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, run_type, host_name):
+    def test_success(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2017-12-24")
         )
+        caplog.set_level(logging.INFO)
         msg_type = download_results.success(parsed_args)
-        assert m_logger.info.called
+        assert caplog.records[0].levelname == "INFO"
+        assert caplog.messages[0].endswith(f"results files from {host_name} downloaded")
         assert msg_type == "success {}".format(run_type)
 
 
@@ -326,21 +328,23 @@ class TestSuccess:
         ("nowcast-agrif", "orcinus-nowcast-agrif"),
     ],
 )
-@patch("nowcast.workers.download_results.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, run_type, host_name):
+    def test_failure(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(
             host_name=host_name, run_type=run_type, run_date=arrow.get("2017-12-24")
         )
+        caplog.set_level(logging.CRITICAL)
         msg_type = download_results.failure(parsed_args)
-        assert m_logger.critical.called
+        assert caplog.records[0].levelname == "CRITICAL"
+        assert caplog.messages[0].endswith(
+            f"results files download from {host_name} failed"
+        )
         assert msg_type == "failure {}".format(run_type)
 
 
-@patch("nowcast.workers.download_results.logger", autospec=True)
 @patch("nowcast.workers.download_results.lib.run_in_subprocess", spec=True)
 @patch("nowcast.workers.download_results.lib.fix_perms", autospec=True)
 class TestDownloadResults:
@@ -359,7 +363,7 @@ class TestDownloadResults:
         ],
     )
     def test_unrecognized_host(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, config
+        self, m_fix_perms, m_run_in_subproc, run_type, config, caplog, monkeypatch
     ):
         parsed_args = SimpleNamespace(
             host_name="foo",
@@ -367,9 +371,15 @@ class TestDownloadResults:
             dest_host="localhost",
             run_date=arrow.get("2018-05-22"),
         )
-        config = {}
+        monkeypatch.setitem(config, "run", {"hindcast hosts": {"optimum-hindcast": {}}})
+        monkeypatch.setitem(
+            config, "run", {"enabled hosts": {"arbutus.cloud-nowcast": {}}}
+        )
+        caplog.set_level(logging.CRITICAL)
         with pytest.raises(nemo_nowcast.WorkerError):
             download_results.download_results(parsed_args, config)
+        assert caplog.records[0].levelname == "CRITICAL"
+        assert caplog.messages[0] == "unrecognized host: foo"
 
     @pytest.mark.parametrize(
         "run_type, host_name",
@@ -383,7 +393,7 @@ class TestDownloadResults:
         ],
     )
     def test_scp_to_localhost_subprocess(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
+        self, m_fix_perms, m_run_in_subproc, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -396,13 +406,11 @@ class TestDownloadResults:
             shlex.split(
                 f"scp -pr {host_name}:SalishSea/{run_type}/22may18 SalishSea/{run_type}"
             ),
-            m_logger.debug,
-            m_logger.error,
+            download_results.logger.debug,
+            download_results.logger.error,
         )
 
-    def test_scp_to_dest_host_subprocess(
-        self, m_fix_perms, m_run_in_subproc, m_logger, config
-    ):
+    def test_scp_to_dest_host_subprocess(self, m_fix_perms, m_run_in_subproc, config):
         parsed_args = SimpleNamespace(
             host_name="sockeye-hindcast",
             run_type="hindcast",
@@ -414,8 +422,8 @@ class TestDownloadResults:
             shlex.split(
                 "scp -pr sockeye-hindcast:SalishSea/hindcast/03sep19 beluga-hindcast:nearline/SalishSea/hindcast"
             ),
-            m_logger.debug,
-            m_logger.error,
+            download_results.logger.debug,
+            download_results.logger.error,
         )
 
     @pytest.mark.parametrize(
@@ -427,7 +435,7 @@ class TestDownloadResults:
         ],
     )
     def test_unlink_fvcom_boundary_files(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
+        self, m_fix_perms, m_run_in_subproc, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -455,7 +463,7 @@ class TestDownloadResults:
         (("optimum-hindcast", "localhost"), ("sockeye-hindcast", "beluga-hindcast")),
     )
     def test_hindcast_not_unlink_fvcom_boundary_files(
-        self, m_fix_perms, m_run_in_subproc, m_logger, host_name, dest_host, config
+        self, m_fix_perms, m_run_in_subproc, host_name, dest_host, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -489,14 +497,7 @@ class TestDownloadResults:
     )
     @patch("nowcast.workers.download_results.lib.FilePerms", autospec=True)
     def test_results_dir_fix_perms(
-        self,
-        m_file_perms,
-        m_fix_perms,
-        m_run_in_subproc,
-        m_logger,
-        run_type,
-        host_name,
-        config,
+        self, m_file_perms, m_fix_perms, m_run_in_subproc, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -525,7 +526,7 @@ class TestDownloadResults:
         ],
     )
     def test_results_files_fix_perms(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
+        self, m_fix_perms, m_run_in_subproc, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -556,7 +557,7 @@ class TestDownloadResults:
         ],
     )
     def test_checklist(
-        self, m_fix_perms, m_run_in_subproc, m_logger, run_type, host_name, config
+        self, m_fix_perms, m_run_in_subproc, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -589,7 +590,7 @@ class TestDownloadResults:
             }
         }
 
-    def test_checklist_agrif(self, m_fix_perms, m_run_in_subproc, m_logger, config):
+    def test_checklist_agrif(self, m_fix_perms, m_run_in_subproc, config):
         parsed_args = SimpleNamespace(
             host_name="orcinus-nowcast-agrif",
             run_type="nowcast-agrif",

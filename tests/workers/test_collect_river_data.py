@@ -14,6 +14,7 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast collect_river_data worker.
 """
+import logging
 from pathlib import Path
 import textwrap
 from types import SimpleNamespace
@@ -56,47 +57,35 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.collect_river_data.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(collect_river_data, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function.
     """
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_river_data.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("collect_river_data",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_river_data.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_river_data.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("river_name",)
-        assert "help" in kwargs
-
-    def test_add_data_date_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_river_data.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--data-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_river_data.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            collect_river_data.collect_river_data,
-            collect_river_data.success,
-            collect_river_data.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = collect_river_data.main()
+        assert worker.name == "collect_river_data"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that collects river discharge observations data"
         )
+
+    def test_add_river_name_arg(self, mock_worker):
+        worker = collect_river_data.main()
+        assert worker.cli.parser._actions[3].dest == "river_name"
+        assert worker.cli.parser._actions[3].default is None
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_data_date_option(self, mock_worker):
+        worker = collect_river_data.main()
+        assert worker.cli.parser._actions[4].dest == "data_date"
+        expected = nemo_nowcast.cli.CommandLineInterface._arrow_date
+        assert worker.cli.parser._actions[4].type == expected
+        assert worker.cli.parser._actions[4].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[4].help
 
 
 class TestConfig:
@@ -108,10 +97,14 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["collect_river_data"]
         assert msg_registry["checklist key"] == "river data"
 
-    @pytest.mark.parametrize("msg", ("success", "failure", "crash"))
-    def test_message_types(self, msg, prod_config):
+    def test_message_registry_keys(self, prod_config):
         msg_registry = prod_config["message registry"]["workers"]["collect_river_data"]
-        assert msg in msg_registry
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success",
+            "failure",
+            "crash",
+        ]
 
     def test_rivers_sections(self, prod_config):
         rivers = prod_config["rivers"]
@@ -147,37 +140,41 @@ class TestConfig:
         }
 
 
-@patch("nowcast.workers.collect_river_data.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function.
     """
 
-    def test_success(self, m_logger):
+    def test_success(self, caplog):
         parsed_args = SimpleNamespace(
             river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
+        caplog.set_level(logging.INFO)
         msg_type = collect_river_data.success(parsed_args)
-        m_logger.info.assert_called_once_with(
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
             "Fraser river average discharge for 2018-12-26 calculated and appended to Fraser_"
             "flow file"
         )
+        assert caplog.messages[0] == expected
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.collect_river_data.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function.
     """
 
-    def test_failure(self, m_logger):
+    def test_failure(self, caplog):
         parsed_args = SimpleNamespace(
             river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
+        caplog.set_level(logging.CRITICAL)
         msg_type = collect_river_data.failure(parsed_args)
-        m_logger.critical.assert_called_once_with(
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
             "Calculation of Fraser river average discharge for 2018-12-26 or "
             "appending it to Fraser_flow file failed"
         )
+        assert caplog.messages[0] == expected
         assert msg_type == "failure"
 
 
@@ -213,13 +210,14 @@ class TestCollectRiverData:
         assert checklist == expected
 
 
-@patch("nowcast.workers.collect_river_data.logger", autospec=True)
 @patch("nowcast.workers.collect_river_data.pandas.read_csv", autospec=True)
 class TestCalcDayAvgDischarge:
-    """Unit tests for _calc_day_avg_discharge() function.
+    """Unit test for _calc_day_avg_discharge() function.
     """
 
-    def test_calc_day_avg_discharge(self, m_read_csv, m_logger):
+    def test_calc_day_avg_discharge(self, m_read_csv, caplog, tmp_path):
+        data_date = arrow.get("2018-12-26")
+        csv_file = tmp_path / "cvs_file"
         data_frame = pandas.DataFrame(
             numpy.linspace(41.9, 44.1, 290),
             index=pandas.date_range(
@@ -228,21 +226,35 @@ class TestCalcDayAvgDischarge:
             columns=["Discharge / Débit (cms)"],
         )
         m_read_csv.return_value = data_frame
+
+        caplog.set_level(logging.DEBUG)
+
         day_avg_discharge = collect_river_data._calc_day_avg_discharge(
-            Path("cvs_file"), arrow.get("2018-12-26")
+            csv_file, data_date
         )
         numpy.testing.assert_almost_equal(day_avg_discharge, 43.0)
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"average discharge for {data_date.format('YYYY-MM-DD')} from {csv_file}: {day_avg_discharge:.6e} m^3/s"
+        assert caplog.messages[0] == expected
 
 
-@patch("nowcast.workers.collect_river_data.logger", autospec=True)
-@patch("nowcast.workers.collect_river_data.Path.open", spec=True)
 class TestStoreDayAvgDischarge:
-    """Unit tests for _store_day_avg_discharge() function.
+    """Unit test for _store_day_avg_discharge() function.
     """
 
-    def test_store_day_avg_discharge(self, m_open, m_logger):
+    def test_store_day_avg_discharge(self, caplog, tmp_path):
+        data_date = arrow.get("2018-12-26")
+        day_avg_discharge = 123.456
+        sog_flow_file = tmp_path / "river_flow"
+        sog_flow_file.write_text("2018 12 25 1.654320e+02\n")
+
+        caplog.set_level(logging.DEBUG)
+
         collect_river_data._store_day_avg_discharge(
-            arrow.get("2018-12-26"), 123.456, Path("river_flow")
+            data_date, day_avg_discharge, sog_flow_file
         )
-        m_open.assert_called_once_with("at")
-        m_open().__enter__().write.assert_called_once_with("2018 12 26 1.234560e+02\n")
+        with sog_flow_file.open("rt") as fp:
+            assert fp.readlines()[-1] == "2018 12 26 1.234560e+02\n"
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"appended {data_date.format('YYYY MM DD')} {day_avg_discharge:.6e} to: {sog_flow_file}"
+        assert caplog.messages[0] == expected
