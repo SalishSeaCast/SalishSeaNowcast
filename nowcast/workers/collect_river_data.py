@@ -42,6 +42,7 @@ def main():
         help="Date to collect river data for.",
     )
     worker.run(collect_river_data, success, failure)
+    return worker
 
 
 def success(parsed_args):
