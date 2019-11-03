@@ -14,6 +14,7 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast collect_weather worker.
 """
+import logging
 import os
 from pathlib import Path
 import textwrap
@@ -65,40 +66,27 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.collect_weather.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(collect_weather, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function.
     """
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_weather.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("collect_weather",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_weather.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_forecast_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_weather.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("forecast",)
-        assert kwargs["choices"] == {"00", "06", "12", "18"}
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        collect_weather.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            collect_weather.collect_weather,
-            collect_weather.success,
-            collect_weather.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = collect_weather.main()
+        assert worker.name == "collect_weather"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that monitors a mirror of HRDPS files from the ECCC MSC datamart"
         )
+
+    def test_add_forecast_arg(self, mock_worker):
+        worker = collect_weather.main()
+        assert worker.cli.parser._actions[3].dest == "forecast"
+        assert worker.cli.parser._actions[3].choices == {"00", "06", "12", "18"}
+        assert worker.cli.parser._actions[3].help
 
 
 class TestConfig:
@@ -110,9 +98,10 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["collect_weather"]
         assert msg_registry["checklist key"] == "weather forecast"
 
-    @pytest.mark.parametrize(
-        "msg",
-        (
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["collect_weather"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
             "success 00",
             "failure 00",
             "success 06",
@@ -122,11 +111,7 @@ class TestConfig:
             "success 18",
             "failure 18",
             "crash",
-        ),
-    )
-    def test_message_types(self, msg, prod_config):
-        msg_registry = prod_config["message registry"]["workers"]["collect_weather"]
-        assert msg in msg_registry
+        ]
 
     def test_file_group(self, prod_config):
         assert "file group" in prod_config
@@ -174,23 +159,22 @@ class TestConfig:
         ("18", "2018-12-28 21:54:43", "2018-12-28"),
     ),
 )
-@patch("nowcast.workers.collect_weather.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, forecast, utcnow, forecast_date):
+    def test_success(self, forecast, utcnow, forecast_date, caplog, monkeypatch):
+        def mock_utcnow():
+            return arrow.get(utcnow)
+
+        monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
         parsed_args = SimpleNamespace(forecast=forecast)
-        p_now = patch(
-            "nowcast.workers.collect_weather.arrow.utcnow",
-            return_value=arrow.get(utcnow),
-            autospec=True,
-        )
-        with p_now:
-            msg_type = collect_weather.success(parsed_args)
-        m_logger.info.assert_called_once_with(
-            f"{forecast_date} weather forecast {parsed_args.forecast} collection complete"
-        )
+        caplog.set_level(logging.INFO)
+
+        msg_type = collect_weather.success(parsed_args)
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{forecast_date} weather forecast {parsed_args.forecast} collection complete"
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {forecast}"
 
 
@@ -203,23 +187,24 @@ class TestSuccess:
         ("18", "2018-12-28 21:54:43", "2018-12-28"),
     ),
 )
-@patch("nowcast.workers.collect_weather.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, forecast, utcnow, forecast_date):
+    def test_failure(self, forecast, utcnow, forecast_date, caplog, monkeypatch):
+        def mock_utcnow():
+            return arrow.get(utcnow)
+
+        monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
         parsed_args = SimpleNamespace(forecast=forecast)
-        p_now = patch(
-            "nowcast.workers.collect_weather.arrow.utcnow",
-            return_value=arrow.get(utcnow),
-            autospec=True,
-        )
-        with p_now:
-            msg_type = collect_weather.failure(parsed_args)
-        m_logger.critical.assert_called_once_with(
+        caplog.set_level(logging.CRITICAL)
+
+        msg_type = collect_weather.failure(parsed_args)
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
             f"{forecast_date} weather forecast {parsed_args.forecast} collection failed"
         )
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {forecast}"
 
 
@@ -232,7 +217,6 @@ class TestFailure:
         ("18", "2018-12-28 21:54:43", "20181228"),
     ),
 )
-@patch("nowcast.workers.collect_weather.logger", autospec=True)
 @patch(
     "nowcast.workers.collect_weather._calc_expected_files",
     return_value=set(),
@@ -249,20 +233,19 @@ class TestCollectWeather:
         m_obs,
         m_mkdir,
         m_calc_exp_files,
-        m_logger,
         forecast,
         utcnow,
         forecast_date,
         config,
+        caplog,
+        monkeypatch,
     ):
+        def mock_utcnow():
+            return arrow.get(utcnow)
+
+        monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
         parsed_args = SimpleNamespace(forecast=forecast)
-        p_now = patch(
-            "nowcast.workers.collect_weather.arrow.utcnow",
-            return_value=arrow.get(utcnow),
-            autospec=True,
-        )
-        with p_now:
-            cheklist = collect_weather.collect_weather(parsed_args, config)
+        cheklist = collect_weather.collect_weather(parsed_args, config)
         assert cheklist == {
             forecast: f"forcing/atmospheric/GEM2.5/GRIB/{forecast_date}/{forecast}"
         }
@@ -277,23 +260,22 @@ class TestCollectWeather:
         ("18", arrow.get("2018-12-28 21:54:43")),
     ),
 )
-@patch("nowcast.workers.collect_weather.logger", autospec=True)
 class TestCalcExpectedFiles:
     """Unit tests for _calc_expected_files() function.
     """
 
-    def test_expected_files(self, m_logger, forecast, utcnow, config, prod_config):
+    def test_expected_files(
+        self, forecast, utcnow, config, prod_config, caplog, monkeypatch
+    ):
+        def mock_utcnow():
+            return arrow.get(utcnow)
+
+        monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
         datamart_dir = Path(config["weather"]["download"]["datamart dir"])
         forecast_date = utcnow.shift(hours=-int(forecast)).format("YYYYMMDD")
-        p_utcnow = patch(
-            "nowcast.workers.collect_weather.arrow.utcnow",
-            return_value=utcnow,
-            autospec=True,
+        expected_files = collect_weather._calc_expected_files(
+            datamart_dir, forecast, forecast_date, config
         )
-        with p_utcnow:
-            expected_files = collect_weather._calc_expected_files(
-                datamart_dir, forecast, forecast_date, config
-            )
         forecast_duration = prod_config["weather"]["download"]["forecast duration"]
         grib_vars = prod_config["weather"]["download"]["grib variables"]
         file_template = config["weather"]["download"]["file template"]
@@ -333,10 +315,9 @@ class TestGribFileEventHandler:
         assert handler.grib_forecast_dir == Path()
         assert handler.grp_name == config["file group"]
 
-    @patch("nowcast.workers.collect_weather.logger", autospec=True)
     @patch("nowcast.workers.collect_weather.lib.mkdir", autospec=True)
     @patch("nowcast.workers.collect_weather.shutil.move", autospec=True)
-    def test_move_expected_file(self, m_move, m_mkdir, m_logger, config):
+    def test_move_expected_file(self, m_move, m_mkdir, config, caplog):
         expected_file = Path(
             config["weather"]["download"]["datamart dir"],
             "18/043/CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2",
@@ -346,25 +327,25 @@ class TestGribFileEventHandler:
             config["weather"]["download"]["GRIB dir"], "20181230", "18"
         )
         grib_hour_dir = grib_forecast_dir / "043"
+        caplog.set_level(logging.DEBUG)
+
         handler = collect_weather._GribFileEventHandler(
             expected_files, grib_forecast_dir, grp_name=config["file group"]
         )
         handler.on_moved(Mock(name="event", dest_path=expected_file))
         m_mkdir.assert_called_once_with(
-            grib_hour_dir, m_logger, grp_name=config["file group"]
+            grib_hour_dir, collect_weather.logger, grp_name=config["file group"]
         )
         m_move.assert_called_once_with(
             os.fspath(expected_file), os.fspath(grib_hour_dir)
         )
-        m_logger.debug.assert_called_once_with(
-            f"moved {expected_file} to {grib_hour_dir}/"
-        )
+        assert caplog.records[0].levelname == "DEBUG"
+        assert caplog.messages[0] == f"moved {expected_file} to {grib_hour_dir}/"
         assert expected_file not in expected_files
 
-    @patch("nowcast.workers.collect_weather.logger", autospec=True)
     @patch("nowcast.workers.collect_weather.lib.mkdir", autospec=True)
     @patch("nowcast.workers.collect_weather.shutil.move", autospec=True)
-    def test_ignore_unexpected_file(self, m_move, m_mkdir, m_logger, config):
+    def test_ignore_unexpected_file(self, m_move, m_mkdir, config, caplog):
         expected_file = Path(
             config["weather"]["download"]["datamart dir"],
             "18/043/CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2",
@@ -373,12 +354,13 @@ class TestGribFileEventHandler:
         grib_forecast_dir = Path(
             config["weather"]["download"]["GRIB dir"], "20181230", "18"
         )
-        grib_hour_dir = grib_forecast_dir / "043"
+        caplog.set_level(logging.DEBUG)
+
         handler = collect_weather._GribFileEventHandler(
             expected_files, grib_forecast_dir, grp_name=config["file group"]
         )
         handler.on_moved(Mock(name="event", dest_path="foo"))
         assert not m_mkdir.called
         assert not m_move.called
-        assert not m_logger.debug.called
+        assert not caplog.records
         assert expected_file in expected_files

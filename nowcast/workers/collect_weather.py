@@ -48,6 +48,7 @@ def main():
         help="Name of forecast to collect files for.",
     )
     worker.run(collect_weather, success, failure)
+    return worker
 
 
 def success(parsed_args):
