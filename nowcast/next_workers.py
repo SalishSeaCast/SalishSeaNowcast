@@ -629,6 +629,7 @@ def after_watch_NEMO(msg, config, checklist):
         "success forecast": [],
         "success forecast2": [],
     }
+    race_condition_workers = {}
     if msg.type.startswith("success"):
         run_type = msg.type.split()[1]
         wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[1]
@@ -665,6 +666,7 @@ def after_watch_NEMO(msg, config, checklist):
                         ),
                     ]
                 )
+                race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
             else:
                 next_workers[msg.type].append(
                     NextWorker(
@@ -689,6 +691,7 @@ def after_watch_NEMO(msg, config, checklist):
                         ),
                     ]
                 )
+                race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
             for host in config["run"]["enabled hosts"]:
                 run_types = config["run"]["enabled hosts"][host]["run types"]
                 if "nowcast-dev" in run_types:
@@ -714,6 +717,7 @@ def after_watch_NEMO(msg, config, checklist):
                     ),
                 ]
             )
+            race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
         enabled_host_config = config["run"]["enabled hosts"][
             msg.payload[run_type]["host"]
         ]
@@ -729,6 +733,8 @@ def after_watch_NEMO(msg, config, checklist):
                     ],
                 )
             )
+    if race_condition_workers:
+        return next_workers[msg.type], race_condition_workers
     return next_workers[msg.type]
 
 
