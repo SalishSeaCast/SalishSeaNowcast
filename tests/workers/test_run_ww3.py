@@ -14,6 +14,7 @@
 #  limitations under the License.
 """Unit tests for Salish Sea WaveWatch3 nowcast/forecast run_ww3 worker.
 """
+import textwrap
 from pathlib import Path
 import subprocess
 from types import SimpleNamespace
@@ -416,31 +417,33 @@ class TestExecute:
     @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
     def test_forecast_execute(self, run_type):
         execution = run_ww3._execute(run_type, arrow.get("2017-04-20"))
-        expected = """echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 120 --bind-to none ${WW3_EXE}/ww3_shel \\
-          >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
-        mv log.ww3 ww3_shel.log && \\
-        rm current.ww3 wind.ww3 && \\
-        rm current/SoG_current_20170420.nc && \\
-        rm wind/SoG_wind_20170420.nc
-        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
-        """
-        expected = expected.splitlines()
-        for i, line in enumerate(execution.splitlines()):
-            assert line.strip() == expected[i].strip()
+        expected = textwrap.dedent(
+            """\
+            echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
+            ${MPIRUN} -np 75 --bind-to none ${WW3_EXE}/ww3_shel \\
+              >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+            mv log.ww3 ww3_shel.log && \\
+            rm current.ww3 wind.ww3 && \\
+            rm current/SoG_current_20170420.nc && \\
+            rm wind/SoG_wind_20170420.nc
+            echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
+            """
+        )
+        assert execution.splitlines() == expected.splitlines()
 
     def test_nowcast_execute(self):
         execution = run_ww3._execute("nowcast", arrow.get("2017-04-20"))
-        expected = """echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 120 --bind-to none ${WW3_EXE}/ww3_shel \\
-          >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
-        mv log.ww3 ww3_shel.log && \\
-        rm current.ww3 wind.ww3 && \\
-        echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
-        """
-        expected = expected.splitlines()
-        for i, line in enumerate(execution.splitlines()):
-            assert line.strip() == expected[i].strip()
+        expected = textwrap.dedent(
+            """\
+            echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
+            ${MPIRUN} -np 75 --bind-to none ${WW3_EXE}/ww3_shel \\
+              >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
+            mv log.ww3 ww3_shel.log && \\
+            rm current.ww3 wind.ww3 && \\
+            echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
+            """
+        )
+        assert execution.splitlines() == expected.splitlines()
 
 
 class TestNetcdfOutput:
