@@ -516,7 +516,7 @@ def _execute(run_type, run_date):
     start_date = run_date.format("YYYYMMDD")
     execution = (
         'echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout\n'
-        "${MPIRUN} -np 120 --bind-to none ${WW3_EXE}/ww3_shel \\\n"
+        "${MPIRUN} -np 75 --bind-to none ${WW3_EXE}/ww3_shel \\\n"
         "  >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\\n"
         "mv log.ww3 ww3_shel.log && \\\n"
         "rm current.ww3 wind.ww3 && \\\n"
