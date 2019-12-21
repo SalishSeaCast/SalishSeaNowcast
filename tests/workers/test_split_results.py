@@ -50,7 +50,7 @@ class TestMain:
     def test_add_run_date_arg(self, mock_worker):
         worker = split_results.main()
         assert worker.cli.parser._actions[4].dest == "run_date"
-        expected = nemo_nowcast.cli.CommandLineInterface._arrow_date
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
         assert worker.cli.parser._actions[4].type == expected
         assert worker.cli.parser._actions[4].default == None
         assert worker.cli.parser._actions[4].help

@@ -133,7 +133,7 @@ class TestMain:
     def test_add_run_date_option(self, mock_worker):
         worker = download_results.main()
         assert worker.cli.parser._actions[6].dest == "run_date"
-        expected = nemo_nowcast.cli.CommandLineInterface._arrow_date
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
         assert worker.cli.parser._actions[6].type == expected
         assert worker.cli.parser._actions[6].default == arrow.now().floor("day")
         assert worker.cli.parser._actions[6].help

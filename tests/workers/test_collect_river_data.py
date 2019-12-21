@@ -18,7 +18,7 @@ import logging
 from pathlib import Path
 import textwrap
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -82,7 +82,7 @@ class TestMain:
     def test_add_data_date_option(self, mock_worker):
         worker = collect_river_data.main()
         assert worker.cli.parser._actions[4].dest == "data_date"
-        expected = nemo_nowcast.cli.CommandLineInterface._arrow_date
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
         assert worker.cli.parser._actions[4].type == expected
         assert worker.cli.parser._actions[4].default == arrow.now().floor("day")
         assert worker.cli.parser._actions[4].help
