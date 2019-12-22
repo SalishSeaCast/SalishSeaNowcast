@@ -19,7 +19,7 @@ from pathlib import Path
 import shlex
 import textwrap
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -417,6 +417,7 @@ class TestDownloadResults:
             pass
 
         monkeypatch.setattr(download_results, "_tidy_dest_host", mock_tidy_dest_host)
+
         parsed_args = SimpleNamespace(
             host_name="sockeye-hindcast",
             run_type="hindcast",
@@ -441,58 +442,89 @@ class TestDownloadResults:
         ],
     )
     def test_unlink_fvcom_boundary_files(
-        self, m_fix_perms, m_run_in_subproc, run_type, host_name, config
+        self,
+        m_fix_perms,
+        m_run_in_subproc,
+        run_type,
+        host_name,
+        config,
+        tmp_path,
+        monkeypatch,
     ):
+        fvcom_t = tmp_path / "FVCOM_T.nc"
+        fvcom_t.write_bytes(b"")
+        fvcom_u = tmp_path / "FVCOM_U.nc"
+        fvcom_u.write_bytes(b"")
+        fvcom_v = tmp_path / "FVCOM_V.nc"
+        fvcom_v.write_bytes(b"")
+        fvcom_w = tmp_path / "FVCOM_W.nc"
+        fvcom_w.write_bytes(b"")
+
+        def mock_glob(path, pattern):
+            return (
+                [fvcom_t, fvcom_u, fvcom_v, fvcom_w]
+                if pattern.startswith("FVCOM")
+                else []
+            )
+
+        monkeypatch.setattr(download_results.Path, "glob", mock_glob)
+
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type=run_type,
             dest_host="localhost",
             run_date=arrow.get("2018-05-22"),
         )
-        m_fvcom_t = Mock(name="FVCOM_T.nc")
-        m_fvcom_u = Mock(name="FVCOM_U.nc")
-        m_fvcom_v = Mock(name="FVCOM_V.nc")
-        m_fvcom_w = Mock(name="FVCOM_W.nc")
-        p_glob = patch(
-            "nowcast.workers.download_results.Path.glob",
-            side_effect=[[m_fvcom_t, m_fvcom_u, m_fvcom_v, m_fvcom_w], [], [], []],
-        )
-        with p_glob:
-            download_results.download_results(parsed_args, config)
-        assert m_fvcom_t.unlink.called
-        assert m_fvcom_u.unlink.called
-        assert m_fvcom_v.unlink.called
-        assert m_fvcom_w.unlink.called
+        download_results.download_results(parsed_args, config)
+        assert not fvcom_t.exists()
+        assert not fvcom_u.exists()
+        assert not fvcom_v.exists()
+        assert not fvcom_w.exists()
 
     @pytest.mark.parametrize(
         "host_name, dest_host",
         (("optimum-hindcast", "localhost"), ("sockeye-hindcast", "beluga-hindcast")),
     )
     def test_hindcast_not_unlink_fvcom_boundary_files(
-        self, m_fix_perms, m_run_in_subproc, host_name, dest_host, config, monkeypatch
+        self,
+        m_fix_perms,
+        m_run_in_subproc,
+        host_name,
+        dest_host,
+        config,
+        tmp_path,
+        monkeypatch,
     ):
+        def mock_glob(*args):
+            return []
+
+        monkeypatch.setattr(download_results.Path, "glob", mock_glob)
+
         def mock_tidy_dest_host(*args):
             pass
 
         monkeypatch.setattr(download_results, "_tidy_dest_host", mock_tidy_dest_host)
+
+        fvcom_t = tmp_path / "FVCOM_T.nc"
+        fvcom_t.write_bytes(b"")
+        fvcom_u = tmp_path / "FVCOM_U.nc"
+        fvcom_u.write_bytes(b"")
+        fvcom_v = tmp_path / "FVCOM_V.nc"
+        fvcom_v.write_bytes(b"")
+        fvcom_w = tmp_path / "FVCOM_W.nc"
+        fvcom_w.write_bytes(b"")
+
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type="hindcast",
             dest_host=dest_host,
             run_date=arrow.get("2019-09-03"),
         )
-        m_fvcom_t = Mock(name="FVCOM_T.nc")
-        m_fvcom_u = Mock(name="FVCOM_U.nc")
-        m_fvcom_v = Mock(name="FVCOM_V.nc")
-        m_fvcom_w = Mock(name="FVCOM_W.nc")
-        with patch(
-            "nowcast.workers.download_results.Path.glob", side_effect=[[], [], []]
-        ):
-            download_results.download_results(parsed_args, config)
-        assert not m_fvcom_t.unlink.called
-        assert not m_fvcom_u.unlink.called
-        assert not m_fvcom_v.unlink.called
-        assert not m_fvcom_w.unlink.called
+        download_results.download_results(parsed_args, config)
+        assert fvcom_t.exists()
+        assert fvcom_u.exists()
+        assert fvcom_v.exists()
+        assert fvcom_w.exists()
 
     @pytest.mark.parametrize(
         "run_type, host_name",
