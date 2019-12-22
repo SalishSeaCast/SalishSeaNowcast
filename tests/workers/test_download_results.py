@@ -410,7 +410,13 @@ class TestDownloadResults:
             download_results.logger.error,
         )
 
-    def test_scp_to_dest_host_subprocess(self, m_fix_perms, m_run_in_subproc, config):
+    def test_scp_to_dest_host_subprocess(
+        self, m_fix_perms, m_run_in_subproc, config, monkeypatch
+    ):
+        def mock_tidy_dest_host(*args):
+            pass
+
+        monkeypatch.setattr(download_results, "_tidy_dest_host", mock_tidy_dest_host)
         parsed_args = SimpleNamespace(
             host_name="sockeye-hindcast",
             run_type="hindcast",
@@ -463,8 +469,12 @@ class TestDownloadResults:
         (("optimum-hindcast", "localhost"), ("sockeye-hindcast", "beluga-hindcast")),
     )
     def test_hindcast_not_unlink_fvcom_boundary_files(
-        self, m_fix_perms, m_run_in_subproc, host_name, dest_host, config
+        self, m_fix_perms, m_run_in_subproc, host_name, dest_host, config, monkeypatch
     ):
+        def mock_tidy_dest_host(*args):
+            pass
+
+        monkeypatch.setattr(download_results, "_tidy_dest_host", mock_tidy_dest_host)
         parsed_args = SimpleNamespace(
             host_name=host_name,
             run_type="hindcast",
