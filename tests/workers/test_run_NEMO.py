@@ -1016,10 +1016,12 @@ class TestRunDescription:
             run_desc = run_NEMO._run_description(
                 run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
             )
+        assert run_desc["vcs revisions"]["git"] == [
+            str(tmp_run_prep.join("..", "NEMO_Nowcast")),
+        ]
         assert run_desc["vcs revisions"]["hg"] == [
             str(tmp_run_prep.join("..", "grid")),
             str(tmp_run_prep.join("..", "NEMO-Cmd")),
-            str(tmp_run_prep.join("..", "NEMO_Nowcast")),
             str(tmp_run_prep.join("..", "rivers-climatology")),
             str(tmp_run_prep.join("..", "SalishSeaCmd")),
             str(tmp_run_prep.join("..", "SS-run-sets")),
