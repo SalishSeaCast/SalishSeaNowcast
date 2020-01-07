@@ -146,7 +146,7 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
 
     $ cd /SalishSeaCast
     $ conda update conda
-    $ conda create \
+    $ conda env create \
         --prefix /SalishSeaCast/salishsea-site-env \
         -f salishsea-site/env/environment-prod.yaml
     $ source activate /SalishSeaCast/salishsea-site-env
