@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Fixture for SalishSeaCast test suite.
+"""Fixtures for SalishSeaCast test suite.
 """
 from pathlib import Path
 from unittest.mock import patch
@@ -30,7 +30,7 @@ def base_config(tmpdir):
     p = tmpdir.join("config.yaml")
     p.write(
         """
-# Items required by the Config instance        
+# Items required by the Config instance
 checklist file: nowcast_checklist.yaml
 python: python
 logging:
