@@ -113,13 +113,13 @@ For the :kbd:`SalishSeaCast` automation system:
         --prefix /SalishSeaCast/nowcast-env \
         -f SalishSeaNowcast/env/environment-prod.yaml
     $ source activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO_Nowcast/
-    (/SalishSeaCast/nowcast-env)$ pip install --editable moad_tools/
-    (/SalishSeaCast/nowcast-env)$ pip install --editable tools/SalishSeaTools/
-    (/SalishSeaCast/nowcast-env)$ pip install --editable OPPTools/
-    (/SalishSeaCast/nowcast-env)$ pip install --editable NEMO-Cmd/
-    (/SalishSeaCast/nowcast-env)$ pip install --editable SalishSeaCmd/
-    (/SalishSeaCast/nowcast-env)$ pip install --editable SalishSeaNowcast/
+    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable NEMO_Nowcast/
+    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable moad_tools/
+    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable tools/SalishSeaTools/
+    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable OPPTools/
+    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable NEMO-Cmd/
+    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable SalishSeaCmd/
+    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable SalishSeaNowcast/
 
 For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_:
 
@@ -135,7 +135,7 @@ For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files 
         --channel conda-forge \
         python=3 appdirs watchdog netifaces humanize psutil paramiko
     $ source activate /SalishSeaCast/sarracenia-env
-    (/SalishSeaCast/sarracenia-env)$ pip install amqplib metpx-sarracenia
+    (/SalishSeaCast/sarracenia-env)$ python3 -m pip install amqplib metpx-sarracenia
     (/SalishSeaCast/sarracenia-env)$ sr_subscribe edit credentials.conf  # initialize datamart credentials
 
 For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.ca/:
@@ -150,7 +150,7 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
         --prefix /SalishSeaCast/salishsea-site-env \
         -f salishsea-site/env/environment-prod.yaml
     $ source activate /SalishSeaCast/salishsea-site-env
-    (/SalishSeaCast/salishsea-site-env) $ pip install --editable salishsea-site/
+    (/SalishSeaCast/salishsea-site-env) $ python3 -m pip install --editable salishsea-site/
 
 
 Environment Variables
