@@ -284,6 +284,17 @@ Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and
     $ mkdir -p /SalishSeaCast/datamart/hydrometric
 
 
+Logging Directories
+===================
+
+Create directories on :kbd:`skookum` for storage of the nowcast system and `salishsea-site web app`_ log files:
+
+.. code-block:: bash
+
+    $ mkdir -p /SalishSeaCast/logs/nowcast
+    $ mkdir -p /SalishSeaCast/logs/salishsea-site
+
+
 Static Web Site Assets Directories
 ==================================
 
