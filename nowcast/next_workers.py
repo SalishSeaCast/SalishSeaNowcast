@@ -1665,7 +1665,7 @@ def after_ping_erddap(msg, config, checklist):
             return next_workers[msg.type]
         for key in keys:
             model_config, run_type = key.split()
-            if not "completed" in checklist["FVCOM run"][f"{model_config} {run_type}"]:
+            if "completed" not in checklist["FVCOM run"][f"{model_config} {run_type}"]:
                 continue
             run_date = checklist["FVCOM run"][f"{model_config} {run_type}"]["run date"]
             next_workers[msg.type].extend(
