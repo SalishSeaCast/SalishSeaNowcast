@@ -1,17 +1,17 @@
-# Copyright 2013-2019 The Salish Sea MEOPAR Contributors
-# and The University of British Columbia
-
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-
-#    https://www.apache.org/licenses/LICENSE-2.0
-
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  and The University of British Columbia
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 """
 Produce surface currents tile figures in both website themed and unthemed style.
 """
@@ -46,7 +46,7 @@ def make_figure(
     :param run_date: Date of the run to create the figure tiles for.
     :type run_date: :py:class:`Arrow.arrow`
 
-    :param t_index: time index 
+    :param t_index: time index
     :type t_index: int
 
     :param Uf: Path to Salish Sea NEMO grid_U output file.
