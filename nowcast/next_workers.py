@@ -1656,12 +1656,6 @@ def after_ping_erddap(msg, config, checklist):
                 args=["wwatch3", run_type, "publish", "--run-date", run_date],
             )
         )
-        if run_type == "forecast2":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nemo_nowcast.workers.clear_checklist", args=[], host="localhost"
-                )
-            )
     if msg.type == "success VFPA-HADCP":
         try:
             keys = checklist["FVCOM run"].keys()
@@ -1671,7 +1665,7 @@ def after_ping_erddap(msg, config, checklist):
             return next_workers[msg.type]
         for key in keys:
             model_config, run_type = key.split()
-            if "completed" not in checklist["FVCOM run"][f"{model_config} {run_type}"]:
+            if not "completed" in checklist["FVCOM run"][f"{model_config} {run_type}"]:
                 continue
             run_date = checklist["FVCOM run"][f"{model_config} {run_type}"]["run date"]
             next_workers[msg.type].extend(
@@ -1802,7 +1796,7 @@ def after_make_feeds(msg, config, checklist):
         "failure forecast": [],
         "failure forecast2": [],
         "success forecast": [],
-        "success forecast2": [],
+        "success forecast2": [NextWorker("nemo_nowcast.workers.clear_checklist")],
     }
     return next_workers[msg.type]
 
