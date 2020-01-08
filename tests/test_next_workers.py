@@ -2477,22 +2477,6 @@ class TestAfterPingERDDAP:
         )
         assert expected in workers
 
-    def test_success_wwatch3_forecast2_launch_clear_checklist(
-        self, config, checklist, monkeypatch
-    ):
-        run_date = "2020-01-04"
-        monkeypatch.setitem(checklist, "ERDDAP flag files", {"wwatch3 - forecast": []})
-        monkeypatch.setitem(
-            checklist, "WWATCH3 run", {"forecast2": {"run date": run_date}}
-        )
-        workers = next_workers.after_ping_erddap(
-            Message("ping_erddap", f"success wwatch3-forecast"), config, checklist
-        )
-        expected = NextWorker(
-            "nemo_nowcast.workers.clear_checklist", args=[], host="localhost"
-        )
-        assert expected in workers
-
     @pytest.mark.parametrize(
         "model_config, run_type",
         (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
@@ -2679,19 +2663,21 @@ class TestAfterMakeFeeds:
 
     @pytest.mark.parametrize(
         "msg_type",
-        [
-            "crash",
-            "failure forecast",
-            "failure forecast2",
-            "success forecast",
-            "success forecast2",
-        ],
+        ["crash", "failure forecast", "failure forecast2", "success forecast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_feeds(
             Message("make_feeds", msg_type), config, checklist
         )
         assert workers == []
+
+    def test_success_forecast2_publish_launch_clear_checklist(self, config, checklist):
+        workers = next_workers.after_make_feeds(
+            Message("make_feeds", "success forecast2"), config, checklist
+        )
+        assert workers[-1] == NextWorker(
+            "nemo_nowcast.workers.clear_checklist", args=[], host="localhost"
+        )
 
 
 class TestAfterClearChecklist:
