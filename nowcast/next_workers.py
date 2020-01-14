@@ -1648,7 +1648,7 @@ def after_ping_erddap(msg, config, checklist):
     }
     if msg.type == "success wwatch3-forecast":
         run_types = checklist["WWATCH3 run"].keys()
-        run_type = "forecast" if "forecast" in run_types else "forecast2"
+        run_type = "forecast2" if "forecast2" in run_types else "forecast"
         run_date = checklist["WWATCH3 run"][run_type]["run date"]
         next_workers[msg.type].append(
             NextWorker(

@@ -2641,7 +2641,12 @@ class TestAfterMakePlots:
         self, config, checklist, monkeypatch
     ):
         monkeypatch.setitem(
-            checklist, "NEMO run", {"forecast2": {"run date": "2020-01-13"}}
+            checklist,
+            "NEMO run",
+            {
+                "forecast": {"run date": "2020-01-13"},
+                "forecast2": {"run date": "2020-01-13"},
+            },
         )
         workers, race_condition_workers = next_workers.after_make_plots(
             Message("make_plots", "success nemo forecast2 publish"), config, checklist
