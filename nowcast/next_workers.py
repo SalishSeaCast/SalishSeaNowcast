@@ -1736,6 +1736,7 @@ def after_make_plots(msg, config, checklist):
         "success wwatch3 forecast publish": [],
         "success wwatch3 forecast2 publish": [],
     }
+    race_condition_workers = {}
     if msg.type.startswith("success"):
         _, model, run_type, _ = msg.type.split()
         if model == "nemo" and "forecast" in run_type:
@@ -1749,6 +1750,10 @@ def after_make_plots(msg, config, checklist):
                     ],
                 )
             )
+            if run_type == "forecast2":
+                race_condition_workers = {"make_feeds", "ping_erddap"}
+    if race_condition_workers:
+        return next_workers[msg.type], race_condition_workers
     return next_workers[msg.type]
 
 
