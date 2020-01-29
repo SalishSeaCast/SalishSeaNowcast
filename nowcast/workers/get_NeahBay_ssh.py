@@ -41,7 +41,7 @@ logger = logging.getLogger(NAME)
 
 #: NOAA Neah Bay sea surface height observations & forecast site URL
 URL = (
-    "https://www.nws.noaa.gov/mdl/etsurge/index.php"
+    "https://slosh.nws.noaa.gov/etsurge/index.php"
     "?page=stn&region=wc&datum=msl&list=&map=0-48&type=both&stn=waneah"
 )
 
