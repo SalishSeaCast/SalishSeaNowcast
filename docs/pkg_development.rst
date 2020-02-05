@@ -129,13 +129,13 @@ The commands below assume that they are cloned beside your :kbd:`SalishSeaNowcas
 .. code-block:: bash
 
     $ cd SalishSeaNowcast
-    $ conda env create -f env/environment-dev.yaml
+    $ conda env create -f envs/environment-dev.yaml
     $ source activate salishsea-nowcast
-    (salishsea-nowcast)$ pip install --editable ../NEMO_Nowcast
-    (salishsea-nowcast)$ pip install --editable ../tools/SalishSeaTools
-    (salishsea-nowcast)$ pip install --editable ../NEMO-Cmd
-    (salishsea-nowcast)$ pip install --editable ../SalishSeaCmd
-    (salishsea-nowcast)$ pip install --editable .
+    (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO_Nowcast
+    (salishsea-nowcast)$ python3 -m pip install --editable ../tools/SalishSeaTools
+    (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO-Cmd
+    (salishsea-nowcast)$ python3 -m pip install --editable ../SalishSeaCmd
+    (salishsea-nowcast)$ python3 -m pip install --editable .
 
 The :kbd:`--editable` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
 

@@ -2,18 +2,18 @@
 # production deployment environment
 #
 # Create a conda environment for production deployment
-# of the Salish Sea Nowcast system with:
+# of the SalishSeaCast system with:
 #
-#    $ conda env create -f SalishSeaNowcast/env/environment-prod.yaml
+#    $ conda env create -f SalishSeaNowcast/envs/environment-prod.yaml
 #    $ source activate nowcast-env
-#    $ pip install --editable NEMO_Nowcast/
-#    $ pip install --editable moad_tools/
-#    $ pip install --editable tools/SalishSeaTools/
-#    $ pip install --editable OPPTools/
-#    $ pip install --editable NEMO-Cmd/
-#    $ pip install --editable SalishSeaCmd/
-#    $ pip install --editable FVCOM-Cmd/
-#    $ pip install --editable SalishSeaNowcast/
+#    $ python3 -m pip install --editable NEMO_Nowcast/
+#    $ python3 -m pip install --editable moad_tools/
+#    $ python3 -m pip install --editable tools/SalishSeaTools/
+#    $ python3 -m pip install --editable OPPTools/
+#    $ python3 -m pip install --editable NEMO-Cmd/
+#    $ python3 -m pip install --editable SalishSeaCmd/
+#    $ python3 -m pip install --editable FVCOM-Cmd/
+#    $ python3 -m pip install --editable SalishSeaNowcast/
 
 name: nowcast-env
 

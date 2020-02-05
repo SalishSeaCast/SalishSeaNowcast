@@ -3,15 +3,15 @@
 #
 # Create a conda environment for web site figures development and testing with:
 #
-#    $ conda env create -f SalishSeaNowcast/env/environment-fig-dev.yaml
+#    $ conda env create -f SalishSeaNowcast/envs/environment-fig-dev.yaml
 #    $ source activate nowcast-fig-dev
-#    $ pip install --editable NEMO_Nowcast/
-#    $ pip install --editable moad_tools/
-#    $ pip install --editable tools/SalishSeaTools/
-#    $ pip install --editable NEMO-Cmd/
-#    $ pip install --editable SalishSeaCmd/
-#    $ pip install --editable SalishSeaNowcast/
-#    $ pip install --editable salishsea-site/
+#    $ python3 -m pip install --editable NEMO_Nowcast/
+#    $ python3 -m pip install --editable moad_tools/
+#    $ python3 -m pip install --editable tools/SalishSeaTools/
+#    $ python3 -m pip install --editable NEMO-Cmd/
+#    $ python3 -m pip install --editable SalishSeaCmd/
+#    $ python3 -m pip install --editable SalishSeaNowcast/
+#    $ python3 -m pip install --editable salishsea-site/
 
 name: nowcast-fig-dev
 

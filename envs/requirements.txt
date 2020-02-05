@@ -1,4 +1,11 @@
-# Python packages and versions used in development environment
+# Python packages and versions used in most recently in development environment
+#
+# This list is intended to be for reference only.
+# Use the conda environment description file (environment-dev.yaml)
+# to create an isolated development environment.
+#
+# Create/update this file with:
+#   (salishsea-nowcast)$ python3 -m pip freeze --path $CONDA_PREFIX/lib/python3*/site-packages >> envs/requirements.txt
 
 alabaster==0.7.12
 angles==2.0

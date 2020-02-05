@@ -2,18 +2,18 @@
 # development environment
 #
 # Create a conda environment for development, testing, and documentation
-# of the Salish Sea Nowcast system with:
+# of the SalishSeaCast system with:
 #
-#    $ conda env create -f SalishSeaNowcast/env/environment-dev.yaml
+#    $ conda env create -f SalishSeaNowcast/envs/environment-dev.yaml
 #    $ source activate salishsea-nowcast
-#    $ pip install --editable NEMO_Nowcast/
-#    $ pip install --editable moad_tools/
-#    $ pip install --editable tools/SalishSeaTools/
-#    $ pip install --editable OPPTools/
-#    $ pip install --editable NEMO-Cmd/
-#    $ pip install --editable SalishSeaCmd/
-#    $ pip install --editable FVCOM-Cmd/
-#    $ pip install --editable SalishSeaNowcast/
+#    $ python3 -m pip install --editable NEMO_Nowcast/
+#    $ python3 -m pip install --editable moad_tools/
+#    $ python3 -m pip install --editable tools/SalishSeaTools/
+#    $ python3 -m pip install --editable OPPTools/
+#    $ python3 -m pip install --editable NEMO-Cmd/
+#    $ python3 -m pip install --editable SalishSeaCmd/
+#    $ python3 -m pip install --editable FVCOM-Cmd/
+#    $ python3 -m pip install --editable SalishSeaNowcast/
 
 name: salishsea-nowcast
 
