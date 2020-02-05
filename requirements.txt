@@ -5,7 +5,7 @@
 # to create an isolated development environment.
 #
 # Create/update this file with:
-#   (salishsea-nowcast)$ python3 -m pip freeze --path $CONDA_PREFIX/lib/python3*/site-packages >> envs/requirements.txt
+#   (salishsea-nowcast)$ python3 -m pip freeze --path $CONDA_PREFIX/lib/python3*/site-packages >> requirements.txt
 
 alabaster==0.7.12
 angles==2.0
