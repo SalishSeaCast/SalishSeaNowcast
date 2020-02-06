@@ -31,4 +31,4 @@ jobs:
       - name: Install package
         shell: bash -l {0}
         run: |
-          python3 -m pip install --editable git@github.com:43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
+          python3 -m pip install --editable git+git@github.com:43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast

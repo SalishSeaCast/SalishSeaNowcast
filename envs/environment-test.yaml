@@ -4,7 +4,7 @@
 # coverage analysis can be run.
 # Primarily intended for creation of a conda env for use in a GitHub Actions workflow.
 
-name: salishsea-nowcast
+name: salishsea-nowcast-test
 
 channels:
   - conda-forge
