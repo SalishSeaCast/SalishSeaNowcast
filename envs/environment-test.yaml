@@ -1,0 +1,64 @@
+# conda environment description file for SalishSeaNowcast package testing environment
+#
+# Creates a conda environment in which the SalishSeaNowcast package unit tests and
+# coverage analysis can be run.
+# Primarily intended for creation of a conda env for use in a GitHub Actions workflow.
+
+name: salishsea-nowcast
+
+channels:
+  - conda-forge
+  - defaults
+  - gomss-nowcast
+
+dependencies:
+  - arrow
+  - basemap
+  - beautifulsoup4
+  - bottleneck
+  - cliff
+  - cmocean
+  - coloredlogs
+  - dask
+  - docutils
+  - gitpython
+  - gsw
+  - lxml
+  - mako
+  - matplotlib>=3
+  - netcdf4
+  - numpy
+  - pandas
+  - paramiko
+  - pillow
+  - pip
+  - poppler
+  - pygrib
+  - pypdf2
+  - pyproj
+  - pytables
+  - pyyaml
+  - pyzmq
+  - requests
+  - scipy
+  - shapely
+  - supervisor
+  - verboselogs
+  - watchdog
+  - xarray
+
+  # For unit tests and coverage monitoring
+  - pytest
+  - pytest-cov
+
+  - pip:
+    - angles
+    - attrs
+    - f90nml
+    - feedgen
+    - python-hglib
+    - retrying
+    - schedule
+    - scour
+    - utm
+    - zeep
