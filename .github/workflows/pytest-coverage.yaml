@@ -28,7 +28,8 @@ jobs:
            python-version: ${{ matrix.python-version }}
            activate-environment: salishsea-nowcast-test
 
-      - name: Install package
+      - name: Install packages
         shell: bash -l {0}
         run: |
           python3 -m pip install --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
+          python3 -m pip install --editable hg+https://bitbucket.org/salishsea/nemo-cmd#egg=NEMO-Cmd
