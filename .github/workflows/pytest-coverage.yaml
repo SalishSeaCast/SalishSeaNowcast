@@ -24,7 +24,7 @@ jobs:
         with:
            auto-update-conda: true
            auto-activate-base: false
-           environment-file: environment-test.yaml
+           environment-file: envs/environment-test.yaml
            python-version: ${{ matrix.python-version }}
            activate-environment: salishsea-nowcast-test
 
