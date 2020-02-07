@@ -1017,7 +1017,8 @@ class TestRunDescription:
                 run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
             )
         assert run_desc["vcs revisions"]["git"] == [
-            str(tmp_run_prep.join("..", "NEMO_Nowcast"))
+            str(tmp_run_prep.join("..", "NEMO_Nowcast")),
+            str(tmp_run_prep.join("..", "SalishSeaNowcast")),
         ]
         assert run_desc["vcs revisions"]["hg"] == [
             str(tmp_run_prep.join("..", "grid")),
