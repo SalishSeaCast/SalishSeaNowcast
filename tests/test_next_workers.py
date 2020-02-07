@@ -2621,43 +2621,28 @@ class TestAfterMakePlots:
         )
         assert workers == []
 
+    @pytest.mark.parametrize(
+        "msg_type, run_type",
+        [
+            ("success nemo forecast publish", "forecast"),
+            ("success nemo forecast2 publish", "forecast2"),
+        ],
+    )
     def test_success_nemo_forecast_launch_make_feeds(
-        self, config, checklist, monkeypatch
+        self, msg_type, run_type, config, checklist, monkeypatch
     ):
         monkeypatch.setitem(
-            checklist, "NEMO run", {"forecast": {"run date": "2016-11-11"}}
+            checklist, "NEMO run", {run_type: {"run date": "2016-11-11"}}
         )
         workers = next_workers.after_make_plots(
-            Message("make_plots", "success nemo forecast publish"), config, checklist
+            Message("make_plots", msg_type), config, checklist
         )
         expected = NextWorker(
             "nowcast.workers.make_feeds",
-            args=["forecast", "--run-date", "2016-11-11"],
+            args=[run_type, "--run-date", "2016-11-11"],
             host="localhost",
         )
         assert expected in workers
-
-    def test_success_nemo_forecast2_launch_make_feeds_w_race_cond_mgmt(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(
-            checklist,
-            "NEMO run",
-            {
-                "forecast": {"run date": "2020-01-13"},
-                "forecast2": {"run date": "2020-01-13"},
-            },
-        )
-        workers, race_condition_workers = next_workers.after_make_plots(
-            Message("make_plots", "success nemo forecast2 publish"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_feeds",
-            args=["forecast2", "--run-date", "2020-01-13"],
-            host="localhost",
-        )
-        assert expected in workers
-        assert race_condition_workers == {"make_feeds", "ping_erddap"}
 
 
 class TestAfterMakeSurfaceCurrentTiles:
