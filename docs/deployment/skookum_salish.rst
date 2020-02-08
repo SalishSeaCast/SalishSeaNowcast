@@ -93,7 +93,7 @@ Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
 .. code-block:: bash
 
     $ cd /SalishSeaCast/NEMO-3.6-code/NEMOGCM/CONFIG
-    $ XIOS_HOME=/SalishSeaCast/XIOS-2 ./makenemo -m GCC_SALISH -n SalishSeaCast -j8
+    $ XIOS_HOME=/SalishSeaCast/XIOS-2 ./makenemo -m GCC_SALISH -n SalishSeaCast_Blue -j8
     $ cd /SalishSeaCast/NEMO-3.6-code/NEMOGCM/TOOLS/
     $ XIOS_HOME=/SalishSeaCast/XIOS-2 ./maketools -m GCC_SALISH -n REBUILD_NEMO
 
