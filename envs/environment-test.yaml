@@ -26,6 +26,8 @@ dependencies:
   - lxml
   - mako
   - matplotlib>=3
+  - -e hg+https://bitbucket.org/salishsea/nemo-cmd#egg=NEMO-Cmd
+  - -e git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
   - netcdf4
   - numpy
   - pandas
@@ -40,9 +42,11 @@ dependencies:
   - pyyaml
   - pyzmq
   - requests
+  - -e hg+https://bitbucket.org/salishsea/salishseacmd#egg=SalishSeaCmd
   - scipy
   - shapely
   - supervisor
+  - -e hg+https://bitbucket.org/salishsea/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools
   - verboselogs
   - watchdog
   - xarray
