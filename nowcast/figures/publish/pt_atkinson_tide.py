@@ -28,13 +28,13 @@ https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/t
 from collections import namedtuple
 
 import matplotlib.pyplot as plt
-from matplotlib.dates import DateFormatter
 import pytz
-
+from matplotlib.dates import DateFormatter
+from pandas.plotting import register_matplotlib_converters
 from salishsea_tools import nc_tools
 
-from nowcast.figures import shared
 import nowcast.figures.website_theme
+from nowcast.figures import shared
 
 
 def make_figure(
@@ -83,6 +83,7 @@ def _prep_fig_axes(figsize, theme):
     fig = plt.figure(figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"])
     ax = fig.add_subplot(1, 1, 1)
     ax.set_facecolor(theme.COLOURS["axes"]["background"])
+    register_matplotlib_converters()
     fig.autofmt_xdate()
     return fig, ax
 
