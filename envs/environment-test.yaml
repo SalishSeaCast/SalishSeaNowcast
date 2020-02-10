@@ -55,7 +55,7 @@ dependencies:
     - angles
     - attrs
     - f90nml
-    - feedgen
+    - feedgen>=0.9.0
     - python-hglib
     - retrying
     - schedule
