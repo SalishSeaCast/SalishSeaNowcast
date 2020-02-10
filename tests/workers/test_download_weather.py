@@ -14,10 +14,11 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast download_weather worker.
 """
+import logging
 from pathlib import Path
 import textwrap
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -39,7 +40,7 @@ def config(base_config):
                 
                 weather:
                   download:
-                    url template: 'http://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+                    url template: 'https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
                     file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
                     grib variables:
                       - UGRD_TGL_10  # u component of wind velocity at 10m elevation
@@ -55,7 +56,7 @@ def config(base_config):
                       - PRMSL_MSL_0  # atmospheric pressure at mean sea level
                       - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
                     forecast duration: 48  # hours
-                    GRIB dir: /tmp/
+                    GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
                 """
             )
         )
@@ -69,48 +70,33 @@ def parsed_args():
     return SimpleNamespace(forecast="06", yesterday=False)
 
 
-@patch("nowcast.workers.download_weather.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(download_weather, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function.
     """
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_weather.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("download_weather",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_weather.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_forecast_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_weather.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("forecast",)
-        assert kwargs["choices"] == {"00", "06", "12", "18"}
-        assert "help" in kwargs
-
-    def test_add_yesterday_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_weather.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("--yesterday",)
-        assert kwargs["action"] == "store_true"
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_weather.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            download_weather.get_grib,
-            download_weather.success,
-            download_weather.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = download_weather.main()
+        assert worker.name == "download_weather"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that downloads the GRIB2 files from today's 00, 06, 12, or 18"
         )
+
+    def test_add_forecast_arg(self, mock_worker):
+        worker = download_weather.main()
+        assert worker.cli.parser._actions[3].dest == "forecast"
+        assert worker.cli.parser._actions[3].choices == {"00", "06", "12", "18"}
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_yesterday_arg(self, mock_worker):
+        worker = download_weather.main()
+        assert worker.cli.parser._actions[4].dest == "yesterday"
+        assert worker.cli.parser._actions[4].default is False
+        assert worker.cli.parser._actions[4].help
 
 
 class TestConfig:
@@ -122,9 +108,10 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["download_weather"]
         assert msg_registry["checklist key"] == "weather forecast"
 
-    @pytest.mark.parametrize(
-        "msg",
-        (
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["download_weather"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
             "success 00",
             "failure 00",
             "success 06",
@@ -134,31 +121,27 @@ class TestConfig:
             "success 18",
             "failure 18",
             "crash",
-        ),
-    )
-    def test_message_types(self, msg, prod_config):
-        msg_registry = prod_config["message registry"]["workers"]["download_weather"]
-        assert msg in msg_registry
+        ]
 
     def test_file_group(self, prod_config):
         assert "file group" in prod_config
         assert prod_config["file group"] == "sallen"
 
     def test_weather_download_section(self, prod_config):
-        assert "weather" in prod_config
-        assert "download" in prod_config["weather"]
-        download = prod_config["weather"]["download"]
-        assert download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+        weather_download = prod_config["weather"]["download"]
         assert (
-            download["url template"]
+            weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+        )
+        assert (
+            weather_download["url template"]
             == "https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}"
         )
         assert (
-            download["file template"]
+            weather_download["file template"]
             == "CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2"
         )
-        assert download["forecast duration"] == 48
-        assert download["grib variables"] == [
+        assert weather_download["forecast duration"] == 48
+        assert weather_download["grib variables"] == [
             "UGRD_TGL_10",
             "VGRD_TGL_10",
             "DSWRF_SFC_0",
@@ -174,29 +157,93 @@ class TestConfig:
         ]
 
 
-@pytest.mark.parametrize("forecast", ["00", "06", "12", "18"])
-@patch("nowcast.workers.download_weather.logger", autospec=True)
+@pytest.mark.parametrize(
+    "forecast, now, forecast_date",
+    (
+        ("00", "2020-02-10 03:58:43", "2020-02-10"),
+        ("06", "2020-02-10 09:59:43", "2020-02-10"),
+        ("12", "2020-02-10 15:56:43", "2020-02-10"),
+        ("18", "2020-02-10 21:54:43", "2020-02-10"),
+    ),
+)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, forecast, parsed_args):
-        parsed_args.forecast = forecast
+    def test_success(self, forecast, now, forecast_date, caplog, monkeypatch):
+        def mock_now():
+            return arrow.get(now)
+
+        monkeypatch.setattr(download_weather.arrow, "now", mock_now)
+        parsed_args = SimpleNamespace(forecast=forecast, yesterday=False)
+        caplog.set_level(logging.INFO)
+
         msg_type = download_weather.success(parsed_args)
-        assert m_logger.info.called
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{forecast_date} weather forecast {parsed_args.forecast} downloads complete"
+        assert caplog.messages[0] == expected
+        assert msg_type == f"success {forecast}"
+
+    def test_success_yesterday(self, forecast, now, forecast_date, caplog, monkeypatch):
+        def mock_now():
+            return arrow.get(now)
+
+        monkeypatch.setattr(download_weather.arrow, "now", mock_now)
+        parsed_args = SimpleNamespace(forecast=forecast, yesterday=True)
+        caplog.set_level(logging.INFO)
+
+        msg_type = download_weather.success(parsed_args)
+        assert caplog.records[0].levelname == "INFO"
+        yesterday_date = arrow.get(forecast_date).shift(days=-1).format("YYYY-MM-DD")
+        expected = f"{yesterday_date} weather forecast {parsed_args.forecast} downloads complete"
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {forecast}"
 
 
-@pytest.mark.parametrize("forecast", ["00", "06", "12", "18"])
-@patch("nowcast.workers.download_weather.logger", autospec=True)
+@pytest.mark.parametrize(
+    "forecast, now, forecast_date",
+    (
+        ("00", "2020-02-10 03:58:43", "2020-02-10"),
+        ("06", "2020-02-10 09:59:43", "2020-02-10"),
+        ("12", "2020-02-10 15:56:43", "2020-02-10"),
+        ("18", "2020-02-10 21:54:43", "2020-02-10"),
+    ),
+)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, forecast, parsed_args):
-        parsed_args.forecast = forecast
+    def test_failure(self, forecast, now, forecast_date, caplog, monkeypatch):
+        def mock_now():
+            return arrow.get(now)
+
+        monkeypatch.setattr(download_weather.arrow, "now", mock_now)
+        parsed_args = SimpleNamespace(forecast=forecast, yesterday=False)
+        caplog.set_level(logging.INFO)
+
         msg_type = download_weather.failure(parsed_args)
-        assert m_logger.critical.called
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
+            f"{forecast_date} weather forecast {parsed_args.forecast} downloads failed"
+        )
+        assert caplog.messages[0] == expected
+        assert msg_type == f"failure {forecast}"
+
+    def test_failure_yesterday(self, forecast, now, forecast_date, caplog, monkeypatch):
+        def mock_now():
+            return arrow.get(now)
+
+        monkeypatch.setattr(download_weather.arrow, "now", mock_now)
+        parsed_args = SimpleNamespace(forecast=forecast, yesterday=True)
+        caplog.set_level(logging.INFO)
+
+        msg_type = download_weather.failure(parsed_args)
+        assert caplog.records[0].levelname == "CRITICAL"
+        yesterday_date = arrow.get(forecast_date).shift(days=-1).format("YYYY-MM-DD")
+        expected = (
+            f"{yesterday_date} weather forecast {parsed_args.forecast} downloads failed"
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {forecast}"
 
 
@@ -228,7 +275,10 @@ class TestGetGrib:
             download_weather.get_grib(parsed_args, config)
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
-            assert args == ("/tmp/20150619/06/00{}".format(hr), m_logger)
+            assert args == (
+                "/results/forcing/atmospheric/GEM2.5/GRIB/20150619/06/00{}".format(hr),
+                m_logger,
+            )
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
     @patch("nowcast.workers.download_weather.requests.Session", autospec=True)
@@ -254,7 +304,7 @@ class TestGetGrib:
             config["weather"]["download"]["url template"],
             config["weather"]["download"]["file template"],
             "UGRD_TGL_10",
-            "/tmp/",
+            config["weather"]["download"]["GRIB dir"],
             "20150619",
             "06",
             "001",
@@ -354,7 +404,7 @@ class TestGetFile:
             None,
         )
         url = (
-            "http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/"
+            "https://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/"
             "CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015061906_P001-00.grib2"
         )
         filepath = (

@@ -12,10 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea NEMO nowcast weather model dataset download worker.
-
-Download the GRIB2 files from today's 00, 06, 12, or 18 Environment Canada
-GEM 2.5km HRDPS operational model forecast.
+"""SalishSeaCast worker that downloads the GRIB2 files from today's 00, 06, 12, or 18
+Environment Canada GEM 2.5km HRDPS operational model forecast.
 """
 import logging
 import os
@@ -51,6 +49,7 @@ def main():
         help="Download forecast files for previous day's date.",
     )
     worker.run(get_grib, success, failure)
+    return worker
 
 
 def success(parsed_args):
