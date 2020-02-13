@@ -31,17 +31,16 @@ jobs:
       - name: Install packages
         shell: bash -l {0}
         run: |
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs --editable hg+https://bitbucket.org/salishsea/nemo-cmd#egg=NEMO-Cmd
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs --editable hg+https://bitbucket.org/salishsea/salishseacmd#egg=SalishSeaCmd
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs --editable hg+https://bitbucket.org/salishsea/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/nemo-cmd#egg=NEMO-Cmd
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/salishseacmd#egg=SalishSeaCmd
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools
           python3 -m pip install --editable $GITHUB_WORKSPACE
 
       - name: pytest package with coverage
         shell: bash -l {0}
         run: |
-          ls $GITHUB_WORKSPACE/envs/
-          ls $GITHUB_WORKSPACE/envs/src
+          ls $GITHUB_WORKSPACE/../vcs_pkgs/
           pytest --cov=$GITHUB_WORKSPACE/tests --cov-report=xml
 
       - name: Upload coverage report to Codecov
