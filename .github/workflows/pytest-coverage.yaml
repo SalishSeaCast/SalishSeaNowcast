@@ -35,12 +35,12 @@ jobs:
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/UBC_MOAD/moad_tools#egg=moad_tools
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/nemo-cmd#egg=NEMO-Cmd
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/salishseacmd#egg=SalishSeaCmd
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/mdunphy/fvcom-cmd#egg=FVCOM-Cmd
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://gitlab.com/mdunphy/OPPTools.git#egg=OPPTools
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/tools#egg=SalishSeaTools
           python3 -m pip install --editable $GITHUB_WORKSPACE
 
 #          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools
+#          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/mdunphy/fvcom-cmd#egg=FVCOM-Cmd
+#          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://gitlab.com/mdunphy/OPPTools.git#egg=OPPTools
 
       - name: pytest package with coverage
         shell: bash -l {0}
