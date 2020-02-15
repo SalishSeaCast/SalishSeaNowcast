@@ -22,8 +22,8 @@ from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
-from salishsea_tools.LiveOcean_BCs import create_LiveOcean_TS_BCs
 from salishsea_tools import LiveOcean_parameters
+from salishsea_tools.LiveOcean_BCs import create_LiveOcean_TS_BCs
 
 NAME = "make_live_ocean_files"
 logger = logging.getLogger(NAME)
@@ -77,7 +77,7 @@ def make_live_ocean_files(parsed_args, config, *args):
     meshfilename = Path(config["temperature salinity"]["mesh mask"])
     download_dir = Path(config["temperature salinity"]["download"]["dest dir"])
     LO_to_SSC_parameters = LiveOcean_parameters.set_parameters(
-        config["temperature salinity"]["parameter_set"]
+        config["temperature salinity"]["parameter set"]
     )
     filepaths = create_LiveOcean_TS_BCs(
         ymd,
@@ -87,7 +87,7 @@ def make_live_ocean_files(parsed_args, config, *args):
         LO_dir=download_dir,
         LO_to_SSC_parameters=LO_to_SSC_parameters,
     )
-    logger.debug(f"Stored T&S western boundary conditions file: {filepaths[0]}")
+    logger.info(f"Stored T&S western boundary conditions file: {filepaths[0]}")
     checklist = {"temperature & salinity": filepaths[0]}
     return checklist
 

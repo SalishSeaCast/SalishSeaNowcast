@@ -147,11 +147,11 @@ temperature salinity:
   # File name template for the daily temperature and salinity boundary
   # conditions files generated from UW Live Ocean forecast
   # **Must be quoted to project {} characters**
-  file template: 'LiveOcean_v201712_{:y%Ym%md%d}.nc'
+  file template: 'LiveOcean_v201905_{:y%Ym%md%d}.nc'
   # Mesh mask from which to get grid parameters for boundary conditions files
   mesh mask: /SalishSeaCast/grid/mesh_mask201702.nc
-  # Parameter set to use to convert from Live Ocean to Salish Sea Cast
-  parameter_set: v201702
+  # Parameter set to use to convert from Live Ocean to SalishSeaCast
+  parameter set: v201905
 
 
 observations:
