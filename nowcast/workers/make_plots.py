@@ -445,7 +445,7 @@ def _prep_nowcast_green_research_fig_functions(
     yyyymmdd = run_date.format("YYYYMMDD")
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
     ptrc_T_hr = _results_dataset("1h", "ptrc_T", results_dir)
-    turb_T_hr = _results_dataset("1h", "turb_T", results_dir)
+    turb_T_hr = _results_dataset("1h", "carp_T", results_dir)
     fig_functions = {}
     image_loops = {
         "salinity": {"nemo var": "vosaline", "cmap": cmocean.cm.haline},
