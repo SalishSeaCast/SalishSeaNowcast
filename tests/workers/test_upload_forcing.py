@@ -15,8 +15,8 @@
 """Unit tests for Salish Sea NEMO nowcast upload_forcing worker.
 """
 import logging
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -260,7 +260,7 @@ class TestConfig:
     )
     def test_live_ocean_uploads(self, host, expected, prod_config):
         live_ocean = prod_config["temperature salinity"]
-        assert live_ocean["file template"] == "LiveOcean_v201712_{:y%Ym%md%d}.nc"
+        assert live_ocean["file template"] == "LiveOcean_v201905_{:y%Ym%md%d}.nc"
         assert live_ocean["bc dir"] == "/results/forcing/LiveOcean/boundary_conditions"
         host_config = prod_config["run"]["enabled hosts"][host]
         assert host_config["forcing"]["bc dir"] == expected
