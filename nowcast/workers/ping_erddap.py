@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea nowcast worker that creates flag files to tell the ERDDAP
-server to reload datasets for which new results have been downloaded.
+"""SalishSeaCast worker that creates flag files to tell the ERDDAP server
+ to reload datasets for which new results have been downloaded.
 """
 import logging
 from pathlib import Path
@@ -64,6 +64,7 @@ def main():
         """,
     )
     worker.run(ping_erddap, success, failure)
+    return worker
 
 
 def success(parsed_args):

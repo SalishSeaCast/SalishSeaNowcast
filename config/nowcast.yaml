@@ -352,21 +352,17 @@ erddap:
 #    LSBBL-CTD:
 #      Decommissioned on 4-Nov-2017
 #      - ubcONCLSBBLCTD15mV1
-#    USDDL-CTD:
-#      Out of service due to node failure on 11-Mar-2019
-#      May return to service in mid-Sep-2019
-#      - ubcONCUSDDLCTD15mV1
+    USDDL-CTD:
+      - ubcONCUSDDLCTD15mV1
     TWDP-ferry:
       - ubcONCTWDP1mV1
     nowcast-green:
-      - ubcSSg3DBiologyFields1hV18-12
-      - ubcSSg3DTracerFields1hV18-12
-      - ubcSSg3DuGridFields1hV18-12
-      - ubcSSg3DvGridFields1hV18-12
-      - ubcSSg3DwGridFields1hV18-12
-      - ubcSSgSurfaceTracerFields1hV18-12
-      - ubcSSgNearSurfaceUVelocity20mV18-12
-      - ubcSSgNearSurfaceVVelocity20mV18-12
+      - ubcSSg3DBiologyFields1hV19-05
+      - ubcSSg3DTracerFields1hV19-05
+      - ubcSSg3DuGridFields1hV19-05
+      - ubcSSg3DvGridFields1hV19-05
+      - ubcSSg3DwGridFields1hV19-05
+      - ubcSSgSurfaceTracerFields1hV19-05
     nemo-forecast:
       # tide gauge station water levels
       - ubcSSfBoundaryBaySSH10m
@@ -390,8 +386,6 @@ erddap:
       - ubcSSf3DuGridFields1h
       - ubcSSf3DvGridFields1h
       - ubcSSfSurfaceTracerFields1h
-      # V18-06 pending okay to remove from CHS
-      - ubcSSfDepthAvgdCurrents1hV18-06
     wwatch3-forecast:
       - ubcSSf2DWaveFields30mV17-02
     VFPA-HADCP:
