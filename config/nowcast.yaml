@@ -567,7 +567,7 @@ run:
           walltime: 23:30:00
           results: /results/SalishSea/nowcast-dev.201806/
         nowcast-green:
-          results: /results2/SalishSea/nowcast-green.201812/
+          results: /results2/SalishSea/nowcast-green.201905/
       forcing:
         ssh dir: /results/forcing/sshNeahBay/
         bc dir: /results/forcing/LiveOcean/boundary_conditions/

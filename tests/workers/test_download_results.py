@@ -240,7 +240,7 @@ class TestConfig:
                 "enabled hosts",
                 "salish-nowcast",
                 "nowcast-green",
-                "/results2/SalishSea/nowcast-green.201812/",
+                "/results2/SalishSea/nowcast-green.201905/",
             ),
             (
                 "enabled hosts",
