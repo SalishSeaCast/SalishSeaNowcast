@@ -15,9 +15,9 @@
 """Unit tests for Salish Sea NEMO nowcast download_results worker.
 """
 import logging
-from pathlib import Path
 import shlex
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -272,11 +272,11 @@ class TestConfig:
 
     def test_results_archive(self, prod_config):
         archives = {
-            "nowcast": "/results/SalishSea/nowcast-blue.201812/",
+            "nowcast": "/results/SalishSea/nowcast-blue.201905/",
             "nowcast-dev": "/results/SalishSea/nowcast-dev.201806/",
-            "forecast": "/results/SalishSea/forecast.201812/",
-            "forecast2": "/results/SalishSea/forecast2.201812/",
-            "nowcast-green": "/results2/SalishSea/nowcast-green.201812/",
+            "forecast": "/results/SalishSea/forecast.201905/",
+            "forecast2": "/results/SalishSea/forecast2.201905/",
+            "nowcast-green": "/results2/SalishSea/nowcast-green.201905/",
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
                 "localhost": "/results2/SalishSea/hindcast.201905/",
