@@ -556,7 +556,7 @@ run:
       email: sallen@eos.ubc.ca
       run types:
         nowcast-dev:
-          run sets dir: /SalishSeaCast/SS-run-sets/v201702/nowcast-dev/
+          run sets dir: /SalishSeaCast/SS-run-sets/v201905/nowcast-dev/
           mpi decomposition: 1x7
           walltime: 23:30:00
           results: /results/SalishSea/nowcast-dev.201806/
