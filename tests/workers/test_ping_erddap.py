@@ -77,7 +77,7 @@ class TestMain:
         worker = ping_erddap.main()
         assert worker.name == "ping_erddap"
         assert worker.description.startswith(
-            "SalishSeaCast nowcast worker that creates flag files to tell the ERDDAP server"
+            "SalishSeaCast worker that creates flag files to tell the ERDDAP server"
         )
 
     def test_add_dataset_arg(self, mock_worker):
