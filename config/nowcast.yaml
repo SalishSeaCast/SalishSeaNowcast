@@ -510,22 +510,22 @@ run:
       # compute host; keyed by run type
       run types:
         nowcast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201812/nowcast-blue/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201905/nowcast-blue/
           # How is the domain to be distributed over the processors in the
           # i (longitude) and j (latitude) directions?
           mpi decomposition: 11x18
           # Directory on compute host where results are stored
           results: /nemoShare/MEOPAR/SalishSea/nowcast/
         forecast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201812/forecast/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201905/forecast/
           mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/forecast/
         forecast2:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201812/forecast2/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201905/forecast2/
           mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/forecast2/
         nowcast-green:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201812/nowcast-green/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201905/nowcast-green/
           mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forcing:
