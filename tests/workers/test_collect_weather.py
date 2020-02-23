@@ -316,9 +316,10 @@ class TestCollectWeather:
 
         checklist = collect_weather.collect_weather(parsed_args, config)
 
-        assert checklist == {
-            forecast: f"forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/{forecast_date}/{forecast}"
+        expected = {
+            f"{forecast} {resolution}": f"forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/{forecast_date}/{forecast}"
         }
+        assert checklist == expected
 
 
 @pytest.mark.parametrize(

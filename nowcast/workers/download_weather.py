@@ -114,7 +114,11 @@ def get_grib(parsed_args, config, *args):
                     session,
                 )
                 lib.fix_perms(filepath)
-    checklist = {f"{date} {forecast} {parsed_args.resolution} forecast": True}
+    checklist = {
+        f"{forecast} {resolution.replace(' km', 'km')}": os.path.join(
+            dest_dir_root, date, forecast
+        )
+    }
     return checklist
 
 

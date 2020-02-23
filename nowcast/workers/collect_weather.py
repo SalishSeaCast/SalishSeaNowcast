@@ -125,7 +125,11 @@ def collect_weather(parsed_args, config, *args):
         f"{grib_dir / forecast_date / forecast}/"
     )
 
-    checklist = {forecast: os.fspath(grib_dir / forecast_date / forecast)}
+    checklist = {
+        f"{forecast} {resolution.replace(' km', 'km')}": os.fspath(
+            grib_dir / forecast_date / forecast
+        )
+    }
     return checklist
 
 

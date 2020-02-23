@@ -451,7 +451,11 @@ class TestGetGrib:
             forecast=forecast, resolution=resolution, yesterday=False
         )
         checklist = download_weather.get_grib(parsed_args, config)
-        assert checklist == {f"20150619 {forecast} {resolution} forecast": True}
+
+        expected = {
+            f"{forecast} {resolution}": f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20150619/{forecast}"
+        }
+        assert checklist == expected
 
 
 @patch(
