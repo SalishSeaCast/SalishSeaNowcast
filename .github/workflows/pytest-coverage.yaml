@@ -45,6 +45,13 @@ jobs:
         run: |
           pytest --cov=$GITHUB_WORKSPACE --cov-report=xml
 
+      - uses: pioug/le-slack-message@v1.0.0
+        with:
+          ACTION_NAME: ${{ github.repository }} pytest suite for Python ${{ matrix.python-version }}
+          JOB: ${{ toJson(job) }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
+
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v1
         with:
