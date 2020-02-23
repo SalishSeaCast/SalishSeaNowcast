@@ -47,6 +47,12 @@ def main():
         choices={"00", "06", "12", "18"},
         help="Name of forecast to collect files for.",
     )
+    worker.cli.add_argument(
+        "resolution",
+        choices={"1km", "2.5km"},
+        default="2.5km",
+        help="Horizontal resolution of forecast to download files from.",
+    )
     worker.run(collect_weather, success, failure)
     return worker
 
@@ -60,10 +66,10 @@ def success(parsed_args):
     """
     forecast_date = arrow.utcnow().shift(hours=-int(parsed_args.forecast))
     logger.info(
-        f"{forecast_date.format('YYYY-MM-DD')} weather forecast "
+        f"{forecast_date.format('YYYY-MM-DD')} {parsed_args.resolution} weather forecast "
         f"{parsed_args.forecast} collection complete"
     )
-    return f"success {parsed_args.forecast}"
+    return f"success {parsed_args.resolution} {parsed_args.forecast}"
 
 
 def failure(parsed_args):
@@ -75,10 +81,10 @@ def failure(parsed_args):
     """
     forecast_date = arrow.utcnow().shift(hours=-int(parsed_args.forecast))
     logger.critical(
-        f"{forecast_date.format('YYYY-MM-DD')} weather forecast "
+        f"{forecast_date.format('YYYY-MM-DD')} {parsed_args.resolution} weather forecast "
         f"{parsed_args.forecast} collection failed"
     )
-    return f"failure {parsed_args.forecast}"
+    return f"failure {parsed_args.resolution} {parsed_args.forecast}"
 
 
 def collect_weather(parsed_args, config, *args):
@@ -90,12 +96,15 @@ def collect_weather(parsed_args, config, *args):
     :rtype: dict
     """
     forecast = parsed_args.forecast
+    resolution = parsed_args.resolution.replace("km", " km")
     forecast_date = arrow.utcnow().shift(hours=-int(forecast) + 4).format("YYYYMMDD")
-    datamart_dir = Path(config["weather"]["download"]["datamart dir"])
-    grib_dir = Path(config["weather"]["download"]["GRIB dir"])
+    datamart_dir = Path(config["weather"]["download"][resolution]["datamart dir"])
+    grib_dir = Path(config["weather"]["download"][resolution]["GRIB dir"])
     grp_name = config["file group"]
 
-    expected_files = _calc_expected_files(datamart_dir, forecast, forecast_date, config)
+    expected_files = _calc_expected_files(
+        datamart_dir, forecast, forecast_date, resolution, config
+    )
 
     lib.mkdir(grib_dir / forecast_date, logger, grp_name=grp_name)
     logger.debug(f"created {grib_dir / forecast_date}/")
@@ -120,19 +129,20 @@ def collect_weather(parsed_args, config, *args):
     return checklist
 
 
-def _calc_expected_files(datamart_dir, forecast, forecast_date, config):
+def _calc_expected_files(datamart_dir, forecast, forecast_date, resolution, config):
     """
     :param :py:class:`pathlib.Path` datamart_dir:
     :param str forecast:
     :param str forecast_date:
+    :param str resolution:
     :param :py:class:`nemo_nowcast.Config` config:
 
     :return: HRDPS file paths that are expected in the forecast mirror tree
     :rtype: set
     """
-    forecast_duration = config["weather"]["download"]["forecast duration"]
-    grib_vars = config["weather"]["download"]["grib variables"]
-    file_template = config["weather"]["download"]["file template"]
+    forecast_duration = config["weather"]["download"][resolution]["forecast duration"]
+    grib_vars = config["weather"]["download"][resolution]["grib variables"]
+    file_template = config["weather"]["download"][resolution]["file template"]
     expected_files = set()
     for hour in range(forecast_duration):
         forecast_hour = f"{hour+1:03d}"
@@ -149,7 +159,7 @@ def _calc_expected_files(datamart_dir, forecast, forecast_date, config):
             }
         )
     logger.debug(
-        f"calculated set of expected file paths for {forecast_date}/{forecast}"
+        f"calculated set of expected file paths for {resolution} {forecast_date}/{forecast}"
     )
     return expected_files
 

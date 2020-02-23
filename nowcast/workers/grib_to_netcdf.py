@@ -255,7 +255,7 @@ def _rotate_grib_wind(config, fcst_section_hrs):
     single file and then rotate the wind direction to geographical
     coordinates.
     """
-    GRIBdir = config["weather"]["download"]["GRIB dir"]
+    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
     wgrib2 = config["weather"]["wgrib2"]
     grid_defn = config["weather"]["grid_defn.pl"]
     for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
@@ -309,7 +309,7 @@ def _collect_grib_scalars(config, fcst_section_hrs):
     variables into an single file and then re-grid them to match the
     u and v wind components.
     """
-    GRIBdir = config["weather"]["download"]["GRIB dir"]
+    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
     wgrib2 = config["weather"]["wgrib2"]
     grid_defn = config["weather"]["grid_defn.pl"]
     for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
@@ -354,7 +354,7 @@ def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
     calculation of instantaneous values from the forecast accumulated
     values.
     """
-    GRIBdir = config["weather"]["download"]["GRIB dir"]
+    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
     OPERdir = config["weather"]["ops dir"]
     wgrib2 = config["weather"]["wgrib2"]
     outgrib = os.path.join(OPERdir, f"oper_allvar_{ymd}.grib")

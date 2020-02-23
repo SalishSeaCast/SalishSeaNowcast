@@ -41,35 +41,39 @@ def after_download_weather(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "failure 00": [],
-        "failure 06": [],
-        "failure 12": [],
-        "failure 18": [],
-        "success 00": [],
-        "success 06": [],
-        "success 12": [],
-        "success 18": [],
+        "failure 2.5km 00": [],
+        "failure 2.5km 06": [],
+        "failure 2.5km 12": [],
+        "failure 2.5km 18": [],
+        "failure 1km 00": [],
+        "failure 1km 12": [],
+        "success 2.5km 00": [],
+        "success 2.5km 06": [],
+        "success 2.5km 12": [],
+        "success 2.5km 18": [],
+        "success 1km 00": [],
+        "success 1km 12": [],
     }
     if msg.type.startswith("success"):
-        if msg.type.endswith("06"):
+        if msg.type.endswith("2.5km 06"):
             data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
             for river_name in config["rivers"]["stations"]:
-                next_workers["success 06"].append(
+                next_workers["success 2.5km 06"].append(
                     NextWorker(
                         "nowcast.workers.collect_river_data",
                         args=[river_name, "--data-date", data_date],
                     )
                 )
             for stn in config["observations"]["ctd data"]["stations"]:
-                next_workers["success 06"].append(
+                next_workers["success 2.5km 06"].append(
                     NextWorker("nowcast.workers.get_onc_ctd", args=[stn])
                 )
             for ferry in config["observations"]["ferry data"]["ferries"]:
-                next_workers["success 06"].append(
+                next_workers["success 2.5km 06"].append(
                     NextWorker("nowcast.workers.get_onc_ferry", args=[ferry])
                 )
             if "forecast2" in config["run types"]:
-                next_workers["success 06"].extend(
+                next_workers["success 2.5km 06"].extend(
                     [
                         NextWorker(
                             "nowcast.workers.get_NeahBay_ssh", args=["forecast2"]
@@ -79,8 +83,8 @@ def after_download_weather(msg, config, checklist):
                         ),
                     ]
                 )
-        if msg.type.endswith("12"):
-            next_workers["success 12"].extend(
+        if msg.type.endswith("2.5km 12"):
+            next_workers["success 2.5km 12"].extend(
                 [
                     NextWorker("nowcast.workers.get_NeahBay_ssh", args=["nowcast"]),
                     NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
@@ -112,36 +116,44 @@ def after_collect_weather(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "failure 00": [],
-        "failure 06": [],
-        "failure 12": [],
-        "failure 18": [],
-        "success 00": [],
-        "success 06": [],
-        "success 12": [],
-        "success 18": [],
+        "failure 2.5km 00": [],
+        "failure 2.5km 06": [],
+        "failure 2.5km 12": [],
+        "failure 2.5km 18": [],
+        "failure 1km 00": [],
+        "failure 1km 12": [],
+        "success 2.5km 00": [],
+        "success 2.5km 06": [],
+        "success 2.5km 12": [],
+        "success 2.5km 18": [],
+        "success 1km 00": [],
+        "success 1km 12": [],
         msg.type: after_download_weather(msg, config, checklist),
     }
-    if msg.type.endswith("00"):
-        next_workers["success 00"].append(
-            NextWorker("nowcast.workers.collect_weather", args=["06"])
+    if msg.type.endswith("2.5km 00"):
+        next_workers["success 2.5km 00"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["06", "2.5km"])
         )
-    if msg.type.endswith("06"):
-        next_workers["success 06"].append(
-            NextWorker("nowcast.workers.collect_weather", args=["12"])
+    if msg.type.endswith("2.5km 06"):
+        next_workers["success 2.5km 06"].append(
+            NextWorker("nowcast.workers.collect_weather", args=["12", "2.5km"])
         )
-    if msg.type.endswith("12"):
+    if msg.type.endswith("2.5km 12"):
         if msg.type.startswith("success"):
             next_workers, race_condition_workers = after_download_weather(
                 msg, config, checklist
             )
             next_workers.append(
-                NextWorker("nowcast.workers.collect_weather", args=["18"])
+                NextWorker("nowcast.workers.collect_weather", args=["18", "2.5km"])
             )
             return next_workers, race_condition_workers
-    if msg.type.endswith("18"):
-        next_workers["success 18"].append(
-            NextWorker("nowcast.workers.collect_weather", args=["00"])
+    if msg.type.endswith("2.5km 18"):
+        next_workers["success 2.5km 18"].extend(
+            [
+                NextWorker("nowcast.workers.download_weather", args=["00", "1km"]),
+                NextWorker("nowcast.workers.download_weather", args=["12", "1km"]),
+                NextWorker("nowcast.workers.collect_weather", args=["00", "2.5km"]),
+            ]
         )
     return next_workers[msg.type]
 

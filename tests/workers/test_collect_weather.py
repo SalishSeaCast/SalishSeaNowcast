@@ -41,23 +41,41 @@ def config(base_config):
                 
                 weather:
                   download:
-                    datamart dir: datamart/hrdps-west/
-                    GRIB dir: forcing/atmospheric/GEM2.5/GRIB/
-                    forecast duration: 48
-                    file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
-                    grib variables:
-                      - UGRD_TGL_10  # u component of wind velocity at 10m elevation
-                      - VGRD_TGL_10  # v component of wind velocity at 10m elevation
-                      - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
-                      - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
-                      - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
-                      - TMP_TGL_2    # air temperature at 2m elevation
-                      - SPFH_TGL_2   # specific humidity at 2m elevation
-                      - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
-                      - APCP_SFC_0   # accumulated precipitation at ground level
-                      - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
-                      - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-                      - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
+                    2.5 km:
+                      datamart dir: datamart/hrdps-west/
+                      GRIB dir: forcing/atmospheric/GEM2.5/GRIB/
+                      forecast duration: 48
+                      file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+                      grib variables:
+                        - UGRD_TGL_10  # u component of wind velocity at 10m elevation
+                        - VGRD_TGL_10  # v component of wind velocity at 10m elevation
+                        - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
+                        - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+                        - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
+                        - TMP_TGL_2    # air temperature at 2m elevation
+                        - SPFH_TGL_2   # specific humidity at 2m elevation
+                        - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
+                        - APCP_SFC_0   # accumulated precipitation at ground level
+                        - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
+                        - PRMSL_MSL_0  # atmospheric pressure at mean sea level
+                        - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
+                    1 km:
+                      datamart dir: datamart/hrdps-west/1km
+                      GRIB dir: forcing/atmospheric/GEM1.0/GRIB/
+                      forecast duration: 36
+                      file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
+                      grib variables:
+                        - UGRD_TGL_10  # u component of wind velocity at 10m elevation
+                        - VGRD_TGL_10  # v component of wind velocity at 10m elevation
+                        - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
+                        - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+                        - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
+                        - TMP_TGL_2    # air temperature at 2m elevation
+                        - SPFH_TGL_2   # specific humidity at 2m elevation
+                        - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
+                        - APCP_SFC_0   # accumulated precipitation at ground level
+                        - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
+                        - PRMSL_MSL_0  # atmospheric pressure at mean sea level
                 """
             )
         )
@@ -88,6 +106,13 @@ class TestMain:
         assert worker.cli.parser._actions[3].choices == {"00", "06", "12", "18"}
         assert worker.cli.parser._actions[3].help
 
+    def test_add_resolution_arg(self, mock_worker):
+        worker = collect_weather.main()
+        assert worker.cli.parser._actions[4].dest == "resolution"
+        assert worker.cli.parser._actions[4].choices == {"1km", "2.5km"}
+        assert worker.cli.parser._actions[4].default == "2.5km"
+        assert worker.cli.parser._actions[4].help
+
 
 class TestConfig:
     """Unit tests for production YAML config file elements related to worker.
@@ -102,14 +127,18 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["collect_weather"]
         assert list(msg_registry.keys()) == [
             "checklist key",
-            "success 00",
-            "failure 00",
-            "success 06",
-            "failure 06",
-            "success 12",
-            "failure 12",
-            "success 18",
-            "failure 18",
+            "success 2.5km 00",
+            "failure 2.5km 00",
+            "success 2.5km 06",
+            "failure 2.5km 06",
+            "success 2.5km 12",
+            "failure 2.5km 12",
+            "success 2.5km 18",
+            "failure 2.5km 18",
+            "success 1km 00",
+            "failure 1km 00",
+            "success 1km 12",
+            "failure 1km 12",
             "crash",
         ]
 
@@ -117,8 +146,8 @@ class TestConfig:
         assert "file group" in prod_config
         assert prod_config["file group"] == "sallen"
 
-    def test_weather_section(self, prod_config):
-        weather_download = prod_config["weather"]["download"]
+    def test_weather_download_2_5_km_section(self, prod_config):
+        weather_download = prod_config["weather"]["download"]["2.5 km"]
         assert weather_download["datamart dir"] == "/SalishSeaCast/datamart/hrdps-west/"
         assert (
             weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
@@ -143,6 +172,34 @@ class TestConfig:
             "TCDC_SFC_0",
         ]
 
+    def test_weather_download_1_km_section(self, prod_config):
+        weather_download = prod_config["weather"]["download"]["1 km"]
+        assert (
+            weather_download["datamart dir"]
+            == "/SalishSeaCast/datamart/hrdps-west/1km/"
+        )
+        assert (
+            weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM1.0/GRIB/"
+        )
+        assert weather_download["forecast duration"] == 36
+        assert (
+            weather_download["file template"]
+            == "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
+        )
+        assert weather_download["grib variables"] == [
+            "UGRD_TGL_10",
+            "VGRD_TGL_10",
+            "DSWRF_SFC_0",
+            "DLWRF_SFC_0",
+            "LHTFL_SFC_0",
+            "TMP_TGL_2",
+            "SPFH_TGL_2",
+            "RH_TGL_2",
+            "APCP_SFC_0",
+            "PRATE_SFC_0",
+            "PRMSL_MSL_0",
+        ]
+
     def test_logging_section(self, prod_config):
         loggers = prod_config["logging"]["publisher"]["loggers"]
         assert loggers["watchdog"]["qualname"] == "watchdog"
@@ -151,70 +208,80 @@ class TestConfig:
 
 
 @pytest.mark.parametrize(
-    "forecast, utcnow, forecast_date",
+    "forecast, resolution, utcnow, forecast_date",
     (
-        ("00", "2018-12-29 03:58:43", "2018-12-29"),
-        ("06", "2018-12-28 09:59:43", "2018-12-28"),
-        ("12", "2018-12-28 15:56:43", "2018-12-28"),
-        ("18", "2018-12-28 21:54:43", "2018-12-28"),
+        ("00", "2.5km", "2018-12-29 03:58:43", "2018-12-29"),
+        ("06", "2.5km", "2018-12-28 09:59:43", "2018-12-28"),
+        ("12", "2.5km", "2018-12-28 15:56:43", "2018-12-28"),
+        ("18", "2.5km", "2018-12-28 21:54:43", "2018-12-28"),
+        ("00", "1km", "2020-02-20 03:58:43", "2020-02-20"),
+        ("12", "1km", "2020-02-20 15:56:43", "2020-02-20"),
     ),
 )
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, forecast, utcnow, forecast_date, caplog, monkeypatch):
+    def test_success(
+        self, forecast, resolution, utcnow, forecast_date, caplog, monkeypatch
+    ):
         def mock_utcnow():
             return arrow.get(utcnow)
 
         monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
-        parsed_args = SimpleNamespace(forecast=forecast)
-        caplog.set_level(logging.INFO)
+        parsed_args = SimpleNamespace(forecast=forecast, resolution=resolution)
+        caplog.set_level(logging.DEBUG)
 
         msg_type = collect_weather.success(parsed_args)
+
         assert caplog.records[0].levelname == "INFO"
-        expected = f"{forecast_date} weather forecast {parsed_args.forecast} collection complete"
+        expected = f"{forecast_date} {resolution} weather forecast {forecast} collection complete"
         assert caplog.messages[0] == expected
-        assert msg_type == f"success {forecast}"
+        assert msg_type == f"success {resolution} {forecast}"
 
 
 @pytest.mark.parametrize(
-    "forecast, utcnow, forecast_date",
+    "forecast, resolution, utcnow, forecast_date",
     (
-        ("00", "2018-12-29 03:58:43", "2018-12-29"),
-        ("06", "2018-12-28 09:59:43", "2018-12-28"),
-        ("12", "2018-12-28 15:56:43", "2018-12-28"),
-        ("18", "2018-12-28 21:54:43", "2018-12-28"),
+        ("00", "2.5km", "2018-12-29 03:58:43", "2018-12-29"),
+        ("06", "2.5km", "2018-12-28 09:59:43", "2018-12-28"),
+        ("12", "2.5km", "2018-12-28 15:56:43", "2018-12-28"),
+        ("18", "2.5km", "2018-12-28 21:54:43", "2018-12-28"),
+        ("00", "1km", "2020-02-10 03:58:43", "2020-02-10"),
+        ("12", "1km", "2020-02-10 15:56:43", "2020-02-10"),
     ),
 )
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, forecast, utcnow, forecast_date, caplog, monkeypatch):
+    def test_failure(
+        self, forecast, resolution, utcnow, forecast_date, caplog, monkeypatch
+    ):
         def mock_utcnow():
             return arrow.get(utcnow)
 
         monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
-        parsed_args = SimpleNamespace(forecast=forecast)
-        caplog.set_level(logging.CRITICAL)
+        parsed_args = SimpleNamespace(forecast=forecast, resolution=resolution)
+        caplog.set_level(logging.DEBUG)
 
         msg_type = collect_weather.failure(parsed_args)
+
         assert caplog.records[0].levelname == "CRITICAL"
-        expected = (
-            f"{forecast_date} weather forecast {parsed_args.forecast} collection failed"
-        )
+        expected = f"{forecast_date} {resolution} weather forecast {forecast} collection failed"
         assert caplog.messages[0] == expected
-        assert msg_type == f"failure {forecast}"
+        assert msg_type == f"failure {resolution} {forecast}"
 
 
 @pytest.mark.parametrize(
-    "forecast, utcnow, forecast_date",
+    "forecast, resolution, utcnow, forecast_date",
     (
-        ("00", "2018-12-29 03:58:43", "20181229"),
-        ("06", "2018-12-28 09:59:43", "20181228"),
-        ("12", "2018-12-28 15:56:43", "20181228"),
-        ("18", "2018-12-28 21:54:43", "20181228"),
+        ("00", "2.5km", "2018-12-29 03:58:43", "20181229"),
+        ("06", "2.5km", "2018-12-28 09:59:43", "20181228"),
+        ("12", "2.5km", "2018-12-28 15:56:43", "20181228"),
+        ("18", "2.5km", "2018-12-28 21:54:43", "20181228"),
+        ("00", "1km", "2020-02-10 03:58:43", "20200210"),
+        ("12", "1km", "2020-02-10 15:56:43", "20200210"),
     ),
 )
 @patch(
@@ -234,6 +301,7 @@ class TestCollectWeather:
         m_mkdir,
         m_calc_exp_files,
         forecast,
+        resolution,
         utcnow,
         forecast_date,
         config,
@@ -244,20 +312,24 @@ class TestCollectWeather:
             return arrow.get(utcnow)
 
         monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
-        parsed_args = SimpleNamespace(forecast=forecast)
-        cheklist = collect_weather.collect_weather(parsed_args, config)
-        assert cheklist == {
-            forecast: f"forcing/atmospheric/GEM2.5/GRIB/{forecast_date}/{forecast}"
+        parsed_args = SimpleNamespace(forecast=forecast, resolution=resolution)
+
+        checklist = collect_weather.collect_weather(parsed_args, config)
+
+        assert checklist == {
+            forecast: f"forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/{forecast_date}/{forecast}"
         }
 
 
 @pytest.mark.parametrize(
-    "forecast, utcnow",
+    "forecast, resolution, utcnow",
     (
-        ("00", arrow.get("2018-12-29 03:58:43")),
-        ("06", arrow.get("2018-12-28 09:59:43")),
-        ("12", arrow.get("2018-12-28 15:56:43")),
-        ("18", arrow.get("2018-12-28 21:54:43")),
+        ("00", "2.5 km", arrow.get("2018-12-29 03:58:43")),
+        ("06", "2.5 km", arrow.get("2018-12-28 09:59:43")),
+        ("12", "2.5 km", arrow.get("2018-12-28 15:56:43")),
+        ("18", "2.5 km", arrow.get("2018-12-28 21:54:43")),
+        ("00", "1 km", arrow.get("2020-02-10 03:58:43")),
+        ("12", "1 km", arrow.get("2020-02-10 15:56:43")),
     ),
 )
 class TestCalcExpectedFiles:
@@ -265,20 +337,28 @@ class TestCalcExpectedFiles:
     """
 
     def test_expected_files(
-        self, forecast, utcnow, config, prod_config, caplog, monkeypatch
+        self, forecast, resolution, utcnow, config, prod_config, caplog, monkeypatch
     ):
         def mock_utcnow():
             return arrow.get(utcnow)
 
         monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
-        datamart_dir = Path(config["weather"]["download"]["datamart dir"])
+        datamart_dir = Path(config["weather"]["download"][resolution]["datamart dir"])
         forecast_date = utcnow.shift(hours=-int(forecast)).format("YYYYMMDD")
+        caplog.set_level(logging.DEBUG)
+
         expected_files = collect_weather._calc_expected_files(
-            datamart_dir, forecast, forecast_date, config
+            datamart_dir, forecast, forecast_date, resolution, config
         )
-        forecast_duration = prod_config["weather"]["download"]["forecast duration"]
-        grib_vars = prod_config["weather"]["download"]["grib variables"]
-        file_template = config["weather"]["download"]["file template"]
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"calculated set of expected file paths for {resolution} {forecast_date}/{forecast}"
+        assert caplog.messages[0] == expected
+        forecast_duration = config["weather"]["download"][resolution][
+            "forecast duration"
+        ]
+        grib_vars = config["weather"]["download"][resolution]["grib variables"]
+        file_template = config["weather"]["download"][resolution]["file template"]
         expected = set()
         for hour in range(forecast_duration):
             forecast_hour = f"{hour + 1:03d}"
@@ -301,11 +381,12 @@ class TestCalcExpectedFiles:
         assert len(expected_files) == forecast_duration * len(grib_vars)
 
 
+@pytest.mark.parametrize("resolution", ("2.5 km", "1 km"))
 class TestGribFileEventHandler:
     """Unit tests for _GribFileEventHandler class.
     """
 
-    def test_constructor(self, config):
+    def test_constructor(self, resolution, config):
         handler = collect_weather._GribFileEventHandler(
             expected_files=set(),
             grib_forecast_dir=Path(),
@@ -317,14 +398,14 @@ class TestGribFileEventHandler:
 
     @patch("nowcast.workers.collect_weather.lib.mkdir", autospec=True)
     @patch("nowcast.workers.collect_weather.shutil.move", autospec=True)
-    def test_move_expected_file(self, m_move, m_mkdir, config, caplog):
+    def test_move_expected_file(self, m_move, m_mkdir, resolution, config, caplog):
         expected_file = Path(
-            config["weather"]["download"]["datamart dir"],
+            config["weather"]["download"][resolution]["datamart dir"],
             "18/043/CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2",
         )
         expected_files = {expected_file}
         grib_forecast_dir = Path(
-            config["weather"]["download"]["GRIB dir"], "20181230", "18"
+            config["weather"]["download"][resolution]["GRIB dir"], "20181230", "18"
         )
         grib_hour_dir = grib_forecast_dir / "043"
         caplog.set_level(logging.DEBUG)
@@ -345,14 +426,14 @@ class TestGribFileEventHandler:
 
     @patch("nowcast.workers.collect_weather.lib.mkdir", autospec=True)
     @patch("nowcast.workers.collect_weather.shutil.move", autospec=True)
-    def test_ignore_unexpected_file(self, m_move, m_mkdir, config, caplog):
+    def test_ignore_unexpected_file(self, m_move, m_mkdir, resolution, config, caplog):
         expected_file = Path(
-            config["weather"]["download"]["datamart dir"],
+            config["weather"]["download"][resolution]["datamart dir"],
             "18/043/CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2",
         )
         expected_files = {expected_file}
         grib_forecast_dir = Path(
-            config["weather"]["download"]["GRIB dir"], "20181230", "18"
+            config["weather"]["download"][resolution]["GRIB dir"], "20181230", "18"
         )
         caplog.set_level(logging.DEBUG)
 

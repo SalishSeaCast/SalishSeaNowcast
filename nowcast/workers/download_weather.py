@@ -44,6 +44,12 @@ def main():
         help="Name of forecast to download files from.",
     )
     worker.cli.add_argument(
+        "resolution",
+        choices={"1km", "2.5km"},
+        default="2.5km",
+        help="Horizontal resolution of forecast to download files from.",
+    )
+    worker.cli.add_argument(
         "--yesterday",
         action="store_true",
         help="Download forecast files for previous day's date.",
@@ -57,8 +63,10 @@ def success(parsed_args):
         ymd = arrow.now().floor("day").shift(days=-1).format("YYYY-MM-DD")
     else:
         ymd = arrow.now().floor("day").format("YYYY-MM-DD")
-    logger.info(f"{ymd} weather forecast {parsed_args.forecast} downloads complete")
-    msg_type = f"success {parsed_args.forecast}"
+    logger.info(
+        f"{ymd} {parsed_args.resolution} weather forecast {parsed_args.forecast} downloads complete"
+    )
+    msg_type = f"success {parsed_args.resolution} {parsed_args.forecast}"
     return msg_type
 
 
@@ -67,21 +75,24 @@ def failure(parsed_args):
         ymd = arrow.now().floor("day").shift(days=-1).format("YYYY-MM-DD")
     else:
         ymd = arrow.now().floor("day").format("YYYY-MM-DD")
-    logger.critical(f"{ymd} weather forecast {parsed_args.forecast} downloads failed")
-    msg_type = f"failure {parsed_args.forecast}"
+    logger.critical(
+        f"{ymd} {parsed_args.resolution} weather forecast {parsed_args.forecast} downloads failed"
+    )
+    msg_type = f"failure {parsed_args.resolution} {parsed_args.forecast}"
     return msg_type
 
 
 def get_grib(parsed_args, config, *args):
     forecast = parsed_args.forecast
+    resolution = parsed_args.resolution.replace("km", " km")
     date = _calc_date(parsed_args, forecast)
-    logger.info(f"downloading {forecast} forecast GRIB2 files for {date}")
-    dest_dir_root = config["weather"]["download"]["GRIB dir"]
+    logger.info(f"downloading {forecast} {resolution} forecast GRIB2 files for {date}")
+    dest_dir_root = config["weather"]["download"][resolution]["GRIB dir"]
     grp_name = config["file group"]
     _mkdirs(dest_dir_root, date, forecast, grp_name)
-    url_tmpl = config["weather"]["download"]["url template"]
-    filename_tmpl = config["weather"]["download"]["file template"]
-    forecast_duration = config["weather"]["download"]["forecast duration"]
+    url_tmpl = config["weather"]["download"][resolution]["url template"]
+    filename_tmpl = config["weather"]["download"][resolution]["file template"]
+    forecast_duration = config["weather"]["download"][resolution]["forecast duration"]
     with requests.Session() as session:
         for forecast_hour in range(1, forecast_duration + 1):
             hr_str = f"{forecast_hour:0=3}"
@@ -91,7 +102,7 @@ def get_grib(parsed_args, config, *args):
                 grp_name=grp_name,
                 exist_ok=False,
             )
-            for var in config["weather"]["download"]["grib variables"]:
+            for var in config["weather"]["download"][resolution]["grib variables"]:
                 filepath = _get_file(
                     url_tmpl,
                     filename_tmpl,
@@ -103,7 +114,7 @@ def get_grib(parsed_args, config, *args):
                     session,
                 )
                 lib.fix_perms(filepath)
-    checklist = {f"{date} {forecast} forecast": True}
+    checklist = {f"{date} {forecast} {parsed_args.resolution} forecast": True}
     return checklist
 
 
@@ -141,7 +152,7 @@ def _get_file(
     size = os.stat(filepath).st_size
     logger.debug(f"downloaded {size} bytes from {file_url}")
     if size == 0:
-        logger.critical(f"Problem, 0 size file {file_url}")
+        logger.critical(f"Problem! 0 size file: {file_url}")
         raise WorkerError
     return filepath
 

@@ -101,12 +101,7 @@ class TestConfig:
         assert "file group" in prod_config
 
     def test_weather_section(self, prod_config):
-        assert "weather" in prod_config
         weather = prod_config["weather"]
-        assert (
-            weather["download"]["GRIB dir"]
-            == "/results/forcing/atmospheric/GEM2.5/GRIB/"
-        )
         assert weather["wgrib2"] == "/SalishSeaCast/private-tools/grib2/wgrib2/wgrib2"
         assert (
             weather["grid_defn.pl"]
@@ -116,6 +111,12 @@ class TestConfig:
         assert (
             weather["monitoring image"]
             == "/results/nowcast-sys/figures/monitoring/wg.png"
+        )
+
+    def test_weather_download_2_5_km_section(self, prod_config):
+        weather_download = prod_config["weather"]["download"]["2.5 km"]
+        assert (
+            weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
         )
 
 

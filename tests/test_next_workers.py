@@ -88,12 +88,16 @@ class TestAfterDownloadWeather:
         "msg_type",
         [
             "crash",
-            "failure 00",
-            "failure 06",
-            "failure 12",
-            "failure 18",
-            "success 00",
-            "success 18",
+            "failure 2.5km 00",
+            "failure 2.5km 06",
+            "failure 2.5km 12",
+            "failure 2.5km 18",
+            "success 2.5km 00",
+            "failure 1km 00",
+            "failure 1km 12",
+            "success 2.5km 18",
+            "success 1km 00",
+            "success 1km 12",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -102,7 +106,7 @@ class TestAfterDownloadWeather:
         )
         assert workers == []
 
-    def test_success_06(self, config, checklist, monkeypatch):
+    def test_success_2_5_km_06(self, config, checklist, monkeypatch):
         def mock_now():
             return arrow.get("2018-12-27")
 
@@ -114,7 +118,7 @@ class TestAfterDownloadWeather:
         monkeypatch.setattr(next_workers.arrow, "utcnow", mock_utcnow)
 
         workers = next_workers.after_download_weather(
-            Message("download_weather", "success 06"), config, checklist
+            Message("download_weather", "success 2.5km 06"), config, checklist
         )
         expected = [
             NextWorker(
@@ -147,9 +151,9 @@ class TestAfterDownloadWeather:
         for next_worker in expected:
             assert next_worker in workers
 
-    def test_success_12(self, config, checklist):
+    def test_success_2_5_km_12(self, config, checklist):
         workers, race_condition_workers = next_workers.after_download_weather(
-            Message("download_weather", "success 12"), config, checklist
+            Message("download_weather", "success 2.5km 12"), config, checklist
         )
         expected = [
             NextWorker(
@@ -171,7 +175,16 @@ class TestAfterCollectWeather:
     """
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure 00", "failure 06", "failure 12", "failure 18"]
+        "msg_type",
+        [
+            "crash",
+            "failure 2.5km 00",
+            "failure 2.5km 06",
+            "failure 2.5km 12",
+            "failure 2.5km 18",
+            "failure 1km 00",
+            "failure 1km 12",
+        ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_collect_weather(
@@ -179,7 +192,7 @@ class TestAfterCollectWeather:
         )
         assert workers == []
 
-    def test_success_06(self, config, checklist, monkeypatch):
+    def test_success_2_5_km_06(self, config, checklist, monkeypatch):
         def mock_now():
             return arrow.get("2018-12-27")
 
@@ -191,7 +204,7 @@ class TestAfterCollectWeather:
         monkeypatch.setattr(next_workers.arrow, "utcnow", mock_utcnow)
 
         workers = next_workers.after_collect_weather(
-            Message("download_weather", "success 06"), config, checklist
+            Message("collect_weather", "success 2.5km 06"), config, checklist
         )
         expected = [
             NextWorker(
@@ -219,15 +232,17 @@ class TestAfterCollectWeather:
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
             ),
-            NextWorker("nowcast.workers.collect_weather", ["12"], host="localhost"),
+            NextWorker(
+                "nowcast.workers.collect_weather", ["12", "2.5km"], host="localhost"
+            ),
         ]
         assert len(workers) == len(expected)
         for next_worker in expected:
             assert next_worker in workers
 
-    def test_success_12(self, config, checklist):
+    def test_success_2_5_km_12(self, config, checklist):
         workers, race_condition_workers = next_workers.after_collect_weather(
-            Message("download_weather", "success 12"), config, checklist
+            Message("collect_weather", "success 2.5km 12"), config, checklist
         )
         expected = [
             NextWorker(
@@ -237,23 +252,41 @@ class TestAfterCollectWeather:
                 "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
             ),
             NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
-            NextWorker("nowcast.workers.collect_weather", ["18"], host="localhost"),
+            NextWorker(
+                "nowcast.workers.collect_weather", ["18", "2.5km"], host="localhost"
+            ),
         ]
         assert len(workers) == len(expected)
         for next_worker in expected:
             assert next_worker in workers
         assert race_condition_workers == {"grib_to_netcdf", "make_live_ocean_files"}
 
-    @pytest.mark.parametrize(
-        "msg_type, args", (("success 00", ["06"]), ("success 18", ["00"]))
-    )
-    def test_success_launch_next_forecast_collect_weather(
-        self, msg_type, args, config, checklist
-    ):
+    def test_success_2_5_km_18(self, config, checklist):
         workers = next_workers.after_collect_weather(
-            Message("collect_weather", msg_type), config, checklist
+            Message("collect_weather", "success 2.5km 18"), config, checklist
         )
-        expected = NextWorker("nowcast.workers.collect_weather", args, host="localhost")
+        expected = [
+            NextWorker(
+                "nowcast.workers.download_weather", ["00", "1km"], host="localhost"
+            ),
+            NextWorker(
+                "nowcast.workers.download_weather", ["12", "1km"], host="localhost"
+            ),
+            NextWorker(
+                "nowcast.workers.collect_weather", ["00", "2.5km"], host="localhost"
+            ),
+        ]
+        assert len(workers) == len(expected)
+        for next_worker in expected:
+            assert next_worker in workers
+
+    def test_success_2_5_km_00(self, config, checklist):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", "success 2.5km 00"), config, checklist
+        )
+        expected = NextWorker(
+            "nowcast.workers.collect_weather", ["06", "2.5km"], host="localhost"
+        )
         assert expected in workers
 
 

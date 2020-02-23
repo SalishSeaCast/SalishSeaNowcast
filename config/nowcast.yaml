@@ -12,32 +12,61 @@ file group: sallen
 
 weather:
   download:
-    # Directory where ECCC datamart hrdps/weat/ mirror files are stored
-    datamart dir: /SalishSeaCast/datamart/hrdps-west/
-    # URL from which to download ECCC HRDPS west domain forecast fields files
-    # **Must be quoted to project {} characters**
-    url template: 'https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
-    # Template for hourly ECCC HRDPS west domain fields file name
-    # **Must be quoted to project {} characters**
-    file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
-    # ECCC HRDPS GRIB forecast file field variable names
-    grib variables:
-      - UGRD_TGL_10  # u component of wind velocity at 10m elevation
-      - VGRD_TGL_10  # v component of wind velocity at 10m elevation
-      - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
-      - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
-      - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
-      - TMP_TGL_2    # air temperature at 2m elevation
-      - SPFH_TGL_2   # specific humidity at 2m elevation
-      - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
-      - APCP_SFC_0   # accumulated precipitation at ground level
-      - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
-      - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-      - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
-    # ECCC HRDPS west domain forecast duration
-    forecast duration: 48  # hours
-    # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
-    GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
+    2.5 km:
+      # Directory where ECCC datamart hrdps/weat/ mirror files are stored
+      datamart dir: /SalishSeaCast/datamart/hrdps-west/
+      # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
+      GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
+      # URL from which to download ECCC HRDPS 2.5km west domain forecast fields files
+      # **Must be quoted to project {} characters**
+      url template: 'https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+      # Template for hourly ECCC HRDPS 2.5km west domain fields file name
+      # **Must be quoted to project {} characters**
+      file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+      # ECCC HRDPS 2.5km GRIB forecast file field variable names
+      grib variables:
+        - UGRD_TGL_10  # u component of wind velocity at 10m elevation
+        - VGRD_TGL_10  # v component of wind velocity at 10m elevation
+        - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
+        - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+        - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
+        - TMP_TGL_2    # air temperature at 2m elevation
+        - SPFH_TGL_2   # specific humidity at 2m elevation
+        - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
+        - APCP_SFC_0   # accumulated precipitation at ground level
+        - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
+        - PRMSL_MSL_0  # atmospheric pressure at mean sea level
+        - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
+      # ECCC HRDPS 2.5km west domain forecast duration
+      forecast duration: 48  # hours
+
+    1 km:
+      # Directory where ECCC datamart hrdps/weat/ mirror files are stored
+      datamart dir: /SalishSeaCast/datamart/hrdps-west/1km/
+      # Destination directory for downloaded GEM 1km operational model GRIB2 files
+      GRIB dir: /results/forcing/atmospheric/GEM1.0/GRIB/
+      # URL from which to download ECCC HRDPS 1km west domain forecast fields files
+      # **Must be quoted to project {} characters**
+      url template: 'https://dd.alpha.meteo.gc.ca/model_hrdps/west/1km/grib2/{forecast}/{hour}/{filename}'
+      # Template for hourly ECCC HRDPS 1km west domain fields file name
+      # **Must be quoted to project {} characters**
+      file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
+      # ECCC HRDPS 1km GRIB forecast file field variable names
+      grib variables:
+        - UGRD_TGL_10  # u component of wind velocity at 10m elevation
+        - VGRD_TGL_10  # v component of wind velocity at 10m elevation
+        - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
+        - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
+        - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
+        - TMP_TGL_2    # air temperature at 2m elevation
+        - SPFH_TGL_2   # specific humidity at 2m elevation
+        - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
+        - APCP_SFC_0   # accumulated precipitation at ground level
+        - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
+        - PRMSL_MSL_0  # atmospheric pressure at mean sea level
+      # ECCC HRDPS 1km west domain forecast duration
+      forecast duration: 36  # hours
+
   # Location of wgrib2 executable
   wgrib2: /SalishSeaCast/private-tools/grib2/wgrib2/wgrib2
   # Location of Pramod Thupaki's grid_defn.pl script
@@ -1146,14 +1175,18 @@ message registry:
       # be used to hold message payload information provided by the worker
       checklist key: weather forecast
       # Message types that the worker can send and their meanings
-      success 00: 00 weather forecast ready
-      failure 00: 00 weather forecast download failed
-      success 06: 06 weather forecast ready
-      failure 06: 06 weather forecast download failed
-      success 12: 12 weather forecast ready
-      failure 12: 12 weather forecast download failed
-      success 18: 18 weather forecast ready
-      failure 18: 18 weather forecast download failed
+      success 2.5km 00: 00 2.5km weather forecast ready
+      failure 2.5km 00: 00 2.5km weather forecast download failed
+      success 2.5km 06: 06 2.5km weather forecast ready
+      failure 2.5km 06: 06 2.5km weather forecast download failed
+      success 2.5km 12: 12 2.5km weather forecast ready
+      failure 2.5km 12: 12 2.5km weather forecast download failed
+      success 2.5km 18: 18 2.5km weather forecast ready
+      failure 2.5km 18: 18 2.5km weather forecast download failed
+      success 1km 00: 00 1km weather forecast ready
+      failure 1km 00: 00 1km weather forecast download failed
+      success 1km 12: 12 1km weather forecast ready
+      failure 1km 12: 12 1km weather forecast download failed
       crash: download_weather worker crashed
 
     # Worker module name
@@ -1162,14 +1195,18 @@ message registry:
       # be used to hold message payload information provided by the worker
       checklist key: weather forecast
       # Message types that the worker can send and their meanings
-      success 00: 00 weather forecast ready
-      failure 00: 00 weather forecast collection failed
-      success 06: 06 weather forecast ready
-      failure 06: 06 weather forecast collection failed
-      success 12: 12 weather forecast ready
-      failure 12: 12 weather forecast collection failed
-      success 18: 18 weather forecast ready
-      failure 18: 18 weather forecast collection failed
+      success 2.5km 00: 00 2.5km weather forecast ready
+      failure 2.5km 00: 00 2.5km weather forecast collection failed
+      success 2.5km 06: 06 2.5km weather forecast ready
+      failure 2.5km 06: 06 2.5km weather forecast collection failed
+      success 2.5km 12: 12 2.5km weather forecast ready
+      failure 2.5km 12: 12 2.5km weather forecast collection failed
+      success 2.5km 18: 18 2.5km weather forecast ready
+      failure 2.5km 18: 18 2.5km weather forecast collection failed
+      success 1km 00: 00 1km weather forecast ready
+      failure 1km 00: 00 1km weather forecast collection failed
+      success 1km 12: 12 1km weather forecast ready
+      failure 1km 12: 12 1km weather forecast collection failed
       crash: collect_weather worker crashed
 
     collect_river_data:
