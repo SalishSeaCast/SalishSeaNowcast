@@ -37,7 +37,7 @@ jobs:
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/salishseacmd#egg=SalishSeaCmd
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable "hg+https://bitbucket.org/salishsea/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://douglatornell:${{ secrets.BITBUCKET_PASSWORD }}@bitbucket.org/mdunphy/fvcom-cmd#egg=FVCOM-Cmd
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git#egg=OPPTools
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git@6c784a4dc44dd9030aafe9a8519e5ae0b6cc3183#egg=OPPTools
           python3 -m pip install --editable $GITHUB_WORKSPACE
 
       - name: pytest package with coverage
