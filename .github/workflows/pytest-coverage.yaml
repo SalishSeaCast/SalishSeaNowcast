@@ -43,7 +43,7 @@ jobs:
       - name: pytest package with coverage
         shell: bash -l {0}
         run: |
-          pytest --cov=$GITHUB_WORKSPACE/tests --cov-report=xml
+          pytest --cov=$GITHUB_WORKSPACE --cov-report=xml
 
       - name: Upload coverage report to Codecov
         uses: codecov/codecov-action@v1
