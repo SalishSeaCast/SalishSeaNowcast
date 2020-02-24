@@ -54,6 +54,15 @@ def main():
         action="store_true",
         help="Download forecast files for previous day's date.",
     )
+    worker.cli.add_argument(
+        "--no-verify-certs",
+        action="store_true",
+        help="""
+            Don't verify TLS/SSL certificates for downloads.
+            NOTE: This is intended for use *only* when downloading from dd.alpha.meteo.gc.ca
+            which has still uses deprecated TLS-1.0.
+        """,
+    )
     worker.run(get_grib, success, failure)
     return worker
 
@@ -94,6 +103,8 @@ def get_grib(parsed_args, config, *args):
     filename_tmpl = config["weather"]["download"][resolution]["file template"]
     forecast_duration = config["weather"]["download"][resolution]["forecast duration"]
     with requests.Session() as session:
+        if parsed_args.no_verify_certs:
+            session.verify = False
         for forecast_hour in range(1, forecast_duration + 1):
             hr_str = f"{forecast_hour:0=3}"
             lib.mkdir(

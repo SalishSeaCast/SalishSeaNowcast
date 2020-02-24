@@ -150,8 +150,14 @@ def after_collect_weather(msg, config, checklist):
     if msg.type.endswith("2.5km 18"):
         next_workers["success 2.5km 18"].extend(
             [
-                NextWorker("nowcast.workers.download_weather", args=["00", "1km"]),
-                NextWorker("nowcast.workers.download_weather", args=["12", "1km"]),
+                NextWorker(
+                    "nowcast.workers.download_weather",
+                    args=["00", "1km", "--no-verify-certs"],
+                ),
+                NextWorker(
+                    "nowcast.workers.download_weather",
+                    args=["12", "1km", "--no-verify-certs"],
+                ),
                 NextWorker("nowcast.workers.collect_weather", args=["00", "2.5km"]),
             ]
         )

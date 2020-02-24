@@ -267,10 +267,14 @@ class TestAfterCollectWeather:
         )
         expected = [
             NextWorker(
-                "nowcast.workers.download_weather", ["00", "1km"], host="localhost"
+                "nowcast.workers.download_weather",
+                ["00", "1km", "--no-verify-certs"],
+                host="localhost",
             ),
             NextWorker(
-                "nowcast.workers.download_weather", ["12", "1km"], host="localhost"
+                "nowcast.workers.download_weather",
+                ["12", "1km", "--no-verify-certs"],
+                host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.collect_weather", ["00", "2.5km"], host="localhost"

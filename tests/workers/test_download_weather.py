@@ -124,6 +124,12 @@ class TestMain:
         assert worker.cli.parser._actions[5].default is False
         assert worker.cli.parser._actions[5].help
 
+    def test_add_verify_certs_option(self, mock_worker):
+        worker = download_weather.main()
+        assert worker.cli.parser._actions[6].dest == "no_verify_certs"
+        assert worker.cli.parser._actions[6].default is False
+        assert worker.cli.parser._actions[6].help
+
 
 class TestConfig:
     """Unit tests for production YAML config file elements related to worker.
@@ -357,7 +363,10 @@ class TestGetGrib:
         config,
     ):
         parsed_args = SimpleNamespace(
-            forecast=forecast, resolution=resolution, yesterday=False
+            forecast=forecast,
+            resolution=resolution,
+            yesterday=False,
+            no_verify_certs=False,
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
@@ -387,7 +396,10 @@ class TestGetGrib:
         config,
     ):
         parsed_args = SimpleNamespace(
-            forecast=forecast, resolution=resolution, yesterday=False
+            forecast=forecast,
+            resolution=resolution,
+            yesterday=False,
+            no_verify_certs=False,
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
@@ -424,7 +436,10 @@ class TestGetGrib:
         config,
     ):
         parsed_args = SimpleNamespace(
-            forecast=forecast, resolution=resolution, yesterday=False
+            forecast=forecast,
+            resolution=resolution,
+            yesterday=False,
+            no_verify_certs=False,
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
@@ -448,7 +463,10 @@ class TestGetGrib:
         config,
     ):
         parsed_args = SimpleNamespace(
-            forecast=forecast, resolution=resolution, yesterday=False
+            forecast=forecast,
+            resolution=resolution,
+            yesterday=False,
+            no_verify_certs=False,
         )
         checklist = download_weather.get_grib(parsed_args, config)
 
