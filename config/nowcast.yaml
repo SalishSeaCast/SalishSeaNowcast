@@ -432,9 +432,9 @@ figures:
       # **Must be quoted to project {} characters**
       'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10m'
     3d tracer fields:
-      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV18-12
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV19-05
     3d biology fields:
-      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV18-12
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV19-05
     2nd narrows hadcp time series:
       https://salishsea.eos.ubc.ca/erddap/tabledap/ubcVFPA2ndNarrowsCurrent2sV1
     wwatch3 fields:
