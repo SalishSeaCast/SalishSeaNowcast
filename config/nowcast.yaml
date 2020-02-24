@@ -465,8 +465,8 @@ figures:
   # Surface current tile figures
   surface current tiles:
     # Rolling forecast u and v velocity fields ERDDAP dataset URLs
-    u field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DuGridFields1hV18-12
-    v field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DvGridFields1hV18-12
+    u field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DuGridFields1h
+    v field: https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf3DvGridFields1h
     # Directory tree behind the https://salishsea.eos.ubc.ca/nowcast-sys/figures/
     # static web server that tile files are to be stored in and requested from
     storage path: /results/nowcast-sys/figures/surface_currents/
