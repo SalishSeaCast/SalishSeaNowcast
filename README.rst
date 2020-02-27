@@ -8,19 +8,25 @@ Salish Sea NEMO Model Nowcast
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 .. image:: https://img.shields.io/badge/python-3.6+-blue.svg
-    :target: https://docs.python.org/3.6/
+    :target: https://docs.python.org/3.7/
     :alt: Python Version
-.. image:: https://img.shields.io/badge/version%20control-hg-blue.svg
-    :target: https://bitbucket.org/salishsea/salishseanowcast/
-    :alt: Mercurial on Bitbucket
+.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaNowcast
+    :alt: Git on GitHub
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 .. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
     :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status
-.. image:: https://img.shields.io/bitbucket/issues/salishsea/salishseanowcast.svg
-    :target: https://bitbucket.org/salishsea/salishseanowcast/issues?status=new&status=open
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/CI/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3ACI
+    :alt: GitHub Workflow Status
+.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
+    :target: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast
+    :alt: Codecov Testing Coverage Report
+.. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues
     :alt: Issue Tracker
 
 The ``SalishSeaNowcast`` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
