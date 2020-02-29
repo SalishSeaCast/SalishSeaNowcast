@@ -611,7 +611,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ hg clone ssh://hg@bitbucket.org/mdunphy/fvcom-cmd FVCOM-Cmd
     $ hg clone ssh://hg@bitbucket.org/salishsea/grid grid
-    $ hg clone ssh://hg@bitbucket.org/UBC_MOAD/moad_tools moad_tools
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-cmd NEMO-Cmd
     $ hg clone ssh://hg@bitbucket.org/salishsea/rivers-climatology rivers-climatology
@@ -633,6 +632,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
+    $ git clone git@github.com:UBC-MOAD/moad_tools.git
     $ git clone git@github.com:43ravens/NEMO_Nowcast.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
     $ git clone git@gitlab.com:mdunphy/FVCOM41.git
