@@ -67,13 +67,13 @@ you can create and activate a figures development environment with these command
     $ cd SalishSeaNowcast
     $ conda env create -f env/environment-fig-dev.yaml
     $ source activate nowcast-fig-dev
-    (nowcast-fig-dev)$ pip install --editable ../NEMO_Nowcast
-    (nowcast-fig-dev)$ pip install --editable ../moad_tools
-    (nowcast-fig-dev)$ pip install --editable ../tools/SalishSeaTools
-    (nowcast-fig-dev)$ pip install --editable ../NEMO-Cmd
-    (nowcast-fig-dev)$ pip install --editable ../SalishSeaCmd
-    (nowcast-fig-dev)$ pip install --editable ../salishsea-site/
-    (nowcast-fig-dev)$ pip install --editable .
+    (nowcast-fig-dev)$ python3 -m pip install --editable ../NEMO_Nowcast
+    (nowcast-fig-dev)$ python3 -m pip install --editable ../moad_tools
+    (nowcast-fig-dev)$ python3 -m pip install --editable ../tools/SalishSeaTools
+    (nowcast-fig-dev)$ python3 -m pip install --editable ../NEMO-Cmd
+    (nowcast-fig-dev)$ python3 -m pip install --editable ../SalishSeaCmd
+    (nowcast-fig-dev)$ python3 -m pip install --editable ../salishsea-site/
+    (nowcast-fig-dev)$ python3 -m pip install --editable .
 
 The :kbd:`--editable` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
 

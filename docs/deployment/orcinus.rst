@@ -99,8 +99,8 @@ The Python packages that the system depends on are installed as user packages in
 .. code-block:: bash
 
     $ cd /home/dlatorne/nowcast-agrif-sys/
-    $ pip install --user --editable NEMO-Cmd/
-    $ pip install --user --editable SalishSeaCmd/
+    $ python3 -m pip install --user --editable NEMO-Cmd/
+    $ python3 -m pip install --user --editable SalishSeaCmd/
 
 
 Populate Run Preparation Directory Tree
