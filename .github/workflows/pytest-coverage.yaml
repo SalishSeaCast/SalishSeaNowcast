@@ -32,7 +32,7 @@ jobs:
         shell: bash -l {0}
         run: |
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
-          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/UBC_MOAD/moad_tools#egg=moad_tools
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/nemo-cmd#egg=NEMO-Cmd
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable hg+https://bitbucket.org/salishsea/salishseacmd#egg=SalishSeaCmd
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable "hg+https://bitbucket.org/salishsea/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
