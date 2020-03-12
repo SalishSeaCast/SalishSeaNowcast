@@ -47,7 +47,7 @@ dependencies:
   - pyproj
   - pypdf2
   - pytables
-  - python=3.7
+  - python>=3.7
   - pyyaml
   - pyzmq
   - requests

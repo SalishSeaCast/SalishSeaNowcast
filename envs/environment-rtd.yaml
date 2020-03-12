@@ -10,7 +10,7 @@ channels:
 dependencies:
   - matplotlib>=3
   - nemo_nowcast
-  - python=3.6
+  - python>=3.7
   - retrying
 
   # RTD packages
