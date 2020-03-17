@@ -1020,6 +1020,7 @@ class TestRunDescription:
             str(tmp_run_prep.join("..", "moad_tools")),
             str(tmp_run_prep.join("..", "NEMO_Nowcast")),
             str(tmp_run_prep.join("..", "SalishSeaNowcast")),
+            str(tmp_run_prep.join("..", "tides")),
         ]
         assert run_desc["vcs revisions"]["hg"] == [
             str(tmp_run_prep.join("..", "grid")),
@@ -1027,7 +1028,6 @@ class TestRunDescription:
             str(tmp_run_prep.join("..", "rivers-climatology")),
             str(tmp_run_prep.join("..", "SalishSeaCmd")),
             str(tmp_run_prep.join("..", "SS-run-sets")),
-            str(tmp_run_prep.join("..", "tides")),
             str(tmp_run_prep.join("..", "tracers")),
             str(tmp_run_prep.join("..", "tools")),
             str(tmp_run_prep.join("..", "XIOS-ARCH")),
