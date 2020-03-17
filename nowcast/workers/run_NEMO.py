@@ -19,17 +19,17 @@ and launches the run.
 """
 import logging
 import os
-from pathlib import Path
 import shlex
 import subprocess
+from pathlib import Path
 
 import arrow
 import f90nml
-from nemo_nowcast import NowcastWorker, WorkerError
 import nemo_cmd.prepare
 import salishsea_cmd.api
 import salishsea_cmd.run
 import yaml
+from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import lib
 
@@ -364,6 +364,7 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
         )
     run_desc["vcs revisions"] = {
         "git": [
+            os.fspath((run_prep_dir / "../moad_tools").resolve()),
             os.fspath((run_prep_dir / "../NEMO_Nowcast").resolve()),
             os.fspath((run_prep_dir / "../SalishSeaNowcast").resolve()),
         ],

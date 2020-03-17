@@ -14,8 +14,8 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast run_NEMO worker.
 """
-from pathlib import Path
 import subprocess
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, patch, Mock
 
@@ -1017,6 +1017,7 @@ class TestRunDescription:
                 run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
             )
         assert run_desc["vcs revisions"]["git"] == [
+            str(tmp_run_prep.join("..", "moad_tools")),
             str(tmp_run_prep.join("..", "NEMO_Nowcast")),
             str(tmp_run_prep.join("..", "SalishSeaNowcast")),
         ]
