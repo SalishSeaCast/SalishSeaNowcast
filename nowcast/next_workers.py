@@ -1136,7 +1136,13 @@ def after_watch_fvcom(msg, config, checklist):
             next_workers[msg.type].append(
                 NextWorker(
                     "nowcast.workers.make_fvcom_boundary",
-                    args=[(config["vhfr fvcom runs"]["host"]), "x2", "forecast"],
+                    args=[
+                        (config["vhfr fvcom runs"]["host"]),
+                        "x2",
+                        "forecast",
+                        "--run-date",
+                        msg.payload[f"{model_config} {run_type}"]["run date"],
+                    ],
                     host=(config["vhfr fvcom runs"]["host"]),
                 )
             )

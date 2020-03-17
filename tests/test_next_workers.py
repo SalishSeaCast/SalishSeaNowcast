@@ -1639,7 +1639,7 @@ class TestAfterWatchFVCOM:
                     "x2 nowcast": {
                         "host": "arbutus.cloud",
                         "model config": "x2",
-                        "run date": "2019-01-18",
+                        "run date": "2020-03-16",
                         "completed": True,
                     }
                 },
@@ -1649,7 +1649,7 @@ class TestAfterWatchFVCOM:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["arbutus.cloud", "x2", "forecast"],
+            args=["arbutus.cloud", "x2", "forecast", "--run-date", "2020-03-16"],
             host="arbutus.cloud",
         )
         assert expected in workers
