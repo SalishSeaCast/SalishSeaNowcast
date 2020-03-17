@@ -4,7 +4,7 @@
 checklist file: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast_checklist.yaml
 
 # Python interpreter in environment with all dependencies installed
-python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python
+python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python3
 
 # Filesystem group name to use for ownership of newly created files
 file group: sallen
@@ -573,7 +573,7 @@ run:
       make forcing links: True
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       envvars: /SalishSeaCast/nowcast-env/etc/conda/activate.d/envvars.sh
-      python: /SalishSeaCast/nowcast-env/bin/python
+      python: /SalishSeaCast/nowcast-env/bin/python3
       config file: /SalishSeaCast/SalishSeaNowcast/config/nowcast.yaml
       run prep dir: /SalishSeaCast/runs/
       grid dir: /SalishSeaCast/grid/

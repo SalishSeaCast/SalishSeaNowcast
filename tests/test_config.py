@@ -30,7 +30,7 @@ class TestConfig:
 
     def test_python(self, prod_config, tmpdir):
         # Config.load() transforms envvars
-        assert prod_config["python"] == f"{tmpdir}/nowcast-env/bin/python"
+        assert prod_config["python"] == f"{tmpdir}/nowcast-env/bin/python3"
 
 
 class TestSlackNotifications:
