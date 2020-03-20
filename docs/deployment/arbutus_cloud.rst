@@ -620,7 +620,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
     $ hg clone ssh://hg@bitbucket.org/salishsea/tracers tracers
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
-    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-arch XIOS-ARCH
 
 
 Git Repositories
@@ -638,7 +637,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@gitlab.com:mdunphy/FVCOM41.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git
-
+    $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
 
 Build XIOS-2
 ============

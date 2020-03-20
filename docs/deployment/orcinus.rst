@@ -39,6 +39,18 @@ and set their groups and permissions:
     $ chmod g+ws /global/scratch/dlatorne/nowcast-agrif
 
 
+Clone Git Repositories
+======================
+
+Clone the following repos into :file:`/home/dlatorne/nowcast-agrif-sys/`:
+
+.. code-block:: bash
+
+    $ cd /home/dlatorne/nowcast-agrif-sys/
+    $ git clone git@github.com:SalishSeaCast/tides.git
+    $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
+
+
 Clone Mercurial Repositories
 ============================
 
@@ -53,10 +65,8 @@ Clone the following repos into :file:`/home/dlatorne/nowcast-agrif-sys/`:
     $ hg clone ssh://hg@bitbucket.org/salishsea/rivers-climatology rivers-climatology
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
     $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
-    $ hg clone ssh://hg@bitbucket.org/salishsea/tides tides
     $ hg clone ssh://hg@bitbucket.org/salishsea/tracers tracers
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
-    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-arch XIOS-ARCH
 
 
 Build XIOS-2
