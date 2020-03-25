@@ -128,7 +128,7 @@ and `Salish Sea MEOPAR tools repo`_.
 The commands below assume that they are cloned beside your :kbd:`SalishSeaNowcast` clone.
 
 .. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
-.. _NEMO-Cmd repo: https://bitbucket.org/salishsea/nemo-cmd
+.. _NEMO-Cmd repo: https://github.com/SalishSeaCast/NEMO-Cmd
 .. _NEMO_Nowcast repo: https://bitbucket.org/43ravens/nemo_nowcast
 .. _Salish Sea MEOPAR tools repo: https://bitbucket.org/salishsea/tools
 
@@ -352,7 +352,7 @@ The output looks something like::
   (line   53) ok        https://bitbucket.org/salishsea/tools/
   (line   55) ok        https://bitbucket.org/salishsea/salishseacmd/
   (line   52) ok        https://bitbucket.org/UBC_MOAD/moad_tools
-  (line   54) ok        https://bitbucket.org/salishsea/nemo-cmd/
+  (line   54) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
   (line   56) ok        https://bitbucket.org/salishsea/salishseanowcast
   (line   57) ok        https://bitbucket.org/salishsea/salishsea-site
   (line   51) ok        https://bitbucket.org/43ravens/nemo_nowcast/
@@ -391,7 +391,7 @@ The output looks something like::
   (line   70) ok        https://bitbucket.org/salishsea/salishseanowcast/
   (line  112) ok        https://nemo-cmd.readthedocs.io/en/latest/
   (line  179) ok        http://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
-  (line  112) ok        https://bitbucket.org/salishsea/nemo-cmd
+  (line  112) ok        https://github.com/SalishSeaCast/NEMO-Cmd
   (line  112) ok        https://bitbucket.org/43ravens/nemo_nowcast
   (line  179) ok        http://www.sphinx-doc.org/en/master/
   (line  112) ok        https://bitbucket.org/salishsea/tools
