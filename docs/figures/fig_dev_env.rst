@@ -48,12 +48,12 @@ The following instructions assume that you have the `Anaconda Python Distributio
 
 You will also need up-to-date clones of the following repositories from Bitbucket:
 
-* NEMO_Nowcast: https://bitbucket.org/43ravens/nemo_nowcast/
-* moad_tools: https://bitbucket.org/UBC_MOAD/moad_tools
+* NEMO_Nowcast: https://github.com/43ravens/NEMO_Nowcast
+* moad_tools: https://github.com/UBC-MOAD/moad_tools
 * tools: https://bitbucket.org/salishsea/tools/
 * NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
 * SalishSeaCmd: https://bitbucket.org/salishsea/salishseacmd/
-* SalishSeaNowcast: https://bitbucket.org/salishsea/salishseanowcast
+* SalishSeaNowcast: https://github.com/SalishSeaCast/SalishSeaNowcast
 * salishsea-site: https://bitbucket.org/salishsea/salishsea-site
 
 Assuming that all of those repositories are cloned,
