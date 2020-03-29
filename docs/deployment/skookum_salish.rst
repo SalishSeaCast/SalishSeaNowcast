@@ -29,7 +29,6 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ cd /SalishSeaCast/
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
     $ hg clone ssh://hg@bitbucket.org/salishsea/private-tools private-tools
-    $ hg clone ssh://hg@bitbucket.org/salishsea/rivers-climatology rivers-climatology
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site salishsea-site
     $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
@@ -59,6 +58,7 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@github.com:UBC-MOAD/moad_tools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:43ravens/NEMO_Nowcast.git
+    $ git clone git@github.com:SalishSeaCast/rivers-climatology.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools

@@ -30,6 +30,7 @@ import salishsea_cmd.api
 import salishsea_cmd.run
 import yaml
 from nemo_nowcast import NowcastWorker, WorkerError
+
 from nowcast import lib
 
 NAME = "run_NEMO"
@@ -367,12 +368,12 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
             os.fspath((run_prep_dir / "../moad_tools").resolve()),
             os.fspath((run_prep_dir / "../NEMO-Cmd").resolve()),
             os.fspath((run_prep_dir / "../NEMO_Nowcast").resolve()),
+            os.fspath((run_prep_dir / "../rivers-climatology").resolve()),
             os.fspath((run_prep_dir / "../SalishSeaNowcast").resolve()),
             os.fspath((run_prep_dir / "../tides").resolve()),
             os.fspath((run_prep_dir / "../XIOS-ARCH").resolve()),
         ],
         "hg": [
-            os.fspath((run_prep_dir / "../rivers-climatology").resolve()),
             os.fspath((run_prep_dir / "../SalishSeaCmd").resolve()),
             os.fspath((run_prep_dir / "../SS-run-sets").resolve()),
             os.fspath((run_prep_dir / "../tracers").resolve()),
