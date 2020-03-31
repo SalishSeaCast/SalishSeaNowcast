@@ -116,7 +116,7 @@ The Python packages that the system depends on are installed as user packages in
 Populate Run Preparation Directory Tree
 =======================================
 
-Copy the :file:`namelist.time` namelist section files and the run description YAML template files from the :file:`SS-run-sets` repo clone into the :file:`/home/dlatorne/nowcast-agrif-sys/runs/` directory:
+Copy the :file:`namelist.time` namelist section files from the :file:`SS-run-sets` repo clone into the :file:`/home/dlatorne/nowcast-agrif-sys/runs/` directory:
 
 .. code-block:: bash
 
@@ -124,7 +124,13 @@ Copy the :file:`namelist.time` namelist section files and the run description YA
     $ cp ../SS-run-sets/v201702/smelt-agrif/namelist.time.template namelist.time
     $ cp ../SS-run-sets/v201702/smelt-agrif/namelist.time.BS.template namelist.time
     $ cp ../SS-run-sets/v201702/smelt-agrif/namelist.time.HS.template namelist.time
-    $ cp ../SS-run-sets/v201702/smelt-agrif/orcinus_nowcast_template.yaml nowcast-agrif_template.yaml
+
+Symlink the run description YAML template files from the :file:`SS-run-sets` repo clone into the :file:`/home/dlatorne/nowcast-agrif-sys/runs/` directory:
+
+.. code-block:: bash
+
+    $ cd /home/dlatorne/nowcast-agrif-sys/runs/
+    $ ln -s ../SS-run-sets/v201702/smelt-agrif/orcinus_nowcast_template.yaml nowcast-agrif_template.yaml
 
 Create an populate forcing sub-directories with:
 
