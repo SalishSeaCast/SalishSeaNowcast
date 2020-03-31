@@ -266,8 +266,8 @@ and add it to the :kbd:`rivers-climatology` repo:
     $ mkdir -p ../subgrids/BaynesSound/bio
     $ /bin/ls | grep rivers_bio_tracers_'m..d..'.nc | \
         ncra -4 -o ../subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc
-    $ hg add rivers-climatology/bio/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc
-    $ hg commit rivers-climatology/bio/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc \
+    $ hg add rivers-climatology/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc
+    $ hg commit rivers-climatology/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc \
       -m"Add rivers biology tracers climatology mean file for Baynes Sound"
 
 
