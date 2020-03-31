@@ -248,6 +248,29 @@ Bathymetry
     There is also subsequent processing by :program:`analysis-michael/agrif/fix_bathy.py` to "enforce minimum depth and fix the longitudes".
 
 
+Rivers Biology Tracers Climatology Mean File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Because the Fraser River is the only river in the model for which we have daily varying values in its biological tracer values,
+we can construct an acceptable rivers biological tracers forcing file for the Baynes Sound sub-grid by averaging the daily Climatology files.
+
+.. warning::
+    This will have to be revisited if/when we change the Puntledge River to use real-time discharges values from a gauge.
+
+Calculate the :file:`rivers-climatology/bio/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc`,
+and add it to the :kbd:`rivers-climatology` repo:
+
+.. code-block:: bash
+
+    $ cd rivers-climatology/bio
+    $ mkdir -p ../subgrids/BaynesSound/bio
+    $ /bin/ls | grep rivers_bio_tracers_'m..d..'.nc | \
+        ncra -4 -o ../subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc
+    $ hg add rivers-climatology/bio/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc
+    $ hg commit rivers-climatology/bio/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc \
+      -m"Add rivers biology tracers climatology mean file for Baynes Sound"
+
+
 Physics Restart Files
 ^^^^^^^^^^^^^^^^^^^^^
 
