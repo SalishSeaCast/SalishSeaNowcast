@@ -392,6 +392,7 @@ erddap:
       - ubcSSg3DvGridFields1hV19-05
       - ubcSSg3DwGridFields1hV19-05
       - ubcSSgSurfaceTracerFields1hV19-05
+      - ubcSSg3DAuxiliaryFields1hV19-05
     nemo-forecast:
       # tide gauge station water levels
       - ubcSSfBoundaryBaySSH10m

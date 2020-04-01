@@ -146,6 +146,7 @@ class TestConfig:
             "ubcSSg3DvGridFields1hV19-05",
             "ubcSSg3DwGridFields1hV19-05",
             "ubcSSgSurfaceTracerFields1hV19-05",
+            "ubcSSg3DAuxiliaryFields1hV19-05",
         ]
         assert erddap["datasetIDs"]["nemo-forecast"] == [
             "ubcSSfBoundaryBaySSH10m",
