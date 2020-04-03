@@ -190,7 +190,7 @@ observations:
     stations:
       - SCVIP
       - SEVIP
-      - USDDL
+#      - USDDL  # out of service since 22-Dec-2019; repair ETA unknown
 #      - LSBBL  # Decommissioned on 4-Nov-2017
     # Destination directory for ONC CTD T&S data netCDF files
     dest dir: /results/observations/ONC/CTD/
@@ -381,8 +381,9 @@ erddap:
 #    LSBBL-CTD:
 #      Decommissioned on 4-Nov-2017
 #      - ubcONCLSBBLCTD15mV1
-    USDDL-CTD:
-      - ubcONCUSDDLCTD15mV1
+#    USDDL-CTD:
+#      out of service since 22-Dec-2019; repair ETA unknown
+#      - ubcONCUSDDLCTD15mV1
     TWDP-ferry:
       - ubcONCTWDP1mV1
     nowcast-green:

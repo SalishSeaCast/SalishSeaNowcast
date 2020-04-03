@@ -443,7 +443,7 @@ class TestAfterGetONC_CTD:
         assert workers == []
 
     @pytest.mark.parametrize("ctd_stn", ["SCVIP", "SEVIP"])
-    #  USDDL node out of service on 11-Mar-2019; may return to service in mid-Sep-2019
+    #  USDDL node out of service again on 22-Dec-2019; ETA for return to service is unknown
     # @pytest.mark.parametrize("ctd_stn", ["SCVIP", "SEVIP", "USDDL"])
     def test_success_launch_ping_erddap(self, ctd_stn, config, checklist):
         workers = next_workers.after_get_onc_ctd(
