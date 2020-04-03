@@ -615,7 +615,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishseawaves SalishSeaWaves
     $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
     $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
-    $ hg clone ssh://hg@bitbucket.org/salishsea/tracers tracers
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
 
 
@@ -634,6 +633,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:SalishSeaCast/rivers-climatology.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
     $ git clone git@github.com:SalishSeaCast/tides.git
+    $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@gitlab.com:mdunphy/FVCOM41.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git

@@ -33,7 +33,6 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ hg clone ssh://hg@bitbucket.org/salishsea/salishsea-site salishsea-site
     $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
     $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
-    $ hg clone ssh://hg@bitbucket.org/salishsea/tracers tracers
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
 
 Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
@@ -63,6 +62,7 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
     $ git clone git@github.com:SalishSeaCast/tides.git
+    $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
 
 Build XIOS-2
