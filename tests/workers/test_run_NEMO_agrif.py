@@ -373,7 +373,7 @@ class TestLaunchRun:
             m_ssh_client,
             f"/home/dlatorne/.local/bin/salishsea run "
             f"nowcast-agrif-sys/runs/{run_id}.yaml "
-            f"scratch/nowcast-agrif/30apr18",
+            f"scratch/nowcast-agrif/30apr18 --debug",
             "orcinus",
             m_logger,
         )

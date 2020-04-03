@@ -18,14 +18,14 @@ TORQUE/MOAB scheduler, and queues the run.
 """
 import logging
 import os
-from pathlib import Path
 import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
 import f90nml
-from nemo_nowcast import NowcastWorker, WorkerError
 import yaml
+from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import ssh_sftp
 
@@ -279,7 +279,7 @@ def _launch_run(ssh_client, host_name, run_id, config):
     run_desc = run_prep_dir / f"{run_id}.yaml"
     scratch_dir = Path(config["run"]["enabled hosts"][host_name]["scratch dir"])
     results_dir = scratch_dir / run_id[:7]
-    cmd = f"{salishsea_cmd} run {run_desc} {results_dir}"
+    cmd = f"{salishsea_cmd} run {run_desc} {results_dir} --debug"
     logger.debug(f"launching run on {host_name}: {cmd}")
     try:
         stdout = ssh_sftp.ssh_exec_command(ssh_client, cmd, host_name, logger)
