@@ -52,7 +52,7 @@ You will also need up-to-date clones of the following repositories from Bitbucke
 * moad_tools: https://github.com/UBC-MOAD/moad_tools
 * tools: https://bitbucket.org/salishsea/tools/
 * NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
-* SalishSeaCmd: https://bitbucket.org/salishsea/salishseacmd/
+* SalishSeaCmd: https://github.com/SalishSeaCast/SalishSeaCmd
 * SalishSeaNowcast: https://github.com/SalishSeaCast/SalishSeaNowcast
 * salishsea-site: https://bitbucket.org/salishsea/salishsea-site
 

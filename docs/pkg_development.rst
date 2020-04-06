@@ -350,12 +350,12 @@ The output looks something like::
   (line   32) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
   (line   44) ok        https://conda.io/docs/install/quick.html
   (line   53) ok        https://bitbucket.org/salishsea/tools/
-  (line   55) ok        https://bitbucket.org/salishsea/salishseacmd/
-  (line   52) ok        https://bitbucket.org/UBC_MOAD/moad_tools
+  (line   55) ok        https://github.com/SalishSeaCast/SalishSeaCmd
+  (line   52) ok        https://github.com/UBC-MOAD/moad_tools
   (line   54) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
-  (line   56) ok        https://bitbucket.org/salishsea/salishseanowcast
+  (line   56) ok        https://github.com/SalishSeaCast/SalishSeaNowcast
   (line   57) ok        https://bitbucket.org/salishsea/salishsea-site
-  (line   51) ok        https://bitbucket.org/43ravens/nemo_nowcast/
+  (line   51) ok        https://github.com/43ravens/NEMO_nowcast/
   writing output... [ 52%] figures/fig_module_tips
   writing output... [ 57%] figures/fig_modules
   (line   55) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.viz_tools.set_aspect

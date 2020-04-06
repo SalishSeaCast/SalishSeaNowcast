@@ -611,8 +611,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ hg clone ssh://hg@bitbucket.org/mdunphy/fvcom-cmd FVCOM-Cmd
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
-    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseacmd SalishSeaCmd
-    $ hg clone ssh://hg@bitbucket.org/salishsea/salishseawaves SalishSeaWaves
     $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
     $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
@@ -631,7 +629,9 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:43ravens/NEMO_Nowcast.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:SalishSeaCast/rivers-climatology.git
+    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
+    $ git clone git@github.com:SalishSeaCast/SalishSeaWaves.git
     $ git clone git@github.com:SalishSeaCast/tides.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@gitlab.com:mdunphy/FVCOM41.git
