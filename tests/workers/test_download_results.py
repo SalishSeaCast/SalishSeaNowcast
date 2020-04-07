@@ -68,10 +68,6 @@ def config(base_config):
                       ssh key: SalishSeaNEMO-nowcast_id_rsa
                           
                   hindcast hosts:
-                      cedar-hindcast:
-                        run types:
-                          hindcast:
-                            results: SalishSea/hindcast
                       optimum-hindcast:
                         run types:
                           hindcast:
@@ -292,7 +288,7 @@ class TestConfig:
         ("nowcast-green", "arbutus.cloud-nowcast"),
         ("forecast", "arbutus.cloud-nowcast"),
         ("forecast2", "arbutus.cloud-nowcast"),
-        ("hindcast", "cedar-hindcast"),
+        ("hindcast", "optimum-hindcast"),
         ("nowcast-agrif", "orcinus-nowcast-agrif"),
     ],
 )
@@ -318,7 +314,7 @@ class TestSuccess:
         ("nowcast-green", "arbutus.cloud-nowcast"),
         ("forecast", "arbutus.cloud-nowcast"),
         ("forecast2", "arbutus.cloud-nowcast"),
-        ("hindcast", "cedar-hindcast"),
+        ("hindcast", "optimum-hindcast"),
         ("nowcast-agrif", "orcinus-nowcast-agrif"),
     ],
 )
@@ -382,7 +378,7 @@ class TestDownloadResults:
             ("nowcast-green", "arbutus.cloud-nowcast"),
             ("forecast", "arbutus.cloud-nowcast"),
             ("forecast2", "arbutus.cloud-nowcast"),
-            ("hindcast", "cedar-hindcast"),
+            ("hindcast", "optimum-hindcast"),
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
     )
@@ -527,7 +523,7 @@ class TestDownloadResults:
             ("nowcast-green", "arbutus.cloud-nowcast"),
             ("forecast", "arbutus.cloud-nowcast"),
             ("forecast2", "arbutus.cloud-nowcast"),
-            ("hindcast", "cedar-hindcast"),
+            ("hindcast", "optimum-hindcast"),
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
     )
@@ -557,7 +553,7 @@ class TestDownloadResults:
             ("nowcast-green", "arbutus.cloud-nowcast"),
             ("forecast", "arbutus.cloud-nowcast"),
             ("forecast2", "arbutus.cloud-nowcast"),
-            ("hindcast", "cedar-hindcast"),
+            ("hindcast", "optimum-hindcast"),
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
     )
@@ -588,7 +584,7 @@ class TestDownloadResults:
             ("nowcast-green", "arbutus.cloud-nowcast"),
             ("forecast", "arbutus.cloud-nowcast"),
             ("forecast2", "arbutus.cloud-nowcast"),
-            ("hindcast", "cedar-hindcast"),
+            ("hindcast", "optimum-hindcast"),
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
     )

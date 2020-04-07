@@ -65,7 +65,7 @@ def config():
                     "run types": ["nowcast-agrif"],
                 },
             },
-            "hindcast hosts": {"cedar": {}},
+            "hindcast hosts": {"optimum-hindcast": {}},
         },
         "wave forecasts": {"host": "arbutus.cloud", "run when": "after nowcast-green"},
         "vhfr fvcom runs": {"host": "arbutus.cloud"},
@@ -1872,7 +1872,7 @@ class TestAfterWatchNEMO_Hindcast:
                 "success",
                 {
                     "hindcast": {
-                        "host": "cedar",
+                        "host": "optimum",
                         "run date": "2018-03-10",
                         "completed": True,
                     }
@@ -1902,7 +1902,7 @@ class TestAfterWatchNEMO_Hindcast:
                 "success",
                 {
                     "hindcast": {
-                        "host": "cedar",
+                        "host": "optimum",
                         "run date": "2018-03-12",
                         "completed": True,
                     }
@@ -1927,7 +1927,7 @@ class TestAfterWatchNEMO_Hindcast:
                 "success",
                 {
                     "hindcast": {
-                        "host": "cedar",
+                        "host": "optimum",
                         "run date": "2018-03-12",
                         "completed": True,
                     }
