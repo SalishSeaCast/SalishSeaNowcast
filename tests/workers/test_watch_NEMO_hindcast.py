@@ -14,16 +14,15 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast watch_NEMO_hindcast worker.
 """
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
 import arrow
 import nemo_nowcast
-import pytest
-
 import nowcast.ssh_sftp
+import pytest
 from nowcast.workers import watch_NEMO_hindcast
 
 
@@ -113,32 +112,13 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["watch_NEMO_hindcast"]
         assert msg in msg_registry
 
-    def test_run_hindcast_hosts_section(self, prod_config):
-        run_hindcast_hosts = prod_config["run"]["hindcast hosts"]
+    def test_optimum_hindcast_section(self, prod_config):
+        optimum_hindcast = prod_config["run"]["hindcast hosts"]["optimum-hindcast"]
+        assert optimum_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
+        assert optimum_hindcast["queue info cmd"] == "/usr/bin/qstat"
+        assert optimum_hindcast["users"] == "sallen,dlatorne"
         assert (
-            run_hindcast_hosts["cedar-hindcast"]["ssh key"]
-            == "SalishSeaNEMO-nowcast_id_rsa"
-        )
-        assert (
-            run_hindcast_hosts["cedar-hindcast"]["queue info cmd"]
-            == "/opt/software/slurm/bin/squeue"
-        )
-        assert run_hindcast_hosts["cedar-hindcast"]["users"] == "allen,dlatorne"
-        assert (
-            run_hindcast_hosts["cedar-hindcast"]["scratch dir"]
-            == "/scratch/dlatorne/hindcast.201905"
-        )
-
-        assert (
-            run_hindcast_hosts["optimum-hindcast"]["ssh key"]
-            == "SalishSeaNEMO-nowcast_id_rsa"
-        )
-        assert (
-            run_hindcast_hosts["optimum-hindcast"]["queue info cmd"] == "/usr/bin/qstat"
-        )
-        assert run_hindcast_hosts["optimum-hindcast"]["users"] == "sallen,dlatorne"
-        assert (
-            run_hindcast_hosts["optimum-hindcast"]["scratch dir"]
+            optimum_hindcast["scratch dir"]
             == "/scratch/sallen/dlatorne/hindcast_v201905_long/"
         )
 

@@ -618,34 +618,6 @@ run:
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
 
-    beluga-hindcast:
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
-      shared storage: False
-      make forcing links: False
-      # Empty collection of run types because all we want to do is upload daily forcing
-      # files
-      run types: {}
-      forcing:
-        ssh dir: /project/def-allen/SalishSea/forcing/sshNeahBay/
-        bc dir: /project/def-allen/SalishSea/forcing/LiveOcean/
-        rivers dir: /project/def-allen/SalishSea/forcing/rivers/
-        Fraser turbidity dir: /project/def-allen/SalishSea/forcing/rivers/river_turb/
-        weather dir: /project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/
-
-    cedar-hindcast:
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
-      shared storage: False
-      make forcing links: False
-      # Empty collection of run types because all we want to do is upload daily forcing
-      # files
-      run types: {}
-      forcing:
-        ssh dir: /project/6001313/SalishSea/forcing/sshNeahBay/
-        bc dir: /project/6001313/SalishSea/forcing/LiveOcean/
-        rivers dir: /project/6001313/SalishSea/forcing/rivers/
-        Fraser turbidity dir: /project/6001313/SalishSea/forcing/rivers/river_turb/
-        weather dir: /project/6001313/SalishSea/forcing/atmospheric/GEM2.5/operational/
-
     graham-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False
@@ -677,34 +649,6 @@ run:
 
   hindcast hosts:
     # HPC compute host name where hindcast runs are executed under automation
-    cedar-hindcast:
-      # Passphrase-less deployment key used by automation for authentication
-      # on the host.
-      # The key-pair is assumed to be stored in $USER/.ssh/.
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
-      # Path to the command used to query the job scheduler queue on the compute host
-      queue info cmd: /opt/software/slurm/bin/squeue
-      # Comma separated list of compute host user ids to use in queue and accounting queries
-      users: allen,dlatorne
-      # Directory on compute host where temporary run directories and run results are stored
-      scratch dir: /scratch/dlatorne/hindcast.201905
-      # Directory on compute host where files (e.g. namelist.time) necessary to prepare
-      # the NEMO runs are stored
-      run prep dir: /home/dlatorne/project/SalishSea/hindcast-sys/runs
-      salishsea cmd:
-        # Path to the salishsea command processor executable to use in the run script
-        executable: /home/dlatorne/project/SalishSea/hindcast-sys/hindcast-env/bin/salishsea
-        # Command-line options to use with the salishsea run command
-        run options: --deflate --max-deflate-jobs 48
-        # Environment variables to set for salishsea run command on hindcast host
-        envvars:
-      # Run type specific configurations for the runs that are executed on the
-      # compute host; keyed by run type
-      run types:
-        hindcast:
-          # Directory on compute host where results are stored
-          results: /scratch/dlatorne/hindcast.201905/
-
     optimum-hindcast:
       # Passphrase-less deployment key used by automation for authentication
       # on the host.

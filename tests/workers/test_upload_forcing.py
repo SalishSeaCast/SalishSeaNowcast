@@ -23,7 +23,6 @@ from unittest.mock import Mock, patch
 import arrow
 import nemo_nowcast
 import pytest
-
 from nowcast.workers import upload_forcing
 
 
@@ -137,8 +136,6 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "beluga-hindcast",
-            "cedar-hindcast",
             "graham-hindcast",
             "optimum-hindcast",
         ]
@@ -158,8 +155,6 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/sshNeahBay/"),
-            ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
-            ("cedar-hindcast", "/project/6001313/SalishSea/forcing/sshNeahBay/"),
             ("graham-hindcast", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
@@ -178,10 +173,9 @@ class TestConfig:
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/river_turb/"),
             (
-                "beluga-hindcast",
+                "graham-hindcast",
                 "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
             ),
-            ("cedar-hindcast", "/project/6001313/SalishSea/forcing/rivers/river_turb/"),
         ),
     )
     def test_fraser_turbidity_uploads(self, host, expected, prod_config):
@@ -198,8 +192,6 @@ class TestConfig:
             ("salish-nowcast", "/results/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
-            ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/rivers/"),
-            ("cedar-hindcast", "/project/6001313/SalishSea/forcing/rivers/"),
             ("graham-hindcast", "/project/def-allen/SalishSea/forcing/rivers/"),
         ),
     )
@@ -223,14 +215,6 @@ class TestConfig:
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             (
-                "beluga-hindcast",
-                "/project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/",
-            ),
-            (
-                "cedar-hindcast",
-                "/project/6001313/SalishSea/forcing/atmospheric/GEM2.5/operational/",
-            ),
-            (
                 "graham-hindcast",
                 "/project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/",
             ),
@@ -253,8 +237,6 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/LiveOcean/"),
-            ("beluga-hindcast", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
-            ("cedar-hindcast", "/project/6001313/SalishSea/forcing/LiveOcean/"),
             ("graham-hindcast", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
         ),
     )

@@ -24,7 +24,6 @@ from unittest.mock import patch
 import arrow
 import nemo_nowcast
 import pytest
-
 from nowcast.workers import download_results
 
 
@@ -169,7 +168,6 @@ class TestConfig:
 
     def test_hindcast_hosts(self, prod_config):
         assert list(prod_config["run"]["hindcast hosts"].keys()) == [
-            "cedar-hindcast",
             "optimum-hindcast",
             "sockeye-hindcast",
         ]
@@ -179,8 +177,6 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "beluga-hindcast",
-            "cedar-hindcast",
             "graham-hindcast",
             "optimum-hindcast",
         ]
@@ -194,8 +190,6 @@ class TestConfig:
             ),
             ("salish-nowcast", ["nowcast-dev", "nowcast-green"]),
             ("orcinus-nowcast-agrif", ["nowcast-agrif"]),
-            ("beluga-hindcast", []),
-            ("cedar-hindcast", []),
             ("graham-hindcast", []),
             ("optimum-hindcast", []),
         ),
@@ -247,12 +241,6 @@ class TestConfig:
                 "orcinus-nowcast-agrif",
                 "nowcast-agrif",
                 "/global/scratch/dlatorne/nowcast-agrif/",
-            ),
-            (
-                "hindcast hosts",
-                "cedar-hindcast",
-                "hindcast",
-                "/scratch/dlatorne/hindcast.201905/",
             ),
             (
                 "hindcast hosts",

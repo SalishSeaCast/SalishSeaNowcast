@@ -14,16 +14,15 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast run_NEMO_hindcast worker.
 """
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
 import nemo_nowcast
-import pytest
-
 import nowcast.ssh_sftp
+import pytest
 from nowcast.workers import run_NEMO_hindcast
 
 
@@ -143,26 +142,6 @@ class TestConfig:
     def test_message_types(self, msg, prod_config):
         msg_registry = prod_config["message registry"]["workers"]["run_NEMO_hindcast"]
         assert msg in msg_registry
-
-    def test_cedar_hindcast_section(self, prod_config):
-        cedar_hindcast = prod_config["run"]["hindcast hosts"]["cedar-hindcast"]
-        assert cedar_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
-        assert cedar_hindcast["queue info cmd"] == "/opt/software/slurm/bin/squeue"
-        assert cedar_hindcast["users"] == "allen,dlatorne"
-        assert cedar_hindcast["scratch dir"] == "/scratch/dlatorne/hindcast.201905"
-        assert (
-            cedar_hindcast["run prep dir"]
-            == "/home/dlatorne/project/SalishSea/hindcast-sys/runs"
-        )
-        assert (
-            cedar_hindcast["salishsea cmd"]["executable"]
-            == "/home/dlatorne/project/SalishSea/hindcast-sys/hindcast-env/bin/salishsea"
-        )
-        assert (
-            cedar_hindcast["salishsea cmd"]["run options"]
-            == "--deflate --max-deflate-jobs 48"
-        )
-        assert cedar_hindcast["salishsea cmd"]["envvars"] is None
 
     def test_optimum_hindcast_section(self, prod_config):
         optimum_hindcast = prod_config["run"]["hindcast hosts"]["optimum-hindcast"]
