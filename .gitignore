@@ -1,6 +1,9 @@
 # Created by .ignore support plugin (hsz.mobi)
 
-# IntelliJ project files
+### Local environemtn hooks
+pre-commit-hook.sh
+
+## IntelliJ project files
 .idea
 *.iml
 out
