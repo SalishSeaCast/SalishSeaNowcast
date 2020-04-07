@@ -248,6 +248,12 @@ class TestConfig:
                 "hindcast",
                 "/scratch/sallen/dlatorne/hindcast_v201905_long/",
             ),
+            (
+                "hindcast hosts",
+                "sockeye-hindcast",
+                "hindcast",
+                "/scratch/sallen1/hindcast_v201905_long/",
+            ),
         ),
     )
     def test_run_type_results_dir(
