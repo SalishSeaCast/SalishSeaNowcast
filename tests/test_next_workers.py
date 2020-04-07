@@ -637,7 +637,7 @@ class TestAfterUploadForcing:
             "run",
             {
                 "enabled hosts": {
-                    "cedar-hindcast": {"run types": {}, "make forcing links": False}
+                    "graham-hindcast": {"run types": {}, "make forcing links": False}
                 }
             },
         )
@@ -645,14 +645,14 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 f"success {run_type}",
-                {"cedar-hindcast": f"2018-04-03 {run_type}"},
+                {"graham-hindcast": f"2018-04-03 {run_type}"},
             ),
             config,
             checklist,
         )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
-            args=["cedar-hindcast", run_type],
+            args=["graham-hindcast", run_type],
             host="localhost",
         )
         assert expected not in workers

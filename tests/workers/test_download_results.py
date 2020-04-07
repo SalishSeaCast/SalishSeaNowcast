@@ -64,7 +64,7 @@ def config(base_config):
                       run types:
                         nowcast-agrif:
                           results: SalishSea/nowcast-agrif/
-                    beluga-hindcast:
+                    graham-hindcast:
                       ssh key: SalishSeaNEMO-nowcast_id_rsa
                           
                   hindcast hosts:

@@ -37,7 +37,7 @@ def config(base_config):
                 """\
                 run:
                   hindcast hosts:
-                    cedar:
+                    graham:
                       ssh key: SalishSeaNEMO-nowcast_id_rsa
                       queue info cmd: /opt/software/slurm/bin/squeue
                       users: allen,dlatorne
@@ -161,7 +161,7 @@ class TestWatchNEMO_Hindcast:
 
     @patch("nowcast.workers.watch_NEMO_hindcast._SqueueHindcastJob", spec=True)
     def test_squeue_run_completed(self, m_job, m_sftp, m_logger, config):
-        parsed_args = SimpleNamespace(host_name="cedar", run_id=None)
+        parsed_args = SimpleNamespace(host_name="graham", run_id=None)
         m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "9813234", "01jul18hindcast"
         m_job().is_queued.return_value = False
@@ -208,7 +208,7 @@ class TestWatchNEMO_Hindcast:
     def test_run_cancelled_or_aborted(
         self, m_job, m_sftp, m_logger, completion_state, config
     ):
-        parsed_args = SimpleNamespace(host_name="cedar", run_id=None)
+        parsed_args = SimpleNamespace(host_name="graham", run_id=None)
         m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "9813234", "01jul18hindcast"
         m_job().is_queued.return_value = False
@@ -398,8 +398,8 @@ class TestQstatHindcastJob:
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedoptimumar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="R")
         job._report_progress = Mock(name="_report_progress")
@@ -631,8 +631,8 @@ class TestSqueueHindcastJob:
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
@@ -648,8 +648,8 @@ class TestSqueueHindcastJob:
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
         with pytest.raises(nemo_nowcast.WorkerError):
@@ -661,8 +661,8 @@ class TestSqueueHindcastJob:
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
@@ -675,8 +675,8 @@ class TestSqueueHindcastJob:
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
@@ -690,8 +690,8 @@ class TestSqueueHindcastJob:
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
@@ -706,9 +706,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job.run_id = "21dec16hindcast"
         job._ssh_exec_command = Mock(
@@ -726,9 +726,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job.tmp_run_dir = Path(
             "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700"
@@ -752,9 +752,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="UNKNOWN")
         assert not job.is_running()
@@ -768,9 +768,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         assert job.is_running()
@@ -788,9 +788,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         job._report_progress = Mock(name="_report_progress")
@@ -808,9 +808,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         job._report_progress = Mock(name="_report_progress")
@@ -831,9 +831,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         job._report_progress = Mock(name="_report_progress")
@@ -859,9 +859,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         job._report_progress = Mock(name="_report_progress")
@@ -872,9 +872,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
         state = job._get_job_state()
@@ -885,9 +885,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
@@ -900,9 +900,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job.run_id = "01oct18hindcast"
         job.it000 = 1_658_881
@@ -919,9 +919,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job.run_id = "21dec16hindcast"
         job.tmp_run_dir = (
@@ -944,13 +944,13 @@ class TestSqueueHindcastJob:
             call(
                 "/opt/software/slurm/bin/sbatch "
                 "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700/SalishSeaNEMO.sh",
-                "21dec16hindcast on cedar: re-queued",
+                "21dec16hindcast on graham: re-queued",
             ),
             call(f"ls -dtr {job.scratch_dir}/*hindcast*"),
             call(
                 "/opt/software/slurm/bin/sbatch -d afterok:12426878 "
                 "/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700/SalishSeaNEMO.sh",
-                "01jan17hindcast on cedar: re-queued",
+                "01jan17hindcast on graham: re-queued",
             ),
         ]
         assert m_logger.debug.called
@@ -959,9 +959,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job._ssh_exec_command = Mock(
             name="_ssh_exec_command", return_value="State\n----------\n"
@@ -983,9 +983,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         job.run_id = "01mar17hindcast"
         job._ssh_exec_command = Mock(
@@ -1006,9 +1006,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["cedar"]["users"],
-            Path(config["run"]["hindcast hosts"]["cedar"]["scratch dir"]),
+            "graham",
+            config["run"]["hindcast hosts"]["graham"]["users"],
+            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
         stdout = job._ssh_exec_command(f"ls -dtr {job.scratch_dir}/*hindcast*")
         assert (
