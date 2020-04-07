@@ -341,7 +341,7 @@ results archive:
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
   hindcast:
     localhost: /results2/SalishSea/hindcast.201905/
-    beluga-hindcast: /nearline/rrg-allen/SalishSea/hindcast_long.201905/
+    graham-hindcast: /nearline/rrg-allen/SalishSea/hindcast_long.201905/
 
 
 rolling forecasts:

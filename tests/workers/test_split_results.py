@@ -21,7 +21,6 @@ from types import SimpleNamespace
 import arrow
 import nemo_nowcast
 import pytest
-
 from nowcast.workers import split_results
 
 
@@ -84,7 +83,7 @@ class TestConfig:
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
                 "localhost": "/results2/SalishSea/hindcast.201905/",
-                "beluga-hindcast": "/nearline/rrg-allen/SalishSea/hindcast_long.201905/",
+                "graham-hindcast": "/nearline/rrg-allen/SalishSea/hindcast_long.201905/",
             },
         }
         assert prod_config["results archive"].keys() == archives.keys()
