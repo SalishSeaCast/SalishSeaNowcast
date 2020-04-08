@@ -161,13 +161,13 @@ Clone Michael Dunphies' debugged version of the nesting tools for AGRIF from :fi
 
     $ ssh salish
     $ cd /data/dlatorne/MEOPAR/
-    $ hg clone ssh://hg@bitbucket.org/mdunphy/nestingtools NEMO-nesting-tools
+    $ git clone git@github.com:SalishSeaCast/NestingTools.git
 
 Build the nesting tools suite of Fortran programs with:
 
 .. code-block:: bash
 
-    $ cd /data/dlatorne/MEOPAR/NEMO-nesting-tools/NEMOGCM/TOOLS
+    $ cd /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS
     $ ./maketools -n NESTING -m GCC_SALISH
 
 
@@ -200,7 +200,7 @@ and add it to the :kbd:`grid` repo:
 .. code-block:: bash
 
     $ cd /results/nowcast-sys/agrif-nesting/BaynesSound/
-    $ /data/dlatorne/MEOPAR/NEMO-nesting-tools/NEMOGCM/TOOLS/NESTING/agrif_create_coordinates.exe \
+    $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_coordinates.exe \
         namelist.nesting.BaynesSound
     $ cp 1_coordinates_seagrid_SalishSea201702.nc \
         /results/nowcast-sys/grid/subgrids/BaynesSound/coordinates_seagrid_SalishSea201702_BS.nc
@@ -214,7 +214,7 @@ Similarly for the Haro Strait sub-grid:
 .. code-block:: bash
 
     $ cd /results/nowcast-sys/agrif-nesting/HaroStrait/
-    $ /data/dlatorne/MEOPAR/NEMO-nesting-tools/NEMOGCM/TOOLS/NESTING/agrif_create_coordinates.exe \
+    $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_coordinates.exe \
         namelist.nesting.HaroStrait
     $ cp 1_coordinates_seagrid_SalishSea201702.nc \
         /results/nowcast-sys/grid/subgrids/HaroStrait/coordinates_seagrid_SalishSea201702_HS.nc
@@ -284,7 +284,7 @@ and upload both files to the appropriate run results directory on :kbd:`orcinus`
 .. code-block:: bash
 
     $ cd /results/nowcast-sys/agrif-nesting/BaynesSound/
-    $ /data/dlatorne/MEOPAR/NEMO-nesting-tools/NEMOGCM/TOOLS/NESTING/agrif_create_restart.exe \
+    $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart.exe \
         namelist.nesting.BaynesSound
     $ scp /results/SalishSea/nowcast-green/12may18/SalishSea_02935440_restart.nc \
         orcinus:/global/scratch/dlatorne/nowcast-agrif/12may18/
@@ -298,7 +298,7 @@ Similarly for the Haro Strait sub-grid:
 .. code-block:: bash
 
     $ cd /results/nowcast-sys/agrif-nesting/HaroStrait/
-    $ /data/dlatorne/MEOPAR/NEMO-nesting-tools/NEMOGCM/TOOLS/NESTING/agrif_create_restart.exe \
+    $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart.exe \
         namelist.nesting.HaroStrait
     $ scp 1_SalishSea_02935440_restart.nc \
         orcinus:/global/scratch/dlatorne/nowcast-agrif/12may18/1_SalishSea_11741760_restart.nc
@@ -319,7 +319,7 @@ and upload both files to the appropriate run results directory on :kbd:`orcinus`
 .. code-block:: bash
 
     $ cd /results/nowcast-sys/agrif-nesting/BaynesSound/
-    $ /data/dlatorne/MEOPAR/NEMO-nesting-tools/NEMOGCM/TOOLS/NESTING/agrif_create_restart_trc.exe \
+    $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart_trc.exe \
         namelist.nesting.BaynesSound
     $ scp /results/SalishSea/nowcast-green/12may18/SalishSea_02935440_restart_trc.nc \
         orcinus:/global/scratch/dlatorne/nowcast-agrif/12may18/
@@ -334,7 +334,7 @@ start by using :program:`agrif_create_restart_trc.exe` to create the sub-grid tr
 .. code-block:: bash
 
     $ cd /results/nowcast-sys/agrif-nesting/HaroStrait/
-    $ /data/dlatorne/MEOPAR/NEMO-nesting-tools/NEMOGCM/TOOLS/NESTING/agrif_create_restart_trc.exe \
+    $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart_trc.exe \
         namelist.nesting.HaroStrait
 
 For some reason :program:`agrif_create_restart_trc.exe` fails to store the variable :kbd:`TRBTRA`
