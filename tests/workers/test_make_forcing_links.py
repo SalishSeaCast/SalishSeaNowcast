@@ -93,33 +93,197 @@ class TestMain:
             "nowcast-green",
             "nowcast-agrif",
         }
-        assert "help" in kwargs
+        assert worker.cli.parser._actions[4].choices == expected
+        assert worker.cli.parser._actions[4].help
 
-    def test_add_shared_storage_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_forcing_links.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
-        assert args == ("--shared-storage",)
-        assert kwargs["action"] == "store_true"
-        assert "help" in kwargs
+    def test_add_shared_storage_arg(self, mock_worker):
+        worker = make_forcing_links.main()
+        assert worker.cli.parser._actions[5].dest == "shared_storage"
+        assert worker.cli.parser._actions[5].default is False
+        assert worker.cli.parser._actions[5].help
 
-    def test_add_run_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_forcing_links.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
+    def test_add_run_date_option(self, mock_worker):
+        worker = make_forcing_links.main()
+        assert worker.cli.parser._actions[6].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[6].type == expected
+        assert worker.cli.parser._actions[6].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[6].help
 
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_forcing_links.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            make_forcing_links.make_forcing_links,
-            make_forcing_links.success,
-            make_forcing_links.failure,
+
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "make_forcing_links" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["make_forcing_links"]
+        assert msg_registry["checklist key"] == "forcing links"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["make_forcing_links"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success nowcast+",
+            "failure nowcast+",
+            "success forecast2",
+            "failure forecast2",
+            "success ssh",
+            "failure ssh",
+            "success nowcast-green",
+            "failure nowcast-green",
+            "success nowcast-agrif",
+            "failure nowcast-agrif",
+            "crash",
+        ]
+
+    def test_enabled_hosts(self, prod_config):
+        assert list(prod_config["run"]["enabled hosts"].keys()) == [
+            "arbutus.cloud-nowcast",
+            "salish-nowcast",
+            "orcinus-nowcast-agrif",
+            "graham-hindcast",
+            "optimum-hindcast",
+        ]
+
+    @pytest.mark.parametrize(
+        "host, ssh_key",
+        (
+            ("arbutus.cloud-nowcast", "SalishSeaNEMO-nowcast_id_rsa"),
+            ("salish-nowcast", "SalishSeaNEMO-nowcast_id_rsa"),
+            ("orcinus-nowcast-agrif", "SalishSeaNEMO-nowcast_id_rsa"),
+            ("graham-hindcast", "SalishSeaNEMO-nowcast_id_rsa"),
+            ("optimum-hindcast", "SalishSeaNEMO-nowcast_id_rsa"),
+        ),
+    )
+    def test_ssh_keys(self, host, ssh_key, prod_config):
+        assert prod_config["run"]["enabled hosts"][host]["ssh key"] == ssh_key
+
+    @pytest.mark.parametrize(
+        "host, run_prep_dir",
+        (
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/nowcast-sys/runs"),
+            ("salish-nowcast", "/SalishSeaCast/runs/"),
+            ("orcinus-nowcast-agrif", "/home/dlatorne/nowcast-agrif-sys/runs"),
+        ),
+    )
+    def test_run_prep_dir(self, host, run_prep_dir, prod_config):
+        assert prod_config["run"]["enabled hosts"][host]["run prep dir"] == run_prep_dir
+
+    def test_ssh_file_template(self, prod_config):
+        assert prod_config["ssh"]["file template"] == "ssh_{:y%Ym%md%d}.nc"
+
+    @pytest.mark.parametrize(
+        "host, ssh_dir",
+        (
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
+            ("salish-nowcast", "/results/forcing/sshNeahBay/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/sshNeahBay/"),
+            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
+            (
+                "optimum-hindcast",
+                "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
+            ),
+        ),
+    )
+    def test_ssh_dir(self, host, ssh_dir, prod_config):
+        assert (
+            prod_config["run"]["enabled hosts"][host]["forcing"]["ssh dir"] == ssh_dir
         )
+
+    def test_rivers_file_templates(self, prod_config):
+        expected = {"b201702": "R201702DFraCElse_{:y%Ym%md%d}.nc"}
+        assert prod_config["rivers"]["file templates"] == expected
+
+    @pytest.mark.parametrize(
+        "host, rivers_dir",
+        (
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
+            ("salish-nowcast", "/results/forcing/rivers/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
+            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/rivers/"),
+            ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
+        ),
+    )
+    def test_rivers_dir(self, host, rivers_dir, prod_config):
+        assert (
+            prod_config["run"]["enabled hosts"][host]["forcing"]["rivers dir"]
+            == rivers_dir
+        )
+
+    @pytest.mark.parametrize(
+        "host, fraser_turbidity_dir",
+        (
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/river_turb/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/river_turb/"),
+            (
+                "graham-hindcast",
+                "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
+            ),
+            (
+                "optimum-hindcast",
+                "/data/sallen/shared/SalishSeaCast/forcing/rivers/river_turb/",
+            ),
+        ),
+    )
+    def test_fraser_turbidity_dir(self, host, fraser_turbidity_dir, prod_config):
+        config_fraser_turbidity_dir = prod_config["run"]["enabled hosts"][host][
+            "forcing"
+        ]["Fraser turbidity dir"]
+        assert config_fraser_turbidity_dir == fraser_turbidity_dir
+
+    def test_fraser_turbidity_file_template(self, prod_config):
+        assert (
+            prod_config["rivers"]["turbidity"]["file template"]
+            == "riverTurbDaily2_{:y%Ym%md%d}.nc"
+        )
+
+    def test_weather_file_template(self, prod_config):
+        assert prod_config["weather"]["file template"] == "ops_{:y%Ym%md%d}.nc"
+
+    @pytest.mark.parametrize(
+        "host, weather_dir",
+        (
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
+            ("salish-nowcast", "/results/forcing/atmospheric/GEM2.5/operational/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
+            (
+                "graham-hindcast",
+                "/project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/",
+            ),
+            (
+                "optimum-hindcast",
+                "/data/sallen/shared/SalishSeaCast/forcing/atmospheric/GEM2.5/operational/",
+            ),
+        ),
+    )
+    def test_weather_dir(self, host, weather_dir, prod_config):
+        assert (
+            prod_config["run"]["enabled hosts"][host]["forcing"]["weather dir"]
+            == weather_dir
+        )
+
+    def test_temperature_salinity_file_template(self, prod_config):
+        assert (
+            prod_config["temperature salinity"]["file template"]
+            == "LiveOcean_v201905_{:y%Ym%md%d}.nc"
+        )
+
+    @pytest.mark.parametrize(
+        "host, bc_dir",
+        (
+            ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
+            ("salish-nowcast", "/results/forcing/LiveOcean/boundary_conditions/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/LiveOcean/"),
+            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
+            (
+                "optimum-hindcast",
+                "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",
+            ),
+        ),
+    )
+    def test_boundary_condition_dir(self, host, bc_dir, prod_config):
+        assert prod_config["run"]["enabled hosts"][host]["forcing"]["bc dir"] == bc_dir
 
 
 @pytest.mark.parametrize(
