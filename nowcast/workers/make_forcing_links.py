@@ -193,13 +193,13 @@ def _make_live_ocean_links(sftp_client, run_date, config, host_name, shared_stor
     run_prep_dir = Path(host_config["run prep dir"])
     dest_path = Path("LiveOcean")
     _clear_links(sftp_client, run_prep_dir, dest_path)
+    filename_template = config["temperature salinity"]["file template"]
+    filename = filename_template.format(run_date.date())
+    bc_dir = Path(host_config["forcing"]["bc dir"])
+    src = bc_dir / filename
     for day in range(-1, 3):
-        filename = config["temperature salinity"]["file template"].format(
-            run_date.shift(days=day).date()
-        )
-        if day <= 0:
-            # if day=1 or 2, we use the current day as source
-            src = Path(host_config["forcing"]["bc dir"], filename)
+        filename = filename_template.format(run_date.shift(days=day).date())
+        src = bc_dir / filename if day <= 0 else src
         dest = run_prep_dir / dest_path / filename
         if shared_storage:
             shutil.copy2(os.fspath(src), os.fspath(dest))
