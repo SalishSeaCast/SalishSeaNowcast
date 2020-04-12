@@ -19,7 +19,6 @@ import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import call, Mock, patch
 
 import arrow
 import nemo_nowcast
@@ -41,8 +40,7 @@ def config(base_config):
                   file template: "ssh_{:y%Ym%md%d}.nc"
                 rivers:
                   file templates:
-                    short: "RFraserCElse_{:y%Ym%md%d}.nc"
-                    long: "RLonFraCElse_{:y%Ym%md%d}.nc"
+                    b201702: "R201702DFraCElse_{:y%Ym%md%d}.nc"
                   turbidity:
                     file template: "riverTurbDaily2_{:y%Ym%md%d}.nc"
                       
@@ -52,13 +50,15 @@ def config(base_config):
                       run prep dir: runs/
                       forcing:
                         ssh dir: sshNeahBay/
+                        rivers dir: rivers/
+                        Fraser turbidity dir: rivers/river_turb/
                     
                     salish-nowcast:
                       run prep dir: runs/
                       forcing:
                         ssh dir: sshNeahBay/
-                        rivers dir: /results/forcing/rivers/
-                        Fraser turbidity dir: /results/forcing/rivers/river_turb/
+                        rivers dir: rivers/
+                        Fraser turbidity dir: rivers/river_turb/
                 """
             )
         )
@@ -361,26 +361,26 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
+@pytest.fixture()
+def mock_clear_links(monkeypatch):
+    def mock_clear_links(sftp_client, run_prep_dir, forcing_dir):
+        pass
+
+    monkeypatch.setattr(make_forcing_links, "_clear_links", mock_clear_links)
+
+
+@pytest.fixture
+def mock_sftp_client(monkeypatch):
+    class MockSFTPClient:
+        def symlink(self, src, dst):
+            os.symlink(src, dst)
+
+    return MockSFTPClient()
+
+
 class TestMakeNeahBaySshLinks:
     """Unit tests for _make_NeahBay_ssh_links() function.
     """
-
-    @staticmethod
-    @pytest.fixture
-    def mock_sftp_client(monkeypatch):
-        class MockSFTPClient:
-            def symlink(self, src, dst):
-                os.symlink(src, dst)
-
-        return MockSFTPClient()
-
-    @staticmethod
-    @pytest.fixture()
-    def mock_clear_links(monkeypatch):
-        def mock_clear_links(sftp_client, run_prep_dir, forcing_dir):
-            pass
-
-        monkeypatch.setattr(make_forcing_links, "_clear_links", mock_clear_links)
 
     @staticmethod
     def prep_files(run_date, host_config, config, tmp_path):
@@ -390,9 +390,9 @@ class TestMakeNeahBaySshLinks:
         run_prep_dir = tmp_path / host_config["run prep dir"]
         run_prep_dir.mkdir()
         (run_prep_dir / "ssh").mkdir()
-        filename_template = config["ssh"]["file template"]
+        filename_tmpl = config["ssh"]["file template"]
         filenames = [
-            filename_template.format(run_date.shift(days=day).date())
+            filename_tmpl.format(run_date.shift(days=day).date())
             for day in range(-1, 3)
         ]
         for filename in filenames:
@@ -450,100 +450,118 @@ class TestMakeNeahBaySshLinks:
             )
 
 
-@patch("nowcast.workers.make_forcing_links._create_symlink", autospec=True)
-@patch("nowcast.workers.make_forcing_links._clear_links", autospec=True)
 class TestMakeRunoffLinks:
     """Unit tests for _make_runoff_links() function.
     """
 
-    @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh"])
-    def test_clear_links(self, m_clear_links, m_create_symlink, run_type, config):
-        run_date = arrow.get("2016-03-11")
-        m_sftp_client = Mock(name="sftp_client")
-        make_forcing_links._make_runoff_links(
-            m_sftp_client, run_type, run_date, config, "salish-nowcast"
-        )
-        m_clear_links.assert_called_once_with(
-            m_sftp_client,
-            Path(config["run"]["enabled hosts"]["salish-nowcast"]["run prep dir"]),
-            "rivers",
-        )
+    @staticmethod
+    def prep_files(run_date, host_config, config, tmp_path):
+        rivers_dir = tmp_path / host_config["forcing"]["rivers dir"]
+        rivers_dir.mkdir()
+        run_prep_dir = tmp_path / host_config["run prep dir"]
+        run_prep_dir.mkdir()
+        (run_prep_dir / "rivers").mkdir()
+        filename_tmpls = config["rivers"]["file templates"]
+        filenames = [
+            tmpl.format(run_date.shift(days=-1).date())
+            for tmpl in filename_tmpls.values()
+        ]
+        for filename in filenames:
+            (rivers_dir / filename).write_text("")
+        return rivers_dir, filenames, run_prep_dir
 
-    @pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh"])
+    @pytest.mark.parametrize(
+        "run_type, host",
+        (
+            ("nowcast+", "arbutus.cloud"),
+            ("nowcast+", "salish-nowcast"),
+            ("forecast2", "arbutus.cloud"),
+            ("forecast2", "salish-nowcast"),
+            ("ssh", "arbutus.cloud"),
+            ("ssh", "salish-nowcast"),
+            ("nowcast-green", "arbutus.cloud"),
+            ("nowcast-agrif", "arbutus.cloud"),
+        ),
+    )
     def test_runoff_files_links(
-        self, m_clear_links, m_create_symlink, run_type, config
+        self,
+        mock_clear_links,
+        mock_sftp_client,
+        run_type,
+        host,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
-        run_date = arrow.get("2016-03-11")
-        m_sftp_client = Mock(name="sftp_client")
-        make_forcing_links._make_runoff_links(
-            m_sftp_client, run_type, run_date, config, "salish-nowcast"
+        run_date = arrow.get("2020-04-12")
+        host_config = config["run"]["enabled hosts"][host]
+        rivers_dir, filenames, run_prep_dir = self.prep_files(
+            run_date, host_config, config, tmp_path
         )
-        start = run_date.shift(days=-1)
-        end = run_date.shift(days=+2)
-        for date in arrow.Arrow.range("day", start, end):
-            expected = call(
-                m_sftp_client,
-                "salish-nowcast",
-                Path(
-                    "/results/forcing/rivers/RFraserCElse_{:y%Ym%md%d}.nc".format(
-                        start.date()
-                    )
-                ),
-                Path("runs/rivers/RFraserCElse_{:y%Ym%md%d}.nc".format(date.date())),
-            )
-            assert expected in m_create_symlink.call_args_list
-            expected = call(
-                m_sftp_client,
-                "salish-nowcast",
-                Path(
-                    "/results/forcing/rivers/RLonFraCElse_{:y%Ym%md%d}.nc".format(
-                        start.date()
-                    )
-                ),
-                Path("runs/rivers/RLonFraCElse_{:y%Ym%md%d}.nc".format(date.date())),
-            )
-            assert expected in m_create_symlink.call_args_list
+        monkeypatch.setitem(host_config, "run prep dir", run_prep_dir)
+        monkeypatch.setitem(host_config["forcing"], "rivers dir", rivers_dir)
+        caplog.set_level(logging.DEBUG)
 
-    def test_runoff_files_links_turbidity(
-        self, m_clear_links, m_create_symlink, config
-    ):
-        run_date = arrow.get("2017-08-12")
-        m_sftp_client = Mock(name="sftp_client")
         make_forcing_links._make_runoff_links(
-            m_sftp_client, "nowcast-green", run_date, config, "salish-nowcast"
+            mock_sftp_client, run_type, run_date, config, host
         )
-        start = run_date.shift(days=-1)
-        end = run_date.shift(days=+2)
-        for date in arrow.Arrow.range("day", start, end):
-            expected = call(
-                m_sftp_client,
-                "salish-nowcast",
-                Path(
-                    "/results/forcing/rivers/RFraserCElse_{:y%Ym%md%d}.nc".format(
-                        start.date()
-                    )
-                ),
-                Path("runs/rivers/RFraserCElse_{:y%Ym%md%d}.nc".format(date.date())),
-            )
-            assert expected in m_create_symlink.call_args_list
-            expected = call(
-                m_sftp_client,
-                "salish-nowcast",
-                Path(
-                    "/results/forcing/rivers/RLonFraCElse_{:y%Ym%md%d}.nc".format(
-                        start.date()
-                    )
-                ),
-                Path("runs/rivers/RLonFraCElse_{:y%Ym%md%d}.nc".format(date.date())),
-            )
-            assert expected in m_create_symlink.call_args_list
-        expected = call(
-            m_sftp_client,
-            "salish-nowcast",
-            Path(
-                "/results/forcing/rivers/river_turb/"
-                "riverTurbDaily2_{:y%Ym%md%d}.nc".format(run_date.date())
-            ),
-            Path("runs/rivers/riverTurbDaily2_{:y%Ym%md%d}.nc".format(run_date.date())),
+
+        filename_tmpls = config["rivers"]["file templates"]
+        i = 0
+        for tmpl in filename_tmpls.values():
+            src_filename = tmpl.format(run_date.shift(days=-1).date())
+            for day in range(-1, 3):
+                filename = tmpl.format(run_date.shift(days=day).date())
+                expected = run_prep_dir / "rivers" / filename
+                assert expected.is_symlink()
+                assert caplog.records[i].levelname == "DEBUG"
+                expected = (
+                    f"{rivers_dir/src_filename} symlinked as {expected} on {host}"
+                )
+                assert caplog.messages[i] == expected
+                i += 1
+
+    @pytest.mark.parametrize(
+        "run_type, host",
+        (("nowcast-green", "arbutus.cloud"), ("nowcast-agrif", "arbutus.cloud"),),
+    )
+    def test_runoff_files_links_turbidity(
+        self,
+        mock_clear_links,
+        mock_sftp_client,
+        run_type,
+        host,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        run_date = arrow.get("2020-04-12")
+        host_config = config["run"]["enabled hosts"][host]
+        rivers_dir, _, run_prep_dir = self.prep_files(
+            run_date, host_config, config, tmp_path
         )
-        assert expected in m_create_symlink.call_args_list
+        monkeypatch.setitem(host_config, "run prep dir", run_prep_dir)
+        monkeypatch.setitem(host_config["forcing"], "rivers dir", rivers_dir)
+        rivers_turb_dir = tmp_path / host_config["forcing"]["Fraser turbidity dir"]
+        rivers_turb_dir.mkdir()
+        monkeypatch.setitem(
+            host_config["forcing"], "Fraser turbidity dir", rivers_turb_dir
+        )
+        filename_tmpl = config["rivers"]["turbidity"]["file template"]
+        turb_filename = filename_tmpl.format(run_date.date())
+        (rivers_turb_dir / turb_filename).write_text("")
+        caplog.set_level(logging.DEBUG)
+
+        make_forcing_links._make_runoff_links(
+            mock_sftp_client, run_type, run_date, config, host
+        )
+
+        expected = run_prep_dir / "rivers" / turb_filename
+        assert expected.is_symlink()
+        assert caplog.records[-1].levelname == "DEBUG"
+        assert (
+            caplog.messages[-1]
+            == f"{rivers_turb_dir/turb_filename} symlinked as {expected} on {host}"
+        )
