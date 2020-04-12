@@ -137,11 +137,11 @@ def _make_NeahBay_ssh_links(sftp_client, run_date, config, host_name, shared_sto
         filename = config["ssh"]["file template"].format(
             run_date.shift(days=day).date()
         )
-        dir = "obs" if day == -1 else "fcst"
-        src = Path(host_config["forcing"]["ssh dir"], dir, filename)
+        src = Path(host_config["forcing"]["ssh dir"], "fcst", filename)
         dest = run_prep_dir / "ssh" / filename
         if shared_storage:
-            shutil.copy2(os.fspath(src), os.fspath(dest))
+            shutil.copy2(src, dest)
+            logger.debug(f"{src} copied to {dest} on {host_name}")
         else:
             _create_symlink(sftp_client, host_name, src, dest)
 
@@ -207,8 +207,8 @@ def _make_live_ocean_links(sftp_client, run_date, config, host_name, shared_stor
             _create_symlink(sftp_client, host_name, src, dest)
 
 
-def _clear_links(sftp_client, run_prep_dir, dir):
-    links_dir = run_prep_dir / dir
+def _clear_links(sftp_client, run_prep_dir, forcing_dir):
+    links_dir = run_prep_dir / forcing_dir
     for linkname in sftp_client.listdir(os.fspath(links_dir)):
         sftp_client.unlink(os.fspath(links_dir / linkname))
     logger.debug(f"{links_dir} symlinks cleared")

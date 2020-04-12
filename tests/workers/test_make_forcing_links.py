@@ -15,6 +15,7 @@
 """Unit tests for SalishSeaCast make_forcing_links worker.
 """
 import logging
+import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -36,6 +37,8 @@ def config(base_config):
         f.write(
             textwrap.dedent(
                 """\
+                ssh:
+                  file template: "ssh_{:y%Ym%md%d}.nc"
                 rivers:
                   file templates:
                     short: "RFraserCElse_{:y%Ym%md%d}.nc"
@@ -45,9 +48,15 @@ def config(base_config):
                       
                 run:
                   enabled hosts:
+                    arbutus.cloud:
+                      run prep dir: runs/
+                      forcing:
+                        ssh dir: sshNeahBay/
+                    
                     salish-nowcast:
                       run prep dir: runs/
                       forcing:
+                        ssh dir: sshNeahBay/
                         rivers dir: /results/forcing/rivers/
                         Fraser turbidity dir: /results/forcing/rivers/river_turb/
                 """
@@ -350,6 +359,95 @@ class TestFailure:
         )
         assert caplog.messages[0] == expected
         assert msg_type == f"failure {run_type}"
+
+
+class TestMakeNeahBaySshLinks:
+    """Unit tests for _make_NeahBay_ssh_links() function.
+    """
+
+    @staticmethod
+    @pytest.fixture
+    def mock_sftp_client(monkeypatch):
+        class MockSFTPClient:
+            def symlink(self, src, dst):
+                os.symlink(src, dst)
+
+        return MockSFTPClient()
+
+    @staticmethod
+    @pytest.fixture()
+    def mock_clear_links(monkeypatch):
+        def mock_clear_links(sftp_client, run_prep_dir, forcing_dir):
+            pass
+
+        monkeypatch.setattr(make_forcing_links, "_clear_links", mock_clear_links)
+
+    @staticmethod
+    def prep_files(run_date, host_config, config, tmp_path):
+        ssh_dir = tmp_path / host_config["forcing"]["ssh dir"]
+        ssh_dir.mkdir()
+        (ssh_dir / "fcst").mkdir()
+        run_prep_dir = tmp_path / host_config["run prep dir"]
+        run_prep_dir.mkdir()
+        (run_prep_dir / "ssh").mkdir()
+        filename_template = config["ssh"]["file template"]
+        filenames = [
+            filename_template.format(run_date.shift(days=day).date())
+            for day in range(-1, 3)
+        ]
+        for filename in filenames:
+            (ssh_dir / "fcst" / filename).write_text("")
+        return ssh_dir, filenames, run_prep_dir
+
+    def test_make_NeahBay_ssh_links(
+        self, config, mock_clear_links, mock_sftp_client, caplog, tmp_path, monkeypatch
+    ):
+        run_date = arrow.get("2020-04-11")
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
+        ssh_dir, filenames, run_prep_dir = self.prep_files(
+            run_date, host_config, config, tmp_path
+        )
+        monkeypatch.setitem(host_config, "run prep dir", run_prep_dir)
+        monkeypatch.setitem(host_config["forcing"], "ssh dir", ssh_dir)
+        caplog.set_level(logging.DEBUG)
+
+        make_forcing_links._make_NeahBay_ssh_links(
+            mock_sftp_client, run_date, config, "arbutus.cloud", shared_storage=False
+        )
+
+        for i, filename in enumerate(filenames):
+            expected = run_prep_dir / "ssh" / filename
+            assert expected.is_symlink()
+            assert caplog.records[i].levelname == "DEBUG"
+            assert (
+                caplog.messages[i]
+                == f"{ssh_dir/'fcst'/filename} symlinked as {expected} on arbutus.cloud"
+            )
+
+    def test_shared_storage_copy(
+        self, config, mock_clear_links, mock_sftp_client, caplog, tmp_path, monkeypatch
+    ):
+        run_date = arrow.get("2020-04-12")
+        host_config = config["run"]["enabled hosts"]["salish-nowcast"]
+        ssh_dir, filenames, run_prep_dir = self.prep_files(
+            run_date, host_config, config, tmp_path
+        )
+        monkeypatch.setitem(host_config["forcing"], "ssh dir", ssh_dir)
+        monkeypatch.setitem(host_config, "run prep dir", run_prep_dir)
+        caplog.set_level(logging.DEBUG)
+
+        make_forcing_links._make_NeahBay_ssh_links(
+            mock_sftp_client, run_date, config, "salish-nowcast", shared_storage=True
+        )
+
+        for i, filename in enumerate(filenames):
+            expected = run_prep_dir / "ssh" / filename
+            assert expected.is_file()
+            assert caplog.records[i].levelname == "DEBUG"
+            assert (
+                caplog.messages[i]
+                == f"{ssh_dir/'fcst'/filename} copied to {expected} on salish-nowcast"
+            )
 
 
 @patch("nowcast.workers.make_forcing_links._create_symlink", autospec=True)
