@@ -12,10 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Unit tests for Salish Sea NEMO nowcast make_forcing_links worker.
+"""Unit tests for SalishSeaCast make_forcing_links worker.
 """
-from pathlib import Path
+import logging
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
@@ -57,36 +58,31 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.make_forcing_links.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(make_forcing_links, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function.
     """
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_forcing_links.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("make_forcing_links",)
-        assert list(kwargs.keys()) == ["description"]
+    def test_instantiate_worker(self, mock_worker):
+        worker = make_forcing_links.main()
+        assert worker.name == "make_forcing_links"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that creates forcing files symlinks for NEMO runs."
+        )
 
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_forcing_links.main()
-        m_worker().init_cli.assert_called_once_with()
+    def test_add_host_name_arg(self, mock_worker):
+        worker = make_forcing_links.main()
+        assert worker.cli.parser._actions[3].dest == "host_name"
+        assert worker.cli.parser._actions[3].help
 
-    def test_add_host_name_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_forcing_links.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("host_name",)
-        assert "help" in kwargs
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_forcing_links.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {
+    def test_add_run_type_arg(self, mock_worker):
+        worker = make_forcing_links.main()
+        assert worker.cli.parser._actions[4].dest == "run_type"
+        expected = {
             "nowcast+",
             "forecast2",
             "ssh",
@@ -287,40 +283,72 @@ class TestConfig:
 
 
 @pytest.mark.parametrize(
-    "run_type", ["nowcast+", "forecast2", "ssh", "nowcast-green", "nowcast-agrif"]
+    "run_type, host_name, shared_storage",
+    (
+        ("nowcast+", "arbutus.cloud-nowcast", False),
+        ("nowcast+", "orcinus-nowcast-agrif", False),
+        ("nowcast+", "salish-nowcast", True),
+        ("ssh", "arbutus.cloud-nowcast", False),
+        ("nowcast-green", "arbutus.cloud-nowcast", False),
+        ("nowcast-agrif", "orcinus-nowcast-agrif", False),
+        ("forecast2", "arbutus.cloud-nowcast", False),
+        ("forecast2", "orcinus-nowcast-agrif", False),
+    ),
 )
-@patch("nowcast.workers.make_forcing_links.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, run_type, host_name, shared_storage, caplog):
         parsed_args = SimpleNamespace(
-            host_name="arbutus.cloud",
+            host_name=host_name,
             run_type=run_type,
-            shared_storaage=False,
-            run_date=arrow.get("2017-01-04"),
+            shared_storage=shared_storage,
+            run_date=arrow.get("2020-04-11"),
         )
+        caplog.set_level(logging.INFO)
+
         msg_type = make_forcing_links.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{run_type} 2020-04-11 forcing file links on {host_name} created"
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh", "nowcast-green"])
-@patch("nowcast.workers.make_forcing_links.logger", autospec=True)
+@pytest.mark.parametrize(
+    "run_type, host_name, shared_storage",
+    (
+        ("nowcast+", "arbutus.cloud-nowcast", False),
+        ("nowcast+", "orcinus-nowcast-agrif", False),
+        ("nowcast+", "salish-nowcast", True),
+        ("ssh", "arbutus.cloud-nowcast", False),
+        ("nowcast-green", "arbutus.cloud-nowcast", False),
+        ("nowcast-agrif", "orcinus-nowcast-agrif", False),
+        ("forecast2", "arbutus.cloud-nowcast", False),
+        ("forecast2", "orcinus-nowcast-agrif", False),
+    ),
+)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, run_type, host_name, shared_storage, caplog):
         parsed_args = SimpleNamespace(
-            host_name="arbutus.cloud",
+            host_name=host_name,
             run_type=run_type,
-            shared_storaage=False,
-            run_date=arrow.get("2017-01-04"),
+            shared_storage=shared_storage,
+            run_date=arrow.get("2020-04-11"),
         )
+        caplog.set_level(logging.CRITICAL)
+
         msg_type = make_forcing_links.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
+            f"{run_type} 2020-04-11 forcing file links creation on {host_name} failed"
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {run_type}"
 
 
@@ -336,9 +364,6 @@ class TestMakeRunoffLinks:
         m_sftp_client = Mock(name="sftp_client")
         make_forcing_links._make_runoff_links(
             m_sftp_client, run_type, run_date, config, "salish-nowcast"
-        )
-        run_prep_dir = Path(
-            config["run"]["enabled hosts"]["salish-nowcast"]["run prep dir"]
         )
         m_clear_links.assert_called_once_with(
             m_sftp_client,

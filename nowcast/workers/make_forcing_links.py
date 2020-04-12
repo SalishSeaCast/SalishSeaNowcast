@@ -12,15 +12,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea NEMO nowcast forcing files symlink creation worker.
+"""SalishSeaCast worker that creates forcing files symlinks for NEMO runs.
 
 Create the forcing file symlinks for a nowcast run on the HPC/cloud
 facility where the run will be executed.
 """
 import logging
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
@@ -71,6 +71,7 @@ def main():
         help="Date of the run to symlink files for.",
     )
     worker.run(make_forcing_links, success, failure)
+    return worker
 
 
 def success(parsed_args):
