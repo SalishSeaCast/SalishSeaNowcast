@@ -54,7 +54,7 @@ You will also need up-to-date clones of the following repositories from Bitbucke
 * NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
 * SalishSeaCmd: https://github.com/SalishSeaCast/SalishSeaCmd
 * SalishSeaNowcast: https://github.com/SalishSeaCast/SalishSeaNowcast
-* salishsea-site: https://bitbucket.org/salishsea/salishsea-site
+* salishsea-site: https://github.com/SalishSeaCast/salishsea-site
 
 Assuming that all of those repositories are cloned,
 one beside the other,

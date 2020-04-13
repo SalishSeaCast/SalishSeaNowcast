@@ -354,7 +354,7 @@ The output looks something like::
   (line   52) ok        https://github.com/UBC-MOAD/moad_tools
   (line   54) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
   (line   56) ok        https://github.com/SalishSeaCast/SalishSeaNowcast
-  (line   57) ok        https://bitbucket.org/salishsea/salishsea-site
+  (line   57) ok        https://github.com/SalishSeaCast/salishsea-site
   (line   51) ok        https://github.com/43ravens/NEMO_nowcast/
   writing output... [ 52%] figures/fig_module_tips
   writing output... [ 57%] figures/fig_modules
