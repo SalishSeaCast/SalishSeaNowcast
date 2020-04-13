@@ -1880,7 +1880,7 @@ class TestAfterWatchNEMO_Hindcast:
             )
         ],
     )
-    def test_success_launch_download_results(self, msg, config, checklist):
+    def test_success_not_launch_download_results(self, msg, config, checklist):
         workers = next_workers.after_watch_NEMO_hindcast(msg, config, checklist)
         expected = NextWorker(
             "nowcast.workers.download_results",
@@ -1892,7 +1892,7 @@ class TestAfterWatchNEMO_Hindcast:
             ],
             host="localhost",
         )
-        assert expected in workers
+        assert expected not in workers
 
     @pytest.mark.parametrize(
         "msg",

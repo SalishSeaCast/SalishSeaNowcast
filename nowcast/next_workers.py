@@ -841,15 +841,6 @@ def after_watch_NEMO_hindcast(msg, config, checklist):
         next_workers[msg.type].extend(
             [
                 NextWorker(
-                    "nowcast.workers.download_results",
-                    args=[
-                        msg.payload["hindcast"]["host"],
-                        "hindcast",
-                        "--run-date",
-                        msg.payload["hindcast"]["run date"],
-                    ],
-                ),
-                NextWorker(
                     "nowcast.workers.watch_NEMO_hindcast",
                     args=[msg.payload["hindcast"]["host"]],
                 ),
