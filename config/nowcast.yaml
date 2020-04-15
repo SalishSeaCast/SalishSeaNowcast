@@ -678,7 +678,7 @@ run:
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /scratch/sallen/dlatorne/fluxes_v201812/
+          results: /scratch/sallen/dlatorne/hindcast_v201905_long/
 
     sockeye-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
