@@ -14,8 +14,8 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast update_forecast_datasets worker.
 """
-from pathlib import Path
 import shlex
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
@@ -503,21 +503,23 @@ class TestAddPastDaysResults:
         assert m_symlink_results.call_args_list == expected
 
     @pytest.mark.parametrize(
-        "model, run_type, run_date, days_from_past, first_date",
+        "model, run_type, run_date, days_from_past, first_date, last_date",
         [
             (
                 "wwatch3",
                 "forecast",
-                arrow.get("2018-04-11"),
+                arrow.get("2020-04-15"),
                 5,
-                arrow.get("2018-04-06"),
+                arrow.get("2020-04-10"),
+                arrow.get("2020-04-15"),
             ),
             (
                 "wwatch3",
                 "forecast2",
-                arrow.get("2018-04-11"),
+                arrow.get("2020-04-15"),
                 5,
-                arrow.get("2018-04-07"),
+                arrow.get("2020-04-11"),
+                arrow.get("2020-04-14"),
             ),
         ],
     )
@@ -530,6 +532,7 @@ class TestAddPastDaysResults:
         run_date,
         days_from_past,
         first_date,
+        last_date,
         config,
         tmpdir,
     ):
@@ -543,7 +546,7 @@ class TestAddPastDaysResults:
             call(
                 Path("opp/wwatch3/nowcast"), day, new_forecast_dir, day, model, run_type
             )
-            for day in arrow.Arrow.range("day", first_date, run_date)
+            for day in arrow.Arrow.range("day", first_date, last_date)
         ]
         assert m_symlink_results.call_args_list == expected
 

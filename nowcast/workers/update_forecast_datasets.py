@@ -12,16 +12,16 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea nowcast worker that builds a new directory of symlinks to model
+"""SalishSeaCast worker that builds a new directory of symlinks to model
 results files for the rolling forecast datasets and replaces the previous
 rolling forecast directory with the new one.
 """
 import logging
 import os
-from pathlib import Path
 import shlex
-import subprocess
 import shutil
+import subprocess
+from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
@@ -193,7 +193,9 @@ def _add_past_days_results(
         if run_type == "forecast"
         else run_date.shift(days=-(days_from_past - 1))
     )
-    for day in arrow.Arrow.range("day", first_date, run_date):
+    wwatch3_forecast2 = model == "wwatch3" and run_type == "forecast2"
+    last_date = run_date.shift(days=-1) if wwatch3_forecast2 else run_date
+    for day in arrow.Arrow.range("day", first_date, last_date):
         _symlink_results(results_archive, day, new_forecast_dir, day, model, run_type)
 
 
@@ -216,22 +218,23 @@ def _add_forecast_results(
         )
         return
     # For preliminary forecast (run_type == 'forecast2'):
-    # Use 1st 24h of forecast run for run_date+1.
+    # Use 1st 24h of forecast run from previous day.
     _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, config)
+    day = run_date.shift(days=-1) if model == "wwatch3" else run_date
     _symlink_results(
         tmp_forecast_results_archive,
-        run_date.shift(days=+1),
+        day.shift(days=+1),
         new_forecast_dir,
-        run_date.shift(days=+1),
+        day.shift(days=+1),
         model,
         run_type,
     )
-    # Use forecast2 run for run_date+2
+    # Use forecast2 run for rest of forecast
     _symlink_results(
         results_archive,
         run_date,
         new_forecast_dir,
-        run_date.shift(days=+2),
+        day.shift(days=+2),
         model,
         run_type,
     )
@@ -239,12 +242,14 @@ def _add_forecast_results(
 
 def _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, config):
     # Create the destination directory
+    ddmmmyy_m1 = run_date.shift(days=-1).format("DDMMMYY").lower()
     ddmmmyy = run_date.format("DDMMMYY").lower()
     ddmmmyy_p1 = run_date.shift(days=+1).format("DDMMMYY").lower()
     model_params = {
         "nemo": {
             "day dir": tmp_forecast_results_archive / ddmmmyy_p1,
             "results archive": Path(config["results archive"]["forecast"]),
+            "forecast day": ddmmmyy,
             "time variable": "time_counter",
         },
         "wwatch3": {
@@ -252,6 +257,7 @@ def _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, con
             "results archive": Path(
                 config["wave forecasts"]["results archive"]["forecast"]
             ),
+            "forecast day": ddmmmyy_m1,
             "time variable": "time",
         },
     }
@@ -263,7 +269,8 @@ def _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, con
         pass
     logger.debug(f"created new {model} temporary forecast directory: {day_dir}")
     results_archive = model_params[model]["results archive"]
-    for forecast_file in (results_archive / ddmmmyy).glob("*.nc"):
+    forecast_day = model_params[model]["forecast day"]
+    for forecast_file in (results_archive / forecast_day).glob("*.nc"):
         if forecast_file.name.startswith("SalishSea_1d"):
             continue
         if forecast_file.name.endswith("restart.nc"):
