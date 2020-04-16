@@ -609,7 +609,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ hg clone ssh://hg@bitbucket.org/mdunphy/fvcom-cmd FVCOM-Cmd
     $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
     $ hg clone ssh://hg@bitbucket.org/salishsea/ss-run-sets SS-run-sets
     $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
@@ -636,6 +635,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@gitlab.com:mdunphy/FVCOM41.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
+    $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
 

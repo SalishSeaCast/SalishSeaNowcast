@@ -116,30 +116,53 @@ and building the documentation with the commands below.
 .. _Anaconda Python Distribution: https://www.anaconda.com/download/
 .. _Miniconda3: https://conda.io/docs/install/quick.html
 
-:kbd:`SalishSeaNowcast` depends on the `NEMO_Nowcast`_,
-:ref:`SalishSeaToolsPackage`,
-`NEMO-Cmd`_,
-and :ref:`SalishSeaCmdProcessor` packages.
-If you have not done so already,
-please clone the `NEMO-Cmd repo`_,
-`NEMO_Nowcast repo`_,
-and `Salish Sea MEOPAR tools repo`_.
-The commands below assume that they are cloned beside your :kbd:`SalishSeaNowcast` clone.
+:kbd:`SalishSeaNowcast` depends on a collection of other Python packages developed by the SalishSeaCast project and friends:
 
+* `NEMO_Nowcast`_
+* `moad_tools`_
+* :ref:`SalishSeaToolsPackage`
+* `OPPTools`_
+* `NEMO-Cmd`_
+* :ref:`SalishSeaCmdProcessor`
+* `FVCOM-Cmd`_
+
+.. _moad_tools: https://ubc-moad-tools.readthedocs.io/en/latest/index.html
+.. _OPPTools: https://gitlab.com/mdunphy/OPPTools
 .. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
-.. _NEMO-Cmd repo: https://github.com/SalishSeaCast/NEMO-Cmd
-.. _NEMO_Nowcast repo: https://bitbucket.org/43ravens/nemo_nowcast
-.. _Salish Sea MEOPAR tools repo: https://bitbucket.org/salishsea/tools
+.. _FVCOM-Cmd: https://github.com/SalishSeaCast/FVCOM-Cmd
+
+If you have not done so already,
+you can clone those repos with:
+
+.. code-block:: bash
+
+    $ cd SalishSeaNowcast/..
+    $ git clone git@github.com:43ravens/NEMO_Nowcast.git
+    $ git clone git@github.com:UBC-MOAD/moad_tools.git
+    $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
+    $ git clone git@gitlab.com:mdunphy/OPPTools.git
+    $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
+    $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
+    $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
+
+If you already have clones of those repos,
+please ensure that they are up to date.
+
+Assuming that those repos are cloned beside your :kbd:`SalishSeaNowcast` clone,
+the commands below install the packages into your :kbd:`salishsea-nowcast` development environment.
 
 .. code-block:: bash
 
     $ cd SalishSeaNowcast
     $ conda env create -f envs/environment-dev.yaml
-    $ source activate salishsea-nowcast
+    $ conda activate salishsea-nowcast
     (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO_Nowcast
+    (salishsea-nowcast)$ python3 -m pip install --editable ../moad_tools
     (salishsea-nowcast)$ python3 -m pip install --editable ../tools/SalishSeaTools
+    (salishsea-nowcast)$ python3 -m pip install --editable ../OPPTools
     (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO-Cmd
     (salishsea-nowcast)$ python3 -m pip install --editable ../SalishSeaCmd
+    (salishsea-nowcast)$ python3 -m pip install --editable ../FVCOM-Cmd
     (salishsea-nowcast)$ python3 -m pip install --editable .
 
 The :kbd:`--editable` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
