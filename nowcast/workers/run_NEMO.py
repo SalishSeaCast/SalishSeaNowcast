@@ -17,19 +17,19 @@ description file and bash run script for a nowcast, nowcast-green, nowcast-dev,
 forecast or forecast2 run on the ONC cloud or salish,
 and launches the run.
 """
-import logging
-import os
 import shlex
-import subprocess
-from pathlib import Path
 
 import arrow
 import f90nml
+import logging
 import nemo_cmd.prepare
+import os
 import salishsea_cmd.api
 import salishsea_cmd.run
+import subprocess
 import yaml
 from nemo_nowcast import NowcastWorker, WorkerError
+from pathlib import Path
 
 from nowcast import lib
 
@@ -371,14 +371,12 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
             os.fspath((run_prep_dir / "../rivers-climatology").resolve()),
             os.fspath((run_prep_dir / "../SalishSeaCmd").resolve()),
             os.fspath((run_prep_dir / "../SalishSeaNowcast").resolve()),
+            os.fspath((run_prep_dir / "../SS-run-sets").resolve()),
             os.fspath((run_prep_dir / "../tides").resolve()),
             os.fspath((run_prep_dir / "../tracers").resolve()),
             os.fspath((run_prep_dir / "../XIOS-ARCH").resolve()),
         ],
-        "hg": [
-            os.fspath((run_prep_dir / "../SS-run-sets").resolve()),
-            os.fspath((run_prep_dir / "../tools").resolve()),
-        ],
+        "hg": [os.fspath((run_prep_dir / "../tools").resolve()),],
     }
     return run_desc
 
