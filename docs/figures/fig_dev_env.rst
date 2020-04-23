@@ -50,7 +50,7 @@ You will also need up-to-date clones of the following repositories from Bitbucke
 
 * NEMO_Nowcast: https://github.com/43ravens/NEMO_Nowcast
 * moad_tools: https://github.com/UBC-MOAD/moad_tools
-* tools: https://bitbucket.org/salishsea/tools/
+* tools: https://github.com/SalishSeaCast/tools
 * NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
 * SalishSeaCmd: https://github.com/SalishSeaCast/SalishSeaCmd
 * SalishSeaNowcast: https://github.com/SalishSeaCast/SalishSeaNowcast

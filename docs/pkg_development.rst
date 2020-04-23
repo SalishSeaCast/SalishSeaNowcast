@@ -139,7 +139,7 @@ you can clone those repos with:
     $ cd SalishSeaNowcast/..
     $ git clone git@github.com:43ravens/NEMO_Nowcast.git
     $ git clone git@github.com:UBC-MOAD/moad_tools.git
-    $ hg clone ssh://hg@bitbucket.org/salishsea/tools tools
+    $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
@@ -371,7 +371,7 @@ The output looks something like::
   (line   22) ok        https://conda.io/docs/
   (line   32) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
   (line   44) ok        https://conda.io/docs/install/quick.html
-  (line   53) ok        https://bitbucket.org/salishsea/tools/
+  (line   53) ok        https://github.com/SalishSeaCast/tools
   (line   55) ok        https://github.com/SalishSeaCast/SalishSeaCmd
   (line   52) ok        https://github.com/UBC-MOAD/moad_tools
   (line   54) ok        https://github.com/SalishSeaCast/NEMO-Cmd/
@@ -416,7 +416,7 @@ The output looks something like::
   (line  112) ok        https://github.com/SalishSeaCast/NEMO-Cmd
   (line  112) ok        https://bitbucket.org/43ravens/nemo_nowcast
   (line  179) ok        http://www.sphinx-doc.org/en/master/
-  (line  112) ok        https://bitbucket.org/salishsea/tools
+  (line  112) ok        https://github.com/SalishSeaCast/tools
   (line  112) ok        https://salishseacmd.readthedocs.io/en/latest/index.html#salishseacmdprocessor
   (line  320) ok        https://coverage.readthedocs.io/en/latest/
   (line  232) ok        https://bitbucket.org/salishsea/salishseanowcast/issues/19

@@ -18,20 +18,20 @@ Scrape the NOAA Neah Bay storm surge site for sea surface height
 observations and forecast values,
 and generate the western open boundary ssh files.
 """
-from contextlib import suppress
 import datetime
 import logging
 import os
-from pathlib import Path
 import shutil
+from contextlib import suppress
+from pathlib import Path
 
-from bs4 import BeautifulSoup
 import matplotlib.backends.backend_agg
 import matplotlib.figure
-from nemo_nowcast import get_web_data, NowcastWorker, WorkerError
 import netCDF4 as nc
 import numpy as np
 import pytz
+from bs4 import BeautifulSoup
+from nemo_nowcast import get_web_data, NowcastWorker, WorkerError
 from salishsea_tools import nc_tools
 
 from nowcast import lib, residuals
@@ -249,10 +249,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
         quiet=True,
     )
     ssh_file.source = os.fspath(textfile)
-    ssh_file.references = (
-        f"https://bitbucket.org/salishsea/tools/src/tip/SalishSeaNowcast/"
-        f"nowcast/workers/{NAME}.py"
-    )
+    ssh_file.references = f"https://github.com/SalishSeaCast/SalishSeaNowcast/blob/master/nowcast/workers/{NAME}.py"
     logger.debug(f"created western open boundary file {filepath}")
 
     # Create netCDF dimensions

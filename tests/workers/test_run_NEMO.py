@@ -14,12 +14,13 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast run_NEMO worker.
 """
-import arrow
-import pytest
 import subprocess
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, patch, Mock
+
+import arrow
+import pytest
 
 from nowcast.workers import run_NEMO
 
@@ -1025,11 +1026,9 @@ class TestRunDescription:
             str(tmp_run_prep.join("..", "SalishSeaNowcast")),
             str(tmp_run_prep.join("..", "SS-run-sets")),
             str(tmp_run_prep.join("..", "tides")),
+            str(tmp_run_prep.join("..", "tools")),
             str(tmp_run_prep.join("..", "tracers")),
             str(tmp_run_prep.join("..", "XIOS-ARCH")),
-        ]
-        assert run_desc["vcs revisions"]["hg"] == [
-            str(tmp_run_prep.join("..", "tools")),
         ]
 
 
