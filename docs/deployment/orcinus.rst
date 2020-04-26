@@ -54,6 +54,7 @@ Clone the following repos into :file:`/home/dlatorne/nowcast-agrif-sys/`:
     $ git clone git@github.com:SalishSeaCast/SS-run-sets.git
     $ git clone git@github.com:SalishSeaCast/tides.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
+    $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
 
 
@@ -65,7 +66,6 @@ Clone the following repos into :file:`/home/dlatorne/nowcast-agrif-sys/`:
 .. code-block:: bash
 
     $ cd /home/dlatorne/nowcast-agrif-sys/
-    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
 
 

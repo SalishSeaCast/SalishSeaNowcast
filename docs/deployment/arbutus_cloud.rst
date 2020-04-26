@@ -609,7 +609,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ hg clone ssh://hg@bitbucket.org/salishsea/nemo-3.6-code NEMO-3.6-code
     $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
 
 
@@ -637,6 +636,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
     $ git clone git@gitlab.com:mdunphy/OPPTools.git
+    $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
 
 Build XIOS-2
