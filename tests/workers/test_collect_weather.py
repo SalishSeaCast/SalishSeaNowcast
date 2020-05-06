@@ -14,14 +14,15 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast collect_weather worker.
 """
+import grp
 import logging
 import os
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
 
 import arrow
+import attr
 import nemo_nowcast
 import pytest
 
@@ -112,6 +113,22 @@ class TestMain:
         assert worker.cli.parser._actions[4].choices == {"1km", "2.5km"}
         assert worker.cli.parser._actions[4].default == "2.5km"
         assert worker.cli.parser._actions[4].help
+
+    def test_add_backfill_option(self, mock_worker):
+        worker = collect_weather.main()
+        assert worker.cli.parser._actions[5].dest == "backfill"
+        assert worker.cli.parser._actions[5].default is False
+        assert worker.cli.parser._actions[5].help
+
+    def test_add_backfill_date_option(self, mock_worker):
+        worker = collect_weather.main()
+        assert worker.cli.parser._actions[6].dest == "backfill_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[6].type == expected
+        assert worker.cli.parser._actions[6].default == arrow.now().floor("day").shift(
+            days=-1
+        )
+        assert worker.cli.parser._actions[6].help
 
 
 class TestConfig:
@@ -273,51 +290,137 @@ class TestFailure:
         assert msg_type == f"failure {resolution} {forecast}"
 
 
-@pytest.mark.parametrize(
-    "forecast, resolution, utcnow, forecast_date",
-    (
-        ("00", "2.5km", "2018-12-29 03:58:43", "20181229"),
-        ("06", "2.5km", "2018-12-28 09:59:43", "20181228"),
-        ("12", "2.5km", "2018-12-28 15:56:43", "20181228"),
-        ("18", "2.5km", "2018-12-28 21:54:43", "20181228"),
-        ("00", "1km", "2020-02-10 03:58:43", "20200210"),
-        ("12", "1km", "2020-02-10 15:56:43", "20200210"),
-    ),
-)
-@patch(
-    "nowcast.workers.collect_weather._calc_expected_files",
-    return_value=set(),
-    autospec=True,
-)
-@patch("nowcast.workers.collect_weather.lib.mkdir", autospec=True)
-@patch("nowcast.workers.collect_weather.watchdog.observers.Observer", autospec=True)
 class TestCollectWeather:
-    """Unit test for collect_weather() function.
+    """Unit tests for collect_weather() function.
     """
 
-    def test_checklist(
+    @staticmethod
+    @pytest.fixture
+    def mock_calc_expected_files(monkeypatch):
+        def mock_calc_expected_files(*args):
+            return set()
+
+        monkeypatch.setattr(
+            collect_weather, "_calc_expected_files", mock_calc_expected_files
+        )
+
+    @pytest.mark.parametrize(
+        "forecast, resolution",
+        (
+            ("00", "2.5km"),
+            ("06", "2.5km"),
+            ("12", "2.5km"),
+            ("18", "2.5km"),
+            ("00", "1km"),
+            ("12", "1km"),
+        ),
+    )
+    def test_checklist_backfill(
         self,
-        m_obs,
-        m_mkdir,
-        m_calc_exp_files,
+        forecast,
+        resolution,
+        mock_calc_expected_files,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        resolution_key = resolution.replace("km", " km")
+        grib_dir = tmp_path / config["weather"]["download"][resolution_key]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution_key], "GRIB dir", grib_dir
+        )
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
+        parsed_args = SimpleNamespace(
+            forecast=forecast,
+            resolution=resolution,
+            backfill=True,
+            backfill_date=arrow.get("2020-05-04"),
+        )
+        caplog.set_level(logging.DEBUG)
+
+        checklist = collect_weather.collect_weather(parsed_args, config)
+
+        assert caplog.records[0].levelname == "DEBUG"
+        assert caplog.messages[0] == f"created {grib_dir/'20200504'}/"
+        assert caplog.records[1].levelname == "DEBUG"
+        assert caplog.messages[1] == f"created {grib_dir/'20200504'}/{forecast}/"
+        assert caplog.records[2].levelname == "INFO"
+        datamart_dir = Path(
+            config["weather"]["download"][resolution_key]["datamart dir"]
+        )
+        expected = f"starting to move 2020-05-04 files from {datamart_dir/forecast}/"
+        assert caplog.messages[2] == expected
+        assert caplog.records[3].levelname == "INFO"
+        expected = f"finished collecting files from {datamart_dir/forecast}/ to {grib_dir}/20200504/{forecast}/"
+        assert caplog.messages[3] == expected
+        expected = {f"{forecast} {resolution}": f"{grib_dir}/20200504/{forecast}"}
+        assert checklist == expected
+
+    @pytest.mark.parametrize(
+        "forecast, resolution, utcnow, forecast_date",
+        (
+            ("00", "2.5km", "2018-12-29 03:58:43", "20181229"),
+            ("06", "2.5km", "2018-12-28 09:59:43", "20181228"),
+            ("12", "2.5km", "2018-12-28 15:56:43", "20181228"),
+            ("18", "2.5km", "2018-12-28 21:54:43", "20181228"),
+            ("00", "1km", "2020-02-10 03:58:43", "20200210"),
+            ("12", "1km", "2020-02-10 15:56:43", "20200210"),
+        ),
+    )
+    def test_checklist_observer(
+        self,
         forecast,
         resolution,
         utcnow,
         forecast_date,
+        mock_calc_expected_files,
         config,
         caplog,
+        tmp_path,
         monkeypatch,
     ):
         def mock_utcnow():
             return arrow.get(utcnow)
 
         monkeypatch.setattr(collect_weather.arrow, "utcnow", mock_utcnow)
-        parsed_args = SimpleNamespace(forecast=forecast, resolution=resolution)
+
+        class MockObserver:
+            def schedule(self, event_handler, path, recursive):
+                pass
+
+            def start(self):
+                pass
+
+        monkeypatch.setattr(
+            collect_weather.watchdog.observers, "Observer", MockObserver
+        )
+
+        resolution_key = resolution.replace("km", " km")
+        grib_dir = tmp_path / config["weather"]["download"][resolution_key]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution_key], "GRIB dir", grib_dir
+        )
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
+        parsed_args = SimpleNamespace(
+            forecast=forecast, resolution=resolution, backfill=False
+        )
+        caplog.set_level(logging.DEBUG)
 
         checklist = collect_weather.collect_weather(parsed_args, config)
 
+        assert caplog.records[2].levelname == "INFO"
+        datamart_dir = Path(
+            config["weather"]["download"][resolution_key]["datamart dir"]
+        )
+        expected = f"starting to watch for files in {datamart_dir/forecast}/"
+        assert caplog.messages[2] == expected
         expected = {
-            f"{forecast} {resolution}": f"forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/{forecast_date}/{forecast}"
+            f"{forecast} {resolution}": f"{grib_dir}/{forecast_date}/{forecast}"
         }
         assert checklist == expected
 
@@ -382,6 +485,55 @@ class TestCalcExpectedFiles:
         assert len(expected_files) == forecast_duration * len(grib_vars)
 
 
+@pytest.mark.parametrize(
+    "forecast, resolution",
+    (
+        ("00", "2.5 km"),
+        ("06", "2.5 km"),
+        ("12", "2.5 km"),
+        ("18", "2.5 km"),
+        ("00", "1 km"),
+        ("12", "1 km"),
+    ),
+)
+class TestMoveFile:
+    """Unit test for _move_file() function.
+    """
+
+    def test_move_file(
+        self, forecast, resolution, config, caplog, tmp_path, monkeypatch
+    ):
+        grib_dir = tmp_path / config["weather"]["download"][resolution]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution], "GRIB dir", grib_dir
+        )
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
+        datamart_dir = (
+            tmp_path / config["weather"]["download"][resolution]["datamart dir"]
+        )
+        caplog.set_level(logging.DEBUG)
+
+        file_template = config["weather"]["download"][resolution]["file template"]
+        var_file = file_template.format(
+            variable="UGRD_TGL_10", date="20200505", forecast=forecast, hour="043"
+        )
+        (datamart_dir / forecast / "043").mkdir(parents=True)
+        expected_file = datamart_dir / forecast / "043" / var_file
+        expected_file.write_bytes(b"")
+        grib_forecast_dir = grib_dir / "20200505" / forecast
+        grib_forecast_dir.mkdir(parents=True)
+        collect_weather._move_file(expected_file, grib_forecast_dir, grp_name)
+
+        assert (grib_forecast_dir / "043" / var_file).exists()
+        assert not expected_file.exists()
+        assert caplog.records[0].levelname == "DEBUG"
+        assert (
+            caplog.messages[0] == f"moved {expected_file} to {grib_forecast_dir/'043'}/"
+        )
+
+
 @pytest.mark.parametrize("resolution", ("2.5 km", "1 km"))
 class TestGribFileEventHandler:
     """Unit tests for _GribFileEventHandler class.
@@ -397,52 +549,87 @@ class TestGribFileEventHandler:
         assert handler.grib_forecast_dir == Path()
         assert handler.grp_name == config["file group"]
 
-    @patch("nowcast.workers.collect_weather.lib.mkdir", autospec=True)
-    @patch("nowcast.workers.collect_weather.shutil.move", autospec=True)
-    def test_move_expected_file(self, m_move, m_mkdir, resolution, config, caplog):
-        expected_file = Path(
-            config["weather"]["download"][resolution]["datamart dir"],
-            "18/043/CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2",
+    def test_move_expected_file(
+        self, resolution, config, caplog, tmp_path, monkeypatch
+    ):
+        @attr.s
+        class MockEvent:
+            dest_path = attr.ib()
+
+        grib_dir = tmp_path / config["weather"]["download"][resolution]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution], "GRIB dir", grib_dir
         )
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
+        datamart_dir = (
+            tmp_path / config["weather"]["download"][resolution]["datamart dir"]
+        )
+        (datamart_dir / "18" / "043").mkdir(parents=True)
+        expected_file = (
+            datamart_dir
+            / "18"
+            / "043"
+            / "CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2"
+        )
+        expected_file.write_bytes(b"")
         expected_files = {expected_file}
-        grib_forecast_dir = Path(
-            config["weather"]["download"][resolution]["GRIB dir"], "20181230", "18"
-        )
+        grib_forecast_dir = grib_dir / "20181230" / "18"
+        grib_forecast_dir.mkdir(parents=True)
         grib_hour_dir = grib_forecast_dir / "043"
         caplog.set_level(logging.DEBUG)
 
         handler = collect_weather._GribFileEventHandler(
             expected_files, grib_forecast_dir, grp_name=config["file group"]
         )
-        handler.on_moved(Mock(name="event", dest_path=expected_file))
-        m_mkdir.assert_called_once_with(
-            grib_hour_dir, collect_weather.logger, grp_name=config["file group"]
-        )
-        m_move.assert_called_once_with(
-            os.fspath(expected_file), os.fspath(grib_hour_dir)
-        )
+        handler.on_moved(MockEvent(dest_path=expected_file))
+
+        assert (
+            grib_forecast_dir
+            / "043"
+            / "CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2"
+        ).exists()
+        assert not expected_file.exists()
         assert caplog.records[0].levelname == "DEBUG"
         assert caplog.messages[0] == f"moved {expected_file} to {grib_hour_dir}/"
         assert expected_file not in expected_files
 
-    @patch("nowcast.workers.collect_weather.lib.mkdir", autospec=True)
-    @patch("nowcast.workers.collect_weather.shutil.move", autospec=True)
-    def test_ignore_unexpected_file(self, m_move, m_mkdir, resolution, config, caplog):
-        expected_file = Path(
-            config["weather"]["download"][resolution]["datamart dir"],
-            "18/043/CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2",
+    def test_ignore_unexpected_file(
+        self, resolution, config, caplog, tmp_path, monkeypatch
+    ):
+        @attr.s
+        class MockEvent:
+            dest_path = attr.ib()
+
+        grib_dir = tmp_path / config["weather"]["download"][resolution]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution], "GRIB dir", grib_dir
         )
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
+        datamart_dir = (
+            tmp_path / config["weather"]["download"][resolution]["datamart dir"]
+        )
+        (datamart_dir / "18" / "043").mkdir(parents=True)
+        expected_file = (
+            datamart_dir
+            / "18"
+            / "043"
+            / "CMC_hrdps_west_TCDC_SFC_0_ps2.5km_2018123018_P043-00.grib2"
+        )
+        expected_file.write_bytes(b"")
         expected_files = {expected_file}
-        grib_forecast_dir = Path(
-            config["weather"]["download"][resolution]["GRIB dir"], "20181230", "18"
-        )
+        grib_forecast_dir = grib_dir / "20181230" / "18"
+        grib_forecast_dir.mkdir(parents=True)
+        grib_hour_dir = grib_forecast_dir / "043"
         caplog.set_level(logging.DEBUG)
 
         handler = collect_weather._GribFileEventHandler(
             expected_files, grib_forecast_dir, grp_name=config["file group"]
         )
-        handler.on_moved(Mock(name="event", dest_path="foo"))
-        assert not m_mkdir.called
-        assert not m_move.called
+        handler.on_moved(MockEvent(dest_path="foo"))
+
         assert not caplog.records
         assert expected_file in expected_files

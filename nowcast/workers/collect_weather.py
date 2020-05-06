@@ -18,14 +18,14 @@ directory tree.
 """
 import logging
 import os
-from pathlib import Path
 import shutil
 import time
+from pathlib import Path
 
 import arrow
-from nemo_nowcast import NowcastWorker
 import watchdog.events
 import watchdog.observers
+from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
 
@@ -52,6 +52,16 @@ def main():
         choices={"1km", "2.5km"},
         default="2.5km",
         help="Horizontal resolution of forecast to download files from.",
+    )
+    worker.cli.add_argument(
+        "--backfill",
+        action="store_true",
+        help="Download forecast files for previous day's date.",
+    )
+    worker.cli.add_date_option(
+        "--backfill-date",
+        default=arrow.now().floor("day").shift(days=-1),
+        help="Prior date to collect forecast files for.",
     )
     worker.run(collect_weather, success, failure)
     return worker
@@ -97,47 +107,58 @@ def collect_weather(parsed_args, config, *args):
     """
     forecast = parsed_args.forecast
     resolution = parsed_args.resolution.replace("km", " km")
-    forecast_date = arrow.utcnow().shift(hours=-int(forecast) + 4).format("YYYYMMDD")
+    forecast_yyyymmdd = (
+        parsed_args.backfill_date.format("YYYYMMDD")
+        if parsed_args.backfill
+        else arrow.utcnow().shift(hours=-int(forecast) + 4).format("YYYYMMDD")
+    )
     datamart_dir = Path(config["weather"]["download"][resolution]["datamart dir"])
     grib_dir = Path(config["weather"]["download"][resolution]["GRIB dir"])
     grp_name = config["file group"]
 
     expected_files = _calc_expected_files(
-        datamart_dir, forecast, forecast_date, resolution, config
+        datamart_dir, forecast, forecast_yyyymmdd, resolution, config
     )
 
-    lib.mkdir(grib_dir / forecast_date, logger, grp_name=grp_name)
-    logger.debug(f"created {grib_dir / forecast_date}/")
-    lib.mkdir(grib_dir / forecast_date / forecast, logger, grp_name=grp_name)
-    logger.debug(f"created {grib_dir / forecast_date/forecast}/")
+    lib.mkdir(grib_dir / forecast_yyyymmdd, logger, grp_name=grp_name)
+    logger.debug(f"created {grib_dir / forecast_yyyymmdd}/")
+    lib.mkdir(grib_dir / forecast_yyyymmdd / forecast, logger, grp_name=grp_name)
+    logger.debug(f"created {grib_dir / forecast_yyyymmdd/forecast}/")
 
-    handler = _GribFileEventHandler(
-        expected_files, grib_dir / forecast_date / forecast, grp_name
-    )
-    observer = watchdog.observers.Observer()
-    observer.schedule(handler, os.fspath(datamart_dir / forecast), recursive=True)
-    logger.info(f"starting to watch for files in {datamart_dir/forecast}/")
-    observer.start()
-    while expected_files:
-        time.sleep(1)
+    if parsed_args.backfill:
+        logger.info(
+            f"starting to move {parsed_args.backfill_date.format('YYYY-MM-DD')} files from {datamart_dir / forecast}/"
+        )
+        for expected_file in expected_files:
+            _move_file(expected_file, grib_dir / forecast_yyyymmdd / forecast, grp_name)
+    else:
+        handler = _GribFileEventHandler(
+            expected_files, grib_dir / forecast_yyyymmdd / forecast, grp_name
+        )
+        observer = watchdog.observers.Observer()
+        observer.schedule(handler, os.fspath(datamart_dir / forecast), recursive=True)
+        logger.info(f"starting to watch for files in {datamart_dir/forecast}/")
+        observer.start()
+        while expected_files:
+            time.sleep(1)
     logger.info(
         f"finished collecting files from {datamart_dir/forecast}/ to "
-        f"{grib_dir / forecast_date / forecast}/"
+        f"{grib_dir / forecast_yyyymmdd / forecast}/"
     )
 
     checklist = {
         f"{forecast} {resolution.replace(' km', 'km')}": os.fspath(
-            grib_dir / forecast_date / forecast
+            grib_dir / forecast_yyyymmdd / forecast
         )
     }
     return checklist
 
 
-def _calc_expected_files(datamart_dir, forecast, forecast_date, resolution, config):
+def _calc_expected_files(datamart_dir, forecast, forecast_yyyymmdd, resolution, config):
     """
     :param :py:class:`pathlib.Path` datamart_dir:
     :param str forecast:
-    :param str forecast_date:
+    :param str forecast_yyyymmdd:
     :param str resolution:
     :param :py:class:`nemo_nowcast.Config` config:
 
@@ -152,7 +173,10 @@ def _calc_expected_files(datamart_dir, forecast, forecast_date, resolution, conf
         forecast_hour = f"{hour+1:03d}"
         var_files = {
             file_template.format(
-                variable=var, date=forecast_date, forecast=forecast, hour=forecast_hour
+                variable=var,
+                date=forecast_yyyymmdd,
+                forecast=forecast,
+                hour=forecast_hour,
             )
             for var in grib_vars
         }
@@ -163,9 +187,21 @@ def _calc_expected_files(datamart_dir, forecast, forecast_date, resolution, conf
             }
         )
     logger.debug(
-        f"calculated set of expected file paths for {resolution} {forecast_date}/{forecast}"
+        f"calculated set of expected file paths for {resolution} {forecast_yyyymmdd}/{forecast}"
     )
     return expected_files
+
+
+def _move_file(expected_file, grib_forecast_dir, grp_name):
+    """
+    :param :py:class:`pathlib.Path` expected_file:
+    :param :py:class:`pathlib.Path` grib_forecast_dir:
+    :param str grp_name:
+    """
+    grib_hour_dir = grib_forecast_dir / expected_file.parent.stem
+    lib.mkdir(grib_hour_dir, logger, grp_name=grp_name)
+    shutil.move(os.fspath(expected_file), os.fspath(grib_hour_dir))
+    logger.debug(f"moved {expected_file} to {grib_hour_dir}/")
 
 
 class _GribFileEventHandler(watchdog.events.FileSystemEventHandler):
@@ -184,10 +220,7 @@ class _GribFileEventHandler(watchdog.events.FileSystemEventHandler):
         super().on_moved(event)
         if Path(event.dest_path) in self.expected_files:
             expected_file = Path(event.dest_path)
-            grib_hour_dir = self.grib_forecast_dir / expected_file.parent.stem
-            lib.mkdir(grib_hour_dir, logger, grp_name=self.grp_name)
-            shutil.move(os.fspath(expected_file), os.fspath(grib_hour_dir))
-            logger.debug(f"moved {expected_file} to {grib_hour_dir}/")
+            _move_file(expected_file, self.grib_forecast_dir, self.grp_name)
             self.expected_files.remove(expected_file)
 
 
