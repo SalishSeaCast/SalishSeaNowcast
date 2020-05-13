@@ -601,17 +601,6 @@ MPI Hosts Mappings
   192.168.238.27 slots=15 max-slots=16
 
 
-Mercurial Repositories
-======================
-
-Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
-
-.. code-block:: bash
-
-    $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
-
-
 Git Repositories
 ================
 
@@ -638,6 +627,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@gitlab.com:mdunphy/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
+    $ git clone git@github.com:SalishSeaCast/XIOS-2.git
 
 Build XIOS-2
 ============

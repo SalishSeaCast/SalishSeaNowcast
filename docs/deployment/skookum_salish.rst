@@ -19,17 +19,6 @@
 :kbd:`skookum`/:kbd:`salish` Deployment
 ***************************************
 
-Mercurial Repositories
-======================
-
-Clone the following repos into :file:`/SalishSeaCast/`:
-
-.. code-block:: bash
-
-    $ cd /SalishSeaCast/
-    $ hg clone ssh://hg@bitbucket.org/salishsea/xios-2 XIOS-2
-
-
 Git Repositories
 ================
 
@@ -55,6 +44,7 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
+    $ git clone git@github.com:SalishSeaCast/XIOS-2.git
 
 Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
 
