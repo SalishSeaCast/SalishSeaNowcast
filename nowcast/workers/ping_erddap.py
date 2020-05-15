@@ -36,7 +36,7 @@ def main():
     worker.cli.add_argument(
         "dataset",
         choices={
-            "download_weather",
+            "weather",
             "SCVIP-CTD",
             "SEVIP-CTD",
             "USDDL-CTD",
@@ -48,7 +48,7 @@ def main():
         },
         help="""
         Type of dataset to notify ERDDAP of:
-        'download_weather' means atmospheric forcing downloaded & processed,
+        'weather' means atmospheric forcing downloaded & processed,
         'SCVIP-CTD' means ONC SCVIP node CTD T&S observations downloaded &
         processed,
         'SEVIP-CTD' means ONC SEVIP node CTD T&S observations downloaded &

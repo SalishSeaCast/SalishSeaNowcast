@@ -84,7 +84,7 @@ class TestMain:
         worker = ping_erddap.main()
         assert worker.cli.parser._actions[3].dest == "dataset"
         assert worker.cli.parser._actions[3].choices == {
-            "download_weather",
+            "weather",
             "SCVIP-CTD",
             "SEVIP-CTD",
             "USDDL-CTD",
