@@ -110,8 +110,8 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["ping_erddap"]
         assert list(msg_registry.keys()) == [
             "checklist key",
-            "success download_weather",
-            "failure download_weather",
+            "success weather",
+            "failure weather",
             "success SCVIP-CTD",
             "failure SCVIP-CTD",
             "success SEVIP-CTD",

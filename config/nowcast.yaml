@@ -1473,8 +1473,8 @@ message registry:
 
     ping_erddap:
       checklist key: ERDDAP flag files
-      success download_weather: atmospheric forcing ERDDAP dataset flag files created
-      failure download_weather: atmospheric forcing ERDDAP dataset flag files creation failed
+      success weather: atmospheric forcing ERDDAP dataset flag files created
+      failure weather: atmospheric forcing ERDDAP dataset flag files creation failed
       success SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files created
       failure SCVIP-CTD: ONC SCVIP node CTD ERDDAP dataset flag files creation failed
       success SEVIP-CTD: ONC SEVIP node CTD ERDDAP dataset flag files created
