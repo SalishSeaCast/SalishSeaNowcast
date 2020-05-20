@@ -1642,8 +1642,8 @@ def after_ping_erddap(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "success download_weather": [],
-        "failure download_weather": [],
+        "success weather": [],
+        "failure weather": [],
         "success SCVIP-CTD": [],
         "failure SCVIP-CTD": [],
         "success SEVIP-CTD": [],

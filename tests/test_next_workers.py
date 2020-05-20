@@ -2472,7 +2472,7 @@ class TestAfterPingERDDAP:
         "msg_type",
         [
             "crash",
-            "failure download_weather",
+            "failure weather",
             "failure SCVIP-CTD",
             "failure SEVIP-CTD",
             "failure USDDL-CTD",
@@ -2481,7 +2481,7 @@ class TestAfterPingERDDAP:
             "failure nowcast-green",
             "failure nemo-forecast",
             "failure wwatch3-forecast",
-            "success download_weather",
+            "success weather",
             "success SCVIP-CTD",
             "success SEVIP-CTD",
             "success USDDL-CTD",
