@@ -15,9 +15,9 @@
 
 .. _NowcastProductionDeployment:
 
-*****************************
-Nowcast Production Deployment
-*****************************
+******************************
+Nowcast Production Deployments
+******************************
 
 In October 2016 the production deployment of the nowcast system was changed to use the :ref:`SalishSeaNowcast-repo` package that is based on the `NEMO_Nowcast framework`_ framework.
 The production deployment uses 3 systems:
@@ -89,3 +89,17 @@ as well are the sub-grid initialization preparation with the NEMO-AGRIF nesting 
    :maxdepth: 2
 
    orcinus
+
+In February 2019 we got access to the UBC EOAS :kbd:`optimum` cluster.
+We use it primarily for long hindcast runs,
+but also some research runs.
+The setup on :kbd:`optimum` is described in:
+
+.. toctree::
+   :maxdepth: 2
+
+   optimum
+
+See also the `#optimum-cluster`_ Slack channel.
+
+.. _#optimum-cluster: https://salishseacast.slack.com/archives/C011S7BCWGK

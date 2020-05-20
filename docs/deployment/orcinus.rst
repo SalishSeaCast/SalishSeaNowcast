@@ -23,7 +23,7 @@ Create Directory Trees
 ======================
 
 Create directory trees for the run preparation directory,
-Mercurial repositories,
+Git repositories,
 temporary run directories,
 and results directories,
 and set their groups and permissions:
@@ -77,6 +77,15 @@ and build XIOS-2 with:
     $ cd /home/dlatorne/nowcast-agrif-sys/XIOS-2
     $ ./make_xios --arch X64_ORCINUS --netcdf_lib netcdf4_seq --job 8
 
+:kbd:`--netcdf_lib netcdf4_seq` is necessary because AGRIF does not support parallel NetCDF output.
+
+To clear away all artifacts of a previous build of XIOS-2 use:
+
+.. code-block:: bash
+
+    cd /home/dlatorne/nowcast-agrif-sys/XIOS-2
+    ./tools/FCM/bin/fcm build --clean
+
 
 Build NEMO-3.6
 ==============
@@ -122,7 +131,7 @@ Symlink the run description YAML template files from the :file:`SS-run-sets` rep
     $ cd /home/dlatorne/nowcast-agrif-sys/runs/
     $ ln -s ../SS-run-sets/v201702/smelt-agrif/orcinus_nowcast_template.yaml nowcast-agrif_template.yaml
 
-Create an populate forcing sub-directories with:
+Create and populate forcing sub-directories with:
 
 .. code-block:: bash
 
