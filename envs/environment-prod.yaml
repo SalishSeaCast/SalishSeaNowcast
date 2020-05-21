@@ -52,6 +52,7 @@ dependencies:
   - pyzmq
   - requests
   - scipy
+  - sentry-sdk
   - shapely
   - supervisor
   - watchdog
@@ -63,7 +64,6 @@ dependencies:
     - f90nml
     - feedgen>=0.9.0
     - python-hglib
-    - raven
     - retrying
     - schedule
     - scour

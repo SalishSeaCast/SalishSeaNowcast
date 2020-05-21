@@ -1011,10 +1011,6 @@ logging:
         formatter: simple
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast.debug.log
         backupCount: 7
-      sentry:
-        class: raven.handlers.logging.SentryHandler
-        level: ERROR
-        # dsn will be obtained from SENTRY_DSN environment variable
       email:
         class: logging.handlers.SMTPHandler
         level: CRITICAL
@@ -1030,8 +1026,9 @@ logging:
       handlers:
        - info_text
        - debug_text
-       - sentry
        - email
+       # No Sentry exception logging from log aggregator because the events are either
+       # duplicates of those from other processes, or they lack traceback info
 
   publisher:
     version: 1
@@ -1051,10 +1048,6 @@ logging:
         class: zmq.log.handlers.PUBHandler
         level: DEBUG
         formatter: simple
-      sentry:
-        class: raven.handlers.logging.SentryHandler
-        level: ERROR
-        # dsn will be obtained from SENTRY_DSN environment variable
       wgrib2_text:
         class: logging.FileHandler
         level: DEBUG
@@ -1101,11 +1094,15 @@ logging:
         level: WARNING
         formatter: simple
     root:
+      # disable propagation to avoid duplicate sentry events from workers and
+      # log_aggregator
+      propagate: False
       level: DEBUG
       handlers:
        - console
        - zmq_pub
-       - sentry
+       # exception logging to Sentry is enabled by a valid Sentry DSN as the value
+       # of the SENTRY_DSN environment variable
 
 
 slack notifications:
