@@ -41,6 +41,7 @@ dependencies:
   - pyzmq
   - requests
   - scipy
+  - sentry-sdk
   - shapely
   - supervisor
   - verboselogs
