@@ -32,11 +32,11 @@ import arrow
 import matplotlib.dates
 import matplotlib.pyplot as plt
 import numpy
-from pandas.plotting import register_matplotlib_converters
 import requests
+import xarray
+from pandas.plotting import register_matplotlib_converters
 from salishsea_tools import data_tools
 from salishsea_tools.places import PLACES
-import xarray
 
 import nowcast.figures.website_theme
 from nowcast.figures import shared
@@ -160,7 +160,7 @@ def _prep_plot_data(place, fvcom_ssh_datasets, nemo_ssh_dataset_url_tmpl):
     # Change dataset times to Pacific time zone
     for fvcom_ssh in fvcom_sshs.values():
         shared.localize_time(fvcom_ssh)
-    with suppress(AttributeError):
+    with suppress(IndexError, AttributeError):
         shared.localize_time(nemo_ssh)
     with suppress(IndexError, AttributeError):
         shared.localize_time(obs)
