@@ -36,6 +36,7 @@ dependencies:
   - lxml
   - mako
   - matplotlib>=3
+  - nc-time-axis
   - netcdf4
   - numpy
   - pandas
