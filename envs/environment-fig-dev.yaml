@@ -37,6 +37,7 @@ dependencies:
   - nc-time-axis
   - netcdf4
   - numpy
+  - numpy-indexed
   - pandas
   - paramiko
   - pillow
