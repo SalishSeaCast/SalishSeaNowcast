@@ -18,11 +18,12 @@ import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
 import pytest
+
 from nowcast.workers import upload_forcing
 
 
@@ -52,55 +53,41 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.upload_forcing.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(upload_forcing, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function.
     """
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        upload_forcing.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("upload_forcing",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        upload_forcing.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_host_name_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        upload_forcing.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("host_name",)
-        assert "help" in kwargs
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        upload_forcing.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {"nowcast+", "forecast2", "ssh", "turbidity"}
-        assert "help" in kwargs
-
-    def test_add_run_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        upload_forcing.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        upload_forcing.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            upload_forcing.upload_forcing,
-            upload_forcing.success,
-            upload_forcing.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = upload_forcing.main()
+        assert worker.name == "upload_forcing"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that upload forcing files for NEMO runs."
         )
+
+    def test_add_host_name_arg(self, mock_worker):
+        worker = upload_forcing.main()
+        assert worker.cli.parser._actions[3].dest == "host_name"
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_run_type_arg(self, mock_worker):
+        worker = upload_forcing.main()
+        assert worker.cli.parser._actions[4].dest == "run_type"
+        expected = {"nowcast+", "forecast2", "ssh", "turbidity"}
+        assert worker.cli.parser._actions[4].choices == expected
+        assert worker.cli.parser._actions[4].help
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = upload_forcing.main()
+        assert worker.cli.parser._actions[5].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[5].type == expected
+        assert worker.cli.parser._actions[5].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[5].help
 
 
 class TestConfig:
@@ -112,9 +99,10 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["upload_forcing"]
         assert msg_registry["checklist key"] == "forcing upload"
 
-    @pytest.mark.parametrize(
-        "msg",
-        (
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["upload_forcing"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
             "success nowcast+",
             "failure nowcast+",
             "success forecast2",
@@ -124,11 +112,7 @@ class TestConfig:
             "success turbidity",
             "failure turbidity",
             "crash",
-        ),
-    )
-    def test_message_types(self, msg, prod_config):
-        msg_registry = prod_config["message registry"]["workers"]["upload_forcing"]
-        assert msg in msg_registry
+        ]
 
     def test_enabled_hosts(self, prod_config):
         enabled_hosts = list(prod_config["run"]["enabled hosts"].keys())
@@ -146,7 +130,7 @@ class TestConfig:
             assert ssh_key == "SalishSeaNEMO-nowcast_id_rsa"
 
     @pytest.mark.parametrize(
-        "host, expected",
+        "host, ssh_key",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
             ("salish-nowcast", "/results/forcing/sshNeahBay/"),
@@ -158,10 +142,10 @@ class TestConfig:
             ("graham-hindcast", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
-    def test_ssh_uploads(self, host, expected, prod_config):
+    def test_ssh_uploads(self, host, ssh_key, prod_config):
         assert prod_config["ssh"]["ssh dir"] == "/results/forcing/sshNeahBay/"
         host_config = prod_config["run"]["enabled hosts"][host]
-        assert host_config["forcing"]["ssh dir"] == expected
+        assert host_config["forcing"]["ssh dir"] == ssh_key
 
     @pytest.mark.parametrize(
         "host, expected",
@@ -248,38 +232,86 @@ class TestConfig:
         assert host_config["forcing"]["bc dir"] == expected
 
 
-@pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh", "turbidity"])
-@patch("nowcast.workers.upload_forcing.logger", autospec=True)
+@pytest.mark.parametrize(
+    "run_type, host_name",
+    (
+        ("nowcast+", "arbutus.cloud-nowcast"),
+        ("nowcast+", "orcinus-nowcast-agrif"),
+        ("nowcast+", "optimum-hindcast"),
+        ("nowcast+", "graham-hindcast"),
+        ("ssh", "arbutus.cloud-nowcast"),
+        ("forecast2", "arbutus.cloud-nowcast"),
+        ("forecast2", "orcinus-nowcast-agrif"),
+        ("forecast2", "optimum-hindcast"),
+        ("forecast2", "graham-hindcast"),
+        ("turbidity", "arbutus.cloud-nowcast"),
+        ("turbidity", "orcinus-nowcast-agrif"),
+        ("turbidity", "optimum-hindcast"),
+        ("turbidity", "graham-hindcast"),
+    ),
+)
 class TestSuccess:
     """Unit tests for success() function.
     """
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(
-            host_name="arbutus.cloud",
-            run_type=run_type,
-            run_date=arrow.get("2017-01-02"),
+            host_name=host_name, run_type=run_type, run_date=arrow.get("2020-06-29"),
         )
+        caplog.set_level(logging.INFO)
+
         msg_type = upload_forcing.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"{run_type} 2020-06-29 forcing files upload to {host_name} completed"
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["nowcast+", "forecast2", "ssh", "turbidity"])
-@patch("nowcast.workers.upload_forcing.logger", autospec=True)
+@pytest.mark.parametrize(
+    "run_type, host_name",
+    (
+        ("nowcast+", "arbutus.cloud-nowcast"),
+        ("nowcast+", "orcinus-nowcast-agrif"),
+        ("nowcast+", "optimum-hindcast"),
+        ("nowcast+", "graham-hindcast"),
+        ("ssh", "arbutus.cloud-nowcast"),
+        ("forecast2", "arbutus.cloud-nowcast"),
+        ("forecast2", "orcinus-nowcast-agrif"),
+        ("forecast2", "optimum-hindcast"),
+        ("forecast2", "graham-hindcast"),
+        ("turbidity", "arbutus.cloud-nowcast"),
+        ("turbidity", "orcinus-nowcast-agrif"),
+        ("turbidity", "optimum-hindcast"),
+        ("turbidity", "graham-hindcast"),
+    ),
+)
 class TestFailure:
     """Unit tests for failure() function.
     """
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(
-            host_name="arbutus.cloud",
-            run_type=run_type,
-            run_date=arrow.get("2017-01-02"),
+            host_name=host_name, run_type=run_type, run_date=arrow.get("2020-06-29"),
         )
+        caplog.set_level(logging.CRITICAL)
+
         msg_type = upload_forcing.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"{run_type} 2020-06-29 forcing files upload to {host_name} failed"
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {run_type}"
+
+
+@pytest.fixture
+def mock_sftp_client(monkeypatch):
+    class MockSFTPClient:
+        pass
+
+    return MockSFTPClient()
 
 
 @patch(
@@ -287,7 +319,6 @@ class TestFailure:
     side_effect=[FileNotFoundError, None, FileNotFoundError, None],
     autospec=True,
 )
-@patch("nowcast.workers.upload_forcing.logger", autospec=True)
 class TestUploadLiveOceanFiles:
     """Unit tests for _upload_live_ocean_files() function.
     """
@@ -297,16 +328,23 @@ class TestUploadLiveOceanFiles:
         [("nowcast+", logging.CRITICAL), ("forecast2", logging.INFO)],
     )
     def test_live_ocean_persistence_symlink_logging_level(
-        self, m_logger, m_upload_file, run_type, logging_level, config
+        self, m_upload_file, run_type, logging_level, mock_sftp_client, config, caplog
     ):
-        sftp_client = Mock(namd="sftp_client")
         run_date = arrow.get("2017-09-03")
         host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
+        caplog.set_level(logging_level)
+
         with patch("nowcast.workers.upload_forcing.Path.symlink_to"):
             upload_forcing._upload_live_ocean_files(
-                sftp_client, run_type, run_date, config, "arbutus.cloud", host_config
+                mock_sftp_client,
+                run_type,
+                run_date,
+                config,
+                "arbutus.cloud",
+                host_config,
             )
+
         if logging_level is None:
-            assert not m_logger.log.called
+            assert not caplog.messages
         else:
-            assert m_logger.log.call_args[0][0] == logging_level
+            assert caplog.records[0].levelno == logging_level

@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea NEMO nowcast upload forcing files worker.
+"""SalishSeaCast worker that upload forcing files for NEMO runs.
 
 Upload the forcing files for a nowcast or forecast run to the HPC/cloud
 facility where the run will be executed.
@@ -60,6 +60,7 @@ def main():
         help="Date of the run to upload files for.",
     )
     worker.run(upload_forcing, success, failure)
+    return worker
 
 
 def success(parsed_args):
