@@ -42,9 +42,16 @@ def config(base_config):
                     
                 run:
                     enabled hosts:
-                        arbutus.cloud:
+                        arbutus.cloud-nowcast:
+                            ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
                                 bc dir: /nemoShare/MEOPAR/LiveOcean/
+                        orcinus-nowcast-agrif:
+                            ssh key: SalishSeaNEMO-nowcast_id_rsa
+                        graham-hindcast:
+                            ssh key: SalishSeaNEMO-nowcast_id_rsa
+                        optimum-hindcast:
+                            ssh key: SalishSeaNEMO-nowcast_id_rsa
                 """
             )
         )
@@ -307,11 +314,170 @@ class TestFailure:
 
 
 @pytest.fixture
+def mock_ssh_client(monkeypatch):
+    class MockSSHClient:
+        def close(self):
+            pass
+
+    return MockSSHClient()
+
+
+@pytest.fixture
 def mock_sftp_client(monkeypatch):
     class MockSFTPClient:
-        pass
+        def close(self):
+            pass
 
     return MockSFTPClient()
+
+
+@pytest.mark.parametrize(
+    "run_type, host_name, file_types",
+    (
+        (
+            "nowcast+",
+            "arbutus.cloud-nowcast",
+            ["ssh", "rivers", "weather", "boundary conditions"],
+        ),
+        (
+            "nowcast+",
+            "orcinus-nowcast-agrif",
+            ["ssh", "rivers", "weather", "boundary conditions"],
+        ),
+        (
+            "nowcast+",
+            "optimum-hindcast",
+            ["ssh", "rivers", "weather", "boundary conditions"],
+        ),
+        (
+            "nowcast+",
+            "graham-hindcast",
+            ["ssh", "rivers", "weather", "boundary conditions"],
+        ),
+        ("ssh", "arbutus.cloud-nowcast", ["ssh"]),
+        (
+            "forecast2",
+            "arbutus.cloud-nowcast",
+            ["ssh", "rivers", "weather", "boundary conditions"],
+        ),
+        (
+            "forecast2",
+            "orcinus-nowcast-agrif",
+            ["ssh", "rivers", "weather", "boundary conditions"],
+        ),
+        (
+            "forecast2",
+            "optimum-hindcast",
+            ["ssh", "rivers", "weather", "boundary conditions"],
+        ),
+        (
+            "forecast2",
+            "graham-hindcast",
+            ["ssh", "rivers", "weather", "boundary conditions"],
+        ),
+        ("turbidity", "arbutus.cloud-nowcast", ["turbidity"]),
+        ("turbidity", "orcinus-nowcast-agrif", ["turbidity"]),
+        ("turbidity", "optimum-hindcast", ["turbidity"]),
+        ("turbidity", "graham-hindcast", ["turbidity"]),
+    ),
+)
+class TestChecklist:
+    """Unit tests for checklist returned by upload_forcing() function.
+    """
+
+    @staticmethod
+    @pytest.fixture
+    def mock_sftp(mock_ssh_client, mock_sftp_client, monkeypatch):
+        def sftp(host_name, ssh_key):
+            return mock_ssh_client, mock_sftp_client
+
+        monkeypatch.setattr(upload_forcing.ssh_sftp, "sftp", sftp)
+
+    @staticmethod
+    @pytest.fixture
+    def mock_upload_ssh_files(monkeypatch):
+        def _upload_ssh_files(
+            sftp_client, run_type, run_date, config, host_name, host_config
+        ):
+            pass
+
+        monkeypatch.setattr(upload_forcing, "_upload_ssh_files", _upload_ssh_files)
+
+    @staticmethod
+    @pytest.fixture
+    def mock_upload_fraser_turbidity_file(monkeypatch):
+        def _upload_fraser_turbidity_file(
+            sftp_client, run_date, config, host_name, host_config
+        ):
+            pass
+
+        monkeypatch.setattr(
+            upload_forcing,
+            "_upload_fraser_turbidity_file",
+            _upload_fraser_turbidity_file,
+        )
+
+    @staticmethod
+    @pytest.fixture
+    def mock_upload_river_runoff_files(monkeypatch):
+        def _upload_river_runoff_files(
+            sftp_client, run_date, config, host_name, host_config
+        ):
+            pass
+
+        monkeypatch.setattr(
+            upload_forcing, "_upload_river_runoff_files", _upload_river_runoff_files
+        )
+
+    @staticmethod
+    @pytest.fixture
+    def mock_upload_weather(monkeypatch):
+        def _upload_weather(
+            sftp_client, run_type, run_date, config, host_name, host_config
+        ):
+            pass
+
+        monkeypatch.setattr(upload_forcing, "_upload_weather", _upload_weather)
+
+    @staticmethod
+    @pytest.fixture
+    def mock_upload_live_ocean_files(monkeypatch):
+        def _upload_live_ocean_files(
+            sftp_client, run_type, run_date, config, host_name, host_config
+        ):
+            pass
+
+        monkeypatch.setattr(
+            upload_forcing, "_upload_live_ocean_files", _upload_live_ocean_files
+        )
+
+    def test_checklist(
+        self,
+        run_type,
+        host_name,
+        file_types,
+        mock_sftp,
+        mock_upload_ssh_files,
+        mock_upload_fraser_turbidity_file,
+        mock_upload_river_runoff_files,
+        mock_upload_weather,
+        mock_upload_live_ocean_files,
+        config,
+        monkeypatch,
+    ):
+        parsed_args = SimpleNamespace(
+            host_name=host_name, run_type=run_type, run_date=arrow.get("2020-06-29"),
+        )
+        checklist = upload_forcing.upload_forcing(parsed_args, config)
+        expected = {
+            host_name: {
+                run_type: {
+                    "run date": parsed_args.run_date.format("YYYY-MM-DD"),
+                    "file types": file_types,
+                }
+            }
+        }
+        assert checklist == expected
 
 
 @patch(
@@ -331,7 +497,7 @@ class TestUploadLiveOceanFiles:
         self, m_upload_file, run_type, logging_level, mock_sftp_client, config, caplog
     ):
         run_date = arrow.get("2017-09-03")
-        host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
         caplog.set_level(logging_level)
 
         with patch("nowcast.workers.upload_forcing.Path.symlink_to"):

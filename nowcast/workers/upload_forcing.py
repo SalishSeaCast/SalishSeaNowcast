@@ -90,15 +90,20 @@ def upload_forcing(parsed_args, config, *args):
     )
     host_config = config["run"]["enabled hosts"][host_name]
     ssh_client, sftp_client = ssh_sftp.sftp(host_name, ssh_key)
+    checklist = {
+        host_name: {
+            run_type: {
+                "run date": parsed_args.run_date.format("YYYY-MM-DD"),
+                "file types": [],
+            }
+        }
+    }
     # Neah Bay sea surface height
     _upload_ssh_files(sftp_client, run_type, run_date, config, host_name, host_config)
     if run_type == "ssh":
         sftp_client.close()
         ssh_client.close()
-        checklist = {
-            host_name: f"{parsed_args.run_type} "
-            f'{parsed_args.run_date.format("YYYY-MM-DD")} ssh'
-        }
+        checklist[host_name][run_type]["file types"] = ["ssh"]
         return checklist
     # Rivers turbidity and runoff
     if run_type == "turbidity":
@@ -107,10 +112,7 @@ def upload_forcing(parsed_args, config, *args):
         )
         sftp_client.close()
         ssh_client.close()
-        checklist = {
-            host_name: f"{parsed_args.run_type} "
-            f'{parsed_args.run_date.format("YYYY-MM-DD")} turbidity'
-        }
+        checklist[host_name][run_type]["file types"] = ["turbidity"]
         return checklist
     _upload_river_runoff_files(sftp_client, run_date, config, host_name, host_config)
     # Weather
@@ -121,11 +123,12 @@ def upload_forcing(parsed_args, config, *args):
     )
     sftp_client.close()
     ssh_client.close()
-    checklist = {
-        host_name: f"{parsed_args.run_type} "
-        f'{parsed_args.run_date.format("YYYY-MM-DD")} '
-        f"ssh  rivers  weather  boundary conditions"
-    }
+    checklist[host_name][run_type]["file types"] = [
+        "ssh",
+        "rivers",
+        "weather",
+        "boundary conditions",
+    ]
     return checklist
 
 
