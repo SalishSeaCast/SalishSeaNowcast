@@ -606,8 +606,13 @@ class TestAfterUploadForcing:
             {
                 "enabled hosts": {
                     "arbutus.cloud": {
-                        "run types": "nowcast-agrif",
                         "make forcing links": True,
+                        "run types": {
+                            "nowcast": {},
+                            "forecast": {},
+                            "forecast2": {},
+                            "nowcast-green": {},
+                        },
                     }
                 }
             },
@@ -616,17 +621,17 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 f"success {run_type}",
-                {"arbutus.cloud": f"2016-10-11 {run_type}"},
+                {"arbutus.cloud": {run_type: {"run date": "2020-06-29"}}},
             ),
             config,
             checklist,
         )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
-            args=["arbutus.cloud", run_type],
+            args=["arbutus.cloud", run_type, "--run-date", "2020-06-29"],
             host="localhost",
         )
-        assert expected in workers
+        assert workers == [expected]
 
     @pytest.mark.parametrize("run_type", ["nowcast+", "ssh", "forecast2"])
     def test_success_no_launch_make_forcing_links(
@@ -645,36 +650,48 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 f"success {run_type}",
-                {"graham-hindcast": f"2018-04-03 {run_type}"},
+                {"graham-hindcast": {run_type: {"run date": "2020-06-29"}}},
             ),
             config,
             checklist,
         )
-        expected = NextWorker(
-            "nowcast.workers.make_forcing_links",
-            args=["graham-hindcast", run_type],
-            host="localhost",
-        )
-        assert expected not in workers
+        assert workers == []
 
     def test_success_turbidity_launch_make_forcing_links_nowcast_green(
-        self, config, checklist
+        self, config, checklist, monkeypatch
     ):
+        monkeypatch.setitem(
+            config,
+            "run",
+            {
+                "enabled hosts": {
+                    "arbutus.cloud": {
+                        "make forcing links": True,
+                        "run types": {
+                            "nowcast": {},
+                            "forecast": {},
+                            "forecast2": {},
+                            "nowcast-green": {},
+                        },
+                    }
+                }
+            },
+        )
         workers = next_workers.after_upload_forcing(
             Message(
                 "upload_forcing",
                 "success turbidity",
-                {"arbutus.cloud": "2017-08-10 turbidity"},
+                {"arbutus.cloud": {"turbidity": {"run date": "2020-06-29"}}},
             ),
             config,
             checklist,
         )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
-            args=["arbutus.cloud", "nowcast-green"],
+            args=["arbutus.cloud", "nowcast-green", "--run-date", "2020-06-29"],
             host="localhost",
         )
-        assert expected in workers
+        assert workers == [expected]
 
     def test_success_turbidity_no_launch_make_forcing_links_agrif(
         self, config, checklist, monkeypatch
@@ -695,17 +712,12 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 "success turbidity",
-                {"orcinus": "2018-04-03 turbidity"},
+                {"orcinus": {"turbidity": {"run date": "2020-06-29"}}},
             ),
             config,
             checklist,
         )
-        expected = NextWorker(
-            "nowcast.workers.make_forcing_links",
-            args=["orcinus", "nowcast-agrif"],
-            host="localhost",
-        )
-        assert expected not in workers
+        assert workers == []
 
     def test_success_turbidity_launch_make_forcing_links_agrif(
         self, config, checklist, monkeypatch
@@ -726,17 +738,17 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 "success turbidity",
-                {"orcinus": "2018-04-03 turbidity"},
+                {"orcinus": {"turbidity": {"run date": "2020-06-29"}}},
             ),
             config,
             checklist,
         )
         expected = NextWorker(
             "nowcast.workers.make_forcing_links",
-            args=["orcinus", "nowcast-agrif"],
+            args=["orcinus", "nowcast-agrif", "--run-date", "2020-06-29"],
             host="localhost",
         )
-        assert expected in workers
+        assert workers == [expected]
 
 
 class TestAfterMakeForcingLinks:

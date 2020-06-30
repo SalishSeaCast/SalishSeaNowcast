@@ -471,6 +471,15 @@ def after_upload_forcing(msg, config, checklist):
         "success ssh": [],
         "success turbidity": [],
     }
+    if not msg.type.startswith("success"):
+        return next_workers[msg.type]
+    forcing_run_type = msg.type.split()[1]
+    run_types = {
+        "forecast2": ("forecast2",),
+        "nowcast+": ("nowcast",),
+        "ssh": ("forecast",),
+        "turbidity": ("nowcast-green", "nowcast-agrif"),
+    }[forcing_run_type]
     try:
         host_name = list(msg.payload.keys())[0]
         host_config = config["run"]["enabled hosts"][host_name]
@@ -478,30 +487,24 @@ def after_upload_forcing(msg, config, checklist):
         # Malformed payload - no host name in payload;
         # upload_forcing worker probably crashed
         return []
-    run_types = [
-        # (run_type, make_forcing_links)
-        ("nowcast", "nowcast+"),
-        ("forecast", "ssh"),
-        ("forecast2", "forecast2"),
-        ("turbidity", "nowcast-green"),
-        ("turbidity", "nowcast-agrif"),
-    ]
-    for run_type, links_run_type in run_types:
-        if host_config["make forcing links"]:
-            if run_type == "turbidity" and links_run_type in host_config["run types"]:
-                next_workers[f"success turbidity"] = [
-                    NextWorker(
-                        "nowcast.workers.make_forcing_links",
-                        args=[host_name, links_run_type],
-                    )
-                ]
-            if run_type in config["run types"]:
-                next_workers[f"success {links_run_type}"] = [
-                    NextWorker(
-                        "nowcast.workers.make_forcing_links",
-                        args=[host_name, links_run_type],
-                    )
-                ]
+    if not host_config["make forcing links"]:
+        return []
+    for nemo_run_type in run_types:
+        if nemo_run_type in host_config["run types"]:
+            links_run_type = (
+                nemo_run_type if forcing_run_type == "turbidity" else forcing_run_type
+            )
+            next_workers[f"success {forcing_run_type}"] = [
+                NextWorker(
+                    "nowcast.workers.make_forcing_links",
+                    args=[
+                        host_name,
+                        links_run_type,
+                        "--run-date",
+                        msg.payload[host_name][forcing_run_type]["run date"],
+                    ],
+                )
+            ]
     return next_workers[msg.type]
 
 
