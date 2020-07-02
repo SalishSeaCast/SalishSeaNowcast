@@ -53,6 +53,7 @@ dependencies:
   - python=3.8
   - pyyaml
   - pyzmq
+  - rasterio
   - requests
   - scipy
   - shapely

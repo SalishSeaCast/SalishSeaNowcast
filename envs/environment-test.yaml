@@ -41,6 +41,7 @@ dependencies:
   - pytables
   - pyyaml
   - pyzmq
+  - rasterio
   - requests
   - scipy
   - sentry-sdk
