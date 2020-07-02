@@ -51,6 +51,7 @@ dependencies:
   - pyyaml
   - requests
   - scipy
+  - sentry-sdk
   - shapely
   - verboselogs
   - watchdog
