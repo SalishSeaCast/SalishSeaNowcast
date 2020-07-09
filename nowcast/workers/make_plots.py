@@ -16,12 +16,12 @@
 the web site from run results.
 """
 import datetime
-from glob import glob
 import logging
 import os
-from pathlib import Path
 import shlex
 import subprocess
+from glob import glob
+from pathlib import Path
 
 # **IMPORTANT**: matplotlib must be imported before anything else that uses it
 # because of the matplotlib.use() call below
@@ -1055,7 +1055,7 @@ def _render_figures(
         )
         logger.debug(f"{filename} saved")
         matplotlib.pyplot.close(fig)
-        if fig_save_format is "svg":
+        if fig_save_format == "svg":
             logger.debug(f"starting SVG scouring of {filename}")
             tmpfilename = filename.with_suffix(".scour")
             scour = Path(os.environ["NOWCAST_ENV"], "bin", "scour")
