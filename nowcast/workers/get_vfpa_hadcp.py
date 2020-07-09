@@ -169,7 +169,7 @@ def _make_hour_dataset(csv_dir, utc_start_hr, place):
     )
     ds = _csv_to_dataset(csv_dir / csv_filename, place)
     logger.debug("transformed csv data into xarray.Dataset")
-    ds.assign_coords(time=ds["time"] - pandas.to_timedelta(utc_offset))
+    ds = ds.assign_coords(time=ds["time"] - pandas.to_timedelta(utc_offset))
     ds["time"].attrs["cf_role"] = "timeseries_id"
     ds["time"].attrs["comment"] = "time values are UTC"
     ds.coords["longitude"], ds.coords["latitude"] = place["lon lat"]
