@@ -23,12 +23,11 @@ https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/defa
 """
 import logging
 import os
-
-import numpy
-import pandas
 from pathlib import Path
 
 import arrow
+import numpy
+import pandas
 import xarray
 from moad_tools.places import PLACES
 from nemo_nowcast import NowcastWorker
@@ -170,7 +169,7 @@ def _make_hour_dataset(csv_dir, utc_start_hr, place):
     )
     ds = _csv_to_dataset(csv_dir / csv_filename, place)
     logger.debug("transformed csv data into xarray.Dataset")
-    ds["time"] -= pandas.to_timedelta(utc_offset)
+    ds.assign_coords(time=ds["time"] - pandas.to_timedelta(utc_offset))
     ds["time"].attrs["cf_role"] = "timeseries_id"
     ds["time"].attrs["comment"] = "time values are UTC"
     ds.coords["longitude"], ds.coords["latitude"] = place["lon lat"]
