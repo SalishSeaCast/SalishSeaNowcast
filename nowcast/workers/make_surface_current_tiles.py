@@ -18,22 +18,22 @@ images for the web site from run results.
 The tile specifications and initial code implementation were provided by IOS.
 """
 import datetime
-from glob import glob
 import logging
 import math
 import multiprocessing
 import os
-from pathlib import Path
-from queue import Empty
 import shlex
 import subprocess
+from glob import glob
+from pathlib import Path
+from queue import Empty
 
 import arrow
+import netCDF4
+import pytz
+from PyPDF2 import PdfFileMerger
 from matplotlib.backend_bases import FigureCanvasBase
 from nemo_nowcast import NowcastWorker
-import netCDF4
-from PyPDF2 import PdfFileMerger
-import pytz
 
 from nowcast import lib
 from nowcast.figures.publish import surface_current_tiles
@@ -306,7 +306,9 @@ def _getTimeFileName(sec, units, calendar):
     """
     Constructs UTC timestamp for the figure file name.
     """
-    dt = netCDF4.num2date(sec, units, calendar=calendar)
+    dt = netCDF4.num2date(
+        sec, units, calendar=calendar, only_use_cftime_datetimes=False
+    )
     dt_utc = datetime.datetime.combine(
         dt.date(), dt.time(), pytz.utc
     )  # add timezone to utc time

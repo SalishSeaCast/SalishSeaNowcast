@@ -18,11 +18,11 @@ Produce surface currents tile figures in both website themed and unthemed style.
 
 import datetime
 
-from matplotlib.figure import Figure
 import netCDF4
 import numpy
 import numpy.ma
 import pytz
+from matplotlib.figure import Figure
 from salishsea_tools import viz_tools
 
 import nowcast.figures.website_theme
@@ -144,7 +144,9 @@ def _createTileTitle(sec, units, calendar):
     """
     Constructs the time stamp in both UTC and local time for the figure title
     """
-    dt = netCDF4.num2date(sec, units, calendar=calendar)
+    dt = netCDF4.num2date(
+        sec, units, calendar=calendar, only_use_cftime_datetimes=False
+    )
     dt_utc = datetime.datetime.combine(
         dt.date(), dt.time(), pytz.utc
     )  # add timezone to utc time
