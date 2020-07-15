@@ -2526,41 +2526,111 @@ class TestAfterPingERDDAP:
         )
         assert expected in workers
 
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
-    )
-    def test_success_vfpa_hadcp_launch_make_plots_fvcom_publish(
-        self, model_config, run_type, config, checklist, monkeypatch
+    def test_success_vfpa_hadcp_nowcast_x2_launch_make_plots_fvcom_publish_nowcast_x2(
+        self, config, checklist, monkeypatch
     ):
-        run_date = "2018-10-25"
+        run_date = "2020-07-07"
         monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
         monkeypatch.setitem(
             checklist,
             "FVCOM run",
             {
-                f"{model_config} {run_type}": {
+                "x2 nowcast": {
                     "completed": True,
-                    "model config": model_config,
+                    "model config": "x2",
                     "run date": run_date,
-                }
+                },
+                "r12 nowcast": {"model config": "r12", "run date": run_date,},
             },
         )
         workers = next_workers.after_ping_erddap(
             Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
         )
-        expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=[
-                "fvcom",
-                f"{run_type}-{model_config}",
-                "publish",
-                "--run-date",
-                run_date,
-            ],
-            host="localhost",
+        expected = [
+            NextWorker(
+                "nowcast.workers.make_plots",
+                args=["fvcom", "nowcast-x2", "publish", "--run-date", run_date,],
+                host="localhost",
+            )
+        ]
+        assert workers == expected
+
+    def test_success_vfpa_hadcp_forecast_x2_launch_make_plots_fvcom_publish_nowcast_forecast_x2(
+        self, config, checklist, monkeypatch
+    ):
+        run_date = "2020-07-07"
+        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
+        monkeypatch.setitem(
+            checklist,
+            "FVCOM run",
+            {
+                "x2 nowcast": {
+                    "completed": True,
+                    "model config": "x2",
+                    "run date": run_date,
+                },
+                "x2 forecast": {
+                    "completed": True,
+                    "model config": "x2",
+                    "run date": run_date,
+                },
+                "r12 nowcast": {"model config": "r12", "run date": run_date,},
+            },
         )
-        assert expected in workers
+        workers = next_workers.after_ping_erddap(
+            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
+        )
+        expected = [
+            NextWorker(
+                "nowcast.workers.make_plots",
+                args=["fvcom", "nowcast-x2", "publish", "--run-date", run_date,],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.make_plots",
+                args=["fvcom", "forecast-x2", "publish", "--run-date", run_date,],
+                host="localhost",
+            ),
+        ]
+        assert workers == expected
+
+    def test_success_vfpa_hadcp_nowcast_r12_launch_make_plots_fvcom_publish_nowcast_r12(
+        self, config, checklist, monkeypatch
+    ):
+        run_date = "2020-07-07"
+        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
+        monkeypatch.setitem(
+            checklist,
+            "FVCOM run",
+            {
+                "x2 nowcast": {
+                    "completed": True,
+                    "model config": "x2",
+                    "run date": run_date,
+                },
+                "x2 forecast": {
+                    "completed": True,
+                    "model config": "x2",
+                    "run date": run_date,
+                },
+                "r12 nowcast": {
+                    "completed": True,
+                    "model config": "r12",
+                    "run date": run_date,
+                },
+            },
+        )
+        workers = next_workers.after_ping_erddap(
+            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
+        )
+        expected = [
+            NextWorker(
+                "nowcast.workers.make_plots",
+                args=["fvcom", "nowcast-r12", "publish", "--run-date", run_date,],
+                host="localhost",
+            ),
+        ]
+        assert workers == expected
 
     @pytest.mark.parametrize(
         "model_config, run_type",

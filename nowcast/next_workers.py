@@ -1683,22 +1683,37 @@ def after_ping_erddap(msg, config, checklist):
             return next_workers[msg.type]
         for key in keys:
             model_config, run_type = key.split()
-            if "completed" not in checklist["FVCOM run"][f"{model_config} {run_type}"]:
-                continue
             run_date = checklist["FVCOM run"][f"{model_config} {run_type}"]["run date"]
-            next_workers[msg.type].extend(
-                [
+            if (
+                model_config == "r12"
+                and "completed" in checklist["FVCOM run"]["r12 nowcast"]
+            ):
+                next_workers[msg.type] = [
                     NextWorker(
                         "nowcast.workers.make_plots",
                         args=[
                             "fvcom",
-                            f"{run_type}-{model_config}",
+                            "nowcast-r12",
                             "publish",
                             "--run-date",
                             run_date,
                         ],
                     )
                 ]
+                break
+            if "completed" not in checklist["FVCOM run"][f"{model_config} {run_type}"]:
+                continue
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_plots",
+                    args=[
+                        "fvcom",
+                        f"{run_type}-{model_config}",
+                        "publish",
+                        "--run-date",
+                        run_date,
+                    ],
+                )
             )
     return next_workers[msg.type]
 
