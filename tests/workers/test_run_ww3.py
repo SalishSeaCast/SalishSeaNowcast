@@ -14,32 +14,42 @@
 #  limitations under the License.
 """Unit tests for Salish Sea WaveWatch3 nowcast/forecast run_ww3 worker.
 """
+import subprocess
 import textwrap
 from pathlib import Path
-import subprocess
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import run_ww3
 
 
-@pytest.fixture
-def config(scope="function"):
-    return {
-        "wave forecasts": {
-            "run prep dir": "wwatch3-runs",
-            "wwatch3 exe path": "wwatch3-5.16/exe",
-            "salishsea cmd": "salishsea",
-            "results": {
-                "nowcast": "wwatch3-nowcast",
-                "forecast": "wwatch3-forecast",
-                "forecast2": "wwatch3-forecast2",
-            },
-        }
-    }
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
+    """
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                wave forecasts:
+                    run prep dir: wwatch3-runs
+                    wwatch3 exe path: wwatch3-5.16/exe
+                    salishsea cmd: salishsea
+                    results:
+                        nowcast: wwatch3-nowcast/
+                        forecast: wwatch3-forecast/
+                        forecast2: wwatch3-forecast2/
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.run_ww3.NowcastWorker", spec=True)
