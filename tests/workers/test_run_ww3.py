@@ -90,6 +90,55 @@ class TestMain:
         assert worker.cli.parser._actions[5].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "run_ww3" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["run_ww3"]
+        assert msg_registry["checklist key"] == "WWATCH3 run"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["run_ww3"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success forecast2",
+            "failure forecast2",
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "crash",
+        ]
+
+    @pytest.mark.parametrize(
+        "run_type, expected",
+        (
+            ("nowcast", "/nemoShare/MEOPAR/SalishSea/wwatch3-nowcast/"),
+            ("forecast", "/nemoShare/MEOPAR/SalishSea/wwatch3-forecast/"),
+            ("forecast2", "/nemoShare/MEOPAR/SalishSea/wwatch3-forecast2/"),
+        ),
+    )
+    def test_results(self, run_type, expected, prod_config):
+        results = prod_config["wave forecasts"]["results"]
+        assert results[run_type] == expected
+
+    def test_run_prep_dir(self, prod_config):
+        run_prep_dir = prod_config["wave forecasts"]["run prep dir"]
+        assert run_prep_dir == "/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs"
+
+    def test_wwatch3_exe(self, prod_config):
+        wwatch3_exe_path = prod_config["wave forecasts"]["wwatch3 exe path"]
+        assert wwatch3_exe_path == "/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe"
+
+    def test_salishsea_cmd(self, prod_config):
+        salishsea_cmd = prod_config["wave forecasts"]["salishsea cmd"]
+        assert (
+            salishsea_cmd == "/nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/salishsea"
+        )
+
+
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestSuccess:
     """Unit tests for success() function.
