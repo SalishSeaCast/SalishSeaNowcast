@@ -12,15 +12,15 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea WaveWatch3 nowcast/forecast worker that prepares the temporary
+"""SalishSeaCast WaveWatch3 nowcast/forecast worker that prepares the temporary
 run directory and bash run script for a prelim-forecast, nowcast or forecast
 run on the ONC cloud, and launches the run.
 """
 import logging
 import os
-from pathlib import Path
 import shlex
 import subprocess
+from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
@@ -57,6 +57,7 @@ def main():
         help="Date to execute the run for.",
     )
     worker.run(run_ww3, success, failure)
+    return worker
 
 
 def success(parsed_args):
