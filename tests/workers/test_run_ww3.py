@@ -15,6 +15,7 @@
 """Unit tests for Salish Sea WaveWatch3 nowcast/forecast run_ww3 worker.
 """
 import logging
+import stat
 import subprocess
 import textwrap
 from pathlib import Path
@@ -29,21 +30,28 @@ from nowcast.workers import run_ww3
 
 
 @pytest.fixture()
-def config(base_config):
+def config(base_config, tmp_path):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
     """
+    run_prep_dir = tmp_path / "wwatch3-runs"
+    run_prep_dir.mkdir()
+    nowcast_results_dir = tmp_path / "wwatch3-nowcast"
+    nowcast_results_dir.mkdir()
+    forecast_results_dir = tmp_path / "wwatch3-forecast"
+    forecast_results_dir.mkdir()
+
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
             textwrap.dedent(
-                """\
+                f"""\
                 wave forecasts:
-                    run prep dir: wwatch3-runs
+                    run prep dir: {run_prep_dir}
                     wwatch3 exe path: wwatch3-5.16/exe
                     salishsea cmd: salishsea
                     results:
-                        nowcast: wwatch3-nowcast/
-                        forecast: wwatch3-forecast/
+                        nowcast: {nowcast_results_dir}
+                        forecast: {forecast_results_dir}
                         forecast2: wwatch3-forecast2/
                 """
             )
@@ -51,6 +59,14 @@ def config(base_config):
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_
+
+
+@pytest.fixture
+def mock_now(monkeypatch):
+    def now():
+        return arrow.get("2020-07-30 14:20:43.123456-0700")
+
+    monkeypatch.setattr(run_ww3.arrow, "now", now)
 
 
 @pytest.fixture
@@ -230,23 +246,17 @@ class TestBuildTmpRunDir:
 
     @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     @patch("nowcast.workers.run_ww3._write_ww3_input_files", autospec=True)
-    @patch("nowcast.workers.run_ww3._create_symlinks", autospec=True)
-    @patch("nowcast.workers.run_ww3._make_run_dir", autospec=True)
     def test_run_dir_path(
-        self,
-        m_make_run_dir,
-        m_create_symlinks,
-        m_write_ww3_input_files,
-        run_type,
-        config,
+        self, m_write_ww3_input_files, run_type, mock_now, config,
     ):
-        m_make_run_dir.return_value = Path(
-            "wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6"
-        )
         run_dir_path = run_ww3._build_tmp_run_dir(
             arrow.get("2017-03-24"), run_type, config
         )
-        assert run_dir_path == Path("wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6")
+
+        run_prep_dir = Path(config["wave forecasts"]["run prep dir"])
+        assert (
+            run_dir_path == run_prep_dir / f"{run_type}_2020-07-30T142043.123456-0700"
+        )
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
@@ -254,15 +264,77 @@ class TestMakeRunDir:
     """Unit test for _make_run_dir() function.
     """
 
-    @patch("nowcast.workers.run_ww3.Path.mkdir")
-    @patch("nowcast.workers.run_ww3.arrow.now")
-    def test_make_run_dir(self, m_now, m_mkdir, run_type):
-        m_now.return_value = "2018-09-18T17:40:42.123456Z"
-        run_dir_path = run_ww3._make_run_dir(run_type, Path("/wwatch3-runs"))
-        m_mkdir.assert_called_once_with(mode=0o775)
-        assert run_dir_path == Path(
-            f"/wwatch3-runs/{run_type}_2018-09-18T17:40:42.123456Z"
+    def test_make_run_dir(self, run_type, mock_now, config):
+        run_prep_dir = Path(config["wave forecasts"]["run prep dir"])
+
+        run_dir_path = run_ww3._make_run_dir(run_type, run_prep_dir)
+
+        assert (
+            run_dir_path == run_prep_dir / f"{run_type}_2020-07-30T142043.123456-0700"
         )
+        assert stat.S_IMODE(run_prep_dir.stat().st_mode) == 0o775
+
+
+class TestCreateSymlinks:
+    """Unit tests for _create_symlinks() function.
+    """
+
+    @pytest.mark.parametrize("run_type", ("forecast2", "nowcast", "forecast"))
+    def test_mod_def_wind_current(self, run_type, config):
+        run_date = arrow.get("2020-07-30")
+        run_prep_path = Path(config["wave forecasts"]["run prep dir"])
+        mod_def_ww3_file = run_prep_path / "mod_def.ww3"
+        mod_def_ww3_file.write_bytes(b"")
+        wind_dir = run_prep_path / "wind"
+        wind_dir.mkdir()
+        current_dir = run_prep_path / "current"
+        current_dir.mkdir()
+        run_dir_path = run_prep_path / "nowcast_2020-07-30T142043.123456-0700"
+        run_dir_path.mkdir()
+
+        run_ww3._create_symlinks(
+            run_date, run_type, run_prep_path, run_dir_path, config
+        )
+
+        assert (run_dir_path / "mod_def.ww3").is_symlink()
+        assert (run_dir_path / "mod_def.ww3").resolve() == mod_def_ww3_file
+        assert (run_dir_path / "wind").is_symlink()
+        assert (run_dir_path / "wind").resolve() == wind_dir
+        assert (run_dir_path / "current").is_symlink()
+        assert (run_dir_path / "current").resolve() == current_dir
+
+    @pytest.mark.parametrize(
+        "run_type, restart_from, restart_date",
+        (
+            ("nowcast", "nowcast", "29jul20"),
+            ("forecast", "nowcast", "30jul20"),
+            ("forecast2", "forecast", "29jul20"),
+        ),
+    )
+    def test_restart(self, run_type, restart_from, restart_date, config):
+        run_date = arrow.get("2020-07-30")
+        run_prep_path = Path(config["wave forecasts"]["run prep dir"])
+        mod_def_ww3_file = run_prep_path / "mod_def.ww3"
+        mod_def_ww3_file.write_bytes(b"")
+        wind_dir = run_prep_path / "wind"
+        wind_dir.mkdir()
+        current_dir = run_prep_path / "current"
+        current_dir.mkdir()
+        prev_run_path = (
+            Path(config["wave forecasts"]["results"][restart_from]) / restart_date
+        )
+        prev_run_path.mkdir()
+        restart_file = prev_run_path / "restart001.ww3"
+        restart_file.write_bytes(b"")
+        run_dir_path = run_prep_path / "nowcast_2020-07-30T142043.123456-0700"
+        run_dir_path.mkdir()
+
+        run_ww3._create_symlinks(
+            run_date, run_type, run_prep_path, run_dir_path, config
+        )
+
+        assert (run_dir_path / "restart.ww3").is_symlink()
+        assert (run_dir_path / "restart.ww3").resolve() == restart_file
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])

@@ -161,10 +161,11 @@ def _create_symlinks(run_date, run_type, run_prep_path, run_dir_path, config):
     """
     for target in ("mod_def.ww3", "wind", "current"):
         (run_dir_path / target).symlink_to(run_prep_path / target)
-    results_path = Path(config["wave forecasts"]["results"]["nowcast"])
-    restart_date = run_date.shift(days=-1) if run_type == "nowcast" else run_date
+    restart_from = "forecast" if run_type == "forecast2" else "nowcast"
+    restart_path = Path(config["wave forecasts"]["results"][restart_from])
+    restart_date = run_date if run_type == "forecast" else run_date.shift(days=-1)
     ddmmmyy = restart_date.format("DDMMMYY").lower()
-    prev_run_path = results_path / ddmmmyy
+    prev_run_path = restart_path / ddmmmyy
     (run_dir_path / "restart.ww3").symlink_to(prev_run_path / "restart001.ww3")
 
 
