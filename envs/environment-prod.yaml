@@ -31,6 +31,7 @@ dependencies:
   - cmocean
   - dask
   - docutils
+  - geopandas
   - gitpython
   - gsw
   - lxml
