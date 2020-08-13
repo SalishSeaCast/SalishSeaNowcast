@@ -27,6 +27,7 @@ dependencies:
   - basemap
   - beautifulsoup4
   - bottleneck
+  - cartopy
   - cliff
   - cmocean
   - coloredlogs
