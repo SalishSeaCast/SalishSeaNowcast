@@ -57,6 +57,7 @@ dependencies:
   - rasterio
   - requests
   - scipy
+  - sentry-sdk
   - shapely
   - supervisor
   - verboselogs
