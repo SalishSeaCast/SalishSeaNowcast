@@ -91,11 +91,11 @@ def make_figure(
     _plot_surface_fields(axs, plot_data, grids, theme)
 
     time = plot_data.bs_temperature.time_counter
-    year = numpy.asscalar(time.dt.year.values)
-    month = numpy.asscalar(time.dt.month.values)
-    day = numpy.asscalar(time.dt.day.values)
-    hour = numpy.asscalar(time.dt.hour.values)
-    minute = numpy.asscalar(time.dt.minute.values)
+    year = time.dt.year.values.item()
+    month = time.dt.month.values.item()
+    day = time.dt.day.values.item()
+    hour = time.dt.hour.values.item()
+    minute = time.dt.minute.values.item()
     fig.suptitle(
         f"{year}-{month:02d}-{day:02d} {hour:02d}:{minute:02d} {plot_data.tz_name}",
         color=theme.COLOURS["text"]["figure title"],
