@@ -18,8 +18,8 @@ cloud facility to archival storage.
 """
 import logging
 import os
-from pathlib import Path
 import shlex
+from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker
@@ -121,7 +121,7 @@ def download_fvcom_results(parsed_args, config, *args):
     results_archive_dir = dest / results_dir
     lib.fix_perms(
         dest / results_dir,
-        mode=lib.FilePerms(user="rwx", group="rwx", other="rx"),
+        mode=int(lib.FilePerms(user="rwx", group="rwx", other="rx")),
         grp_name=config["file group"],
     )
     for filepath in results_archive_dir.glob("*"):

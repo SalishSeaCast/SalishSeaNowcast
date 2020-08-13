@@ -16,21 +16,21 @@
 prepares the temporary run directory and bash run script for a nowcast or
 forecast run on the ONC cloud, and launches the run.
 """
-from datetime import timedelta
 import logging
 import os
-from pathlib import Path
 import shlex
 import shutil
 import subprocess
 import tempfile
 import textwrap
+from datetime import timedelta
+from pathlib import Path
 
 import arrow
 import f90nml
 import fvcom_cmd.api
-from nemo_nowcast import NowcastWorker
 import yaml
+from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
 
@@ -436,7 +436,9 @@ def _create_run_script(
     run_script_path = tmp_run_dir / "VHFR_FVCOM.sh"
     with run_script_path.open("wt") as f:
         f.write(script)
-    lib.fix_perms(run_script_path, lib.FilePerms(user="rwx", group="rwx", other="r"))
+    lib.fix_perms(
+        run_script_path, mode=int(lib.FilePerms(user="rwx", group="rwx", other="r"))
+    )
     logger.debug(f"{run_type}: run script: {run_script_path}")
     return run_script_path
 

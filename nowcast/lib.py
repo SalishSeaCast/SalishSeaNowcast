@@ -81,7 +81,9 @@ def configure_logging(config, logger, debug, email=True):
         logger.addHandler(email)
 
 
-def fix_perms(path, mode=FilePerms(user="rw", group="rw", other="r"), grp_name=None):
+def fix_perms(
+    path, mode=int(FilePerms(user="rw", group="rw", other="r")), grp_name=None
+):
     """Try to set the permissions and group ownership of the file
     or directory at path.
 
@@ -97,7 +99,7 @@ def fix_perms(path, mode=FilePerms(user="rw", group="rw", other="r"), grp_name=N
     :type path: :py:class:`pathlib.Path` or str
 
     :arg mode: Permissions to set for the path.
-    :type mode: :py:class:`nemo_nowcast.fileutils.FilePerms` or int
+    :type mode: int
 
     :arg grp_name: Group name to change the path ownership to.
                    Defaults to None meaning do nothing.
@@ -117,7 +119,7 @@ def fix_perms(path, mode=FilePerms(user="rw", group="rw", other="r"), grp_name=N
 def mkdir(
     path,
     logger,
-    mode=FilePerms(user="rwx", group="rwx", other="rx"),
+    mode=int(FilePerms(user="rwx", group="rwx", other="rx")),
     grp_name=None,
     exist_ok=True,
 ):
@@ -138,7 +140,7 @@ def mkdir(
     :type logger: :class:`logging.Logger`
 
     :arg mode: Permissions to set for the directory.
-    :type mode: :py:class:`nemo_nowcast.fileutils.FilePerms` or int
+    :type mode: int
 
     :arg grp_name: Group name to change the directory's ownership to.
                    Defaults to None meaning that the directory's group

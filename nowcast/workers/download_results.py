@@ -18,8 +18,8 @@ on an HPC/cloud facility to archival storage.
 import contextlib
 import logging
 import os
-from pathlib import Path
 import shlex
+from pathlib import Path
 
 import arrow
 from nemo_nowcast import NowcastWorker, WorkerError
@@ -128,7 +128,7 @@ def _tidy_localhost(run_type, dest, results_dir, config):
             filepath.unlink()
     lib.fix_perms(
         results_archive_dir,
-        mode=lib.FilePerms(user="rwx", group="rwx", other="rx"),
+        mode=int(lib.FilePerms(user="rwx", group="rwx", other="rx")),
         grp_name=config["file group"],
     )
     for filepath in results_archive_dir.glob("*"):

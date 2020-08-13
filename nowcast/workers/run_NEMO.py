@@ -394,7 +394,7 @@ def _create_run_script(
     with run_script_filepath.open("wt") as f:
         f.write(script)
     lib.fix_perms(
-        run_script_filepath, lib.FilePerms(user="rwx", group="rwx", other="r")
+        run_script_filepath, mode=int(lib.FilePerms(user="rwx", group="rwx", other="r"))
     )
     logger.debug(f"{run_type}: run script: {run_script_filepath}")
     return run_script_filepath

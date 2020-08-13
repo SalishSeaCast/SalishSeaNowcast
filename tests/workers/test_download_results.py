@@ -24,6 +24,8 @@ from unittest.mock import patch
 import arrow
 import nemo_nowcast
 import pytest
+
+from nowcast import lib
 from nowcast.workers import download_results
 
 
@@ -527,9 +529,8 @@ class TestDownloadResults:
             ("nowcast-agrif", "orcinus-nowcast-agrif"),
         ],
     )
-    @patch("nowcast.workers.download_results.lib.FilePerms", autospec=True)
     def test_results_dir_fix_perms(
-        self, m_file_perms, m_fix_perms, m_run_in_subproc, run_type, host_name, config
+        self, m_fix_perms, m_run_in_subproc, run_type, host_name, config
     ):
         parsed_args = SimpleNamespace(
             host_name=host_name,
@@ -542,7 +543,7 @@ class TestDownloadResults:
             Path("SalishSea", run_type, "22may18"),
         )
         assert m_fix_perms.call_args_list[0][1] == {
-            "mode": m_file_perms(user="rwx", group="rwx", other="rx"),
+            "mode": int(lib.FilePerms(user="rwx", group="rwx", other="rx")),
             "grp_name": "allen",
         }
 

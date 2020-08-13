@@ -23,8 +23,8 @@ import os
 import traceback
 
 import arrow
-from nemo_nowcast import WorkerError
 import zmq
+from nemo_nowcast import WorkerError
 
 from nowcast import lib, ssh_sftp
 
@@ -165,7 +165,9 @@ def upload_all_files(host_name, run_date, config):
 
 def upload_file(sftp_client, host_name, localpath, remotepath):
     sftp_client.put(localpath, remotepath)
-    sftp_client.chmod(remotepath, int(lib.FilePerms(user="rw", group="rw", other="r")))
+    sftp_client.chmod(
+        remotepath, mode=int(lib.FilePerms(user="rw", group="rw", other="r"))
+    )
     logger.debug(
         "{local} uploaded to {host} at {remote}".format(
             local=localpath, host=host_name, remote=remotepath
