@@ -13,7 +13,6 @@ channels:
 
 dependencies:
   - arrow
-  - basemap
   - beautifulsoup4
   - bottleneck
   - cartopy
