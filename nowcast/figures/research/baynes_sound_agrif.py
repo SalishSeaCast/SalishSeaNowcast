@@ -26,8 +26,8 @@ https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/t
 """
 from types import SimpleNamespace
 
+import cartopy
 import cmocean
-from mpl_toolkits.basemap import Basemap
 import matplotlib.pyplot as plt
 import numpy
 import xarray
@@ -87,8 +87,9 @@ def make_figure(
     plot_data = _prep_plot_data(
         ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url, bs_grid_path
     )
-    fig, axs, grids = _prep_fig_axes(figsize, plot_data, theme)
-    _plot_surface_fields(axs, plot_data, grids, theme)
+    fig, axs = _prep_fig_axes(figsize, plot_data, theme)
+    _plot_surface_fields(axs, plot_data, theme)
+    _axes_labels(axs, theme)
 
     time = plot_data.bs_temperature.time_counter
     year = time.dt.year.values.item()
@@ -102,6 +103,7 @@ def make_figure(
         fontproperties=theme.FONTS["figure title"],
         fontsize=theme.FONTS["figure title"].get_size(),
     )
+    fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     return fig
 
 
@@ -109,13 +111,14 @@ def _prep_plot_data(
     ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url, bs_grid_path
 ):
     """
-    :param :py:class:`pathlib.Path` ss_tracers_path:
-    :param :py:class:`pathlib.Path` bs_phys_path:
-    :param :py:class:`pathlib.Path` bs_bio_path:
-    :param :py:class:`arrow.Arrow` run_date:
-    :param str ss_grid_url:
-    :param :py:class:`pathlib.Path` bs_grid_path:
-    :returns: :py:class:`types.SimpleNamespace`
+    :type ss_tracers_path: :py:class:`pathlib.Path`
+    :type bs_phys_path: :py:class:`pathlib.Path`
+    :type bs_bio_path: :py:class:`pathlib.Path`
+    :type run_date: :py:class:`arrow.Arrow`
+    :type ss_grid_url: str
+    :type bs_grid_path: :py:class:`pathlib.Path`
+
+    :rtype: :py:class:`types.SimpleNamespace`
     """
     SS_BAYNES_SOUND_X, SS_BAYNES_SOUND_Y = slice(112, 166), slice(550, 699)
     ss_grid = xarray.open_dataset(ss_grid_url, mask_and_scale=False).sel(
@@ -161,10 +164,11 @@ def _prep_plot_data(
 
 def _get_data_array(ds_var, water_mask, run_date):
     """
-    :param :py:class:`xarray.DataArray` ds_var:
-    :param :py:class:`xarray.DataArray` water_mask:
-    :param :py:class:`arrow.Arrow` run_date:
-    :returns: :py:class:`xarray.DataArray`
+    :type ds_var: :py:class:`xarray.DataArray`
+    :type water_mask: :py:class:`xarray.DataArray`
+    :type run_date: :py:class:`arrow.Arrow`
+
+    :rtype: :py:class:`xarray.DataArray`
     """
     try:
         return (
@@ -182,69 +186,29 @@ def _get_data_array(ds_var, water_mask, run_date):
 
 def _prep_fig_axes(figsize, plot_data, theme):
     """
-    :param 2-tuple figsize:
-    :param :py:class:`types.SimpleNamespace` plot_data:
-    :param :py:mod:`nowcast.figures.website_theme` theme:
-    :returns: :py:class:`matplotlib.figure.Figure`,
-              4-tuple of :py:class:`matplotlib.axes.Axes`,
-              `types.SimpleNamespace`
+    :type figsize: 2-tuple
+    :type plot_data: :py:class:`types.SimpleNamespace`
+    :type theme: :py:mod:`nowcast.figures.website_theme`
+
+    :rtype: :py:class:`matplotlib.figure.Figure`,
+            4-tuple of :py:class:`matplotlib.axes.Axes`
     """
+    rotated_crs = cartopy.crs.RotatedPole(pole_longitude=120.0, pole_latitude=63.75)
     fig, axs = plt.subplots(
-        1, 4, figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"]
+        1,
+        4,
+        figsize=figsize,
+        facecolor=theme.COLOURS["figure"]["facecolor"],
+        subplot_kw={"projection": rotated_crs, "facecolor": theme.COLOURS["dark land"]},
     )
-    map_params = SimpleNamespace(
-        ll_lon=-124.68,
-        ur_lon=-124.86,
-        ll_lat=49.25,
-        ur_lat=49.925,
-        lon_0_offset=37.9,
-        meridians=numpy.arange(-125.1, -124.3, 0.1),
-        parallels=numpy.arange(49.2, 50, 0.1),
-    )
-    central_lon = (
-        (map_params.ur_lon - map_params.ll_lon) / 2
-        + map_params.ll_lon
-        + map_params.lon_0_offset
-    )
-    central_lat = (map_params.ur_lat - map_params.ll_lat) / 2 + map_params.ll_lat
-    for ax in axs:
-        m = Basemap(
-            ax=ax,
-            projection="lcc",
-            lon_0=central_lon,
-            lat_0=central_lat,
-            llcrnrlon=map_params.ll_lon,
-            urcrnrlon=map_params.ur_lon,
-            llcrnrlat=map_params.ll_lat,
-            urcrnrlat=map_params.ur_lat,
-        )
-        # lon/lat grid
-        m.drawmeridians(
-            map_params.meridians,
-            labels=(False, False, False, True),
-            textcolor=theme.COLOURS["text"]["axis"],
-            fontproperties=theme.FONTS["axis small"],
-        )
-        m.drawparallels(
-            map_params.parallels,
-            labels=(True, False, False, False),
-            textcolor=theme.COLOURS["text"]["axis"],
-            fontproperties=theme.FONTS["axis small"],
-        )
-    ss_x, ss_y = m(
-        plot_data.ss_grid.longitude.values, plot_data.ss_grid.latitude.values
-    )
-    bs_x, bs_y = m(plot_data.bs_grid.nav_lon.values, plot_data.bs_grid.nav_lat.values)
-    grids = SimpleNamespace(ss_x=ss_x, ss_y=ss_y, bs_x=bs_x, bs_y=bs_y)
-    return fig, axs, grids
+    return fig, axs
 
 
-def _plot_surface_fields(axs, plot_data, grids, theme):
+def _plot_surface_fields(axs, plot_data, theme):
     """
-    :param 4-tuple of :py:class:`matplotlib.axes.Axes` axs:
-    :param :py:class:`types.SimpleNamespace` plot_data:
-    :param `types.SimpleNamespace` grids:
-    :param :py:mod:`nowcast.figures.website_theme` theme:
+    :type axs: 4-tuple of :py:class:`matplotlib.axes.Axes`
+    :type plot_data: :py:class:`types.SimpleNamespace`
+    :type theme: :py:mod:`nowcast.figures.website_theme`
     """
     vars = [
         (plot_data.ss_temperature, plot_data.bs_temperature, cmocean.cm.thermal),
@@ -254,30 +218,46 @@ def _plot_surface_fields(axs, plot_data, grids, theme):
     ]
     for i, (ss_var, bs_var, cmap) in enumerate(vars):
         _plot_surface_field(
-            axs[i], ss_var, bs_var, cmap, grids, plot_data.bs_grid.Bathymetry, theme
+            axs[i], ss_var, bs_var, cmap, plot_data.ss_grid, plot_data.bs_grid, theme
         )
 
 
-def _plot_surface_field(ax, ss_var, bs_var, cmap, grids, bs_bathy, theme):
+def _plot_surface_field(ax, ss_var, bs_var, cmap, ss_grid, bs_grid, theme):
     """
-    :param :py:class:`matplotlib.axes.Axes` ax:
-    :param :py:class:`xarray.DataArray` ss_var:
-    :param :py:class:`xarray.DataArray` bs_var:
-    :param :py:class:`matplotlib.colors.ListedColormap` cmap:
-    :param `types.SimpleNamespace` grids:
-    :param :py:class:`xarray.DataArray` bs_bathy:
-    :param :py:mod:`nowcast.figures.website_theme` theme:
+    :type ax: :py:class:`matplotlib.axes.Axes`
+    :type ss_var: :py:class:`xarray.DataArray`
+    :type bs_var: :py:class:`xarray.DataArray`
+    :type cmap: :py:class:`matplotlib.colors.ListedColormap`
+    :type ss_grid: :py:class:`xarray.DataArray`
+    :type bs_grid: :py:class:`xarray.DataArray`
+    :type theme: :py:mod:`nowcast.figures.website_theme`
     """
-    cmap = plt.get_cmap(cmap)
+    plain_crs = cartopy.crs.PlateCarree()
     clevels = numpy.linspace(
         numpy.floor(bs_var.where(bs_var > 0).min()),
         numpy.ceil(bs_var.where(bs_var > 0).max()),
         20,
     )
-    ax.contourf(grids.ss_x, grids.ss_y, ss_var, cmap=cmap, levels=clevels, extend="max")
-    contour_set = ax.contourf(
-        grids.bs_x, grids.bs_y, bs_var, cmap=cmap, levels=clevels, extend="max"
+    ax.contourf(
+        ss_grid.longitude,
+        ss_grid.latitude,
+        ss_var,
+        transform=plain_crs,
+        cmap=cmap,
+        levels=clevels,
+        extend="max",
     )
+    map_extent = ax.get_extent()
+    contour_set = ax.contourf(
+        bs_grid.nav_lon,
+        bs_grid.nav_lat,
+        bs_var,
+        transform=plain_crs,
+        cmap=cmap,
+        levels=clevels,
+        extend="max",
+    )
+    ax.set_extent(map_extent, crs=ax.projection)
     cbar = plt.colorbar(contour_set, ax=ax)
     cbar.ax.axes.tick_params(labelcolor=theme.COLOURS["cbar"]["tick labels"])
     cbar.set_label(
@@ -286,12 +266,29 @@ def _plot_surface_field(ax, ss_var, bs_var, cmap, grids, bs_bathy, theme):
         fontproperties=theme.FONTS["axis"],
     )
     isobath = ax.contour(
-        grids.bs_x,
-        grids.bs_y,
-        bs_bathy,
+        bs_grid.nav_lon,
+        bs_grid.nav_lat,
+        bs_grid.Bathymetry,
         (25,),
+        transform=plain_crs,
         colors=theme.COLOURS["contour lines"]["Baynes Sound entrance"],
     )
-    plt.clabel(isobath, fmt={isobath.levels[0]: f"{isobath.levels[0]:.0f} m"})
-    ax.set_facecolor(theme.COLOURS["dark land"])
-    theme.set_axis_colors(ax)
+    ax.clabel(isobath, fmt={isobath.levels[0]: f"{isobath.levels[0]:.0f} m"})
+
+
+def _axes_labels(axs, theme):
+    """
+    :type axs: 4-tuple of :py:class:`matplotlib.axes.Axes`
+    :type theme: :py:mod:`nowcast.figures.website_theme`
+    """
+    for ax in axs:
+        glines = ax.gridlines(draw_labels=True, auto_inline=False)
+        glines.right_labels, glines.top_labels = False, False
+        glines.xlabel_style = {
+            "color": theme.COLOURS["text"]["axis"],
+            "fontproperties": theme.FONTS["axis small"],
+        }
+        glines.ylabel_style = {
+            "color": theme.COLOURS["text"]["axis"],
+            "fontproperties": theme.FONTS["axis small"],
+        }
