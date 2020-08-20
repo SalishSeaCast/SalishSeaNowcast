@@ -15,6 +15,7 @@
 """Unit tests for Salish Sea WaveWatch3 nowcast/forecast run_ww3 worker.
 """
 import logging
+import os
 import stat
 import subprocess
 import textwrap
@@ -264,6 +265,10 @@ class TestMakeRunDir:
     """Unit test for _make_run_dir() function.
     """
 
+    @pytest.mark.skipif(
+        "GITHUB_ACTIONS" in os.environ,
+        reason="Actions file system seems to disallow 0o775 mode for directories",
+    )
     def test_make_run_dir(self, run_type, mock_now, config):
         run_prep_dir = Path(config["wave forecasts"]["run prep dir"])
 
