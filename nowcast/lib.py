@@ -82,7 +82,7 @@ def configure_logging(config, logger, debug, email=True):
 
 
 def fix_perms(
-    path, mode=int(FilePerms(user="rw", group="rw", other="r")), grp_name=None
+    path, mode=FilePerms(user="rw", group="rw", other="r").__int__(), grp_name=None
 ):
     """Try to set the permissions and group ownership of the file
     or directory at path.
@@ -119,7 +119,7 @@ def fix_perms(
 def mkdir(
     path,
     logger,
-    mode=int(FilePerms(user="rwx", group="rwx", other="rx")),
+    mode=FilePerms(user="rwx", group="rwx", other="rx").__int__(),
     grp_name=None,
     exist_ok=True,
 ):
