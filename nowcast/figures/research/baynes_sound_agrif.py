@@ -103,6 +103,7 @@ def make_figure(
         fontproperties=theme.FONTS["figure title"],
         fontsize=theme.FONTS["figure title"].get_size(),
     )
+    fig.canvas.draw()
     fig.tight_layout(rect=[0, 0.03, 1, 0.95])
     return fig
 
