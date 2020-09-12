@@ -795,7 +795,7 @@ The Python packages that the system depends on are installed in a conda environm
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ conda update conda
+    $ conda update -n base -c defaults conda
     $ conda env create \
         --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
         -f SalishSeaNowcast/envs/environment-prod.yaml

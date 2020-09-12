@@ -98,7 +98,7 @@ For the :kbd:`SalishSeaCast` automation system:
 .. code-block:: bash
 
     $ cd /SalishSeaCast/
-    $ conda update conda
+    $ conda update -n base -c defaults conda
     $ conda env create \
         --prefix /SalishSeaCast/nowcast-env \
         -f SalishSeaNowcast/envs/environment-prod.yaml
@@ -119,7 +119,7 @@ For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files 
 .. code-block:: bash
 
     $ cd /SalishSeaCast/
-    $ conda update conda
+    $ conda update -n base -c defaults conda
     $ conda create \
         --prefix /SalishSeaCast/sarracenia-env \
         --channel conda-forge \
@@ -135,7 +135,7 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
 .. code-block:: bash
 
     $ cd /SalishSeaCast
-    $ conda update conda
+    $ conda update -n base -c defaults conda
     $ conda env create \
         --prefix /SalishSeaCast/salishsea-site-env \
         -f salishsea-site/env/environment-prod.yaml
