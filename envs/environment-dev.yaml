@@ -95,6 +95,3 @@ dependencies:
     - pytest-randomly
 #      If your machine has enough cores & RAM for distributed testing
 #    - pytest-xdist
-
-    # For exception monitoring
-    - raven
