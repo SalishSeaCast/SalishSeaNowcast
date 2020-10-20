@@ -12,12 +12,13 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Unit tests for Salish Sea NEMO nowcast download_live_ocean worker.
+"""Unit tests for SalishSeaCast download_live_ocean worker.
 """
+import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch, Mock
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -50,61 +51,61 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.download_live_ocean.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(download_live_ocean, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_live_ocean.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("download_live_ocean",)
-        assert "description" in kwargs
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_live_ocean.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_live_ocean.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        download_live_ocean.main()
-        args, kwargs = m_worker().run.call_args
-        expected = (
-            download_live_ocean.download_live_ocean,
-            download_live_ocean.success,
-            download_live_ocean.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = download_live_ocean.main()
+        assert worker.name == "download_live_ocean"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that downloads a daily averaged file from the"
         )
-        assert args == expected
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = download_live_ocean.main()
+        assert worker.cli.parser._actions[3].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[3].type == expected
+        assert worker.cli.parser._actions[3].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[3].help
 
 
-@patch("nowcast.workers.download_live_ocean.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function."""
 
-    def test_success(self, m_logger):
-        parsed_args = SimpleNamespace(run_date=arrow.get("2016-11-24"))
+    def test_success(self, caplog):
+        parsed_args = SimpleNamespace(run_date=arrow.get("2020-10-20"))
+        caplog.set_level(logging.INFO)
+
         msg_type = download_live_ocean.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            "2020-10-20 Live Ocean file for Salish Sea western boundary downloaded"
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.download_live_ocean.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function."""
 
-    def test_failure(self, m_logger):
-        parsed_args = SimpleNamespace(run_date=arrow.get("2016-11-24"))
+    def test_failure(self, caplog):
+        parsed_args = SimpleNamespace(run_date=arrow.get("2020-10-20"))
+        caplog.set_level(logging.CRITICAL)
+
         msg_type = download_live_ocean.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
+            "2020-10-20 Live Ocean file for Salish Sea western boundary download failed"
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == "failure"
 
 
