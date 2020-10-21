@@ -75,6 +75,47 @@ class TestMain:
         assert worker.cli.parser._actions[3].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker.
+    """
+
+    def test_message_registry(self, prod_config):
+        assert "download_live_ocean" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["download_live_ocean"]
+        assert msg_registry["checklist key"] == "Live Ocean products"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["download_live_ocean"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success",
+            "failure",
+            "crash",
+        ]
+
+    def test_download_url(self, prod_config):
+        download_url = prod_config["temperature salinity"]["download"]["url"]
+        assert download_url == "https://pm2.blob.core.windows.net/"
+
+    def test_download_dir_prefix(self, prod_config):
+        download_url = prod_config["temperature salinity"]["download"][
+            "directory prefix"
+        ]
+        assert download_url == "f"
+
+    def test_download_file_name(self, prod_config):
+        download_url = prod_config["temperature salinity"]["download"]["file name"]
+        assert download_url == "low_passed_UBC.nc"
+
+    def test_download_dest_dir(self, prod_config):
+        download_url = prod_config["temperature salinity"]["download"]["dest dir"]
+        assert download_url == "/results/forcing/LiveOcean/downloaded/"
+
+    def test_file_group(self, prod_config):
+        assert "file group" in prod_config
+        assert prod_config["file group"] == "sallen"
+
+
 class TestSuccess:
     """Unit test for success() function."""
 

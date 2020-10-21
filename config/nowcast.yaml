@@ -167,9 +167,9 @@ temperature salinity:
     # Directory name prefix for UW Live Ocean daily averaged forecast fields file
     directory prefix: f
     # Template for hourly UW Live Ocean daily averaged forecast file name
-    file name: 'low_passed_UBC.nc'
+    file name: low_passed_UBC.nc
     # Destination directory for downloaded UW Live Ocean files
-    dest dir: /results/forcing/LiveOcean/downloaded
+    dest dir: /results/forcing/LiveOcean/downloaded/
   # Destination directory for daily temperature and salinity boundary conditions
   # files generated from UW Live Ocean forecast
   bc dir: /results/forcing/LiveOcean/boundary_conditions
