@@ -1055,6 +1055,7 @@ slack notifications:
     # List of workers for which notifications will be sent on completion
     # to #ssc-daily-progress channel
     - collect_weather
+    - download_weather
     - download_live_ocean
     - watch_NEMO
     - watch_NEMO_agrif
