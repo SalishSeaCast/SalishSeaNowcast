@@ -204,7 +204,7 @@ if __name__ == "__main__":
     htmlmap_path = root_dir / "salishsea-site/salishsea_site/templates/salishseacast/"
 
     # Un-themed version of the domain
-    fig_domain, ax_domain = _make_figure_domain(coordf, bathyf, theme=None)
+    fig_domain, _ = _make_figure_domain(coordf, bathyf, theme=None)
     _render_figure(fig_domain, image_path, "pdf")
 
     # Themed version of the domain
