@@ -14,19 +14,18 @@
 #  limitations under the License.
 """Unit tests for Salish Sea nowcast watch_ww3 worker.
 """
+import subprocess
 from types import SimpleNamespace
 from unittest.mock import call, patch, Mock
 
 import pytest
-import subprocess
 
 from nowcast.workers import watch_ww3
 
 
 @patch("nowcast.workers.watch_ww3.NowcastWorker")
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         watch_ww3.main()
@@ -63,8 +62,7 @@ class TestMain:
 )
 @patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
@@ -79,8 +77,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
@@ -92,8 +89,7 @@ class TestFailure:
 @patch("nowcast.workers.watch_ww3.logger", autospec=True)
 @patch("nowcast.workers.watch_ww3.subprocess.run", autospec=True)
 class TestFindRunPid:
-    """Unit test for _find_run_pid() function.
-    """
+    """Unit test for _find_run_pid() function."""
 
     def test_find_run_pid(self, m_run, m_logger):
         run_info = {"run exec cmd": "bash SoGWW3.sh"}
@@ -110,8 +106,7 @@ class TestFindRunPid:
 
 
 class TestPidExists:
-    """Unit tests for _pid_exists() function.
-    """
+    """Unit tests for _pid_exists() function."""
 
     def test_negative_pid(self):
         pid_exists = watch_ww3._pid_exists(-1)

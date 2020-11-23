@@ -27,8 +27,7 @@ from nowcast.workers import run_NEMO_agrif
 
 @patch("nowcast.workers.run_NEMO_agrif.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -78,8 +77,7 @@ class TestMain:
 
 @patch("nowcast.workers.run_NEMO_agrif.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, m_logger):
         parsed_args = SimpleNamespace(
@@ -92,8 +90,7 @@ class TestSuccess:
 
 @patch("nowcast.workers.run_NEMO_agrif.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(
@@ -122,8 +119,7 @@ class TestFailure:
     autospec=True,
 )
 class TestRunNEMO_AGRIF:
-    """Unit test for run_NEMO_agrif() function.
-    """
+    """Unit test for run_NEMO_agrif() function."""
 
     config = {
         "run": {

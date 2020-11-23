@@ -18,8 +18,7 @@ tested in worker unit test modules.
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements that are not worker-related.
-    """
+    """Unit tests for production YAML config file elements that are not worker-related."""
 
     def test_checklist_file(self, prod_config, tmpdir):
         # Config.load() transforms envvars
@@ -34,8 +33,7 @@ class TestConfig:
 
 
 class TestSlackNotifications:
-    """Unit tests for production YAML config file elements related to slack notifications.
-    """
+    """Unit tests for production YAML config file elements related to slack notifications."""
 
     def test_daily_progress_channel_envvar(self, prod_config):
         slack_notifications = prod_config["slack notifications"]
@@ -79,8 +77,7 @@ class TestSlackNotifications:
 
 
 class Test0mqMessageSystem:
-    """Unit tests for production YAML config file elements related to 0mq message system.
-    """
+    """Unit tests for production YAML config file elements related to 0mq message system."""
 
     def test_host(self, prod_config):
         zmq = prod_config["zmq"]

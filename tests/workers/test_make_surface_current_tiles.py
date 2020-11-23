@@ -27,8 +27,7 @@ from nowcast.workers import make_surface_current_tiles
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -68,8 +67,7 @@ run types:
 
 @patch("nowcast.workers.make_surface_current_tiles.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -125,8 +123,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert (
@@ -193,8 +190,7 @@ class TestConfig:
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -210,8 +206,7 @@ class TestSuccess:
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -227,8 +222,7 @@ class TestFailure:
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
 @patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestMakeSurfaceCurrentTiles:
-    """Unit tests for make_surface_current_tiles() function.
-    """
+    """Unit tests for make_surface_current_tiles() function."""
 
     def test_checklist(self, m_logger, run_type, config):
         parsed_args = SimpleNamespace(

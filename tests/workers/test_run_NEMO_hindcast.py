@@ -21,15 +21,15 @@ from unittest.mock import Mock, patch
 
 import arrow
 import nemo_nowcast
-import nowcast.ssh_sftp
 import pytest
+
+import nowcast.ssh_sftp
 from nowcast.workers import run_NEMO_hindcast
 
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -72,8 +72,7 @@ def config(base_config):
 
 @patch("nowcast.workers.run_NEMO_hindcast.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -130,8 +129,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "run_NEMO_hindcast" in prod_config["message registry"]["workers"]
@@ -171,8 +169,7 @@ class TestConfig:
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, m_logger, host_name):
         parsed_args = SimpleNamespace(host_name=host_name)
@@ -184,8 +181,7 @@ class TestSuccess:
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, m_logger, host_name):
         parsed_args = SimpleNamespace(host_name=host_name)
@@ -210,8 +206,7 @@ class TestFailure:
 @patch("nowcast.workers.run_NEMO_hindcast._edit_run_desc", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast._launch_run", autospec=True)
 class TestRunNEMO_Hindcast:
-    """Unit tests for run_NEMO_hindcast() function.
-    """
+    """Unit tests for run_NEMO_hindcast() function."""
 
     def test_checklist_full_month_run_date_in_future(
         self,
@@ -464,8 +459,7 @@ class TestRunNEMO_Hindcast:
 @patch("nowcast.workers.run_NEMO_hindcast._get_qstat_queue_info", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast._get_squeue_queue_info", autospec=True)
 class TestGetPrevRunQueueInfo:
-    """Unit tests for _get_prev_run_queue_info() function.
-    """
+    """Unit tests for _get_prev_run_queue_info() function."""
 
     def test_found_prev_hindcast_job_squeue(
         self, m_squeue_info, m_qstat_info, m_logger, config
@@ -506,8 +500,7 @@ class TestGetPrevRunQueueInfo:
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
 class TestGetQstatQueueInfo:
-    """Unit tests for _get_qstat_queue_info() function.
-    """
+    """Unit tests for _get_qstat_queue_info() function."""
 
     def test_no_job_found_on_queue(self, m_ssh_exec_cmd, m_logger, config):
         m_ssh_exec_cmd.return_value = "\n".join(f"header{i}" for i in range(5))
@@ -539,8 +532,7 @@ class TestGetQstatQueueInfo:
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
 class TestGetSqueueQueueInfo:
-    """Unit tests for _get_squeue_queue_info() function.
-    """
+    """Unit tests for _get_squeue_queue_info() function."""
 
     def test_no_job_found_on_queue(self, m_ssh_exec_cmd, m_logger, config):
         m_ssh_exec_cmd.return_value = "header\n"
@@ -573,8 +565,7 @@ class TestGetSqueueQueueInfo:
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.f90nml.read", autospec=True)
 class TestGetPrevRunNamelistInfo:
-    """Unit test for _get_prev_run_namelist_info() function.
-    """
+    """Unit test for _get_prev_run_namelist_info() function."""
 
     def test_get_prev_run_namelist_info(
         self, m_f90nml_read, m_ssh_exec_cmd, m_logger, host_name, config
@@ -609,8 +600,7 @@ class TestGetPrevRunNamelistInfo:
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.f90nml.patch", autospec=True)
 class TestEditNamelistTime:
-    """Unit tests for _edit_namelist_time() function.
-    """
+    """Unit tests for _edit_namelist_time() function."""
 
     def test_download_namelist_time(self, m_patch, m_logger, host_name, config):
         m_sftp_client = Mock(name="sftp_client")
@@ -743,8 +733,7 @@ class TestEditNamelistTime:
     autospec=True,
 )
 class TestEditRunDesc:
-    """Unit tests for _edit_run_desc() function.
-    """
+    """Unit tests for _edit_run_desc() function."""
 
     def test_download_run_desc_template(
         self, m_safe_load, m_logger, host_name, tmpdir, config
@@ -831,8 +820,7 @@ class TestEditRunDesc:
 @patch("nowcast.workers.run_NEMO_hindcast.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
 class TestLaunchRun:
-    """Unit tests for _launch_run() function.
-    """
+    """Unit tests for _launch_run() function."""
 
     def test_launch_run(
         self, m_ssh_exec_cmd, m_logger, host_name, run_opts, envvars, config

@@ -27,8 +27,7 @@ from nowcast.workers import ping_erddap
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -70,8 +69,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = ping_erddap.main()
@@ -98,8 +96,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "ping_erddap" in prod_config["message registry"]["workers"]
@@ -193,8 +190,7 @@ class TestConfig:
     ],
 )
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, dataset, caplog):
         caplog.set_level(logging.DEBUG)
@@ -223,8 +219,7 @@ class TestSuccess:
     ],
 )
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, dataset, caplog):
         caplog.set_level(logging.DEBUG)
@@ -239,8 +234,7 @@ class TestFailure:
 
 
 class TestPingErddap:
-    """Unit tests for ping_erddap() function.
-    """
+    """Unit tests for ping_erddap() function."""
 
     @pytest.mark.parametrize(
         "dataset",

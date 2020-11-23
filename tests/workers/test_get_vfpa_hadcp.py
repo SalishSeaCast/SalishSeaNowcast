@@ -14,8 +14,8 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast get_vfpa_hadcp worker.
 """
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -28,8 +28,7 @@ from nowcast.workers import get_vfpa_hadcp
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -50,8 +49,7 @@ def config(base_config):
 
 @patch("nowcast.workers.get_vfpa_hadcp.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -85,8 +83,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "get_vfpa_hadcp" in prod_config["message registry"]["workers"]
@@ -108,8 +105,7 @@ class TestConfig:
 
 @patch("nowcast.workers.get_vfpa_hadcp.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, m_logger):
         parsed_args = SimpleNamespace(data_date=arrow.get("2018-10-01"))
@@ -122,8 +118,7 @@ class TestSuccess:
 
 @patch("nowcast.workers.get_vfpa_hadcp.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(data_date=arrow.get("2018-10-01"))
@@ -137,8 +132,7 @@ class TestFailure:
 @patch("nowcast.workers.get_vfpa_hadcp.logger", autospec=True)
 @patch("nowcast.workers.get_vfpa_hadcp._make_hour_dataset", autospec=True)
 class TestGetVFPA_HADCP:
-    """Unit test for get_vfpa_hadcp() function.
-    """
+    """Unit test for get_vfpa_hadcp() function."""
 
     def test_checklist_create(self, m_mk_hr_ds, m_logger, config):
         parsed_args = SimpleNamespace(data_date=arrow.get("2018-10-01"))

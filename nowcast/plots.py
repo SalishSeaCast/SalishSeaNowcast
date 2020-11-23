@@ -7,12 +7,10 @@
 """
 
 import datetime
-from glob import glob
-import logging
 import os
 import sys
+from glob import glob
 
-import arrow
 import matplotlib
 import netCDF4 as nc
 import scipy.io as sio
@@ -56,8 +54,7 @@ def main():
 
 
 def make_research_plots(dmy, model_path, bathy, results_dir, plots_dir, coastline):
-    """Make the plots we wish to look at for research purposes.
-    """
+    """Make the plots we wish to look at for research purposes."""
 
     # get the results
     grid_T_dy = results_dataset("1d", "grid_T", results_dir)
@@ -80,8 +77,7 @@ def make_research_plots(dmy, model_path, bathy, results_dir, plots_dir, coastlin
 
 
 def make_publish_plots(dmy, model_path, bathy, results_dir, plots_dir, coastline):
-    """Make the plots we wish to publish.
-    """
+    """Make the plots we wish to publish."""
 
     # get the results
     grid_T_hr = results_dataset("1h", "grid_T", results_dir)

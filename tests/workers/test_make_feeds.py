@@ -14,27 +14,26 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast make_feeds worker.
 """
-from collections import namedtuple
 import datetime
 import os
-from pathlib import Path
 import textwrap
+from collections import namedtuple
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
 import nemo_nowcast
-from nemo_nowcast import WorkerError
 import numpy as np
 import pytest
+from nemo_nowcast import WorkerError
 
 from nowcast.workers import make_feeds
 
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -67,8 +66,7 @@ def config(base_config):
 
 @patch("nowcast.workers.make_feeds.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -108,8 +106,7 @@ class TestMain:
 @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
 @patch("nowcast.workers.make_feeds.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -123,8 +120,7 @@ class TestSuccess:
 @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
 @patch("nowcast.workers.make_feeds.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -136,8 +132,7 @@ class TestFailure:
 
 
 class TestMakeFeeds:
-    """Unit test for make_feeds() function.
-    """
+    """Unit test for make_feeds() function."""
 
     @patch("nowcast.workers.make_feeds._generate_feed", autospec=True)
     @patch("nowcast.workers.make_feeds._calc_max_ssh_risk", autospec=True)
@@ -156,8 +151,7 @@ class TestMakeFeeds:
 
 
 class TestGenerateFeed:
-    """Unit test for _generate_feed() function.
-    """
+    """Unit test for _generate_feed() function."""
 
     @patch("nowcast.workers.make_feeds.arrow.utcnow", autospec=True)
     def test_generate_feed(self, m_utcnow, config):
@@ -204,8 +198,7 @@ class TestGenerateFeed:
 @patch("nowcast.workers.make_feeds._render_entry_content", return_value=b"", spec=True)
 @patch("nowcast.workers.make_feeds.FeedEntry", autospec=True)
 class TestGenerateFeedEntry:
-    """Unit tests for _generate_feed_entry() function.
-    """
+    """Unit tests for _generate_feed_entry() function."""
 
     def test_title(self, m_fe, m_rec, m_now, config):
         storm_surge_path = config["figures"]["storm surge info portal path"]
@@ -264,8 +257,7 @@ class TestGenerateFeedEntry:
 
 
 class TestBuildTagURI:
-    """Unit test for _build_tag_uri() function.
-    """
+    """Unit test for _build_tag_uri() function."""
 
     def test_build_tag_uri(self, config):
         storm_surge_path = config["figures"]["storm surge info portal path"]
@@ -285,8 +277,7 @@ class TestBuildTagURI:
 
 
 class TestRenderEntryContent:
-    """Unit test for _render_entry_content() function.
-    """
+    """Unit test for _render_entry_content() function."""
 
     @patch("nowcast.workers.make_feeds._calc_wind_4h_avg", autospec=True)
     @patch("nowcast.workers.make_feeds.mako.template.Template", autospec=True)
@@ -309,8 +300,7 @@ class TestRenderEntryContent:
 
 
 class TestCalcMaxSshRisk:
-    """Unit test for _calc_max_ssh_risk() function.
-    """
+    """Unit test for _calc_max_ssh_risk() function."""
 
     @patch("nowcast.workers.make_feeds.stormtools.load_tidal_predictions", spec=True)
     @patch("nowcast.workers.make_feeds._calc_max_ssh", autospec=True)
@@ -342,8 +332,7 @@ class TestCalcMaxSshRisk:
 @patch("nowcast.workers.make_feeds.nc_tools.ssh_timeseries_at_point", autospec=True)
 @patch("nowcast.workers.make_feeds.nowcast.figures.shared.find_ssh_max", autospec=True)
 class TestCalcMaxSsh:
-    """Unit test for _calc_max_ssh() function.
-    """
+    """Unit test for _calc_max_ssh() function."""
 
     def test_calc_max_ssh(self, m_fsshmax, m_sshtapt, m_ncd, m_logger, config):
         ssh_ts = namedtuple("ssh_ts", "ssh, time")

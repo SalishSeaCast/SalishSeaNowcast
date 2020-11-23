@@ -29,8 +29,7 @@ from nowcast.workers import make_live_ocean_files
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -53,8 +52,7 @@ def config(base_config):
 
 @patch("nowcast.workers.make_live_ocean_files.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -89,8 +87,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "make_live_ocean_files" in prod_config["message registry"]["workers"]
@@ -131,8 +128,7 @@ class TestConfig:
 
 
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, caplog):
         run_date = arrow.get("2020-02-15")
@@ -148,8 +144,7 @@ class TestSuccess:
 
 
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, caplog):
         run_date = arrow.get("2020-02-15")
@@ -173,8 +168,7 @@ class TestFailure:
 )
 @patch("nowcast.workers.make_live_ocean_files.create_LiveOcean_TS_BCs", spec=True)
 class TestMakeLiveOceanFiles:
-    """Unit test for make_live_ocean_files() function.
-    """
+    """Unit test for make_live_ocean_files() function."""
 
     def test_checklist(self, m_create_ts, m_set_params, config, caplog):
         run_date = arrow.get("2020-02-15")

@@ -18,14 +18,13 @@ of daily nowcast/forecast runs.
 """
 import datetime
 
-from dateutil import tz
 import matplotlib.pyplot as plt
-from matplotlib import dates as mdates
-from matplotlib.patches import Ellipse
+import netCDF4 as nc
 import numpy as np
 import pandas as pd
-import netCDF4 as nc
-
+from dateutil import tz
+from matplotlib import dates as mdates
+from matplotlib.patches import Ellipse
 from salishsea_tools import nc_tools, tidetools as tt, viz_tools, geo_tools
 from scipy import interpolate as interp
 
@@ -531,7 +530,7 @@ def load_vel(day, grid, source, station, deprange):
 
 ## TODO: Move/rename to figures.comparison as adcp_something module
 def plotADCP(grid_m, grid_o, day, station, profile):
-    """ This function will plots the velocities on a colour map with depth of the
+    """This function will plots the velocities on a colour map with depth of the
     model and observational values.
     data over a whole day at a particular station.
 
@@ -622,7 +621,7 @@ def plotADCP(grid_m, grid_o, day, station, profile):
 
 ## TODO: Move/rename to figures.comparison as adcp_time_avg module
 def plottimeavADCP(grid_m, grid_o, day, station):
-    """ This function plots a comparison of the time averaged velocities of the
+    """This function plots a comparison of the time averaged velocities of the
     model and the observations.
 
     :arg grid_m: The model grid
@@ -686,7 +685,7 @@ def plottimeavADCP(grid_m, grid_o, day, station):
 
 ## TODO: Move/rename to figures.comparison as adcp_depth_avg module
 def plotdepavADCP(grid_m, grid_o, day, station):
-    """ This function plots a comparison of the depth averaged velocities of
+    """This function plots a comparison of the depth averaged velocities of
     the model and the observations.
 
     :arg grid_m: The model grid
@@ -755,7 +754,7 @@ def plotdepavADCP(grid_m, grid_o, day, station):
 def plot_ellipses(
     params, x, y, depth="None", numellips=1, imin=0, imax=398, jmin=0, jmax=898
 ):
-    """ Plot ellipses on a map in the Salish Sea.
+    """Plot ellipses on a map in the Salish Sea.
     :arg params: a array containing the parameters (possibly at different
         depths and or locations).The parameters must have 0 as major axis,
         1 as minor axis and 2 as inclination
@@ -893,7 +892,7 @@ def plot_ellipses(
 def plot_ellipses_area(
     params, depth="None", imin=0, imax=398, jmin=0, jmax=898, figsize=(10, 10)
 ):
-    """ Plot ellipses on a map in the Salish Sea.
+    """Plot ellipses on a map in the Salish Sea.
     :arg params: a array containing the parameters (possibly at different
         depths and or locations).
     :type param: np.array

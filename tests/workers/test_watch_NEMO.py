@@ -14,8 +14,8 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast watch_NEMO worker.
 """
-from pathlib import Path
 import subprocess
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
@@ -28,8 +28,7 @@ from nowcast.workers import watch_NEMO
 
 @patch("nowcast.workers.watch_NEMO.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -79,8 +78,7 @@ class TestMain:
 
 @patch("nowcast.workers.watch_NEMO.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     @pytest.mark.parametrize(
         "run_type, host_name",
@@ -111,8 +109,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.watch_NEMO.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, run_type, host_name):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
@@ -139,8 +136,7 @@ class TestFailure:
     "nowcast.workers.watch_NEMO._confirm_run_success", return_value=True, autospec=True
 )
 class TestWatchNEMO:
-    """Unit tests for watch_NEMO function.
-    """
+    """Unit tests for watch_NEMO function."""
 
     config = {
         "run types": {
@@ -321,8 +317,7 @@ class TestWatchNEMO:
 @patch("nowcast.workers.watch_NEMO.logger", autospec=True)
 @patch("nowcast.workers.watch_NEMO.subprocess.run", autospec=True)
 class TestFindRunPid:
-    """Unit tests for _find_run_pid() function.
-    """
+    """Unit tests for _find_run_pid() function."""
 
     def test_find_qsub_run_pid(self, m_run, m_logger):
         run_info = {"run exec cmd": "qsub SalishSeaNEMO.sh", "run id": "4446.master"}
@@ -352,8 +347,7 @@ class TestFindRunPid:
 
 
 class TestPidExists:
-    """Unit tests for _pid_exists() function.
-    """
+    """Unit tests for _pid_exists() function."""
 
     def test_negative_pid(self):
         pid_exists = watch_NEMO._pid_exists(-1)
@@ -392,8 +386,7 @@ class TestPidExists:
 
 @patch("nowcast.workers.watch_NEMO.logger", autospec=True)
 class TestConfirmRunSuccess:
-    """Unit tests for _confirm_run_success() function.
-    """
+    """Unit tests for _confirm_run_success() function."""
 
     config = {
         "run": {

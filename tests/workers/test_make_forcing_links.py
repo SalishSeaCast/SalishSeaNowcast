@@ -29,8 +29,7 @@ from nowcast.workers import make_forcing_links
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -73,8 +72,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = make_forcing_links.main()
@@ -117,8 +115,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "make_forcing_links" in prod_config["message registry"]["workers"]
@@ -305,8 +302,7 @@ class TestConfig:
     ),
 )
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, run_type, host_name, shared_storage, caplog):
         parsed_args = SimpleNamespace(
@@ -339,8 +335,7 @@ class TestSuccess:
     ),
 )
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, run_type, host_name, shared_storage, caplog):
         parsed_args = SimpleNamespace(
@@ -379,8 +374,7 @@ def mock_sftp_client(monkeypatch):
 
 
 class TestMakeNeahBaySshLinks:
-    """Unit tests for _make_NeahBay_ssh_links() function.
-    """
+    """Unit tests for _make_NeahBay_ssh_links() function."""
 
     @staticmethod
     def prep_files(run_date, host_config, config, tmp_path):
@@ -451,8 +445,7 @@ class TestMakeNeahBaySshLinks:
 
 
 class TestMakeRunoffLinks:
-    """Unit tests for _make_runoff_links() function.
-    """
+    """Unit tests for _make_runoff_links() function."""
 
     @staticmethod
     def prep_files(run_date, host_config, config, tmp_path):
@@ -524,7 +517,10 @@ class TestMakeRunoffLinks:
 
     @pytest.mark.parametrize(
         "run_type, host",
-        (("nowcast-green", "arbutus.cloud"), ("nowcast-agrif", "arbutus.cloud"),),
+        (
+            ("nowcast-green", "arbutus.cloud"),
+            ("nowcast-agrif", "arbutus.cloud"),
+        ),
     )
     def test_runoff_files_links_turbidity(
         self,

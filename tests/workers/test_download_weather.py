@@ -15,8 +15,8 @@
 """Unit tests for Salish Sea NEMO nowcast download_weather worker.
 """
 import logging
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -29,8 +29,7 @@ from nowcast.workers import download_weather
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -95,8 +94,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = download_weather.main()
@@ -132,8 +130,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "download_weather" in prod_config["message registry"]["workers"]
@@ -233,8 +230,7 @@ class TestConfig:
     ),
 )
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(
         self, forecast, resolution, now, forecast_date, caplog, monkeypatch
@@ -286,8 +282,7 @@ class TestSuccess:
     ),
 )
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(
         self, forecast, resolution, now, forecast_date, caplog, monkeypatch
@@ -348,8 +343,7 @@ class TestFailure:
 @patch("nowcast.workers.download_weather.lib.fix_perms", autospec=True)
 @patch("nowcast.workers.download_weather._get_file", autospec=True)
 class TestGetGrib:
-    """Unit tests for get_grib() function.
-    """
+    """Unit tests for get_grib() function."""
 
     def test_make_hour_dirs(
         self,
@@ -482,8 +476,7 @@ class TestGetGrib:
     autospec=True,
 )
 class TestCalcDate:
-    """Unit tests for _calc_date() function.
-    """
+    """Unit tests for _calc_date() function."""
 
     def test_calc_date_06_forecast(self, m_utcnow, parsed_args):
         date = download_weather._calc_date(parsed_args, "06")
@@ -498,8 +491,7 @@ class TestCalcDate:
 @patch("nowcast.workers.download_weather.logger", autospec=True)
 @patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
 class TestMkdirs:
-    """Unit tests for _mkdirs() function.
-    """
+    """Unit tests for _mkdirs() function."""
 
     def test_make_date_dir(self, m_mkdir, m_logger):
         download_weather._mkdirs("/tmp", "20150618", "06", "foo")
@@ -517,8 +509,7 @@ class TestMkdirs:
 @patch("nowcast.workers.download_weather.get_web_data", autospec=True)
 @patch("nowcast.workers.download_weather.os.stat", autospec=True)
 class TestGetFile:
-    """Unit tests for _get_file() function.
-    """
+    """Unit tests for _get_file() function."""
 
     @pytest.mark.parametrize("resolution", ("1 km", "2.5 km"))
     def test_get_web_data(self, m_stat, m_get_web_data, resolution, config, caplog):

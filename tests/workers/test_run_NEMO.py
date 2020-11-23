@@ -215,8 +215,7 @@ def tmp_results(tmpdir, run_date, scope="function"):
 
 @patch("nowcast.workers.run_NEMO.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -271,8 +270,7 @@ class TestMain:
 )
 @patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -290,8 +288,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -305,8 +302,7 @@ class TestFailure:
 
 
 class TestCalcNewNamelistLines:
-    """Unit tests for _calc_new_namelist_lines() function.
-    """
+    """Unit tests for _calc_new_namelist_lines() function."""
 
     @pytest.mark.parametrize(
         "run_type, run_date, run_duration, prev_it000, dt_per_day, "
@@ -394,8 +390,7 @@ class TestCalcNewNamelistLines:
 
 
 class TestGetNamelistValue:
-    """Unit tests for _get_namelist_value() function.
-    """
+    """Unit tests for _get_namelist_value() function."""
 
     def test_get_value(self):
         lines = ["  nn_it000 = 8641  ! first time step\n"]
@@ -420,8 +415,7 @@ class TestGetNamelistValue:
 
 
 class TestRunDescription:
-    """Unit tests for _run_description() function.
-    """
+    """Unit tests for _run_description() function."""
 
     def test_config_missing_results_dir(self, config):
         run_date = arrow.get("2015-12-30")
@@ -1033,8 +1027,7 @@ class TestRunDescription:
 
 
 class TestCreateRunScript:
-    """Unit test for _create_run_script() function.
-    """
+    """Unit test for _create_run_script() function."""
 
     @pytest.mark.parametrize(
         "run_type", ["nowcast", "nowcast-green", "forecast", "forecast2"]
@@ -1055,8 +1048,7 @@ class TestCreateRunScript:
 
 
 class TestBuildScript:
-    """Unit test for _build_script function.
-    """
+    """Unit test for _build_script function."""
 
     @pytest.mark.parametrize(
         "run_type", ["nowcast", "nowcast-green", "forecast", "forecast2"]
@@ -1213,8 +1205,7 @@ class TestBuildScript:
 
 
 class TestDefinitions:
-    """Unit test for _definitions() function.
-    """
+    """Unit test for _definitions() function."""
 
     @pytest.mark.parametrize(
         "run_type", ["nowcast", "nowcast-green", "forecast", "forecast2"]
@@ -1278,8 +1269,7 @@ class TestDefinitions:
 
 
 class TestExecute:
-    """Unit test for _execute() function.
-    """
+    """Unit test for _execute() function."""
 
     def test_execute(self, config):
         script = run_NEMO._execute(
@@ -1340,8 +1330,7 @@ class TestExecute:
 @patch("nowcast.workers.run_NEMO.subprocess.Popen", autospec=True)
 @patch("nowcast.workers.run_NEMO.subprocess.run", autospec=True)
 class TestLaunchRun:
-    """Unit tests for _launch_run() function.
-    """
+    """Unit tests for _launch_run() function."""
 
     @pytest.mark.parametrize(
         "run_type, host",

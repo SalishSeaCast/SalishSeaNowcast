@@ -28,8 +28,7 @@ from nowcast.workers import upload_fvcom_atmos_forcing
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -58,8 +57,7 @@ vhfr fvcom runs:
 
 @patch("nowcast.workers.upload_fvcom_atmos_forcing.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -116,8 +114,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert (
@@ -177,8 +174,7 @@ class TestConfig:
 )
 @patch("nowcast.workers.upload_fvcom_atmos_forcing.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success_log_info(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
@@ -198,8 +194,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.upload_fvcom_atmos_forcing.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure_log_critical(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
@@ -225,8 +220,7 @@ class TestFailure:
 @patch("nowcast.workers.upload_fvcom_atmos_forcing.ssh_sftp.upload_file", autospec=True)
 @patch("nowcast.workers.upload_fvcom_atmos_forcing.logger", autospec=True)
 class TestUploadFVCOMAtmosForcing:
-    """Unit tests for upload_fvcom_atmos_forcing() function.
-    """
+    """Unit tests for upload_fvcom_atmos_forcing() function."""
 
     def test_checklist(
         self,

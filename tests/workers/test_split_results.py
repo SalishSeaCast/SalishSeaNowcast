@@ -21,6 +21,7 @@ from types import SimpleNamespace
 import arrow
 import nemo_nowcast
 import pytest
+
 from nowcast.workers import split_results
 
 
@@ -30,8 +31,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = split_results.main()
@@ -56,8 +56,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "split_results" in prod_config["message registry"]["workers"]
@@ -92,8 +91,7 @@ class TestConfig:
 
 
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, caplog):
         parsed_args = SimpleNamespace(
@@ -107,8 +105,7 @@ class TestSuccess:
 
 
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, caplog):
         parsed_args = SimpleNamespace(
@@ -122,8 +119,7 @@ class TestFailure:
 
 
 class TestSplitResults:
-    """Integration test for split_reults() function.
-    """
+    """Integration test for split_reults() function."""
 
     def test_checklist(self, caplog, tmp_path, monkeypatch):
         run_type_results = tmp_path / "hindcast.201905"
@@ -177,8 +173,7 @@ class TestSplitResults:
 
 
 class TestMkDestDir:
-    """Unit test for _mk_dest_dir() function.
-    """
+    """Unit test for _mk_dest_dir() function."""
 
     def test_mk_dest_dir(self, tmp_path):
         run_type_results = tmp_path / "hindcast.201905"
@@ -190,8 +185,7 @@ class TestMkDestDir:
 
 
 class TestMoveResultsNcFile:
-    """Unit tests for _move_results_nc_file() function.
-    """
+    """Unit tests for _move_results_nc_file() function."""
 
     def test_move_nemo_grid_nc_file(self, caplog, tmp_path):
         run_type_results = tmp_path / "hindcast.201905"
@@ -233,8 +227,7 @@ class TestMoveResultsNcFile:
 
 
 class TestMoveRestartFile:
-    """Unit tests for _move_results_nc_file() function.
-    """
+    """Unit tests for _move_results_nc_file() function."""
 
     def test_move_restart_file(self, caplog, tmp_path):
         run_type_results = tmp_path / "hindcast.201905"

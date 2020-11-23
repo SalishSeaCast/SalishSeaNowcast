@@ -21,10 +21,10 @@ The restart file is moved to the last run day's directory.
 """
 import logging
 import os
+import shutil
 from pathlib import Path
 
 import arrow
-import shutil
 from nemo_nowcast import NowcastWorker
 
 NAME = "split_results"
@@ -105,16 +105,14 @@ def split_results(parsed_args, config, *args):
 
 
 def _mk_dest_dir(run_type_results, date):
-    """Separate function for testability.
-    """
+    """Separate function for testability."""
     dest_dir = run_type_results / date.format("DDMMMYY").lower()
     dest_dir.mkdir(exist_ok=True)
     return dest_dir
 
 
 def _move_results_nc_file(nc_file, dest_dir, date):
-    """Separate function for testability.
-    """
+    """Separate function for testability."""
     if nc_file.stem.startswith("SalishSea_1"):
         fn = Path(
             f"{nc_file.stem[:12]}_"
@@ -129,8 +127,7 @@ def _move_results_nc_file(nc_file, dest_dir, date):
 
 
 def _move_restart_file(restart_file, dest_dir):
-    """Separate function for testability.
-    """
+    """Separate function for testability."""
     shutil.move(os.fspath(restart_file), os.fspath(dest_dir))
     logger.debug(f"moved {restart_file} to {dest_dir}")
 

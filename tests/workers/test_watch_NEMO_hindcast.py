@@ -21,15 +21,15 @@ from unittest.mock import call, Mock, patch
 
 import arrow
 import nemo_nowcast
-import nowcast.ssh_sftp
 import pytest
+
+import nowcast.ssh_sftp
 from nowcast.workers import watch_NEMO_hindcast
 
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -58,8 +58,7 @@ def config(base_config):
 
 @patch("nowcast.workers.watch_NEMO_hindcast.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -99,8 +98,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "watch_NEMO_hindcast" in prod_config["message registry"]["workers"]
@@ -126,8 +124,7 @@ class TestConfig:
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, m_logger, host_name):
         parsed_args = SimpleNamespace(host_name=host_name)
@@ -139,8 +136,7 @@ class TestSuccess:
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
 @patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, m_logger, host_name):
         parsed_args = SimpleNamespace(host_name=host_name)
@@ -156,8 +152,7 @@ class TestFailure:
     autospec=True,
 )
 class TestWatchNEMO_Hindcast:
-    """Unit test for watch_NEMO_hindcast() function.
-    """
+    """Unit test for watch_NEMO_hindcast() function."""
 
     @patch("nowcast.workers.watch_NEMO_hindcast._SqueueHindcastJob", spec=True)
     def test_squeue_run_completed(self, m_job, m_sftp, m_logger, config):

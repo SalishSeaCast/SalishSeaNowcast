@@ -29,8 +29,7 @@ from nowcast.workers import make_fvcom_atmos_forcing
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -60,8 +59,7 @@ vhfr fvcom runs:
 
 @patch("nowcast.workers.make_fvcom_atmos_forcing.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -111,8 +109,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "make_fvcom_atmos_forcing" in prod_config["message registry"]["workers"]
@@ -177,8 +174,7 @@ class TestConfig:
 )
 @patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success_log_info(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
@@ -197,8 +193,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.make_fvcom_atmos_forcing.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure_log_critical(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
@@ -222,8 +217,7 @@ class TestFailure:
     autospec=True,
 )
 class TestMakeFVCOMAtmosForcing:
-    """Unit tests for make_fvcom_atmos_forcing() function.
-    """
+    """Unit tests for make_fvcom_atmos_forcing() function."""
 
     @pytest.mark.parametrize(
         "model_config, run_type, run_date, atmos_file_date",

@@ -29,8 +29,7 @@ from nowcast.workers import upload_forcing
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -66,8 +65,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = upload_forcing.main()
@@ -98,8 +96,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "upload_forcing" in prod_config["message registry"]["workers"]
@@ -258,12 +255,13 @@ class TestConfig:
     ),
 )
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2020-06-29"),
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get("2020-06-29"),
         )
         caplog.set_level(logging.INFO)
 
@@ -296,12 +294,13 @@ class TestSuccess:
     ),
 )
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2020-06-29"),
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get("2020-06-29"),
         )
         caplog.set_level(logging.CRITICAL)
 
@@ -382,8 +381,7 @@ def mock_sftp_client(monkeypatch):
     ),
 )
 class TestChecklist:
-    """Unit tests for checklist returned by upload_forcing() function.
-    """
+    """Unit tests for checklist returned by upload_forcing() function."""
 
     @staticmethod
     @pytest.fixture
@@ -466,7 +464,9 @@ class TestChecklist:
         monkeypatch,
     ):
         parsed_args = SimpleNamespace(
-            host_name=host_name, run_type=run_type, run_date=arrow.get("2020-06-29"),
+            host_name=host_name,
+            run_type=run_type,
+            run_date=arrow.get("2020-06-29"),
         )
         checklist = upload_forcing.upload_forcing(parsed_args, config)
         expected = {
@@ -486,8 +486,7 @@ class TestChecklist:
     autospec=True,
 )
 class TestUploadLiveOceanFiles:
-    """Unit tests for _upload_live_ocean_files() function.
-    """
+    """Unit tests for _upload_live_ocean_files() function."""
 
     @pytest.mark.parametrize(
         "run_type, logging_level",

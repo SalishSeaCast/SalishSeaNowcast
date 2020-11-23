@@ -25,11 +25,11 @@ import os
 from pathlib import Path
 
 import arrow
-from nemo_nowcast import NowcastWorker
 import netCDF4 as NC
 import numpy as np
-from salishsea_tools import rivertools
 import yaml
+from nemo_nowcast import NowcastWorker
+from salishsea_tools import rivertools
 
 NAME = "make_runoff_file"
 logger = logging.getLogger(NAME)
@@ -115,8 +115,7 @@ def make_runoff_file(parsed_args, config, *args):
 
 
 def _get_fraser_at_hope(config):
-    """Read daily average discharge data for Fraser at Hope from ECget file.
-    """
+    """Read daily average discharge data for Fraser at Hope from ECget file."""
     filename = Path(config["rivers"]["SOG river files"]["Fraser"])
     fraserflow = np.loadtxt(os.fspath(filename))
     logger.debug(f"read Fraser at Hope data from {filename}")
@@ -124,8 +123,7 @@ def _get_fraser_at_hope(config):
 
 
 def _get_river_climatology(filename):
-    """Read the monthly climatology that we will use for all the other rivers.
-    """
+    """Read the monthly climatology that we will use for all the other rivers."""
     # Open monthly climatology
     clim_rivers = NC.Dataset(filename)
     criverflow = clim_rivers.variables["rorunoff"]
@@ -135,8 +133,7 @@ def _get_river_climatology(filename):
 
 
 def _calculate_daily_flow(yesterday, criverflow):
-    """Interpolate the daily values from the monthly values.
-    """
+    """Interpolate the daily values from the monthly values."""
     pyear, nyear = yesterday.year, yesterday.year
     if yesterday.day < 16:
         prevmonth = yesterday.month - 1
@@ -160,8 +157,7 @@ def _calculate_daily_flow(yesterday, criverflow):
 
 
 def _fraser_climatology(config):
-    """Read in the Fraser climatology separated from Hope flow.
-    """
+    """Read in the Fraser climatology separated from Hope flow."""
     fraser_climatology_file = Path(config["rivers"]["Fraser climatology"])
     with fraser_climatology_file.open("rt") as f:
         fraser_climatology = yaml.safe_load(f)
@@ -249,8 +245,7 @@ def _combine_runoff(
 
 
 def _write_file(filepath, yesterday, flow):
-    """Create the rivers runoff netCDF4 file.
-    """
+    """Create the rivers runoff netCDF4 file."""
     with NC.Dataset(os.fspath(filepath), "w") as nemo:
         nemo.description = "Real Fraser Values, Daily Climatology for Other Rivers"
         # Dimensions

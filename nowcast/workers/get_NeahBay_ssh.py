@@ -215,8 +215,7 @@ def _utc_now_to_run_date(utc_now, run_type):
 
 
 def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
-    """Save the surge for a given day in a netCDF4 file.
-    """
+    """Save the surge for a given day in a netCDF4 file."""
     # Western open boundary (JdF) grid parameter values for NEMO
     startj, endj, r = 370, 470, 1
     lengthj = endj - startj
@@ -342,8 +341,7 @@ def _isolate_day(day, dates, surges, forecast_flags):
 
 
 def _list_full_days(dates, surges, forecast_flags):
-    """Return a list of days that have a full 24 hour data set.
-    """
+    """Return a list of days that have a full 24 hour data set."""
     # Check if first day is a full day
     tc, ds, _, _ = _isolate_day(dates[0], dates, surges, forecast_flags)
     if ds.shape[0] == tc.shape[0]:

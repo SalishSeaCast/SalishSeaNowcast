@@ -17,18 +17,18 @@
 Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
 """
-from collections import OrderedDict
 import glob
 import logging
 import os
 import subprocess
+from collections import OrderedDict
 
 import arrow
 import matplotlib.backends.backend_agg
 import matplotlib.figure
-from nemo_nowcast import NowcastWorker, WorkerError
 import netCDF4 as nc
 import numpy as np
+from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import lib
 
@@ -422,8 +422,7 @@ def _crop_to_watersheds(config, ymd, ist, ien, jst, jen, outgrib, outzeros):
 
 
 def _make_netCDF_files(config, ymd, subdir, outgrib, outzeros):
-    """Convert the GRIB files to netcdf (classic) files.
-    """
+    """Convert the GRIB files to netcdf (classic) files."""
     OPERdir = config["weather"]["ops dir"]
     wgrib2 = config["weather"]["wgrib2"]
     outnetcdf = os.path.join(OPERdir, subdir, f"ops_{ymd}.nc")
@@ -484,8 +483,7 @@ def _calc_instantaneous(outnetcdf, out0netcdf, ymd, flen, zstart, axs):
 
 
 def _change_to_NEMO_variable_names(outnetcdf, axs, ip):
-    """Rename variables to match NEMO naming conventions.
-    """
+    """Rename variables to match NEMO naming conventions."""
     data = nc.Dataset(outnetcdf, "r+")
     data.renameDimension("time", "time_counter")
     data.renameVariable("latitude", "nav_lat")

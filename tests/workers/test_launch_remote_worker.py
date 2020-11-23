@@ -24,15 +24,13 @@ from nowcast.workers import launch_remote_worker
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     return base_config
 
 
 @patch("nowcast.workers.launch_remote_worker.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -79,8 +77,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "launch_remote_worker" in prod_config["message registry"]["workers"]
@@ -99,8 +96,7 @@ class TestConfig:
 
 @patch("nowcast.workers.launch_remote_worker.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, m_logger):
         parsed_args = SimpleNamespace(
@@ -115,8 +111,7 @@ class TestSuccess:
 
 @patch("nowcast.workers.launch_remote_worker.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(
@@ -132,8 +127,7 @@ class TestFailure:
 @patch("nowcast.workers.launch_remote_worker.logger", autospec=True)
 @patch("nowcast.workers.launch_remote_worker.NextWorker", spec=True)
 class TestLaunchRemoteWorker:
-    """Unit test for launch_remote_worker() function.
-    """
+    """Unit test for launch_remote_worker() function."""
 
     @pytest.mark.parametrize(
         "remote_worker, exp_remote_wkr",

@@ -17,9 +17,9 @@ NEMO hindcast run on an HPC cluster that uses the SLURM scheduler.
 """
 import logging
 import os
-from pathlib import Path
 import tempfile
 import time
+from pathlib import Path
 
 import arrow
 import attr
@@ -126,8 +126,7 @@ def watch_NEMO_hindcast(parsed_args, config, *args):
 
 @attr.s
 class _QstatHindcastJob:
-    """Interact with the hindcast job on an HPC host that uses :command:`qstat`.
-    """
+    """Interact with the hindcast job on an HPC host that uses :command:`qstat`."""
 
     ssh_client = attr.ib()
     sftp_client = attr.ib()
@@ -271,8 +270,7 @@ class _QstatHindcastJob:
         return state
 
     def _report_progress(self, time_step_file):
-        """Calculate and log run progress based on value in time.step file.
-        """
+        """Calculate and log run progress based on value in time.step file."""
         time_step = int(time_step_file.splitlines()[0].strip())
         model_seconds = (time_step - self.it000) * self.rdt
         model_time = self.date0.shift(seconds=model_seconds).format(
@@ -360,8 +358,7 @@ class _QstatHindcastJob:
 
 @attr.s
 class _SqueueHindcastJob:
-    """Interact with the hindcast job on an HPC host that uses :command:`squeue`.
-    """
+    """Interact with the hindcast job on an HPC host that uses :command:`squeue`."""
 
     ssh_client = attr.ib()
     sftp_client = attr.ib()
@@ -518,8 +515,7 @@ class _SqueueHindcastJob:
         return state
 
     def _report_progress(self, time_step_file):
-        """Calculate and log run progress based on value in time.step file.
-        """
+        """Calculate and log run progress based on value in time.step file."""
         time_step = int(time_step_file.splitlines()[0].strip())
         model_seconds = (time_step - self.it000) * self.rdt
         model_time = self.date0.shift(seconds=model_seconds).format(

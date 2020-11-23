@@ -26,15 +26,13 @@ from nowcast.workers import get_NeahBay_ssh
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     return base_config
 
 
 @patch("nowcast.workers.get_NeahBay_ssh.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -76,8 +74,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "get_NeahBay_ssh" in prod_config["message registry"]["workers"]
@@ -125,8 +122,7 @@ class TestConfig:
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
 @patch("nowcast.workers.get_NeahBay_ssh.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, run_type):
         parsed_args = Mock(run_type=run_type)
@@ -138,8 +134,7 @@ class TestSuccess:
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
 @patch("nowcast.workers.get_NeahBay_ssh.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, run_type):
         parsed_args = Mock(run_type=run_type)
@@ -149,8 +144,7 @@ class TestFailure:
 
 
 class TestUTCNowToRunDate:
-    """Unit tests for _utc_now_to_run_date() function.
-    """
+    """Unit tests for _utc_now_to_run_date() function."""
 
     def test_nowcast(self):
         utc_now = datetime.datetime(

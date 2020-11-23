@@ -1146,8 +1146,7 @@ def _calc_figure(fig_func, args, kwargs):
 def _render_storm_surge_alerts_thumbnail(
     config, run_type, plot_type, dmy, fig, svg_name, fig_save_format, test_figure
 ):
-    """Undated storm surge alerts thumbnail for storm-surge/index.html page
-    """
+    """Undated storm surge alerts thumbnail for storm-surge/index.html page"""
     now = arrow.now()
     today_dmy = now.format("DDMMMYY").lower()
     yesterday_dmy = now.shift(days=-1).format("DDMMMYY").lower()

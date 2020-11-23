@@ -32,8 +32,7 @@ from nowcast.workers import run_ww3
 
 @pytest.fixture()
 def config(base_config, tmp_path):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     run_prep_dir = tmp_path / "wwatch3-runs"
     run_prep_dir.mkdir()
     nowcast_results_dir = tmp_path / "wwatch3-nowcast"
@@ -76,8 +75,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = run_ww3.main()
@@ -108,8 +106,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "run_ww3" in prod_config["message registry"]["workers"]
@@ -158,8 +155,7 @@ class TestConfig:
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, run_type, caplog):
         parsed_args = SimpleNamespace(
@@ -179,8 +175,7 @@ class TestSuccess:
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, run_type, caplog):
         parsed_args = SimpleNamespace(
@@ -200,8 +195,7 @@ class TestFailure:
 
 @patch("nowcast.workers.run_ww3.logger", autospec=True)
 class TestRunWW3:
-    """Unit tests for run_ww3() function.
-    """
+    """Unit tests for run_ww3() function."""
 
     @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     @patch("nowcast.workers.run_ww3._build_tmp_run_dir", autospec=True)
@@ -242,13 +236,16 @@ class TestRunWW3:
 
 
 class TestBuildTmpRunDir:
-    """Unit tests for _build_tmp_run_dir() function.
-    """
+    """Unit tests for _build_tmp_run_dir() function."""
 
     @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     @patch("nowcast.workers.run_ww3._write_ww3_input_files", autospec=True)
     def test_run_dir_path(
-        self, m_write_ww3_input_files, run_type, mock_now, config,
+        self,
+        m_write_ww3_input_files,
+        run_type,
+        mock_now,
+        config,
     ):
         run_dir_path = run_ww3._build_tmp_run_dir(
             arrow.get("2017-03-24"), run_type, config
@@ -262,8 +259,7 @@ class TestBuildTmpRunDir:
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestMakeRunDir:
-    """Unit test for _make_run_dir() function.
-    """
+    """Unit test for _make_run_dir() function."""
 
     @pytest.mark.skipif(
         "GITHUB_ACTIONS" in os.environ,
@@ -281,8 +277,7 @@ class TestMakeRunDir:
 
 
 class TestCreateSymlinks:
-    """Unit tests for _create_symlinks() function.
-    """
+    """Unit tests for _create_symlinks() function."""
 
     @pytest.mark.parametrize("run_type", ("forecast2", "nowcast", "forecast"))
     def test_mod_def_wind_current(self, run_type, config):
@@ -344,8 +339,7 @@ class TestCreateSymlinks:
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestWW3PrncWindContents:
-    """Unit test for _ww3_prnc_wind_contents() function.
-    """
+    """Unit test for _ww3_prnc_wind_contents() function."""
 
     def test_ww3_prnc_wind_contents(self, run_type):
         contents = run_ww3._ww3_prnc_wind_contents(arrow.get("2017-03-25"), run_type)
@@ -357,8 +351,7 @@ class TestWW3PrncWindContents:
 
 @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
 class TestWW3PrncCurrentContents:
-    """Unit test for _ww3_prnc_current_contents() function.
-    """
+    """Unit test for _ww3_prnc_current_contents() function."""
 
     def test_ww3_prnc_current_contents(self, run_type):
         contents = run_ww3._ww3_prnc_current_contents(arrow.get("2017-03-26"), run_type)
@@ -377,8 +370,7 @@ class TestWW3PrncCurrentContents:
     ],
 )
 class TestWW3ShelContents:
-    """Unit test for _ww3_shel_contents() function.
-    """
+    """Unit test for _ww3_shel_contents() function."""
 
     def test_ww3_shel_contents(
         self, run_type, run_date, start_date, restart_date, end_date, end_time
@@ -428,8 +420,7 @@ class TestWW3ShelContents:
     ],
 )
 class TestWW3OunfContents:
-    """Unit test for _ww3_ounf_contents() function.
-    """
+    """Unit test for _ww3_ounf_contents() function."""
 
     def test_ww3_ounf_contents(self, run_type, run_date, start_date, output_count):
         contents = run_ww3._ww3_ounf_contents(arrow.get(run_date), run_type)
@@ -454,8 +445,7 @@ class TestWW3OunfContents:
     ],
 )
 class TestWW3OunpContents:
-    """Unit test for _ww3_ounp_contents() function.
-    """
+    """Unit test for _ww3_ounp_contents() function."""
 
     def test_ww3_ounp_contents(self, run_type, run_date, start_date, output_count):
         contents = run_ww3._ww3_ounp_contents(arrow.get(run_date), run_type)
@@ -472,8 +462,7 @@ class TestWW3OunpContents:
 
 
 class TestBuildRunScript:
-    """Unit test for _build_run_script() function.
-    """
+    """Unit test for _build_run_script() function."""
 
     @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     def test_top_of_script(self, run_type, config):
@@ -492,8 +481,7 @@ class TestBuildRunScript:
 
 
 class TestDefinitions:
-    """Unit test for _definitions() function.
-    """
+    """Unit test for _definitions() function."""
 
     @pytest.mark.parametrize("run_type", ["forecast2", "nowcast", "forecast"])
     def test_definitions(self, run_type, config):
@@ -518,8 +506,7 @@ class TestDefinitions:
 
 
 class TestPrepare:
-    """Unit test for _prepare() function.
-    """
+    """Unit test for _prepare() function."""
 
     def test_prepare(self):
         preparations = run_ww3._prepare()
@@ -546,8 +533,7 @@ class TestPrepare:
 
 
 class TestExecute:
-    """Unit test for _execute() function.
-    """
+    """Unit test for _execute() function."""
 
     @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
     def test_forecast_execute(self, run_type):
@@ -582,8 +568,7 @@ class TestExecute:
 
 
 class TestNetcdfOutput:
-    """Unit test for _netcdf_output() function.
-    """
+    """Unit test for _netcdf_output() function."""
 
     @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
     def test_forecast_netcdf_output(self, run_type):
@@ -636,8 +621,7 @@ class TestNetcdfOutput:
 
 
 class TestCleanup:
-    """Unit test for _cleanup() function.
-    """
+    """Unit test for _cleanup() function."""
 
     def test_cleanup(self):
         cleanup = run_ww3._cleanup()
@@ -659,8 +643,7 @@ class TestCleanup:
 @patch("nowcast.workers.run_ww3.subprocess.Popen", autospec=True)
 @patch("nowcast.workers.run_ww3.subprocess.run", autospec=True)
 class TestLaunchRun:
-    """Unit tests for _launch_run() function.
-    """
+    """Unit tests for _launch_run() function."""
 
     def test_launch_run(self, m_run, m_popen, m_logger, run_type):
         run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "arbutus.cloud")

@@ -28,8 +28,7 @@ from nowcast.workers import update_forecast_datasets
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -69,8 +68,7 @@ vhfr fvcom runs:
 
 @patch("nowcast.workers.update_forecast_datasets.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -121,8 +119,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "update_forecast_datasets" in prod_config["message registry"]["workers"]
@@ -190,8 +187,7 @@ class TestConfig:
 )
 @patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, model, run_type):
         parsed_args = SimpleNamespace(
@@ -214,8 +210,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, model, run_type):
         parsed_args = SimpleNamespace(
@@ -235,8 +230,7 @@ class TestFailure:
     "nowcast.workers.update_forecast_datasets._update_rolling_forecast", autospec=True
 )
 class TestUpdateForecastDatasets:
-    """Unit tests for update_forecast_datasets() function.
-    """
+    """Unit tests for update_forecast_datasets() function."""
 
     @pytest.mark.parametrize(
         "model, run_type",
@@ -334,8 +328,7 @@ class TestUpdateForecastDatasets:
 
 @patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestSymlinkMostRecentForecast:
-    """Unit tests for _symlink_most_recent_forecast() function.
-    """
+    """Unit tests for _symlink_most_recent_forecast() function."""
 
     @pytest.mark.parametrize(
         "model, run_type",
@@ -403,8 +396,7 @@ class TestSymlinkMostRecentForecast:
 
 @patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestUpdateRollingForecast:
-    """Unit tests for _u[pdate_rolling_forecast() function.
-    """
+    """Unit tests for _u[pdate_rolling_forecast() function."""
 
     @pytest.mark.parametrize(
         "model, run_type",
@@ -445,8 +437,7 @@ class TestUpdateRollingForecast:
 )
 @patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestCreateNewForecastDir:
-    """Unit test for _create_new_forecast_dir() function.
-    """
+    """Unit test for _create_new_forecast_dir() function."""
 
     def test_new_forecast_dir(self, m_logger, model, run_type, tmpdir):
         forecast_dir = tmpdir.ensure_dir(f"rolling-forecasts/{model}")
@@ -461,8 +452,7 @@ class TestCreateNewForecastDir:
     "nowcast.workers.update_forecast_datasets._extract_1st_forecast_day", autospec=True
 )
 class TestAddPastDaysResults:
-    """Unit test for _add_past_days_results() function.
-    """
+    """Unit test for _add_past_days_results() function."""
 
     @pytest.mark.parametrize(
         "model, run_type, run_date, days_from_past, first_date",
@@ -556,8 +546,7 @@ class TestAddPastDaysResults:
     "nowcast.workers.update_forecast_datasets._extract_1st_forecast_day", autospec=True
 )
 class TestAddForecastResults:
-    """Unit tests for _add_forecast_results() function.
-    """
+    """Unit tests for _add_forecast_results() function."""
 
     @pytest.mark.parametrize(
         "run_date, model, run_type, results_archive, forecast_date",
@@ -685,8 +674,7 @@ class TestAddForecastResults:
 
 @patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestExtract1stForecastDay:
-    """Unit tests for _extract_1st_forecast_day() function.
-    """
+    """Unit tests for _extract_1st_forecast_day() function."""
 
     def test_create_tmp_forecast_results_archive(self, m_logger, config, tmpdir):
         tmp_forecast_results_archive = tmpdir.ensure_dir("tmp_nemo_forecast")
@@ -778,8 +766,7 @@ class TestExtract1stForecastDay:
 )
 @patch("nowcast.workers.update_forecast_datasets.logger", autospec=True)
 class TestSymlinkResults:
-    """Unit tests for _symlink_results() function.
-    """
+    """Unit tests for _symlink_results() function."""
 
     def test_create_dest_dir(self, m_logger, model, run_type, tmpdir):
         forecast_day = arrow.get("2017-11-11")

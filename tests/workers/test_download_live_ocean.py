@@ -14,8 +14,8 @@
 #  limitations under the License.
 """Unit tests for Salish Sea NEMO nowcast download_live_ocean worker.
 """
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch, Mock
 
@@ -28,8 +28,7 @@ from nowcast.workers import download_live_ocean
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -53,8 +52,7 @@ def config(base_config):
 
 @patch("nowcast.workers.download_live_ocean.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -90,8 +88,7 @@ class TestMain:
 
 @patch("nowcast.workers.download_live_ocean.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2016-11-24"))
@@ -102,8 +99,7 @@ class TestSuccess:
 
 @patch("nowcast.workers.download_live_ocean.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2016-11-24"))
@@ -113,8 +109,7 @@ class TestFailure:
 
 
 class TestDownloadLiveOcean:
-    """Unit test for download_live_ocean() function.
-    """
+    """Unit test for download_live_ocean() function."""
 
     @patch("nowcast.workers.download_live_ocean.logger", autospec=True)
     @patch("nowcast.workers.download_live_ocean.lib.mkdir", spec=True)

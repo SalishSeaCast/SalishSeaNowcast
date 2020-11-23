@@ -17,7 +17,6 @@
 from unittest.mock import Mock, patch
 
 import arrow
-import nemo_nowcast
 import pytest
 
 from nowcast.workers import download_wwatch3_results
@@ -25,15 +24,13 @@ from nowcast.workers import download_wwatch3_results
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     return base_config
 
 
 @patch("nowcast.workers.download_wwatch3_results.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -92,8 +89,7 @@ class TestMain:
 )
 @patch("nowcast.workers.download_wwatch3_results.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, run_type, host_name):
         parsed_args = Mock(host_name=host_name, run_type=run_type)
@@ -112,8 +108,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.download_wwatch3_results.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, run_type, host_name):
         parsed_args = Mock(host_name=host_name, run_type=run_type)

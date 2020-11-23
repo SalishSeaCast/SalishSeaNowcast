@@ -18,7 +18,6 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
-import nemo_nowcast
 import pytest
 
 from nowcast.workers import get_onc_ferry
@@ -26,15 +25,13 @@ from nowcast.workers import get_onc_ferry
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     return base_config
 
 
 @patch("nowcast.workers.get_onc_ferry.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -79,8 +76,7 @@ class TestMain:
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 @patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, ferry_platform):
         parsed_args = SimpleNamespace(
@@ -93,8 +89,7 @@ class TestSuccess:
 
 @patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(data_date=arrow.get("2016-09-09"))
@@ -105,48 +100,42 @@ class TestFailure:
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestGetONCFerry:
-    """Unit tests for get_onc_ferry() function.
-    """
+    """Unit tests for get_onc_ferry() function."""
 
     pass
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestGetNavData:
-    """Unit tests for _get_nav_data() function.
-    """
+    """Unit tests for _get_nav_data() function."""
 
     pass
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestCalcLocationArrays:
-    """Unit tests for _calc_location_arrays() function.
-    """
+    """Unit tests for _calc_location_arrays() function."""
 
     pass
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestOnCrossing:
-    """Unit tests for _on_crossing() function.
-    """
+    """Unit tests for _on_crossing() function."""
 
     pass
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestCalcCrossingNumbers:
-    """Unit tests for _calc_crossing_numbers() function.
-    """
+    """Unit tests for _calc_crossing_numbers() function."""
 
     pass
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestGetWaterData:
-    """Unit tests for _get_water_data() function.
-    """
+    """Unit tests for _get_water_data() function."""
 
     pass
 
@@ -157,8 +146,7 @@ class TestGetWaterData:
 )
 @patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
 class TestEmptyDeviceData:
-    """Unit tests for _empty_device_data() function.
-    """
+    """Unit tests for _empty_device_data() function."""
 
     def test_empty_device_data(self, m_logger, ferry_platform, device, sensors):
         dataset = get_onc_ferry._empty_device_data(
@@ -176,23 +164,20 @@ class TestEmptyDeviceData:
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestQaqcFilter:
-    """Unit tests for _qaqc_filter() function.
-    """
+    """Unit tests for _qaqc_filter() function."""
 
     pass
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestCreateDataset:
-    """Unit tests for _create_dataset() function.
-    """
+    """Unit tests for _create_dataset() function."""
 
     pass
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestCreateDataarray:
-    """Unit tests for _create_dataarray() function.
-    """
+    """Unit tests for _create_dataarray() function."""
 
     pass

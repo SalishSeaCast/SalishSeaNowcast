@@ -19,17 +19,14 @@ import datetime
 import io
 
 import arrow
-import requests
-
-from dateutil import tz
-import pytz
-
 import matplotlib.dates as mdates
 import matplotlib.pyplot as plt
 import netCDF4 as nc
 import numpy as np
 import pandas as pd
-
+import pytz
+import requests
+from dateutil import tz
 from salishsea_tools import geo_tools, stormtools, tidetools, nc_tools
 
 from nowcast import analyze
@@ -107,7 +104,7 @@ SITES = {
 
 
 def plot_residual_forcing(ax, runs_list, t_orig):
-    """ Plots the observed water level residual at Neah Bay against
+    """Plots the observed water level residual at Neah Bay against
     forced residuals from existing ssh*.txt files for Neah Bay.
     Function may produce none, any, or all (nowcast, forecast, forecast 2)
     forced residuals depending on availability for specified date (runs_list).
@@ -155,7 +152,7 @@ def plot_residual_forcing(ax, runs_list, t_orig):
 
 
 def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
-    """ Plots the observed sea surface height residual against the
+    """Plots the observed sea surface height residual against the
     sea surface height model residual (calculate_residual) at
     specified stations. Function may produce none, any, or all
     (nowcast, forecast, forecast 2) model residuals depending on
@@ -221,7 +218,7 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
 
 
 def get_error_model(names, runs_list, grid_B, t_orig):
-    """ Sets up the calculation for the model residual error.
+    """Sets up the calculation for the model residual error.
 
     :arg names: Names of station.
     :type names: list of strings
@@ -283,7 +280,7 @@ def get_error_model(names, runs_list, grid_B, t_orig):
 
 
 def get_error_forcing(runs_list, t_orig):
-    """ Sets up the calculation for the forcing residual error.
+    """Sets up the calculation for the forcing residual error.
 
     :arg runs_list: Runs that have been verified as complete.
     :type runs_list: list
@@ -327,7 +324,7 @@ def get_error_forcing(runs_list, t_orig):
 
 
 def plot_error_model(axs, names, runs_list, grid_B, t_orig):
-    """ Plots the model residual error.
+    """Plots the model residual error.
 
     :arg axs: The axis where the residual errors are plotted.
     :type axs: list of axes
@@ -364,7 +361,7 @@ def plot_error_model(axs, names, runs_list, grid_B, t_orig):
 
 
 def plot_error_forcing(ax, runs_list, t_orig):
-    """ Plots the forcing residual error.
+    """Plots the forcing residual error.
 
     :arg ax: The axis where the residual errors are plotted.
     :type ax: axis object
@@ -390,7 +387,7 @@ def plot_error_forcing(ax, runs_list, t_orig):
 
 
 def plot_residual_error_all(subject, grid_B, t_orig, figsize=(20, 16)):
-    """ Sets up and combines the plots produced by plot_residual_forcing
+    """Sets up and combines the plots produced by plot_residual_forcing
     and plot_residual_model or plot_error_forcing and plot_error_model.
     This function specifies the stations for which the nested functions
     apply. Figure formatting except x-axis limits and titles are included.
@@ -494,8 +491,8 @@ def combine_errors(name, mode, dates, grid_B):
 
 
 def compare_errors(name, mode, start, end, grid_B, figsize=(20, 12)):
-    """ compares the model and forcing error at a station
-     between dates start and end for a simulation mode."""
+    """compares the model and forcing error at a station
+    between dates start and end for a simulation mode."""
 
     # array of dates for iteration
     numdays = (end - start).days
@@ -608,7 +605,7 @@ def obs_residual_ssh(name, tides, sdt, edt):
 
 
 def obs_residual_ssh_NOAA(name, tides, sdt, edt, product="hourly_height"):
-    """ Calculates the residual of the observed water levels with respect
+    """Calculates the residual of the observed water levels with respect
     to the predicted tides at a specific NOAA station and for a date range.
 
     :arg name: Name of station.
@@ -639,7 +636,7 @@ def obs_residual_ssh_NOAA(name, tides, sdt, edt, product="hourly_height"):
 
 
 def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
-    """ Plots the water level residual as calculated by the function
+    """Plots the water level residual as calculated by the function
     calculate_wlev_residual_NOAA and has the option to also plot the
     observed water levels and predicted tides over the course of one day.
 

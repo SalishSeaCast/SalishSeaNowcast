@@ -105,7 +105,7 @@ def _make_figure_domain(coordf, bathyf, theme):
 
 def _drawTile(tile_coords_dic, ax):
     """
-     Draw boundary of each tile in the main domain.
+    Draw boundary of each tile in the main domain.
     """
     i = 1
     for tile, values in tile_coords_dic.items():

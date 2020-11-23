@@ -26,8 +26,7 @@ from release_mgmt import tag_release
 @patch("release_mgmt.tag_release.Path.exists", return_value=True, autospec=True)
 @patch("release_mgmt.tag_release.hglib.open", autospec=True)
 class TestTagRepo:
-    """Unit tests for _rag_repo() function.
-    """
+    """Unit tests for _rag_repo() function."""
 
     def test_repo_not_exists(self, m_hg_open, m_exists, m_logger):
         m_exists.return_value = False

@@ -15,8 +15,8 @@
 """Unit tests for Salish Sea WaveWatch3 forecast worker make_ww3_current_file
 worker.
 """
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, MagicMock, Mock, patch
 
@@ -29,8 +29,7 @@ from nowcast.workers import make_ww3_current_file
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -62,8 +61,7 @@ def config(base_config):
 
 @patch("nowcast.workers.make_ww3_current_file.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -113,8 +111,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "make_ww3_current_file" in prod_config["message registry"]["workers"]
@@ -169,8 +166,7 @@ class TestConfig:
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
 @patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -186,8 +182,7 @@ class TestSuccess:
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
 @patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -207,8 +202,7 @@ class TestFailure:
 @patch("nowcast.workers.make_ww3_current_file.xarray.open_dataset", autospec=True)
 @patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestMakeWW3CurrentFile:
-    """Unit tests for make_ww3_current_file() function.
-    """
+    """Unit tests for make_ww3_current_file() function."""
 
     @pytest.mark.parametrize("run_type", ("forecast2", "forecast", "nowcast"))
     @patch(
@@ -346,8 +340,7 @@ class TestMakeWW3CurrentFile:
 
 @patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestCalcNowcastDatasets:
-    """Unit tests for _calc_nowcast_datasets() function.
-    """
+    """Unit tests for _calc_nowcast_datasets() function."""
 
     def test_nowcast_datasets(self, m_logger):
         datasets = make_ww3_current_file._calc_nowcast_datasets(
@@ -371,8 +364,7 @@ class TestCalcNowcastDatasets:
 
 @patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 class TestCalcForecastDatasets:
-    """Unit tests for _calc_forecast_datasets() function.
-    """
+    """Unit tests for _calc_forecast_datasets() function."""
 
     def test_forecast_datasets(self, m_logger):
         datasets = make_ww3_current_file._calc_forecast_datasets(
@@ -403,8 +395,7 @@ class TestCalcForecastDatasets:
 @patch("nowcast.workers.make_ww3_current_file.logger", autospec=True)
 @patch("nowcast.workers.make_ww3_current_file.subprocess.run", autospec=True)
 class TestCalcForecast2Datasets:
-    """Unit tests for _calc_forecast2_datasets() function.
-    """
+    """Unit tests for _calc_forecast2_datasets() function."""
 
     def test_forecast2_datasets(self, m_run, m_logger):
         datasets = make_ww3_current_file._calc_forecast2_datasets(

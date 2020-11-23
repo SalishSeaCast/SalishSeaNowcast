@@ -157,8 +157,7 @@ def _prep_fig_axes(figsize, theme):
 
 
 def _calc_clevels(plot_data):
-    """Calculate contour levels for the thalweg and surface plot axes.
-    """
+    """Calculate contour levels for the thalweg and surface plot axes."""
     percent_98_thalweg = np.percentile(
         np.ma.masked_values(plot_data.tracer_hr, 0).compressed(), 98
     )

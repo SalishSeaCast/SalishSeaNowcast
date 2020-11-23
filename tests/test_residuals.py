@@ -23,8 +23,7 @@ from nowcast import residuals
 
 
 class TestToDatetime:
-    """Unit tests for _to_datetime() function.
-    """
+    """Unit tests for _to_datetime() function."""
 
     @pytest.mark.parametrize(
         "datestr, year, isDec, isJan, expected",

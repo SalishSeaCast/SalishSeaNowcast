@@ -18,7 +18,6 @@ from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
 import arrow
-import nemo_nowcast
 import pytest
 
 from nowcast.workers import get_onc_ctd
@@ -26,15 +25,13 @@ from nowcast.workers import get_onc_ctd
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     return base_config
 
 
 @patch("nowcast.workers.get_onc_ctd.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -75,8 +72,7 @@ class TestMain:
 @pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
 @patch("nowcast.workers.get_onc_ctd.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(
@@ -90,8 +86,7 @@ class TestSuccess:
 @pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
 @patch("nowcast.workers.get_onc_ctd.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, onc_station):
         parsed_args = SimpleNamespace(

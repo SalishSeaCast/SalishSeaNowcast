@@ -25,15 +25,13 @@ from nowcast.workers import watch_fvcom
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     return base_config
 
 
 @patch("nowcast.workers.watch_fvcom.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -82,8 +80,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "watch_fvcom" in prod_config["message registry"]["workers"]
@@ -114,8 +111,7 @@ class TestConfig:
 )
 @patch("nowcast.workers.watch_fvcom.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
@@ -132,8 +128,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.watch_fvcom.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
@@ -152,8 +147,7 @@ class TestFailure:
 @patch("nowcast.workers.watch_fvcom._find_run_pid", return_value=43, autospec=True)
 @patch("nowcast.workers.watch_fvcom._pid_exists", return_value=False, autospec=True)
 class TestWatchFVCOM:
-    """Uni tests for watch_fvcom() function.
-    """
+    """Uni tests for watch_fvcom() function."""
 
     def test_checklist(
         self, m_find_run_pid, m_pid_exists, m_logger, model_config, run_type, config
@@ -186,8 +180,7 @@ class TestWatchFVCOM:
 @patch("nowcast.workers.watch_fvcom.logger", autospec=True)
 @patch("nowcast.workers.watch_fvcom.subprocess.run", autospec=True)
 class TestFindRunPid:
-    """Unit test for _find_run_pid() function.
-    """
+    """Unit test for _find_run_pid() function."""
 
     def test_find_run_pid(self, m_run, m_logger):
         run_info = {"run exec cmd": "bash SoGWW3.sh"}
@@ -204,8 +197,7 @@ class TestFindRunPid:
 
 
 class TestPidExists:
-    """Unit tests for _pid_exists() function.
-    """
+    """Unit tests for _pid_exists() function."""
 
     def test_negative_pid(self):
         pid_exists = watch_fvcom._pid_exists(-1)

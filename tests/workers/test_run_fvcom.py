@@ -15,9 +15,9 @@
 """Unit tests for Vancouver Harbour & Fraser River FVCOM run_fvcom worker.
 """
 import os
-from pathlib import Path
 import subprocess
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
@@ -30,8 +30,7 @@ from nowcast.workers import run_fvcom
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -139,8 +138,7 @@ vhfr fvcom runs:
 
 @patch("nowcast.workers.run_fvcom.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -193,8 +191,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "run_fvcom" in prod_config["message registry"]["workers"]
@@ -395,8 +392,7 @@ class TestConfig:
 )
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
@@ -416,8 +412,7 @@ class TestSuccess:
 )
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, model_config, run_type):
         parsed_args = SimpleNamespace(
@@ -447,8 +442,7 @@ class TestFailure:
 @patch("nowcast.workers.run_fvcom._create_run_script")
 @patch("nowcast.workers.run_fvcom._launch_run_script")
 class TestRunFVCOM:
-    """Unit tests for run_fvcom() function.
-    """
+    """Unit tests for run_fvcom() function."""
 
     def test_checklist(
         self,
@@ -497,8 +491,7 @@ class TestRunFVCOM:
 @patch("nowcast.workers.run_fvcom.yaml.safe_dump", autospec=True)
 @patch("nowcast.workers.run_fvcom._run_description")
 class TestCreateRunDescFile:
-    """Unit tests for _create_fun_desc_file() function.
-    """
+    """Unit tests for _create_fun_desc_file() function."""
 
     def test_run_desc_file_path(
         self,
@@ -552,8 +545,7 @@ class TestCreateRunDescFile:
 @patch("nowcast.workers.run_fvcom._edit_namelists")
 @patch("nowcast.workers.run_fvcom._assemble_namelist")
 class TestRunDescription:
-    """Unit test for _run_description() function.
-    """
+    """Unit test for _run_description() function."""
 
     def test_run_desc(
         self,
@@ -595,8 +587,7 @@ class TestRunDescription:
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 @patch("nowcast.workers.run_fvcom._patch_namelist")
 class TestEditNamelists:
-    """Unit test for _edit_namelists() function.
-    """
+    """Unit test for _edit_namelists() function."""
 
     @pytest.mark.parametrize(
         "model_config, run_type, run_date, time_step",
@@ -866,8 +857,7 @@ class TestEditNamelists:
 )
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestAssembleNamelist:
-    """Unit test for _assemble_namelist() function.
-    """
+    """Unit test for _assemble_namelist() function."""
 
     def test_assemble_namelist(self, m_logger, model_config, run_type, config, tmpdir):
         run_prep_dir = Path(str(tmpdir.ensure_dir("fvcom-runs")))
@@ -891,8 +881,7 @@ class TestAssembleNamelist:
 )
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 class TestPrepFVCOM_InputDir:
-    """Unit test for _prep_fvcom_input_dir() function.
-    """
+    """Unit test for _prep_fvcom_input_dir() function."""
 
     def test_prep_fvcom_input_dir(
         self,
@@ -933,8 +922,7 @@ class TestPrepFVCOM_InputDir:
 @patch("nowcast.workers.run_fvcom.logger", autospec=True)
 @patch("nowcast.workers.run_fvcom._build_script", return_value="script", autospec=True)
 class TestCreateRunScript:
-    """Unit tests for _create_run_script() function.
-    """
+    """Unit tests for _create_run_script() function."""
 
     def test_run_script_path(
         self, m_bld_script, m_logger, model_config, run_type, run_date, config, tmpdir
@@ -964,8 +952,7 @@ class TestCreateRunScript:
 )
 @patch("nowcast.workers.run_fvcom.yaml.safe_load", autospec=True)
 class TestBuildScript:
-    """Unit tests for _build_script() function.
-    """
+    """Unit tests for _build_script() function."""
 
     def test_script(
         self, m_yaml_load, model_config, run_type, run_date, config, tmpdir
@@ -1035,8 +1022,7 @@ class TestBuildScript:
     (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
 )
 class TestDefinitions:
-    """Unit tests for _definitions() function.
-    """
+    """Unit tests for _definitions() function."""
 
     def test_definitions(self, model_config, run_type, config, tmpdir):
         run_desc_file_path = tmpdir.ensure(f"21dec17fvcom-{run_type}.yaml")
@@ -1068,8 +1054,7 @@ class TestDefinitions:
     (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
 )
 class TestExecute:
-    """Unit tests for _execute() function.
-    """
+    """Unit tests for _execute() function."""
 
     def test_execute(self, model_config, run_type, config):
         script = run_fvcom._execute(model_config, config)
@@ -1103,8 +1088,7 @@ class TestExecute:
 @patch("nowcast.workers.run_fvcom.subprocess.Popen", autospec=True)
 @patch("nowcast.workers.run_fvcom.subprocess.run", autospec=True)
 class TestLaunchRunScript:
-    """Unit tests for _launch_run_script() function.
-    """
+    """Unit tests for _launch_run_script() function."""
 
     def test_launch_run_script(self, m_run, m_popen, m_logger, run_type):
         run_fvcom._launch_run_script(run_type, "VHFR_FVCOM.sh", "arbutus.cloud")

@@ -31,8 +31,7 @@ from nowcast.workers import collect_weather
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -91,8 +90,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = collect_weather.main()
@@ -132,8 +130,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "collect_weather" in prod_config["message registry"]["workers"]
@@ -236,8 +233,7 @@ class TestConfig:
     ),
 )
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(
         self, forecast, resolution, utcnow, forecast_date, caplog, monkeypatch
@@ -269,8 +265,7 @@ class TestSuccess:
     ),
 )
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(
         self, forecast, resolution, utcnow, forecast_date, caplog, monkeypatch
@@ -291,8 +286,7 @@ class TestFailure:
 
 
 class TestCollectWeather:
-    """Unit tests for collect_weather() function.
-    """
+    """Unit tests for collect_weather() function."""
 
     @staticmethod
     @pytest.fixture
@@ -437,8 +431,7 @@ class TestCollectWeather:
     ),
 )
 class TestCalcExpectedFiles:
-    """Unit tests for _calc_expected_files() function.
-    """
+    """Unit tests for _calc_expected_files() function."""
 
     def test_expected_files(
         self, forecast, resolution, utcnow, config, prod_config, caplog, monkeypatch
@@ -497,8 +490,7 @@ class TestCalcExpectedFiles:
     ),
 )
 class TestMoveFile:
-    """Unit test for _move_file() function.
-    """
+    """Unit test for _move_file() function."""
 
     def test_move_file(
         self, forecast, resolution, config, caplog, tmp_path, monkeypatch
@@ -536,8 +528,7 @@ class TestMoveFile:
 
 @pytest.mark.parametrize("resolution", ("2.5 km", "1 km"))
 class TestGribFileEventHandler:
-    """Unit tests for _GribFileEventHandler class.
-    """
+    """Unit tests for _GribFileEventHandler class."""
 
     def test_constructor(self, resolution, config):
         handler = collect_weather._GribFileEventHandler(

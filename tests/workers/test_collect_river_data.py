@@ -15,8 +15,8 @@
 """Unit tests for SalishSeaCast collect_river_data worker.
 """
 import logging
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -31,8 +31,7 @@ from nowcast.workers import collect_river_data
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -63,8 +62,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = collect_river_data.main()
@@ -89,8 +87,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "collect_river_data" in prod_config["message registry"]["workers"]
@@ -141,8 +138,7 @@ class TestConfig:
 
 
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, caplog):
         parsed_args = SimpleNamespace(
@@ -160,8 +156,7 @@ class TestSuccess:
 
 
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, caplog):
         parsed_args = SimpleNamespace(
@@ -183,8 +178,7 @@ class TestFailure:
 @patch("nowcast.workers.collect_river_data._calc_day_avg_discharge", spec=True)
 @patch("nowcast.workers.collect_river_data._store_day_avg_discharge", autospec=True)
 class TestCollectRiverData:
-    """Unit test for collect_river_data() function.
-    """
+    """Unit test for collect_river_data() function."""
 
     def test_checklist(
         self, m_store_day_avg_q, m_calc_day_avg_q, m_logger, river_name, config
@@ -212,8 +206,7 @@ class TestCollectRiverData:
 
 @patch("nowcast.workers.collect_river_data.pandas.read_csv", autospec=True)
 class TestCalcDayAvgDischarge:
-    """Unit test for _calc_day_avg_discharge() function.
-    """
+    """Unit test for _calc_day_avg_discharge() function."""
 
     def test_calc_day_avg_discharge(self, m_read_csv, caplog, tmp_path):
         data_date = arrow.get("2018-12-26")
@@ -239,8 +232,7 @@ class TestCalcDayAvgDischarge:
 
 
 class TestStoreDayAvgDischarge:
-    """Unit test for _store_day_avg_discharge() function.
-    """
+    """Unit test for _store_day_avg_discharge() function."""
 
     def test_store_day_avg_discharge(self, caplog, tmp_path):
         data_date = arrow.get("2018-12-26")

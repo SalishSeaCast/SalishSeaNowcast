@@ -31,8 +31,7 @@ from nowcast.workers import download_results
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -92,8 +91,7 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
         worker = download_results.main()
@@ -137,8 +135,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "download_results" in prod_config["message registry"]["workers"]
@@ -295,8 +292,7 @@ class TestConfig:
     ],
 )
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(
@@ -321,8 +317,7 @@ class TestSuccess:
     ],
 )
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(
@@ -340,8 +335,7 @@ class TestFailure:
 @patch("nowcast.workers.download_results.lib.run_in_subprocess", spec=True)
 @patch("nowcast.workers.download_results.lib.fix_perms", autospec=True)
 class TestDownloadResults:
-    """Unit tests for download_results() function.
-    """
+    """Unit tests for download_results() function."""
 
     @pytest.mark.parametrize(
         "run_type",

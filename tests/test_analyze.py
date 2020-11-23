@@ -75,14 +75,12 @@ def nonuniform_depths():
 
 
 class TestDepthAverage:
-    """Unit tests for depth_average() function.
-    """
+    """Unit tests for depth_average() function."""
 
     # A couple of examples of translating notebook cells into unit test
     # methods
     def test_1d_zeros_array_n_1(self, linear_depths):
-        """Cell 4 case
-        """
+        """Cell 4 case"""
         var = np.zeros((linear_depths.shape[0], 1))
         result = analyze.depth_average(var, linear_depths, depth_axis=0)
         assert result == np.zeros((1,))
@@ -130,8 +128,7 @@ class TestDepthAverage:
         ],
     )
     def test_multi_dim_array(self, var, depth_axis, expected, linear_depths):
-        """Series of tests for multi-dimensional arrays
-        """
+        """Series of tests for multi-dimensional arrays"""
         result = analyze.depth_average(var, linear_depths, depth_axis=depth_axis)
         np.testing.assert_array_equal(result, expected)
 
@@ -178,8 +175,7 @@ class TestDepthAverage:
     def test_nonuniform_grid_spacing(
         self, var, depth_axis, expected, nonuniform_depths
     ):
-        """Series of tests for a depth array with non-uniform grid spacing.
-        """
+        """Series of tests for a depth array with non-uniform grid spacing."""
         result = analyze.depth_average(var, nonuniform_depths, depth_axis=depth_axis)
         # using almost equal because of some floating point differences
         # Tolerance is 10^-6
@@ -196,8 +192,7 @@ class TestDepthAverage:
         ],
     )
     def test_masking_fullmask(self, var, depth_axis, expected, nonuniform_depths):
-        """Test for simple masked arrays - entire input array is masked.
-        """
+        """Test for simple masked arrays - entire input array is masked."""
         var = np.ma.masked_values(var, 0)
         result = analyze.depth_average(var, nonuniform_depths, depth_axis=depth_axis)
         expected = np.ma.masked_values(expected, 0)

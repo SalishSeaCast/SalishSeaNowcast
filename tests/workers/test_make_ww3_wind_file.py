@@ -15,8 +15,8 @@
 """Unit tests for Salish Sea WaveWatch3 forecast worker make_ww3_wind_file
 worker.
 """
-from pathlib import Path
 import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -29,8 +29,7 @@ from nowcast.workers import make_ww3_wind_file
 
 @pytest.fixture()
 def config(base_config):
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests.
-    """
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
@@ -58,8 +57,7 @@ def config(base_config):
 
 @patch("nowcast.workers.make_ww3_wind_file.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -109,8 +107,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "make_ww3_wind_file" in prod_config["message registry"]["workers"]
@@ -156,8 +153,7 @@ class TestConfig:
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
 @patch("nowcast.workers.make_ww3_wind_file.logger", autospec=True)
 class TestSuccess:
-    """Unit tests for success() function.
-    """
+    """Unit tests for success() function."""
 
     def test_success(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -173,8 +169,7 @@ class TestSuccess:
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
 @patch("nowcast.workers.make_ww3_wind_file.logger", autospec=True)
 class TestFailure:
-    """Unit tests for failure() function.
-    """
+    """Unit tests for failure() function."""
 
     def test_failure(self, m_logger, run_type):
         parsed_args = SimpleNamespace(
@@ -192,8 +187,7 @@ class TestFailure:
 @patch("nowcast.workers.make_ww3_wind_file.logger", autospec=True)
 @patch("nowcast.workers.make_ww3_wind_file._create_dataset", autospec=True)
 class TestMakeWW3WindFile:
-    """Unit tests for make_ww3_wind_file() function.
-    """
+    """Unit tests for make_ww3_wind_file() function."""
 
     @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
     def test_checklist(

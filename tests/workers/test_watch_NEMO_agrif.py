@@ -28,8 +28,7 @@ from nowcast.workers import watch_NEMO_agrif
 
 @patch("nowcast.workers.watch_NEMO_agrif.NowcastWorker", spec=True)
 class TestMain:
-    """Unit tests for main() function.
-    """
+    """Unit tests for main() function."""
 
     def test_instantiate_worker(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -70,8 +69,7 @@ class TestMain:
 
 @patch("nowcast.workers.watch_NEMO_agrif.logger", autospec=True)
 class TestSuccess:
-    """Unit test for success() function.
-    """
+    """Unit test for success() function."""
 
     def test_success(self, m_logger):
         parsed_args = SimpleNamespace(host_name="orcinus", job_id="9305855.orca2.ibb")
@@ -82,8 +80,7 @@ class TestSuccess:
 
 @patch("nowcast.workers.watch_NEMO_agrif.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function.
-    """
+    """Unit test for failure() function."""
 
     def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(host_name="orcinus", job_id="9305855.orca2.ibb")
@@ -118,8 +115,7 @@ class TestFailure:
     "nowcast.workers.watch_NEMO_agrif._is_running", return_value=False, autospec=True
 )
 class TestWatchNEMO_AGRIF:
-    """Unit test for watch_NEMO_agrif() function.
-    """
+    """Unit test for watch_NEMO_agrif() function."""
 
     def test_checklist(
         self,
@@ -161,8 +157,7 @@ class TestWatchNEMO_AGRIF:
     autospec=True,
 )
 class TestGetRunId:
-    """Unit test for _get_run_id() function.
-    """
+    """Unit test for _get_run_id() function."""
 
     def test_get_run_id(self, m_get_queue_info, m_logger):
         ssh_client = Mock(name="ssh_client")
@@ -175,8 +170,7 @@ class TestGetRunId:
 @patch("nowcast.workers.watch_NEMO_agrif.logger", autospec=True)
 @patch("nowcast.workers.watch_NEMO_agrif._get_queue_info", autospec=True)
 class TestIsQueued:
-    """Unit test for _is_queued() function.
-    """
+    """Unit test for _is_queued() function."""
 
     @pytest.mark.parametrize(
         "queue_info, expected", [("job_state = Q\n", True), ("job_state = R\n", False)]
@@ -198,8 +192,7 @@ class TestIsQueued:
 @patch("nowcast.workers.watch_NEMO_agrif.logger", autospec=True)
 @patch("nowcast.workers.watch_NEMO_agrif._get_queue_info", autospec=True)
 class TestIsRunning:
-    """Unit test for _is_running() function.
-    """
+    """Unit test for _is_running() function."""
 
     def test_job_not_on_queue(self, m_get_queue_info, m_logger):
         m_get_queue_info.return_value = "job_state = UNKNOWN\n"
@@ -281,8 +274,7 @@ class TestIsRunning:
 
 @patch("nowcast.workers.watch_NEMO_agrif.logger", autospec=True)
 class TestGetQueueInfo:
-    """Unit tests for _get_queue_info() function.
-    """
+    """Unit tests for _get_queue_info() function."""
 
     @patch(
         "nowcast.workers.watch_NEMO_agrif.ssh_sftp.ssh_exec_command",
@@ -332,8 +324,7 @@ class TestGetQueueInfo:
     autospec=True,
 )
 class TestGetTmpRunDir:
-    """Unit test for _get_tmp_run_dir() functions.
-    """
+    """Unit test for _get_tmp_run_dir() functions."""
 
     def test_get_tmp_run_dir(self, m_ssh_exec_cmd, m_logger):
         m_ssh_client = Mock(name="ssh_client")
@@ -350,8 +341,7 @@ class TestGetTmpRunDir:
 @patch("nowcast.workers.watch_NEMO_agrif.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.f90nml.read", autospec=True)
 class TestGetRunInfo:
-    """Unit test for _get_run_info() function.
-    """
+    """Unit test for _get_run_info() function."""
 
     def test_get_run_info(self, m_f90nml_read, m_logger):
         m_sftp_client = Mock(name="sftp_client")

@@ -81,8 +81,7 @@ def checklist():
 
 
 class TestAfterDownloadWeather:
-    """Unit tests for the after_download_weather function.
-    """
+    """Unit tests for the after_download_weather function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -171,8 +170,7 @@ class TestAfterDownloadWeather:
 
 
 class TestAfterCollectWeather:
-    """Unit tests for the after_collect_weather function.
-    """
+    """Unit tests for the after_collect_weather function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -295,8 +293,7 @@ class TestAfterCollectWeather:
 
 
 class TestAfterCollectRiverData:
-    """Unit tests for the after_collect_river_data function.
-    """
+    """Unit tests for the after_collect_river_data function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -326,8 +323,7 @@ class TestAfterCollectRiverData:
 
 
 class TestAfterMakeRunoffFile:
-    """Unit tests for the after_make_runoff_file function.
-    """
+    """Unit tests for the after_make_runoff_file function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -338,8 +334,7 @@ class TestAfterMakeRunoffFile:
 
 
 class TestAfterGetNeahBaySsh:
-    """Unit tests for the after_get_NeahBay_ssh function.
-    """
+    """Unit tests for the after_get_NeahBay_ssh function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -371,8 +366,7 @@ class TestAfterGetNeahBaySsh:
 
 
 class TestAfterGribToNetcdf:
-    """Unit tests for the after_grib_to_netcdf function.
-    """
+    """Unit tests for the after_grib_to_netcdf function."""
 
     @pytest.mark.parametrize(
         "msg_type", ["crash", "failure nowcast+", "failure forecast2"]
@@ -432,8 +426,7 @@ class TestAfterGribToNetcdf:
 
 
 class TestAfterGetONC_CTD:
-    """Unit tests for the after_get_onc_ctd function.
-    """
+    """Unit tests for the after_get_onc_ctd function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -458,8 +451,7 @@ class TestAfterGetONC_CTD:
 
 
 class TestAfterGetONC_Ferry:
-    """Unit tests for the after_get_onc_ferry function.
-    """
+    """Unit tests for the after_get_onc_ferry function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -484,8 +476,7 @@ class TestAfterGetONC_Ferry:
 
 
 class TestAfterDownloadLiveOcean:
-    """Unit tests for the after_download_live_ocean function.
-    """
+    """Unit tests for the after_download_live_ocean function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -513,8 +504,7 @@ class TestAfterDownloadLiveOcean:
 
 
 class TestAfterMakeLiveOceanFiles:
-    """Unit tests for the after_make_live_ocean_files function.
-    """
+    """Unit tests for the after_make_live_ocean_files function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -536,8 +526,7 @@ class TestAfterMakeLiveOceanFiles:
 
 
 class TestAfterMakeTurbidityFile:
-    """Unit tests for the after_make_turbidity_file function.
-    """
+    """Unit tests for the after_make_turbidity_file function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -571,8 +560,7 @@ class TestAfterMakeTurbidityFile:
 
 
 class TestAfterUploadForcing:
-    """Unit tests for the after_upload_forcing function.
-    """
+    """Unit tests for the after_upload_forcing function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -752,8 +740,7 @@ class TestAfterUploadForcing:
 
 
 class TestAfterMakeForcingLinks:
-    """Unit tests for the after_make_forcing_links function.
-    """
+    """Unit tests for the after_make_forcing_links function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -843,8 +830,7 @@ class TestAfterMakeForcingLinks:
 
 
 class TestAfterRunNEMO:
-    """Unit tests for the after_run_NEMO function.
-    """
+    """Unit tests for the after_run_NEMO function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -885,8 +871,7 @@ class TestAfterRunNEMO:
 
 
 class TestAfterWatchNEMO:
-    """Unit tests for the after_watch_NEMO function.
-    """
+    """Unit tests for the after_watch_NEMO function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1315,8 +1300,7 @@ class TestAfterWatchNEMO:
 
 
 class TestAfterRunNEMO_AGRIF:
-    """Unit tests for the after_run_NEMO_agrif function.
-    """
+    """Unit tests for the after_run_NEMO_agrif function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1344,8 +1328,7 @@ class TestAfterRunNEMO_AGRIF:
 
 
 class TestAfterWatchNEMO_AGRIF:
-    """Unit tests for the after_watch_NEMO_agrif function.
-    """
+    """Unit tests for the after_watch_NEMO_agrif function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1387,8 +1370,7 @@ class TestAfterWatchNEMO_AGRIF:
 
 
 class TestAfterMakeFVCOMBoundary:
-    """Unit tests for the after_make_fvcom_boundary function.
-    """
+    """Unit tests for the after_make_fvcom_boundary function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1458,8 +1440,7 @@ class TestAfterMakeFVCOMBoundary:
 
 
 class TestAfterMakeFVCOMRiversForcing:
-    """Unit tests for the after_make_fvcom_rivers_forcing function.
-    """
+    """Unit tests for the after_make_fvcom_rivers_forcing function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1481,8 +1462,7 @@ class TestAfterMakeFVCOMRiversForcing:
 
 
 class TestAfterMakeFVCOMAtmosForcing:
-    """Unit tests for the after_make_fvcom_atmos_forcing function.
-    """
+    """Unit tests for the after_make_fvcom_atmos_forcing function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1518,8 +1498,7 @@ class TestAfterMakeFVCOMAtmosForcing:
 
 
 class TestAfterUploadFVCOMAtmosForcing:
-    """Unit tests for the after_upload_fvcom_atmos_forcing function.
-    """
+    """Unit tests for the after_upload_fvcom_atmos_forcing function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1555,8 +1534,7 @@ class TestAfterUploadFVCOMAtmosForcing:
 
 
 class TestAfterRunFVCOM:
-    """Unit tests for the after_run_fvcom function.
-    """
+    """Unit tests for the after_run_fvcom function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1598,8 +1576,7 @@ class TestAfterRunFVCOM:
 
 
 class TestAfterWatchFVCOM:
-    """Unit tests for the after_watch_fvcom function.
-    """
+    """Unit tests for the after_watch_fvcom function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1668,8 +1645,7 @@ class TestAfterWatchFVCOM:
 
 
 class TestAfterMakeWW3WindFile:
-    """Unit tests for the after_make_ww3_wind_file function.
-    """
+    """Unit tests for the after_make_ww3_wind_file function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1689,8 +1665,7 @@ class TestAfterMakeWW3WindFile:
 
 
 class TestAfterMakeWW3currentFile:
-    """Unit tests for the after_make_ww3_current_file function.
-    """
+    """Unit tests for the after_make_ww3_current_file function."""
 
     @pytest.mark.parametrize(
         "msg_type", ["crash", "failure forecast2", "failure forecast"]
@@ -1743,8 +1718,7 @@ class TestAfterMakeWW3currentFile:
 
 
 class TestAfterRunWW3:
-    """Unit tests for the after_run_ww3 function.
-    """
+    """Unit tests for the after_run_ww3 function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1772,8 +1746,7 @@ class TestAfterRunWW3:
 
 
 class TestAfterWatchWW3:
-    """Unit tests for the after_watch_ww3 function.
-    """
+    """Unit tests for the after_watch_ww3 function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -1866,8 +1839,7 @@ class TestAfterWatchWW3:
 
 
 class TestAfterWatchNEMO_Hindcast:
-    """Unit tests for the after_watch_NEMO_hindcast function.
-    """
+    """Unit tests for the after_watch_NEMO_hindcast function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1958,8 +1930,7 @@ class TestAfterWatchNEMO_Hindcast:
 
 
 class TestAfterRunNEMO_Hindcast:
-    """Unit tests for the after_run_NEMO_hindcast function.
-    """
+    """Unit tests for the after_run_NEMO_hindcast function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -1970,8 +1941,7 @@ class TestAfterRunNEMO_Hindcast:
 
 
 class TestAfterDownloadResults:
-    """Unit tests for the after_download_results function.
-    """
+    """Unit tests for the after_download_results function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -2097,8 +2067,7 @@ class TestAfterDownloadResults:
 
 
 class TestAfterMakeCHSCurrentsFile:
-    """Unit tests for the after_make_CHS_currents_file function.
-    """
+    """Unit tests for the after_make_CHS_currents_file function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -2140,8 +2109,7 @@ class TestAfterMakeCHSCurrentsFile:
 
 
 class TestAfterSplitResults:
-    """Unit tests for after_split_results function.
-    """
+    """Unit tests for after_split_results function."""
 
     @pytest.mark.parametrize(
         "msg_type", ["crash", "failure hindcast", "success hindcast"]
@@ -2154,8 +2122,7 @@ class TestAfterSplitResults:
 
 
 class TestAfterDownloadWWatch3Results:
-    """Unit tests for the after_download_wwatch3_results function.
-    """
+    """Unit tests for the after_download_wwatch3_results function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -2204,8 +2171,7 @@ class TestAfterDownloadWWatch3Results:
 
 
 class TestAfterDownloadFVCOMResults:
-    """Unit tests for the after_download_fvcom_results function.
-    """
+    """Unit tests for the after_download_fvcom_results function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -2340,8 +2306,7 @@ class TestAfterDownloadFVCOMResults:
 
 
 class TestAfterGetVFPA_HADCP:
-    """Unit tests for the after_get_vfpa_hadcp function.
-    """
+    """Unit tests for the after_get_vfpa_hadcp function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -2365,8 +2330,7 @@ class TestAfterGetVFPA_HADCP:
 
 
 class TestAfterUpdateForecastDatasets:
-    """Unit tests for the after_update_forecast_datasets function.
-    """
+    """Unit tests for the after_update_forecast_datasets function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -2477,8 +2441,7 @@ class TestAfterUpdateForecastDatasets:
 
 
 class TestAfterPingERDDAP:
-    """Unit tests for the after_ping_erddap function.
-    """
+    """Unit tests for the after_ping_erddap function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -2540,7 +2503,10 @@ class TestAfterPingERDDAP:
                     "model config": "x2",
                     "run date": run_date,
                 },
-                "r12 nowcast": {"model config": "r12", "run date": run_date,},
+                "r12 nowcast": {
+                    "model config": "r12",
+                    "run date": run_date,
+                },
             },
         )
         workers = next_workers.after_ping_erddap(
@@ -2549,7 +2515,13 @@ class TestAfterPingERDDAP:
         expected = [
             NextWorker(
                 "nowcast.workers.make_plots",
-                args=["fvcom", "nowcast-x2", "publish", "--run-date", run_date,],
+                args=[
+                    "fvcom",
+                    "nowcast-x2",
+                    "publish",
+                    "--run-date",
+                    run_date,
+                ],
                 host="localhost",
             )
         ]
@@ -2574,7 +2546,10 @@ class TestAfterPingERDDAP:
                     "model config": "x2",
                     "run date": run_date,
                 },
-                "r12 nowcast": {"model config": "r12", "run date": run_date,},
+                "r12 nowcast": {
+                    "model config": "r12",
+                    "run date": run_date,
+                },
             },
         )
         workers = next_workers.after_ping_erddap(
@@ -2583,12 +2558,24 @@ class TestAfterPingERDDAP:
         expected = [
             NextWorker(
                 "nowcast.workers.make_plots",
-                args=["fvcom", "nowcast-x2", "publish", "--run-date", run_date,],
+                args=[
+                    "fvcom",
+                    "nowcast-x2",
+                    "publish",
+                    "--run-date",
+                    run_date,
+                ],
                 host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.make_plots",
-                args=["fvcom", "forecast-x2", "publish", "--run-date", run_date,],
+                args=[
+                    "fvcom",
+                    "forecast-x2",
+                    "publish",
+                    "--run-date",
+                    run_date,
+                ],
                 host="localhost",
             ),
         ]
@@ -2626,7 +2613,13 @@ class TestAfterPingERDDAP:
         expected = [
             NextWorker(
                 "nowcast.workers.make_plots",
-                args=["fvcom", "nowcast-r12", "publish", "--run-date", run_date,],
+                args=[
+                    "fvcom",
+                    "nowcast-r12",
+                    "publish",
+                    "--run-date",
+                    run_date,
+                ],
                 host="localhost",
             ),
         ]
@@ -2697,8 +2690,7 @@ class TestAfterPingERDDAP:
 
 
 class TestAfterMakePlots:
-    """Unit tests for the after_make_plots function.
-    """
+    """Unit tests for the after_make_plots function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -2765,8 +2757,7 @@ class TestAfterMakePlots:
 
 
 class TestAfterMakeSurfaceCurrentTiles:
-    """Unit tests for the after_make_surface_current_tiles function.
-    """
+    """Unit tests for the after_make_surface_current_tiles function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -2777,8 +2768,7 @@ class TestAfterMakeSurfaceCurrentTiles:
 
 
 class TestAfterMakeFeeds:
-    """Unit tests for the after_make_feeds function.
-    """
+    """Unit tests for the after_make_feeds function."""
 
     @pytest.mark.parametrize(
         "msg_type",
@@ -2800,8 +2790,7 @@ class TestAfterMakeFeeds:
 
 
 class TestAfterClearChecklist:
-    """Unit tests for the after_clear_checklist function.
-    """
+    """Unit tests for the after_clear_checklist function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -2820,8 +2809,7 @@ class TestAfterClearChecklist:
 
 
 class TestAfterRotateLogs:
-    """Unit tests for the after_rotate_logs function.
-    """
+    """Unit tests for the after_rotate_logs function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -2832,8 +2820,7 @@ class TestAfterRotateLogs:
 
 
 class TestAfterLaunchRemoteWorker:
-    """Unit tests for the after_launch_remote_worker function.
-    """
+    """Unit tests for the after_launch_remote_worker function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
