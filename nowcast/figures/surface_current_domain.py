@@ -21,10 +21,10 @@ The domain is divided into different tiles and needs to be re-run if the tiles s
 
 from pathlib import Path
 
-from matplotlib.backend_bases import FigureCanvasBase
-from matplotlib.figure import Figure
 import netCDF4
 import numpy
+from matplotlib.backend_bases import FigureCanvasBase
+from matplotlib.figure import Figure
 from salishsea_tools import viz_tools
 
 import nowcast.figures.website_theme

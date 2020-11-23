@@ -23,9 +23,8 @@ https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/t
 from types import SimpleNamespace
 
 import matplotlib.pyplot as plt
-from matplotlib import gridspec
 import numpy as np
-
+from matplotlib import gridspec
 from salishsea_tools import visualisations as vis
 from salishsea_tools import viz_tools
 
