@@ -14,7 +14,7 @@
 #  limitations under the License.
 """Produce a figure that shows colour contours of a tracer on a vertical slice
 along a section of the domain thalweg,
-and on the surface for a section of the domain that excludes Puget Sound 
+and on the surface for a section of the domain that excludes Puget Sound
 in the south and Johnstone Strait in the north.
 
 Testing notebook for this module is
@@ -44,17 +44,17 @@ def make_figure(
     figsize=(16, 9),
     theme=nowcast.figures.website_theme,
 ):
-    """Plot colour contours of tracer on a vertical slice along a section of 
+    """Plot colour contours of tracer on a vertical slice along a section of
     the domain thalweg,
     and on the surface for the Strait of Georgia and Juan de Fuca Strait
     regions of the domain.
 
-    :param hr: UTC time in hours 
+    :param hr: UTC time in hours
     :type hr: :class: str
-    
-    :param tracer_var: Hourly average tracer results from NEMO run. 
+
+    :param tracer_var: Hourly average tracer results from NEMO run.
     :type tracer_var: :py:class:`netCDF4.Variable`
-    
+
     :param bathy: Salish Sea NEMO model bathymetry data.
     :type bathy: :class:`netCDF4.Dataset`
 
@@ -66,13 +66,13 @@ def make_figure(
 
     :param clevels_surface: Colour bar contour intervals for surface plot.
     :type clevels_surface: :class:`numpy.ndarray`
-    
+
     :param cmap: Colour map to use for tracer_var contour plots.
     :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
-    
+
     :param boolean depth_integrated: Integrate the tracer over the water column
                                      depth when :py:obj:`True`.
-    
+
     :param 2-tuple figsize: Figure size (width, height) in inches.
 
     :param theme: Module-like object that defines the style elements for the

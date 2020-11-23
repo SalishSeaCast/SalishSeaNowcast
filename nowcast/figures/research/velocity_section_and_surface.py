@@ -14,7 +14,7 @@
 #  limitations under the License.
 """Produce a figure that shows colour contours of a tracer on a vertical slice
 along a section of the domain thalweg,
-and on the surface for a section of the domain that excludes Puget Sound 
+and on the surface for a section of the domain that excludes Puget Sound
 in the south and Johnstone Strait in the north.
 
 Development notebook for this module is
@@ -25,11 +25,10 @@ https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/t
 """
 from types import SimpleNamespace
 
-import matplotlib.pyplot as plt
-from matplotlib import gridspec
-import numpy as np
 import cmocean
-
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import gridspec
 from salishsea_tools import viz_tools
 
 import nowcast.figures.website_theme
@@ -50,9 +49,9 @@ def make_figure(
     section_lims=((235, 318, 0, 445),),
     surface_lims=(0, 397, 200, 750),
 ):
-    """Produce a figure that shows colour contours of a tracer on a vertical slice 
+    """Produce a figure that shows colour contours of a tracer on a vertical slice
     along a section of the domain thalweg,
-    and on the surface for a section of the domain that excludes Puget Sound 
+    and on the surface for a section of the domain that excludes Puget Sound
     in the south and Johnstone Strait in the north.
 
     :param U_var: Hourly average U velocity from NEMO run
@@ -79,13 +78,13 @@ def make_figure(
     :param levels: List of numbers indicating level curves to draw in increasing order.
     :type levels: :class:`numpy.ndarray`
 
-    :param ibreak: 
+    :param ibreak:
     :type ibreak: `int`
 
     :param 1-tuple sections: tuple of section to plot velocity.
 
-    :param 2-tuple pos: position of subfigures in their axis. 
-  
+    :param 2-tuple pos: position of subfigures in their axis.
+
     :param 4-tuple section_lims: 4-tuple of axis limits for section plots in form of (xmin, xmax, zmin, zmax)
 
     :param 4-tuple surface_lims: 4-tuple of axis limits for surface plot in form of (xmin, xmax, ymin, ymax)

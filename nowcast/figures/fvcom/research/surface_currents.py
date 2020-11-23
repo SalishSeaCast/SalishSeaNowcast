@@ -20,17 +20,16 @@ Testing notebook for this module is
 https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestSurfaceCurrents.ipynb
 """
 
+import warnings
 from types import SimpleNamespace
 
 import matplotlib.pyplot as plt
-from matplotlib.ticker import ScalarFormatter
 import numpy
-import warnings
-
-import nowcast.figures.website_theme
-
 from OPPTools.general_utilities import geometry as mgeom
 from OPPTools.utils import fvcom_postprocess as fpp
+from matplotlib.ticker import ScalarFormatter
+
+import nowcast.figures.website_theme
 
 
 def make_figure(
@@ -43,8 +42,8 @@ def make_figure(
     """Plot surface current vectors over a speed colormap for a sub-area of
     the VHFR FVCOM model.
 
-    :arg str place: Name of domain sub-area 
-    
+    :arg str place: Name of domain sub-area
+
     :arg int time_index: index of dataset for which to plot data
 
     :arg fvcom_results_dataset: VHFR FVCOM model flow fields results dataset.

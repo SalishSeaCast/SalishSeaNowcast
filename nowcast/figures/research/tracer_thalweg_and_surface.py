@@ -14,7 +14,7 @@
 #  limitations under the License.
 """Produce a figure that shows colour contours of a tracer on a vertical slice
 along a section of the domain thalweg,
-and on the surface for a section of the domain that excludes Puget Sound 
+and on the surface for a section of the domain that excludes Puget Sound
 in the south and Johnstone Strait in the north.
 
 .. note::
@@ -35,9 +35,8 @@ https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/t
 from types import SimpleNamespace
 
 import matplotlib.pyplot as plt
-from matplotlib import gridspec
 import numpy as np
-
+from matplotlib import gridspec
 from salishsea_tools import visualisations as vis
 from salishsea_tools import viz_tools
 
@@ -53,26 +52,26 @@ def make_figure(
     figsize=(16, 9),
     theme=nowcast.figures.website_theme,
 ):
-    """Plot colour contours of tracer on a vertical slice along a section of 
+    """Plot colour contours of tracer on a vertical slice along a section of
     the domain thalweg,
     and on the surface for the Strait of Georgia and Juan de Fuca Strait
     regions of the domain.
-    
-    :param tracer_var: Hourly average tracer results from NEMO run. 
+
+    :param tracer_var: Hourly average tracer results from NEMO run.
     :type tracer_var: :py:class:`netCDF4.Variable`
-    
+
     :param bathy: Salish Sea NEMO model bathymetry data.
     :type bathy: :class:`netCDF4.Dataset`
 
     :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
     :type mesh_mask: :class:`netCDF4.Dataset`
-    
+
     :param cmap: Colour map to use for tracer_var contour plots.
     :type cmap: :py:class:`matplotlib.colors.LinearSegmentedColormap`
-    
+
     :param boolean depth_integrated: Integrate the tracer over the water column
                                      depth when :py:obj:`True`.
-    
+
     :param 2-tuple figsize: Figure size (width, height) in inches.
 
     :param theme: Module-like object that defines the style elements for the
@@ -143,7 +142,7 @@ def _prep_fig_axes(figsize, theme):
 
 def _calc_clevels(plot_data):
     """Calculates contour levels for the two axes and decides whether whether
-    the levels are similar enough that one colour bar is sufficient for the 
+    the levels are similar enough that one colour bar is sufficient for the
     figure, or if each axes requires one.
     """
     percent_98_surf = np.percentile(plot_data.surface_hr.compressed(), 98)

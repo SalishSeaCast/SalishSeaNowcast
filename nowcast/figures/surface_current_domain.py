@@ -44,7 +44,7 @@ def _make_figure_domain(coordf, bathyf, theme):
                 figure. See :py:mod:`nowcast.figures.website_theme` for an
                 example.
 
-    :returns: :py:class:`matplotlib.figure.Figure` and plot axes. 
+    :returns: :py:class:`matplotlib.figure.Figure` and plot axes.
     """
 
     if theme is None:

@@ -22,13 +22,12 @@ https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/t
 
 from types import SimpleNamespace
 
+import cmocean
 import matplotlib.pyplot as plt
 import numpy
-import cmocean
+from OPPTools.utils import fvcom_postprocess as fpp
 
 import nowcast.figures.website_theme
-
-from OPPTools.utils import fvcom_postprocess as fpp
 
 
 def make_figure(
@@ -41,8 +40,8 @@ def make_figure(
 ):
     """Plot thalweg transects for model variables from the VHFR FVCOM model.
 
-    :arg str place: Name of domain sub-area 
-    
+    :arg str place: Name of domain sub-area
+
     :arg int time_index: index of dataset for which to plot data
 
     :arg fvcom_results_dataset: VHFR FVCOM model flow fields results dataset.
@@ -105,7 +104,7 @@ def _prep_plot_data(place, fvcom_results_dataset, time_index, varname):
         yt = [5460870.514, 5460186.615, 5459860.430, 5459857.626, 5460230.616,
               5460350.709, 5460123.549, 5459285.152]
         clim = {'salinity':(22, 27), "temp": (5, 9), 'tangential velocity': (-0.5, 0.5)}
-        
+
     if place == "Indian Arm":
         xt = [504338.308, 504614.340, 505299.179, 506644.379, 507388.050,
               508500.265, 508722.376, 509146.408, 508948.526, 510248.889,
@@ -113,7 +112,7 @@ def _prep_plot_data(place, fvcom_results_dataset, time_index, varname):
         yt = [5460870.514, 5462694.832, 5464229.277, 5465152.303, 5466614.650,
               5468046.238, 5468964.879, 5469615.060, 5472405.130, 5475485.044,
               5477079.703, 5478077.966, 5479284.985]
-        clim = {'salinity':(24, 29), "temp": (5.5, 9), 'tangential velocity': (-0.75, 0.75)}        
+        clim = {'salinity':(24, 29), "temp": (5.5, 9), 'tangential velocity': (-0.75, 0.75)}
 
     # fmt: on
     xt, yt = numpy.array(xt), numpy.array(yt)
