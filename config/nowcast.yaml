@@ -162,14 +162,21 @@ ssh:
 
 temperature salinity:
   download:
-    # URL from which to download UW Live Ocean daily averaged forecast fields file
-    url: https://pm2.blob.core.windows.net/
-    # Directory name prefix for UW Live Ocean daily averaged forecast fields file
-    directory prefix: f
-    # Template for hourly UW Live Ocean daily averaged forecast file name
-    file name: low_passed_UBC.nc
+    # Host name from which to download UW Live Ocean daily averaged forecast fields files
+    host: boiler-nowcast
+    # Passphrase-less deployment key used by automation for authentication
+    # on the host.
+    # The key-pair is assumed to be stored in $USER/.ssh/.
+    ssh key: SalishSeaNEMO-nowcast_id_rsa
+    # Template for UW Live Ocean daily averaged forecast fields file processing status
+    status file template: '/data1/parker/LiveOcean_output/cas6_v3/f{yyyymmdd}/ubc2/Info/process_status.csv'
+    # Template for UW Live Ocean daily averaged forecast fields path and file name on remote host
+    bc file template: '/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/low_passed_UBC.nc'
     # Destination directory for downloaded UW Live Ocean files
     dest dir: /results/forcing/LiveOcean/downloaded/
+    # File name for local storage of UW Live Ocean daily averaged forecast file
+    file name: low_passed_UBC.nc
+
   # Destination directory for daily temperature and salinity boundary conditions
   # files generated from UW Live Ocean forecast
   bc dir: /results/forcing/LiveOcean/boundary_conditions

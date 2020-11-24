@@ -22,14 +22,16 @@ import logging
 import math
 import multiprocessing
 import os
+import tempfile
 from pathlib import Path
 
 import arrow
 import nemo_cmd.api
-import requests
-from nemo_nowcast import get_web_data, NowcastWorker
+from dateutil import tz
+from nemo_nowcast import NowcastWorker, WorkerError
+from retrying import retry, RetryError
 
-from nowcast import lib
+from nowcast import lib, ssh_sftp
 
 NAME = "download_live_ocean"
 logger = logging.getLogger(NAME)
@@ -71,37 +73,83 @@ def failure(parsed_args):
 
 def download_live_ocean(parsed_args, config, *args):
     yyyymmdd = parsed_args.run_date.format("YYYYMMDD")
+    dotted_yyyymmdd = parsed_args.run_date.format("YYYY.MM.DD")
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
         f"downloading Salish Sea western boundary daily averaged Live Ocean "
         f"file for {ymd}"
     )
-    base_url = config["temperature salinity"]["download"]["url"]
-    dir_prefix = config["temperature salinity"]["download"]["directory prefix"]
-    filename = config["temperature salinity"]["download"]["file name"]
-    url = f"{base_url}{dir_prefix}{yyyymmdd}/{filename}"
-    dest_dir = Path(config["temperature salinity"]["download"]["dest dir"], yyyymmdd)
-    grp_name = config["file group"]
-    lib.mkdir(str(dest_dir), logger, grp_name=grp_name)
-    checklist = {ymd: []}
-    with requests.Session() as session:
-        url = f"{base_url}{dir_prefix}{yyyymmdd}/{filename}"
-        filepath = _get_file(url, filename, dest_dir, session)
-    checklist[ymd].append(str(filepath))
-    nemo_cmd.api.deflate([filepath], math.floor(multiprocessing.cpu_count() / 2))
-    checklist = {ymd: os.fspath(filepath)}
+    host_name = config["temperature salinity"]["download"]["host"]
+    ssh_key = Path(
+        os.environ["HOME"],
+        ".ssh",
+        config["temperature salinity"]["download"]["ssh key"],
+    )
+    try:
+        ssh_client, sftp_client = ssh_sftp.sftp(host_name, ssh_key)
+        process_status_tmpl = config["temperature salinity"]["download"][
+            "status file template"
+        ]
+        process_status_path = Path(process_status_tmpl.format(yyyymmdd=dotted_yyyymmdd))
+        try:
+            _is_file_ready(sftp_client, host_name, process_status_path)
+        except RetryError as exc:
+            logger.error(
+                f"giving up after {exc.last_attempt.attempt_number} attempts: "
+                f"{exc.last_attempt.value[1]} for {process_status_path}"
+            )
+            raise WorkerError
+        bc_file_tmpl = config["temperature salinity"]["download"]["bc file template"]
+        bc_file_path = Path(bc_file_tmpl.format(yyyymmdd=dotted_yyyymmdd))
+        dest_dir = Path(
+            config["temperature salinity"]["download"]["dest dir"], yyyymmdd
+        )
+        filename = config["temperature salinity"]["download"]["file name"]
+        grp_name = config["file group"]
+        lib.mkdir(dest_dir, logger, grp_name=grp_name)
+        sftp_client.get(os.fspath(bc_file_path), dest_dir / filename)
+        logger.debug(f"downloaded {host_name}:{bc_file_path} to {dest_dir/filename}")
+    finally:
+        sftp_client.close()
+        ssh_client.close()
+    nemo_cmd.api.deflate(
+        [dest_dir / filename], math.floor(multiprocessing.cpu_count() / 2)
+    )
+    checklist = {ymd: os.fspath(dest_dir / filename)}
     return checklist
 
 
-def _get_file(url, filename, dest_dir, session):
-    """
-    :type dest_dir: :class:`pathlib.Path`
-    """
-    filepath = dest_dir / filename
-    get_web_data(url, NAME, filepath, session, wait_exponential_max=10800)
-    size = filepath.stat().st_size
-    logger.debug(f"downloaded {size} bytes from {url}")
-    return filepath
+def _retry_if_not_ready(ready):
+    return not ready
+
+
+@retry(
+    retry_on_result=_retry_if_not_ready,
+    wait_fixed=5 * 60 * 1000,
+    stop_max_delay=3 * 3600 * 1000,
+    wrap_exception=True,
+)
+def _is_file_ready(sftp_client, host_name, process_status_path):
+    end_time, status = None, None
+    with tempfile.NamedTemporaryFile("wt") as process_status:
+        sftp_client.get(os.fspath(process_status_path), process_status.name)
+        logger.debug(f"downloaded {host_name}:{process_status_path}")
+        for line in open(process_status.name, "rt"):
+            if line.startswith("end_time"):
+                end_time = arrow.get(line.split(",")[1].strip())
+                end_time = arrow.get(end_time.datetime, tz.gettz("US/Pacific"))
+            if line.startswith("result"):
+                status = line.split(",")[1].strip()
+        if status == "success" and end_time < arrow.now(tz.gettz("US/Pacific")):
+            logger.debug(
+                f"LiveOcean low_passed_UBC.nc file generation completed at {end_time}"
+            )
+            return True
+        else:
+            logger.debug(
+                "LiveOcean low_passed_UBC.nc file processing not completed yet"
+            )
+            return False
 
 
 if __name__ == "__main__":

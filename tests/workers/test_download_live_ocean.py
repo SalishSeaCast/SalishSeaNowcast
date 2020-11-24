@@ -14,11 +14,12 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast download_live_ocean worker.
 """
+import grp
 import logging
+import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -39,10 +40,12 @@ def config(base_config):
                 
                 temperature salinity:
                   download:
-                    url: https://pm2.blob.core.windows.net/
-                    directory prefix: f
+                    host: boiler-nowcast
+                    ssh key: SalishSeaNEMO-nowcast_id_rsa
+                    status file template: 'LiveOcean_output/cas6_v3/f{yyyymmdd}/ubc2/Info/process_status.csv'
+                    bc file template: 'LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/low_passed_UBC.nc'
                     file name: 'low_passed_UBC.nc'
-                    dest dir: /results/forcing/LiveOcean/downloaded
+                    dest dir: forcing/LiveOcean/downloaded
                 """
             )
         )
@@ -76,8 +79,7 @@ class TestMain:
 
 
 class TestConfig:
-    """Unit tests for production YAML config file elements related to worker.
-    """
+    """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
         assert "download_live_ocean" in prod_config["message registry"]["workers"]
@@ -92,16 +94,6 @@ class TestConfig:
             "failure",
             "crash",
         ]
-
-    def test_download_url(self, prod_config):
-        download_url = prod_config["temperature salinity"]["download"]["url"]
-        assert download_url == "https://pm2.blob.core.windows.net/"
-
-    def test_download_dir_prefix(self, prod_config):
-        download_url = prod_config["temperature salinity"]["download"][
-            "directory prefix"
-        ]
-        assert download_url == "f"
 
     def test_download_file_name(self, prod_config):
         download_url = prod_config["temperature salinity"]["download"]["file name"]
@@ -153,17 +145,42 @@ class TestFailure:
 class TestDownloadLiveOcean:
     """Unit test for download_live_ocean() function."""
 
-    @patch("nowcast.workers.download_live_ocean.logger", autospec=True)
-    @patch("nowcast.workers.download_live_ocean.lib.mkdir", spec=True)
-    @patch("nowcast.workers.download_live_ocean._get_file", spec=True)
-    @patch("nowcast.workers.download_live_ocean.nemo_cmd.api.deflate", spec=True)
-    def test_checklist(self, m_deflate, m_get_file, m_mkdir, m_logger, config):
-        parsed_args = SimpleNamespace(run_date=arrow.get("2016-12-28"))
-        m_get_file.return_value = Path(
-            "/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc"
+    def test_checklist(self, config, caplog, tmp_path, monkeypatch):
+        class MockSshClient:
+            def close(self):
+                pass
+
+        class MockSftpClient:
+            def get(self, remote_path, local_path):
+                pass
+
+            def close(self):
+                pass
+
+        def mock_sftp(host_name, ssh_key):
+            return MockSshClient(), MockSftpClient()
+
+        monkeypatch.setattr(download_live_ocean.ssh_sftp, "sftp", mock_sftp)
+
+        def mock_is_file_ready(sfpt_clinet, host_name, process_status_path):
+            return True
+
+        monkeypatch.setattr(download_live_ocean, "_is_file_ready", mock_is_file_ready)
+
+        dest_dir = tmp_path / config["temperature salinity"]["download"]["dest dir"]
+        dest_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["temperature salinity"]["download"], "dest dir", dest_dir
         )
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
+
+        parsed_args = SimpleNamespace(run_date=arrow.get("2020-10-22"))
+        caplog.set_level(logging.DEBUG)
+
         checklist = download_live_ocean.download_live_ocean(parsed_args, config)
+
         expected = {
-            "2016-12-28": "/results/forcing/LiveOcean/downloaded/20161228/low_passed_UBC.nc"
+            "2020-10-22": os.fspath(dest_dir / "20201022" / "low_passed_UBC.nc")
         }
         assert checklist == expected

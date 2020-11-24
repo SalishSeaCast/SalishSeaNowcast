@@ -122,7 +122,7 @@ class TestConfig:
         )
         assert (
             temperature_salinity["download"]["dest dir"]
-            == "/results/forcing/LiveOcean/downloaded"
+            == "/results/forcing/LiveOcean/downloaded/"
         )
         assert temperature_salinity["parameter set"] == "v201905"
 
