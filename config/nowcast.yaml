@@ -680,6 +680,7 @@ run:
           PATH: $PATH:$HOME/bin
           FORCING: /data/sallen/shared
           PROJECT: /home/sallen/dlatorne
+          SUSANPROJECT: /home/sallen/sallen
       # Run type specific configurations for the runs that are executed on the
       # compute host; keyed by run type
       run types:
