@@ -815,7 +815,8 @@ class TestEditRunDesc:
         (
             "optimum",
             "",
-            "export PATH=$PATH:$HOME/bin; export FORCING=/shared; export PROJECT=/home; ",
+            "export PATH=$PATH:$HOME/bin; export FORCING=/shared; export PROJECT=/home; "
+            "export SUSANPROJECT=/home;",
         ),
     ),
 )
