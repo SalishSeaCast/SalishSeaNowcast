@@ -200,7 +200,7 @@ Build it with:
     $ module load HDF5/1.08/20
     $ module load NETCDF/4.6/1
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/NEMO-3.6-code/NEMO-3.6-code/NEMOGCM/TOOLS/
-    $ ./maketools -m X64_ORCINUS -n REBUILD_NEMO
+    $ ./maketools -m GCC_OPTIMUM_REBUILD_NEMO -n REBUILD_NEMO
 
 
 Install Python Packages
