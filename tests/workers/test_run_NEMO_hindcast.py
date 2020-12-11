@@ -61,7 +61,8 @@ def config(base_config):
                                 PATH: $PATH:$HOME/bin
                                 FORCING: /shared
                                 PROJECT: /home
-                                
+                                SUSANPROJECT: /home
+
             """
             )
         )
@@ -163,6 +164,7 @@ class TestConfig:
             "PATH": "$PATH:$HOME/bin",
             "FORCING": "/data/sallen/shared",
             "PROJECT": "/home/sallen/dlatorne",
+            "SUSANPROJECT": "/home/sallen/sallen",
         }
 
 
