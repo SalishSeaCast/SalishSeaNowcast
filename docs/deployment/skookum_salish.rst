@@ -120,12 +120,10 @@ For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files 
 
     $ cd /SalishSeaCast/
     $ conda update -n base -c defaults conda
-    $ conda create \
+    $ conda env create \
         --prefix /SalishSeaCast/sarracenia-env \
-        --channel conda-forge \
-        python=3 appdirs watchdog netifaces humanize psutil paramiko
+        -f SalishSeaNowcast/envs/environment-sarracenia.yaml
     $ source activate /SalishSeaCast/sarracenia-env
-    (/SalishSeaCast/sarracenia-env)$ python3 -m pip install amqplib metpx-sarracenia
     (/SalishSeaCast/sarracenia-env)$ sr_subscribe edit credentials.conf  # initialize datamart credentials
 
 For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.ca/:
@@ -145,6 +143,9 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
 
 Environment Variables
 =====================
+
+:file:`/SalishSeaCast/nowcast-env`
+----------------------------------
 
 Add the following files to the :file:`/SalishSeaCast/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
 
@@ -183,28 +184,22 @@ and :command:`unset` them when it is deactivated.
     unset SLACK_SSC_HINDCAST_PROGRESS
     EOF
 
-Add the following files to the :file:`/SalishSeaCast/sarracenia-env` environment to automatically :command:`export` the environment variables required by the sarracenia client when the environment is activated:
+
+:file:`/SalishSeaCast/sarracenia-env`
+-------------------------------------
+
+The :file:`/SalishSeaCast/sarracenia-env` environment variables are included in the :file:`SalishSeaNowcast/envs/environment-sarracenia.yaml` file so that they are managed by :command:`conda` to automatically :command:`export` the environment variables required by the sarracenia client when the environment is activated and :command:`unset` them when the environment is deactivated.
+To see the variables and their values:
 
 .. code-block:: bash
 
     $ cd /SalishSeaCast/sarracenia-env
-    $ mkdir -p etc/conda/activate.d
-    $ cat << EOF > etc/conda/activate.d/envvars.sh
-    export SARRACENIA_ENV=/SalishSeaCast/sarracenia-env
-    export SARRACENIA_CONFIG=/SalishSeaCast/SalishSeaNowcast/sarracenia
-    export SENTRY_DSN=a_valid_sentry_dsn_url
-    EOF
+    $ source activate /SalishSeaCast/salishsea-site-env
+    (/SalishSeaCast/salishsea-site-env) $ conda env config vars list
 
-and :command:`unset` them when it is deactivated.
 
-.. code-block:: bash
-
-    $ mkdir -p etc/conda/deactivate.d
-    $ cat << EOF > etc/conda/deactivate.d/envvars.sh
-    unset SARRCENIA_ENV
-    unset SARRACENIA_CONFIG
-    unset SENTRY_DSN
-    EOF
+:file:`/SalishSeaCast/salishsea-site-env`
+-----------------------------------------
 
 Add the following files to the :file:`/SalishSeaCast/salishsea-site-env` environment to automatically :command:`export` the environment variables required by the https://salishsea.eos.ubc.ca website app when the environment is activated:
 

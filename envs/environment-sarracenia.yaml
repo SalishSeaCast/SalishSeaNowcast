@@ -1,0 +1,34 @@
+# conda environment description file for SalishSeaCast system
+# production deployment environment for the sarracenia client that
+# maintains mirrors of the HRDPS forecast files and rivers hydrometric
+# files from the ECCC MSC datamart service.
+#
+# Create a conda environment for production deployment
+# of the sarracenia clinet with:
+#
+#    $ conda env create \
+#        -f SalishSeaNowcast/envs/environment-sarracenia.yaml \
+#        --prefix /SalishSeaCast/sarracenia-env
+
+name: sarracenia-env
+
+channels:
+  - conda-forge
+
+dependencies:
+  - appdirs
+  - humanize
+  - netifaces
+  - pip
+  - psutil
+  - paramiko
+  - python=3
+  - watchdog
+
+  - pip:
+    - amqplib
+    - metpx-sarracenia
+
+variables:
+  SARRACENIA_ENV: /SalishSeaCast/sarracenia-env
+  SARRACENIA_CONFIG: /SalishSeaCast/SalishSeaNowcast/sarracenia
