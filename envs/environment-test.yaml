@@ -8,11 +8,10 @@ name: salishsea-nowcast-test
 
 channels:
   - conda-forge
-  - defaults
-  - gomss-nowcast
 
 dependencies:
   - arrow
+  - attrs
   - beautifulsoup4
   - bottleneck
   - cartopy
@@ -21,6 +20,8 @@ dependencies:
   - coloredlogs
   - dask
   - docutils
+  - f90nml
+  - feedgen>=0.9.0
   - geopandas
   - gitpython
   - gsw
@@ -44,13 +45,18 @@ dependencies:
   - pyzmq
   - rasterio
   - requests
+  - retrying
+  - schedule
   - scipy
+  - scour
   - sentry-sdk
   - shapely
   - supervisor
+  - utm
   - verboselogs
   - watchdog
   - xarray
+  - zeep
 
   # For unit tests and coverage monitoring
   - pytest
@@ -58,12 +64,5 @@ dependencies:
 
   - pip:
     - angles
-    - attrs
-    - f90nml
-    - feedgen>=0.9.0
     - python-hglib
-    - retrying
-    - schedule
-    - scour
-    - utm
-    - zeep
+    - pytest-randomly

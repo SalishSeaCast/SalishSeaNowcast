@@ -19,11 +19,10 @@ name: salishsea-nowcast
 
 channels:
   - conda-forge
-  - defaults
-  - gomss-nowcast
 
 dependencies:
   - arrow
+  - attrs
   - beautifulsoup4
   - bottleneck
   - cartopy
@@ -32,6 +31,8 @@ dependencies:
   - coloredlogs
   - dask
   - docutils
+  - f90nml
+  - feedgen>=0.9.0
   - geopandas
   - gitpython
   - gsw
@@ -56,13 +57,18 @@ dependencies:
   - pyzmq
   - rasterio
   - requests
+  - retrying
+  - schedule
   - scipy
+  - scour
   - sentry-sdk
   - shapely
   - supervisor
+  - utm
   - verboselogs
   - watchdog
   - xarray
+  - zeep
 
   # For coding style
   - black
@@ -70,6 +76,8 @@ dependencies:
   # For unit tests
   - coverage
   - pytest
+#  If your machine has enough cores & RAM for distributed testing
+#  - pytest-xdist
 
   # For documentation
   - sphinx
@@ -81,17 +89,7 @@ dependencies:
 
   - pip:
     - angles
-    - attrs
-    - f90nml
-    - feedgen>=0.9.0
     - python-hglib
-    - retrying
-    - schedule
-    - scour
-    - utm
-    - zeep
 
     # For unit tests
     - pytest-randomly
-#      If your machine has enough cores & RAM for distributed testing
-#    - pytest-xdist

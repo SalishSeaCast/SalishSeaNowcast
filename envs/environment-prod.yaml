@@ -19,18 +19,20 @@ name: nowcast-env
 
 channels:
   - conda-forge
-  - defaults
-  - gomss-nowcast
 
 dependencies:
   - arrow
+  - attrs
   - beautifulsoup4
   - bottleneck
   - cartopy
   - cliff
   - cmocean
+  - coloredlogs
   - dask
   - docutils
+  - f90nml
+  - feedgen>=0.9.0
   - geopandas
   - gitpython
   - gsw
@@ -47,29 +49,27 @@ dependencies:
   - pip
   - poppler
   - pygrib
-  - pyproj
   - pypdf2
+  - pyproj
   - pytables
   - python=3.8
   - pyyaml
   - pyzmq
   - rasterio
   - requests
+  - retrying
+  - schedule
   - scipy
+  - scour
   - sentry-sdk
   - shapely
   - supervisor
+  - utm
+  - verboselogs
   - watchdog
   - xarray
+  - zeep
 
   - pip:
     - angles
-    - attrs
-    - f90nml
-    - feedgen>=0.9.0
     - python-hglib
-    - retrying
-    - schedule
-    - scour
-    - utm
-    - zeep
