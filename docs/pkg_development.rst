@@ -226,9 +226,8 @@ to do a clean build of the documentation.
 The output looks something like::
 
   Removing everything under '_build'...
-  Running Sphinx v1.7.6
-  making output directory...
-  loading pickled environment... not yet created
+  Running Sphinx v3.3.1
+  making output directory... done
   loading intersphinx inventory from https://docs.python.org/3/objects.inv...
   loading intersphinx inventory from https://nemo-nowcast.readthedocs.io/en/latest/objects.inv...
   loading intersphinx inventory from https://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv...
@@ -237,34 +236,24 @@ The output looks something like::
   loading intersphinx inventory from https://salishseacmd.readthedocs.io/en/latest/objects.inv...
   building [mo]: targets for 0 po files that are out of date
   building [html]: targets for 20 source files that are out of date
-  updating environment: 20 added, 0 changed, 0 removed
-  /media/doug/warehouse/conda_envs/nowcast-sphinx-build/lib/python3.6/site-packages/matplotlib/__init__.py:1357: UserWarning:  This call to matplotlib.use() has no effect
-  because the backend has already been chosen;
-  matplotlib.use() must be called *before* pylab, matplotlib.pyplot,
-  or matplotlib.backends is imported for the first time.
-
-    warnings.warn(_use_error_msg)
-
+  updating environment: [new config] 20 added, 0 changed, 0 removed
+  reading sources... [100%] workers
   looking for now-outdated files... none found
   pickling environment... done
   checking consistency... done
   preparing documents... done
   writing output... [100%] workers
-  generating indices...
+  generating indices... genindex py-modindex done
   highlighting module code... [100%] nowcast.workers.watch_ww3
-  writing additional pages... search
+  writing additional pages... search done
   copying images... [100%] ProcessFlow.png
   copying static files... done
   copying extra files... done
-  dumping search index in English (code: en) ... done
+  dumping search index in English (code: en)... done
   dumping object inventory... done
-  build succeeded, 1 warnings.
+  build succeeded.
 
   The HTML pages are in _build/html.
-
-The warning about :kbd:`matplotlib.use()` is expected; see `issue #19`_.
-
-.. _issue #19: https://github.com/SalishSeaCast/SalishSeaNowcast/issues/19
 
 The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
 You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build.
