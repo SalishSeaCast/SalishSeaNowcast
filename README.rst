@@ -19,6 +19,9 @@ Salish Sea NEMO Model Nowcast
 .. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
     :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/sphinx-linkcheck/badge.svg
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
+      :alt: Sphinx linkcheck
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3ACI
     :alt: GitHub Workflow Status
