@@ -24,7 +24,7 @@ The environment will have both the :kbd:`SalishSeaNowcast` nowcast system packag
 and the :kbd:`salishsea-site` web site app package installed in it,
 along with all of their dependencies.
 
-.. _Conda: https://conda.io/docs/
+.. _Conda: https://conda.io/en/latest/
 
 The :kbd:`SalishSeaNowcast` and :kbd:`salishsea-site` packages use some Python language features that are not available in versions prior to Python 3.6,
 in particular:
@@ -41,12 +41,11 @@ Figure development and web site operation both require access to the Salish Sea 
 So,
 you should set up this environment on a Waterhole "fish" machine.
 
-The following instructions assume that you have the `Anaconda Python Distribution`_ or `Miniconda3`_ installed.
+The following instructions assume that you have `Miniconda`_ installed.
 
-.. _Anaconda Python Distribution: https://www.anaconda.com/download/
-.. _Miniconda3: https://conda.io/docs/install/quick.html
+.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
 
-You will also need up-to-date clones of the following repositories from Bitbucket:
+You will also need up-to-date clones of the following repositories from GitHub:
 
 * NEMO_Nowcast: https://github.com/43ravens/NEMO_Nowcast
 * moad_tools: https://github.com/UBC-MOAD/moad_tools
@@ -65,8 +64,8 @@ you can create and activate a figures development environment with these command
 .. code-block:: bash
 
     $ cd SalishSeaNowcast
-    $ conda env create -f env/environment-fig-dev.yaml
-    $ source activate nowcast-fig-dev
+    $ conda env create -f envs/environment-fig-dev.yaml
+    $ conda activate nowcast-fig-dev
     (nowcast-fig-dev)$ python3 -m pip install --editable ../NEMO_Nowcast
     (nowcast-fig-dev)$ python3 -m pip install --editable ../moad_tools
     (nowcast-fig-dev)$ python3 -m pip install --editable ../tools/SalishSeaTools
@@ -81,4 +80,4 @@ To deactivate the environment use:
 
 .. code-block:: bash
 
-    (nowcast-fig-dev)$ source deactivate
+    (nowcast-fig-dev)$ conda deactivate

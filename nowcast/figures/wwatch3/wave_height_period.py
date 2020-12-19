@@ -18,10 +18,10 @@ and observed wave heights and dominant wave periods from the NOAA NDBC
 https://www.ndbc.noaa.gov/data/realtime2/ web service.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
 """
 from contextlib import suppress
 from pathlib import Path
@@ -31,10 +31,10 @@ import matplotlib.dates
 import matplotlib.pyplot as plt
 import moad_tools.observations
 import moad_tools.places
-from pandas.plotting import register_matplotlib_converters
 import requests
-from retrying import retry
 import xarray
+from pandas.plotting import register_matplotlib_converters
+from retrying import retry
 
 import nowcast.figures.website_theme
 from nowcast.figures import shared

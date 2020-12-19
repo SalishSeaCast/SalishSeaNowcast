@@ -34,7 +34,7 @@ message-based architecture provided by the `NEMO_Nowcast`_ framework package.
 `SalishSeaNowcast`_ is the Python package that uses the `NEMO_Nowcast`_ framework to implement the Salish Sea Nowcast system.
 
 .. _NEMO_Nowcast: https://nemo-nowcast.readthedocs.io/en/latest/
-.. _SalishSeaNowcast: https://bitbucket.org/salishsea/salishseanowcast
+.. _SalishSeaNowcast: https://github.com/SalishSeaCast/SalishSeaNowcast
 
 The automation system:
 
@@ -54,7 +54,7 @@ Results of the model runs can be found on the `Salish Sea NEMO model results sit
 The system is deployed on a server maintained by the UBC Dept. of Earth, Ocean and Atmospheric Sciences.
 Computing resources to run the NEMO model are provided by `Ocean Networks Canada`_ (cloud) and `Westgrid`_ (HPC).
 
-.. _Ocean Networks Canada: http://www.oceannetworks.ca/
+.. _Ocean Networks Canada: https://www.oceannetworks.ca/
 .. _Westgrid: https://www.westgrid.ca/
 
 The system consists of long-running message broker,

@@ -25,19 +25,18 @@ It is intended primarily for use on the Salish Sea Storm Surge Information
 Portal page https://salishsea.eos.ubc.ca/storm-surge/.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
 """
 from collections import namedtuple
 
 import arrow
-from matplotlib import gridspec
 import matplotlib.pyplot as plt
 import numpy
-
+from matplotlib import gridspec
 from salishsea_tools import places, nc_tools, stormtools, unit_conversions, wind_tools
 
-from nowcast.figures import shared
 import nowcast.figures.website_theme
+from nowcast.figures import shared
 
 
 def make_figure(

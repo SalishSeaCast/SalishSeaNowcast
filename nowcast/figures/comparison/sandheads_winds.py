@@ -16,21 +16,21 @@
 and direction at Sand Heads during 24 hours of a nowcast run.
 Also show a map with the location of Sand Heads marked.
 Observations are from Environment and Climate Change Canada data:
-http://climate.weather.gc.ca/
+https://climate.weather.gc.ca/
 Model forcing winds are from the Environment and Climate Change Canada
 HRDPS nested model.
 Text below the map acknowledges the sources of the observations and HRDPS product.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/default/notebooks/figures/publish/TestSandHeadsWinds.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
 """
 from types import SimpleNamespace
 
+import matplotlib.dates
 import matplotlib.pyplot as plt
 import numpy
 import xarray
 from matplotlib import gridspec
-import matplotlib.dates
 from pandas.plotting import register_matplotlib_converters
 from salishsea_tools import stormtools, unit_conversions
 from salishsea_tools.places import PLACES

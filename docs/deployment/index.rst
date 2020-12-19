@@ -102,4 +102,4 @@ The setup on :kbd:`optimum` is described in:
 
 See also the `#optimum-cluster`_ Slack channel.
 
-.. _#optimum-cluster: https://salishseacast.slack.com/archives/C011S7BCWGK
+.. _#optimum-cluster: https://salishseacast.slack.com/?redir=%2Farchives%2FC011S7BCWGK

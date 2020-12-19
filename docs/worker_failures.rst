@@ -32,11 +32,11 @@ The notebook is located in :file:`SalishSeaNowcast/nowcast/notebooks/SSH_NeahBay
 This notebook calculates the sea surface height anomaly by removing tidal predictions from the NOAA Neah Bay observations.
 It then saves the result in a netCDF file for use in NEMO simulations.
 
-.. _NOAA forecast: http://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
+.. _NOAA forecast: https://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
 
 .. _NOAA tides and water levels: https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
 
-.. _SSH_NeahBay: https://nbviewer.jupyter.org/url/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/SSH_NeahBay.ipynb
+.. _SSH_NeahBay: https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/SSH_NeahBay.ipynb
 
 
 :py:mod:`download_weather` Worker Failure
@@ -111,14 +111,14 @@ That can be accomplished as follows:
      2015-07-08 17:59:34 DEBUG [download_weather] connected to localhost port 5555
      2015-07-08 17:59:34 INFO [download_weather] downloading 12 forecast GRIB2 files for 20150708
      2015-07-08 17:59:34 INFO [download_weather] downloading 12 forecast GRIB2 files for 20150708
-     2015-07-08 17:59:37 DEBUG [download_weather] downloaded 248557 bytes from http://dd.weather.gc.ca/model_hrdps/west/grib2/12/001/CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015070812_P001-00.grib2
-     2015-07-08 17:59:40 DEBUG [download_weather] downloaded 253914 bytes from http://dd.weather.gc.ca/model_hrdps/west/grib2/12/001/CMC_hrdps_west_VGRD_TGL_10_ps2.5km_2015070812_P001-00.grib2
-     2015-07-08 17:59:42 DEBUG [download_weather] downloaded 47222 bytes from http://dd.weather.gc.ca/model_hrdps/west/grib2/12/001/CMC_hrdps_west_DSWRF_SFC_0_ps2.5km_2015070812_P001-00.grib2
+     2015-07-08 17:59:37 DEBUG [download_weather] downloaded 248557 bytes from https://dd.weather.gc.ca/model_hrdps/west/grib2/12/001/CMC_hrdps_west_UGRD_TGL_10_ps2.5km_2015070812_P001-00.grib2
+     2015-07-08 17:59:40 DEBUG [download_weather] downloaded 253914 bytes from https://dd.weather.gc.ca/model_hrdps/west/grib2/12/001/CMC_hrdps_west_VGRD_TGL_10_ps2.5km_2015070812_P001-00.grib2
+     2015-07-08 17:59:42 DEBUG [download_weather] downloaded 47222 bytes from https://dd.weather.gc.ca/model_hrdps/west/grib2/12/001/CMC_hrdps_west_DSWRF_SFC_0_ps2.5km_2015070812_P001-00.grib2
 
      ...
 
-     2015-07-08 18:16:49 DEBUG [download_weather] downloaded 71893 bytes from http://dd.weather.gc.ca/model_hrdps/west/grib2/12/048/CMC_hrdps_west_APCP_SFC_0_ps2.5km_2015070812_P048-00.grib2
-     2015-07-08 18:16:52 DEBUG [download_weather] downloaded 135163 bytes from http://dd.weather.gc.ca/model_hrdps/west/grib2/12/048/CMC_hrdps_west_PRMSL_MSL_0_ps2.5km_2015070812_P048-00.grib2
+     2015-07-08 18:16:49 DEBUG [download_weather] downloaded 71893 bytes from https://dd.weather.gc.ca/model_hrdps/west/grib2/12/048/CMC_hrdps_west_APCP_SFC_0_ps2.5km_2015070812_P048-00.grib2
+     2015-07-08 18:16:52 DEBUG [download_weather] downloaded 135163 bytes from https://dd.weather.gc.ca/model_hrdps/west/grib2/12/048/CMC_hrdps_west_PRMSL_MSL_0_ps2.5km_2015070812_P048-00.grib2
      2015-07-08 18:16:52 INFO [download_weather] weather forecast 12 downloads complete
      2015-07-08 18:16:52 INFO [download_weather] weather forecast 12 downloads complete
      2015-07-08 18:16:52 DEBUG [download_weather] sent message: (success 12) 12 weather forecast ready
@@ -159,9 +159,9 @@ and its option flags:
       --yesterday    Download forecast files for previous day's date.
 
 The :kbd:`--yesterday` flag allows you to download the previous day's forecast files.
-Use that flag only during the several hour period for which two day's forecast files exist in the http://dd.weather.gc.ca/model_hrdps/west/grib2/ file space.
+Use that flag only during the several hour period for which two day's forecast files exist in the https://dd.weather.gc.ca/model_hrdps/west/grib2/ file space.
 To determine if the :kbd:`--yesterday` flag can be used check the contents of a forecast's hourly directories;
-e.g. http://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/,
+e.g. https://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/,
 to see if files for 2 days exist.
 
 Even if the worker cannot be re-run in the nowcast system deployment environment on :kbd:`skookum` due to permission issues the forecast products can be downloaded using a :ref:`SalishSeaNowcastDevelopmentEnvironment`.

@@ -20,16 +20,16 @@
 *******************************
 
 In April 2019 the `Ocean Networks Canada`_ private cloud computing facility was migrated from :kbd:`west.cloud` to the Compute Canada `arbutus.cloud`_.
-:kbd:`arbutus.cloud` runs on `OpenStack Queens`_ release.
+:kbd:`arbutus.cloud` runs on `OpenStack`_.
 
-.. _Ocean Networks Canada: http://www.oceannetworks.ca/
-.. _arbutus.cloud: https://www.westgrid.ca/support/systems/arbutus
-.. _OpenStack Queens: https://www.openstack.org/software/queens/
+.. _Ocean Networks Canada: https://www.oceannetworks.ca/
+.. _arbutus.cloud: https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud_.28arbutus.cloud.computecanada.ca.29
+.. _OpenStack: https://www.openstack.org/
 
 The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
-The :kbd:`arbutus.cloud` dashboard is at https://arbutus.cloud.computecanada.ca/.
+The :kbd:`arbutus.cloud` dashboard is at :kbd:`https://arbutus.cloud.computecanada.ca/`.
 
-.. _OpenStack dashboard: https://docs.openstack.org/horizon/queens/user/
+.. _OpenStack dashboard: https://docs.openstack.org/horizon/stein/user/
 
 Authentication and authorization for :kbd:`arbutus.cloud` is managed by `computecanada`_,
 so those are the userid/password that are required to log in to the dashboard.
@@ -669,8 +669,8 @@ Build WAVEWATCH III :sup:`®`
 
 Access to download WAVEWATCH III :sup:`®`
 (wwatch3 hereafter)
-code tarballs is obtained by sending an email request from the http://polar.ncep.noaa.gov/waves/wavewatch/license.shtml.
-The eventual reply will provide a username and password that can be used to access http://polar.ncep.noaa.gov/waves/wavewatch/distribution/ from which the :file:`wwatch3.v5.16.tar.gz` files can be downloaded with:
+code tarballs is obtained by sending an email request from the https://polar.ncep.noaa.gov/waves/wavewatch/license.shtml.
+The eventual reply will provide a username and password that can be used to access https://polar.ncep.noaa.gov/waves/wavewatch/distribution/ from which the :file:`wwatch3.v5.16.tar.gz` files can be downloaded with:
 
 .. code-block:: bash
 
@@ -681,17 +681,10 @@ where :kbd:`username`,
 :kbd:`password`,
 and :kbd:`download_url` are those provided in the reply to the email request.
 
-.. note::
-    The `west.cloud-vm`_ repo provides a `Vagrant`_ virtual machine configuration that emulates the Salish Sea Nowcast system compute deployment on ONC west.cloud VMs.
-    The VM can be used for small scale testing of wwatch3.
-
-    .. _west.cloud-vm: https://bitbucket.org/salishsea/west.cloud-vm
-    .. _Vagrant: https://www.vagrantup.com/
-
 Follow the instructions in the Installing Files section of the `wwatch3 manual`_ to unpack the tarball to create a local installation in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/`
 that will use the :program:`gfortran` and :program:`gcc` compilers:
 
-.. _wwatch3 manual: http://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
+.. _wwatch3 manual: https://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
 
 .. code-block:: bash
 

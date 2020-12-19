@@ -34,7 +34,7 @@ The `DevelopTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures
 You can take that approach if you wish,
 or you can develop directly in a module.
 
-.. _DevelopTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
+.. _DevelopTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
 
 Of course,
 the ultimate goal is to produce a module.
@@ -42,7 +42,7 @@ Once you've got a code module,
 you should create a notebook that tests it in the nowcast context.
 The `TestTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` is an example for the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module.
 
-.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
+.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
 
 
 Example Module
@@ -538,7 +538,7 @@ The function docstring
 includes description and type information for each of the function arguments.
 Those are written using `Sphinx Info Field List markup`_ so that they render nicely in the :ref:`automatically generated module documentation <AutomaticModuleDocumentationGeneration>`.
 
-.. _Sphinx Info Field List markup: http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists
+.. _Sphinx Info Field List markup: https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists
 
 Simple,
 1-word type information can be included in the :kbd:`:param ...:` role,

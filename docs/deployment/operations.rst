@@ -37,7 +37,7 @@ are managed by the `supervisor`_ process manager tool.
 So is the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
 
 .. _supervisor: http://supervisord.org/
-.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst#documentation
+.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst
 .. _ECCC MSC datamart service: https://dd.weather.gc.ca/
 
 
@@ -116,6 +116,6 @@ Use :command:`tail -f` to follow the logs to view updates as they occur.
 Automatic Deployment of Changes to :kbd:`salishsea-site` App
 ============================================================
 
-A `deployment pipeline on Bitbucket`_ causes changes to be pulled and updated to :file:`/SalishSeaCast/salishsea-site/` and the app to be restarted via :command:`supervisorctl` whenever changes are pushed to the repo on Bitbucket.
+A `GitHub Actions workflow`_ causes changes to be pulled and updated to :file:`/SalishSeaCast/salishsea-site/` and the app to be restarted via :command:`supervisorctl` whenever changes are pushed to the repo on GitHub.
 
-.. _deployment pipeline on Bitbucket: https://bitbucket.org/salishsea/salishsea-site/addon/pipelines/
+.. _GitHub Actions workflow: https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow:deployment

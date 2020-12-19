@@ -26,10 +26,10 @@ in the south and Johnstone Strait in the north.
 
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
 
 """
 from types import SimpleNamespace

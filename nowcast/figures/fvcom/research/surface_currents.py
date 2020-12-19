@@ -17,7 +17,7 @@
 speed for several regions of interest within the VHFR FVCOM model domain.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestSurfaceCurrents.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/research/TestSurfaceCurrents.ipynb
 """
 
 import warnings

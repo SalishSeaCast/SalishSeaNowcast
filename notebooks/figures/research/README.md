@@ -6,7 +6,7 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ##[DevelopVelocitySectionAndSurfaceModule.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopVelocitySectionAndSurfaceModule.ipynb)  
+* ##[DevelopVelocitySectionAndSurfaceModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopVelocitySectionAndSurfaceModule.ipynb)  
     
     **Develop `velocity_section_and_surface` Figure Module**  
       
@@ -16,7 +16,7 @@ Descriptions under the links below are from the first cell of the notebooks
     It follows the function organization patterns described in  
     [Creating a Figure Module](https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html) docs.  
 
-* ##[TestTracerThalwegAndSurface.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb)  
+* ##[TestTracerThalwegAndSurface.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb)  
     
     **Test `tracer_thalweg_and_surface` Module**  
       
@@ -25,17 +25,17 @@ Descriptions under the links below are from the first cell of the notebooks
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker  
     to help ensure that the module will work in the nowcast production context.  
 
-* ##[PlacesandMapForTimeSeries.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/PlacesandMapForTimeSeries.ipynb)  
+* ##[PlacesandMapForTimeSeries.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/PlacesandMapForTimeSeries.ipynb)  
     
     **Sketch out a Map for Timeseries and Find Good Places ****  
 
-* ##[DevelopFrontPlots.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopFrontPlots.ipynb)  
+* ##[DevelopFrontPlots.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopFrontPlots.ipynb)  
     
     **Develop `front_plots` Figure Module**  
       
     Development of functions for `nowcast.figures.research.front_plots` web site figure module.  
 
-* ##[DevelopTracerThalwegAndSurfaceModule.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb)  
+* ##[DevelopTracerThalwegAndSurfaceModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb)  
     
     **Develop `tracer_thalweg_and_surface` Figure Module**  
       
@@ -45,7 +45,7 @@ Descriptions under the links below are from the first cell of the notebooks
     It follows the function organization patterns described in  
     [Creating a Figure Module](https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html) docs.  
 
-* ##[TestTimeSeriesPlots.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTimeSeriesPlots.ipynb)  
+* ##[TestTimeSeriesPlots.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestTimeSeriesPlots.ipynb)  
     
     **Test `time_series_plots` Module**  
       
@@ -54,7 +54,7 @@ Descriptions under the links below are from the first cell of the notebooks
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker  
     to help ensure that the module will work in the nowcast production context.  
 
-* ##[TestVelocitySectionAndSurface.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestVelocitySectionAndSurface.ipynb)  
+* ##[TestVelocitySectionAndSurface.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestVelocitySectionAndSurface.ipynb)  
     
     **Test `velocity_section_and_surface` Module**  
       
@@ -63,7 +63,7 @@ Descriptions under the links below are from the first cell of the notebooks
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker  
     to help ensure that the module will work in the nowcast production context.  
 
-* ##[TestTracerThalwegAndSurfaceHourly.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestTracerThalwegAndSurfaceHourly.ipynb)  
+* ##[TestTracerThalwegAndSurfaceHourly.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestTracerThalwegAndSurfaceHourly.ipynb)  
     
     **Test `tracer_thalweg_and_surface_hourly` Module**  
       
@@ -72,7 +72,7 @@ Descriptions under the links below are from the first cell of the notebooks
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker  
     to help ensure that the module will work in the nowcast production context.  
 
-* ##[DevelopBaynesSoundAGRIF.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopBaynesSoundAGRIF.ipynb)  
+* ##[DevelopBaynesSoundAGRIF.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopBaynesSoundAGRIF.ipynb)  
     
     **Develop `baynes_sound_agrif` Figure Module**  
       
@@ -85,7 +85,7 @@ Descriptions under the links below are from the first cell of the notebooks
     a fringe of the full domain on the 3 non-land sides.  
     Ideally the axes tick labels will be lon/lat with angled grid lines.  
 
-* ##[TestBaynesSoundAGRIF.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/TestBaynesSoundAGRIF.ipynb)  
+* ##[TestBaynesSoundAGRIF.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestBaynesSoundAGRIF.ipynb)  
     
     **Test `baynes_sound_agrif` Module**  
       
@@ -94,7 +94,7 @@ Descriptions under the links below are from the first cell of the notebooks
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker  
     to help ensure that the module will work in the nowcast production context.  
 
-* ##[DevelopTimeSeriesPlots.ipynb](https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb)  
+* ##[DevelopTimeSeriesPlots.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb)  
     
     **Develop `time_series_plots` Figure Module**  
       

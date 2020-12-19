@@ -23,7 +23,7 @@ is centred.
 Text below the tidal cycle graph acknowledges the use of :program:`ttide`.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
 """
 from collections import namedtuple
 

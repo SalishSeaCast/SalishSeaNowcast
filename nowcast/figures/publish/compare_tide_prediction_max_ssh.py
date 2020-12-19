@@ -35,31 +35,30 @@ tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
 """
 from datetime import timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
-from matplotlib import gridspec
 import matplotlib.dates
 import matplotlib.pyplot as plt
-from matplotlib.ticker import NullFormatter
 import netCDF4
 import numpy
-from pandas.plotting import register_matplotlib_converters
 import requests
 import xarray
-
+from matplotlib import gridspec
+from matplotlib.ticker import NullFormatter
+from pandas.plotting import register_matplotlib_converters
 from salishsea_tools import data_tools, viz_tools, wind_tools
 from salishsea_tools.places import PLACES
 
-from nowcast.figures import shared
 import nowcast.figures.website_theme
+from nowcast.figures import shared
 
 
 def make_figure(

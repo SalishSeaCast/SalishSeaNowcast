@@ -17,15 +17,15 @@ salinity observations from the ONC instrument package aboard a BC Ferries
 vessel.
 
 Testing notebook for this module is
-http://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
 """
 from collections import namedtuple
 
 import matplotlib.pyplot as plt
 import numpy as np
+from salishsea_tools import nc_tools, teos_tools, viz_tools
 
 import nowcast.figures.website_theme
-from salishsea_tools import nc_tools, teos_tools, viz_tools
 
 
 def make_figure(grid_T_hr, figsize=(20, 7.5), theme=nowcast.figures.website_theme):

@@ -17,7 +17,7 @@
 the VHFR FVCOM model domain along several thalweg transects.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestThalwegTransect.ipynb
+`https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/research/TestThalwegTransect.ipynb`
 """
 
 from types import SimpleNamespace

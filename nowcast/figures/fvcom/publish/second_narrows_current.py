@@ -17,22 +17,22 @@ Ironworkers Memorial Crossing bridge calculated by the VHFR FVCOM model,
 the observed current measured by a horizontal ADCP on the bridge piling.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/TestSecondNarrowsCurrent.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/publish/TestSecondNarrowsCurrent.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/salishseanowcast/raw/tip/notebooks/figures/fvcom/DevelopSecondNarrowsCurrent.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/publish/DevelopSecondNarrowsCurrent.ipynb
 """
 from types import SimpleNamespace
 
 import matplotlib.dates
 import matplotlib.pyplot as plt
 import numpy
+import xarray
 from pandas.plotting import register_matplotlib_converters
 from salishsea_tools import unit_conversions
-import xarray
 
-from nowcast.figures import shared
 import nowcast.figures.website_theme
+from nowcast.figures import shared
 
 
 def make_figure(
