@@ -1,61 +1,69 @@
-"""Salish Sea NEMO Jupyter Notebook collection README generator
+#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  and The University of British Columbia
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+"""Jupyter Notebook collection README generator
 
-Copyright 2013-2020 The Salish Sea MEOPAR Contributors
-and The University of British Columbia
+When you add a new notebook to this directory,
+rename a notebook,
+or change the description of a notebook in its first Markdown cell,
+please generate a updated `README.md` file with:
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
+    python3 -m make_readme
 
-   http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+and commit and push the updated `README.md` to GitHub.
 """
 import datetime
-import glob
 import json
-import os
 import re
+from pathlib import Path
 
-
-NBVIEWER = "http://nbviewer.ipython.org/urls"
-REPO = "bitbucket.org/salishsea/salishseanowcast/raw/tip"
-REPO_DIR = "notebooks"
+NBVIEWER = "https://nbviewer.jupyter.org/github"
+GITHUB_ORG = "SalishSeaCast"
+REPO_NAME = "SalishSeaNowcast"
 TITLE_PATTERN = re.compile("#{1,6} ?")
 
 
 def main():
-    url = os.path.join(NBVIEWER, REPO, REPO_DIR)
+    url = f"{NBVIEWER}/{GITHUB_ORG}/{REPO_NAME}/blob/master/{Path.cwd().name}"
+
     readme = """\
 The Jupyter Notebooks in this directory document
-various aspects of the development and maintenance of the Salish Sea
-model nowcast system.
+various aspects of the development and maintenance of the SalishSeaCast
+automation system.
 
 In particular:
 
-* The [ERDDAP_datasets.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/ERDDAP_datasets.ipynb)
+* The [ERDDAP_datasets.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/ERDDAP_datasets.ipynb)
   notebook describes and partially automates the process of generating
   XML fragments for model results datasets to be included in the ERDDAP
   server system.
 * The
-[DevelopingNowcastFigureFunctions.ipynb](http://nbviewer.ipython.org/urls/bitbucket.org/salishsea/tools/raw/tip/SalishSeaNowcast/notebooks/DevelopingNowcastFigureFunctions.ipynb)
+[DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/DevelopingNowcastFigureFunctions.ipynb)
   notebook describes the recommended process for development of those functions,
   and provides an example of development of one.
 
 
 The links below are to static renderings of the notebooks via
-[nbviewer.ipython.org](http://nbviewer.ipython.org/).
+[nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
 """
-    for fn in glob.glob("*.ipynb"):
-        readme += f"* ##[{fn}]({url}/{fn})  \n    \n"
+    for fn in Path(".").glob("*.ipynb"):
+        readme += f"* ## [{fn}]({url}/{fn})  \n    \n"
         readme += notebook_description(fn)
+
     license = f"""
 ##License
 
@@ -90,9 +98,9 @@ def notebook_description(fn):
             line = TITLE_PATTERN.sub("**", line)
             suffix = "**"
         if line.endswith("\n"):
-            description += f"    {line[:-1]}{suffix}  \n"
+            description += f"    {line[:-1]}{suffix}\n"
         else:
-            description += f"    {line}{suffix}  "
+            description += f"    {line}{suffix}"
     description += "\n" * 2
     return description
 
