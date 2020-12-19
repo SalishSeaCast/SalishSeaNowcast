@@ -1,0 +1,67 @@
+name: sphinx-linkcheck
+
+on:
+  push:
+    branches:
+    - '*'
+  pull_request:
+    branches:
+    - '*'
+  schedule:
+    - cron: 43 4 1 * *  # 04:43 UTC on the 1st day of each month
+
+jobs:
+  sphinx-linkcheck:
+    name: linkcheck docs
+    runs-on: 'ubuntu-latest'
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.9']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache conda pkgs
+        uses: actions/cache@v1
+        env:
+          # Increase this value to reset cache if envs/environment-test.yaml has not changed
+          CACHE_NUMBER: 0
+        with:
+          path: ~/conda_pkgs_dir
+          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('envs/environment-test.yaml') }}
+
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+           auto-update-conda: false
+           auto-activate-base: false
+           use-only-tar-bz2: true # Required for caching to work properly!
+           environment-file: envs/environment-test.yaml
+           python-version: ${{ matrix.python-version }}
+           activate-environment: salishsea-nowcast-test
+
+      - name: Install packages
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/FVCOM-Cmd.git#egg=FVCOM-Cmd
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git@6c784a4dc44dd9030aafe9a8519e5ae0b6cc3183#egg=OPPTools
+          python3 -m pip install --editable $GITHUB_WORKSPACE
+
+      - name: linkcheck docs
+        shell: bash -l {0}
+        run: |
+          (cd docs && make linkcheck)
+
+      - uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          author_name: Sphinx linkcheck
+          fields: repo,eventName,ref,workflow
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        if: always()
