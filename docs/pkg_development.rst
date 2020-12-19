@@ -22,8 +22,8 @@
 .. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
-.. image:: https://img.shields.io/badge/python-3.8-blue.svg
-    :target: https://docs.python.org/3.8/
+.. image:: https://img.shields.io/badge/python-3.9-blue.svg
+    :target: https://docs.python.org/3.9/
     :alt: Python Version
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast
@@ -55,11 +55,11 @@ The package uses the `NEMO_Nowcast`_ framework to implement the :ref:`SalishSeaN
 Python Versions
 ===============
 
-.. image:: https://img.shields.io/badge/python-3.8-blue.svg
-    :target: https://docs.python.org/3.8/
+.. image:: https://img.shields.io/badge/python-3.9-blue.svg
+    :target: https://docs.python.org/3.9/
     :alt: Python Version
 
-The :kbd:`SalishSeaNowcast` package is developed and tested using `Python`_ 3.8.
+The :kbd:`SalishSeaNowcast` package is developed and tested using `Python`_ 3.9.
 The package uses some Python language features that are not available in versions prior to 3.6,
 in particular:
 
