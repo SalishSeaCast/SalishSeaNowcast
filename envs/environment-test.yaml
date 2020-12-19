@@ -62,6 +62,10 @@ dependencies:
   - pytest
   - pytest-cov
 
+  # For documentation links checking
+  - sphinx
+  - sphinx_rtd_theme
+
   - pip:
     - angles
     - python-hglib
