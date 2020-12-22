@@ -12,26 +12,34 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea NEMO Jupyter Notebook collection README generator
+"""Jupyter Notebook collection README generator
+
+When you add a new notebook to this directory,
+rename a notebook,
+or change the description of a notebook in its first Markdown cell,
+please generate a updated `README.md` file with:
+
+    python3 -m make_readme
+
+and commit and push the updated `README.md` to GitHub.
 """
 import datetime
-import glob
 import json
-import os
 import re
+from pathlib import Path
 
-
-NBVIEWER = "https://nbviewer.jupyter.org/urls"
-REPO = "bitbucket.org/salishsea/salishseanowcast/raw/tip"
-REPO_DIR = "notebooks/figures/fvcom/publish"
+NBVIEWER = "https://nbviewer.jupyter.org/github"
+GITHUB_ORG = "SalishSeaCast"
+REPO_NAME = "SalishSeaNowcast"
 TITLE_PATTERN = re.compile("#{1,6} ?")
 
 
 def main():
-    url = os.path.join(NBVIEWER, REPO, REPO_DIR)
+    url = f"{NBVIEWER}/{GITHUB_ORG}/{REPO_NAME}/blob/master/{Path.cwd().name}"
+
     readme = """\
 The Jupyter Notebooks in this directory are for development and testing of
-the results figures generation modules of the SalishSeaCast system.
+the results figures generation modules of the SalishSeaCast automation system.
 
 The links below are to static renderings of the notebooks via
 [nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
@@ -39,9 +47,10 @@ Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
 """
-    for fn in glob.glob("*.ipynb"):
-        readme += f"* ##[{fn}]({url}/{fn})  \n    \n"
+    for fn in Path(".").glob("*.ipynb"):
+        readme += f"* ## [{fn}]({url}/{fn})  \n    \n"
         readme += notebook_description(fn)
+
     license = f"""
 ##License
 
@@ -76,9 +85,9 @@ def notebook_description(fn):
             line = TITLE_PATTERN.sub("**", line)
             suffix = "**"
         if line.endswith("\n"):
-            description += f"    {line[:-1]}{suffix}  \n"
+            description += f"    {line[:-1]}{suffix}\n"
         else:
-            description += f"    {line}{suffix}  "
+            description += f"    {line}{suffix}"
     description += "\n" * 2
     return description
 
