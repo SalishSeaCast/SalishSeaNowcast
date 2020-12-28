@@ -149,7 +149,7 @@ ssh:
   tidal predictions: /SalishSeaCast/SalishSeaNowcast/tidal_predictions/
   # Name of Neah Bay hourly prediction file
   # **Must be quoted because of space**
-  neah bay hourly: 'Neah Bay_1h_tidal_prediction_01-Jan-2013_31-Dec-2020.csv'
+  neah bay hourly: 'Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv'
   # Destination directory for Neah Bay sea surface height open boundary files
   ssh dir: /results/forcing/sshNeahBay/
   # Template for the sea surface height forcing file name
