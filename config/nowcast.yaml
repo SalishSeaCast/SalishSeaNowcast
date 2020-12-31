@@ -493,7 +493,7 @@ storm surge feeds:
       title: SalishSeaCast Storm Surge Alerts for Port Metro Vancouver
       city: Vancouver
       tide gauge stn: Point Atkinson
-      tidal predictions: 'Point Atkinson_tidal_prediction_01-Jan-2013_31-Dec-2020.csv'
+      tidal predictions: 'Point Atkinson_tidal_prediction_30-Dec-2006_31-Dec-2030.csv'
 
 
 run:
