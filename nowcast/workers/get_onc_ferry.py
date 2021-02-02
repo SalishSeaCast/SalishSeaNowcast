@@ -1,4 +1,4 @@
-#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,19 +26,19 @@ https://salishsea.eos.ubc.ca/erddap/tabledap/index.html?page=1&itemsPerPage=1000
 Development notebook:
 https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/tip/notebooks/ONC-Ferry-DataToERDDAP.ipynb
 """
-from contextlib import suppress
 import logging
 import os
+from contextlib import suppress
 from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
-from nemo_nowcast import NowcastWorker, WorkerError
 import numpy
 import requests
+import xarray
+from nemo_nowcast import NowcastWorker, WorkerError
 from salishsea_tools import data_tools
 from salishsea_tools.places import PLACES
-import xarray
 
 NAME = "get_onc_ferry"
 logger = logging.getLogger(NAME)

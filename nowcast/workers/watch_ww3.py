@@ -1,4 +1,4 @@
-#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,10 +17,10 @@ progress of a WaveWatch3 run on the ONC cloud computing facility.
 """
 import logging
 import os
-from pathlib import Path
 import shlex
 import subprocess
 import time
+from pathlib import Path
 
 from nemo_nowcast import NowcastWorker
 

@@ -1,4 +1,4 @@
-#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,10 +20,11 @@ import os
 from pathlib import Path
 
 import arrow
-from nemo_nowcast import NowcastWorker
-from nowcast import lib
-from salishsea_tools import viz_tools
 import xarray
+from nemo_nowcast import NowcastWorker
+from salishsea_tools import viz_tools
+
+from nowcast import lib
 
 NAME = "make_CHS_currents_file"
 logger = logging.getLogger(NAME)

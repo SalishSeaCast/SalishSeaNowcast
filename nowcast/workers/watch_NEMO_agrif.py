@@ -1,4 +1,4 @@
-#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,9 @@ NEMO AGRIF run on an HPC cluster that uses the TORQUE/MOAB scheduler.
 """
 import logging
 import os
-from pathlib import Path
 import tempfile
 import time
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow

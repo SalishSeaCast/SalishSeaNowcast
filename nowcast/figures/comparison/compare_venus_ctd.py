@@ -1,4 +1,4 @@
-#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +14,17 @@
 #  limitations under the License.
 """
 """
-from collections import namedtuple
 import os
+from collections import namedtuple
 
-from matplotlib.dates import DateFormatter
 import matplotlib.pyplot as plt
 import numpy as np
 import pytz
-
+from matplotlib.dates import DateFormatter
 from salishsea_tools import data_tools, places, nc_tools, teos_tools
 
-from nowcast.figures import shared
 import nowcast.figures.website_theme
+from nowcast.figures import shared
 
 
 def make_figure(

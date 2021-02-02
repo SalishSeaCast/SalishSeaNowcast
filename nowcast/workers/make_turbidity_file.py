@@ -1,4 +1,4 @@
-#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,7 +26,6 @@ import netCDF4 as nc
 import numpy as np
 import pandas as pd
 import pytz
-
 from nemo_nowcast import NowcastWorker
 
 NAME = "make_turbidity_file"

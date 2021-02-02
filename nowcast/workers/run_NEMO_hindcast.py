@@ -1,4 +1,4 @@
-#  Copyright 2013-2020 The Salish Sea MEOPAR contributors
+#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,14 +18,14 @@ scheduler, and queues the run.
 """
 import logging
 import os
-from pathlib import Path
 import tempfile
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
 import f90nml
-from nemo_nowcast import NowcastWorker, WorkerError
 import yaml
+from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import ssh_sftp
 
