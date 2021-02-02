@@ -109,7 +109,7 @@ class TestConfig:
         )
         assert (
             ssh["neah bay hourly"]
-            == "Neah Bay_1h_tidal_prediction_01-Jan-2013_31-Dec-2020.csv"
+            == "Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv"
         )
         assert ssh["ssh dir"] == "/results/forcing/sshNeahBay/"
         assert ssh["file template"] == "ssh_{:y%Ym%md%d}.nc"
