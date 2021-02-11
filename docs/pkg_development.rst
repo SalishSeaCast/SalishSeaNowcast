@@ -468,7 +468,7 @@ The output looks something like::
   (line  397) ok        https://docs.python.org/3/library/functions.html#float
   (line  397) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.storm_surge_risk_level
   (line  429) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.places.PLACES
-  (line   12) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/analysis-doug/blob/master/notebooks/ONC-CTD-DataToERDDAP.ipynb
+  (line   12) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/analysis-doug/blob/main/notebooks/ONC-CTD-DataToERDDAP.ipynb
   (line    5) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/publish/TestSecondNarrowsCurrent.ipynb
   (line    1) ok        https://climate.weather.gc.ca/
   (line    8) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/publish/DevelopSecondNarrowsCurrent.ipynb

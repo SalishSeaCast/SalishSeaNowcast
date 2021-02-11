@@ -24,7 +24,7 @@ The data are stored as a netCDF-4/HDF5 file that is accessible via
 https://salishsea.eos.ubc.ca/erddap/tabledap/index.html?page=1&itemsPerPage=1000.
 
 Development notebook:
-https://nbviewer.jupyter.org/github/SalishSeaCast/analysis-doug/blob/master/notebooks/ONC-CTD-DataToERDDAP.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/analysis-doug/blob/main/notebooks/ONC-CTD-DataToERDDAP.ipynb
 """
 import logging
 import os
