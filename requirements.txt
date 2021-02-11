@@ -40,7 +40,7 @@ colorama==0.4.4
 coloredlogs==15.0
 colorspacious==1.1.2
 coverage==5.4
-cryptography==3.3.1
+cryptography==3.3.2
 cycler==0.10.0
 cytoolz==0.11.0
 dask==2021.1.1
