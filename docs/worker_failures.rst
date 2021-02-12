@@ -36,7 +36,7 @@ It then saves the result in a netCDF file for use in NEMO simulations.
 
 .. _NOAA tides and water levels: https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
 
-.. _SSH_NeahBay: https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/SSH_NeahBay.ipynb
+.. _SSH_NeahBay: https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/SSH_NeahBay.ipynb
 
 
 :py:mod:`download_weather` Worker Failure

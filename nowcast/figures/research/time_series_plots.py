@@ -22,10 +22,10 @@
 over the last 2 months at a time series site.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestTimeSeriesPlots.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTimeSeriesPlots.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb
 """
 
 from types import SimpleNamespace

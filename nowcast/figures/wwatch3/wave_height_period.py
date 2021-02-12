@@ -18,10 +18,10 @@ and observed wave heights and dominant wave periods from the NOAA NDBC
 https://www.ndbc.noaa.gov/data/realtime2/ web service.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
 """
 from contextlib import suppress
 from pathlib import Path

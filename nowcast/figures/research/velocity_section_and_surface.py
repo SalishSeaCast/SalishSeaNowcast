@@ -18,10 +18,10 @@ and on the surface for a section of the domain that excludes Puget Sound
 in the south and Johnstone Strait in the north.
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopVelocitySectionAndSurfaceModule.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopVelocitySectionAndSurfaceModule.ipynb
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestVelocitySectionAndSurface.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestVelocitySectionAndSurface.ipynb
 """
 from types import SimpleNamespace
 

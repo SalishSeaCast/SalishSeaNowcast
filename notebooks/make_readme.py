@@ -44,12 +44,12 @@ automation system.
 
 In particular:
 
-* The [ERDDAP_datasets.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/ERDDAP_datasets.ipynb)
+* The [ERDDAP_datasets.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/ERDDAP_datasets.ipynb)
   notebook describes and partially automates the process of generating
   XML fragments for model results datasets to be included in the ERDDAP
   server system.
 * The
-[DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/DevelopingNowcastFigureFunctions.ipynb)
+[DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/DevelopingNowcastFigureFunctions.ipynb)
   notebook describes the recommended process for development of those functions,
   and provides an example of development of one.
 

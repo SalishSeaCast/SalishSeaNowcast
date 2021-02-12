@@ -6,7 +6,7 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ## [TestPtAtkinsonTideModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestPtAtkinsonTideModule.ipynb)  
+* ## [TestPtAtkinsonTideModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/TestPtAtkinsonTideModule.ipynb)  
     
     **Test `pt_atkinson_tide` Module**
     

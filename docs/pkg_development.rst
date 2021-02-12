@@ -360,8 +360,8 @@ The output looks something like::
   (line  670) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#module-salishsea_tools.places
   (line  757) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.visualisations.contour_thalweg
   (line  863) ok        https://www.python.org/dev/peps/pep-0008/
-  (line   39) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
-  (line   33) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
+  (line   39) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
+  (line   33) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
   (line  863) ok        https://github.com/google/yapf
   writing output... [ 50%] figures/fig_dev_env
   (line   34) ok        https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
@@ -438,7 +438,7 @@ The output looks something like::
   (line   25) ok        https://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
   (line  161) ok        https://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/
   (line  161) ok        https://dd.weather.gc.ca/model_hrdps/west/grib2/
-  (line   29) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/SSH_NeahBay.ipynb
+  (line   29) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/SSH_NeahBay.ipynb
   (line   25) ok        https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
   writing output... [100%] workers
   (line   38) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/message_broker.html#messagebroker
@@ -469,29 +469,29 @@ The output looks something like::
   (line  397) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.storm_surge_risk_level
   (line  429) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.places.PLACES
   (line   12) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/analysis-doug/blob/main/notebooks/ONC-CTD-DataToERDDAP.ipynb
-  (line    5) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/publish/TestSecondNarrowsCurrent.ipynb
+  (line    5) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestSecondNarrowsCurrent.ipynb
   (line    1) ok        https://climate.weather.gc.ca/
-  (line    8) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/publish/DevelopSecondNarrowsCurrent.ipynb
-  (line    9) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/publish/DevelopTideStnWaterLevel.ipynb
+  (line    8) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopSecondNarrowsCurrent.ipynb
+  (line    9) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopTideStnWaterLevel.ipynb
   (line   12) ok        https://www.eoas.ubc.ca/~rich/#T_Tide
-  (line    5) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
-  (line   23) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
-  (line   10) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
-  (line    6) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/publish/TestTideStnWaterLevel.ipynb
+  (line    5) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
+  (line   23) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+  (line   10) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
+  (line    6) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestTideStnWaterLevel.ipynb
   (line    8) ok        https://salishsea.eos.ubc.ca/storm-surge/
-  (line    4) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/fvcom/research/TestSurfaceCurrents.ipynb
+  (line    4) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/research/TestSurfaceCurrents.ipynb
   (line    7) ok        https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html#creating-a-figure-module
-  (line   26) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
+  (line   26) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
   (line  545) ok        https://docs.python.org/3/library/constants.html#True
-  (line   11) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
+  (line   11) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
   (line  553) ok        https://salishsea.eos.ubc.ca/erddap/griddap/index.html?page=1&itemsPerPage=1000
   (line    1) ok        https://www.ndbc.noaa.gov/data/realtime2/
-  (line   11) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
-  (line   13) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
-  (line    6) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
-  (line   10) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/TestTimeSeriesPlots.ipynb
-  (line   13) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb
-  (line    9) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
+  (line   11) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
+  (line   13) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
+  (line    6) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
+  (line   10) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTimeSeriesPlots.ipynb
+  (line   13) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb
+  (line    9) ok        https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
 
   build succeeded.
 

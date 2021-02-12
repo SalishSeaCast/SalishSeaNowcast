@@ -23,7 +23,7 @@ level, when it occurs, and the 4 hr averaged wind speed, as well as
 acknowledgement of data sources.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
 """
 from collections import namedtuple
 

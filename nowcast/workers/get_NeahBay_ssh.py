@@ -248,7 +248,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
         quiet=True,
     )
     ssh_file.source = os.fspath(textfile)
-    ssh_file.references = f"https://github.com/SalishSeaCast/SalishSeaNowcast/blob/master/nowcast/workers/{NAME}.py"
+    ssh_file.references = f"https://github.com/SalishSeaCast/SalishSeaNowcast/blob/main/nowcast/workers/{NAME}.py"
     logger.debug(f"created western open boundary file {filepath}")
 
     # Create netCDF dimensions

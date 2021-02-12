@@ -22,7 +22,7 @@ HRDPS nested model.
 Text below the map acknowledges the sources of the observations and HRDPS product.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
+https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
 """
 from types import SimpleNamespace
 

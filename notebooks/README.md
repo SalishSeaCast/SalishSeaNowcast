@@ -4,12 +4,12 @@ automation system.
 
 In particular:
 
-* The [ERDDAP_datasets.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/ERDDAP_datasets.ipynb)
+* The [ERDDAP_datasets.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/ERDDAP_datasets.ipynb)
   notebook describes and partially automates the process of generating
   XML fragments for model results datasets to be included in the ERDDAP
   server system.
 * The
-[DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/DevelopingNowcastFigureFunctions.ipynb)
+[DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/DevelopingNowcastFigureFunctions.ipynb)
   notebook describes the recommended process for development of those functions,
   and provides an example of development of one.
 
@@ -19,19 +19,19 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ## [TofinoWaterLevels.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/TofinoWaterLevels.ipynb)  
+* ## [TofinoWaterLevels.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/TofinoWaterLevels.ipynb)  
     
     Notebook to compare Tofino water levels to previous years.
 
-* ## [In_Template.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/In_Template.ipynb)  
+* ## [In_Template.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/In_Template.ipynb)  
     
     Reasearch figures template
 
-* ## [LiveOcean_TS_BC_Runner.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/LiveOcean_TS_BC_Runner.ipynb)  
+* ## [LiveOcean_TS_BC_Runner.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/LiveOcean_TS_BC_Runner.ipynb)  
     
     Test LiveOcean BC's for new tidally average single time files
 
-* ## [ERDDAP_datasets.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/ERDDAP_datasets.ipynb)  
+* ## [ERDDAP_datasets.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/ERDDAP_datasets.ipynb)  
     
     **Building ERDDAP Datasets**
     
@@ -50,42 +50,42 @@ Descriptions under the links below are from the first cell of the notebooks
     * code and metadata to transform the output of `GenerateDatasetsXml.sh`
     into XML fragments that are ready for inclusion in `/opt/tomcat/content/erddap/datasets.xml`
 
-* ## [DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/DevelopingNowcastFigureFunctions.ipynb)  
+* ## [DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/DevelopingNowcastFigureFunctions.ipynb)  
     
     This notebook describes the recommended process for development of
     functions for the `salishsea_tools.nowcast.figures` module,
     and provides an example of development of such a function.
 
-* ## [Developing-make_ww3_current_file-worker.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/Developing-make_ww3_current_file-worker.ipynb)  
+* ## [Developing-make_ww3_current_file-worker.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/Developing-make_ww3_current_file-worker.ipynb)  
     
     **Developing `make_ww3_current_file` Worker**
     
     Code experiments and verification for the `make_ww3_current_file` worker.
 
-* ## [DailyNowcastFigures.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/DailyNowcastFigures.ipynb)  
+* ## [DailyNowcastFigures.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/DailyNowcastFigures.ipynb)  
     
     Template for daily nowcast figure generation.
 
-* ## [ExamineResiduals.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/ExamineResiduals.ipynb)  
+* ## [ExamineResiduals.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/ExamineResiduals.ipynb)  
     
     Notebook for examinng residuals and error in residuals
 
-* ## [MakeOldRunoffFiles.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/MakeOldRunoffFiles.ipynb)  
+* ## [MakeOldRunoffFiles.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/MakeOldRunoffFiles.ipynb)  
     
     **Code to make old runoff files ****
     note: make_old_runoffs.yaml is identical to nowcast.yaml but puts the river output files somewhere other that /results to avoid accidental overwriting
 
-* ## [Out_Template.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/Out_Template.ipynb)  
+* ## [Out_Template.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/Out_Template.ipynb)  
     
     Production template
 
-* ## [Developing-make_ww3_wind_file-worker.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/Developing-make_ww3_wind_file-worker.ipynb)  
+* ## [Developing-make_ww3_wind_file-worker.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/Developing-make_ww3_wind_file-worker.ipynb)  
     
     **Developing `make_ww3_wind_file` Worker**
     
     Code experiments and verification for the `make_ww3_wind_file` worker.
 
-* ## [Original_DailyNowcastFigures.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/Original_DailyNowcastFigures.ipynb)  
+* ## [Original_DailyNowcastFigures.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/Original_DailyNowcastFigures.ipynb)  
     
     Template notebook for creation of notebooks that show daily figures
     from most recent Salish Sea NEMO model real-time (nowcast) run.
@@ -93,19 +93,19 @@ Descriptions under the links below are from the first cell of the notebooks
     This is an interim step toward fully automated web publication of
     analysis and monitoring figures from nowcast runs.
 
-* ## [DevelopingSalinityTemplate.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/DevelopingSalinityTemplate.ipynb)  
+* ## [DevelopingSalinityTemplate.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/DevelopingSalinityTemplate.ipynb)  
     
-* ## [Testing research_VENUS.py module.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/Testing research_VENUS.py module.ipynb)  
+* ## [Testing research_VENUS.py module.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/Testing research_VENUS.py module.ipynb)  
     
     This notebook is used to test the research_VENUS.py module.
 
-* ## [SSH_NeahBay.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/SSH_NeahBay.ipynb)  
+* ## [SSH_NeahBay.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/SSH_NeahBay.ipynb)  
     
     This notebook creates daily forcing files for the sea surface height (hourly frequency) at Neah Bay. This can be used to create "obs" or "hindcast" forcing files for nowcasts in the event of a automation system error.
 
-* ## [surge_warning.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/surge_warning.ipynb)  
+* ## [surge_warning.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/surge_warning.ipynb)  
     
-* ## [TestResearchFerriesModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/TestResearchFerriesModule.ipynb)  
+* ## [TestResearchFerriesModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/TestResearchFerriesModule.ipynb)  
     
     **Test New `research_ferries` Module**
     
@@ -114,19 +114,19 @@ Descriptions under the links below are from the first cell of the notebooks
     
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [Salininty_Template.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/Salininty_Template.ipynb)  
+* ## [Salininty_Template.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/Salininty_Template.ipynb)  
     
     Salinity ferry data template
 
-* ## [TestingAnalyzeModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/TestingAnalyzeModule.ipynb)  
+* ## [TestingAnalyzeModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/TestingAnalyzeModule.ipynb)  
     
     Noteboook to test analyze.py functions
 
-* ## [DevelopingAnalyzeModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/DevelopingAnalyzeModule.ipynb)  
+* ## [DevelopingAnalyzeModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/DevelopingAnalyzeModule.ipynb)  
     
     Notebook for developing functions in analyze.py
 
-* ## [FCST_Template.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/notebooks/FCST_Template.ipynb)  
+* ## [FCST_Template.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/FCST_Template.ipynb)  
     
     Forecast template
 
