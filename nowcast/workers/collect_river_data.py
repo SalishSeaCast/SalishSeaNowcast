@@ -20,6 +20,7 @@ from pathlib import Path
 
 import arrow
 import pandas
+import sentry_sdk
 from nemo_nowcast import NowcastWorker
 
 NAME = "collect_river_data"
@@ -84,11 +85,13 @@ def collect_river_data(parsed_args, config, *args):
     :rtype: dict
     """
     river_name = parsed_args.river_name
+    sentry_sdk.set_tag("river-name", river_name)
     data_date = parsed_args.data_date
     logger.info(
         f"Collecting {river_name} river data for {data_date.format('YYYY-MM-DD')}"
     )
     stn_id = config["rivers"]["stations"][river_name]
+    sentry_sdk.set_tag("stn-id", stn_id)
     csv_file_template = config["rivers"]["csv file template"]
     csv_file = Path(config["rivers"]["datamart dir"]) / csv_file_template.format(
         stn_id=stn_id
