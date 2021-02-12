@@ -595,7 +595,7 @@ or from the green checkmark to the left of the "Latest commit" message on the `r
 The testing coverage report is uploaded to `codecov.io`_
 
 .. _repo actions page: https://github.com/SalishSeaCast/SalishSeaNowcast/actions
-.. _repo commits page: https://github.com/SalishSeaCast/SalishSeaNowcast/commits/master
+.. _repo commits page: https://github.com/SalishSeaCast/SalishSeaNowcast/commits/main
 .. _repo code overview page: https://github.com/SalishSeaCast/SalishSeaNowcast
 .. _codecov.io: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast
 
