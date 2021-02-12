@@ -601,7 +601,7 @@ The testing coverage report is uploaded to `codecov.io`_
 
 The `GitHub Actions`_ workflow configuration that defines the continuous integration tasks is in the :file:`.github/workflows/pytest-coverage.yaml` file.
 
-.. _GitHub Actions: https://docs.github.com/en/free-pro-team@latest/actions
+.. _GitHub Actions: https://docs.github.com/en/actions
 
 
 .. _SalishSeaNowcastVersionControlRepository:
