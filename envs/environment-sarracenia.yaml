@@ -4,7 +4,7 @@
 # files from the ECCC MSC datamart service.
 #
 # Create a conda environment for production deployment
-# of the sarracenia clinet with:
+# of the sarracenia client with:
 #
 #    $ conda env create \
 #        -f SalishSeaNowcast/envs/environment-sarracenia.yaml \
