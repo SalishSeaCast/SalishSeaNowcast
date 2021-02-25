@@ -33,7 +33,7 @@ def config(base_config):
         f.write(
             """
 file group: allen
-            
+
 figures:
   grid dir: nowcast-sys/grid/
   surface current tiles:
@@ -44,7 +44,7 @@ results archive:
   nowcast-green: results/nowcast-green.201806/
   forecast: results/forecast.201806/
   forecast2: results/forecast2.201806/
-  
+
 run types:
   nowcast-green:
     coordinates: coordinates_seagrid_SalishSea201702.nc

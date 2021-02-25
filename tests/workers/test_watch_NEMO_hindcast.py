@@ -42,7 +42,7 @@ def config(base_config):
                       queue info cmd: /opt/software/slurm/bin/squeue
                       users: allen,dlatorne
                       scratch dir: scratch/hindcast
-                
+
                     optimum:
                       ssh key: SalishSeaNEMO-nowcast_id_rsa
                       queue info cmd: /usr/bin/qstat
@@ -514,8 +514,8 @@ class TestQstatHindcastJob:
         job.run_id = "01jan13hindcast"
         m_ssh_exec_cmd.return_value = textwrap.dedent(
             """\
-            
-            admin.default.domain: 
+
+            admin.default.domain:
                                                                                               Req'd    Req'd       Elap
             Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
             ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
@@ -544,8 +544,8 @@ class TestQstatHindcastJob:
         job.run_id = "11jan13hindcast"
         m_ssh_exec_cmd.return_value = textwrap.dedent(
             """\
-            
-            admin.default.domain: 
+
+            admin.default.domain:
                                                                                               Req'd    Req'd       Elap
             Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
             ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
@@ -573,7 +573,7 @@ class TestQstatHindcastJob:
         m_ssh_exec_cmd.return_value = textwrap.dedent(
             """\
 
-            admin.default.domain: 
+            admin.default.domain:
                                                                                               Req'd    Req'd       Elap
             Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
             ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
@@ -602,7 +602,7 @@ class TestQstatHindcastJob:
         m_ssh_exec_cmd.return_value = textwrap.dedent(
             """\
 
-            admin.default.domain: 
+            admin.default.domain:
                                                                                               Req'd    Req'd       Elap
             Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
             ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------

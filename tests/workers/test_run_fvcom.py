@@ -36,7 +36,7 @@ def config(base_config):
         f.write(
             """
 vhfr fvcom runs:
-  case name: 
+  case name:
     x2: vh_x2
     r12: vh_r12
   run prep dir: fvcom-runs/
@@ -75,12 +75,12 @@ vhfr fvcom runs:
    x2: fvcom-runs/input.x2/
    r12: fvcom-runs/input.r12/
 
-  output station timeseries: 
+  output station timeseries:
     x2:
       FVCOM-VHFR-config/output/vh_x2_station.txt
     r12:
       FVCOM-VHFR-config/output/vh_r12_station.txt
-      
+
   namelists:
     'vh_x2_run.nml':
       - namelist.case
@@ -108,17 +108,17 @@ vhfr fvcom runs:
       - namelist.grid
       - namelist.nesting
       - namelist.station_timeseries
-      
+
   number of processors:
    x2: 28
    r12: 84
-  
+
   mpi hosts file:
    x2: ${HOME}/mpi_hosts.fvcom.x2
    r12: ${HOME}/mpi_hosts.fvcom.r12
-  
+
   fvc_cmd: bin/fvc
-  
+
   run types:
     nowcast x2:
       time step: 0.5
@@ -985,30 +985,30 @@ class TestBuildScript:
             RESULTS_DIR="{results_dir}/{ddmmmyy}"
             MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts.fvcom.{model_config}"
             GATHER="bin/fvc gather"
-            
+
             mkdir -p ${{RESULTS_DIR}}
-    
+
             cd ${{WORK_DIR}}
             echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
-    
+
             echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
             ${{MPIRUN}} -np {n_processors} --bind-to none ./fvcom \\
               --casename=vh_{model_config} --logfile=./fvcom.log \\
               >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
             echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
-            
+
             /bin/rm -f --verbose ${{WORK_DIR}}/.fvcomtestfile
             /bin/rmdir --verbose ${{WORK_DIR}}/output
-    
+
             echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
             ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
             echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-            
+
             chmod g+rwx ${{RESULTS_DIR}}
             chmod g+rw ${{RESULTS_DIR}}/*
             chmod o+rx ${{RESULTS_DIR}}
             chmod o+r ${{RESULTS_DIR}}/*
-    
+
             echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
             rmdir $(pwd)
             echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
@@ -1071,7 +1071,7 @@ class TestExecute:
               --casename=vh_{model_config} --logfile=./fvcom.log \\
               >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
             echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
-            
+
             /bin/rm -f --verbose ${{WORK_DIR}}/.fvcomtestfile
             /bin/rmdir --verbose ${{WORK_DIR}}/output
 

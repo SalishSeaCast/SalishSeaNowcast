@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """Salish Sea WaveWatch3 forecast worker that produces the hourly wind forcing
-file for a prelim-forecast or forecast run 
+file for a prelim-forecast or forecast run
 """
 import logging
 import os

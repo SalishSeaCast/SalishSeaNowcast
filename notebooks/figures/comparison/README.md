@@ -6,30 +6,30 @@ The links below are to static renderings of the notebooks via
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ## [TestCompareVENUS_CTD.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestCompareVENUS_CTD.ipynb)  
-    
+* ## [TestCompareVENUS_CTD.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestCompareVENUS_CTD.ipynb)
+
     **Test `compare_venus_ctd` Module**
-    
+
     Render figure object produced by the `nowcast.figures.publish.compare_venus_ctd` module.
     Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.
-    
+
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestSalinityFerryTrackModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestSalinityFerryTrackModule.ipynb)  
-    
+* ## [TestSalinityFerryTrackModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestSalinityFerryTrackModule.ipynb)
+
     **Test `salinity_ferry_track` Module**
-    
+
     Render figure objects produced by the `nowcast.figures.comparison.salinity_ferry_track` module.
     Provides data for visual testing to confirm that refactoring has not adversely changed figure for web page.
-    
+
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestSandHeadsWinds.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestSandHeadsWinds.ipynb)  
-    
+* ## [TestSandHeadsWinds.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestSandHeadsWinds.ipynb)
+
     **Test `sandheads_winds` Module**
-    
+
     Render figure object produced by the `nowcast.figures.comparison.sandheads_winds` module.
-    
+
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker
     to help ensure that the module will work in the nowcast production context.
 

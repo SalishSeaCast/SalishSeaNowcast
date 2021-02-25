@@ -1107,7 +1107,7 @@ class TestBuildScript:
         ${{GATHER}} ${{RESULTS_DIR}} --debug \
 >>${{RESULTS_DIR}}/stdout
         echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-        
+
         chmod g+rwx ${{RESULTS_DIR}}
         chmod g+rw ${{RESULTS_DIR}}/*
         chmod o+rx ${{RESULTS_DIR}}
@@ -1149,7 +1149,7 @@ class TestBuildScript:
                 config,
             )
         expected = f"""#!/bin/bash
-        
+
         #PBS -N 13may17nowcast
         #PBS -S /bin/bash
         #PBS -l walltime=23:30:00
@@ -1188,7 +1188,7 @@ class TestBuildScript:
         ${{GATHER}} ${{RESULTS_DIR}} --debug \
 >>${{RESULTS_DIR}}/stdout
         echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-        
+
         chmod g+rwx ${{RESULTS_DIR}}
         chmod g+rw ${{RESULTS_DIR}}/*
         chmod o+rx ${{RESULTS_DIR}}

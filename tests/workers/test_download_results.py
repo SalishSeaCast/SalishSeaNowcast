@@ -38,17 +38,17 @@ def config(base_config):
             textwrap.dedent(
                 """\
                 file group: allen
-                
+
                 results archive:
                   nowcast: SalishSea/nowcast/
                   forecast: SalishSea/forecast/
                   forecast2: SalishSea/forecast2/
                   nowcast-green: SalishSea/nowcast-green/
                   nowcast-agrif: SalishSea/nowcast-agrif/
-                  hindcast: 
+                  hindcast:
                     localhost: SalishSea/hindcast/
                     graham-hindcast: nearline/SalishSea/hindcast/
-                
+
                 run:
                   enabled hosts:
                     arbutus.cloud-nowcast:
@@ -67,7 +67,7 @@ def config(base_config):
                           results: SalishSea/nowcast-agrif/
                     graham-hindcast:
                       ssh key: SalishSeaNEMO-nowcast_id_rsa
-                          
+
                   hindcast hosts:
                       optimum-hindcast:
                         run types:

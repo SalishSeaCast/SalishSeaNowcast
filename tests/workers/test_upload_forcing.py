@@ -38,7 +38,7 @@ def config(base_config):
                 temperature salinity:
                     bc dir: /results/forcing/LiveOcean/modified
                     file template: 'single_LO_{:y%Ym%md%d}.nc'
-                    
+
                 run:
                     enabled hosts:
                         arbutus.cloud-nowcast:

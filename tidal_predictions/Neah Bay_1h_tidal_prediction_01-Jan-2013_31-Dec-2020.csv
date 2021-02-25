@@ -1,7 +1,7 @@
 Harmonics from,/ocean/nsoontie/MEOPAR/tides/NOAA_tidal_constituents/NeahBay_2015_wlev.csv,Time zone,PST,
 Mean (m),-0.039973,Mean sea level of observed time series,
 Latitude,48.366667,
-time , pred_8 , pred_all , pred_noshallow 
+time , pred_8 , pred_all , pred_noshallow
 01-Jan-2013 00:00:00 , -0.349763, -0.373790, -0.386399
 01-Jan-2013 01:00:00 , 0.159154, 0.141849, 0.109245
 01-Jan-2013 02:00:00 , 0.561332, 0.525591, 0.506720

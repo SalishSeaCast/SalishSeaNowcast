@@ -581,7 +581,7 @@ class TestNetcdfOutput:
         rm SoG_ww3_fields_20170331.nc SoG_ww3_fields_20170401.nc && \\
         rm out_grd.ww3
         echo "Ending netCDF4 fields output at $(date)" >>${RESULTS_DIR}/stdout
-        
+
         echo "Starting netCDF4 points output at $(date)" >>${RESULTS_DIR}/stdout
         ${WW3_EXE}/ww3_ounp >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
         ncrcat -4 -L4 -o SoG_ww3_points_20170331_20170401.nc \\
@@ -628,7 +628,7 @@ class TestCleanup:
         expected = """echo "Results gathering started at $(date)" >>${RESULTS_DIR}/stdout
         ${GATHER} ${RESULTS_DIR} --debug >>${RESULTS_DIR}/stdout
         echo "Results gathering ended at $(date)" >>${RESULTS_DIR}/stdout
-        
+
         echo "Deleting run directory" >>${RESULTS_DIR}/stdout
         rmdir $(pwd)
         echo "Finished at $(date)" >>${RESULTS_DIR}/stdout

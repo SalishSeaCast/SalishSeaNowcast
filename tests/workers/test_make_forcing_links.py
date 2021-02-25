@@ -42,7 +42,7 @@ def config(base_config):
                     b201702: "R201702DFraCElse_{:y%Ym%md%d}.nc"
                   turbidity:
                     file template: "riverTurbDaily2_{:y%Ym%md%d}.nc"
-                      
+
                 run:
                   enabled hosts:
                     arbutus.cloud:
@@ -51,7 +51,7 @@ def config(base_config):
                         ssh dir: sshNeahBay/
                         rivers dir: rivers/
                         Fraser turbidity dir: rivers/river_turb/
-                    
+
                     salish-nowcast:
                       run prep dir: runs/
                       forcing:

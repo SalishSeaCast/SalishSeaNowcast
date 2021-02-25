@@ -201,7 +201,7 @@ def _ww3_prnc_wind_contents(run_date, run_type):
     contents = f"""$ WAVEWATCH III NETCDF Field preprocessor input \
 ww3_prnc_wind.inp
 $
-$ Forcing type, grid type, time in file, header 
+$ Forcing type, grid type, time in file, header
    'WND' 'LL' T T
 $
 $ Dimension variable names
@@ -230,7 +230,7 @@ def _ww3_prnc_current_contents(run_date, run_type):
     contents = f"""$ WAVEWATCH III NETCDF Field preprocessor input \
 ww3_prnc_current.inp
 $
-$ Forcing type, grid type, time in file, header 
+$ Forcing type, grid type, time in file, header
   'CUR' 'LL' T T
 $ Name of dimensions
 $
@@ -352,7 +352,7 @@ $ netCDF4 output
 $ real numbers
 $ swell partitions
 $ one file
-  4 
+  4
   4
   0 1 2
   T
@@ -402,7 +402,7 @@ $ time,station dimension order
 $ WMO standard output
   SoG_ww3_points_
   8
-  4 
+  4
   T 100
   2
   0
