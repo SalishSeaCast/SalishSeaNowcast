@@ -1,0 +1,20 @@
+# Git pre-commit hooks config file
+# Only takes effect if you have pre-commit installed in the env,
+# and after you run `pre-commit install`
+#
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+  # Out-of-the-box hooks from the pre-commit org
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  # Code formatting with black
+  - repo: https://github.com/psf/black
+    rev: 20.8b1
+    hooks:
+      - id: black

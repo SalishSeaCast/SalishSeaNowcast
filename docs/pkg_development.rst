@@ -28,6 +28,9 @@
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast
     :alt: Git on GitHub
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
@@ -170,34 +173,32 @@ To deactivate the environment use:
 Coding Style
 ============
 
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+   :target: https://github.com/pre-commit/pre-commit
+   :alt: pre-commit
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 
-The :kbd:`SalishSeaNowcast` package uses the `black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+The :kbd:`SalishSeaNowcast` package uses Git pre-commit hooks managed by `pre-commit`_ to maintain consistent code style and and other aspects of code,
+docs,
+and repo QA.
 
-.. _black: https://black.readthedocs.io/en/stable/
-.. _PEP 8: https://www.python.org/dev/peps/pep-0008/
+.. _pre-commit: https://pre-commit.com/
 
-:command:`black` is installed as part of the :ref:`SalishSeaNowcastDevelopmentEnvironment` setup.
-
-To run :command:`black` on the entire code-base use:
+To install the `pre-commit` hooks in a newly cloned repo,
+activate the conda development environment,
+and run :command:`pre-commit install`:
 
 .. code-block:: bash
 
     $ cd SalishSeaNowcast
     $ conda activate salishsea-nowcast
-    (salishsea-nowcast)$ black ./
+    (salishsea-nowcast)$ pre-commit install
 
-in the repository root directory.
-The output looks something like::
+.. note:: You only need to install the hooks once immediately after you make a new clone of the `SalishSeaNowcast repository`_ and build your :ref:`SalishSeaNowcastDevelopmentEnvironment`.
 
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaNowcast/nowcast/next_workers.py
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaNowcast/nowcast/workers/make_CHS_currents_file.py
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaNowcast/tests/test_make_CHS_currents_file.py
-  reformatted /media/doug/warehouse/MEOPAR/SalishSeaNowcast/tests/test_next_workers.py
-  All done! ✨ 🍰 ✨
-  4 files reformatted, 117 files left unchanged.
+.. _SalishSeaNowcast repository: https://github.com/SalishSeaCast/SalishSeaNowcast
 
 
 .. _SalishSeaNowcastBuildingTheDocumentation:
