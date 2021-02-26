@@ -57,7 +57,7 @@ def main():
         help="""
         Type of run to make rivers forcing file for:
         'nowcast' means run for present UTC day (after NEMO nowcast run)
-        'forecast' means updated forecast run 
+        'forecast' means updated forecast run
         (next 36h UTC, after NEMO forecast run)
         """,
     )

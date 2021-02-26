@@ -40,10 +40,10 @@ vhfr fvcom runs:
       fraser nodes file: vh_x2_river_nodes_fraser.txt
     r12:
       fraser nodes file: vh_r12_river_nodes_fraser.txt
-      
+
   nemo coupling:
     nemo coordinates: grid/coordinates_seagrid_SalishSea201702.nc
-    
+
   rivers forcing:
     nemo rivers dir: rivers/
     runoff file template: R201702DFraCElse_{yyyymmdd}.nc

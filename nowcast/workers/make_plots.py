@@ -102,7 +102,7 @@ def main():
         'nowcast-x2' means VHFR FVCOM x2 configuration nowcast run,
         'nowcast-r12' means VHFR FVCOM r12 configuration nowcast run,
         'forecast' means NEMO forecast physics-only runs, or wwatch3 forecast run,
-        'forecast2' means NEMO preliminary forecast physics-only runs, or wwatch3 preliminary 
+        'forecast2' means NEMO preliminary forecast physics-only runs, or wwatch3 preliminary
         forecast run,
         'forecast-x2' means VHFR FVCOM x2 configuration forecast run,
         """,
@@ -130,11 +130,11 @@ def main():
         The identifier may be the svg_name of the figure used in make_plots
         (e.g. SH_wind is the svg_name of figures stored as SH_wind_{ddmmmyy}.svg),
         the name of the website figure module
-        (e.g. storm_surge_alerts is the module name of 
+        (e.g. storm_surge_alerts is the module name of
         nowcast.figures.publish.storm_surge_alerts).
         The figure will be rendered in
         /results/nowcast-sys/figures/test/{run_type}/{ddmmmyy}/ so that it is
-        accessible in a browser at 
+        accessible in a browser at
         https://salishsea.eos.ubc.ca/{run_type}/{ddmmmyy}/{svg_name}_{ddmmyy}.svg
         """,
     )

@@ -38,7 +38,7 @@ def config(base_config):
             textwrap.dedent(
                 """\
                 file group: allen
-                
+
                 weather:
                   download:
                     2.5 km:

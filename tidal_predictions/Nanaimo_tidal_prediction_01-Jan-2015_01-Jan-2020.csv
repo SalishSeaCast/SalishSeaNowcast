@@ -1,7 +1,7 @@
 Harmonics from: ,Nanaimo_tidal_prediction_01-Jan-2015_01-Jan-2020.csv,
 Mean ,3.080000,
 Latitude ,49.166667,
-Time_Local , pred_8 , pred_all , pred_noshallow 
+Time_Local , pred_8 , pred_all , pred_noshallow
 01-Jan-2015 00:00:00 , -0.351688, -0.451760, -0.480584
 01-Jan-2015 01:00:00 , 0.224813, 0.140122, 0.105882
 01-Jan-2015 02:00:00 , 0.642082, 0.589288, 0.556121

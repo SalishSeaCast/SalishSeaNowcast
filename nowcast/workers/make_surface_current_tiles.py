@@ -59,7 +59,7 @@ def main():
         Type of run to produce plots for:
         'forecast' means forecast physics-only runs,
         'forecast2' means forecast2 preliminary forecast physics-only runs,
-        'nowcast-green' means nowcast-green run-of-record runs 
+        'nowcast-green' means nowcast-green run-of-record runs
         (primarily used to generate tiles for a past date from archival run results)
         """,
     )

@@ -38,14 +38,14 @@ def config(base_config):
                 run types:
                   nowcast:
                     mesh mask: mesh_mask201702.nc
-                    
+
                 run:
                   enabled hosts:
                     arbutus.cloud:
                       run types:
                         nowcast:
                           results: /nemoShare/MEOPAR/SalishSea/nowcast/
-                
+
                 wave forecasts:
                   run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs
                   grid dir: grid/

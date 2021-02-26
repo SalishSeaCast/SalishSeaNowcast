@@ -50,7 +50,7 @@ def main():
         'nowcast+' means nowcast & 1st forecast runs,
         'forecast2' means 2nd forecast run,
         'ssh' means Neah Bay sea surface height files only (for forecast run),
-        'turbidity' means Fraser River turbidity file only 
+        'turbidity' means Fraser River turbidity file only
         (for nowcast-green run).
         """,
     )

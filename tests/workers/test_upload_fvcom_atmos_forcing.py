@@ -36,7 +36,7 @@ def config(base_config):
 vhfr fvcom runs:
   host: arbutus.cloud
   ssh key: SalishSeaNEMO-nowcast_id_rsa
-  
+
   atmospheric forcing:
     fvcom atmos dir: forcing/atmospheric/GEM2.5/vhfr-fvcom
     atmos file template: 'atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc'

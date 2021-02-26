@@ -35,7 +35,7 @@ def config(base_config):
             textwrap.dedent(
                 """\
                 file group: allen
-                
+
                 run types:
                   nowcast:
                     mesh mask: mesh_mask201702.nc
@@ -43,12 +43,12 @@ def config(base_config):
                     mesh mask: mesh_mask201702.nc
                   forecast2:
                     mesh mask: mesh_mask201702.nc
-                    
+
                 results archive:
                   nowcast: nowcast-blue/
                   forecast: forecast/
                   forecast2: forecast2/
-                  
+
                 figures:
                   grid dir:
                     nowcast-sys/grid/

@@ -48,13 +48,13 @@ rolling forecasts:
   wwatch3:
     dest dir: rolling-forecasts/wwatch3/
     most recent forecast dir: opp/wwatch3/most_recent_forecast
-    
+
 wave forecasts:
   results archive:
     nowcast: opp/wwatch3/nowcast/
     forecast: opp/wwatch3/forecast/
     forecast2: opp/wwatch3/forecast2/
-    
+
 vhfr fvcom runs:
   results archive:
     nowcast x2: opp/fvcom/nowcast x2/

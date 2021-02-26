@@ -37,13 +37,13 @@ def config(base_config):
                 """\
                 weather:
                   file template: 'ops_{:y%Ym%md%d}.nc'
-                
+
                 run:
                   enabled hosts:
                     arbutus.cloud:
                       forcing:
                         weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
-                        
+
                 wave forecasts:
                   run prep dir: /nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/
                   wind file template: 'SoG_wind_{yyyymmdd}.nc'

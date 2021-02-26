@@ -63,7 +63,7 @@ def main():
         help="""
         Type of run to execute:
         'nowcast' means run for present UTC day (after NEMO nowcast run)
-        'forecast' means updated forecast run 
+        'forecast' means updated forecast run
         (next 36h UTC, after NEMO forecast run)
         """,
     )
@@ -522,19 +522,19 @@ def _execute(model_config, config):
     script = textwrap.dedent(
         f"""\
         mkdir -p ${{RESULTS_DIR}}
-        
+
         cd ${{WORK_DIR}}
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
-        
+
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
         ${{MPIRUN}} -np {n_processors} --bind-to none ./fvcom \\
           --casename={casename} --logfile=./fvcom.log \\
           >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
-            
+
         /bin/rm -f --verbose ${{WORK_DIR}}/.fvcomtestfile
         /bin/rmdir --verbose ${{WORK_DIR}}/output
-        
+
         echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
         ${{GATHER}} ${{RESULTS_DIR}} --debug >>${{RESULTS_DIR}}/stdout
         echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout

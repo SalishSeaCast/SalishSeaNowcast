@@ -36,19 +36,19 @@ def config(base_config):
             textwrap.dedent(
                 """\
                 file group: allen
-                
+
                 vhfr fvcom runs:
                   host: arbutus.cloud
                   run types:
-                    nowcast x2: 
+                    nowcast x2:
                       results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
-                    forecast x2: 
+                    forecast x2:
                       results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
-                    nowcast r12: 
+                    nowcast r12:
                       results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/
                   results archive:
                     nowcast x2: /opp/fvcom/nowcast-x2/
-                    forecast x2: /opp/fvcom/forecast-x2/ 
+                    forecast x2: /opp/fvcom/forecast-x2/
                     nowcast r12: /opp/fvcom/nowcast-r12/
                 """
             )

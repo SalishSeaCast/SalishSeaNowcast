@@ -1,7 +1,7 @@
 Harmonics from: ,Campbell River_tidal_prediction_01-Jan-2015_01-Jan-2020.csv,
 Mean ,2.916000,
 Latitude ,50.042317,
-Time_Local , pred_8 , pred_all , pred_noshallow 
+Time_Local , pred_8 , pred_all , pred_noshallow
 01-Jan-2015 00:00:00 , -0.146534, -0.277829, -0.307993
 01-Jan-2015 01:00:00 , 0.275678, 0.277768, 0.155072
 01-Jan-2015 02:00:00 , 0.541772, 0.611390, 0.482978

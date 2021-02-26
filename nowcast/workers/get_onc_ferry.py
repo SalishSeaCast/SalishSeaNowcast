@@ -392,7 +392,7 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
         attrs={
             "history": f"""{now} Download raw data from ONC scalardata API.
 {now} Filter to exclude data with qaqcFlag != 1.
-{now} Resample data to 1 minute intervals using mean, standard deviation and 
+{now} Resample data to 1 minute intervals using mean, standard deviation and
 count as aggregation functions.
 {now} Store as netCDF4 file.
 """,

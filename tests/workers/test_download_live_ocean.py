@@ -37,7 +37,7 @@ def config(base_config):
             textwrap.dedent(
                 """\
                 file group: allen
-                
+
                 temperature salinity:
                   download:
                     host: boiler-nowcast

@@ -1,7 +1,7 @@
 Harmonics from: ,/data/nsoontie/MEOPAR/analysis/Nancy/nowcast/NeahBay_31-Dec-2013_31-Dec-2014.csv,
 Mean ,-0.033040,
 Latitude ,48.366667,
-Time_Local , pred_8 , pred_all , pred_noshallow 
+Time_Local , pred_8 , pred_all , pred_noshallow
 01-Jan-2015 00:00:00 , 0.111576, 0.121653, 0.139386
 01-Jan-2015 01:00:00 , -0.133013, -0.090869, -0.068905
 01-Jan-2015 02:00:00 , -0.328735, -0.243367, -0.243885

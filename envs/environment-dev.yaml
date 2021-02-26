@@ -70,8 +70,8 @@ dependencies:
   - xarray
   - zeep
 
-  # For coding style
-  - black
+  # For code style & repo QA
+  - pre-commit
 
   # For unit tests
   - coverage

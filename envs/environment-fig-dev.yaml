@@ -59,8 +59,8 @@ dependencies:
   - watchdog
   - xarray
 
-  # For coding style
-  - black
+  # For code style & repo QA
+  - pre-commit
 
   # For figures development
   - jupyterlab

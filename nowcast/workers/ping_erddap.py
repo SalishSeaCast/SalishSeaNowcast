@@ -55,7 +55,7 @@ def main():
         processed,
         'USDDL-CTD' means ONC USDDL node CTD T&S observations downloaded &
         processed,
-        'TWDP-ferry' means ONC Tsawwassen/Duke Pt. ferry observations 
+        'TWDP-ferry' means ONC Tsawwassen/Duke Pt. ferry observations
         downloaded & processed,
         'VFPA-HADCP' means VFPA 2nd Narrows Rail Bridge HADCP observations processed,
         'nowcast-green' means nowcast green ocean run,

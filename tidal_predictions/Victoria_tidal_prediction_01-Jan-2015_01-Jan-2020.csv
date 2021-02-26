@@ -1,7 +1,7 @@
 Harmonics from: ,Victoria_tidal_prediction_01-Jan-2015_01-Jan-2020.csv,
 Mean ,1.881000,
 Latitude ,48.424400,
-Time_Local , pred_8 , pred_all , pred_noshallow 
+Time_Local , pred_8 , pred_all , pred_noshallow
 01-Jan-2015 00:00:00 , 0.023795, -0.065118, -0.071555
 01-Jan-2015 01:00:00 , 0.133987, 0.050572, 0.083281
 01-Jan-2015 02:00:00 , 0.176713, 0.145659, 0.177823

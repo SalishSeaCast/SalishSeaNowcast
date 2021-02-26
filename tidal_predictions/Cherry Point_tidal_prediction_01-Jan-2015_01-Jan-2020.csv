@@ -1,7 +1,7 @@
 Harmonics from: ,Cherry Point_tidal_prediction_01-Jan-2015_01-Jan-2020.csv,
 Mean ,0.011710,
 Latitude ,48.860000,
-Time_Local , pred_8 , pred_all , pred_noshallow 
+Time_Local , pred_8 , pred_all , pred_noshallow
 01-Jan-2015 00:00:00 , -0.237902, -0.382449, -0.390558
 01-Jan-2015 01:00:00 , 0.225376, 0.115560, 0.108104
 01-Jan-2015 02:00:00 , 0.551693, 0.511368, 0.492039

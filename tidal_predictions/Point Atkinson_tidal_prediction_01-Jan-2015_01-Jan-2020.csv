@@ -1,7 +1,7 @@
 Harmonics from: ,Point Atkinson_tidal_prediction_01-Jan-2015_01-Jan-2020.csv,
 Mean ,3.090000,
 Latitude ,49.337500,
-Time_Local , pred_8 , pred_all , pred_noshallow 
+Time_Local , pred_8 , pred_all , pred_noshallow
 01-Jan-2015 00:00:00 , -0.322051, -0.462199, -0.485913
 01-Jan-2015 01:00:00 , 0.234986, 0.135432, 0.103841
 01-Jan-2015 02:00:00 , 0.634269, 0.593613, 0.559569
