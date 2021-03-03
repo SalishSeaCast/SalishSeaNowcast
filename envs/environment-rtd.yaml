@@ -4,13 +4,13 @@
 name: sphinx-build
 
 channels:
-  - defaults
-  - gomss-nowcast
+  - conda-forge
+  - nodefaults
 
 dependencies:
-  - matplotlib>=3
-  - nemo_nowcast
-  - python>=3.6
+  - matplotlib
+  - pip
+  - python=3.9
   - retrying
 
   # RTD packages
@@ -18,3 +18,6 @@ dependencies:
   - pillow
   - sphinx
   - sphinx_rtd_theme
+
+  - pip:
+      - git+https://github.com/43ravens/NEMO_Nowcast.git#egg=nemo_nowcast
