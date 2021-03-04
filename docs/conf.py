@@ -79,6 +79,7 @@ todo_include_todos = True
 
 autodoc_mock_imports = [
     "bs4",
+    "cartopy",
     "cmocean",
     "f90nml",
     "feedgen",
