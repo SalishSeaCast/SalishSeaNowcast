@@ -12,12 +12,14 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Unit tests for Salish Sea NEMO nowcast get_onc_ferry worker.
+"""Unit tests for SalishSeaCast get_onc_ferry worker.
 """
+import logging
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import get_onc_ferry
@@ -29,61 +31,53 @@ def config(base_config):
     return base_config
 
 
-@patch("nowcast.workers.get_onc_ferry.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(get_onc_ferry, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ferry.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("get_onc_ferry",)
-        assert "description" in kwargs
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ferry.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_onc_station_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ferry.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("ferry_platform",)
-        assert kwargs["choices"] == {"TWDP"}
-        assert "help" in kwargs
-
-    def test_add_data_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ferry.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--data-date",)
-        assert kwargs["default"] == arrow.now().floor("day").shift(days=-1)
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ferry.main()
-        args, kwargs = m_worker().run.call_args
-        expected = (
-            get_onc_ferry.get_onc_ferry,
-            get_onc_ferry.success,
-            get_onc_ferry.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = get_onc_ferry.main()
+        assert worker.name == "get_onc_ferry"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that downloads data for a specified UTC day from an ONC BC Ferries"
         )
-        assert args == expected
+
+    def test_add_onc_station_arg(self, mock_worker):
+        worker = get_onc_ferry.main()
+        assert worker.cli.parser._actions[3].dest == "ferry_platform"
+        assert worker.cli.parser._actions[3].choices == {"TWDP"}
+        assert worker.cli.parser._actions[4].help
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = get_onc_ferry.main()
+        assert worker.cli.parser._actions[4].dest == "data_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[4].type == expected
+        assert worker.cli.parser._actions[4].default == arrow.now().floor("day").shift(
+            days=-1
+        )
+        assert worker.cli.parser._actions[4].help
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
-@patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, ferry_platform):
+    def test_success(self, ferry_platform, caplog):
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
+        caplog.set_level(logging.INFO)
+
         msg_type = get_onc_ferry.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"2016-09-09 ONC {ferry_platform} ferry data file created"
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {ferry_platform}"
 
 
@@ -144,11 +138,10 @@ class TestGetWaterData:
     "ferry_platform, device, sensors",
     [("TWDP", "TSG", "temperature,conductivity,salinity")],
 )
-@patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
 class TestEmptyDeviceData:
     """Unit tests for _empty_device_data() function."""
 
-    def test_empty_device_data(self, m_logger, ferry_platform, device, sensors):
+    def test_empty_device_data(self, ferry_platform, device, sensors, caplog):
         dataset = get_onc_ferry._empty_device_data(
             ferry_platform, device, "2017-12-01", sensors
         )

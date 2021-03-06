@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea nowcast worker that downloads data for a specified UTC day from
-an ONC BC Ferries measurement platform.
+"""SalishSeaCast worker that downloads data for a specified UTC day from an ONC BC Ferries
+measurement platform.
 
 The data are filtered to include only values for which qaqcFlag == 1
 (meaning that all of ONC's automated QA/QC tests were passed).
@@ -64,6 +64,7 @@ def main():
         help="UTC date to get ONC ferry data for.",
     )
     worker.run(get_onc_ferry, success, failure)
+    return worker
 
 
 def success(parsed_args):
