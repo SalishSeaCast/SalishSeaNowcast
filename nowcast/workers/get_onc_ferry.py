@@ -76,8 +76,10 @@ def success(parsed_args):
 
 def failure(parsed_args):
     ymd = parsed_args.data_date.format("YYYY-MM-DD")
-    logger.critical(f"{ymd} ONC ferry data file creation failed")
-    msg_type = "failure"
+    logger.critical(
+        f"{ymd} ONC {parsed_args.ferry_platform} ferry data file creation failed"
+    )
+    msg_type = f"failure {parsed_args.ferry_platform}"
     return msg_type
 
 

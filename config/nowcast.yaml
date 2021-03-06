@@ -1202,7 +1202,7 @@ message registry:
     get_onc_ferry:
       checklist key: ONC ferry data
       success TWDP: ONC TWDP ferry route data file created
-      failure: ONC ferry route data file creation failed
+      failure TWDP: ONC TWDP ferry route data file creation failed
       crash: get_onc_ferry worker crashed
 
     download_live_ocean:

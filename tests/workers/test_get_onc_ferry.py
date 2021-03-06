@@ -16,7 +16,6 @@
 """
 import logging
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -81,15 +80,22 @@ class TestSuccess:
         assert msg_type == f"success {ferry_platform}"
 
 
-@patch("nowcast.workers.get_onc_ferry.logger", autospec=True)
+@pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger):
-        parsed_args = SimpleNamespace(data_date=arrow.get("2016-09-09"))
+    def test_failure(self, ferry_platform, caplog):
+        parsed_args = SimpleNamespace(
+            ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
+        )
+        caplog.set_level(logging.CRITICAL)
+
         msg_type = get_onc_ferry.failure(parsed_args)
-        assert m_logger.critical.called
-        assert msg_type == f"failure"
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"2016-09-09 ONC {ferry_platform} ferry data file creation failed"
+        assert caplog.messages[0] == expected
+        assert msg_type == f"failure {ferry_platform}"
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
