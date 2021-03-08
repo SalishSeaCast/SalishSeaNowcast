@@ -169,16 +169,8 @@ def _get_nav_data(ferry_platform, ymd, location_config):
 
 
 def _calc_location_arrays(nav_data, location_config):
-    lons = (nav_data.longitude.resample(sampleTime="1Min").mean()).rename(
-        {"sampleTime": "time"}
-    )
-    lons.attrs["units"] = "degree_east"
-    lons.attrs["station"] = nav_data.attrs["station"]
-    lats = (nav_data.latitude.resample(sampleTime="1Min").mean()).rename(
-        {"sampleTime": "time"}
-    )
-    lats.attrs["units"] = "degree_north"
-    lats.attrs["station"] = nav_data.attrs["station"]
+    lons = _resample_nav_coord(nav_data, "longitude", "degree_east")
+    lats = _resample_nav_coord(nav_data, "latitude", "degree_north")
     terminals = [
         SimpleNamespace(
             lon=PLACES[terminal]["lon lat"][0],
@@ -190,6 +182,15 @@ def _calc_location_arrays(nav_data, location_config):
     on_crossing_mask = _on_crossing(lons, lats, terminals)
     crossing_numbers = _calc_crossing_numbers(on_crossing_mask)
     return lons, lats, on_crossing_mask, crossing_numbers
+
+
+def _resample_nav_coord(nav_data, coord, units):
+    resampled_coord = (nav_data[coord].resample(sampleTime="1Min").mean()).rename(
+        {"sampleTime": "time"}
+    )
+    resampled_coord.attrs["units"] = units
+    resampled_coord.attrs["station"] = nav_data.attrs["station"]
+    return resampled_coord
 
 
 def _on_crossing(lons, lats, terminals):
