@@ -82,6 +82,10 @@ class TestConfig:
             "crash",
         ]
 
+    def test_lon_lat_ji_map_path(self, prod_config):
+        nemo_ji_map = prod_config["observations"]["lon/lat to NEMO ji map"]
+        assert nemo_ji_map == "/SalishSeaCast/grid/grid_from_lat_lon_mask999.nc"
+
     def test_TWDP_section(self, prod_config):
         ferry_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"]
         assert ferry_config["route name"] == "Tsawwassen - Duke Point"

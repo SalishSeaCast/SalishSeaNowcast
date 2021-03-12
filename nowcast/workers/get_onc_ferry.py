@@ -89,6 +89,7 @@ def get_onc_ferry(parsed_args, config, *args):
     ferry_config = config["observations"]["ferry data"]["ferries"][ferry_platform]
     location_config = ferry_config["location"]
     devices_config = ferry_config["devices"]
+    nemo_ji_map = config["observations"]["lon/lat to NEMO ji map"]
     data_arrays = SimpleNamespace()
     try:
         nav_data = _get_nav_data(ferry_platform, ymd, location_config)
@@ -98,9 +99,11 @@ def get_onc_ferry(parsed_args, config, *args):
     (
         data_arrays.longitude,
         data_arrays.latitude,
+        data_arrays.nemo_grid_j,
+        data_arrays.nemo_grid_i,
         data_arrays.on_crossing_mask,
         data_arrays.crossing_number,
-    ) = _calc_location_arrays(nav_data, location_config)
+    ) = _calc_location_arrays(nav_data, location_config, nemo_ji_map)
     for device in devices_config:
         device_data = _get_water_data(ferry_platform, device, ymd, devices_config)
         sensor_data_arrays = _qaqc_filter(
@@ -118,11 +121,19 @@ def get_onc_ferry(parsed_args, config, *args):
     )
     logger.debug(f"storing ONC {ferry_platform} dataset for {ymd} as {nc_filepath}")
     encoding = {
-        var: {"dtype": "int32", "_FillValue": 0}
-        for var in dataset.data_vars
-        if var.endswith("sample_count")
+        "time": {
+            "units": "minutes since 1970-01-01 00:00",
+            "chunksizes": [dataset.time.size],
+        }
     }
-    encoding["time"] = {"units": "minutes since 1970-01-01 00:00"}
+    encoding.update({var: {"chunksizes": [dataset[var].size]} for var in dataset})
+    encoding.update(
+        {
+            var: {"dtype": "int32", "_FillValue": 0, "chunksizes": [dataset[var].size]}
+            for var in dataset
+            if var.endswith("sample_count")
+        }
+    )
     dataset.to_netcdf(
         os.fspath(nc_filepath), encoding=encoding, unlimited_dims=("time",)
     )
@@ -168,9 +179,14 @@ def _get_nav_data(ferry_platform, ymd, location_config):
     raise WorkerError(msg)
 
 
-def _calc_location_arrays(nav_data, location_config):
+def _calc_location_arrays(nav_data, location_config, nemo_ji_map):
     lons = _resample_nav_coord(nav_data, "longitude", "degree_east")
     lats = _resample_nav_coord(nav_data, "latitude", "degree_north")
+    with xarray.open_dataset(nemo_ji_map) as grid_map:
+        nemo_grid_js = grid_map.jj.sel(lons=lons, lats=lats, method="nearest")
+        nemo_grid_js = nemo_grid_js.reset_coords(("lons", "lats"), drop=True)
+        nemo_grid_is = grid_map.ii.sel(lons=lons, lats=lats, method="nearest")
+        nemo_grid_is = nemo_grid_is.reset_coords(("lons", "lats"), drop=True)
     terminals = [
         SimpleNamespace(
             lon=PLACES[terminal]["lon lat"][0],
@@ -181,7 +197,7 @@ def _calc_location_arrays(nav_data, location_config):
     ]
     on_crossing_mask = _on_crossing(lons, lats, terminals)
     crossing_numbers = _calc_crossing_numbers(on_crossing_mask)
-    return lons, lats, on_crossing_mask, crossing_numbers
+    return lons, lats, nemo_grid_js, nemo_grid_is, on_crossing_mask, crossing_numbers
 
 
 def _resample_nav_coord(nav_data, coord, units):
@@ -340,7 +356,14 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
 
 
 def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, ymd):
-    location_vars = {"longitude", "latitude", "on_crossing_mask", "crossing_number"}
+    location_vars = {
+        "longitude",
+        "latitude",
+        "nemo_grid_j",
+        "nemo_grid_i",
+        "on_crossing_mask",
+        "crossing_number",
+    }
 
     def count(values, axis):
         return 0 if numpy.all(numpy.isnan(values)) else int(values.size)
@@ -398,6 +421,7 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
 {now} Filter to exclude data with qaqcFlag != 1.
 {now} Resample data to 1 minute intervals using mean, standard deviation and
 count as aggregation functions.
+{now} Add SalishSeaCast NEMO grid nearest ji indices corresponding to lons/lats.
 {now} Store as netCDF4 file.
 """,
             "ferry_route_name": ferry_config["route name"],
@@ -414,16 +438,28 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             "ioos category": "location",
             "standard name": "longitude",
             "long name": "Longitude",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch"
-            f'?deviceCategory={location_config["device category"]}',
+            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
         },
         "latitude": {
             "name": "latitude",
             "ioos category": "location",
             "standard name": "latitude",
             "long name": "Latitude",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch"
-            f'?deviceCategory={location_config["device category"]}',
+            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+        },
+        "nemo_grid_j": {
+            "name": "nemo_grid_j",
+            "ioos category": "location",
+            "standard name": "nemo_grid_j",
+            "long name": "NEMO grid j index",
+            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+        },
+        "nemo_grid_i": {
+            "name": "nemo_grid_i",
+            "ioos category": "location",
+            "standard name": "nemo_grid_i",
+            "long name": "NEMO grid i index",
+            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
         },
         "on_crossing_mask": {
             "name": "on_crossing_mask",

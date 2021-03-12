@@ -191,6 +191,8 @@ temperature salinity:
 
 
 observations:
+  # Dataset that maps high resolution lon/lat grid on to NEMO j/i indices
+  lon/lat to NEMO ji map: /SalishSeaCast/grid/grid_from_lat_lon_mask999.nc
   # ONC Strait of Georgia nodes real-time CTD data
   ctd data:
     # ONC node station names to download data from
