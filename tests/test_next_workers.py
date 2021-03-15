@@ -453,7 +453,7 @@ class TestAfterGetONC_CTD:
 class TestAfterGetONC_Ferry:
     """Unit tests for the after_get_onc_ferry function."""
 
-    @pytest.mark.parametrize("msg_type", ["crash", "failure"])
+    @pytest.mark.parametrize("msg_type", ["crash", "failure TWDP"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_get_onc_ferry(
             Message("get_onc_ferry", msg_type), config, checklist

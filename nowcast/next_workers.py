@@ -344,7 +344,7 @@ def after_get_onc_ferry(msg, config, checklist):
     :returns: Worker(s) to launch next
     :rtype: list
     """
-    next_workers = {"crash": [], "failure": [], "success TWDP": []}
+    next_workers = {"crash": [], "failure TWDP": [], "success TWDP": []}
     if msg.type.startswith("success"):
         ferry_platform = msg.type.split()[1]
         next_workers[msg.type].append(
