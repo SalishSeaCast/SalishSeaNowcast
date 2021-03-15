@@ -158,6 +158,7 @@ Add the following files to the :file:`/SalishSeaCast/nowcast-env` environment to
     export NOWCAST_CONFIG=/SalishSeaCast/SalishSeaNowcast/config
     export NOWCAST_YAML=/SalishSeaCast/SalishSeaNowcast/config/nowcast.yaml
     export NOWCAST_LOGS=/SalishSeaCast/logs/nowcast
+    export NUMEXPR_MAX_THREADS=6
     export ONC_USER_TOKEN=a_valid_ONC_data_API_user_token
     export SARRACENIA_ENV=/SalishSeaCast/sarracenia-env
     export SARRACENIA_CONFIG=/SalishSeaCast/SalishSeaNowcast/sarracenia
@@ -176,6 +177,7 @@ and :command:`unset` them when it is deactivated.
     unset NOWCAST_CONFIG
     unset NOWCAST_YAML
     unset NOWCAST_LOGS
+    unset NUMEXPR_MAX_THREADS
     unset ONC_USER_TOKEN
     unset SARRCENIA_ENV
     unset SARRACENIA_CONFIG

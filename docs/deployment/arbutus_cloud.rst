@@ -817,6 +817,7 @@ Add the following files to the :file:`/nemoShare/MEOPAR/nowcast-sys/nowcast-env`
     export NOWCAST_CONFIG=/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config
     export NOWCAST_YAML=/nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
     export NOWCAST_LOGS=/nemoShare/MEOPAR/nowcast-sys/logs/nowcast
+    export NUMEXPR_MAX_THREADS=8
     export SENTRY_DSN=a_valid_sentry_dsn_url
     EOF
 
@@ -830,6 +831,7 @@ and :command:`unset` them when it is deactivated.
     unset NOWCAST_CONFIG
     unset NOWCAST_YAML
     unset NOWCAST_LOGS
+    unset NUMEXPR_MAX_THREADS
     unset SENTRY_DSN
     EOF
 
