@@ -51,7 +51,7 @@ jobs:
           author_name: Python ${{ matrix.python-version }} pytest & coverage report
           fields: repo,eventName,ref,workflow
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_SALISHSEACAST_WEBHOOK_URL }}
         if: always()
 
       - name: Upload coverage report to Codecov
