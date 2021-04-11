@@ -56,7 +56,6 @@ dependencies:
   - verboselogs
   - watchdog
   - xarray
-  - zeep
 
   # For unit tests and coverage monitoring
   - pytest

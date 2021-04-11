@@ -68,7 +68,6 @@ dependencies:
   - verboselogs
   - watchdog
   - xarray
-  - zeep
 
   - pip:
     - angles

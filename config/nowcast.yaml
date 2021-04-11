@@ -1042,11 +1042,6 @@ logging:
         qualname: watchdog
         level: WARNING
         formatter: simple
-      zeep:
-        # SOAP client library used to access CHS real-time water levels service
-        qualname: zeep
-        level: WARNING
-        formatter: simple
     root:
       # disable propagation to avoid duplicate sentry events from workers and
       # log_aggregator
