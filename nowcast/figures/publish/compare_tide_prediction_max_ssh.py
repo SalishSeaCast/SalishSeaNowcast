@@ -47,8 +47,8 @@ from types import SimpleNamespace
 import arrow
 import matplotlib.dates
 import matplotlib.pyplot as plt
-import netCDF4
 import numpy
+import pandas
 import requests
 import xarray
 from matplotlib import gridspec
@@ -141,17 +141,19 @@ def _prep_plot_data(
     ssh_forecast = _get_ssh_forecast(place, ssh_fcst_dataset_url_tmpl)
     # CHS water level observations dataset
     try:
-        obs_1min = data_tools.get_chs_tides(
-            "obs",
-            place,
-            arrow.get(str(ssh_forecast.time[0].values)) - timedelta(seconds=5 * 60),
-            arrow.get(str(ssh_forecast.time[-1].values)),
+        obs_1min = (
+            data_tools.get_chs_tides(
+                "obs",
+                place,
+                arrow.get(str(ssh_forecast.time.values[0])) - timedelta(seconds=5 * 60),
+                arrow.get(str(ssh_forecast.time.values[-1])),
+            )
+            .to_xarray()
+            .rename({"index": "time"})
         )
-        obs_10min_avg = xarray.DataArray(
-            obs_1min.resample("10min", loffset="5min").mean()
-        )
-        obs = xarray.Dataset({"water_level": obs_10min_avg.rename({"dim_0": "time"})})
-    except TypeError:
+        obs_10min_avg = obs_1min.resample(time="10min", loffset="5min").mean()
+        obs = obs_10min_avg.to_dataset(name="water_level")
+    except (AttributeError, KeyError):
         # No observations available
         obs = None
     shared.localize_time(ssh_forecast)
@@ -175,8 +177,8 @@ def _prep_plot_data(
     # Predicted tide water levels dataset from ttide
     ttide = shared.get_tides(place, tidal_predictions)
     ttide.rename(columns={" pred_noshallow ": "pred_noshallow"}, inplace=True)
-    ttide.index = ttide.time
-    ttide_ds = xarray.Dataset.from_dataframe(ttide)
+    ttide.index = pandas.to_datetime(ttide.time.values, format="%Y-%m-%d %H:%M:%S")
+    ttide_ds = ttide.to_xarray().drop_vars(["time"]).rename({"index": "time"})
     # Localize ttide dataset timezone to ssh_forecast times because ttide
     # extends well beyond ends of ssh_forecast period
     shared.localize_time(
@@ -290,7 +292,7 @@ def _plot_info_box(ax_info, place, plot_data, theme):
             y=0.75,
             words=(
                 f"Max SSH: "
-                f"{numpy.asscalar(plot_data.max_ssh)+plot_data.msl:.2f} "
+                f"{plot_data.max_ssh.item()+plot_data.msl:.2f} "
                 f"metres above chart datum"
             ),
         ),
@@ -306,8 +308,7 @@ def _plot_info_box(ax_info, place, plot_data, theme):
         SimpleNamespace(
             x=0.05,
             y=0.45,
-            words=f"Residual: "
-            f"{numpy.asscalar(plot_data.max_model_residual.ssh):.2f} metres",
+            words=f"Residual: " f"{plot_data.max_model_residual.ssh.item():.2f} metres",
         ),
         SimpleNamespace(
             x=0.05,

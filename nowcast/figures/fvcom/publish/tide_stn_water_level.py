@@ -110,50 +110,58 @@ def _prep_plot_data(place, fvcom_ssh_datasets, nemo_ssh_dataset_url_tmpl):
         nemo_ssh = None
     # CHS water level observations dataset
     try:
-        obs_1min = data_tools.get_chs_tides(
-            "obs",
-            place,
-            arrow.get(fvcom_period.start) - timedelta(seconds=5 * 60),
-            arrow.get(fvcom_period.stop),
+        obs_1min = (
+            data_tools.get_chs_tides(
+                "obs",
+                place,
+                arrow.get(fvcom_period.start) - timedelta(seconds=5 * 60),
+                arrow.get(fvcom_period.stop),
+            )
+            .to_xarray()
+            .rename({"index": "time"})
         )
-        obs = xarray.Dataset(
-            {"water_level": xarray.DataArray(obs_1min).rename({"dim_0": "time"})}
-        )
-    except TypeError:
-        # Invalid tide gauge station number, probably None
-        obs = None
+        obs = obs_1min.to_dataset(name="water_level")
+    except (AttributeError, KeyError):
+        # No observations available, or invalid tide gauge station number
+        obs_1min, obs = None, None
     # CHS water level predictions dataset
     try:
         pred_place = "Point Atkinson" if place == "Sandy Cove" else place
-        pred = data_tools.get_chs_tides(
-            "pred",
-            pred_place,
-            arrow.get(fvcom_period.start),
-            arrow.get(fvcom_period.stop),
-        )
-        pred = xarray.Dataset(
-            {
-                "water_level": xarray.DataArray.from_series(pred).rename(
-                    {"index": "time"}
+        try:
+            pred = (
+                data_tools.get_chs_tides(
+                    "pred",
+                    pred_place,
+                    arrow.get(fvcom_period.start),
+                    arrow.get(fvcom_period.stop),
                 )
-            }
-        )
+                .to_xarray()
+                .rename({"index": "time"})
+            )
+            pred = pred.to_dataset(name="water_level")
+        except (AttributeError, KeyError):
+            # No predictions available, or invalid tide gauge station number
+            pred = None
         # Residual differences between corrected model and observations and predicted tides
         fvcom_residuals = {}
         for model_config, fvcom_ssh in fvcom_sshs.items():
-            fvcom_residuals[model_config] = fvcom_ssh - pred.water_level
-            shared.localize_time(fvcom_residuals[model_config])
+            try:
+                fvcom_residuals[model_config] = fvcom_ssh - pred.water_level
+                shared.localize_time(fvcom_residuals[model_config])
+            except AttributeError:
+                fvcom_residuals = None
         try:
             nemo_residual = nemo_ssh.ssh - pred.water_level
             shared.localize_time(nemo_residual)
         except AttributeError:
             nemo_residual = None
-        obs_15min_avg = (obs_1min.resample("15min").mean())[1:]
-        obs_15min = xarray.Dataset(
-            {"water_level": xarray.DataArray(obs_15min_avg).rename({"dim_0": "time"})}
-        )
-        obs_residual = obs_15min.water_level - pred.water_level
-        shared.localize_time(obs_residual)
+        try:
+            obs_15min_avg = (obs_1min.resample(time="15min").mean())[1:]
+            obs_15min = obs_15min_avg.to_dataset(name="water_level")
+            obs_residual = obs_15min.water_level - pred.water_level
+            shared.localize_time(obs_residual)
+        except AttributeError:
+            obs_residual = None
     except (TypeError, IndexError):
         # Invalid tide gauge station number, probably None
         pred, fvcom_residuals, nemo_residual, obs_residual = None, None, None, None
