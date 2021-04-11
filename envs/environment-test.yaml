@@ -10,7 +10,7 @@ channels:
   - conda-forge
 
 dependencies:
-  - arrow
+  - arrow>=1.0
   - attrs
   - beautifulsoup4
   - bottleneck
