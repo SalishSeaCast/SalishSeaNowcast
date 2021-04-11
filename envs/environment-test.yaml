@@ -8,6 +8,7 @@ name: salishsea-nowcast-test
 
 channels:
   - conda-forge
+  - nodefaults
 
 dependencies:
   - arrow>=1.0

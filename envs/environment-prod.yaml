@@ -19,6 +19,7 @@ name: nowcast-env
 
 channels:
   - conda-forge
+  - nodefaults
 
 dependencies:
   - arrow>=1.0

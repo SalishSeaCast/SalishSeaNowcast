@@ -19,6 +19,7 @@ name: salishsea-nowcast
 
 channels:
   - conda-forge
+  - nodefaults
 
 dependencies:
   - arrow>=1.0
