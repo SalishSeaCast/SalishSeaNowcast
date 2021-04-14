@@ -143,6 +143,16 @@ rivers:
 
 
 ssh:
+  download:
+    # URL from which to download NOAA Neah Bay sea surface height obs/forecast files
+    # **Must be quoted to project {} characters**
+    url template: 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/etss/prod/etss.{yyyymmdd}/etss.t{forecast}z.csv_tar'
+    # Template for the downloaded CSV tarball file name
+    # **Must be quoted to project {} characters**
+    tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar'
+    # Template for the directory and file name of the CSV file to extract from the tarball
+    # **Must be quoted to project {} characters**
+    tarball csv file template: 'etss.{yyyymmdd}/t{forecast}z_csv/9443090.csv'
   # Coordinates file to get lats/lons from
   coordinates: /SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc
   # Directory containing tidal predication file for sea surface height correction
@@ -1169,6 +1179,18 @@ message registry:
       success: rivers forcing ready
       failure: rivers forcing files preparation failed
       crash: make_runoff_file worker crashed
+
+    collect_NeahBay_ssh:
+      checklist key: Neah Bay ssh data
+      success 00: 00Z Neah Bay ssh data collection succeeded
+      failure 00: 00Z Neah Bay ssh data collection failed
+      success 06: 06Z Neah Bay ssh data collection succeeded
+      failure 06: 06Z Neah Bay ssh data collection failed
+      success 12: 12Z Neah Bay ssh data collection succeeded
+      failure 12: 12Z Neah Bay ssh data collection failed
+      success 18: 18Z Neah Bay ssh data collection succeeded
+      failure 18: 18Z Neah Bay ssh data collection failed
+      crash: collect_NeahBay_ssh worker crashed
 
     get_NeahBay_ssh:
       checklist key: Neah Bay ssh
