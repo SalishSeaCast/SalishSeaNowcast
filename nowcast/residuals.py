@@ -698,7 +698,7 @@ def plot_wlev_residual_NOAA(t_orig, elements, figsize=(20, 6)):
     return fig
 
 
-def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False):
+def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False, fromtar=False):
     """Calculate the Neah Bay forcing anomaly for the data stored in textfile.
 
     :arg textfile: the textfile containing forecast/observations
@@ -714,21 +714,35 @@ def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False):
     The dates, surges and a flag specifying if each point was a forecast
     """
 
-    data = _load_surge_data(textfile, archive)
-    if archive:
-        data.Date = pd.to_datetime(data["Date"] + " " + data["Time"], utc=True)
+    if fromtar:
+        data = pd.read_csv(textfile, parse_dates=[0], index_col=0).rename(
+            columns={"      OB": "obs", "      TWL": 'fcst'})
+        data['Date'] = pd.to_datetime(data.index)
+        # clean up 00:00 obs
+        datesat00 = data.resample('1d').nearest().index.array
+        data['offset'] = data.obs - data['    TIDE']
+        data.loc[data.Date.isin(datesat00), 'obs'] = (data[(data.Date.shift(1).isin(datesat00))].offset.values
+                                                   + data[data.Date.isin(datesat00)]['    TIDE'].values)
+        data.loc[data.obs > 9000, 'obs']  = 9999
+        data = data.resample('1h').nearest()
+        data['Date'] = pd.to_datetime(data.index, utc=True)
         dates = data.Date.array
     else:
-        dates = np.array(data.date.values)
-        # Check if today is Jan or Dec
-        isDec, isJan = False, False
-        if run_date.month == 1:
-            isJan = True
-        if run_date.month == 12:
-            isDec = True
-        for i in range(dates.shape[0]):
-            dates[i] = _to_datetime(dates[i], run_date.year, isDec, isJan)
-    surge, forecast_flag = _calculate_forcing_surge(data, dates, tide_file, archive)
+        data = _load_surge_data(textfile, archive)
+        if archive:
+            data.Date = pd.to_datetime(data["Date"] + " " + data["Time"], utc=True)
+            dates = data.Date.array
+        else:
+            dates = np.array(data.date.values)
+            # Check if today is Jan or Dec
+            isDec, isJan = False, False
+            if run_date.month == 1:
+                isJan = True
+            if run_date.month == 12:
+                isDec = True
+            for i in range(dates.shape[0]):
+                dates[i] = _to_datetime(dates[i], run_date.year, isDec, isJan)
+    surge, forecast_flag = _calculate_forcing_surge(data, dates, tide_file, archive, fromtar)
     return dates, surge, forecast_flag
 
 
@@ -747,30 +761,36 @@ def _load_surge_data(filename, archive=False):
     return data
 
 
-def _calculate_forcing_surge(data, dates, tide_file, archive=False):
+def _calculate_forcing_surge(data, dates, tide_file, archive=False, fromtar=False):
     """Given Neah Bay water levels stored in data, calculate the sea surface
     height anomaly by removing tides.
 
     Return the surges in metres,and a flag indicating if each anomaly
     was a forecast.
     """
+    MSL_in_feet = 4.32
     # Initialize forecast flag and surge array
     forecast_flag = []
     surge = []
     # Load tides
     ttide, _ = stormtools.load_tidal_predictions(tide_file)
+    sealevel_correction = 0.
     for d in dates:
-        # Convert datetime to string for comparing with times in data
         tide = ttide.pred_all[ttide.time == d].item()
         if archive:
             obs = data.obs[data.Date == d].item()
+        elif fromtar:
+            obs = data.obs[data.Date == d].item()
+            fcst = data.fcst[data.Date == d].item()
+            sealevel_correction = MSL_in_feet
         else:
+           # Convert datetime to string for comparing with times in data
             daystr = d.strftime("%m/%d %HZ")
             obs = data.obs[data.date == daystr].item()
             fcst = data.fcst[data.date == daystr].item()
-        if obs == 99.90:
+        if obs == 99.90 or obs == 9999:
             # Fall daylight savings
-            if fcst == 99.90:
+            if fcst == 99.90 or fcst == 9999:
                 try:
                     # No new forecast value, so persist the previous value
                     surge.append(surge[-1])
@@ -779,10 +799,10 @@ def _calculate_forcing_surge(data, dates, tide_file, archive=False):
                     surge = [0]
                 forecast_flag.append(False)
             else:
-                surge.append(_feet_to_metres(fcst) - tide)
+                surge.append(_feet_to_metres(fcst - sealevel_correction) - tide)
                 forecast_flag.append(True)
         else:
-            surge.append(_feet_to_metres(obs) - tide)
+            surge.append(_feet_to_metres(obs - sealevel_correction) - tide)
             forecast_flag.append(False)
     return surge, forecast_flag
 
