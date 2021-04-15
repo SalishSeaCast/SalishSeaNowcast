@@ -40,6 +40,11 @@ jobs:
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git@6c784a4dc44dd9030aafe9a8519e5ae0b6cc3183#egg=OPPTools
           python3 -m pip install --editable $GITHUB_WORKSPACE
 
+      - name: show envvars
+        shell: bash -l {0}
+        run: |
+          env
+
       - name: pytest package with coverage
         shell: bash -l {0}
         run: |
