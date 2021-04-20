@@ -1,7 +1,17 @@
 #  Copyright 2013-2021 The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
-
 #
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
 """Unit tests for SalishSeaCast make_ssh_file worker.
 """
 import logging
@@ -25,6 +35,17 @@ def config(base_config):
         f.write(
             textwrap.dedent(
                 """\
+                ssh:
+                  download:
+                    tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar'
+
+                  tidal predictions: /SalishSeaCast/SalishSeaNowcast/tidal_predictions/
+                  neah bay hourly: Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv
+                  ssh dir: /results/forcing/sshNeahBay/
+                  
+                results archive:
+                  nowcast: /results/SalishSea/nowcast-blue.201905/
+                  forecast2: /results/SalishSea/forecast2.201905/
                 """
             )
         )
@@ -94,6 +115,26 @@ class TestConfig:
             "crash",
         ]
 
+    def test_file_group(self, prod_config):
+        assert prod_config["file group"] == "sallen"
+
+    def test_ssh_section(self, prod_config):
+        ssh = prod_config["ssh"]
+        assert ssh["tidal predictions"] == "/SalishSeaCast/SalishSeaNowcast/tidal_predictions/"
+        assert ssh["neah bay hourly"] == "Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv"
+        assert ssh["ssh dir"] == "/results/forcing/sshNeahBay/"
+
+    def test_ssh_download_section(self, prod_config):
+        ssh_download = prod_config["ssh"]["download"]
+        assert (
+            ssh_download["tar file template"] == "etss.{yyyymmdd}.t{forecast}z.csv_tar"
+        )
+
+    def test_results_archive_section(self, prod_config):
+        results_archive = prod_config["results archive"]
+        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201905/"
+        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201905/"
+
 
 @pytest.mark.parametrize(
     "run_type, run_date",
@@ -150,12 +191,22 @@ class TestMakeSshFile:
     """Unit tests for make_ssh_file() function."""
 
     def test_checklist(self, run_type, run_date, config, caplog, monkeypatch):
+        def mock_copy_csv_to_results_dir(data_file, run_date, run_type, config):
+            pass
+
+        monkeypatch.setattr(
+            make_ssh_file, "_copy_csv_to_results_dir", mock_copy_csv_to_results_dir
+        )
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get(run_date), text_file=None
+            run_type=run_type, run_date=arrow.get(run_date), text_file=None, archive=False,
         )
         caplog.set_level(logging.DEBUG)
 
         checklist = make_ssh_file.make_ssh_file(parsed_args, config)
 
-        expected = {}
+        ssh_dir = Path(config["ssh"]["ssh dir"])
+        yyyymmdd = arrow.get(run_date).format("YYYYMMDD")
+        forecast = "12" if run_type == "nowcast" else "00"
+        csv_file = Path(f"etss.{yyyymmdd}.t{forecast}z.csv")
+        expected = {run_type: {"csv": os.fspath(ssh_dir / "txt" / csv_file)}}
         assert checklist == expected

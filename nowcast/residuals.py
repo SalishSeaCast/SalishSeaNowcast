@@ -721,9 +721,11 @@ def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False, fromtar=F
         # clean up 00:00 obs
         datesat00 = data.resample('1d').nearest().index.array
         data['offset'] = data.obs - data['    TIDE']
-        data.loc[data.Date.isin(datesat00), 'obs'] = (data[(data.Date.shift(1).isin(datesat00))].offset.values
-                                                   + data[data.Date.isin(datesat00)]['    TIDE'].values)
-        data.loc[data.obs > 9000, 'obs']  = 9999
+        data.loc[data.Date.isin(datesat00), 'obs'] = (
+            data[(data.Date.shift(1).isin(datesat00))].offset.values
+            + data[data.Date.isin(datesat00)]['    TIDE'].values
+        )
+        data.loc[data.obs > 9000, 'obs'] = 9999
         data = data.resample('1h').nearest()
         data['Date'] = pd.to_datetime(data.index, utc=True)
         dates = data.Date.array
