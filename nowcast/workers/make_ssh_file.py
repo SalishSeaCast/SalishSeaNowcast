@@ -120,34 +120,41 @@ def make_ssh_file(parsed_args, config, *args):
     run_date = parsed_args.run_date
     yyyymmdd = run_date.format("YYYYMMDD")
     run_type = parsed_args.run_type
-    ssh_forecast = "12" if run_type == "nowcast" else "00"
+    ssh_forecast = "06" if run_type == "nowcast" else "00"
+    logger.info(
+        f"building {run_type} sea surface height boundary conditions file(s) from "
+        f"{run_date.format('YYYY-MM-DD')} NOAA Neah Bay {ssh_forecast}Z "
+        f"observation and forecast values"
+    )
     ssh_dir = Path(config["ssh"]["ssh dir"])
     tar_file_tmpl = config["ssh"]["download"]["tar file template"]
-    csv_file = Path(tar_file_tmpl.format(yyyymmdd=yyyymmdd, forecast=ssh_forecast)).with_suffix(".csv")
-    data_file = parsed_args.text_file or ssh_dir/"txt"/csv_file
+    csv_file = Path(
+        tar_file_tmpl.format(yyyymmdd=yyyymmdd, forecast=ssh_forecast)
+    ).with_suffix(".csv")
+    data_file = parsed_args.text_file or ssh_dir / "txt" / csv_file
     checklist = {run_type: {}}
     if parsed_args.text_file is None:
         # Store a copy of the CSV file from the NOAA tarball in the run results directory so that
         # there is definitive record of the sea surface height data that was used for the run
         _copy_csv_to_results_dir(data_file, run_date, run_type, config)
         checklist[run_type].update({"csv": os.fspath(data_file)})
-    # Grab all surge data in the NOAA data file
+    # Grab all sea surface height data in the NOAA data file
     tidal_preds_dir = Path(config["ssh"]["tidal predictions"])
     neah_bay_hourly_tides = config["ssh"]["neah bay hourly"]
     dates, sshs, fflags = residuals.NeahBay_forcing_anom(
         data_file,
-        run_date.datetime if run_type == "nowcast" else run_date.shift(days=-1).datetime,
-        tidal_preds_dir/neah_bay_hourly_tides,
-        parsed_args.archive, parsed_args.text_file is None,
+        run_date.datetime
+        if run_type == "nowcast"
+        else run_date.shift(days=-1).datetime,
+        tidal_preds_dir / neah_bay_hourly_tides,
+        parsed_args.archive,
+        parsed_args.text_file is None,
     )
+    logger.debug(f"read sea surface height data from {data_file}")
     # Identify days with full ssh information
     dates_full = _list_full_days(dates, sshs, fflags)
 
-    coords = Path(config["ssh"]["coordinates"])
-    with netCDF4.Dataset(coords) as coordinates:
-        lats = coordinates.variables["nav_lat"][:]
-        lons = coordinates.variables["nav_lon"][:]
-    logger.debug(f"loaded lats & lons from {coords}")
+    lons, lats = _get_lons_lats(config)
 
     if parsed_args.text_file is None:
         fig, ax = _setup_plot()
@@ -162,15 +169,16 @@ def make_ssh_file(parsed_args, config, *args):
         filepath = _save_netcdf(
             d, tc, sshd, forecast_flag, data_file, config, lats, lons
         )
+        logger.info(f"wrote sea surface height boundary file: {filepath}")
         filename = os.path.basename(filepath)
         lib.fix_perms(filename, grp_name=config["file group"])
         if forecast_flag:
-            if "fcst" in checklist:
-                checklist["fcst"].append(filename)
+            if "fcst" not in checklist[run_type]:
+                checklist[run_type].update({"fcst": [filepath]})
             else:
-                checklist["fcst"] = [filename]
+                checklist[run_type]["fcst"].append(filepath)
         else:
-            checklist["obs"] = filename
+            checklist[run_type].update({"obs": filepath})
 
     if parsed_args.text_file is None:
         _render_plot(fig, ax, config)
@@ -179,9 +187,14 @@ def make_ssh_file(parsed_args, config, *args):
 
 def _copy_csv_to_results_dir(data_file, run_date, run_type, config):
     results_date = run_date if run_type == "nowcast" else run_date.shift(days=-1)
-    results_dir = Path(config["results archive"][run_type], results_date.format("DDMMMYY").lower())
-    lib.mkdir(os.fspath(results_dir), logger, grp_name=config["file group"], exist_ok=True)
+    results_dir = Path(
+        config["results archive"][run_type], results_date.format("DDMMMYY").lower()
+    )
+    lib.mkdir(
+        os.fspath(results_dir), logger, grp_name=config["file group"], exist_ok=True
+    )
     shutil.copy2(data_file, results_dir)
+    logger.debug(f"copied {data_file} to {results_dir}")
 
 
 def _list_full_days(dates, surges, forecast_flags):
@@ -227,6 +240,15 @@ def _isolate_day(day, dates, surges, forecast_flags):
     return tc, numpy.array(dates_r), numpy.array(surge_r), numpy.array(flag_r)
 
 
+def _get_lons_lats(config):
+    coords = Path(config["ssh"]["coordinates"])
+    with netCDF4.Dataset(coords) as coordinates:
+        lats = coordinates.variables["nav_lat"][:]
+        lons = coordinates.variables["nav_lon"][:]
+    logger.debug(f"loaded lats & lons from {coords}")
+    return lons, lats
+
+
 def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
     """Save the surge for a given day in a netCDF4 file."""
     # Western open boundary (JdF) grid parameter values for NEMO
@@ -250,7 +272,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
             # File path does not exist
             pass
         comment = "Observation from Neah Bay storm surge website"
-    comment = " ".join((comment, f"generated by Salish Sea NEMO nowcast {NAME} worker"))
+    comment = " ".join((comment, f"generated by SalishSeaCast {NAME} worker"))
     ssh_file = netCDF4.Dataset(filepath, "w")
     nc_tools.init_dataset_attrs(
         ssh_file,
@@ -334,6 +356,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
     logger.debug(f"saved western open boundary file {filepath}")
     return filepath
 
+
 def _setup_plot():
     fig = matplotlib.figure.Figure(figsize=(10, 4))
     ax = fig.add_subplot(1, 1, 1)
@@ -350,6 +373,9 @@ def _render_plot(fig, ax, config):
     canvas = matplotlib.backends.backend_agg.FigureCanvasAgg(fig)
     canvas.print_figure(image_file)
     lib.fix_perms(image_file, grp_name=config["file group"])
+    logger.debug(
+        f"rendered sea surface height processing monitoring image: {image_file}"
+    )
 
 
 if __name__ == "__main__":

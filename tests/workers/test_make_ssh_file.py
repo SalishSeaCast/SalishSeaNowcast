@@ -35,14 +35,19 @@ def config(base_config):
         f.write(
             textwrap.dedent(
                 """\
+                file group: sallen
+
                 ssh:
                   download:
                     tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar'
 
+                  coordinates: /SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc
                   tidal predictions: /SalishSeaCast/SalishSeaNowcast/tidal_predictions/
                   neah bay hourly: Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv
                   ssh dir: /results/forcing/sshNeahBay/
-                  
+                  file template: 'ssh_{:y%Ym%md%d}.nc'
+                  monitoring image: /results/nowcast-sys/figures/monitoring/NBssh.png
+
                 results archive:
                   nowcast: /results/SalishSea/nowcast-blue.201905/
                   forecast2: /results/SalishSea/forecast2.201905/
@@ -120,9 +125,24 @@ class TestConfig:
 
     def test_ssh_section(self, prod_config):
         ssh = prod_config["ssh"]
-        assert ssh["tidal predictions"] == "/SalishSeaCast/SalishSeaNowcast/tidal_predictions/"
-        assert ssh["neah bay hourly"] == "Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv"
+        assert (
+            ssh["coordinates"]
+            == "/SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc"
+        )
+        assert (
+            ssh["tidal predictions"]
+            == "/SalishSeaCast/SalishSeaNowcast/tidal_predictions/"
+        )
+        assert (
+            ssh["neah bay hourly"]
+            == "Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv"
+        )
         assert ssh["ssh dir"] == "/results/forcing/sshNeahBay/"
+        assert ssh["file template"] == "ssh_{:y%Ym%md%d}.nc"
+        assert (
+            ssh["monitoring image"]
+            == "/results/nowcast-sys/figures/monitoring/NBssh.png"
+        )
 
     def test_ssh_download_section(self, prod_config):
         ssh_download = prod_config["ssh"]["download"]
@@ -197,8 +217,24 @@ class TestMakeSshFile:
         monkeypatch.setattr(
             make_ssh_file, "_copy_csv_to_results_dir", mock_copy_csv_to_results_dir
         )
+
+        def mock_NeahBay_forcing_anom(textfile, run_date, tide_file, archive, fromtar):
+            return [arrow.get(run_date).datetime], "surge", "forecast_flags"
+
+        monkeypatch.setattr(
+            make_ssh_file.residuals, "NeahBay_forcing_anom", mock_NeahBay_forcing_anom
+        )
+
+        def mock_get_lons_lats(config):
+            return "lons", "lats"
+
+        monkeypatch.setattr(make_ssh_file, "_get_lons_lats", mock_get_lons_lats)
+
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get(run_date), text_file=None, archive=False,
+            run_type=run_type,
+            run_date=arrow.get(run_date),
+            text_file=None,
+            archive=False,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -206,7 +242,7 @@ class TestMakeSshFile:
 
         ssh_dir = Path(config["ssh"]["ssh dir"])
         yyyymmdd = arrow.get(run_date).format("YYYYMMDD")
-        forecast = "12" if run_type == "nowcast" else "00"
+        forecast = "06" if run_type == "nowcast" else "00"
         csv_file = Path(f"etss.{yyyymmdd}.t{forecast}z.csv")
         expected = {run_type: {"csv": os.fspath(ssh_dir / "txt" / csv_file)}}
         assert checklist == expected
