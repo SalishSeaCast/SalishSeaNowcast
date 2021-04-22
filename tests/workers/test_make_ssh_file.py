@@ -24,7 +24,7 @@ import arrow
 import nemo_nowcast
 import pytest
 
-from nowcast.workers import make_ssh_file
+from nowcast.workers import make_ssh_files
 
 
 @pytest.fixture()
@@ -61,27 +61,27 @@ def config(base_config):
 
 @pytest.fixture
 def mock_worker(mock_nowcast_worker, monkeypatch):
-    monkeypatch.setattr(make_ssh_file, "NowcastWorker", mock_nowcast_worker)
+    monkeypatch.setattr(make_ssh_files, "NowcastWorker", mock_nowcast_worker)
 
 
 class TestMain:
     """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
-        worker = make_ssh_file.main()
+        worker = make_ssh_files.main()
         assert worker.name == "make_ssh_file"
         assert worker.description.startswith(
             "SalishSeaCast worker that generates a sea surface height boundary conditions file"
         )
 
     def test_add_run_type_arg(self, mock_worker):
-        worker = make_ssh_file.main()
+        worker = make_ssh_files.main()
         assert worker.cli.parser._actions[3].dest == "run_type"
         assert worker.cli.parser._actions[3].choices == {"nowcast", "forecast2"}
         assert worker.cli.parser._actions[3].help
 
     def test_add_run_date_option(self, mock_worker):
-        worker = make_ssh_file.main()
+        worker = make_ssh_files.main()
         assert worker.cli.parser._actions[4].dest == "run_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
         assert worker.cli.parser._actions[4].type == expected
@@ -89,13 +89,13 @@ class TestMain:
         assert worker.cli.parser._actions[4].help
 
     def test_add_text_file_option(self, mock_worker):
-        worker = make_ssh_file.main()
+        worker = make_ssh_files.main()
         assert worker.cli.parser._actions[5].dest == "text_file"
         assert worker.cli.parser._actions[5].type == Path
         assert worker.cli.parser._actions[5].help
 
     def test_add_archive_option(self, mock_worker):
-        worker = make_ssh_file.main()
+        worker = make_ssh_files.main()
         assert worker.cli.parser._actions[6].dest == "archive"
         assert worker.cli.parser._actions[6].default is False
         assert worker.cli.parser._actions[6].help
@@ -170,7 +170,7 @@ class TestSuccess:
         parsed_args = SimpleNamespace(run_type=run_type, run_date=arrow.get(run_date))
         caplog.set_level(logging.DEBUG)
 
-        msg_type = make_ssh_file.success(parsed_args)
+        msg_type = make_ssh_files.success(parsed_args)
 
         assert caplog.records[0].levelname == "INFO"
         expected = f"sea surface height boundary file for {run_date.format('YYYY-MM-DD')} {run_type} run created"
@@ -192,7 +192,7 @@ class TestFailure:
         parsed_args = SimpleNamespace(run_type=run_type, run_date=arrow.get(run_date))
         caplog.set_level(logging.DEBUG)
 
-        msg_type = make_ssh_file.failure(parsed_args)
+        msg_type = make_ssh_files.failure(parsed_args)
 
         assert caplog.records[0].levelname == "CRITICAL"
         expected = f"sea surface height boundary file for {run_date.format('YYYY-MM-DD')} {run_type} run creation failed"
@@ -215,20 +215,20 @@ class TestMakeSshFile:
             pass
 
         monkeypatch.setattr(
-            make_ssh_file, "_copy_csv_to_results_dir", mock_copy_csv_to_results_dir
+            make_ssh_files, "_copy_csv_to_results_dir", mock_copy_csv_to_results_dir
         )
 
         def mock_NeahBay_forcing_anom(textfile, run_date, tide_file, archive, fromtar):
             return [arrow.get(run_date).datetime], "surge", "forecast_flags"
 
         monkeypatch.setattr(
-            make_ssh_file.residuals, "NeahBay_forcing_anom", mock_NeahBay_forcing_anom
+            make_ssh_files.residuals, "NeahBay_forcing_anom", mock_NeahBay_forcing_anom
         )
 
         def mock_get_lons_lats(config):
             return "lons", "lats"
 
-        monkeypatch.setattr(make_ssh_file, "_get_lons_lats", mock_get_lons_lats)
+        monkeypatch.setattr(make_ssh_files, "_get_lons_lats", mock_get_lons_lats)
 
         parsed_args = SimpleNamespace(
             run_type=run_type,
@@ -238,7 +238,7 @@ class TestMakeSshFile:
         )
         caplog.set_level(logging.DEBUG)
 
-        checklist = make_ssh_file.make_ssh_file(parsed_args, config)
+        checklist = make_ssh_files.make_ssh_file(parsed_args, config)
 
         ssh_dir = Path(config["ssh"]["ssh dir"])
         yyyymmdd = arrow.get(run_date).format("YYYYMMDD")
