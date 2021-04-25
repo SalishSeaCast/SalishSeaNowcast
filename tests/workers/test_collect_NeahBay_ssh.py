@@ -200,7 +200,7 @@ class TestCollectNeahBaySsh:
 
         monkeypatch.setattr(collect_NeahBay_ssh, "_extract_csv", mock_extract_csv)
 
-        parsed_args = SimpleNamespace(forecast=forecast, data_date=data_date)
+        parsed_args = SimpleNamespace(forecast=forecast, data_date=arrow.get(data_date))
         caplog.set_level(logging.DEBUG)
 
         checklist = collect_NeahBay_ssh.collect_NeahBay_ssh(parsed_args, config)

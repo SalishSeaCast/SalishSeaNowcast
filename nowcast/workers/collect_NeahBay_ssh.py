@@ -113,7 +113,7 @@ def collect_NeahBay_ssh(parsed_args, config, *args):
         logger.debug(f"downloaded {size} bytes from {tar_url}")
         _extract_csv(tar_csv_member, tar_file_path, csv_file_path)
     checklist = {
-        "data date": data_date,
+        "data date": data_date.format("YYYY-MM-DD"),
         f"{forecast}": os.fspath(csv_file_path),
     }
     return checklist
