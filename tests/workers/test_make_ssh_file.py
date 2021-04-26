@@ -230,6 +230,11 @@ class TestMakeSshFile:
 
         monkeypatch.setattr(make_ssh_files, "_get_lons_lats", mock_get_lons_lats)
 
+        def mock_render_plot(fig, ax, config):
+            pass
+
+        monkeypatch.setattr(make_ssh_files, "_render_plot", mock_render_plot)
+
         parsed_args = SimpleNamespace(
             run_type=run_type,
             run_date=arrow.get(run_date),
