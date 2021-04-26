@@ -1192,7 +1192,7 @@ message registry:
       failure 18: 18Z Neah Bay ssh data collection failed
       crash: collect_NeahBay_ssh worker crashed
 
-    make_ssh_file:
+    make_ssh_files:
       checklist key: sea surface height forcing
       success nowcast: sea surface height forcing for nowcast ready
       failure nowcast: sea surface height forcing file prep for nowcast failed

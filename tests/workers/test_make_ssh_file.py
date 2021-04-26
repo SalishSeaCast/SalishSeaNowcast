@@ -69,7 +69,7 @@ class TestMain:
 
     def test_instantiate_worker(self, mock_worker):
         worker = make_ssh_files.main()
-        assert worker.name == "make_ssh_file"
+        assert worker.name == "make_ssh_files"
         assert worker.description.startswith(
             "SalishSeaCast worker that generates a sea surface height boundary conditions file"
         )
@@ -105,12 +105,12 @@ class TestConfig:
     """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
-        assert "make_ssh_file" in prod_config["message registry"]["workers"]
-        msg_registry = prod_config["message registry"]["workers"]["make_ssh_file"]
+        assert "make_ssh_files" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["make_ssh_files"]
         assert msg_registry["checklist key"] == "sea surface height forcing"
 
     def test_message_registry_keys(self, prod_config):
-        msg_registry = prod_config["message registry"]["workers"]["make_ssh_file"]
+        msg_registry = prod_config["message registry"]["workers"]["make_ssh_files"]
         assert list(msg_registry.keys()) == [
             "checklist key",
             "success nowcast",

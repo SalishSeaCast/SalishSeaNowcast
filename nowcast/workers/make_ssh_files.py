@@ -32,7 +32,7 @@ from salishsea_tools import nc_tools
 
 from nowcast import lib, residuals
 
-NAME = "make_ssh_file"
+NAME = "make_ssh_files"
 logger = logging.getLogger(NAME)
 
 
