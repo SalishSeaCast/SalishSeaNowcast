@@ -116,7 +116,7 @@ class TestAfterDownloadWeather:
 
         monkeypatch.setattr(next_workers.arrow, "utcnow", mock_utcnow)
 
-        workers = next_workers.after_download_weather(
+        workers, race_condition_workers = next_workers.after_download_weather(
             Message("download_weather", "success 2.5km 06"), config, checklist
         )
         expected = [
@@ -139,9 +139,7 @@ class TestAfterDownloadWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.get_NeahBay_ssh", ["forecast2"], host="localhost"
-            ),
+            NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
             ),
@@ -149,15 +147,14 @@ class TestAfterDownloadWeather:
         assert len(workers) == len(expected)
         for next_worker in expected:
             assert next_worker in workers
+        assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
 
     def test_success_2_5_km_12(self, config, checklist):
         workers, race_condition_workers = next_workers.after_download_weather(
             Message("download_weather", "success 2.5km 12"), config, checklist
         )
         expected = [
-            NextWorker(
-                "nowcast.workers.get_NeahBay_ssh", ["nowcast"], host="localhost"
-            ),
+            NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
             ),
@@ -166,7 +163,11 @@ class TestAfterDownloadWeather:
         assert len(workers) == len(expected)
         for next_worker in expected:
             assert next_worker in workers
-        assert race_condition_workers == {"grib_to_netcdf", "make_live_ocean_files"}
+        assert race_condition_workers == {
+            "grib_to_netcdf",
+            "make_live_ocean_files",
+            "make_ssh_files",
+        }
 
 
 class TestAfterCollectWeather:
@@ -201,7 +202,7 @@ class TestAfterCollectWeather:
 
         monkeypatch.setattr(next_workers.arrow, "utcnow", mock_utcnow)
 
-        workers = next_workers.after_collect_weather(
+        workers, race_condition_workers = next_workers.after_collect_weather(
             Message("collect_weather", "success 2.5km 06"), config, checklist
         )
         expected = [
@@ -224,9 +225,7 @@ class TestAfterCollectWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.get_NeahBay_ssh", ["forecast2"], host="localhost"
-            ),
+            NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
             ),
@@ -237,15 +236,14 @@ class TestAfterCollectWeather:
         assert len(workers) == len(expected)
         for next_worker in expected:
             assert next_worker in workers
+        assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
 
     def test_success_2_5_km_12(self, config, checklist):
         workers, race_condition_workers = next_workers.after_collect_weather(
             Message("collect_weather", "success 2.5km 12"), config, checklist
         )
         expected = [
-            NextWorker(
-                "nowcast.workers.get_NeahBay_ssh", ["nowcast"], host="localhost"
-            ),
+            NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
             ),
@@ -257,7 +255,11 @@ class TestAfterCollectWeather:
         assert len(workers) == len(expected)
         for next_worker in expected:
             assert next_worker in workers
-        assert race_condition_workers == {"grib_to_netcdf", "make_live_ocean_files"}
+        assert race_condition_workers == {
+            "grib_to_netcdf",
+            "make_live_ocean_files",
+            "make_ssh_files",
+        }
 
     def test_success_2_5_km_18(self, config, checklist):
         workers = next_workers.after_collect_weather(
@@ -329,6 +331,76 @@ class TestAfterMakeRunoffFile:
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_runoff_file(
             Message("make_runoff_file", msg_type), config, checklist
+        )
+        assert workers == []
+
+
+class TestAfterCollectNeahBaySsh:
+    """Unit tests for the after_collect_NeahBay_ssh function."""
+
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "crash",
+            "failure 00",
+            "failure 06",
+            "failure 12",
+            "failure 18",
+        ],
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_collect_NeahBay_ssh(
+            Message("collect_NeahBay_ssh", msg_type), config, checklist
+        )
+        assert workers == []
+
+    @pytest.mark.parametrize(
+        "data_date, ssh_forecast, run_type",
+        [
+            ("2021-04-25", "00", "forecast2"),
+            ("2021-04-25", "06", "nowcast"),
+        ],
+    )
+    def test_success_launch_make_ssh_files(
+        self, data_date, ssh_forecast, run_type, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(
+            checklist,
+            "Neah Bay ssh data",
+            {
+                "data date": data_date,
+                f"{ssh_forecast}": f"etss.{data_date.format('YYYYMMDD')}.t{ssh_forecast}z.csv",
+            },
+        )
+        workers = next_workers.after_collect_NeahBay_ssh(
+            Message("collect_NeahBay_ssh", f"success {ssh_forecast}"), config, checklist
+        )
+        expected = [
+            NextWorker(
+                "nowcast.workers.make_ssh_files",
+                [run_type, "--run-date", data_date],
+                host="localhost",
+            )
+        ]
+        assert workers == expected
+
+
+class TestAfterMakeSshFiles:
+    """Unit tests for the after_make_ssh_files function."""
+
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "crash",
+            "failure nowcast",
+            "failure forecast2",
+            "success nowcast",
+            "success forecast2",
+        ],
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_ssh_files(
+            Message("make_ssh_files", msg_type), config, checklist
         )
         assert workers == []
 
@@ -890,7 +962,7 @@ class TestAfterWatchNEMO:
         )
         assert workers == []
 
-    def test_success_nowcast_launch_get_NeahBay_ssh_forecast(self, config, checklist):
+    def test_success_nowcast(self, config, checklist):
         workers = next_workers.after_watch_NEMO(
             Message(
                 "watch_NEMO",
@@ -898,7 +970,7 @@ class TestAfterWatchNEMO:
                 {
                     "nowcast": {
                         "host": "arbutus.cloud",
-                        "run date": "2016-10-16",
+                        "run date": "2021-04-26",
                         "completed": True,
                     }
                 },
@@ -906,60 +978,29 @@ class TestAfterWatchNEMO:
             config,
             checklist,
         )
-        expected = NextWorker(
-            "nowcast.workers.get_NeahBay_ssh", args=["forecast"], host="localhost"
-        )
-        assert workers[0] == expected
-
-    def test_success_nowcast_launch_make_fvcom_boundary_x2_nowcast(
-        self, config, checklist
-    ):
-        workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success nowcast",
-                {
-                    "nowcast": {
-                        "host": "arbutus.cloud",
-                        "run date": "2018-01-20",
-                        "completed": True,
-                    }
-                },
+        expected = [
+            NextWorker(
+                "nowcast.workers.make_forcing_links",
+                args=["arbutus.cloud", "ssh", "--run-date", "2021-04-26"],
+                host="localhost",
             ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_boundary",
-            args=["arbutus.cloud", "x2", "nowcast"],
-            host="arbutus.cloud",
-        )
-        assert expected in workers
-
-    def test_success_nowcast_launch_make_fvcom_boundary_r12_nowcast(
-        self, config, checklist
-    ):
-        workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success nowcast",
-                {
-                    "nowcast": {
-                        "host": "arbutus.cloud",
-                        "run date": "2019-04-03",
-                        "completed": True,
-                    }
-                },
+            NextWorker(
+                "nowcast.workers.make_fvcom_boundary",
+                args=["arbutus.cloud", "x2", "nowcast"],
+                host="arbutus.cloud",
             ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_boundary",
-            args=["arbutus.cloud", "r12", "nowcast"],
-            host="arbutus.cloud",
-        )
-        assert expected in workers
+            NextWorker(
+                "nowcast.workers.make_fvcom_boundary",
+                args=["arbutus.cloud", "r12", "nowcast"],
+                host="arbutus.cloud",
+            ),
+            NextWorker(
+                "nowcast.workers.download_results",
+                args=["arbutus.cloud", "nowcast", "--run-date", "2021-04-26"],
+                host="localhost",
+            ),
+        ]
+        assert workers == expected
 
     def test_success_forecast_launch_make_turbidity_file(self, config, checklist):
         workers = next_workers.after_watch_NEMO(

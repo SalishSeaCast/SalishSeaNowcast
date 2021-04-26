@@ -75,23 +75,27 @@ def after_download_weather(msg, config, checklist):
             if "forecast2" in config["run types"]:
                 next_workers["success 2.5km 06"].extend(
                     [
-                        NextWorker(
-                            "nowcast.workers.get_NeahBay_ssh", args=["forecast2"]
-                        ),
+                        NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["00"]),
                         NextWorker(
                             "nowcast.workers.grib_to_netcdf", args=["forecast2"]
                         ),
                     ]
                 )
+                race_condition_workers = {"grib_to_netcdf", "make_ssh_files"}
+                return next_workers[msg.type], race_condition_workers
         if msg.type.endswith("2.5km 12"):
             next_workers["success 2.5km 12"].extend(
                 [
-                    NextWorker("nowcast.workers.get_NeahBay_ssh", args=["nowcast"]),
+                    NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["06"]),
                     NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
                     NextWorker("nowcast.workers.download_live_ocean"),
                 ]
             )
-            race_condition_workers = {"grib_to_netcdf", "make_live_ocean_files"}
+            race_condition_workers = {
+                "grib_to_netcdf",
+                "make_live_ocean_files",
+                "make_ssh_files",
+            }
             return next_workers[msg.type], race_condition_workers
     return next_workers[msg.type]
 
@@ -135,9 +139,14 @@ def after_collect_weather(msg, config, checklist):
             NextWorker("nowcast.workers.collect_weather", args=["06", "2.5km"])
         )
     if msg.type.endswith("2.5km 06"):
-        next_workers["success 2.5km 06"].append(
-            NextWorker("nowcast.workers.collect_weather", args=["12", "2.5km"])
-        )
+        if msg.type.startswith("success"):
+            next_workers, race_condition_workers = after_download_weather(
+                msg, config, checklist
+            )
+            next_workers.append(
+                NextWorker("nowcast.workers.collect_weather", args=["12", "2.5km"])
+            )
+            return next_workers, race_condition_workers
     if msg.type.endswith("2.5km 12"):
         if msg.type.startswith("success"):
             next_workers, race_condition_workers = after_download_weather(
@@ -207,6 +216,83 @@ def after_make_runoff_file(msg, config, checklist):
     :rtype: list
     """
     next_workers = {"crash": [], "failure": [], "success": []}
+    return next_workers[msg.type]
+
+
+def after_collect_NeahBay_ssh(msg, config, checklist):
+    """Calculate the list of workers to launch after the collect_NeahBay_ssh worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        "crash": [],
+        "failure 00": [],
+        "failure 06": [],
+        "failure 12": [],
+        "failure 18": [],
+        "success 00": [],
+        "success 06": [],
+        "success 12": [],
+        "success 18": [],
+    }
+    if msg.type.startswith("success"):
+        ssh_fcst_run_type_map = {
+            "00": "forecast2",
+            "06": "nowcast",
+        }
+        data_date = checklist["Neah Bay ssh data"]["data date"]
+        ssh_forecast = msg.type.split()[1]
+        next_workers[f"success {ssh_forecast}"] = [
+            NextWorker(
+                "nowcast.workers.make_ssh_files",
+                args=[
+                    ssh_fcst_run_type_map[ssh_forecast],
+                    "--run-date",
+                    data_date,
+                ],
+            )
+        ]
+    return next_workers[msg.type]
+
+
+def after_make_ssh_files(msg, config, checklist):
+    """Calculate the list of workers to launch after the make_ssh_files worker
+    ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {
+        "crash": [],
+        "failure nowcast": [],
+        "failure forecast2": [],
+        "success nowcast": [],
+        "success forecast2": [],
+    }
     return next_workers[msg.type]
 
 
@@ -657,7 +743,15 @@ def after_watch_NEMO(msg, config, checklist):
         if run_type == "nowcast":
             next_workers[msg.type].extend(
                 [
-                    NextWorker("nowcast.workers.get_NeahBay_ssh", args=["forecast"]),
+                    NextWorker(
+                        "nowcast.workers.make_forcing_links",
+                        args=[
+                            msg.payload["nowcast"]["host"],
+                            "ssh",
+                            "--run-date",
+                            msg.payload[run_type]["run date"],
+                        ],
+                    ),
                     NextWorker(
                         "nowcast.workers.make_fvcom_boundary",
                         args=[(config["vhfr fvcom runs"]["host"]), "x2", "nowcast"],

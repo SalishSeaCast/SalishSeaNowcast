@@ -92,12 +92,21 @@ Workers
     :members: main
 
 
-.. _GetNeahBaySshWorker:
+.. _CollectNeahBaySshWorker:
 
-:kbd:`get_NeahBay_ssh`
-----------------------
+:kbd:`collect_NeahBay_ssh`
+--------------------------
 
-.. automodule:: nowcast.workers.get_NeahBay_ssh
+.. automodule:: nowcast.workers.collect_NeahBay_ssh
+    :members: main
+
+
+.. _MakeSshFilesWorker:
+
+:kbd:`make_ssh_files`
+---------------------
+
+.. automodule:: nowcast.workers.make_ssh_files
     :members: main
 
 
