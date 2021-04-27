@@ -1,0 +1,3 @@
+# Tell GitHub linguist tool to interpret Jupyter Notebooks as Python code
+# so that repo landing page shows language statistics of package more accurately
+*.ipynb linguist-language=Python
