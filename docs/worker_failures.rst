@@ -19,24 +19,17 @@
 Mitigating Worker Failures
 **************************
 
-:py:mod:`get_NeahBay_ssh` Worker Failure
+:py:mod:`collect_NeahBay_ssh` Worker Failure
 ========================================
 
 The sea surface height anomaly at the western Juan de Fuca boundary is taken from a `NOAA forecast`_ of storm surge at Neah Bay.
-If this page is not accessible then the :mod:`get_NeahBay_ssh` worker may fail.
-In this case, we can recover observed sea surface heights from the `NOAA tides and water levels`_ which may be used in the future.
+If this page is not accessible then the :mod:`collect_NeahBay_ssh` worker may fail.  As the observations for several days are saved in the files on this pages, one can try at a later time and if necessary use yesterday's files to continue the forecast.  If it goes several days, we can recover observed sea surface heights from the `NOAA tides and water levels`_ .
 
-To recover the observed sea surface anomaly, run through this `SSH_NeahBay`_ notebook with the appropriate date.
-The notebook is located in :file:`SalishSeaNowcast/nowcast/notebooks/SSH_NeahBay.ipynb`.
+:mod:`make_ssh_files` can take a date so older files can be run.  Files from the observation site can also be run with the appropriate flag.
 
-This notebook calculates the sea surface height anomaly by removing tidal predictions from the NOAA Neah Bay observations.
-It then saves the result in a netCDF file for use in NEMO simulations.
-
-.. _NOAA forecast: https://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
+.. _NOAA forecast: https://nomads.ncep.noaa.gov/pub/data/nccf/com/etss/prod/ 
 
 .. _NOAA tides and water levels: https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
-
-.. _SSH_NeahBay: https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/SSH_NeahBay.ipynb
 
 
 :py:mod:`download_weather` Worker Failure
