@@ -1200,16 +1200,6 @@ message registry:
       failure forecast2: sea surface height forcing file prep for forecast2 failed
       crash: make_ssh_file worker crashed
 
-    get_NeahBay_ssh:
-      checklist key: Neah Bay ssh
-      success nowcast: Neah Bay ssh for nowcast ready
-      failure nowcast: Neah Bay sea surface height file prep for nowcast failed
-      success forecast: Neah Bay ssh for forecast ready
-      failure forecast : Neah Bay sea surface height file prep for forecast failed
-      success forecast2: Neah Bay ssh for forecast2 ready
-      failure forecast2: Neah Bay sea surface height file prep for forecast2 failed
-      crash: get_NeahBay_ssh worker crashed
-
     grib_to_netcdf:
       checklist key: weather forcing
       success nowcast+: atmospheric nowcast/forecast forcing ready

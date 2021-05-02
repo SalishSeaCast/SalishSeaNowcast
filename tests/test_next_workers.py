@@ -405,38 +405,6 @@ class TestAfterMakeSshFiles:
         assert workers == []
 
 
-class TestAfterGetNeahBaySsh:
-    """Unit tests for the after_get_NeahBay_ssh function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        [
-            "crash",
-            "failure nowcast",
-            "failure forecast",
-            "failure forecast2",
-            "success nowcast",
-            "success forecast2",
-        ],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_get_NeahBay_ssh(
-            Message("get_NeahBay_ssh", msg_type), config, checklist
-        )
-        assert workers == []
-
-    def test_success_forecast_launch_upload_forcing_ssh(self, config, checklist):
-        workers = next_workers.after_get_NeahBay_ssh(
-            Message("get_NeahBay_ssh", "success forecast"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.upload_forcing",
-            args=["arbutus.cloud", "ssh"],
-            host="localhost",
-        )
-        assert expected in workers
-
-
 class TestAfterGribToNetcdf:
     """Unit tests for the after_grib_to_netcdf function."""
 

@@ -290,47 +290,6 @@ def after_make_ssh_files(msg, config, checklist):
     return next_workers[msg.type]
 
 
-def after_get_NeahBay_ssh(msg, config, checklist):
-    """Calculate the list of workers to launch after the get_NeahBay_ssh worker
-    ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure nowcast": [],
-        "failure forecast": [],
-        "failure forecast2": [],
-        "success nowcast": [],
-        "success forecast2": [],
-        "success forecast": [],
-    }
-    if msg.type == "success forecast":
-        for host in config["run"]["enabled hosts"]:
-            enabled_host_config = config["run"]["enabled hosts"][host]
-            upload_forcing_ssh = (
-                "forecast" in enabled_host_config["run types"]
-                and not enabled_host_config["shared storage"]
-            )
-            if upload_forcing_ssh:
-                next_workers["success forecast"].append(
-                    NextWorker("nowcast.workers.upload_forcing", args=[host, "ssh"])
-                )
-    return next_workers[msg.type]
-
-
 def after_grib_to_netcdf(msg, config, checklist):
     """Calculate the list of workers to launch after the grib_to_netcdf worker
     ends.
