@@ -440,6 +440,8 @@ erddap:
       - ubcSSf2DWaveFields30mV17-02
     VFPA-HADCP:
       - ubcVFPA2ndNarrowsCurrent2sV1
+    fvcom-forecast:
+      - ubcSSFVCOM-VHFR-BaroclinicX2
 
 
 figures:
@@ -1514,6 +1516,8 @@ message registry:
       failure nemo-forecast: NEMO forecast ERDDAP dataset flag files creation failed
       success wwatch3-forecast: WaveWatch3 forecast ERDDAP dataset flag files created
       failure wwatch3-forecast: WaveWatch3 forecast ERDDAP dataset flag files creation failed
+      success fvcom-forecast: VHFR FVCOM x2 forecast ERDDAP dataset flag files created
+      failure fvcom-forecast: VHFR FVCOM x2 forecast ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
 
     make_plots:

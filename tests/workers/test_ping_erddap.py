@@ -55,7 +55,9 @@ def config(base_config):
                       - ubcSSf2DWaveFields30mV17-02
                     VFPA-HADCP:
                       - ubcVFPA2ndNarrowsCurrent2sV1
-"""
+                    fvcom-forecast:
+                      - ubcSSFVCOM-VHFR-BaroclinicX2
+                """
             )
         )
     config_ = nemo_nowcast.Config()
@@ -91,6 +93,7 @@ class TestMain:
             "nowcast-green",
             "nemo-forecast",
             "wwatch3-forecast",
+            "fvcom-forecast",
         }
         assert worker.cli.parser._actions[3].help
 
@@ -125,6 +128,8 @@ class TestConfig:
             "failure nemo-forecast",
             "success wwatch3-forecast",
             "failure wwatch3-forecast",
+            "success fvcom-forecast",
+            "failure fvcom-forecast",
             "crash",
         ]
 
@@ -173,6 +178,9 @@ class TestConfig:
             "ubcSSf2DWaveFields30mV17-02"
         ]
         assert erddap["datasetIDs"]["VFPA-HADCP"] == ["ubcVFPA2ndNarrowsCurrent2sV1"]
+        assert erddap["datasetIDs"]["fvcom-forecast"] == [
+            "ubcSSFVCOM-VHFR-BaroclinicX2"
+        ]
 
 
 @pytest.mark.parametrize(
@@ -187,6 +195,7 @@ class TestConfig:
         "nowcast-green",
         "nemo-forecast",
         "wwatch3-forecast",
+        "fvcom-forecast",
     ],
 )
 class TestSuccess:
@@ -216,6 +225,7 @@ class TestSuccess:
         "nowcast-green",
         "nemo-forecast",
         "wwatch3-forecast",
+        "fvcom-forecast",
     ],
 )
 class TestFailure:
@@ -248,6 +258,7 @@ class TestPingErddap:
             "nowcast-green",
             "nemo-forecast",
             "wwatch3-forecast",
+            "fvcom-forecast",
         ],
     )
     def test_ping_erddap(self, dataset, config, tmp_path, caplog, monkeypatch):
