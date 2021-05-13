@@ -1578,6 +1578,13 @@ def after_download_fvcom_results(msg, config, checklist):
                 ),
             ]
         )
+        if run_type == "nowcast":
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.ping_erddap",
+                    args=[f"fvcom-{model_config}-nowcast"],
+                )
+            )
         if run_type == "forecast":
             next_workers[msg.type].append(
                 NextWorker(
@@ -1710,6 +1717,12 @@ def after_ping_erddap(msg, config, checklist):
         "failure nemo-forecast": [],
         "success wwatch3-forecast": [],
         "failure wwatch3-forecast": [],
+        "success fvcom-x2-nowcast": [],
+        "failure fvcom-x2-nowcast": [],
+        "success fvcom-r12-nowcast": [],
+        "failure fvcom-r12-nowcast": [],
+        "success fvcom-forecast": [],
+        "failure fvcom-forecast": [],
     }
     if msg.type == "success wwatch3-forecast":
         run_types = checklist["WWATCH3 run"].keys()

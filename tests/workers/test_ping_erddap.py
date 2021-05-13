@@ -55,6 +55,10 @@ def config(base_config):
                       - ubcSSf2DWaveFields30mV17-02
                     VFPA-HADCP:
                       - ubcVFPA2ndNarrowsCurrent2sV1
+                    fvcom-x2-nowcast:
+                      - ubcSSFVCOM-VHFR-BaroclinicX2
+                    fvcom-r12-nowcast:
+                      - ubcSSFVCOM-VHFR-BaroclinicR12
                     fvcom-forecast:
                       - ubcSSFVCOM-VHFR-BaroclinicX2
                 """
@@ -93,6 +97,8 @@ class TestMain:
             "nowcast-green",
             "nemo-forecast",
             "wwatch3-forecast",
+            "fvcom-x2-nowcast",
+            "fvcom-r12-nowcast",
             "fvcom-forecast",
         }
         assert worker.cli.parser._actions[3].help
@@ -128,6 +134,10 @@ class TestConfig:
             "failure nemo-forecast",
             "success wwatch3-forecast",
             "failure wwatch3-forecast",
+            "success fvcom-x2-nowcast",
+            "failure fvcom-x2-nowcast",
+            "success fvcom-r12-nowcast",
+            "failure fvcom-r12-nowcast",
             "success fvcom-forecast",
             "failure fvcom-forecast",
             "crash",
@@ -178,6 +188,12 @@ class TestConfig:
             "ubcSSf2DWaveFields30mV17-02"
         ]
         assert erddap["datasetIDs"]["VFPA-HADCP"] == ["ubcVFPA2ndNarrowsCurrent2sV1"]
+        assert erddap["datasetIDs"]["fvcom-x2-nowcast"] == [
+            "ubcSSFVCOM-VHFR-BaroclinicX2"
+        ]
+        assert erddap["datasetIDs"]["fvcom-r12-nowcast"] == [
+            "ubcSSFVCOM-VHFR-BaroclinicR12"
+        ]
         assert erddap["datasetIDs"]["fvcom-forecast"] == [
             "ubcSSFVCOM-VHFR-BaroclinicX2"
         ]
@@ -195,6 +211,8 @@ class TestConfig:
         "nowcast-green",
         "nemo-forecast",
         "wwatch3-forecast",
+        "fvcom-x2-nowcast",
+        "fvcom-r12-nowcast",
         "fvcom-forecast",
     ],
 )
@@ -225,6 +243,8 @@ class TestSuccess:
         "nowcast-green",
         "nemo-forecast",
         "wwatch3-forecast",
+        "fvcom-x2-nowcast",
+        "fvcom-r12-nowcast",
         "fvcom-forecast",
     ],
 )
@@ -258,6 +278,8 @@ class TestPingErddap:
             "nowcast-green",
             "nemo-forecast",
             "wwatch3-forecast",
+            "fvcom-x2-nowcast",
+            "fvcom-r12-nowcast",
             "fvcom-forecast",
         ],
     )

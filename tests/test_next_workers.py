@@ -2260,6 +2260,34 @@ class TestAfterDownloadFVCOMResults:
     @pytest.mark.parametrize(
         "model_config, run_type", (("x2", "nowcast"), ("r12", "nowcast"))
     )
+    def test_success_nowcast_launch_ping_erddap(
+        self, model_config, run_type, config, checklist
+    ):
+        workers = next_workers.after_download_fvcom_results(
+            Message(
+                "download_fvcom_results",
+                f"success {model_config} {run_type}",
+                {
+                    run_type: {
+                        "host": "arbutus.cloud",
+                        "model config": model_config,
+                        "run date": "2021-05-13",
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.ping_erddap",
+            args=[f"fvcom-{model_config}-nowcast"],
+            host="localhost",
+        )
+        assert workers[2] == expected
+
+    @pytest.mark.parametrize(
+        "model_config, run_type", (("x2", "nowcast"), ("r12", "nowcast"))
+    )
     def test_success_nowcast_no_launch_update_forecast_datasets(
         self, model_config, run_type, config, checklist
     ):
@@ -2281,6 +2309,29 @@ class TestAfterDownloadFVCOMResults:
         expected = NextWorker(
             "nowcast.workers.update_forecast_datasets",
             args=["fvcom", "nowcast", "--run-date", "2018-10-25"],
+            host="localhost",
+        )
+        assert expected not in workers
+
+    def test_success_forecast_no_launch_ping_erddap(self, config, checklist):
+        workers = next_workers.after_download_fvcom_results(
+            Message(
+                "download_fvcom_results",
+                f"success x2 forecast",
+                {
+                    "forecast": {
+                        "host": "arbutus.cloud",
+                        "model config": "x2",
+                        "run date": "2021-05-13",
+                    }
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.ping_erddap",
+            args=["fvcom-x2-forecast"],
             host="localhost",
         )
         assert expected not in workers
@@ -2465,12 +2516,18 @@ class TestAfterPingERDDAP:
             "failure nowcast-green",
             "failure nemo-forecast",
             "failure wwatch3-forecast",
+            "failure fvcom-x2-nowcast",
+            "failure fvcom-r12-nowcast",
+            "failure fvcom-forecast",
             "success weather",
             "success SCVIP-CTD",
             "success SEVIP-CTD",
             "success USDDL-CTD",
             "success TWDP-ferry",
             "success nemo-forecast",
+            "success fvcom-x2-nowcast",
+            "success fvcom-r12-nowcast",
+            "success fvcom-forecast",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
