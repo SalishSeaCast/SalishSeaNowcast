@@ -958,11 +958,6 @@ class TestAfterWatchNEMO:
                 host="arbutus.cloud",
             ),
             NextWorker(
-                "nowcast.workers.make_fvcom_boundary",
-                args=["arbutus.cloud", "r12", "nowcast"],
-                host="arbutus.cloud",
-            ),
-            NextWorker(
                 "nowcast.workers.download_results",
                 args=["arbutus.cloud", "nowcast", "--run-date", "2021-04-26"],
                 host="localhost",
@@ -1624,20 +1619,30 @@ class TestAfterWatchFVCOM:
             args=["arbutus.cloud", model_config, run_type, "--run-date", "2019-02-27"],
             host="localhost",
         )
-        assert expected in workers
+        assert workers[0] == expected
 
-    def test_success_nowcast_launch_make_fvcom_boundary_x2_forecast(
-        self, config, checklist
+    @pytest.mark.parametrize(
+        "done_model_config, done_run_type, launch_model_config, launch_run_type",
+        [("x2", "nowcast", "x2", "forecast"), ("x2", "forecast", "r12", "nowcast")],
+    )
+    def test_success_launch_make_fvcom_boundary(
+        self,
+        done_model_config,
+        done_run_type,
+        launch_model_config,
+        launch_run_type,
+        config,
+        checklist,
     ):
         workers = next_workers.after_watch_fvcom(
             Message(
                 "watch_fvcom",
-                "success x2 nowcast",
+                f"success {done_model_config} {done_run_type}",
                 {
-                    "x2 nowcast": {
+                    f"{done_model_config} {done_run_type}": {
                         "host": "arbutus.cloud",
-                        "model config": "x2",
-                        "run date": "2020-03-16",
+                        "model config": done_model_config,
+                        "run date": "2021-05-27",
                         "completed": True,
                     }
                 },
@@ -1647,10 +1652,16 @@ class TestAfterWatchFVCOM:
         )
         expected = NextWorker(
             "nowcast.workers.make_fvcom_boundary",
-            args=["arbutus.cloud", "x2", "forecast", "--run-date", "2020-03-16"],
+            args=[
+                "arbutus.cloud",
+                launch_model_config,
+                launch_run_type,
+                "--run-date",
+                "2021-05-27",
+            ],
             host="arbutus.cloud",
         )
-        assert expected in workers
+        assert workers[1] == expected
 
 
 class TestAfterMakeWW3WindFile:
