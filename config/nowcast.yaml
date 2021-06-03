@@ -921,7 +921,7 @@ vhfr fvcom runs:
   # Number of processors
   number of processors:
     x2: 30
-    r12: 75
+    r12: 90
   # Location on the compute host of the file that contains IP addresses
   # and MPI slots specifications.
   mpi hosts file:

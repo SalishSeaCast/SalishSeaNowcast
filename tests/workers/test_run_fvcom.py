@@ -245,7 +245,7 @@ class TestConfig:
             == "/nemoShare/MEOPAR/nowcast-sys/FVCOM41/"
         )
         assert vhfr_fvcom_runs["number of processors"]["x2"] == 30
-        assert vhfr_fvcom_runs["number of processors"]["r12"] == 75
+        assert vhfr_fvcom_runs["number of processors"]["r12"] == 90
         assert vhfr_fvcom_runs["mpi hosts file"]["x2"] == "${HOME}/mpi_hosts.fvcom.x2"
         assert vhfr_fvcom_runs["mpi hosts file"]["r12"] == "${HOME}/mpi_hosts.fvcom.r12"
         assert (
