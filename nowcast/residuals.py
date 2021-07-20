@@ -716,18 +716,19 @@ def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False, fromtar=F
 
     if fromtar:
         data = pd.read_csv(textfile, parse_dates=[0], index_col=0).rename(
-            columns={"      OB": "obs", "      TWL": 'fcst'})
-        data['Date'] = pd.to_datetime(data.index)
-        # clean up 00:00 obs
-        datesat00 = data.resample('1d').nearest().index.array
-        data['offset'] = data.obs - data['    TIDE']
-        data.loc[data.Date.isin(datesat00), 'obs'] = (
-            data[(data.Date.shift(1).isin(datesat00))].offset.values
-            + data[data.Date.isin(datesat00)]['    TIDE'].values
+            columns={"      OB": "obs", "      TWL": "fcst"}
         )
-        data.loc[data.obs > 9000, 'obs'] = 9999
-        data = data.resample('1h').nearest()
-        data['Date'] = pd.to_datetime(data.index, utc=True)
+        data["Date"] = pd.to_datetime(data.index)
+        # clean up 00:00 obs
+        datesat00 = data.resample("1d").nearest().index.array
+        data["offset"] = data.obs - data["    TIDE"]
+        data.loc[data.Date.isin(datesat00), "obs"] = (
+            data[(data.Date.shift(1).isin(datesat00))].offset.values
+            + data[data.Date.isin(datesat00)]["    TIDE"].values
+        )
+        data.loc[data.obs > 9000, "obs"] = 9999
+        data = data.resample("1h").nearest()
+        data["Date"] = pd.to_datetime(data.index, utc=True)
         dates = data.Date.array
     else:
         data = _load_surge_data(textfile, archive)
@@ -744,7 +745,9 @@ def NeahBay_forcing_anom(textfile, run_date, tide_file, archive=False, fromtar=F
                 isDec = True
             for i in range(dates.shape[0]):
                 dates[i] = _to_datetime(dates[i], run_date.year, isDec, isJan)
-    surge, forecast_flag = _calculate_forcing_surge(data, dates, tide_file, archive, fromtar)
+    surge, forecast_flag = _calculate_forcing_surge(
+        data, dates, tide_file, archive, fromtar
+    )
     return dates, surge, forecast_flag
 
 
@@ -776,7 +779,7 @@ def _calculate_forcing_surge(data, dates, tide_file, archive=False, fromtar=Fals
     surge = []
     # Load tides
     ttide, _ = stormtools.load_tidal_predictions(tide_file)
-    sealevel_correction = 0.
+    sealevel_correction = 0.0
     for d in dates:
         tide = ttide.pred_all[ttide.time == d].item()
         if archive:
@@ -786,7 +789,7 @@ def _calculate_forcing_surge(data, dates, tide_file, archive=False, fromtar=Fals
             fcst = data.fcst[data.Date == d].item()
             sealevel_correction = MSL_in_feet
         else:
-           # Convert datetime to string for comparing with times in data
+            # Convert datetime to string for comparing with times in data
             daystr = d.strftime("%m/%d %HZ")
             obs = data.obs[data.date == daystr].item()
             fcst = data.fcst[data.date == daystr].item()

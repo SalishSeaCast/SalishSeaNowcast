@@ -27,7 +27,7 @@ If this page is not accessible then the :mod:`collect_NeahBay_ssh` worker may fa
 
 :mod:`make_ssh_files` can take a date so older files can be run.  Files from the observation site can also be run with the appropriate flag.
 
-.. _NOAA forecast: https://nomads.ncep.noaa.gov/pub/data/nccf/com/etss/prod/ 
+.. _NOAA forecast: https://nomads.ncep.noaa.gov/pub/data/nccf/com/etss/prod/
 
 .. _NOAA tides and water levels: https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
 
