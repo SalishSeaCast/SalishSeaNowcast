@@ -19,7 +19,9 @@ weather:
       GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
       # URL from which to download ECCC HRDPS 2.5km west domain forecast fields files
       # **Must be quoted to project {} characters**
-      url template: 'https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+      url template: 'https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+      # Older, slower URL:
+#      url template: 'https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
       # Template for hourly ECCC HRDPS 2.5km west domain fields file name
       # **Must be quoted to project {} characters**
       file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'

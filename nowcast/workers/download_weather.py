@@ -160,7 +160,9 @@ def _get_file(
         variable=var, date=date, forecast=forecast, hour=hr_str
     )
     filepath = os.path.join(dest_dir_root, date, forecast, hr_str, filename)
-    file_url = url_tmpl.format(forecast=forecast, hour=hr_str, filename=filename)
+    file_url = url_tmpl.format(
+        date=date, forecast=forecast, hour=hr_str, filename=filename
+    )
     get_web_data(
         file_url, NAME, Path(filepath), session=session, wait_exponential_max=9000
     )

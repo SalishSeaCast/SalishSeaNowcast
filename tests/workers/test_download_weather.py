@@ -41,7 +41,7 @@ def config(base_config):
                   download:
                     2.5 km:
                       GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
-                      url template: 'https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+                      url template: 'https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
                       file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
                       grib variables:
                         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
@@ -167,7 +167,7 @@ class TestConfig:
         )
         assert (
             weather_download["url template"]
-            == "https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}"
+            == "https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/west/grib2/{forecast}/{hour}/{filename}"
         )
         assert (
             weather_download["file template"]
@@ -530,7 +530,7 @@ class TestGetFile:
             variable="UGRD_TGL_10", date="20150619", forecast="06", hour="001"
         )
         url = config["weather"]["download"][resolution]["url template"].format(
-            forecast="06", hour="001", filename=filename
+            date="20150619", forecast="06", hour="001", filename=filename
         )
         filepath = Path(
             config["weather"]["download"][resolution]["GRIB dir"],
