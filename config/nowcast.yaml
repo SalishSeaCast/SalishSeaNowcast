@@ -1050,6 +1050,11 @@ logging:
         qualname: matplotlib
         level: WARNING
         formatter: simple
+      PIL:
+        # Python Imaging Library (aka pillow) used by figure modules
+        qualname: PIL
+        level: WARNING
+        formatter: simple
       paramiko:
         # ssh/sftp client library used by various workers
         qualname: paramiko
