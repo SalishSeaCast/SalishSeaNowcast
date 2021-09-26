@@ -42,10 +42,13 @@
       :alt: Sphinx linkcheck
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CI
-    :alt: GitHub Workflow Status
+    :alt: pytest and test coverage analysis
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast
     :alt: Codecov Testing Coverage Report
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:codeql-analysis
+      :alt: CodeQL analysis
 .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues
     :alt: Issue Tracker
