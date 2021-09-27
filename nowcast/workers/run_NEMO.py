@@ -476,8 +476,8 @@ def _definitions(
 
 def _execute(nemo_processors, xios_processors, xios_host):
     mpirun = (
-        f"${{MPIRUN}} -np {nemo_processors} --bind-to core ./nemo.exe : "
-        f"-np {xios_processors} --bind-to core ./xios_server.exe"
+        f"${{MPIRUN}} -np {nemo_processors} --bind-to none ./nemo.exe : "
+        f"-np {xios_processors} --bind-to none ./xios_server.exe"
     )
     if xios_host is not None:
         mpirun = (

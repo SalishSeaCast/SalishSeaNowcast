@@ -1140,14 +1140,15 @@ class TestBuildScript:
             "output": {"XIOS servers": 1},
         }
         with p_config:
-            script = run_NEMO._build_script(
-                Path(str(tmp_run_dir)),
-                "nowcast-dev",
-                Path(str(run_desc_file)),
-                Path(str(results_dir)) / "13may17",
-                "salish-nowcast",
-                config,
-            )
+            with patch("salishsea_cmd.run.SYSTEM", "salish"):
+                script = run_NEMO._build_script(
+                    Path(str(tmp_run_dir)),
+                    "nowcast-dev",
+                    Path(str(run_desc_file)),
+                    Path(str(results_dir)) / "13may17",
+                    "salish-nowcast",
+                    config,
+                )
         expected = f"""#!/bin/bash
 
         #PBS -N 13may17nowcast
@@ -1157,8 +1158,8 @@ class TestBuildScript:
         #PBS -m bea
         #PBS -M somebody@example.com
         #PBS -l procs=8
-        # memory per processor
-        #PBS -l pmem=2000mb
+        # total memory for job
+        #PBS -l mem=64gb
 
         RUN_ID="13may17nowcast"
         RUN_DESC="13may17.yaml"
@@ -1174,8 +1175,8 @@ class TestBuildScript:
         echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
 
         echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 7 --bind-to core ./nemo.exe : \
--np 1 --bind-to core ./xios_server.exe \
+        ${{MPIRUN}} -np 7 --bind-to none ./nemo.exe : \
+-np 1 --bind-to none ./xios_server.exe \
 >>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
         echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
 
@@ -1281,8 +1282,8 @@ class TestExecute:
         echo "working dir: $(pwd)" >>${RESULTS_DIR}/stdout
 
         echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
-        ${MPIRUN} -np 15 --bind-to core ./nemo.exe : \
--np 1 --bind-to core ./xios_server.exe \
+        ${MPIRUN} -np 15 --bind-to none ./nemo.exe : \
+-np 1 --bind-to none ./xios_server.exe \
 >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr
         echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
 
