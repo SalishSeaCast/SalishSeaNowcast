@@ -20,7 +20,7 @@ Mitigating Worker Failures
 **************************
 
 :py:mod:`collect_NeahBay_ssh` Worker Failure
-========================================
+============================================
 
 The sea surface height anomaly at the western Juan de Fuca boundary is taken from a `NOAA forecast`_ of storm surge at Neah Bay.
 If this page is not accessible then the :mod:`collect_NeahBay_ssh` worker may fail.  As the observations for several days are saved in the files on this pages, one can try at a later time and if necessary use yesterday's files to continue the forecast.  If it goes several days, we can recover observed sea surface heights from the `NOAA tides and water levels`_ .
