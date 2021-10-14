@@ -5,7 +5,7 @@
 # to create an isolated development environment.
 #
 # Create/update this file with:
-#   (salishsea-nowcast)$ python3 -m pip list --format=freeze >> requirements.txt
+#   (salishsea-nowcast)$ python3 -m pip list --format=freeze >> envs/requirements.txt
 
 affine==2.3.0
 alabaster==0.7.12
