@@ -14,6 +14,7 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast watch_NEMO_agrif worker.
 """
+import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch, Mock
@@ -24,6 +25,27 @@ import pytest
 
 import nowcast.ssh_sftp
 from nowcast.workers import watch_NEMO_agrif
+
+
+@pytest.fixture
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                run:
+                  enabled hosts:
+                    orcinus:
+                      ssh key: SalishSeaNEMO-nowcast_id_rsa,
+                      scratch dir: scratch/nowcast-agrif,
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.watch_NEMO_agrif.NowcastWorker", spec=True)
@@ -126,18 +148,9 @@ class TestWatchNEMO_AGRIF:
         m_get_run_id,
         m_sftp,
         m_logger,
+        config,
     ):
         parsed_args = SimpleNamespace(host_name="orcinus", job_id="9305855.orca2.ibb")
-        config = {
-            "run": {
-                "enabled hosts": {
-                    "orcinus": {
-                        "ssh key": "SalishSeaNEMO-nowcast_id_rsa",
-                        "scratch dir": "scratch/nowcast-agrif",
-                    }
-                }
-            }
-        }
         checklist = watch_NEMO_agrif.watch_NEMO_agrif(parsed_args, config)
         expected = {
             "nowcast-agrif": {

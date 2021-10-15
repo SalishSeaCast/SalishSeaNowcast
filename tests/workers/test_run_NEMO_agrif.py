@@ -14,6 +14,8 @@
 #  limitations under the License.
 """Unit tests for SalishSeaCast run_NEMO_agrif worker.
 """
+import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
@@ -23,6 +25,30 @@ import pytest
 
 import nowcast.ssh_sftp
 from nowcast.workers import run_NEMO_agrif
+
+
+@pytest.fixture
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                run:
+                  enabled hosts:
+                    orcinus:
+                      ssh key: SalishSeaNEMO-nowcast_id_rsa
+                      scratch dir: scratch/nowcast-agrif
+                      run prep dir: nowcast-agrif-sys/runs
+                      salishsea cmd: .local/bin/salishsea
+
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.run_NEMO_agrif.NowcastWorker", spec=True)
@@ -121,18 +147,6 @@ class TestFailure:
 class TestRunNEMO_AGRIF:
     """Unit test for run_NEMO_agrif() function."""
 
-    config = {
-        "run": {
-            "enabled hosts": {
-                "orcinus": {
-                    "ssh key": "SalishSeaNEMO-nowcast_id_rsa",
-                    "scratch dir": "scratch/nowcast-agrif",
-                    "salishsea cmd": "/home/dlatorne/.local/bin/salishsea",
-                }
-            }
-        }
-    }
-
     def test_checklist(
         self,
         m_launch_run,
@@ -141,11 +155,12 @@ class TestRunNEMO_AGRIF:
         _get_prev_run_namelists_info,
         m_sftp,
         m_logger,
+        config,
     ):
         parsed_args = SimpleNamespace(
             host_name="orcinus", run_date=arrow.get("2018-04-30")
         )
-        checklist = run_NEMO_agrif.run_NEMO_agrif(parsed_args, self.config)
+        checklist = run_NEMO_agrif.run_NEMO_agrif(parsed_args, config)
         expected = {
             "nowcast-agrif": {
                 "host": "orcinus",
@@ -165,18 +180,12 @@ class TestEditNamelistTimes:
     Unit tests for _edit_namelist_times() function.
     """
 
-    config = {
-        "run": {
-            "enabled hosts": {"orcinus": {"run prep dir": "nowcast-agrif-sys/runs"}}
-        }
-    }
-
-    def test_download_namelist_times(self, m_patch, m_logger):
+    def test_download_namelist_times(self, m_patch, m_logger, config):
         m_sftp_client = Mock(name="sftp_client")
         prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         run_date = arrow.get("2018-04-30")
         run_NEMO_agrif._edit_namelist_times(
-            m_sftp_client, "orcinus", prev_run_namelists_info, run_date, self.config
+            m_sftp_client, "orcinus", prev_run_namelists_info, run_date, config
         )
         assert m_sftp_client.get.call_args_list == [
             call(
@@ -189,12 +198,12 @@ class TestEditNamelistTimes:
             ),
         ]
 
-    def test_patch_namelist_times(self, m_patch, m_logger):
+    def test_patch_namelist_times(self, m_patch, m_logger, config):
         m_sftp_client = Mock(name="sftp_client")
         prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         run_date = arrow.get("2018-04-30")
         run_NEMO_agrif._edit_namelist_times(
-            m_sftp_client, "orcinus", prev_run_namelists_info, run_date, self.config
+            m_sftp_client, "orcinus", prev_run_namelists_info, run_date, config
         )
         assert m_patch.call_args_list == [
             call(
@@ -215,12 +224,12 @@ class TestEditNamelistTimes:
             ),
         ]
 
-    def test_upload_namelist_times(self, m_patch, m_logger):
+    def test_upload_namelist_times(self, m_patch, m_logger, config):
         m_sftp_client = Mock(name="sftp_client")
         prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         run_date = arrow.get("2018-04-30")
         run_NEMO_agrif._edit_namelist_times(
-            m_sftp_client, "orcinus", prev_run_namelists_info, run_date, self.config
+            m_sftp_client, "orcinus", prev_run_namelists_info, run_date, config
         )
         assert m_sftp_client.put.call_args_list == [
             call(
@@ -252,18 +261,7 @@ class TestEditRunDesc:
     Unit tests for __edit_run_desc() function.
     """
 
-    config = {
-        "run": {
-            "enabled hosts": {
-                "orcinus": {
-                    "scratch dir": "scratch/nowcast-agrif",
-                    "run prep dir": "nowcast-agrif-sys/runs",
-                }
-            }
-        }
-    }
-
-    def test_download_run_desc_template(self, m_safe_load, m_logger, tmpdir):
+    def test_download_run_desc_template(self, m_safe_load, m_logger, config, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
         prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         setattr(prev_run_namelists_info, "1_rdt", 20)
@@ -274,7 +272,7 @@ class TestEditRunDesc:
             prev_run_namelists_info,
             "30apr18nowcast-agrif",
             arrow.get("2018-04-30"),
-            self.config,
+            config,
             yaml_tmpl=yaml_tmpl,
         )
         m_sftp_client.get.assert_called_once_with(
@@ -283,7 +281,7 @@ class TestEditRunDesc:
         )
 
     @patch("nowcast.workers.run_NEMO_agrif.yaml.safe_dump", autospec=True)
-    def test_edit_run_desc(self, m_safe_dump, m_safe_load, m_logger, tmpdir):
+    def test_edit_run_desc(self, m_safe_dump, m_safe_load, m_logger, config, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
         prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         setattr(prev_run_namelists_info, "1_rdt", 20)
@@ -295,7 +293,7 @@ class TestEditRunDesc:
                 prev_run_namelists_info,
                 "30apr18nowcast-agrif",
                 arrow.get("2018-04-30"),
-                self.config,
+                config,
                 yaml_tmpl=yaml_tmpl,
             )
         m_safe_dump.assert_called_once_with(
@@ -314,7 +312,7 @@ class TestEditRunDesc:
             default_flow_style=False,
         )
 
-    def test_upload_run_desc(self, m_safe_load, m_logger, tmpdir):
+    def test_upload_run_desc(self, m_safe_load, m_logger, config, tmpdir):
         m_sftp_client = Mock(name="sftp_client")
         prev_run_namelists_info = SimpleNamespace(itend=2_363_040, rdt=40)
         setattr(prev_run_namelists_info, "1_rdt", 20)
@@ -325,7 +323,7 @@ class TestEditRunDesc:
             prev_run_namelists_info,
             "30apr18nowcast-agrif",
             arrow.get("2018-04-30"),
-            self.config,
+            config,
             yaml_tmpl=yaml_tmpl,
         )
         m_sftp_client.put.assert_called_once_with(
@@ -341,19 +339,7 @@ class TestLaunchRun:
     Unit tests for _launch_run() function.
     """
 
-    config = {
-        "run": {
-            "enabled hosts": {
-                "orcinus": {
-                    "scratch dir": "scratch/nowcast-agrif",
-                    "run prep dir": "nowcast-agrif-sys/runs",
-                    "salishsea cmd": "/home/dlatorne/.local/bin/salishsea",
-                }
-            }
-        }
-    }
-
-    def test_launch_run(self, m_ssh_exec_cmd, m_logger):
+    def test_launch_run(self, m_ssh_exec_cmd, m_logger, config):
         m_ssh_client = Mock(name="ssh_client")
         run_id = "30apr18nowcast-agrif"
         m_ssh_exec_cmd.return_value = (
@@ -363,11 +349,11 @@ class TestLaunchRun:
             f"salishsea_cmd.run INFO: 9332731.orca2.ibb\n\n"
         )
         run_dir, job_id = run_NEMO_agrif._launch_run(
-            m_ssh_client, "orcinus", run_id, self.config
+            m_ssh_client, "orcinus", run_id, config
         )
         m_ssh_exec_cmd.assert_called_once_with(
             m_ssh_client,
-            f"/home/dlatorne/.local/bin/salishsea run "
+            f".local/bin/salishsea run "
             f"nowcast-agrif-sys/runs/{run_id}.yaml "
             f"scratch/nowcast-agrif/30apr18 --debug",
             "orcinus",
@@ -377,13 +363,13 @@ class TestLaunchRun:
         assert run_dir == expected
         assert job_id == "9332731.orca2.ibb"
 
-    def test_ssh_error(self, m_ssh_exec_cmd, m_logger):
+    def test_ssh_error(self, m_ssh_exec_cmd, m_logger, config):
         m_ssh_client = Mock(name="ssh_client")
         m_ssh_exec_cmd.side_effect = nowcast.ssh_sftp.SSHCommandError(
             "cmd", "stdout", "stderr"
         )
         with pytest.raises(nemo_nowcast.WorkerError):
             run_NEMO_agrif._launch_run(
-                m_ssh_client, "orcinus", "30apr18nowcast-agrif", self.config
+                m_ssh_client, "orcinus", "30apr18nowcast-agrif", config
             )
         m_logger.error.assert_called_once_with("stderr")

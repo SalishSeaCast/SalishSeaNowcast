@@ -15,15 +15,58 @@
 """Unit tests for Salish Sea NEMO nowcast watch_NEMO worker.
 """
 import subprocess
+import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 from nemo_nowcast import NowcastWorker, Message
 
 from nowcast.workers import watch_NEMO
+
+
+@pytest.fixture
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                run types:
+                  nowcast:
+                    duration: 1  # day
+                  nowcast-dev:
+                    duration: 1  # day
+                  nowcast-green:
+                    duration: 1  # day
+                  forecast:
+                    duration: 1.5  # days
+                  forecast2:
+                    duration: 1.25  # days
+                run:
+                  enabled hosts:
+                    arbutus.cloud:
+                      run types:
+                        nowcast:
+                          results: results/SalishSea/nowcast/
+                        nowcast-green:
+                          results: results/SalishSea/nowcast-green/
+                        nowcast-dev:
+                          results: results/SalishSea/nowcast-dev/
+                        forecast:
+                          results: results/SalishSea/forecast/
+                        forecast2:
+                          results: results/SalishSea/forecast2/
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @patch("nowcast.workers.watch_NEMO.NowcastWorker", spec=True)
@@ -36,11 +79,6 @@ class TestMain:
         args, kwargs = m_worker.call_args
         assert args == ("watch_NEMO",)
         assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO.main()
-        m_worker().init_cli.assert_called_once_with()
 
     def test_init_cli(self, m_worker):
         m_worker().cli = Mock(name="cli")
@@ -138,16 +176,6 @@ class TestFailure:
 class TestWatchNEMO:
     """Unit tests for watch_NEMO function."""
 
-    config = {
-        "run types": {
-            "nowcast": {"duration": 1},  # day
-            "nowcast-dev": {"duration": 1},  # day
-            "nowcast-green": {"duration": 1},  # day
-            "forecast": {"duration": 1.5},  # day
-            "forecast2": {"duration": 1.25},  # day
-        }
-    }
-
     def test_checklist(
         self,
         m_confirm,
@@ -157,6 +185,7 @@ class TestWatchNEMO:
         m_logger,
         run_type,
         host_name,
+        config,
     ):
         m_nml_read.return_value = {
             "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
@@ -178,7 +207,7 @@ class TestWatchNEMO:
                 },
             ),
         )
-        checklist = watch_NEMO.watch_NEMO(parsed_args, self.config, tell_manager)
+        checklist = watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
         expected = {
             run_type: {"host": host_name, "run date": "2017-11-13", "completed": True}
         }
@@ -193,6 +222,7 @@ class TestWatchNEMO:
         m_logger,
         run_type,
         host_name,
+        config,
         tmpdir,
     ):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
@@ -217,7 +247,7 @@ class TestWatchNEMO:
             ),
         )
         watch_NEMO.POLL_INTERVAL = 0
-        watch_NEMO.watch_NEMO(parsed_args, self.config, tell_manager)
+        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
         m_logger.info.assert_called_once_with(
             f"{run_type} on {host_name}: "
             f"time.step not found; continuing to watch..."
@@ -232,6 +262,7 @@ class TestWatchNEMO:
         m_logger,
         run_type,
         host_name,
+        config,
         tmpdir,
     ):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
@@ -263,7 +294,7 @@ class TestWatchNEMO:
             ),
         )
         watch_NEMO.POLL_INTERVAL = 0
-        watch_NEMO.watch_NEMO(parsed_args, self.config, tell_manager)
+        watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
         m_logger.info.assert_called_once_with(
             f"{run_type} on {host_name}: "
             f"timestep: 1081 = 2017-11-13 12:00:00 UTC, 50.0% complete"
@@ -278,6 +309,7 @@ class TestWatchNEMO:
         m_logger,
         run_type,
         host_name,
+        config,
     ):
         m_nml_read.return_value = {
             "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": 20_171_113},
@@ -299,7 +331,7 @@ class TestWatchNEMO:
                 },
             ),
         )
-        checklist = watch_NEMO.watch_NEMO(parsed_args, self.config, tell_manager)
+        checklist = watch_NEMO.watch_NEMO(parsed_args, config, tell_manager)
         expected = {
             run_type: {"host": host_name, "run date": "2017-11-13", "completed": True}
         }
@@ -310,7 +342,7 @@ class TestWatchNEMO:
             Path("tmp_run_dir"),
             2160,
             2160,
-            self.config,
+            config,
         )
 
 
@@ -388,22 +420,6 @@ class TestPidExists:
 class TestConfirmRunSuccess:
     """Unit tests for _confirm_run_success() function."""
 
-    config = {
-        "run": {
-            "enabled hosts": {
-                "arbutus.cloud": {
-                    "run types": {
-                        "nowcast": {"results": "SalishSea/nowcast-blue/"},
-                        "nowcast-green": {"results": "SalishSea/nowcast-green/"},
-                        "nowcast-dev": {"results": "SalishSea/nowcast-dev/"},
-                        "forecast": {"results": "SalishSea/forecast/"},
-                        "forecast2": {"results": "SalishSea/forecast2/"},
-                    }
-                }
-            }
-        }
-    }
-
     @pytest.mark.parametrize(
         "run_type, itend, restart_timestep",
         [
@@ -414,7 +430,9 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_run_succeeded(self, m_logger, run_type, itend, restart_timestep, tmpdir):
+    def test_run_succeeded(
+        self, m_logger, run_type, itend, restart_timestep, config, tmpdir
+    ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -426,7 +444,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert run_succeeded
 
@@ -440,7 +458,7 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_no_results_dir(self, m_logger, run_type, itend, restart_timestep):
+    def test_no_results_dir(self, m_logger, run_type, itend, restart_timestep, config):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (False, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -452,7 +470,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert not run_succeeded
 
@@ -467,7 +485,12 @@ class TestConfirmRunSuccess:
         ],
     )
     def test_output_abort_file_exists(
-        self, m_logger, run_type, itend, restart_timestep
+        self,
+        m_logger,
+        run_type,
+        itend,
+        restart_timestep,
+        config,
     ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, True, True, True)
@@ -480,7 +503,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert not run_succeeded
 
@@ -494,7 +517,9 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_no_time_step_file(self, m_logger, run_type, itend, restart_timestep):
+    def test_no_time_step_file(
+        self, m_logger, run_type, itend, restart_timestep, config
+    ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -506,7 +531,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert "time.step" in m_logger.critical.call_args_list[0][0][0]
         assert not run_succeeded
@@ -521,7 +546,9 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_wrong_final_time_step(self, m_logger, run_type, itend, restart_timestep):
+    def test_wrong_final_time_step(
+        self, m_logger, run_type, itend, restart_timestep, config
+    ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -533,7 +560,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert not run_succeeded
 
@@ -547,7 +574,9 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_no_physics_restart_file(self, m_logger, run_type, itend, restart_timestep):
+    def test_no_physics_restart_file(
+        self, m_logger, run_type, itend, restart_timestep, config
+    ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, False, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -559,13 +588,13 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         expected = f"SalishSea_{restart_timestep:08d}_restart.nc"
         assert expected in m_logger.critical.call_args[0][0]
         assert not run_succeeded
 
-    def test_no_tracers_restart_file(self, m_logger):
+    def test_no_tracers_restart_file(self, m_logger, config):
         restart_timestep = 2160
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, False)
@@ -578,7 +607,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     2160,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         expected = f"SalishSea_{restart_timestep:08d}_restart_trc.nc"
         assert expected in m_logger.critical.call_args[0][0]
@@ -594,7 +623,9 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_no_ocean_output_file(self, m_logger, run_type, itend, restart_timestep):
+    def test_no_ocean_output_file(
+        self, m_logger, run_type, itend, restart_timestep, config
+    ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -606,7 +637,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert "ocean.output" in m_logger.critical.call_args_list[1][0][0]
         assert not run_succeeded
@@ -621,7 +652,9 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_error_in_ocean_output(self, m_logger, run_type, itend, restart_timestep):
+    def test_error_in_ocean_output(
+        self, m_logger, run_type, itend, restart_timestep, config
+    ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -634,7 +667,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert not run_succeeded
 
@@ -648,7 +681,9 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_no_solver_stat_file(self, m_logger, run_type, itend, restart_timestep):
+    def test_no_solver_stat_file(
+        self, m_logger, run_type, itend, restart_timestep, config
+    ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -660,7 +695,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert "solver.stat" in m_logger.critical.call_args_list[2][0][0]
         assert not run_succeeded
@@ -675,7 +710,9 @@ class TestConfirmRunSuccess:
             ("forecast2", 2700, 2160),
         ],
     )
-    def test_nan_in_solver_stat(self, m_logger, run_type, itend, restart_timestep):
+    def test_nan_in_solver_stat(
+        self, m_logger, run_type, itend, restart_timestep, config
+    ):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -691,11 +728,11 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     itend,
                     restart_timestep,
-                    self.config,
+                    config,
                 )
         assert not run_succeeded
 
-    def test_nan_in_tracer_stat(self, m_logger):
+    def test_nan_in_tracer_stat(self, m_logger, config):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -712,11 +749,11 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     2160,
                     2160,
-                    self.config,
+                    config,
                 )
         assert not run_succeeded
 
-    def test_no_tracer_stat_file(self, m_logger):
+    def test_no_tracer_stat_file(self, m_logger, config):
         with patch("nowcast.workers.watch_NEMO.Path.exists") as m_exists:
             m_exists.side_effect = (True, False, True, True)
             with patch("nowcast.workers.watch_NEMO.Path.open") as m_open:
@@ -729,7 +766,7 @@ class TestConfirmRunSuccess:
                     Path("tmp_run_dir"),
                     2160,
                     2160,
-                    self.config,
+                    config,
                 )
         assert "tracer.stat" in m_logger.critical.call_args_list[3][0][0]
         assert not run_succeeded

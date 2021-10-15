@@ -15,124 +15,126 @@
 """Unit tests for Salish Sea NEMO nowcast run_NEMO worker.
 """
 import subprocess
+import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, patch, Mock
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import run_NEMO
 
 
 @pytest.fixture
-def config(scope="function"):
-    return {
-        "coordinates": "coordinates_seagrid_SalishSea.nc",
-        "run types": {
-            "nowcast": {
-                "config name": "SalishSea",
-                "coordinates": "coordinates_seagrid_SalishSea2.nc",
-                "bathymetry": "bathy_downonegrid2.nc",
-                "mesh_mask": "mesh_mask_downbyone2.nc",
-                "land processor elimination": "bathy_downonegrid2.csv",
-                "duration": 1,
-                "restart from": "nowcast",
-            },
-            "nowcast-dev": {
-                "config name": "SalishSea",
-                "coordinates": "coordinates_seagrid_SalishSea201702.nc",
-                "bathymetry": "bathymetry_201702.nc",
-                "mesh_mask": "mesh_mask201702.nc",
-                "land processor elimination": "bathymetry_201702.csv",
-                "duration": 1,
-                "restart from": "nowcast-green",
-            },
-            "nowcast-green": {
-                "config name": "SOG",
-                "coordinates": "coordinates_seagrid_SalishSea2.nc",
-                "bathymetry": "bathy_downonegrid2.nc",
-                "mesh_mask": "mesh_mask_downbyone2.nc",
-                "land processor elimination": "bathy_downonegrid2.csv",
-                "duration": 1,
-                "restart from": "nowcast-green",
-            },
-            "forecast": {
-                "config name": "SalishSea",
-                "coordinates": "coordinates_seagrid_SalishSea2.nc",
-                "bathymetry": "bathy_downonegrid2.nc",
-                "mesh_mask": "mesh_mask_downbyone2.nc",
-                "land processor elimination": "bathy_downonegrid2.csv",
-                "duration": 1.5,
-                "restart from": "nowcast",
-            },
-            "forecast2": {
-                "config name": "SalishSea",
-                "coordinates": "coordinates_seagrid_SalishSea2.nc",
-                "bathymetry": "bathy_downonegrid2.nc",
-                "mesh_mask": "mesh_mask_downbyone2.nc",
-                "land processor elimination": "bathy_downonegrid2.csv",
-                "duration": 1.25,
-                "restart from": "forecast",
-            },
-        },
-        "run": {
-            "enabled hosts": {
-                "arbutus.cloud": {
-                    "mpi hosts file": "${HOME}/mpi_hosts",
-                    "xios host": "192.168.238.14",
-                    "run prep dir": "nowcast-sys/runs/",
-                    "grid dir": "nowcast-sys/grid/",
-                    "salishsea_cmd": "bin/salishsea",
-                    "job exec cmd": "bash",
-                    "run types": {
-                        "nowcast": {
-                            "run sets dir": "SS-run-sets/SalishSea/nemo3.6/nowcast-blue/",
-                            "mpi decomposition": "9x19",
-                            "results": "results/SalishSea/nowcast",
-                        },
-                        "forecast": {
-                            "run sets dir": "SS-run-sets/SalishSea/nemo3.6/forecast/",
-                            "mpi decomposition": "9x19",
-                            "results": "results/SalishSea/forecast/",
-                        },
-                        "forecast2": {
-                            "run sets dir": "SS-run-sets/SalishSea/nemo3.6/forecast2/",
-                            "mpi decomposition": "9x19",
-                            "results": "results/SalishSea/forecast2/",
-                        },
-                        "nowcast-green": {
-                            "run sets dir": "SS-run-sets/SalishSea/nemo3.6/nowcast-green/",
-                            "mpi decomposition": "9x19",
-                            "results": "results/SalishSea/nowcast-green/",
-                        },
-                    },
-                    "forcing": {
-                        "bottom friction mask": "/grid/jetty_mask_bathy201702.nc"
-                    },
-                },
-                "salish-nowcast": {
-                    "run prep dir": "nowcast-sys/runs/",
-                    "grid dir": "nowcast-sys/grid/",
-                    "salishsea_cmd": "bin/salishsea",
-                    "job exec cmd": "qsub",
-                    "email": "somebody@example.com",
-                    "run types": {
-                        "nowcast-dev": {
-                            "run sets dir": "SS-run-sets/SalishSea/nemo3.6/nowcast-dev/",
-                            "mpi decomposition": "1x7",
-                            "walltime": "23:30:00",
-                            "results": "results/SalishSea/nowcast-dev",
-                        },
-                        "nowcast-green": {"results": "results/SalishSea/nowcast-dev"},
-                    },
-                    "forcing": {
-                        "bottom friction mask": "/grid/jetty_mask_bathy201702.nc"
-                    },
-                },
-            }
-        },
-    }
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                results archive:
+                  nowcast: results/SalishSea/nowcast-blue.201905/
+                  nowcast-dev: results/SalishSea/nowcast-dev.201905/
+                  nowcast-green: results2/SalishSea/nowcast-green.201905/
+                  forecast: results/SalishSea/forecast.201905/
+                  forecast2: results/SalishSea/forecast2.201905/
+
+                run types:
+                  nowcast:
+                    config name: SalishSeaCast_Blue
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                    land processor elimination: bathymetry_201702.csv
+                    duration: 1  # day
+                    restart from: nowcast
+                  nowcast-dev:
+                    config name: SalishSeaCast_Blue
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                    land processor elimination: bathymetry_201702.csv
+                    duration: 1  # day
+                    restart from: nowcast-dev
+                  nowcast-green:
+                    config name:  SalishSeaCast
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                    land processor elimination: bathymetry_201702.csv
+                    duration: 1  # day
+                    restart from: nowcast-green
+                  forecast:
+                    config name:  SalishSeaCast_Blue
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                    land processor elimination: bathymetry_201702.csv
+                    duration: 1.5  # days
+                    restart from: nowcast
+                  forecast2:
+                    config name:  SalishSeaCast_Blue
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                    land processor elimination: bathymetry_201702.csv
+                    duration: 1.25  # days
+                    restart from: forecast
+
+                run:
+                  enabled hosts:
+                    arbutus.cloud:
+                      mpi hosts file: ${HOME}/mpi_hosts
+                      xios host: 192.168.238.14
+                      run prep dir: nowcast-sys/runs/
+                      grid dir: nowcast-sys/grid/
+                      salishsea_cmd: bin/salishsea
+                      job exec cmd: bash
+                      run types:
+                        nowcast:
+                          run sets dir: SS-run-sets/v201905/nowcast-blue/
+                          mpi decomposition: 11x18
+                          results: results/SalishSea/nowcast/
+                        forecast:
+                          run sets dir: SS-run-sets/v201905/forecast/
+                          mpi decomposition: 11x18
+                          results: results/SalishSea/forecast/
+                        forecast2:
+                          run sets dir: SS-run-sets/v201905/forecast2/
+                          mpi decomposition: 11x18
+                          results: results/SalishSea/forecast2/
+                        nowcast-green:
+                          run sets dir: SS-run-sets/v201905/nowcast-green/
+                          mpi decomposition: 11x18
+                          results: results/SalishSea/nowcast-green/
+                      forcing:
+                        bottom friction mask: grid/jetty_mask_bathy201702.nc
+
+                    salish-nowcast:
+                      run prep dir: nowcast-sys/runs/
+                      grid dir: nowcast-sys/grid/
+                      salishsea_cmd: bin/salishsea
+                      job exec cmd: qsub
+                      email: somebody@example.com
+                      run types:
+                        nowcast-dev:
+                          run sets dir: SS-run-sets/SalishSea/nemo3.6/nowcast-dev/
+                          mpi decomposition: 1x7
+                          walltime: "23:30:00"
+                          results: results/SalishSea/nowcast-dev/
+                        nowcast-green:
+                          results: results/SalishSea/nowcast-dev/
+                      forcing:
+                        bottom friction mask: grid/jetty_mask_bathy201702.nc
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @pytest.fixture
@@ -422,7 +424,11 @@ class TestRunDescription:
         dmy = run_date.format("DDMMMYY").lower()
         run_id = "{dmy}{run_type}".format(dmy=dmy, run_type="nowcast")
         host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
-        p_config = patch.dict(host_config["run types"], nowcast={})
+        p_config = patch.dict(
+            host_config["run types"]["nowcast"],
+            {"run sets dir": "foo", "mpi decomposition": "11x18"},
+            clear=True,
+        )
         with p_config:
             with patch("nowcast.workers.run_NEMO.logger", autospec=True):
                 with pytest.raises(run_NEMO.WorkerError):
@@ -433,11 +439,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("arbutus.cloud", "nowcast", "SalishSea"),
-            ("arbutus.cloud", "nowcast-green", "SOG"),
-            ("salish-nowcast", "nowcast-dev", "SalishSea"),
-            ("arbutus.cloud", "forecast", "SalishSea"),
-            ("arbutus.cloud", "forecast2", "SalishSea"),
+            ("arbutus.cloud", "nowcast", "SalishSeaCast_Blue"),
+            ("arbutus.cloud", "nowcast-green", "SalishSeaCast"),
+            ("salish-nowcast", "nowcast-dev", "SalishSeaCast_Blue"),
+            ("arbutus.cloud", "forecast", "SalishSeaCast_Blue"),
+            ("arbutus.cloud", "forecast2", "SalishSeaCast_Blue"),
         ],
     )
     def test_config_name(
@@ -491,11 +497,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("arbutus.cloud", "nowcast", "9x19"),
-            ("arbutus.cloud", "nowcast-green", "9x19"),
+            ("arbutus.cloud", "nowcast", "11x18"),
+            ("arbutus.cloud", "nowcast-green", "11x18"),
             ("salish-nowcast", "nowcast-dev", "1x7"),
-            ("arbutus.cloud", "forecast", "9x19"),
-            ("arbutus.cloud", "forecast2", "9x19"),
+            ("arbutus.cloud", "forecast", "11x18"),
+            ("arbutus.cloud", "forecast2", "11x18"),
         ],
     )
     def test_mpi_decomposition(
@@ -606,12 +612,12 @@ class TestRunDescription:
             (
                 "arbutus.cloud",
                 "nowcast",
-                "nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc",
+                "nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc",
             ),
             (
                 "arbutus.cloud",
                 "nowcast-green",
-                "nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc",
+                "nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc",
             ),
             (
                 "salish-nowcast",
@@ -621,12 +627,12 @@ class TestRunDescription:
             (
                 "arbutus.cloud",
                 "forecast",
-                "nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc",
+                "nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc",
             ),
             (
                 "arbutus.cloud",
                 "forecast2",
-                "nowcast-sys/grid/coordinates_seagrid_SalishSea2.nc",
+                "nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc",
             ),
         ],
     )
@@ -652,15 +658,15 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("arbutus.cloud", "nowcast", "nowcast-sys/grid/bathy_downonegrid2.nc"),
+            ("arbutus.cloud", "nowcast", "nowcast-sys/grid/bathymetry_201702.nc"),
             (
                 "arbutus.cloud",
                 "nowcast-green",
-                "nowcast-sys/grid/bathy_downonegrid2.nc",
+                "nowcast-sys/grid/bathymetry_201702.nc",
             ),
             ("salish-nowcast", "nowcast-dev", "nowcast-sys/grid/bathymetry_201702.nc"),
-            ("arbutus.cloud", "forecast", "nowcast-sys/grid/bathy_downonegrid2.nc"),
-            ("arbutus.cloud", "forecast2", "nowcast-sys/grid/bathy_downonegrid2.nc"),
+            ("arbutus.cloud", "forecast", "nowcast-sys/grid/bathymetry_201702.nc"),
+            ("arbutus.cloud", "forecast2", "nowcast-sys/grid/bathymetry_201702.nc"),
         ],
     )
     def test_grid_bathymetry(
@@ -685,11 +691,11 @@ class TestRunDescription:
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
         [
-            ("arbutus.cloud", "nowcast", "nowcast-sys/grid/bathy_downonegrid2.csv"),
+            ("arbutus.cloud", "nowcast", "nowcast-sys/grid/bathymetry_201702.csv"),
             (
                 "arbutus.cloud",
                 "nowcast-green",
-                "nowcast-sys/grid/bathy_downonegrid2.csv",
+                "nowcast-sys/grid/bathymetry_201702.csv",
             ),
             ("salish-nowcast", "nowcast-dev", False),
         ],
@@ -821,7 +827,7 @@ class TestRunDescription:
             run_desc = run_NEMO._run_description(
                 run_date, run_type, run_id, 2160, host_name, config
             )
-        expected = "/grid/jetty_mask_bathy201702.nc"
+        expected = "grid/jetty_mask_bathy201702.nc"
         assert run_desc["forcing"]["bfr_coef.nc"]["link to"] == expected
 
     @pytest.mark.parametrize(
@@ -1057,12 +1063,12 @@ class TestBuildScript:
     @patch(
         "nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors", return_value=119
     )
-    def test_script_west_cloud(self, m_gnp, m_lrd, run_type, config, tmpdir):
+    def test_script_arbutus_cloud(self, m_gnp, m_lrd, run_type, config, tmpdir):
         tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
         run_desc_file = tmpdir.ensure("13may17.yaml")
         host_config = config["run"]["enabled hosts"]["arbutus.cloud"]
         results_dir = tmpdir.ensure_dir(host_config["run types"][run_type]["results"])
-        p_config = patch.dict(config, [("results archive", str(results_dir))])
+        p_config = patch.dict(config["results archive"], {run_type: str(results_dir)})
         m_lrd.return_value = {
             "run_id": "13may17nowcast",
             "MPI decomposition": "11x18",
@@ -1132,7 +1138,9 @@ class TestBuildScript:
         results_dir = tmpdir.ensure_dir(
             host_config["run types"]["nowcast-dev"]["results"]
         )
-        p_config = patch.dict(config, [("results archive", str(results_dir))])
+        p_config = patch.dict(
+            config["results archive"], {"nowcast-dev": str(results_dir)}
+        )
         m_lrd.return_value = {
             "run_id": "13may17nowcast",
             "MPI decomposition": "1x7",

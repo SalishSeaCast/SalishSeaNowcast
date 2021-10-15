@@ -14,7 +14,11 @@
 #  limitations under the License.
 """Unit tests for nowcast.next_workers module.
 """
+import textwrap
+from pathlib import Path
+
 import arrow
+import nemo_nowcast
 import pytest
 from nemo_nowcast import Message, NextWorker
 
@@ -22,54 +26,88 @@ from nowcast import next_workers
 
 
 @pytest.fixture
-def config():
-    """Nowcast system config dict data structure;
-    a mock for :py:attr:`nemo_nowcast.config.Config._dict`.
-    """
-    return {
-        "rivers": {
-            "stations": {
-                "Capilano": "08GA010",
-                "Englishman": "08HB002",
-                "Fraser": "08MF005",
-            }
-        },
-        "observations": {
-            "ctd data": {"stations": ["SCVIP", "SEVIP", "USDDL"]},
-            "ferry data": {"ferries": {"TWDP": {}}},
-            "hadcp data": {},
-        },
-        "run types": {
-            "nowcast": {},
-            "nowcast-dev": {},
-            "nowcast-green": {},
-            "nowcast-agrif": {},
-            "forecast": {},
-            "forecast2": {},
-        },
-        "run": {
-            "enabled hosts": {
-                "arbutus.cloud": {
-                    "shared storage": False,
-                    "make forcing links": True,
-                    "run types": ["nowcast", "forecast", "forecast2", "nowcast-green"],
-                },
-                "salish": {
-                    "shared storage": True,
-                    "make forcing links": True,
-                    "run types": ["nowcast-dev"],
-                },
-                "orcinus": {
-                    "shared storage": False,
-                    "make forcing links": False,
-                    "run types": ["nowcast-agrif"],
-                },
-            },
-            "hindcast hosts": {"optimum-hindcast": {}},
-        },
-        "wave forecasts": {"host": "arbutus.cloud", "run when": "after nowcast-green"},
-        "vhfr fvcom runs": {"host": "arbutus.cloud"},
-    }
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                rivers:
+                  stations:
+                    Capilano: 08GA010
+                    Englishman: 08HB002
+                    Fraser: 08MF005
+
+                observations:
+                  ctd data:
+                    stations:
+                      - SCVIP
+                      - SEVIP
+                      - USDDL
+                  ferry data:
+                    ferries:
+                      TWDP:
+                        route name: Tsawwassen - Duke Point
+                  hadcp data:
+                    csv dir: observations/AISDATA/
+
+                run types:
+                  nowcast:
+                    config name: SalishSeaCast_Blue
+                  nowcast-dev:
+                    config name: SalishSeaCast_Blue
+                  nowcast-green:
+                    config name:  SalishSeaCast
+                  nowcast-agrif:
+                    config name:  SMELTAGRIF
+                  forecast:
+                    config name:  SalishSeaCast_Blue
+                  forecast2:
+                    config name:  SalishSeaCast_Blue
+
+                run:
+                  enabled hosts:
+                    arbutus.cloud:
+                      shared storage: False
+                      make forcing links: True
+                      run types:
+                        nowcast:
+                          run sets dir: SS-run-sets/v201905/nowcast-blue/
+                        forecast:
+                          run sets dir: SS-run-sets/v201905/forecast/
+                        forecast2:
+                          run sets dir: SS-run-sets/v201905/forecast2/
+                        nowcast-green:
+                          run sets dir: SS-run-sets/v201905/nowcast-green/
+                    salish:
+                      shared storage: True
+                      make forcing links: True
+                      run types:
+                        nowcast-dev:
+                          run sets dir: SS-run-sets/v201905/nowcast-dev/
+                    orcinus:
+                      shared storage: False
+                      make forcing links: True
+                      run types:
+                        nowcast-agrif:
+                          results: nowcast-agrif/
+                  hindcast hosts:
+                    optimum-hindcast:
+                      queue info cmd: /usr/bin/qstat
+
+                wave forecasts:
+                  host: arbutus.cloud
+                  run when: after nowcast-green
+
+                vhfr fvcom runs:
+                  host: arbutus.cloud
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @pytest.fixture

@@ -15,7 +15,8 @@
 """Unit tests for Salish Sea NEMO nowcast split_results worker.
 """
 import logging
-import os
+import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
@@ -23,6 +24,25 @@ import nemo_nowcast
 import pytest
 
 from nowcast.workers import split_results
+
+
+@pytest.fixture
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                results archive:
+                  hindcast:
+                    localhost: results/SalishSea/hindcast.201905/
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @pytest.fixture
@@ -121,12 +141,14 @@ class TestFailure:
 class TestSplitResults:
     """Integration test for split_reults() function."""
 
-    def test_checklist(self, caplog, tmp_path, monkeypatch):
-        run_type_results = tmp_path / "hindcast.201905"
-        run_type_results.mkdir()
-        config = {
-            "results archive": {"hindcast": {"localhost": os.fspath(run_type_results)}}
-        }
+    def test_checklist(self, config, caplog, tmp_path, monkeypatch):
+        run_type_results = tmp_path / Path(
+            config["results archive"]["hindcast"]["localhost"]
+        )
+        run_type_results.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["results archive"]["hindcast"], "localhost", run_type_results
+        )
 
         results_dir = run_type_results / "01jan07"
         results_dir.mkdir()
@@ -167,9 +189,7 @@ class TestSplitResults:
             / "01jan07"
             / "SalishSea_1h_20070101_20070101_grid_T.nc"
         ).exists()
-        assert (
-            tmp_path / run_type_results / "02jan07" / "SalishSea_01587600_restart.nc"
-        ).exists()
+        assert (run_type_results / "02jan07" / "SalishSea_01587600_restart.nc").exists()
 
 
 class TestMkDestDir:
