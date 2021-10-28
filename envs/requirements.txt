@@ -45,7 +45,7 @@ coverage==6.0
 cryptography==3.4.7
 cycler==0.10.0
 cytoolz==0.11.0
-dask==2021.9.1
+dask==2021.10.0
 decorator==5.1.0
 distlib==0.3.3
 distributed==2021.9.1
