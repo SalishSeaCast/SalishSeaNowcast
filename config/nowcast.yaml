@@ -686,7 +686,7 @@ run:
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: sallen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
-      scratch dir: /scratch/sallen/dlatorne/hindcast_202007_asselin/
+      scratch dir: /scratch/sallen/dlatorne/v202111/
       # Directory on compute host where files (e.g. namelist.time) necessary to prepare
       # the NEMO runs are stored
       run prep dir: /home/sallen/dlatorne/SalishSeaCast/hindcast-sys/runs
@@ -706,7 +706,7 @@ run:
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /scratch/sallen/dlatorne/hindcast_v201905_long/
+          results: /scratch/sallen/dlatorne/v202111/
 
     sockeye-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa

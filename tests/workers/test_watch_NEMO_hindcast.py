@@ -115,10 +115,7 @@ class TestConfig:
         assert optimum_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
         assert optimum_hindcast["queue info cmd"] == "/usr/bin/qstat"
         assert optimum_hindcast["users"] == "sallen,dlatorne"
-        assert (
-            optimum_hindcast["scratch dir"]
-            == "/scratch/sallen/dlatorne/hindcast_202007_asselin/"
-        )
+        assert optimum_hindcast["scratch dir"] == "/scratch/sallen/dlatorne/v202111/"
 
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
