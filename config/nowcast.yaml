@@ -181,7 +181,7 @@ temperature salinity:
     # The key-pair is assumed to be stored in $USER/.ssh/.
     ssh key: SalishSeaNEMO-nowcast_id_rsa
     # Template for UW Live Ocean daily averaged forecast fields file processing status
-    status file template: '/data1/parker/LiveOcean_output/cas6_v3/f{yyyymmdd}/ubc2/Info/process_status.csv'
+    status file template: '/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/ubc_done.txt'
     # Template for UW Live Ocean daily averaged forecast fields path and file name on remote host
     bc file template: '/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/low_passed_UBC.nc'
     # Destination directory for downloaded UW Live Ocean files

@@ -42,7 +42,7 @@ def config(base_config):
                   download:
                     host: boiler-nowcast
                     ssh key: SalishSeaNEMO-nowcast_id_rsa
-                    status file template: 'LiveOcean_output/cas6_v3/f{yyyymmdd}/ubc2/Info/process_status.csv'
+                    status file template: 'LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/ubc_done.txt'
                     bc file template: 'LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/low_passed_UBC.nc'
                     file name: 'low_passed_UBC.nc'
                     dest dir: forcing/LiveOcean/downloaded
