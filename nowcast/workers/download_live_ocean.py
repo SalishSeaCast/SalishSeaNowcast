@@ -130,19 +130,15 @@ def _retry_if_not_ready(ready):
     wrap_exception=True,
 )
 def _is_file_ready(sftp_client, host_name, process_status_path):
-    end_time, status = None, None
     with tempfile.NamedTemporaryFile("wt") as process_status:
         sftp_client.get(os.fspath(process_status_path), process_status.name)
         logger.debug(f"downloaded {host_name}:{process_status_path}")
-        for line in open(process_status.name, "rt"):
-            if line.startswith("end_time"):
-                end_time = arrow.get(line.split(",")[1].strip())
-                end_time = arrow.get(end_time.datetime, tz.gettz("US/Pacific"))
-            if line.startswith("result"):
-                status = line.split(",")[1].strip()
-        if status == "success" and end_time < arrow.now(tz.gettz("US/Pacific")):
+        with open(process_status.name, "rt") as status_file:
+            ready_time = arrow.get(status_file.readline())
+            ready_time = arrow.get(ready_time.datetime, tz.gettz("US/Pacific"))
+        if ready_time < arrow.now(tz.gettz("US/Pacific")):
             logger.debug(
-                f"LiveOcean low_passed_UBC.nc file generation completed at {end_time}"
+                f"LiveOcean low_passed_UBC.nc file generation completed at {ready_time}"
             )
             return True
         else:
