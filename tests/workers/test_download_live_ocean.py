@@ -95,17 +95,24 @@ class TestConfig:
             "crash",
         ]
 
-    def test_download_file_name(self, prod_config):
-        download_url = prod_config["temperature salinity"]["download"]["file name"]
-        assert download_url == "low_passed_UBC.nc"
-
-    def test_download_dest_dir(self, prod_config):
-        download_url = prod_config["temperature salinity"]["download"]["dest dir"]
-        assert download_url == "/results/forcing/LiveOcean/downloaded/"
-
     def test_file_group(self, prod_config):
         assert "file group" in prod_config
         assert prod_config["file group"] == "sallen"
+
+    def test_download_section(self, prod_config):
+        download = prod_config["temperature salinity"]["download"]
+        assert download["host"] == "boiler-nowcast"
+        assert download["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
+        assert (
+            download["status file template"]
+            == "/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/ubc_done.txt"
+        )
+        assert (
+            download["bc file template"]
+            == "/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/low_passed_UBC.nc"
+        )
+        assert download["dest dir"] == "/results/forcing/LiveOcean/downloaded/"
+        assert download["file name"] == "low_passed_UBC.nc"
 
 
 class TestSuccess:
