@@ -74,8 +74,9 @@ dependencies:
   - pre-commit
 
   # For unit tests
-  - coverage
   - pytest
+  - pytest-cov
+  - tomli
 #  If your machine has enough cores & RAM for distributed testing
 #  - pytest-xdist
 
