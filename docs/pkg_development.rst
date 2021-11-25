@@ -47,7 +47,7 @@
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast
     :alt: Codecov Testing Coverage Report
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:codeql-analysis
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CodeQL
       :alt: CodeQL analysis
 .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues
