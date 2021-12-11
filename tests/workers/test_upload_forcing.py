@@ -47,7 +47,7 @@ def config(base_config):
                                 bc dir: /nemoShare/MEOPAR/LiveOcean/
                         orcinus-nowcast-agrif:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
-                        graham-hindcast:
+                        graham-dtn:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                         optimum-hindcast:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
@@ -124,7 +124,7 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "graham-hindcast",
+            "graham-dtn",
             "optimum-hindcast",
         ]
 
@@ -143,7 +143,7 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/sshNeahBay/"),
-            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
+            ("graham-dtn", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
     def test_ssh_uploads(self, host, ssh_key, prod_config):
@@ -161,7 +161,7 @@ class TestConfig:
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/river_turb/"),
             (
-                "graham-hindcast",
+                "graham-dtn",
                 "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
             ),
         ),
@@ -180,7 +180,7 @@ class TestConfig:
             ("salish-nowcast", "/results/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
-            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/rivers/"),
+            ("graham-dtn", "/project/def-allen/SalishSea/forcing/rivers/"),
         ),
     )
     def test_river_runoff_uploads(self, host, expected, prod_config):
@@ -203,7 +203,7 @@ class TestConfig:
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             (
-                "graham-hindcast",
+                "graham-dtn",
                 "/project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/",
             ),
         ),
@@ -225,7 +225,7 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/LiveOcean/"),
-            ("graham-hindcast", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
+            ("graham-dtn", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
         ),
     )
     def test_live_ocean_uploads(self, host, expected, prod_config):
@@ -242,16 +242,16 @@ class TestConfig:
         ("nowcast+", "arbutus.cloud-nowcast"),
         ("nowcast+", "orcinus-nowcast-agrif"),
         ("nowcast+", "optimum-hindcast"),
-        ("nowcast+", "graham-hindcast"),
+        ("nowcast+", "graham-dtn"),
         ("ssh", "arbutus.cloud-nowcast"),
         ("forecast2", "arbutus.cloud-nowcast"),
         ("forecast2", "orcinus-nowcast-agrif"),
         ("forecast2", "optimum-hindcast"),
-        ("forecast2", "graham-hindcast"),
+        ("forecast2", "graham-dtn"),
         ("turbidity", "arbutus.cloud-nowcast"),
         ("turbidity", "orcinus-nowcast-agrif"),
         ("turbidity", "optimum-hindcast"),
-        ("turbidity", "graham-hindcast"),
+        ("turbidity", "graham-dtn"),
     ),
 )
 class TestSuccess:
@@ -281,16 +281,16 @@ class TestSuccess:
         ("nowcast+", "arbutus.cloud-nowcast"),
         ("nowcast+", "orcinus-nowcast-agrif"),
         ("nowcast+", "optimum-hindcast"),
-        ("nowcast+", "graham-hindcast"),
+        ("nowcast+", "graham-dtn"),
         ("ssh", "arbutus.cloud-nowcast"),
         ("forecast2", "arbutus.cloud-nowcast"),
         ("forecast2", "orcinus-nowcast-agrif"),
         ("forecast2", "optimum-hindcast"),
-        ("forecast2", "graham-hindcast"),
+        ("forecast2", "graham-dtn"),
         ("turbidity", "arbutus.cloud-nowcast"),
         ("turbidity", "orcinus-nowcast-agrif"),
         ("turbidity", "optimum-hindcast"),
-        ("turbidity", "graham-hindcast"),
+        ("turbidity", "graham-dtn"),
     ),
 )
 class TestFailure:
@@ -350,7 +350,7 @@ def mock_sftp_client(monkeypatch):
         ),
         (
             "nowcast+",
-            "graham-hindcast",
+            "graham-dtn",
             ["ssh", "rivers", "weather", "boundary conditions"],
         ),
         ("ssh", "arbutus.cloud-nowcast", ["ssh"]),
@@ -371,13 +371,13 @@ def mock_sftp_client(monkeypatch):
         ),
         (
             "forecast2",
-            "graham-hindcast",
+            "graham-dtn",
             ["ssh", "rivers", "weather", "boundary conditions"],
         ),
         ("turbidity", "arbutus.cloud-nowcast", ["turbidity"]),
         ("turbidity", "orcinus-nowcast-agrif", ["turbidity"]),
         ("turbidity", "optimum-hindcast", ["turbidity"]),
-        ("turbidity", "graham-hindcast", ["turbidity"]),
+        ("turbidity", "graham-dtn", ["turbidity"]),
     ),
 )
 class TestChecklist:
