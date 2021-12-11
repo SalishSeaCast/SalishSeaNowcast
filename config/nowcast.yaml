@@ -362,7 +362,7 @@ results archive:
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
   hindcast:
     localhost: /results2/SalishSea/hindcast.201905/
-    graham-hindcast: /nearline/rrg-allen/SalishSea/hindcast_long.201905/
+    graham-dtn: /nearline/rrg-allen/SalishSea/hindcast_long.201905/
 
 
 rolling forecasts:
@@ -645,7 +645,7 @@ run:
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
 
-    graham-hindcast:
+    graham-dtn:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
       shared storage: False
       make forcing links: False

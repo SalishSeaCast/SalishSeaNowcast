@@ -47,7 +47,7 @@ def config(base_config):
                   nowcast-agrif: SalishSea/nowcast-agrif/
                   hindcast:
                     localhost: SalishSea/hindcast/
-                    graham-hindcast: nearline/SalishSea/hindcast/
+                    graham-dtn: nearline/SalishSea/hindcast/
 
                 run:
                   enabled hosts:
@@ -65,7 +65,7 @@ def config(base_config):
                       run types:
                         nowcast-agrif:
                           results: SalishSea/nowcast-agrif/
-                    graham-hindcast:
+                    graham-dtn:
                       ssh key: SalishSeaNEMO-nowcast_id_rsa
 
                   hindcast hosts:
@@ -172,7 +172,7 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "graham-hindcast",
+            "graham-dtn",
             "optimum-hindcast",
         ]
 
@@ -185,7 +185,7 @@ class TestConfig:
             ),
             ("salish-nowcast", ["nowcast-dev", "nowcast-green"]),
             ("orcinus-nowcast-agrif", ["nowcast-agrif"]),
-            ("graham-hindcast", []),
+            ("graham-dtn", []),
             ("optimum-hindcast", []),
         ),
     )
@@ -269,7 +269,7 @@ class TestConfig:
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
                 "localhost": "/results2/SalishSea/hindcast.201905/",
-                "graham-hindcast": "/nearline/rrg-allen/SalishSea/hindcast_long.201905/",
+                "graham-dtn": "/nearline/rrg-allen/SalishSea/hindcast_long.201905/",
             },
         }
         assert prod_config["results archive"].keys() == archives.keys()
@@ -407,13 +407,13 @@ class TestDownloadResults:
         parsed_args = SimpleNamespace(
             host_name="sockeye-hindcast",
             run_type="hindcast",
-            dest_host="graham-hindcast",
+            dest_host="graham-dtn",
             run_date=arrow.get("2019-09-03"),
         )
         download_results.download_results(parsed_args, config)
         m_run_in_subproc.assert_called_once_with(
             shlex.split(
-                "scp -pr sockeye-hindcast:SalishSea/hindcast/03sep19 graham-hindcast:nearline/SalishSea/hindcast"
+                "scp -pr sockeye-hindcast:SalishSea/hindcast/03sep19 graham-dtn:nearline/SalishSea/hindcast"
             ),
             download_results.logger.debug,
             download_results.logger.error,
@@ -469,7 +469,7 @@ class TestDownloadResults:
 
     @pytest.mark.parametrize(
         "host_name, dest_host",
-        (("optimum-hindcast", "localhost"), ("sockeye-hindcast", "graham-hindcast")),
+        (("optimum-hindcast", "localhost"), ("sockeye-hindcast", "graham-dtn")),
     )
     def test_hindcast_not_unlink_fvcom_boundary_files(
         self,
