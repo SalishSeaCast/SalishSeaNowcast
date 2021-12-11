@@ -708,7 +708,7 @@ class TestAfterUploadForcing:
             "run",
             {
                 "enabled hosts": {
-                    "graham-hindcast": {"run types": {}, "make forcing links": False}
+                    "graham-dtn": {"run types": {}, "make forcing links": False}
                 }
             },
         )
@@ -716,7 +716,7 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 f"success {run_type}",
-                {"graham-hindcast": {run_type: {"run date": "2020-06-29"}}},
+                {"graham-dtn": {run_type: {"run date": "2020-06-29"}}},
             ),
             config,
             checklist,
