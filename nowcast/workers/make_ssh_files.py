@@ -190,9 +190,7 @@ def _copy_csv_to_results_dir(data_file, run_date, run_type, config):
     results_dir = Path(
         config["results archive"][run_type], results_date.format("DDMMMYY").lower()
     )
-    lib.mkdir(
-        os.fspath(results_dir), logger, grp_name=config["file group"], exist_ok=True
-    )
+    lib.mkdir(results_dir, logger, grp_name=config["file group"], exist_ok=True)
     shutil.copy2(data_file, results_dir)
     logger.debug(f"copied {data_file} to {results_dir}")
 
