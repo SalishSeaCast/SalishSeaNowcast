@@ -1046,7 +1046,7 @@ def _render_figures(
                 if model == "nemo"
                 else Path(config["figures"]["storage path"], model, run_type, dmy)
             )
-            lib.mkdir(os.fspath(fig_files_dir), logger, grp_name=config["file group"])
+            lib.mkdir(fig_files_dir, logger, grp_name=config["file group"])
         filename = fig_files_dir / f"{svg_name}_{dmy}.{fig_save_format}"
         if image_loop_figure:
             filename = fig_files_dir / f"{svg_name}.{fig_save_format}"
