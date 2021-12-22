@@ -40,11 +40,9 @@ def config(base_config):
 
                 temperature salinity:
                   download:
-                    host: boiler-nowcast
-                    ssh key: SalishSeaNEMO-nowcast_id_rsa
-                    status file template: 'LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/ubc_done.txt'
-                    bc file template: 'LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/low_passed_UBC.nc'
-                    file name: 'low_passed_UBC.nc'
+                    status file url template: 'https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc_done.txt'
+                    bc file url template: 'https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc.nc'
+                    file name: low_passed_UBC.nc
                     dest dir: forcing/LiveOcean/downloaded
                 """
             )
@@ -101,16 +99,8 @@ class TestConfig:
 
     def test_download_section(self, prod_config):
         download = prod_config["temperature salinity"]["download"]
-        assert download["host"] == "boiler-nowcast"
-        assert download["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
-        assert (
-            download["status file template"]
-            == "/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/ubc_done.txt"
-        )
-        assert (
-            download["bc file template"]
-            == "/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/low_passed_UBC.nc"
-        )
+        assert download["status file url template"] == "https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc_done.txt"
+        assert download["bc file url template"] == "https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc.nc"
         assert download["dest dir"] == "/results/forcing/LiveOcean/downloaded/"
         assert download["file name"] == "low_passed_UBC.nc"
 
@@ -153,26 +143,16 @@ class TestDownloadLiveOcean:
     """Unit test for download_live_ocean() function."""
 
     def test_checklist(self, config, caplog, tmp_path, monkeypatch):
-        class MockSshClient:
-            def close(self):
-                pass
 
-        class MockSftpClient:
-            def get(self, remote_path, local_path):
-                pass
-
-            def close(self):
-                pass
-
-        def mock_sftp(host_name, ssh_key):
-            return MockSshClient(), MockSftpClient()
-
-        monkeypatch.setattr(download_live_ocean.ssh_sftp, "sftp", mock_sftp)
-
-        def mock_is_file_ready(sfpt_clinet, host_name, process_status_path):
+        def mock_is_file_ready(process_status_path, session):
             return True
 
         monkeypatch.setattr(download_live_ocean, "_is_file_ready", mock_is_file_ready)
+
+        def mock_get_web_data(file_url, logger_name, filepath, session):
+            (dest_dir / "20201022" / "low_passed_UBC.nc").write_text("mock contents")
+
+        monkeypatch.setattr(download_live_ocean, "get_web_data", mock_get_web_data)
 
         dest_dir = tmp_path / config["temperature salinity"]["download"]["dest dir"]
         dest_dir.mkdir(parents=True)

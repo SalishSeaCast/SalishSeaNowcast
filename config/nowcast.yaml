@@ -174,31 +174,27 @@ ssh:
 
 temperature salinity:
   download:
-    # Host name from which to download UW Live Ocean daily averaged forecast fields files
-    host: boiler-nowcast
-    # Passphrase-less deployment key used by automation for authentication
-    # on the host.
-    # The key-pair is assumed to be stored in $USER/.ssh/.
-    ssh key: SalishSeaNEMO-nowcast_id_rsa
-    # Template for UW Live Ocean daily averaged forecast fields file processing status
-    status file template: '/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/ubc_done.txt'
-    # Template for UW Live Ocean daily averaged forecast fields path and file name on remote host
-    bc file template: '/data1/parker/LiveOcean_roms/output/cas6_v3_lo8b/f{yyyymmdd}/low_passed_UBC.nc'
-    # Destination directory for downloaded UW Live Ocean files
+    # Template for UW LiveOcean day-averaged forecast fields file processing status URL
+    # **Must be quoted to project {} characters**
+    status file url template: 'https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc_done.txt'
+    # Template for UW LiveOcean day-averaged forecast fields file URL
+    # **Must be quoted to project {} characters**
+    bc file url template: 'https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc.nc'
+    # Destination directory for downloaded UW LiveOcean files
     dest dir: /results/forcing/LiveOcean/downloaded/
-    # File name for local storage of UW Live Ocean daily averaged forecast file
+    # File name for local storage of UW LiveOcean day-averaged forecast file
     file name: low_passed_UBC.nc
 
   # Destination directory for daily temperature and salinity boundary conditions
-  # files generated from UW Live Ocean forecast
+  # files generated from UW LiveOcean forecast
   bc dir: /results/forcing/LiveOcean/boundary_conditions
   # File name template for the daily temperature and salinity boundary
-  # conditions files generated from UW Live Ocean forecast
+  # conditions files generated from UW LiveOcean forecast
   # **Must be quoted to project {} characters**
   file template: 'LiveOcean_v201905_{:y%Ym%md%d}.nc'
   # Mesh mask from which to get grid parameters for boundary conditions files
   mesh mask: /SalishSeaCast/grid/mesh_mask201702.nc
-  # Parameter set to use to convert from Live Ocean to SalishSeaCast
+  # Parameter set to use to convert from LiveOcean to SalishSeaCast
   parameter set: v201905
 
 
