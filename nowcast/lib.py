@@ -134,7 +134,7 @@ def mkdir(
     are probably correct already.
 
     :arg path: Path to create the directory at.
-    :type path: str
+    :type path: :py:class:`pathlib.Path` or str
 
     :arg logger: Logger object.
     :type logger: :class:`logging.Logger`
@@ -147,7 +147,7 @@ def mkdir(
                    will be the same as its parent's.
     :type grp_name: str
 
-    :arg exist_ok: Indicate whether or not to log and error message and
+    :arg exist_ok: Indicate whether to log and error message and
                    raise an exception if path already exists.
                    Defaults to True meaning that an existing path is
                    accepted silently.
