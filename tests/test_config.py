@@ -15,21 +15,169 @@
 """Unit tests for SalishSeaCast production config elements that are not likely to be
 tested in worker unit test modules.
 """
+import pytest
 
 
 class TestConfig:
     """Unit tests for production YAML config file elements that are not worker-related."""
 
     def test_checklist_file(self, prod_config, tmpdir):
-        # Config.load() transforms envvars
+        # Config.load() transforms NOWCAST.ENV part of envvars
         assert (
             prod_config["checklist file"]
             == f"{tmpdir}/nowcast_logs/nowcast_checklist.yaml"
         )
 
     def test_python(self, prod_config, tmpdir):
-        # Config.load() transforms envvars
+        # Config.load() transforms NOWCAST.ENV part of envvars
         assert prod_config["python"] == f"{tmpdir}/nowcast-env/bin/python3"
+
+
+class TestLoggingPublisher:
+    """Unit tests for production YAML config file elements related to logging publishers
+    (e.g. workers).
+    """
+
+    def test_logging_config(self, prod_config):
+        publisher_logging = prod_config["logging"]["publisher"]
+        assert publisher_logging["version"] == 1
+        assert not publisher_logging["disable_existing_loggers"]
+
+    def test_formatters(self, prod_config):
+        formatters = prod_config["logging"]["publisher"]["formatters"]
+        assert list(formatters.keys()) == ["simple"]
+        assert (
+            formatters["simple"]["format"]
+            == "%(asctime)s %(levelname)s [%(name)s] %(message)s"
+        )
+
+    def test_handlers(self, prod_config):
+        handlers = prod_config["logging"]["publisher"]["handlers"]
+        assert list(handlers.keys()) == [
+            "console",
+            "zmq_pub",
+            "wgrib2_text",
+            "hindcast_info",
+            "hindcast_debug",
+            "checklist",
+        ]
+
+    def test_console_handler(self, prod_config):
+        console_handler = prod_config["logging"]["publisher"]["handlers"]["console"]
+        assert console_handler["class"] == "logging.StreamHandler"
+        assert console_handler["level"] == 100
+        assert console_handler["formatter"] == "simple"
+        assert console_handler["stream"] == "ext://sys.stdout"
+
+    def test_zmq_pub_handler(self, prod_config):
+        zmq_pub_handler = prod_config["logging"]["publisher"]["handlers"]["zmq_pub"]
+        assert zmq_pub_handler["class"] == "zmq.log.handlers.PUBHandler"
+        assert zmq_pub_handler["level"] == "DEBUG"
+        assert zmq_pub_handler["formatter"] == "simple"
+
+    def test_wgrib2_text_handler(self, prod_config, tmpdir):
+        wgrib2_text_handler = prod_config["logging"]["publisher"]["handlers"][
+            "wgrib2_text"
+        ]
+        assert wgrib2_text_handler["class"] == "logging.FileHandler"
+        assert wgrib2_text_handler["level"] == "DEBUG"
+        assert wgrib2_text_handler["formatter"] == "simple"
+        # Config.load() transforms NOWCAST.ENV part of envvars
+        assert wgrib2_text_handler["filename"] == f"{tmpdir}/nowcast_logs/wgrib2.log"
+        assert wgrib2_text_handler["mode"] == "w"
+
+    def test_hindcast_info_handler(self, prod_config, tmpdir):
+        hindcast_info_handler = prod_config["logging"]["publisher"]["handlers"][
+            "hindcast_info"
+        ]
+        assert hindcast_info_handler["class"] == "logging.handlers.RotatingFileHandler"
+        assert hindcast_info_handler["level"] == "INFO"
+        assert hindcast_info_handler["formatter"] == "simple"
+        # Config.load() transforms NOWCAST.ENV part of envvars
+        assert (
+            hindcast_info_handler["filename"] == f"{tmpdir}/nowcast_logs/hindcast.log"
+        )
+        assert hindcast_info_handler["backupCount"] == 7
+
+    def test_hindcast_debug_handler(self, prod_config, tmpdir):
+        hindcast_debug_handler = prod_config["logging"]["publisher"]["handlers"][
+            "hindcast_debug"
+        ]
+        assert hindcast_debug_handler["class"] == "logging.handlers.RotatingFileHandler"
+        assert hindcast_debug_handler["level"] == "DEBUG"
+        assert hindcast_debug_handler["formatter"] == "simple"
+        # Config.load() transforms NOWCAST.ENV part of envvars
+        assert (
+            hindcast_debug_handler["filename"]
+            == f"{tmpdir}/nowcast_logs/hindcast.debug.log"
+        )
+        assert hindcast_debug_handler["backupCount"] == 7
+
+    def test_checklist_handler(self, prod_config, tmpdir):
+        checklist_handler = prod_config["logging"]["publisher"]["handlers"]["checklist"]
+        assert checklist_handler["class"] == "logging.handlers.RotatingFileHandler"
+        assert checklist_handler["level"] == "INFO"
+        assert checklist_handler["formatter"] == "simple"
+        # Config.load() transforms NOWCAST.ENV part of envvars
+        assert checklist_handler["filename"] == f"{tmpdir}/nowcast_logs/checklist.log"
+        assert checklist_handler["backupCount"] == 7
+
+    def test_loggers(self, prod_config, tmpdir):
+        loggers = prod_config["logging"]["publisher"]["loggers"]
+        assert list(loggers.keys()) == [
+            "wgrib2",
+            "run_NEMO_hindcast",
+            "watch_NEMO_hindcast",
+            "checklist",
+            "matplotlib",
+            "PIL",
+            "paramiko",
+            "watchdog",
+        ]
+
+    def test_wgrib2_logger(self, prod_config):
+        logger = prod_config["logging"]["publisher"]["loggers"]["wgrib2"]
+        assert logger["qualname"] == "wgrib2"
+        assert logger["level"] == "DEBUG"
+        assert not logger["propagate"]
+        assert logger["handlers"] == ["wgrib2_text"]
+
+    def test_run_NEMO_hindcast_logger(self, prod_config):
+        logger = prod_config["logging"]["publisher"]["loggers"]["run_NEMO_hindcast"]
+        assert logger["qualname"] == "run_NEMO_hindcast"
+        assert logger["level"] == "DEBUG"
+        assert not logger["propagate"]
+        assert logger["handlers"] == ["hindcast_info", "hindcast_debug"]
+
+    def test_watch_NEMO_hindcast_logger(self, prod_config):
+        logger = prod_config["logging"]["publisher"]["loggers"]["watch_NEMO_hindcast"]
+        assert logger["qualname"] == "watch_NEMO_hindcast"
+        assert logger["level"] == "DEBUG"
+        assert not logger["propagate"]
+        assert logger["handlers"] == ["hindcast_info", "hindcast_debug"]
+
+    def test_checklist_logger(self, prod_config):
+        logger = prod_config["logging"]["publisher"]["loggers"]["checklist"]
+        assert logger["qualname"] == "checklist"
+        assert logger["level"] == "INFO"
+        assert not logger["propagate"]
+        assert logger["handlers"] == ["checklist"]
+
+    @pytest.mark.parametrize(
+        "package",
+        ("matplotlib", "PIL", "paramiko", "watchdog"),
+    )
+    def test_warning_loggers(self, package, prod_config, tmpdir):
+        logger = prod_config["logging"]["publisher"]["loggers"][package]
+        assert logger["qualname"] == package
+        assert logger["level"] == "WARNING"
+        assert logger["formatter"] == "simple"
+
+    def test_root_logger(self, prod_config):
+        logger = prod_config["logging"]["publisher"]["root"]
+        assert logger["level"] == "DEBUG"
+        assert not logger["propagate"]
+        assert logger["handlers"] == ["console", "zmq_pub"]
 
 
 class TestSlackNotifications:
