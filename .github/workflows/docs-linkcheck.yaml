@@ -2,11 +2,7 @@ name: sphinx-linkcheck
 
 on:
   push:
-    branches:
-    - '*'
-  pull_request:
-    branches:
-    - '*'
+    branches: ['*']
   schedule:
     - cron: 43 4 1 * *  # 04:43 UTC on the 1st day of each month
 
