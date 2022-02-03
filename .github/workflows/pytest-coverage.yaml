@@ -16,12 +16,18 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: conda-incubator/setup-miniconda@v2
+      - name: Set up conda environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
-           auto-update-conda: true
+           miniforge-variant: Mambaforge-pypy3
+           miniforge-version: latest
+           use-mamba: true
+           auto-update-conda: false
            auto-activate-base: false
-           environment-file: envs/environment-test.yaml
+           channels: conda-forge,nodefaults
+           channel-priority: true
            python-version: ${{ matrix.python-version }}
+           environment-file: envs/environment-test.yaml
            activate-environment: salishsea-nowcast-test
 
       - name: Install packages

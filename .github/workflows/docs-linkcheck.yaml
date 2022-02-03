@@ -12,28 +12,28 @@ jobs:
     runs-on: 'ubuntu-latest'
     strategy:
       fail-fast: false
+      # Python version matrix is necessary because we are using the environment-test.yaml
+      # environment that is also used for unit tests and coverage analysis.
+      # That environment defers to the Python version(s) here so that it can be used
+      # for multi-version CI.
       matrix:
         python-version: ['3.9']
 
     steps:
       - uses: actions/checkout@v2
 
-      - name: Cache conda pkgs
-        uses: actions/cache@v1
-        env:
-          # Increase this value to reset cache if envs/environment-test.yaml has not changed
-          CACHE_NUMBER: 0
+      - name: Set up conda environment
+        uses: conda-incubator/setup-miniconda@v2
         with:
-          path: ~/conda_pkgs_dir
-          key: ${{ runner.os }}-conda-${{ env.CACHE_NUMBER }}-${{ hashFiles('envs/environment-test.yaml') }}
-
-      - uses: conda-incubator/setup-miniconda@v2
-        with:
+           miniforge-variant: Mambaforge-pypy3
+           miniforge-version: latest
+           use-mamba: true
            auto-update-conda: false
            auto-activate-base: false
-           use-only-tar-bz2: true # Required for caching to work properly!
-           environment-file: envs/environment-test.yaml
+           channels: conda-forge,nodefaults
+           channel-priority: true
            python-version: ${{ matrix.python-version }}
+           environment-file: envs/environment-test.yaml
            activate-environment: salishsea-nowcast-test
 
       - name: Install packages
