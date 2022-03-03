@@ -97,7 +97,7 @@ def _prep_plot_data(place, fvcom_stns_datasets, obs_dataset):
         fvcom_v = fvcom_stns_dataset.v.isel(siglay=0, station=stations.index(place))
         # FVCOM current speed and direction
         fvcom_speeds[model_config] = numpy.sqrt(
-            fvcom_us[model_config] ** 2 + fvcom_v ** 2
+            fvcom_us[model_config] ** 2 + fvcom_v**2
         )
         fvcom_speeds[model_config].name = "fvcom_current_speed"
         fvcom_speeds[model_config].attrs.update(

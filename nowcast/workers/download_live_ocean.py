@@ -74,8 +74,11 @@ def download_live_ocean(parsed_args, config, *args):
     yyyymmdd = parsed_args.run_date.format("YYYYMMDD")
     dotted_yyyymmdd = parsed_args.run_date.format("YYYY.MM.DD")
     ymd = parsed_args.run_date.format("YYYY-MM-DD")
-    logger.info(f"downloading Salish Sea western boundary day-averaged LiveOcean file for {ymd}")
-    process_status_url_tmpl = config["temperature salinity"]["download"]["status file url template"]
+    logger.info(
+        f"downloading Salish Sea western boundary day-averaged LiveOcean file for {ymd}"
+    )
+    ts_config = config["temperature salinity"]
+    process_status_url_tmpl = ts_config["download"]["status file url template"]
     process_status_url = process_status_url_tmpl.format(yyyymmdd=dotted_yyyymmdd)
     with requests.Session() as session:
         try:
@@ -86,15 +89,19 @@ def download_live_ocean(parsed_args, config, *args):
                 f"{exc.last_attempt.value[1]} for {process_status_url}"
             )
             raise WorkerError
-        bc_file_url_tmpl = config["temperature salinity"]["download"]["bc file url template"]
+        bc_file_url_tmpl = ts_config["download"]["bc file url template"]
         bc_file_url = bc_file_url_tmpl.format(yyyymmdd=dotted_yyyymmdd)
-        dest_dir = Path(config["temperature salinity"]["download"]["dest dir"], yyyymmdd)
-        filename = config["temperature salinity"]["download"]["file name"]
+        dest_dir = Path(ts_config["download"]["dest dir"], yyyymmdd)
+        filename = ts_config["download"]["file name"]
         grp_name = config["file group"]
         lib.mkdir(dest_dir, logger, grp_name=grp_name)
-        get_web_data(bc_file_url, logger_name=NAME, filepath=dest_dir / filename, session=session)
+        get_web_data(
+            bc_file_url, logger_name=NAME, filepath=dest_dir / filename, session=session
+        )
         size = os.stat(dest_dir / filename).st_size
-        logger.info(f"downloaded {size} bytes from {bc_file_url} to {dest_dir / filename}")
+        logger.info(
+            f"downloaded {size} bytes from {bc_file_url} to {dest_dir / filename}"
+        )
         if size == 0:
             logger.critical(f"Problem! 0 size file: {dest_dir / filename}")
             raise WorkerError
@@ -118,9 +125,9 @@ def _is_file_ready(process_status_url, session):
         response = session.get(process_status_url)
         response.raise_for_status()
     except (
-            requests.exceptions.ConnectionError,
-            requests.exceptions.HTTPError,
-            socket.error,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.HTTPError,
+        socket.error,
     ) as exc:
         logger.debug(f"received {exc} from {process_status_url}")
         raise exc
