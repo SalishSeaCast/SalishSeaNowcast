@@ -91,7 +91,7 @@ def _prep_plot_data(hrdps_dataset_url, run_type, run_date):
     v_hrdps = hrdps.v_wind.sel(time=run_date.format("YYYY-MM-DD")).isel(
         gridY=j, gridX=i
     )
-    hrdps_speed = numpy.sqrt(u_hrdps ** 2 + v_hrdps ** 2)
+    hrdps_speed = numpy.sqrt(u_hrdps**2 + v_hrdps**2)
     hrdps_speed.name = "hrdps_wind_speed"
     hrdps_speed.attrs.update(
         {"long_name": "Wind Speed", "units": "m/s", "label": "Model"}

@@ -48,11 +48,11 @@ def make_figure(
 
     :arg str place: Horizontal ADCP station name.
 
-    :arg fvcom_ssh_datasets: Dictionary of VHFR FVCOM model tide gauge station
-                             sea surface height time series of
-                             py:class:`xarray.Dataset` objects keyed by model
-                             model configuration (:kbd:`x2`, :kbd:`r12`).
-    :type fvcom_ssh_datasets: :py:class:`dict`
+    :arg fvcom_stns_datasets: Dictionary of VHFR FVCOM model tide gauge station
+                              sea surface height time series of
+                              py:class:`xarray.Dataset` objects keyed by model
+                              model configuration (:kbd:`x2`, :kbd:`r12`).
+    :type fvcom_stns_datasets: :py:class:`dict`
 
     :arg obs_dataset: Observed horizontal ADCP station sea water current time series dataset.
     :type obs_dataset: 'py:class:xarray.Dataset`
@@ -97,7 +97,7 @@ def _prep_plot_data(place, fvcom_stns_datasets, obs_dataset):
         fvcom_v = fvcom_stns_dataset.v.isel(siglay=0, station=stations.index(place))
         # FVCOM current speed and direction
         fvcom_speeds[model_config] = numpy.sqrt(
-            fvcom_us[model_config] ** 2 + fvcom_v ** 2
+            fvcom_us[model_config] ** 2 + fvcom_v**2
         )
         fvcom_speeds[model_config].name = "fvcom_current_speed"
         fvcom_speeds[model_config].attrs.update(

@@ -210,7 +210,7 @@ def _makeTiles(
         YC = numpy.concatenate([YC, zeros])
         UC = numpy.concatenate([UC, tempU])
         VC = numpy.concatenate([VC, zeros])
-        SC = numpy.sqrt(UC ** 2 + VC ** 2)
+        SC = numpy.sqrt(UC**2 + VC**2)
         i = SC < 0.05
         if numpy.any(i):
             UCC, VCC, XCC, YCC = _cut(UC, VC, XC, YC, i)

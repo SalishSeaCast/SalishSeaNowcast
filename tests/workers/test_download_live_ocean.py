@@ -99,8 +99,14 @@ class TestConfig:
 
     def test_download_section(self, prod_config):
         download = prod_config["temperature salinity"]["download"]
-        assert download["status file url template"] == "https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc_done.txt"
-        assert download["bc file url template"] == "https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc.nc"
+        assert (
+            download["status file url template"]
+            == "https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc_done.txt"
+        )
+        assert (
+            download["bc file url template"]
+            == "https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc.nc"
+        )
         assert download["dest dir"] == "/results/forcing/LiveOcean/downloaded/"
         assert download["file name"] == "low_passed_UBC.nc"
 
@@ -143,7 +149,6 @@ class TestDownloadLiveOcean:
     """Unit test for download_live_ocean() function."""
 
     def test_checklist(self, config, caplog, tmp_path, monkeypatch):
-
         def mock_is_file_ready(process_status_path, session):
             return True
 
