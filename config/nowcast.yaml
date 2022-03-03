@@ -682,7 +682,7 @@ run:
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: sallen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
-      scratch dir: /scratch/sallen/dlatorne/v202111/
+      scratch dir: /scratch/sallen/dlatorne/v201905r/
       # Directory on compute host where files (e.g. namelist.time) necessary to prepare
       # the NEMO runs are stored
       run prep dir: /home/sallen/dlatorne/SalishSeaCast/hindcast-sys/runs
@@ -702,7 +702,7 @@ run:
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /scratch/sallen/dlatorne/v202111/
+          results: /scratch/sallen/dlatorne/v201905r/
 
     sockeye-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
@@ -1022,6 +1022,18 @@ logging:
         formatter: simple
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
         mode: w
+      hindcast_info:
+        class: logging.handlers.RotatingFileHandler
+        level: INFO
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/hindcast.log
+        backupCount: 7
+      hindcast_debug:
+        class: logging.handlers.RotatingFileHandler
+        level: DEBUG
+        formatter: simple
+        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/hindcast.debug.log
+        backupCount: 7
       checklist:
         class: logging.handlers.RotatingFileHandler
         level: INFO
@@ -1035,6 +1047,20 @@ logging:
         propagate: False
         handlers:
           - wgrib2_text
+      run_NEMO_hindcast:
+        qualname: run_NEMO_hindcast
+        level: DEBUG
+        propagate: False
+        handlers:
+          - hindcast_info
+          - hindcast_debug
+      watch_NEMO_hindcast:
+        qualname: watch_NEMO_hindcast
+        level: DEBUG
+        propagate: False
+        handlers:
+          - hindcast_info
+          - hindcast_debug
       checklist:
         qualname: checklist
         level: INFO
