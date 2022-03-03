@@ -161,7 +161,6 @@ def _interpTurb(tdf2, idate, mthresh):
     dfout["hDD"] = [
         idate - 1 + (ind - int(mthresh)) / 24.0 for ind in range(len(dfout))
     ]
-    pd.set_option("precision", 9)
     iout = 0
     for ind, row in tdf2.iterrows():
         if ind == 0:
