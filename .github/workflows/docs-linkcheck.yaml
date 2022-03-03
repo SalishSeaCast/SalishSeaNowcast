@@ -17,7 +17,7 @@ jobs:
       # That environment defers to the Python version(s) here so that it can be used
       # for multi-version CI.
       matrix:
-        python-version: ['3.9']
+        python-version: ['3.10']
 
     steps:
       - uses: actions/checkout@v2
