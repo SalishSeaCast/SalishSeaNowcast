@@ -70,6 +70,8 @@ Python Versions
 
 The :kbd:`SalishSeaNowcast` package is developed and tested using `Python`_ 3.10.
 
+.. _Python: https://www.python.org/
+
 
 .. _SalishSeaNowcastGettingTheCode:
 
