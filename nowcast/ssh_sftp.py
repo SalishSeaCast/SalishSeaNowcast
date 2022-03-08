@@ -66,7 +66,8 @@ def ssh(host, key_filename, ssh_config_file="~/.ssh/config"):
         ssh_config.parse(f)
     host = ssh_config.lookup(host)
     ssh_client.connect(
-        host["hostname"], username=host["user"], key_filename=os.fspath(key_filename)
+        host["hostname"], username=host["user"], key_filename=os.fspath(key_filename),
+        allow_agent=False, look_for_keys=False,
     )
     return ssh_client
 
