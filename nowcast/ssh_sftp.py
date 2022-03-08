@@ -48,8 +48,10 @@ def ssh(host, key_filename, ssh_config_file="~/.ssh/config"):
     The client's close() method should be called when its usefulness
     had ended.
 
-    :param host: Name of the host to connect the client to.
-    :type config: str
+    :param str host: Name of the host to connect the client to.
+
+    :param key_filename: Path/filename of the ssh key to use for authentication.
+    :type key_filename: :py:class:`pathlib.Path`
 
     :param str ssh_config_file: File path/name of the SSH2 config file from
                                 which to obtain the hostname and username
@@ -108,8 +110,10 @@ def sftp(host, key_filename, ssh_config_file="~/.ssh/config"):
     The clients' close() methods should be called when their usefulness
     had ended.
 
-    :param host: Name of the host to connect the client to.
-    :type config: str
+    :param str host: Name of the host to connect the client to.
+
+    :param key_filename: Path/filename of the ssh key to use for authentication.
+    :type key_filename: :py:class:`pathlib.Path`
 
     :param str ssh_config_file: File path/name of the SSH2 config file from
                                 which to obtain the hostname and username
