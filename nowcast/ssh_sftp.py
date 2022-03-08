@@ -67,10 +67,19 @@ def ssh(host, key_filename, ssh_config_file="~/.ssh/config"):
     with open(os.path.expanduser(ssh_config_file)) as f:
         ssh_config.parse(f)
     host = ssh_config.lookup(host)
-    ssh_client.connect(
-        host["hostname"], username=host["user"], key_filename=os.fspath(key_filename),
-        allow_agent=False, look_for_keys=False,
-    )
+    try:
+        # Modern ssh server that uses a rsa-sha2 algorithm; e.g. arbutus and graham
+        ssh_client.connect(
+            host["hostname"], username=host["user"], key_filename=os.fspath(key_filename),
+            allow_agent=False, look_for_keys=False,
+        )
+    except paramiko.ssh_exception.SSHException:
+        # Legacy ssh server that doesn't use rsa-sha2 algorithms; e.g. orcinus and optimum
+        ssh_client.connect(
+            host["hostname"], username=host["user"], key_filename=os.fspath(key_filename),
+            allow_agent=False, look_for_keys=False,
+            disabled_algorithms={'pubkeys': ['rsa-sha2-512', 'rsa-sha2-256']},
+        )
     return ssh_client
 
 
