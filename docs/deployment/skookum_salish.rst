@@ -41,7 +41,7 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
-    $ git clone git@gitlab.com:mdunphy/OPPTools.git OPPTools
+    $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
     $ git clone git@github.com:SalishSeaCast/XIOS-2.git
@@ -106,6 +106,9 @@ For the :kbd:`SalishSeaCast` automation system:
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable NEMO_Nowcast/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable moad_tools/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable tools/SalishSeaTools/
+    (/SalishSeaCast/nowcast-env)$ cd OPPTools/
+    (/SalishSeaCast/nowcast-env)$ git switch SalishSeaCast-prod
+    (/SalishSeaCast/nowcast-env)$ cd /SalishSeaCast/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable OPPTools/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable NEMO-Cmd/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable SalishSeaCmd/

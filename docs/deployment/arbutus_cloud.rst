@@ -624,7 +624,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@gitlab.com:mdunphy/FVCOM41.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
-    $ git clone git@gitlab.com:mdunphy/OPPTools.git
+    $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
     $ git clone git@github.com:SalishSeaCast/XIOS-2.git
@@ -796,6 +796,9 @@ The Python packages that the system depends on are installed in a conda environm
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable NEMO_Nowcast/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable moad_tools/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable tools/SalishSeaTools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ cd OPPTools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ git switch SalishSeaCast-prod
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ cd /nemoShare/MEOPAR/nowcast-sys/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable OPPTools/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable NEMO-Cmd/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable SalishSeaCmd/
