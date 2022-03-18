@@ -129,7 +129,7 @@ you can clone those repos with:
     $ git clone git@github.com:43ravens/NEMO_Nowcast.git
     $ git clone git@github.com:UBC-MOAD/moad_tools.git
     $ git clone git@github.com:SalishSeaCast/tools.git
-    $ git clone git@gitlab.com:mdunphy/OPPTools.git
+    $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
     $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
@@ -148,7 +148,10 @@ the commands below install the packages into your :kbd:`salishsea-nowcast` devel
     (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO_Nowcast
     (salishsea-nowcast)$ python3 -m pip install --editable ../moad_tools
     (salishsea-nowcast)$ python3 -m pip install --editable ../tools/SalishSeaTools
-    (salishsea-nowcast)$ python3 -m pip install --editable ../OPPTools
+    (salishsea-nowcast)$ cd ../OPPTools
+    (salishsea-nowcast)$ git switch SalishSeaCast-prod
+    (salishsea-nowcast)$ cd ../SalishSeaNowcast
+    (salishsea-nowcast)$ python3 -m pip install --editable OPPTools
     (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO-Cmd
     (salishsea-nowcast)$ python3 -m pip install --editable ../SalishSeaCmd
     (salishsea-nowcast)$ python3 -m pip install --editable ../FVCOM-Cmd
