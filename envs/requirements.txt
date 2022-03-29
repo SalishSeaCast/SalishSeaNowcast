@@ -92,7 +92,7 @@ numpy-indexed==0.3.5
 openpyxl==3.0.9
 packaging==21.3
 pandas==1.4.1
-paramiko==2.9.2
+paramiko==2.10.1
 partd==1.2.0
 pbr==5.8.1
 Pillow==9.0.1
