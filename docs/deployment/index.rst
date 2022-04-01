@@ -67,7 +67,7 @@ The production deployment uses 3 systems:
    running daily nowcast runs as :kbd:`fvcom-nowcast-r12`.
 
    .. _Ocean Networks Canada: https://www.oceannetworks.ca/
-   .. _arbutus.cloud: https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud_.28arbutus.cloud.computecanada.ca.29
+   .. _arbutus.cloud: https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud
    .. _Ceph object storage: https://en.wikipedia.org/wiki/Ceph_(software)
 
 These sections describe the setup of the nowcast system on :kbd:`skookum`/:kbd:`salish` and :kbd:`arbutus.cloud`,

@@ -306,7 +306,7 @@ The output looks something like::
   (line   22) ok        https://www.oceannetworks.ca/
   (line   29) ok        https://docs.openstack.org/horizon/stein/user/
   (line   22) ok        https://www.openstack.org/
-  (line   22) ok        https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud_.28arbutus.cloud.computecanada.ca.29
+  (line   22) ok        https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud
   (line   43) redirect  https://arbutus.cloud.computecanada.ca/ - with Found to https://arbutus.cloud.computecanada.ca/auth/login/?next=/
   (line   34) ok        https://www.computecanada.ca/
   (line   43) ok        https://docs.openstack.org/queens/user/
