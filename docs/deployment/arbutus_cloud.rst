@@ -23,7 +23,7 @@ In April 2019 the `Ocean Networks Canada`_ private cloud computing facility was 
 :kbd:`arbutus.cloud` runs on `OpenStack`_.
 
 .. _Ocean Networks Canada: https://www.oceannetworks.ca/
-.. _arbutus.cloud: https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud_.28arbutus.cloud.computecanada.ca.29
+.. _arbutus.cloud: https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud
 .. _OpenStack: https://www.openstack.org/
 
 The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
