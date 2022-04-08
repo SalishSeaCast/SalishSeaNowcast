@@ -334,9 +334,9 @@ The output looks something like::
   (line   32) ok        https://dd.weather.gc.ca/
   (line   95) ok        https://dd.weather.gc.ca/
   (line  119) ok        https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow:deployment
-  (line   95) ok        https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst
-  (line   95) ok        https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst
-  (line   32) ok        https://github.com/MetPX/sarracenia/blob/master/doc/sr_subscribe.1.rst
+  (line   95) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
+  (line   95) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
+  (line   32) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
   writing output... [ 30%] deployment/optimum
   writing output... [ 35%] deployment/orcinus
   writing output... [ 40%] deployment/skookum_salish
