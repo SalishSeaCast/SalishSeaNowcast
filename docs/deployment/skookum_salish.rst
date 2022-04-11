@@ -93,16 +93,21 @@ Python Packages
 
 The Python packages that the system depends on are installed in conda environments.
 
+.. note::
+   In Mar-2022 the Python environment and package management tool used for the system
+   was changed from Miniconda3 to `Mambaforge-pypy3`_.
+
+   .. _Mambaforge-pypy3: https://github.com/conda-forge/miniforge
+
 For the :kbd:`SalishSeaCast` automation system:
 
 .. code-block:: bash
 
     $ cd /SalishSeaCast/
-    $ conda update -n base -c defaults conda
-    $ conda env create \
+    $ mamba env create \
         --prefix /SalishSeaCast/nowcast-env \
         -f SalishSeaNowcast/envs/environment-prod.yaml
-    $ source activate /SalishSeaCast/nowcast-env
+    $ conda activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable NEMO_Nowcast/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable moad_tools/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable tools/SalishSeaTools/
@@ -122,11 +127,10 @@ For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files 
 .. code-block:: bash
 
     $ cd /SalishSeaCast/
-    $ conda update -n base -c defaults conda
-    $ conda env create \
+    $ mamba env create \
         --prefix /SalishSeaCast/sarracenia-env \
         -f SalishSeaNowcast/envs/environment-sarracenia.yaml
-    $ source activate /SalishSeaCast/sarracenia-env
+    $ conda activate /SalishSeaCast/sarracenia-env
     (/SalishSeaCast/sarracenia-env)$ sr_subscribe edit credentials.conf  # initialize datamart credentials
 
 For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.ca/:
@@ -136,11 +140,10 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
 .. code-block:: bash
 
     $ cd /SalishSeaCast
-    $ conda update -n base -c defaults conda
-    $ conda env create \
+    $ mamba env create \
         --prefix /SalishSeaCast/salishsea-site-env \
         -f salishsea-site/env/environment-prod.yaml
-    $ source activate /SalishSeaCast/salishsea-site-env
+    $ conda activate /SalishSeaCast/salishsea-site-env
     (/SalishSeaCast/salishsea-site-env) $ python3 -m pip install --editable salishsea-site/
 
 
