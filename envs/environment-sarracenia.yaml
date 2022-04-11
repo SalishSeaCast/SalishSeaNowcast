@@ -14,11 +14,14 @@ name: sarracenia-env
 
 channels:
   - conda-forge
+  - nodefaults
 
 dependencies:
+  - amqp
   - appdirs
+  - humanfriendly
   - humanize
-  - netifaces
+  - jsonpickle
   - pip
   - psutil
   - paramiko
@@ -26,8 +29,7 @@ dependencies:
   - watchdog
 
   - pip:
-    - amqplib
-    - metpx-sarracenia
+    - metpx-sarracenia[amqp]
 
 variables:
   SARRACENIA_ENV: /SalishSeaCast/sarracenia-env
