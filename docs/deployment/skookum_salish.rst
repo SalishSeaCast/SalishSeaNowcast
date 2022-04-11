@@ -185,7 +185,7 @@ and :command:`unset` them when it is deactivated.
     unset NOWCAST_LOGS
     unset NUMEXPR_MAX_THREADS
     unset ONC_USER_TOKEN
-    unset SARRCENIA_ENV
+    unset SARRACENIA_ENV
     unset SARRACENIA_CONFIG
     unset SENTRY_DSN
     unset SLACK_SSC_DAILY_PROGRESS
