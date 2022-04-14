@@ -156,8 +156,6 @@ class TestConfig:
         (
             "success x2 nowcast",
             "failure x2 nowcast",
-            "success x2 forecast",
-            "failure x2 forecast",
             "success r12 nowcast",
             "failure r12 nowcast",
             "crash",
@@ -237,10 +235,6 @@ class TestConfig:
         assert (
             run_types["nowcast x2"]["nemo boundary results"]
             == "/nemoShare/MEOPAR/SalishSea/nowcast/"
-        )
-        assert (
-            run_types["forecast x2"]["nemo boundary results"]
-            == "/nemoShare/MEOPAR/SalishSea/forecast/"
         )
         assert (
             run_types["nowcast r12"]["nemo boundary results"]

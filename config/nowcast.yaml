@@ -366,9 +366,6 @@ rolling forecasts:
   days from past: 5
   # Root of directory tree to hold temporary results files
   temporary results archives: /tmp/
-  fvcom:
-    # Destination directory for most recent forecast file symlinks
-    most recent forecast dir: /opp/fvcom/most_recent_forecast/
   nemo:
     # Destination directory for rolling forecast results directories
     dest dir: /results/SalishSea/rolling-forecasts/nemo/
@@ -442,8 +439,6 @@ erddap:
       - ubcSSFVCOM-VHFR-BaroclinicX2
     fvcom-r12-nowcast:
       - ubcSSFVCOM-VHFR-BaroclinicR12
-    fvcom-forecast:
-      - ubcSSFVCOM-VHFR-BaroclinicX2
 
 
 figures:
@@ -858,7 +853,7 @@ vhfr fvcom runs:
     # Template for NEMO runoff forcing file names
     # **Must be quoted to project {} characters**
     runoff file template: 'R201702DFraCElse_{yyyymmdd}.nc'
-    # File containing monthly average conservative temperature clmatologies for NEMO runoff forcing
+    # File containing monthly average conservative temperature climatology for NEMO runoff forcing
     temperature climatology: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc
     # Template for rivers forcing file names
     # **Must be quoted to project {} characters**
@@ -938,10 +933,6 @@ vhfr fvcom runs:
       time step: 0.5
       # Directory on compute host where results are stored
       results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
-    forecast x2:
-      nemo boundary results: /nemoShare/MEOPAR/SalishSea/forecast/
-      time step: 0.5
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/
     nowcast r12:
       nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
       time step: 0.2
@@ -950,7 +941,6 @@ vhfr fvcom runs:
   # in ddmmmyy/ directories; keyed by run type
   results archive:
     nowcast x2: /opp/fvcom/nowcast-x2/
-    forecast x2: /opp/fvcom/forecast-x2/
     nowcast r12: /opp/fvcom/nowcast-r12/
   # Name of the results file containing the tide gauge stations sea surface height time series
   stations dataset filename:
@@ -1369,8 +1359,6 @@ message registry:
       checklist key: FVCOM boundary conditions
       success x2 nowcast: x2 configuration nowcast FVCOM boundary condition file created
       failure x2 nowcast: x2 configuration nowcast FVCOM boundary condition file creation failed
-      success x2 forecast: x2 configuration forecast FVCOM boundary condition file created
-      failure x2 forecast: x2 configuration forecast FVCOM boundary condition file creation failed
       success r12 nowcast: r12 configuration nowcast FVCOM boundary condition file created
       failure r12 nowcast: r12 configuration forecast FVCOM boundary condition file creation failed
       crash: make_fvcom_boundary worker crashed
@@ -1379,8 +1367,6 @@ message registry:
       checklist key: FVCOM rivers forcing
       success x2 nowcast: x2 configuration nowcast FVCOM rivers forcing file created
       failure x2 nowcast: x2 configuration nowcast FVCOM rivers forcing file creation failed
-      success x2 forecast: x2 configuration forecast FVCOM rivers forcing file created
-      failure x2 forecast: x2 configuration forecast FVCOM rivers forcing file creation failed
       success r12 nowcast: r12 configuration nowcast FVCOM rivers forcing file created
       failure r12 nowcast: r12 configuration nowcast FVCOM rivers forcing file creation failed
       crash: make_fvcom_atmos_forcing worker crashed
@@ -1389,8 +1375,6 @@ message registry:
       checklist key: FVCOM atmospheric forcing
       success x2 nowcast: x2 configuration nowcast FVCOM atmospheric forcing file created
       failure x2 nowcast: x2 configuration nowcast FVCOM atmospheric forcing file creation failed
-      success x2 forecast: x2 configuration forecast FVCOM atmospheric forcing file created
-      failure x2 forecast: x2 configuration forecast FVCOM atmospheric forcing file creation failed
       success r12 nowcast: r12 configuration nowcast FVCOM atmospheric forcing file created
       failure r12 nowcast: r12 configuration nowcast FVCOM atmospheric forcing file creation failed
       crash: make_fvcom_atmos_forcing worker crashed
@@ -1399,8 +1383,6 @@ message registry:
       checklist key: FVCOM atmospheric forcing upload
       success x2 nowcast: FVCOM x2 configuration nowcast atmospheric forcing file uploaded
       failure x2 nowcast: FVCOM x2 configuration nowcast atmospheric forcing file upload failed
-      success x2 forecast: FVCOM x2 configuration forecast atmospheric forcing file uploaded
-      failure x2 forecast: FVCOM x2 configuration forecast atmospheric forcing file upload failed
       success r12 nowcast: FVCOM r12 configuration nowcast atmospheric forcing file uploaded
       failure r12 nowcast: FVCOM r12 configuration nowcast atmospheric forcing file upload failed
       crash: upload_fvcom_atmos_forcing worker crashed
@@ -1409,8 +1391,6 @@ message registry:
       checklist key: FVCOM run
       success x2 nowcast: x2 configuration nowcast FVCOM run started
       failure x2 nowcast: x2 configuration nowcast FVCOM run failed
-      success x2 forecast: x2 configuration forecast FVCOM run started
-      failure x2 forecast: x2 configuration forecast FVCOM run failed
       success r12 nowcast: r12 configuration nowcast FVCOM run started
       failure r12 nowcast: r12 configuration nowcast FVCOM run failed
       crash: run_fvcom worker crashed
@@ -1420,8 +1400,6 @@ message registry:
       need: FVCOM run information dict requested
       success x2 nowcast: x2 configuration nowcast FVCOM run completed
       failure x2 nowcast: x2 configuration nowcast FVCOM run failed
-      success x2 forecast: x2 configuration forecast FVCOM run completed
-      failure x2 forecast: x2 configuration forecast FVCOM run failed
       success r12 nowcast: r12 configuration nowcast FVCOM run completed
       failure r12 nowcast: r12 configuration nowcast FVCOM run failed
       crash: watch_fvcom worker crashed
@@ -1489,6 +1467,12 @@ message registry:
       failure nowcast-agrif: nowcast-agrif results files download failed
       crash: download_results worker crashed
 
+    split_results:
+      checklist key: results splitting
+      success hindcast: hindcast results files split into daily directories
+      failure hindcast: hindcast results files splitting into daily directories failed
+      crash: split_results worker crashed
+
     download_wwatch3_results:
       checklist key: WWATCH3 results files
       success forecast2: WaveWatch3 forecast2 results files downloaded
@@ -1503,22 +1487,12 @@ message registry:
       checklist key: VHFR FVCOM results files
       success x2 nowcast: VHFR FVCOM x2 configuration nowcast results files downloaded
       failure x2 nowcast: VHFR FVCOM x2 configuration nowcast results files download failed
-      success x2 forecast: VHFR FVCOM x2 configuration forecast results files downloaded
-      failure x2 forecast: VHFR FVCOM x2 configuration forecast results files download failed
       success r12 nowcast: VHFR FVCOM r12 configuration nowcast results files downloaded
       failure r12 nowcast: VHFR FVCOM r12 configuration nowcast results files download failed
       crash: download_fvcom_results worker crashed
 
-    split_results:
-      checklist key: results splitting
-      success hindcast: hindcast results files split into daily directories
-      failure hindcast: hindcast results files splitting into daily directories failed
-      crash: split_results worker crashed
-
     update_forecast_datasets:
      checklist key: update forecast datasets
-     success fvcom forecast: VHFR FVCOM most_recent_forecast files dataset updated from forecast run
-     failure fvcom forecast: VHFR FVCOM most_recent_forecast files dataset update from forecast run failed
      success nemo forecast: NEMO forecast datasets updated from forecast run
      failure nemo forecast: NEMO forecast datasets update from forecast run failed
      success nemo forecast2: NEMO forecast datasets updated from forecast2 run
@@ -1553,8 +1527,6 @@ message registry:
       failure fvcom-x2-nowcast: VHFR FVCOM x2 nowcast ERDDAP dataset flag files creation failed
       success fvcom-r12-nowcast: VHFR FVCOM r12 nowcast ERDDAP dataset flag files created
       failure fvcom-r12-nowcast: VHFR FVCOM r12 nowcast ERDDAP dataset flag files creation failed
-      success fvcom-forecast: VHFR FVCOM x2 forecast ERDDAP dataset flag files created
-      failure fvcom-forecast: VHFR FVCOM x2 forecast ERDDAP dataset flag files creation failed
       crash: ping_erddap worker crashed
 
     make_plots:
@@ -1575,14 +1547,10 @@ message registry:
       failure nemo forecast2 publish: nemo forecast2 publish plots failed
       success fvcom nowcast-x2 publish: fvcom x2 configuration nowcast publish plots produced
       failure fvcom nowcast-x2 publish: fvcom x2 configuration nowcast publish plots failed
-      success fvcom forecast-x2 publish: fvcom x2 configuration forecast publish plots produced
-      failure fvcom forecast-x2 publish: fvcom x2 configuration forecast publish plots failed
       success fvcom nowcast-r12 publish: fvcom r12 configuration nowcast publish plots produced
       failure fvcom nowcast-r12 publish: fvcom r12 configuration nowcast publish plots failed
       success fvcom nowcast-x2 research: fvcom x2 configuration nowcast research plots produced
       failure fvcom nowcast-x2 research: fvcom x2 configuration nowcast research plots failed
-      success fvcom forecast-x2 research: fvcom x2 configuration forecast research plots produced
-      failure fvcom forecast-x2 research: fvcom x2 configuration forecast research plots failed
       success fvcom nowcast-r12 research: fvcom r12 configuration nowcast research plots produced
       failure fvcom nowcast-r12 research: fvcom r12 configuration nowcast research plots failed
       success wwatch3 forecast publish: wwatch3 forecast publish plots produced

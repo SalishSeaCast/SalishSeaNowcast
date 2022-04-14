@@ -93,8 +93,6 @@ class TestConfig:
             "need",
             "success x2 nowcast",
             "failure x2 nowcast",
-            "success x2 forecast",
-            "failure x2 forecast",
             "success r12 nowcast",
             "failure r12 nowcast",
             "crash",
