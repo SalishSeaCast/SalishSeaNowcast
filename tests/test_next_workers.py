@@ -1416,7 +1416,7 @@ class TestAfterMakeFVCOMBoundary:
 
     @pytest.mark.parametrize(
         "msg_type",
-        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
+        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_fvcom_boundary(
@@ -1426,7 +1426,7 @@ class TestAfterMakeFVCOMBoundary:
 
     @pytest.mark.parametrize(
         "model_config, run_type",
-        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+        [("x2", "nowcast"), ("r12", "nowcast")],
     )
     def test_success_launch_make_fvcom_atmos_forcing(
         self, model_config, run_type, config, checklist
@@ -1453,7 +1453,7 @@ class TestAfterMakeFVCOMBoundary:
 
     @pytest.mark.parametrize(
         "model_config, run_type",
-        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+        [("x2", "nowcast"), ("r12", "nowcast")],
     )
     def test_success_launch_make_fvcom_rivers_forcing(
         self, model_config, run_type, config, checklist
@@ -1508,7 +1508,7 @@ class TestAfterMakeFVCOMAtmosForcing:
 
     @pytest.mark.parametrize(
         "msg_type",
-        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
+        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_fvcom_atmos_forcing(
@@ -1518,7 +1518,7 @@ class TestAfterMakeFVCOMAtmosForcing:
 
     @pytest.mark.parametrize(
         "model_config, run_type",
-        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+        [("x2", "nowcast"), ("r12", "nowcast")],
     )
     def test_success_launch_upload_fvcom_atmos_forcing(
         self, model_config, run_type, config, checklist
@@ -1544,7 +1544,7 @@ class TestAfterUploadFVCOMAtmosForcing:
 
     @pytest.mark.parametrize(
         "msg_type",
-        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
+        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_upload_fvcom_atmos_forcing(
@@ -1554,7 +1554,7 @@ class TestAfterUploadFVCOMAtmosForcing:
 
     @pytest.mark.parametrize(
         "model_config, run_type",
-        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+        [("x2", "nowcast"), ("r12", "nowcast")],
     )
     def test_success_launch_run_fvcom(self, model_config, run_type, config, checklist):
         msg = Message(
@@ -1580,7 +1580,7 @@ class TestAfterRunFVCOM:
 
     @pytest.mark.parametrize(
         "msg_type",
-        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
+        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_run_fvcom(
@@ -1590,7 +1590,7 @@ class TestAfterRunFVCOM:
 
     @pytest.mark.parametrize(
         "model_config, run_type",
-        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+        [("x2", "nowcast"), ("r12", "nowcast")],
     )
     def test_success_launch_watch_fvcom(
         self, model_config, run_type, config, checklist
@@ -1622,7 +1622,7 @@ class TestAfterWatchFVCOM:
 
     @pytest.mark.parametrize(
         "msg_type",
-        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
+        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_watch_fvcom(
@@ -1632,7 +1632,7 @@ class TestAfterWatchFVCOM:
 
     @pytest.mark.parametrize(
         "model_config, run_type",
-        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+        [("x2", "nowcast"), ("r12", "nowcast")],
     )
     def test_success_launch_download_fvcom_results(
         self, model_config, run_type, config, checklist
@@ -1661,7 +1661,7 @@ class TestAfterWatchFVCOM:
 
     @pytest.mark.parametrize(
         "done_model_config, done_run_type, launch_model_config, launch_run_type",
-        [("x2", "nowcast", "x2", "forecast"), ("x2", "forecast", "r12", "nowcast")],
+        [("x2", "nowcast", "r12", "nowcast")],
     )
     def test_success_launch_make_fvcom_boundary(
         self,
@@ -2233,7 +2233,7 @@ class TestAfterDownloadFVCOMResults:
 
     @pytest.mark.parametrize(
         "msg_type",
-        ["crash", "failure x2 nowcast", "failure x2 forecast", "failure r12 nowcast"],
+        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_download_fvcom_results(
@@ -2243,7 +2243,7 @@ class TestAfterDownloadFVCOMResults:
 
     @pytest.mark.parametrize(
         "model_config, run_type",
-        [("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")],
+        [("x2", "nowcast"), ("r12", "nowcast")],
     )
     def test_success_launch_get_vfpa_hadcp(
         self, model_config, run_type, config, checklist
@@ -2272,7 +2272,7 @@ class TestAfterDownloadFVCOMResults:
 
     @pytest.mark.parametrize(
         "model_config, run_type",
-        (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
+        (("x2", "nowcast"), ("r12", "nowcast")),
     )
     def test_success_vfpa_hadcp_launch_make_plots_fvcom_research(
         self, model_config, run_type, config, checklist
@@ -2362,57 +2362,6 @@ class TestAfterDownloadFVCOMResults:
         )
         assert expected not in workers
 
-    def test_success_forecast_no_launch_ping_erddap(self, config, checklist):
-        workers = next_workers.after_download_fvcom_results(
-            Message(
-                "download_fvcom_results",
-                f"success x2 forecast",
-                {
-                    "forecast": {
-                        "host": "arbutus.cloud",
-                        "model config": "x2",
-                        "run date": "2021-05-13",
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.ping_erddap",
-            args=["fvcom-x2-forecast"],
-            host="localhost",
-        )
-        assert expected not in workers
-
-    def test_success_forecast_launch_update_forecast_datasets(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(
-            checklist, "FVCOM run", {"forecast": {"run date": "2018-10-25"}}
-        )
-        workers = next_workers.after_download_fvcom_results(
-            Message(
-                "download_fvcom_results",
-                "success x2 forecast",
-                {
-                    "forecast": {
-                        "host": "arbutus.cloud",
-                        "model config": "x2",
-                        "run date": "2018-10-25",
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.update_forecast_datasets",
-            args=["fvcom", "forecast", "--run-date", "2018-10-25"],
-            host="localhost",
-        )
-        assert expected in workers
-
 
 class TestAfterGetVFPA_HADCP:
     """Unit tests for the after_get_vfpa_hadcp function."""
@@ -2445,7 +2394,6 @@ class TestAfterUpdateForecastDatasets:
         "msg_type",
         [
             "crash",
-            "failure fvcom forecast",
             "failure nemo forecast",
             "failure nemo forecast2",
             "failure wwatch3 forecast",
@@ -2472,22 +2420,6 @@ class TestAfterUpdateForecastDatasets:
         )
         expected = NextWorker(
             "nowcast.workers.ping_erddap", args=["nemo-forecast"], host="localhost"
-        )
-        assert expected in workers
-
-    def test_success_fvcom_launch_ping_erddap_fvcom_forecast(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(
-            checklist, "FVCOM run", {"x2 forecast": {"run date": "2019-04-15"}}
-        )
-        workers = next_workers.after_update_forecast_datasets(
-            Message("update_forecast_datasets", f"success fvcom forecast"),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.ping_erddap", args=["fvcom-forecast"], host="localhost"
         )
         assert expected in workers
 
@@ -2567,7 +2499,6 @@ class TestAfterPingERDDAP:
             "failure wwatch3-forecast",
             "failure fvcom-x2-nowcast",
             "failure fvcom-r12-nowcast",
-            "failure fvcom-forecast",
             "success weather",
             "success SCVIP-CTD",
             "success SEVIP-CTD",
@@ -2576,7 +2507,6 @@ class TestAfterPingERDDAP:
             "success nemo-forecast",
             "success fvcom-x2-nowcast",
             "success fvcom-r12-nowcast",
-            "success fvcom-forecast",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -2819,10 +2749,8 @@ class TestAfterMakePlots:
             "failure nemo forecast publish",
             "failure nemo forecast2 publish",
             "failure fvcom nowcast-x2 publish",
-            "failure fvcom forecast-x2 publish",
             "failure fvcom nowcast-r12 publish",
             "failure fvcom nowcast-x2 research",
-            "failure fvcom forecast-x2 research",
             "failure fvcom nowcast-r12 research",
             "failure wwatch3 forecast publish",
             "failure wwatch3 forecast2 publish",
@@ -2832,10 +2760,8 @@ class TestAfterMakePlots:
             "success nemo nowcast-green research",
             "success nemo nowcast-agrif research",
             "success fvcom nowcast-x2 publish",
-            "success fvcom forecast-x2 publish",
             "success fvcom nowcast-r12 publish",
             "success fvcom nowcast-x2 research",
-            "success fvcom forecast-x2 research",
             "success fvcom nowcast-r12 research",
             "success wwatch3 forecast publish",
             "success wwatch3 forecast2 publish",

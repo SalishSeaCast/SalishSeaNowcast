@@ -131,8 +131,6 @@ class TestConfig:
     @pytest.mark.parametrize(
         "msg",
         (
-            "success fvcom forecast",
-            "failure fvcom forecast",
             "success nemo forecast",
             "failure nemo forecast",
             "success nemo forecast2",
@@ -151,7 +149,7 @@ class TestConfig:
         assert msg in msg_registry
 
     def test_results_archives(self, prod_config):
-        fvcom_run_types = ("nowcast x2", "forecast x2")
+        fvcom_run_types = ("nowcast x2", "nowcast r12")
         for run_type in fvcom_run_types:
             assert run_type in prod_config["vhfr fvcom runs"]["results archive"]
         nemo_run_types = ("nowcast", "forecast", "forecast2")
@@ -164,8 +162,6 @@ class TestConfig:
     def test_rolling_foreacsts(self, prod_config):
         assert prod_config["rolling forecasts"]["days from past"] == 5
         assert prod_config["rolling forecasts"]["temporary results archives"] == "/tmp/"
-        fvcom = prod_config["rolling forecasts"]["fvcom"]
-        assert fvcom["most recent forecast dir"] == "/opp/fvcom/most_recent_forecast/"
         nemo = prod_config["rolling forecasts"]["nemo"]
         assert nemo["dest dir"] == "/results/SalishSea/rolling-forecasts/nemo/"
         wwatch3 = prod_config["rolling forecasts"]["wwatch3"]

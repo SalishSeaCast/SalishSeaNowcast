@@ -138,8 +138,6 @@ class TestConfig:
             "failure fvcom-x2-nowcast",
             "success fvcom-r12-nowcast",
             "failure fvcom-r12-nowcast",
-            "success fvcom-forecast",
-            "failure fvcom-forecast",
             "crash",
         ]
 
@@ -193,9 +191,6 @@ class TestConfig:
         ]
         assert erddap["datasetIDs"]["fvcom-r12-nowcast"] == [
             "ubcSSFVCOM-VHFR-BaroclinicR12"
-        ]
-        assert erddap["datasetIDs"]["fvcom-forecast"] == [
-            "ubcSSFVCOM-VHFR-BaroclinicX2"
         ]
 
 

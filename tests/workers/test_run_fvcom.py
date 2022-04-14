@@ -203,8 +203,6 @@ class TestConfig:
         (
             "success x2 nowcast",
             "failure x2 nowcast",
-            "success x2 forecast",
-            "failure x2 forecast",
             "success r12 nowcast",
             "failure r12 nowcast",
             "crash",
@@ -368,11 +366,6 @@ class TestConfig:
             "time step": 0.5,
             "results": "/nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/",
         }
-        assert run_types["forecast x2"] == {
-            "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/forecast/",
-            "time step": 0.5,
-            "results": "/nemoShare/MEOPAR/SalishSea/fvcom-forecast-x2/",
-        }
         assert run_types["nowcast r12"] == {
             "nemo boundary results": "/nemoShare/MEOPAR/SalishSea/nowcast/",
             "time step": 0.2,
@@ -382,7 +375,6 @@ class TestConfig:
     def test_results_archive_section(self, prod_config):
         results_archive = prod_config["vhfr fvcom runs"]["results archive"]
         assert results_archive["nowcast x2"] == "/opp/fvcom/nowcast-x2/"
-        assert results_archive["forecast x2"] == "/opp/fvcom/forecast-x2/"
         assert results_archive["nowcast r12"] == "/opp/fvcom/nowcast-r12/"
 
 

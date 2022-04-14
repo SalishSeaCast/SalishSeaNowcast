@@ -941,10 +941,8 @@ def after_make_fvcom_boundary(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure x2 nowcast": [],
-        "failure x2 forecast": [],
         "failure r12 nowcast": [],
         "success x2 nowcast": [],
-        "success x2 forecast": [],
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
@@ -995,10 +993,8 @@ def after_make_fvcom_rivers_forcing(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure x2 nowcast": [],
-        "failure x2 forecast": [],
         "failure r12 nowcast": [],
         "success x2 nowcast": [],
-        "success x2 forecast": [],
         "success r12 nowcast": [],
     }
     return []
@@ -1025,10 +1021,8 @@ def after_make_fvcom_atmos_forcing(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure x2 nowcast": [],
-        "failure x2 forecast": [],
         "failure r12 nowcast": [],
         "success x2 nowcast": [],
-        "success x2 forecast": [],
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
@@ -1066,10 +1060,8 @@ def after_upload_fvcom_atmos_forcing(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure x2 nowcast": [],
-        "failure x2 forecast": [],
         "failure r12 nowcast": [],
         "success x2 nowcast": [],
-        "success x2 forecast": [],
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
@@ -1108,10 +1100,8 @@ def after_run_fvcom(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure x2 nowcast": [],
-        "failure x2 forecast": [],
         "failure r12 nowcast": [],
         "success x2 nowcast": [],
-        "success x2 forecast": [],
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
@@ -1148,10 +1138,8 @@ def after_watch_fvcom(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure x2 nowcast": [],
-        "failure x2 forecast": [],
         "failure r12 nowcast": [],
         "success x2 nowcast": [],
-        "success x2 forecast": [],
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
@@ -1169,20 +1157,6 @@ def after_watch_fvcom(msg, config, checklist):
             )
         )
         if run_type == "nowcast" and model_config == "x2":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_fvcom_boundary",
-                    args=[
-                        (config["vhfr fvcom runs"]["host"]),
-                        "x2",
-                        "forecast",
-                        "--run-date",
-                        msg.payload[f"{model_config} {run_type}"]["run date"],
-                    ],
-                    host=(config["vhfr fvcom runs"]["host"]),
-                )
-            )
-        if run_type == "forecast" and model_config == "x2":
             next_workers[msg.type].append(
                 NextWorker(
                     "nowcast.workers.make_fvcom_boundary",
@@ -1560,10 +1534,8 @@ def after_download_fvcom_results(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure x2 nowcast": [],
-        "failure x2 forecast": [],
         "failure r12 nowcast": [],
         "success x2 nowcast": [],
-        "success x2 forecast": [],
         "success r12 nowcast": [],
     }
     if msg.type.startswith("success"):
@@ -1592,13 +1564,6 @@ def after_download_fvcom_results(msg, config, checklist):
                 NextWorker(
                     "nowcast.workers.ping_erddap",
                     args=[f"fvcom-{model_config}-nowcast"],
-                )
-            )
-        if run_type == "forecast":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.update_forecast_datasets",
-                    args=["fvcom", "forecast", "--run-date", run_date],
                 )
             )
     return next_workers[msg.type]
@@ -1650,12 +1615,10 @@ def after_update_forecast_datasets(msg, config, checklist):
     """
     next_workers = {
         "crash": [],
-        "failure fvcom forecast": [],
         "failure nemo forecast": [],
         "failure nemo forecast2": [],
         "failure wwatch3 forecast": [],
         "failure wwatch3 forecast2": [],
-        "success fvcom forecast": [],
         "success nemo forecast": [],
         "success nemo forecast2": [],
         "success wwatch3 forecast": [],
@@ -1664,11 +1627,7 @@ def after_update_forecast_datasets(msg, config, checklist):
     if msg.type.startswith("success"):
         model = msg.type.split()[1]
         run_type = msg.type.split()[2]
-        try:
-            run_date = checklist[f"{model.upper()} run"][run_type]["run date"]
-        except KeyError:
-            # FVCOM run has model config prefixed to run type
-            run_date = checklist[f"{model.upper()} run"][f"x2 {run_type}"]["run date"]
+        run_date = checklist[f"{model.upper()} run"][run_type]["run date"]
         next_workers[msg.type].append(
             NextWorker("nowcast.workers.ping_erddap", args=[f"{model}-forecast"])
         )
@@ -1730,8 +1689,6 @@ def after_ping_erddap(msg, config, checklist):
         "failure fvcom-x2-nowcast": [],
         "success fvcom-r12-nowcast": [],
         "failure fvcom-r12-nowcast": [],
-        "success fvcom-forecast": [],
-        "failure fvcom-forecast": [],
     }
     if msg.type == "success wwatch3-forecast":
         run_types = checklist["WWATCH3 run"].keys()
@@ -1815,10 +1772,8 @@ def after_make_plots(msg, config, checklist):
         "failure nemo forecast publish": [],
         "failure nemo forecast2 publish": [],
         "failure fvcom nowcast-x2 publish": [],
-        "failure fvcom forecast-x2 publish": [],
         "failure fvcom nowcast-r12 publish": [],
         "failure fvcom nowcast-x2 research": [],
-        "failure fvcom forecast-x2 research": [],
         "failure fvcom nowcast-r12 research": [],
         "failure wwatch3 forecast publish": [],
         "failure wwatch3 forecast2 publish": [],
@@ -1830,10 +1785,8 @@ def after_make_plots(msg, config, checklist):
         "success nemo forecast publish": [],
         "success nemo forecast2 publish": [],
         "success fvcom nowcast-x2 publish": [],
-        "success fvcom forecast-x2 publish": [],
         "success fvcom nowcast-r12 publish": [],
         "success fvcom nowcast-x2 research": [],
-        "success fvcom forecast-x2 research": [],
         "success fvcom nowcast-r12 research": [],
         "success wwatch3 forecast publish": [],
         "success wwatch3 forecast2 publish": [],
