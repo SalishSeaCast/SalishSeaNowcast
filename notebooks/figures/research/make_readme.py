@@ -1,4 +1,4 @@
-#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
+#  Copyright 2013 – present The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +23,6 @@ please generate a updated `README.md` file with:
 
 and commit and push the updated `README.md` to GitHub.
 """
-import datetime
 import json
 import re
 from pathlib import Path
@@ -54,7 +53,7 @@ Descriptions under the links below are from the first cell of the notebooks
     license = f"""
 ##License
 
-These notebooks and files are copyright 2013-{datetime.date.today().year}
+These notebooks and files are copyright 2013 – present
 by the Salish Sea MEOPAR Project Contributors
 and The University of British Columbia.
 

@@ -1,4 +1,4 @@
-#  Copyright 2013-2021 The Salish Sea MEOPAR contributors
+#  Copyright 2013 – present The Salish Sea MEOPAR contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -187,7 +187,7 @@ class TestGenerateFeed:
             'forecast.html" rel="related" type="text/html"/>',
             '  <generator uri="https://lkiesow.github.io/python-feedgen" '
             'version="0.9.0">python-feedgen</generator>',
-            "  <rights>Copyright 2015-2016, Salish Sea MEOPAR Project Contributors "
+            "  <rights>Copyright 2015 - present, Salish Sea MEOPAR Project Contributors "
             "and The University of British Columbia</rights>",
             "</feed>",
         ]

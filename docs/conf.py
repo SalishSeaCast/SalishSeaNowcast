@@ -28,15 +28,8 @@ project = setup_cfg["metadata"]["name"]
 
 author = "Salish Sea MEOPAR Project Contributors and The University of British Columbia"
 
-import datetime
-
 pkg_creation_year = 2013
-copyright_years = (
-    f"{pkg_creation_year}"
-    if datetime.date.today().year == pkg_creation_year
-    else f"{pkg_creation_year}-{datetime.date.today():%Y}"
-)
-copyright = f"{copyright_years}, {author}"
+copyright = f"{pkg_creation_year} – present, {author}"
 
 # The short X.Y version
 import nowcast

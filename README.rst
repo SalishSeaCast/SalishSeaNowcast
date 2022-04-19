@@ -69,7 +69,7 @@ License
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
 
-The Salish Sea NEMO model nowcast system code and documentation are copyright 2013-2021 by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
+The Salish Sea NEMO model nowcast system code and documentation are copyright 2013 – present by the `Salish Sea MEOPAR Project Contributors`_ and The University of British Columbia.
 
 .. _Salish Sea MEOPAR Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
 
