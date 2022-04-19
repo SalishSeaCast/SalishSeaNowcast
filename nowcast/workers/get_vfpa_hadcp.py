@@ -19,7 +19,7 @@ The observations are stored as a collection of netCDF-4/HDF5 files that is acces
 https://salishsea.eos.ubc.ca/erddap/info/ubcVFPA2ndNarrowsCurrent2sV1/index.html.
 
 Development notebook:
-https://nbviewer.jupyter.org/urls/bitbucket.org/salishsea/analysis-doug/raw/default/notebooks/2ndNarrowsHADPCtoERDDAP.ipynb
+https://nbviewer.org/urls/bitbucket.org/salishsea/analysis-doug/raw/default/notebooks/2ndNarrowsHADPCtoERDDAP.ipynb
 """
 import logging
 import os

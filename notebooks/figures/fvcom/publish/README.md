@@ -2,11 +2,11 @@ The Jupyter Notebooks in this directory are for development and testing of
 the results figures generation modules of the SalishSeaCast automation system.
 
 The links below are to static renderings of the notebooks via
-[nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
+[nbviewer.org](https://nbviewer.org/).
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ## [TestTideStnWaterLevel.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/TestTideStnWaterLevel.ipynb)
+* ## [TestTideStnWaterLevel.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/TestTideStnWaterLevel.ipynb)
 
     **Test `tide_stn_water_level` Module**
 
@@ -15,7 +15,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestSecondNarrowsCurrent.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/TestSecondNarrowsCurrent.ipynb)
+* ## [TestSecondNarrowsCurrent.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/TestSecondNarrowsCurrent.ipynb)
 
     **Test `second_narrows_current` Module**
 
@@ -24,13 +24,13 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [DevelopTideStnWaterLevel.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/DevelopTideStnWaterLevel.ipynb)
+* ## [DevelopTideStnWaterLevel.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/DevelopTideStnWaterLevel.ipynb)
 
     **Develop `tide_stn_water_level` Figure Module**
 
     Development of functions for `nowcast.figures.fvcom.tide_stn_water_level` web site figure module.
 
-* ## [DevelopSecondNarrowsCurrent.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/DevelopSecondNarrowsCurrent.ipynb)
+* ## [DevelopSecondNarrowsCurrent.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/DevelopSecondNarrowsCurrent.ipynb)
 
     **Develop `second_narrows_current` Figure Module**
 

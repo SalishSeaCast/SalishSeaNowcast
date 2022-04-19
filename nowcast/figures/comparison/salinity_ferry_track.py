@@ -17,7 +17,7 @@ salinity observations from the ONC instrument package aboard a BC Ferries
 vessel.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
 """
 from collections import namedtuple
 

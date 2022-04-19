@@ -18,10 +18,10 @@ and predicted and observed water levels from the CHS
 :kbd:`https://ws-shc.qc.dfo-mpo.gc.ca/` water levels web service.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestTideStnWaterLevel.ipynb
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestTideStnWaterLevel.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopTideStnWaterLevel.ipynb
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopTideStnWaterLevel.ipynb
 """
 from contextlib import suppress
 from datetime import timedelta

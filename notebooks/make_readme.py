@@ -27,7 +27,7 @@ import json
 import re
 from pathlib import Path
 
-NBVIEWER = "https://nbviewer.jupyter.org/github"
+NBVIEWER = "https://nbviewer.org/github"
 GITHUB_ORG = "SalishSeaCast"
 REPO_NAME = "SalishSeaNowcast"
 TITLE_PATTERN = re.compile("#{1,6} ?")
@@ -43,18 +43,18 @@ automation system.
 
 In particular:
 
-* The [ERDDAP_datasets.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/ERDDAP_datasets.ipynb)
+* The [ERDDAP_datasets.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/ERDDAP_datasets.ipynb)
   notebook describes and partially automates the process of generating
   XML fragments for model results datasets to be included in the ERDDAP
   server system.
 * The
-[DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/DevelopingNowcastFigureFunctions.ipynb)
+  [DevelopingNowcastFigureFunctions.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/DevelopingNowcastFigureFunctions.ipynb)
   notebook describes the recommended process for development of those functions,
   and provides an example of development of one.
 
 
 The links below are to static renderings of the notebooks via
-[nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
+[nbviewer.org](https://nbviewer.org/).
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 

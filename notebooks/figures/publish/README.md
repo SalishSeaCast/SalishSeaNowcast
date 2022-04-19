@@ -2,11 +2,11 @@ The Jupyter Notebooks in this directory are for development and testing of
 the results figures generation modules of the SalishSeaCast automation system.
 
 The links below are to static renderings of the notebooks via
-[nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
+[nbviewer.org](https://nbviewer.org/).
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ## [TestPtAtkinsonTideModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/TestPtAtkinsonTideModule.ipynb)
+* ## [TestPtAtkinsonTideModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/TestPtAtkinsonTideModule.ipynb)
 
     **Test `pt_atkinson_tide` Module**
 
@@ -15,7 +15,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestCompareTidePredictionMaxSSH.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestCompareTidePredictionMaxSSH.ipynb)
+* ## [TestCompareTidePredictionMaxSSH.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestCompareTidePredictionMaxSSH.ipynb)
 
     **Test `compare_tide_prediction_max_ssh` Module**
 
@@ -24,7 +24,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestStormSurgeAlertsModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestStormSurgeAlertsModule.ipynb)
+* ## [TestStormSurgeAlertsModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestStormSurgeAlertsModule.ipynb)
 
     **Test `storm_surge_alerts` Module**
 
@@ -33,13 +33,13 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [DevelopCompareTidePredictionMaxSSH.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/DevelopCompareTidePredictionMaxSSH.ipynb)
+* ## [DevelopCompareTidePredictionMaxSSH.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/DevelopCompareTidePredictionMaxSSH.ipynb)
 
     **Develop `compare_tide_prediction_max_ssh` Figure Module**
 
     Development of functions for `nowcast.figures.publish.compare_tide_prediction_max_ssh` web site figure module.
 
-* ## [TestStormSurgeAlertsThumbnailModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestStormSurgeAlertsThumbnailModule.ipynb)
+* ## [TestStormSurgeAlertsThumbnailModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestStormSurgeAlertsThumbnailModule.ipynb)
 
     **Test `storm_surge_alerts_thumbnail` Module**
 
@@ -48,7 +48,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestSurfaceCurrentTiles.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestSurfaceCurrentTiles.ipynb)
+* ## [TestSurfaceCurrentTiles.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestSurfaceCurrentTiles.ipynb)
 
     **Test `surface_current_tiles` Module**
 

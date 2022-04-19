@@ -27,7 +27,7 @@ import json
 import re
 from pathlib import Path
 
-NBVIEWER = "https://nbviewer.jupyter.org/github"
+NBVIEWER = "https://nbviewer.org/github"
 GITHUB_ORG = "SalishSeaCast"
 REPO_NAME = "SalishSeaNowcast"
 TITLE_PATTERN = re.compile("#{1,6} ?")
@@ -41,7 +41,7 @@ The Jupyter Notebooks in this directory are for development and testing of
 the results figures generation modules of the SalishSeaCast automation system.
 
 The links below are to static renderings of the notebooks via
-[nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
+[nbviewer.org](https://nbviewer.org/).
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 

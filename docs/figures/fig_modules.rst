@@ -69,7 +69,7 @@ The `DevelopTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures
 You can take that approach if you wish,
 or you can develop directly in a module.
 
-.. _DevelopTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
+.. _DevelopTracerThalwegAndSurfaceModule: https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
 
 Of course,
 the ultimate goal is to produce a module.
@@ -77,4 +77,4 @@ Once you've got a code module,
 you should create a notebook that tests it in the nowcast system context.
 The `TestTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` is an example for the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module.
 
-.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
+.. _TestTracerThalwegAndSurfaceModule: https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb

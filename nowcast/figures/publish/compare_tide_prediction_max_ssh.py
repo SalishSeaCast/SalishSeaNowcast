@@ -35,10 +35,10 @@ tide gauge location, the time at which it occurs, the ssh residual, and the
 wind speed and direction at that time.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
 """
 from datetime import timedelta
 from pathlib import Path

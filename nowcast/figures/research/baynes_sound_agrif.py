@@ -19,10 +19,10 @@ a fringe of the full domain on the 3 non-land sides. The axes grid and tick
 labels are an angled lon/lat grid.
 
 Testing notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestBaynesSoundAGRIF.ipynb
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestBaynesSoundAGRIF.ipynb
 
 Development notebook for this module is
-https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopBaynesSoundAGRIF.ipynb
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopBaynesSoundAGRIF.ipynb
 """
 from types import SimpleNamespace
 

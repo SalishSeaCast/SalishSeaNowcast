@@ -2,11 +2,11 @@ The Jupyter Notebooks in this directory are for development and testing of
 the results figures generation modules of the SalishSeaCast automation system.
 
 The links below are to static renderings of the notebooks via
-[nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
+[nbviewer.org](https://nbviewer.org/).
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ## [TestCompareVENUS_CTD.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestCompareVENUS_CTD.ipynb)
+* ## [TestCompareVENUS_CTD.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestCompareVENUS_CTD.ipynb)
 
     **Test `compare_venus_ctd` Module**
 
@@ -15,7 +15,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestSalinityFerryTrackModule.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestSalinityFerryTrackModule.ipynb)
+* ## [TestSalinityFerryTrackModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestSalinityFerryTrackModule.ipynb)
 
     **Test `salinity_ferry_track` Module**
 
@@ -24,7 +24,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestSandHeadsWinds.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestSandHeadsWinds.ipynb)
+* ## [TestSandHeadsWinds.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestSandHeadsWinds.ipynb)
 
     **Test `sandheads_winds` Module**
 

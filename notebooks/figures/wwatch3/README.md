@@ -2,11 +2,11 @@ The Jupyter Notebooks in this directory are for development and testing of
 the results figures generation modules of the SalishSeaCast automation system.
 
 The links below are to static renderings of the notebooks via
-[nbviewer.jupyter.org](https://nbviewer.jupyter.org/).
+[nbviewer.org](https://nbviewer.org/).
 Descriptions under the links below are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ## [TestWaveHeightPeriod.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/wwatch3/TestWaveHeightPeriod.ipynb)
+* ## [TestWaveHeightPeriod.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/wwatch3/TestWaveHeightPeriod.ipynb)
 
     **Test `wave_height_period` Figure Module**
 
@@ -15,7 +15,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [DevelopWaveHeightPeriod.ipynb](https://nbviewer.jupyter.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/wwatch3/DevelopWaveHeightPeriod.ipynb)
+* ## [DevelopWaveHeightPeriod.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/wwatch3/DevelopWaveHeightPeriod.ipynb)
 
     **Develop `wave_height_period` Figure Module**
 
