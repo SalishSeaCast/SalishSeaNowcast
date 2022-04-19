@@ -135,7 +135,7 @@ class TestConfig:
         )
         assert (
             ssh["tidal predictions"]
-            == "/SalishSeaCast/SalishSeaNowcast/tidal_predictions/"
+            == "/SalishSeaCast/tidal-predictions/"
         )
         assert (
             ssh["neah bay hourly"]
