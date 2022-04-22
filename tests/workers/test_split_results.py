@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Unit tests for Salish Sea NEMO nowcast split_results worker.
+"""Unit tests for SalishSeaCast split_results worker.
 """
 import logging
 import textwrap

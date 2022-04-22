@@ -54,7 +54,7 @@ def make_figure(
     :param tracer_var: Hourly average tracer results from NEMO run.
     :type tracer_var: :py:class:`netCDF4.Variable`
 
-    :param bathy: Salish Sea NEMO model bathymetry data.
+    :param bathy: SalishSeaCast NEMO model bathymetry data.
     :type bathy: :class:`netCDF4.Dataset`
 
     :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.

@@ -14,7 +14,7 @@
 #  limitations under the License.
 """Salish Sea FVCOM Vancouver Harbour and Fraser River model worker that
 produces boundary condition files for the FVCOM model open boundary in the
-Strait of Georgia from the Salish Sea NEMO model results.
+Strait of Georgia from the SalishSeaCast NEMO model results.
 """
 import logging
 import os

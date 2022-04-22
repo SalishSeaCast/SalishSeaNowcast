@@ -167,7 +167,7 @@ def plot_residual_model(axs, names, runs_list, grid_B, t_orig):
     :arg runs_list: Runs that have been verified as complete.
     :type runs_list: list
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
     :arg t_orig: Date being considered.
@@ -226,7 +226,7 @@ def get_error_model(names, runs_list, grid_B, t_orig):
     :arg runs_list: Runs that have been verified as complete.
     :type runs_list: list
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
     :arg t_orig: Date being considered.
@@ -335,7 +335,7 @@ def plot_error_model(axs, names, runs_list, grid_B, t_orig):
     :arg runs_list: Runs that have been verified as complete.
     :type runs_list: list of strings
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
     :arg t_orig: Date being considered.
@@ -395,7 +395,7 @@ def plot_residual_error_all(subject, grid_B, t_orig, figsize=(20, 16)):
     :arg subject: Subject of figure, either 'residual' or 'error'.
     :type subject: string
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
     :arg t_orig: Date being considered.
@@ -450,7 +450,7 @@ def combine_errors(name, mode, dates, grid_B):
     :arg dates: list of dates to combine
     :type dates: list of datetime objects
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset
 
     :returns: force, model, time, daily_time.

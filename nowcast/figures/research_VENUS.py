@@ -160,7 +160,7 @@ def compare_VENUS(station, grid_T, grid_B, figsize=(6, 10)):
     :arg grid_T: Hourly tracer results dataset from NEMO.
     :type grid_T: :class:`netCDF4.Dataset`
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
     :arg figsize: Figure size (width, height) in inches.
@@ -367,7 +367,7 @@ def VENUS_location(grid_B, figsize=(10, 10)):
     """Plots the location of the VENUS Central, East and DDL nodes as well as
     Vancouver as a reference on a bathymetry map.
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
     :arg figsize: Figure size (width, height) in inches.

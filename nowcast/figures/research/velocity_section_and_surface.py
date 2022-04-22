@@ -60,7 +60,7 @@ def make_figure(
     :param V_var: Hourly average V velocity from NEMO run
     :type V_var: :class:`numpy.ndarray`
 
-    :param bathy: Salish Sea NEMO model bathymetry data.
+    :param bathy: SalishSeaCast NEMO model bathymetry data.
     :type bathy: :class:`netCDF4.Dataset`
 
     :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.

@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """Salish Sea nowcast worker that produces hourly temperature and salinity
-boundary conditions files for the Salish Sea NEMO model western (Juan de Fuca)
+boundary conditions files for the SalishSeaCast NEMO model western (Juan de Fuca)
 open boundary from the University of Washington Live Ocean model forecast
 product.
 """

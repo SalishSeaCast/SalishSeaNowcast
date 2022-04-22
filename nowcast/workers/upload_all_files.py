@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea NEMO nowcast worker that uploads the forcing files
+"""SalishSeaCast worker that uploads the forcing files
 for a nowcast run to the HPC/cloud facility where the run will be
 executed assuming that the previous nowcasts were not run there
 """

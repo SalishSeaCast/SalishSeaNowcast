@@ -60,7 +60,8 @@ The code in the figure modules is just the code that is specific to creating tha
 Generic functions that are useful in the creation of more than one figure are collected in the :py:obj:`nowcast.figures.shared` module.
 Figure modules also often import modules from the :ref:`SalishSeaToolsPackage`.
 For example,
-:py:func:`salishsea_tools.viz_tools.set_aspect` is used to set the aspect ratio of a figure axes object appropriately for the Salish Sea NEMO model grid.
+:py:func:`salishsea_tools.viz_tools.set_aspect` is used to set the aspect ratio of a
+figure axes object appropriately for the SalishSeaCast NEMO model grid.
 
 The :ref:`CreatingAFigureModule` docs contain a detailed element-by-element discussion of how to create and structure a web site figure module.
 They use the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module as an example.
@@ -75,6 +76,7 @@ Of course,
 the ultimate goal is to produce a module.
 Once you've got a code module,
 you should create a notebook that tests it in the nowcast system context.
-The `TestTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/` is an example for the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module.
+The `TestTracerThalwegAndSurfaceModule`_ notebook in :file:`notebooks/figures/research/`
+is an example for the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` module.
 
 .. _TestTracerThalwegAndSurfaceModule: https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb

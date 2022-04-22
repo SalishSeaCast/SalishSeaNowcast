@@ -88,7 +88,7 @@ Descriptions under the links below are from the first cell of the notebooks
 * ## [Original_DailyNowcastFigures.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/Original_DailyNowcastFigures.ipynb)
 
     Template notebook for creation of notebooks that show daily figures
-    from most recent Salish Sea NEMO model real-time (nowcast) run.
+    from most recent SalishSeaCast NEMO model real-time (nowcast) run.
 
     This is an interim step toward fully automated web publication of
     analysis and monitoring figures from nowcast runs.

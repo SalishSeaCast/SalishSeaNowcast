@@ -53,7 +53,8 @@
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues
     :alt: Issue Tracker
 
-The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with running the Salish Sea NEMO model in a daily nowcast/forecast mode.
+The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with
+running the SalishSeaCast ocean models in a daily nowcast/forecast mode.
 The package uses the `NEMO_Nowcast`_ framework to implement the :ref:`SalishSeaNowcastSystem`.
 
 .. _NEMO_Nowcast: https://nemo-nowcast.readthedocs.io/en/latest/

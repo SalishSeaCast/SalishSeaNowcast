@@ -135,13 +135,12 @@ and its option flags:
     usage: python -m nowcast.workers.download_weather
            [-h] [--debug] [--yesterday] config_file {18,00,12,06}
 
-    Salish Sea NEMO nowcast weather model dataset download worker. Download the
+    SalishSeaCast weather model dataset download worker. Download the
     GRIB2 files from today's 00, 06, 12, or 18 EC GEM 2.5km HRDPS operational
     model forecast.
 
     positional arguments:
-      config_file    Path/name of YAML configuration file for Salish Sea NEMO
-                     nowcast.
+      config_file    Path/name of YAML configuration file for SalishSeaCast
       {18,00,12,06}  Name of forecast to download files from.
 
     optional arguments:

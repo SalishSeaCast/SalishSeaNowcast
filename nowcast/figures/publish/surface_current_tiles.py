@@ -49,19 +49,19 @@ def make_figure(
     :param t_index: time index
     :type t_index: int
 
-    :param Uf: Path to Salish Sea NEMO grid_U output file.
+    :param Uf: Path to SalishSeaCast NEMO grid_U output file.
     :type Uf: :py:class:`pathlib.Path`
 
-    :param Vf: Path to Salish Sea NEMO grid_V output file.
+    :param Vf: Path to SalishSeaCast NEMO grid_V output file.
     :type Vf: :py:class:`pathlib.Path`
 
-    :param coordf: Path to Salish Sea NEMO model coordinates file.
+    :param coordf: Path to SalishSeaCast NEMO model coordinates file.
     :type coordf: :py:class:`pathlib.Path`
 
-    :param mesh_maskf: Path to Salish Sea NEMO-generated mesh mask file.
+    :param mesh_maskf: Path to SalishSeaCast NEMO-generated mesh mask file.
     :type mesh_maskf: :py:class:`pathlib.Path`
 
-    :param bathyf: Path to Salish Sea NEMO model bathymetry file.
+    :param bathyf: Path to SalishSeaCast NEMO model bathymetry file.
     :type bathyf: :py:class:`pathlib.Path`
 
     :param tile_coords_dic: Dictionary containing tile coordinate definitions in longitude and latitude.

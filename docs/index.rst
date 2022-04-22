@@ -15,18 +15,21 @@
 
 .. _SalishSeaNowcastSystem:
 
-*************************
-Salish Sea Nowcast System
-*************************
+*******************************************
+SalishSeaCast OCean Model Automation System
+*******************************************
 
-The Salish Sea Nowcast system is a software automation system that runs the `Salish Sea NEMO ocean model`_ in a daily nowcast/forecast mode.
+The Salish Sea Nowcast system is a software automation system that runs the
+`SalishSeaCast ocean models`_ in a daily nowcast/forecast mode.
 The runs use as-recent-as-available
 (typically previous day)
 forcing data for the western boundary sea surface height and the Fraser River flow,
-and atmospheric forcing from the four-times-daily produced forecast product from the `Environment Canada High Resolution Deterministic Prediction System (HRDPS)`_ operational GEM 2.5km resolution model.
+and atmospheric forcing from the four-times-daily produced forecast product from the
+Environment and Climate Change Canada `High Resolution Deterministic Prediction System (HRDPS)`_
+operational GEM 2.5km resolution model.
 
-.. _Salish Sea NEMO ocean model: https://salishsea.eos.ubc.ca/nemo/
-.. _Environment Canada High Resolution Deterministic Prediction System (HRDPS): https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html
+.. _SalishSeaCast ocean models: https://salishsea.eos.ubc.ca/nemo/
+.. _High Resolution Deterministic Prediction System (HRDPS): https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html
 
 The runs are automated using an asynchronous,
 distributed,
@@ -46,9 +49,9 @@ The automation system:
 * prepares a collection of plots from the run results for monitoring purposes
 * publishes the plots and the processing log to the web
 
-Results of the model runs can be found on the `Salish Sea NEMO model results site`_ and on the project's `ERDDAP server`_.
+Results of the model runs can be found on the `SalishSeaCast model results site`_ and on the project's `ERDDAP server`_.
 
-.. _Salish Sea NEMO model results site: https://salishsea.eos.ubc.ca/nemo/results/
+.. _SalishSeaCast model results site: https://salishsea.eos.ubc.ca/nemo/results/
 .. _ERDDAP server: https://salishsea.eos.ubc.ca/erddap/index.html
 
 The system is deployed on a server maintained by the UBC Dept. of Earth, Ocean and Atmospheric Sciences.

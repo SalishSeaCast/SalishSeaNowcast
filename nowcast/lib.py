@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea NEMO nowcast utility functions for use by workers.
+"""SalishSeaCast utility functions for use by workers.
 """
 import grp
 import logging

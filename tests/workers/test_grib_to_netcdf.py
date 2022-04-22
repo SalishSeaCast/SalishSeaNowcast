@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Unit tests for Salish Sea NEMO nowcast grib_to_netcdf worker.
+"""Unit tests for SalishSeaCast grib_to_netcdf worker.
 """
 from types import SimpleNamespace
 from unittest.mock import Mock, patch

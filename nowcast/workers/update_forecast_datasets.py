@@ -45,7 +45,7 @@ def main():
         help="""
         Model to update the rolling forecast datasets for:
         'fvcom' means the Vancouver Harbour Fraser River (VHFR) FVCOM model,
-        'nemo' means the Salish Sea NEMO model,
+        'nemo' means the SalishSeaCast NEMO model,
         'wwatch3' means the Strait of Georgia WaveWatch3(TM) model.
         """,
     )

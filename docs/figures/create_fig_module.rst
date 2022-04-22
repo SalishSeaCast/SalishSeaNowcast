@@ -97,7 +97,7 @@ and then we'll look at each section in detail.
         :param tracer_var: Hourly average tracer results from NEMO run.
         :type tracer_var: :py:class:`netCDF4.Variable`
 
-        :param bathy: Salish Sea NEMO model bathymetry data.
+        :param bathy: SalishSeaCast NEMO model bathymetry data.
         :type bathy: :class:`netCDF4.Dataset`
 
         :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
@@ -430,7 +430,7 @@ It is also the module's only :ref:`public function <LibraryCodePublicAndPrivate>
         :param tracer_var: Hourly average tracer results from NEMO run.
         :type tracer_var: :py:class:`netCDF4.Variable`
 
-        :param bathy: Salish Sea NEMO model bathymetry data.
+        :param bathy: SalishSeaCast NEMO model bathymetry data.
         :type bathy: :class:`netCDF4.Dataset`
 
         :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.
@@ -514,7 +514,7 @@ The function docstring
     :param tracer_var: Hourly average tracer results from NEMO run.
     :type tracer_var: :py:class:`netCDF4.Variable`
 
-    :param bathy: Salish Sea NEMO model bathymetry data.
+    :param bathy: SalishSeaCast NEMO model bathymetry data.
     :type bathy: :class:`netCDF4.Dataset`
 
     :param mesh_mask: NEMO-generated mesh mask for run that produced tracer_var.

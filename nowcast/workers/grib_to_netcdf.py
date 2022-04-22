@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea NEMO nowcast weather forcing file generation worker.
+"""SalishSeaCast weather forcing file generation worker.
 
 Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
@@ -39,7 +39,7 @@ wgrib2_logger = logging.getLogger("wgrib2")
 # Corners of sub-region of GEM 2.5km operational forecast grid
 # that enclose the watersheds (other than the Fraser River)
 # that are used to calculate river flows for runoff forcing files
-# for the Salish Sea NEMO model.
+# for the SalishSeaCast NEMO model.
 # The Fraser is excluded because real-time gauge data at Hope are
 # available for it.
 IST, IEN = 110, 365
@@ -402,7 +402,7 @@ def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
 def _crop_to_watersheds(config, ymd, ist, ien, jst, jen, outgrib, outzeros):
     """Crop the grid to the sub-region of GEM 2.5km operational forecast
     grid that encloses the watersheds that are used to calculate river
-    flows for runoff forcing files for the Salish Sea NEMO model.
+    flows for runoff forcing files for the SalishSeaCast NEMO model.
     """
     OPERdir = config["weather"]["ops dir"]
     wgrib2 = config["weather"]["wgrib2"]

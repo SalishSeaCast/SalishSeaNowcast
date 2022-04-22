@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea NEMO nowcast worker that produces visualization images for
+"""SalishSeaCast worker that produces visualization images for
 the web site from run results.
 """
 import datetime
@@ -77,7 +77,7 @@ def main():
         choices={"nemo", "fvcom", "wwatch3"},
         help="""
         Model to produce plots for:
-        'nemo' means the Salish Sea NEMO model,
+        'nemo' means the SalishSeaCast NEMO model,
         'fvcom' means the Vancouver Harbour/Fraser River FVCOM model,
         'wwatch3' means the Strait of Georgia WaveWatch3(TM) model,
         """,

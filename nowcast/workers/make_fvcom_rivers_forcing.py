@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea FVCOM Vancouver Harbour and Fraser River model worker that
-produces river discharges forcing files for the FVCOM model from the Salish Sea NEMO
+"""SalishSeaCast FVCOM Vancouver Harbour and Fraser River model worker that
+produces river discharges forcing files for the FVCOM model from the SalishSeaCast NEMO
 model runoff forcing files.
 """
 import logging

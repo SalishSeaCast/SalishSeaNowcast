@@ -185,7 +185,7 @@ def plot_files(ax, grid_B, files, var, depth, t_orig, t_final, name, label, colo
     :arg ax: The axis where the variable is plotted.
     :type ax: axis object
 
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
     :arg files: Multiple result files in chronological order.
@@ -248,7 +248,7 @@ def compare_ssh_tides(
     grid_B, files, t_orig, t_final, name, PST=0, MSL=0, figsize=(20, 6)
 ):
     """
-    :arg grid_B: Bathymetry dataset for the Salish Sea NEMO model.
+    :arg grid_B: Bathymetry dataset for the SalishSeaCast NEMO model.
     :type grid_B: :class:`netCDF4.Dataset`
 
     :arg files: Multiple result files in chronological order.

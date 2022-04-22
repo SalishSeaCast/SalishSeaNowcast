@@ -34,10 +34,10 @@ def _make_figure_domain(coordf, bathyf, theme):
     """
     Create surface currents tiled domain figure showing the boundary and labels of each tile.
 
-    :param coordf: Path to Salish Sea NEMO model coordinates file.
+    :param coordf: Path to SalishSeaCast NEMO model coordinates file.
     :type coordf: :py:class:`pathlib.Path`
 
-    :param bathyf: Path to Salish Sea NEMO model bathymetry file.
+    :param bathyf: Path to SalishSeaCast NEMO model bathymetry file.
     :type bathyf: :py:class:`pathlib.Path`
 
     :param theme: Module-like object that defines the style elements for the

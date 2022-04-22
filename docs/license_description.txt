@@ -1,7 +1,7 @@
 Licenses
 ========
 
-Salish Sea NEMO model nowcast system code and documentation are copyright 2013 – present
+The SalishSeaCast ocean model automation system code and documentation are copyright 2013 – present
 by the `SalishSeaCast Project Contributors`_ and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
