@@ -26,7 +26,7 @@ setup_cfg = configparser.ConfigParser()
 setup_cfg.read(os.path.abspath("../setup.cfg"))
 project = setup_cfg["metadata"]["name"]
 
-author = "Salish Sea MEOPAR Project Contributors and The University of British Columbia"
+author = "SalishSeaCast Project Contributors and The University of British Columbia"
 
 pkg_creation_year = 2013
 copyright = f"{pkg_creation_year} – present, {author}"

@@ -1,4 +1,4 @@
-#  Copyright 2013 – present The Salish Sea MEOPAR contributors
+#  Copyright 2013 – present by the SalishSeaCast Project contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -103,10 +103,10 @@ def _generate_feed(feed, feeds_config, atom_path):
     fg.id(_build_tag_uri("2015-12-12", feed, utcnow, feeds_config, atom_path))
     fg.language("en-ca")
     fg.author(
-        name="Salish Sea MEOPAR Project", uri=f'https://{feeds_config["domain"]}/'
+        name="SalishSeaCast Project", uri=f'https://{feeds_config["domain"]}/'
     )
     fg.rights(
-        f"Copyright 2015 - present, Salish Sea MEOPAR Project "
+        f"Copyright 2015 - present by the SalishSeaCast Project "
         f"Contributors and The University of British Columbia"
     )
     fg.link(
@@ -136,7 +136,7 @@ def _generate_feed_entry(feed, max_ssh_info, config, atom_path):
         )
     )
     fe.author(
-        name="Salish Sea MEOPAR Project",
+        name="SalishSeaCast Project",
         uri=f'https://{config["storm surge feeds"]["domain"]}/',
     )
     fe.content(_render_entry_content(feed, max_ssh_info, config), type="html")

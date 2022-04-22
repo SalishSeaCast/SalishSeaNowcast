@@ -1,4 +1,4 @@
-#  Copyright 2013 – present The Salish Sea MEOPAR contributors
+#  Copyright 2013 – present by the SalishSeaCast Project contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -67,7 +67,7 @@ Descriptions under the links below are from the first cell of the notebooks
 ##License
 
 These notebooks and files are copyright 2013 – present
-by the Salish Sea MEOPAR Project Contributors
+by the SalishSeaCast Project Contributors
 and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.

@@ -1,4 +1,4 @@
-#  Copyright 2013 – present The Salish Sea MEOPAR contributors
+#  Copyright 2013 – present by the SalishSeaCast Project contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -178,7 +178,7 @@ class TestGenerateFeed:
         assert feed.splitlines()[4].endswith("</updated>")
         expected = [
             "  <author>",
-            "    <name>Salish Sea MEOPAR Project</name>",
+            "    <name>SalishSeaCast Project</name>",
             "    <uri>https://salishsea.eos.ubc.ca/</uri>",
             "  </author>",
             '  <link href="https://salishsea.eos.ubc.ca/storm-surge/atom/'
@@ -187,7 +187,7 @@ class TestGenerateFeed:
             'forecast.html" rel="related" type="text/html"/>',
             '  <generator uri="https://lkiesow.github.io/python-feedgen" '
             'version="0.9.0">python-feedgen</generator>',
-            "  <rights>Copyright 2015 - present, Salish Sea MEOPAR Project Contributors "
+            "  <rights>Copyright 2015 - present by the SalishSeaCast Project Contributors "
             "and The University of British Columbia</rights>",
             "</feed>",
         ]
@@ -232,7 +232,7 @@ class TestGenerateFeedEntry:
             "pmv.xml", "max_ssh_info", config, os.path.join(storm_surge_path, atom_path)
         )
         m_fe().author.assert_called_once_with(
-            name="Salish Sea MEOPAR Project", uri="https://salishsea.eos.ubc.ca/"
+            name="SalishSeaCast Project", uri="https://salishsea.eos.ubc.ca/"
         )
 
     def test_content(self, m_fe, m_rec, m_now, config):

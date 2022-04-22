@@ -1,4 +1,4 @@
-#  Copyright 2013 – present The Salish Sea MEOPAR contributors
+#  Copyright 2013 – present by the SalishSeaCast Project contributors
 #  and The University of British Columbia
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -214,8 +214,8 @@ def _make_hour_dataset(csv_dir, utc_start_hr, place):
             "Fisheries and Oceans Canada, Institute of Ocean Sciences"
         ),
         "license": (
-            "The Salish Sea MEOPAR observation datasets are copyright 2013 – present by the "
-            "Salish Sea MEOPAR Project Contributors, The University of British Columbia, "
+            "The SalishSeaCast observation datasets are copyright 2013 – present by the "
+            "SalishSeaCast Project Contributors, The University of British Columbia, "
             "and the Vancouver Fraser Port Authority. "
             "They are licensed under the Apache License, Version 2.0. "
             "https://www.apache.org/licenses/LICENSE-2.0. "
