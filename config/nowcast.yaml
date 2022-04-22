@@ -602,7 +602,7 @@ run:
       # Optional email address to which to send notifications of the beginning
       # and end of execution of the run, as well as notification of abnormal
       # abort messages.
-      email: sallen@eos.ubc.ca
+      email: sallen@eoas.ubc.ca
       run types:
         nowcast-dev:
           run sets dir: /SalishSeaCast/SS-run-sets/v201905/nowcast-dev/
