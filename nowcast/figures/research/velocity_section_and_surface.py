@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """Produce a figure that shows colour contours of a tracer on a vertical slice
 along a section of the domain thalweg,
 and on the surface for a section of the domain that excludes Puget Sound

@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """SalishSeaCast worker that downloads the GRIB2 files from today's 00, 06, 12, or 18
 Environment Canada GEM 2.5km HRDPS operational model forecast.
 """

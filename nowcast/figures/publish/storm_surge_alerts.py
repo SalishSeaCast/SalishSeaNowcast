@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """Produce a figure that shows a map of the Salish Sea with markers indicating
 the risks of high water levels at the Point Atkinson, Victoria, Campbell River,
 Nanaimo, and Cherry Point tide gauge locations.

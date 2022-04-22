@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """SalishSeaCast worker that downloads a daily averaged file from the
 University of Washington Live Ocean model forecast product for a specified date.
 The file contains a hyperslab that covers the SalishSeaCast NEMO model western

@@ -14,6 +14,10 @@
 #  limitations under the License.
 """SalishSeaCast worker that upload forcing files for NEMO runs.
 
+# SPDX-License-Identifier: Apache-2.0
+
+
+
 Upload the forcing files for a nowcast or forecast run to the HPC/cloud
 facility where the run will be executed.
 """

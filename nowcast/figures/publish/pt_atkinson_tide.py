@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """Produce a figure that shows the tidal cycle at Point Atkinson during
 a 4 week period centred around a model results period.
 The tidal cycle is based on predictions calculated by :program:`ttide`

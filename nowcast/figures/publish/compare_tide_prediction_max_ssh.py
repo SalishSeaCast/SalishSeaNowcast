@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """Produce a figure that shows a map of the Salish Sea with coloured contours
 showing the sea surface height when it is at its maximum at a specified tide
 gauge station.

@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """Produce a figure that shows the sea water current at the 2nd Narrows
 Ironworkers Memorial Crossing bridge calculated by the VHFR FVCOM model,
 the observed current measured by a horizontal ADCP on the bridge piling.

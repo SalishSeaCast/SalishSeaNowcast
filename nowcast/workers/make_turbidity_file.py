@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """SalishSeaCast worker that produces daily average Fraser River
 turbidity file from hourly real-time turbidity data collected from Environment
 and Climate Change Canada Fraser River water quality buoy.

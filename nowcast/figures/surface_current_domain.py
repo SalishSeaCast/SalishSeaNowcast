@@ -12,11 +12,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-This standalone code produces the surface current tiled domain figure in both website themed and unthemed style and saves
-the figure files in '/SalishSeaCast/salishsea-site/salishsea_site/static/img/'.
 
-The domain is divided into different tiles and needs to be re-run if the tiles specification/coordinates are changed.
+# SPDX-License-Identifier: Apache-2.0
+
+
+"""This standalone code produces the surface current tiled domain figure in both
+website themed and unthemed style and saves the figure files in
+'/SalishSeaCast/salishsea-site/salishsea_site/static/img/'.
+
+The domain is divided into different tiles and needs to be re-run if the tile
+specification/coordinates are changed.
 """
 
 from pathlib import Path

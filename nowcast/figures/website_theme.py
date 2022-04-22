@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """Colour, fonts, and utility functions that define the look of figures for the
 https://salishsea.eos.ubc.ca/nemo/ web pages.
 """

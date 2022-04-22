@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """A collection of Python functions to produce model results visualization
 figures for analysis and model evaluation of nowcast, forecast, and
 forecast2 runs.

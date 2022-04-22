@@ -13,6 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# SPDX-License-Identifier: Apache-2.0
+
+
 """Produce image-loop figures showing vertical transects for variables from
 the VHFR FVCOM model domain along several thalweg transects.
 

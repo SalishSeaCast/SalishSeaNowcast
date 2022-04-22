@@ -13,6 +13,9 @@
 ..  See the License for the specific language governing permissions and
 ..  limitations under the License.
 
+.. SPDX-License-Identifier: Apache-2.0
+
+
 .. _CreatingAFigureModule:
 
 ************************
@@ -67,6 +70,9 @@ and then we'll look at each section in detail.
     # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     # See the License for the specific language governing permissions and
     # limitations under the License.
+
+    # SPDX-License-Identifier: Apache-2.0
+
 
     """Produce a figure that shows colour contours of a tracer on a vertical slice
     along a section of the domain thalweg,
@@ -349,6 +355,8 @@ At the top of the file is our :ref:`LibraryCodeStandardCopyrightHeaderBlock`:
     # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
     # See the License for the specific language governing permissions and
     # limitations under the License.
+
+    # SPDX-License-Identifier: Apache-2.0
 
 
 Module Docstring

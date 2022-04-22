@@ -13,6 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# SPDX-License-Identifier: Apache-2.0
+
+
 """Produce image-loop figures showing surface current vectors on a heatmap of
 speed for several regions of interest within the VHFR FVCOM model domain.
 
