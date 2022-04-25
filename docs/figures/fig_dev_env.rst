@@ -56,6 +56,7 @@ You will also need up-to-date clones of the following repositories from GitHub:
 * NEMO-Cmd: https://github.com/SalishSeaCast/NEMO-Cmd
 * SalishSeaCmd: https://github.com/SalishSeaCast/SalishSeaCmd
 * SalishSeaNowcast: https://github.com/SalishSeaCast/SalishSeaNowcast
+* tidal-predictions: https://github.com/SalishSeaCast/tidal-predictions
 * salishsea-site: https://github.com/SalishSeaCast/salishsea-site
 
 Assuming that all of those repositories are cloned,

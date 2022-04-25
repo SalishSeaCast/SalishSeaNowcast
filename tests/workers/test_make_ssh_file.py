@@ -46,7 +46,7 @@ def config(base_config):
                     tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar'
 
                   coordinates: /SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc
-                  tidal predictions: /SalishSeaCast/SalishSeaNowcast/tidal_predictions/
+                  tidal predictions: /SalishSeaCast/tidal-predictions/
                   neah bay hourly: Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv
                   ssh dir: /results/forcing/sshNeahBay/
                   file template: 'ssh_{:y%Ym%md%d}.nc'
