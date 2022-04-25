@@ -40,6 +40,7 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@github.com:SalishSeaCast/SalishSeaNowcast.git
     $ git clone git@github.com:SalishSeaCast/salishsea-site.git
     $ git clone git@github.com:SalishSeaCast/SS-run-sets.git
+    $ git clone git@github.com:SalishSeaCast/tidal-predictions.git
     $ git clone git@github.com:SalishSeaCast/tides.git
     $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
