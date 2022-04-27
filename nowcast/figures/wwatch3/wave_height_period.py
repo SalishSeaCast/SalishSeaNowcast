@@ -92,7 +92,7 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
         }
     )
     wwatch3_period = slice(
-        str(wwatch3_fields.time.values[0]), str(wwatch3_fields.time.values[-1])
+        str(wwatch3_fields.time.data[0]), str(wwatch3_fields.time.data[-1])
     )
     try:
         obs = moad_tools.observations.get_ndbc_buoy(buoy)
