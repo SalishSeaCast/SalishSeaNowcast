@@ -54,7 +54,7 @@ def make_figure(
     at :kbd:`buoy`.
 
     :arg str buoy: Wave buoy name;
-                   must be a key in :py:obj:`salishsea_tools.places.PLACES`.
+                   must be a key in :py:obj:`moad_tools.places.PLACES`.
 
     :arg str wwatch3_dataset_url: ERDDAP URL for SalishSeaCast WaveWatch3(TM)
                                   NEMO model fields time series dataset.
