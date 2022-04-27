@@ -38,7 +38,6 @@ import moad_tools.places
 import requests
 import xarray
 from pandas.plotting import register_matplotlib_converters
-from retrying import retry
 
 import nowcast.figures.website_theme
 from nowcast.figures import shared
@@ -77,7 +76,7 @@ def make_figure(
 
 
 def _prep_plot_data(buoy, wwatch3_dataset_url):
-    wwatch3_fields = _get_wwatch3_fields(wwatch3_dataset_url)
+    wwatch3_fields = xarray.open_dataset(wwatch3_dataset_url)
     wwatch3 = xarray.Dataset(
         {
             "wave_height": wwatch3_fields.hs.sel(
@@ -114,22 +113,6 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
         # No observations available, but we still want to plot the model results
         obs = None
     return SimpleNamespace(wwatch3=wwatch3, obs=obs)
-
-
-@retry(wait_fixed=2000, stop_max_attempt_number=10)
-def _get_wwatch3_fields(dataset_url):
-    ## TODO: This is a work-around because neither netCDF4 nor xarray are able
-    ##       to load the dataset directly from the URL due to an OpenDAP issue
-    dataset_id = dataset_url.rsplit("/", 1)[1].split(".", 1)[0]
-    wwatch3_fields_file = Path("/tmp").joinpath(dataset_id).with_suffix(".nc")
-    with wwatch3_fields_file.open("wb") as f:
-        resp = requests.get(f"{dataset_url}")
-        f.write(resp.content)
-    try:
-        wwatch3_fields = xarray.open_dataset(wwatch3_fields_file)
-    except OSError:
-        raise ValueError(f"WaveWatch3 fields dataset not found")
-    return wwatch3_fields
 
 
 def _prep_fig_axes(figsize, theme):
