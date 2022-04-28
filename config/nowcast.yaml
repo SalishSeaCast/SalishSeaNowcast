@@ -457,7 +457,7 @@ figures:
     2nd narrows hadcp time series:
       https://salishsea.eos.ubc.ca/erddap/tabledap/ubcVFPA2ndNarrowsCurrent2sV1
     wwatch3 fields:
-      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02.nc?hs,fp
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02
   # Directory in which to find bathymetry and mesh mask files
   grid dir: /SalishSeaCast/grid/
   # Pacific Now-West coastline polygons file
