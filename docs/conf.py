@@ -68,6 +68,11 @@ intersphinx_mapping = {
     "salishseacmd": ("https://salishseacmd.readthedocs.io/en/latest/", None),
 }
 
+linkcheck_ignore = [
+    # Private GitHub repositories that linkcheck will ignore
+    'https://github.com/SalishSeaCast/tidal-predictions',
+]
+
 todo_include_todos = True
 
 autodoc_mock_imports = [
