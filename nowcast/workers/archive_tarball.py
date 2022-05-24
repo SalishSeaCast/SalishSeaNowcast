@@ -17,12 +17,13 @@
 
 
 """SalishSeaCast worker that creates a tarball of a month's run results and
-moved to remote archival storage. Compression is *not* used for the tarball
+moves it to remote archival storage. Compression is *not* used for the tarball
 because the netCDF files that compose most of it are already highly compressed.
 A .index text file containing a list of the files in the tarball is also created
 and moved to the remote storage.
 """
 import argparse
+import functools
 import logging
 import os
 import stat
@@ -30,6 +31,7 @@ import tarfile
 from pathlib import Path
 
 import arrow
+import sysrsync
 from nemo_nowcast import NowcastWorker
 
 NAME = "archive_tarball"
@@ -112,15 +114,23 @@ def archive_tarball(parsed_args, config, *args):
     _create_tarball(tarball, results_path_pattern)
     logger.info(f"creating {tarball.with_suffix('.index')} from {tarball}")
     _create_tarball_index(tarball)
+    dest_dir = Path(config["results tarballs"][dest_host]) / run_type_results.parts[-1]
+    logger.info(f"rsync-ing {tarball} and index to {dest_host}:{dest_dir}/")
+    _rsync_to_remote(tarball, dest_host, dest_dir)
     return {
         "tarball archived": {
             "tarball": os.fspath(tarball),
             "index": os.fspath(tarball.with_suffix(".index")),
+            "destination": f"{dest_host}:{dest_dir}/",
         }
     }
 
 
 def _create_tarball(tarball, results_path_pattern):
+    """
+    :param :py:class:`pathlib.Path` tarball:
+    :param :py:class:`pathlib.Path` results_path_pattern:
+    """
     with tarfile.open(tarball, "w") as tar:
         results_dir = results_path_pattern.parent.parent
         os.chdir(results_dir)
@@ -130,6 +140,9 @@ def _create_tarball(tarball, results_path_pattern):
 
 
 def _create_tarball_index(tarball):
+    """
+    :param :py:class:`pathlib.Path` tarball:
+    """
     with tarball.with_suffix(".index").open("wt") as f:
         with tarfile.open(tarball, "r") as tar:
             for m in tar.getmembers():
@@ -140,6 +153,24 @@ def _create_tarball_index(tarball):
                     f"{mode} {m.gname}/{m.uname} {m.size:>10} "
                     f"{arrow.get(m.mtime).format('YYYY-MM-DD HH:mm')} {name}\n"
                 )
+
+
+def _rsync_to_remote(tarball, dest_host, dest_dir):
+    """
+    :param :py:class:`pathlib.Path` tarball:
+    :param str dest_host:
+    :param :py:class:`pathlib.Path` dest_dir:
+    """
+    rsync = functools.partial(
+        sysrsync.run,
+        destination_ssh=dest_host,
+        destination=os.fspath(dest_dir),
+        options=["-t"],
+    )
+    logger.debug(f"rsync-ing {tarball} to {dest_host}:{dest_dir}/")
+    rsync(source=os.fspath(tarball))
+    logger.debug(f"rsync-ing {tarball.with_suffix('.index')} to {dest_host}:{dest_dir}/")
+    rsync(source=os.fspath(tarball.with_suffix(".index")))
 
 
 if __name__ == "__main__":
