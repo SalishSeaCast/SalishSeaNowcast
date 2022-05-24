@@ -39,9 +39,9 @@ def config(base_config):
             textwrap.dedent(
                 """\
                 results archive:
-                  nowcast: SalishSea/nowcast/
-                  nowcast-green: SalishSea/nowcast-green/
-                  nowcast-agrif: SalishSea/nowcast-agrif/
+                  nowcast: SalishSea/nowcast.201905/
+                  nowcast-green: SalishSea/nowcast-green.201905/
+                  nowcast-agrif: SalishSea/nowcast-agrif.201702/
 
                 results tarballs:
                   temporary tarball dir: ocean/dlatorne/
@@ -126,6 +126,12 @@ class TestConfig:
     def test_results_archive(self, run_type, results_path, prod_config):
         assert prod_config["results archive"][run_type] == results_path
 
+    @pytest.mark.parametrize("dest_host, dest_dir", (
+            ("graham-dtn", "/nearline/rrg-allen/SalishSea/"),
+    ))
+    def test_dest_host_dir(self, dest_host, dest_dir, prod_config):
+        assert prod_config["results tarballs"][dest_host] == dest_dir
+
 
 @pytest.mark.parametrize(
     "run_type",
@@ -193,24 +199,36 @@ class TestArchiveTarball:
 
         monkeypatch.setattr(archive_tarball, "_create_tarball_index", mock_create_tarball_index)
 
+        def mock_rsync_to_remote(tarball, dest_host, dest_dir):
+            pass
+
+        monkeypatch.setattr(archive_tarball, "_rsync_to_remote", mock_rsync_to_remote)
+
         yyyy_mmm = arrow.get("2022-may", "YYYY-MMM")
         parsed_args = SimpleNamespace(run_type="nowcast-green", yyyy_mmm=yyyy_mmm, dest_host="graham-dtn")
         caplog.set_level(logging.INFO)
         checklist = archive_tarball.archive_tarball(parsed_args, config)
         assert caplog.records[0].levelname == "INFO"
         expected = (
-            "creating ocean/dlatorne/nowcast-green-may22.tar from SalishSea/nowcast-green/*may22/"
+            "creating ocean/dlatorne/nowcast-green.201905-may22.tar from "
+            "SalishSea/nowcast-green.201905/*may22/"
         )
         assert caplog.messages[0] == expected
         expected = (
-            "creating ocean/dlatorne/nowcast-green-may22.index from "
-            "ocean/dlatorne/nowcast-green-may22.tar"
+            "creating ocean/dlatorne/nowcast-green.201905-may22.index from "
+            "ocean/dlatorne/nowcast-green.201905-may22.tar"
         )
         assert caplog.messages[1] == expected
+        expected = (
+            "rsync-ing ocean/dlatorne/nowcast-green.201905-may22.tar and index to "
+            "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.201905/"
+        )
+        assert caplog.messages[2] == expected
         expected = {
             "tarball archived": {
-                "tarball": "ocean/dlatorne/nowcast-green-may22.tar",
-                "index": "ocean/dlatorne/nowcast-green-may22.index",
+                "tarball": "ocean/dlatorne/nowcast-green.201905-may22.tar",
+                "index": "ocean/dlatorne/nowcast-green.201905-may22.index",
+                "destination": "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.201905/"
             }
         }
         assert checklist == expected

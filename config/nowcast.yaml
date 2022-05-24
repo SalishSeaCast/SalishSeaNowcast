@@ -363,8 +363,11 @@ results archive:
 # Config for archival storage of month-long tarballs of results
 # on a remote host; e.g. graham:/nearline/
 results tarballs:
-  # Local path with sufficient room to store ~1Tb tarball and index file
+  # Local path with sufficient room to store ~170Gb tarball and index file
   temporary tarball dir: /ocean/dlatorne/
+  # Remote host and path to rsync tarballs to;
+  # results dir stem (e.g. nowcast-green.201905) will be added to path
+  graham-dtn: /nearline/rrg-allen/SalishSea/
 
 
 rolling forecasts:
