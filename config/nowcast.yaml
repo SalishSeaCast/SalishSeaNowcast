@@ -360,6 +360,13 @@ results archive:
     graham-dtn: /nearline/rrg-allen/SalishSea/nowcast-green.201905/
 
 
+# Config for archival storage of month-long tarballs of results
+# on a remote host; e.g. graham:/nearline/
+results tarballs:
+  # Local path with sufficient room to store ~1Tb tarball and index file
+  temporary tarball dir: /ocean/dlatorne/
+
+
 rolling forecasts:
   # Number of days prior to run date to include in forecast dataset
   days from past: 5
@@ -1471,6 +1478,16 @@ message registry:
       success hindcast: hindcast results files split into daily directories
       failure hindcast: hindcast results files splitting into daily directories failed
       crash: split_results worker crashed
+
+    archive_tarball:
+      checklist key: archived tarballs
+      success nowcast: nowcast results tarball archived
+      failure nowcast: nowcast results tarball archiving failed
+      success nowcast-green: nowcast-green results tarball archived
+      failure nowcast-green: nowcast-green results tarball archiving failed
+      success nowcast-agrif: nowcast-agrif results tarball archived
+      failure nowcast-agrif: nowcast-agrif results tarball archiving failed
+      crash: archive_tarball worker crashed
 
     download_wwatch3_results:
       checklist key: WWATCH3 results files
