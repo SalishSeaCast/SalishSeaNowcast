@@ -91,6 +91,7 @@ dependencies:
   - pip:
     - angles
     - python-hglib
+    - sysrsync
 
     # For unit tests
     - pytest-randomly
