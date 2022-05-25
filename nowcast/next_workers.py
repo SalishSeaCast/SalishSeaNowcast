@@ -1406,6 +1406,14 @@ def after_download_results(msg, config, checklist):
                 next_workers[msg.type].append(
                     NextWorker("nowcast.workers.ping_erddap", args=["nowcast-green"])
                 )
+                if arrow.get(run_date).shift(days=+1).day == 1:
+                    yyyymmm = arrow.get(run_date).format("YYYY-MMM").lower()
+                    next_workers[msg.type].append(
+                        NextWorker(
+                            "nowcast.workers.archive_tarball",
+                            args=["nowcast-green", yyyymmm, "graham-dtn"],
+                        )
+                    )
                 return next_workers[msg.type]
         if run_type.startswith("forecast"):
             next_workers[msg.type].append(
