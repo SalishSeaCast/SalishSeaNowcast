@@ -18,6 +18,7 @@
 
 """Unit tests for SalishSeaCast archive_tarball worker.
 """
+import argparse
 import logging
 import textwrap
 from pathlib import Path
@@ -183,6 +184,20 @@ class TestFailure:
         )
         assert caplog.messages[0] == expected
         assert msg_type == f"failure {run_type}"
+
+
+class TestArrowYYYYMMM:
+    """Unit tests for _arrow_yyyy_mmm() function."""
+
+    def test_arrow_yyyy_mmm(self):
+        yyyymmm = archive_tarball._arrow_yyyy_mmm("2022-may")
+        assert yyyymmm == arrow.get("2022-05-01 00:00:00")
+
+    def test_bad_year_month_format(self):
+        with pytest.raises(argparse.ArgumentTypeError) as exc_info:
+            archive_tarball._arrow_yyyy_mmm("2022-05")
+        expected = "unrecognized year-month format: 2022-05 - please use YYYY-MMM"
+        assert exc_info.value.args[0] == expected
 
 
 class TestArchiveTarball:
