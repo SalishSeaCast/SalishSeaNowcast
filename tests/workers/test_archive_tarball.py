@@ -186,7 +186,7 @@ class TestFailure:
 
 
 class TestArchiveTarball:
-    """Unit tests for archive_tarball() function."""
+    """Unit test for archive_tarball() function."""
 
     def test_checklist(self, config, caplog, monkeypatch):
         def mock_create_tarball(tarball, results_path_pattern):
@@ -203,6 +203,11 @@ class TestArchiveTarball:
             pass
 
         monkeypatch.setattr(archive_tarball, "_rsync_to_remote", mock_rsync_to_remote)
+
+        def mock_delete_tmp_files(tarball):
+            pass
+
+        monkeypatch.setattr(archive_tarball, "_delete_tmp_files", mock_delete_tmp_files)
 
         yyyy_mmm = arrow.get("2022-may", "YYYY-MMM")
         parsed_args = SimpleNamespace(run_type="nowcast-green", yyyy_mmm=yyyy_mmm, dest_host="graham-dtn")
