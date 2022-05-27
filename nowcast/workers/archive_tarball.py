@@ -117,6 +117,7 @@ def archive_tarball(parsed_args, config, *args):
     dest_dir = Path(config["results tarballs"][dest_host]) / run_type_results.parts[-1]
     logger.info(f"rsync-ing {tarball} and index to {dest_host}:{dest_dir}/")
     _rsync_to_remote(tarball, dest_host, dest_dir)
+    _delete_tmp_files(tarball)
     return {
         "tarball archived": {
             "tarball": os.fspath(tarball),
@@ -171,6 +172,16 @@ def _rsync_to_remote(tarball, dest_host, dest_dir):
     rsync(source=os.fspath(tarball))
     logger.debug(f"rsync-ing {tarball.with_suffix('.index')} to {dest_host}:{dest_dir}/")
     rsync(source=os.fspath(tarball.with_suffix(".index")))
+
+
+def _delete_tmp_files(tarball):
+    """
+    :param :py:class:`pathlib.Path` tarball:
+    """
+    logger.debug(f"deleting {tarball}")
+    tarball.unlink()
+    logger.debug(f"deleting {tarball.with_suffix('.index')}")
+    tarball.with_suffix('.index').unlink()
 
 
 if __name__ == "__main__":
