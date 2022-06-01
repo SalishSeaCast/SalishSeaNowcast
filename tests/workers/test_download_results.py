@@ -306,7 +306,7 @@ class TestSuccess:
         msg_type = download_results.success(parsed_args)
         assert caplog.records[0].levelname == "INFO"
         assert caplog.messages[0].endswith(f"results files from {host_name} downloaded")
-        assert msg_type == "success {}".format(run_type)
+        assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize(
@@ -333,7 +333,7 @@ class TestFailure:
         assert caplog.messages[0].endswith(
             f"results files download from {host_name} failed"
         )
-        assert msg_type == "failure {}".format(run_type)
+        assert msg_type == f"failure {run_type}"
 
 
 @patch("nowcast.workers.download_results.lib.run_in_subprocess", spec=True)
