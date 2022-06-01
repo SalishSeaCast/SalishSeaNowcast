@@ -26,7 +26,7 @@ In April 2019 the `Ocean Networks Canada`_ private cloud computing facility was 
 :kbd:`arbutus.cloud` runs on `OpenStack`_.
 
 .. _Ocean Networks Canada: https://www.oceannetworks.ca/
-.. _arbutus.cloud: https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud
+.. _arbutus.cloud: https://docs.alliancecan.ca/wiki/Cloud_resources#Arbutus_cloud
 .. _OpenStack: https://www.openstack.org/
 
 The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
@@ -46,7 +46,7 @@ Web Interface
 Initial setup was done via the https://arbutus.cloud.computecanada.ca/ web interface with guidance from the
 `Compute Canada Cloud Quickstart Guide`_ and the `OpenStack End User Guide`_.
 
-.. _Compute Canada Cloud Quickstart Guide: https://docs.computecanada.ca/wiki/Cloud_Quick_Start
+.. _Compute Canada Cloud Quickstart Guide: https://docs.alliancecan.ca/wiki/Cloud_Quick_Start
 .. _OpenStack End User Guide: https://docs.openstack.org/queens/user/
 
 The project (aka tenant) name for the SalishSeaCast system is :kbd:`rrg-allen`.

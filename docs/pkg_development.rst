@@ -46,8 +46,8 @@
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/CI/badge.svg
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CI
     :alt: pytest and test coverage analysis
-.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast
+.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/main/graph/badge.svg
+    :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaNowcast
     :alt: Codecov Testing Coverage Report
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg
       :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CodeQL
@@ -642,7 +642,7 @@ The testing coverage report is uploaded to `codecov.io`_
 .. _repo actions page: https://github.com/SalishSeaCast/SalishSeaNowcast/actions
 .. _repo commits page: https://github.com/SalishSeaCast/SalishSeaNowcast/commits/main
 .. _repo code overview page: https://github.com/SalishSeaCast/SalishSeaNowcast
-.. _codecov.io: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast
+.. _codecov.io: https://app.codecov.io/gh/SalishSeaCast/SalishSeaNowcast
 
 The `GitHub Actions`_ workflow configuration that defines the continuous integration tasks is in the :file:`.github/workflows/pytest-coverage.yaml` file.
 
@@ -687,8 +687,8 @@ License
 The SalishSeaCast NEMO model nowcast system code and documentation are copyright 2013 – present
 by the `SalishSeaCast Project Contributors`_ and The University of British Columbia.
 
-.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
+.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Please see the LICENSE file for details of the license.
