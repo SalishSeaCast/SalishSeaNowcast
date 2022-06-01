@@ -288,6 +288,13 @@ Workers
     :members: main
 
 
+:kbd:`archive_tarball`
+----------------------
+
+.. automodule:: nowcast.workers.archive_tarball
+    :members: main
+
+
 :kbd:`split_results`
 --------------------
 
