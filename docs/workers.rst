@@ -394,6 +394,13 @@ Special Workers
     :members: main
 
 
+:kbd:`rotate_hindcast_logs`
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: nowcast.workers.rotate_hindcast_logs
+    :members: main
+
+
 :kbd:`next_workers` Module
 ==========================
 
