@@ -1608,6 +1608,12 @@ message registry:
       failure: log file rotation failed
       crash: rotate_logs worker crashed
 
+    rotate_hindcast_logs:
+      checklist key: hindcast log rotation
+      success: hindcast log files rotated
+      failure: hindcast log file rotation failed
+      crash: rotate_hindcast_logs worker crashed
+
     launch_remote_worker:
       checklist key: remote worker launch
       success: remote worker launched
