@@ -18,10 +18,9 @@
 
 """SalishSeaCast worker that rotates hindcast processing logs.
 
-Iterate through the nowcast worker publisher logging handlers, calling the
-:py:meth:`~logging.handlers.RotatingFileHandler.doRollover` method on any
-that are instances of :py:class:`logging.handlers.RotatingFileHandler`
-and whose names begin with ``hindcast``.
+Call the :py:meth:`~logging.handlers.RotatingFileHandler.doRollover` method on the
+:py:class:`logging.handlers.RotatingFileHandler` handlers of the ``run_NEMO_hindcast``
+logger.
 
 This worker is intended to be launched from the command-line
 by the nowcast administrator as necessary for maintenance of the hindcast log files
