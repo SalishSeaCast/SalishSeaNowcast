@@ -2092,7 +2092,8 @@ class TestAfterDownloadResults:
         )
         archive_tarball = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["nowcast-green", "2022-may", "graham-dtn"], host="localhost",
+            args=["nowcast-green", "2022-may", "graham-dtn"],
+            host="localhost",
         )
         assert archive_tarball not in workers
 
@@ -2110,7 +2111,8 @@ class TestAfterDownloadResults:
         )
         expected = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["nowcast-green", "2022-may", "graham-dtn"], host="localhost",
+            args=["nowcast-green", "2022-may", "graham-dtn"],
+            host="localhost",
         )
         assert expected in workers
 
@@ -2896,6 +2898,17 @@ class TestAfterRotateLogs:
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_rotate_logs(
             Message("rotate_logs", msg_type), config, checklist
+        )
+        assert workers == []
+
+
+class TestAfterRotateHindcastLogs:
+    """Unit tests for the after_rotate_hindcast_logs function."""
+
+    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_rotate_logs(
+            Message("rotate_hindcast_logs", msg_type), config, checklist
         )
         assert workers == []
 
