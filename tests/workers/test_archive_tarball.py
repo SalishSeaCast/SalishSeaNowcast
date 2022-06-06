@@ -116,20 +116,25 @@ class TestConfig:
         ]
 
     def test_results_tarballs(self, prod_config):
-        assert prod_config["results tarballs"]["temporary tarball dir"] == "/ocean/dlatorne/"
+        assert (
+            prod_config["results tarballs"]["temporary tarball dir"]
+            == "/ocean/dlatorne/"
+        )
 
-    @pytest.mark.parametrize("run_type, results_path", (
-        ("nowcast", "/results/SalishSea/nowcast-blue.201905/"),
-        ("nowcast-green", "/results2/SalishSea/nowcast-green.201905/"),
-        ("nowcast-agrif", "/results/SalishSea/nowcast-agrif.201702/"),
-
-    ))
+    @pytest.mark.parametrize(
+        "run_type, results_path",
+        (
+            ("nowcast", "/results/SalishSea/nowcast-blue.201905/"),
+            ("nowcast-green", "/results2/SalishSea/nowcast-green.201905/"),
+            ("nowcast-agrif", "/results/SalishSea/nowcast-agrif.201702/"),
+        ),
+    )
     def test_results_archive(self, run_type, results_path, prod_config):
         assert prod_config["results archive"][run_type] == results_path
 
-    @pytest.mark.parametrize("dest_host, dest_dir", (
-            ("graham-dtn", "/nearline/rrg-allen/SalishSea/"),
-    ))
+    @pytest.mark.parametrize(
+        "dest_host, dest_dir", (("graham-dtn", "/nearline/rrg-allen/SalishSea/"),)
+    )
     def test_dest_host_dir(self, dest_host, dest_dir, prod_config):
         assert prod_config["results tarballs"][dest_host] == dest_dir
 
@@ -148,7 +153,9 @@ class TestSuccess:
     def test_success(self, run_type, caplog):
         yyyy_mmm = arrow.get("2022-may", "YYYY-MMM")
         dest_host = "graham-dtn"
-        parsed_args = SimpleNamespace(run_type=run_type, yyyy_mmm=yyyy_mmm, dest_host=dest_host)
+        parsed_args = SimpleNamespace(
+            run_type=run_type, yyyy_mmm=yyyy_mmm, dest_host=dest_host
+        )
         caplog.set_level(logging.INFO)
         msg_type = archive_tarball.success(parsed_args)
         assert caplog.records[0].levelname == "INFO"
@@ -174,7 +181,9 @@ class TestFailure:
     def test_failure(self, run_type, caplog):
         yyyy_mmm = arrow.get("2022-may", "YYYY-MMM")
         dest_host = "graham-dtn"
-        parsed_args = SimpleNamespace(run_type=run_type, yyyy_mmm=yyyy_mmm, dest_host=dest_host)
+        parsed_args = SimpleNamespace(
+            run_type=run_type, yyyy_mmm=yyyy_mmm, dest_host=dest_host
+        )
         caplog.set_level(logging.CRITICAL)
         msg_type = archive_tarball.failure(parsed_args)
         assert caplog.records[0].levelname == "CRITICAL"
@@ -212,7 +221,9 @@ class TestArchiveTarball:
         def mock_create_tarball_index(tarball):
             pass
 
-        monkeypatch.setattr(archive_tarball, "_create_tarball_index", mock_create_tarball_index)
+        monkeypatch.setattr(
+            archive_tarball, "_create_tarball_index", mock_create_tarball_index
+        )
 
         def mock_rsync_to_remote(tarball, dest_host, dest_dir):
             pass
@@ -225,7 +236,9 @@ class TestArchiveTarball:
         monkeypatch.setattr(archive_tarball, "_delete_tmp_files", mock_delete_tmp_files)
 
         yyyy_mmm = arrow.get("2022-may", "YYYY-MMM")
-        parsed_args = SimpleNamespace(run_type="nowcast-green", yyyy_mmm=yyyy_mmm, dest_host="graham-dtn")
+        parsed_args = SimpleNamespace(
+            run_type="nowcast-green", yyyy_mmm=yyyy_mmm, dest_host="graham-dtn"
+        )
         caplog.set_level(logging.INFO)
         checklist = archive_tarball.archive_tarball(parsed_args, config)
         assert caplog.records[0].levelname == "INFO"
@@ -248,7 +261,7 @@ class TestArchiveTarball:
             "tarball archived": {
                 "tarball": "ocean/dlatorne/nowcast-green.201905-may22.tar",
                 "index": "ocean/dlatorne/nowcast-green.201905-may22.index",
-                "destination": "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.201905/"
+                "destination": "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.201905/",
             }
         }
         assert checklist == expected

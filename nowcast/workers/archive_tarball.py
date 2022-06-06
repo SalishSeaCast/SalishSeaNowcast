@@ -104,12 +104,12 @@ def failure(parsed_args):
 
 def archive_tarball(parsed_args, config, *args):
     run_type = parsed_args.run_type
-    yyyy_mmm = parsed_args.yyyy_mmm.format('MMMYY').lower()
+    yyyy_mmm = parsed_args.yyyy_mmm.format("MMMYY").lower()
     dest_host = parsed_args.dest_host
     tmp_tarball_dir = Path(config["results tarballs"]["temporary tarball dir"])
     run_type_results = Path(config["results archive"][run_type])
     tarball = tmp_tarball_dir / f"{run_type_results.parts[-1]}-{yyyy_mmm}.tar"
-    results_path_pattern = run_type_results/f"*{yyyy_mmm}"
+    results_path_pattern = run_type_results / f"*{yyyy_mmm}"
     logger.info(f"creating {tarball} from {results_path_pattern}/")
     _create_tarball(tarball, results_path_pattern)
     logger.info(f"creating {tarball.with_suffix('.index')} from {tarball}")
@@ -135,7 +135,9 @@ def _create_tarball(tarball, results_path_pattern):
     with tarfile.open(tarball, "w") as tar:
         results_dir = results_path_pattern.parent.parent
         os.chdir(results_dir)
-        for p in sorted(results_path_pattern.parent.glob(results_path_pattern.parts[-1])):
+        for p in sorted(
+            results_path_pattern.parent.glob(results_path_pattern.parts[-1])
+        ):
             logger.debug(f"adding {p}/ to {tarball}")
             tar.add(p.relative_to(results_dir))
 
@@ -170,7 +172,9 @@ def _rsync_to_remote(tarball, dest_host, dest_dir):
     )
     logger.debug(f"rsync-ing {tarball} to {dest_host}:{dest_dir}/")
     rsync(source=os.fspath(tarball))
-    logger.debug(f"rsync-ing {tarball.with_suffix('.index')} to {dest_host}:{dest_dir}/")
+    logger.debug(
+        f"rsync-ing {tarball.with_suffix('.index')} to {dest_host}:{dest_dir}/"
+    )
     rsync(source=os.fspath(tarball.with_suffix(".index")))
 
 
@@ -181,7 +185,7 @@ def _delete_tmp_files(tarball):
     logger.debug(f"deleting {tarball}")
     tarball.unlink()
     logger.debug(f"deleting {tarball.with_suffix('.index')}")
-    tarball.with_suffix('.index').unlink()
+    tarball.with_suffix(".index").unlink()
 
 
 if __name__ == "__main__":
