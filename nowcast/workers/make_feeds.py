@@ -102,9 +102,7 @@ def _generate_feed(feed, feeds_config, atom_path):
     fg.title(feeds_config["feeds"][feed]["title"])
     fg.id(_build_tag_uri("2015-12-12", feed, utcnow, feeds_config, atom_path))
     fg.language("en-ca")
-    fg.author(
-        name="SalishSeaCast Project", uri=f'https://{feeds_config["domain"]}/'
-    )
+    fg.author(name="SalishSeaCast Project", uri=f'https://{feeds_config["domain"]}/')
     fg.rights(
         f"Copyright 2015 - present by the SalishSeaCast Project "
         f"Contributors and The University of British Columbia"

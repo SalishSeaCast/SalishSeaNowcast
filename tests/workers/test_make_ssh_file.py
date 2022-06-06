@@ -133,10 +133,7 @@ class TestConfig:
             ssh["coordinates"]
             == "/SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc"
         )
-        assert (
-            ssh["tidal predictions"]
-            == "/SalishSeaCast/tidal-predictions/"
-        )
+        assert ssh["tidal predictions"] == "/SalishSeaCast/tidal-predictions/"
         assert (
             ssh["neah bay hourly"]
             == "Neah Bay Hourly_tidal_prediction_30-Dec-2006_31-Dec-2030.csv"

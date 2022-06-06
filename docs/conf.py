@@ -70,7 +70,7 @@ intersphinx_mapping = {
 
 linkcheck_ignore = [
     # Private GitHub repositories that linkcheck will ignore
-    'https://github.com/SalishSeaCast/tidal-predictions',
+    "https://github.com/SalishSeaCast/tidal-predictions",
 ]
 
 todo_include_todos = True
