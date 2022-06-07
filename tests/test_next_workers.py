@@ -2187,6 +2187,28 @@ class TestAfterDownloadResults:
         assert expected in workers
 
 
+class TestAfterArchiveTarball:
+    """Unit tests for the after_archive_tarball function."""
+
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "crash",
+            "success nowcast",
+            "failure nowcast",
+            "success nowcast-green",
+            "failure nowcast-green",
+            "success nowcast-agrif",
+            "failure nowcast-agrif",
+        ],
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_archive_tarball(
+            Message("archive_tarball", msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterMakeCHSCurrentsFile:
     """Unit tests for the after_make_CHS_currents_file function."""
 
