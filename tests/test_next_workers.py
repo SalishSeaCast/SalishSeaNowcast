@@ -18,6 +18,7 @@
 
 """Unit tests for nowcast.next_workers module.
 """
+import inspect
 import textwrap
 from pathlib import Path
 
@@ -120,6 +121,26 @@ def checklist():
     a mock for :py:attr:`nemo_nowcast.manager.NowcastManager.checklist`.
     """
     return {}
+
+
+class TestAfterWorkerFunctions:
+    """Unit test to confirm that all worker modules have a corresponding after_*() function
+    in the next_workers module.
+    """
+
+    def test_all_workers_have_after_functions(self):
+        def worker_modules():
+            for module in Path("../nowcast/workers/").glob("*.py"):
+                if module.name != "__init__.py":
+                    yield module
+
+        after_funcs = {
+            func[0] for func in inspect.getmembers(next_workers, inspect.isfunction)
+        }
+        for module in worker_modules():
+            # if module.stem in {"archive_tarball"}:
+            #     continue
+            assert f"after_{module.stem}" in after_funcs
 
 
 class TestAfterDownloadWeather:
