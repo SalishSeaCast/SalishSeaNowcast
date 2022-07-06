@@ -74,7 +74,7 @@ Jinja2==3.1.1
 joblib==1.1.0
 kiwisolver==1.4.2
 locket==1.0.0
-lxml==4.8.0
+lxml==4.9.1
 lz4==4.0.0
 Mako==1.2.0
 mapclassify==2.4.3
