@@ -90,60 +90,6 @@ class TestConfig:
         nemo_ji_map = prod_config["observations"]["lon/lat to NEMO ji map"]
         assert nemo_ji_map == "/SalishSeaCast/grid/grid_from_lat_lon_mask999.nc"
 
-    def test_TWDP_section(self, prod_config):
-        ferry_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"]
-        assert ferry_config["route name"] == "Tsawwassen - Duke Point"
-        expected = "Mobile Platforms, British Columbia Ferries, Tsawwassen - Duke Point"
-        assert ferry_config["ONC station description"] == expected
-        expected = "{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_METEO_1m_{yyyymmdd}.nc"
-        assert ferry_config["filepath template"] == expected
-
-    def test_TWDP_location_section(self, prod_config):
-        location_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"][
-            "location"
-        ]
-        assert location_config["stations"] == ["TWDP.N1", "TWDP.N2"]
-        assert location_config["device category"] == "NAV"
-        assert location_config["sensors"] == ["longitude", "latitude"]
-        assert location_config["terminals"] == ["Tsawwassen", "Duke Pt."]
-
-    def test_TWDP_devices_section(self, prod_config):
-        devices_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"][
-            "devices"
-        ]
-        assert devices_config["TSG"]["sensors"] == {
-            "temperature": "temperature",
-            "conductivity": "conductivity",
-            "salinity": "salinity",
-        }
-        assert devices_config["OXYSENSOR"]["sensors"] == {
-            "o2_saturation": "oxygen_saturation",
-            "o2_concentration_corrected": "oxygen_corrected",
-            "o2_temperature": "temperature",
-        }
-        assert devices_config["TURBCHLFL"]["sensors"] == {
-            "cdom_fluorescence": "cdom_fluorescence",
-            "chlorophyll": "chlorophyll",
-            "turbidity": "turbidity",
-        }
-        assert devices_config["CO2SENSOR"]["sensors"] == {
-            "co2_partial_pressure": "partial_pressure",
-            "co2_concentration_linearized": "co2",
-        }
-        assert devices_config["TEMPHUMID"]["sensors"] == {
-            "air_temperature": "air_temperature",
-            "relative_humidity": "REL_HUMIDITY",
-        }
-        assert devices_config["BARPRESS"]["sensors"] == {
-            "barometric_pressure": "barometric_pressure",
-        }
-        assert devices_config["PYRANOMETER"]["sensors"] == {
-            "solar_radiation": "solar_radiation",
-        }
-        assert devices_config["PYRGEOMETER"]["sensors"] == {
-            "longwave_radiation": "downward_radiation",
-        }
-
     def test_dest_dir(self, prod_config):
         ferry_data_config = prod_config["observations"]["ferry data"]
         assert ferry_data_config["dest dir"] == "/results/observations/ONC/ferries/"

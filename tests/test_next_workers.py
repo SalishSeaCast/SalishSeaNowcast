@@ -51,9 +51,7 @@ def config(base_config):
                       - SEVIP
                       - USDDL
                   ferry data:
-                    ferries:
-                      TWDP:
-                        route name: Tsawwassen - Duke Point
+                    ferries: {}
                   hadcp data:
                     csv dir: observations/AISDATA/
 
@@ -201,7 +199,6 @@ class TestAfterDownloadWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
-            NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
@@ -287,7 +284,6 @@ class TestAfterCollectWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
-            NextWorker("nowcast.workers.get_onc_ferry", ["TWDP"], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
