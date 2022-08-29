@@ -151,7 +151,7 @@ class TestConfig:
         assert optimum_hindcast["ssh key"] == "SalishSeaNEMO-nowcast_id_rsa"
         assert optimum_hindcast["queue info cmd"] == "/usr/bin/qstat"
         assert optimum_hindcast["users"] == "sallen,dlatorne"
-        assert optimum_hindcast["scratch dir"] == "/scratch/sallen/dlatorne/v201905r/"
+        assert optimum_hindcast["scratch dir"] == "/scratch/sallen/dlatorne/v202111/"
         assert (
             optimum_hindcast["run prep dir"]
             == "/home/sallen/dlatorne/SalishSeaCast/hindcast-sys/runs"

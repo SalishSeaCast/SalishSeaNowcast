@@ -245,7 +245,7 @@ class TestConfig:
                 "hindcast hosts",
                 "optimum-hindcast",
                 "hindcast",
-                "/scratch/sallen/dlatorne/v201905r/",
+                "/scratch/sallen/dlatorne/v202111/",
             ),
             (
                 "hindcast hosts",
