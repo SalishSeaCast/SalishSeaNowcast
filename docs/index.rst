@@ -58,10 +58,13 @@ Results of the model runs can be found on the `SalishSeaCast model results site`
 .. _ERDDAP server: https://salishsea.eos.ubc.ca/erddap/index.html
 
 The system is deployed on a server maintained by the UBC Dept. of Earth, Ocean and Atmospheric Sciences.
-Computing resources to run the NEMO model are provided by `Ocean Networks Canada`_ (cloud) and `Westgrid`_ (HPC).
+Computing resources to run the NEMO model are provided by `Ocean Networks Canada`_ (cloud),
+`UBC Advanced Research Computing`_ (HPC),
+and `Digital Research Alliance of Canada`_ (cloud and HPC).
 
 .. _Ocean Networks Canada: https://www.oceannetworks.ca/
-.. _Westgrid: https://www.westgrid.ca/
+.. _UBC Advanced Research Computing: https://arc.ubc.ca/
+.. _Digital Research Alliance of Canada: https://alliancecan.ca/en
 
 The system consists of long-running message broker,
 log aggregator,
