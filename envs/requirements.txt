@@ -75,7 +75,7 @@ kiwisolver==1.4.3
 locket==1.0.0
 lxml==4.9.1
 lz4==4.0.0
-Mako==1.2.1
+Mako==1.2.2
 mapclassify==2.4.3
 MarkupSafe==2.1.1
 matplotlib==3.5.2
