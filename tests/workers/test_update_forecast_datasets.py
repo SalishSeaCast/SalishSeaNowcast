@@ -19,6 +19,7 @@
 """Unit tests for SalishSeaCast update_forecast_datasets worker.
 """
 import shlex
+import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch
@@ -36,34 +37,36 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-results archive:
-  nowcast: results/nowcast-blue/
-  forecast: results/forecast/
-  forecast2: results/forecast2/
+            textwrap.dedent(
+                """\
+                results archive:
+                  nowcast: results/nowcast-blue/
+                  forecast: results/forecast/
+                  forecast2: results/forecast2/
 
-rolling forecasts:
-  days from past: 5
-  temporary results archives: /tmp/
-  fvcom:
-    most recent forecast dir: opp/fvcom/most_recent_forecast
-  nemo:
-    dest dir: rolling-forecasts/nemo/
-  wwatch3:
-    dest dir: rolling-forecasts/wwatch3/
-    most recent forecast dir: opp/wwatch3/most_recent_forecast
+                rolling forecasts:
+                  days from past: 5
+                  temporary results archives: /tmp/
+                  fvcom:
+                    most recent forecast dir: opp/fvcom/most_recent_forecast
+                  nemo:
+                    dest dir: rolling-forecasts/nemo/
+                  wwatch3:
+                    dest dir: rolling-forecasts/wwatch3/
+                    most recent forecast dir: opp/wwatch3/most_recent_forecast
 
-wave forecasts:
-  results archive:
-    nowcast: opp/wwatch3/nowcast/
-    forecast: opp/wwatch3/forecast/
-    forecast2: opp/wwatch3/forecast2/
+                wave forecasts:
+                  results archive:
+                    nowcast: opp/wwatch3/nowcast/
+                    forecast: opp/wwatch3/forecast/
+                    forecast2: opp/wwatch3/forecast2/
 
-vhfr fvcom runs:
-  results archive:
-    nowcast x2: opp/fvcom/nowcast x2/
-    forecast x2: opp/fvcom/forecast x2/
-"""
+                vhfr fvcom runs:
+                  results archive:
+                    nowcast x2: opp/fvcom/nowcast x2/
+                    forecast x2: opp/fvcom/forecast x2/
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
