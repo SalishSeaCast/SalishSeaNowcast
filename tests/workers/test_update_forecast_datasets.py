@@ -22,7 +22,7 @@ import shlex
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import call, Mock, patch
+from unittest.mock import call, patch
 
 import arrow
 import nemo_nowcast
@@ -73,56 +73,45 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.update_forecast_datasets.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(update_forecast_datasets, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        update_forecast_datasets.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("update_forecast_datasets",)
-        assert "description" in kwargs
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        update_forecast_datasets.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_model_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        update_forecast_datasets.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("model",)
-        assert kwargs["choices"] == {"fvcom", "nemo", "wwatch3"}
-        assert "help" in kwargs
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        update_forecast_datasets.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {"forecast", "forecast2"}
-        assert "help" in kwargs
-
-    def test_add_data_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        update_forecast_datasets.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        update_forecast_datasets.main()
-        args, kwargs = m_worker().run.call_args
-        expected = (
-            update_forecast_datasets.update_forecast_datasets,
-            update_forecast_datasets.success,
-            update_forecast_datasets.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = update_forecast_datasets.main()
+        assert worker.name == "update_forecast_datasets"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that builds a new directory of symlinks to model results files"
         )
-        assert args == expected
+
+    def test_add_model_arg(self, mock_worker):
+        worker = update_forecast_datasets.main()
+        assert worker.cli.parser._actions[3].dest == "model"
+        assert worker.cli.parser._actions[3].choices == {"fvcom", "nemo", "wwatch3"}
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_run_type_arg(self, mock_worker):
+        worker = update_forecast_datasets.main()
+        assert worker.cli.parser._actions[4].dest == "run_type"
+        assert worker.cli.parser._actions[4].choices == {"forecast", "forecast2"}
+        assert worker.cli.parser._actions[4].help
+
+    def test_add_data_date_arg(self, mock_worker, monkeypatch):
+        def mock_now():
+            return arrow.get("2022-10-04 14:50:43")
+
+        monkeypatch.setattr(update_forecast_datasets.arrow, "now", mock_now)
+
+        worker = update_forecast_datasets.main()
+        assert worker.cli.parser._actions[5].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[5].type == expected
+        assert worker.cli.parser._actions[5].default == arrow.get("2022-10-04")
+        assert worker.cli.parser._actions[5].help
 
 
 class TestConfig:

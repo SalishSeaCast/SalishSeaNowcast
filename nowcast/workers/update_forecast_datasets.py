@@ -12,9 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that builds a new directory of symlinks to model
-results files for the rolling forecast datasets and replaces the previous
-rolling forecast directory with the new one.
+"""SalishSeaCast worker that builds a new directory of symlinks to model results files
+for the rolling forecast datasets and replaces the previous rolling forecast directory
+with the new one.
 """
 import logging
 import os
@@ -64,6 +64,7 @@ def main():
         help="Date of the run to update rolling forecast datasets for.",
     )
     worker.run(update_forecast_datasets, success, failure)
+    return worker
 
 
 def success(parsed_args):
