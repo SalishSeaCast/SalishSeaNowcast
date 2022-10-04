@@ -18,6 +18,7 @@ dependencies:
   - pillow
   - sphinx
   - sphinx_rtd_theme
+  - sphinx-notfound-page
 
   - pip:
       - git+https://github.com/43ravens/NEMO_Nowcast.git#egg=nemo_nowcast
