@@ -220,22 +220,50 @@ class TestFailure:
         assert msg_type == f"failure {model} {run_type}"
 
 
-@patch(
-    "nowcast.workers.update_forecast_datasets._symlink_most_recent_forecast",
-    autospec=True,
-)
-@patch(
-    "nowcast.workers.update_forecast_datasets._update_rolling_forecast", autospec=True
-)
 class TestUpdateForecastDatasets:
     """Unit tests for update_forecast_datasets() function."""
+
+    @staticmethod
+    @pytest.fixture
+    def mock_symlink_most_recent_forecast(monkeypatch):
+        def mock_symlink_most_recent_forecast(
+            run_date, most_recent_fcst_dir, model, run_type, config
+        ):
+            pass
+
+        monkeypatch.setattr(
+            update_forecast_datasets,
+            "_symlink_most_recent_forecast",
+            mock_symlink_most_recent_forecast,
+        )
+
+    @staticmethod
+    @pytest.fixture
+    def mock_update_rolling_forecast(monkeypatch):
+        def mock_update_rolling_forecast(
+            run_date, forecast_dir, model, run_type, config
+        ):
+            pass
+
+        monkeypatch.setattr(
+            update_forecast_datasets,
+            "_update_rolling_forecast",
+            mock_update_rolling_forecast,
+        )
 
     @pytest.mark.parametrize(
         "model, run_type",
         [("fvcom", "forecast"), ("wwatch3", "forecast"), ("wwatch3", "forecast2")],
     )
     def test_most_recent_forecast_checklist(
-        self, m_upd_rf, m_symlink_mrf, model, run_type, config, caplog, tmpdir
+        self,
+        mock_update_rolling_forecast,
+        mock_symlink_most_recent_forecast,
+        model,
+        run_type,
+        config,
+        caplog,
+        tmpdir,
     ):
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2018-10-24")
@@ -267,7 +295,14 @@ class TestUpdateForecastDatasets:
         ],
     )
     def test_rolling_forecast_checklist(
-        self, m_upd_rf, m_symlink_mrf, model, run_type, config, caplog, tmpdir
+        self,
+        mock_update_rolling_forecast,
+        mock_symlink_most_recent_forecast,
+        model,
+        run_type,
+        config,
+        caplog,
+        tmpdir,
     ):
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
@@ -293,7 +328,14 @@ class TestUpdateForecastDatasets:
         "model, run_type", [("wwatch3", "forecast"), ("wwatch3", "forecast2")]
     )
     def test_most_recent_and_rolling_forecast_checklist(
-        self, m_upd_rf, m_symlink_mrf, model, run_type, config, caplog, tmpdir
+        self,
+        mock_update_rolling_forecast,
+        mock_symlink_most_recent_forecast,
+        model,
+        run_type,
+        config,
+        caplog,
+        tmpdir,
     ):
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
@@ -428,7 +470,7 @@ class TestUpdateRollingForecast:
     "model, run_type", [("nemo", "forecast"), ("nemo", "forecast2")]
 )
 class TestCreateNewForecastDir:
-    """Unit test for _create_new_forecast_dir() function."""
+    """Unit tests for _create_new_forecast_dir() function."""
 
     def test_new_forecast_dir(self, model, run_type, caplog, tmpdir):
         forecast_dir = tmpdir.ensure_dir(f"rolling-forecasts/{model}")
@@ -438,10 +480,21 @@ class TestCreateNewForecastDir:
         assert new_forecast_dir == Path(f"{forecast_dir}_new")
 
 
+@pytest.fixture
+def mock_extract_1st_forecast_day(monkeypatch):
+    def mock_extract_1st_forecast_day(
+        tmp_forecast_results_archive, run_date, model, config
+    ):
+        pass
+
+    monkeypatch.setattr(
+        update_forecast_datasets,
+        "_extract_1st_forecast_day",
+        mock_extract_1st_forecast_day,
+    )
+
+
 @patch("nowcast.workers.update_forecast_datasets._symlink_results", autospec=True)
-@patch(
-    "nowcast.workers.update_forecast_datasets._extract_1st_forecast_day", autospec=True
-)
 class TestAddPastDaysResults:
     """Unit test for _add_past_days_results() function."""
 
@@ -454,8 +507,8 @@ class TestAddPastDaysResults:
     )
     def test_symlink_nemo_nowcast_days(
         self,
-        m_ex_1st_fcst_day,
         m_symlink_results,
+        mock_extract_1st_forecast_day,
         model,
         run_type,
         run_date,
@@ -506,8 +559,8 @@ class TestAddPastDaysResults:
     )
     def test_symlink_wwatch3_forecast_days(
         self,
-        m_ex_1st_fcst_day,
         m_symlink_results,
+        mock_extract_1st_forecast_day,
         model,
         run_type,
         run_date,
@@ -533,9 +586,6 @@ class TestAddPastDaysResults:
 
 
 @patch("nowcast.workers.update_forecast_datasets._symlink_results")
-@patch(
-    "nowcast.workers.update_forecast_datasets._extract_1st_forecast_day", autospec=True
-)
 class TestAddForecastResults:
     """Unit tests for _add_forecast_results() function."""
 
@@ -560,8 +610,8 @@ class TestAddForecastResults:
     )
     def test_symlink_forecast_run(
         self,
-        m_ex_1st_fcst_day,
         m_symlink_results,
+        mock_extract_1st_forecast_day,
         run_date,
         model,
         run_type,
@@ -584,7 +634,7 @@ class TestAddForecastResults:
         )
 
     def test_wwatch3_symlink_forecast2_run(
-        self, m_ex_1st_fcst_day, m_symlink_results, config, tmpdir
+        self, m_symlink_results, mock_extract_1st_forecast_day, config, tmpdir
     ):
         run_date = arrow.get("2018-01-24")
         model = "wwatch3"
@@ -609,6 +659,10 @@ class TestAddForecastResults:
             run_type,
         )
 
+    @patch(
+        "nowcast.workers.update_forecast_datasets._extract_1st_forecast_day",
+        autospec=True,
+    )
     def test_nemo_forecast2_extract_1st_forecast_day(
         self, m_ex_1st_fcst_day, m_symlink_results, config, tmpdir
     ):
@@ -629,7 +683,7 @@ class TestAddForecastResults:
         )
 
     def test_nemo_symlink_forecast2_run(
-        self, m_ex_1st_fcst_day, m_symlink_results, config, tmpdir
+        self, m_symlink_results, mock_extract_1st_forecast_day, config, tmpdir
     ):
         new_forecast_dir = Path(str(tmpdir.ensure_dir(f"rolling-forecasts/nemo_new")))
         run_date = arrow.get("2018-01-24")
@@ -675,25 +729,30 @@ class TestExtract1stForecastDay:
         )
         assert Path(str(tmp_forecast_results_archive), "25jan18").exists()
 
-    @patch("nowcast.workers.update_forecast_datasets.Path.glob", autospec=True)
     @patch("nowcast.workers.update_forecast_datasets.subprocess.run", autospec=True)
-    def test_nemo_ncks_subprocess(self, m_run, m_glob, config, caplog, tmpdir):
+    def test_nemo_ncks_subprocess(self, m_run, config, caplog, tmpdir, monkeypatch):
+        def mock_glob(path, pattern):
+            return [
+                # A 10min file that we want to operate on
+                Path("results/forecast/24jan18/CampbellRiver.nc"),
+                # A 1hr file that we want to operate on
+                Path(
+                    "results/forecast/24jan18/"
+                    "SalishSea_1h_20180124_20180125_grid_T.nc"
+                ),
+                # Files that we don't want to operate on
+                Path("results/forecast/24jan18/SalishSea_02702160_restart.nc"),
+                Path(
+                    "results/forecast/24jan18/"
+                    "SalishSea_1d_20180124_20180125_grid_T.nc"
+                ),
+            ]
+
+        monkeypatch.setattr(update_forecast_datasets.Path, "glob", mock_glob)
+
         model = "nemo"
         tmp_forecast_results_archive = tmpdir.ensure_dir(f"tmp_{model}_forecast")
         run_date = arrow.get("2018-01-24")
-        m_glob.return_value = [
-            # A 10min file that we want to operate on
-            Path("results/forecast/24jan18/CampbellRiver.nc"),
-            # A 1hr file that we want to operate on
-            Path(
-                "results/forecast/24jan18/" "SalishSea_1h_20180124_20180125_grid_T.nc"
-            ),
-            # Files that we don't want to operate on
-            Path("results/forecast/24jan18/SalishSea_02702160_restart.nc"),
-            Path(
-                "results/forecast/24jan18/" "SalishSea_1d_20180124_20180125_grid_T.nc"
-            ),
-        ]
         update_forecast_datasets._extract_1st_forecast_day(
             Path(str(tmp_forecast_results_archive)), run_date, model, config
         )
@@ -716,16 +775,25 @@ class TestExtract1stForecastDay:
             ),
         ]
 
-    @patch("nowcast.workers.update_forecast_datasets.Path.glob", autospec=True)
     @patch("nowcast.workers.update_forecast_datasets.subprocess.run", autospec=True)
-    def test_wwatch3_ncks_subprocess(self, m_run, m_glob, config, caplog, tmpdir):
+    def test_wwatch3_ncks_subprocess(self, m_run, config, caplog, tmpdir, monkeypatch):
+        def mock_glob(path, pattern):
+            return [
+                Path(
+                    "opp/wwatch3/forecast/11apr18/"
+                    "SoG_ww3_fields_20180410_20180412.nc"
+                ),
+                Path(
+                    "opp/wwatch3/forecast/11apr18/"
+                    "SoG_ww3_points_20180410_20180412.nc"
+                ),
+            ]
+
+        monkeypatch.setattr(update_forecast_datasets.Path, "glob", mock_glob)
+
         model = "wwatch3"
         tmp_forecast_results_archive = tmpdir.ensure_dir(f"tmp_{model}_forecast")
         run_date = arrow.get("2018-04-11")
-        m_glob.return_value = [
-            Path("opp/wwatch3/forecast/11apr18/" "SoG_ww3_fields_20180410_20180412.nc"),
-            Path("opp/wwatch3/forecast/11apr18/" "SoG_ww3_points_20180410_20180412.nc"),
-        ]
         update_forecast_datasets._extract_1st_forecast_day(
             Path(str(tmp_forecast_results_archive)), run_date, model, config
         )
