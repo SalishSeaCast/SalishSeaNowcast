@@ -83,6 +83,7 @@ dependencies:
   # For documentation
   - sphinx
   - sphinx_rtd_theme
+  - sphinx-notfound-page
 
   # For exploration
 #  - ipython

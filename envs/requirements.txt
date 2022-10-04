@@ -48,6 +48,7 @@ distlib==0.3.5
 distributed==2022.9.2
 docutils==0.19
 et-xmlfile==1.1.0
+execnet==1.9.0
 f90nml==1.4.3
 feedgen==0.9.0
 filelock==3.8.0
@@ -90,7 +91,6 @@ numexpr==2.8.3
 numpy==1.23.3
 numpy-indexed==0.3.5
 openpyxl==3.0.10
-PPTools==0.1.0
 packaging==21.3
 pandas==1.5.0
 paramiko==2.11.0
@@ -120,6 +120,7 @@ pyshp==2.3.1
 PySocks==1.7.1
 pytest==7.1.3
 pytest-cov==4.0.0
+pytest-forked==1.4.0
 pytest-randomly==3.12.0
 pytest-xdist==2.5.0
 python-dateutil==2.8.2
@@ -148,6 +149,7 @@ snuggs==1.4.7
 sortedcontainers==2.4.0
 soupsieve==2.3.2.post1
 Sphinx==5.2.3
+sphinx-notfound-page==0.8.3
 sphinx-rtd-theme==0.5.2
 sphinxcontrib-applehelp==1.0.2
 sphinxcontrib-devhelp==1.0.2
