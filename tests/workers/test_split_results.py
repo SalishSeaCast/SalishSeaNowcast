@@ -105,8 +105,8 @@ class TestConfig:
             "nowcast-green": "/results2/SalishSea/nowcast-green.201905/",
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
-                "localhost": "/results2/SalishSea/nowcast-green.201905/",
-                "graham-dtn": "/nearline/rrg-allen/SalishSea/nowcast-green.201905/",
+                "localhost": "/results2/SalishSea/nowcast-green.202111/",
+                "graham-dtn": "/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
             },
         }
         assert prod_config["results archive"].keys() == archives.keys()
