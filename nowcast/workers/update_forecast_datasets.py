@@ -272,9 +272,13 @@ def _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, con
     results_archive = model_params[model]["results archive"]
     forecast_day = model_params[model]["forecast day"]
     for forecast_file in (results_archive / forecast_day).glob("*.nc"):
-        if forecast_file.name.startswith("SalishSea_1d"):
-            continue
-        if forecast_file.name.endswith("restart.nc"):
+        if any(
+            (
+                forecast_file.name.startswith("SalishSea_1d"),
+                forecast_file.name.startswith("VENUS"),
+                forecast_file.name.endswith("restart.nc"),
+            )
+        ):
             continue
         forecast_file_24h = day_dir / forecast_file.name
         forecast_time_intervals = {
@@ -310,6 +314,14 @@ def _symlink_results(
     # Symlink the results files into the destination directory
     ddmmmyy = results_day.format("DDMMMYY").lower()
     for f in (results_archive / ddmmmyy).glob("*.nc"):
+        if any(
+            (
+                f.name.startswith("SalishSea_1d"),
+                f.name.startswith("VENUS"),
+                f.name.endswith("restart.nc"),
+            )
+        ):
+            continue
         (day_dir / f.name).symlink_to(f)
     logger.debug(f"symlinked *.nc files from {results_archive/ddmmmyy} in to {day_dir}")
 

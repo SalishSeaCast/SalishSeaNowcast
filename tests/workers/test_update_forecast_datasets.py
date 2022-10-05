@@ -804,6 +804,36 @@ class TestExtract1stForecastDay:
         ]
 
     @patch("nowcast.workers.update_forecast_datasets.subprocess.run", autospec=True)
+    def test_exclude_VENUS_node_files(self, m_run, config, caplog, tmpdir, monkeypatch):
+        def mock_glob(path, pattern):
+            return [
+                # A 1hr file that we want to operate on
+                Path("results/forecast/04oct22/CHS_currents.nc"),
+                # ONC VENUS node files that we want to exclude
+                Path("results/forecast/04oct22/VENUS_central_gridded.nc"),
+                Path("results/forecast/04oct22/VENUS_delta_gridded.nc"),
+                Path("results/forecast/04oct22/VENUS_east_gridded.nc"),
+            ]
+
+        monkeypatch.setattr(update_forecast_datasets.Path, "glob", mock_glob)
+
+        model = "nemo"
+        tmp_forecast_results_archive = tmpdir.ensure_dir(f"tmp_{model}_forecast")
+        run_date = arrow.get("2022-10-04")
+        update_forecast_datasets._extract_1st_forecast_day(
+            Path(str(tmp_forecast_results_archive)), run_date, model, config
+        )
+        assert m_run.call_args_list == [
+            call(
+                shlex.split(
+                    f"/usr/bin/ncks -d time_counter,0,23 "
+                    f"results/forecast/04oct22/CHS_currents.nc "
+                    f"{tmp_forecast_results_archive}/05oct22/CHS_currents.nc"
+                )
+            ),
+        ]
+
+    @patch("nowcast.workers.update_forecast_datasets.subprocess.run", autospec=True)
     def test_wwatch3_ncks_subprocess(self, m_run, config, caplog, tmpdir, monkeypatch):
         def mock_glob(path, pattern):
             return [
@@ -881,3 +911,29 @@ class TestSymlinkResults:
             run_type,
         )
         assert forecast_dir.join("11nov17", "PointAtkinson.nc").check(link=True)
+
+    @pytest.mark.parametrize(
+        "excluded_file",
+        (
+            "VENUS_central_gridded.nc",
+            "VENUS_delta_gridded.nc",
+            "VENUS_east_gridded.nc",
+            "SalishSea_1d_20221006_20221007_grid_U.nc",
+            "SalishSea_09279360_restart.nc",
+        ),
+    )
+    def test_symlink_exclusions(self, excluded_file, model, run_type, caplog, tmpdir):
+        results_day = arrow.get("2022-10-04")
+        results_archive = tmpdir.ensure_dir(f"results/{run_type}/")
+        results_archive.ensure(f"04oct22/{excluded_file}")
+        forecast_day = arrow.get("2022-10-05")
+        forecast_dir = tmpdir.ensure_dir(f"rolling-forecasts/{model}_new")
+        update_forecast_datasets._symlink_results(
+            Path(str(results_archive)),
+            results_day,
+            Path(str(forecast_dir)),
+            forecast_day,
+            model,
+            run_type,
+        )
+        assert not forecast_dir.join("05oct22", excluded_file).check(link=True)
