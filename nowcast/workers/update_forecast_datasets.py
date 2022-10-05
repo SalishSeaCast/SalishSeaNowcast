@@ -278,7 +278,10 @@ def _extract_1st_forecast_day(tmp_forecast_results_archive, run_date, model, con
             continue
         forecast_file_24h = day_dir / forecast_file.name
         forecast_time_intervals = {
-            "nemo": 24 if forecast_file.name.startswith("SalishSea_1h") else 24 * 6,
+            "nemo": 24
+            if forecast_file.name.startswith("SalishSea_1h")
+            or forecast_file.name.startswith("CHS_currents")
+            else 24 * 6,
             "wwatch3": 24 * 2
             if forecast_file.name.startswith("SoG_ww3_fields")
             else 24 * 6,

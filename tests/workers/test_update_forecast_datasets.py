@@ -776,6 +776,34 @@ class TestExtract1stForecastDay:
         ]
 
     @patch("nowcast.workers.update_forecast_datasets.subprocess.run", autospec=True)
+    def test_issue112(self, m_run, config, caplog, tmpdir, monkeypatch):
+        """Reproduce issue #112 re: Present day missing from ERDDAP depth-averaged currents dataset."""
+
+        def mock_glob(path, pattern):
+            return [
+                # A 1hr file that we want to operate on
+                Path("results/forecast/04oct22/CHS_currents.nc"),
+            ]
+
+        monkeypatch.setattr(update_forecast_datasets.Path, "glob", mock_glob)
+
+        model = "nemo"
+        tmp_forecast_results_archive = tmpdir.ensure_dir(f"tmp_{model}_forecast")
+        run_date = arrow.get("2022-10-04")
+        update_forecast_datasets._extract_1st_forecast_day(
+            Path(str(tmp_forecast_results_archive)), run_date, model, config
+        )
+        assert m_run.call_args_list == [
+            call(
+                shlex.split(
+                    f"/usr/bin/ncks -d time_counter,0,23 "
+                    f"results/forecast/04oct22/CHS_currents.nc "
+                    f"{tmp_forecast_results_archive}/05oct22/CHS_currents.nc"
+                )
+            ),
+        ]
+
+    @patch("nowcast.workers.update_forecast_datasets.subprocess.run", autospec=True)
     def test_wwatch3_ncks_subprocess(self, m_run, config, caplog, tmpdir, monkeypatch):
         def mock_glob(path, pattern):
             return [
