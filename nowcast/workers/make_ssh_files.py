@@ -263,7 +263,7 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
         filepath = os.path.join(save_path, "obs", filename)
         try:
             # Unlink file path in case it exists as a symlink to a fcst/
-            # file created byh upload_forcing worker because there was
+            # file created by upload_forcing worker because there was
             # no obs/ file
             os.unlink(filepath)
         except OSError:
