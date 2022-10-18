@@ -180,21 +180,7 @@ def make_ssh_file(parsed_args, config, *args):
         else:
             checklist[run_type].update({"obs": filepath})
 
-    # Confirm that obs files were created. If not, create them by symlinking to fcst file for date
-    earliest_obs_date = (
-        run_date.shift(days=-4) if run_type == "nowcast" else run_date.shift(days=-5)
-    )
-    obs_dates = arrow.Arrow.range("days", earliest_obs_date, run_date.shift(days=-1))
-    for obs_date in obs_dates:
-        obs_file = config["ssh"]["file template"].format(obs_date.datetime)
-        obs_path = ssh_dir / "obs" / obs_file
-        if not obs_path.exists():
-            fcst_relative_path = Path("..", "fcst", obs_file)
-            obs_path.symlink_to(fcst_relative_path)
-            logger.critical(
-                f"{obs_path} was not created; using {fcst_relative_path} instead via symlink"
-            )
-            checklist[run_type].update({"obs": os.fspath(fcst_relative_path)})
+    _ensure_all_files_created(run_date, run_type, ssh_dir, checklist, config)
 
     if parsed_args.text_file is None:
         _render_plot(fig, ax, config)
@@ -369,6 +355,24 @@ def _save_netcdf(day, tc, surges, forecast_flag, textfile, config, lats, lons):
         pass
     logger.debug(f"saved western open boundary file {filepath}")
     return filepath
+
+
+def _ensure_all_files_created(run_date, run_type, ssh_dir, checklist, config):
+    """Confirm that obs files were created. If not, create them by symlinking to fcst file for date."""
+    earliest_obs_date = (
+        run_date.shift(days=-4) if run_type == "nowcast" else run_date.shift(days=-5)
+    )
+    obs_dates = arrow.Arrow.range("days", earliest_obs_date, run_date.shift(days=-1))
+    for obs_date in obs_dates:
+        obs_file = config["ssh"]["file template"].format(obs_date.datetime)
+        obs_path = ssh_dir / "obs" / obs_file
+        if not obs_path.exists():
+            fcst_relative_path = Path("..", "fcst", obs_file)
+            obs_path.symlink_to(fcst_relative_path)
+            logger.critical(
+                f"{obs_path} was not created; using {fcst_relative_path} instead via symlink"
+            )
+            checklist[run_type].update({"obs": os.fspath(fcst_relative_path)})
 
 
 def _setup_plot():
