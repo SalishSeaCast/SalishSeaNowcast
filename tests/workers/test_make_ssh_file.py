@@ -231,6 +231,15 @@ class TestMakeSshFile:
 
         monkeypatch.setattr(make_ssh_files, "_get_lons_lats", mock_get_lons_lats)
 
+        def mock_ensure_all_files_created(
+            run_date, run_type, ssh_dir, checklist, config
+        ):
+            pass
+
+        monkeypatch.setattr(
+            make_ssh_files, "_ensure_all_files_created", mock_ensure_all_files_created
+        )
+
         def mock_render_plot(fig, ax, config):
             pass
 
@@ -252,3 +261,48 @@ class TestMakeSshFile:
         csv_file = Path(f"etss.{yyyymmdd}.t{forecast}z.csv")
         expected = {run_type: {"csv": os.fspath(ssh_dir / "txt" / csv_file)}}
         assert checklist == expected
+
+
+@pytest.mark.parametrize(
+    "run_type, run_date",
+    (
+        ("nowcast", arrow.get("2022-10-18")),
+        ("forecast2", arrow.get("2022-10-18")),
+    ),
+)
+class TestMakeSshFile:
+    """Unit tests for _ensure_all_files_created() function."""
+
+    def test_ensure_all_files_created(
+        self, run_type, run_date, config, caplog, tmp_path
+    ):
+        ssh_dir = tmp_path / "sshNeahBay"
+        ssh_dir.mkdir()
+        (ssh_dir / "obs").mkdir()
+        (ssh_dir / "fcst").mkdir()
+        obs_filename_tmpl = "ssh_{:y%Ym%md%d}.nc"
+        earliest_obs_date = (
+            run_date.shift(days=-4)
+            if run_type == "nowcast"
+            else run_date.shift(days=-5)
+        )
+        obs_dates = arrow.Arrow.range(
+            "days", earliest_obs_date, run_date.shift(days=-2)
+        )
+        for obs_date in obs_dates:
+            (ssh_dir / "obs" / obs_filename_tmpl.format(obs_date.datetime)).touch()
+        checklist = {run_type: {}}
+        caplog.set_level(logging.DEBUG)
+
+        make_ssh_files._ensure_all_files_created(
+            run_date, run_type, ssh_dir, checklist, config
+        )
+
+        expected_filename = obs_filename_tmpl.format(run_date.shift(days=-1).datetime)
+        expected_path = ssh_dir / "obs" / expected_filename
+        assert expected_path.is_symlink()
+        assert expected_path.resolve() == ssh_dir / "fcst" / expected_filename
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"{expected_path} was not created; using ../fcst/{expected_filename} instead via symlink"
+        assert caplog.messages[0] == expected
+        assert checklist[run_type]["obs"] == f"../fcst/{expected_filename}"
