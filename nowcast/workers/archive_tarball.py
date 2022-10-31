@@ -108,7 +108,11 @@ def archive_tarball(parsed_args, config, *args):
     yyyy_mmm = parsed_args.yyyy_mmm.format("MMMYY").lower()
     dest_host = parsed_args.dest_host
     tmp_tarball_dir = Path(config["results tarballs"]["temporary tarball dir"])
-    run_type_results = Path(config["results archive"][run_type])
+    run_type_results = (
+        Path(config["results archive"]["hindcast"]["localhost"])
+        if run_type == "hindcast"
+        else Path(config["results archive"][run_type])
+    )
     tarball = tmp_tarball_dir / f"{run_type_results.parts[-1]}-{yyyy_mmm}.tar"
     results_path_pattern = run_type_results / f"*{yyyy_mmm}"
     logger.info(f"creating {tarball} from {results_path_pattern}/")
