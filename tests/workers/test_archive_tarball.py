@@ -78,6 +78,7 @@ class TestMain:
             "nowcast",
             "nowcast-green",
             "nowcast-agrif",
+            "hindcast",
         }
         assert worker.cli.parser._actions[3].choices == expected
         assert worker.cli.parser._actions[3].help
@@ -113,6 +114,8 @@ class TestConfig:
             "failure nowcast-green",
             "success nowcast-agrif",
             "failure nowcast-agrif",
+            "success hindcast",
+            "failure hindcast",
             "crash",
         ]
 
@@ -150,6 +153,7 @@ class TestConfig:
         "nowcast",
         "nowcast-green",
         "nowcast-agrif",
+        "hindcast",
     ],
 )
 class TestSuccess:
@@ -178,6 +182,7 @@ class TestSuccess:
         "nowcast",
         "nowcast-green",
         "nowcast-agrif",
+        "hindcast",
     ],
 )
 class TestFailure:
