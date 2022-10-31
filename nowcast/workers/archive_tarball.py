@@ -47,6 +47,7 @@ def main():
             "nowcast",
             "nowcast-green",
             "nowcast-agrif",
+            "hindcast",
         },
         help="Type of run to archive results files from.",
     )

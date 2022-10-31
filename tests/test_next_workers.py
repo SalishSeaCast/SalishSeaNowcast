@@ -2199,6 +2199,8 @@ class TestAfterArchiveTarball:
             "failure nowcast-green",
             "success nowcast-agrif",
             "failure nowcast-agrif",
+            "success hindcast",
+            "failure hindcast",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):

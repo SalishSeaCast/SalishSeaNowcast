@@ -1435,6 +1435,8 @@ message registry:
       failure nowcast-green: nowcast-green results tarball archiving failed
       success nowcast-agrif: nowcast-agrif results tarball archived
       failure nowcast-agrif: nowcast-agrif results tarball archiving failed
+      success hindcast: nowcast results tarball archived
+      failure hindcast: nowcast results tarball archiving failed
       crash: archive_tarball worker crashed
 
     download_wwatch3_results:
