@@ -55,6 +55,9 @@ def config(base_config):
                   hadcp data:
                     csv dir: observations/AISDATA/
 
+                results tarballs:
+                  archive hindcast: True
+
                 run types:
                   nowcast:
                     config name: SalishSeaCast_Blue
@@ -2250,12 +2253,20 @@ class TestAfterMakeCHSCurrentsFile:
 class TestAfterSplitResults:
     """Unit tests for after_split_results function."""
 
-    @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure hindcast", "success hindcast"]
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+    @pytest.mark.parametrize("msg_type", ["crash", "failure hindcast"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist, monkeypatch):
+        monkeypatch.setitem(config["results tarballs"], "archive hindcast", False)
         workers = next_workers.after_split_results(
             Message("split_results", msg_type), config, checklist
+        )
+        assert workers == []
+
+    def test_success_not_archive_hindcast_no_next_workers(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(config["results tarballs"], "archive hindcast", False)
+        workers = next_workers.after_split_results(
+            Message("split_results", "success hindcast"), config, checklist
         )
         assert workers == []
 

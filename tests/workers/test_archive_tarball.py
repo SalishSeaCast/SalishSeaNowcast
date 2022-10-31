@@ -45,6 +45,7 @@ def config(base_config):
                   nowcast-agrif: SalishSea/nowcast-agrif.201702/
 
                 results tarballs:
+                  archive hindcast: True
                   temporary tarball dir: ocean/dlatorne/
                   graham-dtn: /nearline/rrg-allen/SalishSea/
                 """
@@ -116,6 +117,10 @@ class TestConfig:
         ]
 
     def test_results_tarballs(self, prod_config):
+        # Confirm that there is an "archive hindcast" key and that it value is a boolean
+        # Don't confirm a specific value so that we don't have to change this test when we
+        # enable/disable hindcast archiving
+        assert prod_config["results tarballs"]["archive hindcast"] in {True, False}
         assert (
             prod_config["results tarballs"]["temporary tarball dir"]
             == "/ocean/dlatorne/"
