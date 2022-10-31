@@ -1511,6 +1511,9 @@ def after_split_results(msg, config, checklist):
     :returns: Worker(s) to launch next
     :rtype: list
     """
+    if config["results tarballs"]["archive hindcast"]:
+        ## TODO: implement
+        pass
     return []
 
 

@@ -306,6 +306,8 @@ results archive:
 # Config for archival storage of month-long tarballs of results
 # on a remote host; e.g. graham:/nearline/
 results tarballs:
+  # Should hindcast results be archived?
+  archive hindcast: True
   # Local path with sufficient room to store ~170Gb tarball and index file
   temporary tarball dir: /ocean/dlatorne/
   # Remote host and path to rsync tarballs to;
