@@ -43,6 +43,8 @@ def config(base_config):
                   nowcast: SalishSea/nowcast.201905/
                   nowcast-green: SalishSea/nowcast-green.201905/
                   nowcast-agrif: SalishSea/nowcast-agrif.201702/
+                  hindcast:
+                    localhost: SalishSea/nowcast-green.202111/
 
                 results tarballs:
                   archive hindcast: True
@@ -140,6 +142,10 @@ class TestConfig:
     def test_results_archive(self, run_type, results_path, prod_config):
         assert prod_config["results archive"][run_type] == results_path
 
+    def test_hindcast_results_archive(self, prod_config):
+        expected = "/results2/SalishSea/nowcast-green.202111/"
+        assert prod_config["results archive"]["hindcast"]["localhost"] == expected
+
     @pytest.mark.parametrize(
         "dest_host, dest_dir", (("graham-dtn", "/nearline/rrg-allen/SalishSea/"),)
     )
@@ -220,9 +226,9 @@ class TestArrowYYYYMMM:
 
 
 class TestArchiveTarball:
-    """Unit test for archive_tarball() function."""
+    """Unit tests for archive_tarball() function."""
 
-    def test_checklist(self, config, caplog, monkeypatch):
+    def test_checklist_nowcast_green(self, config, caplog, monkeypatch):
         def mock_create_tarball(tarball, results_path_pattern):
             pass
 
@@ -249,7 +255,7 @@ class TestArchiveTarball:
         parsed_args = SimpleNamespace(
             run_type="nowcast-green", yyyy_mmm=yyyy_mmm, dest_host="graham-dtn"
         )
-        caplog.set_level(logging.INFO)
+        caplog.set_level(logging.DEBUG)
         checklist = archive_tarball.archive_tarball(parsed_args, config)
         assert caplog.records[0].levelname == "INFO"
         expected = (
@@ -272,6 +278,60 @@ class TestArchiveTarball:
                 "tarball": "ocean/dlatorne/nowcast-green.201905-may22.tar",
                 "index": "ocean/dlatorne/nowcast-green.201905-may22.index",
                 "destination": "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.201905/",
+            }
+        }
+        assert checklist == expected
+
+    def test_checklist_hindcast(self, config, caplog, monkeypatch):
+        def mock_create_tarball(tarball, results_path_pattern):
+            pass
+
+        monkeypatch.setattr(archive_tarball, "_create_tarball", mock_create_tarball)
+
+        def mock_create_tarball_index(tarball):
+            pass
+
+        monkeypatch.setattr(
+            archive_tarball, "_create_tarball_index", mock_create_tarball_index
+        )
+
+        def mock_rsync_to_remote(tarball, dest_host, dest_dir):
+            pass
+
+        monkeypatch.setattr(archive_tarball, "_rsync_to_remote", mock_rsync_to_remote)
+
+        def mock_delete_tmp_files(tarball):
+            pass
+
+        monkeypatch.setattr(archive_tarball, "_delete_tmp_files", mock_delete_tmp_files)
+
+        yyyy_mmm = arrow.get("2022-oct", "YYYY-MMM")
+        parsed_args = SimpleNamespace(
+            run_type="hindcast", yyyy_mmm=yyyy_mmm, dest_host="graham-dtn"
+        )
+        caplog.set_level(logging.DEBUG)
+        checklist = archive_tarball.archive_tarball(parsed_args, config)
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            "creating ocean/dlatorne/nowcast-green.202111-oct22.tar from "
+            "SalishSea/nowcast-green.202111/*oct22/"
+        )
+        assert caplog.messages[0] == expected
+        expected = (
+            "creating ocean/dlatorne/nowcast-green.202111-oct22.index from "
+            "ocean/dlatorne/nowcast-green.202111-oct22.tar"
+        )
+        assert caplog.messages[1] == expected
+        expected = (
+            "rsync-ing ocean/dlatorne/nowcast-green.202111-oct22.tar and index to "
+            "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.202111/"
+        )
+        assert caplog.messages[2] == expected
+        expected = {
+            "tarball archived": {
+                "tarball": "ocean/dlatorne/nowcast-green.202111-oct22.tar",
+                "index": "ocean/dlatorne/nowcast-green.202111-oct22.index",
+                "destination": "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
             }
         }
         assert checklist == expected
