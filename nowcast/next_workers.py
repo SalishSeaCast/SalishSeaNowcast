@@ -1511,10 +1511,23 @@ def after_split_results(msg, config, checklist):
     :returns: Worker(s) to launch next
     :rtype: list
     """
-    if config["results tarballs"]["archive hindcast"]:
-        ## TODO: implement
-        pass
-    return []
+    next_workers = {
+        "crash": [],
+        "failure hindcast": [],
+        "success hindcast": [],
+    }
+    if msg.type.startswith("success"):
+        if config["results tarballs"]["archive hindcast"]:
+            last_date = max(map(arrow.get, msg.payload))
+            if arrow.get(last_date).shift(days=+1).day == 1:
+                yyyymmm = arrow.get(last_date).format("YYYY-MMM").lower()
+                next_workers[msg.type].append(
+                    NextWorker(
+                        "nowcast.workers.archive_tarball",
+                        args=["hindcast", yyyymmm, "graham-dtn"],
+                    )
+                )
+    return next_workers[msg.type]
 
 
 def after_download_wwatch3_results(msg, config, checklist):
