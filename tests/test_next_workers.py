@@ -2272,6 +2272,53 @@ class TestAfterSplitResults:
         )
         assert workers == []
 
+    def test_success_archive_hindcast_monthend_launch_archive_tarball_hindcast(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(config["results tarballs"], "archive hindcast", True)
+        workers = next_workers.after_split_results(
+            Message(
+                "split_results",
+                "success hindcast",
+                payload={
+                    "2022-10-26",
+                    "2022-10-27",
+                    "2022-10-28",
+                    "2022-10-29",
+                    "2022-10-30",
+                    "2022-10-31",
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.archive_tarball",
+            args=["hindcast", "2022-oct", "graham-dtn"],
+        )
+        assert workers == [expected]
+
+    def test_success_archive_hindcast_not_monthend_launch_archive_tarball_hindcast(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(config["results tarballs"], "archive hindcast", True)
+        workers = next_workers.after_split_results(
+            Message(
+                "split_results",
+                "success hindcast",
+                payload={
+                    "2022-10-21",
+                    "2022-10-21",
+                    "2022-10-23",
+                    "2022-10-24",
+                    "2022-10-25",
+                },
+            ),
+            config,
+            checklist,
+        )
+        assert workers == []
+
 
 class TestAfterDownloadWWatch3Results:
     """Unit tests for the after_download_wwatch3_results function."""
