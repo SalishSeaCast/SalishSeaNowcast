@@ -9,6 +9,7 @@
 #    $ python3 -m pip install --editable NEMO_Nowcast/
 #    $ python3 -m pip install --editable moad_tools/
 #    $ python3 -m pip install --editable tools/SalishSeaTools/
+#    $ python3 -m pip install --editable Reshapr/
 #    $ python3 -m pip install --editable OPPTools/
 #    $ python3 -m pip install --editable NEMO-Cmd/
 #    $ python3 -m pip install --editable SalishSeaCmd/
@@ -27,6 +28,7 @@ dependencies:
   - beautifulsoup4
   - bottleneck
   - cartopy
+  - click
   - cliff
   - cmocean
   - coloredlogs
@@ -34,6 +36,7 @@ dependencies:
   - docutils
   - f90nml
   - feedgen>=0.9.0
+  - flox
   - geopandas
   - gitpython
   - gsw
@@ -59,11 +62,13 @@ dependencies:
   - rasterio
   - requests
   - retrying
+  - rich
   - schedule
   - scipy
   - scour
   - sentry-sdk
   - shapely
+  - structlog
   - supervisor
   - utm
   - verboselogs
@@ -78,7 +83,7 @@ dependencies:
   - pytest-cov
   - tomli
 #  If your machine has enough cores & RAM for distributed testing
-#  - pytest-xdist
+  - pytest-xdist
 
   # For documentation
   - sphinx
