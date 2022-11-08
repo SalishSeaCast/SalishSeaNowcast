@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea nowcast worker that monitors and reports on the
-progress of a WaveWatch3 run on the ONC cloud computing facility.
+"""Salish Sea nowcast worker that monitors and reports on the progress of a WaveWatch3 run
+ on the ONC cloud computing facility.
 """
 import logging
 import os
@@ -39,7 +39,11 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
-    worker.cli.add_argument("host_name", help="Name of the host to monitor the run on")
+    worker.cli.add_argument(
+        "host_name",
+        default="arbutus.cloud-nowcast",
+        help="Name of the host to monitor the run on",
+    )
     worker.cli.add_argument(
         "run_type",
         choices={"nowcast", "forecast", "forecast2"},
@@ -51,6 +55,7 @@ def main():
         """,
     )
     worker.run(watch_ww3, success, failure)
+    return worker
 
 
 def success(parsed_args):

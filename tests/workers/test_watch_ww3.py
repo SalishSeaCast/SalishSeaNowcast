@@ -27,37 +27,36 @@ import pytest
 from nowcast.workers import watch_ww3
 
 
-@patch("nowcast.workers.watch_ww3.NowcastWorker")
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(watch_ww3, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        watch_ww3.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("watch_ww3",)
-        assert list(kwargs.keys()) == ["description"]
+    def test_instantiate_worker(self, mock_worker):
+        worker = watch_ww3.main()
+        assert worker.name == "watch_ww3"
+        assert worker.description.startswith(
+            "Salish Sea nowcast worker that monitors and reports on the progress of a WaveWatch3 run"
+        )
 
-    def test_init_cli(self, m_worker):
-        watch_ww3.main()
-        m_worker().init_cli.assert_called_once_with()
+    def test_add_host_name_arg(self, mock_worker):
+        worker = watch_ww3.main()
+        assert worker.cli.parser._actions[3].dest == "host_name"
+        assert worker.cli.parser._actions[3].default == "arbutus.cloud-nowcast"
+        assert worker.cli.parser._actions[3].help
 
-    def test_add_host_name_arg(self, m_worker):
-        watch_ww3.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("host_name",)
-        assert "help" in kwargs
-
-    def test_add_run_type_arg(self, m_worker):
-        watch_ww3.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {"nowcast", "forecast", "forecast2"}
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        watch_ww3.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (watch_ww3.watch_ww3, watch_ww3.success, watch_ww3.failure)
+    def test_add_run_type_arg(self, mock_worker):
+        worker = watch_ww3.main()
+        assert worker.cli.parser._actions[4].dest == "run_type"
+        assert worker.cli.parser._actions[4].choices == {
+            "nowcast",
+            "forecast",
+            "forecast2",
+        }
+        assert worker.cli.parser._actions[4].help
 
 
 @pytest.mark.parametrize(
