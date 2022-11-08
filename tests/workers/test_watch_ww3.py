@@ -58,6 +58,29 @@ class TestMain:
         assert worker.cli.parser._actions[4].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "watch_ww3" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["watch_ww3"]
+        assert msg_registry["checklist key"] == "WWATCH3 run"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["watch_ww3"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "need",
+            "success forecast2",
+            "failure forecast2",
+            "success nowcast",
+            "failure nowcast",
+            "success forecast",
+            "failure forecast",
+            "crash",
+        ]
+
+
 @pytest.mark.parametrize(
     "run_type, host_name",
     (
