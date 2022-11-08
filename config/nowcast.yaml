@@ -675,7 +675,7 @@ wave forecasts:
   # NEMO run to run wwatch3 forecast run after
   # User 'after forecast' during storm surge season and 'after nowcast-green`
   # the rest of the year
-  run when: after nowcast-green
+  run when: after forecast
   # Directory on compute host where files (e.g. ww3_*.inp,  mod_def.ww3) and
   # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
   # are stored
