@@ -19,9 +19,7 @@
 """Unit tests for Salish Sea nowcast watch_ww3 worker.
 """
 import logging
-import subprocess
 from types import SimpleNamespace
-from unittest.mock import call, patch, Mock
 
 import pytest
 
@@ -106,22 +104,26 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
-@patch("nowcast.workers.watch_ww3.subprocess.run", autospec=True)
 class TestFindRunPid:
     """Unit test for _find_run_pid() function."""
 
-    def test_find_run_pid(self, m_run, caplog):
+    def test_find_run_pid(self, caplog, monkeypatch):
+        def mock_run(cmd, stdout, check, universal_newlines):
+            return SimpleNamespace(stdout="4343")
+
+        monkeypatch.setattr(watch_ww3.subprocess, "run", mock_run)
+
         run_info = {"run exec cmd": "bash SoGWW3.sh"}
-        m_run.return_value = Mock(stdout="4343")
-        watch_ww3._find_run_pid(run_info)
-        assert m_run.call_args_list == [
-            call(
-                ["pgrep", "--newest", "--exact", "--full", "bash SoGWW3.sh"],
-                stdout=subprocess.PIPE,
-                check=True,
-                universal_newlines=True,
-            )
-        ]
+        caplog.set_level(logging.DEBUG)
+
+        pid = watch_ww3._find_run_pid(run_info)
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = (
+            'searching processes with `pgrep --newest --exact --full "bash SoGWW3.sh"`'
+        )
+        assert caplog.messages[0] == expected
+        assert pid == 4343
 
 
 class TestPidExists:
@@ -135,28 +137,41 @@ class TestPidExists:
         with pytest.raises(ValueError):
             watch_ww3._pid_exists(0)
 
-    @patch("nowcast.workers.watch_ww3.os.kill", return_value=None, autospec=True)
-    def test_pid_exists(self, m_kill):
+    def test_pid_exists(self, monkeypatch):
+        def mock_kill(pid, signal):
+            return None
+
+        monkeypatch.setattr(watch_ww3.os, "kill", mock_kill)
+
         pid_exists = watch_ww3._pid_exists(42)
+
         assert pid_exists
 
-    @patch(
-        "nowcast.workers.watch_ww3.os.kill",
-        side_effect=ProcessLookupError,
-        autospec=True,
-    )
-    def test_no_such_pid(self, m_kill):
+    def test_no_such_pid(self, monkeypatch):
+        def mock_kill(pid, signal):
+            raise ProcessLookupError
+
+        monkeypatch.setattr(watch_ww3.os, "kill", mock_kill)
+
         pid_exists = watch_ww3._pid_exists(42)
+
         assert not pid_exists
 
-    @patch(
-        "nowcast.workers.watch_ww3.os.kill", side_effect=PermissionError, autospec=True
-    )
-    def test_pid_permission_error(self, m_kill):
+    def test_pid_permission_error(self, monkeypatch):
+        def mock_kill(pid, signal):
+            raise PermissionError
+
+        monkeypatch.setattr(watch_ww3.os, "kill", mock_kill)
+
         pid_exists = watch_ww3._pid_exists(42)
+
         assert pid_exists
 
-    @patch("nowcast.workers.watch_ww3.os.kill", side_effect=OSError, autospec=True)
-    def test_oserror(self, m_kill):
+    def test_oserror(self, monkeypatch):
+        def mock_kill(pid, signal):
+            raise OSError
+
+        monkeypatch.setattr(watch_ww3.os, "kill", mock_kill)
+
         with pytest.raises(OSError):
             watch_ww3._pid_exists(42)

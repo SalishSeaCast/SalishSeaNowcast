@@ -123,13 +123,16 @@ def watch_ww3(parsed_args, config, tell_manager):
 
 def _find_run_pid(run_info):
     run_exec_cmd = run_info["run exec cmd"]
-    cmd = shlex.split(f'pgrep --newest --exact --full "{run_exec_cmd}"')
-    logger.debug(f'searching processes for "{run_exec_cmd}"')
+    cmd = f'pgrep --newest --exact --full "{run_exec_cmd}"'
+    logger.debug(f"searching processes with `{cmd}`")
     pid = None
     while pid is None:
         try:
             proc = subprocess.run(
-                cmd, stdout=subprocess.PIPE, check=True, universal_newlines=True
+                shlex.split(cmd),
+                stdout=subprocess.PIPE,
+                check=True,
+                universal_newlines=True,
             )
             pid = int(proc.stdout)
         except subprocess.CalledProcessError:
