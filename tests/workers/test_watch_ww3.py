@@ -18,6 +18,7 @@
 
 """Unit tests for Salish Sea nowcast watch_ww3 worker.
 """
+import logging
 import subprocess
 from types import SimpleNamespace
 from unittest.mock import call, patch, Mock
@@ -61,40 +62,55 @@ class TestMain:
 
 @pytest.mark.parametrize(
     "run_type, host_name",
-    [("forecast2", "arbutus.cloud-nowcast"), ("forecast", "arbutus.cloud-nowcast")],
+    (
+        ("nowcast", "arbutus.cloud-nowcast"),
+        ("forecast", "arbutus.cloud-nowcast"),
+        ("forecast2", "arbutus.cloud-nowcast"),
+    ),
 )
-@patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, run_type, host_name):
+    def test_success(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = watch_ww3.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{run_type} WWATCH3 run on {host_name} completed"
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize(
     "run_type, host_name",
-    [("forecast2", "arbutus.cloud-nowcast"), ("forecast", "arbutus.cloud-nowcast")],
+    (
+        ("nowcast", "arbutus.cloud-nowcast"),
+        ("forecast", "arbutus.cloud-nowcast"),
+        ("forecast2", "arbutus.cloud-nowcast"),
+    ),
 )
-@patch("nowcast.workers.watch_ww3.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type, host_name):
+    def test_failure(self, run_type, host_name, caplog):
         parsed_args = SimpleNamespace(host_name=host_name, run_type=run_type)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = watch_ww3.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"{run_type} WWATCH3 run on {host_name} failed"
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {run_type}"
 
 
-@patch("nowcast.workers.watch_ww3.logger", autospec=True)
 @patch("nowcast.workers.watch_ww3.subprocess.run", autospec=True)
 class TestFindRunPid:
     """Unit test for _find_run_pid() function."""
 
-    def test_find_run_pid(self, m_run, m_logger):
+    def test_find_run_pid(self, m_run, caplog):
         run_info = {"run exec cmd": "bash SoGWW3.sh"}
         m_run.return_value = Mock(stdout="4343")
         watch_ww3._find_run_pid(run_info)
