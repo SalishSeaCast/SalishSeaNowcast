@@ -88,6 +88,7 @@ def watch_ww3(parsed_args, config, tell_manager):
             with (run_dir / "log.ww3").open("rt") as f:
                 lines = f.readlines()
             lines.reverse()
+            time_step = 0
             for line in lines:
                 try:
                     time_step = int(line.split()[0])
