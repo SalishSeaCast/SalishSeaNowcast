@@ -1340,6 +1340,17 @@ def after_watch_ww3(msg, config, checklist):
                     host=msg.payload[run_type]["host"],
                 )
             )
+        if run_type == "forecast":
+            wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[
+                1
+            ]
+            if wave_forecast_after == "forecast":
+                next_workers[msg.type].append(
+                    NextWorker(
+                        "nowcast.workers.make_turbidity_file",
+                        args=["--run-date", msg.payload[run_type]["run date"]],
+                    )
+                )
     return next_workers[msg.type]
 
 

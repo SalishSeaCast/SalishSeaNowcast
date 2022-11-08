@@ -124,6 +124,14 @@ def checklist():
     return {}
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to next_workers."""
+
+    def test_wave_forecasts_run_when(self, prod_config):
+        wave_fcsts = prod_config["wave forecasts"]
+        assert wave_fcsts["run when"] == "after forecast"
+
+
 class TestAfterWorkerFunctions:
     """Unit test to confirm that all worker modules have a corresponding after_*() function
     in the next_workers module.
@@ -1916,6 +1924,53 @@ class TestAfterWatchWW3:
                 msg.payload[run_type]["run date"],
             ],
             host="arbutus.cloud",
+        )
+        assert expected in workers
+
+    def test_success_forecast_no_launch_make_turbidity_file(self, config, checklist):
+        """config["wave forcasts"]["run when"] == "after nowcast-green" case"""
+        msg = Message(
+            "watch_ww3",
+            "success forecast",
+            {
+                "forecast": {
+                    "host": "arbutus.cloud",
+                    "run date": "2022-11-08",
+                    "completed": True,
+                }
+            },
+        )
+        workers = next_workers.after_watch_ww3(msg, config, checklist)
+        run_type = msg.type.split()[1]
+        not_expected = NextWorker(
+            "nowcast.workers.make_turbidity_file",
+            args=["--run-date", msg.payload[run_type]["run date"]],
+            host="localhost",
+        )
+        assert not_expected not in workers
+
+    def test_success_forecast_launch_make_turbidity_file(
+        self, config, checklist, monkeypatch
+    ):
+        """config["wave forcasts"]["run when"] == "after forecast" case"""
+        msg = Message(
+            "watch_ww3",
+            "success forecast",
+            {
+                "forecast": {
+                    "host": "arbutus.cloud",
+                    "run date": "2022-11-08",
+                    "completed": True,
+                }
+            },
+        )
+        monkeypatch.setitem(config["wave forecasts"], "run when", "after forecast")
+        workers = next_workers.after_watch_ww3(msg, config, checklist)
+        run_type = msg.type.split()[1]
+        expected = NextWorker(
+            "nowcast.workers.make_turbidity_file",
+            args=["--run-date", msg.payload[run_type]["run date"]],
+            host="localhost",
         )
         assert expected in workers
 
