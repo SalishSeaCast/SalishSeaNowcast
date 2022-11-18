@@ -1,0 +1,37 @@
+# `reshapr extract` config to resample v202111 hour-average biology to day-average
+
+dataset:
+  model profile: SalishSeaCast-202111-salish.yaml
+  time base: hour
+  variables group: biology
+
+dask cluster: salish_cluster.yaml
+
+# Placeholder state/end dates that are overridden by worker's run-date arg
+start date: 2007-01-01
+end date: 2007-01-01
+
+extract variables:
+  - ammonium
+  - biogenic_silicon
+  - diatoms
+  - dissolved_organic_nitrogen
+  - flagellates
+  - mesozooplankton
+  - microzooplankton
+  - nitrate
+  - particulate_organic_nitrogen
+  - silicon
+  - nitrate
+
+resample:
+  time interval: 1D
+  aggregation: mean
+
+extracted dataset:
+  name: SalishSeaCast_1d_biol_T
+  description: Day-averaged biology variables resampled from v202111 SalishSea_1h_*_biol_T.nc
+  deflate: True
+  format: NETCDF4
+  # ddmmmyy/ directory will be appended to dest dir by worker
+  dest dir: /results2/SalishSea/nowcast-green.202111/
