@@ -1,0 +1,30 @@
+# `reshapr extract` config to resample v202111 day-average physics tracers to month-average
+
+dataset:
+  model profile: SalishSeaCast-202111-salish.yaml
+  time base: day
+  variables group: physics tracers
+
+dask cluster: salish_cluster.yaml
+
+# Placeholder state/end dates that are overridden by worker's run-date arg
+start date: 2007-01-01
+end date: 2007-01-31
+
+extract variables:
+  - sossheig
+  - vosaline
+  - votemper
+  - sigma_theta
+  - e3t
+
+resample:
+  time interval: 1M
+  aggregation: mean
+
+extracted dataset:
+  name: SalishSeaCast_1m_grid_T
+  description: Month-averaged physics tracers variables resampled from v202111 SalishSea_1d_*_grid_T.nc
+  deflate: True
+  format: NETCDF4
+  dest dir: /results2/SalishSea/month-avg.202111/

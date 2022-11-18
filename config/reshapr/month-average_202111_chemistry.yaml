@@ -1,0 +1,31 @@
+# `reshapr extract` config to resample v202111 day-average chemistry to month-average
+
+dataset:
+  model profile: SalishSeaCast-202111-salish.yaml
+  time base: day
+  variables group: chemistry
+
+dask cluster: salish_cluster.yaml
+
+# Placeholder state/end dates that are overridden by worker's run-date arg
+start date: 2007-01-01
+end date: 2007-01-31
+
+extract variables:
+  - CO2_flux
+  - dissolved_oxygen
+  - dissolved_inorganic_carbon
+  - PAR
+  - total_alkalinity
+  - turbidity
+
+resample:
+  time interval: 1M
+  aggregation: mean
+
+extracted dataset:
+  name: SalishSeaCast_1m_chem_T
+  description: Month-averaged chemistry variables resampled from v202111 SalishSea_1d_*_chem_T.nc
+  deflate: True
+  format: NETCDF4
+  dest dir: /results2/SalishSea/month-avg.202111/

@@ -1,0 +1,36 @@
+# `reshapr extract` config to resample v202111 day-average biology to month-average
+
+dataset:
+  model profile: SalishSeaCast-202111-salish.yaml
+  time base: day
+  variables group: biology
+
+dask cluster: salish_cluster.yaml
+
+# Placeholder state/end dates that are overridden by worker's run-date arg
+start date: 2007-01-01
+end date: 2007-01-31
+
+extract variables:
+  - ammonium
+  - biogenic_silicon
+  - diatoms
+  - dissolved_organic_nitrogen
+  - flagellates
+  - mesozooplankton
+  - microzooplankton
+  - nitrate
+  - particulate_organic_nitrogen
+  - silicon
+  - nitrate
+
+resample:
+  time interval: 1M
+  aggregation: mean
+
+extracted dataset:
+  name: SalishSeaCast_1m_biol_T
+  description: Month-averaged biology variables resampled from v202111 SalishSea_1d_*_biol_T.nc
+  deflate: True
+  format: NETCDF4
+  dest dir: /results2/SalishSea/month-avg.202111/
