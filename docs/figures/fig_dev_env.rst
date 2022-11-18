@@ -72,6 +72,7 @@ you can create and activate a figures development environment with these command
     $ conda activate nowcast-fig-dev
     (nowcast-fig-dev)$ python3 -m pip install --editable ../NEMO_Nowcast
     (nowcast-fig-dev)$ python3 -m pip install --editable ../moad_tools
+    (nowcast-fig-dev)$ python3 -m pip install --editable ../Reshapr
     (nowcast-fig-dev)$ python3 -m pip install --editable ../tools/SalishSeaTools
     (nowcast-fig-dev)$ python3 -m pip install --editable ../NEMO-Cmd
     (nowcast-fig-dev)$ python3 -m pip install --editable ../SalishSeaCmd

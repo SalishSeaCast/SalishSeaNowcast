@@ -24,6 +24,7 @@ from unittest.mock import patch
 import attr
 import nemo_nowcast
 import pytest
+import structlog
 
 
 @pytest.fixture()
@@ -89,3 +90,21 @@ def mock_nowcast_worker(monkeypatch):
         MockNowcastWorker, "init_cli", nemo_nowcast.NowcastWorker.init_cli
     )
     return MockNowcastWorker
+
+
+@pytest.fixture(name="log_output")
+def fixture_log_output():
+    """Capture structlog log output from Reshapr for testing.
+
+    Reference: https://www.structlog.org/en/stable/testing.html
+    """
+    return structlog.testing.LogCapture()
+
+
+@pytest.fixture(autouse=True)
+def fixture_configure_structlog(log_output):
+    """Configure structlog log capture fixture.
+
+    Reference: https://www.structlog.org/en/stable/testing.html
+    """
+    structlog.configure(processors=[log_output])

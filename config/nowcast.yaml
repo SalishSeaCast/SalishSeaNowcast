@@ -315,6 +315,36 @@ results tarballs:
   graham-dtn: /nearline/rrg-allen/SalishSea/
 
 
+# Config for post-run resampling via Reshapr to create day-averaged and month-averaged
+# results files
+averaged datasets:
+  # Directory where Reshapr extraction/resampling config files are stored
+  reshapr config dir: /SalishSeaCast/SalishSeaNowcast/config/reshapr/
+  # Configs for day-averaged files keyed by variable group
+  day:
+    biology:
+      # Reshapr extraction/resampling config YAML file name
+      reshapr config: day-average_202111_biology.yaml
+      # **Must be quoted to project {} characters**
+      file pattern: "SalishSea_1d_{yyyymmdd}_{yyyymmdd}_biol_T.nc"
+    chemistry:
+      reshapr config: day-average_202111_chemistry.yaml
+      file pattern: "SalishSea_1d_{yyyymmdd}_{yyyymmdd}_chem_T.nc"
+    physics:
+      reshapr config: day-average_202111_physics.yaml
+      file pattern: "SalishSea_1d_{yyyymmdd}_{yyyymmdd}_grid_T.nc"
+  # Configs for month-averaged files keyed by variable group
+  month:
+    biology:
+      reshapr config: month-average_202111_biology.yaml
+      file pattern: "SalishSeaCast_1m_biol_T_{yyyymmdd}_{yyyymmdd}.nc"
+    chemistry:
+      reshapr config: month-average_202111_chemistry.yaml
+      file pattern: "SalishSeaCast_1m_chem_T_{yyyymmdd}_{yyyymmdd}.nc"
+    physics:
+      reshapr config: month-average_202111_physics.yaml
+      file pattern: "SalishSeaCast_1m_grid_T_{yyyymmdd}_{yyyymmdd}.nc"
+
 rolling forecasts:
   # Number of days prior to run date to include in forecast dataset
   days from past: 5
@@ -1426,6 +1456,12 @@ message registry:
       success hindcast: hindcast results files split into daily directories
       failure hindcast: hindcast results files splitting into daily directories failed
       crash: split_results worker crashed
+
+    make_averaged_dataset:
+      checklist key: averaged dataset
+      success: dataset averaged
+      failure: dataset averaging failed
+      crash: make_averaged_dataset worker crashed
 
     archive_tarball:
       checklist key: archived tarballs

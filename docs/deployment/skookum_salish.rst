@@ -114,6 +114,7 @@ For the :kbd:`SalishSeaCast` automation system:
     $ conda activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable NEMO_Nowcast/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable moad_tools/
+    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable Reshapr/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable tools/SalishSeaTools/
     (/SalishSeaCast/nowcast-env)$ cd OPPTools/
     (/SalishSeaCast/nowcast-env)$ git switch SalishSeaCast-prod

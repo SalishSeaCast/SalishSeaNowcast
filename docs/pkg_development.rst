@@ -113,6 +113,7 @@ and building the documentation with the commands below.
 
 * `NEMO_Nowcast`_
 * `moad_tools`_
+* `Reshapr`_
 * :ref:`SalishSeaToolsPackage`
 * `OPPTools`_
 * `NEMO-Cmd`_
@@ -120,6 +121,7 @@ and building the documentation with the commands below.
 * `FVCOM-Cmd`_
 
 .. _moad_tools: https://ubc-moad-tools.readthedocs.io/en/latest/index.html
+.. _Reshapr: https://reshapr.readthedocs.io/en/latest/index.html
 .. _OPPTools: https://gitlab.com/mdunphy/OPPTools
 .. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
 .. _FVCOM-Cmd: https://github.com/SalishSeaCast/FVCOM-Cmd
@@ -132,6 +134,7 @@ you can clone those repos with:
     $ cd SalishSeaNowcast/..
     $ git clone git@github.com:43ravens/NEMO_Nowcast.git
     $ git clone git@github.com:UBC-MOAD/moad_tools.git
+    $ git clone git@github.com:UBC-MOAD/Reshapr.git
     $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
@@ -151,6 +154,7 @@ the commands below install the packages into your :kbd:`salishsea-nowcast` devel
     $ conda activate salishsea-nowcast
     (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO_Nowcast
     (salishsea-nowcast)$ python3 -m pip install --editable ../moad_tools
+    (salishsea-nowcast)$ python3 -m pip install --editable ../Reshapr
     (salishsea-nowcast)$ python3 -m pip install --editable ../tools/SalishSeaTools
     (salishsea-nowcast)$ cd ../OPPTools
     (salishsea-nowcast)$ git switch SalishSeaCast-prod

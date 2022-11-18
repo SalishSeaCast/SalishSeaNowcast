@@ -288,6 +288,13 @@ Workers
     :members: main
 
 
+:kbd:`make_averaged_dataset`
+----------------------------
+
+.. automodule:: nowcast.workers.make_averaged_dataset
+    :members: main
+
+
 :kbd:`archive_tarball`
 ----------------------
 
