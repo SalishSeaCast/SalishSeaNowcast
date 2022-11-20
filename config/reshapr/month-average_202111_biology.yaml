@@ -5,7 +5,7 @@ dataset:
   time base: day
   variables group: biology
 
-dask cluster: salish_cluster.yaml
+dask cluster: tcp://142.103.36.12:4386
 
 # Placeholder state/end dates that are overridden by worker's run-date arg
 start date: 2007-01-01
