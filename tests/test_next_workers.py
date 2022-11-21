@@ -2241,6 +2241,17 @@ class TestAfterDownloadResults:
         assert expected in workers
 
 
+class TestAfterMakeAveragedDataset:
+    """Unit tests for the after_make_averaged_dataset function."""
+
+    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_averaged_dataset(
+            Message("make_averaged_dataset", msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterArchiveTarball:
     """Unit tests for the after_archive_tarball function."""
 
