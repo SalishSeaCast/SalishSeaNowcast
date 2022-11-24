@@ -374,7 +374,13 @@ class TestMakeAveragedDataset:
         assert caplog.records[0].levelname == "INFO"
         expected = f"creating {avg_time_interval}-averaged dataset for 16-Nov-2022 {reshapr_var_group} on test.host"
         assert caplog.messages[0] == expected
-        expected = {"averaged dataset": os.fspath(tmp_path / "16nov22" / nc_filename)}
+        expected = {
+            "2022-11-16": {
+                f"{avg_time_interval} {reshapr_var_group}": os.fspath(
+                    tmp_path / "16nov22" / nc_filename
+                )
+            }
+        }
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -417,7 +423,13 @@ class TestMakeAveragedDataset:
         assert caplog.records[0].levelname == "INFO"
         expected = f"creating {avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} on test.host"
         assert caplog.messages[0] == expected
-        expected = {"averaged dataset": os.fspath(tmp_path / "test_results.nc")}
+        expected = {
+            "2022-11-01": {
+                f"{avg_time_interval} {reshapr_var_group}": os.fspath(
+                    tmp_path / "test_results.nc"
+                )
+            }
+        }
         assert checklist == expected
 
     def test_bad_month_avg_run_date(self, caplog):
