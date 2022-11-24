@@ -29,6 +29,7 @@ import os
 from pathlib import Path
 
 import arrow
+import structlog
 from nemo_nowcast import NowcastWorker, WorkerError
 import reshapr.api.v1.extract
 
@@ -38,12 +39,11 @@ logger = logging.getLogger(NAME)
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.make_averaged_dataset --help`
     """
+    _configure_structlog()
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
@@ -70,6 +70,42 @@ def main():
     )
     worker.run(make_averaged_dataset, success, failure)
     return worker
+
+
+def _configure_structlog():
+    """Configure structlog (used by Reshapr) to pass a formatted log message string
+    to the :py:mod:`logging`.
+
+    ref: https://www.structlog.org/en/latest/standard-library.html#rendering-within-structlog
+    """
+    structlog.configure(
+        processors=[
+            # If log level is too low, abort pipeline and throw away log entry.
+            structlog.stdlib.filter_by_level,
+            # If the "stack_info" key in the event dict is true, remove it and
+            # render the current stack trace in the "stack" key.
+            structlog.processors.StackInfoRenderer(),
+            # If the "exc_info" key in the event dict is either true or a
+            # sys.exc_info() tuple, remove "exc_info" and render the exception
+            # with traceback into the "exception" key.
+            structlog.processors.format_exc_info,
+            # If some value is in bytes, decode it to a unicode str.
+            structlog.processors.UnicodeDecoder(),
+            # Render the final event dict nicely aligned and ordered, but without colours
+            # because we're generally logging to files.
+            structlog.dev.ConsoleRenderer(colors=False),
+        ],
+        # ``wrapper_class`` is the bound logger that you get back from
+        # get_logger(). This one imitates the API of ``logging.Logger``.
+        wrapper_class=structlog.stdlib.BoundLogger,
+        # ``logger_factory`` is used to create wrapped loggers that are used for
+        # OUTPUT. This one returns a ``logging.Logger``. The final value (a string)
+        # from the final processor (``ConsoleRenderer``) will be passed to
+        # the method of the same name as that called on the bound logger.
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        # Effectively freeze configuration after creating the first bound logger.
+        cache_logger_on_first_use=True,
+    )
 
 
 def success(parsed_args):
