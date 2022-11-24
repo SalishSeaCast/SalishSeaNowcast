@@ -1106,7 +1106,11 @@ zmq:
     logging:
       message_broker: 5560
       manager: 5561
-      workers: [5562, 5563, 5564, 5565, 5566, 5567, 5568, 5569, 5570, 5571, 5572, 5573, 5574, 5575, 5576, 5577, 5578, 5579, 5590, 5591, 5592, 5593, 5594]
+      workers: [
+        5562, 5563, 5564, 5565, 5566, 5567, 5568, 5569,
+        5570, 5571, 5572, 5573, 5574, 5575, 5576, 5577, 5578, 5579,
+        5590, 5591, 5592, 5593, 5594
+      ]
     # **host:port pairs in lists must be quoted to protect : characters**
       run_NEMO: ['salish.eos.ubc.ca:5556', '206.12.100.213:5556']
       watch_NEMO: ['salish.eos.ubc.ca:5557', '206.12.100.213:5557']
@@ -1118,6 +1122,16 @@ zmq:
       make_fvcom_rivers_forcing: ['206.12.100.213:5582','206.12.100.213:5583']
       run_fvcom: ['206.12.100.213:5584', '206.12.100.213:5585']
       watch_fvcom: ['206.12.100.213:5586', '206.12.100.213:5587']
+      make_averaged_dataset: [
+        "salish.eos.ubc.ca:5562", "salish.eos.ubc.ca:5563", "salish.eos.ubc.ca:5564",
+        "salish.eos.ubc.ca:5565", "salish.eos.ubc.ca:5566", "salish.eos.ubc.ca:5567",
+        "salish.eos.ubc.ca:5568", "salish.eos.ubc.ca:5569", "salish.eos.ubc.ca:5570",
+        "salish.eos.ubc.ca:5571", "salish.eos.ubc.ca:5572", "salish.eos.ubc.ca:5573",
+        "salish.eos.ubc.ca:5574", "salish.eos.ubc.ca:5575", "salish.eos.ubc.ca:5576",
+        "salish.eos.ubc.ca:5577", "salish.eos.ubc.ca:5578", "salish.eos.ubc.ca:5579",
+        "salish.eos.ubc.ca:5580", "salish.eos.ubc.ca:5581", "salish.eos.ubc.ca:5582",
+        "salish.eos.ubc.ca:5583", "salish.eos.ubc.ca:5584", "salish.eos.ubc.ca:5585",
+      ]
 
 
 message registry:
