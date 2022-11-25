@@ -193,9 +193,9 @@ def make_averaged_dataset(parsed_args, config, *args):
         dest_nc_filename = file_pattern.format(yyyymmdd=run_date.format("YYYYMMDD"))
         nc_path = nc_path.rename(nc_path.with_name(dest_nc_filename))
     return {
-        run_date.format("YYYY-MM-DD"): {
-            f"{avg_time_interval} {reshapr_var_group}": os.fspath(nc_path)
-        }
+        f"{run_date.format('YYYY-MM-DD')} {avg_time_interval} {reshapr_var_group}": os.fspath(
+            nc_path
+        )
     }
 
 

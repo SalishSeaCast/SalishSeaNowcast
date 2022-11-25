@@ -372,14 +372,15 @@ class TestMakeAveragedDataset:
         checklist = make_averaged_dataset.make_averaged_dataset(parsed_args, config)
 
         assert caplog.records[0].levelname == "INFO"
-        expected = f"creating {avg_time_interval}-averaged dataset for 16-Nov-2022 {reshapr_var_group} on test.host"
+        expected = (
+            f"creating {avg_time_interval}-averaged dataset for 16-Nov-2022 "
+            f"{reshapr_var_group} on test.host"
+        )
         assert caplog.messages[0] == expected
         expected = {
-            "2022-11-16": {
-                f"{avg_time_interval} {reshapr_var_group}": os.fspath(
-                    tmp_path / "16nov22" / nc_filename
-                )
-            }
+            f"2022-11-16 {avg_time_interval} {reshapr_var_group}": os.fspath(
+                tmp_path / "16nov22" / nc_filename
+            )
         }
         assert checklist == expected
 
@@ -421,14 +422,15 @@ class TestMakeAveragedDataset:
         checklist = make_averaged_dataset.make_averaged_dataset(parsed_args, config)
 
         assert caplog.records[0].levelname == "INFO"
-        expected = f"creating {avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} on test.host"
+        expected = (
+            f"creating {avg_time_interval}-averaged dataset for Nov-2022 "
+            f"{reshapr_var_group} on test.host"
+        )
         assert caplog.messages[0] == expected
         expected = {
-            "2022-11-01": {
-                f"{avg_time_interval} {reshapr_var_group}": os.fspath(
-                    tmp_path / "test_results.nc"
-                )
-            }
+            f"2022-11-01 {avg_time_interval} {reshapr_var_group}": os.fspath(
+                tmp_path / "test_results.nc"
+            )
         }
         assert checklist == expected
 
