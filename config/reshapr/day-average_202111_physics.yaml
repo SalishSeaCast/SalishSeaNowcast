@@ -25,6 +25,7 @@ resample:
 extracted dataset:
   name: SalishSeaCast_1d_grid_T
   description: Day-averaged physics tracers variables resampled from v202111 SalishSea_1h_*_grid_T.nc
+  use model coords: True
   deflate: True
   format: NETCDF4
   # ddmmmyy/ directory will be appended to dest dir by worker
