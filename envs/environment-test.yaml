@@ -30,7 +30,7 @@ dependencies:
   - gsw
   - lxml
   - mako
-  - matplotlib>=3
+  - matplotlib
   - nc-time-axis
   - netcdf4
   - numpy
