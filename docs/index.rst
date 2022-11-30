@@ -19,7 +19,7 @@
 .. _SalishSeaNowcastSystem:
 
 *******************************************
-SalishSeaCast OCean Model Automation System
+SalishSeaCast Ocean Model Automation System
 *******************************************
 
 The Salish Sea Nowcast system is a software automation system that runs the
