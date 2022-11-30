@@ -42,7 +42,7 @@ colorspacious==1.1.2
 commonmark==0.9.1
 contourpy==1.0.5
 coverage==6.5.0
-cryptography==37.0.4
+cryptography==38.0.3
 cycler==0.11.0
 cytoolz==0.12.0
 dask==2022.10.2
