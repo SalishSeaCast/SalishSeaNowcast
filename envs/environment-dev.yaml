@@ -23,7 +23,7 @@ channels:
   - nodefaults
 
 dependencies:
-  - arrow>=1.0
+  - arrow
   - attrs
   - beautifulsoup4
   - bottleneck
