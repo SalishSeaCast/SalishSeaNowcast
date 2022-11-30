@@ -32,6 +32,7 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ cd /SalishSeaCast/
     $ git clone git@github.com:SalishSeaCast/grid.git
     $ git clone git@github.com:UBC-MOAD/moad_tools.git
+    $ git clone git@github.com:UBC-MOAD/Reshapr.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:43ravens/NEMO_Nowcast.git
     $ git clone git@github.com:SalishSeaCast/private-tools.git
@@ -372,3 +373,55 @@ https://salishsea.eos.ubc.ca/ with:
     $ ln -s /SalishSeaCast/salishsea-site/salishsea_site/static/img/index_page/storm_surge_nowcast.svg
 
     $ mkdir -p /results/nowcast-sys/figures/bloomcast
+
+
+Persistent Dask Cluster for :py:mod:`~nowcast.workers.make_averaged_dataset` Worker
+===================================================================================
+
+The :py:mod:`~nowcast.workers.make_averaged_dataset` worker is launched:
+
+* after every nowcast-green run to down-sample hour-average NEMO results files to day-averaged files
+* after that processing is completed at the end of each month to down-sample day-averaged files
+  to month-averaged files
+
+That means that there are often concurrent instances of the worker.
+Instead of letting each worker instance spin up its own *ad hoc* dask cluster,
+we use a persistent dask cluster on :kbd:`salish` that the worker dispatches tasks to.
+
+Create a ``tmux`` session on :kbd:`salish` for the dask cluster:
+
+.. code-block:: bash
+
+    $ tmux new -s make_averaged_dataset
+
+In the first ``tmux`` terminal,
+activate the :file:`/SalishSeaCast/nowcast-env` environment,
+and launch the :command:`dask-scheduler` with its serving port on 4386,
+and its dashboard port on 4387:
+
+.. code-block:: bash
+
+    $ conda activate /SalishSeaCast/nowcast-env
+    (/SalishSeaCast/nowcast-env)$ dask-scheduler --port 4386 --dashboard-address :4387
+
+Use :kbd:`Control-b ,` to rename the ``tmux`` terminal to ``dask-scheduler``.
+
+Start a second ``tmux`` terminal with :kbd:`Control-b c`,
+activate the :file:`/SalishSeaCast/nowcast-env` environment,
+and launch the 4 :command:`dask-worker` processes with there properties:
+
+* 4 threads per worker
+* memory limit per worker process computed automatically
+* worker files stored on the :file:`/dev/shm` shared memory file system
+* workers restart every 3600 seconds with 60 second random staggering of their restart times
+* workers communicate with the scheduler on port 4386
+
+.. code-block:: bash
+
+    $ conda activate /SalishSeaCast/nowcast-env
+    (/SalishSeaCast/nowcast-env)$ dask-worker --nworkers=4 --nthreads=4 --memory-limit auto \
+                                    --local-directory /dev/shm \
+                                    --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
+                                    localhost:4386
+
+Use :kbd:`Control-b ,` to rename the ``tmux`` terminal to ``dask-workers``.
