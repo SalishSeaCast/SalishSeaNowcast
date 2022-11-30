@@ -63,7 +63,8 @@ Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
 Build XIOS-2
 ============
 
-Symlink the XIOS-2 build configuration files for :kbd:`salish` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
+Symlink the XIOS-2 build configuration files for :kbd:`salish` from the
+:file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
 .. code-block:: bash
 
@@ -124,7 +125,8 @@ For the :kbd:`SalishSeaCast` automation system:
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable SalishSeaCmd/
     (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable SalishSeaNowcast/
 
-For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_:
+For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and
+rivers hydrometric files from the `ECCC MSC datamart service`_:
 
 .. _sarracenia client: https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
 .. _ECCC MSC datamart service: https://dd.weather.gc.ca/
@@ -158,7 +160,9 @@ Environment Variables
 :file:`/SalishSeaCast/nowcast-env`
 ----------------------------------
 
-Add the following files to the :file:`/SalishSeaCast/nowcast-env` environment to automatically :command:`export` the environment variables required by the nowcast system when the environment is activated:
+Add the following files to the :file:`/SalishSeaCast/nowcast-env` environment to
+automatically :command:`export` the environment variables required by the nowcast system
+when the environment is activated:
 
 .. code-block:: bash
 
@@ -201,7 +205,11 @@ and :command:`unset` them when it is deactivated.
 :file:`/SalishSeaCast/sarracenia-env`
 -------------------------------------
 
-The :file:`/SalishSeaCast/sarracenia-env` environment variables are included in the :file:`SalishSeaNowcast/envs/environment-sarracenia.yaml` file so that they are managed by :command:`conda` to automatically :command:`export` the environment variables required by the sarracenia client when the environment is activated and :command:`unset` them when the environment is deactivated.
+The :file:`/SalishSeaCast/sarracenia-env` environment variables are included in the
+:file:`SalishSeaNowcast/envs/environment-sarracenia.yaml` file so that they are managed by
+:command:`conda` to automatically :command:`export` the environment variables required by the
+sarracenia client when the environment is activated and :command:`unset` them when the
+environment is deactivated.
 To see the variables and their values:
 
 .. code-block:: bash
@@ -214,7 +222,9 @@ To see the variables and their values:
 :file:`/SalishSeaCast/salishsea-site-env`
 -----------------------------------------
 
-Add the following files to the :file:`/SalishSeaCast/salishsea-site-env` environment to automatically :command:`export` the environment variables required by the https://salishsea.eos.ubc.ca website app when the environment is activated:
+Add the following files to the :file:`/SalishSeaCast/salishsea-site-env` environment to
+automatically :command:`export` the environment variables required by the
+https://salishsea.eos.ubc.ca website app when the environment is activated:
 
 .. code-block:: bash
 
@@ -245,7 +255,8 @@ and :command:`unset` them when it is deactivated.
 Nowcast Runs Directories
 ========================
 
-On the hosts where the nowcast system NEMO runs will be executed create a :file:`runs/` directory and populate it with:
+On the hosts where the nowcast system NEMO runs will be executed create a
+:file:`runs/` directory and populate it with:
 
 .. code-block:: bash
 
@@ -274,7 +285,8 @@ The hosts and their :file:`runs` directories presently in use are:
 ECCC MSC Datamart Mirror Directories
 ====================================
 
-Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and rivers hydrometric files maintained by the `sarracenia client`_:
+Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and
+rivers hydrometric files maintained by the `sarracenia client`_:
 
 .. code-block:: bash
 
@@ -285,7 +297,8 @@ Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and
 Logging Directories
 ===================
 
-Create directories on :kbd:`skookum` for storage of the nowcast system and `salishsea-site web app`_ log files:
+Create directories on :kbd:`skookum` for storage of the nowcast system and
+`salishsea-site web app`_ log files:
 
 .. code-block:: bash
 
@@ -296,7 +309,8 @@ Create directories on :kbd:`skookum` for storage of the nowcast system and `sali
 Static Web Site Assets Directories
 ==================================
 
-A collection of static file assets for the `salishsea-site web app`_ are stored in the :file:`/results/nowcast-sys/figures/` tree.
+A collection of static file assets for the `salishsea-site web app`_ are stored in the
+:file:`/results/nowcast-sys/figures/` tree.
 Create the that directory,
 and the directories for results visualization figures from the NEMO model runs with:
 
@@ -312,7 +326,8 @@ and the directories for results visualization figures from the NEMO model runs w
     $ mkdir -p /results/nowcast-sys/figures/surface_currents/forecast
     $ mkdir -p /results/nowcast-sys/figures/surface_currents/forecast2
 
-Create directories for results visualization figures from the FVCOM Vancouver Harbour and Lower Fraser River model runs with:
+Create directories for results visualization figures from the
+FVCOM Vancouver Harbour and Lower Fraser River model runs with:
 
 .. code-block:: bash
 
@@ -320,14 +335,16 @@ Create directories for results visualization figures from the FVCOM Vancouver Ha
     $ mkdir -p /results/nowcast-sys/figures/fvcom/nowcast-r12
     $ mkdir -p /results/nowcast-sys/figures/fvcom/nowcast-x2
 
-Create directories for results visualization figures from the WaveWatch III® Strait of Georgia amd Juan de Fuca Strait wave model runs with:
+Create directories for results visualization figures from the
+WaveWatch III® Strait of Georgia amd Juan de Fuca Strait wave model runs with:
 
 .. code-block:: bash
 
     $ mkdir -p /results/nowcast-sys/figures/wwatch3/forecast
     $ mkdir -p /results/nowcast-sys/figures/wwatch3/forecast2
 
-Create a directory for visualization figures generated during preparation of the forcing files for the NEMO model runs with:
+Create a directory for visualization figures generated during preparation of the
+forcing files for the NEMO model runs with:
 
 .. code-block:: bash
 
@@ -340,7 +357,8 @@ Create a directory for storm surge alert ATOM feed with:
     $ mkdir -p /results/nowcast-sys/figures/storm-surge/atom
 
 Finally,
-create a directory and symlinks for the images used on the index page of https://salishsea.eos.ubc.ca/ with:
+create a directory and symlinks for the images used on the index page of
+https://salishsea.eos.ubc.ca/ with:
 
 .. code-block:: bash
 
