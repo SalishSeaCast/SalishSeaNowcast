@@ -70,6 +70,7 @@ dependencies:
   - shapely
   - structlog
   - supervisor
+  - tenacity
   - utm
   - verboselogs
   - watchdog
