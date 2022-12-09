@@ -32,7 +32,8 @@ import arrow
 import structlog
 from nemo_nowcast import NowcastWorker, WorkerError
 import reshapr.api.v1.extract
-
+import xarray
+from tenacity import retry, stop_after_attempt, wait_random, retry_if_exception_type
 
 NAME = "make_averaged_dataset"
 logger = logging.getLogger(NAME)
@@ -186,6 +187,7 @@ def make_averaged_dataset(parsed_args, config, *args):
                 reshapr_config_dir / reshapr_config_yaml, start_date, end_date
             )
     nc_path = reshapr.api.v1.extract.extract_netcdf(reshapr_config, reshapr_config_yaml)
+    nc_path.chmod(0o664)
     if avg_time_interval == "day":
         file_pattern = config["averaged datasets"][avg_time_interval][
             reshapr_var_group
@@ -197,6 +199,31 @@ def make_averaged_dataset(parsed_args, config, *args):
             nc_path
         )
     }
+
+
+@retry(
+    retry=retry_if_exception_type((WorkerError, OSError, RuntimeError)),
+    reraise=True,
+    stop=stop_after_attempt(5),
+    wait=wait_random(min=5, max=10),
+)
+def _extract_netcdf(reshapr_config, reshapr_config_yaml):
+    nc_path = reshapr.api.v1.extract.extract_netcdf(reshapr_config, reshapr_config_yaml)
+    if not nc_path.exists():
+        logger.error(f"reshapr extraction failed for {os.fspath(nc_path)}")
+        raise WorkerError()
+    nc_path_size = nc_path.stat().st_size
+    if nc_path_size < 1_000_000:
+        logger.error(
+            f"reshapr extraction failed: {os.fspath(nc_path)} is too small: {nc_path_size}"
+        )
+        raise WorkerError()
+    try:
+        xarray.open_dataset(nc_path)
+    except OSError as exc:
+        logger.error(exc)
+        raise WorkerError
+    return nc_path
 
 
 if __name__ == "__main__":
