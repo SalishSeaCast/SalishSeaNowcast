@@ -403,7 +403,9 @@ class TestMakeAveragedDataset:
         monkeypatch,
     ):
         def mock_extract_netcdf(reshapr_config, reshapr_config_yaml):
-            return tmp_path / "test_results.nc"
+            nc_path = tmp_path / "test_results.nc"
+            nc_path.write_bytes(b"")
+            return nc_path
 
         monkeypatch.setattr(
             make_averaged_dataset.reshapr.api.v1.extract,
