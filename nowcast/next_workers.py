@@ -1548,23 +1548,6 @@ def after_split_results(msg, config, checklist):
         "success hindcast": [],
     }
     if msg.type.startswith("success"):
-        for run_date in map(arrow.get, msg.payload):
-            next_workers[msg.type].extend(
-                [
-                    NextWorker(
-                        "nowcast.workers.make_averaged_dataset",
-                        args=[
-                            "salish-nowcast",
-                            "day",
-                            var_group,
-                            "--run-date",
-                            run_date.format("YYYY-MM-DD"),
-                        ],
-                        host="salish-nowcast",
-                    )
-                    for var_group in ("biology", "chemistry", "physics")
-                ]
-            )
         if config["results tarballs"]["archive hindcast"]:
             last_date = max(map(arrow.get, msg.payload))
             if arrow.get(last_date).shift(days=+1).day == 1:
