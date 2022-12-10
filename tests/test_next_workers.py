@@ -2329,45 +2329,6 @@ class TestAfterSplitResults:
         )
         assert workers == []
 
-    def test_success_launch_make_averaged_dataset_for_days(
-        self, config, checklist, monkeypatch
-    ):
-        msg = Message(
-            "split_results",
-            "success hindcast",
-            payload={
-                "2022-11-21",
-                "2022-11-22",
-                "2022-11-23",
-                "2022-11-24",
-                "2022-11-25",
-            },
-        )
-        workers = next_workers.after_split_results(
-            msg,
-            config,
-            checklist,
-        )
-        expected = []
-        for run_date in msg.payload:
-            expected.extend(
-                [
-                    NextWorker(
-                        "nowcast.workers.make_averaged_dataset",
-                        args=[
-                            "salish-nowcast",
-                            "day",
-                            var_group,
-                            "--run-date",
-                            arrow.get(run_date).format("YYYY-MM-DD"),
-                        ],
-                        host="salish-nowcast",
-                    )
-                    for var_group in ("biology", "chemistry", "physics")
-                ]
-            )
-        assert workers == expected
-
     def test_success_not_archive_hindcast_notlaunch_archive_tarball_hindcast(
         self, config, checklist, monkeypatch
     ):
@@ -2388,7 +2349,6 @@ class TestAfterSplitResults:
             "nowcast.workers.archive_tarball",
             args=["hindcast", "2022-nov", "graham-dtn"],
         )
-        assert len(workers) == 15
         assert archive_tarball not in workers
 
     def test_success_archive_hindcast_monthend_launch_archive_tarball_hindcast(
@@ -2440,7 +2400,6 @@ class TestAfterSplitResults:
             "nowcast.workers.archive_tarball",
             args=["hindcast", "2022-oct", "graham-dtn"],
         )
-        assert len(workers) == 15
         assert archive_tarball not in workers
 
 
