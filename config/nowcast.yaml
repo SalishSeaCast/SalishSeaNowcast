@@ -1037,6 +1037,27 @@ logging:
         handlers:
           - hindcast_info
           - hindcast_debug
+      split_results:
+        qualname: split_results
+        level: DEBUG
+        propagate: False
+        handlers:
+          - hindcast_info
+          - hindcast_debug
+      make_averaged_dataset:
+        qualname: make_averaged_dataset
+        level: DEBUG
+        propagate: False
+        handlers:
+          - hindcast_info
+          - hindcast_debug
+      reshapr:
+        qualname: reshapr
+        level: DEBUG
+        propagate: False
+        handlers:
+          - hindcast_info
+          - hindcast_debug
       checklist:
         qualname: checklist
         level: INFO
