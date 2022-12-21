@@ -186,7 +186,7 @@ def make_averaged_dataset(parsed_args, config, *args):
             reshapr_config = reshapr.api.v1.extract.load_extraction_config(
                 reshapr_config_dir / reshapr_config_yaml, start_date, end_date
             )
-    nc_path = reshapr.api.v1.extract.extract_netcdf(reshapr_config, reshapr_config_yaml)
+    nc_path = _extract_netcdf(reshapr_config, reshapr_config_yaml)
     nc_path.chmod(0o664)
     if avg_time_interval == "day":
         file_pattern = config["averaged datasets"][avg_time_interval][
