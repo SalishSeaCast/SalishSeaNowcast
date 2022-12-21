@@ -356,8 +356,8 @@ class TestMakeAveragedDataset:
             return nc_path
 
         monkeypatch.setattr(
-            make_averaged_dataset.reshapr.api.v1.extract,
-            "extract_netcdf",
+            make_averaged_dataset,
+            "_extract_netcdf",
             mock_extract_netcdf,
         )
 
@@ -408,8 +408,8 @@ class TestMakeAveragedDataset:
             return nc_path
 
         monkeypatch.setattr(
-            make_averaged_dataset.reshapr.api.v1.extract,
-            "extract_netcdf",
+            make_averaged_dataset,
+            "_extract_netcdf",
             mock_extract_netcdf,
         )
 
