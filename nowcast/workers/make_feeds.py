@@ -248,8 +248,8 @@ def _calc_wind_4h_avg(feed, max_ssh_time, config):
     )
     wind_vector = wind_tools.wind_speed_dir(wind_avg.u, wind_avg.v)
     return {
-        "wind_speed_4h_avg": np.asscalar(wind_vector.speed),
-        "wind_dir_4h_avg": np.asscalar(wind_vector.dir),
+        "wind_speed_4h_avg": wind_vector.speed.item(),
+        "wind_dir_4h_avg": wind_vector.dir.item(),
     }
 
 
