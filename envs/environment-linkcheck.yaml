@@ -1,0 +1,90 @@
+# conda environment description file for SalishSeaNowcast docs Sphinx linkcheck
+# environment
+#
+# Primarily intended for creation of a conda env for use by the GitHub Actions
+# UBC-MOAD sphinx-linkcheck reusable workflow.
+
+name: salishsea-nowcast-linkcheck
+
+channels:
+  - conda-forge
+  - nodefaults
+
+dependencies:
+  - arrow
+  - attrs
+  - beautifulsoup4
+  - bottleneck
+  - cartopy
+  - click
+  - cliff
+  - cmocean
+  - coloredlogs
+  - dask
+  - docutils
+  - f90nml
+  - feedgen>=0.9.0
+  - flox
+  - geopandas
+  - gitpython
+  - gsw
+  - lxml
+  - mako
+  - matplotlib
+  - nc-time-axis
+  - netcdf4
+  - numpy
+  - numpy-indexed
+  - pandas
+  - paramiko
+  - pillow
+  - pip
+  - poppler
+  - pygrib
+  - pypdf2
+  - pyproj
+  - pytables
+  - pyyaml
+  - pyzmq
+  - rasterio
+  - requests
+  - retrying
+  - rich
+  - schedule
+  - scipy
+  - scour
+  - sentry-sdk
+  - shapely
+  - structlog
+  - supervisor
+  - tenacity
+  - utm
+  - verboselogs
+  - watchdog
+  - xarray
+
+  # For unit tests and coverage monitoring
+  - pytest
+  - pytest-cov
+  - tomli
+
+  # For documentation links checking
+  - sphinx
+  - sphinx_rtd_theme
+  - sphinx-notfound-page
+
+  - pip:
+    - angles
+    - python-hglib
+    - pytest-randomly
+    - sysrsync
+
+    # Install MOAD-ish dependencies and SalishSeaNowcast package in editable mode
+    - --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
+    - --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
+    - --editable git+https://github.com/UBC-MOAD/Reshapr#egg=Reshapr
+    - --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
+    - --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
+    - --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
+    - --editable git+https://github.com/SalishSeaCast/FVCOM-Cmd.git#egg=FVCOM-Cmd
+    - --editable ../

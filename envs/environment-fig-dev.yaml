@@ -1,10 +1,10 @@
 # conda environment description file for SalishSeaCast web site figures
 # development environment
 #
-# Create a conda environment for web site figures development and testing with:
+# Create a conda environment for website figures development and testing with:
 #
 #    $ conda env create -f SalishSeaNowcast/envs/environment-fig-dev.yaml
-#    $ source activate nowcast-fig-dev
+#    $ conda activate nowcast-fig-dev
 #    $ python3 -m pip install --editable NEMO_Nowcast/
 #    $ python3 -m pip install --editable moad_tools/
 #    $ python3 -m pip install --editable Reshapr/

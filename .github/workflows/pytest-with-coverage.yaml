@@ -1,28 +1,30 @@
-name: CI
+name: pytest-with-coverage
 
 on:
   push:
     branches: ['*']
 
 jobs:
-  test-coverage:
-    name: pytest & coverage report
-    runs-on: 'ubuntu-latest'
+  pytest-with-coverage:
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
       fail-fast: false
       matrix:
-        python-version: ['3.10']
-
+        python-version: [ '3.10' ]
+    runs-on: 'ubuntu-latest'
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up conda environment
-        uses: conda-incubator/setup-miniconda@v2
+        uses: conda-incubator/setup-miniconda@3b0f2504dd76ef23b6d31f291f4913fb60ab5ff3
         with:
            miniforge-variant: Mambaforge-pypy3
            miniforge-version: latest
            use-mamba: true
-           auto-update-conda: false
+           auto-update-conda: true
            auto-activate-base: false
            channels: conda-forge,nodefaults
            channel-priority: true
@@ -30,7 +32,7 @@ jobs:
            environment-file: envs/environment-test.yaml
            activate-environment: salishsea-nowcast-test
 
-      - name: Install packages
+      - name: Install private OPPTools package from GitLab
         shell: bash -l {0}
         run: |
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
@@ -43,29 +45,13 @@ jobs:
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git@6c784a4dc44dd9030aafe9a8519e5ae0b6cc3183#egg=OPPTools
           python3 -m pip install --editable $GITHUB_WORKSPACE
 
-      - name: show envvars
-        shell: bash -l {0}
-        run: |
-          env
-
       - name: pytest package with coverage
         shell: bash -l {0}
         run: |
           pytest --cov=$GITHUB_WORKSPACE --cov-report=xml
 
-      - uses: 8398a7/action-slack@v3
-        with:
-          status: ${{ job.status }}
-          author_name: Python ${{ matrix.python-version }} pytest & coverage report
-          fields: repo,eventName,ref,workflow
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_SALISHSEACAST_WEBHOOK_URL }}
-        if: always()
-
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           file: ./coverage.xml
           flags: unittests
-        if: always()

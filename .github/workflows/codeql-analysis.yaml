@@ -9,35 +9,14 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
       security-events: write
-
     strategy:
       fail-fast: false
       matrix:
         language: [ 'python' ]
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v2
-      with:
-        languages: ${{ matrix.language }}
-
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
-
-    - name: Push job status to SalishSeaCast Slack
-      uses: 8398a7/action-slack@v3
-      with:
-        status: ${{ job.status }}
-        author_name: CodeQL analysis
-        fields: repo,eventName,ref,workflow
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_SALISHSEACAST_WEBHOOK_URL }}
-      if: always()
+    uses: UBC-MOAD/gha-workflows/.github/workflows/codeql-analysis.yaml@73cd061e7d3c3cabc39cda291cb7bc9b95b7ab35
+    with:
+      language: ${{ matrix.language }}

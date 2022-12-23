@@ -5,7 +5,7 @@
 # of the SalishSeaCast system with:
 #
 #    $ conda env create -f SalishSeaNowcast/envs/environment-dev.yaml
-#    $ source activate salishsea-nowcast
+#    $ conda activate salishsea-nowcast
 #    $ python3 -m pip install --editable NEMO_Nowcast/
 #    $ python3 -m pip install --editable moad_tools/
 #    $ python3 -m pip install --editable tools/SalishSeaTools/
@@ -83,7 +83,6 @@ dependencies:
   - pytest
   - pytest-cov
   - tomli
-#  If your machine has enough cores & RAM for distributed testing
   - pytest-xdist
 
   # For documentation
