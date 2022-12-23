@@ -21,4 +21,6 @@ dependencies:
   - sphinx-notfound-page
 
   - pip:
-      - git+https://github.com/43ravens/NEMO_Nowcast.git#egg=nemo_nowcast
+    # Install NEMO_Nowcast and SalishSeaNowcast packages in editable mode
+    - --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
+    - --editable ../

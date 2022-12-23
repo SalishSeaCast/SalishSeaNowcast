@@ -78,3 +78,14 @@ dependencies:
     - python-hglib
     - pytest-randomly
     - sysrsync
+
+    # Install MOAD-ish dependencies and SalishSeaNowcast package in editable mode
+    - --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
+    - --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
+    - --editable git+https://github.com/UBC-MOAD/Reshapr#egg=Reshapr
+    - --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
+    - --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
+    - --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
+    - --editable git+https://github.com/SalishSeaCast/FVCOM-Cmd.git#egg=FVCOM-Cmd
+    - --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git@6c784a4dc44dd9030aafe9a8519e5ae0b6cc3183#egg=OPPTools
+    - --editable ../
