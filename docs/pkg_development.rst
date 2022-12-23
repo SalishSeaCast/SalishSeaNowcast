@@ -43,14 +43,14 @@
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/sphinx-linkcheck/badge.svg
       :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
       :alt: Sphinx linkcheck
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/CI/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CI
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/pytest-with-coverage/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
     :alt: pytest and test coverage analysis
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/main/graph/badge.svg
     :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaNowcast
     :alt: Codecov Testing Coverage Report
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CodeQL
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3ACodeQL
       :alt: CodeQL analysis
 .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues
@@ -275,7 +275,7 @@ Link Checking the Documentation
 -------------------------------
 
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/sphinx-linkcheck/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Asphinx-linkcheck
       :alt: Sphinx linkcheck
 
 
@@ -341,7 +341,7 @@ The output looks something like::
   (line   75) ok        http://supervisord.org/running.html#running-supervisorctl
   (line   32) ok        https://dd.weather.gc.ca/
   (line   95) ok        https://dd.weather.gc.ca/
-  (line  119) ok        https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow:deployment
+  (line  119) ok        https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow%3Adeployment
   (line   95) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
   (line   95) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
   (line   32) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
@@ -422,8 +422,8 @@ The output looks something like::
   (line  525) ok        https://coverage.readthedocs.io/en/latest/
   (line  525) ok        https://pytest-cov.readthedocs.io/en/latest/
   (line  115) ok        https://github.com/SalishSeaCast/FVCOM-Cmd
-  (line  550) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3ACI
-  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3ACI
+  (line  550) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
+  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
   (line  567) ok        https://docs.github.com/en/free-pro-team@latest/actions
   (line  581) ok        https://git-scm.com/
   (line  262) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/issues/19
@@ -432,7 +432,7 @@ The output looks something like::
   (line   20) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (line   20) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   20) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
-  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/CI/badge.svg
+  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/pytest-with-coverage/badge.svg
   (line   20) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
   (line  556) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions
   (line  203) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
@@ -506,7 +506,7 @@ The output looks something like::
 
 :command:`make linkcheck` is run monthly via a `scheduled GitHub Actions workflow`_
 
-.. _scheduled GitHub Actions workflow: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
+.. _scheduled GitHub Actions workflow: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Asphinx-linkcheck
 
 
 .. _SalishSeaNowcastRunningTheUnitTests:
@@ -633,8 +633,8 @@ to produce an HTML report that you can view in your browser by opening :file:`Sa
 Continuous Integration
 ----------------------
 
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/CI/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CI
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/pytest-with-coverage/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
     :alt: GitHub Workflow Status
 
 The :kbd:`SalishSeaNowcast` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.

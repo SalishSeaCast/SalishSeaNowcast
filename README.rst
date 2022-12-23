@@ -23,16 +23,16 @@ SalishSeaNowcast
     :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/sphinx-linkcheck/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Asphinx-linkcheck
       :alt: Sphinx linkcheck
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/CI/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3ACI
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/pytest-with-coverage/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
     :alt: pytest and test coverage analysis
 .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
     :target: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast
     :alt: Codecov Testing Coverage Report
 .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CodeQL
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3ACodeQL
       :alt: CodeQL analysis
 .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues

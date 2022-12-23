@@ -1,0 +1,20 @@
+name: pytest-with-coverage
+
+on:
+  push:
+    branches: ['*']
+
+jobs:
+  pytest-with-coverage:
+    permissions:
+      contents: read
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ '3.11' ]
+    uses: UBC-MOAD/gha-workflows/.github/workflows/pytest-with-coverage.yaml@73cd061e7d3c3cabc39cda291cb7bc9b95b7ab35
+    with:
+      python-version: ${{ matrix.python-version }}
+      conda-env-file: envs/environment-test.yaml
+      conda-env-name: salishsea-nowcast-test
