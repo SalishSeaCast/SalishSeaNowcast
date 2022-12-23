@@ -80,11 +80,11 @@ dependencies:
     - sysrsync
 
     # Install MOAD-ish dependencies and SalishSeaNowcast package in editable mode
-    - --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
-    - --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
-    - --editable git+https://github.com/UBC-MOAD/Reshapr#egg=Reshapr
-    - --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
-    - --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
-    - --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
-    - --editable git+https://github.com/SalishSeaCast/FVCOM-Cmd.git#egg=FVCOM-Cmd
+    - --editable --src $GITHUB_WORKSPACE/../vcs_pkgs/ git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
+    - --editable --src $GITHUB_WORKSPACE/../vcs_pkgs/ git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
+    - --editable --src $GITHUB_WORKSPACE/../vcs_pkgs/ git+https://github.com/UBC-MOAD/Reshapr#egg=Reshapr
+    - --editable --src $GITHUB_WORKSPACE/../vcs_pkgs/ git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
+    - --editable --src $GITHUB_WORKSPACE/../vcs_pkgs/ git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
+    - --editable --src $GITHUB_WORKSPACE/../vcs_pkgs/ "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
+    - --editable --src $GITHUB_WORKSPACE/../vcs_pkgs/ git+https://github.com/SalishSeaCast/FVCOM-Cmd.git#egg=FVCOM-Cmd
     - --editable ../
