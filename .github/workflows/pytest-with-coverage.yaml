@@ -13,9 +13,37 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ '3.10' ]
-    uses: UBC-MOAD/gha-workflows/.github/workflows/pytest-with-coverage.yaml@73cd061e7d3c3cabc39cda291cb7bc9b95b7ab35
-    with:
-      python-version: ${{ matrix.python-version }}
-      conda-env-file: envs/environment-test.yaml
-      conda-env-name: salishsea-nowcast-test
-    secrets: inherit
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up conda environment
+        uses: conda-incubator/setup-miniconda@3b0f2504dd76ef23b6d31f291f4913fb60ab5ff3
+        with:
+           miniforge-variant: Mambaforge-pypy3
+           miniforge-version: latest
+           use-mamba: true
+           auto-update-conda: true
+           auto-activate-base: false
+           channels: conda-forge,nodefaults
+           channel-priority: true
+           python-version: ${{ matrix.python-version }}
+           environment-file: envs/environment-test.yaml
+           activate-environment: salishsea-nowcast-test
+
+      - name: Install private OPPTools package from GitLab
+        shell: bash -l {0}
+        run: |
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git@6c784a4dc44dd9030aafe9a8519e5ae0b6cc3183#egg=OPPTools
+
+      - name: pytest package with coverage
+        shell: bash -l {0}
+        run: |
+          pytest --cov=$GITHUB_WORKSPACE --cov-report=xml
+
+      - name: Upload coverage report to Codecov
+        uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
+        with:
+          file: ./coverage.xml
+          flags: unittests
