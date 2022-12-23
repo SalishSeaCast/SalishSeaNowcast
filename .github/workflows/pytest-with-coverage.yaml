@@ -18,3 +18,4 @@ jobs:
       python-version: ${{ matrix.python-version }}
       conda-env-file: envs/environment-test.yaml
       conda-env-name: salishsea-nowcast-test
+    secrets: inherit
