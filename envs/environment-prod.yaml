@@ -5,7 +5,7 @@
 # of the SalishSeaCast system with:
 #
 #    $ conda env create -f SalishSeaNowcast/envs/environment-prod.yaml
-#    $ source activate nowcast-env
+#    $ conda activate nowcast-env
 #    $ python3 -m pip install --editable NEMO_Nowcast/
 #    $ python3 -m pip install --editable moad_tools/
 #    $ python3 -m pip install --editable tools/SalishSeaTools/
