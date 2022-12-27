@@ -147,7 +147,7 @@ scikit-learn==1.1.2
 scipy==1.9.3
 scour==0.38.2
 sentry-sdk==1.11.1
-setuptools==65.5.1
+setuptools==65.6.3
 Shapely==1.8.5.post1
 sip==6.6.2
 six==1.16.0
@@ -187,7 +187,7 @@ verboselogs==1.7
 virtualenv==20.16.5
 watchdog==2.1.9
 wcwidth==0.2.5
-wheel==0.38.1
+wheel==0.38.4
 xarray==2022.11.0
 xyzservices==2022.9.0
 zeep==4.1.0
