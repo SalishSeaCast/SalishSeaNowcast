@@ -100,6 +100,7 @@ rivers:
     Fraser: 08MF005
     HomathkoMouth: 08GD004
     NicomeklLangley: 08MH155
+    RobertsCreek: 08GA047
     SalmonSayward: 08HD006
     SanJuanPortRenfrew: 08HA010
     SquamishBrackendale: 08GA022
@@ -116,6 +117,7 @@ rivers:
     Fraser: /data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow
     HomathkoMouth: /results/forcing/rivers/observations/Homathko_Mouth_flow
     NicomeklLangley: /results/forcing/rivers/observations/Nicomekl_Langley_flow
+    RobertsCreek: /results/forcing/rivers/observations/RobertsCreek_flow
     SalmonSayward: /results/forcing/rivers/observations/Salmon_Sayward_flow
     SanJuanPortRenfrew: /results/forcing/rivers/observations/SanJuan_PortRenfrew_flow
     SquamishBrackendale: /results/forcing/rivers/observations/Squamish_Brackendale_flow
