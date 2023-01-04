@@ -33,6 +33,7 @@ dependencies:
   - geopandas
   - gitpython
   - gsw
+  - httpx
   - lxml
   - mako
   - matplotlib
