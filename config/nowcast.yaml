@@ -89,24 +89,25 @@ rivers:
   # ECCC datamart hydrometric CSV file name template
   # **Must be quoted to protect {} characters**
   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
-  # Mapping of river names and ECCC station ids for which daily average discharges are
-  # calculated and stored
+  # Mapping of river names and ECCC or USGS station ids for which daily average discharges
+  # are calculated and stored
   stations:
-    # River name (camel-case): ECCC station id
-    Capilano: 08GA010
-    ChilliwackVedder: 08MH001
-    ClowhomClowhomLake: 08GB013
-    Englishman: 08HB002
-    Fraser: 08MF005
-    HomathkoMouth: 08GD004
-    NicomeklLangley: 08MH155
-    RobertsCreek: 08GA047
-    SalmonSayward: 08HD006
-    SanJuanPortRenfrew: 08HA010
-    SquamishBrackendale: 08GA022
-    TheodosiaScotty: 08GC008
-    TheodosiaBypass: 08GC006
-    TheodosiaDiversion: 08GC005
+    ECCC:
+      # River name (camel-case): ECCC station id
+      Capilano: 08GA010
+      ChilliwackVedder: 08MH001
+      ClowhomClowhomLake: 08GB013
+      Englishman: 08HB002
+      Fraser: 08MF005
+      HomathkoMouth: 08GD004
+      NicomeklLangley: 08MH155
+      RobertsCreek: 08GA047
+      SalmonSayward: 08HD006
+      SanJuanPortRenfrew: 08HA010
+      SquamishBrackendale: 08GA022
+      TheodosiaScotty: 08GC008
+      TheodosiaBypass: 08GC006
+      TheodosiaDiversion: 08GC005
   # Files containing daily average river discharges
   SOG river files:
     # River name (camel-case): SOG-forcing river flow file path
