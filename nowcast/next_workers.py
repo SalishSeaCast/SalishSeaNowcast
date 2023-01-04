@@ -61,13 +61,14 @@ def after_download_weather(msg, config, checklist):
     if msg.type.startswith("success"):
         if msg.type.endswith("2.5km 06"):
             data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
-            for river_name in config["rivers"]["stations"]:
-                next_workers["success 2.5km 06"].append(
-                    NextWorker(
-                        "nowcast.workers.collect_river_data",
-                        args=[river_name, "--data-date", data_date],
+            for data_src in config["rivers"]["stations"]:
+                for river_name in config["rivers"]["stations"][data_src]:
+                    next_workers["success 2.5km 06"].append(
+                        NextWorker(
+                            "nowcast.workers.collect_river_data",
+                            args=[data_src, river_name, "--data-date", data_date],
+                        )
                     )
-                )
             for stn in config["observations"]["ctd data"]["stations"]:
                 next_workers["success 2.5km 06"].append(
                     NextWorker("nowcast.workers.get_onc_ctd", args=[stn])

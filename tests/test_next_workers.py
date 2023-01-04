@@ -40,9 +40,10 @@ def config(base_config):
                 """\
                 rivers:
                   stations:
-                    Capilano: 08GA010
-                    Englishman: 08HB002
-                    Fraser: 08MF005
+                    ECCC:
+                      Capilano: 08GA010
+                      Englishman: 08HB002
+                      Fraser: 08MF005
 
                 observations:
                   ctd data:
@@ -194,17 +195,17 @@ class TestAfterDownloadWeather:
         expected = [
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Capilano", "--data-date", "2018-12-26"],
+                ["ECCC", "Capilano", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Englishman", "--data-date", "2018-12-26"],
+                ["ECCC", "Englishman", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Fraser", "--data-date", "2018-12-26"],
+                ["ECCC", "Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
@@ -279,17 +280,17 @@ class TestAfterCollectWeather:
         expected = [
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Capilano", "--data-date", "2018-12-26"],
+                ["ECCC", "Capilano", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Englishman", "--data-date", "2018-12-26"],
+                ["ECCC", "Englishman", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker(
                 "nowcast.workers.collect_river_data",
-                ["Fraser", "--data-date", "2018-12-26"],
+                ["ECCC", "Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),

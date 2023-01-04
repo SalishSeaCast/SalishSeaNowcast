@@ -45,9 +45,10 @@ def config(base_config):
                   datamart dir: datamart/hydrometric/
                   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
                   stations:
-                    Capilano: 08GA010
-                    Englishman: 08HB002
-                    Fraser: 08MF005
+                    ECCC:
+                        Capilano: 08GA010
+                        Englishman: 08HB002
+                        Fraser: 08MF005
                   SOG river files:
                     Capilano: /opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow
                     Englishman: SOG-projects/SOG-forcing/ECget/Englishman_flow
@@ -72,22 +73,28 @@ class TestMain:
         worker = collect_river_data.main()
         assert worker.name == "collect_river_data"
         assert worker.description.startswith(
-            "SalishSeaCast worker that collects river discharge observations data"
+            "SalishSeaCast worker that collects river discharge observation data"
         )
+
+    def test_add_data_source_arg(self, mock_worker):
+        worker = collect_river_data.main()
+        assert worker.cli.parser._actions[3].dest == "data_src"
+        assert worker.cli.parser._actions[3].choices == {"ECCC", "USGS"}
+        assert worker.cli.parser._actions[3].help
 
     def test_add_river_name_arg(self, mock_worker):
         worker = collect_river_data.main()
-        assert worker.cli.parser._actions[3].dest == "river_name"
-        assert worker.cli.parser._actions[3].default is None
-        assert worker.cli.parser._actions[3].help
+        assert worker.cli.parser._actions[4].dest == "river_name"
+        assert worker.cli.parser._actions[4].default is None
+        assert worker.cli.parser._actions[4].help
 
     def test_add_data_date_option(self, mock_worker):
         worker = collect_river_data.main()
-        assert worker.cli.parser._actions[4].dest == "data_date"
+        assert worker.cli.parser._actions[5].dest == "data_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
-        assert worker.cli.parser._actions[4].type == expected
-        assert worker.cli.parser._actions[4].default == arrow.now().floor("day")
-        assert worker.cli.parser._actions[4].help
+        assert worker.cli.parser._actions[5].type == expected
+        assert worker.cli.parser._actions[5].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[5].help
 
 
 class TestConfig:
@@ -107,11 +114,14 @@ class TestConfig:
             "crash",
         ]
 
-    def test_rivers_sections(self, prod_config):
+    def test_rivers_paths_files(self, prod_config):
         rivers = prod_config["rivers"]
         assert rivers["datamart dir"] == "/SalishSeaCast/datamart/hydrometric/"
         assert rivers["csv file template"] == "BC_{stn_id}_hourly_hydrometric.csv"
-        assert rivers["stations"] == {
+
+    def test_ECCC_rivers(self, prod_config):
+        rivers = prod_config["rivers"]
+        assert rivers["stations"]["ECCC"] == {
             "Capilano": "08GA010",
             "ChilliwackVedder": "08MH001",
             "ClowhomClowhomLake": "08GB013",
@@ -127,6 +137,9 @@ class TestConfig:
             "TheodosiaBypass": "08GC006",
             "TheodosiaDiversion": "08GC005",
         }
+
+    def test_SOG_river_files(self, prod_config):
+        rivers = prod_config["rivers"]
         assert rivers["SOG river files"] == {
             "Capilano": "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow",
             "ChilliwackVedder": "/results/forcing/rivers/observations/Chilliwack_Vedder_flow",
@@ -150,15 +163,12 @@ class TestSuccess:
 
     def test_success(self, caplog):
         parsed_args = SimpleNamespace(
-            river_name="Fraser", data_date=arrow.get("2018-12-26")
+            data_src="ECCC", river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
         caplog.set_level(logging.INFO)
         msg_type = collect_river_data.success(parsed_args)
         assert caplog.records[0].levelname == "INFO"
-        expected = (
-            "Fraser river average discharge for 2018-12-26 calculated and appended to Fraser_"
-            "flow file"
-        )
+        expected = "ECCC Fraser river data collection for 2018-12-26 completed"
         assert caplog.messages[0] == expected
         assert msg_type == "success"
 
@@ -168,35 +178,40 @@ class TestFailure:
 
     def test_failure(self, caplog):
         parsed_args = SimpleNamespace(
-            river_name="Fraser", data_date=arrow.get("2018-12-26")
+            data_src="ECCC", river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
         caplog.set_level(logging.CRITICAL)
         msg_type = collect_river_data.failure(parsed_args)
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
-            "Calculation of Fraser river average discharge for 2018-12-26 or "
+            "Calculation of ECCC Fraser river average discharge for 2018-12-26 or "
             "appending it to Fraser_flow file failed"
         )
         assert caplog.messages[0] == expected
         assert msg_type == "failure"
 
 
-@pytest.mark.parametrize("river_name", ("Fraser", "Englishman"))
-@patch("nowcast.workers.collect_river_data.logger", autospec=True)
+@pytest.mark.parametrize(
+    "data_src, river_name",
+    (
+        ("ECCC", "Fraser"),
+        ("ECCC", "Englishman"),
+    ),
+)
 @patch("nowcast.workers.collect_river_data._calc_day_avg_discharge", spec=True)
 @patch("nowcast.workers.collect_river_data._store_day_avg_discharge", autospec=True)
 class TestCollectRiverData:
     """Unit test for collect_river_data() function."""
 
     def test_checklist(
-        self, m_store_day_avg_q, m_calc_day_avg_q, m_logger, river_name, config
+        self, m_store_day_avg_q, m_calc_day_avg_q, data_src, river_name, config, caplog
     ):
         parsed_args = SimpleNamespace(
-            river_name=river_name, data_date=arrow.get("2018-12-26")
+            data_src=data_src, river_name=river_name, data_date=arrow.get("2018-12-26")
         )
         checklist = collect_river_data.collect_river_data(parsed_args, config)
 
-        stn_id = config["rivers"]["stations"][river_name]
+        stn_id = config["rivers"]["stations"][data_src][river_name]
         csv_file_template = config["rivers"]["csv file template"]
         m_calc_day_avg_q.assert_called_once_with(
             Path(config["rivers"]["datamart dir"])

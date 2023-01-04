@@ -12,8 +12,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that collects river discharge observations data from an ECCC
-datamart CSV file mirror and appends a day average discharge to a SOG forcing file.
+"""SalishSeaCast worker that collects river discharge observation data from
+an ECCC datamart CSV file mirror, or the USGS Water Service REST service,
+and appends a day-average discharge to a SOG-format forcing file.
 """
 import logging
 from pathlib import Path
@@ -28,14 +29,15 @@ logger = logging.getLogger(NAME)
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.collect_river_data --help`
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
+    worker.cli.add_argument(
+        "data_src", choices={"ECCC", "USGS"}, help="Name of the river data service."
+    )
     worker.cli.add_argument("river_name", help="Name of the river to collect data for.")
     worker.cli.add_date_option(
         "--data-date",
@@ -54,9 +56,8 @@ def success(parsed_args):
     :rtype: str
     """
     logger.info(
-        f"{parsed_args.river_name} river average discharge for "
-        f"{parsed_args.data_date.format('YYYY-MM-DD')} calculated and appended to "
-        f"{parsed_args.river_name}_flow file"
+        f"{parsed_args.data_src} {parsed_args.river_name} river data collection for "
+        f"{parsed_args.data_date.format('YYYY-MM-DD')} completed"
     )
     return "success"
 
@@ -69,8 +70,8 @@ def failure(parsed_args):
     :rtype: str
     """
     logger.critical(
-        f"Calculation of {parsed_args.river_name} river average discharge for "
-        f"{parsed_args.data_date.format('YYYY-MM-DD')} or "
+        f"Calculation of {parsed_args.data_src} {parsed_args.river_name} "
+        f"river average discharge for {parsed_args.data_date.format('YYYY-MM-DD')} or "
         f"appending it to {parsed_args.river_name}_flow file failed"
     )
     return "failure"
@@ -84,13 +85,14 @@ def collect_river_data(parsed_args, config, *args):
     :return: Nowcast system checklist items
     :rtype: dict
     """
+    data_src = parsed_args.data_src
     river_name = parsed_args.river_name
     sentry_sdk.set_tag("river-name", river_name)
     data_date = parsed_args.data_date
     logger.info(
-        f"Collecting {river_name} river data for {data_date.format('YYYY-MM-DD')}"
+        f"Collecting {data_src} {river_name} river data for {data_date.format('YYYY-MM-DD')}"
     )
-    stn_id = config["rivers"]["stations"][river_name]
+    stn_id = config["rivers"]["stations"][data_src][river_name]
     sentry_sdk.set_tag("stn-id", stn_id)
     csv_file_template = config["rivers"]["csv file template"]
     csv_file = Path(config["rivers"]["datamart dir"]) / csv_file_template.format(
