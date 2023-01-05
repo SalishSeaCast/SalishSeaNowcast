@@ -87,18 +87,14 @@ def collect_river_data(parsed_args, config, *args):
     """
     data_src = parsed_args.data_src
     river_name = parsed_args.river_name
+    stn_id = config["rivers"]["stations"][data_src][river_name]
+    sentry_sdk.set_tag("stn-id", stn_id)
     sentry_sdk.set_tag("river-name", river_name)
     data_date = parsed_args.data_date
     logger.info(
         f"Collecting {data_src} {river_name} river data for {data_date.format('YYYY-MM-DD')}"
     )
-    stn_id = config["rivers"]["stations"][data_src][river_name]
-    sentry_sdk.set_tag("stn-id", stn_id)
-    csv_file_template = config["rivers"]["csv file template"]
-    csv_file = Path(config["rivers"]["datamart dir"]) / csv_file_template.format(
-        stn_id=stn_id
-    )
-    day_avg_discharge = _calc_day_avg_discharge(csv_file, data_date)
+    day_avg_discharge = _calc_eccc_day_avg_discharge(river_name, data_date, config)
     daily_avg_file = Path(config["rivers"]["SOG river files"][river_name])
     _store_day_avg_discharge(data_date, day_avg_discharge, daily_avg_file)
     checklist = {"river name": river_name, "data date": data_date.format("YYYY-MM-DD")}
@@ -109,13 +105,19 @@ def collect_river_data(parsed_args, config, *args):
     return checklist
 
 
-def _calc_day_avg_discharge(csv_file, data_date):
+def _calc_eccc_day_avg_discharge(river_name, data_date, config):
     """
-    :param :py:class:`pathlib.Path` csv_file:
+    :param str river_name:
     :param :py:class:`Arrow.arrow` data_date:
+    :param :py:class:`nemo_nowcast.Config` config:
 
     :rtype: float
     """
+    csv_file_template = config["rivers"]["csv file template"]
+    stn_id = config["rivers"]["stations"]["ECCC"][river_name]
+    csv_file = Path(config["rivers"]["datamart dir"]) / csv_file_template.format(
+        stn_id=stn_id
+    )
     df = pandas.read_csv(
         csv_file,
         usecols=["Date", "Discharge / Débit (cms)"],
