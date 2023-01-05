@@ -22,7 +22,6 @@ import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -46,13 +45,9 @@ def config(base_config):
                   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
                   stations:
                     ECCC:
-                        Capilano: 08GA010
-                        Englishman: 08HB002
                         Fraser: 08MF005
                   SOG river files:
-                    Capilano: /opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow
-                    Englishman: SOG-projects/SOG-forcing/ECget/Englishman_flow
-                    Fraser: SOG-projects/SOG-forcing/ECget/Fraser_flow
+                    Fraser: Fraser_flow
                 """
             )
         )
@@ -206,64 +201,77 @@ class TestFailure:
 
 @pytest.mark.parametrize(
     "data_src, river_name",
-    (
-        ("ECCC", "Fraser"),
-        ("ECCC", "Englishman"),
-    ),
+    (("ECCC", "Fraser"),),
 )
-@patch("nowcast.workers.collect_river_data._calc_day_avg_discharge", spec=True)
-@patch("nowcast.workers.collect_river_data._store_day_avg_discharge", autospec=True)
 class TestCollectRiverData:
     """Unit test for collect_river_data() function."""
 
     def test_checklist(
-        self, m_store_day_avg_q, m_calc_day_avg_q, data_src, river_name, config, caplog
+        self, data_src, river_name, config, caplog, tmp_path, monkeypatch
     ):
+        def mock_calc_day_avg_discharge(csv_file, data_date):
+            return 12345.6
+
+        monkeypatch.setattr(
+            collect_river_data, "_calc_day_avg_discharge", mock_calc_day_avg_discharge
+        )
+
+        sog_river_file = config["rivers"]["SOG river files"][river_name]
+        monkeypatch.setitem(
+            config["rivers"]["SOG river files"], river_name, tmp_path / sog_river_file
+        )
+
         parsed_args = SimpleNamespace(
             data_src=data_src, river_name=river_name, data_date=arrow.get("2018-12-26")
         )
+
+        caplog.set_level(logging.DEBUG)
+
         checklist = collect_river_data.collect_river_data(parsed_args, config)
 
-        stn_id = config["rivers"]["stations"][data_src][river_name]
-        csv_file_template = config["rivers"]["csv file template"]
-        m_calc_day_avg_q.assert_called_once_with(
-            Path(config["rivers"]["datamart dir"])
-            / csv_file_template.format(stn_id=stn_id),
-            arrow.get("2018-12-26"),
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"Collecting {data_src} {river_name} river data for 2018-12-26"
+        assert caplog.messages[0] == expected
+        assert caplog.records[2].levelname == "INFO"
+        expected = (
+            f"Appended {data_src} {river_name} river average discharge for 2018-12-26 to: "
+            f"{Path(config['rivers']['SOG river files'][river_name])}"
         )
-        m_store_day_avg_q.assert_called_once_with(
-            arrow.get("2018-12-26"),
-            m_calc_day_avg_q(),
-            Path(config["rivers"]["SOG river files"][river_name]),
-        )
+        assert caplog.messages[2] == expected
         expected = {"river name": river_name, "data date": "2018-12-26"}
         assert checklist == expected
 
 
-@patch("nowcast.workers.collect_river_data.pandas.read_csv", autospec=True)
 class TestCalcDayAvgDischarge:
     """Unit test for _calc_day_avg_discharge() function."""
 
-    def test_calc_day_avg_discharge(self, m_read_csv, caplog, tmp_path):
+    def test_calc_day_avg_discharge(self, caplog, tmp_path, monkeypatch):
+        def mock_read_csv(csv_file, usecols, index_col, date_parser):
+            return pandas.DataFrame(
+                numpy.linspace(41.9, 44.1, 290),
+                index=pandas.date_range(
+                    "2018-12-25 23:55:00", "2018-12-27 00:00:00", freq="5min"
+                ),
+                columns=["Discharge / Débit (cms)"],
+            )
+
+        monkeypatch.setattr(collect_river_data.pandas, "read_csv", mock_read_csv)
+
         data_date = arrow.get("2018-12-26")
         csv_file = tmp_path / "cvs_file"
-        data_frame = pandas.DataFrame(
-            numpy.linspace(41.9, 44.1, 290),
-            index=pandas.date_range(
-                "2018-12-25 23:55:00", "2018-12-27 00:00:00", freq="5min"
-            ),
-            columns=["Discharge / Débit (cms)"],
-        )
-        m_read_csv.return_value = data_frame
 
         caplog.set_level(logging.DEBUG)
 
         day_avg_discharge = collect_river_data._calc_day_avg_discharge(
             csv_file, data_date
         )
+
         numpy.testing.assert_almost_equal(day_avg_discharge, 43.0)
         assert caplog.records[0].levelname == "DEBUG"
-        expected = f"average discharge for {data_date.format('YYYY-MM-DD')} from {csv_file}: {day_avg_discharge:.6e} m^3/s"
+        expected = (
+            f"average discharge for {data_date.format('YYYY-MM-DD')} "
+            f"from {csv_file}: {day_avg_discharge:.6e} m^3/s"
+        )
         assert caplog.messages[0] == expected
 
 

@@ -103,7 +103,8 @@ def collect_river_data(parsed_args, config, *args):
     _store_day_avg_discharge(data_date, day_avg_discharge, daily_avg_file)
     checklist = {"river name": river_name, "data date": data_date.format("YYYY-MM-DD")}
     logger.info(
-        f"Appended {river_name} river average discharge for {data_date.format('YYYY-MM-DD')} to: {daily_avg_file}"
+        f"Appended {data_src} {river_name} river average discharge for "
+        f"{data_date.format('YYYY-MM-DD')} to: {daily_avg_file}"
     )
     return checklist
 
