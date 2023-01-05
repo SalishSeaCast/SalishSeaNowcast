@@ -209,11 +209,13 @@ class TestCollectRiverData:
     def test_checklist(
         self, data_src, river_name, config, caplog, tmp_path, monkeypatch
     ):
-        def mock_calc_day_avg_discharge(csv_file, data_date):
+        def mock_calc_eccc_day_avg_discharge(river_name, data_date, config):
             return 12345.6
 
         monkeypatch.setattr(
-            collect_river_data, "_calc_day_avg_discharge", mock_calc_day_avg_discharge
+            collect_river_data,
+            "_calc_eccc_day_avg_discharge",
+            mock_calc_eccc_day_avg_discharge,
         )
 
         sog_river_file = config["rivers"]["SOG river files"][river_name]
@@ -245,7 +247,7 @@ class TestCollectRiverData:
 class TestCalcDayAvgDischarge:
     """Unit test for _calc_day_avg_discharge() function."""
 
-    def test_calc_day_avg_discharge(self, caplog, tmp_path, monkeypatch):
+    def test_calc_day_avg_discharge(self, config, caplog, tmp_path, monkeypatch):
         def mock_read_csv(csv_file, usecols, index_col, date_parser):
             return pandas.DataFrame(
                 numpy.linspace(41.9, 44.1, 290),
@@ -257,20 +259,18 @@ class TestCalcDayAvgDischarge:
 
         monkeypatch.setattr(collect_river_data.pandas, "read_csv", mock_read_csv)
 
-        data_date = arrow.get("2018-12-26")
-        csv_file = tmp_path / "cvs_file"
-
         caplog.set_level(logging.DEBUG)
 
-        day_avg_discharge = collect_river_data._calc_day_avg_discharge(
-            csv_file, data_date
+        day_avg_discharge = collect_river_data._calc_eccc_day_avg_discharge(
+            "Fraser", "2018-12-26", config
         )
 
         numpy.testing.assert_almost_equal(day_avg_discharge, 43.0)
         assert caplog.records[0].levelname == "DEBUG"
         expected = (
-            f"average discharge for {data_date.format('YYYY-MM-DD')} "
-            f"from {csv_file}: {day_avg_discharge:.6e} m^3/s"
+            f"average discharge for 2018-12-26 from "
+            f"datamart/hydrometric/BC_08MF005_hourly_hydrometric.csv: "
+            f"{day_avg_discharge:.6e} m^3/s"
         )
         assert caplog.messages[0] == expected
 
