@@ -44,6 +44,8 @@ def config(base_config):
                       Capilano: 08GA010
                       Englishman: 08HB002
                       Fraser: 08MF005
+                    USGS:
+                      SkagitMountVernon: 12200500
 
                 observations:
                   ctd data:
@@ -208,6 +210,11 @@ class TestAfterDownloadWeather:
                 ["ECCC", "Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
@@ -216,9 +223,7 @@ class TestAfterDownloadWeather:
                 "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
             ),
         ]
-        assert len(workers) == len(expected)
-        for next_worker in expected:
-            assert next_worker in workers
+        assert workers == expected
         assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
 
     def test_success_2_5_km_12(self, config, checklist):
@@ -293,6 +298,11 @@ class TestAfterCollectWeather:
                 ["ECCC", "Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
@@ -304,9 +314,7 @@ class TestAfterCollectWeather:
                 "nowcast.workers.collect_weather", ["12", "2.5km"], host="localhost"
             ),
         ]
-        assert len(workers) == len(expected)
-        for next_worker in expected:
-            assert next_worker in workers
+        assert workers == expected
         assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
 
     def test_success_2_5_km_12(self, config, checklist):

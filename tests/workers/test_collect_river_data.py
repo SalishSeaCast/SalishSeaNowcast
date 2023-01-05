@@ -138,6 +138,15 @@ class TestConfig:
             "TheodosiaDiversion": "08GC005",
         }
 
+    def test_USGS_rivers(self, prod_config):
+        rivers = prod_config["rivers"]
+        assert rivers["stations"]["USGS"] == {
+            "SkagitMountVernon": 12200500,
+            "SnohomishMonroe": 12150800,
+            "NiquallyMcKenna": 12089500,
+            "GreenwaterGreenwater": 12097500,
+        }
+
     def test_SOG_river_files(self, prod_config):
         rivers = prod_config["rivers"]
         assert rivers["SOG river files"] == {
@@ -146,11 +155,15 @@ class TestConfig:
             "ClowhomClowhomLake": "/results/forcing/rivers/observations/Clowhom_ClowhomLake_flow",
             "Englishman": "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow",
             "Fraser": "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow",
+            "GreenwaterGreenwater": "/results/forcing/rivers/observations/Greenwater_Greenwater_flow",
             "HomathkoMouth": "/results/forcing/rivers/observations/Homathko_Mouth_flow",
+            "NiquallyMcKenna": "/results/forcing/rivers/observations/Niqually_McKenna_flow",
             "NicomeklLangley": "/results/forcing/rivers/observations/Nicomekl_Langley_flow",
             "RobertsCreek": "/results/forcing/rivers/observations/RobertsCreek_flow",
             "SalmonSayward": "/results/forcing/rivers/observations/Salmon_Sayward_flow",
             "SanJuanPortRenfrew": "/results/forcing/rivers/observations/SanJuan_PortRenfrew_flow",
+            "SkagitMountVernon": "/results/forcing/rivers/observations/Skagit_MountVernon_flow",
+            "SnohomishMonroe": "/results/forcing/rivers/observations/Snohomish_Monroe_flow",
             "SquamishBrackendale": "/results/forcing/rivers/observations/Squamish_Brackendale_flow",
             "TheodosiaScotty": "/results/forcing/rivers/observations/Theodosia_Scotty_flow",
             "TheodosiaBypass": "/results/forcing/rivers/observations/Theodosia_Bypass_flow",
