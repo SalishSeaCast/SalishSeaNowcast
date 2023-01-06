@@ -132,6 +132,7 @@ pyshp==2.3.1
 PySocks==1.7.1
 pytest==7.2.0
 pytest-cov==4.0.0
+pytest-httpx==0.21.2
 pytest-randomly==3.12.0
 pytest-xdist==3.1.0
 python-dateutil==2.8.2
@@ -162,7 +163,7 @@ snowballstemmer==2.2.0
 snuggs==1.4.7
 sortedcontainers==2.4.0
 soupsieve==2.3.2.post1
-Sphinx==6.0.0
+Sphinx==6.1.1
 sphinx-notfound-page==0.8.3
 sphinx-rtd-theme==0.5.2
 sphinxcontrib-applehelp==1.0.2

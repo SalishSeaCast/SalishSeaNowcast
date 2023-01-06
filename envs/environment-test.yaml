@@ -67,6 +67,8 @@ dependencies:
   # For unit tests and coverage monitoring
   - pytest
   - pytest-cov
+  - pytest-httpx
+  - pytest-randomly
   - tomli
 
   # For documentation links checking
