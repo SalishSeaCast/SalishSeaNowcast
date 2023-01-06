@@ -83,8 +83,10 @@ dependencies:
   # For unit tests
   - pytest
   - pytest-cov
-  - tomli
+  - pytest-httpx
+  - pytest-randomly
   - pytest-xdist
+  - tomli
 
   # For documentation
   - sphinx
@@ -99,6 +101,3 @@ dependencies:
     - angles
     - python-hglib
     - sysrsync
-
-    # For unit tests
-    - pytest-randomly
