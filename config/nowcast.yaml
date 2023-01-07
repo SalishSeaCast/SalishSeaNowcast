@@ -89,6 +89,18 @@ rivers:
   # ECCC datamart hydrometric CSV file name template
   # **Must be quoted to protect {} characters**
   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
+  # USGS waterservice URL
+  usgs url: https://waterservices.usgs.gov/nwis/dv/
+  # USGS Water Service REST query parameters
+  usgs params:
+    format: json
+    # Parameter code for discharge in cubic ft per second
+    # **Must be quaoted to protect leading zeros**
+    parameterCd: "00060"
+    # River station id and start/end dates that change for every query
+    sites: ""
+    startDT: ""
+    endDT: ""
   # Mapping of river names and ECCC or USGS station ids for which daily average discharges
   # are calculated and stored
   stations:
