@@ -24,10 +24,12 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
+import httpx
 import nemo_nowcast
 import numpy
 import pandas
 import pytest
+from nemo_nowcast import WorkerError
 
 from nowcast.workers import collect_river_data
 
@@ -43,11 +45,21 @@ def config(base_config):
                 rivers:
                   datamart dir: datamart/hydrometric/
                   csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
+                  usgs url: https://waterservices.usgs.gov/nwis/dv/
+                  usgs params:
+                    format: json
+                    parameterCd: "00060"
+                    sites: ""
+                    startDT: ""
+                    endDT: ""
                   stations:
                     ECCC:
-                        Fraser: 08MF005
+                      Fraser: 08MF005
+                    USGS:
+                      SkagitMountVernon: 12200500
                   SOG river files:
                     Fraser: Fraser_flow
+                    SkagitMountVernon: Skagit_MountVernon_flow
                 """
             )
         )
@@ -109,10 +121,22 @@ class TestConfig:
             "crash",
         ]
 
-    def test_rivers_paths_files(self, prod_config):
+    def test_ECCC_rivers_paths_files(self, prod_config):
         rivers = prod_config["rivers"]
         assert rivers["datamart dir"] == "/SalishSeaCast/datamart/hydrometric/"
         assert rivers["csv file template"] == "BC_{stn_id}_hourly_hydrometric.csv"
+
+    def test_USGS_url_params(self, prod_config):
+        rivers = prod_config["rivers"]
+        assert rivers["usgs url"] == "https://waterservices.usgs.gov/nwis/dv/"
+        expected = {
+            "format": "json",
+            "parameterCd": "00060",
+            "sites": "",
+            "startDT": "",
+            "endDT": "",
+        }
+        assert rivers["usgs params"] == expected
 
     def test_ECCC_rivers(self, prod_config):
         rivers = prod_config["rivers"]
@@ -201,7 +225,10 @@ class TestFailure:
 
 @pytest.mark.parametrize(
     "data_src, river_name",
-    (("ECCC", "Fraser"),),
+    (
+        ("ECCC", "Fraser"),
+        ("USGS", "SkagitMountVernon"),
+    ),
 )
 class TestCollectRiverData:
     """Unit test for collect_river_data() function."""
@@ -216,6 +243,15 @@ class TestCollectRiverData:
             collect_river_data,
             "_calc_eccc_day_avg_discharge",
             mock_calc_eccc_day_avg_discharge,
+        )
+
+        def mock_get_usgs_day_avg_discharge(river_name, data_date, config):
+            return 12345.6
+
+        monkeypatch.setattr(
+            collect_river_data,
+            "_get_usgs_day_avg_discharge",
+            mock_get_usgs_day_avg_discharge,
         )
 
         sog_river_file = config["rivers"]["SOG river files"][river_name]
@@ -244,10 +280,10 @@ class TestCollectRiverData:
         assert checklist == expected
 
 
-class TestCalcDayAvgDischarge:
-    """Unit test for _calc_day_avg_discharge() function."""
+class TestCalcECCC_DayAvgDischarge:
+    """Unit test for _calc_eccc_day_avg_discharge() function."""
 
-    def test_calc_day_avg_discharge(self, config, caplog, tmp_path, monkeypatch):
+    def test_calc_eccc_day_avg_discharge(self, config, caplog, tmp_path, monkeypatch):
         def mock_read_csv(csv_file, usecols, index_col, date_parser):
             return pandas.DataFrame(
                 numpy.linspace(41.9, 44.1, 290),
@@ -273,6 +309,200 @@ class TestCalcDayAvgDischarge:
             f"{day_avg_discharge:.6e} m^3/s"
         )
         assert caplog.messages[0] == expected
+
+
+class TestGetUSGS_DayAvgDischarge:
+    """Unit test for _get_usgs_day_avg_discharge() function."""
+
+    def test_get_usgs_day_avg_discharge(self, config, httpx_mock, caplog):
+        httpx_mock.add_response(
+            json={
+                "value": {
+                    "timeSeries": [
+                        {
+                            "variable": {
+                                "noDataValue": -999999,
+                            },
+                            "values": [{"value": [{"value": 43 / 0.0283168}]}],
+                        }
+                    ]
+                }
+            }
+        )
+        caplog.set_level(logging.DEBUG)
+
+        day_avg_discharge = collect_river_data._get_usgs_day_avg_discharge(
+            "SkagitMountVernon", "2023-01-06", config
+        )
+
+        numpy.testing.assert_almost_equal(day_avg_discharge, 43.0)
+        assert caplog.records[1].levelname == "DEBUG"
+        expected = (
+            f"average discharge for SkagitMountVernon on 2023-01-06 from "
+            f"https://waterservices.usgs.gov/nwis/dv/: {day_avg_discharge:.6e} m^3/s"
+        )
+        assert caplog.messages[1] == expected
+
+    def test_http_RequestError(self, config, httpx_mock, caplog):
+        httpx_mock.add_exception(httpx.RequestError("error issuing request"))
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            collect_river_data._get_usgs_day_avg_discharge(
+                "SkagitMountVernon", "2023-01-06", config
+            )
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        usgs_url = config["rivers"]["usgs url"]
+        assert caplog.messages[0].startswith(f"Error while requesting {usgs_url}")
+
+    def test_HTTPStatusError(self, config, httpx_mock, caplog):
+        httpx_mock.add_response(status_code=500)
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            collect_river_data._get_usgs_day_avg_discharge(
+                "SkagitMountVernon", "2023-01-06", config
+            )
+
+        assert caplog.records[1].levelname == "CRITICAL"
+        usgs_url = config["rivers"]["usgs url"]
+        assert caplog.messages[1].startswith(
+            f"Error response 500 while requesting {usgs_url}"
+        )
+
+    def test_empty_timeseries(self, config, httpx_mock, caplog):
+        httpx_mock.add_response(json={"value": {"timeSeries": []}})
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            collect_river_data._get_usgs_day_avg_discharge(
+                "SkagitMountVernon", "2023-01-06", config
+            )
+
+        assert caplog.records[1].levelname == "CRITICAL"
+        assert caplog.messages[1] == "SkagitMountVernon 2023-01-06 timeSeries is empty"
+
+    @pytest.mark.parametrize(
+        "values",
+        (
+            [],
+            [{"value": []}],
+        ),
+    )
+    def test_cfs_value_IndexError(self, values, config, httpx_mock, caplog):
+        httpx_mock.add_response(
+            json={
+                "value": {
+                    "timeSeries": [
+                        {
+                            "variable": {
+                                "noDataValue": -999999,
+                            },
+                            "values": values,
+                        }
+                    ]
+                }
+            }
+        )
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            collect_river_data._get_usgs_day_avg_discharge(
+                "SkagitMountVernon", "2023-01-06", config
+            )
+
+        assert caplog.records[1].levelname == "CRITICAL"
+        expected = "IndexError in SkagitMountVernon 2023-01-06 timeSeries JSON"
+        assert caplog.messages[1] == expected
+
+    @pytest.mark.parametrize(
+        "value",
+        (
+            {
+                "timeSeries": [
+                    {
+                        "variable": {
+                            "noDataValue": -999999,
+                        },
+                        "not values": [],
+                    }
+                ]
+            },
+            {
+                "timeSeries": [
+                    {
+                        "variable": {
+                            "noDataValue": -999999,
+                        },
+                        "values": [{"not value": []}],
+                    }
+                ]
+            },
+            {
+                "timeSeries": [
+                    {
+                        "variable": {
+                            "noDataValue": -999999,
+                        },
+                        "values": [{"value": [{"not value": 43}]}],
+                    }
+                ]
+            },
+        ),
+    )
+    def test_cfs_value_KeyError(self, value, config, httpx_mock, caplog):
+        httpx_mock.add_response(
+            json={
+                "value": value,
+            }
+        )
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            collect_river_data._get_usgs_day_avg_discharge(
+                "SkagitMountVernon", "2023-01-06", config
+            )
+
+        assert caplog.records[1].levelname == "CRITICAL"
+        expectged = "KeyError in SkagitMountVernon 2023-01-06 timeSeries JSON"
+        assert caplog.messages[1] == expectged
+
+    def test_no_data(self, config, httpx_mock, caplog):
+        httpx_mock.add_response(
+            json={
+                "value": {
+                    "timeSeries": [
+                        {
+                            "variable": {
+                                "noDataValue": -999999,
+                            },
+                            "values": [
+                                {
+                                    "value": [
+                                        {
+                                            "value": -999999,
+                                        }
+                                    ]
+                                }
+                            ],
+                        }
+                    ]
+                }
+            }
+        )
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            collect_river_data._get_usgs_day_avg_discharge(
+                "SkagitMountVernon", "2023-01-06", config
+            )
+
+        assert caplog.records[1].levelname == "CRITICAL"
+        expected = (
+            "Got no-data value (-999999) in SkagitMountVernon 2023-01-06 timeSeries"
+        )
+        assert caplog.messages[1] == expected
 
 
 class TestStoreDayAvgDischarge:

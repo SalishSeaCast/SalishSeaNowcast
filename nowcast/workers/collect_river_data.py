@@ -20,9 +20,10 @@ import logging
 from pathlib import Path
 
 import arrow
+import httpx
 import pandas
 import sentry_sdk
-from nemo_nowcast import NowcastWorker
+from nemo_nowcast import NowcastWorker, WorkerError
 
 NAME = "collect_river_data"
 logger = logging.getLogger(NAME)
@@ -94,7 +95,12 @@ def collect_river_data(parsed_args, config, *args):
     logger.info(
         f"Collecting {data_src} {river_name} river data for {data_date.format('YYYY-MM-DD')}"
     )
-    day_avg_discharge = _calc_eccc_day_avg_discharge(river_name, data_date, config)
+    day_avg_discharge_funcs = {
+        # data_src: function
+        "ECCC": _calc_eccc_day_avg_discharge,
+        "USGS": _get_usgs_day_avg_discharge,
+    }
+    day_avg_discharge = day_avg_discharge_funcs[data_src](river_name, data_date, config)
     daily_avg_file = Path(config["rivers"]["SOG river files"][river_name])
     _store_day_avg_discharge(data_date, day_avg_discharge, daily_avg_file)
     checklist = {"river name": river_name, "data date": data_date.format("YYYY-MM-DD")}
@@ -129,6 +135,67 @@ def _calc_eccc_day_avg_discharge(river_name, data_date, config):
     ]
     logger.debug(
         f"average discharge for {data_date.format('YYYY-MM-DD')} from {csv_file}: {day_avg_discharge:.6e} m^3/s"
+    )
+    return day_avg_discharge
+
+
+def _get_usgs_day_avg_discharge(river_name, data_date, config):
+    """
+    :param str river_name:
+    :param :py:class:`Arrow.arrow` data_date:
+    :param :py:class:`nemo_nowcast.Config` config:
+
+    :rtype: float
+    """
+    usgs_url = config["rivers"]["usgs url"]
+    usgs_parmas = config["rivers"]["usgs params"]
+    stn_id = config["rivers"]["stations"]["USGS"][river_name]
+    yyyymmdd = data_date.format("YYYY-MM-DD")
+    usgs_parmas.update(
+        {
+            "sites": stn_id,
+            "startDT": yyyymmdd,
+            "endDT": yyyymmdd,
+        }
+    )
+    with httpx.Client() as client:
+        try:
+            response = client.get(usgs_url, params=usgs_parmas, follow_redirects=True)
+            response.raise_for_status()
+        except httpx.RequestError as exc:
+            msg = f"Error while requesting {exc.request.url}"
+            logger.critical(msg)
+            raise WorkerError(msg)
+        except httpx.HTTPStatusError as exc:
+            msg = f"Error response {exc.response.status_code} while requesting {exc.request.url}"
+            logger.critical(msg)
+            raise WorkerError(msg)
+        try:
+            timeseries = response.json()["value"]["timeSeries"][0]
+        except IndexError:
+            msg = f"{river_name} {yyyymmdd} timeSeries is empty"
+            logger.critical(msg)
+            raise WorkerError(msg)
+    no_data_value = timeseries["variable"]["noDataValue"]
+    try:
+        cfs = timeseries["values"][0]["value"][0]["value"]
+    except IndexError:
+        msg = f"IndexError in {river_name} {yyyymmdd} timeSeries JSON"
+        logger.critical(msg)
+        raise WorkerError(msg)
+    except KeyError:
+        msg = f"KeyError in {river_name} {yyyymmdd} timeSeries JSON"
+        logger.critical(msg)
+        raise WorkerError(msg)
+    if cfs == no_data_value:
+        msg = (
+            f"Got no-data value ({no_data_value}) in {river_name} {yyyymmdd} timeSeries"
+        )
+        logger.critical(msg)
+        raise WorkerError(msg)
+    day_avg_discharge = float(cfs) * 0.0283168
+    logger.debug(
+        f"average discharge for {river_name} on {yyyymmdd} from {usgs_url}: {day_avg_discharge:.6e} m^3/s"
     )
     return day_avg_discharge
 
