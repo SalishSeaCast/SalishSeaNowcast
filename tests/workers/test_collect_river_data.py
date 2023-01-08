@@ -162,7 +162,7 @@ class TestConfig:
         assert rivers["stations"]["USGS"] == {
             "SkagitMountVernon": 12200500,
             "SnohomishMonroe": 12150800,
-            "NiquallyMcKenna": 12089500,
+            "NisquallyMcKenna": 12089500,
             "GreenwaterGreenwater": 12097500,
         }
 
@@ -176,7 +176,7 @@ class TestConfig:
             "Fraser": "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow",
             "GreenwaterGreenwater": "/results/forcing/rivers/observations/Greenwater_Greenwater_flow",
             "HomathkoMouth": "/results/forcing/rivers/observations/Homathko_Mouth_flow",
-            "NiquallyMcKenna": "/results/forcing/rivers/observations/Niqually_McKenna_flow",
+            "NisquallyMcKenna": "/results/forcing/rivers/observations/Nisqually_McKenna_flow",
             "NicomeklLangley": "/results/forcing/rivers/observations/Nicomekl_Langley_flow",
             "RobertsCreek": "/results/forcing/rivers/observations/RobertsCreek_flow",
             "SalmonSayward": "/results/forcing/rivers/observations/Salmon_Sayward_flow",
