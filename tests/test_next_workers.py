@@ -186,11 +186,6 @@ class TestAfterDownloadWeather:
 
         monkeypatch.setattr(next_workers.arrow, "now", mock_now)
 
-        def mock_utcnow():
-            return arrow.get("2018-12-27")
-
-        monkeypatch.setattr(next_workers.arrow, "utcnow", mock_utcnow)
-
         workers, race_condition_workers = next_workers.after_download_weather(
             Message("download_weather", "success 2.5km 06"), config, checklist
         )
@@ -210,11 +205,6 @@ class TestAfterDownloadWeather:
                 ["ECCC", "Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
-            NextWorker(
-                "nowcast.workers.collect_river_data",
-                ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
-                host="localhost",
-            ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
@@ -226,20 +216,28 @@ class TestAfterDownloadWeather:
         assert workers == expected
         assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
 
-    def test_success_2_5_km_12(self, config, checklist):
+    def test_success_2_5_km_12(self, config, checklist, monkeypatch):
+        def mock_now():
+            return arrow.get("2018-12-27")
+
+        monkeypatch.setattr(next_workers.arrow, "now", mock_now)
+
         workers, race_condition_workers = next_workers.after_download_weather(
             Message("download_weather", "success 2.5km 12"), config, checklist
         )
         expected = [
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
             ),
             NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
         ]
-        assert len(workers) == len(expected)
-        for next_worker in expected:
-            assert next_worker in workers
+        assert workers == expected
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_live_ocean_files",
@@ -274,11 +272,6 @@ class TestAfterCollectWeather:
 
         monkeypatch.setattr(next_workers.arrow, "now", mock_now)
 
-        def mock_utcnow():
-            return arrow.get("2018-12-27")
-
-        monkeypatch.setattr(next_workers.arrow, "utcnow", mock_utcnow)
-
         workers, race_condition_workers = next_workers.after_collect_weather(
             Message("collect_weather", "success 2.5km 06"), config, checklist
         )
@@ -298,11 +291,6 @@ class TestAfterCollectWeather:
                 ["ECCC", "Fraser", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
-            NextWorker(
-                "nowcast.workers.collect_river_data",
-                ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
-                host="localhost",
-            ),
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
@@ -317,11 +305,21 @@ class TestAfterCollectWeather:
         assert workers == expected
         assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
 
-    def test_success_2_5_km_12(self, config, checklist):
+    def test_success_2_5_km_12(self, config, checklist, monkeypatch):
+        def mock_now():
+            return arrow.get("2018-12-27")
+
+        monkeypatch.setattr(next_workers.arrow, "now", mock_now)
+
         workers, race_condition_workers = next_workers.after_collect_weather(
             Message("collect_weather", "success 2.5km 12"), config, checklist
         )
         expected = [
+            NextWorker(
+                "nowcast.workers.collect_river_data",
+                ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
+                host="localhost",
+            ),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
             NextWorker(
                 "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
@@ -331,9 +329,7 @@ class TestAfterCollectWeather:
                 "nowcast.workers.collect_weather", ["18", "2.5km"], host="localhost"
             ),
         ]
-        assert len(workers) == len(expected)
-        for next_worker in expected:
-            assert next_worker in workers
+        assert workers == expected
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_live_ocean_files",
