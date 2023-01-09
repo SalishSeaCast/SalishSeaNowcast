@@ -59,16 +59,15 @@ def after_download_weather(msg, config, checklist):
         "success 1km 12": [],
     }
     if msg.type.startswith("success"):
+        data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
         if msg.type.endswith("2.5km 06"):
-            data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
-            for data_src in config["rivers"]["stations"]:
-                for river_name in config["rivers"]["stations"][data_src]:
-                    next_workers["success 2.5km 06"].append(
-                        NextWorker(
-                            "nowcast.workers.collect_river_data",
-                            args=[data_src, river_name, "--data-date", data_date],
-                        )
+            for river_name in config["rivers"]["stations"]["ECCC"]:
+                next_workers["success 2.5km 06"].append(
+                    NextWorker(
+                        "nowcast.workers.collect_river_data",
+                        args=["ECCC", river_name, "--data-date", data_date],
                     )
+                )
             for stn in config["observations"]["ctd data"]["stations"]:
                 next_workers["success 2.5km 06"].append(
                     NextWorker("nowcast.workers.get_onc_ctd", args=[stn])
@@ -89,6 +88,13 @@ def after_download_weather(msg, config, checklist):
                 race_condition_workers = {"grib_to_netcdf", "make_ssh_files"}
                 return next_workers[msg.type], race_condition_workers
         if msg.type.endswith("2.5km 12"):
+            for river_name in config["rivers"]["stations"]["USGS"]:
+                next_workers["success 2.5km 12"].append(
+                    NextWorker(
+                        "nowcast.workers.collect_river_data",
+                        args=["USGS", river_name, "--data-date", data_date],
+                    )
+                )
             next_workers["success 2.5km 12"].extend(
                 [
                     NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["06"]),
