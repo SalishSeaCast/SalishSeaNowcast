@@ -5,13 +5,13 @@
 # This file does only contain a selection of the most common options. For a
 # full list see the documentation:
 # http://www.sphinx-doc.org/en/master/config
-
 # -- Path setup --------------------------------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 
+import importlib.metadata
 import os
 import sys
 
@@ -20,21 +20,13 @@ sys.path.insert(0, os.path.abspath(".."))
 
 # -- Project information -----------------------------------------------------
 
-import configparser
-
-setup_cfg = configparser.ConfigParser()
-setup_cfg.read(os.path.abspath("../setup.cfg"))
-project = setup_cfg["metadata"]["name"]
-
+project = "SalishSeaNowcast"
 author = "SalishSeaCast Project Contributors and The University of British Columbia"
-
 pkg_creation_year = 2013
 copyright = f"{pkg_creation_year} – present, {author}"
 
 # The short X.Y version
-import nowcast
-
-version = nowcast.__version__
+version = importlib.metadata.version(project)
 # The full version, including alpha/beta/rc tags
 release = version
 
