@@ -699,3 +699,55 @@ by the `SalishSeaCast Project Contributors`_ and The University of British Colum
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
 Please see the LICENSE file for details of the license.
+
+
+Release Process
+===============
+
+Releases are done at Doug's discretion when significant pieces of development work have been
+completed.
+
+The release process steps are:
+
+#. Use :command:`hatch version release` to bump the version from ``.devn`` to the next release
+   version identifier
+
+#. Commit the version bump
+
+#. Create an annotated tag for the release with :guilabel:`Git -> New Tag...` in PyCharm
+   or :command:`git tag -e -a vyy.n`
+
+#. Push the version bump commit and tag to GitHub
+
+#. Use the GitHub web interface to create a release,
+   editing the auto-generated release notes as necessary
+
+#. Use the GitHub :guilabel:`Issues -> Milestones` web interface to edit the release
+   milestone:
+
+   * Change the :guilabel:`Due date` to the release date
+   * Delete the "when it's ready" comment in the :guilabel:`Description`
+
+#. Use the GitHub :guilabel:`Issues -> Milestones` web interface to create a milestone for
+   the next release:
+
+   * Set the :guilabel:`Title` to the next release version,
+     prepended with a ``v``;
+     e.g. ``v23.1``
+   * Set the :guilabel:`Due date` to the end of the year of the next release
+   * Set the :guilabel:`Description` to something like
+     ``v23.1 release - when it's ready :-)``
+   * Create the next release milestone
+
+#. Review the open issues,
+   especially any that are associated with the milestone for the just released version,
+   and update their milestone.
+
+#. Close the milestone for the just released version.
+
+#. Use :command:`hatch version minor,dev` to bump the version for the next development cycle,
+   or use :command:`hatch version major,minor,dev` for a year rollover version bump
+
+#. Commit the version bump
+
+#. Push the version bump commit to GitHub
