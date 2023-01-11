@@ -71,11 +71,6 @@ dependencies:
   - pytest-randomly
   - tomli
 
-  # For documentation links checking
-  - sphinx
-  - sphinx_rtd_theme
-  - sphinx-notfound-page
-
   - pip:
     - angles
     - python-hglib
