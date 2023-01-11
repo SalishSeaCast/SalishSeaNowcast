@@ -127,3 +127,7 @@ source = ["nowcast", "tests"]
 
 [tool.coverage.report]
 show_missing = true
+
+
+[tool.hatch.version]
+path = "nowcast/__about__.py"
