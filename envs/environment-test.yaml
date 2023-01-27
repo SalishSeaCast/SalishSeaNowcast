@@ -74,5 +74,4 @@ dependencies:
   - pip:
     - angles
     - python-hglib
-    - pytest-randomly
     - sysrsync
