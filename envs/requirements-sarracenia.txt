@@ -1,0 +1,33 @@
+# Python packages and versions used in production environment
+#
+# This list is intended to be for reference only.
+# Use the conda environment description file (environment-sarracenia.yaml)
+# to create an isolated production environment.
+#
+# Create/update this file with:
+#   (sarracenia-env)$ python3 -m pip list --format=freeze >> envs/requirements-sarracenia.txt
+
+amqp==5.1.0
+appdirs==1.4.4
+argh==0.26.2
+bcrypt==3.2.0
+cffi==1.15.0
+cryptography==36.0.2
+humanfriendly==10.0
+humanize==4.0.0
+importlib-metadata==4.11.3
+jsonpickle==2.1.0
+metpx-sarracenia==2.21.8
+netifaces==0.10.9
+paramiko==2.10.3
+pip==22.0.4
+psutil==5.9.0
+pycparser==2.21
+PyNaCl==1.5.0
+PyYAML==6.0
+setuptools==62.1.0
+six==1.16.0
+vine==5.0.0
+watchdog==2.1.7
+wheel==0.37.1
+zipp==3.8.0
