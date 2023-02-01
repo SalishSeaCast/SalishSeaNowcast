@@ -30,7 +30,7 @@ dependencies:
   - watchdog
 
   - pip:
-    - metpx-sarracenia[amqp]
+    - metpx-sarracenia
 
 variables:
   SARRACENIA_ENV: /SalishSeaCast/sarracenia-env
