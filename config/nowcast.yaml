@@ -149,9 +149,6 @@ rivers:
     TheodosiaDiversion: /results/forcing/rivers/observations/Theodosia_Diversion_flow
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
-  # Monthly climatology
-  monthly climatology:
-    b201702: /SalishSeaCast/rivers-climatology/rivers_month_201702.nc
   # Templates for the runoff forcing file names
   # **Must be quoted to project {} characters**
   file templates:
