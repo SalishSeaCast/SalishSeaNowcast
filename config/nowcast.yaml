@@ -147,9 +147,6 @@ rivers:
     TheodosiaScotty: /results/forcing/rivers/observations/Theodosia_Scotty_flow
     TheodosiaBypass: /results/forcing/rivers/observations/Theodosia_Bypass_flow
     TheodosiaDiversion: /results/forcing/rivers/observations/Theodosia_Diversion_flow
-  # File that describes Fraser River climatology separation from measured
-  # flow at Hope
-  Fraser climatology: /SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
   # Monthly climatology
