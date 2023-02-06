@@ -152,7 +152,7 @@ rivers:
   # Templates for the runoff forcing file names
   # **Must be quoted to project {} characters**
   file templates:
-    b201702: 'R201702DFraCElse_{:y%Ym%md%d}.nc'
+    b202108: 'R202108Dailies_{:y%Ym%md%d}.nc'
   prop_dict modules:
     b201702: salishsea_tools.river_201702
   turbidity:
