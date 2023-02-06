@@ -154,7 +154,7 @@ rivers:
   file templates:
     b202108: 'R202108Dailies_{:y%Ym%md%d}.nc'
   prop_dict modules:
-    b201702: salishsea_tools.river_201702
+    b202108: salishsea_tools.river_202108
   turbidity:
     # File containing hourly real-time Fraser River water quality buoy turbidity data
     ECget Fraser turbidity: /results/observations/ECCC/fraser_buoy.csv
