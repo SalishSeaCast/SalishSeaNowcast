@@ -198,7 +198,7 @@ class TestConfig:
         )
 
     def test_rivers_file_templates(self, prod_config):
-        expected = {"b201702": "R201702DFraCElse_{:y%Ym%md%d}.nc"}
+        expected = {"b202108": "R202108Dailies_{:y%Ym%md%d}.nc"}
         assert prod_config["rivers"]["file templates"] == expected
 
     @pytest.mark.parametrize(
