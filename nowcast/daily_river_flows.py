@@ -105,12 +105,22 @@ persist_until = {
 
 
 def get_area(config):
-    # directory = Path(config["run"]["enabled hosts"]["salish-nowcast"]["grid dir"])
-    directory = Path("/home/sallen/MEOPAR/grid/")
-    coords_file = directory / config["run types"]["nowcast-green"]["coordinates"]
-    with xr.open_dataset(coords_file, decode_times=False) as fB:
-        area = fB["e1t"][0, :] * fB["e2t"][0, :]
+    # TODO: Remove except in worker code
+    try:
+        grid_dir = Path(config["run"]["enabled hosts"]["salish-nowcast"]["grid dir"])
+        coords_file = grid_dir / config["run types"]["nowcast-green"]["coordinates"]
+        with xr.open_dataset(coords_file, decode_times=False) as fB:
+            area = fB["e1t"][0, :] * fB["e2t"][0, :]
+    except FileNotFoundError:
+        grid_dir = Path("../../grid/")
+        coords_file = grid_dir / config["run types"]["nowcast-green"]["coordinates"]
+        with xr.open_dataset(coords_file, decode_times=False) as fB:
+            area = fB["e1t"][0, :] * fB["e2t"][0, :]
     return area
+
+
+def _parse_long_csv_line(line):
+    return line[:4]
 
 
 def read_river(river_name, ps, config):
@@ -122,6 +132,8 @@ def read_river(river_name, ps, config):
         sep="\s+",
         index_col=False,
         names=["year", "month", "day", "flow"],
+        on_bad_lines=_parse_long_csv_line,
+        engine="python",
     )
     river_flow["date"] = pd.to_datetime(river_flow.drop(columns="flow"))
     river_flow.set_index("date", inplace=True)
