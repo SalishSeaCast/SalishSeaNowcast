@@ -11,7 +11,7 @@ amqp==5.1.0
 appdirs==1.4.4
 bcrypt==3.2.2
 cffi==1.15.1
-cryptography==39.0.0
+cryptography==39.0.1
 humanfriendly==10.0
 humanize==4.5.0
 importlib-metadata==6.0.0
