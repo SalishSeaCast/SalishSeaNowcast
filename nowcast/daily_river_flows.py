@@ -9,7 +9,6 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 import xarray as xr
-import yaml
 
 from salishsea_tools import rivertools
 from salishsea_tools import river_202108 as rivers
