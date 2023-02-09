@@ -30,11 +30,14 @@ from pathlib import Path
 NBVIEWER = "https://nbviewer.org/github"
 GITHUB_ORG = "SalishSeaCast"
 REPO_NAME = "SalishSeaNowcast"
+DEFAULT_BRANCH_NAME = "main"
 TITLE_PATTERN = re.compile("#{1,6} ?")
 
 
 def main():
-    url = f"{NBVIEWER}/{GITHUB_ORG}/{REPO_NAME}/blob/master/{Path.cwd().name}"
+    cwd_parts = Path.cwd().parts
+    repo_path = Path(*cwd_parts[cwd_parts.index(REPO_NAME) + 1 :])
+    url = f"{NBVIEWER}/{GITHUB_ORG}/{REPO_NAME}/blob/{DEFAULT_BRANCH_NAME}/{repo_path}"
 
     readme = """\
 The Jupyter Notebooks in this directory document
