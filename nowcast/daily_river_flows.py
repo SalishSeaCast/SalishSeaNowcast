@@ -14,8 +14,6 @@ import yaml
 from salishsea_tools import rivertools
 from salishsea_tools import river_202108 as rivers
 
-prop_dict_name = "river_202108"
-
 
 names = [
     "bute",
@@ -475,7 +473,7 @@ def write_file(day, runoff, config):
         ),
         "title": netcdf_title,
         "notebook": notebook,
-        "rivers_base": prop_dict_name,
+        "rivers_base": config["rivers"]["prop_dict module"],
         "summary": f"Daily Runoff for Bathymetry 202108",
         "history": (
             "[{}] File creation.".format(dt.datetime.today().strftime("%Y-%m-%d"))

@@ -152,8 +152,8 @@ rivers:
   # Template for the runoff forcing file name
   # **Must be quoted to project {} characters**
   file template: 'R202108Dailies_{:y%Ym%md%d}.nc'
-  prop_dict modules:
-    b202108: salishsea_tools.river_202108
+  # Module containing dictionary of the proportions that each river occupies in its watershed
+  prop_dict module: salishsea_tools.river_202108
   turbidity:
     # File containing hourly real-time Fraser River water quality buoy turbidity data
     ECget Fraser turbidity: /results/observations/ECCC/fraser_buoy.csv
