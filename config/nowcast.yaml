@@ -149,10 +149,9 @@ rivers:
     TheodosiaDiversion: /results/forcing/rivers/observations/Theodosia_Diversion_flow
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
-  # Templates for the runoff forcing file names
+  # Template for the runoff forcing file name
   # **Must be quoted to project {} characters**
-  file templates:
-    b202108: 'R202108Dailies_{:y%Ym%md%d}.nc'
+  file template: 'R202108Dailies_{:y%Ym%md%d}.nc'
   prop_dict modules:
     b202108: salishsea_tools.river_202108
   turbidity:

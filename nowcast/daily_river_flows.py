@@ -16,8 +16,6 @@ from salishsea_tools import river_202108 as rivers
 
 prop_dict_name = "river_202108"
 
-bathy_type = "b202108"
-
 
 names = [
     "bute",
@@ -460,9 +458,9 @@ def write_file(day, runoff, config):
 
     # set up filename
     directory = Path(config["rivers"]["rivers dir"])
-    filename_tmpls = config["rivers"]["file templates"][bathy_type]
+    filename_tmpl = config["rivers"]["file template"]
 
-    filename = directory / filename_tmpls.format(day.date())
+    filename = directory / filename_tmpl.format(day.date())
     print(filename)
 
     netcdf_title = f"Rivers for {day.date()}"
