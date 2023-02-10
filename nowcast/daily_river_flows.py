@@ -1,7 +1,7 @@
 """
     Module for calculating daily river flows
 """
-
+import functools
 from pathlib import Path
 
 import arrow
@@ -115,21 +115,30 @@ def get_area(config):
 
 
 def _parse_long_csv_line(line):
+    """pandas .csv parser helper to handle lines with extra columns.
+
+    Returns the first 4 columns from the line.
+    """
     return line[:4]
+
+
+# Customize pandas.read_csv() with the args we always want to use for reading river discharge
+# .csv files
+_read_river_csv = functools.partial(
+    pd.read_csv,
+    header=None,
+    delim_whitespace=True,
+    index_col=False,
+    names=["year", "month", "day", "flow"],
+    engine="python",
+    on_bad_lines=_parse_long_csv_line,
+)
 
 
 def read_river(river_name, ps, config):
     """Read daily average discharge data for river_name from river flow file."""
     filename = Path(config["rivers"]["SOG river files"][river_name.replace("_", "")])
-    river_flow = pd.read_csv(
-        filename,
-        header=None,
-        sep="\s+",
-        index_col=False,
-        names=["year", "month", "day", "flow"],
-        on_bad_lines=_parse_long_csv_line,
-        engine="python",
-    )
+    river_flow = _read_river_csv(filename)
     river_flow["date"] = pd.to_datetime(river_flow.drop(columns="flow"))
     river_flow.set_index("date", inplace=True)
     river_flow = river_flow.drop(columns=["year", "month", "day"])
@@ -141,27 +150,9 @@ def read_river(river_name, ps, config):
 
 
 def read_river_Theodosia(config):
-    part1 = pd.read_csv(
-        config["rivers"]["SOG river files"]["TheodosiaScotty"],
-        header=None,
-        sep="\s+",
-        index_col=False,
-        names=["year", "month", "day", "flow"],
-    )
-    part2 = pd.read_csv(
-        config["rivers"]["SOG river files"]["TheodosiaBypass"],
-        header=None,
-        sep="\s+",
-        index_col=False,
-        names=["year", "month", "day", "flow"],
-    )
-    part3 = pd.read_csv(
-        config["rivers"]["SOG river files"]["TheodosiaDiversion"],
-        header=None,
-        sep="\s+",
-        index_col=False,
-        names=["year", "month", "day", "flow"],
-    )
+    part1 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaScotty"])
+    part2 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaBypass"])
+    part3 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaDiversion"])
     for part in [part1, part2, part3]:
         part["date"] = pd.to_datetime(part.drop(columns="flow"))
         part.set_index("date", inplace=True)
