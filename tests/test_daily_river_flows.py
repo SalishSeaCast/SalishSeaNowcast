@@ -38,7 +38,7 @@ class TestParseLongCSVLine:
 
 
 class TestReadRiverCSV:
-    """Unit tests for"""
+    """Unit tests for daily_river_flows._read_river_csv()"""
 
     def test_well_formed_lines(self):
         csv_lines = textwrap.dedent(
@@ -77,5 +77,35 @@ class TestReadRiverCSV:
                 "day": [20, 21],
                 "flow": [1.13e1, 5.97e1],
             }
+        )
+        pandas.testing.assert_frame_equal(river_flow, expected)
+
+
+class TestSetDateAsIndex:
+    """Unit test for daily_river_flows._set_date_as_index()."""
+
+    def test_set_date_as_index(self):
+        river_flow = pandas.DataFrame(
+            {
+                "year": 1923,
+                "month": 2,
+                "day": [20, 21],
+                "flow": [1.13e1, 5.97e1],
+            }
+        )
+
+        daily_river_flows._set_date_as_index(river_flow)
+
+        expected = pandas.DataFrame(
+            data={
+                "flow": [1.13e1, 5.97e1],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("1923-02-20"),
+                    pandas.to_datetime("1923-02-21"),
+                ],
+                name="date",
+            ),
         )
         pandas.testing.assert_frame_equal(river_flow, expected)

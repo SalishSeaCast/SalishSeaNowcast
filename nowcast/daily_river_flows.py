@@ -123,9 +123,9 @@ def _parse_long_csv_line(line):
     return line[:4]
 
 
-# Customize pandas.read_csv() with the args we always want to use for reading river discharge
-# .csv files
 _read_river_csv = functools.partial(
+    # Customize pandas.read_csv() with the args we always want to use for reading river discharge
+    # .csv files
     pd.read_csv,
     header=None,
     delim_whitespace=True,
@@ -136,6 +136,13 @@ _read_river_csv = functools.partial(
 )
 
 
+def _set_date_as_index(river_flow):
+    """Set date as dataframe index and drop year, month & day columns used to construct date."""
+    river_flow["date"] = pd.to_datetime(river_flow.drop(columns="flow"))
+    river_flow.set_index("date", inplace=True)
+    river_flow.drop(columns=["year", "month", "day"], inplace=True)
+
+
 def read_river(river_name, ps, config):
     """Read daily average discharge data for river_name from river flow file."""
     filename = Path(config["rivers"]["SOG river files"][river_name.replace("_", "")])
@@ -143,9 +150,7 @@ def read_river(river_name, ps, config):
         # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
         warnings.simplefilter("ignore")
         river_flow = _read_river_csv(filename)
-    river_flow["date"] = pd.to_datetime(river_flow.drop(columns="flow"))
-    river_flow.set_index("date", inplace=True)
-    river_flow = river_flow.drop(columns=["year", "month", "day"])
+    _set_date_as_index(river_flow)
     if ps == "primary":
         river_flow = river_flow.rename(columns={"flow": "Primary River Flow"})
     elif ps == "secondary":
@@ -169,9 +174,7 @@ def read_river_Theodosia(config):
             config["rivers"]["SOG river files"]["TheodosiaDiversion"]
         )
     for part in [part1, part2, part3]:
-        part["date"] = pd.to_datetime(part.drop(columns="flow"))
-        part.set_index("date", inplace=True)
-        part.drop(columns=["year", "month", "day"], inplace=True)
+        _set_date_as_index(part)
     part1 = part1.rename(columns={"flow": "Scotty"})
     part2 = part2.rename(columns={"flow": "Bypass"})
     part3 = part3.rename(columns={"flow": "Diversion"})
