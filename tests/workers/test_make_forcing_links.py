@@ -197,9 +197,10 @@ class TestConfig:
             prod_config["run"]["enabled hosts"][host]["forcing"]["ssh dir"] == ssh_dir
         )
 
-    def test_rivers_file_templates(self, prod_config):
-        expected = {"b202108": "R202108Dailies_{:y%Ym%md%d}.nc"}
-        assert prod_config["rivers"]["file templates"] == expected
+    def test_rivers_file_template(self, prod_config):
+        assert (
+            prod_config["rivers"]["file template"] == "R202108Dailies_{:y%Ym%md%d}.nc"
+        )
 
     @pytest.mark.parametrize(
         "host, rivers_dir",

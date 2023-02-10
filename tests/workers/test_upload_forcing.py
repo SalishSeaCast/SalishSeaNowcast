@@ -189,7 +189,7 @@ class TestConfig:
     )
     def test_river_runoff_uploads(self, host, expected, prod_config):
         rivers = prod_config["rivers"]
-        assert rivers["file templates"] == {"b202108": "R202108Dailies_{:y%Ym%md%d}.nc"}
+        assert rivers["file template"] == "R202108Dailies_{:y%Ym%md%d}.nc"
         assert rivers["rivers dir"] == "/results/forcing/rivers/"
         host_config = prod_config["run"]["enabled hosts"][host]
         assert host_config["forcing"]["rivers dir"] == expected
