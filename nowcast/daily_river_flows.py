@@ -2,6 +2,7 @@
     Module for calculating daily river flows
 """
 import functools
+import warnings
 from pathlib import Path
 
 import arrow
@@ -138,7 +139,10 @@ _read_river_csv = functools.partial(
 def read_river(river_name, ps, config):
     """Read daily average discharge data for river_name from river flow file."""
     filename = Path(config["rivers"]["SOG river files"][river_name.replace("_", "")])
-    river_flow = _read_river_csv(filename)
+    with warnings.catch_warnings():
+        # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
+        warnings.simplefilter("ignore")
+        river_flow = _read_river_csv(filename)
     river_flow["date"] = pd.to_datetime(river_flow.drop(columns="flow"))
     river_flow.set_index("date", inplace=True)
     river_flow = river_flow.drop(columns=["year", "month", "day"])
@@ -150,9 +154,20 @@ def read_river(river_name, ps, config):
 
 
 def read_river_Theodosia(config):
-    part1 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaScotty"])
-    part2 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaBypass"])
-    part3 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaDiversion"])
+    with warnings.catch_warnings():
+        # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
+        warnings.simplefilter("ignore")
+        part1 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaScotty"])
+    with warnings.catch_warnings():
+        # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
+        warnings.simplefilter("ignore")
+        part2 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaBypass"])
+    with warnings.catch_warnings():
+        # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
+        warnings.simplefilter("ignore")
+        part3 = _read_river_csv(
+            config["rivers"]["SOG river files"]["TheodosiaDiversion"]
+        )
     for part in [part1, part2, part3]:
         part["date"] = pd.to_datetime(part.drop(columns="flow"))
         part.set_index("date", inplace=True)
