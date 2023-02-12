@@ -22,6 +22,7 @@ import io
 import textwrap
 
 import pandas.testing
+import pytest
 
 from nowcast import daily_river_flows
 
@@ -99,6 +100,55 @@ class TestSetDateAsIndex:
         expected = pandas.DataFrame(
             data={
                 "flow": [1.13e1, 5.97e1],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("1923-02-20"),
+                    pandas.to_datetime("1923-02-21"),
+                ],
+                name="date",
+            ),
+        )
+        pandas.testing.assert_frame_equal(river_flow, expected)
+
+
+class TestReadRiver:
+    """Unit tests for daily_river_flows._read_river()."""
+
+    @pytest.mark.parametrize(
+        "ps, expected_col_name",
+        (
+            ("primary", "Primary River Flow"),
+            ("secondary", "Secondary River Flow"),
+        ),
+    )
+    def test_read_river(self, ps, expected_col_name, monkeypatch):
+        def mock_read_river_csv(filename):
+            return pandas.DataFrame(
+                {
+                    "year": 1923,
+                    "month": 2,
+                    "day": [20, 21],
+                    "flow": [1.13e1, 5.97e1],
+                }
+            )
+
+        monkeypatch.setattr(daily_river_flows, "_read_river_csv", mock_read_river_csv)
+
+        river_name = "Squamish_Brackendale"
+        config = {
+            "rivers": {
+                "SOG river files": {
+                    "SquamishBrackendale": "forcing/rivers/observations/Squamish_Brackendale_flow",
+                }
+            }
+        }
+
+        river_flow = daily_river_flows._read_river(river_name, ps, config)
+
+        expected = pandas.DataFrame(
+            data={
+                expected_col_name: [1.13e1, 5.97e1],
             },
             index=pandas.Index(
                 data=[

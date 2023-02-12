@@ -119,6 +119,10 @@ def _parse_long_csv_line(line):
     """pandas .csv parser helper to handle lines with extra columns.
 
     Returns the first 4 columns from the line.
+
+    :param list line: Column values from a .csv file line.
+
+    :rtype: list
     """
     return line[:4]
 
@@ -137,14 +141,27 @@ _read_river_csv = functools.partial(
 
 
 def _set_date_as_index(river_flow):
-    """Set date as dataframe index and drop year, month & day columns used to construct date."""
+    """Set date as dataframe index and drop year, month & day columns used to construct date.
+
+    :param river_flow: River flow dataframe from .csv file.
+    :type river_flow: :py:class:`pandas.Dataframe`
+    """
     river_flow["date"] = pd.to_datetime(river_flow.drop(columns="flow"))
     river_flow.set_index("date", inplace=True)
     river_flow.drop(columns=["year", "month", "day"], inplace=True)
 
 
-def read_river(river_name, ps, config):
-    """Read daily average discharge data for river_name from river flow file."""
+def _read_river(river_name, ps, config):
+    """Read daily average discharge data for river_name from river flow file.
+
+    :param str river_name:
+
+    :param str ps:
+
+    :param dict config:
+
+    :rtype: :py:class:`pandas.Dataframe`
+    """
     filename = Path(config["rivers"]["SOG river files"][river_name.replace("_", "")])
     with warnings.catch_warnings():
         # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
@@ -197,7 +214,7 @@ def read_river_Theodosia(config):
 
 def patch_fitting(primary_river, useriver, dateneeded, gap_length, config):
     bad = False
-    firstchoice = read_river(useriver, "primary", config)
+    firstchoice = _read_river(useriver, "primary", config)
     length = 7  # number of days we use to fit against
     ratio = 0
     for day in arrow.Arrow.range(
@@ -277,7 +294,7 @@ def do_a_pair(
     config,
     secondary_river_name="Null",
 ):
-    primary_river = read_river(primary_river_name, "primary", config)
+    primary_river = _read_river(primary_river_name, "primary", config)
 
     if len(primary_river[primary_river.index == str(dateneeded.date())]) == 1:
         primary_flow = primary_river[
@@ -291,7 +308,7 @@ def do_a_pair(
         if secondary_river_name == "Theodosia":
             secondary_river = read_river_Theodosia(config)
         else:
-            secondary_river = read_river(secondary_river_name, "secondary", config)
+            secondary_river = _read_river(secondary_river_name, "secondary", config)
 
         if len(secondary_river[secondary_river.index == str(dateneeded.date())]) == 1:
             secondary_flow = secondary_river[
@@ -316,7 +333,7 @@ def do_a_pair(
 def do_fraser(
     watershed_from_river, dateneeded, primary_river_name, secondary_river_name, config
 ):
-    primary_river = read_river(primary_river_name, "primary", config)
+    primary_river = _read_river(primary_river_name, "primary", config)
 
     if len(primary_river[primary_river.index == str(dateneeded.date())]) == 1:
         good = True
@@ -336,7 +353,7 @@ def do_fraser(
             print(gap_length)
             primary_flow = lastdata.values
 
-    secondary_river = read_river(secondary_river_name, "secondary", config)
+    secondary_river = _read_river(secondary_river_name, "secondary", config)
 
     if len(secondary_river[secondary_river.index == str(dateneeded.date())]) == 1:
         good = True
