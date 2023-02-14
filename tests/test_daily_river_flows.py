@@ -20,11 +20,35 @@
 """
 import io
 import textwrap
+from pathlib import Path
 
+import nemo_nowcast
 import pandas.testing
 import pytest
 
 from nowcast import daily_river_flows
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                rivers:
+                  SOG river files:
+                    SquamishBrackendale: forcing/rivers/observations/Squamish_Brackendale_flow
+                    TheodosiaScotty: forcing/rivers/observations/Theodosia_Scotty_flow
+                    TheodosiaBypass: forcing/rivers/observations/Theodosia_Bypass_flow
+                    TheodosiaDiversion: forcing/rivers/observations/Theodosia_Diversion_flow
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 class TestParseLongCSVLine:
@@ -122,7 +146,7 @@ class TestReadRiver:
             ("secondary", "Secondary River Flow"),
         ),
     )
-    def test_read_river(self, ps, expected_col_name, monkeypatch):
+    def test_read_river(self, ps, expected_col_name, config, monkeypatch):
         def mock_read_river_csv(filename):
             return pandas.DataFrame(
                 {
@@ -136,13 +160,6 @@ class TestReadRiver:
         monkeypatch.setattr(daily_river_flows, "_read_river_csv", mock_read_river_csv)
 
         river_name = "Squamish_Brackendale"
-        config = {
-            "rivers": {
-                "SOG river files": {
-                    "SquamishBrackendale": "forcing/rivers/observations/Squamish_Brackendale_flow",
-                }
-            }
-        }
 
         river_flow = daily_river_flows._read_river(river_name, ps, config)
 
@@ -159,3 +176,112 @@ class TestReadRiver:
             ),
         )
         pandas.testing.assert_frame_equal(river_flow, expected)
+
+
+class TestReadRiverTheodosia:
+    """Unit tests for daily_river_flows._read_river_Theodosia()."""
+
+    def test_read_river_Theodosia(self, config, monkeypatch):
+        mock_dataframes = [
+            # TheodosiaScotty
+            pandas.DataFrame(
+                {
+                    "year": 2023,
+                    "month": 2,
+                    "day": [11, 12],
+                    "flow": [5.902153e0, 5.576458e0],
+                }
+            ),
+            # TheodosiaBypass
+            pandas.DataFrame(
+                {
+                    "year": 2023,
+                    "month": 2,
+                    "day": [11, 12],
+                    "flow": [4.423993e0, 4.274444e0],
+                }
+            ),
+            # TheodosiaDiversion
+            pandas.DataFrame(
+                {
+                    "year": 2023,
+                    "month": 2,
+                    "day": [11, 12],
+                    "flow": [4.795868e0, 4.090347e0],
+                }
+            ),
+        ]
+
+        def mock_read_river_csv(filename):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_read_river_csv", mock_read_river_csv)
+
+        theodosia = daily_river_flows._read_river_Theodosia(config)
+
+        expected = pandas.DataFrame(
+            data={
+                "Secondary River Flow": [6.27403e0, 5.39236e0],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-11"),
+                    pandas.to_datetime("2023-02-12"),
+                ],
+                name="date",
+            ),
+        )
+        pandas.testing.assert_frame_equal(theodosia, expected)
+
+    def test_read_river_Theodosia_wo_Scotty(self, config, monkeypatch):
+        mock_dataframes = [
+            # TheodosiaScotty
+            pandas.DataFrame(
+                {
+                    "year": 2003,
+                    "month": 10,
+                    "day": [16, 17],
+                    "flow": [7.83e0, 2.3e1],
+                }
+            ),
+            # TheodosiaBypass
+            pandas.DataFrame(
+                {
+                    "year": 2003,
+                    "month": 10,
+                    "day": [15, 16, 17],
+                    "flow": [3.13e0, 5.20e0, 4.07e0],
+                }
+            ),
+            # TheodosiaDiversion
+            pandas.DataFrame(
+                {
+                    "year": 2003,
+                    "month": 10,
+                    "day": [15, 16, 17],
+                    "flow": [4.38e0, 3.17e1, 5.89e1],
+                }
+            ),
+        ]
+
+        def mock_read_river_csv(filename):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_read_river_csv", mock_read_river_csv)
+
+        theodosia = daily_river_flows._read_river_Theodosia(config)
+
+        expected = pandas.DataFrame(
+            data={
+                "Secondary River Flow": [6.25902e0, 3.433000e1, 7.783000e1],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2003-10-15"),
+                    pandas.to_datetime("2003-10-16"),
+                    pandas.to_datetime("2003-10-17"),
+                ],
+                name="date",
+            ),
+        )
+        pandas.testing.assert_frame_equal(theodosia, expected)

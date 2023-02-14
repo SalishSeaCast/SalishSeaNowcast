@@ -120,7 +120,7 @@ def _parse_long_csv_line(line):
 
     Returns the first 4 columns from the line.
 
-    :param list line: Column values from a .csv file line.
+    :param list line:
 
     :rtype: list
     """
@@ -143,8 +143,7 @@ _read_river_csv = functools.partial(
 def _set_date_as_index(river_flow):
     """Set date as dataframe index and drop year, month & day columns used to construct date.
 
-    :param river_flow: River flow dataframe from .csv file.
-    :type river_flow: :py:class:`pandas.Dataframe`
+    :param :py:class:`pandas.Dataframe` river_flow:
     """
     river_flow["date"] = pd.to_datetime(river_flow.drop(columns="flow"))
     river_flow.set_index("date", inplace=True)
@@ -155,9 +154,7 @@ def _read_river(river_name, ps, config):
     """Read daily average discharge data for river_name from river flow file.
 
     :param str river_name:
-
-    :param str ps:
-
+    :param str ps: "primary" or "secondary"
     :param dict config:
 
     :rtype: :py:class:`pandas.Dataframe`
@@ -175,39 +172,46 @@ def _read_river(river_name, ps, config):
     return river_flow
 
 
-def read_river_Theodosia(config):
+def _read_river_Theodosia(config):
+    """Read daily average discharge observations for 3 parts of Theodosia River
+    from river flow files, and combine them to get total.
+
+    :param dict config:
+
+    :rtype: :py:class:`pandas.Dataframe`
+    """
+    part_names = ("TheodosiaScotty", "TheodosiaBypass", "TheodosiaDiversion")
     with warnings.catch_warnings():
         # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
         warnings.simplefilter("ignore")
-        part1 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaScotty"])
-    with warnings.catch_warnings():
-        # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
-        warnings.simplefilter("ignore")
-        part2 = _read_river_csv(config["rivers"]["SOG river files"]["TheodosiaBypass"])
-    with warnings.catch_warnings():
-        # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
-        warnings.simplefilter("ignore")
-        part3 = _read_river_csv(
-            config["rivers"]["SOG river files"]["TheodosiaDiversion"]
-        )
-    for part in [part1, part2, part3]:
+        parts = [
+            _read_river_csv(Path(config["rivers"]["SOG river files"][part_name]))
+            for part_name in part_names
+        ]
+    for part, part_name in zip(parts, part_names):
         _set_date_as_index(part)
-    part1 = part1.rename(columns={"flow": "Scotty"})
-    part2 = part2.rename(columns={"flow": "Bypass"})
-    part3 = part3.rename(columns={"flow": "Diversion"})
-    theodosia = (part3.merge(part2, how="inner", on="date")).merge(
-        part1, how="inner", on="date"
+        part.rename(columns={"flow": part_name.replace("Theodosia", "")}, inplace=True)
+
+    # Calculate discharge from 3 gauged parts of river above control infrastructure
+    theodosia = (parts[2].merge(parts[1], how="outer", on="date")).merge(
+        parts[0], how="outer", on="date"
     )
     theodosia["Secondary River Flow"] = (
         theodosia["Scotty"] + theodosia["Diversion"] - theodosia["Bypass"]
     )
-    part3["FlowFromDiversion"] = part3.Diversion * theodosia_from_diversion_only
-    theodosia = theodosia.merge(part3, how="outer", on="date", sort=True)
-    theodosia["Secondary River Flow"] = theodosia["Secondary River Flow"].fillna(
-        theodosia["FlowFromDiversion"]
+
+    # Alternative discharge calculation from gauged diversion part
+    # Used for dates before Scotty part was gauged, or in the event of missing obs
+    parts[2]["FlowFromDiversion"] = parts[2].Diversion * theodosia_from_diversion_only
+    theodosia = theodosia.merge(parts[2], how="outer", on="date", sort=True)
+    theodosia["Secondary River Flow"].fillna(
+        theodosia["FlowFromDiversion"], inplace=True
     )
-    theodosia = theodosia.drop(
-        ["Diversion_x", "Bypass", "Scotty", "Diversion_y", "FlowFromDiversion"], axis=1
+
+    theodosia.drop(
+        ["Diversion_x", "Bypass", "Scotty", "Diversion_y", "FlowFromDiversion"],
+        axis=1,
+        inplace=True,
     )
     return theodosia
 
@@ -306,7 +310,7 @@ def do_a_pair(
 
     if use_secondary:
         if secondary_river_name == "Theodosia":
-            secondary_river = read_river_Theodosia(config)
+            secondary_river = _read_river_Theodosia(config)
         else:
             secondary_river = _read_river(secondary_river_name, "secondary", config)
 
