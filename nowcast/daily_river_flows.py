@@ -216,38 +216,60 @@ def _read_river_Theodosia(config):
     return theodosia
 
 
-def patch_fitting(primary_river, useriver, dateneeded, gap_length, config):
-    bad = False
-    firstchoice = _read_river(useriver, "primary", config)
-    length = 7  # number of days we use to fit against
-    ratio = 0
-    for day in arrow.Arrow.range(
+def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config):
+    """
+    :param :py:class:`pandas.Dataframe` river_flow:
+    :param str fit_from_river_name:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param int gap_length:
+    :param dict config:
+
+    :rtype: tuple
+    """
+    fit_from_river_flow = _read_river(fit_from_river_name, "primary", config)
+    obs_yyyymmdd = obs_date.format("YYYY-MM-DD")
+    try:
+        fit_from_river_flow.loc[obs_yyyymmdd]
+    except KeyError:
+        # If river to fit from is missing obs date, the fit is a failure
+        bad, flux = True, np.nan
+        return bad, flux
+
+    fit_duration = 7  # number of days we use to fit against
+    fit_dates = arrow.Arrow.range(
         "day",
-        dateneeded.shift(days=-length - gap_length),
-        dateneeded.shift(days=-1 - gap_length),
-    ):
-        numer = primary_river[primary_river.index == str(day.date())].values
-        denom = firstchoice[firstchoice.index == str(day.date())].values
-        if (len(denom) == 1) and (len(numer) == 1):
-            ratio = ratio + numer / denom
-        else:
-            bad = True
-
-    if len(firstchoice[firstchoice.index == str(dateneeded.date())].values) != 1:
-        bad = True
-
-    if not bad:
-        flux = (
-            ratio
-            / length
-            * firstchoice[firstchoice.index == str(dateneeded.date())].values
+        obs_date.shift(days=-fit_duration - gap_length),
+        obs_date.shift(days=-1 - gap_length),
+    )
+    try:
+        ratio = sum(
+            river_flow.loc[yyyymmdd := day.format("YYYY-MM-DD"), "Primary River Flow"]
+            / fit_from_river_flow.loc[yyyymmdd, "Primary River Flow"]
+            for day in fit_dates
         )
-    else:
-        flux = np.nan
+    except KeyError:
+        # If either river is missing a value during the fitting period, the fit is a failure
+        bad, flux = True, np.nan
+        return bad, flux
+
+    bad = False
+    flux = (ratio / fit_duration) * fit_from_river_flow.loc[
+        obs_yyyymmdd, "Primary River Flow"
+    ]
     return bad, flux
 
 
 def patch_gaps(name, primary_river, dateneeded, config):
+    """
+    :param str river_name:
+    :param :py:class:`pandas.Dataframe` river_flow:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param dict config:
+
+    :rtype: :py:class:`numpy.ndarray`
+
+    :raises: # TODO
+    """
     lastdata = primary_river.iloc[-1]
 
     # Find the length of gap assuming that the required day is beyond the time series available
@@ -279,7 +301,7 @@ def patch_gaps(name, primary_river, dateneeded, config):
             else:
                 print("typo in fit list")
                 stop
-            bad, flux = patch_fitting(
+            bad, flux = _patch_fitting(
                 primary_river, useriver, dateneeded, gap_length, config
             )
             if bad:
