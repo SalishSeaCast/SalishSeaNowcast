@@ -69,6 +69,7 @@ matching_dictionary = {
 }
 backup_dictionary = {"SanJuan_PortRenfrew": "RobertsCreek", "Theodosia": "Englishman"}
 patching_dictionary = {
+    # TODO: add config tests to ensure that all lists end with "persist"
     "Englishman": ["fit", "persist"],
     "Theodosia": ["fit", "backup", "persist"],
     "RobertsCreek": ["fit", "persist"],
@@ -84,6 +85,7 @@ patching_dictionary = {
     "Clowhom_ClowhomLake": ["fit", "persist"],
 }
 persist_until = {
+    # number of days to persist last observation for before switching to fitting strategies
     "Englishman": 0,
     "Theodosia": 0,
     "RobertsCreek": 0,
@@ -259,56 +261,56 @@ def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config
     return bad, flux
 
 
-def patch_gaps(name, primary_river, dateneeded, config):
+def _patch_missing_obs(river_name, river_flow, obs_date, config):
     """
     :param str river_name:
     :param :py:class:`pandas.Dataframe` river_flow:
     :param :py:class:`arrow.Arrow` obs_date:
     :param dict config:
 
-    :rtype: :py:class:`numpy.ndarray`
+    :rtype: float
 
-    :raises: # TODO
+    :raises: :py:exc:`ValueError`
     """
-    lastdata = primary_river.iloc[-1]
+    last_obs_date = arrow.get(river_flow.iloc[-1].name)
+    if last_obs_date > obs_date:
+        # We can only handle patching discharge values for dates beyond the end of the observations
+        # time series.
+        # Use Susan's MakeDailyNCFiles notebook if you need to patch discharges
+        # within the time series.
+        raise ValueError(
+            f"obs_date={obs_date.format('YYYY-MM-DD')} is not beyond end of time series at "
+            f"{last_obs_date.format('YYYY-MM-DD')}"
+        )
 
-    # Find the length of gap assuming that the required day is beyond the time series available
-    lastdata = primary_river.iloc[-1]
-    if lastdata.name > dateneeded.naive:
-        print("Not working at end of time series, use MakeDailyNCFiles notebook")
-        stop
-    else:
-        day = dt.datetime(2020, 1, 2) - dt.datetime(2020, 1, 1)
-        gap_length = int((dateneeded.naive - lastdata.name) / day)
-        print(gap_length)
+    gap_length = (obs_date - last_obs_date).days
+    print(gap_length)
+    if gap_length <= persist_until[river_name]:
+        # Handle rivers for which Susan's statistical investigation showed that persistence
+        # is better than fitting for short periods of missing observations.
+        print("persist")
+        flux = river_flow.iloc[-1, -1]
+        return flux
 
-    notfitted = True
-    method = 0
-    while notfitted:
-        if gap_length > persist_until[name]:
-            fittype = patching_dictionary[name][method]
-        else:
-            fittype = "persist"
-        print(fittype)
-        if fittype == "persist":
-            flux = lastdata.values
-            notfitted = False
-        else:
-            if fittype == "fit":
-                useriver = matching_dictionary[name]
-            elif fittype == "backup":
-                useriver = backup_dictionary[name]
-            else:
-                print("typo in fit list")
-                stop
-            bad, flux = _patch_fitting(
-                primary_river, useriver, dateneeded, gap_length, config
-            )
-            if bad:
-                method = method + 1
-            else:
-                notfitted = False
-    return flux
+    for fit_type in patching_dictionary[river_name]:
+        print(fit_type)
+        match fit_type:
+            case "persist":
+                flux = river_flow.iloc[-1, -1]
+                return flux
+            case "fit":
+                fit_from_river_name = matching_dictionary[river_name]
+            case "backup":
+                fit_from_river_name = backup_dictionary[river_name]
+            case _:
+                # TODO: add config tests to ensure that patching_dictionary has only valid keys
+                #       making this case unnecessary
+                raise ValueError("typo in fit list")
+        bad, flux = _patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        )
+        if not np.isnan(flux):
+            return flux
 
 
 def do_a_pair(
@@ -328,7 +330,9 @@ def do_a_pair(
         ].values
     else:
         print(primary_river_name, " need to patch")
-        primary_flow = patch_gaps(primary_river_name, primary_river, dateneeded, config)
+        primary_flow = _patch_missing_obs(
+            primary_river_name, primary_river, dateneeded, config
+        )
 
     if use_secondary:
         if secondary_river_name == "Theodosia":
@@ -342,7 +346,7 @@ def do_a_pair(
             ].values
         else:
             print(secondary_river_name, " need to patch")
-            secondary_flow = patch_gaps(
+            secondary_flow = _patch_missing_obs(
                 secondary_river_name, secondary_river, dateneeded, config
             )
 
@@ -389,7 +393,7 @@ def do_fraser(
     else:
         good = False
         print(secondary_river_name, " need to patch")
-        secondary_flow = patch_gaps(
+        secondary_flow = _patch_missing_obs(
             secondary_river_name, secondary_river, dateneeded, config
         )
 

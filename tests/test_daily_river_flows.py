@@ -365,7 +365,7 @@ class TestPatchFitting:
         )
 
         assert bad is False
-        numpy.testing.assert_allclose(flux, 54.759385)
+        assert flux == pytest.approx(54.759385)
 
     def test_3_days_missing_patch_successful(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config):
@@ -443,7 +443,7 @@ class TestPatchFitting:
         )
 
         assert bad is False
-        numpy.testing.assert_allclose(flux, 54.038875)
+        assert flux == pytest.approx(54.038875)
 
     def test_gap_in_river_to_patch_failure(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config):
@@ -666,3 +666,195 @@ class TestPatchFitting:
 
         assert bad is True
         assert numpy.isnan(flux)
+
+
+class TestPatchMissingObs:
+    """Unit tests for daily_river_flows._patch_missing_obs()."""
+
+    def test_obs_date_not_at_end_of_timeseries(self, config):
+        river_name = "Nicomekl_Langley"
+        river_flow = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-10"),
+                    pandas.to_datetime("2023-02-11"),
+                    pandas.to_datetime("2023-02-12"),
+                    pandas.to_datetime("2023-02-13"),
+                    pandas.to_datetime("2023-02-14"),
+                    pandas.to_datetime("2023-02-15"),
+                    pandas.to_datetime("2023-02-16"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    1.910105e00,
+                    1.379547e00,
+                    2.236864e00,
+                    3.346551e00,
+                    1.748188e00,
+                    1.233519e00,
+                    1.151951e00,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-13")
+
+        with pytest.raises(
+            ValueError, match=r".* is not beyond end of time series at .*"
+        ) as excinfo:
+            daily_river_flows._patch_missing_obs(
+                river_name, river_flow, obs_date, config
+            )
+
+    def test_persist(self, config):
+        river_name = "Clowhom_ClowhomLake"
+        river_flow = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-13"),
+                    pandas.to_datetime("2023-02-14"),
+                    pandas.to_datetime("2023-02-15"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    5.549688e00,
+                    4.717500e00,
+                    4.036944e00,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-16")
+
+        flux = daily_river_flows._patch_missing_obs(
+            river_name, river_flow, obs_date, config
+        )
+
+        assert flux == pytest.approx(4.036944e00)
+
+    def test_fit(self, config, monkeypatch):
+        def mock_patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        ):
+            bad, flux = False, 54.759385
+            return bad, flux
+
+        monkeypatch.setattr(daily_river_flows, "_patch_fitting", mock_patch_fitting)
+
+        river_name = "Squamish_Brackendale"
+        river_flow = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-06"),
+                    pandas.to_datetime("2023-02-07"),
+                    pandas.to_datetime("2023-02-08"),
+                    pandas.to_datetime("2023-02-09"),
+                    pandas.to_datetime("2023-02-10"),
+                    pandas.to_datetime("2023-02-11"),
+                    pandas.to_datetime("2023-02-12"),
+                    pandas.to_datetime("2023-02-13"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    4.181135e01,
+                    9.415799e01,
+                    8.465509e01,
+                    6.185860e01,
+                    6.616285e01,
+                    6.533544e01,
+                    5.635754e01,
+                    8.004896e01,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-14")
+
+        flux = daily_river_flows._patch_missing_obs(
+            river_name, river_flow, obs_date, config
+        )
+
+        assert flux == pytest.approx(54.759385)
+
+    def test_backup(self, config, monkeypatch):
+        mock_patch_fitting_returns = [
+            # bad, flux
+            (True, numpy.nan),  # fit from Englishman River fails
+            (False, 68.43567),  # fit from Roberts Creek
+        ]
+
+        def mock_patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        ):
+            return mock_patch_fitting_returns.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_patch_fitting", mock_patch_fitting)
+
+        river_name = "SanJuan_PortRenfrew"
+        river_flow = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-13"),
+                    pandas.to_datetime("2023-02-14"),
+                    pandas.to_datetime("2023-02-15"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    6.963472e01,
+                    5.954271e01,
+                    5.195243e01,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-16")
+
+        flux = daily_river_flows._patch_missing_obs(
+            river_name, river_flow, obs_date, config
+        )
+
+        assert flux == pytest.approx(68.43567)
+
+    def test_perist_is_last_resort(self, config, monkeypatch):
+        mock_patch_fitting_returns = [
+            # bad, flux
+            (True, numpy.nan),  # fit from Englishman River fails
+            (True, numpy.nan),  # fit from Roberts Creek fails
+        ]
+
+        def mock_patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        ):
+            return mock_patch_fitting_returns.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_patch_fitting", mock_patch_fitting)
+
+        river_name = "SanJuan_PortRenfrew"
+        river_flow = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-13"),
+                    pandas.to_datetime("2023-02-14"),
+                    pandas.to_datetime("2023-02-15"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    6.963472e01,
+                    5.954271e01,
+                    5.195243e01,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-16")
+
+        flux = daily_river_flows._patch_missing_obs(
+            river_name, river_flow, obs_date, config
+        )
+
+        assert flux == pytest.approx(5.195243e01)
