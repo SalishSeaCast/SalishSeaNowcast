@@ -360,11 +360,10 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
-        bad, flux = daily_river_flows._patch_fitting(
+        flux = daily_river_flows._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
-        assert bad is False
         assert flux == pytest.approx(54.759385)
 
     def test_3_days_missing_patch_successful(self, config, monkeypatch):
@@ -438,11 +437,10 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 3
 
-        bad, flux = daily_river_flows._patch_fitting(
+        flux = daily_river_flows._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
-        assert bad is False
         assert flux == pytest.approx(54.038875)
 
     def test_gap_in_river_to_patch_failure(self, config, monkeypatch):
@@ -512,11 +510,10 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
-        bad, flux = daily_river_flows._patch_fitting(
+        flux = daily_river_flows._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
-        assert bad is True
         assert numpy.isnan(flux)
 
     def test_gap_in_river_to_fit_from_failure(self, config, monkeypatch):
@@ -586,11 +583,10 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
-        bad, flux = daily_river_flows._patch_fitting(
+        flux = daily_river_flows._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
-        assert bad is True
         assert numpy.isnan(flux)
 
     def test_river_to_patch_from_missing_obs_date_failure(self, config, monkeypatch):
@@ -660,11 +656,10 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
-        bad, flux = daily_river_flows._patch_fitting(
+        flux = daily_river_flows._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
-        assert bad is True
         assert numpy.isnan(flux)
 
 
@@ -782,8 +777,8 @@ class TestPatchMissingObs:
     def test_backup(self, config, monkeypatch):
         mock_patch_fitting_returns = [
             # bad, flux
-            (True, numpy.nan),  # fit from Englishman River fails
-            (False, 68.43567),  # fit from Roberts Creek
+            numpy.nan,  # fit from Englishman River fails
+            68.43567,  # fit from Roberts Creek
         ]
 
         def mock_patch_fitting(
@@ -822,8 +817,8 @@ class TestPatchMissingObs:
     def test_perist_is_last_resort(self, config, monkeypatch):
         mock_patch_fitting_returns = [
             # bad, flux
-            (True, numpy.nan),  # fit from Englishman River fails
-            (True, numpy.nan),  # fit from Roberts Creek fails
+            numpy.nan,  # fit from Englishman River fails
+            numpy.nan,  # fit from Roberts Creek fails
         ]
 
         def mock_patch_fitting(

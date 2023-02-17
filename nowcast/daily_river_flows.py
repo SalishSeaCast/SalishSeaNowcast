@@ -226,7 +226,7 @@ def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config
     :param int gap_length:
     :param dict config:
 
-    :rtype: tuple
+    :rtype: float
     """
     fit_from_river_flow = _read_river(fit_from_river_name, "primary", config)
     obs_yyyymmdd = obs_date.format("YYYY-MM-DD")
@@ -234,8 +234,8 @@ def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config
         fit_from_river_flow.loc[obs_yyyymmdd]
     except KeyError:
         # If river to fit from is missing obs date, the fit is a failure
-        bad, flux = True, np.nan
-        return bad, flux
+        flux = np.nan
+        return flux
 
     fit_duration = 7  # number of days we use to fit against
     fit_dates = arrow.Arrow.range(
@@ -251,14 +251,13 @@ def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config
         )
     except KeyError:
         # If either river is missing a value during the fitting period, the fit is a failure
-        bad, flux = True, np.nan
-        return bad, flux
+        flux = np.nan
+        return flux
 
-    bad = False
     flux = (ratio / fit_duration) * fit_from_river_flow.loc[
         obs_yyyymmdd, "Primary River Flow"
     ]
-    return bad, flux
+    return flux
 
 
 def _patch_missing_obs(river_name, river_flow, obs_date, config):
@@ -306,7 +305,7 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
                 # TODO: add config tests to ensure that patching_dictionary has only valid keys
                 #       making this case unnecessary
                 raise ValueError("typo in fit list")
-        bad, flux = _patch_fitting(
+        flux = _patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
         if not np.isnan(flux):
