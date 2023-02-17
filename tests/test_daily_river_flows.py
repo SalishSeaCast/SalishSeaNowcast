@@ -733,8 +733,8 @@ class TestPatchMissingObs:
         def mock_patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         ):
-            bad, flux = False, 54.759385
-            return bad, flux
+            flux = 54.759385
+            return flux
 
         monkeypatch.setattr(daily_river_flows, "_patch_fitting", mock_patch_fitting)
 
