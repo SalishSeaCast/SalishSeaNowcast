@@ -71,6 +71,7 @@ backup_dictionary = {"SanJuan_PortRenfrew": "RobertsCreek", "Theodosia": "Englis
 patching_dictionary = {
     # TODO: add config tests to ensure that all lists end with "persist"
     "Englishman": ["fit", "persist"],
+    "Fraser": ["persist"],
     "Theodosia": ["fit", "backup", "persist"],
     "RobertsCreek": ["fit", "persist"],
     "Salmon_Sayward": ["fit", "persist"],
@@ -87,6 +88,7 @@ patching_dictionary = {
 persist_until = {
     # number of days to persist last observation for before switching to fitting strategies
     "Englishman": 0,
+    "Fraser": 10_000,  # always persist
     "Theodosia": 0,
     "RobertsCreek": 0,
     "Salmon_Sayward": 0,
@@ -364,50 +366,32 @@ def _do_a_pair(
     return watershed_flow
 
 
-def do_fraser(
-    watershed_from_river, dateneeded, primary_river_name, secondary_river_name, config
-):
-    primary_river = _read_river(primary_river_name, "primary", config)
+def _do_fraser(obs_date, config):
+    """
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param doct config:
 
-    if len(primary_river[primary_river.index == str(dateneeded.date())]) == 1:
-        good = True
-        primary_flow = primary_river[
-            primary_river.index == str(dateneeded.date())
-        ].values
-    else:
-        good = False
-        print(primary_river_name, " need to patch")
-        lastdata = primary_river.iloc[-1]
-        if lastdata.name > dateneeded.naive:
-            print("Not working at end of time series, use MakeDailyNCFiles notebook")
-            stop
-        else:
-            day = dt.datetime(2020, 1, 2) - dt.datetime(2020, 1, 1)
-            gap_length = int((dateneeded.naive - lastdata.name) / day)
-            print(gap_length)
-            primary_flow = lastdata.values
+    :return: tuple
+    """
+    primary_river = _read_river("Fraser", "primary", config)
+    primary_flow = _get_river_flow("Fraser", primary_river, obs_date, config)
 
-    secondary_river = _read_river(secondary_river_name, "secondary", config)
-
-    if len(secondary_river[secondary_river.index == str(dateneeded.date())]) == 1:
-        good = True
-        secondary_flow = secondary_river[
-            secondary_river.index == str(dateneeded.date())
-        ].values
-    else:
-        good = False
-        print(secondary_river_name, " need to patch")
-        secondary_flow = _patch_missing_obs(
-            secondary_river_name, secondary_river, dateneeded, config
-        )
+    secondary_river = _read_river("Nicomekl_Langley", "secondary", config)
+    secondary_flow = _get_river_flow(
+        "Nicomekl_Langley", secondary_river, obs_date, config
+    )
 
     Fraser_flux = (
+        # Fraser at Hope plus its portion that is proxy for glacial runoff dominated rivers
+        # (e.g. Harrison) that flow into Fraser below Hope
         primary_flow * watershed_from_river["fraser"]["primary"]
+        # Proxy for rainfall runoff dominated rivers that flow into Fraser below Hope
         + secondary_flow
         * watershed_from_river["fraser"]["secondary"]
         * watershed_from_river["fraser"]["nico_into_fraser"]
     )
     secondary_flux = (
+        # Proxy for rainfall runoff dominated rivers in the Fraser Basin that flow into SoG
         secondary_flow
         * watershed_from_river["fraser"]["secondary"]
         * (1 - watershed_from_river["fraser"]["nico_into_fraser"])
@@ -427,13 +411,7 @@ def calculate_watershed_flows(dateneeded, config):
                 name, dateneeded, rivers_for_watershed[name]["primary"], config
             )
         elif name == "fraser":
-            flows["Fraser"], flows["nonFraser"] = do_fraser(
-                watershed_from_river,
-                dateneeded,
-                rivers_for_watershed[name]["primary"],
-                rivers_for_watershed[name]["secondary"],
-                config,
-            )
+            flows["Fraser"], flows["nonFraser"] = _do_fraser(dateneeded, config)
         else:
             flows[name] = _do_a_pair(
                 name,

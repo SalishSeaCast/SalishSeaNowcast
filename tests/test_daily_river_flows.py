@@ -1136,3 +1136,162 @@ class TestDoAPair:
         )
 
         assert watershed_flux == pytest.approx(123.54403)
+
+
+class TestDoFraser:
+    """Unit tests for daily_river_flows._do_Fraser()."""
+
+    def test_no_patches(self, config, monkeypatch):
+        mock_dataframes = [
+            # Primary river
+            pandas.DataFrame(
+                # Fraser
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-19"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [6.625833e02],
+                },
+            ),
+            # Secondary river
+            pandas.DataFrame(
+                # Nicomekl_Langley
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-19"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [2.402962e00],
+                },
+            ),
+        ]
+
+        def mock_read_river(river_name, ps, config_):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
+
+        obs_date = arrow.get("2023-02-19")
+        primary_river_name = "Fraser"
+        secondary_river_name = "Nicomekl_Langley"
+
+        Fraser_flux, secondary_flux = daily_river_flows._do_fraser(obs_date, config)
+
+        assert Fraser_flux == pytest.approx(1094.56091294)
+        assert secondary_flux == pytest.approx(63.978142)
+
+    def test_persist_Fraser(self, config, monkeypatch):
+        mock_dataframes = [
+            # Primary river
+            pandas.DataFrame(
+                # Fraser
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-18"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [6.528406e02],
+                },
+            ),
+            # Secondary river
+            pandas.DataFrame(
+                # Nicomekl_Langley
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-19"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [2.402962e00],
+                },
+            ),
+        ]
+
+        def mock_read_river(river_name, ps, config_):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
+
+        mock_river_flows = [
+            # Fraser
+            6.528406e02,
+            # Nicomekl_Langley
+            2.402962e00,
+        ]
+
+        def mock_get_river_flow(river_name, river_flow, obs_date, config):
+            return mock_river_flows.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_get_river_flow", mock_get_river_flow)
+
+        obs_date = arrow.get("2023-02-19")
+        primary_river_name = "Fraser"
+        secondary_river_name = "Nicomekl_Langley"
+
+        Fraser_flux, secondary_flux = daily_river_flows._do_fraser(obs_date, config)
+
+        assert Fraser_flux == pytest.approx(1083.249638)
+        assert secondary_flux == pytest.approx(63.978142)
+
+    def test_patch_Nicomekl(self, config, monkeypatch):
+        mock_dataframes = [
+            # Primary river
+            pandas.DataFrame(
+                # Fraser
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-19"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [6.625833e02],
+                },
+            ),
+            # Secondary river
+            pandas.DataFrame(
+                # Nicomekl_Langley
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-18"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [3.095674e00],
+                },
+            ),
+        ]
+
+        def mock_read_river(river_name, ps, config_):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
+        mock_river_flows = [
+            # Fraser
+            6.625833e02,
+            # Nicomekl_Langley
+            2.402962e00,
+        ]
+
+        def mock_get_river_flow(river_name, river_flow, obs_date, config):
+            return mock_river_flows.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_get_river_flow", mock_get_river_flow)
+
+        obs_date = arrow.get("2023-02-19")
+        primary_river_name = "Fraser"
+        secondary_river_name = "Nicomekl_Langley"
+
+        Fraser_flux, secondary_flux = daily_river_flows._do_fraser(obs_date, config)
+
+        assert Fraser_flux == pytest.approx(1094.56091294)
+        assert secondary_flux == pytest.approx(63.978142)
