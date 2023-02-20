@@ -853,3 +853,286 @@ class TestPatchMissingObs:
         )
 
         assert flux == pytest.approx(5.195243e01)
+
+
+@pytest.mark.parametrize(
+    "flow_col_label", ("Primary River Flow", "Secondary River Flow")
+)
+class TestGetRiverFlow:
+    """Unit tests for daily_river_flows._get_river_flow()."""
+
+    def test_get_river_flow(self, flow_col_label, config):
+        river_name = "SanJuan_PortRenfrew"
+        river_df = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-13"),
+                    pandas.to_datetime("2023-02-14"),
+                    pandas.to_datetime("2023-02-15"),
+                ],
+                name="date",
+            ),
+            data={
+                flow_col_label: [
+                    6.963472e01,
+                    5.954271e01,
+                    5.195243e01,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-15")
+
+        river_flow = daily_river_flows._get_river_flow(
+            river_name, river_df, obs_date, config
+        )
+
+        assert river_flow == pytest.approx(5.195243e01)
+
+    def test_patch(self, flow_col_label, config, monkeypatch):
+        def mock_patch_missing_obs(river_name, river_flow, obs_date, config):
+            flux = 4.749479e01
+            return flux
+
+        monkeypatch.setattr(
+            daily_river_flows, "_patch_missing_obs", mock_patch_missing_obs
+        )
+
+        river_name = "SanJuan_PortRenfrew"
+        river_df = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-13"),
+                    pandas.to_datetime("2023-02-14"),
+                    pandas.to_datetime("2023-02-15"),
+                ],
+                name="date",
+            ),
+            data={
+                flow_col_label: [
+                    6.963472e01,
+                    5.954271e01,
+                    5.195243e01,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-16")
+
+        river_flow = daily_river_flows._get_river_flow(
+            river_name, river_df, obs_date, config
+        )
+
+        assert river_flow == pytest.approx(4.749479e01)
+
+
+class TestDoAPair:
+    """Unit tests for daily_river_flows._do_a_pair()."""
+
+    def test_primary_river_only_no_patch_reqd(self, config, monkeypatch):
+        def mock_read_river(river_name, ps, config_):
+            return pandas.DataFrame(
+                # Homathko_Mouth
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-13"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [4.444965e01],
+                },
+            )
+
+        monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
+
+        watershed_name = "bute"
+        obs_date = arrow.get("2023-02-13")
+        primary_river_name = "Homathko_Mouth"
+        secondary_river_name = None
+
+        watershed_flux = daily_river_flows._do_a_pair(
+            watershed_name, obs_date, primary_river_name, config, secondary_river_name
+        )
+
+        assert watershed_flux == pytest.approx(89.566045)
+
+    def test_primary_river_patched(self, config, monkeypatch):
+        def mock_read_river(river_name, ps, config_):
+            return pandas.DataFrame(
+                # Homathko_Mouth
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-17"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [4.329455e01],
+                },
+            )
+
+        monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
+
+        def mock_patch_missing_obs(river_name, river_flow, obs_date, config):
+            mock_flux = 5.338837e01
+            return mock_flux
+
+        monkeypatch.setattr(
+            daily_river_flows, "_patch_missing_obs", mock_patch_missing_obs
+        )
+
+        watershed_name = "bute"
+        obs_date = arrow.get("2023-02-18")
+        primary_river_name = "Homathko_Mouth"
+        secondary_river_name = None
+
+        watershed_flux = daily_river_flows._do_a_pair(
+            watershed_name, obs_date, primary_river_name, config, secondary_river_name
+        )
+
+        assert watershed_flux == pytest.approx(107.577565)
+
+    def test_primary_and_secondary_rivers_no_patches(self, config, monkeypatch):
+        mock_dataframes = [
+            # Primary river
+            pandas.DataFrame(
+                # Clowhom_ClowhomLake
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-13"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [5.549688e00],
+                },
+            ),
+            # Secondary river
+            pandas.DataFrame(
+                # RobertsCreek
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-13"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [9.963607e-01],
+                },
+            ),
+        ]
+
+        def mock_read_river(river_name, ps, config_):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
+
+        watershed_name = "jervis"
+        obs_date = arrow.get("2023-02-13")
+        primary_river_name = "Clowhom_ClowhomLake"
+        secondary_river_name = "RobertsCreek"
+
+        watershed_flux = daily_river_flows._do_a_pair(
+            watershed_name, obs_date, primary_river_name, config, secondary_river_name
+        )
+
+        assert watershed_flux == pytest.approx(188.682157)
+
+    def test_secondary_Theodosia_no_patches(self, config, monkeypatch):
+        def mock_read_river(river_name, ps, config_):
+            return pandas.DataFrame(
+                # Homathko_Mouth
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-18"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [4.175144e01],
+                },
+            )
+
+        monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
+
+        def mock_read_river_Theodosia(config_):
+            return pandas.DataFrame(
+                # Theodosia
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-18"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [5.39236e0],
+                },
+            )
+
+        monkeypatch.setattr(
+            daily_river_flows, "_read_river_Theodosia", mock_read_river_Theodosia
+        )
+
+        watershed_name = "toba"
+        obs_date = arrow.get("2023-02-18")
+        primary_river_name = "Homathko_Mouth"
+        secondary_river_name = "Theodosia"
+
+        watershed_flux = daily_river_flows._do_a_pair(
+            watershed_name, obs_date, primary_river_name, config, secondary_river_name
+        )
+
+        assert watershed_flux == pytest.approx(97.67179087)
+
+    def test_secondary_river_patched(self, config, monkeypatch):
+        mock_dataframes = [
+            # Primary river
+            pandas.DataFrame(
+                # Clowhom_ClowhomLake
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-18"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [3.391116e00],
+                },
+            ),
+            # Secondary river
+            pandas.DataFrame(
+                # RobertsCreek
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-17"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [6.383818e-01],
+                },
+            ),
+        ]
+
+        def mock_read_river(river_name, ps, config_):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
+
+        def mock_patch_missing_obs(river_name, river_flow, obs_date, config):
+            mock_flux = 8.285429e-01
+            return mock_flux
+
+        monkeypatch.setattr(
+            daily_river_flows, "_patch_missing_obs", mock_patch_missing_obs
+        )
+
+        watershed_name = "jervis"
+        obs_date = arrow.get("2023-02-13")
+        primary_river_name = "Clowhom_ClowhomLake"
+        secondary_river_name = "RobertsCreek"
+
+        watershed_flux = daily_river_flows._do_a_pair(
+            watershed_name, obs_date, primary_river_name, config, secondary_river_name
+        )
+
+        assert watershed_flux == pytest.approx(123.54403)

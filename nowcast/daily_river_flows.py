@@ -245,8 +245,8 @@ def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config
     )
     try:
         ratio = sum(
-            river_flow.loc[yyyymmdd := day.format("YYYY-MM-DD"), "Primary River Flow"]
-            / fit_from_river_flow.loc[yyyymmdd, "Primary River Flow"]
+            river_flow.loc[yyyymmdd := day.format("YYYY-MM-DD"), river_flow.columns[0]]
+            / fit_from_river_flow.loc[yyyymmdd, river_flow.columns[0]]
             for day in fit_dates
         )
     except KeyError:
@@ -255,7 +255,7 @@ def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config
         return flux
 
     flux = (ratio / fit_duration) * fit_from_river_flow.loc[
-        obs_yyyymmdd, "Primary River Flow"
+        obs_yyyymmdd, river_flow.columns[0]
     ]
     return flux
 
@@ -312,51 +312,56 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
             return flux
 
 
-def do_a_pair(
-    water_shed,
-    watershed_from_river,
-    dateneeded,
+def _get_river_flow(river_name, river_df, obs_date, config):
+    """
+    :param str river_name:
+    :param :py:class:`pandas.Dataframe` river_df:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param dict config:
+
+    :return: float
+    """
+    try:
+        river_flow = river_df.loc[obs_date.format("YYYY-MM-DD"), river_df.columns[0]]
+    except KeyError:
+        # No discharge obs for date, so patch
+        print(river_name, " need to patch")
+        river_flow = _patch_missing_obs(river_name, river_df, obs_date, config)
+    return river_flow
+
+
+def _do_a_pair(
+    watershed_name,
+    obs_date,
     primary_river_name,
-    use_secondary,
     config,
-    secondary_river_name="Null",
+    secondary_river_name=None,
 ):
+    """
+    :param str watershed_name:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param str primary_river_name:
+    :param dict config:
+    :param str or :py:class:`NoneType` secondary_river_name:
+
+    :return: float
+    """
     primary_river = _read_river(primary_river_name, "primary", config)
+    primary_flow = _get_river_flow(primary_river_name, primary_river, obs_date, config)
+    watershed_flow = primary_flow * watershed_from_river[watershed_name]["primary"]
+    if secondary_river_name is None:
+        return watershed_flow
 
-    if len(primary_river[primary_river.index == str(dateneeded.date())]) == 1:
-        primary_flow = primary_river[
-            primary_river.index == str(dateneeded.date())
-        ].values
-    else:
-        print(primary_river_name, " need to patch")
-        primary_flow = _patch_missing_obs(
-            primary_river_name, primary_river, dateneeded, config
-        )
-
-    if use_secondary:
-        if secondary_river_name == "Theodosia":
-            secondary_river = _read_river_Theodosia(config)
-        else:
-            secondary_river = _read_river(secondary_river_name, "secondary", config)
-
-        if len(secondary_river[secondary_river.index == str(dateneeded.date())]) == 1:
-            secondary_flow = secondary_river[
-                secondary_river.index == str(dateneeded.date())
-            ].values
-        else:
-            print(secondary_river_name, " need to patch")
-            secondary_flow = _patch_missing_obs(
-                secondary_river_name, secondary_river, dateneeded, config
-            )
-
-        watershed_flux = (
-            primary_flow * watershed_from_river[water_shed]["primary"]
-            + secondary_flow * watershed_from_river[water_shed]["secondary"]
-        )
-    else:
-        watershed_flux = primary_flow * watershed_from_river[water_shed]["primary"]
-
-    return watershed_flux
+    secondary_river = (
+        _read_river_Theodosia(config)
+        if secondary_river_name == "Theodosia"
+        else _read_river(secondary_river_name, "secondary", config)
+    )
+    secondary_flow = _get_river_flow(
+        secondary_river_name, secondary_river, obs_date, config
+    )
+    watershed_flow += secondary_flow * watershed_from_river[watershed_name]["secondary"]
+    return watershed_flow
 
 
 def do_fraser(
@@ -418,13 +423,8 @@ def calculate_watershed_flows(dateneeded, config):
         print(name)
         if rivers_for_watershed[name]["secondary"] == "False":
             print("no secondary")
-            flows[name] = do_a_pair(
-                name,
-                watershed_from_river,
-                dateneeded,
-                rivers_for_watershed[name]["primary"],
-                False,
-                config,
+            flows[name] = _do_a_pair(
+                name, dateneeded, rivers_for_watershed[name]["primary"], config
             )
         elif name == "fraser":
             flows["Fraser"], flows["nonFraser"] = do_fraser(
@@ -435,12 +435,10 @@ def calculate_watershed_flows(dateneeded, config):
                 config,
             )
         else:
-            flows[name] = do_a_pair(
+            flows[name] = _do_a_pair(
                 name,
-                watershed_from_river,
                 dateneeded,
                 rivers_for_watershed[name]["primary"],
-                True,
                 config,
                 rivers_for_watershed[name]["secondary"],
             )
