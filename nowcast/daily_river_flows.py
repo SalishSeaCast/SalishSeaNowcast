@@ -104,21 +104,6 @@ persist_until = {
 }
 
 
-def get_area(config):
-    # TODO: Remove except in worker code
-    try:
-        grid_dir = Path(config["run"]["enabled hosts"]["salish-nowcast"]["grid dir"])
-        coords_file = grid_dir / config["run types"]["nowcast-green"]["coordinates"]
-        with xr.open_dataset(coords_file, decode_times=False) as fB:
-            area = fB["e1t"][0, :] * fB["e2t"][0, :]
-    except FileNotFoundError:
-        grid_dir = Path("../../grid/")
-        coords_file = grid_dir / config["run types"]["nowcast-green"]["coordinates"]
-        with xr.open_dataset(coords_file, decode_times=False) as fB:
-            area = fB["e1t"][0, :] * fB["e2t"][0, :]
-    return area
-
-
 def _parse_long_csv_line(line):
     """pandas .csv parser helper to handle lines with extra columns.
 
@@ -431,6 +416,18 @@ def _calc_watershed_flows(obs_date, config):
     return flows
 
 
+def _get_area(config):
+    # TODO: Make getting the coordinates less convoluted
+    grid_dir = Path(config["run"]["enabled hosts"]["salish-nowcast"]["grid dir"])
+    if not grid_dir.exists():
+        # TODO: This should be unnecessary in worker code
+        grid_dir = Path("../../grid/")
+    coords_file = grid_dir / config["run types"]["nowcast-green"]["coordinates"]
+    with xr.open_dataset(coords_file, decode_times=False) as ds:
+        area = ds.e1t[0] * ds.e2t[0]
+    return area
+
+
 def create_runoff_array(flows, horz_area):
 
     fraserratio = rivers.prop_dict["fraser"]["Fraser"]["prop"]
@@ -534,6 +531,6 @@ def write_file(day, runoff, config):
 
 def make_runoff_files(dateneeded, config):
     flows = _calc_watershed_flows(dateneeded, config)
-    horz_area = get_area(config)
+    horz_area = _get_area(config)
     runoff = create_runoff_array(flows, horz_area)
     write_file(dateneeded, runoff, config)
