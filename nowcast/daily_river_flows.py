@@ -15,7 +15,7 @@ from salishsea_tools import rivertools
 from salishsea_tools import river_202108 as rivers
 
 
-names = [
+watershed_names = [
     "bute",
     "evi_n",
     "jervis",
@@ -40,12 +40,12 @@ watershed_from_river = {
     "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
 }
 rivers_for_watershed = {
-    "bute": {"primary": "Homathko_Mouth", "secondary": "False"},
-    "evi_n": {"primary": "Salmon_Sayward", "secondary": "False"},
+    "bute": {"primary": "Homathko_Mouth", "secondary": None},
+    "evi_n": {"primary": "Salmon_Sayward", "secondary": None},
     "jervis": {"primary": "Clowhom_ClowhomLake", "secondary": "RobertsCreek"},
-    "evi_s": {"primary": "Englishman", "secondary": "False"},
-    "howe": {"primary": "Squamish_Brackendale", "secondary": "False"},
-    "jdf": {"primary": "SanJuan_PortRenfrew", "secondary": "False"},
+    "evi_s": {"primary": "Englishman", "secondary": None},
+    "howe": {"primary": "Squamish_Brackendale", "secondary": None},
+    "jdf": {"primary": "SanJuan_PortRenfrew", "secondary": None},
     "skagit": {"primary": "Skagit_MountVernon", "secondary": "Snohomish_Monroe"},
     "puget": {"primary": "Nisqually_McKenna", "secondary": "Greenwater_Greenwater"},
     "toba": {"primary": "Homathko_Mouth", "secondary": "Theodosia"},
@@ -400,30 +400,31 @@ def _do_fraser(obs_date, config):
     return Fraser_flux, secondary_flux
 
 
-def calculate_watershed_flows(dateneeded, config):
+def _calc_watershed_flows(obs_date, config):
+    """
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param doct config:
+
+    :return: dict
+    """
 
     flows = {}
-    for name in names:
-        print(name)
-        if rivers_for_watershed[name]["secondary"] == "False":
-            print("no secondary")
-            flows[name] = _do_a_pair(
-                name, dateneeded, rivers_for_watershed[name]["primary"], config
-            )
-        elif name == "fraser":
-            flows["Fraser"], flows["nonFraser"] = _do_fraser(dateneeded, config)
+    for watershed_name in watershed_names:
+        print(watershed_name)
+        if watershed_name == "fraser":
+            flows["fraser"], flows["non_fraser"] = _do_fraser(obs_date, config)
+            print(flows["fraser"])
         else:
-            flows[name] = _do_a_pair(
-                name,
-                dateneeded,
-                rivers_for_watershed[name]["primary"],
+            if rivers_for_watershed[watershed_name]["secondary"] is None:
+                print("no secondary")
+            flows[watershed_name] = _do_a_pair(
+                watershed_name,
+                obs_date,
+                rivers_for_watershed[watershed_name]["primary"],
                 config,
-                rivers_for_watershed[name]["secondary"],
+                rivers_for_watershed[watershed_name]["secondary"],
             )
-        if name == "fraser":
-            print(flows["Fraser"])
-        else:
-            print(flows[name])
+            print(flows[watershed_name])
 
     print("files read")
 
@@ -438,14 +439,14 @@ def create_runoff_array(flows, horz_area):
     run_depth = np.ones_like(runoff)
     run_temp = np.empty_like(runoff)
 
-    for name in names:
+    for name in watershed_names:
         if name == "fraser":
             for key in rivers.prop_dict[name]:
                 if "Fraser" in key:
-                    flux = flows["Fraser"].flatten()[0]
+                    flux = flows["fraser"].flatten()[0]
                     subarea = fraserratio
                 else:
-                    flux = flows["nonFraser"].flatten()[0]
+                    flux = flows["non_fraser"].flatten()[0]
                     subarea = 1 - fraserratio
 
                 river = rivers.prop_dict["fraser"][key]
@@ -532,7 +533,7 @@ def write_file(day, runoff, config):
 
 
 def make_runoff_files(dateneeded, config):
-    flows = calculate_watershed_flows(dateneeded, config)
+    flows = _calc_watershed_flows(dateneeded, config)
     horz_area = get_area(config)
     runoff = create_runoff_array(flows, horz_area)
     write_file(dateneeded, runoff, config)

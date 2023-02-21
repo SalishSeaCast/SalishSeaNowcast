@@ -1177,8 +1177,6 @@ class TestDoFraser:
         monkeypatch.setattr(daily_river_flows, "_read_river", mock_read_river)
 
         obs_date = arrow.get("2023-02-19")
-        primary_river_name = "Fraser"
-        secondary_river_name = "Nicomekl_Langley"
 
         Fraser_flux, secondary_flux = daily_river_flows._do_fraser(obs_date, config)
 
@@ -1233,8 +1231,6 @@ class TestDoFraser:
         monkeypatch.setattr(daily_river_flows, "_get_river_flow", mock_get_river_flow)
 
         obs_date = arrow.get("2023-02-19")
-        primary_river_name = "Fraser"
-        secondary_river_name = "Nicomekl_Langley"
 
         Fraser_flux, secondary_flux = daily_river_flows._do_fraser(obs_date, config)
 
@@ -1288,10 +1284,61 @@ class TestDoFraser:
         monkeypatch.setattr(daily_river_flows, "_get_river_flow", mock_get_river_flow)
 
         obs_date = arrow.get("2023-02-19")
-        primary_river_name = "Fraser"
-        secondary_river_name = "Nicomekl_Langley"
 
         Fraser_flux, secondary_flux = daily_river_flows._do_fraser(obs_date, config)
 
         assert Fraser_flux == pytest.approx(1094.56091294)
         assert secondary_flux == pytest.approx(63.978142)
+
+
+class TestCalcWatershedFlows:
+    """Unit test for daily_river_flows._calc_watershed_flows()."""
+
+    def test_calc_watershed_flows(self, config, monkeypatch):
+        mock_watershed_flows = [
+            ("bute", 83.3223456),
+            ("evi_n", 354.56739384),
+            ("jervis", 118.43897380000001),
+            ("evi_s", 175.51416120000002),
+            ("howe", 84.56446136),
+            ("jdf", 380.26035625),
+            ("skagit", 519.6378946),
+            ("puget", 442.39027494999993),
+            ("toba", 56.474250732),
+        ]
+
+        def mock_do_a_pair(
+            watershed_name,
+            obs_date,
+            primary_river_name,
+            config,
+            secondary_river_name=None,
+        ):
+            return mock_watershed_flows.pop(0)[1]
+
+        monkeypatch.setattr(daily_river_flows, "_do_a_pair", mock_do_a_pair)
+
+        def mock_do_fraser(obs_date, config):
+            return 1094.5609129386, 63.9781423614
+
+        monkeypatch.setattr(daily_river_flows, "_do_fraser", mock_do_fraser)
+
+        obs_date = arrow.get("2023-02-19")
+
+        flows = daily_river_flows._calc_watershed_flows(obs_date, config)
+
+        expected = {
+            "bute": 83.3223456,
+            "evi_n": 354.56739384,
+            "jervis": 118.43897380000001,
+            "evi_s": 175.51416120000002,
+            "howe": 84.56446136,
+            "jdf": 380.26035625,
+            "skagit": 519.6378946,
+            "puget": 442.39027494999993,
+            "toba": 56.474250732,
+            "fraser": 1094.5609129386,
+        }
+        for name in daily_river_flows.watershed_names:
+            assert flows[name] == pytest.approx(expected[name])
+        assert flows["non_fraser"] == pytest.approx(63.9781423614)
