@@ -46,6 +46,13 @@ def config(base_config):
                     TheodosiaScotty: forcing/rivers/observations/Theodosia_Scotty_flow
                     TheodosiaBypass: forcing/rivers/observations/Theodosia_Bypass_flow
                     TheodosiaDiversion: forcing/rivers/observations/Theodosia_Diversion_flow
+                run types:
+                  nowcast-green:
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                run:
+                  enabled hosts:
+                    salish-nowcast:
+                      grid dir: /SalishSeaCast/grid/
                 """
             )
         )
@@ -1342,3 +1349,37 @@ class TestCalcWatershedFlows:
         for name in daily_river_flows.watershed_names:
             assert flows[name] == pytest.approx(expected[name])
         assert flows["non_fraser"] == pytest.approx(63.9781423614)
+
+
+class TestCreateRunoffArray:
+    """Unit test for daily_river_flows._create_runoff_array()."""
+
+    def test_create_runoff_array(self, config):
+        flows = {
+            "bute": 97.0915257,
+            "evi_n": 565.25543574,
+            "jervis": 217.69422748000002,
+            "evi_s": 180.9227418,
+            "howe": 127.6401284,
+            "jdf": 621.7123890299999,
+            "skagit": 1133.0656029000002,
+            "puget": 577.08733426,
+            "toba": 106.458897294,
+            "fraser": 1168.6866122853,
+            "non_fraser": 56.6227761147,
+        }
+        horz_area = daily_river_flows._get_area(config)
+
+        runoff_array = daily_river_flows._create_runoff_array(flows, horz_area)
+
+        # Check selected river runoffs
+        # Nicomekl
+        assert runoff_array[388, 350] == pytest.approx(0.012653)
+        # Fraser (channel head in model)
+        assert runoff_array[500, 394] == pytest.approx(5.517576)
+        # Qunisam
+        numpy.testing.assert_allclose(
+            runoff_array[750:752, 123], [0.20318864, 0.20318864]
+        )
+        # Check total runoff
+        assert runoff_array.sum() == pytest.approx(20.7198114)

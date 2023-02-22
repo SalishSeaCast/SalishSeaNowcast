@@ -306,7 +306,7 @@ def _get_river_flow(river_name, river_df, obs_date, config):
     :param :py:class:`arrow.Arrow` obs_date:
     :param dict config:
 
-    :return: float
+    :rtype: float
     """
     try:
         river_flow = river_df.loc[obs_date.format("YYYY-MM-DD"), river_df.columns[0]]
@@ -331,7 +331,7 @@ def _do_a_pair(
     :param dict config:
     :param str or :py:class:`NoneType` secondary_river_name:
 
-    :return: float
+    :rtype: float
     """
     primary_river = _read_river(primary_river_name, "primary", config)
     primary_flow = _get_river_flow(primary_river_name, primary_river, obs_date, config)
@@ -354,9 +354,9 @@ def _do_a_pair(
 def _do_fraser(obs_date, config):
     """
     :param :py:class:`arrow.Arrow` obs_date:
-    :param doct config:
+    :param dict config:
 
-    :return: tuple
+    :rtype: tuple
     """
     primary_river = _read_river("Fraser", "primary", config)
     primary_flow = _get_river_flow("Fraser", primary_river, obs_date, config)
@@ -388,9 +388,9 @@ def _do_fraser(obs_date, config):
 def _calc_watershed_flows(obs_date, config):
     """
     :param :py:class:`arrow.Arrow` obs_date:
-    :param doct config:
+    :param dict config:
 
-    :return: dict
+    :rtype: dict
     """
 
     flows = {}
@@ -417,59 +417,68 @@ def _calc_watershed_flows(obs_date, config):
 
 
 def _get_area(config):
+    """
+    :param dict config:
+
+    :rtype: :py:class:`numpy.ndarray`
+    """
     # TODO: Make getting the coordinates less convoluted
     grid_dir = Path(config["run"]["enabled hosts"]["salish-nowcast"]["grid dir"])
     if not grid_dir.exists():
         # TODO: This should be unnecessary in worker code
-        grid_dir = Path("../../grid/")
+        grid_dir = Path("../grid/")
     coords_file = grid_dir / config["run types"]["nowcast-green"]["coordinates"]
     with xr.open_dataset(coords_file, decode_times=False) as ds:
         area = ds.e1t[0] * ds.e2t[0]
     return area
 
 
-def create_runoff_array(flows, horz_area):
+def _create_runoff_array(flows, horz_area):
+    """
+    :param dict flows:
+    :param :py:class:`numpy.ndarray` horz_area:
 
-    fraserratio = rivers.prop_dict["fraser"]["Fraser"]["prop"]
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    runoff_array = np.zeros((horz_area.shape[0], horz_area.shape[1]))
+    # rivertools.fill_runoff_array() needs depth and temperature arrays,
+    # but we don't return them
+    runoff_depth = np.ones_like(runoff_array)
+    runoff_temperature = np.empty_like(runoff_array)
 
-    runoff = np.zeros((horz_area.shape[0], horz_area.shape[1]))
-    run_depth = np.ones_like(runoff)
-    run_temp = np.empty_like(runoff)
-
-    for name in watershed_names:
-        if name == "fraser":
-            for key in rivers.prop_dict[name]:
-                if "Fraser" in key:
-                    flux = flows["fraser"].flatten()[0]
-                    subarea = fraserratio
-                else:
-                    flux = flows["non_fraser"].flatten()[0]
-                    subarea = 1 - fraserratio
-
+    for watershed_name in watershed_names:
+        if watershed_name == "fraser":
+            fraser_ratio = rivers.prop_dict["fraser"]["Fraser"]["prop"]
+            for key in rivers.prop_dict[watershed_name]:
+                flux, subarea = (
+                    (flows["fraser"], fraser_ratio)
+                    if key == "Fraser"
+                    else (flows["non_fraser"], 1 - fraser_ratio)
+                )
                 river = rivers.prop_dict["fraser"][key]
-                runoff = rivertools.fill_runoff_array(
+                runoff_array, _ = rivertools.fill_runoff_array(
                     flux * river["prop"] / subarea,
                     river["i"],
                     river["di"],
                     river["j"],
                     river["dj"],
                     river["depth"],
-                    runoff,
-                    run_depth,
+                    runoff_array,
+                    runoff_depth,
                     horz_area,
-                )[0]
+                )
         else:
-            flowtoday = flows[name].flatten()[0]
-            runoff, run_depth, run_temp = rivertools.put_watershed_into_runoff(
+            flow = flows[watershed_name]
+            runoff_array, _, _ = rivertools.put_watershed_into_runoff(
                 "constant",
                 horz_area,
-                flowtoday,
-                runoff,
-                run_depth,
-                run_temp,
-                rivers.prop_dict[name],
+                flow,
+                runoff_array,
+                runoff_depth,
+                runoff_temperature,
+                rivers.prop_dict[watershed_name],
             )
-    return runoff
+    return runoff_array
 
 
 def write_file(day, runoff, config):
@@ -532,5 +541,5 @@ def write_file(day, runoff, config):
 def make_runoff_files(dateneeded, config):
     flows = _calc_watershed_flows(dateneeded, config)
     horz_area = _get_area(config)
-    runoff = create_runoff_array(flows, horz_area)
+    runoff = _create_runoff_array(flows, horz_area)
     write_file(dateneeded, runoff, config)
