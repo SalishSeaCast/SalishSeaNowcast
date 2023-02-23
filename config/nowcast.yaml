@@ -13,33 +13,33 @@ file group: sallen
 weather:
   download:
     2.5 km:
-      # Directory where ECCC datamart hrdps/weat/ mirror files are stored
-      datamart dir: /SalishSeaCast/datamart/hrdps-west/
-      # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
-      GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
-      # URL from which to download ECCC HRDPS 2.5km west domain forecast fields files
+      # Directory where ECCC datamart hrdps/continental/ mirror files are stored
+      datamart dir: /SalishSeaCast/datamart/hrdps-continental/
+      # Destination directory for downloaded HRDPS 2.5km continental domain GRIB2 files
+      GRIB dir: /results/forcing/atmospheric/continental2.5/GRIB/
+      # URL from which to download ECCC HRDPS 2.5km continental domain forecast fields files
       # **Must be quoted to project {} characters**
-      url template: 'https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+      url template: "https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
       # Older, slower URL:
-#      url template: 'https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
-      # Template for hourly ECCC HRDPS 2.5km west domain fields file name
+#      url template: "https://dd.weather.gc.ca/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
+      # Template for hourly ECCC HRDPS 2.5km continental domain fields file name
       # **Must be quoted to project {} characters**
-      file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
       # ECCC HRDPS 2.5km GRIB forecast file field variable names
       grib variables:
-        - UGRD_TGL_10  # u component of wind velocity at 10m elevation
-        - VGRD_TGL_10  # v component of wind velocity at 10m elevation
-        - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
-        - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
-        - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
-        - TMP_TGL_2    # air temperature at 2m elevation
-        - SPFH_TGL_2   # specific humidity at 2m elevation
-        - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
-        - APCP_SFC_0   # accumulated precipitation at ground level
-        - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
-        - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-        - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
-      # ECCC HRDPS 2.5km west domain forecast duration
+        - UGRD_AGL-10m  # u component of wind velocity at 10m elevation
+        - VGRD_AGL-10m  # v component of wind velocity at 10m elevation
+        - DSWRF_Sfc     # accumulated downward shortwave (solar) radiation at ground level
+        - DLWRF_Sfc     # accumulated downward longwave (thermal) radiation at ground level
+        - LHTFL_Sfc     # upward surface latent heat flux (for VHFR FVCOM)
+        - TMP_AGL-2m    # air temperature at 2m elevation
+        - SPFH_AGL-2m   # specific humidity at 2m elevation
+        - RH_AGL-2m     # relative humidity at 2m elevation (for VHFR FVCOM)
+        - APCP_Sfc      # accumulated precipitation at ground level
+        - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
+        - PRMSL_MSL     # atmospheric pressure at mean sea level
+        - TCDC_Sfc      # total cloud in percent (for parametrization of radiation missing from 2007-2014 GEMLAM)
+      # ECCC HRDPS 2.5km continental domain forecast duration
       forecast duration: 48  # hours
 
     1 km:

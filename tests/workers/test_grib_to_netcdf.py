@@ -117,7 +117,8 @@ class TestConfig:
     def test_weather_download_2_5_km_section(self, prod_config):
         weather_download = prod_config["weather"]["download"]["2.5 km"]
         assert (
-            weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+            weather_download["GRIB dir"]
+            == "/results/forcing/atmospheric/continental2.5/GRIB/"
         )
 
 

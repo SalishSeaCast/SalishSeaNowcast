@@ -46,10 +46,10 @@ def config(base_config):
                 weather:
                   download:
                     2.5 km:
-                      datamart dir: datamart/hrdps-west/
-                      GRIB dir: forcing/atmospheric/GEM2.5/GRIB/
+                      datamart dir: datamart/hrdps-continental/
+                      GRIB dir: forcing/atmospheric/continental2.5/GRIB/
                       forecast duration: 48
-                      file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+                      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
                       grib variables:
                         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
                         - VGRD_TGL_10  # v component of wind velocity at 10m elevation
@@ -166,28 +166,32 @@ class TestConfig:
 
     def test_weather_download_2_5_km_section(self, prod_config):
         weather_download = prod_config["weather"]["download"]["2.5 km"]
-        assert weather_download["datamart dir"] == "/SalishSeaCast/datamart/hrdps-west/"
         assert (
-            weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+            weather_download["datamart dir"]
+            == "/SalishSeaCast/datamart/hrdps-continental/"
+        )
+        assert (
+            weather_download["GRIB dir"]
+            == "/results/forcing/atmospheric/continental2.5/GRIB/"
         )
         assert weather_download["forecast duration"] == 48
         assert (
             weather_download["file template"]
-            == "CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2"
+            == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
         )
         assert weather_download["grib variables"] == [
-            "UGRD_TGL_10",
-            "VGRD_TGL_10",
-            "DSWRF_SFC_0",
-            "DLWRF_SFC_0",
-            "LHTFL_SFC_0",
-            "TMP_TGL_2",
-            "SPFH_TGL_2",
-            "RH_TGL_2",
-            "APCP_SFC_0",
-            "PRATE_SFC_0",
-            "PRMSL_MSL_0",
-            "TCDC_SFC_0",
+            "UGRD_AGL-10m",
+            "VGRD_AGL-10m",
+            "DSWRF_Sfc",
+            "DLWRF_Sfc",
+            "LHTFL_Sfc",
+            "TMP_AGL-2m",
+            "SPFH_AGL-2m",
+            "RH_AGL-2m",
+            "APCP_Sfc",
+            "PRATE_Sfc",
+            "PRMSL_MSL",
+            "TCDC_Sfc",
         ]
 
     def test_weather_download_1_km_section(self, prod_config):

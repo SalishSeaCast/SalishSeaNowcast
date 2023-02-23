@@ -44,28 +44,29 @@ def config(base_config):
                 weather:
                   download:
                     2.5 km:
-                      GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
-                      url template: 'https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
-                      file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
+                      datamart dir: /SalishSeaCast/datamart/hrdps-continental/
+                      GRIB dir: /results/forcing/atmospheric/continental2.5/GRIB/
+                      url template: "https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
+                      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
                       grib variables:
-                        - UGRD_TGL_10  # u component of wind velocity at 10m elevation
-                        - VGRD_TGL_10  # v component of wind velocity at 10m elevation
-                        - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
-                        - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
-                        - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
-                        - TMP_TGL_2    # air temperature at 2m elevation
-                        - SPFH_TGL_2   # specific humidity at 2m elevation
-                        - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
-                        - APCP_SFC_0   # accumulated precipitation at ground level
-                        - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
-                        - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-                        - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
+                        - UGRD_AGL-10m  # u component of wind velocity at 10m elevation
+                        - VGRD_AGL-10m  # v component of wind velocity at 10m elevation
+                        - DSWRF_Sfc     # accumulated downward shortwave (solar) radiation at ground level
+                        - DLWRF_Sfc     # accumulated downward longwave (thermal) radiation at ground level
+                        - LHTFL_Sfc     # upward surface latent heat flux (for VHFR FVCOM)
+                        - TMP_AGL-2m    # air temperature at 2m elevation
+                        - SPFH_AGL-2m   # specific humidity at 2m elevation
+                        - RH_AGL-2m     # relative humidity at 2m elevation (for VHFR FVCOM)
+                        - APCP_Sfc      # accumulated precipitation at ground level
+                        - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
+                        - PRMSL_MSL     # atmospheric pressure at mean sea level
+                        - TCDC_Sfc      # total cloud in percent (for parametrization of radiation missing from 2007-2014 GEMLAM)
                       forecast duration: 48  # hours
 
                     1 km:
                       GRIB dir: /results/forcing/atmospheric/GEM1.0/GRIB/
-                      url template: 'https://dd.alpha.meteo.gc.ca/model_hrdps/west/1km/grib2/{forecast}/{hour}/{filename}'
-                      file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
+                      url template: "https://dd.alpha.meteo.gc.ca/model_hrdps/west/1km/grib2/{forecast}/{hour}/{filename}"
+                      file template: "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
                       grib variables:
                         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
                         - VGRD_TGL_10  # v component of wind velocity at 10m elevation
@@ -167,30 +168,31 @@ class TestConfig:
     def test_weather_download_2_5_km_section(self, prod_config):
         weather_download = prod_config["weather"]["download"]["2.5 km"]
         assert (
-            weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+            weather_download["GRIB dir"]
+            == "/results/forcing/atmospheric/continental2.5/GRIB/"
         )
         assert (
             weather_download["url template"]
-            == "https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/west/grib2/{forecast}/{hour}/{filename}"
+            == "https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
         )
         assert (
             weather_download["file template"]
-            == "CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2"
+            == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
         )
         assert weather_download["forecast duration"] == 48
         assert weather_download["grib variables"] == [
-            "UGRD_TGL_10",
-            "VGRD_TGL_10",
-            "DSWRF_SFC_0",
-            "DLWRF_SFC_0",
-            "LHTFL_SFC_0",
-            "TMP_TGL_2",
-            "SPFH_TGL_2",
-            "RH_TGL_2",
-            "APCP_SFC_0",
-            "PRATE_SFC_0",
-            "PRMSL_MSL_0",
-            "TCDC_SFC_0",
+            "UGRD_AGL-10m",
+            "VGRD_AGL-10m",
+            "DSWRF_Sfc",
+            "DLWRF_Sfc",
+            "LHTFL_Sfc",
+            "TMP_AGL-2m",
+            "SPFH_AGL-2m",
+            "RH_AGL-2m",
+            "APCP_Sfc",
+            "PRATE_Sfc",
+            "PRMSL_MSL",
+            "TCDC_Sfc",
         ]
 
     def test_weather_download_1_km_section(self, prod_config):
@@ -326,17 +328,6 @@ class TestFailure:
         assert msg_type == f"failure {resolution} {forecast}"
 
 
-@pytest.mark.parametrize(
-    "forecast, resolution",
-    (
-        ("00", "1km"),
-        ("12", "1km"),
-        ("00", "2.5km"),
-        ("06", "2.5km"),
-        ("12", "2.5km"),
-        ("18", "2.5km"),
-    ),
-)
 @patch("nowcast.workers.download_weather.logger", autospec=True)
 @patch(
     "nowcast.workers.download_weather._calc_date",
@@ -349,7 +340,54 @@ class TestFailure:
 class TestGetGrib:
     """Unit tests for get_grib() function."""
 
-    def test_make_hour_dirs(
+    @pytest.mark.parametrize(
+        "forecast, resolution",
+        (
+            ("00", "2.5km"),
+            ("06", "2.5km"),
+            ("12", "2.5km"),
+            ("18", "2.5km"),
+        ),
+    )
+    def test_make_hour_dirs_2_5km(
+        self,
+        m_get_file,
+        m_fix_perms,
+        m_mkdir,
+        m_calc_date,
+        m_logger,
+        forecast,
+        resolution,
+        config,
+    ):
+        parsed_args = SimpleNamespace(
+            forecast=forecast,
+            resolution=resolution,
+            yesterday=False,
+            no_verify_certs=False,
+        )
+        p_config = patch.dict(
+            config["weather"]["download"][resolution.replace("km", " km")],
+            {"forecast duration": 6},
+        )
+        with p_config:
+            download_weather.get_grib(parsed_args, config)
+        for hr in range(1, 7):
+            args, kwargs = m_mkdir.call_args_list[hr + 1]
+            assert args == (
+                f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20150619/{forecast}/00{hr}",
+                m_logger,
+            )
+            assert kwargs == {"grp_name": "allen", "exist_ok": False}
+
+    @pytest.mark.parametrize(
+        "forecast, resolution",
+        (
+            ("00", "1km"),
+            ("12", "1km"),
+        ),
+    )
+    def test_make_hour_dirs_1km(
         self,
         m_get_file,
         m_fix_perms,
@@ -380,6 +418,17 @@ class TestGetGrib:
             )
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
+    @pytest.mark.parametrize(
+        "forecast, resolution, variable",
+        (
+            ("00", "1km", "UGRD_TGL_10"),
+            ("12", "1km", "UGRD_TGL_10"),
+            ("00", "2.5km", "UGRD_AGL-10m"),
+            ("06", "2.5km", "UGRD_AGL-10m"),
+            ("12", "2.5km", "UGRD_AGL-10m"),
+            ("18", "2.5km", "UGRD_AGL-10m"),
+        ),
+    )
     @patch("nowcast.workers.download_weather.requests.Session", autospec=True)
     def test_get_grib_variable_file(
         self,
@@ -391,6 +440,7 @@ class TestGetGrib:
         m_logger,
         forecast,
         resolution,
+        variable,
         config,
     ):
         parsed_args = SimpleNamespace(
@@ -401,7 +451,7 @@ class TestGetGrib:
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
-            {"grib variables": ["UGRD_TGL_10"], "forecast duration": 1},
+            {"grib variables": [variable], "forecast duration": 1},
         )
         with p_config:
             download_weather.get_grib(parsed_args, config)
@@ -413,7 +463,7 @@ class TestGetGrib:
             config["weather"]["download"][resolution.replace("km", " km")][
                 "file template"
             ],
-            "UGRD_TGL_10",
+            variable,
             config["weather"]["download"][resolution.replace("km", " km")]["GRIB dir"],
             "20150619",
             forecast,
@@ -422,7 +472,55 @@ class TestGetGrib:
         )
         assert kwargs == {}
 
+    @pytest.mark.parametrize(
+        "forecast, resolution, variable",
+        (
+            ("00", "1km", "UGRD_TGL_10"),
+            ("12", "1km", "UGRD_TGL_10"),
+            ("00", "2.5km", "UGRD_AGL-10m"),
+            ("06", "2.5km", "UGRD_AGL-10m"),
+            ("12", "2.5km", "UGRD_AGL-10m"),
+            ("18", "2.5km", "UGRD_AGL-10m"),
+        ),
+    )
     def test_fix_perms(
+        self,
+        m_get_file,
+        m_fix_perms,
+        m_mkdir,
+        m_calc_date,
+        m_logger,
+        forecast,
+        resolution,
+        variable,
+        config,
+    ):
+        parsed_args = SimpleNamespace(
+            forecast=forecast,
+            resolution=resolution,
+            yesterday=False,
+            no_verify_certs=False,
+        )
+        p_config = patch.dict(
+            config["weather"]["download"][resolution.replace("km", " km")],
+            {"grib variables": [variable], "forecast duration": 1},
+        )
+        m_get_file.return_value = "filepath"
+        p_fix_perms = patch("nowcast.workers.download_weather.lib.fix_perms")
+        with p_config, p_fix_perms as m_fix_perms:
+            download_weather.get_grib(parsed_args, config)
+        m_fix_perms.assert_called_once_with("filepath")
+
+    @pytest.mark.parametrize(
+        "forecast, resolution",
+        (
+            ("00", "2.5km"),
+            ("06", "2.5km"),
+            ("12", "2.5km"),
+            ("18", "2.5km"),
+        ),
+    )
+    def test_checklist_2_5km(
         self,
         m_get_file,
         m_fix_perms,
@@ -439,17 +537,21 @@ class TestGetGrib:
             yesterday=False,
             no_verify_certs=False,
         )
-        p_config = patch.dict(
-            config["weather"]["download"][resolution.replace("km", " km")],
-            {"grib variables": ["UGRD_TGL_10"], "forecast duration": 1},
-        )
-        m_get_file.return_value = "filepath"
-        p_fix_perms = patch("nowcast.workers.download_weather.lib.fix_perms")
-        with p_config, p_fix_perms as m_fix_perms:
-            download_weather.get_grib(parsed_args, config)
-        m_fix_perms.assert_called_once_with("filepath")
+        checklist = download_weather.get_grib(parsed_args, config)
 
-    def test_checklist(
+        expected = {
+            f"{forecast} {resolution}": f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20150619/{forecast}"
+        }
+        assert checklist == expected
+
+    @pytest.mark.parametrize(
+        "forecast, resolution",
+        (
+            ("00", "1km"),
+            ("12", "1km"),
+        ),
+    )
+    def test_checklist_1km(
         self,
         m_get_file,
         m_fix_perms,
@@ -515,15 +617,23 @@ class TestMkdirs:
 class TestGetFile:
     """Unit tests for _get_file() function."""
 
-    @pytest.mark.parametrize("resolution", ("1 km", "2.5 km"))
-    def test_get_web_data(self, m_stat, m_get_web_data, resolution, config, caplog):
+    @pytest.mark.parametrize(
+        "resolution, variable",
+        (
+            ("1 km", "UGRD_TGL_10"),
+            ("2.5 km", "UGRD_AGL-10m"),
+        ),
+    )
+    def test_get_web_data(
+        self, m_stat, m_get_web_data, resolution, variable, config, caplog
+    ):
         m_stat().st_size = 123_456
         caplog.set_level(logging.DEBUG)
 
         download_weather._get_file(
             config["weather"]["download"][resolution]["url template"],
             config["weather"]["download"][resolution]["file template"],
-            "UGRD_TGL_10",
+            variable,
             config["weather"]["download"][resolution]["GRIB dir"],
             "20150619",
             "06",
@@ -531,7 +641,7 @@ class TestGetFile:
             None,
         )
         filename = config["weather"]["download"][resolution]["file template"].format(
-            variable="UGRD_TGL_10", date="20150619", forecast="06", hour="001"
+            variable=variable, date="20150619", forecast="06", hour="001"
         )
         url = config["weather"]["download"][resolution]["url template"].format(
             date="20150619", forecast="06", hour="001", filename=filename
