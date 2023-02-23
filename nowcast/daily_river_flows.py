@@ -426,7 +426,7 @@ def _get_area(config):
     grid_dir = Path(config["run"]["enabled hosts"]["salish-nowcast"]["grid dir"])
     if not grid_dir.exists():
         # TODO: This should be unnecessary in worker code
-        grid_dir = Path("../grid/")
+        grid_dir = Path("../../grid/")
     coords_file = grid_dir / config["run types"]["nowcast-green"]["coordinates"]
     with xr.open_dataset(coords_file, decode_times=False) as ds:
         area = ds.e1t[0] * ds.e2t[0]
