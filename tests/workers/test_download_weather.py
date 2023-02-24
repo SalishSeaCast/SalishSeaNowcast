@@ -538,7 +538,6 @@ class TestMkdirs:
 
 
 @patch("nowcast.workers.download_weather.get_web_data", autospec=True)
-@patch("nowcast.workers.download_weather.os.stat", autospec=True)
 class TestGetFile:
     """Unit tests for _get_file() function."""
 
@@ -550,9 +549,19 @@ class TestGetFile:
         ),
     )
     def test_get_web_data(
-        self, m_stat, m_get_web_data, resolution, variable, config, caplog
+        self,
+        m_get_web_data,
+        resolution,
+        variable,
+        config,
+        caplog,
+        monkeypatch,
     ):
-        m_stat().st_size = 123_456
+        def mock_stat(filepath):
+            return SimpleNamespace(st_size=123_456)
+
+        monkeypatch.setattr(download_weather.os, "stat", mock_stat)
+
         caplog.set_level(logging.DEBUG)
 
         download_weather._get_file(
@@ -565,13 +574,13 @@ class TestGetFile:
             "001",
             None,
         )
+
         filename = config["weather"]["download"][resolution]["file template"].format(
             variable=variable, date="20150619", forecast="06", hour="001"
         )
         url = config["weather"]["download"][resolution]["url template"].format(
             date="20150619", forecast="06", hour="001", filename=filename
         )
-
         filepath = Path(
             config["weather"]["download"][resolution]["GRIB dir"],
             "20150619",
@@ -587,14 +596,24 @@ class TestGetFile:
             session=None,
             wait_exponential_max=9000,
         )
+
         assert caplog.records[0].levelname == "DEBUG"
         assert caplog.messages[0] == f"downloaded 123456 bytes from {url}"
 
     @pytest.mark.parametrize("resolution", ("1 km", "2.5 km"))
     def test_empty_file_exception(
-        self, m_stat, m_get_web_data, resolution, config, caplog
+        self,
+        m_get_web_data,
+        resolution,
+        config,
+        caplog,
+        monkeypatch,
     ):
-        m_stat().st_size = 0
+        def mock_stat(filepath):
+            return SimpleNamespace(st_size=0)
+
+        monkeypatch.setattr(download_weather.os, "stat", mock_stat)
+
         caplog.set_level(logging.DEBUG)
 
         with pytest.raises(download_weather.WorkerError):
