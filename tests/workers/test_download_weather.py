@@ -100,7 +100,7 @@ class TestMain:
         worker = download_weather.main()
         assert worker.name == "download_weather"
         assert worker.description.startswith(
-            "SalishSeaCast worker that downloads the GRIB2 files from today's 00, 06, 12, or 18"
+            "SalishSeaCast worker that downloads the GRIB2 files from the 00, 06, 12, or 18"
         )
 
     def test_add_forecast_arg(self, mock_worker):
