@@ -89,11 +89,6 @@ def config(base_config):
 
 
 @pytest.fixture
-def parsed_args():
-    return SimpleNamespace(forecast="06", resolution="2.5km", yesterday=False)
-
-
-@pytest.fixture
 def mock_worker(mock_nowcast_worker, monkeypatch):
     monkeypatch.setattr(download_weather, "NowcastWorker", mock_nowcast_worker)
 
@@ -121,10 +116,12 @@ class TestMain:
         assert worker.cli.parser._actions[4].default == "2.5km"
         assert worker.cli.parser._actions[4].help
 
-    def test_add_yesterday_option(self, mock_worker):
+    def test_add_data_date_option(self, mock_worker):
         worker = download_weather.main()
-        assert worker.cli.parser._actions[5].dest == "yesterday"
-        assert worker.cli.parser._actions[5].default is False
+        assert worker.cli.parser._actions[5].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[5].type == expected
+        assert worker.cli.parser._actions[5].default == arrow.now().floor("day")
         assert worker.cli.parser._actions[5].help
 
     def test_add_verify_certs_option(self, mock_worker):
@@ -225,115 +222,69 @@ class TestConfig:
 
 
 @pytest.mark.parametrize(
-    "forecast, resolution, now, forecast_date",
+    "forecast, resolution, forecast_date",
     (
-        ("00", "2.5km", "2020-02-10 03:58:43", "2020-02-10"),
-        ("06", "2.5km", "2020-02-10 09:59:43", "2020-02-10"),
-        ("12", "2.5km", "2020-02-10 15:56:43", "2020-02-10"),
-        ("18", "2.5km", "2020-02-10 21:54:43", "2020-02-10"),
-        ("00", "1km", "2020-02-10 03:58:43", "2020-02-10"),
-        ("12", "1km", "2020-02-10 15:56:43", "2020-02-10"),
+        ("00", "2.5km", "2020-02-10"),
+        ("06", "2.5km", "2020-02-10"),
+        ("12", "2.5km", "2020-02-10"),
+        ("18", "2.5km", "2020-02-10"),
+        ("00", "1km", "2020-02-10"),
+        ("12", "1km", "2020-02-10"),
     ),
 )
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(
-        self, forecast, resolution, now, forecast_date, caplog, monkeypatch
-    ):
-        def mock_now():
-            return arrow.get(now)
-
-        monkeypatch.setattr(download_weather.arrow, "now", mock_now)
+    def test_success(self, forecast, resolution, forecast_date, caplog, monkeypatch):
         parsed_args = SimpleNamespace(
-            forecast=forecast, resolution=resolution, yesterday=False
+            forecast=forecast,
+            resolution=resolution,
+            run_date=forecast_date,
+            no_verify_certs=False,
         )
-        caplog.set_level(logging.INFO)
+
+        caplog.set_level(logging.DEBUG)
 
         msg_type = download_weather.success(parsed_args)
+
         assert caplog.records[0].levelname == "INFO"
         expected = f"{forecast_date} {resolution} weather forecast {forecast} downloads complete"
         assert caplog.messages[0] == expected
         assert msg_type == f"success {resolution} {forecast}"
 
-    def test_success_yesterday(
-        self, forecast, resolution, now, forecast_date, caplog, monkeypatch
-    ):
-        def mock_now():
-            return arrow.get(now)
-
-        monkeypatch.setattr(download_weather.arrow, "now", mock_now)
-        parsed_args = SimpleNamespace(
-            forecast=forecast, resolution=resolution, yesterday=True
-        )
-        caplog.set_level(logging.INFO)
-
-        msg_type = download_weather.success(parsed_args)
-        assert caplog.records[0].levelname == "INFO"
-        yesterday_date = arrow.get(forecast_date).shift(days=-1).format("YYYY-MM-DD")
-        expected = f"{yesterday_date} {resolution} weather forecast {forecast} downloads complete"
-        assert caplog.messages[0] == expected
-        assert msg_type == f"success {resolution} {forecast}"
-
 
 @pytest.mark.parametrize(
-    "forecast, resolution, now, forecast_date",
+    "forecast, resolution, forecast_date",
     (
-        ("00", "1km", "2020-02-10 03:58:43", "2020-02-10"),
-        ("12", "1km", "2020-02-10 15:56:43", "2020-02-10"),
-        ("00", "2.5km", "2020-02-10 03:58:43", "2020-02-10"),
-        ("06", "2.5km", "2020-02-10 09:59:43", "2020-02-10"),
-        ("12", "2.5km", "2020-02-10 15:56:43", "2020-02-10"),
-        ("18", "2.5km", "2020-02-10 21:54:43", "2020-02-10"),
+        ("00", "1km", "2020-02-10"),
+        ("12", "1km", "2020-02-10"),
+        ("00", "2.5km", "2020-02-10"),
+        ("06", "2.5km", "2020-02-10"),
+        ("12", "2.5km", "2020-02-10"),
+        ("18", "2.5km", "2020-02-10"),
     ),
 )
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(
-        self, forecast, resolution, now, forecast_date, caplog, monkeypatch
-    ):
-        def mock_now():
-            return arrow.get(now)
-
-        monkeypatch.setattr(download_weather.arrow, "now", mock_now)
+    def test_failure(self, forecast, resolution, forecast_date, caplog, monkeypatch):
         parsed_args = SimpleNamespace(
-            forecast=forecast, resolution=resolution, yesterday=False
+            forecast=forecast,
+            resolution=resolution,
+            run_date=forecast_date,
+            no_verify_certs=False,
         )
-        caplog.set_level(logging.INFO)
+        caplog.set_level(logging.DEBUG)
 
         msg_type = download_weather.failure(parsed_args)
+
         assert caplog.records[0].levelname == "CRITICAL"
         expected = f"{forecast_date} {resolution} weather forecast {parsed_args.forecast} downloads failed"
         assert caplog.messages[0] == expected
         assert msg_type == f"failure {resolution} {forecast}"
 
-    def test_failure_yesterday(
-        self, forecast, resolution, now, forecast_date, caplog, monkeypatch
-    ):
-        def mock_now():
-            return arrow.get(now)
-
-        monkeypatch.setattr(download_weather.arrow, "now", mock_now)
-        parsed_args = SimpleNamespace(
-            forecast=forecast, resolution=resolution, yesterday=True
-        )
-        caplog.set_level(logging.INFO)
-
-        msg_type = download_weather.failure(parsed_args)
-        assert caplog.records[0].levelname == "CRITICAL"
-        yesterday_date = arrow.get(forecast_date).shift(days=-1).format("YYYY-MM-DD")
-        expected = f"{yesterday_date} {resolution} weather forecast {parsed_args.forecast} downloads failed"
-        assert caplog.messages[0] == expected
-        assert msg_type == f"failure {resolution} {forecast}"
-
 
 @patch("nowcast.workers.download_weather.logger", autospec=True)
-@patch(
-    "nowcast.workers.download_weather._calc_date",
-    return_value="20150619",
-    autospec=True,
-)
 @patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
 @patch("nowcast.workers.download_weather.lib.fix_perms", autospec=True)
 @patch("nowcast.workers.download_weather._get_file", autospec=True)
@@ -354,7 +305,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_calc_date,
         m_logger,
         forecast,
         resolution,
@@ -363,7 +313,7 @@ class TestGetGrib:
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
-            yesterday=False,
+            run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
         )
         p_config = patch.dict(
@@ -375,7 +325,7 @@ class TestGetGrib:
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
             assert args == (
-                f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20150619/{forecast}/00{hr}",
+                f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}",
                 m_logger,
             )
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
@@ -392,7 +342,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_calc_date,
         m_logger,
         forecast,
         resolution,
@@ -401,7 +350,7 @@ class TestGetGrib:
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
-            yesterday=False,
+            run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
         )
         p_config = patch.dict(
@@ -413,7 +362,7 @@ class TestGetGrib:
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
             assert args == (
-                f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20150619/{forecast}/00{hr}",
+                f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}",
                 m_logger,
             )
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
@@ -436,7 +385,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_calc_date,
         m_logger,
         forecast,
         resolution,
@@ -446,7 +394,7 @@ class TestGetGrib:
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
-            yesterday=False,
+            run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
         )
         p_config = patch.dict(
@@ -465,7 +413,7 @@ class TestGetGrib:
             ],
             variable,
             config["weather"]["download"][resolution.replace("km", " km")]["GRIB dir"],
-            "20150619",
+            "20230224",
             forecast,
             "001",
             m_session().__enter__(),
@@ -488,7 +436,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_calc_date,
         m_logger,
         forecast,
         resolution,
@@ -498,7 +445,7 @@ class TestGetGrib:
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
-            yesterday=False,
+            run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
         )
         p_config = patch.dict(
@@ -525,7 +472,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_calc_date,
         m_logger,
         forecast,
         resolution,
@@ -534,13 +480,13 @@ class TestGetGrib:
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
-            yesterday=False,
+            run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
         )
         checklist = download_weather.get_grib(parsed_args, config)
 
         expected = {
-            f"{forecast} {resolution}": f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20150619/{forecast}"
+            f"{forecast} {resolution}": f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}"
         }
         assert checklist == expected
 
@@ -556,7 +502,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_calc_date,
         m_logger,
         forecast,
         resolution,
@@ -565,33 +510,15 @@ class TestGetGrib:
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
-            yesterday=False,
+            run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
         )
         checklist = download_weather.get_grib(parsed_args, config)
 
         expected = {
-            f"{forecast} {resolution}": f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20150619/{forecast}"
+            f"{forecast} {resolution}": f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}"
         }
         assert checklist == expected
-
-
-@patch(
-    "nowcast.workers.download_weather.arrow.utcnow",
-    return_value=arrow.get(2015, 6, 18, 19, 3, 42),
-    autospec=True,
-)
-class TestCalcDate:
-    """Unit tests for _calc_date() function."""
-
-    def test_calc_date_06_forecast(self, m_utcnow, parsed_args):
-        date = download_weather._calc_date(parsed_args, "06")
-        assert date == "20150618"
-
-    def test_calc_date_yesterday(self, m_utcnow, parsed_args):
-        parsed_args.yesterday = True
-        date = download_weather._calc_date(parsed_args, "06")
-        assert date == "20150617"
 
 
 @patch("nowcast.workers.download_weather.logger", autospec=True)
