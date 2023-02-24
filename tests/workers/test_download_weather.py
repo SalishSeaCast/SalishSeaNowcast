@@ -284,7 +284,6 @@ class TestFailure:
         assert msg_type == f"failure {resolution} {forecast}"
 
 
-@patch("nowcast.workers.download_weather.logger", autospec=True)
 @patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
 @patch("nowcast.workers.download_weather.lib.fix_perms", autospec=True)
 @patch("nowcast.workers.download_weather._get_file", autospec=True)
@@ -305,7 +304,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_logger,
         forecast,
         resolution,
         config,
@@ -320,14 +318,14 @@ class TestGetGrib:
             config["weather"]["download"][resolution.replace("km", " km")],
             {"forecast duration": 6},
         )
+
         with p_config:
             download_weather.get_grib(parsed_args, config)
+
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
-            assert args == (
-                f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}",
-                m_logger,
-            )
+            expected = f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            assert args[0] == expected
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
     @pytest.mark.parametrize(
@@ -342,7 +340,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_logger,
         forecast,
         resolution,
         config,
@@ -357,14 +354,14 @@ class TestGetGrib:
             config["weather"]["download"][resolution.replace("km", " km")],
             {"forecast duration": 6},
         )
+
         with p_config:
             download_weather.get_grib(parsed_args, config)
+
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
-            assert args == (
-                f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}",
-                m_logger,
-            )
+            expected = f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            assert args[0] == expected
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
     @pytest.mark.parametrize(
@@ -385,7 +382,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_logger,
         forecast,
         resolution,
         variable,
@@ -401,8 +397,10 @@ class TestGetGrib:
             config["weather"]["download"][resolution.replace("km", " km")],
             {"grib variables": [variable], "forecast duration": 1},
         )
+
         with p_config:
             download_weather.get_grib(parsed_args, config)
+
         args, kwargs = m_get_file.call_args
         assert args == (
             config["weather"]["download"][resolution.replace("km", " km")][
@@ -436,7 +434,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_logger,
         forecast,
         resolution,
         variable,
@@ -454,8 +451,10 @@ class TestGetGrib:
         )
         m_get_file.return_value = "filepath"
         p_fix_perms = patch("nowcast.workers.download_weather.lib.fix_perms")
+
         with p_config, p_fix_perms as m_fix_perms:
             download_weather.get_grib(parsed_args, config)
+
         m_fix_perms.assert_called_once_with("filepath")
 
     @pytest.mark.parametrize(
@@ -472,7 +471,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_logger,
         forecast,
         resolution,
         config,
@@ -483,6 +481,7 @@ class TestGetGrib:
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
         )
+
         checklist = download_weather.get_grib(parsed_args, config)
 
         expected = {
@@ -502,7 +501,6 @@ class TestGetGrib:
         m_get_file,
         m_fix_perms,
         m_mkdir,
-        m_logger,
         forecast,
         resolution,
         config,
@@ -513,6 +511,7 @@ class TestGetGrib:
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
         )
+
         checklist = download_weather.get_grib(parsed_args, config)
 
         expected = {
@@ -521,21 +520,20 @@ class TestGetGrib:
         assert checklist == expected
 
 
-@patch("nowcast.workers.download_weather.logger", autospec=True)
 @patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
 class TestMkdirs:
     """Unit tests for _mkdirs() function."""
 
-    def test_make_date_dir(self, m_mkdir, m_logger):
+    def test_make_date_dir(self, m_mkdir):
         download_weather._mkdirs("/tmp", "20150618", "06", "foo")
         args, kwargs = m_mkdir.call_args_list[0]
-        assert args == ("/tmp/20150618", m_logger)
+        assert args[0] == "/tmp/20150618"
         assert kwargs == {"grp_name": "foo"}
 
-    def test_make_forecast_dir(self, m_mkdir, m_logger):
+    def test_make_forecast_dir(self, m_mkdir):
         download_weather._mkdirs("/tmp", "20150618", "06", "foo")
         args, kwargs = m_mkdir.call_args_list[1]
-        assert args == ("/tmp/20150618/06", m_logger)
+        assert args[0] == "/tmp/20150618/06"
         assert kwargs == {"grp_name": "foo", "exist_ok": False}
 
 
@@ -573,6 +571,7 @@ class TestGetFile:
         url = config["weather"]["download"][resolution]["url template"].format(
             date="20150619", forecast="06", hour="001", filename=filename
         )
+
         filepath = Path(
             config["weather"]["download"][resolution]["GRIB dir"],
             "20150619",
@@ -580,6 +579,7 @@ class TestGetFile:
             "001",
             filename,
         )
+
         m_get_web_data.assert_called_once_with(
             url,
             "download_weather",
@@ -608,6 +608,7 @@ class TestGetFile:
                 "001",
                 None,
             )
+
         assert caplog.records[0].levelname == "DEBUG"
         assert caplog.messages[0].startswith("downloaded 0 bytes from")
         assert caplog.records[1].levelname == "CRITICAL"
