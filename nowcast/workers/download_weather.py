@@ -16,8 +16,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCast worker that downloads the GRIB2 files from today's 00, 06, 12, or 18
-Environment Canada GEM 2.5km HRDPS operational model forecast.
+"""SalishSeaCast worker that downloads the GRIB2 files from the 00, 06, 12, or 18
+Environment and Climate Change Canada GEM 2.5km HRDPS operational model forecast.
 """
 import logging
 import os
@@ -34,9 +34,7 @@ logger = logging.getLogger(NAME)
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.download_weather --help`
     """
