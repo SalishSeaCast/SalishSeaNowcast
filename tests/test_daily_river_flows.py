@@ -19,6 +19,7 @@
 """Unit tests for daily_river_flows module.
 """
 import io
+import os
 import textwrap
 from pathlib import Path
 
@@ -1351,6 +1352,10 @@ class TestCalcWatershedFlows:
         assert flows["non_fraser"] == pytest.approx(63.9781423614)
 
 
+@pytest.mark.skipif(
+    "GITHUB_ACTIONS" in os.environ,
+    reason="_get_area() uses file from grid repo that is too annoying to make available on Actions",
+)
 class TestCreateRunoffArray:
     """Unit test for daily_river_flows._create_runoff_array()."""
 
