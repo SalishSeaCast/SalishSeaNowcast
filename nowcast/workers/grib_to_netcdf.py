@@ -12,7 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast weather forcing file generation worker.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
+"""SalishSeaCast worker that generates weather forcing file from GRIB2 forecast files.
 
 Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
@@ -49,9 +53,7 @@ SandI, SandJ = 151, 136
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.grib_to_netcdf --help`
     """
@@ -72,6 +74,7 @@ def main():
         help="Date of the run to produce netCDF files for.",
     )
     worker.run(grib_to_netcdf, success, failure)
+    return worker
 
 
 def success(parsed_args):
@@ -212,7 +215,7 @@ def _define_forecast_segments_nowcast(rundate):
 
 def _define_forecast_segments_forecast2(rundate):
     """Define segments of forecasts to build into working weather files
-    for the extend forecast i.e. forecast2
+    for the extended forecast i.e. forecast2
     """
 
     # today is the day after this nowcast/forecast sequence started

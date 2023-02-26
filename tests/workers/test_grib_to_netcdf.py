@@ -19,9 +19,10 @@
 """Unit tests for SalishSeaCast grib_to_netcdf worker.
 """
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import grib_to_netcdf
@@ -33,47 +34,34 @@ def config(base_config):
     return base_config
 
 
-@patch("nowcast.workers.grib_to_netcdf.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(grib_to_netcdf, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        grib_to_netcdf.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("grib_to_netcdf",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        grib_to_netcdf.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        grib_to_netcdf.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {"nowcast+", "forecast2"}
-        assert "help" in kwargs
-
-    def test_add_run_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        grib_to_netcdf.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        grib_to_netcdf.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            grib_to_netcdf.grib_to_netcdf,
-            grib_to_netcdf.success,
-            grib_to_netcdf.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = grib_to_netcdf.main()
+        assert worker.name == "grib_to_netcdf"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that generates weather forcing file from GRIB2 forecast files."
         )
+
+    def test_add_run_type_arg(self, mock_worker):
+        worker = grib_to_netcdf.main()
+        assert worker.cli.parser._actions[3].dest == "run_type"
+        assert worker.cli.parser._actions[3].choices == {"nowcast+", "forecast2"}
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = grib_to_netcdf.main()
+        assert worker.cli.parser._actions[4].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[4].type == expected
+        assert worker.cli.parser._actions[4].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[4].help
 
 
 class TestConfig:
