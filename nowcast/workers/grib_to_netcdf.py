@@ -160,7 +160,7 @@ def _define_forecast_segments_nowcast(run_date):
     """Define segments of forecasts to build into working weather files
     for nowcast and a following forecast
 
-    :param :py:class:`arrow.Arrow`
+    :param :py:class:`arrow.Arrow` run_date:
 
     :rtype: tuple
     """
@@ -171,7 +171,7 @@ def _define_forecast_segments_nowcast(run_date):
     tomorrow = today.shift(days=+1)
     next_day = today.shift(days=+2)
     nemo_yyyymmdd = "[y]YYYY[m]MM[d]DD"
-    fcst_section_hrs_list = [[], [], []]
+    fcst_section_hrs_list = [{}, {}, {}]
 
     # today
     p1 = Path(yesterday.format("YYYYMMDD"), "18")
@@ -179,7 +179,7 @@ def _define_forecast_segments_nowcast(run_date):
     p3 = Path(today_yyyymmdd, "12")
     logger.debug(f"forecast sections: {p1} {p2} {p3}")
     fcst_section_hrs_list[0] = {
-        # (part, (dir, real start hr, forecast start hr, end hr))
+        # part: (dir, real start hr, forecast start hr, end hr)
         "section 1": (os.fspath(p1), -1, (24 - 18 - 1), (24 - 18 + 0)),
         "section 2": (os.fspath(p2), 1, (1 - 0), (12 - 0)),
         "section 3": (os.fspath(p3), 13, (13 - 12), (23 - 12)),
@@ -194,7 +194,7 @@ def _define_forecast_segments_nowcast(run_date):
     p1 = Path(today_yyyymmdd, "12")
     logger.debug(f"tomorrow forecast section: {p1}")
     fcst_section_hrs_list[1] = {
-        # (part, (dir, start hr, end hr))
+        # part: (dir, start hr, end hr)
         "section 1": (os.fspath(p1), -1, (24 - 12 - 1), (24 + 23 - 12)),
     }
     zero_starts.append([])
@@ -206,7 +206,7 @@ def _define_forecast_segments_nowcast(run_date):
     p1 = Path(today_yyyymmdd, "12")
     logger.debug(f"next day forecast section: {p1}")
     fcst_section_hrs_list[2] = {
-        # (part, (dir, start hr, end hr))
+        # part: (dir, start hr, end hr)
         "section 1": (os.fspath(p1), -1, (24 + 24 - 12 - 1), (24 + 24 + 12 - 12)),
     }
     zero_starts.append([])
@@ -216,44 +216,50 @@ def _define_forecast_segments_nowcast(run_date):
     return (fcst_section_hrs_list, zero_starts, lengths, subdirectories, yearmonthdays)
 
 
-def _define_forecast_segments_forecast2(rundate):
+def _define_forecast_segments_forecast2(run_date):
     """Define segments of forecasts to build into working weather files
     for the extended forecast i.e. forecast2
+
+    :param :py:class:`arrow.Arrow` run_date:
+
+    :rtype: tuple
     """
 
     # today is the day after this nowcast/forecast sequence started
-    today = rundate
+    today = run_date
+    today_yyyymmdd = today.format("YYYYMMDD")
     tomorrow = today.shift(days=+1)
     nextday = today.shift(days=+2)
+    nemo_yyyymmdd = "[y]YYYY[m]MM[d]DD"
 
-    fcst_section_hrs_arr = [OrderedDict() for x in range(2)]
+    fcst_section_hrs_list = [{}, {}]
 
     # tomorrow
-    p1 = os.path.join(today.format("YYYYMMDD"), "06")
-    logger.info(f"forecast section: {p1}")
-    fcst_section_hrs_arr[0] = OrderedDict(
-        [("section 1", (p1, -1, 24 - 6 - 1, 24 + 23 - 6))]
-    )
-    zerostart = [[]]
-    length = [24]
-    subdirectory = ["fcst"]
-    yearmonthday = [tomorrow.strftime("y%Ym%md%d")]
+    p1 = Path(today_yyyymmdd, "06")
+    logger.debug(f"forecast section: {p1}")
+    fcst_section_hrs_list[0] = {
+        # part:(dir, start hr, end hr)
+        "section 1": (os.fspath(p1), -1, (24 - 6 - 1), (24 + 23 - 6)),
+    }
+    zero_starts = [[]]
+    lengths = [24]
+    subdirectories = ["fcst"]
+    # TODO: refactor to today.date() for compatibility with config["weather"]["file template']
+    yearmonthdays = [tomorrow.format(nemo_yyyymmdd)]
 
     # nextday
-    p1 = os.path.join(today.format("YYYYMMDD"), "06")
-    logger.info(f"next day forecast section: {p1}")
-    fcst_section_hrs_arr[1] = OrderedDict(
-        [
-            # (part, (dir, start hr, end hr))
-            ("section 1", (p1, -1, 24 + 24 - 6 - 1, 24 + 24 + 6 - 6))
-        ]
-    )
-    zerostart.append([])
-    length.append(7)
-    subdirectory.append("fcst")
-    yearmonthday.append(nextday.strftime("y%Ym%md%d"))
+    p1 = Path(today_yyyymmdd, "06")
+    logger.debug(f"next day forecast section: {p1}")
+    fcst_section_hrs_list[1] = {
+        # part: (dir, start hr, end hr)
+        "section 1": (os.fspath(p1), -1, (24 + 24 - 6 - 1), (24 + 24 + 6 - 6)),
+    }
+    zero_starts.append([])
+    lengths.append(7)
+    subdirectories.append("fcst")
+    yearmonthdays.append(nextday.format(nemo_yyyymmdd))
 
-    return (fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday)
+    return (fcst_section_hrs_list, zero_starts, lengths, subdirectories, yearmonthdays)
 
 
 def _rotate_grib_wind(config, fcst_section_hrs):

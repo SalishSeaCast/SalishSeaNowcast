@@ -239,3 +239,74 @@ class TestDefineForecastSegmentsNowcast:
             run_date.shift(days=+2).format(nemo_yyyymmdd),
         ]
         assert yearmonthdays == expected
+
+
+class TestDefineForecastSegmentsForecast2:
+    """Unit tests for _define_forecast_segments_forecast2() function."""
+
+    def test_log_messages(self, caplog):
+        run_date = arrow.get("2023-02-26")
+        caplog.set_level(logging.DEBUG)
+
+        grib_to_netcdf._define_forecast_segments_forecast2(run_date)
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"forecast section: {run_date.format('YYYYMMDD')}/06"
+        assert caplog.messages[0] == expected
+        assert caplog.records[1].levelname == "DEBUG"
+        expected = f"next day forecast section: {run_date.format('YYYYMMDD')}/06"
+        assert caplog.messages[1] == expected
+
+    def test_fcst_section_hrs_list(self, caplog):
+        run_date = arrow.get("2023-02-26")
+        caplog.set_level(logging.DEBUG)
+
+        segments = grib_to_netcdf._define_forecast_segments_forecast2(run_date)
+        fcst_section_hrs_list, _, _, _, _ = segments
+
+        expected = [
+            {"section 1": ("20230226/06", -1, 17, 41)},
+            {"section 1": ("20230226/06", -1, 41, 48)},
+        ]
+        assert fcst_section_hrs_list == expected
+
+    def test_zero_starts(self, caplog):
+        run_date = arrow.get("2023-02-26")
+        caplog.set_level(logging.DEBUG)
+
+        segments = grib_to_netcdf._define_forecast_segments_forecast2(run_date)
+        _, zero_starts, _, _, _ = segments
+
+        assert zero_starts == [[], []]
+
+    def test_lengths(self, caplog):
+        run_date = arrow.get("2023-02-26")
+        caplog.set_level(logging.DEBUG)
+
+        segments = grib_to_netcdf._define_forecast_segments_forecast2(run_date)
+        _, _, lengths, _, _ = segments
+
+        assert lengths == [24, 7]
+
+    def test_subdirectories(self, caplog):
+        run_date = arrow.get("2023-02-26")
+        caplog.set_level(logging.DEBUG)
+
+        segments = grib_to_netcdf._define_forecast_segments_forecast2(run_date)
+        _, _, _, subdirectories, _ = segments
+
+        assert subdirectories == ["fcst", "fcst"]
+
+    def test_yearmonthdays(self, caplog):
+        run_date = arrow.get("2023-02-26")
+        caplog.set_level(logging.DEBUG)
+
+        segments = grib_to_netcdf._define_forecast_segments_forecast2(run_date)
+        _, _, _, _, yearmonthdays = segments
+
+        nemo_yyyymmdd = "[y]YYYY[m]MM[d]DD"
+        expected = [
+            run_date.shift(days=+1).format(nemo_yyyymmdd),
+            run_date.shift(days=+2).format(nemo_yyyymmdd),
+        ]
+        assert yearmonthdays == expected
