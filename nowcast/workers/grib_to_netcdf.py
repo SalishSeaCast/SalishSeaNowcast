@@ -26,6 +26,7 @@ import logging
 import os
 import subprocess
 from collections import OrderedDict
+from pathlib import Path
 
 import arrow
 import matplotlib.backends.backend_agg
@@ -155,64 +156,64 @@ def grib_to_netcdf(parsed_args, config, *args):
     return checklist
 
 
-def _define_forecast_segments_nowcast(rundate):
+def _define_forecast_segments_nowcast(run_date):
     """Define segments of forecasts to build into working weather files
     for nowcast and a following forecast
+
+    :param :py:class:`arrow.Arrow`
+
+    :rtype: tuple
     """
 
-    today = rundate
+    today = run_date
+    today_yyyymmdd = today.format("YYYYMMDD")
     yesterday = today.shift(days=-1)
     tomorrow = today.shift(days=+1)
-    nextday = today.shift(days=+2)
-    fcst_section_hrs_arr = [OrderedDict() for x in range(3)]
+    next_day = today.shift(days=+2)
+    nemo_yyyymmdd = "[y]YYYY[m]MM[d]DD"
+    fcst_section_hrs_list = [[], [], []]
 
     # today
-    p1 = os.path.join(yesterday.format("YYYYMMDD"), "18")
-    p2 = os.path.join(today.format("YYYYMMDD"), "00")
-    p3 = os.path.join(today.format("YYYYMMDD"), "12")
+    p1 = Path(yesterday.format("YYYYMMDD"), "18")
+    p2 = Path(today_yyyymmdd, "00")
+    p3 = Path(today_yyyymmdd, "12")
     logger.debug(f"forecast sections: {p1} {p2} {p3}")
-    # TODO: no need to use OrderedDict in Python>3.6
-    fcst_section_hrs_arr[0] = OrderedDict(
-        [
-            # (part, (dir, real start hr, forecast start hr, end hr))
-            ("section 1", (p1, -1, 24 - 18 - 1, 24 - 18 + 0)),
-            ("section 2", (p2, 1, 1 - 0, 12 - 0)),
-            ("section 3", (p3, 13, 13 - 12, 23 - 12)),
-        ]
-    )
-    zerostart = [[1, 13]]
-    length = [24]
-    subdirectory = [""]
-    yearmonthday = [today.strftime("y%Ym%md%d")]
+    fcst_section_hrs_list[0] = {
+        # (part, (dir, real start hr, forecast start hr, end hr))
+        "section 1": (os.fspath(p1), -1, (24 - 18 - 1), (24 - 18 + 0)),
+        "section 2": (os.fspath(p2), 1, (1 - 0), (12 - 0)),
+        "section 3": (os.fspath(p3), 13, (13 - 12), (23 - 12)),
+    }
+    zero_starts = [[1, 13]]
+    lengths = [24]
+    subdirectories = [""]
+    # TODO: refactor to today.date() for compatibility with config["weather"]["file template']
+    yearmonthdays = [today.format(nemo_yyyymmdd)]
 
     # tomorrow (forecast)
-    p1 = os.path.join(today.format("YYYYMMDD"), "12")
+    p1 = Path(today_yyyymmdd, "12")
     logger.debug(f"tomorrow forecast section: {p1}")
-    fcst_section_hrs_arr[1] = OrderedDict(
-        [
-            # (part, (dir, start hr, end hr))
-            ("section 1", (p1, -1, 24 - 12 - 1, 24 + 23 - 12))
-        ]
-    )
-    zerostart.append([])
-    length.append(24)
-    subdirectory.append("fcst")
-    yearmonthday.append(tomorrow.strftime("y%Ym%md%d"))
+    fcst_section_hrs_list[1] = {
+        # (part, (dir, start hr, end hr))
+        "section 1": (os.fspath(p1), -1, (24 - 12 - 1), (24 + 23 - 12)),
+    }
+    zero_starts.append([])
+    lengths.append(24)
+    subdirectories.append("fcst")
+    yearmonthdays.append(tomorrow.format(nemo_yyyymmdd))
 
     # next day (forecast)
-    p1 = os.path.join(today.format("YYYYMMDD"), "12")
+    p1 = Path(today_yyyymmdd, "12")
     logger.debug(f"next day forecast section: {p1}")
-    fcst_section_hrs_arr[2] = OrderedDict(
-        [
-            # (part, (dir, start hr, end hr))
-            ("section 1", (p1, -1, 24 + 24 - 12 - 1, 24 + 24 + 12 - 12))
-        ]
-    )
-    zerostart.append([])
-    length.append(13)
-    subdirectory.append("fcst")
-    yearmonthday.append(nextday.strftime("y%Ym%md%d"))
-    return (fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday)
+    fcst_section_hrs_list[2] = {
+        # (part, (dir, start hr, end hr))
+        "section 1": (os.fspath(p1), -1, (24 + 24 - 12 - 1), (24 + 24 + 12 - 12)),
+    }
+    zero_starts.append([])
+    lengths.append(13)
+    subdirectories.append("fcst")
+    yearmonthdays.append(next_day.format(nemo_yyyymmdd))
+    return (fcst_section_hrs_list, zero_starts, lengths, subdirectories, yearmonthdays)
 
 
 def _define_forecast_segments_forecast2(rundate):
