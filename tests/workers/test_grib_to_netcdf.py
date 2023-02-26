@@ -18,8 +18,8 @@
 
 """Unit tests for SalishSeaCast grib_to_netcdf worker.
 """
+import logging
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -110,29 +110,37 @@ class TestConfig:
         )
 
 
-@pytest.mark.parametrize("run_type", ["nowcast+", "forecast2"])
-@patch("nowcast.workers.grib_to_netcdf.logger", autospec=True)
+@pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, run_type, caplog):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2019-02-11")
+            run_type=run_type, run_date=arrow.get("2023-02-26")
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = grib_to_netcdf.success(parsed_args)
-        assert m_logger.info.called
-        assert msg_type == "success {}".format(run_type)
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"2023-02-26 NEMO-atmos forcing file for {run_type} created"
+        assert caplog.messages[0] == expected
+        assert msg_type == f"success {run_type}"
 
 
-@pytest.mark.parametrize("run_type", ["nowcast+", "forecast2"])
-@patch("nowcast.workers.grib_to_netcdf.logger", autospec=True)
+@pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, run_type, caplog):
         parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2019-02-11")
+            run_type=run_type, run_date=arrow.get("2023-02-26")
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = grib_to_netcdf.failure(parsed_args)
-        assert m_logger.critical.called
-        assert msg_type == "failure {}".format(run_type)
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"2023-02-26 NEMO-atmos forcing file creation for {run_type} failed"
+        assert caplog.messages[0] == expected
+        assert msg_type == f"failure {run_type}"

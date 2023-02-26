@@ -40,16 +40,17 @@ NAME = "grib_to_netcdf"
 logger = logging.getLogger(NAME)
 wgrib2_logger = logging.getLogger("wgrib2")
 
+# TODO: update - watersheds are not the reason for sub-region choice
 # Corners of sub-region of GEM 2.5km operational forecast grid
 # that enclose the watersheds (other than the Fraser River)
 # that are used to calculate river flows for runoff forcing files
 # for the SalishSeaCast NEMO model.
 # The Fraser is excluded because real-time gauge data at Hope are
 # available for it.
-IST, IEN = 110, 365
-JST, JEN = 20, 285
+IST, IEN = 230, 460
+JST, JEN = 300, 285
 # Position of Sand Heads
-SandI, SandJ = 151, 136
+SandI, SandJ = 118, 108
 
 
 def main():
@@ -170,6 +171,7 @@ def _define_forecast_segments_nowcast(rundate):
     p2 = os.path.join(today.format("YYYYMMDD"), "00")
     p3 = os.path.join(today.format("YYYYMMDD"), "12")
     logger.debug(f"forecast sections: {p1} {p2} {p3}")
+    # TODO: no need to use OrderedDict in Python>3.6
     fcst_section_hrs_arr[0] = OrderedDict(
         [
             # (part, (dir, real start hr, forecast start hr, end hr))
@@ -291,12 +293,14 @@ def _rotate_grib_wind(config, fcst_section_hrs):
                         f" may have failed: {pattern}"
                     )
                     raise WorkerError
+                # TODO: refactor to use shlex.split()
                 cmd = [wgrib2, fn[0], "-append", "-grib", outuv]
                 lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
             # rotate
             GRIDspec = subprocess.check_output(
                 [grid_defn, outuv], cwd=os.path.dirname(wgrib2)
             )
+            # TODO: refactor to use shlex.split()
             cmd = [wgrib2, outuv]
             cmd.extend("-new_grid_winds earth".split())
             cmd.append("-new_grid")
@@ -427,9 +431,14 @@ def _crop_to_watersheds(config, ymd, ist, ien, jst, jen, outgrib, outzeros):
 def _make_netCDF_files(config, ymd, subdir, outgrib, outzeros):
     """Convert the GRIB files to netcdf (classic) files."""
     OPERdir = config["weather"]["ops dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    outnetcdf = os.path.join(OPERdir, subdir, f"ops_{ymd}.nc")
+    # filename_tmpl = config["weather"]["file template"]
+    # # TODO: Fix this - ymd is already formatted at "y%Ym%md%d"
+    # #       so we have to hack the filename tmeplate
+    # filename_tmpl.replace(":y%Ym%md%d", "ymd")
+    # outnetcdf = os.path.join(OPERdir, subdir, filename_tmpl.format(ymd))
+    outnetcdf = os.path.join(OPERdir, subdir, f"RlatLon_{ymd}.nc")
     out0netcdf = os.path.join(OPERdir, subdir, f"oper_000_{ymd}.nc")
+    wgrib2 = config["weather"]["wgrib2"]
     cmd = [wgrib2, outgrib, "-netcdf", outnetcdf]
     lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
     logger.debug(f"created hourly netCDF classic file: {outnetcdf}")
