@@ -235,14 +235,13 @@ class TestConfig:
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, forecast, resolution, forecast_date, caplog, monkeypatch):
+    def test_success(self, forecast, resolution, forecast_date, caplog):
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
             run_date=forecast_date,
             no_verify_certs=False,
         )
-
         caplog.set_level(logging.DEBUG)
 
         msg_type = download_weather.success(parsed_args)
@@ -267,7 +266,7 @@ class TestSuccess:
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, forecast, resolution, forecast_date, caplog, monkeypatch):
+    def test_failure(self, forecast, resolution, forecast_date, caplog):
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
