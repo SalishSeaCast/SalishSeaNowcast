@@ -38,6 +38,7 @@ jobs:
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/UBC-MOAD/Reshapr#egg=Reshapr
+          python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/pywgrib2_xr@SalishSeaCast#egg=pywgrib2_xr
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
