@@ -69,10 +69,8 @@ weather:
       # ECCC HRDPS 1km west domain forecast duration
       forecast duration: 36  # hours
 
-  # Location of wgrib2 executable
-  wgrib2: /SalishSeaCast/private-tools/grib2/wgrib2/wgrib2
-  # Location of Pramod Thupaki's grid_defn.pl script
-  grid_defn.pl: /SalishSeaCast/private-tools/PThupaki/grid_defn.pl
+  # wgrib2-style grid description of rotated lat-lon grid used in 2.5km HRDPS continental product
+  grid desc: rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500
   # Destination directory for NEMO forcing files generated from GRIB2 files
   ops dir: /results/forcing/atmospheric/GEM2.5/operational/
   # Template for the atmospheric forcing file name

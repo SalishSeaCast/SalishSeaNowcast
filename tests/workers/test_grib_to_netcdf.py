@@ -19,11 +19,15 @@
 """Unit tests for SalishSeaCast grib_to_netcdf worker.
 """
 import logging
+import os
+import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
 import nemo_nowcast
 import pytest
+from nemo_nowcast import WorkerError
 
 from nowcast.workers import grib_to_netcdf
 
@@ -31,7 +35,35 @@ from nowcast.workers import grib_to_netcdf
 @pytest.fixture()
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
-    return base_config
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                weather:
+                  download:
+                    2.5 km:
+                      GRIB dir: forcing/atmospheric/continental2.5/GRIB/
+                      grib variables:
+                        - UGRD_AGL-10m  # u component of wind velocity at 10m elevation
+                        - VGRD_AGL-10m  # v component of wind velocity at 10m elevation
+                        - DSWRF_Sfc     # accumulated downward shortwave (solar) radiation at ground level
+                        - DLWRF_Sfc     # accumulated downward longwave (thermal) radiation at ground level
+                        - LHTFL_Sfc     # upward surface latent heat flux (for VHFR FVCOM)
+                        - TMP_AGL-2m    # air temperature at 2m elevation
+                        - SPFH_AGL-2m   # specific humidity at 2m elevation
+                        - RH_AGL-2m     # relative humidity at 2m elevation (for VHFR FVCOM)
+                        - APCP_Sfc      # accumulated precipitation at ground level
+                        - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
+                        - PRMSL_MSL     # atmospheric pressure at mean sea level
+
+                  grid desc: rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @pytest.fixture
@@ -91,12 +123,15 @@ class TestConfig:
 
     def test_weather_section(self, prod_config):
         weather = prod_config["weather"]
-        assert weather["wgrib2"] == "/SalishSeaCast/private-tools/grib2/wgrib2/wgrib2"
         assert (
-            weather["grid_defn.pl"]
-            == "/SalishSeaCast/private-tools/PThupaki/grid_defn.pl"
+            weather["grid desc"]
+            == "rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500"
         )
-        assert weather["ops dir"] == "/results/forcing/atmospheric/GEM2.5/operational/"
+        assert (
+            weather["ops dir"]
+            == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
+        )
+        assert weather["file template"] == "hrdps_{:y%Ym%md%d}.nc"
         assert (
             weather["monitoring image"]
             == "/results/nowcast-sys/figures/monitoring/wg.png"
@@ -310,3 +345,91 @@ class TestDefineForecastSegmentsForecast2:
             run_date.shift(days=+2).format(nemo_yyyymmdd),
         ]
         assert yearmonthdays == expected
+
+
+@pytest.mark.skipif(
+    "GITHUB_ACTIONS" in os.environ,
+    reason="ligwgrib2 is not yet in GHA test env",
+)
+class TestRotateGribWind:
+    """Unit tests for __rotate_grib_wind() function."""
+
+    def test_missing_wind_var_file_raises_WorkerError(
+        self, config, caplog, tmp_path, monkeypatch
+    ):
+        grib_dir = tmp_path / Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        hour_dir = grib_dir.joinpath("20230226", "18", "005")
+        hour_dir.mkdir(parents=True)
+        hour_dir = grib_dir.joinpath("20230226", "18", "006")
+        hour_dir.mkdir(parents=True)
+
+        fcst_section_hrs = {"section 1": ("20230226/18", -1, 5, 6)}
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            grib_to_netcdf._rotate_grib_wind(fcst_section_hrs, config)
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"No GRIB file found; a previous download may have failed for 20230226/18/005 UGRD_AGL-10m"
+        assert caplog.messages[0] == expected
+
+    def test_empty_wind_var_file_raises_WorkerError(
+        self, config, caplog, tmp_path, monkeypatch
+    ):
+        grib_dir = tmp_path / Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        for hour in ("005", "006"):
+            hour_dir = grib_dir.joinpath("20230226", "18", hour)
+            hour_dir.mkdir(parents=True)
+            for wind_var in ("UGRD_AGL-10m", "VGRD_AGL-10m"):
+                wind_file = (
+                    hour_dir
+                    / f"20230226T18Z_MSC_HRDPS_{wind_var}_RLatLon0.0225_PT{hour}H.grib2"
+                )
+                wind_file.write_bytes(b"")
+
+        fcst_section_hrs = {"section 1": ("20230226/18", -1, 5, 6)}
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            grib_to_netcdf._rotate_grib_wind(fcst_section_hrs, config)
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"Empty GRIB file found; a previous download may have failed for 20230226/18/005 UGRD_AGL-10m"
+        assert caplog.messages[0] == expected
+
+    def test_remove_outuv_file(self, config, caplog, tmp_path, monkeypatch):
+        grib_dir = tmp_path / Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        hour_dir = grib_dir.joinpath("20230226", "18", "005")
+        hour_dir.mkdir(parents=True)
+        for wind_var in ("UGRD_AGL-10m", "VGRD_AGL-10m"):
+            wind_file = (
+                hour_dir
+                / f"20230226T18Z_MSC_HRDPS_{wind_var}_RLatLon0.0225_PT005H.grib2"
+            )
+            wind_file.write_bytes(b"not empty")
+        outuv = hour_dir / "UV.grib"
+        outuv.write_bytes(b"")
+        hour_dir = grib_dir.joinpath("20230226", "18", "006")
+        hour_dir.mkdir(parents=True)
+        for wind_var in ("UGRD_AGL-10m", "VGRD_AGL-10m"):
+            wind_file = (
+                hour_dir
+                / f"20230226T18Z_MSC_HRDPS_{wind_var}_RLatLon0.0225_PT006H.grib2"
+            )
+            wind_file.write_bytes(b"not empty")
+
+        fcst_section_hrs = {"section 1": ("20230226/18", -1, 5, 6)}
+        caplog.set_level(logging.DEBUG)
+
+        grib_to_netcdf._rotate_grib_wind(fcst_section_hrs, config)
+
+        assert not outuv.exists()

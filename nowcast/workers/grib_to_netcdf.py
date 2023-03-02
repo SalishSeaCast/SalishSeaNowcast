@@ -25,7 +25,6 @@ import glob
 import logging
 import os
 import subprocess
-from collections import OrderedDict
 from pathlib import Path
 
 import arrow
@@ -33,6 +32,7 @@ import matplotlib.backends.backend_agg
 import matplotlib.figure
 import netCDF4 as nc
 import numpy as np
+import pywgrib2_xr
 from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import lib
@@ -99,34 +99,19 @@ def grib_to_netcdf(parsed_args, config, *args):
     """Collect weather forecast results from hourly GRIB2 files
     and produces day-long NEMO atmospheric forcing netCDF files.
     """
-    runtype = parsed_args.run_type
-    rundate = parsed_args.run_date
+    run_date = parsed_args.run_date
+    match parsed_args.run_type:
+        case "nowcast+":
+            segments = _define_forecast_segments_nowcast(run_date)
+        case "forecast2":
+            segments = _define_forecast_segments_forecast2(run_date)
 
-    if runtype == "nowcast+":
-        (
-            fcst_section_hrs_arr,
-            zerostart,
-            length,
-            subdirectory,
-            yearmonthday,
-        ) = _define_forecast_segments_nowcast(rundate)
-    elif runtype == "forecast2":
-        (
-            fcst_section_hrs_arr,
-            zerostart,
-            length,
-            subdirectory,
-            yearmonthday,
-        ) = _define_forecast_segments_forecast2(rundate)
-
-    # set-up plotting
-    fig, axs = _set_up_plotting()
     checklist = {}
     ip = 0
-    for fcst_section_hrs, zstart, flen, subdir, ymd in zip(
-        fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday
-    ):
-        _rotate_grib_wind(config, fcst_section_hrs)
+    # prep monitoring image
+    fig, axs = _set_up_plotting()
+    for fcst_section_hrs, zstart, flen, subdir, ymd in zip(*segments):
+        _rotate_grib_wind(fcst_section_hrs, config)
         _collect_grib_scalars(config, fcst_section_hrs)
         outgrib, outzeros = _concat_hourly_gribs(config, ymd, fcst_section_hrs)
         outgrib, outzeros = _crop_to_watersheds(
@@ -148,6 +133,7 @@ def grib_to_netcdf(parsed_args, config, *args):
                 checklist[subdir] = [os.path.basename(outnetcdf)]
             else:
                 checklist.update({subdir: os.path.basename(outnetcdf)})
+
     axs[2, 0].legend(loc="upper left")
     image_file = config["weather"]["monitoring image"]
     canvas = matplotlib.backends.backend_agg.FigureCanvasAgg(fig)
@@ -213,6 +199,7 @@ def _define_forecast_segments_nowcast(run_date):
     lengths.append(13)
     subdirectories.append("fcst")
     yearmonthdays.append(next_day.format(nemo_yyyymmdd))
+
     return (fcst_section_hrs_list, zero_starts, lengths, subdirectories, yearmonthdays)
 
 
@@ -262,59 +249,69 @@ def _define_forecast_segments_forecast2(run_date):
     return (fcst_section_hrs_list, zero_starts, lengths, subdirectories, yearmonthdays)
 
 
-def _rotate_grib_wind(config, fcst_section_hrs):
+def _rotate_grib_wind(fcst_section_hrs, config):
     """Use wgrib2 to consolidate each hour's u and v wind components into a
-    single file and then rotate the wind direction to geographical
-    coordinates.
+    single file and then rotate the wind direction to geographical coordinates.
+
+    :param dict fcst_section_hrs:
+    :param dict config:
     """
-    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    grid_defn = config["weather"]["grid_defn.pl"]
+    grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+    grid_desc = config["weather"]["grid desc"]
     for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
             sfhour = f"{fhour:03d}"
-            outuv = os.path.join(GRIBdir, day_fcst, sfhour, "UV.grib")
-            outuvrot = os.path.join(GRIBdir, day_fcst, sfhour, "UVrot.grib")
+            outuv = grib_dir / Path(day_fcst, sfhour, "UV.grib")
+            outuvrot = grib_dir / Path(day_fcst, sfhour, "UVrot.grib")
+
             # Delete residual instances of files that are created so that
             # function can be re-run cleanly
-            try:
-                os.remove(outuv)
-            except OSError:
-                pass
-            try:
-                os.remove(outuvrot)
-            except OSError:
-                pass
+            outuv.unlink(missing_ok=True)
+            outuvrot.unlink(missing_ok=True)
+
             # Consolidate u and v wind component values into one file
-            for fpattern in ["*UGRD*", "*VGRD*"]:
-                pattern = os.path.join(GRIBdir, day_fcst, sfhour, fpattern)
-                fn = glob.glob(pattern)
+            grib_vars = config["weather"]["download"]["2.5 km"]["grib variables"]
+            wind_var_names = [
+                var_name
+                for var_name in grib_vars
+                if var_name.startswith("UGRD") or var_name.startswith("VGRD")
+            ]
+            for wind_var in wind_var_names:
                 try:
-                    if os.stat(fn[0]).st_size == 0:
-                        logger.critical(f"Problem: 0 size file {fn[0]}")
-                        raise WorkerError
+                    wind_file = list(
+                        (grib_dir / Path(day_fcst, sfhour)).glob(f"*{wind_var}*.grib2")
+                    )[0]
                 except IndexError:
                     logger.critical(
-                        f"No GRIB files match pattern; a previous download;"
-                        f" may have failed: {pattern}"
+                        f"No GRIB file found; "
+                        f"a previous download may have failed for {Path(day_fcst, sfhour)} {wind_var}"
                     )
                     raise WorkerError
-                # TODO: refactor to use shlex.split()
-                cmd = [wgrib2, fn[0], "-append", "-grib", outuv]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            # rotate
-            GRIDspec = subprocess.check_output(
-                [grid_defn, outuv], cwd=os.path.dirname(wgrib2)
-            )
-            # TODO: refactor to use shlex.split()
-            cmd = [wgrib2, outuv]
-            cmd.extend("-new_grid_winds earth".split())
-            cmd.append("-new_grid")
-            cmd.extend(GRIDspec.split())
-            cmd.append(outuvrot)
-            lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            os.remove(outuv)
+                if wind_file.stat().st_size == 0:
+                    logger.critical(
+                        f"Empty GRIB file found; "
+                        f"a previous download may have failed for {Path(day_fcst, sfhour)} {wind_var}"
+                    )
+                    raise WorkerError
+
+                args = "-append -grib"
+                infile = os.fspath(wind_file)
+                outfile = os.fspath(outuv)
+                # pywgrib2_xr.wgrib() args must be strings,
+                # and files must be freed after use to close them
+                pywgrib2_xr.wgrib(infile, *args.split(), outfile)
+                pywgrib2_xr.free_files(infile, outfile)
+
+            # Remap wind vectors from grid to earth orientation
+            args = f"-new_grid_winds earth -new_grid {grid_desc}"
+            infile = os.fspath(outuv)
+            outfile = os.fspath(outuvrot)
+            # pywgrib2_xr.wgrib() args must be strings,
+            # and files must be freed after use to close them
+            pywgrib2_xr.wgrib(infile, *args.split(), outfile)
+            pywgrib2_xr.free_files(infile, outfile)
+            outuv.unlink(missing_ok=True)
     logger.debug("consolidated and rotated wind components")
 
 
