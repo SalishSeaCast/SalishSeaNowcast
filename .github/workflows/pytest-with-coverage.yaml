@@ -38,7 +38,7 @@ jobs:
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/UBC-MOAD/Reshapr#egg=Reshapr
-          git clone git+https://github.com/SalishSeaCast/pywgrib2_xr@SalishSeaCast $GITHUB_WORKSPACE/../vcs_pkgs/
+          git clone git+https://github.com/SalishSeaCast/pywgrib2_xr@SalishSeaCast $GITHUB_WORKSPACE/../vcs_pkgs/pywgrib2_xr
           conda install $GITHUB_WORKSPACE/../vcs_pkgs/pywgrib2_xr/_vendor/libwgrib2-3.0.0-hdee5e95_2.tar.bz2
           python3 -m pip install --editable $GITHUB_WORKSPACE/../vcs_pkgs/pywgrib2_xr
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
