@@ -38,7 +38,6 @@ weather:
         - APCP_Sfc      # accumulated precipitation at ground level
         - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
         - PRMSL_MSL     # atmospheric pressure at mean sea level
-        - TCDC_Sfc      # total cloud in percent (for parametrization of radiation missing from 2007-2014 GEMLAM)
       # ECCC HRDPS 2.5km continental domain forecast duration
       forecast duration: 48  # hours
 

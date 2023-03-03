@@ -60,7 +60,6 @@ def config(base_config):
                         - APCP_Sfc      # accumulated precipitation at ground level
                         - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
                         - PRMSL_MSL     # atmospheric pressure at mean sea level
-                        - TCDC_Sfc      # total cloud in percent (for parametrization of radiation missing from 2007-2014 GEMLAM)
                       forecast duration: 48  # hours
 
                     1 km:
@@ -189,7 +188,6 @@ class TestConfig:
             "APCP_Sfc",
             "PRATE_Sfc",
             "PRMSL_MSL",
-            "TCDC_Sfc",
         ]
 
     def test_weather_download_1_km_section(self, prod_config):

@@ -191,7 +191,6 @@ class TestConfig:
             "APCP_Sfc",
             "PRATE_Sfc",
             "PRMSL_MSL",
-            "TCDC_Sfc",
         ]
 
     def test_weather_download_1_km_section(self, prod_config):
