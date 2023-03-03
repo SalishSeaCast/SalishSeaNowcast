@@ -21,10 +21,8 @@
 Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
 """
-import glob
 import logging
 import os
-import subprocess
 from pathlib import Path
 
 import arrow
@@ -249,6 +247,22 @@ def _define_forecast_segments_forecast2(run_date):
     return (fcst_section_hrs_list, zero_starts, lengths, subdirectories, yearmonthdays)
 
 
+def _wgrib2_append(in_file, out_file):
+    """Run the equivalent of the command-line:
+         wgrib2 in_file -append -grib out_file
+
+    :param :py:class:`pathlib.Path in_file:
+    :param :py:class:`pathlib.Path out_file:
+    """
+    args = "-append -grib"
+    infile = os.fspath(in_file)
+    outfile = os.fspath(out_file)
+    # pywgrib2_xr.wgrib() args must be strings,
+    # and files must be freed after use to close them
+    pywgrib2_xr.wgrib(infile, *args.split(), outfile)
+    pywgrib2_xr.free_files(infile, outfile)
+
+
 def _rotate_grib_wind(fcst_section_hrs, config):
     """Use wgrib2 to consolidate each hour's u and v wind components into a
     single file and then rotate the wind direction to geographical coordinates.
@@ -280,14 +294,7 @@ def _rotate_grib_wind(fcst_section_hrs, config):
             hour_dir = grib_dir / Path(day_fcst, sfhour)
             for wind_var in wind_var_names:
                 wind_file = list(hour_dir.glob(f"*{wind_var}*.grib2"))[0]
-
-                args = "-append -grib"
-                infile = os.fspath(wind_file)
-                outfile = os.fspath(outuv)
-                # pywgrib2_xr.wgrib() args must be strings,
-                # and files must be freed after use to close them
-                pywgrib2_xr.wgrib(infile, *args.split(), outfile)
-                pywgrib2_xr.free_files(infile, outfile)
+                _wgrib2_append(wind_file, outuv)
 
             # Remap wind vectors from grid to earth orientation
             args = f"-new_grid_winds earth -new_grid {grid_desc}"

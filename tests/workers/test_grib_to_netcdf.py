@@ -342,3 +342,17 @@ class TestDefineForecastSegmentsForecast2:
             run_date.shift(days=+2).format(nemo_yyyymmdd),
         ]
         assert yearmonthdays == expected
+
+
+class TestWgrib2Append:
+    """Unit test for _wgrib2_append() function."""
+
+    def test_wgrib2_append(self, caplog, tmp_path):
+        in_file = tmp_path / "in_file.grib"
+        in_file.write_bytes(b"")
+        out_file = tmp_path / "out_file.grib"
+        out_file.write_bytes(b"")
+
+        grib_to_netcdf._wgrib2_append(in_file, out_file)
+
+        assert out_file.exists()
