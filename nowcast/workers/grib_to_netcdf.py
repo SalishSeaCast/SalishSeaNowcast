@@ -110,8 +110,8 @@ def grib_to_netcdf(parsed_args, config, *args):
     fig, axs = _set_up_plotting()
     for fcst_section_hrs, zstart, flen, subdir, ymd in zip(*segments):
         _rotate_grib_wind(fcst_section_hrs, config)
-        _collect_grib_scalars(config, fcst_section_hrs)
-        outgrib, outzeros = _concat_hourly_gribs(config, ymd, fcst_section_hrs)
+        _collect_grib_scalars(fcst_section_hrs, config)
+        outgrib, outzeros = _concat_hourly_gribs(ymd, fcst_section_hrs, config)
         outgrib, outzeros = _crop_to_watersheds(
             config, ymd, IST, IEN, JST, JEN, outgrib, outzeros
         )
@@ -308,46 +308,35 @@ def _rotate_grib_wind(fcst_section_hrs, config):
     logger.debug("consolidated and rotated wind components")
 
 
-def _collect_grib_scalars(config, fcst_section_hrs):
-    """Use wgrib2 and grid_defn.pl to consolidate each hour's scalar
-    variables into an single file and then re-grid them to match the
-    u and v wind components.
+def _collect_grib_scalars(fcst_section_hrs, config):
+    """Use wgrib2 to consolidate each hour's scalar variables into a single file.
+
+    :param dict fcst_section_hrs:
+    :param dict config:
     """
-    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    grid_defn = config["weather"]["grid_defn.pl"]
-    for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
+    grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+    for day_fcst, _, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
             sfhour = f"{fhour:03d}"
-            outscalar = os.path.join(GRIBdir, day_fcst, sfhour, "scalar.grib")
-            outscalargrid = os.path.join(GRIBdir, day_fcst, sfhour, "gscalar.grib")
+            outscalar = grib_dir / Path(day_fcst, sfhour, "scalar.grib")
+
             # Delete residual instances of files that are created so that
             # function can be re-run cleanly
-            try:
-                os.remove(outscalar)
-            except OSError:
-                pass
-            try:
-                os.remove(outscalargrid)
-            except OSError:
-                pass
+            outscalar.unlink(missing_ok=True)
+
             # Consolidate scalar variables into one file
-            for fn in glob.glob(os.path.join(GRIBdir, day_fcst, sfhour, "*")):
-                if not ("GRD" in fn) and ("CMC" in fn):
-                    cmd = [wgrib2, fn, "-append", "-grib", outscalar]
-                    lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            #  Re-grid
-            GRIDspec = subprocess.check_output(
-                [grid_defn, outscalar], cwd=os.path.dirname(wgrib2)
-            )
-            cmd = [wgrib2, outscalar]
-            cmd.append("-new_grid")
-            cmd.extend(GRIDspec.split())
-            cmd.append(outscalargrid)
-            lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            os.remove(outscalar)
-    logger.debug("consolidated and re-gridded scalar variables")
+            grib_vars = config["weather"]["download"]["2.5 km"]["grib variables"]
+            scalar_var_names = [
+                var_name
+                for var_name in grib_vars
+                if not (var_name.startswith("UGRD") or var_name.startswith("VGRD"))
+            ]
+            hour_dir = grib_dir / Path(day_fcst, sfhour)
+            for var_name in scalar_var_names:
+                var_file = list(hour_dir.glob(f"*{var_name}*.grib2"))[0]
+                _wgrib2_append(var_file, outscalar)
+    logger.debug("consolidated scalar variables")
 
 
 def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
