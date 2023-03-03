@@ -339,48 +339,39 @@ def _collect_grib_scalars(fcst_section_hrs, config):
     logger.debug("consolidated scalar variables")
 
 
-def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
+def _concat_hourly_gribs(ymd, fcst_section_hrs, config):
     """Concatenate in hour order the wind velocity components
     and scalar variables from hourly files into a daily file.
 
     Also create the zero-hour file that is used to initialize the
     calculation of instantaneous values from the forecast accumulated
     values.
+
+    :param str ymd:
+    :param dict fcst_section_hrs:
+    :param dict config:
     """
-    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
-    OPERdir = config["weather"]["ops dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    outgrib = os.path.join(OPERdir, f"oper_allvar_{ymd}.grib")
-    outzeros = os.path.join(OPERdir, f"oper_000_{ymd}.grib")
+    grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+    ops_dir = Path(config["weather"]["ops dir"])
+    outgrib = ops_dir / f"oper_allvar_{ymd}.grib"
+    outzeros = ops_dir / f"oper_000_{ymd}.grib"
 
     # Delete residual instances of files that are created so that
     # function can be re-run cleanly
-    try:
-        os.remove(outgrib)
-    except OSError:
-        pass
-    try:
-        os.remove(outzeros)
-    except OSError:
-        pass
+    outgrib.unlink(missing_ok=True)
+    outzeros.unlink(missing_ok=True)
+
     for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
             sfhour = f"{fhour:03d}"
-            outuvrot = os.path.join(GRIBdir, day_fcst, sfhour, "UVrot.grib")
-            outscalargrid = os.path.join(GRIBdir, day_fcst, sfhour, "gscalar.grib")
-            if fhour == start_hr and realstart == -1:
-                cmd = [wgrib2, outuvrot, "-append", "-grib", outzeros]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-                cmd = [wgrib2, outscalargrid, "-append", "-grib", outzeros]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            else:
-                cmd = [wgrib2, outuvrot, "-append", "-grib", outgrib]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-                cmd = [wgrib2, outscalargrid, "-append", "-grib", outgrib]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            os.remove(outuvrot)
-            os.remove(outscalargrid)
+            outuvrot = grib_dir / Path(day_fcst, sfhour, "UVrot.grib")
+            outscalargrid = grib_dir / Path(day_fcst, sfhour, "scalar.grib")
+            out_file = outzeros if fhour == start_hr and realstart == -1 else outgrib
+            _wgrib2_append(outuvrot, out_file)
+            outuvrot.unlink(missing_ok=True)
+            _wgrib2_append(outscalargrid, out_file)
+            outscalargrid.unlink(missing_ok=True)
     logger.debug(
         f"concatenated variables in hour order from hourly files to daily "
         f"file {outgrib}"

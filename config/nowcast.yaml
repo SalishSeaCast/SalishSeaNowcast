@@ -72,7 +72,7 @@ weather:
   # wgrib2-style grid description of rotated lat-lon grid used in 2.5km HRDPS continental product
   grid desc: rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500
   # Destination directory for NEMO forcing files generated from GRIB2 files
-  ops dir: /results/forcing/atmospheric/GEM2.5/operational/
+  ops dir: /results/forcing/atmospheric/continental2.5/nemo_forcing/
   # Template for the atmospheric forcing file name
   # **Must be quoted to project {} characters**
   file template: 'ops_{:y%Ym%md%d}.nc'

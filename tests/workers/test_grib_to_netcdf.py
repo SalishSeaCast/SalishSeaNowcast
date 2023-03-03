@@ -19,7 +19,6 @@
 """Unit tests for SalishSeaCast grib_to_netcdf worker.
 """
 import logging
-import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -27,7 +26,6 @@ from types import SimpleNamespace
 import arrow
 import nemo_nowcast
 import pytest
-from nemo_nowcast import WorkerError
 
 from nowcast.workers import grib_to_netcdf
 
@@ -127,7 +125,10 @@ class TestConfig:
             weather["grid desc"]
             == "rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500"
         )
-        assert weather["ops dir"] == "/results/forcing/atmospheric/GEM2.5/operational/"
+        assert (
+            weather["ops dir"]
+            == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
+        )
         assert weather["file template"] == "ops_{:y%Ym%md%d}.nc"
         assert (
             weather["monitoring image"]
