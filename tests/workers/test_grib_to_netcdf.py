@@ -127,11 +127,8 @@ class TestConfig:
             weather["grid desc"]
             == "rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500"
         )
-        assert (
-            weather["ops dir"]
-            == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
-        )
-        assert weather["file template"] == "hrdps_{:y%Ym%md%d}.nc"
+        assert weather["ops dir"] == "/results/forcing/atmospheric/GEM2.5/operational/"
+        assert weather["file template"] == "ops_{:y%Ym%md%d}.nc"
         assert (
             weather["monitoring image"]
             == "/results/nowcast-sys/figures/monitoring/wg.png"
