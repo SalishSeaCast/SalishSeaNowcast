@@ -258,7 +258,7 @@ def _rotate_grib_wind(fcst_section_hrs, config):
     """
     grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
     grid_desc = config["weather"]["grid desc"]
-    for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
+    for day_fcst, _, start_hr, end_hr in fcst_section_hrs.values():
         for fhour in range(start_hr, end_hr + 1):
             # Set up directories and files
             sfhour = f"{fhour:03d}"
@@ -277,23 +277,9 @@ def _rotate_grib_wind(fcst_section_hrs, config):
                 for var_name in grib_vars
                 if var_name.startswith("UGRD") or var_name.startswith("VGRD")
             ]
+            hour_dir = grib_dir / Path(day_fcst, sfhour)
             for wind_var in wind_var_names:
-                try:
-                    wind_file = list(
-                        (grib_dir / Path(day_fcst, sfhour)).glob(f"*{wind_var}*.grib2")
-                    )[0]
-                except IndexError:
-                    logger.critical(
-                        f"No GRIB file found; "
-                        f"a previous download may have failed for {Path(day_fcst, sfhour)} {wind_var}"
-                    )
-                    raise WorkerError
-                if wind_file.stat().st_size == 0:
-                    logger.critical(
-                        f"Empty GRIB file found; "
-                        f"a previous download may have failed for {Path(day_fcst, sfhour)} {wind_var}"
-                    )
-                    raise WorkerError
+                wind_file = list(hour_dir.glob(f"*{wind_var}*.grib2"))[0]
 
                 args = "-append -grib"
                 infile = os.fspath(wind_file)
