@@ -47,7 +47,7 @@ wgrib2_logger = logging.getLogger("wgrib2")
 # The Fraser is excluded because real-time gauge data at Hope are
 # available for it.
 IST, IEN = 230, 460
-JST, JEN = 300, 285
+JST, JEN = 300, 490
 # Position of Sand Heads
 SandI, SandJ = 118, 108
 
@@ -113,7 +113,7 @@ def grib_to_netcdf(parsed_args, config, *args):
         _collect_grib_scalars(fcst_section_hrs, config)
         outgrib, outzeros = _concat_hourly_gribs(ymd, fcst_section_hrs, config)
         outgrib, outzeros = _crop_to_watersheds(
-            config, ymd, IST, IEN, JST, JEN, outgrib, outzeros
+            ymd, IST, IEN, JST, JEN, outgrib, outzeros, config
         )
         outnetcdf, out0netcdf = _make_netCDF_files(
             config, ymd, subdir, outgrib, outzeros
@@ -251,8 +251,8 @@ def _wgrib2_append(in_file, out_file):
     """Run the equivalent of the command-line:
          wgrib2 in_file -append -grib out_file
 
-    :param :py:class:`pathlib.Path in_file:
-    :param :py:class:`pathlib.Path out_file:
+    :param :py:class:`pathlib.Path` in_file:
+    :param :py:class:`pathlib.Path` out_file:
     """
     args = "-append -grib"
     infile = os.fspath(in_file)
@@ -350,6 +350,8 @@ def _concat_hourly_gribs(ymd, fcst_section_hrs, config):
     :param str ymd:
     :param dict fcst_section_hrs:
     :param dict config:
+
+    :rtype: tuple
     """
     grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
     ops_dir = Path(config["weather"]["ops dir"])
@@ -383,26 +385,53 @@ def _concat_hourly_gribs(ymd, fcst_section_hrs, config):
     return outgrib, outzeros
 
 
-def _crop_to_watersheds(config, ymd, ist, ien, jst, jen, outgrib, outzeros):
+def _crop_to_watersheds(ymd, ist, ien, jst, jen, outgrib, outzeros, config):
     """Crop the grid to the sub-region of GEM 2.5km operational forecast
-    grid that encloses the watersheds that are used to calculate river
-    flows for runoff forcing files for the SalishSeaCast NEMO model.
+    grid that encloses the SalishSeaCast NEMO model grid.
+
+    :param str ymd:
+    :param int ist:
+    :param int ien:
+    :param int jst:
+    :param int jen:
+    :param :py:class:`pathlib.Path` outgrib:
+    :param :py:class:`pathlib.Path` outzeros:
+    :param dict config:
+
+    :rtype: tuple
     """
-    OPERdir = config["weather"]["ops dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    newgrib = os.path.join(OPERdir, f"oper_allvar_small_{ymd}.grib")
-    newzeros = os.path.join(OPERdir, f"oper_000_small_{ymd}.grib")
-    istr = f"{ist}:{ien}"
-    jstr = f"{jst}:{jen}"
-    cmd = [wgrib2, outgrib, "-ijsmall_grib", istr, jstr, newgrib]
-    lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
+    ops_dir = Path(config["weather"]["ops dir"])
+    newgrib = ops_dir / f"oper_allvar_small_{ymd}.grib"
+    newzeros = ops_dir / f"oper_000_small_{ymd}.grib"
+    _wgrib2_crop(outgrib, ien, ist, jen, jst, newgrib)
+    outgrib.unlink(missing_ok=True)
     logger.debug(f"cropped hourly file to watersheds sub-region: {newgrib}")
-    cmd = [wgrib2, outzeros, "-ijsmall_grib", istr, jstr, newzeros]
-    lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(f"cropped zero-hour file to watersheds sub-region: {newgrib}")
-    os.remove(outgrib)
-    os.remove(outzeros)
+    _wgrib2_crop(outzeros, ien, ist, jen, jst, newzeros)
+    outzeros.unlink(missing_ok=True)
+    logger.debug(f"cropped zero-hour file to watersheds sub-region: {newzeros}")
     return newgrib, newzeros
+
+
+def _wgrib2_crop(in_file, ien, ist, jen, jst, out_file):
+    """Run the equivalent of the command-line:
+         wgrib2 in_file -ijsmall_grib ist:ien jst:jen out_file
+
+    :param :py:class:`pathlib.Path` in_file:
+    :param int ien:
+    :param int ist:
+    :param int jen:
+    :param int jst:
+    :param :py:class:`pathlib.Path` out_file:
+
+    :rtype: tuple
+    """
+    args = f"-ijsmall_grib {ist}:{ien} {jst}:{jen}"
+    infile = os.fspath(in_file)
+    outfile = os.fspath(out_file)
+    # pywgrib2_xr.wgrib() args must be strings,
+    # and files must be freed after use to close them
+    pywgrib2_xr.wgrib(infile, *args.split(), outfile)
+    pywgrib2_xr.free_files(infile, outfile)
 
 
 def _make_netCDF_files(config, ymd, subdir, outgrib, outzeros):

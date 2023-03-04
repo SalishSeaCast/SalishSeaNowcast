@@ -69,6 +69,22 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
     monkeypatch.setattr(grib_to_netcdf, "NowcastWorker", mock_nowcast_worker)
 
 
+class TestGirdIndices:
+    """Unit tests for module variables that define indices of sub-region grid that is extracted."""
+
+    def test_i_indices(self):
+        assert grib_to_netcdf.IST == 230
+        assert grib_to_netcdf.IEN == 460
+
+    def test_j_indices(self):
+        assert grib_to_netcdf.JST == 300
+        assert grib_to_netcdf.JEN == 490
+
+    def test_SandHeads_indices(self):
+        assert grib_to_netcdf.SandI == 118
+        assert grib_to_netcdf.SandJ == 108
+
+
 class TestMain:
     """Unit tests for main() function."""
 
