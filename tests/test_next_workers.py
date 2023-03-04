@@ -209,12 +209,15 @@ class TestAfterDownloadWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
-            ),
+            # NextWorker(
+            #     "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
+            # ),
         ]
         assert workers == expected
-        assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
+        assert race_condition_workers == {
+            # "grib_to_netcdf",
+            "make_ssh_files",
+        }
 
     def test_success_2_5_km_12(self, config, checklist, monkeypatch):
         def mock_now():
@@ -232,14 +235,14 @@ class TestAfterDownloadWeather:
                 host="localhost",
             ),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
-            ),
+            # NextWorker(
+            #     "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
+            # ),
             NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
         ]
         assert workers == expected
         assert race_condition_workers == {
-            "grib_to_netcdf",
+            # "grib_to_netcdf",
             "make_live_ocean_files",
             "make_ssh_files",
         }
@@ -295,15 +298,18 @@ class TestAfterCollectWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
-            ),
+            # NextWorker(
+            #     "nowcast.workers.grib_to_netcdf", ["forecast2"], host="localhost"
+            # ),
             NextWorker(
                 "nowcast.workers.collect_weather", ["12", "2.5km"], host="localhost"
             ),
         ]
         assert workers == expected
-        assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
+        assert race_condition_workers == {
+            # "grib_to_netcdf",
+            "make_ssh_files"
+        }
 
     def test_success_2_5_km_12(self, config, checklist, monkeypatch):
         def mock_now():
@@ -321,9 +327,9 @@ class TestAfterCollectWeather:
                 host="localhost",
             ),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
-            ),
+            # NextWorker(
+            #     "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
+            # ),
             NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
             NextWorker(
                 "nowcast.workers.collect_weather", ["18", "2.5km"], host="localhost"
@@ -331,7 +337,7 @@ class TestAfterCollectWeather:
         ]
         assert workers == expected
         assert race_condition_workers == {
-            "grib_to_netcdf",
+            # "grib_to_netcdf",
             "make_live_ocean_files",
             "make_ssh_files",
         }
@@ -637,7 +643,7 @@ class TestAfterMakeLiveOceanFiles:
             args=["arbutus.cloud", "nowcast+"],
             host="localhost",
         )
-        assert expected in workers
+        assert expected not in workers
 
 
 class TestAfterMakeTurbidityFile:
@@ -660,7 +666,7 @@ class TestAfterMakeTurbidityFile:
             args=[host_name, "turbidity"],
             host="localhost",
         )
-        assert expected in workers
+        assert expected not in workers
 
     def test_success_no_launch_upload_forcing_salish(self, config, checklist):
         workers = next_workers.after_make_turbidity_file(
