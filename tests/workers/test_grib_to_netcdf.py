@@ -56,8 +56,6 @@ def config(base_config):
                         - PRMSL_MSL     # atmospheric pressure at mean sea level
                       lon indices: [300, 490]
                       lat indices: [230, 460]
-
-                  grid desc: rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500
                 """
             )
         )
@@ -131,10 +129,6 @@ class TestConfig:
 
     def test_weather_section(self, prod_config):
         weather = prod_config["weather"]
-        assert (
-            weather["grid desc"]
-            == "rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500"
-        )
         assert (
             weather["ops dir"]
             == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
