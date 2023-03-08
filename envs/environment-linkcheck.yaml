@@ -20,18 +20,15 @@ dependencies:
   - cliff
   - cmocean
   - coloredlogs
-  - Cython  # for pywgrib2_xr
   - dask
   - docutils
   - f90nml
   - feedgen>=0.9.0
   - flox
   - geopandas
-  - gfortran  # for pywgrib2_xr
   - gitpython
   - gsw
   - httpx
-  - jasper<3  # for libwgrib2
   - lxml
   - mako
   - matplotlib
@@ -48,7 +45,6 @@ dependencies:
   - pypdf2
   - pyproj
   - pytables
-  - python-blosc  # for pywgrib2_xr
   - pyyaml
   - pyzmq
   - rasterio
@@ -66,7 +62,6 @@ dependencies:
   - utm
   - verboselogs
   - watchdog
-  - wurlitzer  # for pywgrib2_xr
   - xarray
 
   # For documentation links checking
@@ -83,7 +78,6 @@ dependencies:
     - --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
     - --editable git+https://github.com/UBC-MOAD/moad_tools#egg=moad_tools
     - --editable git+https://github.com/UBC-MOAD/Reshapr#egg=Reshapr
-    - --editable git+https://github.com/SalishSeaCast/pywgrib2_xr@SalishSeaCast#egg=pywgrib2_xr
     - --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
     - --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
     - --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"

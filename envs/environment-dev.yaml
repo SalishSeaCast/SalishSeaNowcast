@@ -10,7 +10,6 @@
 #    $ python3 -m pip install --editable moad_tools/
 #    $ python3 -m pip install --editable tools/SalishSeaTools/
 #    $ python3 -m pip install --editable Reshapr/
-#    $ python3 -m pip install --editable pywgrib2_xr/  # use the SalishSeaCast branch
 #    $ python3 -m pip install --editable OPPTools/
 #    $ python3 -m pip install --editable NEMO-Cmd/
 #    $ python3 -m pip install --editable SalishSeaCmd/
@@ -33,18 +32,15 @@ dependencies:
   - cliff
   - cmocean
   - coloredlogs
-  - Cython  # for pywgrib2_xr
   - dask
   - docutils
   - f90nml
   - feedgen>=0.9.0
   - flox
   - geopandas
-  - gfortran  # for pywgrib2_xr
   - gitpython
   - gsw
   - httpx
-  - jasper<3  # for libwgrib2
   - lxml
   - mako
   - matplotlib
@@ -62,7 +58,6 @@ dependencies:
   - pyproj
   - pytables
   - python=3.10
-  - python-blosc  # for pywgrib2_xr
   - pyyaml
   - pyzmq
   - rasterio
@@ -80,7 +75,6 @@ dependencies:
   - utm
   - verboselogs
   - watchdog
-  - wurlitzer  # for pywgrib2_xr
   - xarray
 
   # For coding style, repo QA, and pkg management
