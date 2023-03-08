@@ -42,6 +42,7 @@ def config(base_config):
                   download:
                     2.5 km:
                       GRIB dir: forcing/atmospheric/continental2.5/GRIB/
+                      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
                       grib variables:
                         - UGRD_AGL-10m  # u component of wind velocity at 10m elevation
                         - VGRD_AGL-10m  # v component of wind velocity at 10m elevation
@@ -145,6 +146,10 @@ class TestConfig:
             weather_download["GRIB dir"]
             == "/results/forcing/atmospheric/continental2.5/GRIB/"
         )
+        assert (
+            weather_download["file template"]
+            == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+        )
         assert weather_download["lon indices"] == [300, 490]
         assert weather_download["lat indices"] == [230, 460]
 
@@ -188,7 +193,43 @@ class TestFailure:
 class TestGribToNetcdf:
     """Unit test for grib_to_netcdf() function."""
 
-    pass
+    @pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
+    def test_log_messages(self, run_type, config, caplog):
+        parsed_args = SimpleNamespace(
+            run_date=arrow.get("2023-03-08"),
+            run_type=run_type,
+        )
+        caplog.set_level(logging.DEBUG)
+
+        grib_to_netcdf.grib_to_netcdf(parsed_args, config)
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"creating NEMO-atmos forcing files for 2023-03-08 {run_type[:-1]}"
+        assert caplog.messages[0].startswith(expected)
+
+
+class TestCalcGribFilePaths:
+    """Unit test for _calc_grib_file_paths() function."""
+
+    def test_calc_grib_file_paths(self, config):
+        fcst_date = arrow.get("2023-03-08")
+        fcst_hr = "12"
+        fcst_step_range = (1, 3)
+        msc_var = "UGRD_TGL_10"
+
+        grib_files = grib_to_netcdf._calc_grib_file_paths(
+            fcst_date, fcst_hr, fcst_step_range, msc_var, config
+        )
+
+        expected = [
+            Path(
+                "forcing/atmospheric/continental2.5/GRIB/20230308/12/001/20230308T12Z_MSC_HRDPS_UGRD_TGL_10_RLatLon0.0225_PT001H.grib2"
+            ),
+            Path(
+                "forcing/atmospheric/continental2.5/GRIB/20230308/12/002/20230308T12Z_MSC_HRDPS_UGRD_TGL_10_RLatLon0.0225_PT002H.grib2"
+            ),
+        ]
+        assert grib_files == expected
 
 
 class TestDefineForecastSegmentsNowcast:

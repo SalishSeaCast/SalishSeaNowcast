@@ -88,14 +88,40 @@ def grib_to_netcdf(parsed_args, config, *args):
     """Collect weather forecast results from hourly GRIB2 files
     and produces day-long NEMO atmospheric forcing netCDF files.
     """
+    checklist = {}
     run_date = parsed_args.run_date
+    run_type = parsed_args.run_type
+    match run_type:
+        case "nowcast+":
+            logger.info(
+                f"creating NEMO-atmos forcing files for {run_date.format('YYYY-MM-DD')} "
+                f"nowcast and forecast runs"
+            )
+            # run_date dataset is composed of pieces from 3 grib forecast hours
+            # run_date + 1 dataset is composed of hours 11-35 from 12Z forecast
+            grib_files = _calc_grib_file_paths(
+                run_date.shift(days=+1),
+                "12",
+                (11, 35),
+                "UGRD_AGL-10m",
+                config,
+            )
+            # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
+        case "forecast2":
+            logger.info(
+                f"creating NEMO-atmos forcing files for {run_date.format('YYYY-MM-DD')} "
+                f"forecast2 run"
+            )
+            # run_date + 1 dataset is composed of hours 17-41 from 06Z forecast
+            # run_date + 2 dataset is composed of hours 41-48 from 06Z forecast
+    return checklist
+
     match parsed_args.run_type:
         case "nowcast+":
             segments = _define_forecast_segments_nowcast(run_date)
         case "forecast2":
             segments = _define_forecast_segments_forecast2(run_date)
 
-    checklist = {}
     ip = 0
     # prep monitoring image
     fig, axs = _set_up_plotting()
@@ -129,6 +155,32 @@ def grib_to_netcdf(parsed_args, config, *args):
     canvas.print_figure(image_file)
     lib.fix_perms(image_file, grp_name=config["file group"])
     return checklist
+
+
+def _calc_grib_file_paths(fcst_date, fcst_hr, fcst_step_range, msc_var, config):
+    """
+    :param :py:class:`arrow.Arrow` fcst_date:
+    :param str fcst_hr:
+    :param tuple fcst_step_range:
+    :param str msc_var:
+    :param dict config:
+
+    :rtype: list
+    """
+    grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+    file_tmpl = config["weather"]["download"]["2.5 km"]["file template"]
+    fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
+    grib_files = []
+    for fcst_step in range(*fcst_step_range):
+        grib_hr_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr, f"{fcst_step:03d}")
+        grib_file = file_tmpl.format(
+            date=fcst_yyyymmdd,
+            forecast=fcst_hr,
+            variable=msc_var,
+            hour=f"{fcst_step:03d}",
+        )
+        grib_files.append(grib_hr_dir / grib_file)
+    return grib_files
 
 
 def _define_forecast_segments_nowcast(run_date):
