@@ -30,7 +30,6 @@ import matplotlib.backends.backend_agg
 import matplotlib.figure
 import netCDF4 as nc
 import numpy as np
-import pywgrib2_xr
 from nemo_nowcast import NowcastWorker, WorkerError
 
 from nowcast import lib
