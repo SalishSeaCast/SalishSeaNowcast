@@ -21,6 +21,7 @@
 Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
 """
+import functools
 import logging
 import os
 from pathlib import Path
@@ -31,6 +32,7 @@ import matplotlib.figure
 import netCDF4 as nc
 import numpy as np
 from nemo_nowcast import NowcastWorker, WorkerError
+import xarray
 
 from nowcast import lib
 
@@ -91,6 +93,7 @@ def grib_to_netcdf(parsed_args, config, *args):
     checklist = {}
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type
+    nemo_datasets = {}
     match run_type:
         case "nowcast+":
             logger.info(
@@ -105,6 +108,9 @@ def grib_to_netcdf(parsed_args, config, *args):
                 (11, 35),
                 "UGRD_AGL-10m",
                 config,
+            )
+            nemo_datasets["UGRD_AGL-10m"] = _calc_nemo_var_ds(
+                "u10", "u_wind", grib_files, config
             )
             # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
         case "forecast2":
@@ -181,6 +187,71 @@ def _calc_grib_file_paths(fcst_date, fcst_hr, fcst_step_range, msc_var, config):
         )
         grib_files.append(grib_hr_dir / grib_file)
     return grib_files
+
+
+def _trim_grib(ds, y_slice, x_slice):
+    """Preprocessing function for xarray.open_mfdataset().
+
+    :param :py:class:`xarray.Dataset` ds:
+    :param :py:class:`slice` y_slice:
+    :param :py:class:`slice` x_slice:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    # Select region of interest
+    ds = ds.sel(y=y_slice, x=x_slice)
+    # Drop coordinates that we don't need
+    keep_coords = ("time", "step", "latitude", "longitude")
+    ds = ds.reset_coords(
+        [coord for coord in ds.coords if coord not in keep_coords],
+        drop=True,
+    )
+    return ds
+
+
+def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
+    """
+    :param str grib_var:
+    :param str nemo_var:
+    :param list grib_files:
+    :param dict config:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    y_slice = slice(*config["weather"]["download"]["2.5 km"]["lon indices"])
+    x_slice = slice(*config["weather"]["download"]["2.5 km"]["lat indices"])
+    _partial_trim_grib = functools.partial(_trim_grib, y_slice=y_slice, x_slice=x_slice)
+    grib_ds = xarray.open_mfdataset(
+        grib_files,
+        preprocess=_partial_trim_grib,
+        combine="nested",
+        concat_dim="step",
+        engine="cfgrib",
+    )
+    time_counter = grib_ds.step.values + grib_ds.time.values
+    nemo_da = xarray.DataArray(
+        data=grib_ds[grib_var].data,
+        coords={
+            "time_counter": time_counter,
+            "y": grib_ds.y,
+            "x": grib_ds.x,
+        },
+        attrs=grib_ds[grib_var].attrs,
+    )
+    nemo_ds = xarray.Dataset(
+        data_vars={
+            nemo_var: nemo_da,
+        },
+        coords={
+            "time_counter": time_counter,
+            "y": grib_ds.y,
+            "x": grib_ds.x,
+            "nav_lon": (["y", "x"], grib_ds.longitude.data),
+            "nav_lat": (["y", "x"], grib_ds.latitude.data),
+        },
+        attrs=grib_ds.attrs,
+    )
+    return nemo_ds
 
 
 def _define_forecast_segments_nowcast(run_date):

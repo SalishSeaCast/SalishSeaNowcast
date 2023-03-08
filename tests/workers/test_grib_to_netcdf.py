@@ -194,7 +194,12 @@ class TestGribToNetcdf:
     """Unit test for grib_to_netcdf() function."""
 
     @pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
-    def test_log_messages(self, run_type, config, caplog):
+    def test_log_messages(self, run_type, config, caplog, monkeypatch):
+        def mock_calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
+            pass
+
+        monkeypatch.setattr(grib_to_netcdf, "_calc_nemo_var_ds", mock_calc_nemo_var_ds)
+
         parsed_args = SimpleNamespace(
             run_date=arrow.get("2023-03-08"),
             run_type=run_type,
@@ -230,6 +235,22 @@ class TestCalcGribFilePaths:
             ),
         ]
         assert grib_files == expected
+
+
+class TestTrimGrib:
+    """Unit test for _trim_grib() function."""
+
+    def test_trim_grib(self):
+        # TODO: test something!
+        pass
+
+
+class TestCalcNemoVarDs:
+    """Unit test for _calc_nemo_var_ds() function."""
+
+    def test_calc_nemo_var_ds(self):
+        # TODO: test something!
+        pass
 
 
 class TestDefineForecastSegmentsNowcast:
