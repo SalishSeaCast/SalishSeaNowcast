@@ -16,6 +16,7 @@ dependencies:
   - beautifulsoup4
   - bottleneck
   - cartopy
+  - cfgrib
   - click
   - cliff
   - cmocean
