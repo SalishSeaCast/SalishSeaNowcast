@@ -38,15 +38,7 @@ NAME = "grib_to_netcdf"
 logger = logging.getLogger(NAME)
 wgrib2_logger = logging.getLogger("wgrib2")
 
-# TODO: update - watersheds are not the reason for sub-region choice
-# Corners of sub-region of GEM 2.5km operational forecast grid
-# that enclose the watersheds (other than the Fraser River)
-# that are used to calculate river flows for runoff forcing files
-# for the SalishSeaCast NEMO model.
-# The Fraser is excluded because real-time gauge data at Hope are
-# available for it.
-IST, IEN = 230, 460
-JST, JEN = 300, 490
+# TODO: move these constants to config YAMl file
 # Position of Sand Heads
 SandI, SandJ = 118, 108
 

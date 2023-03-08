@@ -38,6 +38,10 @@ weather:
         - APCP_Sfc      # accumulated precipitation at ground level
         - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
         - PRMSL_MSL     # atmospheric pressure at mean sea level
+      # Index ranges (inclusive) of longitudes and latitudes of ECCC HRDPS 2.5km continental
+      # domain that we use
+      lon indices: [300, 490]
+      lat indices: [230, 460]
       # ECCC HRDPS 2.5km continental domain forecast duration
       forecast duration: 48  # hours
 

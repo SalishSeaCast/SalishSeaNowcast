@@ -54,6 +54,8 @@ def config(base_config):
                         - APCP_Sfc      # accumulated precipitation at ground level
                         - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
                         - PRMSL_MSL     # atmospheric pressure at mean sea level
+                      lon indices: [300, 490]
+                      lat indices: [230, 460]
 
                   grid desc: rot-ll:245.305142:-36.088520:0.000000 345.178780:2540:0.022500 -12.302501:1290:0.022500
                 """
@@ -71,14 +73,6 @@ def mock_worker(mock_nowcast_worker, monkeypatch):
 
 class TestGirdIndices:
     """Unit tests for module variables that define indices of sub-region grid that is extracted."""
-
-    def test_i_indices(self):
-        assert grib_to_netcdf.IST == 230
-        assert grib_to_netcdf.IEN == 460
-
-    def test_j_indices(self):
-        assert grib_to_netcdf.JST == 300
-        assert grib_to_netcdf.JEN == 490
 
     def test_SandHeads_indices(self):
         assert grib_to_netcdf.SandI == 118
@@ -157,6 +151,8 @@ class TestConfig:
             weather_download["GRIB dir"]
             == "/results/forcing/atmospheric/continental2.5/GRIB/"
         )
+        assert weather_download["lon indices"] == [300, 490]
+        assert weather_download["lat indices"] == [230, 460]
 
 
 @pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
