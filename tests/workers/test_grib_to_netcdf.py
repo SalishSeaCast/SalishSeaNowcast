@@ -25,7 +25,9 @@ from types import SimpleNamespace
 
 import arrow
 import nemo_nowcast
+import numpy
 import pytest
+import xarray
 
 from nowcast.workers import grib_to_netcdf
 
@@ -204,6 +206,20 @@ class TestGribToNetcdf:
 
         monkeypatch.setattr(grib_to_netcdf, "_calc_nemo_var_ds", mock_calc_nemo_var_ds)
 
+        def mock_combine_by_coords(data_objects, combine_attrs):
+            return xarray.Dataset(
+                data_vars={"var": ("x", numpy.array([], dtype=float))},
+            )
+
+        monkeypatch.setattr(
+            grib_to_netcdf.xarray, "combine_by_coords", mock_combine_by_coords
+        )
+
+        def mock_to_netcdf(nemo_ds, encoding, nc_file_path):
+            pass
+
+        monkeypatch.setattr(grib_to_netcdf, "_to_netcdf", mock_to_netcdf)
+
         parsed_args = SimpleNamespace(
             run_date=arrow.get("2023-03-08"),
             run_type=run_type,
@@ -215,6 +231,37 @@ class TestGribToNetcdf:
         assert caplog.records[0].levelname == "INFO"
         expected = f"creating NEMO-atmos forcing files for 2023-03-08 {run_type[:-1]}"
         assert caplog.messages[0].startswith(expected)
+
+    def test_nowcastp_checklist(self, config, caplog, monkeypatch):
+        def mock_calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
+            pass
+
+        monkeypatch.setattr(grib_to_netcdf, "_calc_nemo_var_ds", mock_calc_nemo_var_ds)
+
+        def mock_combine_by_coords(data_objects, combine_attrs):
+            return xarray.Dataset(
+                data_vars={"var": ("x", numpy.array([], dtype=float))},
+            )
+
+        monkeypatch.setattr(
+            grib_to_netcdf.xarray, "combine_by_coords", mock_combine_by_coords
+        )
+
+        def mock_to_netcdf(nemo_ds, encoding, nc_file_path):
+            pass
+
+        monkeypatch.setattr(grib_to_netcdf, "_to_netcdf", mock_to_netcdf)
+
+        parsed_args = SimpleNamespace(
+            run_date=arrow.get("2023-03-09"),
+            run_type="nowcast+",
+        )
+        caplog.set_level(logging.DEBUG)
+
+        checklist = grib_to_netcdf.grib_to_netcdf(parsed_args, config)
+
+        expected = {"fcst": ["hrdps_y2023m03d10.nc"]}
+        assert checklist == expected
 
 
 class TestCalcGribFilePaths:

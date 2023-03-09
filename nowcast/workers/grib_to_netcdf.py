@@ -100,18 +100,39 @@ def grib_to_netcdf(parsed_args, config, *args):
                 f"creating NEMO-atmos forcing files for {run_date.format('YYYY-MM-DD')} "
                 f"nowcast and forecast runs"
             )
+            var_names = config["weather"]["download"]["2.5 km"]["variables"]
             # run_date dataset is composed of pieces from 3 grib forecast hours
             # run_date + 1 dataset is composed of hours 11-35 from 12Z forecast
-            grib_files = _calc_grib_file_paths(
-                run_date.shift(days=+1),
-                "12",
-                (11, 35),
-                "UGRD_AGL-10m",
-                config,
+            fcst = True
+            fcst_date = run_date.shift(days=+1)
+            for msc_var, grib_var, nemo_var in var_names:
+                grib_files = _calc_grib_file_paths(
+                    fcst_date,
+                    "12",
+                    (11, 35),
+                    msc_var,
+                    config,
+                )
+                nemo_datasets[nemo_var] = _calc_nemo_var_ds(
+                    grib_var, nemo_var, grib_files, config
+                )
+            nemo_ds = xarray.combine_by_coords(
+                nemo_datasets.values(), combine_attrs="drop_conflicts"
             )
-            nemo_datasets["UGRD_AGL-10m"] = _calc_nemo_var_ds(
-                "u10", "u_wind", grib_files, config
-            )
+
+            # apportion accumulation variables (precip and radiation)
+            # rotate wind components to earth-reference
+
+            # clean up dataset attrs
+            nc_file = _write_netcdf(nemo_ds, fcst_date, config, fcst)
+            if fcst:
+                if "fcst" not in checklist:
+                    checklist["fcst"] = [nc_file.name]
+                else:
+                    checklist["fcst"].append(nc_file.name)
+            else:
+                checklist["nowcast"] = nc_file.name
+
             # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
         case "forecast2":
             logger.info(
@@ -252,6 +273,37 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
         attrs=grib_ds.attrs,
     )
     return nemo_ds
+
+
+def _write_netcdf(nemo_ds, file_date, config, fcst=False):
+    """
+    :param :py:class:`xarray.Dataset` nemo_ds:
+    :param :py:class:`arrow.Arrow` file_date:
+    :param dict config:
+    :param boolean fcst:
+
+    :rtype: :py:class:`pathlib.Path`
+    """
+    encoding = {
+        "time_counter": {"units": "seconds since 1970-01-01 00:00", "dtype": float},
+    }
+    encoding.update({var: {"zlib": True, "complevel": 4} for var in nemo_ds.data_vars})
+    ops_dir = Path(config["weather"]["ops dir"])
+    nc_file_tmpl = config["weather"]["file template"]
+    nc_filename = nc_file_tmpl.format(file_date.date())
+    nc_file = Path("fcst/", nc_filename) if fcst else Path(nc_filename)
+    _to_netcdf(nemo_ds, encoding, ops_dir / nc_file)
+    return nc_file
+
+
+def _to_netcdf(nemo_ds, encoding, nc_file_path):
+    """This function is separate to facilitate testing the calling function.
+
+    :param :py:class:`xarray.Dataset` nemo_ds:
+    :param dict encoding:
+    :param :py:class:`pathlib.Path` nc_file_path:
+    """
+    nemo_ds.to_netcdf(nc_file_path, encoding=encoding, unlimited_dims=("time_counter",))
 
 
 def _define_forecast_segments_nowcast(run_date):
