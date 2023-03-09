@@ -48,25 +48,25 @@ def config(base_config):
                       GRIB dir: /results/forcing/atmospheric/continental2.5/GRIB/
                       url template: "https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
                       file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
-                      grib variables:
-                        - UGRD_AGL-10m  # u component of wind velocity at 10m elevation
-                        - VGRD_AGL-10m  # v component of wind velocity at 10m elevation
-                        - DSWRF_Sfc     # accumulated downward shortwave (solar) radiation at ground level
-                        - DLWRF_Sfc     # accumulated downward longwave (thermal) radiation at ground level
-                        - LHTFL_Sfc     # upward surface latent heat flux (for VHFR FVCOM)
-                        - TMP_AGL-2m    # air temperature at 2m elevation
-                        - SPFH_AGL-2m   # specific humidity at 2m elevation
-                        - RH_AGL-2m     # relative humidity at 2m elevation (for VHFR FVCOM)
-                        - APCP_Sfc      # accumulated precipitation at ground level
-                        - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
-                        - PRMSL_MSL     # atmospheric pressure at mean sea level
+                      variables:
+                        - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
+                        - [VGRD_AGL-10m, v10, v_wind]           # v component of wind velocity at 10m elevation
+                        - [DSWRF_Sfc, ssrd, solar]              # accumulated downward shortwave (solar) radiation at ground level
+                        - [DLWRF_Sfc, strd, therm_rad]          # accumulated downward longwave (thermal) radiation at ground level
+                        - [LHTFL_Sfc, lhtfl, LHTFL_surface]     # upward surface latent heat flux (for VHFR FVCOM)
+                        - [TMP_AGL-2m, t2m, tair]               # air temperature at 2m elevation
+                        - [SPFH_AGL-2m, sh2, qair]              # specific humidity at 2m elevation
+                        - [RH_AGL-2m, r2, RH_2maboveground]     # relative humidity at 2m elevation (for VHFR FVCOM)
+                        - [APCP_Sfc, unknown, precip]           # accumulated precipitation at ground level
+                        - [PRATE_Sfc, prate, PRATE_surface]     # precipitation rate at ground level (for VHFR FVCOM)
+                        - [PRMSL_MSL, prmsl, atmpres]           # atmospheric pressure at mean sea level
                       forecast duration: 48  # hours
 
                     1 km:
                       GRIB dir: /results/forcing/atmospheric/GEM1.0/GRIB/
                       url template: "https://dd.alpha.meteo.gc.ca/model_hrdps/west/1km/grib2/{forecast}/{hour}/{filename}"
                       file template: "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
-                      grib variables:
+                      variables:
                         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
                         - VGRD_TGL_10  # v component of wind velocity at 10m elevation
                         - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
@@ -176,18 +176,18 @@ class TestConfig:
             == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
         )
         assert weather_download["forecast duration"] == 48
-        assert weather_download["grib variables"] == [
-            "UGRD_AGL-10m",
-            "VGRD_AGL-10m",
-            "DSWRF_Sfc",
-            "DLWRF_Sfc",
-            "LHTFL_Sfc",
-            "TMP_AGL-2m",
-            "SPFH_AGL-2m",
-            "RH_AGL-2m",
-            "APCP_Sfc",
-            "PRATE_Sfc",
-            "PRMSL_MSL",
+        assert weather_download["variables"] == [
+            ["UGRD_AGL-10m", "u10", "u_wind"],
+            ["VGRD_AGL-10m", "v10", "v_wind"],
+            ["DSWRF_Sfc", "ssrd", "solar"],
+            ["DLWRF_Sfc", "strd", "therm_rad"],
+            ["LHTFL_Sfc", "lhtfl", "LHTFL_surface"],
+            ["TMP_AGL-2m", "t2m", "tair"],
+            ["SPFH_AGL-2m", "sh2", "qair"],
+            ["RH_AGL-2m", "r2", "RH_2maboveground"],
+            ["APCP_Sfc", "unknown", "precip"],
+            ["PRATE_Sfc", "prate", "PRATE_surface"],
+            ["PRMSL_MSL", "prmsl", "atmpres"],
         ]
 
     def test_weather_download_1_km_section(self, prod_config):
@@ -204,7 +204,7 @@ class TestConfig:
             == "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
         )
         assert weather_download["forecast duration"] == 36
-        assert weather_download["grib variables"] == [
+        assert weather_download["variables"] == [
             "UGRD_TGL_10",
             "VGRD_TGL_10",
             "DSWRF_SFC_0",
@@ -362,14 +362,14 @@ class TestGetGrib:
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
     @pytest.mark.parametrize(
-        "forecast, resolution, variable",
+        "forecast, resolution, variables",
         (
             ("00", "1km", "UGRD_TGL_10"),
             ("12", "1km", "UGRD_TGL_10"),
-            ("00", "2.5km", "UGRD_AGL-10m"),
-            ("06", "2.5km", "UGRD_AGL-10m"),
-            ("12", "2.5km", "UGRD_AGL-10m"),
-            ("18", "2.5km", "UGRD_AGL-10m"),
+            ("00", "2.5km", ["UGRD_AGL-10m", "u10", "u_wind"]),
+            ("06", "2.5km", ["UGRD_AGL-10m", "u10", "u_wind"]),
+            ("12", "2.5km", ["UGRD_AGL-10m", "u10", "u_wind"]),
+            ("18", "2.5km", ["UGRD_AGL-10m", "u10", "u_wind"]),
         ),
     )
     @patch("nowcast.workers.download_weather.requests.Session", autospec=True)
@@ -381,7 +381,7 @@ class TestGetGrib:
         m_mkdir,
         forecast,
         resolution,
-        variable,
+        variables,
         config,
     ):
         parsed_args = SimpleNamespace(
@@ -392,13 +392,14 @@ class TestGetGrib:
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
-            {"grib variables": [variable], "forecast duration": 1},
+            {"variables": [variables], "forecast duration": 1},
         )
 
         with p_config:
             download_weather.get_grib(parsed_args, config)
 
         args, kwargs = m_get_file.call_args
+        variable = variables[0] if resolution == "2.5km" else variables
         assert args == (
             config["weather"]["download"][resolution.replace("km", " km")][
                 "url template"
@@ -444,7 +445,7 @@ class TestGetGrib:
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
-            {"grib variables": [variable], "forecast duration": 1},
+            {"variables": [variable], "forecast duration": 1},
         )
         m_get_file.return_value = "filepath"
         p_fix_perms = patch("nowcast.workers.download_weather.lib.fix_perms")

@@ -26,18 +26,19 @@ weather:
       # **Must be quoted to project {} characters**
       file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
       # ECCC HRDPS 2.5km GRIB forecast file field variable names
-      grib variables:
-        - UGRD_AGL-10m  # u component of wind velocity at 10m elevation
-        - VGRD_AGL-10m  # v component of wind velocity at 10m elevation
-        - DSWRF_Sfc     # accumulated downward shortwave (solar) radiation at ground level
-        - DLWRF_Sfc     # accumulated downward longwave (thermal) radiation at ground level
-        - LHTFL_Sfc     # upward surface latent heat flux (for VHFR FVCOM)
-        - TMP_AGL-2m    # air temperature at 2m elevation
-        - SPFH_AGL-2m   # specific humidity at 2m elevation
-        - RH_AGL-2m     # relative humidity at 2m elevation (for VHFR FVCOM)
-        - APCP_Sfc      # accumulated precipitation at ground level
-        - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
-        - PRMSL_MSL     # atmospheric pressure at mean sea level
+      variables:
+        # [MSC name, GRIB std name, NEMO name]
+        - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
+        - [VGRD_AGL-10m, v10, v_wind]           # v component of wind velocity at 10m elevation
+        - [DSWRF_Sfc, ssrd, solar]              # accumulated downward shortwave (solar) radiation at ground level
+        - [DLWRF_Sfc, strd, therm_rad]          # accumulated downward longwave (thermal) radiation at ground level
+        - [LHTFL_Sfc, lhtfl, LHTFL_surface]     # upward surface latent heat flux (for VHFR FVCOM)
+        - [TMP_AGL-2m, t2m, tair]               # air temperature at 2m elevation
+        - [SPFH_AGL-2m, sh2, qair]              # specific humidity at 2m elevation
+        - [RH_AGL-2m, r2, RH_2maboveground]     # relative humidity at 2m elevation (for VHFR FVCOM)
+        - [APCP_Sfc, unknown, precip]           # accumulated precipitation at ground level
+        - [PRATE_Sfc, prate, PRATE_surface]     # precipitation rate at ground level (for VHFR FVCOM)
+        - [PRMSL_MSL, prmsl, atmpres]           # atmospheric pressure at mean sea level
       # Index ranges (inclusive) of longitudes and latitudes of ECCC HRDPS 2.5km continental
       # domain that we use
       lon indices: [300, 490]
@@ -57,7 +58,7 @@ weather:
       # **Must be quoted to project {} characters**
       file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
       # ECCC HRDPS 1km GRIB forecast file field variable names
-      grib variables:
+      variables:
         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
         - VGRD_TGL_10  # v component of wind velocity at 10m elevation
         - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level

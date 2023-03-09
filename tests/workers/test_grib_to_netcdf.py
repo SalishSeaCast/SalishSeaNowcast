@@ -43,18 +43,19 @@ def config(base_config):
                     2.5 km:
                       GRIB dir: forcing/atmospheric/continental2.5/GRIB/
                       file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
-                      grib variables:
-                        - UGRD_AGL-10m  # u component of wind velocity at 10m elevation
-                        - VGRD_AGL-10m  # v component of wind velocity at 10m elevation
-                        - DSWRF_Sfc     # accumulated downward shortwave (solar) radiation at ground level
-                        - DLWRF_Sfc     # accumulated downward longwave (thermal) radiation at ground level
-                        - LHTFL_Sfc     # upward surface latent heat flux (for VHFR FVCOM)
-                        - TMP_AGL-2m    # air temperature at 2m elevation
-                        - SPFH_AGL-2m   # specific humidity at 2m elevation
-                        - RH_AGL-2m     # relative humidity at 2m elevation (for VHFR FVCOM)
-                        - APCP_Sfc      # accumulated precipitation at ground level
-                        - PRATE_Sfc     # precipitation rate at ground level (for VHFR FVCOM)
-                        - PRMSL_MSL     # atmospheric pressure at mean sea level
+                      variables:
+                        # [MSC name, GRIB std name, NEMO name]
+                        - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
+                        - [VGRD_AGL-10m, v10, v_wind]           # v component of wind velocity at 10m elevation
+                        - [DSWRF_Sfc, ssrd, solar]              # accumulated downward shortwave (solar) radiation at ground level
+                        - [DLWRF_Sfc, strd, therm_rad]          # accumulated downward longwave (thermal) radiation at ground level
+                        - [LHTFL_Sfc, lhtfl, LHTFL_surface]     # upward surface latent heat flux (for VHFR FVCOM)
+                        - [TMP_AGL-2m, t2m, tair]               # air temperature at 2m elevation
+                        - [SPFH_AGL-2m, sh2, qair]              # specific humidity at 2m elevation
+                        - [RH_AGL-2m, r2, RH_2maboveground]     # relative humidity at 2m elevation (for VHFR FVCOM)
+                        - [APCP_Sfc, unknown, precip]           # accumulated precipitation at ground level
+                        - [PRATE_Sfc, prate, PRATE_surface]     # precipitation rate at ground level (for VHFR FVCOM)
+                        - [PRMSL_MSL, prmsl, atmpres]           # atmospheric pressure at mean sea level
                       lon indices: [300, 490]
                       lat indices: [230, 460]
                 """

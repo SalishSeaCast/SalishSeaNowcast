@@ -97,6 +97,11 @@ def get_grib(parsed_args, config, *args):
     _mkdirs(dest_dir_root, date, forecast, grp_name)
     url_tmpl = config["weather"]["download"][resolution]["url template"]
     filename_tmpl = config["weather"]["download"][resolution]["file template"]
+    var_names = config["weather"]["download"][resolution]["variables"]
+    # 2.5km config has collections of 3 names per var, 1km has just MSC var name
+    msc_var_names = [
+        var_name[0] if resolution == "2.5 km" else var_name for var_name in var_names
+    ]
     forecast_duration = config["weather"]["download"][resolution]["forecast duration"]
     with requests.Session() as session:
         if parsed_args.no_verify_certs:
@@ -109,11 +114,11 @@ def get_grib(parsed_args, config, *args):
                 grp_name=grp_name,
                 exist_ok=False,
             )
-            for var in config["weather"]["download"][resolution]["grib variables"]:
+            for var_name in msc_var_names:
                 filepath = _get_file(
                     url_tmpl,
                     filename_tmpl,
-                    var,
+                    var_name,
                     dest_dir_root,
                     date,
                     forecast,

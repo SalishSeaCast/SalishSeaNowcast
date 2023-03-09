@@ -166,7 +166,11 @@ def _calc_expected_files(datamart_dir, forecast, forecast_yyyymmdd, resolution, 
     :rtype: set
     """
     forecast_duration = config["weather"]["download"][resolution]["forecast duration"]
-    grib_vars = config["weather"]["download"][resolution]["grib variables"]
+    var_names = config["weather"]["download"][resolution]["variables"]
+    # 2.5km config has collections of 3 names per var, 1km has just MSC var name
+    msc_var_names = [
+        var_name[0] if resolution == "2.5 km" else var_name for var_name in var_names
+    ]
     file_template = config["weather"]["download"][resolution]["file template"]
     expected_files = set()
     for hour in range(forecast_duration):
@@ -178,7 +182,7 @@ def _calc_expected_files(datamart_dir, forecast, forecast_yyyymmdd, resolution, 
                 forecast=forecast,
                 hour=forecast_hour,
             )
-            for var in grib_vars
+            for var in msc_var_names
         }
         expected_files.update(
             {
