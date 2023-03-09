@@ -245,7 +245,7 @@ class TestConfig:
         )
 
     def test_weather_file_template(self, prod_config):
-        assert prod_config["weather"]["file template"] == "ops_{:y%Ym%md%d}.nc"
+        assert prod_config["weather"]["file template"] == "hrdps_{:y%Ym%md%d}.nc"
 
     @pytest.mark.parametrize(
         "host, weather_dir",

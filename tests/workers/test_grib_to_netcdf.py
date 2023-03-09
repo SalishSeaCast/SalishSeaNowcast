@@ -58,6 +58,9 @@ def config(base_config):
                         - [PRMSL_MSL, prmsl, atmpres]           # atmospheric pressure at mean sea level
                       lon indices: [300, 490]
                       lat indices: [230, 460]
+
+                  ops dir: forcing/atmospheric/continental2.5/nemo_forcing/
+                  file template: "hrdps_{:y%Ym%md%d}.nc"
                 """
             )
         )
@@ -135,7 +138,7 @@ class TestConfig:
             weather["ops dir"]
             == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
         )
-        assert weather["file template"] == "ops_{:y%Ym%md%d}.nc"
+        assert weather["file template"] == "hrdps_{:y%Ym%md%d}.nc"
         assert (
             weather["monitoring image"]
             == "/results/nowcast-sys/figures/monitoring/wg.png"

@@ -77,7 +77,7 @@ weather:
   ops dir: /results/forcing/atmospheric/continental2.5/nemo_forcing/
   # Template for the atmospheric forcing file name
   # **Must be quoted to project {} characters**
-  file template: 'ops_{:y%Ym%md%d}.nc'
+  file template: "hrdps_{:y%Ym%md%d}.nc"
   # Location to store image that grib_to_netcdf worker creates to facilitate
   # monitoring of its operation
   monitoring image: /results/nowcast-sys/figures/monitoring/wg.png
