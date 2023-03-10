@@ -196,6 +196,10 @@ def _calc_grib_file_paths(fcst_date, fcst_hr, fcst_step_range, msc_var, config):
     grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
     file_tmpl = config["weather"]["download"]["2.5 km"]["file template"]
     fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
+    logger.debug(
+        f"creating {msc_var} GRIB file paths list for {fcst_yyyymmdd} {fcst_hr}Z forecast hours "
+        f"{fcst_step_range[0]:03d} to {fcst_step_range[1]:03d}"
+    )
     grib_files = []
     start, stop = fcst_step_range
     for fcst_step in range(start, stop + 1):
@@ -239,6 +243,7 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
 
     :rtype: :py:class:`xarray.Dataset`
     """
+    logger.debug(f"creating {nemo_var} dataset from {grib_var} files")
     y_slice = slice(*config["weather"]["download"]["2.5 km"]["lon indices"])
     x_slice = slice(*config["weather"]["download"]["2.5 km"]["lat indices"])
     _partial_trim_grib = functools.partial(_trim_grib, y_slice=y_slice, x_slice=x_slice)
@@ -289,6 +294,7 @@ def _apportion_accumulation_vars(nemo_ds, config):
 
     """
     accum_vars = config["weather"]["download"]["2.5 km"]["accumulation variables"]
+    logger.debug(f"apportioning {', '.join(accum_vars)}")
     # TODO: handle case of datasets that span forecasts, meaning that the "previous" value for
     #       the apportioning isn't the first time step
     apportioned_vars = {}
@@ -328,6 +334,7 @@ def _write_netcdf(nemo_ds, file_date, config, fcst=False):
     nc_filename = nc_file_tmpl.format(file_date.date())
     nc_file = Path("fcst/", nc_filename) if fcst else Path(nc_filename)
     _to_netcdf(nemo_ds, encoding, ops_dir / nc_file)
+    logger.debug(f"created {ops_dir / nc_file}")
     return nc_file
 
 

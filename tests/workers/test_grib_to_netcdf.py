@@ -285,6 +285,20 @@ class TestGribToNetcdf:
         expected = f"creating NEMO-atmos forcing files for 2023-03-08 {run_type[:-1]}"
         assert caplog.messages[0].startswith(expected)
 
+        if run_type == "forecast2":
+            # TODO: until forecast2 code is implemented
+            return
+        for i, var_names in enumerate(
+            config["weather"]["download"]["2.5 km"]["variables"]
+        ):
+            msc_var, _, _ = var_names
+            assert caplog.records[i + 1].levelname == "DEBUG"
+            expected = (
+                f"creating {msc_var} GRIB file paths list for 20230308 12Z forecast hours "
+                f"011 to 035"
+            )
+            assert caplog.messages[i + 1] == expected
+
     def test_nowcast_checklist(
         self,
         mock_calc_nemo_var_ds,
