@@ -130,13 +130,7 @@ def grib_to_netcdf(parsed_args, config, *args):
             fcst = True
             fcst_date = run_date.shift(days=+1)
             nc_file = _write_netcdf(nemo_ds, fcst_date, config, fcst)
-            if fcst:
-                if "fcst" not in checklist:
-                    checklist["fcst"] = [nc_file.name]
-                else:
-                    checklist["fcst"].append(nc_file.name)
-            else:
-                checklist["nowcast"] = nc_file.name
+            _update_checklist(nc_file, fcst, checklist)
 
             # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
         case "forecast2":
@@ -345,6 +339,21 @@ def _to_netcdf(nemo_ds, encoding, nc_file_path):
     :param :py:class:`pathlib.Path` nc_file_path:
     """
     nemo_ds.to_netcdf(nc_file_path, encoding=encoding, unlimited_dims=("time_counter",))
+
+
+def _update_checklist(nc_file, fcst, checklist):
+    """
+    :param :py:class:`pathlib.Path` nc_file:
+    :param boolean fcst:
+    :param dict checklist:
+    """
+    if fcst:
+        if "fcst" not in checklist:
+            checklist["fcst"] = [nc_file.name]
+        else:
+            checklist["fcst"].append(nc_file.name)
+    else:
+        checklist["nowcast"] = nc_file.name
 
 
 def _define_forecast_segments_nowcast(run_date):

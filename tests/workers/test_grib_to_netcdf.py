@@ -349,6 +349,40 @@ class TestWriteNetcdf:
         pass
 
 
+class TestUpdateChecklist:
+    """Unit tests for _update_checklist() function."""
+
+    def test_add_first_forecast(self):
+        nc_file = Path("fcst/", "hrdps_y2023m03d09.nc")
+        fcst = True
+        checklist = {}
+
+        grib_to_netcdf._update_checklist(nc_file, fcst, checklist)
+
+        expected = {"fcst": ["hrdps_y2023m03d09.nc"]}
+        assert checklist == expected
+
+    def test_add_second_forecast(self):
+        nc_file = Path("fcst/", "hrdps_y2023m03d10.nc")
+        fcst = True
+        checklist = {"fcst": ["hrdps_y2023m03d09.nc"]}
+
+        grib_to_netcdf._update_checklist(nc_file, fcst, checklist)
+
+        expected = {"fcst": ["hrdps_y2023m03d09.nc", "hrdps_y2023m03d10.nc"]}
+        assert checklist == expected
+
+    def test_add_nowcast(self):
+        nc_file = Path("hrdps_y2023m03d08.nc")
+        fcst = False
+        checklist = {}
+
+        grib_to_netcdf._update_checklist(nc_file, fcst, checklist)
+
+        expected = {"nowcast": "hrdps_y2023m03d08.nc"}
+        assert checklist == expected
+
+
 class TestDefineForecastSegmentsNowcast:
     """Unit tests for _define_forecast_segments_nowcast() function."""
 
