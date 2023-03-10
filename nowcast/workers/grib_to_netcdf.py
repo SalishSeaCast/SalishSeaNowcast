@@ -272,8 +272,8 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
             "time_counter": time_counter,
             "y": grib_ds.y,
             "x": grib_ds.x,
-            "nav_lon": (["y", "x"], grib_ds.longitude.data),
-            "nav_lat": (["y", "x"], grib_ds.latitude.data),
+            "nav_lon": grib_ds.longitude,
+            "nav_lat": grib_ds.latitude,
         },
         attrs=grib_ds.attrs,
     )
