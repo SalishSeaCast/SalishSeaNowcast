@@ -243,6 +243,18 @@ class TestGribToNetcdf:
 
     @staticmethod
     @pytest.fixture
+    def mock_apportion_accumulation_vars(monkeypatch):
+        def _mock_apportion_accumulation_vars(nemo_ds, config):
+            pass
+
+        monkeypatch.setattr(
+            grib_to_netcdf,
+            "_apportion_accumulation_vars",
+            _mock_apportion_accumulation_vars,
+        )
+
+    @staticmethod
+    @pytest.fixture
     def mock_to_netcdf(monkeypatch):
         def _mock_to_netcdf(nemo_ds, encoding, nc_file_path):
             pass
@@ -255,6 +267,7 @@ class TestGribToNetcdf:
         run_type,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
+        mock_apportion_accumulation_vars,
         mock_to_netcdf,
         config,
         caplog,
@@ -276,6 +289,7 @@ class TestGribToNetcdf:
         self,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
+        mock_apportion_accumulation_vars,
         mock_to_netcdf,
         config,
         caplog,
