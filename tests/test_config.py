@@ -136,6 +136,7 @@ class TestLoggingPublisher:
             "make_averaged_dataset",
             "reshapr",
             "checklist",
+            "cfgrib",
             "matplotlib",
             "PIL",
             "paramiko",
