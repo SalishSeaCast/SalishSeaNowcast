@@ -20,6 +20,11 @@
 
 Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
+
+Development notebooks are in:
+
+* https://github.com/SalishSeaCast/analysis-doug/tree/main/notebooks/continental-HRDPS
+* https://github.com/SalishSeaCast/tools/tree/main/I_ForcingFiles/Atmos
 """
 import functools
 import logging
@@ -103,11 +108,9 @@ def grib_to_netcdf(parsed_args, config, *args):
             var_names = config["weather"]["download"]["2.5 km"]["variables"]
             # run_date dataset is composed of pieces from 3 grib forecast hours
             # run_date + 1 dataset is composed of hours 11-35 from 12Z forecast
-            fcst = True
-            fcst_date = run_date.shift(days=+1)
             for msc_var, grib_var, nemo_var in var_names:
                 grib_files = _calc_grib_file_paths(
-                    fcst_date,
+                    run_date,
                     "12",
                     (11, 35),
                     msc_var,
@@ -119,11 +122,13 @@ def grib_to_netcdf(parsed_args, config, *args):
             nemo_ds = xarray.combine_by_coords(
                 nemo_datasets.values(), combine_attrs="drop_conflicts"
             )
+            _apportion_accumulation_vars(nemo_ds, config)
 
-            # apportion accumulation variables (precip and radiation)
             # rotate wind components to earth-reference
 
             # clean up dataset attrs
+            fcst = True
+            fcst_date = run_date.shift(days=+1)
             nc_file = _write_netcdf(nemo_ds, fcst_date, config, fcst)
             if fcst:
                 if "fcst" not in checklist:
@@ -198,7 +203,8 @@ def _calc_grib_file_paths(fcst_date, fcst_hr, fcst_step_range, msc_var, config):
     file_tmpl = config["weather"]["download"]["2.5 km"]["file template"]
     fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
     grib_files = []
-    for fcst_step in range(*fcst_step_range):
+    start, stop = fcst_step_range
+    for fcst_step in range(start, stop + 1):
         grib_hr_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr, f"{fcst_step:03d}")
         grib_file = file_tmpl.format(
             date=fcst_yyyymmdd,
@@ -273,6 +279,41 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
         attrs=grib_ds.attrs,
     )
     return nemo_ds
+
+
+def _apportion_accumulation_vars(nemo_ds, config):
+    """Apportion variables that hold quantities (e.g. precipitation, short & long vwave radiation)
+    accumulated over 24 hours in the GRIB files to hourly values.
+
+    Also, drop the first time step from the dataset. It is the "previous" value for the
+    apportioning (and excess baggage for the other variables), so no longer needed.
+
+    :param :py:class:`xarray.Dataset` nemo_ds:
+    :param dict config:
+
+    :rtype: :py:class:`xarray.Dataset` nemo_ds
+
+    """
+    accum_vars = config["weather"]["download"]["2.5 km"]["accumulation variables"]
+    # TODO: handle case of datasets that span forecasts, meaning that the "previous" value for
+    #       the apportioning isn't the first time step
+    apportioned_vars = {}
+    for var in nemo_ds.data_vars:
+        apportioned_vars[var] = nemo_ds[var][1:]
+        if var in accum_vars:
+            apportioned_vars[var].data = nemo_ds[var][1:].data - nemo_ds[var][0:-1].data
+    apportioned_ds = xarray.Dataset(
+        data_vars=apportioned_vars,
+        coords={
+            "time_counter": nemo_ds.time_counter[1:],
+            "y": nemo_ds.y,
+            "x": nemo_ds.x,
+            "nav_lon": nemo_ds.nav_lon,
+            "nav_lat": nemo_ds.nav_lat,
+        },
+        attrs=nemo_ds.attrs,
+    )
+    return apportioned_ds
 
 
 def _write_netcdf(nemo_ds, file_date, config, fcst=False):

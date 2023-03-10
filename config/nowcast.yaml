@@ -25,7 +25,7 @@ weather:
       # Template for hourly ECCC HRDPS 2.5km continental domain fields file name
       # **Must be quoted to project {} characters**
       file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
-      # ECCC HRDPS 2.5km GRIB forecast file field variable names
+      # ECCC HRDPS 2.5km forecast field variable names
       variables:
         # [MSC name, GRIB std name, NEMO name]
         - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
@@ -39,6 +39,12 @@ weather:
         - [APCP_Sfc, unknown, precip]           # accumulated precipitation at ground level
         - [PRATE_Sfc, prate, PRATE_surface]     # precipitation rate at ground level (for VHFR FVCOM)
         - [PRMSL_MSL, prmsl, atmpres]           # atmospheric pressure at mean sea level
+      # NEMO variable names of forecast variables that hold quantities accumulated over
+      # 24 hours in the GRIB files; values are apportioned to hourly in grib_to_netcdf
+      accumulation variables:
+        - solar
+        - therm_rad
+        - precip
       # Index ranges (inclusive) of longitudes and latitudes of ECCC HRDPS 2.5km continental
       # domain that we use
       lon indices: [300, 490]

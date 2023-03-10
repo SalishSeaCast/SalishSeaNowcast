@@ -58,6 +58,10 @@ def config(base_config):
                         - [APCP_Sfc, unknown, precip]           # accumulated precipitation at ground level
                         - [PRATE_Sfc, prate, PRATE_surface]     # precipitation rate at ground level (for VHFR FVCOM)
                         - [PRMSL_MSL, prmsl, atmpres]           # atmospheric pressure at mean sea level
+                      accumulation variables:
+                        - solar
+                        - therm_rad
+                        - precip
                       lon indices: [300, 490]
                       lat indices: [230, 460]
 
@@ -134,6 +138,37 @@ class TestConfig:
     def test_file_group_item(self, prod_config):
         assert "file group" in prod_config
 
+    def test_weather_download_2_5_km_section(self, prod_config):
+        weather_download = prod_config["weather"]["download"]["2.5 km"]
+        assert (
+            weather_download["GRIB dir"]
+            == "/results/forcing/atmospheric/continental2.5/GRIB/"
+        )
+        assert (
+            weather_download["file template"]
+            == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+        )
+        assert weather_download["variables"] == [
+            ["UGRD_AGL-10m", "u10", "u_wind"],
+            ["VGRD_AGL-10m", "v10", "v_wind"],
+            ["DSWRF_Sfc", "ssrd", "solar"],
+            ["DLWRF_Sfc", "strd", "therm_rad"],
+            ["LHTFL_Sfc", "lhtfl", "LHTFL_surface"],
+            ["TMP_AGL-2m", "t2m", "tair"],
+            ["SPFH_AGL-2m", "sh2", "qair"],
+            ["RH_AGL-2m", "r2", "RH_2maboveground"],
+            ["APCP_Sfc", "unknown", "precip"],
+            ["PRATE_Sfc", "prate", "PRATE_surface"],
+            ["PRMSL_MSL", "prmsl", "atmpres"],
+        ]
+        assert weather_download["accumulation variables"] == [
+            "solar",
+            "therm_rad",
+            "precip",
+        ]
+        assert weather_download["lon indices"] == [300, 490]
+        assert weather_download["lat indices"] == [230, 460]
+
     def test_weather_section(self, prod_config):
         weather = prod_config["weather"]
         assert (
@@ -145,19 +180,6 @@ class TestConfig:
             weather["monitoring image"]
             == "/results/nowcast-sys/figures/monitoring/wg.png"
         )
-
-    def test_weather_download_2_5_km_section(self, prod_config):
-        weather_download = prod_config["weather"]["download"]["2.5 km"]
-        assert (
-            weather_download["GRIB dir"]
-            == "/results/forcing/atmospheric/continental2.5/GRIB/"
-        )
-        assert (
-            weather_download["file template"]
-            == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
-        )
-        assert weather_download["lon indices"] == [300, 490]
-        assert weather_download["lat indices"] == [230, 460]
 
 
 @pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
@@ -199,27 +221,45 @@ class TestFailure:
 class TestGribToNetcdf:
     """Unit test for grib_to_netcdf() function."""
 
-    @pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
-    def test_log_messages(self, run_type, config, caplog, monkeypatch):
-        def mock_calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
+    @staticmethod
+    @pytest.fixture
+    def mock_calc_nemo_var_ds(monkeypatch):
+        def _mock_calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
             pass
 
-        monkeypatch.setattr(grib_to_netcdf, "_calc_nemo_var_ds", mock_calc_nemo_var_ds)
+        monkeypatch.setattr(grib_to_netcdf, "_calc_nemo_var_ds", _mock_calc_nemo_var_ds)
 
-        def mock_combine_by_coords(data_objects, combine_attrs):
+    @staticmethod
+    @pytest.fixture
+    def mock_combine_by_coords(monkeypatch):
+        def _mock_combine_by_coords(data_objects, combine_attrs):
             return xarray.Dataset(
                 data_vars={"var": ("x", numpy.array([], dtype=float))},
             )
 
         monkeypatch.setattr(
-            grib_to_netcdf.xarray, "combine_by_coords", mock_combine_by_coords
+            grib_to_netcdf.xarray, "combine_by_coords", _mock_combine_by_coords
         )
 
-        def mock_to_netcdf(nemo_ds, encoding, nc_file_path):
+    @staticmethod
+    @pytest.fixture
+    def mock_to_netcdf(monkeypatch):
+        def _mock_to_netcdf(nemo_ds, encoding, nc_file_path):
             pass
 
-        monkeypatch.setattr(grib_to_netcdf, "_to_netcdf", mock_to_netcdf)
+        monkeypatch.setattr(grib_to_netcdf, "_to_netcdf", _mock_to_netcdf)
 
+    @pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
+    def test_log_messages(
+        self,
+        run_type,
+        mock_calc_nemo_var_ds,
+        mock_combine_by_coords,
+        mock_to_netcdf,
+        config,
+        caplog,
+        monkeypatch,
+    ):
         parsed_args = SimpleNamespace(
             run_date=arrow.get("2023-03-08"),
             run_type=run_type,
@@ -232,26 +272,15 @@ class TestGribToNetcdf:
         expected = f"creating NEMO-atmos forcing files for 2023-03-08 {run_type[:-1]}"
         assert caplog.messages[0].startswith(expected)
 
-    def test_nowcastp_checklist(self, config, caplog, monkeypatch):
-        def mock_calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
-            pass
-
-        monkeypatch.setattr(grib_to_netcdf, "_calc_nemo_var_ds", mock_calc_nemo_var_ds)
-
-        def mock_combine_by_coords(data_objects, combine_attrs):
-            return xarray.Dataset(
-                data_vars={"var": ("x", numpy.array([], dtype=float))},
-            )
-
-        monkeypatch.setattr(
-            grib_to_netcdf.xarray, "combine_by_coords", mock_combine_by_coords
-        )
-
-        def mock_to_netcdf(nemo_ds, encoding, nc_file_path):
-            pass
-
-        monkeypatch.setattr(grib_to_netcdf, "_to_netcdf", mock_to_netcdf)
-
+    def test_nowcast_checklist(
+        self,
+        mock_calc_nemo_var_ds,
+        mock_combine_by_coords,
+        mock_to_netcdf,
+        config,
+        caplog,
+        monkeypatch,
+    ):
         parsed_args = SimpleNamespace(
             run_date=arrow.get("2023-03-09"),
             run_type="nowcast+",
@@ -270,7 +299,7 @@ class TestCalcGribFilePaths:
     def test_calc_grib_file_paths(self, config):
         fcst_date = arrow.get("2023-03-08")
         fcst_hr = "12"
-        fcst_step_range = (1, 3)
+        fcst_step_range = (1, 2)
         msc_var = "UGRD_TGL_10"
 
         grib_files = grib_to_netcdf._calc_grib_file_paths(
@@ -300,6 +329,22 @@ class TestCalcNemoVarDs:
     """Unit test for _calc_nemo_var_ds() function."""
 
     def test_calc_nemo_var_ds(self):
+        # TODO: test something!
+        pass
+
+
+class TestApportionAccumulationVars:
+    """Unit test for _apportion_accumulation_vars() function."""
+
+    def test_apportion_accumulation_vars(self):
+        # TODO: test something!
+        pass
+
+
+class TestWriteNetcdf:
+    """Unit test for _write_netcdf() function."""
+
+    def test_write_netcdf(self):
         # TODO: test something!
         pass
 
