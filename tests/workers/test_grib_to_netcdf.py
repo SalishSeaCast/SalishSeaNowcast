@@ -361,6 +361,25 @@ class TestCalcNemoVarDs:
         pass
 
 
+class TestCalcGridAngle:
+    """Units test for _calc_grid_angle() function."""
+
+    @pytest.mark.parametrize(
+        "direction, expected",
+        (
+            ("x", -45.00001432394728),
+            ("y", -135.00001432394725),
+        ),
+    )
+    def test_calc_grid_angle(self, direction, expected):
+        lat1, lat2 = 0, -0.001
+        lon1, lon2 = 0, 0.001
+
+        angle = grib_to_netcdf._calc_grid_angle(lat1, lon1, lat2, lon2, direction)
+
+        assert numpy.rad2deg(angle) == pytest.approx(expected)
+
+
 class TestApportionAccumulationVars:
     """Unit test for _apportion_accumulation_vars() function."""
 

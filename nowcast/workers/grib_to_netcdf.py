@@ -35,7 +35,7 @@ import arrow
 import matplotlib.backends.backend_agg
 import matplotlib.figure
 import netCDF4 as nc
-import numpy as np
+import numpy
 from nemo_nowcast import NowcastWorker, WorkerError
 import xarray
 
@@ -278,6 +278,30 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
         attrs=grib_ds.attrs,
     )
     return nemo_ds
+
+
+def _calc_grid_angle(lat1, lon1, lat2, lon2, direction):
+    """Calculate the angle of rotation of the grid.
+
+    Based on: https://www.movable-type.co.uk/scripts/latlong.html?from=49.243824,-121.887340&to=49.227648,-121.89631
+    Susan changed the algorithm from the link above so that it is NOT bearing but the angle
+    (which increases counter-clockwise) from due east.
+
+    :param :py:class:`numpy.ndarray` lat1:
+    :param :py:class:`numpy.ndarray` lon1:
+    :param :py:class:`numpy.ndarray` lat2:
+    :param :py:class:`numpy.ndarray` lon2:
+    :param str direction: "x" or "y"
+
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    del_lon = lon2 - lon1
+    y_component = numpy.sin(del_lon) * numpy.cos(lat2)
+    x_component = numpy.cos(lat1) * numpy.sin(lat2) - numpy.sin(lat1) * numpy.cos(
+        lat2
+    ) * numpy.cos(del_lon)
+    da = numpy.pi / 2 if direction == "x" else 0
+    return numpy.arctan2(-y_component, x_component) + da
 
 
 def _apportion_accumulation_vars(nemo_ds, config):
