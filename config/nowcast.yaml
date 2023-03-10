@@ -1089,6 +1089,11 @@ logging:
         propagate: False
         handlers:
           - checklist
+      cfgrib:
+        # cfgrib library used by grib_to_netcdf worker
+        qualname: cgrib
+        level: WARNING
+        formatter: simple
       matplotlib:
         # matplotlib library used by figure modules
         qualname: matplotlib
