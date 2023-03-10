@@ -233,9 +233,7 @@ class TestGribToNetcdf:
     @pytest.fixture
     def mock_combine_by_coords(monkeypatch):
         def _mock_combine_by_coords(data_objects, combine_attrs):
-            return xarray.Dataset(
-                data_vars={"var": ("x", numpy.array([], dtype=float))},
-            )
+            pass
 
         monkeypatch.setattr(
             grib_to_netcdf.xarray, "combine_by_coords", _mock_combine_by_coords
@@ -245,7 +243,9 @@ class TestGribToNetcdf:
     @pytest.fixture
     def mock_apportion_accumulation_vars(monkeypatch):
         def _mock_apportion_accumulation_vars(nemo_ds, config):
-            pass
+            return xarray.Dataset(
+                data_vars={"var": ("x", numpy.array([], dtype=float))},
+            )
 
         monkeypatch.setattr(
             grib_to_netcdf,

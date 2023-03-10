@@ -122,7 +122,7 @@ def grib_to_netcdf(parsed_args, config, *args):
             nemo_ds = xarray.combine_by_coords(
                 nemo_datasets.values(), combine_attrs="drop_conflicts"
             )
-            _apportion_accumulation_vars(nemo_ds, config)
+            nemo_ds = _apportion_accumulation_vars(nemo_ds, config)
 
             # rotate wind components to earth-reference
 
@@ -294,7 +294,7 @@ def _apportion_accumulation_vars(nemo_ds, config):
 
     """
     accum_vars = config["weather"]["download"]["2.5 km"]["accumulation variables"]
-    logger.debug(f"apportioning {', '.join(accum_vars)}")
+    logger.debug(f"apportioning {', '.join(accum_vars)} accumulation variables")
     # TODO: handle case of datasets that span forecasts, meaning that the "previous" value for
     #       the apportioning isn't the first time step
     apportioned_vars = {}
