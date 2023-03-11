@@ -241,6 +241,16 @@ class TestGribToNetcdf:
 
     @staticmethod
     @pytest.fixture
+    def mock_calc_earth_ref_winds(monkeypatch):
+        def _mock_calc_earth_ref_winds(nemo_ds):
+            pass
+
+        monkeypatch.setattr(
+            grib_to_netcdf, "_calc_earth_ref_winds", _mock_calc_earth_ref_winds
+        )
+
+    @staticmethod
+    @pytest.fixture
     def mock_apportion_accumulation_vars(monkeypatch):
         def _mock_apportion_accumulation_vars(nemo_ds, config):
             return xarray.Dataset(
@@ -267,6 +277,7 @@ class TestGribToNetcdf:
         run_type,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
+        mock_calc_earth_ref_winds,
         mock_apportion_accumulation_vars,
         mock_to_netcdf,
         config,
@@ -303,6 +314,7 @@ class TestGribToNetcdf:
         self,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
+        mock_calc_earth_ref_winds,
         mock_apportion_accumulation_vars,
         mock_to_netcdf,
         config,
@@ -357,6 +369,14 @@ class TestCalcNemoVarDs:
     """Unit test for _calc_nemo_var_ds() function."""
 
     def test_calc_nemo_var_ds(self):
+        # TODO: test something!
+        pass
+
+
+class TestCalcEarthRefWinds:
+    """Unit test for _calc_earth_ref_winds() function."""
+
+    def test_calc_earth_ref_winds(self):
         # TODO: test something!
         pass
 

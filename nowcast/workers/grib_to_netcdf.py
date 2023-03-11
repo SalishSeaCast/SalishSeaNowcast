@@ -122,11 +122,11 @@ def grib_to_netcdf(parsed_args, config, *args):
             nemo_ds = xarray.combine_by_coords(
                 nemo_datasets.values(), combine_attrs="drop_conflicts"
             )
+            nemo_ds = _calc_earth_ref_winds(nemo_ds)
             nemo_ds = _apportion_accumulation_vars(nemo_ds, config)
 
-            # rotate wind components to earth-reference
-
             # clean up dataset attrs
+
             fcst = True
             fcst_date = run_date.shift(days=+1)
             nc_file = _write_netcdf(nemo_ds, fcst_date, config, fcst)
@@ -244,8 +244,12 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
     :rtype: :py:class:`xarray.Dataset`
     """
     logger.debug(f"creating {nemo_var} dataset from {grib_var} files")
-    y_slice = slice(*config["weather"]["download"]["2.5 km"]["lon indices"])
-    x_slice = slice(*config["weather"]["download"]["2.5 km"]["lat indices"])
+    y_min, y_max = config["weather"]["download"]["2.5 km"]["lon indices"]
+    x_min, x_max = config["weather"]["download"]["2.5 km"]["lat indices"]
+    # We need 1 point more than the final domain size to facilitate calculation of the
+    # grid rotation angle for the wind components
+    y_slice = slice(y_min, y_max + 1)
+    x_slice = slice(x_min, x_max + 1)
     _partial_trim_grib = functools.partial(_trim_grib, y_slice=y_slice, x_slice=x_slice)
     grib_ds = xarray.open_mfdataset(
         grib_files,
@@ -278,6 +282,49 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
         attrs=grib_ds.attrs,
     )
     return nemo_ds
+
+
+def _calc_earth_ref_winds(nemo_ds):
+    """Rotate wind components to earth-reference.
+
+    :param :py:class:`xarray.Dataset` nemo_ds:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    x_angles = _calc_grid_angle(
+        nemo_ds.nav_lat.data[:-1, :-1],
+        nemo_ds.nav_lon.data[:-1, :-1],
+        nemo_ds.nav_lat.data[:-1, 1:],
+        nemo_ds.nav_lon.data[:-1, 1:],
+        "x",
+    )
+    y_angles = _calc_grid_angle(
+        nemo_ds.nav_lat.data[:-1, :-1],
+        nemo_ds.nav_lon.data[:-1, :-1],
+        nemo_ds.nav_lat.data[1:, :-1],
+        nemo_ds.nav_lon.data[1:, :-1],
+        "y",
+    )
+    angles = (x_angles + y_angles) / 2
+    u_wind_grid = nemo_ds.u_wind[:, :-1, :-1].data
+    v_wind_grid = nemo_ds.v_wind[:, :-1, :-1].data
+    u_wind_earth = u_wind_grid * numpy.cos(angles) - v_wind_grid * numpy.sin(angles)
+    v_wind_earth = u_wind_grid * numpy.sin(angles) + v_wind_grid * numpy.cos(angles)
+    trimmed_data_vars = {var: nemo_ds[var][:, :-1, :-1] for var in nemo_ds.data_vars}
+    trimmed_data_vars["u_wind"].data = u_wind_earth
+    trimmed_data_vars["v_wind"].data = v_wind_earth
+    trimmed_ds = xarray.Dataset(
+        data_vars=trimmed_data_vars,
+        coords={
+            "time_counter": nemo_ds.time_counter,
+            "y": nemo_ds.y[:-1],
+            "x": nemo_ds.x[:-1],
+            "nav_lon": nemo_ds.nav_lon[:-1, :-1],
+            "nav_lat": nemo_ds.nav_lat[:-1, :-1],
+        },
+        attrs=nemo_ds.attrs,
+    )
+    return trimmed_ds
 
 
 def _calc_grid_angle(lat1, lon1, lat2, lon2, direction):
@@ -316,7 +363,7 @@ def _apportion_accumulation_vars(nemo_ds, config):
     :param :py:class:`xarray.Dataset` nemo_ds:
     :param dict config:
 
-    :rtype: :py:class:`xarray.Dataset` nemo_ds
+    :rtype: :py:class:`xarray.Dataset`
 
     """
     accum_vars = config["weather"]["download"]["2.5 km"]["accumulation variables"]
