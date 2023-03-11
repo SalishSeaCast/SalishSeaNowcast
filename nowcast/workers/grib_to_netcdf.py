@@ -371,13 +371,8 @@ def _apportion_accumulation_vars(nemo_ds, config):
     logger.debug(f"apportioning {', '.join(accum_vars)} accumulation variables")
     # TODO: handle case of datasets that span forecasts, meaning that the "previous" value for
     #       the apportioning isn't the first time step
-    apportioned_vars = {}
-    for var in nemo_ds.data_vars:
-        apportioned_vars[var] = nemo_ds[var][1:]
-        if var in accum_vars:
-            apportioned_vars[var].data = nemo_ds[var][1:].data - nemo_ds[var][0:-1].data
     apportioned_ds = xarray.Dataset(
-        data_vars=apportioned_vars,
+        data_vars={var: nemo_ds[var][1:] for var in nemo_ds.data_vars},
         coords={
             "time_counter": nemo_ds.time_counter[1:],
             "y": nemo_ds.y,
@@ -387,6 +382,10 @@ def _apportion_accumulation_vars(nemo_ds, config):
         },
         attrs=nemo_ds.attrs,
     )
+    for var in accum_vars:
+        apportioned_ds[var].data = (
+            nemo_ds[var][1:].data - nemo_ds[var][0:-1].data
+        ) / 3600
     return apportioned_ds
 
 
