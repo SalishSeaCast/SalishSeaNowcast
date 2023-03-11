@@ -292,6 +292,7 @@ def _calc_earth_ref_winds(nemo_ds):
 
     :rtype: :py:class:`xarray.Dataset`
     """
+    logger.debug("calculating earth-referenced wind components")
     x_angles = _calc_grid_angle(
         nemo_ds.nav_lat.data[:-1, :-1],
         nemo_ds.nav_lon.data[:-1, :-1],
@@ -311,11 +312,8 @@ def _calc_earth_ref_winds(nemo_ds):
     v_wind_grid = nemo_ds.v_wind[:, :-1, :-1].data
     u_wind_earth = u_wind_grid * numpy.cos(angles) - v_wind_grid * numpy.sin(angles)
     v_wind_earth = u_wind_grid * numpy.sin(angles) + v_wind_grid * numpy.cos(angles)
-    trimmed_data_vars = {var: nemo_ds[var][:, :-1, :-1] for var in nemo_ds.data_vars}
-    trimmed_data_vars["u_wind"].data = u_wind_earth
-    trimmed_data_vars["v_wind"].data = v_wind_earth
     trimmed_ds = xarray.Dataset(
-        data_vars=trimmed_data_vars,
+        data_vars={var: nemo_ds[var][:, :-1, :-1] for var in nemo_ds.data_vars},
         coords={
             "time_counter": nemo_ds.time_counter,
             "y": nemo_ds.y[:-1],
@@ -325,6 +323,8 @@ def _calc_earth_ref_winds(nemo_ds):
         },
         attrs=nemo_ds.attrs,
     )
+    trimmed_ds.u_wind.data = u_wind_earth
+    trimmed_ds.v_wind.data = v_wind_earth
     return trimmed_ds
 
 
