@@ -281,7 +281,7 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
 
 
 def _calc_grid_angle(lat1, lon1, lat2, lon2, direction):
-    """Calculate the angle of rotation of the grid.
+    """Calculate the angle (in radians) of rotation of the grid.
 
     Based on: https://www.movable-type.co.uk/scripts/latlong.html?from=49.243824,-121.887340&to=49.227648,-121.89631
     Susan changed the algorithm from the link above so that it is NOT bearing but the angle
@@ -295,7 +295,9 @@ def _calc_grid_angle(lat1, lon1, lat2, lon2, direction):
 
     :rtype: :py:class:`numpy.ndarray`
     """
-    del_lon = lon2 - lon1
+    lat1 = numpy.deg2rad(lat1)
+    lat2 = numpy.deg2rad(lat2)
+    del_lon = numpy.deg2rad(lon2) - numpy.deg2rad(lon1)
     y_component = numpy.sin(del_lon) * numpy.cos(lat2)
     x_component = numpy.cos(lat1) * numpy.sin(lat2) - numpy.sin(lat1) * numpy.cos(
         lat2
