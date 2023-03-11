@@ -281,6 +281,7 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
         },
         attrs=grib_ds.attrs,
     )
+    nemo_ds.nav_lon.data = nemo_ds.nav_lon.data + 360
     return nemo_ds
 
 
