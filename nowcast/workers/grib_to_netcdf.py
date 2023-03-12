@@ -124,11 +124,8 @@ def grib_to_netcdf(parsed_args, config, *args):
             )
             nemo_ds = _calc_earth_ref_winds(nemo_ds)
             nemo_ds = _apportion_accumulation_vars(nemo_ds, config)
-
-            # clean up dataset attrs
-
-            fcst = True
-            fcst_date = run_date.shift(days=+1)
+            _improve_metadata(nemo_ds, run_type, run_date, config)
+            fcst_date = run_date.shift(days=fcst_date_offset)
             nc_file = _write_netcdf(nemo_ds, fcst_date, config, fcst)
             _update_checklist(nc_file, fcst, checklist)
 
@@ -388,6 +385,171 @@ def _apportion_accumulation_vars(nemo_ds, config):
             nemo_ds[var][1:].data - nemo_ds[var][0:-1].data
         ) / 3600
     return apportioned_ds
+
+
+def _improve_metadata(nemo_ds, run_type, run_date, config):
+    """
+    :param :py:class:`xarray.Dataset` nemo_ds:
+    :param str run_type:
+    :param :py:class:`arrow.Arrow` run_date:
+    :param dict config:
+    """
+    nemo_ds.time_counter.attrs.update(
+        {
+            "axis": "T",
+            "ioos_category": "Time",
+            "long_name": "Time Axis",
+            "standard_name": "time",
+            "time_origin": "01-JAN-1970 00:00",
+        }
+    )
+    nemo_ds.y.attrs.update(
+        {
+            "ioos_category": "location",
+            "long_name": "Y",
+            "standard_name": "y",
+            "units": "count",
+            "comment": (
+                "Y values are grid indices in the model y-direction; "
+                "geo-location data for the SalishSeaCast sub-domain of the ECCC MSC "
+                "2.5km resolution HRDPS continental model grid is available in the "
+                "ubcSSaSurfaceAtmosphereFieldsV22-02 dataset."
+            ),
+        },
+    )
+    nemo_ds.x.attrs.update(
+        {
+            "ioos_category": "location",
+            "long_name": "X",
+            "standard_name": "x",
+            "units": "count",
+            "comment": (
+                "X values are grid indices in the model x-direction; "
+                "geo-location data for the SalishSeaCast sub-domain of the ECCC MSC "
+                "2.5km resolution HRDPS continental model grid is available in the "
+                "ubcSSaSurfaceAtmosphereFieldsV22-02 dataset."
+            ),
+        }
+    )
+    nemo_ds.nav_lon.attrs.update(
+        {
+            "ioos_category": "location",
+            "long_name": "Longitude",
+        }
+    )
+    nemo_ds.nav_lat.attrs.update(
+        {
+            "ioos_category": "location",
+            "long_name": "Latitude",
+        }
+    )
+    nemo_var_names = [
+        name[2] for name in config["weather"]["download"]["2.5 km"]["variables"]
+    ]
+    for nemo_var in nemo_var_names:
+        nemo_ds[nemo_var].attrs.update(
+            {
+                "GRIB_numberOfPoints": "43700LL",
+                "GRIB_Nx": "230LL",
+                "GRIB_Ny": "190LL",
+                "ioos_category": "atmospheric",
+            }
+        )
+    nemo_ds.LHTFL_surface.attrs.update(
+        {
+            "standard_name": "surface_downward_latent_heat_flux",
+            "units": "W m-2",
+            "comment": "For Vancouver Harbour and Lower Fraser River FVCOM model",
+        }
+    )
+    nemo_ds.PRATE_surface.attrs.update(
+        {
+            "standard_name": "precipitation_flux",
+            "units": "kg m-2 s-1",
+            "comment": "For Vancouver Harbour and Lower Fraser River FVCOM model",
+        }
+    )
+    nemo_ds.RH_2maboveground.attrs.update(
+        {
+            "standard_name": "relative_humidity",
+            "units": "%",
+            "comment": "For Vancouver Harbour and Lower Fraser River FVCOM model",
+        }
+    )
+    nemo_ds.atmpres.attrs.update(
+        {
+            "standard_name": "air_pressure_at_mean_sea_level",
+            "long_name": "Air Pressure at MSL",
+            "units": "Pa",
+        }
+    )
+    nemo_ds.precip.attrs.update(
+        {
+            "standard_name": "precipitation_flux",
+            "long_name": "Precipitation Flux",
+            "units": "kg m-2 s-1",
+        }
+    )
+    nemo_ds.qair.attrs.update(
+        {
+            "standard_name": "specific_humidity",
+            "long_name": "Specific Humidity at 2m",
+            "units": "kg kg-1",
+        }
+    )
+    nemo_ds.solar.attrs.update(
+        {
+            "standard_name": "surface_downwelling_shortwave_flux_in_air",
+            "long_name": "Downward Short-Wave (Solar) Radiation Flux",
+            "units": "W m-2",
+        }
+    )
+    nemo_ds.tair.attrs.update(
+        {
+            "standard_name": "air_temperature",
+            "long_name": "Air Temperature at 2m",
+            "units": "K",
+        }
+    )
+    nemo_ds.therm_rad.attrs.update(
+        {
+            "standard_name": "surface_downwelling_longwave_flux_in_air",
+            "long_name": "Downward Long-Wave (Thermal) Radiation Flux",
+            "units": "W m-2",
+        }
+    )
+    nemo_ds.u_wind.attrs.update(
+        {
+            "standard_name": "eastward_wind",
+            "long_name": "U-Component of Wind at 10m",
+            "units": "m s-1",
+        }
+    )
+    nemo_ds.v_wind.attrs.update(
+        {
+            "standard_name": "northward_wind",
+            "long_name": "V-Component of Wind at 10m",
+            "units": "m s-1",
+        }
+    )
+    nemo_ds.attrs.update(
+        {
+            "title": "HRDPS, Salish Sea, Atmospheric Forcing Fields, Hourly, v22-02",
+            "project": "UBC EOAS SalishSeaCast",
+            "institution": "UBC EOAS",
+            "institution_fullname": "Earth, Ocean & Atmospheric Sciences, University of British Columbia",
+            "creator_name": "SalishSeaCast Project Contributors",
+            "creator_email": "sallen at eoas.ubc.ca",
+            "creator_url": "https://salishsea.eos.ubc.ca",
+            "history": (
+                f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
+                f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
+                f"{run_type} --run-date {run_date.format('YYYY-MM-DD')}"
+            ),
+            "drawLandMask": "over",
+            "coverage_content_type": "modelResult",
+        }
+    )
 
 
 def _write_netcdf(nemo_ds, file_date, config, fcst=False):

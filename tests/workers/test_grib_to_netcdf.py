@@ -271,6 +271,14 @@ class TestGribToNetcdf:
 
         monkeypatch.setattr(grib_to_netcdf, "_to_netcdf", _mock_to_netcdf)
 
+    @staticmethod
+    @pytest.fixture
+    def mock_improve_metadata(monkeypatch):
+        def _mock_improve_metadata(nemo_ds, run_type, run_date, config):
+            pass
+
+        monkeypatch.setattr(grib_to_netcdf, "_improve_metadata", _mock_improve_metadata)
+
     @pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
     def test_log_messages(
         self,
@@ -279,6 +287,7 @@ class TestGribToNetcdf:
         mock_combine_by_coords,
         mock_calc_earth_ref_winds,
         mock_apportion_accumulation_vars,
+        mock_improve_metadata,
         mock_to_netcdf,
         config,
         caplog,
@@ -296,26 +305,13 @@ class TestGribToNetcdf:
         expected = f"creating NEMO-atmos forcing files for 2023-03-08 {run_type[:-1]}"
         assert caplog.messages[0].startswith(expected)
 
-        if run_type == "forecast2":
-            # TODO: until forecast2 code is implemented
-            return
-        for i, var_names in enumerate(
-            config["weather"]["download"]["2.5 km"]["variables"]
-        ):
-            msc_var, _, _ = var_names
-            assert caplog.records[i + 1].levelname == "DEBUG"
-            expected = (
-                f"creating {msc_var} GRIB file paths list for 20230308 12Z forecast hours "
-                f"011 to 035"
-            )
-            assert caplog.messages[i + 1] == expected
-
     def test_nowcast_checklist(
         self,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
         mock_calc_earth_ref_winds,
         mock_apportion_accumulation_vars,
+        mock_improve_metadata,
         mock_to_netcdf,
         config,
         caplog,
@@ -329,18 +325,21 @@ class TestGribToNetcdf:
 
         checklist = grib_to_netcdf.grib_to_netcdf(parsed_args, config)
 
-        expected = {"fcst": ["hrdps_y2023m03d10.nc"]}
+        expected = {
+            "nowcast": "hrdps_y2023m03d09.nc",
+            # "fcst": ["hrdps_y2023m03d10.nc"],
+        }
         assert checklist == expected
 
 
 class TestCalcGribFilePaths:
-    """Unit test for _calc_grib_file_paths() function."""
+    """Unit tests for _calc_grib_file_paths() function."""
 
     def test_calc_grib_file_paths(self, config):
         fcst_date = arrow.get("2023-03-08")
         fcst_hr = "12"
         fcst_step_range = (1, 2)
-        msc_var = "UGRD_TGL_10"
+        msc_var = "UGRD_AGL-10m"
 
         grib_files = grib_to_netcdf._calc_grib_file_paths(
             fcst_date, fcst_hr, fcst_step_range, msc_var, config
@@ -348,13 +347,31 @@ class TestCalcGribFilePaths:
 
         expected = [
             Path(
-                "forcing/atmospheric/continental2.5/GRIB/20230308/12/001/20230308T12Z_MSC_HRDPS_UGRD_TGL_10_RLatLon0.0225_PT001H.grib2"
+                "forcing/atmospheric/continental2.5/GRIB/20230308/12/001/20230308T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H.grib2"
             ),
             Path(
-                "forcing/atmospheric/continental2.5/GRIB/20230308/12/002/20230308T12Z_MSC_HRDPS_UGRD_TGL_10_RLatLon0.0225_PT002H.grib2"
+                "forcing/atmospheric/continental2.5/GRIB/20230308/12/002/20230308T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT002H.grib2"
             ),
         ]
         assert grib_files == expected
+
+    def test_log_messages(self, config, caplog):
+        fcst_date = arrow.get("2023-03-12")
+        fcst_hr = "18"
+        fcst_step_range = (5, 6)
+        msc_var = "UGRD_AGL-10m"
+        caplog.set_level(logging.DEBUG)
+
+        grib_to_netcdf._calc_grib_file_paths(
+            fcst_date, fcst_hr, fcst_step_range, msc_var, config
+        )
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = (
+            f"creating {msc_var} GRIB file paths list for 20230312 18Z forecast hours "
+            f"005 to 006"
+        )
+        assert caplog.messages[0] == expected
 
 
 class TestTrimGrib:
@@ -398,6 +415,309 @@ class TestCalcGridAngle:
         angle = grib_to_netcdf._calc_grid_angle(lat1, lon1, lat2, lon2, direction)
 
         assert numpy.rad2deg(angle) == pytest.approx(expected)
+
+
+@pytest.mark.parametrize("run_type", ("nowcast+",))
+class TestImproveMetadata:
+    """Unit test for _improve_metadata() function."""
+
+    @staticmethod
+    @pytest.fixture
+    def nemo_ds():
+        mock_var_da = xarray.DataArray(
+            data=numpy.empty(shape=(1, 1, 1)),
+            coords={
+                "time_counter": ("time_counter", numpy.empty(shape=(1,))),
+                "y": ("y", numpy.empty(shape=(1,))),
+                "x": ("x", numpy.empty(shape=(1,))),
+            },
+        )
+        return xarray.Dataset(
+            data_vars={
+                "nav_lon": xarray.DataArray(
+                    data=numpy.empty(shape=(1, 1)),
+                    coords={
+                        "y": ("y", numpy.empty(shape=(1,))),
+                        "x": ("x", numpy.empty(shape=(1,))),
+                    },
+                ),
+                "nav_lat": xarray.DataArray(
+                    data=numpy.empty(shape=(1, 1)),
+                    coords={
+                        "y": ("y", numpy.empty(shape=(1,))),
+                        "x": ("x", numpy.empty(shape=(1,))),
+                    },
+                ),
+                "LHTFL_surface": mock_var_da,
+                "PRATE_surface": mock_var_da,
+                "RH_2maboveground": mock_var_da,
+                "atmpres": mock_var_da,
+                "precip": mock_var_da,
+                "qair": mock_var_da,
+                "solar": mock_var_da,
+                "tair": mock_var_da,
+                "therm_rad": mock_var_da,
+                "u_wind": mock_var_da,
+                "v_wind": mock_var_da,
+            },
+            coords={
+                "time_counter": ("time_counter", numpy.empty(shape=(1,))),
+                "y": ("y", numpy.empty(shape=(1,))),
+                "x": ("x", numpy.empty(shape=(1,))),
+            },
+            attrs={},
+        )
+
+    def test_time_counter_coord(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "axis": "T",
+            "ioos_category": "Time",
+            "long_name": "Time Axis",
+            "standard_name": "time",
+            "time_origin": "01-JAN-1970 00:00",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.time_counter.attrs[key] == value
+
+    def test_y_coord(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "ioos_category": "location",
+            "long_name": "Y",
+            "standard_name": "y",
+            "units": "count",
+            "comment": (
+                "Y values are grid indices in the model y-direction; "
+                "geo-location data for the SalishSeaCast sub-domain of the ECCC MSC "
+                "2.5km resolution HRDPS continental model grid is available in the "
+                "ubcSSaSurfaceAtmosphereFieldsV22-02 dataset."
+            ),
+        }
+        for key, value in expected.items():
+            assert nemo_ds.y.attrs[key] == value
+
+    def test_x_coord(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "ioos_category": "location",
+            "long_name": "X",
+            "standard_name": "x",
+            "units": "count",
+            "comment": (
+                "X values are grid indices in the model x-direction; "
+                "geo-location data for the SalishSeaCast sub-domain of the ECCC MSC "
+                "2.5km resolution HRDPS continental model grid is available in the "
+                "ubcSSaSurfaceAtmosphereFieldsV22-02 dataset."
+            ),
+        }
+        for key, value in expected.items():
+            assert nemo_ds.x.attrs[key] == value
+
+    def test_nav_lon_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "ioos_category": "location",
+            "long_name": "Longitude",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.nav_lon.attrs[key] == value
+
+    def test_nav_lat_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "ioos_category": "location",
+            "long_name": "Latitude",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.nav_lat.attrs[key] == value
+
+    def test_all_atmospheric_vars(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "GRIB_numberOfPoints": "43700LL",
+            "GRIB_Nx": "230LL",
+            "GRIB_Ny": "190LL",
+            "ioos_category": "atmospheric",
+        }
+        nemo_var_names = [
+            name[2] for name in config["weather"]["download"]["2.5 km"]["variables"]
+        ]
+        for nemo_var in nemo_var_names:
+            for key, value in expected.items():
+                assert nemo_ds[nemo_var].attrs[key] == value
+
+    def test_LHTFL_surface_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "surface_downward_latent_heat_flux",
+            "units": "W m-2",
+            "comment": "For Vancouver Harbour and Lower Fraser River FVCOM model",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.LHTFL_surface.attrs[key] == value
+
+    def test_PRATE_surface_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "precipitation_flux",
+            "units": "kg m-2 s-1",
+            "comment": "For Vancouver Harbour and Lower Fraser River FVCOM model",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.PRATE_surface.attrs[key] == value
+
+    def test_atmpres_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "air_pressure_at_mean_sea_level",
+            "long_name": "Air Pressure at MSL",
+            "units": "Pa",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.atmpres.attrs[key] == value
+
+    def test_precip_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "precipitation_flux",
+            "long_name": "Precipitation Flux",
+            "units": "kg m-2 s-1",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.precip.attrs[key] == value
+
+    def test_qair_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "specific_humidity",
+            "long_name": "Specific Humidity at 2m",
+            "units": "kg kg-1",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.qair.attrs[key] == value
+
+    def test_solar_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "surface_downwelling_shortwave_flux_in_air",
+            "long_name": "Downward Short-Wave (Solar) Radiation Flux",
+            "units": "W m-2",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.solar.attrs[key] == value
+
+    def test_tair_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "air_temperature",
+            "long_name": "Air Temperature at 2m",
+            "units": "K",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.tair.attrs[key] == value
+
+    def test_therm_rad_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "surface_downwelling_longwave_flux_in_air",
+            "long_name": "Downward Long-Wave (Thermal) Radiation Flux",
+            "units": "W m-2",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.therm_rad.attrs[key] == value
+
+    def test_u_wind_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "eastward_wind",
+            "long_name": "U-Component of Wind at 10m",
+            "units": "m s-1",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.u_wind.attrs[key] == value
+
+    def test_v_wind_var(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "standard_name": "northward_wind",
+            "long_name": "V-Component of Wind at 10m",
+            "units": "m s-1",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.v_wind.attrs[key] == value
+
+    def test_dataset_attrs(self, run_type, nemo_ds, config):
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+
+        expected = {
+            "title": "HRDPS, Salish Sea, Atmospheric Forcing Fields, Hourly, v22-02",
+            "project": "UBC EOAS SalishSeaCast",
+            "institution": "UBC EOAS",
+            "institution_fullname": "Earth, Ocean & Atmospheric Sciences, University of British Columbia",
+            "creator_name": "SalishSeaCast Project Contributors",
+            "creator_email": "sallen at eoas.ubc.ca",
+            "creator_url": "https://salishsea.eos.ubc.ca",
+            "history": (
+                f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
+                f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
+                f"{run_type} --run-date {run_date.format('YYYY-MM-DD')}"
+            ),
+            "drawLandMask": "over",
+            "coverage_content_type": "modelResult",
+        }
+        for key, value in expected.items():
+            assert nemo_ds.attrs[key] == value
 
 
 class TestApportionAccumulationVars:
