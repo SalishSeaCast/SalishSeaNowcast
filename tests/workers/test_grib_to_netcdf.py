@@ -334,6 +334,14 @@ class TestGribToNetcdf:
         assert checklist == expected
 
 
+class TestCalcNemoDs:
+    """Unit test for _calc_nemo_ds() function."""
+
+    def test_calc_nemo_ds(self):
+        # TODO: test something!
+        pass
+
+
 class TestCalcGribFilePaths:
     """Unit tests for _calc_grib_file_paths() function."""
 

@@ -98,45 +98,69 @@ def grib_to_netcdf(parsed_args, config, *args):
     checklist = {}
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type
-    nemo_datasets = {}
+    var_names = config["weather"]["download"]["2.5 km"]["variables"]
     match run_type:
         case "nowcast+":
             logger.info(
                 f"creating NEMO-atmos forcing files for {run_date.format('YYYY-MM-DD')} "
                 f"nowcast and forecast runs"
             )
-            var_names = config["weather"]["download"]["2.5 km"]["variables"]
-            # run_date dataset is composed of pieces from 3 grib forecast hours
-            # run_date + 1 dataset is composed of hours 11-35 from 12Z forecast
-            for msc_var, grib_var, nemo_var in var_names:
-                grib_files = _calc_grib_file_paths(
-                    run_date,
-                    "12",
-                    (11, 35),
-                    msc_var,
-                    config,
-                )
-                nemo_datasets[nemo_var] = _calc_nemo_var_ds(
-                    grib_var, nemo_var, grib_files, config
-                )
-            nemo_ds = xarray.combine_by_coords(
-                nemo_datasets.values(), combine_attrs="drop_conflicts"
+            # run_date dataset is composed of pieces from 3 grib forecast hours:
+            #   hours 5-6 from 18Z forecast of previous day
+            #   hours 1-12 from 00Z forecast of run_date day
+            #   hours 1-11 from 12Z forecast of run_date day
+            # run_date_offset, fcst_hr, fcst_step_range, fcst, fcst_date_offset = -1, "18", (5, 6), False, 0
+            fcst_hr, fcst_step_range = "18", (5, 6)
+            nemo_ds_18 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
+                run_date_offset=-1,
             )
-            nemo_ds = _calc_earth_ref_winds(nemo_ds)
-            nemo_ds = _apportion_accumulation_vars(nemo_ds, config)
-            _improve_metadata(nemo_ds, run_type, run_date, config)
-            fcst_date = run_date.shift(days=fcst_date_offset)
-            nc_file = _write_netcdf(nemo_ds, fcst_date, config, fcst)
-            _update_checklist(nc_file, fcst, checklist)
+
+            # run_date_offset, fcst_hr, fcst_step_range, fcst, fcst_date_offset = 0, "00", (1, 12), False, 0
+            # run_date_offset, fcst_hr, fcst_step_range, fcst, fcst_date_offset = 0, "12", (1, 11), False, 0
+
+            # nemo_ds = xarray.combine_by_coords((nemo_ds_18, nemo_ds_12))
+
+            nc_file = _write_netcdf(nemo_ds_18, run_date, run_date, run_type, config)
+            _update_checklist(nc_file, False, checklist)
+
+            # run_date + 1 dataset is composed of hours 11-35 from 12Z forecast
+            # run_date_offset, fcst_hr, fcst_step_range, fcst, fcst_date_offset = 0, "12", (11, 35), True, +1
 
             # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
+            run_date_offset, fcst_hr, fcst_step_range, fcst, fcst_date_offset = (
+                0,
+                "12",
+                (35, 48),
+                True,
+                +2,
+            )
+
         case "forecast2":
             logger.info(
                 f"creating NEMO-atmos forcing files for {run_date.format('YYYY-MM-DD')} "
                 f"forecast2 run"
             )
             # run_date + 1 dataset is composed of hours 17-41 from 06Z forecast
+            run_date_offset, fcst_hr, fcst_step_range, fcst, fcst_date_offset = (
+                0,
+                "06",
+                (17, 41),
+                True,
+                +1,
+            )
             # run_date + 2 dataset is composed of hours 41-48 from 06Z forecast
+            run_date_offset, fcst_hr, fcst_step_range, fcst, fcst_date_offset = (
+                0,
+                "06",
+                (41, 48),
+                True,
+                +2,
+            )
     return checklist
 
     match parsed_args.run_type:
@@ -178,6 +202,44 @@ def grib_to_netcdf(parsed_args, config, *args):
     canvas.print_figure(image_file)
     lib.fix_perms(image_file, grp_name=config["file group"])
     return checklist
+
+
+def _calc_nemo_ds(
+    var_names, run_date, fcst_hr, fcst_step_range, config, run_date_offset=0
+):
+    """
+    :param list var_names:
+    :param :py:class:`arrow.Arrow`. run_date:
+    :param tuple fcst_step_range:
+    :param dict config:
+    :param int run_date_offset:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    fcst_date = run_date.shift(days=run_date_offset)
+    logger.debug(
+        f"creating NEMO forcing dataset from {fcst_date.format('YYYYMMDD')} {fcst_hr}Z "
+        f"forecast hours {fcst_step_range[0]:03d} to {fcst_step_range[1]:03d}"
+    )
+    nemo_datasets = {}
+    for msc_var, grib_var, nemo_var in var_names:
+        grib_files = _calc_grib_file_paths(
+            fcst_date,
+            fcst_hr,
+            fcst_step_range,
+            msc_var,
+            config,
+        )
+        nemo_datasets[nemo_var] = _calc_nemo_var_ds(
+            grib_var, nemo_var, grib_files, config
+        )
+    nemo_ds = xarray.combine_by_coords(
+        nemo_datasets.values(), combine_attrs="drop_conflicts"
+    )
+    nemo_ds = _calc_earth_ref_winds(nemo_ds)
+    nemo_ds = _apportion_accumulation_vars(nemo_ds, config)
+    _improve_metadata(nemo_ds, config)
+    return nemo_ds
 
 
 def _calc_grib_file_paths(fcst_date, fcst_hr, fcst_step_range, msc_var, config):
