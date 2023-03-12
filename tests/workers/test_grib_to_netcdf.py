@@ -232,8 +232,10 @@ class TestGribToNetcdf:
     @staticmethod
     @pytest.fixture
     def mock_combine_by_coords(monkeypatch):
-        def _mock_combine_by_coords(data_objects, combine_attrs):
-            pass
+        def _mock_combine_by_coords(data_objects, **kwargs):
+            return xarray.Dataset(
+                data_vars={"var": ("x", numpy.array([], dtype=float))},
+            )
 
         monkeypatch.setattr(
             grib_to_netcdf.xarray, "combine_by_coords", _mock_combine_by_coords
@@ -274,7 +276,7 @@ class TestGribToNetcdf:
     @staticmethod
     @pytest.fixture
     def mock_improve_metadata(monkeypatch):
-        def _mock_improve_metadata(nemo_ds, run_type, run_date, config):
+        def _mock_improve_metadata(nemo_ds, config):
             pass
 
         monkeypatch.setattr(grib_to_netcdf, "_improve_metadata", _mock_improve_metadata)
@@ -469,9 +471,7 @@ class TestImproveMetadata:
         )
 
     def test_time_counter_coord(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "axis": "T",
@@ -484,9 +484,7 @@ class TestImproveMetadata:
             assert nemo_ds.time_counter.attrs[key] == value
 
     def test_y_coord(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "ioos_category": "location",
@@ -504,9 +502,7 @@ class TestImproveMetadata:
             assert nemo_ds.y.attrs[key] == value
 
     def test_x_coord(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "ioos_category": "location",
@@ -524,9 +520,7 @@ class TestImproveMetadata:
             assert nemo_ds.x.attrs[key] == value
 
     def test_nav_lon_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "ioos_category": "location",
@@ -536,9 +530,7 @@ class TestImproveMetadata:
             assert nemo_ds.nav_lon.attrs[key] == value
 
     def test_nav_lat_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "ioos_category": "location",
@@ -548,9 +540,7 @@ class TestImproveMetadata:
             assert nemo_ds.nav_lat.attrs[key] == value
 
     def test_all_atmospheric_vars(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "GRIB_numberOfPoints": "43700LL",
@@ -566,9 +556,7 @@ class TestImproveMetadata:
                 assert nemo_ds[nemo_var].attrs[key] == value
 
     def test_LHTFL_surface_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "surface_downward_latent_heat_flux",
@@ -579,9 +567,7 @@ class TestImproveMetadata:
             assert nemo_ds.LHTFL_surface.attrs[key] == value
 
     def test_PRATE_surface_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "precipitation_flux",
@@ -592,9 +578,7 @@ class TestImproveMetadata:
             assert nemo_ds.PRATE_surface.attrs[key] == value
 
     def test_atmpres_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "air_pressure_at_mean_sea_level",
@@ -605,9 +589,7 @@ class TestImproveMetadata:
             assert nemo_ds.atmpres.attrs[key] == value
 
     def test_precip_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "precipitation_flux",
@@ -618,9 +600,7 @@ class TestImproveMetadata:
             assert nemo_ds.precip.attrs[key] == value
 
     def test_qair_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "specific_humidity",
@@ -631,9 +611,7 @@ class TestImproveMetadata:
             assert nemo_ds.qair.attrs[key] == value
 
     def test_solar_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "surface_downwelling_shortwave_flux_in_air",
@@ -644,9 +622,7 @@ class TestImproveMetadata:
             assert nemo_ds.solar.attrs[key] == value
 
     def test_tair_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "air_temperature",
@@ -657,9 +633,7 @@ class TestImproveMetadata:
             assert nemo_ds.tair.attrs[key] == value
 
     def test_therm_rad_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "surface_downwelling_longwave_flux_in_air",
@@ -670,9 +644,7 @@ class TestImproveMetadata:
             assert nemo_ds.therm_rad.attrs[key] == value
 
     def test_u_wind_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "eastward_wind",
@@ -683,9 +655,7 @@ class TestImproveMetadata:
             assert nemo_ds.u_wind.attrs[key] == value
 
     def test_v_wind_var(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "standard_name": "northward_wind",
@@ -696,9 +666,7 @@ class TestImproveMetadata:
             assert nemo_ds.v_wind.attrs[key] == value
 
     def test_dataset_attrs(self, run_type, nemo_ds, config):
-        run_date = arrow.get("2023-03-12")
-
-        grib_to_netcdf._improve_metadata(nemo_ds, run_type, run_date, config)
+        grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
             "title": "HRDPS, Salish Sea, Atmospheric Forcing Fields, Hourly, v22-02",
@@ -708,11 +676,6 @@ class TestImproveMetadata:
             "creator_name": "SalishSeaCast Project Contributors",
             "creator_email": "sallen at eoas.ubc.ca",
             "creator_url": "https://salishsea.eos.ubc.ca",
-            "history": (
-                f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
-                f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
-                f"{run_type} --run-date {run_date.format('YYYY-MM-DD')}"
-            ),
             "drawLandMask": "over",
             "coverage_content_type": "modelResult",
         }
@@ -729,11 +692,43 @@ class TestApportionAccumulationVars:
 
 
 class TestWriteNetcdf:
-    """Unit test for _write_netcdf() function."""
+    """Unit tests for _write_netcdf() function."""
 
-    def test_write_netcdf(self):
-        # TODO: test something!
-        pass
+    @staticmethod
+    @pytest.fixture
+    def mock_to_netcdf(monkeypatch):
+        def _mock_to_netcdf(nemo_ds, encoding, nc_file_path):
+            pass
+
+        monkeypatch.setattr(grib_to_netcdf, "_to_netcdf", _mock_to_netcdf)
+
+    @pytest.mark.parametrize(
+        "run_type, fcst",
+        (
+            ("nowcast+", False),
+            ("forecast2", True),
+        ),
+    )
+    def test_history_attr(self, run_type, fcst, config, mock_to_netcdf, monkeypatch):
+        def mock_now(tz):
+            return arrow.get("2023-03-12 16:02:43", tzinfo="PDT")
+
+        monkeypatch.setattr(grib_to_netcdf.arrow, "now", mock_now)
+
+        nemo_ds = xarray.Dataset()
+        file_date = arrow.get("2023-03-12")
+        run_date = arrow.get("2023-03-12")
+
+        grib_to_netcdf._write_netcdf(
+            nemo_ds, file_date, run_date, run_type, config, fcst
+        )
+
+        expected = (
+            f"[Sun 2023-03-12 16:02:43 -07:00] "
+            f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
+            f"{run_type} --run-date 2023-03-12"
+        )
+        assert nemo_ds.attrs["history"] == expected
 
 
 class TestUpdateChecklist:

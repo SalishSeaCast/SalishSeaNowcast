@@ -387,11 +387,9 @@ def _apportion_accumulation_vars(nemo_ds, config):
     return apportioned_ds
 
 
-def _improve_metadata(nemo_ds, run_type, run_date, config):
+def _improve_metadata(nemo_ds, config):
     """
     :param :py:class:`xarray.Dataset` nemo_ds:
-    :param str run_type:
-    :param :py:class:`arrow.Arrow` run_date:
     :param dict config:
     """
     nemo_ds.time_counter.attrs.update(
@@ -541,21 +539,18 @@ def _improve_metadata(nemo_ds, run_type, run_date, config):
             "creator_name": "SalishSeaCast Project Contributors",
             "creator_email": "sallen at eoas.ubc.ca",
             "creator_url": "https://salishsea.eos.ubc.ca",
-            "history": (
-                f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
-                f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
-                f"{run_type} --run-date {run_date.format('YYYY-MM-DD')}"
-            ),
             "drawLandMask": "over",
             "coverage_content_type": "modelResult",
         }
     )
 
 
-def _write_netcdf(nemo_ds, file_date, config, fcst=False):
+def _write_netcdf(nemo_ds, file_date, run_date, run_type, config, fcst=False):
     """
     :param :py:class:`xarray.Dataset` nemo_ds:
     :param :py:class:`arrow.Arrow` file_date:
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
     :param dict config:
     :param boolean fcst:
 
@@ -573,6 +568,15 @@ def _write_netcdf(nemo_ds, file_date, config, fcst=False):
     nc_file_tmpl = config["weather"]["file template"]
     nc_filename = nc_file_tmpl.format(file_date.date())
     nc_file = Path("fcst/", nc_filename) if fcst else Path(nc_filename)
+    nemo_ds.attrs.update(
+        {
+            "history": (
+                f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
+                f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
+                f"{run_type} --run-date {run_date.format('YYYY-MM-DD')}"
+            ),
+        }
+    )
     _to_netcdf(nemo_ds, encoding, ops_dir / nc_file)
     logger.debug(f"created {ops_dir / nc_file}")
     return nc_file
