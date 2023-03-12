@@ -243,7 +243,7 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
 
     :rtype: :py:class:`xarray.Dataset`
     """
-    logger.debug(f"creating {nemo_var} dataset from {grib_var} files")
+    logger.debug(f"creating {nemo_var} dataset from {grib_var} GRIB files")
     y_min, y_max = config["weather"]["download"]["2.5 km"]["lon indices"]
     x_min, x_max = config["weather"]["download"]["2.5 km"]["lat indices"]
     # We need 1 point more than the final domain size to facilitate calculation of the
@@ -282,6 +282,7 @@ def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
         attrs=grib_ds.attrs,
     )
     nemo_ds.nav_lon.data = nemo_ds.nav_lon.data + 360
+    nemo_ds = nemo_ds.drop_vars(["time", "longitude", "latitude"])
     return nemo_ds
 
 
@@ -399,7 +400,11 @@ def _write_netcdf(nemo_ds, file_date, config, fcst=False):
     :rtype: :py:class:`pathlib.Path`
     """
     encoding = {
-        "time_counter": {"units": "seconds since 1970-01-01 00:00", "dtype": float},
+        "time_counter": {
+            "calendar": "gregorian",
+            "units": "seconds since 1970-01-01 00:00",
+            "dtype": float,
+        },
     }
     encoding.update({var: {"zlib": True, "complevel": 4} for var in nemo_ds.data_vars})
     ops_dir = Path(config["weather"]["ops dir"])
