@@ -148,12 +148,6 @@ logging:
         class: raven.handlers.logging.SentryHandler
         level: ERROR
         # dsn will be obtained from SENTRY_DSN environment variable
-      wgrib2_text:
-        class: logging.FileHandler
-        level: DEBUG
-        formatter: simple
-        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
-        mode: w
       checklist:
         class: logging.handlers.RotatingFileHandler
         level: INFO
@@ -161,12 +155,6 @@ logging:
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
         backupCount: 7
     loggers:
-      wgrib2:
-        qualname: wgrib2
-        level: DEBUG
-        propagate: False
-        handlers:
-          - wgrib2_text
       checklist:
         qualname: checklist
         level: INFO

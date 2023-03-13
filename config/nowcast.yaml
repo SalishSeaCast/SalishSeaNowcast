@@ -1023,12 +1023,6 @@ logging:
         class: zmq.log.handlers.PUBHandler
         level: DEBUG
         formatter: simple
-      wgrib2_text:
-        class: logging.FileHandler
-        level: DEBUG
-        formatter: simple
-        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
-        mode: w
       hindcast_info:
         class: logging.handlers.RotatingFileHandler
         level: INFO
@@ -1048,12 +1042,6 @@ logging:
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
         backupCount: 7
     loggers:
-      wgrib2:
-        qualname: wgrib2
-        level: DEBUG
-        propagate: False
-        handlers:
-          - wgrib2_text
       run_NEMO_hindcast:
         qualname: run_NEMO_hindcast
         level: DEBUG

@@ -38,7 +38,6 @@ import xarray
 
 NAME = "grib_to_netcdf"
 logger = logging.getLogger(NAME)
-wgrib2_logger = logging.getLogger("wgrib2")
 
 # TODO: move these constants to config YAMl file
 # Position of Sand Heads
