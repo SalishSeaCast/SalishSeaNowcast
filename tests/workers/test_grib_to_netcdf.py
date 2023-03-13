@@ -329,7 +329,9 @@ class TestGribToNetcdf:
 
         expected = {
             "nowcast": "hrdps_y2023m03d09.nc",
-            # "fcst": ["hrdps_y2023m03d10.nc"],
+            "fcst": [
+                "hrdps_y2023m03d10.nc",
+            ],
         }
         assert checklist == expected
 
