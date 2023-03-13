@@ -720,7 +720,7 @@ class TestWriteNetcdf:
     )
     def test_history_attr(self, run_type, fcst, config, mock_to_netcdf, monkeypatch):
         def mock_now(tz):
-            return arrow.get("2023-03-12 16:02:43", tzinfo=dateutil.tz.gettz("PDT"))
+            return arrow.get("2023-03-12 16:02:43-07:00")
 
         monkeypatch.setattr(grib_to_netcdf.arrow, "now", mock_now)
 
