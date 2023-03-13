@@ -51,15 +51,6 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
     $ git clone git@github.com:SalishSeaCast/XIOS-2.git
 
-Copy the :program:`wgrib2` executable into :file:`private-tools/grib2/wgrib2/`:
-
-.. code-block:: bash
-
-    $ mkdir -p /SalishSeaCast/private-tools/grib2/wgrib2/
-    $ cp --preserve=timestamps \
-        /ocean/sallen/allen/research/MEOPAR/private-tools/grib2/wgrib2/wgrib2 \
-        /SalishSeaCast/private-tools/grib2/wgrib2/
-
 
 Build XIOS-2
 ============
