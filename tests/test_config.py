@@ -294,6 +294,7 @@ class Test0mqMessageSystem:
                 "salish.eos.ubc.ca:5584",
                 "salish.eos.ubc.ca:5585",
             ],
+            "grib_to_netcdf": "salish.eos.ubc.ca:5562",
         }
 
 

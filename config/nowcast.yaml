@@ -1179,6 +1179,7 @@ zmq:
         "salish.eos.ubc.ca:5580", "salish.eos.ubc.ca:5581", "salish.eos.ubc.ca:5582",
         "salish.eos.ubc.ca:5583", "salish.eos.ubc.ca:5584", "salish.eos.ubc.ca:5585",
       ]
+      grib_to_netcdf: "salish.eos.ubc.ca:5562"
 
 
 message registry:
