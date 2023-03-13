@@ -205,7 +205,13 @@ def grib_to_netcdf(parsed_args, config, *args):
 
 
 def _calc_nemo_ds(
-    var_names, run_date, fcst_hr, fcst_step_range, config, run_date_offset=0
+    var_names,
+    run_date,
+    fcst_hr,
+    fcst_step_range,
+    config,
+    run_date_offset=0,
+    first_step_is_offset=True,
 ):
     """
     :param list var_names:
@@ -213,6 +219,7 @@ def _calc_nemo_ds(
     :param tuple fcst_step_range:
     :param dict config:
     :param int run_date_offset:
+    :param boolean first_step_is_offset:
 
     :rtype: :py:class:`xarray.Dataset`
     """
@@ -237,7 +244,7 @@ def _calc_nemo_ds(
         nemo_datasets.values(), combine_attrs="drop_conflicts"
     )
     nemo_ds = _calc_earth_ref_winds(nemo_ds)
-    nemo_ds = _apportion_accumulation_vars(nemo_ds, config)
+    nemo_ds = _apportion_accumulation_vars(nemo_ds, first_step_is_offset, config)
     _improve_metadata(nemo_ds, config)
     return nemo_ds
 
@@ -414,14 +421,17 @@ def _calc_grid_angle(lat1, lon1, lat2, lon2, direction):
     return numpy.arctan2(-y_component, x_component) + da
 
 
-def _apportion_accumulation_vars(nemo_ds, config):
-    """Apportion variables that hold quantities (e.g. precipitation, short & long vwave radiation)
+def _apportion_accumulation_vars(nemo_ds, first_step_is_offset, config):
+    """Apportion variables that hold quantities (e.g. precipitation, short & long wave radiation)
     accumulated over 24 hours in the GRIB files to hourly values.
 
-    Also, drop the first time step from the dataset. It is the "previous" value for the
-    apportioning (and excess baggage for the other variables), so no longer needed.
+    Also, when the first time step is the "previous" value for the apportioning
+    (first_step_isOffset=True), drop that time step from the dataset.
+    It is no longer needed for the accumulation variables,
+    and always was excess baggage for the other variables.
 
     :param :py:class:`xarray.Dataset` nemo_ds:
+    :param boolean first_step_is_offset:
     :param dict config:
 
     :rtype: :py:class:`xarray.Dataset`
@@ -429,12 +439,18 @@ def _apportion_accumulation_vars(nemo_ds, config):
     """
     accum_vars = config["weather"]["download"]["2.5 km"]["accumulation variables"]
     logger.debug(f"apportioning {', '.join(accum_vars)} accumulation variables")
-    # TODO: handle case of datasets that span forecasts, meaning that the "previous" value for
-    #       the apportioning isn't the first time step
+    data_vars = (
+        {var: nemo_ds[var][1:] for var in nemo_ds.data_vars}
+        if first_step_is_offset
+        else {var: nemo_ds[var] for var in nemo_ds.data_vars}
+    )
+    time_counter = (
+        nemo_ds.time_counter[1:] if first_step_is_offset else nemo_ds.time_counter
+    )
     apportioned_ds = xarray.Dataset(
-        data_vars={var: nemo_ds[var][1:] for var in nemo_ds.data_vars},
+        data_vars=data_vars,
         coords={
-            "time_counter": nemo_ds.time_counter[1:],
+            "time_counter": time_counter,
             "y": nemo_ds.y,
             "x": nemo_ds.x,
             "nav_lon": nemo_ds.nav_lon,
@@ -443,9 +459,12 @@ def _apportion_accumulation_vars(nemo_ds, config):
         attrs=nemo_ds.attrs,
     )
     for var in accum_vars:
-        apportioned_ds[var].data = (
-            nemo_ds[var][1:].data - nemo_ds[var][0:-1].data
-        ) / 3600
+        apportioned_data = nemo_ds[var][1:].data - nemo_ds[var][0:-1].data
+        if first_step_is_offset:
+            apportioned_ds[var].data = apportioned_data
+        else:
+            apportioned_ds[var].data[1:] = apportioned_data
+        apportioned_ds[var].data /= 3600
     return apportioned_ds
 
 

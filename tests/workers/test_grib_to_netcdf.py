@@ -24,7 +24,6 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
-import dateutil.tz
 import nemo_nowcast
 import numpy
 import pytest
@@ -255,7 +254,7 @@ class TestGribToNetcdf:
     @staticmethod
     @pytest.fixture
     def mock_apportion_accumulation_vars(monkeypatch):
-        def _mock_apportion_accumulation_vars(nemo_ds, config):
+        def _mock_apportion_accumulation_vars(nemo_ds, first_step_is_offset, config):
             return xarray.Dataset(
                 data_vars={"var": ("x", numpy.array([], dtype=float))},
             )
