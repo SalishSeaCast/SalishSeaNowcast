@@ -138,11 +138,11 @@ def grib_to_netcdf(parsed_args, config, *args):
             )
             nemo_ds = xarray.combine_by_coords((nemo_ds_18, nemo_ds_00, nemo_ds_12))
             nc_file = _write_netcdf(nemo_ds, run_date, run_date, run_type, config)
-            _update_checklist(nc_file, False, checklist)
+            _update_checklist(nc_file, checklist)
 
             # run_date + 1 dataset is composed of hours 11-35 from 12Z forecast
             fcst_hr, fcst_step_range = "12", (11, 35)
-            nemo_ds_fcst_day_2 = _calc_nemo_ds(
+            nemo_ds_fcst_day_1 = _calc_nemo_ds(
                 var_names,
                 run_date,
                 fcst_hr,
@@ -150,14 +150,14 @@ def grib_to_netcdf(parsed_args, config, *args):
                 config,
             )
             nc_file = _write_netcdf(
-                nemo_ds_fcst_day_2,
+                nemo_ds_fcst_day_1,
                 run_date.shift(days=+1),
                 run_date,
                 run_type,
                 config,
                 fcst=True,
             )
-            _update_checklist(nc_file, True, checklist)
+            _update_checklist(nc_file, checklist, fcst=True)
 
             # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
             fcst_hr, fcst_step_range = "12", (35, 48)
@@ -176,7 +176,7 @@ def grib_to_netcdf(parsed_args, config, *args):
                 config,
                 fcst=True,
             )
-            _update_checklist(nc_file, True, checklist)
+            _update_checklist(nc_file, checklist, fcst=True)
 
         case "forecast2":
             logger.info(
@@ -699,11 +699,11 @@ def _to_netcdf(nemo_ds, encoding, nc_file_path):
     nemo_ds.to_netcdf(nc_file_path, encoding=encoding, unlimited_dims=("time_counter",))
 
 
-def _update_checklist(nc_file, fcst, checklist):
+def _update_checklist(nc_file, checklist, fcst=False):
     """
     :param :py:class:`pathlib.Path` nc_file:
-    :param boolean fcst:
     :param dict checklist:
+    :param boolean fcst:
     """
     if fcst:
         if "fcst" not in checklist:

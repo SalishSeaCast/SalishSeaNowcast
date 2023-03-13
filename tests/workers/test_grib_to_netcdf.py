@@ -747,30 +747,27 @@ class TestUpdateChecklist:
 
     def test_add_first_forecast(self):
         nc_file = Path("fcst/", "hrdps_y2023m03d09.nc")
-        fcst = True
         checklist = {}
 
-        grib_to_netcdf._update_checklist(nc_file, fcst, checklist)
+        grib_to_netcdf._update_checklist(nc_file, checklist, fcst=True)
 
         expected = {"fcst": ["hrdps_y2023m03d09.nc"]}
         assert checklist == expected
 
     def test_add_second_forecast(self):
         nc_file = Path("fcst/", "hrdps_y2023m03d10.nc")
-        fcst = True
         checklist = {"fcst": ["hrdps_y2023m03d09.nc"]}
 
-        grib_to_netcdf._update_checklist(nc_file, fcst, checklist)
+        grib_to_netcdf._update_checklist(nc_file, checklist, fcst=True)
 
         expected = {"fcst": ["hrdps_y2023m03d09.nc", "hrdps_y2023m03d10.nc"]}
         assert checklist == expected
 
     def test_add_nowcast(self):
         nc_file = Path("hrdps_y2023m03d08.nc")
-        fcst = False
         checklist = {}
 
-        grib_to_netcdf._update_checklist(nc_file, fcst, checklist)
+        grib_to_netcdf._update_checklist(nc_file, checklist)
 
         expected = {"nowcast": "hrdps_y2023m03d08.nc"}
         assert checklist == expected
