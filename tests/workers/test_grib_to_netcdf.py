@@ -336,6 +336,33 @@ class TestGribToNetcdf:
         }
         assert checklist == expected
 
+    def test_forecast2_checklist(
+        self,
+        mock_calc_nemo_var_ds,
+        mock_combine_by_coords,
+        mock_calc_earth_ref_winds,
+        mock_apportion_accumulation_vars,
+        mock_improve_metadata,
+        mock_to_netcdf,
+        config,
+        caplog,
+        monkeypatch,
+    ):
+        parsed_args = SimpleNamespace(
+            run_date=arrow.get("2023-03-13"),
+            run_type="forecast2",
+        )
+        caplog.set_level(logging.DEBUG)
+
+        checklist = grib_to_netcdf.grib_to_netcdf(parsed_args, config)
+
+        expected = {
+            "fcst": [
+                "hrdps_y2023m03d14.nc",
+            ],
+        }
+        assert checklist == expected
+
 
 class TestCalcNemoDs:
     """Unit test for _calc_nemo_ds() function."""
