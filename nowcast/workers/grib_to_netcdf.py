@@ -160,13 +160,23 @@ def grib_to_netcdf(parsed_args, config, *args):
             _update_checklist(nc_file, True, checklist)
 
             # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
-            run_date_offset, fcst_hr, fcst_step_range, fcst, fcst_date_offset = (
-                0,
-                "12",
-                (35, 48),
-                True,
-                +2,
+            fcst_hr, fcst_step_range = "12", (35, 48)
+            nemo_ds_fcst_day_2 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
             )
+            nc_file = _write_netcdf(
+                nemo_ds_fcst_day_2,
+                run_date.shift(days=+2),
+                run_date,
+                run_type,
+                config,
+                fcst=True,
+            )
+            _update_checklist(nc_file, True, checklist)
 
         case "forecast2":
             logger.info(
