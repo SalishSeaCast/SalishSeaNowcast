@@ -84,6 +84,8 @@ weather:
   # Template for the atmospheric forcing file name
   # **Must be quoted to project {} characters**
   file template: "hrdps_{:y%Ym%md%d}.nc"
+  # Address of dask cluster scheduler for grib_to_netcdf to use
+  dask cluster: tcp://142.103.36.12:4386
   # Location to store image that grib_to_netcdf worker creates to facilitate
   # monitoring of its operation
   monitoring image: /results/nowcast-sys/figures/monitoring/wg.png
