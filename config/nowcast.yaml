@@ -47,8 +47,8 @@ weather:
         - precip
       # Index ranges (inclusive) of longitudes and latitudes of ECCC HRDPS 2.5km continental
       # domain that we use
-      lon indices: [300, 490]
-      lat indices: [230, 460]
+      lon indices: [230, 460]
+      lat indices: [300, 490]
       # ECCC HRDPS 2.5km continental domain forecast duration
       forecast duration: 48  # hours
 
