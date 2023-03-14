@@ -675,7 +675,7 @@ def _write_netcdf(nemo_ds, file_date, run_date, run_type, config, fcst=False):
         }
     )
     _to_netcdf(nemo_ds, encoding, ops_dir / nc_file)
-    logger.debug(f"created {ops_dir / nc_file}")
+    logger.info(f"created {ops_dir / nc_file}")
     return nc_file
 
 

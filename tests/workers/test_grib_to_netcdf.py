@@ -788,6 +788,38 @@ class TestWriteNetcdf:
         )
         assert nemo_ds.attrs["history"] == expected
 
+    def test_not_fcst(self, config, mock_to_netcdf, caplog):
+        nemo_ds = xarray.Dataset()
+        file_date = arrow.get("2023-03-14")
+        run_date = arrow.get("2023-03-14")
+        run_type = "nowcast+"
+        caplog.set_level(logging.DEBUG)
+
+        nc_file = grib_to_netcdf._write_netcdf(
+            nemo_ds, file_date, run_date, run_type, config
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = "created forcing/atmospheric/continental2.5/nemo_forcing/hrdps_y2023m03d14.nc"
+        assert caplog.messages[0] == expected
+        assert nc_file == Path("hrdps_y2023m03d14.nc")
+
+    def test_fcst(self, config, mock_to_netcdf, caplog):
+        nemo_ds = xarray.Dataset()
+        file_date = arrow.get("2023-03-15")
+        run_date = arrow.get("2023-03-14")
+        run_type = "nowcast+"
+        caplog.set_level(logging.DEBUG)
+
+        nc_file = grib_to_netcdf._write_netcdf(
+            nemo_ds, file_date, run_date, run_type, config, fcst=True
+        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = "created forcing/atmospheric/continental2.5/nemo_forcing/fcst/hrdps_y2023m03d15.nc"
+        assert caplog.messages[0] == expected
+        assert nc_file == Path("fcst", "hrdps_y2023m03d15.nc")
+
 
 class TestUpdateChecklist:
     """Unit tests for _update_checklist() function."""
