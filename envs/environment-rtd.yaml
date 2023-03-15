@@ -18,7 +18,7 @@ dependencies:
   - mock
   - pillow
   - sphinx
-  - sphinx_rtd_theme=1.1.1
+  - sphinx_rtd_theme=1.2
   - sphinx-notfound-page
 
   - pip:
