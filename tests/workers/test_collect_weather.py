@@ -46,29 +46,28 @@ def config(base_config):
                 weather:
                   download:
                     2.5 km:
-                      datamart dir: datamart/hrdps-west/
-                      GRIB dir: forcing/atmospheric/GEM2.5/GRIB/
+                      datamart dir: datamart/hrdps-continental/
+                      GRIB dir: forcing/atmospheric/continental2.5/GRIB/
                       forecast duration: 48
-                      file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
-                      grib variables:
-                        - UGRD_TGL_10  # u component of wind velocity at 10m elevation
-                        - VGRD_TGL_10  # v component of wind velocity at 10m elevation
-                        - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
-                        - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
-                        - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
-                        - TMP_TGL_2    # air temperature at 2m elevation
-                        - SPFH_TGL_2   # specific humidity at 2m elevation
-                        - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
-                        - APCP_SFC_0   # accumulated precipitation at ground level
-                        - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
-                        - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-                        - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
+                      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+                      variables:
+                        - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
+                        - [VGRD_AGL-10m, v10, v_wind]           # v component of wind velocity at 10m elevation
+                        - [DSWRF_Sfc, ssrd, solar]              # accumulated downward shortwave (solar) radiation at ground level
+                        - [DLWRF_Sfc, strd, therm_rad]          # accumulated downward longwave (thermal) radiation at ground level
+                        - [LHTFL_Sfc, lhtfl, LHTFL_surface]     # upward surface latent heat flux (for VHFR FVCOM)
+                        - [TMP_AGL-2m, t2m, tair]               # air temperature at 2m elevation
+                        - [SPFH_AGL-2m, sh2, qair]              # specific humidity at 2m elevation
+                        - [RH_AGL-2m, r2, RH_2maboveground]     # relative humidity at 2m elevation (for VHFR FVCOM)
+                        - [APCP_Sfc, unknown, precip]           # accumulated precipitation at ground level
+                        - [PRATE_Sfc, prate, PRATE_surface]     # precipitation rate at ground level (for VHFR FVCOM)
+                        - [PRMSL_MSL, prmsl, atmpres]           # atmospheric pressure at mean sea level
                     1 km:
                       datamart dir: datamart/hrdps-west/1km
                       GRIB dir: forcing/atmospheric/GEM1.0/GRIB/
                       forecast duration: 36
                       file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
-                      grib variables:
+                      variables:
                         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
                         - VGRD_TGL_10  # v component of wind velocity at 10m elevation
                         - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
@@ -166,28 +165,31 @@ class TestConfig:
 
     def test_weather_download_2_5_km_section(self, prod_config):
         weather_download = prod_config["weather"]["download"]["2.5 km"]
-        assert weather_download["datamart dir"] == "/SalishSeaCast/datamart/hrdps-west/"
         assert (
-            weather_download["GRIB dir"] == "/results/forcing/atmospheric/GEM2.5/GRIB/"
+            weather_download["datamart dir"]
+            == "/SalishSeaCast/datamart/hrdps-continental/"
+        )
+        assert (
+            weather_download["GRIB dir"]
+            == "/results/forcing/atmospheric/continental2.5/GRIB/"
         )
         assert weather_download["forecast duration"] == 48
         assert (
             weather_download["file template"]
-            == "CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2"
+            == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
         )
-        assert weather_download["grib variables"] == [
-            "UGRD_TGL_10",
-            "VGRD_TGL_10",
-            "DSWRF_SFC_0",
-            "DLWRF_SFC_0",
-            "LHTFL_SFC_0",
-            "TMP_TGL_2",
-            "SPFH_TGL_2",
-            "RH_TGL_2",
-            "APCP_SFC_0",
-            "PRATE_SFC_0",
-            "PRMSL_MSL_0",
-            "TCDC_SFC_0",
+        assert weather_download["variables"] == [
+            ["UGRD_AGL-10m", "u10", "u_wind"],
+            ["VGRD_AGL-10m", "v10", "v_wind"],
+            ["DSWRF_Sfc", "ssrd", "solar"],
+            ["DLWRF_Sfc", "strd", "therm_rad"],
+            ["LHTFL_Sfc", "lhtfl", "LHTFL_surface"],
+            ["TMP_AGL-2m", "t2m", "tair"],
+            ["SPFH_AGL-2m", "sh2", "qair"],
+            ["RH_AGL-2m", "r2", "RH_2maboveground"],
+            ["APCP_Sfc", "unknown", "precip"],
+            ["PRATE_Sfc", "prate", "PRATE_surface"],
+            ["PRMSL_MSL", "prmsl", "atmpres"],
         ]
 
     def test_weather_download_1_km_section(self, prod_config):
@@ -204,7 +206,7 @@ class TestConfig:
             weather_download["file template"]
             == "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
         )
-        assert weather_download["grib variables"] == [
+        assert weather_download["variables"] == [
             "UGRD_TGL_10",
             "VGRD_TGL_10",
             "DSWRF_SFC_0",
@@ -458,7 +460,11 @@ class TestCalcExpectedFiles:
         forecast_duration = config["weather"]["download"][resolution][
             "forecast duration"
         ]
-        grib_vars = config["weather"]["download"][resolution]["grib variables"]
+        var_names = config["weather"]["download"][resolution]["variables"]
+        msc_var_names = [
+            var_name[0] if resolution == "2.5 km" else var_name
+            for var_name in var_names
+        ]
         file_template = config["weather"]["download"][resolution]["file template"]
         expected = set()
         for hour in range(forecast_duration):
@@ -470,7 +476,7 @@ class TestCalcExpectedFiles:
                     forecast=forecast,
                     hour=forecast_hour,
                 )
-                for var in grib_vars
+                for var in msc_var_names
             }
             expected.update(
                 {
@@ -479,7 +485,7 @@ class TestCalcExpectedFiles:
                 }
             )
         assert expected_files == expected
-        assert len(expected_files) == forecast_duration * len(grib_vars)
+        assert len(expected_files) == forecast_duration * len(var_names)
 
 
 @pytest.mark.parametrize(

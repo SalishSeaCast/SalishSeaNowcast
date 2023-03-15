@@ -60,7 +60,6 @@ class TestLoggingPublisher:
         assert list(handlers.keys()) == [
             "console",
             "zmq_pub",
-            "wgrib2_text",
             "hindcast_info",
             "hindcast_debug",
             "checklist",
@@ -78,17 +77,6 @@ class TestLoggingPublisher:
         assert zmq_pub_handler["class"] == "zmq.log.handlers.PUBHandler"
         assert zmq_pub_handler["level"] == "DEBUG"
         assert zmq_pub_handler["formatter"] == "simple"
-
-    def test_wgrib2_text_handler(self, prod_config, tmpdir):
-        wgrib2_text_handler = prod_config["logging"]["publisher"]["handlers"][
-            "wgrib2_text"
-        ]
-        assert wgrib2_text_handler["class"] == "logging.FileHandler"
-        assert wgrib2_text_handler["level"] == "DEBUG"
-        assert wgrib2_text_handler["formatter"] == "simple"
-        # Config.load() transforms NOWCAST.ENV part of envvars
-        assert wgrib2_text_handler["filename"] == f"{tmpdir}/nowcast_logs/wgrib2.log"
-        assert wgrib2_text_handler["mode"] == "w"
 
     def test_hindcast_info_handler(self, prod_config, tmpdir):
         hindcast_info_handler = prod_config["logging"]["publisher"]["handlers"][
@@ -129,25 +117,18 @@ class TestLoggingPublisher:
     def test_loggers(self, prod_config, tmpdir):
         loggers = prod_config["logging"]["publisher"]["loggers"]
         assert list(loggers.keys()) == [
-            "wgrib2",
             "run_NEMO_hindcast",
             "watch_NEMO_hindcast",
             "split_results",
             "make_averaged_dataset",
             "reshapr",
             "checklist",
+            "cfgrib",
             "matplotlib",
             "PIL",
             "paramiko",
             "watchdog",
         ]
-
-    def test_wgrib2_logger(self, prod_config):
-        logger = prod_config["logging"]["publisher"]["loggers"]["wgrib2"]
-        assert logger["qualname"] == "wgrib2"
-        assert logger["level"] == "DEBUG"
-        assert not logger["propagate"]
-        assert logger["handlers"] == ["wgrib2_text"]
 
     def test_run_NEMO_hindcast_logger(self, prod_config):
         logger = prod_config["logging"]["publisher"]["loggers"]["run_NEMO_hindcast"]
@@ -313,6 +294,7 @@ class Test0mqMessageSystem:
                 "salish.eos.ubc.ca:5584",
                 "salish.eos.ubc.ca:5585",
             ],
+            "grib_to_netcdf": "salish.eos.ubc.ca:5562",
         }
 
 

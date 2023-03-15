@@ -80,12 +80,15 @@ def after_download_weather(msg, config, checklist):
                 next_workers["success 2.5km 06"].extend(
                     [
                         NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["00"]),
-                        NextWorker(
-                            "nowcast.workers.grib_to_netcdf", args=["forecast2"]
-                        ),
+                        # NextWorker(
+                        #     "nowcast.workers.grib_to_netcdf", args=["forecast2"]
+                        # ),
                     ]
                 )
-                race_condition_workers = {"grib_to_netcdf", "make_ssh_files"}
+                race_condition_workers = {
+                    # "grib_to_netcdf",
+                    "make_ssh_files",
+                }
                 return next_workers[msg.type], race_condition_workers
         if msg.type.endswith("2.5km 12"):
             for river_name in config["rivers"]["stations"]["USGS"]:
@@ -98,12 +101,12 @@ def after_download_weather(msg, config, checklist):
             next_workers["success 2.5km 12"].extend(
                 [
                     NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["06"]),
-                    NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
+                    # NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
                     NextWorker("nowcast.workers.download_live_ocean"),
                 ]
             )
             race_condition_workers = {
-                "grib_to_netcdf",
+                # "grib_to_netcdf",
                 "make_live_ocean_files",
                 "make_ssh_files",
             }
@@ -454,11 +457,12 @@ def after_make_live_ocean_files(msg, config, checklist):
     if msg.type == "success":
         for host in config["run"]["enabled hosts"]:
             if not config["run"]["enabled hosts"][host]["shared storage"]:
-                next_workers[msg.type].append(
-                    NextWorker(
-                        "nowcast.workers.upload_forcing", args=[host, "nowcast+"]
-                    )
-                )
+                pass
+                # next_workers[msg.type].append(
+                #     NextWorker(
+                #         "nowcast.workers.upload_forcing", args=[host, "nowcast+"]
+                #     )
+                # )
     return next_workers[msg.type]
 
 
@@ -484,11 +488,12 @@ def after_make_turbidity_file(msg, config, checklist):
     if msg.type == "success":
         for host in config["run"]["enabled hosts"]:
             if not config["run"]["enabled hosts"][host]["shared storage"]:
-                next_workers["success"].append(
-                    NextWorker(
-                        "nowcast.workers.upload_forcing", args=[host, "turbidity"]
-                    )
-                )
+                pass
+                # next_workers["success"].append(
+                #     NextWorker(
+                #         "nowcast.workers.upload_forcing", args=[host, "turbidity"]
+                #     )
+                # )
     return next_workers[msg.type]
 
 

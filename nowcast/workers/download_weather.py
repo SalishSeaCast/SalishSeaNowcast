@@ -16,8 +16,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCast worker that downloads the GRIB2 files from today's 00, 06, 12, or 18
-Environment Canada GEM 2.5km HRDPS operational model forecast.
+"""SalishSeaCast worker that downloads the GRIB2 files from the 00, 06, 12, or 18
+Environment and Climate Change Canada GEM 2.5km HRDPS operational model forecast.
 """
 import logging
 import os
@@ -34,9 +34,7 @@ logger = logging.getLogger(NAME)
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.download_weather --help`
     """
@@ -53,10 +51,10 @@ def main():
         default="2.5km",
         help="Horizontal resolution of forecast to download files from.",
     )
-    worker.cli.add_argument(
-        "--yesterday",
-        action="store_true",
-        help="Download forecast files for previous day's date.",
+    worker.cli.add_date_option(
+        "--run-date",
+        default=arrow.now().floor("day"),
+        help="Forecast date to download.",
     )
     worker.cli.add_argument(
         "--no-verify-certs",
@@ -72,10 +70,7 @@ def main():
 
 
 def success(parsed_args):
-    if parsed_args.yesterday:
-        ymd = arrow.now().floor("day").shift(days=-1).format("YYYY-MM-DD")
-    else:
-        ymd = arrow.now().floor("day").format("YYYY-MM-DD")
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.info(
         f"{ymd} {parsed_args.resolution} weather forecast {parsed_args.forecast} downloads complete"
     )
@@ -84,10 +79,7 @@ def success(parsed_args):
 
 
 def failure(parsed_args):
-    if parsed_args.yesterday:
-        ymd = arrow.now().floor("day").shift(days=-1).format("YYYY-MM-DD")
-    else:
-        ymd = arrow.now().floor("day").format("YYYY-MM-DD")
+    ymd = parsed_args.run_date.format("YYYY-MM-DD")
     logger.critical(
         f"{ymd} {parsed_args.resolution} weather forecast {parsed_args.forecast} downloads failed"
     )
@@ -98,13 +90,18 @@ def failure(parsed_args):
 def get_grib(parsed_args, config, *args):
     forecast = parsed_args.forecast
     resolution = parsed_args.resolution.replace("km", " km")
-    date = _calc_date(parsed_args, forecast)
+    date = parsed_args.run_date.format("YYYYMMDD")
     logger.info(f"downloading {forecast} {resolution} forecast GRIB2 files for {date}")
     dest_dir_root = config["weather"]["download"][resolution]["GRIB dir"]
     grp_name = config["file group"]
     _mkdirs(dest_dir_root, date, forecast, grp_name)
     url_tmpl = config["weather"]["download"][resolution]["url template"]
     filename_tmpl = config["weather"]["download"][resolution]["file template"]
+    var_names = config["weather"]["download"][resolution]["variables"]
+    # 2.5km config has collections of 3 names per var, 1km has just MSC var name
+    msc_var_names = [
+        var_name[0] if resolution == "2.5 km" else var_name for var_name in var_names
+    ]
     forecast_duration = config["weather"]["download"][resolution]["forecast duration"]
     with requests.Session() as session:
         if parsed_args.no_verify_certs:
@@ -117,11 +114,11 @@ def get_grib(parsed_args, config, *args):
                 grp_name=grp_name,
                 exist_ok=False,
             )
-            for var in config["weather"]["download"][resolution]["grib variables"]:
+            for var_name in msc_var_names:
                 filepath = _get_file(
                     url_tmpl,
                     filename_tmpl,
-                    var,
+                    var_name,
                     dest_dir_root,
                     date,
                     forecast,
@@ -135,16 +132,6 @@ def get_grib(parsed_args, config, *args):
         )
     }
     return checklist
-
-
-def _calc_date(parsed_args, forecast):
-    yesterday = parsed_args.yesterday
-    utc = arrow.utcnow()
-    utc = utc.shift(hours=-int(forecast))
-    if yesterday:
-        utc = utc.shift(days=-1)
-    date = utc.format("YYYYMMDD")
-    return date
 
 
 def _mkdirs(dest_dir_root, date, forecast, grp_name):

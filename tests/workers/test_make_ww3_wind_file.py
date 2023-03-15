@@ -143,7 +143,7 @@ class TestConfig:
 
     def test_weather_section(self, prod_config):
         weather = prod_config["weather"]
-        assert weather["file template"] == "ops_{:y%Ym%md%d}.nc"
+        assert weather["file template"] == "hrdps_{:y%Ym%md%d}.nc"
 
     def test_wave_forecasts_section(self, prod_config):
         wave_forecasts = prod_config["wave forecasts"]

@@ -214,8 +214,11 @@ class TestConfig:
     )
     def test_weather_uploads(self, host, expected, prod_config):
         weather = prod_config["weather"]
-        assert weather["file template"] == "ops_{:y%Ym%md%d}.nc"
-        assert weather["ops dir"] == "/results/forcing/atmospheric/GEM2.5/operational/"
+        assert weather["file template"] == "hrdps_{:y%Ym%md%d}.nc"
+        assert (
+            weather["ops dir"]
+            == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
+        )
         host_config = prod_config["run"]["enabled hosts"][host]
         assert host_config["forcing"]["weather dir"] == expected
 

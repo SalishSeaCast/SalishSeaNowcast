@@ -25,6 +25,7 @@ dependencies:
   - beautifulsoup4
   - bottleneck
   - cartopy
+  - cfgrib
   - cliff
   - cmocean
   - coloredlogs

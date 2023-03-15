@@ -32,7 +32,7 @@ jobs:
            environment-file: envs/environment-test.yaml
            activate-environment: salishsea-nowcast-test
 
-      - name: Install private OPPTools package from GitLab
+      - name: Install editable-node dependency packages
         shell: bash -l {0}
         run: |
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
@@ -42,6 +42,7 @@ jobs:
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/FVCOM-Cmd.git#egg=FVCOM-Cmd
+          # OPPTools is a private GitLab repo, so an access token is required
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git@6c784a4dc44dd9030aafe9a8519e5ae0b6cc3183#egg=OPPTools
           python3 -m pip install --editable $GITHUB_WORKSPACE
 

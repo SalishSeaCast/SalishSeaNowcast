@@ -12,46 +12,41 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast weather forcing file generation worker.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
+"""SalishSeaCast worker that generates weather forcing file from GRIB2 forecast files.
 
 Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
+
+Development notebooks are in:
+
+* https://github.com/SalishSeaCast/analysis-doug/tree/main/notebooks/continental-HRDPS
+* https://github.com/SalishSeaCast/tools/tree/main/I_ForcingFiles/Atmos
 """
-import glob
+import functools
 import logging
-import os
-import subprocess
-from collections import OrderedDict
+from pathlib import Path
 
 import arrow
-import matplotlib.backends.backend_agg
-import matplotlib.figure
-import netCDF4 as nc
-import numpy as np
-from nemo_nowcast import NowcastWorker, WorkerError
+import dask.distributed
+import numpy
+from nemo_nowcast import NowcastWorker
+import xarray
 
-from nowcast import lib
 
 NAME = "grib_to_netcdf"
 logger = logging.getLogger(NAME)
-wgrib2_logger = logging.getLogger("wgrib2")
 
-# Corners of sub-region of GEM 2.5km operational forecast grid
-# that enclose the watersheds (other than the Fraser River)
-# that are used to calculate river flows for runoff forcing files
-# for the SalishSeaCast NEMO model.
-# The Fraser is excluded because real-time gauge data at Hope are
-# available for it.
-IST, IEN = 110, 365
-JST, JEN = 20, 285
+# TODO: move these constants to config YAMl file
 # Position of Sand Heads
-SandI, SandJ = 151, 136
+SandI, SandJ = 118, 108
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.grib_to_netcdf --help`
     """
@@ -72,6 +67,7 @@ def main():
         help="Date of the run to produce netCDF files for.",
     )
     worker.run(grib_to_netcdf, success, failure)
+    return worker
 
 
 def success(parsed_args):
@@ -94,487 +90,618 @@ def grib_to_netcdf(parsed_args, config, *args):
     """Collect weather forecast results from hourly GRIB2 files
     and produces day-long NEMO atmospheric forcing netCDF files.
     """
-    runtype = parsed_args.run_type
-    rundate = parsed_args.run_date
-
-    if runtype == "nowcast+":
-        (
-            fcst_section_hrs_arr,
-            zerostart,
-            length,
-            subdirectory,
-            yearmonthday,
-        ) = _define_forecast_segments_nowcast(rundate)
-    elif runtype == "forecast2":
-        (
-            fcst_section_hrs_arr,
-            zerostart,
-            length,
-            subdirectory,
-            yearmonthday,
-        ) = _define_forecast_segments_forecast2(rundate)
-
-    # set-up plotting
-    fig, axs = _set_up_plotting()
     checklist = {}
-    ip = 0
-    for fcst_section_hrs, zstart, flen, subdir, ymd in zip(
-        fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday
-    ):
-        _rotate_grib_wind(config, fcst_section_hrs)
-        _collect_grib_scalars(config, fcst_section_hrs)
-        outgrib, outzeros = _concat_hourly_gribs(config, ymd, fcst_section_hrs)
-        outgrib, outzeros = _crop_to_watersheds(
-            config, ymd, IST, IEN, JST, JEN, outgrib, outzeros
-        )
-        outnetcdf, out0netcdf = _make_netCDF_files(
-            config, ymd, subdir, outgrib, outzeros
-        )
-        _calc_instantaneous(outnetcdf, out0netcdf, ymd, flen, zstart, axs)
-        _change_to_NEMO_variable_names(outnetcdf, axs, ip)
-        ip += 1
+    run_date = parsed_args.run_date
+    run_type = parsed_args.run_type
+    var_names = config["weather"]["download"]["2.5 km"]["variables"]
+    dask_client = dask.distributed.Client(config["weather"]["dask cluster"])
+    match run_type:
+        case "nowcast+":
+            logger.info(
+                f"creating NEMO-atmos forcing files for {run_date.format('YYYY-MM-DD')} "
+                f"nowcast and forecast runs"
+            )
+            # run_date dataset is composed of pieces from 3 grib forecast hours:
+            #   hours 5-6 from 18Z forecast of previous day
+            #   hours 1-12 from 00Z forecast of run_date day
+            #   hours 1-11 from 12Z forecast of run_date day
+            fcst_hr, fcst_step_range = "18", (5, 6)
+            nemo_ds_18 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
+                run_date_offset=-1,
+            )
+            fcst_hr, fcst_step_range = "00", (1, 12)
+            nemo_ds_00 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
+                first_step_is_offset=False,
+            )
+            fcst_hr, fcst_step_range = "12", (1, 11)
+            nemo_ds_12 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
+                first_step_is_offset=False,
+            )
+            nemo_ds = xarray.combine_by_coords((nemo_ds_18, nemo_ds_00, nemo_ds_12))
+            nc_file = _write_netcdf(nemo_ds, run_date, run_date, run_type, config)
+            _update_checklist(nc_file, checklist)
 
-        _netCDF4_deflate(outnetcdf)
-        lib.fix_perms(outnetcdf, grp_name=config["file group"])
-        if subdir in checklist:
-            checklist[subdir].append(os.path.basename(outnetcdf))
-        else:
-            if subdir:
-                checklist[subdir] = [os.path.basename(outnetcdf)]
-            else:
-                checklist.update({subdir: os.path.basename(outnetcdf)})
-    axs[2, 0].legend(loc="upper left")
-    image_file = config["weather"]["monitoring image"]
-    canvas = matplotlib.backends.backend_agg.FigureCanvasAgg(fig)
-    canvas.print_figure(image_file)
-    lib.fix_perms(image_file, grp_name=config["file group"])
+            # run_date + 1 dataset is composed of hours 11-35 from 12Z forecast
+            fcst_hr, fcst_step_range = "12", (11, 35)
+            nemo_ds_fcst_day_1 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
+            )
+            nc_file = _write_netcdf(
+                nemo_ds_fcst_day_1,
+                run_date.shift(days=+1),
+                run_date,
+                run_type,
+                config,
+                fcst=True,
+            )
+            _update_checklist(nc_file, checklist, fcst=True)
+
+            # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
+            fcst_hr, fcst_step_range = "12", (35, 48)
+            nemo_ds_fcst_day_2 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
+            )
+            nc_file = _write_netcdf(
+                nemo_ds_fcst_day_2,
+                run_date.shift(days=+2),
+                run_date,
+                run_type,
+                config,
+                fcst=True,
+            )
+            _update_checklist(nc_file, checklist, fcst=True)
+
+        case "forecast2":
+            logger.info(
+                f"creating NEMO-atmos forcing files for {run_date.format('YYYY-MM-DD')} "
+                f"forecast2 run"
+            )
+            # run_date + 1 dataset is composed of hours 17-41 from 06Z forecast
+            fcst_hr, fcst_step_range = "06", (17, 41)
+            nemo_ds_fcst_day_1 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
+            )
+            nc_file = _write_netcdf(
+                nemo_ds_fcst_day_1,
+                run_date.shift(days=+1),
+                run_date,
+                run_type,
+                config,
+                fcst=True,
+            )
+            _update_checklist(nc_file, checklist, fcst=True)
+
+            # run_date + 2 dataset is composed of hours 41-48 from 06Z forecast
+            fcst_hr, fcst_step_range = "06", (41, 48)
+            nemo_ds_fcst_day_2 = _calc_nemo_ds(
+                var_names,
+                run_date,
+                fcst_hr,
+                fcst_step_range,
+                config,
+            )
+            nc_file = _write_netcdf(
+                nemo_ds_fcst_day_2,
+                run_date.shift(days=+2),
+                run_date,
+                run_type,
+                config,
+                fcst=True,
+            )
+            _update_checklist(nc_file, checklist, fcst=True)
+    dask_client.close()
     return checklist
 
 
-def _define_forecast_segments_nowcast(rundate):
-    """Define segments of forecasts to build into working weather files
-    for nowcast and a following forecast
+def _calc_nemo_ds(
+    var_names,
+    run_date,
+    fcst_hr,
+    fcst_step_range,
+    config,
+    run_date_offset=0,
+    first_step_is_offset=True,
+):
     """
+    :param list var_names:
+    :param :py:class:`arrow.Arrow`. run_date:
+    :param tuple fcst_step_range:
+    :param dict config:
+    :param int run_date_offset:
+    :param boolean first_step_is_offset:
 
-    today = rundate
-    yesterday = today.shift(days=-1)
-    tomorrow = today.shift(days=+1)
-    nextday = today.shift(days=+2)
-    fcst_section_hrs_arr = [OrderedDict() for x in range(3)]
-
-    # today
-    p1 = os.path.join(yesterday.format("YYYYMMDD"), "18")
-    p2 = os.path.join(today.format("YYYYMMDD"), "00")
-    p3 = os.path.join(today.format("YYYYMMDD"), "12")
-    logger.debug(f"forecast sections: {p1} {p2} {p3}")
-    fcst_section_hrs_arr[0] = OrderedDict(
-        [
-            # (part, (dir, real start hr, forecast start hr, end hr))
-            ("section 1", (p1, -1, 24 - 18 - 1, 24 - 18 + 0)),
-            ("section 2", (p2, 1, 1 - 0, 12 - 0)),
-            ("section 3", (p3, 13, 13 - 12, 23 - 12)),
-        ]
-    )
-    zerostart = [[1, 13]]
-    length = [24]
-    subdirectory = [""]
-    yearmonthday = [today.strftime("y%Ym%md%d")]
-
-    # tomorrow (forecast)
-    p1 = os.path.join(today.format("YYYYMMDD"), "12")
-    logger.debug(f"tomorrow forecast section: {p1}")
-    fcst_section_hrs_arr[1] = OrderedDict(
-        [
-            # (part, (dir, start hr, end hr))
-            ("section 1", (p1, -1, 24 - 12 - 1, 24 + 23 - 12))
-        ]
-    )
-    zerostart.append([])
-    length.append(24)
-    subdirectory.append("fcst")
-    yearmonthday.append(tomorrow.strftime("y%Ym%md%d"))
-
-    # next day (forecast)
-    p1 = os.path.join(today.format("YYYYMMDD"), "12")
-    logger.debug(f"next day forecast section: {p1}")
-    fcst_section_hrs_arr[2] = OrderedDict(
-        [
-            # (part, (dir, start hr, end hr))
-            ("section 1", (p1, -1, 24 + 24 - 12 - 1, 24 + 24 + 12 - 12))
-        ]
-    )
-    zerostart.append([])
-    length.append(13)
-    subdirectory.append("fcst")
-    yearmonthday.append(nextday.strftime("y%Ym%md%d"))
-    return (fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday)
-
-
-def _define_forecast_segments_forecast2(rundate):
-    """Define segments of forecasts to build into working weather files
-    for the extend forecast i.e. forecast2
+    :rtype: :py:class:`xarray.Dataset`
     """
-
-    # today is the day after this nowcast/forecast sequence started
-    today = rundate
-    tomorrow = today.shift(days=+1)
-    nextday = today.shift(days=+2)
-
-    fcst_section_hrs_arr = [OrderedDict() for x in range(2)]
-
-    # tomorrow
-    p1 = os.path.join(today.format("YYYYMMDD"), "06")
-    logger.info(f"forecast section: {p1}")
-    fcst_section_hrs_arr[0] = OrderedDict(
-        [("section 1", (p1, -1, 24 - 6 - 1, 24 + 23 - 6))]
-    )
-    zerostart = [[]]
-    length = [24]
-    subdirectory = ["fcst"]
-    yearmonthday = [tomorrow.strftime("y%Ym%md%d")]
-
-    # nextday
-    p1 = os.path.join(today.format("YYYYMMDD"), "06")
-    logger.info(f"next day forecast section: {p1}")
-    fcst_section_hrs_arr[1] = OrderedDict(
-        [
-            # (part, (dir, start hr, end hr))
-            ("section 1", (p1, -1, 24 + 24 - 6 - 1, 24 + 24 + 6 - 6))
-        ]
-    )
-    zerostart.append([])
-    length.append(7)
-    subdirectory.append("fcst")
-    yearmonthday.append(nextday.strftime("y%Ym%md%d"))
-
-    return (fcst_section_hrs_arr, zerostart, length, subdirectory, yearmonthday)
-
-
-def _rotate_grib_wind(config, fcst_section_hrs):
-    """Use wgrib2 to consolidate each hour's u and v wind components into a
-    single file and then rotate the wind direction to geographical
-    coordinates.
-    """
-    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    grid_defn = config["weather"]["grid_defn.pl"]
-    for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
-        for fhour in range(start_hr, end_hr + 1):
-            # Set up directories and files
-            sfhour = f"{fhour:03d}"
-            outuv = os.path.join(GRIBdir, day_fcst, sfhour, "UV.grib")
-            outuvrot = os.path.join(GRIBdir, day_fcst, sfhour, "UVrot.grib")
-            # Delete residual instances of files that are created so that
-            # function can be re-run cleanly
-            try:
-                os.remove(outuv)
-            except OSError:
-                pass
-            try:
-                os.remove(outuvrot)
-            except OSError:
-                pass
-            # Consolidate u and v wind component values into one file
-            for fpattern in ["*UGRD*", "*VGRD*"]:
-                pattern = os.path.join(GRIBdir, day_fcst, sfhour, fpattern)
-                fn = glob.glob(pattern)
-                try:
-                    if os.stat(fn[0]).st_size == 0:
-                        logger.critical(f"Problem: 0 size file {fn[0]}")
-                        raise WorkerError
-                except IndexError:
-                    logger.critical(
-                        f"No GRIB files match pattern; a previous download;"
-                        f" may have failed: {pattern}"
-                    )
-                    raise WorkerError
-                cmd = [wgrib2, fn[0], "-append", "-grib", outuv]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            # rotate
-            GRIDspec = subprocess.check_output(
-                [grid_defn, outuv], cwd=os.path.dirname(wgrib2)
-            )
-            cmd = [wgrib2, outuv]
-            cmd.extend("-new_grid_winds earth".split())
-            cmd.append("-new_grid")
-            cmd.extend(GRIDspec.split())
-            cmd.append(outuvrot)
-            lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            os.remove(outuv)
-    logger.debug("consolidated and rotated wind components")
-
-
-def _collect_grib_scalars(config, fcst_section_hrs):
-    """Use wgrib2 and grid_defn.pl to consolidate each hour's scalar
-    variables into an single file and then re-grid them to match the
-    u and v wind components.
-    """
-    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    grid_defn = config["weather"]["grid_defn.pl"]
-    for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
-        for fhour in range(start_hr, end_hr + 1):
-            # Set up directories and files
-            sfhour = f"{fhour:03d}"
-            outscalar = os.path.join(GRIBdir, day_fcst, sfhour, "scalar.grib")
-            outscalargrid = os.path.join(GRIBdir, day_fcst, sfhour, "gscalar.grib")
-            # Delete residual instances of files that are created so that
-            # function can be re-run cleanly
-            try:
-                os.remove(outscalar)
-            except OSError:
-                pass
-            try:
-                os.remove(outscalargrid)
-            except OSError:
-                pass
-            # Consolidate scalar variables into one file
-            for fn in glob.glob(os.path.join(GRIBdir, day_fcst, sfhour, "*")):
-                if not ("GRD" in fn) and ("CMC" in fn):
-                    cmd = [wgrib2, fn, "-append", "-grib", outscalar]
-                    lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            #  Re-grid
-            GRIDspec = subprocess.check_output(
-                [grid_defn, outscalar], cwd=os.path.dirname(wgrib2)
-            )
-            cmd = [wgrib2, outscalar]
-            cmd.append("-new_grid")
-            cmd.extend(GRIDspec.split())
-            cmd.append(outscalargrid)
-            lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            os.remove(outscalar)
-    logger.debug("consolidated and re-gridded scalar variables")
-
-
-def _concat_hourly_gribs(config, ymd, fcst_section_hrs):
-    """Concatenate in hour order the wind velocity components
-    and scalar variables from hourly files into a daily file.
-
-    Also create the zero-hour file that is used to initialize the
-    calculation of instantaneous values from the forecast accumulated
-    values.
-    """
-    GRIBdir = config["weather"]["download"]["2.5 km"]["GRIB dir"]
-    OPERdir = config["weather"]["ops dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    outgrib = os.path.join(OPERdir, f"oper_allvar_{ymd}.grib")
-    outzeros = os.path.join(OPERdir, f"oper_000_{ymd}.grib")
-
-    # Delete residual instances of files that are created so that
-    # function can be re-run cleanly
-    try:
-        os.remove(outgrib)
-    except OSError:
-        pass
-    try:
-        os.remove(outzeros)
-    except OSError:
-        pass
-    for day_fcst, realstart, start_hr, end_hr in fcst_section_hrs.values():
-        for fhour in range(start_hr, end_hr + 1):
-            # Set up directories and files
-            sfhour = f"{fhour:03d}"
-            outuvrot = os.path.join(GRIBdir, day_fcst, sfhour, "UVrot.grib")
-            outscalargrid = os.path.join(GRIBdir, day_fcst, sfhour, "gscalar.grib")
-            if fhour == start_hr and realstart == -1:
-                cmd = [wgrib2, outuvrot, "-append", "-grib", outzeros]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-                cmd = [wgrib2, outscalargrid, "-append", "-grib", outzeros]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            else:
-                cmd = [wgrib2, outuvrot, "-append", "-grib", outgrib]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-                cmd = [wgrib2, outscalargrid, "-append", "-grib", outgrib]
-                lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-            os.remove(outuvrot)
-            os.remove(outscalargrid)
+    fcst_date = run_date.shift(days=run_date_offset)
     logger.debug(
-        f"concatenated variables in hour order from hourly files to daily "
-        f"file {outgrib}"
+        f"creating NEMO forcing dataset from {fcst_date.format('YYYYMMDD')} {fcst_hr}Z "
+        f"forecast hours {fcst_step_range[0]:03d} to {fcst_step_range[1]:03d}"
     )
-    logger.debug(
-        f"created zero-hour file for initialization of accumulated -> "
-        f"instantaneous values calculations: {outzeros}"
+    nemo_datasets = {}
+    for msc_var, grib_var, nemo_var in var_names:
+        grib_files = _calc_grib_file_paths(
+            fcst_date,
+            fcst_hr,
+            fcst_step_range,
+            msc_var,
+            config,
+        )
+        nemo_datasets[nemo_var] = _calc_nemo_var_ds(
+            grib_var, nemo_var, grib_files, config
+        )
+    nemo_ds = xarray.combine_by_coords(
+        nemo_datasets.values(), combine_attrs="drop_conflicts"
     )
-    return outgrib, outzeros
+    nemo_ds = _calc_earth_ref_winds(nemo_ds)
+    nemo_ds = _apportion_accumulation_vars(nemo_ds, first_step_is_offset, config)
+    _improve_metadata(nemo_ds, config)
+    return nemo_ds
 
 
-def _crop_to_watersheds(config, ymd, ist, ien, jst, jen, outgrib, outzeros):
-    """Crop the grid to the sub-region of GEM 2.5km operational forecast
-    grid that encloses the watersheds that are used to calculate river
-    flows for runoff forcing files for the SalishSeaCast NEMO model.
+def _calc_grib_file_paths(fcst_date, fcst_hr, fcst_step_range, msc_var, config):
     """
-    OPERdir = config["weather"]["ops dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    newgrib = os.path.join(OPERdir, f"oper_allvar_small_{ymd}.grib")
-    newzeros = os.path.join(OPERdir, f"oper_000_small_{ymd}.grib")
-    istr = f"{ist}:{ien}"
-    jstr = f"{jst}:{jen}"
-    cmd = [wgrib2, outgrib, "-ijsmall_grib", istr, jstr, newgrib]
-    lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(f"cropped hourly file to watersheds sub-region: {newgrib}")
-    cmd = [wgrib2, outzeros, "-ijsmall_grib", istr, jstr, newzeros]
-    lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(f"cropped zero-hour file to watersheds sub-region: {newgrib}")
-    os.remove(outgrib)
-    os.remove(outzeros)
-    return newgrib, newzeros
+    :param :py:class:`arrow.Arrow` fcst_date:
+    :param str fcst_hr:
+    :param tuple fcst_step_range:
+    :param str msc_var:
+    :param dict config:
 
-
-def _make_netCDF_files(config, ymd, subdir, outgrib, outzeros):
-    """Convert the GRIB files to netcdf (classic) files."""
-    OPERdir = config["weather"]["ops dir"]
-    wgrib2 = config["weather"]["wgrib2"]
-    outnetcdf = os.path.join(OPERdir, subdir, f"ops_{ymd}.nc")
-    out0netcdf = os.path.join(OPERdir, subdir, f"oper_000_{ymd}.nc")
-    cmd = [wgrib2, outgrib, "-netcdf", outnetcdf]
-    lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(f"created hourly netCDF classic file: {outnetcdf}")
-    lib.fix_perms(outnetcdf, grp_name=config["file group"])
-    cmd = [wgrib2, outzeros, "-netcdf", out0netcdf]
-    lib.run_in_subprocess(cmd, wgrib2_logger.debug, logger.error)
-    logger.debug(f"created zero-hour netCDF classic file: {out0netcdf}")
-    os.remove(outgrib)
-    os.remove(outzeros)
-    return outnetcdf, out0netcdf
-
-
-def _calc_instantaneous(outnetcdf, out0netcdf, ymd, flen, zstart, axs):
-    """Calculate instantaneous values from the forecast accumulated values
-    for the precipitation and radiation variables.
+    :rtype: list
     """
-    data = nc.Dataset(outnetcdf, "r+")
-    data0 = nc.Dataset(out0netcdf, "r")
-    acc_vars = ("APCP_surface", "DSWRF_surface", "DLWRF_surface")
-    acc_values = {"acc": {}, "zero": {}, "inst": {}}
-    for var in acc_vars:
-        acc_values["acc"][var] = data.variables[var][:]
-        acc_values["zero"][var] = data0.variables[var][:]
-        acc_values["inst"][var] = np.empty_like(acc_values["acc"][var])
-    data0.close()
-    os.remove(out0netcdf)
-
-    axs[1, 0].plot(acc_values["acc"]["APCP_surface"][:, SandI, SandJ], "o-")
-
-    for var in acc_vars:
-        acc_values["inst"][var][0] = (
-            acc_values["acc"][var][0] - acc_values["zero"][var][0]
-        ) / 3600
-        for realhour in range(1, flen):
-            if realhour in zstart:
-                acc_values["inst"][var][realhour] = (
-                    acc_values["acc"][var][realhour] / 3600
-                )
-            else:
-                acc_values["inst"][var][realhour] = (
-                    acc_values["acc"][var][realhour]
-                    - acc_values["acc"][var][realhour - 1]
-                ) / 3600
-
-    axs[1, 1].plot(acc_values["inst"]["APCP_surface"][:, SandI, SandJ], "o-", label=ymd)
-
-    for var in acc_vars:
-        data.variables[var][:] = acc_values["inst"][var][:]
-    data.close()
+    grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+    file_tmpl = config["weather"]["download"]["2.5 km"]["file template"]
+    fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
     logger.debug(
-        "calculated instantaneous values from forecast accumulated values "
-        "for precipitation and long- & short-wave radiation"
+        f"creating {msc_var} GRIB file paths list for {fcst_yyyymmdd} {fcst_hr}Z forecast hours "
+        f"{fcst_step_range[0]:03d} to {fcst_step_range[1]:03d}"
+    )
+    grib_files = []
+    start, stop = fcst_step_range
+    for fcst_step in range(start, stop + 1):
+        grib_hr_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr, f"{fcst_step:03d}")
+        grib_file = file_tmpl.format(
+            date=fcst_yyyymmdd,
+            forecast=fcst_hr,
+            variable=msc_var,
+            hour=f"{fcst_step:03d}",
+        )
+        grib_files.append(grib_hr_dir / grib_file)
+    return grib_files
+
+
+def _trim_grib(ds, y_slice, x_slice):
+    """Preprocessing function for xarray.open_mfdataset().
+
+    :param :py:class:`xarray.Dataset` ds:
+    :param :py:class:`slice` y_slice:
+    :param :py:class:`slice` x_slice:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    # Select region of interest
+    ds = ds.sel(y=y_slice, x=x_slice)
+    # Drop coordinates that we don't need
+    keep_coords = ("time", "step", "latitude", "longitude")
+    ds = ds.reset_coords(
+        [coord for coord in ds.coords if coord not in keep_coords],
+        drop=True,
+    )
+    return ds
+
+
+def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
+    """
+    :param str grib_var:
+    :param str nemo_var:
+    :param list grib_files:
+    :param dict config:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    logger.debug(f"creating {nemo_var} dataset from {grib_var} GRIB files")
+    y_min, y_max = config["weather"]["download"]["2.5 km"]["lon indices"]
+    x_min, x_max = config["weather"]["download"]["2.5 km"]["lat indices"]
+    # We need 1 point more than the final domain size to facilitate calculation of the
+    # grid rotation angle for the wind components
+    y_slice = slice(y_min, y_max + 1)
+    x_slice = slice(x_min, x_max + 1)
+    _partial_trim_grib = functools.partial(_trim_grib, y_slice=y_slice, x_slice=x_slice)
+    grib_ds = xarray.open_mfdataset(
+        grib_files,
+        preprocess=_partial_trim_grib,
+        combine="nested",
+        concat_dim="step",
+        engine="cfgrib",
+    )
+    time_counter = grib_ds.step.values + grib_ds.time.values
+    nemo_da = xarray.DataArray(
+        data=grib_ds[grib_var].data,
+        coords={
+            "time_counter": time_counter,
+            "y": grib_ds.y,
+            "x": grib_ds.x,
+        },
+        attrs=grib_ds[grib_var].attrs,
+    )
+    nemo_ds = xarray.Dataset(
+        data_vars={
+            nemo_var: nemo_da,
+        },
+        coords={
+            "time_counter": time_counter,
+            "y": grib_ds.y,
+            "x": grib_ds.x,
+            "nav_lon": grib_ds.longitude,
+            "nav_lat": grib_ds.latitude,
+        },
+        attrs=grib_ds.attrs,
+    )
+    nemo_ds.nav_lon.data = nemo_ds.nav_lon.data + 360
+    nemo_ds = nemo_ds.drop_vars(["time", "longitude", "latitude"])
+    return nemo_ds
+
+
+def _calc_earth_ref_winds(nemo_ds):
+    """Rotate wind components to earth-reference.
+
+    :param :py:class:`xarray.Dataset` nemo_ds:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    logger.debug("calculating earth-referenced wind components")
+    x_angles = _calc_grid_angle(
+        nemo_ds.nav_lat.data[:-1, :-1],
+        nemo_ds.nav_lon.data[:-1, :-1],
+        nemo_ds.nav_lat.data[:-1, 1:],
+        nemo_ds.nav_lon.data[:-1, 1:],
+        "x",
+    )
+    y_angles = _calc_grid_angle(
+        nemo_ds.nav_lat.data[:-1, :-1],
+        nemo_ds.nav_lon.data[:-1, :-1],
+        nemo_ds.nav_lat.data[1:, :-1],
+        nemo_ds.nav_lon.data[1:, :-1],
+        "y",
+    )
+    angles = (x_angles + y_angles) / 2
+    u_wind_grid = nemo_ds.u_wind[:, :-1, :-1].data
+    v_wind_grid = nemo_ds.v_wind[:, :-1, :-1].data
+    u_wind_earth = u_wind_grid * numpy.cos(angles) - v_wind_grid * numpy.sin(angles)
+    v_wind_earth = u_wind_grid * numpy.sin(angles) + v_wind_grid * numpy.cos(angles)
+    trimmed_ds = xarray.Dataset(
+        data_vars={var: nemo_ds[var][:, :-1, :-1] for var in nemo_ds.data_vars},
+        coords={
+            "time_counter": nemo_ds.time_counter,
+            "y": nemo_ds.y[:-1],
+            "x": nemo_ds.x[:-1],
+            "nav_lon": nemo_ds.nav_lon[:-1, :-1],
+            "nav_lat": nemo_ds.nav_lat[:-1, :-1],
+        },
+        attrs=nemo_ds.attrs,
+    )
+    trimmed_ds.u_wind.data = u_wind_earth
+    trimmed_ds.v_wind.data = v_wind_earth
+    return trimmed_ds
+
+
+def _calc_grid_angle(lat1, lon1, lat2, lon2, direction):
+    """Calculate the angle (in radians) of rotation of the grid.
+
+    Based on: https://www.movable-type.co.uk/scripts/latlong.html?from=49.243824,-121.887340&to=49.227648,-121.89631
+    Susan changed the algorithm from the link above so that it is NOT bearing but the angle
+    (which increases counter-clockwise) from due east.
+
+    :param :py:class:`numpy.ndarray` lat1:
+    :param :py:class:`numpy.ndarray` lon1:
+    :param :py:class:`numpy.ndarray` lat2:
+    :param :py:class:`numpy.ndarray` lon2:
+    :param str direction: "x" or "y"
+
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    lat1 = numpy.deg2rad(lat1)
+    lat2 = numpy.deg2rad(lat2)
+    del_lon = numpy.deg2rad(lon2) - numpy.deg2rad(lon1)
+    y_component = numpy.sin(del_lon) * numpy.cos(lat2)
+    x_component = numpy.cos(lat1) * numpy.sin(lat2) - numpy.sin(lat1) * numpy.cos(
+        lat2
+    ) * numpy.cos(del_lon)
+    da = numpy.pi / 2 if direction == "x" else 0
+    return numpy.arctan2(-y_component, x_component) + da
+
+
+def _apportion_accumulation_vars(nemo_ds, first_step_is_offset, config):
+    """Apportion variables that hold quantities (e.g. precipitation, short & long wave radiation)
+    accumulated over 24 hours in the GRIB files to hourly values.
+
+    Also, when the first time step is the "previous" value for the apportioning
+    (first_step_isOffset=True), drop that time step from the dataset.
+    It is no longer needed for the accumulation variables,
+    and always was excess baggage for the other variables.
+
+    :param :py:class:`xarray.Dataset` nemo_ds:
+    :param boolean first_step_is_offset:
+    :param dict config:
+
+    :rtype: :py:class:`xarray.Dataset`
+
+    """
+    accum_vars = config["weather"]["download"]["2.5 km"]["accumulation variables"]
+    logger.debug(f"apportioning {', '.join(accum_vars)} accumulation variables")
+    data_vars = (
+        {var: nemo_ds[var][1:] for var in nemo_ds.data_vars}
+        if first_step_is_offset
+        else {var: nemo_ds[var] for var in nemo_ds.data_vars}
+    )
+    time_counter = (
+        nemo_ds.time_counter[1:] if first_step_is_offset else nemo_ds.time_counter
+    )
+    apportioned_ds = xarray.Dataset(
+        data_vars=data_vars,
+        coords={
+            "time_counter": time_counter,
+            "y": nemo_ds.y,
+            "x": nemo_ds.x,
+            "nav_lon": nemo_ds.nav_lon,
+            "nav_lat": nemo_ds.nav_lat,
+        },
+        attrs=nemo_ds.attrs,
+    )
+    for var in accum_vars:
+        apportioned_data = nemo_ds[var][1:].data - nemo_ds[var][0:-1].data
+        if first_step_is_offset:
+            apportioned_ds[var].data = apportioned_data
+        else:
+            apportioned_ds[var].data[1:] = apportioned_data
+        apportioned_ds[var].data /= 3600
+    return apportioned_ds
+
+
+def _improve_metadata(nemo_ds, config):
+    """
+    :param :py:class:`xarray.Dataset` nemo_ds:
+    :param dict config:
+    """
+    nemo_ds.time_counter.attrs.update(
+        {
+            "axis": "T",
+            "ioos_category": "Time",
+            "long_name": "Time Axis",
+            "standard_name": "time",
+            "time_origin": "01-JAN-1970 00:00",
+        }
+    )
+    nemo_ds.y.attrs.update(
+        {
+            "ioos_category": "location",
+            "long_name": "Y",
+            "standard_name": "y",
+            "units": "count",
+            "comment": (
+                "Y values are grid indices in the model y-direction; "
+                "geo-location data for the SalishSeaCast sub-domain of the ECCC MSC "
+                "2.5km resolution HRDPS continental model grid is available in the "
+                "ubcSSaSurfaceAtmosphereFieldsV22-02 dataset."
+            ),
+        },
+    )
+    nemo_ds.x.attrs.update(
+        {
+            "ioos_category": "location",
+            "long_name": "X",
+            "standard_name": "x",
+            "units": "count",
+            "comment": (
+                "X values are grid indices in the model x-direction; "
+                "geo-location data for the SalishSeaCast sub-domain of the ECCC MSC "
+                "2.5km resolution HRDPS continental model grid is available in the "
+                "ubcSSaSurfaceAtmosphereFieldsV22-02 dataset."
+            ),
+        }
+    )
+    nemo_ds.nav_lon.attrs.update(
+        {
+            "ioos_category": "location",
+            "long_name": "Longitude",
+        }
+    )
+    nemo_ds.nav_lat.attrs.update(
+        {
+            "ioos_category": "location",
+            "long_name": "Latitude",
+        }
+    )
+    nemo_var_names = [
+        name[2] for name in config["weather"]["download"]["2.5 km"]["variables"]
+    ]
+    for nemo_var in nemo_var_names:
+        nemo_ds[nemo_var].attrs.update(
+            {
+                "GRIB_numberOfPoints": "43700LL",
+                "GRIB_Nx": "230LL",
+                "GRIB_Ny": "190LL",
+                "ioos_category": "atmospheric",
+            }
+        )
+    nemo_ds.LHTFL_surface.attrs.update(
+        {
+            "standard_name": "surface_downward_latent_heat_flux",
+            "units": "W m-2",
+            "comment": "For Vancouver Harbour and Lower Fraser River FVCOM model",
+        }
+    )
+    nemo_ds.PRATE_surface.attrs.update(
+        {
+            "standard_name": "precipitation_flux",
+            "units": "kg m-2 s-1",
+            "comment": "For Vancouver Harbour and Lower Fraser River FVCOM model",
+        }
+    )
+    nemo_ds.RH_2maboveground.attrs.update(
+        {
+            "standard_name": "relative_humidity",
+            "units": "%",
+            "comment": "For Vancouver Harbour and Lower Fraser River FVCOM model",
+        }
+    )
+    nemo_ds.atmpres.attrs.update(
+        {
+            "standard_name": "air_pressure_at_mean_sea_level",
+            "long_name": "Air Pressure at MSL",
+            "units": "Pa",
+        }
+    )
+    nemo_ds.precip.attrs.update(
+        {
+            "standard_name": "precipitation_flux",
+            "long_name": "Precipitation Flux",
+            "units": "kg m-2 s-1",
+        }
+    )
+    nemo_ds.qair.attrs.update(
+        {
+            "standard_name": "specific_humidity",
+            "long_name": "Specific Humidity at 2m",
+            "units": "kg kg-1",
+        }
+    )
+    nemo_ds.solar.attrs.update(
+        {
+            "standard_name": "surface_downwelling_shortwave_flux_in_air",
+            "long_name": "Downward Short-Wave (Solar) Radiation Flux",
+            "units": "W m-2",
+        }
+    )
+    nemo_ds.tair.attrs.update(
+        {
+            "standard_name": "air_temperature",
+            "long_name": "Air Temperature at 2m",
+            "units": "K",
+        }
+    )
+    nemo_ds.therm_rad.attrs.update(
+        {
+            "standard_name": "surface_downwelling_longwave_flux_in_air",
+            "long_name": "Downward Long-Wave (Thermal) Radiation Flux",
+            "units": "W m-2",
+        }
+    )
+    nemo_ds.u_wind.attrs.update(
+        {
+            "standard_name": "eastward_wind",
+            "long_name": "U-Component of Wind at 10m",
+            "units": "m s-1",
+        }
+    )
+    nemo_ds.v_wind.attrs.update(
+        {
+            "standard_name": "northward_wind",
+            "long_name": "V-Component of Wind at 10m",
+            "units": "m s-1",
+        }
+    )
+    nemo_ds.attrs.update(
+        {
+            "title": "HRDPS, Salish Sea, Atmospheric Forcing Fields, Hourly, v22-02",
+            "project": "UBC EOAS SalishSeaCast",
+            "institution": "UBC EOAS",
+            "institution_fullname": "Earth, Ocean & Atmospheric Sciences, University of British Columbia",
+            "creator_name": "SalishSeaCast Project Contributors",
+            "creator_email": "sallen at eoas.ubc.ca",
+            "creator_url": "https://salishsea.eos.ubc.ca",
+            "drawLandMask": "over",
+            "coverage_content_type": "modelResult",
+        }
     )
 
 
-def _change_to_NEMO_variable_names(outnetcdf, axs, ip):
-    """Rename variables to match NEMO naming conventions."""
-    data = nc.Dataset(outnetcdf, "r+")
-    data.renameDimension("time", "time_counter")
-    data.renameVariable("latitude", "nav_lat")
-    data.renameVariable("longitude", "nav_lon")
-    data.renameVariable("time", "time_counter")
-    time_counter = data.variables["time_counter"]
-    time_counter.time_origin = arrow.get("1970-01-01 00:00:00").format(
-        "YYYY-MMM-DD HH:mm:ss"
+def _write_netcdf(nemo_ds, file_date, run_date, run_type, config, fcst=False):
+    """
+    :param :py:class:`xarray.Dataset` nemo_ds:
+    :param :py:class:`arrow.Arrow` file_date:
+    :param :py:class:`arrow.Arrow` run_date:
+    :param str run_type:
+    :param dict config:
+    :param boolean fcst:
+
+    :rtype: :py:class:`pathlib.Path`
+    """
+    encoding = {
+        "time_counter": {
+            "calendar": "gregorian",
+            "units": "seconds since 1970-01-01 00:00",
+            "dtype": float,
+        },
+    }
+    encoding.update({var: {"zlib": True, "complevel": 4} for var in nemo_ds.data_vars})
+    ops_dir = Path(config["weather"]["ops dir"])
+    nc_file_tmpl = config["weather"]["file template"]
+    nc_filename = nc_file_tmpl.format(file_date.date())
+    nc_file = Path("fcst/", nc_filename) if fcst else Path(nc_filename)
+    nemo_ds.attrs.update(
+        {
+            "history": (
+                f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
+                f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
+                f"{run_type} --run-date {run_date.format('YYYY-MM-DD')}"
+            ),
+        }
     )
-    data.renameVariable("UGRD_10maboveground", "u_wind")
-    data.renameVariable("VGRD_10maboveground", "v_wind")
-    data.renameVariable("DSWRF_surface", "solar")
-    data.renameVariable("SPFH_2maboveground", "qair")
-    data.renameVariable("DLWRF_surface", "therm_rad")
-    data.renameVariable("TMP_2maboveground", "tair")
-    data.renameVariable("PRMSL_meansealevel", "atmpres")
-    data.renameVariable("APCP_surface", "precip")
-    data.renameVariable("TCDC_surface", "percentcloud")
-    logger.debug("changed variable names to their NEMO names")
+    _to_netcdf(nemo_ds, encoding, ops_dir / nc_file)
+    logger.info(f"created {ops_dir / nc_file}")
+    return nc_file
 
-    Temp = data.variables["tair"][:]
-    axs[0, ip].pcolormesh(Temp[0])
-    axs[0, ip].set_xlim([0, Temp.shape[2]])
-    axs[0, ip].set_ylim([0, Temp.shape[1]])
-    axs[0, ip].plot(SandI, SandJ, "wo")
 
-    if ip == 0:
-        label = "day 1"
-    elif ip == 1:
-        label = "day 2"
+def _to_netcdf(nemo_ds, encoding, nc_file_path):
+    """This function is separate to facilitate testing the calling function.
+
+    :param :py:class:`xarray.Dataset` nemo_ds:
+    :param dict encoding:
+    :param :py:class:`pathlib.Path` nc_file_path:
+    """
+    nemo_ds.to_netcdf(nc_file_path, encoding=encoding, unlimited_dims=("time_counter",))
+
+
+def _update_checklist(nc_file, checklist, fcst=False):
+    """
+    :param :py:class:`pathlib.Path` nc_file:
+    :param dict checklist:
+    :param boolean fcst:
+    """
+    if fcst:
+        if "fcst" not in checklist:
+            checklist["fcst"] = [nc_file.name]
+        else:
+            checklist["fcst"].append(nc_file.name)
     else:
-        label = "day 3"
-    humid = data.variables["qair"][:]
-    axs[1, 2].plot(humid[:, SandI, SandJ], "-o")
-    solar = data.variables["solar"][:]
-    axs[2, 0].plot(solar[:, SandI, SandJ], "-o", label=label)
-    longwave = data.variables["therm_rad"][:]
-    axs[2, 1].plot(longwave[:, SandI, SandJ], "-o")
-    pres = data.variables["atmpres"][:]
-    axs[2, 2].plot(pres[:, SandI, SandJ], "-o")
-    uwind = data.variables["u_wind"][:]
-    axs[3, 0].plot(uwind[:, SandI, SandJ], "-o")
-    vwind = data.variables["v_wind"][:]
-    axs[3, 1].plot(vwind[:, SandI, SandJ], "-o")
-    axs[3, 2].plot(
-        np.sqrt(uwind[:, SandI, SandJ] ** 2 + vwind[:, SandI, SandJ] ** 2), "-o"
-    )
-
-    data.close()
-
-
-def _netCDF4_deflate(outnetcdf):
-    """Run ncks in a subprocess to convert outnetcdf to netCDF4 format
-    with it variables compressed with Lempel-Ziv deflation.
-    """
-    cmd = ["ncks", "-4", "-L4", "-O", outnetcdf, outnetcdf]
-    try:
-        lib.run_in_subprocess(cmd, logger.debug, logger.error)
-        logger.debug(f"netCDF4 deflated {outnetcdf}")
-    except WorkerError:
-        raise
-
-
-def _set_up_plotting():
-    fig = matplotlib.figure.Figure(figsize=(10, 15))
-    axs = np.empty((4, 3), dtype="object")
-    axs[0, 0] = fig.add_subplot(4, 3, 1)
-    axs[0, 0].set_title("Air Temp. 0 hr")
-    axs[0, 1] = fig.add_subplot(4, 3, 2)
-    axs[0, 1].set_title("Air Temp. +1 day")
-    axs[0, 2] = fig.add_subplot(4, 3, 3)
-    axs[0, 2].set_title("Air Temp. +2 days")
-    axs[1, 0] = fig.add_subplot(4, 3, 4)
-    axs[1, 0].set_title("Accumulated Precip")
-    axs[1, 1] = fig.add_subplot(4, 3, 5)
-    axs[1, 1].set_title("Instant. Precip")
-    axs[1, 2] = fig.add_subplot(4, 3, 6)
-    axs[1, 2].set_title("Humidity")
-    axs[2, 0] = fig.add_subplot(4, 3, 7)
-    axs[2, 0].set_title("Solar Rad")
-    axs[2, 1] = fig.add_subplot(4, 3, 8)
-    axs[2, 1].set_title("Longwave Down")
-    axs[2, 2] = fig.add_subplot(4, 3, 9)
-    axs[2, 2].set_title("Sea Level Pres")
-    axs[3, 0] = fig.add_subplot(4, 3, 10)
-    axs[3, 0].set_title("u wind")
-    axs[3, 1] = fig.add_subplot(4, 3, 11)
-    axs[3, 1].set_title("v wind")
-    axs[3, 2] = fig.add_subplot(4, 3, 12)
-    axs[3, 2].set_title("Wind Speed")
-    return fig, axs
+        checklist["nowcast"] = nc_file.name
 
 
 if __name__ == "__main__":

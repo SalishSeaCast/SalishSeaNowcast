@@ -13,33 +13,43 @@ file group: sallen
 weather:
   download:
     2.5 km:
-      # Directory where ECCC datamart hrdps/weat/ mirror files are stored
-      datamart dir: /SalishSeaCast/datamart/hrdps-west/
-      # Destination directory for downloaded GEM 2.5km operational model GRIB2 files
-      GRIB dir: /results/forcing/atmospheric/GEM2.5/GRIB/
-      # URL from which to download ECCC HRDPS 2.5km west domain forecast fields files
+      # Directory where ECCC datamart hrdps/continental/ mirror files are stored
+      datamart dir: /SalishSeaCast/datamart/hrdps-continental/
+      # Destination directory for downloaded HRDPS 2.5km continental domain GRIB2 files
+      GRIB dir: /results/forcing/atmospheric/continental2.5/GRIB/
+      # URL from which to download ECCC HRDPS 2.5km continental domain forecast fields files
       # **Must be quoted to project {} characters**
-      url template: 'https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
+      url template: "https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
       # Older, slower URL:
-#      url template: 'https://dd.weather.gc.ca/model_hrdps/west/grib2/{forecast}/{hour}/{filename}'
-      # Template for hourly ECCC HRDPS 2.5km west domain fields file name
+#      url template: "https://dd.weather.gc.ca/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
+      # Template for hourly ECCC HRDPS 2.5km continental domain fields file name
       # **Must be quoted to project {} characters**
-      file template: 'CMC_hrdps_west_{variable}_ps2.5km_{date}{forecast}_P{hour}-00.grib2'
-      # ECCC HRDPS 2.5km GRIB forecast file field variable names
-      grib variables:
-        - UGRD_TGL_10  # u component of wind velocity at 10m elevation
-        - VGRD_TGL_10  # v component of wind velocity at 10m elevation
-        - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
-        - DLWRF_SFC_0  # accumulated downward longwave (thermal) radiation at ground level
-        - LHTFL_SFC_0  # upward surface latent heat flux (for VHFR FVCOM)
-        - TMP_TGL_2    # air temperature at 2m elevation
-        - SPFH_TGL_2   # specific humidity at 2m elevation
-        - RH_TGL_2     # relative humidity at 2m elevation (for VHFR FVCOM)
-        - APCP_SFC_0   # accumulated precipitation at ground level
-        - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
-        - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-        - TCDC_SFC_0   # total cloud in percent (for parametrization of radiation missing from 2007-2014 GRMLAM)
-      # ECCC HRDPS 2.5km west domain forecast duration
+      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+      # ECCC HRDPS 2.5km forecast field variable names
+      variables:
+        # [MSC name, GRIB std name, NEMO name]
+        - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
+        - [VGRD_AGL-10m, v10, v_wind]           # v component of wind velocity at 10m elevation
+        - [DSWRF_Sfc, ssrd, solar]              # accumulated downward shortwave (solar) radiation at ground level
+        - [DLWRF_Sfc, strd, therm_rad]          # accumulated downward longwave (thermal) radiation at ground level
+        - [LHTFL_Sfc, lhtfl, LHTFL_surface]     # upward surface latent heat flux (for VHFR FVCOM)
+        - [TMP_AGL-2m, t2m, tair]               # air temperature at 2m elevation
+        - [SPFH_AGL-2m, sh2, qair]              # specific humidity at 2m elevation
+        - [RH_AGL-2m, r2, RH_2maboveground]     # relative humidity at 2m elevation (for VHFR FVCOM)
+        - [APCP_Sfc, unknown, precip]           # accumulated precipitation at ground level
+        - [PRATE_Sfc, prate, PRATE_surface]     # precipitation rate at ground level (for VHFR FVCOM)
+        - [PRMSL_MSL, prmsl, atmpres]           # atmospheric pressure at mean sea level
+      # NEMO variable names of forecast variables that hold quantities accumulated over
+      # 24 hours in the GRIB files; values are apportioned to hourly in grib_to_netcdf
+      accumulation variables:
+        - solar
+        - therm_rad
+        - precip
+      # Index ranges (inclusive) of longitudes and latitudes of ECCC HRDPS 2.5km continental
+      # domain that we use
+      lon indices: [230, 460]
+      lat indices: [300, 490]
+      # ECCC HRDPS 2.5km continental domain forecast duration
       forecast duration: 48  # hours
 
     1 km:
@@ -54,7 +64,7 @@ weather:
       # **Must be quoted to project {} characters**
       file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
       # ECCC HRDPS 1km GRIB forecast file field variable names
-      grib variables:
+      variables:
         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
         - VGRD_TGL_10  # v component of wind velocity at 10m elevation
         - DSWRF_SFC_0  # accumulated downward shortwave (solar) radiation at ground level
@@ -69,15 +79,13 @@ weather:
       # ECCC HRDPS 1km west domain forecast duration
       forecast duration: 36  # hours
 
-  # Location of wgrib2 executable
-  wgrib2: /SalishSeaCast/private-tools/grib2/wgrib2/wgrib2
-  # Location of Pramod Thupaki's grid_defn.pl script
-  grid_defn.pl: /SalishSeaCast/private-tools/PThupaki/grid_defn.pl
   # Destination directory for NEMO forcing files generated from GRIB2 files
-  ops dir: /results/forcing/atmospheric/GEM2.5/operational/
+  ops dir: /results/forcing/atmospheric/continental2.5/nemo_forcing/
   # Template for the atmospheric forcing file name
   # **Must be quoted to project {} characters**
-  file template: 'ops_{:y%Ym%md%d}.nc'
+  file template: "hrdps_{:y%Ym%md%d}.nc"
+  # Address of dask cluster scheduler for grib_to_netcdf to use
+  dask cluster: tcp://142.103.36.12:4386
   # Location to store image that grib_to_netcdf worker creates to facilitate
   # monitoring of its operation
   monitoring image: /results/nowcast-sys/figures/monitoring/wg.png
@@ -1017,12 +1025,6 @@ logging:
         class: zmq.log.handlers.PUBHandler
         level: DEBUG
         formatter: simple
-      wgrib2_text:
-        class: logging.FileHandler
-        level: DEBUG
-        formatter: simple
-        filename: $(NOWCAST.ENV.NOWCAST_LOGS)/wgrib2.log
-        mode: w
       hindcast_info:
         class: logging.handlers.RotatingFileHandler
         level: INFO
@@ -1042,12 +1044,6 @@ logging:
         filename: $(NOWCAST.ENV.NOWCAST_LOGS)/checklist.log
         backupCount: 7
     loggers:
-      wgrib2:
-        qualname: wgrib2
-        level: DEBUG
-        propagate: False
-        handlers:
-          - wgrib2_text
       run_NEMO_hindcast:
         qualname: run_NEMO_hindcast
         level: DEBUG
@@ -1089,6 +1085,11 @@ logging:
         propagate: False
         handlers:
           - checklist
+      cfgrib:
+        # cfgrib library used by grib_to_netcdf worker
+        qualname: cgrib
+        level: WARNING
+        formatter: simple
       matplotlib:
         # matplotlib library used by figure modules
         qualname: matplotlib
@@ -1180,6 +1181,7 @@ zmq:
         "salish.eos.ubc.ca:5580", "salish.eos.ubc.ca:5581", "salish.eos.ubc.ca:5582",
         "salish.eos.ubc.ca:5583", "salish.eos.ubc.ca:5584", "salish.eos.ubc.ca:5585",
       ]
+      grib_to_netcdf: "salish.eos.ubc.ca:5562"
 
 
 message registry:
