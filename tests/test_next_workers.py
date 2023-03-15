@@ -132,7 +132,7 @@ class TestConfig:
 
     def test_wave_forecasts_run_when(self, prod_config):
         wave_fcsts = prod_config["wave forecasts"]
-        assert wave_fcsts["run when"] == "after forecast"
+        assert wave_fcsts["run when"] == "after nowcast-green"
 
 
 class TestAfterWorkerFunctions:
