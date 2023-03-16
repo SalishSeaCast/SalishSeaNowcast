@@ -97,13 +97,20 @@ def make_ww3_current_file(parsed_args, config, *args):
     mesh_mask = os.fspath(grid_dir / config["run types"]["nowcast"]["mesh mask"])
     nemo_dir = Path(host_config["run types"]["nowcast"]["results"]).parent
     nemo_file_tmpl = config["wave forecasts"]["NEMO file template"]
+    wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[1]
     dest_dir = Path(config["wave forecasts"]["run prep dir"], "current")
     filepath_tmpl = config["wave forecasts"]["current file template"]
     nc_filepath = dest_dir / filepath_tmpl.format(yyyymmdd=run_date.format("YYYYMMDD"))
     if run_type in {"nowcast", "forecast"}:
-        datasets = _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl)
+        datasets = _calc_nowcast_datasets(
+            run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
+        )
     if run_type == "forecast":
-        datasets.update(_calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl))
+        datasets.update(
+            _calc_forecast_datasets(
+                run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
+            )
+        )
     if run_type == "forecast2":
         datasets = _calc_forecast2_datasets(
             run_date, nemo_dir, nemo_file_tmpl, dest_dir
@@ -142,34 +149,48 @@ def make_ww3_current_file(parsed_args, config, *args):
     return checklist
 
 
-def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl):
+def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after):
     datasets = {"u": [], "v": []}
+    nemo_results = "nowcast" if wave_forecast_after == "forecast" else "nowcast-green"
     dmy = run_date.format("DDMMMYY").lower()
     s_yyyymmdd = e_yyyymmdd = run_date.format("YYYYMMDD")
     for grid in datasets:
-        nowcast_file = (nemo_dir / f"nowcast/{dmy}") / nemo_file_tmpl.format(
-            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+        nowcast_file = (
+            nemo_dir
+            / Path(nemo_results, dmy)
+            / nemo_file_tmpl.format(
+                s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+            )
         )
         datasets[grid].append(nowcast_file)
         logger.debug(f"{grid} dataset: {nowcast_file}")
     return datasets
 
 
-def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
+def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after):
     datasets = {"u": [], "v": []}
+    nemo_results = "nowcast" if wave_forecast_after == "forecast" else "nowcast-green"
     dmy = run_date.format("DDMMMYY").lower()
     s_yyyymmdd = e_yyyymmdd = run_date.format("YYYYMMDD")
     for grid in datasets:
-        nowcast_file = (nemo_dir / f"nowcast/{dmy}") / nemo_file_tmpl.format(
-            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+        nowcast_file = (
+            nemo_dir
+            / Path(nemo_results, dmy)
+            / nemo_file_tmpl.format(
+                s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+            )
         )
         datasets[grid].append(nowcast_file)
         logger.debug(f"{grid} dataset: {nowcast_file}")
     s_yyyymmdd = run_date.shift(days=+1).format("YYYYMMDD")
     e_yyyymmdd = run_date.shift(days=+2).format("YYYYMMDD")
     for grid in datasets:
-        forecast_file = (nemo_dir / f"forecast/{dmy}") / nemo_file_tmpl.format(
-            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+        forecast_file = (
+            nemo_dir
+            / Path("forecast", dmy)
+            / nemo_file_tmpl.format(
+                s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+            )
         )
         datasets[grid].append(forecast_file)
         logger.debug(f"{grid} dataset: {forecast_file}")
@@ -182,8 +203,12 @@ def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl, dest_dir):
     s_yyyymmdd = run_date.format("YYYYMMDD")
     e_yyyymmdd = run_date.shift(days=+1).format("YYYYMMDD")
     for grid in datasets:
-        forecast_file = (nemo_dir / f"forecast/{dmy}") / nemo_file_tmpl.format(
-            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+        forecast_file = (
+            nemo_dir
+            / Path("forecast", dmy)
+            / nemo_file_tmpl.format(
+                s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+            )
         )
         forecast_file_24h = dest_dir / nemo_file_tmpl.format(
             s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=s_yyyymmdd, grid=grid.upper()
@@ -200,8 +225,12 @@ def _calc_forecast2_datasets(run_date, nemo_dir, nemo_file_tmpl, dest_dir):
     s_yyyymmdd = run_date.shift(days=+1).format("YYYYMMDD")
     e_yyyymmdd = run_date.shift(days=+2).format("YYYYMMDD")
     for grid in datasets:
-        forecast2_file = (nemo_dir / f"forecast2/{dmy}") / nemo_file_tmpl.format(
-            s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+        forecast2_file = (
+            nemo_dir
+            / Path("forecast2", dmy)
+            / nemo_file_tmpl.format(
+                s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
+            )
         )
         datasets[grid].append(forecast2_file)
         logger.debug(f"{grid} dataset: {forecast2_file}")
