@@ -1080,7 +1080,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast": {
                         "host": "arbutus.cloud",
-                        "run date": "2017-04-14",
+                        "run date": "2023-03-16",
                         "completed": True,
                     }
                 },
@@ -1090,7 +1090,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1107,7 +1107,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast": {
                         "host": "arbutus.cloud",
-                        "run date": "2017-04-14",
+                        "run date": "2023-03-16",
                         "completed": True,
                     }
                 },
@@ -1117,7 +1117,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected
@@ -1156,7 +1156,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast2": {
                         "host": "arbutus.cloud",
-                        "run date": "2017-04-14",
+                        "run date": "2023-03-16",
                         "completed": True,
                     }
                 },
@@ -1166,7 +1166,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast2"],
+            args=["arbutus.cloud", "forecast2", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1182,7 +1182,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast2": {
                         "host": "arbutus.cloud",
-                        "run date": "2017-04-14",
+                        "run date": "2023-03-16",
                         "completed": True,
                     }
                 },
@@ -1192,7 +1192,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast2"],
+            args=["arbutus.cloud", "forecast2", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected
@@ -1209,7 +1209,7 @@ class TestAfterWatchNEMO:
                 {
                     "nowcast-green": {
                         "host": "arbutus.cloud",
-                        "run date": "2017-04-14",
+                        "run date": "2023-03-16",
                         "completed": True,
                     }
                 },
@@ -1219,7 +1219,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1236,7 +1236,7 @@ class TestAfterWatchNEMO:
                 {
                     "nowcast-green": {
                         "host": "arbutus.cloud",
-                        "run date": "2017-04-14",
+                        "run date": "2023-03-16",
                         "completed": True,
                     }
                 },
@@ -1246,7 +1246,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected
