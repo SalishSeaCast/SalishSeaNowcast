@@ -1240,8 +1240,10 @@ def after_make_ww3_current_file(msg, config, checklist):
     next_workers = {
         "crash": [],
         "failure forecast2": [],
+        "failure nowcast": [],
         "failure forecast": [],
         "success forecast2": [],
+        "success nowcast": [],
         "success forecast": [],
     }
     if msg.type.startswith("success"):

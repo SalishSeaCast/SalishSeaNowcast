@@ -1769,7 +1769,8 @@ class TestAfterMakeWW3currentFile:
     """Unit tests for the after_make_ww3_current_file function."""
 
     @pytest.mark.parametrize(
-        "msg_type", ["crash", "failure forecast2", "failure forecast"]
+        "msg_type",
+        ["crash", "failure forecast2", "failure nowcast", "failure forecast"],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_ww3_current_file(
@@ -1793,6 +1794,26 @@ class TestAfterMakeWW3currentFile:
         expected = NextWorker(
             "nowcast.workers.run_ww3",
             args=["arbutus.cloud", "nowcast", "--run-date", "2019-08-05"],
+            host="arbutus.cloud",
+        )
+        assert workers[0] == expected
+
+    def test_success_nowcast_launch_run_ww3_nowcast(self, config, checklist):
+        workers = next_workers.after_make_ww3_current_file(
+            Message(
+                "make_ww3_current_file",
+                "success forecast",
+                {
+                    "forecast": "current/SoG_current_20230316.nc",
+                    "run date": "2023-03-16",
+                },
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.run_ww3",
+            args=["arbutus.cloud", "nowcast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
