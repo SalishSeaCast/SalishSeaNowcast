@@ -144,8 +144,16 @@ def _create_dataset(time, lats, lons, u_wind, v_wind, datasets):
             f"{[os.fspath(dataset) for dataset in datasets]}",
         },
     )
-    del ds.u_wind.attrs["coordinates"]
-    del ds.v_wind.attrs["coordinates"]
+    try:
+        # Datasets from pre-23feb23 HRDPS west atmospheric forcing files
+        # have wind component coordinates attributes that we don't need,
+        # so delete them
+        del ds.u_wind.attrs["coordinates"]
+        del ds.v_wind.attrs["coordinates"]
+    except KeyError:
+        # Datasets from 23feb23 onward HRDPS continental atmospheric forcing files
+        # don't have wind component coordinates attributes, and that's okay
+        pass
     return ds
 
 
