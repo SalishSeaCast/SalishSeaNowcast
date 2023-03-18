@@ -102,12 +102,16 @@ def after_download_weather(msg, config, checklist):
                 [
                     NextWorker("nowcast.workers.make_turbidity_file"),
                     NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["06"]),
-                    # NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
+                    NextWorker(
+                        "nowcast.workers.grib_to_netcdf",
+                        args=["nowcast+"],
+                        host="salish-nowcast",
+                    ),
                     NextWorker("nowcast.workers.download_live_ocean"),
                 ]
             )
             race_condition_workers = {
-                # "grib_to_netcdf",
+                "grib_to_netcdf",
                 "make_live_ocean_files",
                 "make_ssh_files",
             }

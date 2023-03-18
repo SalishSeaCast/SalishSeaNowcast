@@ -236,14 +236,14 @@ class TestAfterDownloadWeather:
             ),
             NextWorker("nowcast.workers.make_turbidity_file", [], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
-            # NextWorker(
-            #     "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
-            # ),
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="salish-nowcast"
+            ),
             NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
         ]
         assert workers == expected
         assert race_condition_workers == {
-            # "grib_to_netcdf",
+            "grib_to_netcdf",
             "make_live_ocean_files",
             "make_ssh_files",
         }
@@ -329,9 +329,9 @@ class TestAfterCollectWeather:
             ),
             NextWorker("nowcast.workers.make_turbidity_file", [], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
-            # NextWorker(
-            #     "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
-            # ),
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="salish-nowcast"
+            ),
             NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
             NextWorker(
                 "nowcast.workers.collect_weather", ["18", "2.5km"], host="localhost"
@@ -339,7 +339,7 @@ class TestAfterCollectWeather:
         ]
         assert workers == expected
         assert race_condition_workers == {
-            # "grib_to_netcdf",
+            "grib_to_netcdf",
             "make_live_ocean_files",
             "make_ssh_files",
         }
