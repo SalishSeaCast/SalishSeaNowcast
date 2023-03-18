@@ -830,6 +830,10 @@ class TestAfterUploadForcing:
         )
         assert workers == []
 
+    ## TODO: remove skip when catch-up is finished
+    @pytest.mark.skip(
+        reason="Not running nowcast-agrif during HRDPS continental catch-up"
+    )
     def test_success_turbidity_launch_make_forcing_links_agrif(
         self, config, checklist, monkeypatch
     ):
@@ -1177,6 +1181,10 @@ class TestAfterWatchNEMO:
         assert workers[1] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
 
+    ## TODO: remove skip when catch-up is finished
+    @pytest.mark.skip(
+        reason="Running run_type=nowcast during HRDPS continental catch-up"
+    )
     def test_success_nowcast_green_launch_make_ww3_wind_file_forecast(
         self, config, checklist, monkeypatch
     ):
@@ -1204,6 +1212,10 @@ class TestAfterWatchNEMO:
         assert workers[0] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
 
+    ## TODO: remove skip when catch-up is finished
+    @pytest.mark.skip(
+        reason="Running run_type=nowcast during HRDPS continental catch-up"
+    )
     def test_success_nowcast_green_launch_make_ww3_current_file_forecast(
         self, config, checklist, monkeypatch
     ):
@@ -1231,7 +1243,11 @@ class TestAfterWatchNEMO:
         assert workers[1] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
 
-    def test_success_nowcast_green_launch_mk_forcing_links_nowcastp_shrdstrg(
+    ## TODO: remove skip when catch-up is finished
+    @pytest.mark.skip(
+        reason="Not running nowcast-dev during HRDPS continental catch-up"
+    )
+    def test_success_nowcast_green_launch_mk_forcing_links_nowcastp_shared_storage(
         self, config, checklist
     ):
         workers, race_condition_workers = next_workers.after_watch_NEMO(
@@ -1912,6 +1928,10 @@ class TestAfterWatchWW3:
         )
         assert expected in workers
 
+    ## TODO: remove skip when catch-up is finished
+    @pytest.mark.skip(
+        reason="Not running nowcast-dev during HRDPS continental catch-up"
+    )
     def test_success_nowcast_launch_run_ww3_forecast(self, config, checklist):
         msg = Message(
             "watch_ww3",
