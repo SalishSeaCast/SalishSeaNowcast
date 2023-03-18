@@ -100,6 +100,7 @@ def after_download_weather(msg, config, checklist):
                 )
             next_workers["success 2.5km 12"].extend(
                 [
+                    NextWorker("nowcast.workers.make_turbidity_file"),
                     NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["06"]),
                     # NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
                     NextWorker("nowcast.workers.download_live_ocean"),
@@ -756,13 +757,6 @@ def after_watch_NEMO(msg, config, checklist):
                     ]
                 )
                 race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
-            else:
-                next_workers[msg.type].append(
-                    NextWorker(
-                        "nowcast.workers.make_turbidity_file",
-                        args=["--run-date", msg.payload[run_type]["run date"]],
-                    )
-                )
         if run_type == "nowcast-green":
             if wave_forecast_after == "nowcast-green":
                 host_name = config["wave forecasts"]["host"]
@@ -1372,29 +1366,19 @@ def after_watch_ww3(msg, config, checklist):
             )
         )
         if run_type == "nowcast":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.run_ww3",
-                    args=[
-                        msg.payload[run_type]["host"],
-                        "forecast",
-                        "--run-date",
-                        msg.payload[run_type]["run date"],
-                    ],
-                    host=msg.payload[run_type]["host"],
-                )
-            )
-        if run_type == "forecast":
-            wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[
-                1
-            ]
-            if wave_forecast_after == "forecast":
-                next_workers[msg.type].append(
-                    NextWorker(
-                        "nowcast.workers.make_turbidity_file",
-                        args=["--run-date", msg.payload[run_type]["run date"]],
-                    )
-                )
+            pass
+            # next_workers[msg.type].append(
+            #     NextWorker(
+            #         "nowcast.workers.run_ww3",
+            #         args=[
+            #             msg.payload[run_type]["host"],
+            #             "forecast",
+            #             "--run-date",
+            #             msg.payload[run_type]["run date"],
+            #         ],
+            #         host=msg.payload[run_type]["host"],
+            #     )
+            # )
     return next_workers[msg.type]
 
 

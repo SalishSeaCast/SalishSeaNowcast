@@ -234,6 +234,7 @@ class TestAfterDownloadWeather:
                 ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
+            NextWorker("nowcast.workers.make_turbidity_file", [], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
             # NextWorker(
             #     "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
@@ -326,6 +327,7 @@ class TestAfterCollectWeather:
                 ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
                 host="localhost",
             ),
+            NextWorker("nowcast.workers.make_turbidity_file", [], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
             # NextWorker(
             #     "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="localhost"
@@ -1045,29 +1047,6 @@ class TestAfterWatchNEMO:
             ),
         ]
         assert workers == expected
-
-    def test_success_forecast_launch_make_turbidity_file(self, config, checklist):
-        workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success forecast",
-                {
-                    "forecast": {
-                        "host": "arbutus.cloud",
-                        "run date": "2017-08-10",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_turbidity_file",
-            args=["--run-date", "2017-08-10"],
-            host="localhost",
-        )
-        assert workers[0] == expected
 
     def test_success_forecast_launch_make_ww3_wind_file_forecast(
         self, config, checklist, monkeypatch
@@ -1956,53 +1935,6 @@ class TestAfterWatchWW3:
                 msg.payload[run_type]["run date"],
             ],
             host="arbutus.cloud",
-        )
-        assert expected in workers
-
-    def test_success_forecast_no_launch_make_turbidity_file(self, config, checklist):
-        """config["wave forcasts"]["run when"] == "after nowcast-green" case"""
-        msg = Message(
-            "watch_ww3",
-            "success forecast",
-            {
-                "forecast": {
-                    "host": "arbutus.cloud",
-                    "run date": "2022-11-08",
-                    "completed": True,
-                }
-            },
-        )
-        workers = next_workers.after_watch_ww3(msg, config, checklist)
-        run_type = msg.type.split()[1]
-        not_expected = NextWorker(
-            "nowcast.workers.make_turbidity_file",
-            args=["--run-date", msg.payload[run_type]["run date"]],
-            host="localhost",
-        )
-        assert not_expected not in workers
-
-    def test_success_forecast_launch_make_turbidity_file(
-        self, config, checklist, monkeypatch
-    ):
-        """config["wave forcasts"]["run when"] == "after forecast" case"""
-        msg = Message(
-            "watch_ww3",
-            "success forecast",
-            {
-                "forecast": {
-                    "host": "arbutus.cloud",
-                    "run date": "2022-11-08",
-                    "completed": True,
-                }
-            },
-        )
-        monkeypatch.setitem(config["wave forecasts"], "run when", "after forecast")
-        workers = next_workers.after_watch_ww3(msg, config, checklist)
-        run_type = msg.type.split()[1]
-        expected = NextWorker(
-            "nowcast.workers.make_turbidity_file",
-            args=["--run-date", msg.payload[run_type]["run date"]],
-            host="localhost",
         )
         assert expected in workers
 
