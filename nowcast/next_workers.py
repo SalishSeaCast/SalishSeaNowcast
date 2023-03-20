@@ -490,15 +490,6 @@ def after_make_turbidity_file(msg, config, checklist):
     :rtype: list
     """
     next_workers = {"crash": [], "failure": [], "success": []}
-    if msg.type == "success":
-        for host in config["run"]["enabled hosts"]:
-            if not config["run"]["enabled hosts"][host]["shared storage"]:
-                pass
-                # next_workers["success"].append(
-                #     NextWorker(
-                #         "nowcast.workers.upload_forcing", args=[host, "turbidity"]
-                #     )
-                # )
     return next_workers[msg.type]
 
 
@@ -761,6 +752,13 @@ def after_watch_NEMO(msg, config, checklist):
                     ]
                 )
                 race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
+            for host in config["run"]["enabled hosts"]:
+                if not config["run"]["enabled hosts"][host]["shared storage"]:
+                    next_workers[msg.type].append(
+                        NextWorker(
+                            "nowcast.workers.upload_forcing", args=[host, "turbidity"]
+                        )
+                    )
         if run_type == "nowcast-green":
             if wave_forecast_after == "nowcast-green":
                 host_name = config["wave forecasts"]["host"]
