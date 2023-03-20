@@ -1368,19 +1368,18 @@ def after_watch_ww3(msg, config, checklist):
             )
         )
         if run_type == "nowcast":
-            pass
-            # next_workers[msg.type].append(
-            #     NextWorker(
-            #         "nowcast.workers.run_ww3",
-            #         args=[
-            #             msg.payload[run_type]["host"],
-            #             "forecast",
-            #             "--run-date",
-            #             msg.payload[run_type]["run date"],
-            #         ],
-            #         host=msg.payload[run_type]["host"],
-            #     )
-            # )
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.run_ww3",
+                    args=[
+                        msg.payload[run_type]["host"],
+                        "forecast",
+                        "--run-date",
+                        msg.payload[run_type]["run date"],
+                    ],
+                    host=msg.payload[run_type]["host"],
+                )
+            )
     return next_workers[msg.type]
 
 
