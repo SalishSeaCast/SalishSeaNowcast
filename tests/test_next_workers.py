@@ -636,16 +636,17 @@ class TestAfterMakeLiveOceanFiles:
         )
         assert workers == []
 
-    def test_success_launch_upload_forcing(self, config, checklist):
+    @pytest.mark.parametrize("host", ("arbutus.cloud", "orcinus"))
+    def test_success_launch_upload_forcing(self, host, config, checklist):
         workers = next_workers.after_make_live_ocean_files(
             Message("make_live_ocean_files", "success"), config, checklist
         )
         expected = NextWorker(
             "nowcast.workers.upload_forcing",
-            args=["arbutus.cloud", "nowcast+"],
+            args=[host, "nowcast+"],
             host="localhost",
         )
-        assert expected not in workers
+        assert expected in workers
 
 
 class TestAfterMakeTurbidityFile:

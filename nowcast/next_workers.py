@@ -463,11 +463,11 @@ def after_make_live_ocean_files(msg, config, checklist):
         for host in config["run"]["enabled hosts"]:
             if not config["run"]["enabled hosts"][host]["shared storage"]:
                 pass
-                # next_workers[msg.type].append(
-                #     NextWorker(
-                #         "nowcast.workers.upload_forcing", args=[host, "nowcast+"]
-                #     )
-                # )
+                next_workers[msg.type].append(
+                    NextWorker(
+                        "nowcast.workers.upload_forcing", args=[host, "nowcast+"]
+                    )
+                )
     return next_workers[msg.type]
 
 
