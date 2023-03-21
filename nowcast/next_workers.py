@@ -80,13 +80,15 @@ def after_download_weather(msg, config, checklist):
                 next_workers["success 2.5km 06"].extend(
                     [
                         NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["00"]),
-                        # NextWorker(
-                        #     "nowcast.workers.grib_to_netcdf", args=["forecast2"]
-                        # ),
+                        NextWorker(
+                            "nowcast.workers.grib_to_netcdf",
+                            args=["forecast2"],
+                            host="salish-nowcast",
+                        ),
                     ]
                 )
                 race_condition_workers = {
-                    # "grib_to_netcdf",
+                    "grib_to_netcdf",
                     "make_ssh_files",
                 }
                 return next_workers[msg.type], race_condition_workers
@@ -102,12 +104,16 @@ def after_download_weather(msg, config, checklist):
                 [
                     NextWorker("nowcast.workers.make_turbidity_file"),
                     NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["06"]),
-                    # NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"]),
+                    NextWorker(
+                        "nowcast.workers.grib_to_netcdf",
+                        args=["nowcast+"],
+                        host="salish-nowcast",
+                    ),
                     NextWorker("nowcast.workers.download_live_ocean"),
                 ]
             )
             race_condition_workers = {
-                # "grib_to_netcdf",
+                "grib_to_netcdf",
                 "make_live_ocean_files",
                 "make_ssh_files",
             }
