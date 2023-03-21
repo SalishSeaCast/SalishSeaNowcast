@@ -1284,6 +1284,10 @@ class TestAfterWatchNEMO:
         assert workers[1] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
 
+    ## TODO: remove skip when catch-up is finished
+    @pytest.mark.skip(
+        reason="Not running nowcast-dev during HRDPS continental catch-up"
+    )
     def test_success_nowcast_green_launch_mk_forcing_links_nowcastp_shrdstrg(
         self, config, checklist
     ):
