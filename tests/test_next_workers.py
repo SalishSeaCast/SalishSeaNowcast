@@ -1007,11 +1007,12 @@ class TestAfterWatchNEMO:
                 args=["arbutus.cloud", "ssh", "--run-date", "2021-04-26"],
                 host="localhost",
             ),
-            NextWorker(
-                "nowcast.workers.make_fvcom_boundary",
-                args=["arbutus.cloud", "x2", "nowcast"],
-                host="arbutus.cloud",
-            ),
+            ## TODO: Add a config switch to control running FVCOM VHFR
+            # NextWorker(
+            #     "nowcast.workers.make_fvcom_boundary",
+            #     args=["arbutus.cloud", "x2", "nowcast"],
+            #     host="arbutus.cloud",
+            # ),
             NextWorker(
                 "nowcast.workers.download_results",
                 args=["arbutus.cloud", "nowcast", "--run-date", "2021-04-26"],
