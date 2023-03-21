@@ -19,7 +19,6 @@ directory tree.
 import logging
 import os
 import shutil
-import time
 from pathlib import Path
 
 import arrow
@@ -140,7 +139,12 @@ def collect_weather(parsed_args, config, *args):
         logger.info(f"starting to watch for files in {datamart_dir/forecast}/")
         observer.start()
         while expected_files:
-            time.sleep(1)
+            # We need to have a timeout on the observer thread so that the status
+            # of the expected files set gets checked, otherwise the worker never
+            # finishes because the main thread is blocked by the observer thread.
+            observer.join(timeout=1)
+        observer.stop()
+        observer.join()
     logger.info(
         f"finished collecting files from {datamart_dir/forecast}/ to "
         f"{grib_dir / forecast_yyyymmdd / forecast}/"
