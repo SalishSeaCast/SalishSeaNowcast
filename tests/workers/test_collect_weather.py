@@ -391,7 +391,13 @@ class TestCollectWeather:
             def schedule(self, event_handler, path, recursive):
                 pass
 
+            def join(self):
+                pass
+
             def start(self):
+                pass
+
+            def stop(self):
                 pass
 
         monkeypatch.setattr(
