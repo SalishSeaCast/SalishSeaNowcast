@@ -645,7 +645,7 @@ class TestAfterMakeLiveOceanFiles:
             args=["arbutus.cloud", "nowcast+"],
             host="localhost",
         )
-        assert expected not in workers
+        assert workers[0] == expected
 
 
 class TestAfterMakeTurbidityFile:

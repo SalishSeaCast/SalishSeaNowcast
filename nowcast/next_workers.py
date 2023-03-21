@@ -458,12 +458,11 @@ def after_make_live_ocean_files(msg, config, checklist):
     if msg.type == "success":
         for host in config["run"]["enabled hosts"]:
             if not config["run"]["enabled hosts"][host]["shared storage"]:
-                pass
-                # next_workers[msg.type].append(
-                #     NextWorker(
-                #         "nowcast.workers.upload_forcing", args=[host, "nowcast+"]
-                #     )
-                # )
+                next_workers[msg.type].append(
+                    NextWorker(
+                        "nowcast.workers.upload_forcing", args=[host, "nowcast+"]
+                    )
+                )
     return next_workers[msg.type]
 
 
@@ -1365,18 +1364,18 @@ def after_watch_ww3(msg, config, checklist):
         )
         if run_type == "nowcast":
             pass
-            # next_workers[msg.type].append(
-            #     NextWorker(
-            #         "nowcast.workers.run_ww3",
-            #         args=[
-            #             msg.payload[run_type]["host"],
-            #             "forecast",
-            #             "--run-date",
-            #             msg.payload[run_type]["run date"],
-            #         ],
-            #         host=msg.payload[run_type]["host"],
-            #     )
-            # )
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.run_ww3",
+                    args=[
+                        msg.payload[run_type]["host"],
+                        "forecast",
+                        "--run-date",
+                        msg.payload[run_type]["run date"],
+                    ],
+                    host=msg.payload[run_type]["host"],
+                )
+            )
     return next_workers[msg.type]
 
 
