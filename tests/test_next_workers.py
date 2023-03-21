@@ -150,8 +150,6 @@ class TestAfterWorkerFunctions:
             func[0] for func in inspect.getmembers(next_workers, inspect.isfunction)
         }
         for module in worker_modules():
-            # if module.stem in {"archive_tarball"}:
-            #     continue
             assert f"after_{module.stem}" in after_funcs
 
 
