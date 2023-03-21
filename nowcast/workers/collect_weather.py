@@ -135,7 +135,7 @@ def collect_weather(parsed_args, config, *args):
             expected_files, grib_dir / forecast_yyyymmdd / forecast, grp_name
         )
         observer = watchdog.observers.Observer()
-        observer.schedule(handler, os.fspath(datamart_dir / forecast), recursive=True)
+        observer.schedule(handler, datamart_dir / forecast, recursive=True)
         logger.info(f"starting to watch for files in {datamart_dir/forecast}/")
         observer.start()
         while expected_files:
@@ -208,7 +208,7 @@ def _move_file(expected_file, grib_forecast_dir, grp_name):
     """
     grib_hour_dir = grib_forecast_dir / expected_file.parent.stem
     lib.mkdir(grib_hour_dir, logger, grp_name=grp_name)
-    shutil.move(os.fspath(expected_file), os.fspath(grib_hour_dir))
+    shutil.move(expected_file, grib_hour_dir)
     logger.debug(f"moved {expected_file} to {grib_hour_dir}/")
 
 
