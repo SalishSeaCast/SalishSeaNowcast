@@ -18,19 +18,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up conda environment
-        uses: conda-incubator/setup-miniconda@3b0f2504dd76ef23b6d31f291f4913fb60ab5ff3
+      - name: Set up Conda environment with Micromamba
+        uses: mamba-org/provision-with-micromamba@e2b397b12d0a38069451664382b769c9456e3d6d
         with:
-           miniforge-variant: Mambaforge-pypy3
-           miniforge-version: latest
-           use-mamba: true
-           auto-update-conda: true
-           auto-activate-base: false
-           channels: conda-forge,nodefaults
-           channel-priority: true
-           python-version: ${{ matrix.python-version }}
            environment-file: envs/environment-test.yaml
-           activate-environment: salishsea-nowcast-test
+           environment-name: salishsea-nowcast-test
+           cache-env: true
+           extra-specs: |
+             python=${{ matrix.python-version }}
 
       - name: Install editable-node dependency packages
         shell: bash -l {0}
