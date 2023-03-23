@@ -1043,7 +1043,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-15"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1071,7 +1071,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-15"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected
@@ -1249,7 +1249,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-15"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1276,7 +1276,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-15"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected

@@ -729,6 +729,7 @@ def after_watch_NEMO(msg, config, checklist):
         if run_type == "forecast":
             if wave_forecast_after == "forecast":
                 host_name = config["wave forecasts"]["host"]
+                run_date = arrow.get(msg.payload[run_type]["run date"]).shift(days=-1)
                 next_workers[msg.type].extend(
                     [
                         NextWorker(
@@ -737,7 +738,7 @@ def after_watch_NEMO(msg, config, checklist):
                                 host_name,
                                 "forecast",
                                 "--run-date",
-                                msg.payload[run_type]["run date"],
+                                run_date.format("YYYY-MM-DD"),
                             ],
                             host=host_name,
                         ),
@@ -747,7 +748,7 @@ def after_watch_NEMO(msg, config, checklist):
                                 host_name,
                                 "forecast",
                                 "--run-date",
-                                msg.payload[run_type]["run date"],
+                                run_date.format("YYYY-MM-DD"),
                             ],
                             host=host_name,
                         ),
@@ -764,6 +765,7 @@ def after_watch_NEMO(msg, config, checklist):
         if run_type == "nowcast-green":
             if wave_forecast_after == "nowcast-green":
                 host_name = config["wave forecasts"]["host"]
+                run_date = arrow.get(msg.payload[run_type]["run date"]).shift(days=-1)
                 next_workers[msg.type].extend(
                     [
                         NextWorker(
@@ -772,7 +774,7 @@ def after_watch_NEMO(msg, config, checklist):
                                 host_name,
                                 "forecast",
                                 "--run-date",
-                                msg.payload[run_type]["run date"],
+                                run_date.format("YYYY-MM-DD"),
                             ],
                             host=host_name,
                         ),
@@ -782,7 +784,7 @@ def after_watch_NEMO(msg, config, checklist):
                                 host_name,
                                 "forecast",
                                 "--run-date",
-                                msg.payload[run_type]["run date"],
+                                run_date.format("YYYY-MM-DD"),
                             ],
                             host=host_name,
                         ),
