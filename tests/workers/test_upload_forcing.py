@@ -203,12 +203,12 @@ class TestConfig:
             ("salish-nowcast", "/results/forcing/atmospheric/GEM2.5/operational/"),
             (
                 "optimum-hindcast",
-                "/data/sallen/shared/SalishSeaCast/forcing/atmospheric/GEM2.5/operational/",
+                "/data/sallen/shared/SalishSeaCast/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             (
                 "graham-dtn",
-                "/project/def-allen/SalishSea/forcing/atmospheric/GEM2.5/operational/",
+                "/project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
         ),
     )
