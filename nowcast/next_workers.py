@@ -791,15 +791,15 @@ def after_watch_NEMO(msg, config, checklist):
                     ]
                 )
                 race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
-            # for host in config["run"]["enabled hosts"]:
-            #     run_types = config["run"]["enabled hosts"][host]["run types"]
-            #     if "nowcast-dev" in run_types:
-            #         next_workers[msg.type].append(
-            #             NextWorker(
-            #                 "nowcast.workers.make_forcing_links",
-            #                 args=[host, "nowcast+", "--shared-storage"],
-            #             )
-            #         )
+            for host in config["run"]["enabled hosts"]:
+                run_types = config["run"]["enabled hosts"][host]["run types"]
+                if "nowcast-dev" in run_types:
+                    next_workers[msg.type].append(
+                        NextWorker(
+                            "nowcast.workers.make_forcing_links",
+                            args=[host, "nowcast+", "--shared-storage"],
+                        )
+                    )
         if run_type == "forecast2":
             host_name = config["wave forecasts"]["host"]
             next_workers[msg.type].extend(

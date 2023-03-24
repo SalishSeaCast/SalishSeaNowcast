@@ -251,7 +251,10 @@ class TestConfig:
         "host, weather_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
-            ("salish-nowcast", "/results/forcing/atmospheric/GEM2.5/operational/"),
+            (
+                "salish-nowcast",
+                "/results/forcing/atmospheric/continental2.5/nemo_forcing/",
+            ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
             (
                 "graham-dtn",

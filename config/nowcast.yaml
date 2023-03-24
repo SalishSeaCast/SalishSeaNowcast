@@ -635,7 +635,7 @@ run:
         bc dir: /results/forcing/LiveOcean/boundary_conditions/
         rivers dir: /results/forcing/rivers/
         bottom friction mask: /SalishSeaCast/grid/jetty_mask_bathy201702.nc
-        weather dir: /results/forcing/atmospheric/GEM2.5/operational/
+        weather dir: /results/forcing/atmospheric/continental2.5/nemo_forcing/
 
     orcinus-nowcast-agrif:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
