@@ -653,7 +653,7 @@ run:
         bc dir: /home/sallen/MEOPAR/LiveOcean/
         rivers dir: /home/sallen/MEOPAR/rivers/
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
-        weather dir: /home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/
+        weather dir: /home/sallen/MEOPAR/continental2.5/NEMO-atmos/
 
     graham-dtn:
       ssh key: SalishSeaNEMO-nowcast_id_rsa

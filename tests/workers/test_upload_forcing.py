@@ -208,7 +208,7 @@ class TestConfig:
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
-            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
+            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/continental2.5/NEMO-atmos/"),
             (
                 "graham-dtn",
                 "/project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
