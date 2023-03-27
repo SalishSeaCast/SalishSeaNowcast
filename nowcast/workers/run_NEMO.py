@@ -315,7 +315,7 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
         ]
         namelist_smelt_sections = (
             "namelist_smelt_biology",
-            "namelist_smelt_rivers",
+            "namelist_smelt_rivers.arbutus",
             "namelist_smelt_skog",
         )
         namelists["namelist_smelt_cfg"] = [
