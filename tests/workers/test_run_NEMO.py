@@ -956,7 +956,7 @@ class TestRunDescription:
         assert run_desc["namelists"]["namelist_top_cfg"] == expected
         expected = [
             str(tmp_run_sets.join("namelist_smelt_biology")),
-            str(tmp_run_sets.join("namelist_smelt_rivers")),
+            str(tmp_run_sets.join("namelist_smelt_rivers.arbutus")),
             str(tmp_run_sets.join("namelist_smelt_skog")),
         ]
         assert run_desc["namelists"]["namelist_smelt_cfg"] == expected
