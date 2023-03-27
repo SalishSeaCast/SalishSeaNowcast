@@ -21,4 +21,4 @@ jobs:
         language: [ 'python' ]
     uses: UBC-MOAD/gha-workflows/.github/workflows/codeql-analysis.yaml@73cd061e7d3c3cabc39cda291cb7bc9b95b7ab35
     with:
-      language: ${{ matrix.language }}
+      category: "/language:${{matrix.language}}"
