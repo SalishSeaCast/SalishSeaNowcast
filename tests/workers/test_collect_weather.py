@@ -175,7 +175,7 @@ class TestConfig:
         )
         assert weather_download["forecast duration"] == 48
         assert (
-            weather_download["file template"]
+            weather_download["ECCC file template"]
             == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
         )
         assert weather_download["variables"] == [
