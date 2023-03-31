@@ -61,6 +61,14 @@ def main():
         'forecast2' means 2nd forecast run.
         """,
     )
+    worker.cli.add_argument(
+        "--full-continental-grid",
+        action="store_true",
+        help="""
+        Process full continental domain HRDPS GRIB files rather than files already cropped to
+        SalishSeaCast domain by crop_gribs worker.
+        """,
+    )
     worker.cli.add_date_option(
         "--run-date",
         default=arrow.now().floor("day"),
@@ -93,7 +101,14 @@ def grib_to_netcdf(parsed_args, config, *args):
     checklist = {}
     run_date = parsed_args.run_date
     run_type = parsed_args.run_type
+    full_grid = parsed_args.full_continental_grid
     var_names = config["weather"]["download"]["2.5 km"]["variables"]
+    if not full_grid:
+        # A bug in cfgrib.xarray_to_grib.to_grib() causes the buggy "unknown" GRIB name for the
+        # ACPC_Sfc variable in the ECCC files to be named "t" (for "air_temperature").
+        # So, we compensate for that here.
+        acpc_index = var_names.index(["APCP_Sfc", "unknown", "precip"])
+        var_names[acpc_index] = ["APCP_Sfc", "t", "precip"]
     dask_client = dask.distributed.Client(config["weather"]["dask cluster"])
     match run_type:
         case "nowcast+":
@@ -111,6 +126,7 @@ def grib_to_netcdf(parsed_args, config, *args):
                 run_date,
                 fcst_hr,
                 fcst_step_range,
+                full_grid,
                 config,
                 run_date_offset=-1,
             )
@@ -120,6 +136,7 @@ def grib_to_netcdf(parsed_args, config, *args):
                 run_date,
                 fcst_hr,
                 fcst_step_range,
+                full_grid,
                 config,
                 first_step_is_offset=False,
             )
@@ -129,6 +146,7 @@ def grib_to_netcdf(parsed_args, config, *args):
                 run_date,
                 fcst_hr,
                 fcst_step_range,
+                full_grid,
                 config,
                 first_step_is_offset=False,
             )
@@ -139,11 +157,7 @@ def grib_to_netcdf(parsed_args, config, *args):
             # run_date + 1 dataset is composed of hours 11-35 from 12Z forecast
             fcst_hr, fcst_step_range = "12", (11, 35)
             nemo_ds_fcst_day_1 = _calc_nemo_ds(
-                var_names,
-                run_date,
-                fcst_hr,
-                fcst_step_range,
-                config,
+                var_names, run_date, fcst_hr, fcst_step_range, full_grid, config
             )
             nc_file = _write_netcdf(
                 nemo_ds_fcst_day_1,
@@ -158,11 +172,7 @@ def grib_to_netcdf(parsed_args, config, *args):
             # run_date + 2 dataset is composed of hours 35-48 from 12Z forecast
             fcst_hr, fcst_step_range = "12", (35, 48)
             nemo_ds_fcst_day_2 = _calc_nemo_ds(
-                var_names,
-                run_date,
-                fcst_hr,
-                fcst_step_range,
-                config,
+                var_names, run_date, fcst_hr, fcst_step_range, full_grid, config
             )
             nc_file = _write_netcdf(
                 nemo_ds_fcst_day_2,
@@ -182,11 +192,7 @@ def grib_to_netcdf(parsed_args, config, *args):
             # run_date + 1 dataset is composed of hours 17-41 from 06Z forecast
             fcst_hr, fcst_step_range = "06", (17, 41)
             nemo_ds_fcst_day_1 = _calc_nemo_ds(
-                var_names,
-                run_date,
-                fcst_hr,
-                fcst_step_range,
-                config,
+                var_names, run_date, fcst_hr, fcst_step_range, full_grid, config
             )
             nc_file = _write_netcdf(
                 nemo_ds_fcst_day_1,
@@ -205,6 +211,7 @@ def grib_to_netcdf(parsed_args, config, *args):
                 run_date,
                 fcst_hr,
                 fcst_step_range,
+                full_grid,
                 config,
             )
             nc_file = _write_netcdf(
@@ -225,6 +232,7 @@ def _calc_nemo_ds(
     run_date,
     fcst_hr,
     fcst_step_range,
+    full_grid,
     config,
     run_date_offset=0,
     first_step_is_offset=True,
@@ -233,6 +241,7 @@ def _calc_nemo_ds(
     :param list var_names:
     :param :py:class:`arrow.Arrow`. run_date:
     :param tuple fcst_step_range:
+    :param boolean full_grid:
     :param dict config:
     :param int run_date_offset:
     :param boolean first_step_is_offset:
@@ -247,14 +256,10 @@ def _calc_nemo_ds(
     nemo_datasets = {}
     for msc_var, grib_var, nemo_var in var_names:
         grib_files = _calc_grib_file_paths(
-            fcst_date,
-            fcst_hr,
-            fcst_step_range,
-            msc_var,
-            config,
+            fcst_date, fcst_hr, fcst_step_range, msc_var, full_grid, config
         )
         nemo_datasets[nemo_var] = _calc_nemo_var_ds(
-            grib_var, nemo_var, grib_files, config
+            msc_var, grib_var, nemo_var, grib_files, full_grid, config
         )
     nemo_ds = xarray.combine_by_coords(
         nemo_datasets.values(), combine_attrs="drop_conflicts"
@@ -265,18 +270,25 @@ def _calc_nemo_ds(
     return nemo_ds
 
 
-def _calc_grib_file_paths(fcst_date, fcst_hr, fcst_step_range, msc_var, config):
+def _calc_grib_file_paths(
+    fcst_date, fcst_hr, fcst_step_range, msc_var, full_grid, config
+):
     """
     :param :py:class:`arrow.Arrow` fcst_date:
     :param str fcst_hr:
     :param tuple fcst_step_range:
     :param str msc_var:
+    :param boolean full_grid:
     :param dict config:
 
     :rtype: list
     """
     grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
-    file_tmpl = config["weather"]["download"]["2.5 km"]["file template"]
+    file_tmpl = (
+        config["weather"]["download"]["2.5 km"]["ECCC file template"]
+        if full_grid
+        else config["weather"]["download"]["2.5 km"]["SSC cropped file template"]
+    )
     fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
     logger.debug(
         f"creating {msc_var} GRIB file paths list for {fcst_yyyymmdd} {fcst_hr}Z forecast hours "
@@ -305,8 +317,9 @@ def _trim_grib(ds, y_slice, x_slice):
 
     :rtype: :py:class:`xarray.Dataset`
     """
-    # Select region of interest
-    ds = ds.sel(y=y_slice, x=x_slice)
+    if y_slice is not None and x_slice is not None:
+        # Select region of interest
+        ds = ds.sel(y=y_slice, x=x_slice)
     # Drop coordinates that we don't need
     keep_coords = ("time", "step", "latitude", "longitude")
     ds = ds.reset_coords(
@@ -316,23 +329,32 @@ def _trim_grib(ds, y_slice, x_slice):
     return ds
 
 
-def _calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
+def _calc_nemo_var_ds(msc_var, grib_var, nemo_var, grib_files, full_grid, config):
     """
+    :param str msc_var:
     :param str grib_var:
     :param str nemo_var:
     :param list grib_files:
+    :param boolean full_grid:
     :param dict config:
 
     :rtype: :py:class:`xarray.Dataset`
     """
-    logger.debug(f"creating {nemo_var} dataset from {grib_var} GRIB files")
-    y_min, y_max = config["weather"]["download"]["2.5 km"]["lon indices"]
-    x_min, x_max = config["weather"]["download"]["2.5 km"]["lat indices"]
-    # We need 1 point more than the final domain size to facilitate calculation of the
-    # grid rotation angle for the wind components
-    y_slice = slice(y_min, y_max + 1)
-    x_slice = slice(x_min, x_max + 1)
-    _partial_trim_grib = functools.partial(_trim_grib, y_slice=y_slice, x_slice=x_slice)
+    logger.debug(f"creating {nemo_var} dataset from {msc_var} GRIB files")
+    if not full_grid:
+        # GRIB files have already been cropped to the sub-grid that contains the
+        # SalishSeaCast NEMO domain
+        _partial_trim_grib = functools.partial(_trim_grib, y_slice=None, x_slice=None)
+    else:
+        y_min, y_max = config["weather"]["download"]["2.5 km"]["lon indices"]
+        x_min, x_max = config["weather"]["download"]["2.5 km"]["lat indices"]
+        # We need 1 point more than the final domain size to facilitate calculation of the
+        # grid rotation angle for the wind components
+        y_slice = slice(y_min, y_max + 1)
+        x_slice = slice(x_min, x_max + 1)
+        _partial_trim_grib = functools.partial(
+            _trim_grib, y_slice=y_slice, x_slice=x_slice
+        )
     grib_ds = xarray.open_mfdataset(
         grib_files,
         preprocess=_partial_trim_grib,

@@ -44,7 +44,8 @@ def config(base_config):
                   download:
                     2.5 km:
                       GRIB dir: forcing/atmospheric/continental2.5/GRIB/
-                      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+                      ECCC file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+                      SSC cropped file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H_SSC.grib2"
                       variables:
                         # [MSC name, GRIB std name, NEMO name]
                         - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
@@ -105,13 +106,19 @@ class TestMain:
         assert worker.cli.parser._actions[3].choices == {"nowcast+", "forecast2"}
         assert worker.cli.parser._actions[3].help
 
+    def test_add_full_continental_grid_option(self, mock_worker):
+        worker = grib_to_netcdf.main()
+        assert worker.cli.parser._actions[4].dest == "full_continental_grid"
+        assert worker.cli.parser._actions[4].default is False
+        assert worker.cli.parser._actions[4].help
+
     def test_add_run_date_option(self, mock_worker):
         worker = grib_to_netcdf.main()
-        assert worker.cli.parser._actions[4].dest == "run_date"
+        assert worker.cli.parser._actions[5].dest == "run_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
-        assert worker.cli.parser._actions[4].type == expected
-        assert worker.cli.parser._actions[4].default == arrow.now().floor("day")
-        assert worker.cli.parser._actions[4].help
+        assert worker.cli.parser._actions[5].type == expected
+        assert worker.cli.parser._actions[5].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[5].help
 
 
 class TestConfig:
@@ -146,8 +153,12 @@ class TestConfig:
             == "/results/forcing/atmospheric/continental2.5/GRIB/"
         )
         assert (
-            weather_download["file template"]
+            weather_download["ECCC file template"]
             == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+        )
+        assert (
+            weather_download["SSC cropped file template"]
+            == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H_SSC.grib2"
         )
         assert weather_download["variables"] == [
             ["UGRD_AGL-10m", "u10", "u_wind"],
@@ -240,7 +251,9 @@ class TestGribToNetcdf:
     @staticmethod
     @pytest.fixture
     def mock_calc_nemo_var_ds(monkeypatch):
-        def _mock_calc_nemo_var_ds(grib_var, nemo_var, grib_files, config):
+        def _mock_calc_nemo_var_ds(
+            msc_var, grib_var, nemo_var, grib_files, full_grid, config
+        ):
             pass
 
         monkeypatch.setattr(grib_to_netcdf, "_calc_nemo_var_ds", _mock_calc_nemo_var_ds)
@@ -297,10 +310,19 @@ class TestGribToNetcdf:
 
         monkeypatch.setattr(grib_to_netcdf, "_improve_metadata", _mock_improve_metadata)
 
-    @pytest.mark.parametrize("run_type", ("nowcast+", "forecast2"))
+    @pytest.mark.parametrize(
+        "run_type, full_grid",
+        (
+            ("nowcast+", True),
+            ("nowcast+", False),
+            ("forecast2", True),
+            ("forecast2", False),
+        ),
+    )
     def test_log_messages(
         self,
         run_type,
+        full_grid,
         mock_dask_client,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
@@ -315,6 +337,7 @@ class TestGribToNetcdf:
         parsed_args = SimpleNamespace(
             run_date=arrow.get("2023-03-08"),
             run_type=run_type,
+            full_continental_grid=full_grid,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -324,8 +347,10 @@ class TestGribToNetcdf:
         expected = f"creating NEMO-atmos forcing files for 2023-03-08 {run_type[:-1]}"
         assert caplog.messages[0].startswith(expected)
 
+    @pytest.mark.parametrize("full_grid", (True, False))
     def test_nowcast_checklist(
         self,
+        full_grid,
         mock_dask_client,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
@@ -340,6 +365,7 @@ class TestGribToNetcdf:
         parsed_args = SimpleNamespace(
             run_date=arrow.get("2023-03-09"),
             run_type="nowcast+",
+            full_continental_grid=full_grid,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -354,8 +380,10 @@ class TestGribToNetcdf:
         }
         assert checklist == expected
 
+    @pytest.mark.parametrize("full_grid", (True, False))
     def test_forecast2_checklist(
         self,
+        full_grid,
         mock_dask_client,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
@@ -370,6 +398,7 @@ class TestGribToNetcdf:
         parsed_args = SimpleNamespace(
             run_date=arrow.get("2023-03-13"),
             run_type="forecast2",
+            full_continental_grid=full_grid,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -395,35 +424,63 @@ class TestCalcNemoDs:
 class TestCalcGribFilePaths:
     """Unit tests for _calc_grib_file_paths() function."""
 
-    def test_calc_grib_file_paths(self, config):
+    def test_ECCC_grib_file_paths(self, config):
         fcst_date = arrow.get("2023-03-08")
         fcst_hr = "12"
         fcst_step_range = (1, 2)
         msc_var = "UGRD_AGL-10m"
+        full_grid = True
 
         grib_files = grib_to_netcdf._calc_grib_file_paths(
-            fcst_date, fcst_hr, fcst_step_range, msc_var, config
+            fcst_date, fcst_hr, fcst_step_range, msc_var, full_grid, config
         )
 
         expected = [
             Path(
-                "forcing/atmospheric/continental2.5/GRIB/20230308/12/001/20230308T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H.grib2"
+                "forcing/atmospheric/continental2.5/GRIB/20230308/12/001/"
+                "20230308T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H.grib2"
             ),
             Path(
-                "forcing/atmospheric/continental2.5/GRIB/20230308/12/002/20230308T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT002H.grib2"
+                "forcing/atmospheric/continental2.5/GRIB/20230308/12/002/"
+                "20230308T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT002H.grib2"
             ),
         ]
         assert grib_files == expected
 
-    def test_log_messages(self, config, caplog):
+    def test_SSC_cropped_grib_file_paths(self, config):
+        fcst_date = arrow.get("2023-03-08")
+        fcst_hr = "12"
+        fcst_step_range = (1, 2)
+        msc_var = "UGRD_AGL-10m"
+        full_grid = False
+
+        grib_files = grib_to_netcdf._calc_grib_file_paths(
+            fcst_date, fcst_hr, fcst_step_range, msc_var, full_grid, config
+        )
+
+        expected = [
+            Path(
+                "forcing/atmospheric/continental2.5/GRIB/20230308/12/001/"
+                "20230308T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H_SSC.grib2"
+            ),
+            Path(
+                "forcing/atmospheric/continental2.5/GRIB/20230308/12/002/"
+                "20230308T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT002H_SSC.grib2"
+            ),
+        ]
+        assert grib_files == expected
+
+    @pytest.mark.parametrize("full_grid", (True, False))
+    def test_log_messages(self, full_grid, config, caplog):
         fcst_date = arrow.get("2023-03-12")
         fcst_hr = "18"
         fcst_step_range = (5, 6)
         msc_var = "UGRD_AGL-10m"
+        full_grid = full_grid
         caplog.set_level(logging.DEBUG)
 
         grib_to_netcdf._calc_grib_file_paths(
-            fcst_date, fcst_hr, fcst_step_range, msc_var, config
+            fcst_date, fcst_hr, fcst_step_range, msc_var, full_grid, config
         )
 
         assert caplog.records[0].levelname == "DEBUG"

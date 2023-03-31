@@ -24,7 +24,11 @@ weather:
 #      url template: "https://dd.weather.gc.ca/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
       # Template for hourly ECCC HRDPS 2.5km continental domain fields file name
       # **Must be quoted to project {} characters**
-      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+      ECCC file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+      # Template for hourly HRDPS 2.5km continental domain fields file name for files
+      # that have been cropped to the sub-grid that contains the SalishSeaCast NEMO domain
+      # **Must be quoted to project {} characters**
+      SSC cropped file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H_SSC.grib2"
       # ECCC HRDPS 2.5km forecast field variable names
       variables:
         # [MSC name, GRIB std name, NEMO name]
