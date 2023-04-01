@@ -253,13 +253,22 @@ def _calc_nemo_ds(
         f"creating NEMO forcing dataset from {fcst_date.format('YYYYMMDD')} {fcst_hr}Z "
         f"forecast hours {fcst_step_range[0]:03d} to {fcst_step_range[1]:03d}"
     )
+    # GRIB files that have been cropped to the sub-grid that contains the
+    # SalishSeaCast NEMO domain contain messed up lon/lat arrays due to buggy or
+    # undocumented behaviour of cfgrib.xarray_to_grib.to_grib().
+    # So, we load a georef dataset containing the correct lon/lat arrays.
+    # NOTE: This georef dataset has the 1 point more in both directions than the
+    # final domain size to facilitate calculation of the grid rotation angle
+    # for the wind components.
+    georef_path = config["weather"]["download"]["2.5 km"]["SSC georef"]
+    georef_ds = xarray.open_dataset(georef_path) if not full_grid else None
     nemo_datasets = {}
     for msc_var, grib_var, nemo_var in var_names:
         grib_files = _calc_grib_file_paths(
             fcst_date, fcst_hr, fcst_step_range, msc_var, full_grid, config
         )
         nemo_datasets[nemo_var] = _calc_nemo_var_ds(
-            msc_var, grib_var, nemo_var, grib_files, full_grid, config
+            msc_var, grib_var, nemo_var, grib_files, full_grid, georef_ds, config
         )
     nemo_ds = xarray.combine_by_coords(
         nemo_datasets.values(), combine_attrs="drop_conflicts"
@@ -329,13 +338,16 @@ def _trim_grib(ds, y_slice, x_slice):
     return ds
 
 
-def _calc_nemo_var_ds(msc_var, grib_var, nemo_var, grib_files, full_grid, config):
+def _calc_nemo_var_ds(
+    msc_var, grib_var, nemo_var, grib_files, full_grid, georef_ds, config
+):
     """
     :param str msc_var:
     :param str grib_var:
     :param str nemo_var:
     :param list grib_files:
     :param boolean full_grid:
+    :param :py:class:`xarray.Dataset` or None georef_ds:
     :param dict config:
 
     :rtype: :py:class:`xarray.Dataset`
@@ -348,8 +360,8 @@ def _calc_nemo_var_ds(msc_var, grib_var, nemo_var, grib_files, full_grid, config
     else:
         y_min, y_max = config["weather"]["download"]["2.5 km"]["lon indices"]
         x_min, x_max = config["weather"]["download"]["2.5 km"]["lat indices"]
-        # We need 1 point more than the final domain size to facilitate calculation of the
-        # grid rotation angle for the wind components
+        # We need 1 point more in both directions than the final domain size to facilitate
+        # calculation of the grid rotation angle for the wind components
         y_slice = slice(y_min, y_max + 1)
         x_slice = slice(x_min, x_max + 1)
         _partial_trim_grib = functools.partial(
@@ -373,6 +385,18 @@ def _calc_nemo_var_ds(msc_var, grib_var, nemo_var, grib_files, full_grid, config
         },
         attrs=grib_ds[grib_var].attrs,
     )
+    if not full_grid:
+        # GRIB files have already been cropped to the sub-grid that contains the
+        # SalishSeaCast NEMO domain but due to buggy or undocumented behaviour of
+        # cfgrib.xarray_to_grib.to_grib() the lon/lat arrays are messed up.
+        # So, we use a georef dataset containing the correct lon/lat arrays.
+        nav_lon = georef_ds.longitude
+        nav_lat = georef_ds.latitude
+    else:
+        # Lons/Lats are okay in datasets from the full HRDPS continental domain
+        # that we cropped via _partial_trim_grib() when we loaded them above
+        nav_lon = grib_ds.longitude
+        nav_lat = grib_ds.latitude
     nemo_ds = xarray.Dataset(
         data_vars={
             nemo_var: nemo_da,
@@ -381,13 +405,14 @@ def _calc_nemo_var_ds(msc_var, grib_var, nemo_var, grib_files, full_grid, config
             "time_counter": time_counter,
             "y": grib_ds.y,
             "x": grib_ds.x,
-            "nav_lon": grib_ds.longitude,
-            "nav_lat": grib_ds.latitude,
+            "nav_lon": nav_lon,
+            "nav_lat": nav_lat,
         },
         attrs=grib_ds.attrs,
     )
     nemo_ds.nav_lon.data = nemo_ds.nav_lon.data + 360
-    nemo_ds = nemo_ds.drop_vars(["time", "longitude", "latitude"])
+    if full_grid:
+        nemo_ds = nemo_ds.drop_vars(["time", "longitude", "latitude"])
     return nemo_ds
 
 
