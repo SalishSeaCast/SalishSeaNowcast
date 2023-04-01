@@ -29,6 +29,7 @@ weather:
       # that have been cropped to the sub-grid that contains the SalishSeaCast NEMO domain
       # **Must be quoted to project {} characters**
       SSC cropped file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H_SSC.grib2"
+      SSC georef: /results/forcing/atmospheric/continental2.5/GRIB/SSC_grid_georef.nc
       # ECCC HRDPS 2.5km forecast field variable names
       variables:
         # [MSC name, GRIB std name, NEMO name]

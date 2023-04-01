@@ -46,6 +46,7 @@ def config(base_config):
                       GRIB dir: forcing/atmospheric/continental2.5/GRIB/
                       ECCC file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
                       SSC cropped file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H_SSC.grib2"
+                      SSC georef: forcing/atmospheric/continental2.5/GRIB/SSC_grid_georef.nc
                       variables:
                         # [MSC name, GRIB std name, NEMO name]
                         - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
@@ -160,6 +161,10 @@ class TestConfig:
             weather_download["SSC cropped file template"]
             == "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H_SSC.grib2"
         )
+        assert (
+            weather_download["SSC georef"]
+            == "/results/forcing/atmospheric/continental2.5/GRIB/SSC_grid_georef.nc"
+        )
         assert weather_download["variables"] == [
             ["UGRD_AGL-10m", "u10", "u_wind"],
             ["VGRD_AGL-10m", "v10", "v_wind"],
@@ -250,9 +255,17 @@ class TestGribToNetcdf:
 
     @staticmethod
     @pytest.fixture
+    def mock_open_dataset(monkeypatch):
+        def _mock_open_dataset(path):
+            pass
+
+        monkeypatch.setattr(grib_to_netcdf.xarray, "open_dataset", _mock_open_dataset)
+
+    @staticmethod
+    @pytest.fixture
     def mock_calc_nemo_var_ds(monkeypatch):
         def _mock_calc_nemo_var_ds(
-            msc_var, grib_var, nemo_var, grib_files, full_grid, config
+            msc_var, grib_var, nemo_var, grib_files, full_grid, georef_ds, config
         ):
             pass
 
@@ -324,6 +337,7 @@ class TestGribToNetcdf:
         run_type,
         full_grid,
         mock_dask_client,
+        mock_open_dataset,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
         mock_calc_earth_ref_winds,
@@ -352,6 +366,7 @@ class TestGribToNetcdf:
         self,
         full_grid,
         mock_dask_client,
+        mock_open_dataset,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
         mock_calc_earth_ref_winds,
@@ -385,6 +400,7 @@ class TestGribToNetcdf:
         self,
         full_grid,
         mock_dask_client,
+        mock_open_dataset,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
         mock_calc_earth_ref_winds,
