@@ -361,6 +361,7 @@ def _calc_nemo_var_ds(msc_var, grib_var, nemo_var, grib_files, full_grid, config
         combine="nested",
         concat_dim="step",
         engine="cfgrib",
+        backend_kwargs={"indexpath": ""},
     )
     time_counter = grib_ds.step.values + grib_ds.time.values
     nemo_da = xarray.DataArray(
