@@ -1226,12 +1226,8 @@ message registry:
       failure 1km 12: 12 1km weather forecast download failed
       crash: download_weather worker crashed
 
-    # Worker module name
     collect_weather:
-      # The key in the system checklist that the manager maintains that is to
-      # be used to hold message payload information provided by the worker
       checklist key: weather forecast
-      # Message types that the worker can send and their meanings
       success 2.5km 00: 00 2.5km weather forecast ready
       failure 2.5km 00: 00 2.5km weather forecast collection failed
       success 2.5km 06: 06 2.5km weather forecast ready
@@ -1245,6 +1241,18 @@ message registry:
       success 1km 12: 12 1km weather forecast ready
       failure 1km 12: 12 1km weather forecast collection failed
       crash: collect_weather worker crashed
+
+    crop_gribs:
+      checklist key: weather forecast
+      success 00: 00 GRIB files cropped
+      failure 00: 00 GRIB file cropping failed
+      success 06: 06 GRIB files cropped
+      failure 06: 06 GRIB file cropping failed
+      success 12: 12 GRIB files cropped
+      failure 12: 12 GRIB file cropping failed
+      success 18: 18 GRIB files cropped
+      failure 18: 18 GRIB file cropping failed
+      crash: crop_gribs worker crashed
 
     collect_river_data:
       checklist key: river data
