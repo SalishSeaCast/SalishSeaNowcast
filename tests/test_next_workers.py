@@ -27,7 +27,7 @@ import nemo_nowcast
 import pytest
 from nemo_nowcast import Message, NextWorker
 
-from nowcast import next_workers
+from nowcast import next_workers, workers
 
 
 @pytest.fixture
@@ -142,15 +142,16 @@ class TestAfterWorkerFunctions:
 
     def test_all_workers_have_after_functions(self):
         def worker_modules():
-            for module in Path("../nowcast/workers/").glob("*.py"):
-                if module.name != "__init__.py":
-                    yield module
+            workers_dir = Path(inspect.getfile(workers)).parent
+            for worker_module in workers_dir.glob("*.py"):
+                if worker_module.name != "__init__.py":
+                    yield worker_module
 
         after_funcs = {
             func[0] for func in inspect.getmembers(next_workers, inspect.isfunction)
         }
-        for module in worker_modules():
-            assert f"after_{module.stem}" in after_funcs
+        for worker_module in worker_modules():
+            assert f"after_{worker_module.stem}" in after_funcs
 
 
 class TestAfterDownloadWeather:
