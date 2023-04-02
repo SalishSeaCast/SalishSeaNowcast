@@ -358,8 +358,8 @@ def _calc_nemo_var_ds(
         # SalishSeaCast NEMO domain
         _partial_trim_grib = functools.partial(_trim_grib, y_slice=None, x_slice=None)
     else:
-        y_min, y_max = config["weather"]["download"]["2.5 km"]["lon indices"]
-        x_min, x_max = config["weather"]["download"]["2.5 km"]["lat indices"]
+        y_min, y_max = config["weather"]["download"]["2.5 km"]["lat indices"]
+        x_min, x_max = config["weather"]["download"]["2.5 km"]["lon indices"]
         # We need 1 point more in both directions than the final domain size to facilitate
         # calculation of the grid rotation angle for the wind components
         y_slice = slice(y_min, y_max + 1)
