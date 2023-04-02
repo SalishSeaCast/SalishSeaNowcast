@@ -183,8 +183,8 @@ class TestConfig:
             "therm_rad",
             "precip",
         ]
-        assert weather_download["lon indices"] == [230, 460]
-        assert weather_download["lat indices"] == [300, 490]
+        assert weather_download["lon indices"] == [300, 490]
+        assert weather_download["lat indices"] == [230, 460]
 
     def test_weather_section(self, prod_config):
         weather = prod_config["weather"]
