@@ -165,10 +165,8 @@ class TestAfterDownloadWeather:
             "failure 2.5km 06",
             "failure 2.5km 12",
             "failure 2.5km 18",
-            "success 2.5km 00",
             "failure 1km 00",
             "failure 1km 12",
-            "success 2.5km 18",
             "success 1km 00",
             "success 1km 12",
         ],
@@ -178,6 +176,20 @@ class TestAfterDownloadWeather:
             Message("download_weather", msg_type), config, checklist
         )
         assert workers == []
+
+    def test_success_2_5_km_00(self, config, checklist, monkeypatch):
+        def mock_now():
+            return arrow.get("2023-04-04")
+
+        monkeypatch.setattr(next_workers.arrow, "now", mock_now)
+
+        workers = next_workers.after_download_weather(
+            Message("download_weather", "success 2.5km 00"), config, checklist
+        )
+        expected = [
+            NextWorker("nowcast.workers.crop_gribs", ["00"], host="localhost"),
+        ]
+        assert workers == expected
 
     def test_success_2_5_km_06(self, config, checklist, monkeypatch):
         def mock_now():
@@ -189,6 +201,7 @@ class TestAfterDownloadWeather:
             Message("download_weather", "success 2.5km 06"), config, checklist
         )
         expected = [
+            NextWorker("nowcast.workers.crop_gribs", ["06"], host="localhost"),
             NextWorker(
                 "nowcast.workers.collect_river_data",
                 ["ECCC", "Capilano", "--data-date", "2018-12-26"],
@@ -208,9 +221,6 @@ class TestAfterDownloadWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["forecast2"], host="salish-nowcast"
-            ),
         ]
         assert workers == expected
         assert race_condition_workers == {
@@ -228,6 +238,7 @@ class TestAfterDownloadWeather:
             Message("download_weather", "success 2.5km 12"), config, checklist
         )
         expected = [
+            NextWorker("nowcast.workers.crop_gribs", ["12"], host="localhost"),
             NextWorker(
                 "nowcast.workers.collect_river_data",
                 ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
@@ -235,9 +246,6 @@ class TestAfterDownloadWeather:
             ),
             NextWorker("nowcast.workers.make_turbidity_file", [], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="salish-nowcast"
-            ),
             NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
         ]
         assert workers == expected
@@ -246,6 +254,20 @@ class TestAfterDownloadWeather:
             "make_live_ocean_files",
             "make_ssh_files",
         }
+
+    def test_success_2_5_km_18(self, config, checklist, monkeypatch):
+        def mock_now():
+            return arrow.get("2023-04-04")
+
+        monkeypatch.setattr(next_workers.arrow, "now", mock_now)
+
+        workers = next_workers.after_download_weather(
+            Message("download_weather", "success 2.5km 18"), config, checklist
+        )
+        expected = [
+            NextWorker("nowcast.workers.crop_gribs", ["18"], host="localhost"),
+        ]
+        assert workers == expected
 
 
 class TestAfterCollectWeather:
@@ -269,6 +291,18 @@ class TestAfterCollectWeather:
         )
         assert workers == []
 
+    def test_success_2_5_km_00(self, config, checklist):
+        workers = next_workers.after_collect_weather(
+            Message("collect_weather", "success 2.5km 00"), config, checklist
+        )
+        expected = [
+            NextWorker("nowcast.workers.crop_gribs", ["00"], host="localhost"),
+            NextWorker(
+                "nowcast.workers.collect_weather", ["06", "2.5km"], host="localhost"
+            ),
+        ]
+        assert workers == expected
+
     def test_success_2_5_km_06(self, config, checklist, monkeypatch):
         def mock_now():
             return arrow.get("2018-12-27")
@@ -279,6 +313,7 @@ class TestAfterCollectWeather:
             Message("collect_weather", "success 2.5km 06"), config, checklist
         )
         expected = [
+            NextWorker("nowcast.workers.crop_gribs", ["06"], host="localhost"),
             NextWorker(
                 "nowcast.workers.collect_river_data",
                 ["ECCC", "Capilano", "--data-date", "2018-12-26"],
@@ -299,9 +334,6 @@ class TestAfterCollectWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
             NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["forecast2"], host="salish-nowcast"
-            ),
-            NextWorker(
                 "nowcast.workers.collect_weather", ["12", "2.5km"], host="localhost"
             ),
         ]
@@ -318,6 +350,7 @@ class TestAfterCollectWeather:
             Message("collect_weather", "success 2.5km 12"), config, checklist
         )
         expected = [
+            NextWorker("nowcast.workers.crop_gribs", ["12"], host="localhost"),
             NextWorker(
                 "nowcast.workers.collect_river_data",
                 ["USGS", "SkagitMountVernon", "--data-date", "2018-12-26"],
@@ -325,9 +358,6 @@ class TestAfterCollectWeather:
             ),
             NextWorker("nowcast.workers.make_turbidity_file", [], host="localhost"),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["06"], host="localhost"),
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="salish-nowcast"
-            ),
             NextWorker("nowcast.workers.download_live_ocean", [], host="localhost"),
             NextWorker(
                 "nowcast.workers.collect_weather", ["18", "2.5km"], host="localhost"
@@ -345,6 +375,7 @@ class TestAfterCollectWeather:
             Message("collect_weather", "success 2.5km 18"), config, checklist
         )
         expected = [
+            NextWorker("nowcast.workers.crop_gribs", ["18"], host="localhost"),
             NextWorker(
                 "nowcast.workers.download_weather",
                 ["00", "1km"],
@@ -359,18 +390,61 @@ class TestAfterCollectWeather:
                 "nowcast.workers.collect_weather", ["00", "2.5km"], host="localhost"
             ),
         ]
-        assert len(workers) == len(expected)
-        for next_worker in expected:
-            assert next_worker in workers
+        assert workers == expected
 
-    def test_success_2_5_km_00(self, config, checklist):
-        workers = next_workers.after_collect_weather(
-            Message("collect_weather", "success 2.5km 00"), config, checklist
+
+class TestAfterCropGribs:
+    """Unit tests for the after_crop_gribs function."""
+
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "crash",
+            "failure 00",
+            "failure 06",
+            "failure 12",
+            "failure 18",
+            "success 00",
+            "success 18",
+        ],
+    )
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_crop_gribs(
+            Message("crop_gribs", msg_type), config, checklist
         )
-        expected = NextWorker(
-            "nowcast.workers.collect_weather", ["06", "2.5km"], host="localhost"
+        assert workers == []
+
+    def test_success_06(self, config, checklist, monkeypatch):
+        def mock_now():
+            return arrow.get("2023-04-04")
+
+        monkeypatch.setattr(next_workers.arrow, "now", mock_now)
+
+        workers = next_workers.after_crop_gribs(
+            Message("crop_gribs", "success 06"), config, checklist
         )
-        assert expected in workers
+        expected = [
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf", ["forecast2"], host="salish-nowcast"
+            ),
+        ]
+        assert workers == expected
+
+    def test_success_12(self, config, checklist, monkeypatch):
+        def mock_now():
+            return arrow.get("2023-04-04")
+
+        monkeypatch.setattr(next_workers.arrow, "now", mock_now)
+
+        workers = next_workers.after_crop_gribs(
+            Message("crop_gribs", "success 12"), config, checklist
+        )
+        expected = [
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="salish-nowcast"
+            ),
+        ]
+        assert workers == expected
 
 
 class TestAfterCollectRiverData:

@@ -60,7 +60,14 @@ def after_download_weather(msg, config, checklist):
     }
     if msg.type.startswith("success"):
         data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
+        if msg.type.endswith("2.5km 00"):
+            next_workers["success 2.5km 00"].append(
+                NextWorker("nowcast.workers.crop_gribs", args=["00"])
+            )
         if msg.type.endswith("2.5km 06"):
+            next_workers["success 2.5km 06"].append(
+                NextWorker("nowcast.workers.crop_gribs", args=["06"])
+            )
             for river_name in config["rivers"]["stations"]["ECCC"]:
                 next_workers["success 2.5km 06"].append(
                     NextWorker(
@@ -77,15 +84,8 @@ def after_download_weather(msg, config, checklist):
                     NextWorker("nowcast.workers.get_onc_ferry", args=[ferry])
                 )
             if "forecast2" in config["run types"]:
-                next_workers["success 2.5km 06"].extend(
-                    [
-                        NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["00"]),
-                        NextWorker(
-                            "nowcast.workers.grib_to_netcdf",
-                            args=["forecast2"],
-                            host="salish-nowcast",
-                        ),
-                    ]
+                next_workers["success 2.5km 06"].append(
+                    NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["00"]),
                 )
                 race_condition_workers = {
                     "grib_to_netcdf",
@@ -93,6 +93,9 @@ def after_download_weather(msg, config, checklist):
                 }
                 return next_workers[msg.type], race_condition_workers
         if msg.type.endswith("2.5km 12"):
+            next_workers["success 2.5km 12"].append(
+                NextWorker("nowcast.workers.crop_gribs", args=["12"])
+            )
             for river_name in config["rivers"]["stations"]["USGS"]:
                 next_workers["success 2.5km 12"].append(
                     NextWorker(
@@ -104,11 +107,6 @@ def after_download_weather(msg, config, checklist):
                 [
                     NextWorker("nowcast.workers.make_turbidity_file"),
                     NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["06"]),
-                    NextWorker(
-                        "nowcast.workers.grib_to_netcdf",
-                        args=["nowcast+"],
-                        host="salish-nowcast",
-                    ),
                     NextWorker("nowcast.workers.download_live_ocean"),
                 ]
             )
@@ -118,6 +116,10 @@ def after_download_weather(msg, config, checklist):
                 "make_ssh_files",
             }
             return next_workers[msg.type], race_condition_workers
+        if msg.type.endswith("2.5km 18"):
+            next_workers["success 2.5km 18"].append(
+                NextWorker("nowcast.workers.crop_gribs", args=["18"])
+            )
     return next_workers[msg.type]
 
 
@@ -216,6 +218,22 @@ def after_crop_gribs(msg, config, checklist):
         "success 12": [],
         "success 18": [],
     }
+    if msg.type == "success 06":
+        next_workers["success 06"].append(
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf",
+                args=["forecast2"],
+                host="salish-nowcast",
+            )
+        )
+    if msg.type == "success 12":
+        next_workers["success 12"].append(
+            NextWorker(
+                "nowcast.workers.grib_to_netcdf",
+                args=["nowcast+"],
+                host="salish-nowcast",
+            )
+        )
     return next_workers[msg.type]
 
 
