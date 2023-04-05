@@ -96,7 +96,7 @@ def get_grib(parsed_args, config, *args):
     grp_name = config["file group"]
     _mkdirs(dest_dir_root, date, forecast, grp_name)
     url_tmpl = config["weather"]["download"][resolution]["url template"]
-    filename_tmpl = config["weather"]["download"][resolution]["file template"]
+    filename_tmpl = config["weather"]["download"][resolution]["ECCC file template"]
     var_names = config["weather"]["download"][resolution]["variables"]
     # 2.5km config has collections of 3 names per var, 1km has just MSC var name
     msc_var_names = [
