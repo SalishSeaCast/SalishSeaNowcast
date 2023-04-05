@@ -412,8 +412,15 @@ def _calc_nemo_var_ds(
         attrs=grib_ds.attrs,
     )
     nemo_ds.nav_lon.data = nemo_ds.nav_lon.data + 360
-    if full_grid:
-        nemo_ds = nemo_ds.drop_vars(["time", "longitude", "latitude"])
+    try:
+        # Drop unneeded variables that come from full continental domain GRIB files.
+        # Drop time separately from lons/lats because drop_vars() fails is any of the vars
+        # in the list don't exist.
+        nemo_ds = nemo_ds.drop_vars(["time"])
+        nemo_ds = nemo_ds.drop_vars(["longitude", "latitude"])
+    except ValueError:
+        # We don't care if some or all of them don't exist in the dataset
+        pass
     return nemo_ds
 
 
