@@ -723,6 +723,12 @@ class TestImproveMetadata:
         grib_to_netcdf._improve_metadata(nemo_ds, config)
 
         expected = {
+            "GRIB_paramId": "500041",
+            "GRIB_cfName": "precipitation_flux",
+            "GRIB_cfVarName": "precipitation_flux",
+            "GRIB_name": "Total Precipitation rate (S)",
+            "GRIB_shortName": "tot_prec",
+            "GRIB_units": "kg m-2 s-1",
             "standard_name": "precipitation_flux",
             "long_name": "Precipitation Flux",
             "units": "kg m-2 s-1",
