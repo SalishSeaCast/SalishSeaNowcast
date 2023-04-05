@@ -21,6 +21,8 @@ end their work.
 
 Function names **must** be of the form :py:func:`after_worker_name`.
 """
+from pathlib import Path
+
 import arrow
 from nemo_nowcast import NextWorker
 
@@ -61,8 +63,13 @@ def after_download_weather(msg, config, checklist):
     if msg.type.startswith("success"):
         data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
         if msg.type.endswith("2.5km 00"):
+            grib_dir = Path(checklist["weather forecast"]["00 2.5km"])
+            fcst_date_yyyymmdd = grib_dir.parent.stem
+            fcst_date = arrow.get(fcst_date_yyyymmdd, "YYYYMMDD").format("YYYY-MM-DD")
             next_workers["success 2.5km 00"].append(
-                NextWorker("nowcast.workers.crop_gribs", args=["00"])
+                NextWorker(
+                    "nowcast.workers.crop_gribs", args=["00", "--fcst-date", fcst_date]
+                )
             )
         if msg.type.endswith("2.5km 06"):
             next_workers["success 2.5km 06"].append(
