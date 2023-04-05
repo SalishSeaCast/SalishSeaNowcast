@@ -47,7 +47,7 @@ def config(base_config):
                       datamart dir: /SalishSeaCast/datamart/hrdps-continental/
                       GRIB dir: /results/forcing/atmospheric/continental2.5/GRIB/
                       url template: "https://hpfx.collab.science.gc.ca/{date}/WXO-DD/model_hrdps/continental/2.5km/{forecast}/{hour}/{filename}"
-                      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+                      ECCC file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
                       variables:
                         - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
                         - [VGRD_AGL-10m, v10, v_wind]           # v component of wind velocity at 10m elevation
@@ -65,7 +65,7 @@ def config(base_config):
                     1 km:
                       GRIB dir: /results/forcing/atmospheric/GEM1.0/GRIB/
                       url template: "https://dd.alpha.meteo.gc.ca/model_hrdps/west/1km/grib2/{forecast}/{hour}/{filename}"
-                      file template: "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
+                      ECCC file template: "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
                       variables:
                         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
                         - VGRD_TGL_10  # v component of wind velocity at 10m elevation
@@ -200,7 +200,7 @@ class TestConfig:
             == "https://dd.alpha.meteo.gc.ca/model_hrdps/west/1km/grib2/{forecast}/{hour}/{filename}"
         )
         assert (
-            weather_download["file template"]
+            weather_download["ECCC file template"]
             == "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
         )
         assert weather_download["forecast duration"] == 36
@@ -405,7 +405,7 @@ class TestGetGrib:
                 "url template"
             ],
             config["weather"]["download"][resolution.replace("km", " km")][
-                "file template"
+                "ECCC file template"
             ],
             variable,
             config["weather"]["download"][resolution.replace("km", " km")]["GRIB dir"],
@@ -564,7 +564,7 @@ class TestGetFile:
 
         download_weather._get_file(
             config["weather"]["download"][resolution]["url template"],
-            config["weather"]["download"][resolution]["file template"],
+            config["weather"]["download"][resolution]["ECCC file template"],
             variable,
             config["weather"]["download"][resolution]["GRIB dir"],
             "20150619",
@@ -573,9 +573,9 @@ class TestGetFile:
             None,
         )
 
-        filename = config["weather"]["download"][resolution]["file template"].format(
-            variable=variable, date="20150619", forecast="06", hour="001"
-        )
+        filename = config["weather"]["download"][resolution][
+            "ECCC file template"
+        ].format(variable=variable, date="20150619", forecast="06", hour="001")
         url = config["weather"]["download"][resolution]["url template"].format(
             date="20150619", forecast="06", hour="001", filename=filename
         )
@@ -617,7 +617,7 @@ class TestGetFile:
         with pytest.raises(download_weather.WorkerError):
             download_weather._get_file(
                 config["weather"]["download"][resolution]["url template"],
-                config["weather"]["download"][resolution]["file template"],
+                config["weather"]["download"][resolution]["ECCC file template"],
                 "UGRD_TGL_10",
                 config["weather"]["download"][resolution]["GRIB dir"],
                 "20150619",

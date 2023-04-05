@@ -175,7 +175,7 @@ def _calc_expected_files(datamart_dir, forecast, forecast_yyyymmdd, resolution, 
     msc_var_names = [
         var_name[0] if resolution == "2.5 km" else var_name for var_name in var_names
     ]
-    file_template = config["weather"]["download"][resolution]["file template"]
+    file_template = config["weather"]["download"][resolution]["ECCC file template"]
     expected_files = set()
     for hour in range(forecast_duration):
         forecast_hour = f"{hour+1:03d}"

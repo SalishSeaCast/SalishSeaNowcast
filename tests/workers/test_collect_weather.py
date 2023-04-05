@@ -49,7 +49,7 @@ def config(base_config):
                       datamart dir: datamart/hrdps-continental/
                       GRIB dir: forcing/atmospheric/continental2.5/GRIB/
                       forecast duration: 48
-                      file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
+                      ECCC file template: "{date}T{forecast}Z_MSC_HRDPS_{variable}_RLatLon0.0225_PT{hour}H.grib2"
                       variables:
                         - [UGRD_AGL-10m, u10, u_wind]           # u component of wind velocity at 10m elevation
                         - [VGRD_AGL-10m, v10, v_wind]           # v component of wind velocity at 10m elevation
@@ -66,7 +66,7 @@ def config(base_config):
                       datamart dir: datamart/hrdps-west/1km
                       GRIB dir: forcing/atmospheric/GEM1.0/GRIB/
                       forecast duration: 36
-                      file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
+                      ECCC file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
                       variables:
                         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
                         - VGRD_TGL_10  # v component of wind velocity at 10m elevation
@@ -203,7 +203,7 @@ class TestConfig:
         )
         assert weather_download["forecast duration"] == 36
         assert (
-            weather_download["file template"]
+            weather_download["ECCC file template"]
             == "CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2"
         )
         assert weather_download["variables"] == [
@@ -471,7 +471,7 @@ class TestCalcExpectedFiles:
             var_name[0] if resolution == "2.5 km" else var_name
             for var_name in var_names
         ]
-        file_template = config["weather"]["download"][resolution]["file template"]
+        file_template = config["weather"]["download"][resolution]["ECCC file template"]
         expected = set()
         for hour in range(forecast_duration):
             forecast_hour = f"{hour + 1:03d}"
@@ -523,7 +523,7 @@ class TestMoveFile:
         )
         caplog.set_level(logging.DEBUG)
 
-        file_template = config["weather"]["download"][resolution]["file template"]
+        file_template = config["weather"]["download"][resolution]["ECCC file template"]
         var_file = file_template.format(
             variable="UGRD_TGL_10", date="20200505", forecast=forecast, hour="043"
         )
@@ -532,6 +532,7 @@ class TestMoveFile:
         expected_file.write_bytes(b"")
         grib_forecast_dir = grib_dir / "20200505" / forecast
         grib_forecast_dir.mkdir(parents=True)
+
         collect_weather._move_file(expected_file, grib_forecast_dir, grp_name)
 
         assert (grib_forecast_dir / "043" / var_file).exists()

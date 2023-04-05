@@ -67,7 +67,7 @@ weather:
       url template: 'https://dd.alpha.meteo.gc.ca/model_hrdps/west/1km/grib2/{forecast}/{hour}/{filename}'
       # Template for hourly ECCC HRDPS 1km west domain fields file name
       # **Must be quoted to project {} characters**
-      file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
+      ECCC file template: 'CMC_hrdps_west_{variable}_rotated_latlon0.009x0.009_{date}T{forecast}Z_P{hour}-00.grib2'
       # ECCC HRDPS 1km GRIB forecast file field variable names
       variables:
         - UGRD_TGL_10  # u component of wind velocity at 10m elevation
