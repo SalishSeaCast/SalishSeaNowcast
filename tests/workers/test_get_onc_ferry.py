@@ -152,40 +152,44 @@ class TestCalcLocationArrays:
     pass
 
 
-# TODO: remove this skip when issue #174 is resolved
-@pytest.mark.skip(reason="fails on GHA with pandas=2.0.0; see issue #174")
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestResampleNavCoord:
     """Unit test for _resample_nav_coord() function."""
 
-    nav_data = xarray.Dataset(
-        data_vars={
-            "longitude": (["sampleTime"], numpy.linspace(-123.79566, -123.80266, 59))
-        },
-        coords={
-            "sampleTime": pandas.date_range(
-                start="2021-03-08T10:14:43.082000000", periods=59, freq="1S"
-            )
-        },
-        attrs={"station": "TWDP.N1"},
-    )
+    # TODO: remove this skip when issue #174 is resolved
+    @pytest.mark.skip(reason="fails on GHA with pandas=2.0.0; see issue #174")
+    def test_resample_nav_coord(self, ferry_platform):
+        nav_data = xarray.Dataset(
+            data_vars={
+                "longitude": (
+                    ["sampleTime"],
+                    numpy.linspace(-123.79566, -123.80266, 59),
+                )
+            },
+            coords={
+                "sampleTime": pandas.date_range(
+                    start="2021-03-08T10:14:43.082000000", periods=59, freq="1S"
+                )
+            },
+            attrs={"station": "TWDP.N1"},
+        )
 
-    resampled_coord = get_onc_ferry._resample_nav_coord(
-        nav_data, "longitude", "degrees_east"
-    )
+        resampled_coord = get_onc_ferry._resample_nav_coord(
+            nav_data, "longitude", "degrees_east"
+        )
 
-    expected_times = pandas.date_range(
-        start="2021-03-08T10:14:00", end="2021-03-08T10:15:00", freq="1min"
-    )
-    xarray.testing.assert_equal(
-        resampled_coord.time,
-        xarray.DataArray(expected_times, coords=[("time", expected_times)]),
-    )
-    numpy.testing.assert_array_almost_equal(
-        resampled_coord.data, numpy.array([-123.796626, -123.800186])
-    )
-    assert resampled_coord.attrs["units"] == "degrees_east"
-    assert resampled_coord.attrs["station"] == "TWDP.N1"
+        expected_times = pandas.date_range(
+            start="2021-03-08T10:14:00", end="2021-03-08T10:15:00", freq="1min"
+        )
+        xarray.testing.assert_equal(
+            resampled_coord.time,
+            xarray.DataArray(expected_times, coords=[("time", expected_times)]),
+        )
+        numpy.testing.assert_array_almost_equal(
+            resampled_coord.data, numpy.array([-123.796626, -123.800186])
+        )
+        assert resampled_coord.attrs["units"] == "degrees_east"
+        assert resampled_coord.attrs["station"] == "TWDP.N1"
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
