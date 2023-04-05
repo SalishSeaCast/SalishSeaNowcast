@@ -81,6 +81,24 @@ Workers
     :members: main
 
 
+.. _CropGribsWorker:
+
+:kbd:`crop_gribs`
+---------------------
+
+.. automodule:: nowcast.workers.crop_gribs
+    :members: main
+
+
+.. _GribToNetcdfWorker:
+
+:kbd:`grib_to_netcdf`
+---------------------
+
+.. automodule:: nowcast.workers.grib_to_netcdf
+    :members: main
+
+
 :kbd:`collect_river_data`
 -------------------------
 
@@ -110,15 +128,6 @@ Workers
 ---------------------
 
 .. automodule:: nowcast.workers.make_ssh_files
-    :members: main
-
-
-.. _GribToNetcdfWorker:
-
-:kbd:`grib_to_netcdf`
----------------------
-
-.. automodule:: nowcast.workers.grib_to_netcdf
     :members: main
 
 
