@@ -32,7 +32,6 @@ import logging
 from pathlib import Path
 
 import arrow
-import dask.distributed
 import numpy
 from nemo_nowcast import NowcastWorker
 import xarray
@@ -110,7 +109,6 @@ def grib_to_netcdf(parsed_args, config, *args):
         # So, we compensate for that here.
         acpc_index = var_names.index(["APCP_Sfc", "unknown", "precip"])
         var_names[acpc_index] = ["APCP_Sfc", "t", "precip"]
-    dask_client = dask.distributed.Client(config["weather"]["dask cluster"])
     match run_type:
         case "nowcast+":
             logger.info(
@@ -224,7 +222,6 @@ def grib_to_netcdf(parsed_args, config, *args):
                 fcst=True,
             )
             _update_checklist(nc_file, checklist, fcst=True)
-    dask_client.close()
     return checklist
 
 

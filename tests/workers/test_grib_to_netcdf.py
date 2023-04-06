@@ -69,7 +69,6 @@ def config(base_config):
 
                   ops dir: forcing/atmospheric/continental2.5/nemo_forcing/
                   file template: "hrdps_{:y%Ym%md%d}.nc"
-                  dask cluster: tcp://142.103.36.12:4386
                 """
             )
         )
@@ -193,7 +192,6 @@ class TestConfig:
             == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
         )
         assert weather["file template"] == "hrdps_{:y%Ym%md%d}.nc"
-        assert weather["dask cluster"] == "tcp://142.103.36.12:4386"
         assert (
             weather["monitoring image"]
             == "/results/nowcast-sys/figures/monitoring/wg.png"
@@ -238,20 +236,6 @@ class TestFailure:
 
 class TestGribToNetcdf:
     """Unit test for grib_to_netcdf() function."""
-
-    @staticmethod
-    @pytest.fixture
-    def mock_dask_client(monkeypatch):
-        def _mock_dask_client(address):
-            class MockClient:
-                def close(self):
-                    pass
-
-            return MockClient()
-
-        monkeypatch.setattr(
-            grib_to_netcdf.dask.distributed, "Client", _mock_dask_client
-        )
 
     @staticmethod
     @pytest.fixture
@@ -336,7 +320,6 @@ class TestGribToNetcdf:
         self,
         run_type,
         full_grid,
-        mock_dask_client,
         mock_open_dataset,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
@@ -365,7 +348,6 @@ class TestGribToNetcdf:
     def test_nowcast_checklist(
         self,
         full_grid,
-        mock_dask_client,
         mock_open_dataset,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
@@ -399,7 +381,6 @@ class TestGribToNetcdf:
     def test_forecast2_checklist(
         self,
         full_grid,
-        mock_dask_client,
         mock_open_dataset,
         mock_calc_nemo_var_ds,
         mock_combine_by_coords,
