@@ -227,19 +227,11 @@ def after_crop_gribs(msg, config, checklist):
     }
     if msg.type == "success 06":
         next_workers["success 06"].append(
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf",
-                args=["forecast2"],
-                host="salish-nowcast",
-            )
+            NextWorker("nowcast.workers.grib_to_netcdf", args=["forecast2"])
         )
     if msg.type == "success 12":
         next_workers["success 12"].append(
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf",
-                args=["nowcast+"],
-                host="salish-nowcast",
-            )
+            NextWorker("nowcast.workers.grib_to_netcdf", args=["nowcast+"])
         )
     return next_workers[msg.type]
 

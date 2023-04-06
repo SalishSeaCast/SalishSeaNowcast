@@ -443,11 +443,7 @@ class TestAfterCropGribs:
         workers = next_workers.after_crop_gribs(
             Message("crop_gribs", "success 06"), config, checklist
         )
-        expected = [
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["forecast2"], host="salish-nowcast"
-            ),
-        ]
+        expected = [NextWorker("nowcast.workers.grib_to_netcdf", ["forecast2"])]
         assert workers == expected
 
     def test_success_12(self, config, checklist, monkeypatch):
@@ -459,11 +455,7 @@ class TestAfterCropGribs:
         workers = next_workers.after_crop_gribs(
             Message("crop_gribs", "success 12"), config, checklist
         )
-        expected = [
-            NextWorker(
-                "nowcast.workers.grib_to_netcdf", ["nowcast+"], host="salish-nowcast"
-            ),
-        ]
+        expected = [NextWorker("nowcast.workers.grib_to_netcdf", ["nowcast+"])]
         assert workers == expected
 
 
