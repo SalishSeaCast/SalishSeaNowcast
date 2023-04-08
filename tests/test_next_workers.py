@@ -1130,7 +1130,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-15"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1158,7 +1158,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-15"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected
@@ -1273,7 +1273,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast2": {
                         "host": "arbutus.cloud",
-                        "run date": "2023-03-16",
+                        "run date": "2023-04-07",
                         "completed": True,
                     }
                 },
@@ -1283,7 +1283,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast2", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "forecast2", "--run-date", "2023-04-08"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1299,7 +1299,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast2": {
                         "host": "arbutus.cloud",
-                        "run date": "2023-03-16",
+                        "run date": "2023-04-07",
                         "completed": True,
                     }
                 },
@@ -1309,7 +1309,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast2", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "forecast2", "--run-date", "2023-04-08"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected
@@ -1336,7 +1336,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-15"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1363,7 +1363,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-15"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected
@@ -1901,8 +1901,8 @@ class TestAfterMakeWW3currentFile:
                 "make_ww3_current_file",
                 "success forecast",
                 {
-                    "forecast": "current/SoG_current_20190805.nc",
-                    "run date": "2019-08-05",
+                    "forecast": "current/SoG_current_20230407.nc",
+                    "run date": "2023-04-07",
                 },
             ),
             config,
@@ -1910,7 +1910,7 @@ class TestAfterMakeWW3currentFile:
         )
         expected = NextWorker(
             "nowcast.workers.run_ww3",
-            args=["arbutus.cloud", "nowcast", "--run-date", "2019-08-05"],
+            args=["arbutus.cloud", "nowcast", "--run-date", "2023-04-07"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1921,8 +1921,8 @@ class TestAfterMakeWW3currentFile:
                 "make_ww3_current_file",
                 "success forecast",
                 {
-                    "forecast": "current/SoG_current_20230316.nc",
-                    "run date": "2023-03-16",
+                    "forecast": "current/SoG_current_20230407.nc",
+                    "run date": "2023-04-07",
                 },
             ),
             config,
@@ -1930,7 +1930,7 @@ class TestAfterMakeWW3currentFile:
         )
         expected = NextWorker(
             "nowcast.workers.run_ww3",
-            args=["arbutus.cloud", "nowcast", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "nowcast", "--run-date", "2023-04-07"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1941,8 +1941,8 @@ class TestAfterMakeWW3currentFile:
                 "make_ww3_current_file",
                 "success forecast2",
                 {
-                    "forecast2": "current/SoG_current_20190805.nc",
-                    "run date": "2019-08-05",
+                    "forecast2": "current/SoG_current_20230408.nc",
+                    "run date": "2023-04-08",
                 },
             ),
             config,
@@ -1950,7 +1950,7 @@ class TestAfterMakeWW3currentFile:
         )
         expected = NextWorker(
             "nowcast.workers.run_ww3",
-            args=["arbutus.cloud", "forecast2", "--run-date", "2019-08-05"],
+            args=["arbutus.cloud", "forecast2", "--run-date", "2023-04-08"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
