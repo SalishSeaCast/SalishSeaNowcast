@@ -26,7 +26,7 @@ name = "SalishSeaNowcast"
 dynamic = [ "version" ]
 description = "SalishSeaCast ocean modeling automation system"
 readme = "README.rst"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = { file = "LICENSE" }
 authors = [
     { name = "Doug Latornell", email = "dlatornell@eoas.ubc.ca" },
@@ -40,7 +40,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Operating System :: POSIX :: Linux",
     "Operating System :: Unix",
     "Environment :: Console",
