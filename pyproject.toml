@@ -36,17 +36,7 @@ keywords = [
     "UBC-MOAD", "Salish Sea", "SalishSeaCast",
 ]
 classifiers = [
-    "Development Status :: 5 - Production/Stable",
     "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Operating System :: POSIX :: Linux",
-    "Operating System :: Unix",
-    "Environment :: Console",
-    "Intended Audience :: Science/Research",
-    "Intended Audience :: Education",
-    "Intended Audience :: Developers",
 ]
 dependencies = [
     # see envs/environment-prod.yaml for conda environment production installation
