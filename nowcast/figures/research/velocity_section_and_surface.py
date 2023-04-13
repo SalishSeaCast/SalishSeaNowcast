@@ -138,7 +138,6 @@ def make_figure(
 
 
 def _prep_plot_data(U, V, mesh_mask, bathy, hr=0, sections=(450,)):
-
     # Index, mask, and unstagger U and V
     U_trim, V_trim = viz_tools.unstagger(
         np.ma.masked_where(mesh_mask["umask"][0, ...] == 0, U[hr, ...]),
@@ -174,7 +173,6 @@ def _prep_plot_data(U, V, mesh_mask, bathy, hr=0, sections=(450,)):
 
 
 def _prep_fig_axes(figsize, theme, sections=(450,), pos=((0.1, 0.95),)):
-
     # Make Figure
     fig = plt.figure(figsize=figsize, facecolor=theme.COLOURS["figure"]["facecolor"])
 
@@ -216,7 +214,6 @@ def _prep_fig_axes(figsize, theme, sections=(450,), pos=((0.1, 0.95),)):
 def _plot_vel_section(
     fig, axs, cax, V, plot_data, bathy, ibreak=24, cmap=None, levels=None
 ):
-
     zindex = [slice(None, ibreak + 1), slice(ibreak, None)]
     for ax, iz, ifill in zip(axs, zindex, [ibreak, -1]):
         C = ax.contourf(
@@ -263,7 +260,6 @@ def _cbar_labels(cbar, contour_intervals, theme, label):
 def _section_axes_labels(
     ax, plot_data, theme, lims=(150, 350, 0, 450), ibreak=24, xlabel=True
 ):
-
     # Top panel
     ax[0].set_xlim(lims[:2])
     ax[0].set_ylim([plot_data.depth[ibreak], lims[2]])
@@ -286,7 +282,6 @@ def _section_axes_labels(
 
 
 def _plot_vel_surface(ax, plot_data, bathy, sections=None):
-
     ax.quiver(
         plot_data.gridX[::5],
         plot_data.gridY[::5],

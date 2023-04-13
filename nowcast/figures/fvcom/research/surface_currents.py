@@ -75,7 +75,6 @@ def _prep_fig_axes(figsize, theme):
 
 
 def _prep_plot_data(place, fvcom_results_dataset, time_index):
-
     # Get time stamp from results dataset
     date_bytes = fvcom_results_dataset.variables["Times"][time_index, :]
     date_str = date_bytes.data.tostring().decode("utf-8")

@@ -77,7 +77,6 @@ def _prep_fig_axes(figsize, theme):
 
 
 def _prep_plot_data(place, fvcom_results_dataset, time_index, varname):
-
     # Get time stamp from results dataset
     date_bytes = fvcom_results_dataset.variables["Times"][time_index, :]
     date_str = date_bytes.data.tostring().decode("utf-8")
@@ -152,7 +151,6 @@ def _prep_plot_data(place, fvcom_results_dataset, time_index, varname):
 
 
 def _plot_thalweg(ax, plot_data, theme):
-
     # use continuous colormap with pcolormesh
     hp = ax.pcolormesh(
         plot_data.xx,
