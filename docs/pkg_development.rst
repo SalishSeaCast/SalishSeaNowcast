@@ -25,8 +25,8 @@
 .. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
     :target: https://www.apache.org/licenses/LICENSE-2.0
     :alt: Licensed under the Apache License, Version 2.0
-.. image:: https://img.shields.io/badge/python-3.10-blue.svg
-    :target: https://docs.python.org/3.10/
+.. image:: https://img.shields.io/badge/Python-3.11-blue?logo=python&label=Python&logoColor=gold
+    :target: https://docs.python.org/3.11/
     :alt: Python Version
 .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast
@@ -68,14 +68,14 @@ The package uses the `NEMO_Nowcast`_ framework to implement the :ref:`SalishSeaN
 
 .. _SalishSeaNowcastPythonVersions:
 
-Python Versions
-===============
+Python Version
+==============
 
-.. image:: https://img.shields.io/badge/python-3.10-blue.svg
-    :target: https://docs.python.org/3.10/
+.. image:: https://img.shields.io/badge/Python-3.11-blue?logo=python&label=Python&logoColor=gold
+    :target: https://docs.python.org/3.11/
     :alt: Python Version
 
-The :kbd:`SalishSeaNowcast` package is developed and tested using `Python`_ 3.10.
+The :kbd:`SalishSeaNowcast` package is developed and tested using `Python`_ 3.11.
 
 .. _Python: https://www.python.org/
 
@@ -431,7 +431,7 @@ The output looks something like::
   (line  581) ok        https://git-scm.com/
   (line  262) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/issues/19
   (line   20) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
-  (line   20) ok        https://img.shields.io/badge/python-3.10-blue.svg
+  (line   20) ok        https://img.shields.io/badge/python-3.11-blue.svg
   (line   20) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (line   20) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   20) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
