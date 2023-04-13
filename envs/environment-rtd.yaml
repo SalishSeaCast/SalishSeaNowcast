@@ -11,6 +11,7 @@ dependencies:
   - cartopy
   - matplotlib
   - pip
+  - pygrib
   - python=3.11
   - retrying
 
