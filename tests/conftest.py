@@ -74,7 +74,6 @@ def mock_nowcast_worker(monkeypatch):
 
     @attr.s
     class MockNowcastWorker:
-
         name = attr.ib()
         description = attr.ib()
         package = attr.ib(default="nowcast.workers")

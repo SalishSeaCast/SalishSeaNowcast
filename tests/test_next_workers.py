@@ -1591,7 +1591,6 @@ class TestAfterMakeFVCOMBoundary:
     def test_success_launch_make_fvcom_atmos_forcing(
         self, model_config, run_type, config, checklist
     ):
-
         msg = Message(
             "make_fvcom_boundary",
             f"success {model_config} {run_type}",

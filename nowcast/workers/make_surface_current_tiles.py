@@ -166,7 +166,6 @@ def make_surface_current_tiles(parsed_args, config, *args):
         f"in {num_procs} processes into {storage_path}"
     )
     for results_dir in [results_dirm2, results_dirm1, results_dir0]:
-
         u_list = glob(os.fspath(results_dir) + "/SalishSea_1h_*_grid_U.nc")
         v_list = glob(os.fspath(results_dir) + "/SalishSea_1h_*_grid_V.nc")
 

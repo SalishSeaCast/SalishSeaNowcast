@@ -187,7 +187,6 @@ def _makeTiles(
     tiles = []
     figs = []
     for tile, values in tile_coords_dic.items():
-
         x1, x2, y1, y2 = values[0], values[1], values[2], values[3]
         sec = dsU.variables["time_counter"][t_index]
 
