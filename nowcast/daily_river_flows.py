@@ -481,6 +481,60 @@ def _create_runoff_array(flows, horz_area):
     return runoff_array
 
 
+def _calc_runoff_dataset(obs_date, runoff_array, config):
+    """
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param :py:class:`numpy.ndarray` runoff_array:
+    :param dict config:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    coords = {
+        "time_counter": [obs_date.datetime],
+        "y": np.arange(runoff_array.shape[0]),
+        "x": np.arange(runoff_array.shape[1]),
+    }
+    runoff_da = xr.DataArray(
+        # expand runoff array to include time coordinate
+        data=np.expand_dims(runoff_array, axis=0),
+        coords=coords,
+        attrs={
+            "standard_name": "runoff_flux",
+            "long_name": "River Runoff Flux",
+            "units": "kg m-2 s-1",
+        },
+    )
+    runoff_ds = xr.Dataset(
+        data_vars={"rorunoff": runoff_da},
+        coords=coords,
+        attrs={
+            "creator_email": "sallen@eoas.ubc.ca",
+            "creator_name": "SalishSeaCast Project contributors",
+            "creator_url": "https://github.com/SalishSeaCast/SalishSeaNowcast/blob/main/nowcast/workers/make_runoff_file.py",
+            "institution": "UBC EOAS",
+            "institution_fullname": (
+                "Earth, Ocean & Atmospheric Sciences, University of British Columbia"
+            ),
+            "title": f"River Runoff Fluxes for {obs_date.format('YYYY-MM-DD')}",
+            "summary": (
+                f"Day-average river runoff fluxes calculated for {obs_date.format('YYYY-MM-DD')} "
+                f"on v202108 bathymetry. "
+                f"The runoff fluxes are calculated from day-averaged discharge (1 day lagged) "
+                f"observations from gauged rivers across the SalishSeaCast model domain using "
+                f"fits developed by Susan Allen."
+            ),
+            "development_notebook": "https://github.com/SalishSeaCast/tools/blob/main/I_ForcingFiles/Rivers/ProductionDailyRiverNCfile.ipynb",
+            "rivers_watersheds_proportions": config["rivers"]["prop_dict module"],
+            "history": (
+                f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
+                f"python3 -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
+                f"--run-date {obs_date.format('YYYY-MM-DD')}"
+            ),
+        },
+    )
+    return runoff_ds
+
+
 def write_file(day, runoff, config):
     "keep it small and simple, runoff only"
     notebook = "ProductionDailyRiverNCfile.ipynb"
@@ -506,7 +560,7 @@ def write_file(day, runoff, config):
         "creator_url": "https://salishsea-meopar-docs.readthedocs.org/",
         "institution": "UBC EOAS",
         "institution_fullname": (
-            "Earth, Ocean & Atmospheric Sciences," " University of British Columbia"
+            "Earth, Ocean & Atmospheric Sciences, University of British Columbia"
         ),
         "title": netcdf_title,
         "notebook": notebook,

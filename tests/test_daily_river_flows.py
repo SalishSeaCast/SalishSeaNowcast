@@ -47,6 +47,7 @@ def config(base_config):
                     TheodosiaScotty: forcing/rivers/observations/Theodosia_Scotty_flow
                     TheodosiaBypass: forcing/rivers/observations/Theodosia_Bypass_flow
                     TheodosiaDiversion: forcing/rivers/observations/Theodosia_Diversion_flow
+                  prop_dict module: salishsea_tools.river_202108
                 run types:
                   nowcast-green:
                     coordinates: coordinates_seagrid_SalishSea201702.nc
@@ -1388,3 +1389,107 @@ class TestCreateRunoffArray:
         )
         # Check total runoff
         assert runoff_array.sum() == pytest.approx(20.7198114)
+
+
+class TestCalcRunoffDataset:
+    """Unit test for daily_river_flows._calc_runoff_dataset()."""
+
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def runoff_array():
+        _runoff_array = numpy.zeros((898, 398))
+        _runoff_array[750:752, 123] = [0.20318864, 0.20318864]
+        return _runoff_array
+
+    def test_data_array_values(self, runoff_array, config):
+        obs_date = arrow.get("2023-05-11")
+
+        runoff_ds = daily_river_flows._calc_runoff_dataset(
+            obs_date, runoff_array, config
+        )
+
+        numpy.testing.assert_allclose(
+            runoff_ds["rorunoff"][0, 750:752, 123], [0.20318864, 0.20318864]
+        )
+
+    def test_data_array_attrs(self, runoff_array, config):
+        obs_date = arrow.get("2023-05-11")
+
+        runoff_ds = daily_river_flows._calc_runoff_dataset(
+            obs_date, runoff_array, config
+        )
+
+        assert runoff_ds["rorunoff"].attrs["standard_name"] == "runoff_flux"
+        assert runoff_ds["rorunoff"].attrs["long_name"] == "River Runoff Flux"
+        assert runoff_ds["rorunoff"].attrs["units"] == "kg m-2 s-1"
+
+    def test_coords(self, runoff_array, config):
+        obs_date = arrow.get("2023-05-11")
+
+        runoff_ds = daily_river_flows._calc_runoff_dataset(
+            obs_date, runoff_array, config
+        )
+
+        assert len(runoff_ds.coords) == 3
+        assert runoff_ds.coords["time_counter"] == [obs_date.datetime]
+        assert all(runoff_ds.coords["y"] == numpy.arange(runoff_array.shape[0]))
+        assert all(runoff_ds.coords["x"] == numpy.arange(runoff_array.shape[1]))
+
+    def test_dims(self, runoff_array, config):
+        obs_date = arrow.get("2023-05-11")
+
+        runoff_ds = daily_river_flows._calc_runoff_dataset(
+            obs_date, runoff_array, config
+        )
+
+        assert len(runoff_ds.dims) == 3
+        assert runoff_ds.dims["time_counter"] == 1
+        assert runoff_ds.dims["y"] == runoff_array.shape[0]
+        assert runoff_ds.dims["x"] == runoff_array.shape[1]
+
+    def test_dataset_attrs(self, runoff_array, config, monkeypatch):
+        def mock_now(tz):
+            return arrow.get("2023-05-11T14:51:43-07:00")
+
+        monkeypatch.setattr(daily_river_flows.arrow, "now", mock_now)
+
+        obs_date = arrow.get("2023-05-11")
+
+        runoff_ds = daily_river_flows._calc_runoff_dataset(
+            obs_date, runoff_array, config
+        )
+
+        assert runoff_ds.attrs["creator_email"] == "sallen@eoas.ubc.ca"
+        assert runoff_ds.attrs["creator_name"] == "SalishSeaCast Project contributors"
+        assert (
+            runoff_ds.attrs["creator_url"]
+            == "https://github.com/SalishSeaCast/SalishSeaNowcast/blob/main/nowcast/workers/make_runoff_file.py"
+        )
+        assert runoff_ds.attrs["institution"] == "UBC EOAS"
+        assert (
+            runoff_ds.attrs["institution_fullname"]
+            == "Earth, Ocean & Atmospheric Sciences, University of British Columbia"
+        )
+        assert (
+            runoff_ds.attrs["title"]
+            == f"River Runoff Fluxes for {obs_date.format('YYYY-MM-DD')}"
+        )
+        assert runoff_ds.attrs["summary"] == (
+            f"Day-average river runoff fluxes calculated for {obs_date.format('YYYY-MM-DD')} "
+            f"on v202108 bathymetry. "
+            f"The runoff fluxes are calculated from day-averaged discharge (1 day lagged) observations "
+            f"from gauged rivers across the SalishSeaCast model domain using fits developed by Susan Allen."
+        )
+        assert (
+            runoff_ds.attrs["development_notebook"]
+            == "https://github.com/SalishSeaCast/tools/blob/main/I_ForcingFiles/Rivers/ProductionDailyRiverNCfile.ipynb"
+        )
+        assert (
+            runoff_ds.attrs["rivers_waterhsheds_proportions"]
+            == config["rivers"]["prop_dict module"]
+        )
+        assert runoff_ds.attrs["history"] == (
+            f"[Thu {obs_date.format('YYYY-MM-DD')} 14:51:43 -07:00] "
+            f"python3 -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
+            f"--run-date {obs_date.format('YYYY-MM-DD')}"
+        )
