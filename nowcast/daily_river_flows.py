@@ -6,7 +6,6 @@ import warnings
 from pathlib import Path
 
 import arrow
-import datetime as dt
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -490,7 +489,7 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
     :rtype: :py:class:`xarray.Dataset`
     """
     coords = {
-        "time_counter": [obs_date.datetime],
+        "time_counter": pd.to_datetime([obs_date.format("YYYY-MM-DD")]),
         "y": np.arange(runoff_array.shape[0]),
         "x": np.arange(runoff_array.shape[1]),
     }
@@ -535,65 +534,46 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
     return runoff_ds
 
 
-def write_file(day, runoff, config):
-    "keep it small and simple, runoff only"
-    notebook = "ProductionDailyRiverNCfile.ipynb"
-    coords = {
-        "x": range(398),
-        "y": range(898),
-        "time_counter": [0],
+def _write_netcdf(runoff_ds, obs_date, config):
+    """
+    :param :py:class:`xarray.Dataset` runoff_ds:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param dict config:
+
+    :rtype: :py:class:`pathlib.Path`
+    """
+    encoding = {
+        "time_counter": {
+            "calendar": "gregorian",
+            "units": "days since 2007-01-01",
+        },
     }
-    var_attrs = {"units": "kg m-2 s-1", "long_name": "runoff_flux"}
-
-    # set up filename
-    directory = Path(config["rivers"]["rivers dir"])
-    filename_tmpl = config["rivers"]["file template"]
-
-    filename = directory / filename_tmpl.format(day.date())
-    print(filename)
-
-    netcdf_title = f"Rivers for {day.date()}"
-    ds_attrs = {
-        "acknowledgements": "Based on river fit",
-        "creator_email": "sallen@eoas.ubc.ca",
-        "creator_name": "Salish Sea MEOPAR Project Contributors",
-        "creator_url": "https://salishsea-meopar-docs.readthedocs.org/",
-        "institution": "UBC EOAS",
-        "institution_fullname": (
-            "Earth, Ocean & Atmospheric Sciences, University of British Columbia"
-        ),
-        "title": netcdf_title,
-        "notebook": notebook,
-        "rivers_base": config["rivers"]["prop_dict module"],
-        "summary": f"Daily Runoff for Bathymetry 202108",
-        "history": (
-            "[{}] File creation.".format(dt.datetime.today().strftime("%Y-%m-%d"))
-        ),
-    }
-    runoffs = np.empty((1, runoff.shape[0], runoff.shape[1]))
-    runoffs[0] = runoff
-
-    da = xr.DataArray(
-        data=runoffs,
-        name="rorunoff",
-        dims=("time_counter", "y", "x"),
-        coords=coords,
-        attrs=var_attrs,
+    encoding.update(
+        {var: {"zlib": True, "complevel": 4} for var in runoff_ds.data_vars}
     )
+    rivers_dir = Path(config["rivers"]["rivers dir"])
+    filename_tmpl = config["rivers"]["file template"]
+    nc_filename = filename_tmpl.format(obs_date.date())
+    to_netcdf(runoff_ds, encoding, rivers_dir / nc_filename)
+    print(f"created {rivers_dir / nc_filename}")
+    return rivers_dir / nc_filename
 
-    ds = xr.Dataset(data_vars={"rorunoff": da}, coords=coords, attrs=ds_attrs)
 
-    encoding = {var: {"zlib": True} for var in ds.data_vars}
+def to_netcdf(runoff_ds, encoding, nc_file_path):
+    """This function is separate to facilitate testing of the calling function.
 
-    ds.to_netcdf(
-        filename,
-        unlimited_dims=("time_counter"),
-        encoding=encoding,
+    :param :py:class:`xarray.Dataset` runoff_ds:
+    :param dict encoding:
+    :param :py:class:`pathlib.Path` nc_file_path:
+    """
+    runoff_ds.to_netcdf(
+        nc_file_path, encoding=encoding, unlimited_dims=("time_counter",)
     )
 
 
 def make_runoff_files(dateneeded, config):
     flows = _calc_watershed_flows(dateneeded, config)
     horz_area = _get_area(config)
-    runoff = _create_runoff_array(flows, horz_area)
-    write_file(dateneeded, runoff, config)
+    runoff_array = _create_runoff_array(flows, horz_area)
+    runoff_ds = _calc_runoff_dataset(dateneeded, runoff_array, config)
+    nc_file_path = _write_netcdf(runoff_ds, dateneeded, config)

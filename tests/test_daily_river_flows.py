@@ -28,6 +28,7 @@ import nemo_nowcast
 import numpy.testing
 import pandas.testing
 import pytest
+import xarray
 
 from nowcast import daily_river_flows
 
@@ -47,6 +48,8 @@ def config(base_config):
                     TheodosiaScotty: forcing/rivers/observations/Theodosia_Scotty_flow
                     TheodosiaBypass: forcing/rivers/observations/Theodosia_Bypass_flow
                     TheodosiaDiversion: forcing/rivers/observations/Theodosia_Diversion_flow
+                  rivers dir: results/forcing/rivers/
+                  file template: "R202108Dailies_{:y%Ym%md%d}.nc"
                   prop_dict module: salishsea_tools.river_202108
                 run types:
                   nowcast-green:
@@ -1392,7 +1395,7 @@ class TestCreateRunoffArray:
 
 
 class TestCalcRunoffDataset:
-    """Unit test for daily_river_flows._calc_runoff_dataset()."""
+    """Unit tests for daily_river_flows._calc_runoff_dataset()."""
 
     @staticmethod
     @pytest.fixture(scope="class")
@@ -1431,7 +1434,7 @@ class TestCalcRunoffDataset:
         )
 
         assert len(runoff_ds.coords) == 3
-        assert runoff_ds.coords["time_counter"] == [obs_date.datetime]
+        assert runoff_ds.coords["time_counter"] == pandas.to_datetime(["2023-05-11"])
         assert all(runoff_ds.coords["y"] == numpy.arange(runoff_array.shape[0]))
         assert all(runoff_ds.coords["x"] == numpy.arange(runoff_array.shape[1]))
 
@@ -1449,7 +1452,7 @@ class TestCalcRunoffDataset:
 
     def test_dataset_attrs(self, runoff_array, config, monkeypatch):
         def mock_now(tz):
-            return arrow.get("2023-05-11T14:51:43-07:00")
+            return arrow.get("2023-05-11 14:51:43-07:00")
 
         monkeypatch.setattr(daily_river_flows.arrow, "now", mock_now)
 
@@ -1485,7 +1488,7 @@ class TestCalcRunoffDataset:
             == "https://github.com/SalishSeaCast/tools/blob/main/I_ForcingFiles/Rivers/ProductionDailyRiverNCfile.ipynb"
         )
         assert (
-            runoff_ds.attrs["rivers_waterhsheds_proportions"]
+            runoff_ds.attrs["rivers_watersheds_proportions"]
             == config["rivers"]["prop_dict module"]
         )
         assert runoff_ds.attrs["history"] == (
@@ -1493,3 +1496,24 @@ class TestCalcRunoffDataset:
             f"python3 -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
             f"--run-date {obs_date.format('YYYY-MM-DD')}"
         )
+
+
+class TestWriteNetcdf:
+    """Unit test for daily_river_flows._write_netcdf()."""
+
+    def test_write_netcdf(self, config, tmp_path, monkeypatch):
+        def mock_to_netcdf(runoff_ds, encoding, nc_file_path):
+            pass
+
+        monkeypatch.setattr(daily_river_flows, "to_netcdf", mock_to_netcdf)
+        rivers_dir = Path(config["rivers"]["rivers dir"])
+        tmp_rivers_dir = tmp_path / rivers_dir
+        tmp_rivers_dir.mkdir(parents=True)
+        monkeypatch.setitem(config["rivers"], "rivers dir", tmp_rivers_dir)
+
+        runoff_ds = xarray.Dataset()
+        obs_date = arrow.get("2023-05-12")
+
+        nc_file_path = daily_river_flows._write_netcdf(runoff_ds, obs_date, config)
+
+        assert nc_file_path == tmp_rivers_dir / "R202108Dailies_y2023m05d12.nc"
