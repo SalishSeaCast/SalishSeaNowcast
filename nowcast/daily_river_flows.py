@@ -552,7 +552,10 @@ def _write_netcdf(runoff_ds, obs_date, config):
         {var: {"zlib": True, "complevel": 4} for var in runoff_ds.data_vars}
     )
     rivers_dir = Path(config["rivers"]["rivers dir"])
-    filename_tmpl = config["rivers"]["file template"]
+    # TODO: Change from hard-coded to config item in worker;
+    #       hard-coded here to avoid disrupting automation
+    # filename_tmpl = config["rivers"]["file template"]
+    filename_tmpl = "R202108Dailies_{:y%Ym%md%d}.nc"
     nc_filename = filename_tmpl.format(obs_date.date())
     to_netcdf(runoff_ds, encoding, rivers_dir / nc_filename)
     print(f"created {rivers_dir / nc_filename}")
