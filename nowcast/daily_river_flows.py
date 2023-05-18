@@ -523,7 +523,10 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
                 f"fits developed by Susan Allen."
             ),
             "development_notebook": "https://github.com/SalishSeaCast/tools/blob/main/I_ForcingFiles/Rivers/ProductionDailyRiverNCfile.ipynb",
-            "rivers_watersheds_proportions": config["rivers"]["prop_dict module"],
+            # TODO: Change from hard-coded to config item in worker;
+            #       hard-coded here to avoid disrupting automation
+            # "rivers_watersheds_proportions": config["rivers"]["prop_dict module"],
+            "rivers_watersheds_proportions": "salishsea_tools.river_202108",
             "history": (
                 f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
                 f"python3 -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
