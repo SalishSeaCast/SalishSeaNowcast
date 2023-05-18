@@ -104,7 +104,7 @@ class TestConfig:
 
     def test_rivers_sections(self, prod_config):
         rivers = prod_config["rivers"]
-        assert rivers["file template"] == "R201702DFraCElse_{:y%Ym%md%d}.nc"
+        assert rivers["file templates"]["b201702"] == "R201702DFraCElse_{:y%Ym%md%d}.nc"
         assert rivers["rivers dir"] == "/results/forcing/rivers/"
         assert rivers["prop_dict module"] == "salishsea_tools.river_201702"
         assert (

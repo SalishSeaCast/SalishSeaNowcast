@@ -197,9 +197,10 @@ class TestConfig:
             prod_config["run"]["enabled hosts"][host]["forcing"]["ssh dir"] == ssh_dir
         )
 
-    def test_rivers_file_template(self, prod_config):
+    def test_rivers_file_templates(self, prod_config):
         assert (
-            prod_config["rivers"]["file template"] == "R201702DFraCElse_{:y%Ym%md%d}.nc"
+            prod_config["rivers"]["file templates"]["b201702"]
+            == "R201702DFraCElse_{:y%Ym%md%d}.nc"
         )
 
     @pytest.mark.parametrize(
