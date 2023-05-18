@@ -40,7 +40,7 @@ are managed by the `supervisor`_ process manager tool.
 So is the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
 
 .. _supervisor: http://supervisord.org/
-.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
+.. _sarracenia client: https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
 .. _ECCC MSC datamart service: https://dd.weather.gc.ca/
 
 
