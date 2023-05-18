@@ -105,19 +105,21 @@ class TestConfig:
     def test_rivers_sections(self, prod_config):
         rivers = prod_config["rivers"]
         assert rivers["file templates"]["b201702"] == "R201702DFraCElse_{:y%Ym%md%d}.nc"
-        assert (
-            rivers["monthly climatology"]["b201702"]
-            == "/SalishSeaCast/rivers-climatology/rivers_month_201702.nc"
-        )
         assert rivers["rivers dir"] == "/results/forcing/rivers/"
-        assert rivers["prop_dict modules"]["b201702"] == "salishsea_tools.river_201702"
+        assert rivers["prop_dict module"] == "salishsea_tools.river_201702"
         assert (
             rivers["SOG river files"]["Capilano"]
             == "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow"
         )
+
+    def test_rivers_climatology(self, prod_config):
         assert (
-            rivers["Fraser climatology"]
+            prod_config["rivers"]["Fraser climatology"]
             == "/SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml"
+        )
+        assert (
+            prod_config["rivers"]["monthly climatology"]["b201702"]
+            == "/SalishSeaCast/rivers-climatology/rivers_month_201702.nc"
         )
 
 

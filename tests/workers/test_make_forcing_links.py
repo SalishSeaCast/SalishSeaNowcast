@@ -198,8 +198,10 @@ class TestConfig:
         )
 
     def test_rivers_file_templates(self, prod_config):
-        expected = {"b201702": "R201702DFraCElse_{:y%Ym%md%d}.nc"}
-        assert prod_config["rivers"]["file templates"] == expected
+        assert (
+            prod_config["rivers"]["file templates"]["b201702"]
+            == "R201702DFraCElse_{:y%Ym%md%d}.nc"
+        )
 
     @pytest.mark.parametrize(
         "host, rivers_dir",
