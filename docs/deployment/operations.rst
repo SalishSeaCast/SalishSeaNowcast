@@ -97,7 +97,7 @@ Use :kbd:`quit` or :kbd:`exit` to exit from :command:`supervisorctl`.
 
 `sr_subscribe`_ is the command-line interface for interacting with the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
 
-.. _sr_subscribe: https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
+.. _sr_subscribe: https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
 
 :command:`sr_subscribe` is run in :kbd:`foreground` mode instead of daemonized so that it can be managed by ::command:`supervisord`.
 Use :command:`supervisorctl` to view the :command:`sr_subscribe` log files:\
