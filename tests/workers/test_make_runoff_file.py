@@ -112,6 +112,16 @@ class TestConfig:
             == "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow"
         )
 
+    def test_rivers_climatology(self, prod_config):
+        assert (
+            prod_config["rivers"]["Fraser climatology"]
+            == "/SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml"
+        )
+        assert (
+            prod_config["rivers"]["monthly climatology"]["b201702"]
+            == "/SalishSeaCast/rivers-climatology/rivers_month_201702.nc"
+        )
+
 
 @patch("nowcast.workers.make_runoff_file.logger", autospec=True)
 class TestSuccess:
