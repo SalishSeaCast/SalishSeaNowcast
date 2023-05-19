@@ -106,7 +106,7 @@ class TestConfig:
         rivers = prod_config["rivers"]
         assert rivers["file templates"]["b201702"] == "R201702DFraCElse_{:y%Ym%md%d}.nc"
         assert rivers["rivers dir"] == "/results/forcing/rivers/"
-        assert rivers["prop_dict module"] == "salishsea_tools.river_201702"
+        assert rivers["prop_dict modules"]["b201702"] == "salishsea_tools.river_201702"
         assert (
             rivers["SOG river files"]["Capilano"]
             == "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow"

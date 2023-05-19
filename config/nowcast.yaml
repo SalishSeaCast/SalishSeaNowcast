@@ -176,7 +176,9 @@ rivers:
   file templates:
     b201702:  "R201702DFraCElse_{:y%Ym%md%d}.nc"
   # Module containing dictionary of the proportions that each river occupies in its watershed
-  prop_dict module: salishsea_tools.river_201702
+  # TODO: collapse to single item for v202111; b201702 key not required
+  prop_dict modules:
+    b201702: salishsea_tools.river_201702
   turbidity:
     # File containing hourly real-time Fraser River water quality buoy turbidity data
     ECget Fraser turbidity: /results/observations/ECCC/fraser_buoy.csv
