@@ -500,6 +500,17 @@ class TestAfterMakeRunoffFile:
         assert workers == []
 
 
+class TestAfterMakeV202111RunoffFile:
+    """Unit tests for the after_make_v202111_runoff_file function."""
+
+    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_v202111_runoff_file(
+            Message("make_v202111_runoff_file", msg_type), config, checklist
+        )
+        assert workers == []
+
+
 class TestAfterCollectNeahBaySsh:
     """Unit tests for the after_collect_NeahBay_ssh function."""
 

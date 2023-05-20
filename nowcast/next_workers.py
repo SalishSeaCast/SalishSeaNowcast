@@ -282,6 +282,28 @@ def after_make_runoff_file(msg, config, checklist):
     return next_workers[msg.type]
 
 
+def after_make_v202111_runoff_file(msg, config, checklist):
+    """Calculate the list of workers to launch after the make_v202111_runoff_file
+    worker ends.
+
+    :arg msg: Nowcast system message.
+    :type msg: :py:class:`nemo_nowcast.message.Message`
+
+    :arg config: :py:class:`dict`-like object that holds the nowcast system
+                 configuration that is loaded from the system configuration
+                 file.
+    :type config: :py:class:`nemo_nowcast.config.Config`
+
+    :arg dict checklist: System checklist: data structure containing the
+                         present state of the nowcast system.
+
+    :returns: Worker(s) to launch next
+    :rtype: list
+    """
+    next_workers = {"crash": [], "failure": [], "success": []}
+    return next_workers[msg.type]
+
+
 def after_collect_NeahBay_ssh(msg, config, checklist):
     """Calculate the list of workers to launch after the collect_NeahBay_ssh worker
     ends.

@@ -1,0 +1,139 @@
+#  Copyright 2013 – present by the SalishSeaCast Project contributors
+#  and The University of British Columbia
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
+"""Unit test for SalishSeaCast make_v202111_runoff_file worker.
+"""
+import logging
+import textwrap
+from pathlib import Path
+from types import SimpleNamespace
+
+import arrow
+import nemo_nowcast
+import pytest
+
+from nowcast.workers import make_v202111_runoff_file
+
+
+@pytest.fixture()
+def config(base_config):
+    """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
+
+
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(make_v202111_runoff_file, "NowcastWorker", mock_nowcast_worker)
+
+
+class TestMain:
+    """Unit tests for main() function."""
+
+    def test_instantiate_worker(self, mock_worker):
+        worker = make_v202111_runoff_file.main()
+
+        assert worker.name == "make_v202111_runoff_file"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that calculates NEMO runoff forcing file from day-averaged river"
+        )
+
+    def test_add_data_date_option(self, mock_worker):
+        worker = make_v202111_runoff_file.main()
+
+        assert worker.cli.parser._actions[3].dest == "data_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[3].type == expected
+        assert worker.cli.parser._actions[3].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[3].help
+
+
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "make_v202111_runoff_file" in prod_config["message registry"]["workers"]
+
+    def test_checklist_key(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_v202111_runoff_file"
+        ]
+
+        assert msg_registry["checklist key"] == "v202111 rivers forcing"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_v202111_runoff_file"
+        ]
+
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success",
+            "failure",
+            "crash",
+        ]
+
+
+class TestSuccess:
+    """Unit test for success() function."""
+
+    def test_success(self, caplog):
+        parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
+        caplog.set_level(logging.DEBUG)
+
+        msg_type = make_v202111_runoff_file.success(parsed_args)
+
+        assert caplog.records[0].levelname == "INFO"
+        assert caplog.messages[0] == "2023-05-19 runoff file creation completed"
+        assert msg_type == "success"
+
+
+class TestFailure:
+    """Unit test for failure() function."""
+
+    def test_failure(self, caplog):
+        parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
+        caplog.set_level(logging.DEBUG)
+
+        msg_type = make_v202111_runoff_file.failure(parsed_args)
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        assert caplog.messages[0] == "2023-05-19 runoff file creation failed"
+        assert msg_type == "failure"
+
+
+class TestMakeV202111RunoffFile:
+    """Unit tests for make_v202111_runoff_file() function."""
+
+    def test_checklist(self, config, caplog):
+        parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
+
+        checklist = make_v202111_runoff_file.make_v202111_runoff_file(
+            parsed_args, config
+        )
+
+        assert checklist == {}
