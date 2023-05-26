@@ -22,9 +22,13 @@ and fits developed by Susan Allen.
 Missing river discharge observations are handled by a scheme of persistence or scaling of
 a nearby gauged river, depending on time span of missing observations.
 """
+import functools
 import logging
+import warnings
+from pathlib import Path
 
 import arrow
+import pandas
 from nemo_nowcast import NowcastWorker
 
 NAME = "make_v202111_runoff_file"
@@ -218,7 +222,52 @@ def _read_river(river_name, ps, config):
 
     :rtype: :py:class:`pandas.Dataframe`
     """
-    pass
+    filename = Path(config["rivers"]["SOG river files"][river_name.replace("_", "")])
+    with warnings.catch_warnings():
+        # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
+        warnings.simplefilter("ignore")
+        river_flow = _read_river_csv(filename)
+    _set_date_as_index(river_flow)
+    if ps == "primary":
+        river_flow = river_flow.rename(columns={"flow": "Primary River Flow"})
+    elif ps == "secondary":
+        river_flow = river_flow.rename(columns={"flow": "Secondary River Flow"})
+    return river_flow
+
+
+def _parse_long_csv_line(line):
+    """pandas .csv parser helper to handle lines with extra columns.
+
+    Returns the first 4 columns from the line.
+
+    :param list line:
+
+    :rtype: list
+    """
+    return line[:4]
+
+
+_read_river_csv = functools.partial(
+    # Customize pandas.read_csv() with the args we always want to use for reading river discharge
+    # .csv files
+    pandas.read_csv,
+    header=None,
+    delim_whitespace=True,
+    index_col=False,
+    names=["year", "month", "day", "flow"],
+    engine="python",
+    on_bad_lines=_parse_long_csv_line,
+)
+
+
+def _set_date_as_index(river_flow):
+    """Set date as dataframe index and drop year, month & day columns used to construct date.
+
+    :param :py:class:`pandas.Dataframe` river_flow:
+    """
+    river_flow["date"] = pandas.to_datetime(river_flow.drop(columns="flow"))
+    river_flow.set_index("date", inplace=True)
+    river_flow.drop(columns=["year", "month", "day"], inplace=True)
 
 
 def _read_river_Theodosia(config):

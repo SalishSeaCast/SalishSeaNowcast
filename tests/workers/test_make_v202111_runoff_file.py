@@ -39,6 +39,13 @@ def config(base_config):
         f.write(
             textwrap.dedent(
                 """\
+                rivers:
+                  SOG river files:
+                    HomathkoMouth: forcing/rivers/observations/Homathko_Mouth_flow
+                    SquamishBrackendale: forcing/rivers/observations/Squamish_Brackendale_flow
+                    TheodosiaScotty: forcing/rivers/observations/Theodosia_Scotty_flow
+                    TheodosiaBypass: forcing/rivers/observations/Theodosia_Bypass_flow
+                    TheodosiaDiversion: forcing/rivers/observations/Theodosia_Diversion_flow
                 """
             )
         )
@@ -97,6 +104,31 @@ class TestConfig:
             "failure",
             "crash",
         ]
+
+    def test_SOG_river_files(self, prod_config):
+        SOG_river_files = prod_config["rivers"]["SOG river files"]
+
+        expected = {
+            "Capilano": "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow",
+            "ChilliwackVedder": "/results/forcing/rivers/observations/Chilliwack_Vedder_flow",
+            "ClowhomClowhomLake": "/results/forcing/rivers/observations/Clowhom_ClowhomLake_flow",
+            "Englishman": "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Englishman_flow",
+            "Fraser": "/data/dlatorne/SOG-projects/SOG-forcing/ECget/Fraser_flow",
+            "GreenwaterGreenwater": "/results/forcing/rivers/observations/Greenwater_Greenwater_flow",
+            "HomathkoMouth": "/results/forcing/rivers/observations/Homathko_Mouth_flow",
+            "NisquallyMcKenna": "/results/forcing/rivers/observations/Nisqually_McKenna_flow",
+            "NicomeklLangley": "/results/forcing/rivers/observations/Nicomekl_Langley_flow",
+            "RobertsCreek": "/results/forcing/rivers/observations/RobertsCreek_flow",
+            "SalmonSayward": "/results/forcing/rivers/observations/Salmon_Sayward_flow",
+            "SanJuanPortRenfrew": "/results/forcing/rivers/observations/SanJuan_PortRenfrew_flow",
+            "SkagitMountVernon": "/results/forcing/rivers/observations/Skagit_MountVernon_flow",
+            "SnohomishMonroe": "/results/forcing/rivers/observations/Snohomish_Monroe_flow",
+            "SquamishBrackendale": "/results/forcing/rivers/observations/Squamish_Brackendale_flow",
+            "TheodosiaScotty": "/results/forcing/rivers/observations/Theodosia_Scotty_flow",
+            "TheodosiaBypass": "/results/forcing/rivers/observations/Theodosia_Bypass_flow",
+            "TheodosiaDiversion": "/results/forcing/rivers/observations/Theodosia_Diversion_flow",
+        }
+        assert SOG_river_files == expected
 
 
 class TestModuleVariables:
@@ -764,3 +796,88 @@ class TestGetRiverFlow:
         )
 
         assert river_flow == pytest.approx(4.749479e01)
+
+
+class TestReadRiver:
+    """Unit tests for _read_river()."""
+
+    @pytest.mark.parametrize(
+        "ps, expected_col_name",
+        (
+            ("primary", "Primary River Flow"),
+            ("secondary", "Secondary River Flow"),
+        ),
+    )
+    def test_read_river(self, ps, expected_col_name, config, monkeypatch):
+        def mock_read_river_csv(filename):
+            return pandas.DataFrame(
+                {
+                    "year": 1923,
+                    "month": 2,
+                    "day": [20, 21],
+                    "flow": [1.13e1, 5.97e1],
+                }
+            )
+
+        monkeypatch.setattr(
+            make_v202111_runoff_file, "_read_river_csv", mock_read_river_csv
+        )
+
+        river_name = "Squamish_Brackendale"
+
+        river_flow = make_v202111_runoff_file._read_river(river_name, ps, config)
+
+        expected = pandas.DataFrame(
+            data={
+                expected_col_name: [1.13e1, 5.97e1],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("1923-02-20"),
+                    pandas.to_datetime("1923-02-21"),
+                ],
+                name="date",
+            ),
+        )
+        pandas.testing.assert_frame_equal(river_flow, expected)
+
+
+class TestParseLongCSVLine:
+    """Unit test for _parse_long_csv_line()."""
+
+    def test_parse_long_csv_line(self):
+        line = make_v202111_runoff_file._parse_long_csv_line(
+            "1923 02 13 1.100000E+01 B".split()
+        )
+
+        assert line == "1923 02 13 1.100000E+01".split()
+
+
+class TestSetDateAsIndex:
+    """Unit test for _set_date_as_index()."""
+
+    def test_set_date_as_index(self):
+        river_flow = pandas.DataFrame(
+            {
+                "year": 1923,
+                "month": 2,
+                "day": [20, 21],
+                "flow": [1.13e1, 5.97e1],
+            }
+        )
+
+        make_v202111_runoff_file._set_date_as_index(river_flow)
+
+        expected = pandas.DataFrame(
+            data={
+                "flow": [1.13e1, 5.97e1],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("1923-02-20"),
+                    pandas.to_datetime("1923-02-21"),
+                ],
+                name="date",
+            ),
+        )
+        pandas.testing.assert_frame_equal(river_flow, expected)
