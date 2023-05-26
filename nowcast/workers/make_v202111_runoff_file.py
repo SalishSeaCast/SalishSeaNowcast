@@ -75,6 +75,7 @@ watershed_from_river = {
     "puget": {"primary": 8.790, "secondary": 29.09},
     "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
 }
+theodosia_from_diversion_only = 1.429  # see Susan's TheodosiaWOScotty notebook
 
 
 def main():
@@ -278,7 +279,40 @@ def _read_river_Theodosia(config):
 
     :rtype: :py:class:`pandas.Dataframe`
     """
-    pass
+    part_names = ("TheodosiaScotty", "TheodosiaBypass", "TheodosiaDiversion")
+    with warnings.catch_warnings():
+        # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
+        warnings.simplefilter("ignore")
+        parts = [
+            _read_river_csv(Path(config["rivers"]["SOG river files"][part_name]))
+            for part_name in part_names
+        ]
+    for part, part_name in zip(parts, part_names):
+        _set_date_as_index(part)
+        part.rename(columns={"flow": part_name.replace("Theodosia", "")}, inplace=True)
+
+    # Calculate discharge from 3 gauged parts of river above control infrastructure
+    theodosia = (parts[2].merge(parts[1], how="outer", on="date")).merge(
+        parts[0], how="outer", on="date"
+    )
+    theodosia["Secondary River Flow"] = (
+        theodosia["Scotty"] + theodosia["Diversion"] - theodosia["Bypass"]
+    )
+
+    # Alternative discharge calculation from gauged diversion part
+    # Used for dates before Scotty part was gauged, or in the event of missing obs
+    parts[2]["FlowFromDiversion"] = parts[2].Diversion * theodosia_from_diversion_only
+    theodosia = theodosia.merge(parts[2], how="outer", on="date", sort=True)
+    theodosia["Secondary River Flow"].fillna(
+        theodosia["FlowFromDiversion"], inplace=True
+    )
+
+    theodosia.drop(
+        ["Diversion_x", "Bypass", "Scotty", "Diversion_y", "FlowFromDiversion"],
+        axis=1,
+        inplace=True,
+    )
+    return theodosia
 
 
 def _get_river_flow(river_name, river_df, obs_date, config):

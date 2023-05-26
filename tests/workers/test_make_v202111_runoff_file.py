@@ -191,6 +191,9 @@ class TestModuleVariables:
 
         assert make_v202111_runoff_file.watershed_from_river == expected
 
+    def test_theodosia_from_diversion_only(self):
+        assert make_v202111_runoff_file.theodosia_from_diversion_only == 1.429
+
 
 class TestSuccess:
     """Unit test for success() function."""
@@ -881,3 +884,116 @@ class TestSetDateAsIndex:
             ),
         )
         pandas.testing.assert_frame_equal(river_flow, expected)
+
+
+class TestReadRiverTheodosia:
+    """Unit tests for _read_river_Theodosia()."""
+
+    def test_read_river_Theodosia(self, config, monkeypatch):
+        mock_dataframes = [
+            # TheodosiaScotty
+            pandas.DataFrame(
+                {
+                    "year": 2023,
+                    "month": 2,
+                    "day": [11, 12],
+                    "flow": [5.902153e0, 5.576458e0],
+                }
+            ),
+            # TheodosiaBypass
+            pandas.DataFrame(
+                {
+                    "year": 2023,
+                    "month": 2,
+                    "day": [11, 12],
+                    "flow": [4.423993e0, 4.274444e0],
+                }
+            ),
+            # TheodosiaDiversion
+            pandas.DataFrame(
+                {
+                    "year": 2023,
+                    "month": 2,
+                    "day": [11, 12],
+                    "flow": [4.795868e0, 4.090347e0],
+                }
+            ),
+        ]
+
+        def mock_read_river_csv(filename):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(
+            make_v202111_runoff_file, "_read_river_csv", mock_read_river_csv
+        )
+
+        theodosia = make_v202111_runoff_file._read_river_Theodosia(config)
+
+        expected = pandas.DataFrame(
+            data={
+                "Secondary River Flow": [6.27403e0, 5.39236e0],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-11"),
+                    pandas.to_datetime("2023-02-12"),
+                ],
+                name="date",
+            ),
+        )
+        pandas.testing.assert_frame_equal(theodosia, expected)
+
+    def test_read_river_Theodosia_wo_Scotty(self, config, monkeypatch):
+        mock_dataframes = [
+            # TheodosiaScotty
+            pandas.DataFrame(
+                {
+                    "year": 2003,
+                    "month": 10,
+                    "day": [16, 17],
+                    "flow": [7.83e0, 2.3e1],
+                }
+            ),
+            # TheodosiaBypass
+            pandas.DataFrame(
+                {
+                    "year": 2003,
+                    "month": 10,
+                    "day": [15, 16, 17],
+                    "flow": [3.13e0, 5.20e0, 4.07e0],
+                }
+            ),
+            # TheodosiaDiversion
+            pandas.DataFrame(
+                {
+                    "year": 2003,
+                    "month": 10,
+                    "day": [15, 16, 17],
+                    "flow": [4.38e0, 3.17e1, 5.89e1],
+                }
+            ),
+        ]
+
+        def mock_read_river_csv(filename):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(
+            make_v202111_runoff_file, "_read_river_csv", mock_read_river_csv
+        )
+
+        theodosia = make_v202111_runoff_file._read_river_Theodosia(config)
+
+        expected = pandas.DataFrame(
+            data={
+                "Secondary River Flow": [6.25902e0, 3.433000e1, 7.783000e1],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2003-10-15"),
+                    pandas.to_datetime("2003-10-16"),
+                    pandas.to_datetime("2003-10-17"),
+                ],
+                name="date",
+            ),
+        )
+        pandas.testing.assert_frame_equal(theodosia, expected)
