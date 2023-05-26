@@ -25,6 +25,7 @@ from types import SimpleNamespace
 
 import arrow
 import nemo_nowcast
+import pandas
 import pytest
 
 from nowcast.workers import make_v202111_runoff_file
@@ -141,6 +142,22 @@ class TestModuleVariables:
         }
 
         assert make_v202111_runoff_file.rivers_for_watershed == expected
+
+    def test_watershed_from_river(self):
+        expected = {
+            "bute": {"primary": 2.015},
+            "jervis": {"primary": 8.810, "secondary": 140.3},
+            "howe": {"primary": 2.276},
+            "jdf": {"primary": 8.501},
+            "evi_n": {"primary": 10.334},
+            "evi_s": {"primary": 24.60},
+            "toba": {"primary": 0.4563, "secondary": 14.58},
+            "skagit": {"primary": 1.267, "secondary": 1.236},
+            "puget": {"primary": 8.790, "secondary": 29.09},
+            "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
+        }
+
+        assert make_v202111_runoff_file.watershed_from_river == expected
 
 
 class TestSuccess:
@@ -294,3 +311,242 @@ class TestCalcWatershedFlows:
         assert caplog.messages[12] == "puget watershed flow: 442.390 m3 s-1"
         assert caplog.messages[13] == "toba watershed flow: 56.474 m3 s-1"
         assert caplog.messages[14] == "fraser watershed flow: 1094.561 m3 s-1"
+
+
+class TestDoFraser:
+    """Unit tests for _do_Fraser()."""
+
+    def test_no_patches(self, config, monkeypatch):
+        mock_dataframes = [
+            # Primary river
+            pandas.DataFrame(
+                # Fraser
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-19"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [6.625833e02],
+                },
+            ),
+            # Secondary river
+            pandas.DataFrame(
+                # Nicomekl_Langley
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-19"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [2.402962e00],
+                },
+            ),
+        ]
+
+        def mock_read_river(river_name, ps, config_):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+
+        obs_date = arrow.get("2023-02-19")
+
+        fraser_flux, secondary_flux = make_v202111_runoff_file._do_fraser(
+            obs_date, config
+        )
+
+        assert fraser_flux == pytest.approx(1094.56091294)
+        assert secondary_flux == pytest.approx(63.978142)
+
+    def test_persist_fraser(self, config, monkeypatch):
+        mock_dataframes = [
+            # Primary river
+            pandas.DataFrame(
+                # Fraser
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-18"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [6.528406e02],
+                },
+            ),
+            # Secondary river
+            pandas.DataFrame(
+                # Nicomekl_Langley
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-19"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [2.402962e00],
+                },
+            ),
+        ]
+
+        def mock_read_river(river_name, ps, config_):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+
+        mock_river_flows = [
+            # Fraser
+            6.528406e02,
+            # Nicomekl_Langley
+            2.402962e00,
+        ]
+
+        def mock_get_river_flow(river_name, river_flow, obs_date, config):
+            return mock_river_flows.pop(0)
+
+        monkeypatch.setattr(
+            make_v202111_runoff_file, "_get_river_flow", mock_get_river_flow
+        )
+
+        obs_date = arrow.get("2023-02-19")
+
+        fraser_flux, secondary_flux = make_v202111_runoff_file._do_fraser(
+            obs_date, config
+        )
+
+        assert fraser_flux == pytest.approx(1083.249638)
+        assert secondary_flux == pytest.approx(63.978142)
+
+    def test_patch_nicomekl(self, config, monkeypatch):
+        mock_dataframes = [
+            # Primary river
+            pandas.DataFrame(
+                # Fraser
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-19"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [6.625833e02],
+                },
+            ),
+            # Secondary river
+            pandas.DataFrame(
+                # Nicomekl_Langley
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-18"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Secondary River Flow": [3.095674e00],
+                },
+            ),
+        ]
+
+        def mock_read_river(river_name, ps, config_):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        mock_river_flows = [
+            # Fraser
+            6.625833e02,
+            # Nicomekl_Langley
+            2.402962e00,
+        ]
+
+        def mock_get_river_flow(river_name, river_flow, obs_date, config):
+            return mock_river_flows.pop(0)
+
+        monkeypatch.setattr(
+            make_v202111_runoff_file, "_get_river_flow", mock_get_river_flow
+        )
+
+        obs_date = arrow.get("2023-02-19")
+
+        fraser_flux, secondary_flux = make_v202111_runoff_file._do_fraser(
+            obs_date, config
+        )
+
+        assert fraser_flux == pytest.approx(1094.56091294)
+        assert secondary_flux == pytest.approx(63.978142)
+
+
+@pytest.mark.parametrize(
+    "flow_col_label", ("Primary River Flow", "Secondary River Flow")
+)
+class TestGetRiverFlow:
+    """Unit tests for daily_river_flows._get_river_flow()."""
+
+    def test_get_river_flow(self, flow_col_label, config):
+        river_name = "SanJuan_PortRenfrew"
+        river_df = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-13"),
+                    pandas.to_datetime("2023-02-14"),
+                    pandas.to_datetime("2023-02-15"),
+                ],
+                name="date",
+            ),
+            data={
+                flow_col_label: [
+                    6.963472e01,
+                    5.954271e01,
+                    5.195243e01,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-15")
+
+        river_flow = make_v202111_runoff_file._get_river_flow(
+            river_name, river_df, obs_date, config
+        )
+
+        assert river_flow == pytest.approx(5.195243e01)
+
+    def test_patch(self, flow_col_label, config, caplog, monkeypatch):
+        def mock_patch_missing_obs(river_name, river_flow, obs_date, config):
+            flux = 4.749479e01
+            return flux
+
+        monkeypatch.setattr(
+            make_v202111_runoff_file, "_patch_missing_obs", mock_patch_missing_obs
+        )
+
+        river_name = "SanJuan_PortRenfrew"
+        river_df = pandas.DataFrame(
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-13"),
+                    pandas.to_datetime("2023-02-14"),
+                    pandas.to_datetime("2023-02-15"),
+                ],
+                name="date",
+            ),
+            data={
+                flow_col_label: [
+                    6.963472e01,
+                    5.954271e01,
+                    5.195243e01,
+                ],
+            },
+        )
+        obs_date = arrow.get("2023-02-16")
+        caplog.set_level(logging.DEBUG)
+
+        river_flow = make_v202111_runoff_file._get_river_flow(
+            river_name, river_df, obs_date, config
+        )
+
+        assert caplog.records[0].levelname == "ERROR"
+        assert (
+            caplog.messages[0]
+            == "no 2023-02-16 discharge obs for SanJuan_PortRenfrew: patching"
+        )
+
+        assert river_flow == pytest.approx(4.749479e01)

@@ -59,6 +59,18 @@ rivers_for_watershed = {
     "toba": {"primary": "Homathko_Mouth", "secondary": "Theodosia"},
     "fraser": {"primary": "Fraser", "secondary": "Nicomekl_Langley"},
 }
+watershed_from_river = {
+    "bute": {"primary": 2.015},
+    "jervis": {"primary": 8.810, "secondary": 140.3},
+    "howe": {"primary": 2.276},
+    "jdf": {"primary": 8.501},
+    "evi_n": {"primary": 10.334},
+    "evi_s": {"primary": 24.60},
+    "toba": {"primary": 0.4563, "secondary": 14.58},
+    "skagit": {"primary": 1.267, "secondary": 1.236},
+    "puget": {"primary": 8.790, "secondary": 29.09},
+    "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
+}
 
 
 def main():
@@ -138,7 +150,30 @@ def _do_fraser(obs_date, config):
 
     :rtype: tuple
     """
-    pass
+    primary_river = _read_river("Fraser", "primary", config)
+    primary_flow = _get_river_flow("Fraser", primary_river, obs_date, config)
+
+    secondary_river = _read_river("Nicomekl_Langley", "secondary", config)
+    secondary_flow = _get_river_flow(
+        "Nicomekl_Langley", secondary_river, obs_date, config
+    )
+
+    fraser_flux = (
+        # Fraser at Hope plus its portion that is proxy for glacial runoff dominated rivers
+        # (e.g. Harrison) that flow into Fraser below Hope
+        primary_flow * watershed_from_river["fraser"]["primary"]
+        # Proxy for rainfall runoff dominated rivers that flow into Fraser below Hope
+        + secondary_flow
+        * watershed_from_river["fraser"]["secondary"]
+        * watershed_from_river["fraser"]["nico_into_fraser"]
+    )
+    secondary_flux = (
+        # Proxy for rainfall runoff dominated rivers in the Fraser Basin that flow into SoG
+        secondary_flow
+        * watershed_from_river["fraser"]["secondary"]
+        * (1 - watershed_from_river["fraser"]["nico_into_fraser"])
+    )
+    return fraser_flux, secondary_flux
 
 
 def _do_a_river_pair(
@@ -156,6 +191,50 @@ def _do_a_river_pair(
     :param str or :py:class:`NoneType` secondary_river_name:
 
     :rtype: float
+    """
+    pass
+
+
+def _read_river(river_name, ps, config):
+    """
+    :param str river_name:
+    :param str ps: "primary" or "secondary"
+    :param dict config:
+
+    :rtype: :py:class:`pandas.Dataframe`
+    """
+    pass
+
+
+def _get_river_flow(river_name, river_df, obs_date, config):
+    """
+    :param str river_name:
+    :param :py:class:`pandas.Dataframe` river_df:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param dict config:
+
+    :rtype: float
+    """
+    obs_yyyymmdd = obs_date.format("YYYY-MM-DD")
+    try:
+        river_flow = river_df.loc[obs_yyyymmdd, river_df.columns[0]]
+    except KeyError:
+        # No discharge obs for date, so patch
+        logger.error(f"no {obs_yyyymmdd} discharge obs for {river_name}: patching")
+        river_flow = _patch_missing_obs(river_name, river_df, obs_date, config)
+    return river_flow
+
+
+def _patch_missing_obs(river_name, river_flow, obs_date, config):
+    """
+    :param str river_name:
+    :param :py:class:`pandas.Dataframe` river_flow:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param dict config:
+
+    :rtype: float
+
+    :raises: :py:exc:`ValueError`
     """
     pass
 
