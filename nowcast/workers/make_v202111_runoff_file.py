@@ -192,13 +192,39 @@ def _do_a_river_pair(
 
     :rtype: float
     """
-    pass
+    primary_river = _read_river(primary_river_name, "primary", config)
+    primary_flow = _get_river_flow(primary_river_name, primary_river, obs_date, config)
+    watershed_flow = primary_flow * watershed_from_river[watershed_name]["primary"]
+    if secondary_river_name is None:
+        return watershed_flow
+
+    secondary_river = (
+        _read_river_Theodosia(config)
+        if secondary_river_name == "Theodosia"
+        else _read_river(secondary_river_name, "secondary", config)
+    )
+    secondary_flow = _get_river_flow(
+        secondary_river_name, secondary_river, obs_date, config
+    )
+    watershed_flow += secondary_flow * watershed_from_river[watershed_name]["secondary"]
+    return watershed_flow
 
 
 def _read_river(river_name, ps, config):
     """
     :param str river_name:
     :param str ps: "primary" or "secondary"
+    :param dict config:
+
+    :rtype: :py:class:`pandas.Dataframe`
+    """
+    pass
+
+
+def _read_river_Theodosia(config):
+    """Read daily average discharge observations for 3 parts of Theodosia River
+    from river flow files, and combine them to get total.
+
     :param dict config:
 
     :rtype: :py:class:`pandas.Dataframe`
