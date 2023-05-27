@@ -28,6 +28,7 @@ import warnings
 from pathlib import Path
 
 import arrow
+import numpy
 import pandas
 from nemo_nowcast import NowcastWorker
 
@@ -76,6 +77,55 @@ watershed_from_river = {
     "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
 }
 theodosia_from_diversion_only = 1.429  # see Susan's TheodosiaWOScotty notebook
+persist_until = {
+    # number of days to persist last observation for before switching to fitting strategies
+    "Englishman": 0,
+    "Fraser": 10_000,  # always persist
+    "Theodosia": 0,
+    "RobertsCreek": 0,
+    "Salmon_Sayward": 0,
+    "Squamish_Brackendale": 0,
+    "SanJuan_PortRenfrew": 0,
+    "Nisqually_McKenna": 4,
+    "Snohomish_Monroe": 0,
+    "Skagit_MountVernon": 3,
+    "Homathko_Mouth": 1,
+    "Nicomekl_Langley": 0,
+    "Greenwater_Greenwater": 1,
+    "Clowhom_ClowhomLake": 2,
+}
+patching_dictionary = {
+    "Englishman": ["fit", "persist"],
+    "Fraser": ["persist"],
+    "Theodosia": ["fit", "backup", "persist"],
+    "RobertsCreek": ["fit", "persist"],
+    "Salmon_Sayward": ["fit", "persist"],
+    "Squamish_Brackendale": ["fit", "persist"],
+    "SanJuan_PortRenfrew": ["fit", "backup", "persist"],
+    "Nisqually_McKenna": ["fit", "persist"],
+    "Snohomish_Monroe": ["fit", "persist"],
+    "Skagit_MountVernon": ["fit", "persist"],
+    "Homathko_Mouth": ["fit", "persist"],
+    "Nicomekl_Langley": ["fit", "persist"],
+    "Greenwater_Greenwater": ["fit", "persist"],
+    "Clowhom_ClowhomLake": ["fit", "persist"],
+}
+matching_dictionary = {
+    "Englishman": "Salmon_Sayward",
+    "Theodosia": "Clowhom_ClowhomLake",
+    "RobertsCreek": "Englishman",
+    "Salmon_Sayward": "Englishman",
+    "Squamish_Brackendale": "Homathko_Mouth",
+    "SanJuan_PortRenfrew": "Englishman",
+    "Nisqually_McKenna": "Snohomish_Monroe",
+    "Snohomish_Monroe": "Skagit_MountVernon",
+    "Skagit_MountVernon": "Snohomish_Monroe",
+    "Homathko_Mouth": "Squamish_Brackendale",
+    "Nicomekl_Langley": "RobertsCreek",
+    "Greenwater_Greenwater": "Snohomish_Monroe",
+    "Clowhom_ClowhomLake": "Theodosia_Diversion",
+}
+backup_dictionary = {"SanJuan_PortRenfrew": "RobertsCreek", "Theodosia": "Englishman"}
 
 
 def main():
@@ -344,6 +394,55 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
     :rtype: float
 
     :raises: :py:exc:`ValueError`
+    """
+    last_obs_date = arrow.get(river_flow.iloc[-1].name)
+    if last_obs_date > obs_date:
+        # We can only handle patching discharge values for dates beyond the end of the observations
+        # time series.
+        # Use Susan's MakeDailyNCFiles notebook if you need to patch discharges
+        # within the time series.
+        raise ValueError(
+            f"obs_date={obs_date.format('YYYY-MM-DD')} is not beyond end of time series at "
+            f"{last_obs_date.format('YYYY-MM-DD')}"
+        )
+
+    gap_length = (obs_date - last_obs_date).days
+    print(gap_length)
+    if gap_length <= persist_until[river_name]:
+        # Handle rivers for which Susan's statistical investigation showed that persistence
+        # is better than fitting for short periods of missing observations.
+        print("persist")
+        flux = river_flow.iloc[-1, -1]
+        return flux
+
+    for fit_type in patching_dictionary[river_name]:
+        print(fit_type)
+        match fit_type:
+            case "persist":
+                flux = river_flow.iloc[-1, -1]
+                return flux
+            case "fit":
+                fit_from_river_name = matching_dictionary[river_name]
+            case "backup":
+                fit_from_river_name = backup_dictionary[river_name]
+            case _:
+                raise ValueError("typo in fit types list")
+        flux = _patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        )
+        if not numpy.isnan(flux):
+            return flux
+
+
+def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config):
+    """
+    :param :py:class:`pandas.Dataframe` river_flow:
+    :param str fit_from_river_name:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param int gap_length:
+    :param dict config:
+
+    :rtype: float
     """
     pass
 
