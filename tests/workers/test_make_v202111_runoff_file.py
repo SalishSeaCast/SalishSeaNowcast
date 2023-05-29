@@ -328,7 +328,20 @@ class TestMakeV202111RunoffFile:
     @pytest.fixture
     def mock_calc_watershed_flows(monkeypatch):
         def _mock_calc_watershed_flows(obs_date, config):
-            pass
+            flows = {
+                "bute": 97.0915257,
+                "evi_n": 565.25543574,
+                "jervis": 217.69422748000002,
+                "evi_s": 180.9227418,
+                "howe": 127.6401284,
+                "jdf": 621.7123890299999,
+                "skagit": 1133.0656029000002,
+                "puget": 577.08733426,
+                "toba": 106.458897294,
+                "fraser": 1168.6866122853,
+                "non_fraser": 56.6227761147,
+            }
+            return flows
 
         monkeypatch.setattr(
             make_v202111_runoff_file,
@@ -340,7 +353,7 @@ class TestMakeV202111RunoffFile:
     @pytest.fixture
     def mock_get_grid_cell_areas(monkeypatch):
         def _mock_get_grid_cell_areas(config):
-            grid_cell_areas = numpy.array([898, 398], dtype=float)
+            grid_cell_areas = numpy.empty((898, 398), dtype=float)
             grid_cell_areas.fill(200_000)
             return grid_cell_areas
 
@@ -1706,3 +1719,40 @@ class TestPatchFitting:
         )
 
         assert numpy.isnan(flux)
+
+
+class TestCreateRunoffArray:
+    """Unit test for make_v202111_runoff_file._create_runoff_array()."""
+
+    def test_create_runoff_array(self, config):
+        flows = {
+            "bute": 97.0915257,
+            "evi_n": 565.25543574,
+            "jervis": 217.69422748000002,
+            "evi_s": 180.9227418,
+            "howe": 127.6401284,
+            "jdf": 621.7123890299999,
+            "skagit": 1133.0656029000002,
+            "puget": 577.08733426,
+            "toba": 106.458897294,
+            "fraser": 1168.6866122853,
+            "non_fraser": 56.6227761147,
+        }
+        mock_grid_cell_areas = numpy.empty((898, 398), dtype=float)
+        mock_grid_cell_areas.fill(200_000)
+
+        runoff_array = make_v202111_runoff_file._create_runoff_array(
+            flows, mock_grid_cell_areas
+        )
+
+        # Check selected river runoffs
+        # Nicomekl
+        assert runoff_array[388, 350] == pytest.approx(0.0137139)
+        # Fraser (channel head in model)
+        assert runoff_array[500, 394] == pytest.approx(5.8434331)
+        # Qunisam
+        numpy.testing.assert_allclose(
+            runoff_array[750:752, 123], [0.213957536, 0.213957536]
+        )
+        # Check total runoff
+        assert runoff_array.sum() == pytest.approx(22.54050399)

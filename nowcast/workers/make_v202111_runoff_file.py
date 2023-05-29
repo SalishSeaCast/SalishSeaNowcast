@@ -33,6 +33,10 @@ import pandas
 import xarray
 from nemo_nowcast import NowcastWorker
 
+from salishsea_tools import rivertools
+from salishsea_tools import river_202108 as rivers
+
+
 NAME = "make_v202111_runoff_file"
 logger = logging.getLogger(NAME)
 
@@ -166,6 +170,7 @@ def make_v202111_runoff_file(parsed_args, config, *args):
     )
     flows = _calc_watershed_flows(obs_date, config)
     grid_cell_areas = _get_grid_cell_areas(config)
+    runoff_array = _create_runoff_array(flows, grid_cell_areas)
 
     checklist = {}
 
@@ -504,6 +509,54 @@ def _get_grid_cell_areas(config):
     with xarray.open_dataset(coords_file, decode_times=False) as coords:
         grid_cell_areas = coords.e1t[0] * coords.e2t[0]
     return grid_cell_areas.to_numpy()
+
+
+def _create_runoff_array(flows, grid_cell_areas):
+    """
+    :param dict flows:
+    :param :py:class:`numpy.ndarray` grid_cell_areas:
+
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    runoff_array = numpy.zeros((grid_cell_areas.shape[0], grid_cell_areas.shape[1]))
+    # rivertools.fill_runoff_array() needs depth and temperature arrays,
+    # but we don't return them
+    runoff_depth = numpy.ones_like(runoff_array)
+    runoff_temperature = numpy.empty_like(runoff_array)
+
+    for watershed_name in watershed_names:
+        if watershed_name == "fraser":
+            fraser_ratio = rivers.prop_dict["fraser"]["Fraser"]["prop"]
+            for key in rivers.prop_dict[watershed_name]:
+                flux, subarea = (
+                    (flows["fraser"], fraser_ratio)
+                    if key == "Fraser"
+                    else (flows["non_fraser"], 1 - fraser_ratio)
+                )
+                river = rivers.prop_dict["fraser"][key]
+                runoff_array, _ = rivertools.fill_runoff_array(
+                    flux * river["prop"] / subarea,
+                    river["i"],
+                    river["di"],
+                    river["j"],
+                    river["dj"],
+                    river["depth"],
+                    runoff_array,
+                    runoff_depth,
+                    grid_cell_areas,
+                )
+        else:
+            flow = flows[watershed_name]
+            runoff_array, _, _ = rivertools.put_watershed_into_runoff(
+                "constant",
+                grid_cell_areas,
+                flow,
+                runoff_array,
+                runoff_depth,
+                runoff_temperature,
+                rivers.prop_dict[watershed_name],
+            )
+    return runoff_array
 
 
 if __name__ == "__main__":
