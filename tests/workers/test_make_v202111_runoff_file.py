@@ -1080,7 +1080,7 @@ class TestReadRiverTheodosia:
 class TestPatchMissingObs:
     """Unit tests for make_v202111_runoff_file._patch_missing_obs()."""
 
-    def test_obs_date_not_at_end_of_timeseries(self, config):
+    def test_obs_date_not_at_end_of_timeseries(self, config, caplog):
         river_name = "Nicomekl_Langley"
         river_flow = pandas.DataFrame(
             index=pandas.Index(
@@ -1116,7 +1116,7 @@ class TestPatchMissingObs:
                 river_name, river_flow, obs_date, config
             )
 
-    def test_persist(self, config):
+    def test_persist(self, config, caplog):
         river_name = "Clowhom_ClowhomLake"
         river_flow = pandas.DataFrame(
             index=pandas.Index(
@@ -1136,14 +1136,21 @@ class TestPatchMissingObs:
             },
         )
         obs_date = arrow.get("2023-02-16")
+        caplog.set_level(logging.DEBUG)
 
         flux = make_v202111_runoff_file._patch_missing_obs(
             river_name, river_flow, obs_date, config
         )
 
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = (
+            "patched missing 2023-02-16 Clowhom_ClowhomLake discharge by persistence"
+        )
+        assert caplog.messages[0] == expected
+
         assert flux == pytest.approx(4.036944e00)
 
-    def test_fit(self, config, monkeypatch):
+    def test_fit(self, config, caplog, monkeypatch):
         def mock_patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         ):
@@ -1183,16 +1190,21 @@ class TestPatchMissingObs:
             },
         )
         obs_date = arrow.get("2023-02-14")
+        caplog.set_level(logging.DEBUG)
 
         flux = make_v202111_runoff_file._patch_missing_obs(
             river_name, river_flow, obs_date, config
         )
 
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = "patched missing 2023-02-14 Squamish_Brackendale discharge by fitting from Homathko_Mouth"
+        assert caplog.messages[0] == expected
+
         assert flux == pytest.approx(54.759385)
 
-    def test_backup(self, config, monkeypatch):
+    def test_backup(self, config, caplog, monkeypatch):
         mock_patch_fitting_returns = [
-            # bad, flux
+            # flux
             numpy.nan,  # fit from Englishman River fails
             68.43567,  # fit from Roberts Creek
         ]
@@ -1225,14 +1237,19 @@ class TestPatchMissingObs:
             },
         )
         obs_date = arrow.get("2023-02-16")
+        caplog.set_level(logging.DEBUG)
 
         flux = make_v202111_runoff_file._patch_missing_obs(
             river_name, river_flow, obs_date, config
         )
 
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = "patched missing 2023-02-16 SanJuan_PortRenfrew discharge by fitting from backup river: RobertsCreek"
+        assert caplog.messages[0] == expected
+
         assert flux == pytest.approx(68.43567)
 
-    def test_persist_is_last_resort(self, config, monkeypatch):
+    def test_persist_is_last_resort(self, config, caplog, monkeypatch):
         mock_patch_fitting_returns = [
             # bad, flux
             numpy.nan,  # fit from Englishman River fails
@@ -1267,10 +1284,17 @@ class TestPatchMissingObs:
             },
         )
         obs_date = arrow.get("2023-02-16")
+        caplog.set_level(logging.DEBUG)
 
         flux = make_v202111_runoff_file._patch_missing_obs(
             river_name, river_flow, obs_date, config
         )
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = (
+            "patched missing 2023-02-16 SanJuan_PortRenfrew discharge by persistence"
+        )
+        assert caplog.messages[0] == expected
 
         assert flux == pytest.approx(5.195243e01)
 

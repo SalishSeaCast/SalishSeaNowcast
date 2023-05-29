@@ -395,6 +395,7 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
 
     :raises: :py:exc:`ValueError`
     """
+    obs_date_yyyymmdd = obs_date.format("YYYY-MM-DD")
     last_obs_date = arrow.get(river_flow.iloc[-1].name)
     if last_obs_date > obs_date:
         # We can only handle patching discharge values for dates beyond the end of the observations
@@ -402,24 +403,27 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
         # Use Susan's MakeDailyNCFiles notebook if you need to patch discharges
         # within the time series.
         raise ValueError(
-            f"obs_date={obs_date.format('YYYY-MM-DD')} is not beyond end of time series at "
+            f"obs_date={obs_date_yyyymmdd} is not beyond end of time series at "
             f"{last_obs_date.format('YYYY-MM-DD')}"
         )
 
     gap_length = (obs_date - last_obs_date).days
-    print(gap_length)
     if gap_length <= persist_until[river_name]:
         # Handle rivers for which Susan's statistical investigation showed that persistence
         # is better than fitting for short periods of missing observations.
-        print("persist")
         flux = river_flow.iloc[-1, -1]
+        logger.debug(
+            f"patched missing {obs_date_yyyymmdd} {river_name} discharge by persistence"
+        )
         return flux
 
     for fit_type in patching_dictionary[river_name]:
-        print(fit_type)
         match fit_type:
             case "persist":
                 flux = river_flow.iloc[-1, -1]
+                logger.debug(
+                    f"patched missing {obs_date_yyyymmdd} {river_name} discharge by persistence"
+                )
                 return flux
             case "fit":
                 fit_from_river_name = matching_dictionary[river_name]
@@ -431,6 +435,16 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
         if not numpy.isnan(flux):
+            if fit_type == "backup":
+                logger.debug(
+                    f"patched missing {obs_date_yyyymmdd} {river_name} discharge by fitting from "
+                    f"backup river: {fit_from_river_name}"
+                )
+            else:
+                logger.debug(
+                    f"patched missing {obs_date_yyyymmdd} {river_name} discharge by fitting from "
+                    f"{fit_from_river_name}"
+                )
             return flux
 
 
