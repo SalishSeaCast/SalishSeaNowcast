@@ -444,7 +444,36 @@ def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config
 
     :rtype: float
     """
-    pass
+    fit_from_river_flow = _read_river(fit_from_river_name, "primary", config)
+    obs_yyyymmdd = obs_date.format("YYYY-MM-DD")
+    try:
+        fit_from_river_flow.loc[obs_yyyymmdd]
+    except KeyError:
+        # If river to fit from is missing obs date, the fit is a failure
+        flux = numpy.nan
+        return flux
+
+    fit_duration = 7  # number of days we use to fit against
+    fit_dates = arrow.Arrow.range(
+        "day",
+        obs_date.shift(days=-fit_duration - gap_length),
+        obs_date.shift(days=-1 - gap_length),
+    )
+    try:
+        ratio = sum(
+            river_flow.loc[yyyymmdd := day.format("YYYY-MM-DD"), river_flow.columns[0]]
+            / fit_from_river_flow.loc[yyyymmdd, river_flow.columns[0]]
+            for day in fit_dates
+        )
+    except KeyError:
+        # If either river is missing a value during the fitting period, the fit is a failure
+        flux = numpy.nan
+        return flux
+
+    flux = (ratio / fit_duration) * fit_from_river_flow.loc[
+        obs_yyyymmdd, river_flow.columns[0]
+    ]
+    return flux
 
 
 if __name__ == "__main__":

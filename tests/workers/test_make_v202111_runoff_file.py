@@ -1273,3 +1273,376 @@ class TestPatchMissingObs:
         )
 
         assert flux == pytest.approx(5.195243e01)
+
+
+class TestPatchFitting:
+    """Unit tests for make_v202111_runoff_file._patch_fitting()."""
+
+    def test_1_day_missing_patch_successful(self, config, monkeypatch):
+        def mock_read_river(river_name, ps, config):
+            return pandas.DataFrame(
+                # Homathko_Mouth
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-06"),
+                        pandas.to_datetime("2023-02-07"),
+                        pandas.to_datetime("2023-02-08"),
+                        pandas.to_datetime("2023-02-09"),
+                        pandas.to_datetime("2023-02-10"),
+                        pandas.to_datetime("2023-02-11"),
+                        pandas.to_datetime("2023-02-12"),
+                        pandas.to_datetime("2023-02-13"),
+                        pandas.to_datetime("2023-02-14"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [
+                        3.690729e01,
+                        6.113299e01,
+                        5.083090e01,
+                        4.158090e01,
+                        4.387431e01,
+                        4.237986e01,
+                        4.243368e01,
+                        4.444965e01,
+                        3.756528e01,
+                    ],
+                },
+            )
+
+        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+
+        river_flow = pandas.DataFrame(
+            # Squamish_Brackendale
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-06"),
+                    pandas.to_datetime("2023-02-07"),
+                    pandas.to_datetime("2023-02-08"),
+                    pandas.to_datetime("2023-02-09"),
+                    pandas.to_datetime("2023-02-10"),
+                    pandas.to_datetime("2023-02-11"),
+                    pandas.to_datetime("2023-02-12"),
+                    pandas.to_datetime("2023-02-13"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    4.181135e01,
+                    9.415799e01,
+                    8.465509e01,
+                    6.185860e01,
+                    6.616285e01,
+                    6.533544e01,
+                    5.635754e01,
+                    8.004896e01,
+                ],
+            },
+        )
+        fit_from_river_name = "Homathko_Mouth"
+        obs_date = arrow.get("2023-02-14")
+        gap_length = 1
+
+        flux = make_v202111_runoff_file._patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        )
+
+        assert flux == pytest.approx(54.759385)
+
+    def test_3_days_missing_patch_successful(self, config, monkeypatch):
+        def mock_read_river(river_name, ps, config):
+            return pandas.DataFrame(
+                # Homathko_Mouth
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-04"),
+                        pandas.to_datetime("2023-02-05"),
+                        pandas.to_datetime("2023-02-06"),
+                        pandas.to_datetime("2023-02-07"),
+                        pandas.to_datetime("2023-02-08"),
+                        pandas.to_datetime("2023-02-09"),
+                        pandas.to_datetime("2023-02-10"),
+                        pandas.to_datetime("2023-02-11"),
+                        pandas.to_datetime("2023-02-12"),
+                        pandas.to_datetime("2023-02-13"),
+                        pandas.to_datetime("2023-02-14"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [
+                        3.107431e01,
+                        3.446285e01,
+                        3.690729e01,
+                        6.113299e01,
+                        5.083090e01,
+                        4.158090e01,
+                        4.387431e01,
+                        4.237986e01,
+                        4.243368e01,
+                        4.444965e01,
+                        3.756528e01,
+                    ],
+                },
+            )
+
+        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+
+        river_flow = pandas.DataFrame(
+            # Squamish_Brackendale
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-04"),
+                    pandas.to_datetime("2023-02-05"),
+                    pandas.to_datetime("2023-02-06"),
+                    pandas.to_datetime("2023-02-07"),
+                    pandas.to_datetime("2023-02-08"),
+                    pandas.to_datetime("2023-02-09"),
+                    pandas.to_datetime("2023-02-10"),
+                    pandas.to_datetime("2023-02-11"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    4.714132e01,
+                    4.199236e01,
+                    4.181135e01,
+                    9.415799e01,
+                    8.465509e01,
+                    6.185860e01,
+                    6.616285e01,
+                    6.533544e01,
+                ],
+            },
+        )
+        fit_from_river_name = "Homathko_Mouth"
+        obs_date = arrow.get("2023-02-14")
+        gap_length = 3
+
+        flux = make_v202111_runoff_file._patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        )
+
+        assert flux == pytest.approx(54.038875)
+
+    def test_gap_in_river_to_patch_failure(self, config, monkeypatch):
+        def mock_read_river(river_name, ps, config):
+            return pandas.DataFrame(
+                # Homathko_Mouth
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-06"),
+                        pandas.to_datetime("2023-02-07"),
+                        pandas.to_datetime("2023-02-08"),
+                        pandas.to_datetime("2023-02-09"),
+                        pandas.to_datetime("2023-02-10"),
+                        pandas.to_datetime("2023-02-11"),
+                        pandas.to_datetime("2023-02-12"),
+                        pandas.to_datetime("2023-02-13"),
+                        pandas.to_datetime("2023-02-14"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [
+                        3.690729e01,
+                        6.113299e01,
+                        5.083090e01,
+                        4.158090e01,
+                        4.387431e01,
+                        4.237986e01,
+                        4.243368e01,
+                        4.444965e01,
+                        3.756528e01,
+                    ],
+                },
+            )
+
+        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+
+        river_flow = pandas.DataFrame(
+            # Squamish_Brackendale
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-06"),
+                    pandas.to_datetime("2023-02-07"),
+                    pandas.to_datetime("2023-02-08"),
+                    # missing day
+                    pandas.to_datetime("2023-02-10"),
+                    pandas.to_datetime("2023-02-11"),
+                    pandas.to_datetime("2023-02-12"),
+                    pandas.to_datetime("2023-02-13"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    4.181135e01,
+                    9.415799e01,
+                    8.465509e01,
+                    # missing day
+                    6.616285e01,
+                    6.533544e01,
+                    5.635754e01,
+                    8.004896e01,
+                ],
+            },
+        )
+        fit_from_river_name = "Homathko_Mouth"
+        obs_date = arrow.get("2023-02-14")
+        gap_length = 1
+
+        flux = make_v202111_runoff_file._patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        )
+
+        assert numpy.isnan(flux)
+
+    def test_gap_in_river_to_fit_from_failure(self, config, monkeypatch):
+        def mock_read_river(river_name, ps, config):
+            return pandas.DataFrame(
+                # Homathko_Mouth
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-06"),
+                        pandas.to_datetime("2023-02-07"),
+                        pandas.to_datetime("2023-02-08"),
+                        # missing day
+                        pandas.to_datetime("2023-02-10"),
+                        pandas.to_datetime("2023-02-11"),
+                        pandas.to_datetime("2023-02-12"),
+                        pandas.to_datetime("2023-02-13"),
+                        pandas.to_datetime("2023-02-14"),
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [
+                        3.690729e01,
+                        6.113299e01,
+                        5.083090e01,
+                        # missing day
+                        4.387431e01,
+                        4.237986e01,
+                        4.243368e01,
+                        4.444965e01,
+                        3.756528e01,
+                    ],
+                },
+            )
+
+        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+
+        river_flow = pandas.DataFrame(
+            # Squamish_Brackendale
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-06"),
+                    pandas.to_datetime("2023-02-07"),
+                    pandas.to_datetime("2023-02-08"),
+                    pandas.to_datetime("2023-02-09"),
+                    pandas.to_datetime("2023-02-10"),
+                    pandas.to_datetime("2023-02-11"),
+                    pandas.to_datetime("2023-02-12"),
+                    pandas.to_datetime("2023-02-13"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    4.181135e01,
+                    9.415799e01,
+                    8.465509e01,
+                    6.185860e01,
+                    6.616285e01,
+                    6.533544e01,
+                    5.635754e01,
+                    8.004896e01,
+                ],
+            },
+        )
+        fit_from_river_name = "Homathko_Mouth"
+        obs_date = arrow.get("2023-02-14")
+        gap_length = 1
+
+        flux = make_v202111_runoff_file._patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        )
+
+        assert numpy.isnan(flux)
+
+    def test_river_to_patch_from_missing_obs_date_failure(self, config, monkeypatch):
+        def mock_read_river(river_name, ps, config):
+            return pandas.DataFrame(
+                # Homathko_Mouth
+                index=pandas.Index(
+                    data=[
+                        pandas.to_datetime("2023-02-06"),
+                        pandas.to_datetime("2023-02-07"),
+                        pandas.to_datetime("2023-02-08"),
+                        pandas.to_datetime("2023-02-09"),
+                        pandas.to_datetime("2023-02-10"),
+                        pandas.to_datetime("2023-02-11"),
+                        pandas.to_datetime("2023-02-12"),
+                        pandas.to_datetime("2023-02-13"),
+                        # missing obs date
+                    ],
+                    name="date",
+                ),
+                data={
+                    "Primary River Flow": [
+                        3.690729e01,
+                        6.113299e01,
+                        5.083090e01,
+                        4.158090e01,
+                        4.387431e01,
+                        4.237986e01,
+                        4.243368e01,
+                        4.444965e01,
+                        # missing obs date value
+                    ],
+                },
+            )
+
+        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+
+        river_flow = pandas.DataFrame(
+            # Squamish_Brackendale
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2023-02-06"),
+                    pandas.to_datetime("2023-02-07"),
+                    pandas.to_datetime("2023-02-08"),
+                    pandas.to_datetime("2023-02-09"),
+                    pandas.to_datetime("2023-02-10"),
+                    pandas.to_datetime("2023-02-11"),
+                    pandas.to_datetime("2023-02-12"),
+                    pandas.to_datetime("2023-02-13"),
+                ],
+                name="date",
+            ),
+            data={
+                "Primary River Flow": [
+                    4.181135e01,
+                    9.415799e01,
+                    8.465509e01,
+                    6.185860e01,
+                    6.616285e01,
+                    6.533544e01,
+                    5.635754e01,
+                    8.004896e01,
+                ],
+            },
+        )
+        fit_from_river_name = "Homathko_Mouth"
+        obs_date = arrow.get("2023-02-14")
+        gap_length = 1
+
+        flux = make_v202111_runoff_file._patch_fitting(
+            river_flow, fit_from_river_name, obs_date, gap_length, config
+        )
+
+        assert numpy.isnan(flux)
