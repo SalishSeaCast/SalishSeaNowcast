@@ -47,6 +47,13 @@ def config(base_config):
                     TheodosiaScotty: forcing/rivers/observations/Theodosia_Scotty_flow
                     TheodosiaBypass: forcing/rivers/observations/Theodosia_Bypass_flow
                     TheodosiaDiversion: forcing/rivers/observations/Theodosia_Diversion_flow
+                run types:
+                  nowcast-green:
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                run:
+                  enabled hosts:
+                    salish-nowcast:
+                      grid dir: /SalishSeaCast/grid/
                 """
             )
         )
@@ -130,6 +137,19 @@ class TestConfig:
             "TheodosiaDiversion": "/results/forcing/rivers/observations/Theodosia_Diversion_flow",
         }
         assert SOG_river_files == expected
+
+    def test_grid_dir(self, prod_config):
+        grid_dir = Path(
+            prod_config["run"]["enabled hosts"]["salish-nowcast"]["grid dir"]
+        )
+
+        expected = Path("/SalishSeaCast/grid/")
+        assert grid_dir == expected
+
+    def test_coords_file(self, prod_config):
+        coords_file = prod_config["run types"]["nowcast-green"]["coordinates"]
+        expected = "coordinates_seagrid_SalishSea201702.nc"
+        assert coords_file == expected
 
 
 class TestModuleVariables:
@@ -316,7 +336,21 @@ class TestMakeV202111RunoffFile:
             _mock_calc_watershed_flows,
         )
 
-    def test_checklist(self, mock_calc_watershed_flows, config, caplog):
+    @staticmethod
+    @pytest.fixture
+    def mock_get_grid_cell_areas(monkeypatch):
+        def _mock_get_grid_cell_areas(config):
+            grid_cell_areas = numpy.array([898, 398], dtype=float)
+            grid_cell_areas.fill(200_000)
+            return grid_cell_areas
+
+        monkeypatch.setattr(
+            make_v202111_runoff_file, "_get_grid_cell_areas", _mock_get_grid_cell_areas
+        )
+
+    def test_checklist(
+        self, mock_calc_watershed_flows, mock_get_grid_cell_areas, config, caplog
+    ):
         parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
 
         checklist = make_v202111_runoff_file.make_v202111_runoff_file(
@@ -325,7 +359,9 @@ class TestMakeV202111RunoffFile:
 
         assert checklist == {}
 
-    def test_log_messages(self, mock_calc_watershed_flows, config, caplog):
+    def test_log_messages(
+        self, mock_calc_watershed_flows, mock_get_grid_cell_areas, config, caplog
+    ):
         parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-26"))
         caplog.set_level(logging.DEBUG)
 

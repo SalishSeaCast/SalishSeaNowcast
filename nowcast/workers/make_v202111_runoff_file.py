@@ -30,6 +30,7 @@ from pathlib import Path
 import arrow
 import numpy
 import pandas
+import xarray
 from nemo_nowcast import NowcastWorker
 
 NAME = "make_v202111_runoff_file"
@@ -164,6 +165,7 @@ def make_v202111_runoff_file(parsed_args, config, *args):
         f"calculating NEMO runoff forcing for 202108 bathymetry for {obs_date.format('YYYY-MM-DD')}"
     )
     flows = _calc_watershed_flows(obs_date, config)
+    grid_cell_areas = _get_grid_cell_areas(config)
 
     checklist = {}
 
@@ -488,6 +490,20 @@ def _patch_fitting(river_flow, fit_from_river_name, obs_date, gap_length, config
         obs_yyyymmdd, river_flow.columns[0]
     ]
     return flux
+
+
+def _get_grid_cell_areas(config):
+    """
+    :param dict config:
+
+    :rtype: :py:class:`numpy.ndarray`
+    """
+    # TODO: Make getting the coordinates less convoluted
+    grid_dir = Path(config["run"]["enabled hosts"]["salish-nowcast"]["grid dir"])
+    coords_file = grid_dir / config["run types"]["nowcast-green"]["coordinates"]
+    with xarray.open_dataset(coords_file, decode_times=False) as coords:
+        grid_cell_areas = coords.e1t[0] * coords.e2t[0]
+    return grid_cell_areas.to_numpy()
 
 
 if __name__ == "__main__":
