@@ -19,6 +19,7 @@
 """Unit test for SalishSeaCast make_v202111_runoff_file worker.
 """
 import logging
+import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -28,6 +29,7 @@ import nemo_nowcast
 import numpy
 import pandas
 import pytest
+import xarray
 
 from nowcast.workers import make_v202111_runoff_file
 
@@ -47,6 +49,9 @@ def config(base_config):
                     TheodosiaScotty: forcing/rivers/observations/Theodosia_Scotty_flow
                     TheodosiaBypass: forcing/rivers/observations/Theodosia_Bypass_flow
                     TheodosiaDiversion: forcing/rivers/observations/Theodosia_Diversion_flow
+                  rivers dir: results/forcing/rivers/
+                  file templates:
+                    b202108:  "R202108Dailies_{:y%Ym%md%d}.nc"
                   prop_dict modules:
                     b202108: salishsea_tools.river_202108
 
@@ -141,6 +146,14 @@ class TestConfig:
             "TheodosiaDiversion": "/results/forcing/rivers/observations/Theodosia_Diversion_flow",
         }
         assert SOG_river_files == expected
+
+    def test_rivers_dir(self, prod_config):
+        assert prod_config["rivers"]["rivers dir"] == "/results/forcing/rivers/"
+
+    def test_filename_tmpl(self, prod_config):
+        filename_tmpl = prod_config["rivers"]["file templates"]["b202108"]
+
+        assert filename_tmpl == "R202108Dailies_{:y%Ym%md%d}.nc"
 
     def test_prop_dict_modules(self, prod_config):
         prop_dict_module = prod_config["rivers"]["prop_dict modules"]["b202108"]
@@ -370,20 +383,55 @@ class TestMakeV202111RunoffFile:
             make_v202111_runoff_file, "_get_grid_cell_areas", _mock_get_grid_cell_areas
         )
 
+    @staticmethod
+    @pytest.fixture
+    def mock_to_netcdf(monkeypatch):
+        def _mock_to_netcdf(runoff_ds, encoding, nc_file_path):
+            pass
+
+        monkeypatch.setattr(make_v202111_runoff_file, "to_netcdf", _mock_to_netcdf)
+
     def test_checklist(
-        self, mock_calc_watershed_flows, mock_get_grid_cell_areas, config, caplog
+        self,
+        mock_calc_watershed_flows,
+        mock_get_grid_cell_areas,
+        mock_to_netcdf,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
+        rivers_dir = Path(config["rivers"]["rivers dir"])
+        tmp_rivers_dir = tmp_path / rivers_dir
+        tmp_rivers_dir.mkdir(parents=True)
+        monkeypatch.setitem(config["rivers"], "rivers dir", tmp_rivers_dir)
+
         parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
 
         checklist = make_v202111_runoff_file.make_v202111_runoff_file(
             parsed_args, config
         )
 
-        assert checklist == {}
+        expected = {
+            "b202108": os.fspath(tmp_rivers_dir / "R202108Dailies_y2023m05d19.nc")
+        }
+        assert checklist == expected
 
     def test_log_messages(
-        self, mock_calc_watershed_flows, mock_get_grid_cell_areas, config, caplog
+        self,
+        mock_calc_watershed_flows,
+        mock_get_grid_cell_areas,
+        mock_to_netcdf,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
     ):
+        rivers_dir = Path(config["rivers"]["rivers dir"])
+        tmp_rivers_dir = tmp_path / rivers_dir
+        tmp_rivers_dir.mkdir(parents=True)
+        monkeypatch.setitem(config["rivers"], "rivers dir", tmp_rivers_dir)
+
         parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-26"))
         caplog.set_level(logging.DEBUG)
 
@@ -394,6 +442,12 @@ class TestMakeV202111RunoffFile:
             "calculating NEMO runoff forcing for 202108 bathymetry for 2023-05-26"
         )
         assert caplog.messages[0] == expected
+        assert caplog.records[2].levelname == "INFO"
+        expected = (
+            f"stored NEMO runoff forcing for 202108 bathymetry for 2023-05-26: "
+            f"{tmp_rivers_dir / 'R202108Dailies_y2023m05d26.nc'}"
+        )
+        assert caplog.messages[2] == expected
 
 
 class TestCalcWatershedFlows:
@@ -1869,3 +1923,33 @@ class TestCalcRunoffDataset:
             f"python3 -m nowcast.workers.make_v202111_runoff_file $NOWCAST_YAML "
             f"--run-date {obs_date.format('YYYY-MM-DD')}"
         )
+
+
+class TestWriteNetcdf:
+    """Unit test for make_v202111_runoff_file._write_netcdf()."""
+
+    def test_write_netcdf(self, config, caplog, tmp_path, monkeypatch):
+        def mock_to_netcdf(runoff_ds, encoding, nc_file_path):
+            pass
+
+        monkeypatch.setattr(make_v202111_runoff_file, "to_netcdf", mock_to_netcdf)
+        rivers_dir = Path(config["rivers"]["rivers dir"])
+        tmp_rivers_dir = tmp_path / rivers_dir
+        tmp_rivers_dir.mkdir(parents=True)
+        monkeypatch.setitem(config["rivers"], "rivers dir", tmp_rivers_dir)
+
+        runoff_ds = xarray.Dataset()
+        obs_date = arrow.get("2023-05-30")
+        caplog.set_level("DEBUG")
+
+        nc_file_path = make_v202111_runoff_file._write_netcdf(
+            runoff_ds, obs_date, config
+        )
+
+        assert caplog.records[0].levelname == "DEBUG"
+        assert (
+            caplog.messages[0]
+            == f"wrote {tmp_rivers_dir / 'R202108Dailies_y2023m05d30.nc'}"
+        )
+
+        assert nc_file_path == tmp_rivers_dir / "R202108Dailies_y2023m05d30.nc"

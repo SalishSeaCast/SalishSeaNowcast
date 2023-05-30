@@ -24,6 +24,7 @@ a nearby gauged river, depending on time span of missing observations.
 """
 import functools
 import logging
+import os
 import warnings
 from pathlib import Path
 
@@ -172,9 +173,12 @@ def make_v202111_runoff_file(parsed_args, config, *args):
     grid_cell_areas = _get_grid_cell_areas(config)
     runoff_array = _create_runoff_array(flows, grid_cell_areas)
     runoff_ds = _calc_runoff_dataset(obs_date, runoff_array, config)
-
-    checklist = {}
-
+    nc_file_path = _write_netcdf(runoff_ds, obs_date, config)
+    logger.info(
+        f"stored NEMO runoff forcing for 202108 bathymetry for {obs_date.format('YYYY-MM-DD')}: "
+        f"{nc_file_path}"
+    )
+    checklist = {"b202108": os.fspath(nc_file_path)}
     return checklist
 
 
@@ -615,6 +619,43 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
         },
     )
     return runoff_ds
+
+
+def _write_netcdf(runoff_ds, obs_date, config):
+    """
+    :param :py:class:`xarray.Dataset` runoff_ds:
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param dict config:
+
+    :rtype: :py:class:`pathlib.Path`
+    """
+    encoding = {
+        "time_counter": {
+            "calendar": "gregorian",
+            "units": "days since 2007-01-01",
+        },
+    }
+    encoding.update(
+        {var: {"zlib": True, "complevel": 4} for var in runoff_ds.data_vars}
+    )
+    rivers_dir = Path(config["rivers"]["rivers dir"])
+    filename_tmpl = config["rivers"]["file templates"]["b202108"]
+    nc_filename = filename_tmpl.format(obs_date.date())
+    to_netcdf(runoff_ds, encoding, rivers_dir / nc_filename)
+    logger.debug(f"wrote {rivers_dir / nc_filename}")
+    return rivers_dir / nc_filename
+
+
+def to_netcdf(runoff_ds, encoding, nc_file_path):
+    """This function is separate to facilitate testing of the calling function.
+
+    :param :py:class:`xarray.Dataset` runoff_ds:
+    :param dict encoding:
+    :param :py:class:`pathlib.Path` nc_file_path:
+    """
+    runoff_ds.to_netcdf(
+        nc_file_path, encoding=encoding, unlimited_dims=("time_counter",)
+    )
 
 
 if __name__ == "__main__":
