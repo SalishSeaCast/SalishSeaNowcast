@@ -179,6 +179,7 @@ rivers:
   # TODO: collapse to single item for v202111; b201702 key not required
   prop_dict modules:
     b201702: salishsea_tools.river_201702
+    b202108: salishsea_tools.river_202108
   turbidity:
     # File containing hourly real-time Fraser River water quality buoy turbidity data
     ECget Fraser turbidity: /results/observations/ECCC/fraser_buoy.csv

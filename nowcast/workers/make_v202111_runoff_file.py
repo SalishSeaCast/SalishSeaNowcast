@@ -171,6 +171,7 @@ def make_v202111_runoff_file(parsed_args, config, *args):
     flows = _calc_watershed_flows(obs_date, config)
     grid_cell_areas = _get_grid_cell_areas(config)
     runoff_array = _create_runoff_array(flows, grid_cell_areas)
+    runoff_ds = _calc_runoff_dataset(obs_date, runoff_array, config)
 
     checklist = {}
 
@@ -557,6 +558,63 @@ def _create_runoff_array(flows, grid_cell_areas):
                 rivers.prop_dict[watershed_name],
             )
     return runoff_array
+
+
+def _calc_runoff_dataset(obs_date, runoff_array, config):
+    """
+    :param :py:class:`arrow.Arrow` obs_date:
+    :param :py:class:`numpy.ndarray` runoff_array:
+    :param dict config:
+
+    :rtype: :py:class:`xarray.Dataset`
+    """
+    obs_date_yyyymmdd = obs_date.format("YYYY-MM-DD")
+    coords = {
+        "time_counter": pandas.to_datetime([obs_date_yyyymmdd]),
+        "y": numpy.arange(runoff_array.shape[0]),
+        "x": numpy.arange(runoff_array.shape[1]),
+    }
+    runoff_da = xarray.DataArray(
+        # expand runoff array to include time coordinate
+        data=numpy.expand_dims(runoff_array, axis=0),
+        coords=coords,
+        attrs={
+            "standard_name": "runoff_flux",
+            "long_name": "River Runoff Flux",
+            "units": "kg m-2 s-1",
+        },
+    )
+    runoff_ds = xarray.Dataset(
+        data_vars={"rorunoff": runoff_da},
+        coords=coords,
+        attrs={
+            "creator_email": "sallen@eoas.ubc.ca",
+            "creator_name": "SalishSeaCast Project contributors",
+            "creator_url": "https://github.com/SalishSeaCast/SalishSeaNowcast/blob/main/nowcast/workers/make_v202111_runoff_file.py",
+            "institution": "UBC EOAS",
+            "institution_fullname": (
+                "Earth, Ocean & Atmospheric Sciences, University of British Columbia"
+            ),
+            "title": f"River Runoff Fluxes for {obs_date_yyyymmdd}",
+            "summary": (
+                f"Day-average river runoff fluxes calculated for {obs_date_yyyymmdd} "
+                f"on v202108 bathymetry. "
+                f"The runoff fluxes are calculated from day-averaged discharge (1 day lagged) "
+                f"observations from gauged rivers across the SalishSeaCast model domain using "
+                f"fits developed by Susan Allen."
+            ),
+            "development_notebook": "https://github.com/SalishSeaCast/tools/blob/main/I_ForcingFiles/Rivers/ProductionDailyRiverNCfile.ipynb",
+            "rivers_watersheds_proportions": config["rivers"]["prop_dict modules"][
+                "b202108"
+            ],
+            "history": (
+                f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
+                f"python3 -m nowcast.workers.make_v202111_runoff_file $NOWCAST_YAML "
+                f"--run-date {obs_date_yyyymmdd}"
+            ),
+        },
+    )
+    return runoff_ds
 
 
 if __name__ == "__main__":
