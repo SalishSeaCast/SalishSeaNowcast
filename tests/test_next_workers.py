@@ -477,9 +477,30 @@ class TestAfterCollectRiverData:
             Message("collect_river_data", "success"), config, checklist
         )
         expected = NextWorker("nowcast.workers.make_runoff_file", [], host="localhost")
-        assert expected in workers
+        assert workers[0] == expected
+
+    def test_success_Fraser_launch_make_v202111_runoff_file(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(checklist, "river data", {"river name": "Fraser"})
+        workers = next_workers.after_collect_river_data(
+            Message("collect_river_data", "success"), config, checklist
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_v202111_runoff_file", [], host="localhost"
+        )
+        assert workers[1] == expected
 
     def test_success_Englishman_no_launch_make_runoff_file(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(checklist, "river data", {"river name": "Englishman"})
+        workers = next_workers.after_collect_river_data(
+            Message("collect_river_data", "success"), config, checklist
+        )
+        assert workers == []
+
+    def test_success_Englishman_no_launch_make_v202111_runoff_file(
         self, config, checklist, monkeypatch
     ):
         monkeypatch.setitem(checklist, "river data", {"river name": "Englishman"})
@@ -496,6 +517,17 @@ class TestAfterMakeRunoffFile:
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_runoff_file(
             Message("make_runoff_file", msg_type), config, checklist
+        )
+        assert workers == []
+
+
+class TestAfterMakeV202111RunoffFile:
+    """Unit tests for the after_make_v202111_runoff_file function."""
+
+    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_v202111_runoff_file(
+            Message("make_v202111_runoff_file", msg_type), config, checklist
         )
         assert workers == []
 
