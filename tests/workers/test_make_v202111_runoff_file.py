@@ -93,7 +93,8 @@ class TestMain:
         assert worker.cli.parser._actions[3].dest == "data_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
         assert worker.cli.parser._actions[3].type == expected
-        assert worker.cli.parser._actions[3].default == arrow.now().floor("day")
+        expected = arrow.now().floor("day").shift(days=-1)
+        assert worker.cli.parser._actions[3].default == expected
         assert worker.cli.parser._actions[3].help
 
 

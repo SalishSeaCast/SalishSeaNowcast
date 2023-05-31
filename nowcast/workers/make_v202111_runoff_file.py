@@ -143,7 +143,7 @@ def main():
     worker.init_cli()
     worker.cli.add_date_option(
         "--data-date",
-        default=arrow.now().floor("day"),
+        default=arrow.now().floor("day").shift(days=-1),
         help="Date to make runoff file for.",
     )
     worker.run(make_v202111_runoff_file, success, failure)
