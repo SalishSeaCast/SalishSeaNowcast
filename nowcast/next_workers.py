@@ -257,6 +257,9 @@ def after_collect_river_data(msg, config, checklist):
     next_workers = {"crash": [], "failure": [], "success": []}
     if msg.type == "success" and checklist["river data"]["river name"] == "Fraser":
         next_workers["success"].append(NextWorker("nowcast.workers.make_runoff_file"))
+        next_workers["success"].append(
+            NextWorker("nowcast.workers.make_v202111_runoff_file")
+        )
     return next_workers[msg.type]
 
 

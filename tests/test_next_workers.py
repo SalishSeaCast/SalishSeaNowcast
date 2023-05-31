@@ -477,9 +477,30 @@ class TestAfterCollectRiverData:
             Message("collect_river_data", "success"), config, checklist
         )
         expected = NextWorker("nowcast.workers.make_runoff_file", [], host="localhost")
-        assert expected in workers
+        assert workers[0] == expected
+
+    def test_success_Fraser_launch_make_v202111_runoff_file(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(checklist, "river data", {"river name": "Fraser"})
+        workers = next_workers.after_collect_river_data(
+            Message("collect_river_data", "success"), config, checklist
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_v202111_runoff_file", [], host="localhost"
+        )
+        assert workers[1] == expected
 
     def test_success_Englishman_no_launch_make_runoff_file(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(checklist, "river data", {"river name": "Englishman"})
+        workers = next_workers.after_collect_river_data(
+            Message("collect_river_data", "success"), config, checklist
+        )
+        assert workers == []
+
+    def test_success_Englishman_no_launch_make_v202111_runoff_file(
         self, config, checklist, monkeypatch
     ):
         monkeypatch.setitem(checklist, "river data", {"river name": "Englishman"})
