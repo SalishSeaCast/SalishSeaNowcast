@@ -83,34 +83,34 @@ def make_runoff_file(parsed_args, config, *args):
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
 
     checklist = {}
-    for bathy_type in config["rivers"]["file templates"]:
-        logger.info(f"calculating runoff forcing for bathymetry type: {bathy_type}")
-        # Get climatology
-        climatology_file = Path(config["rivers"]["monthly climatology"][bathy_type])
-        criverflow, area = _get_river_climatology(climatology_file)
-        # Interpolate to today
-        driverflow = _calculate_daily_flow(yesterday, criverflow)
-        logger.debug(f'calculated flow for {yesterday.format("YYYY-MM-DD")}')
-        # Calculate combined runoff and write file
-        directory = Path(config["rivers"]["rivers dir"])
-        filename_tmpls = config["rivers"]["file templates"][bathy_type]
-        prop_dict = importlib.import_module(
-            config["rivers"]["prop_dict modules"][bathy_type]
-        ).prop_dict
-        filepath = _combine_runoff(
-            prop_dict,
-            flow_at_hope,
-            yesterday,
-            afterHope,
-            nonFraser,
-            fraserratio,
-            otherratio,
-            driverflow,
-            area,
-            directory,
-            filename_tmpls,
-        )
-        checklist[bathy_type] = os.fspath(filepath)
+    bathy_type = "b201702"
+    logger.info(f"calculating runoff forcing for b201702 bathymetry")
+    # Get climatology
+    climatology_file = Path(config["rivers"]["monthly climatology"][bathy_type])
+    criverflow, area = _get_river_climatology(climatology_file)
+    # Interpolate to today
+    driverflow = _calculate_daily_flow(yesterday, criverflow)
+    logger.debug(f'calculated flow for {yesterday.format("YYYY-MM-DD")}')
+    # Calculate combined runoff and write file
+    directory = Path(config["rivers"]["rivers dir"])
+    filename_tmpls = config["rivers"]["file templates"][bathy_type]
+    prop_dict = importlib.import_module(
+        config["rivers"]["prop_dict modules"][bathy_type]
+    ).prop_dict
+    filepath = _combine_runoff(
+        prop_dict,
+        flow_at_hope,
+        yesterday,
+        afterHope,
+        nonFraser,
+        fraserratio,
+        otherratio,
+        driverflow,
+        area,
+        directory,
+        filename_tmpls,
+    )
+    checklist[bathy_type] = os.fspath(filepath)
     return checklist
 
 
