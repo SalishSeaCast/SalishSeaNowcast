@@ -236,6 +236,8 @@ class TestAfterDownloadWeather:
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_ssh_files",
+            "make_runoff_file",
+            "make_v202111_runoff_file",
         }
 
     def test_success_2_5_km_12(self, config, checklist, monkeypatch):
@@ -263,6 +265,8 @@ class TestAfterDownloadWeather:
             "grib_to_netcdf",
             "make_live_ocean_files",
             "make_ssh_files",
+            "make_runoff_file",
+            "make_v202111_runoff_file",
         }
 
     def test_success_2_5_km_18(self, config, checklist, monkeypatch):
@@ -358,7 +362,12 @@ class TestAfterCollectWeather:
             ),
         ]
         assert workers == expected
-        assert race_condition_workers == {"grib_to_netcdf", "make_ssh_files"}
+        assert race_condition_workers == {
+            "grib_to_netcdf",
+            "make_ssh_files",
+            "make_runoff_file",
+            "make_v202111_runoff_file",
+        }
 
     def test_success_2_5_km_12(self, config, checklist, monkeypatch):
         def mock_now():
@@ -388,6 +397,8 @@ class TestAfterCollectWeather:
             "grib_to_netcdf",
             "make_live_ocean_files",
             "make_ssh_files",
+            "make_runoff_file",
+            "make_v202111_runoff_file",
         }
 
     def test_success_2_5_km_18(self, config, checklist):
@@ -462,61 +473,10 @@ class TestAfterCropGribs:
 class TestAfterCollectRiverData:
     """Unit tests for the after_collect_river_data function."""
 
-    @pytest.mark.parametrize("msg_type", ["crash", "failure"])
+    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_collect_river_data(
             Message("collect_river_data", msg_type), config, checklist
-        )
-        assert workers == []
-
-    def test_success_Fraser_launch_make_runoff_file(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(checklist, "river data", {"river name": "Fraser"})
-        workers = next_workers.after_collect_river_data(
-            Message("collect_river_data", "success"), config, checklist
-        )
-        expected = NextWorker("nowcast.workers.make_runoff_file", [], host="localhost")
-        assert workers[0] == expected
-
-    def test_success_Fraser_launch_make_v202111_runoff_file(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(checklist, "river data", {"river name": "Fraser"})
-        workers = next_workers.after_collect_river_data(
-            Message("collect_river_data", "success"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_v202111_runoff_file", [], host="localhost"
-        )
-        assert workers[1] == expected
-
-    def test_success_Englishman_no_launch_make_runoff_file(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(checklist, "river data", {"river name": "Englishman"})
-        workers = next_workers.after_collect_river_data(
-            Message("collect_river_data", "success"), config, checklist
-        )
-        assert workers == []
-
-    def test_success_Englishman_no_launch_make_v202111_runoff_file(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(checklist, "river data", {"river name": "Englishman"})
-        workers = next_workers.after_collect_river_data(
-            Message("collect_river_data", "success"), config, checklist
-        )
-        assert workers == []
-
-
-class TestAfterMakeRunoffFile:
-    """Unit tests for the after_make_runoff_file function."""
-
-    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_make_runoff_file(
-            Message("make_runoff_file", msg_type), config, checklist
         )
         assert workers == []
 
@@ -528,6 +488,17 @@ class TestAfterMakeV202111RunoffFile:
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_v202111_runoff_file(
             Message("make_v202111_runoff_file", msg_type), config, checklist
+        )
+        assert workers == []
+
+
+class TestAfterMakeRunoffFile:
+    """Unit tests for the after_make_runoff_file function."""
+
+    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
+        workers = next_workers.after_make_runoff_file(
+            Message("make_runoff_file", msg_type), config, checklist
         )
         assert workers == []
 
@@ -591,8 +562,6 @@ class TestAfterMakeSshFiles:
             "crash",
             "failure nowcast",
             "failure forecast2",
-            "success nowcast",
-            "success forecast2",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -600,6 +569,20 @@ class TestAfterMakeSshFiles:
             Message("make_ssh_files", msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize("msg_type", ["success nowcast", "success forecast2"])
+    def test_success_launch_make_v202111_runoff_file(self, msg_type, config, checklist):
+        workers = next_workers.after_make_ssh_files(
+            Message("make_ssh_files", msg_type), config, checklist
+        )
+        assert workers[0] == NextWorker("nowcast.workers.make_v202111_runoff_file")
+
+    @pytest.mark.parametrize("msg_type", ["success nowcast", "success forecast2"])
+    def test_success_launch_make_runoff_file(self, msg_type, config, checklist):
+        workers = next_workers.after_make_ssh_files(
+            Message("make_ssh_files", msg_type), config, checklist
+        )
+        assert workers[1] == NextWorker("nowcast.workers.make_runoff_file")
 
 
 class TestAfterGribToNetcdf:
@@ -754,12 +737,19 @@ class TestAfterMakeLiveOceanFiles:
         workers = next_workers.after_make_live_ocean_files(
             Message("make_live_ocean_files", "success"), config, checklist
         )
-        expected = NextWorker(
-            "nowcast.workers.upload_forcing",
-            args=["arbutus.cloud", "nowcast+"],
-            host="localhost",
-        )
-        assert workers[0] == expected
+        expected = [
+            NextWorker(
+                "nowcast.workers.upload_forcing",
+                args=["arbutus.cloud", "nowcast+"],
+                host="localhost",
+            ),
+            NextWorker(
+                "nowcast.workers.upload_forcing",
+                args=["orcinus", "nowcast+"],
+                host="localhost",
+            ),
+        ]
+        assert workers == expected
 
 
 class TestAfterMakeTurbidityFile:
