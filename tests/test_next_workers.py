@@ -235,7 +235,6 @@ class TestAfterDownloadWeather:
         assert workers == expected
         assert race_condition_workers == {
             "grib_to_netcdf",
-            "make_ssh_files",
             "make_runoff_file",
             "make_v202111_runoff_file",
         }
@@ -264,7 +263,6 @@ class TestAfterDownloadWeather:
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_live_ocean_files",
-            "make_ssh_files",
             "make_runoff_file",
             "make_v202111_runoff_file",
         }
@@ -364,7 +362,6 @@ class TestAfterCollectWeather:
         assert workers == expected
         assert race_condition_workers == {
             "grib_to_netcdf",
-            "make_ssh_files",
             "make_runoff_file",
             "make_v202111_runoff_file",
         }
@@ -396,7 +393,6 @@ class TestAfterCollectWeather:
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_live_ocean_files",
-            "make_ssh_files",
             "make_runoff_file",
             "make_v202111_runoff_file",
         }

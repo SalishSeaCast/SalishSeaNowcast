@@ -96,7 +96,6 @@ def after_download_weather(msg, config, checklist):
                 )
                 race_condition_workers = {
                     "grib_to_netcdf",
-                    "make_ssh_files",
                     "make_runoff_file",
                     "make_v202111_runoff_file",
                 }
@@ -122,7 +121,6 @@ def after_download_weather(msg, config, checklist):
             race_condition_workers = {
                 "grib_to_netcdf",
                 "make_live_ocean_files",
-                "make_ssh_files",
                 "make_runoff_file",
                 "make_v202111_runoff_file",
             }
