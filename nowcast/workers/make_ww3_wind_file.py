@@ -114,11 +114,12 @@ def make_ww3_wind_file(parsed_args, config, *args):
         lats = lats_lons.nav_lat
         lons = lats_lons.nav_lon
         logger.debug(f"lats and lons from: {datasets[0]}")
-        with xarray.open_mfdataset(datasets) as hrdps:
-            ds = _create_dataset(
-                hrdps.time_counter, lats, lons, hrdps.u_wind, hrdps.v_wind, datasets
-            )
-            ds.to_netcdf(os.fspath(nc_filepath))
+    with xarray.open_mfdataset(datasets) as hrdps:
+        ds = _create_dataset(
+            hrdps.time_counter, lats, lons, hrdps.u_wind, hrdps.v_wind, datasets
+        )
+        logger.debug("created winds dataset")
+        ds.to_netcdf(os.fspath(nc_filepath))
     logger.debug(f"stored wind forcing file: {nc_filepath}")
     checklist = {run_type: os.fspath(nc_filepath)}
     return checklist

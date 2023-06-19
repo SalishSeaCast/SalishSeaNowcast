@@ -119,28 +119,25 @@ def make_ww3_current_file(parsed_args, config, *args):
         lats = grid.nav_lat[1:, 1:]
         lons = grid.nav_lon[1:, 1:] + 360
         logger.debug(f"lats and lons from: {mesh_mask}")
-        with xarray.open_mfdataset(datasets["u"]) as u_nemo:
-            logger.debug(f'u velocities from {datasets["u"]}')
-            with xarray.open_mfdataset(datasets["v"]) as v_nemo:
-                logger.debug(f'v velocities from {datasets["v"]}')
-                u_unstaggered, v_unstaggered = viz_tools.unstagger(
-                    u_nemo.vozocrtx[:, 0, ...], v_nemo.vomecrty[:, 0, ...]
-                )
-                del u_unstaggered.coords["time_centered"]
-                del u_unstaggered.coords["depthu"]
-                del v_unstaggered.coords["time_centered"]
-                del v_unstaggered.coords["depthv"]
-                logger.debug(
-                    "unstaggered velocity components on to mesh mask lats/lons"
-                )
-                u_current, v_current = viz_tools.rotate_vel(
-                    u_unstaggered, v_unstaggered
-                )
-                logger.debug("rotated velocity components north/south alignment")
-                ds = _create_dataset(
-                    u_current.time_counter, lats, lons, u_current, v_current, datasets
-                )
-                ds.to_netcdf(os.fspath(nc_filepath))
+    with xarray.open_mfdataset(datasets["u"]) as u_nemo:
+        logger.debug(f'u velocities from {datasets["u"]}')
+        with xarray.open_mfdataset(datasets["v"]) as v_nemo:
+            logger.debug(f'v velocities from {datasets["v"]}')
+            u_unstaggered, v_unstaggered = viz_tools.unstagger(
+                u_nemo.vozocrtx[:, 0, ...], v_nemo.vomecrty[:, 0, ...]
+            )
+            del u_unstaggered.coords["time_centered"]
+            del u_unstaggered.coords["depthu"]
+            del v_unstaggered.coords["time_centered"]
+            del v_unstaggered.coords["depthv"]
+            logger.debug("unstaggered velocity components on to mesh mask lats/lons")
+            u_current, v_current = viz_tools.rotate_vel(u_unstaggered, v_unstaggered)
+            logger.debug("rotated velocity components north/south alignment")
+            ds = _create_dataset(
+                u_current.time_counter, lats, lons, u_current, v_current, datasets
+            )
+            logger.debug("created currents dataset")
+            ds.to_netcdf(os.fspath(nc_filepath))
     logger.debug(f"stored currents forcing file: {nc_filepath}")
     checklist = {
         run_type: os.fspath(nc_filepath),
