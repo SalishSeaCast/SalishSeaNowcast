@@ -31,7 +31,7 @@ jobs:
            create-args: >-
              python=${{ inputs.python-version }}
 
-      - name: Install editable-node dependency packages
+      - name: Install editable-mode dependency packages
         shell: bash -l {0}
         run: |
           python3 -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
