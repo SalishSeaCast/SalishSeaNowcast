@@ -76,7 +76,7 @@ hatchling==1.14.0
 HeapDict==1.0.1
 hpack==4.0.0
 httpcore==0.16.3
-httpx==0.23.3
+httpx==0.24.1
 humanfriendly==10.0
 hyperframe==6.0.1
 hyperlink==21.0.0
@@ -148,7 +148,7 @@ pyshp==2.3.1
 PySocks==1.7.1
 pytest==7.3.0
 pytest-cov==4.0.0
-pytest-httpx==0.21.3
+pytest-httpx==0.22.0
 pytest-randomly==3.12.0
 pytest-xdist==3.2.1
 python-dateutil==2.8.2

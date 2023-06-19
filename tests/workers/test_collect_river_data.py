@@ -336,12 +336,13 @@ class TestGetUSGS_DayAvgDischarge:
         )
 
         numpy.testing.assert_almost_equal(day_avg_discharge, 43.0)
-        assert caplog.records[1].levelname == "DEBUG"
+        # httpx generates DEBUG & INFO level messages in records 0-2
+        assert caplog.records[3].levelname == "DEBUG"
         expected = (
             f"average discharge for SkagitMountVernon on 2023-01-06 from "
             f"https://waterservices.usgs.gov/nwis/dv/: {day_avg_discharge:.6e} m^3/s"
         )
-        assert caplog.messages[1] == expected
+        assert caplog.messages[3] == expected
 
     def test_http_RequestError(self, config, httpx_mock, caplog):
         httpx_mock.add_exception(httpx.RequestError("error issuing request"))
@@ -352,9 +353,10 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        assert caplog.records[0].levelname == "CRITICAL"
+        # httpx generates DEBUG & INFO level messages in records 0-1
+        assert caplog.records[2].levelname == "CRITICAL"
         usgs_url = config["rivers"]["usgs url"]
-        assert caplog.messages[0].startswith(f"Error while requesting {usgs_url}")
+        assert caplog.messages[2].startswith(f"Error while requesting {usgs_url}")
 
     def test_HTTPStatusError(self, config, httpx_mock, caplog):
         httpx_mock.add_response(status_code=500)
@@ -365,9 +367,10 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        assert caplog.records[1].levelname == "CRITICAL"
+        # httpx generates DEBUG & INFO level messages in records 0-2
+        assert caplog.records[3].levelname == "CRITICAL"
         usgs_url = config["rivers"]["usgs url"]
-        assert caplog.messages[1].startswith(
+        assert caplog.messages[3].startswith(
             f"Error response 500 while requesting {usgs_url}"
         )
 
@@ -380,8 +383,9 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        assert caplog.records[1].levelname == "CRITICAL"
-        assert caplog.messages[1] == "SkagitMountVernon 2023-01-06 timeSeries is empty"
+        # httpx generates DEBUG & INFO level messages in records 0-2
+        assert caplog.records[3].levelname == "CRITICAL"
+        assert caplog.messages[3] == "SkagitMountVernon 2023-01-06 timeSeries is empty"
 
     @pytest.mark.parametrize(
         "values",
@@ -412,9 +416,10 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        assert caplog.records[1].levelname == "CRITICAL"
+        # httpx generates DEBUG & INFO level messages in records 0-2
+        assert caplog.records[3].levelname == "CRITICAL"
         expected = "IndexError in SkagitMountVernon 2023-01-06 timeSeries JSON"
-        assert caplog.messages[1] == expected
+        assert caplog.messages[3] == expected
 
     @pytest.mark.parametrize(
         "value",
@@ -464,9 +469,10 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        assert caplog.records[1].levelname == "CRITICAL"
-        expectged = "KeyError in SkagitMountVernon 2023-01-06 timeSeries JSON"
-        assert caplog.messages[1] == expectged
+        # httpx generates DEBUG & INFO level messages in records 0-2
+        assert caplog.records[3].levelname == "CRITICAL"
+        expected = "KeyError in SkagitMountVernon 2023-01-06 timeSeries JSON"
+        assert caplog.messages[3] == expected
 
     def test_no_data(self, config, httpx_mock, caplog):
         httpx_mock.add_response(
@@ -498,11 +504,12 @@ class TestGetUSGS_DayAvgDischarge:
                 "SkagitMountVernon", "2023-01-06", config
             )
 
-        assert caplog.records[1].levelname == "CRITICAL"
+        # httpx generates DEBUG & INFO level messages in records 0-2
+        assert caplog.records[3].levelname == "CRITICAL"
         expected = (
             "Got no-data value (-999999) in SkagitMountVernon 2023-01-06 timeSeries"
         )
-        assert caplog.messages[1] == expected
+        assert caplog.messages[3] == expected
 
 
 class TestStoreDayAvgDischarge:
