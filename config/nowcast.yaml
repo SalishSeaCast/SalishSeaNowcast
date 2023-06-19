@@ -1101,7 +1101,7 @@ logging:
       # Noisy dependencies
       cfgrib:
         # cfgrib library used by grib_to_netcdf worker
-        qualname: cgrib
+        qualname: cfgrib
         level: ERROR
         formatter: simple
       matplotlib:
@@ -1124,6 +1124,7 @@ logging:
         qualname: watchdog
         level: WARNING
         formatter: simple
+
     root:
       # disable propagation to avoid duplicate sentry events from workers and
       # log_aggregator
