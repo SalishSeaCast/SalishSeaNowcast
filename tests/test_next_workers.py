@@ -1192,7 +1192,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast": {
                         "host": "arbutus.cloud",
-                        "run date": "2023-03-20",
+                        "run date": "2023-07-15",
                         "completed": True,
                     }
                 },
@@ -1204,11 +1204,11 @@ class TestAfterWatchNEMO:
         expected = [
             NextWorker(
                 "nowcast.workers.upload_forcing",
-                args=["arbutus.cloud", "turbidity"],
+                args=["arbutus.cloud", "turbidity", "--run-date", "2023-07-15"],
             ),
             NextWorker(
                 "nowcast.workers.upload_forcing",
-                args=["orcinus", "turbidity"],
+                args=["orcinus", "turbidity", "--run-date", "2023-07-15"],
             ),
         ]
         assert workers[0:2] == expected
@@ -1230,7 +1230,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast": {
                         "host": "arbutus.cloud",
-                        "run date": "2023-03-20",
+                        "run date": "2023-07-15",
                         "completed": True,
                     }
                 },
@@ -1242,11 +1242,11 @@ class TestAfterWatchNEMO:
         expected = [
             NextWorker(
                 "nowcast.workers.upload_forcing",
-                args=["arbutus.cloud", "turbidity"],
+                args=["arbutus.cloud", "turbidity", "--run-date", "2023-07-15"],
             ),
             NextWorker(
                 "nowcast.workers.upload_forcing",
-                args=["orcinus", "turbidity"],
+                args=["orcinus", "turbidity", "--run-date", "2023-07-15"],
             ),
         ]
         assert workers[2:4] == expected

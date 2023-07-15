@@ -833,7 +833,13 @@ def after_watch_NEMO(msg, config, checklist):
                 if not config["run"]["enabled hosts"][host]["shared storage"]:
                     next_workers[msg.type].append(
                         NextWorker(
-                            "nowcast.workers.upload_forcing", args=[host, "turbidity"]
+                            "nowcast.workers.upload_forcing",
+                            args=[
+                                host,
+                                "turbidity",
+                                "--run-date",
+                                msg.payload[run_type]["run date"],
+                            ],
                         )
                     )
         if run_type == "nowcast-green":
