@@ -62,19 +62,19 @@ def after_download_weather(msg, config, checklist):
     }
     if msg.type.startswith("success"):
         data_date = arrow.now().shift(days=-1).format("YYYY-MM-DD")
-        if msg.type.endswith("2.5km 00"):
-            grib_dir = Path(checklist["weather forecast"]["00 2.5km"])
-            fcst_date_yyyymmdd = grib_dir.parent.stem
-            fcst_date = arrow.get(fcst_date_yyyymmdd, "YYYYMMDD").format("YYYY-MM-DD")
-            next_workers["success 2.5km 00"].append(
-                NextWorker(
-                    "nowcast.workers.crop_gribs", args=["00", "--fcst-date", fcst_date]
-                )
-            )
+        # if msg.type.endswith("2.5km 00"):
+        # grib_dir = Path(checklist["weather forecast"]["00 2.5km"])
+        # fcst_date_yyyymmdd = grib_dir.parent.stem
+        # fcst_date = arrow.get(fcst_date_yyyymmdd, "YYYYMMDD").format("YYYY-MM-DD")
+        # next_workers["success 2.5km 00"].append(
+        #     NextWorker(
+        #         "nowcast.workers.crop_gribs", args=["00", "--fcst-date", fcst_date]
+        #     )
+        # )
         if msg.type.endswith("2.5km 06"):
-            next_workers["success 2.5km 06"].append(
-                NextWorker("nowcast.workers.crop_gribs", args=["06"])
-            )
+            # next_workers["success 2.5km 06"].append(
+            #     NextWorker("nowcast.workers.crop_gribs", args=["06"])
+            # )
             for river_name in config["rivers"]["stations"]["ECCC"]:
                 next_workers["success 2.5km 06"].append(
                     NextWorker(
@@ -101,9 +101,9 @@ def after_download_weather(msg, config, checklist):
                 }
                 return next_workers[msg.type], race_condition_workers
         if msg.type.endswith("2.5km 12"):
-            next_workers["success 2.5km 12"].append(
-                NextWorker("nowcast.workers.crop_gribs", args=["12"])
-            )
+            # next_workers["success 2.5km 12"].append(
+            #     NextWorker("nowcast.workers.crop_gribs", args=["12"])
+            # )
             for river_name in config["rivers"]["stations"]["USGS"]:
                 next_workers["success 2.5km 12"].append(
                     NextWorker(
@@ -125,10 +125,10 @@ def after_download_weather(msg, config, checklist):
                 "make_v202111_runoff_file",
             }
             return next_workers[msg.type], race_condition_workers
-        if msg.type.endswith("2.5km 18"):
-            next_workers["success 2.5km 18"].append(
-                NextWorker("nowcast.workers.crop_gribs", args=["18"])
-            )
+        # if msg.type.endswith("2.5km 18"):
+        #     next_workers["success 2.5km 18"].append(
+        #         NextWorker("nowcast.workers.crop_gribs", args=["18"])
+        #     )
     return next_workers[msg.type]
 
 
@@ -167,16 +167,22 @@ def after_collect_weather(msg, config, checklist):
         msg.type: after_download_weather(msg, config, checklist),
     }
     if msg.type.endswith("2.5km 00"):
-        next_workers["success 2.5km 00"].append(
-            NextWorker("nowcast.workers.collect_weather", args=["06", "2.5km"])
+        next_workers["success 2.5km 00"].extend(
+            [
+                NextWorker("nowcast.workers.collect_weather", args=["06", "2.5km"]),
+                NextWorker("nowcast.workers.crop_gribs", args=["06"]),
+            ]
         )
     if msg.type.endswith("2.5km 06"):
         if msg.type.startswith("success"):
             next_workers, race_condition_workers = after_download_weather(
                 msg, config, checklist
             )
-            next_workers.append(
-                NextWorker("nowcast.workers.collect_weather", args=["12", "2.5km"])
+            next_workers.extend(
+                [
+                    NextWorker("nowcast.workers.collect_weather", args=["12", "2.5km"]),
+                    NextWorker("nowcast.workers.crop_gribs", args=["12"]),
+                ]
             )
             return next_workers, race_condition_workers
     if msg.type.endswith("2.5km 12"):
@@ -184,18 +190,33 @@ def after_collect_weather(msg, config, checklist):
             next_workers, race_condition_workers = after_download_weather(
                 msg, config, checklist
             )
-            next_workers.append(
-                NextWorker("nowcast.workers.collect_weather", args=["18", "2.5km"])
+            next_workers.extend(
+                [
+                    NextWorker("nowcast.workers.collect_weather", args=["18", "2.5km"]),
+                    NextWorker("nowcast.workers.crop_gribs", args=["18"]),
+                ]
             )
             return next_workers, race_condition_workers
     if msg.type.endswith("2.5km 18"):
-        next_workers["success 2.5km 18"].extend(
-            [
-                NextWorker("nowcast.workers.download_weather", args=["00", "1km"]),
-                NextWorker("nowcast.workers.download_weather", args=["12", "1km"]),
-                NextWorker("nowcast.workers.collect_weather", args=["00", "2.5km"]),
-            ]
-        )
+        if msg.type.startswith("success"):
+            grib_dir = Path(checklist["weather forecast"]["18 2.5km"])
+            fcst_date_yyyymmdd = grib_dir.parent.stem
+            fcst_date = (
+                arrow.get(fcst_date_yyyymmdd, "YYYYMMDD")
+                .shift(days=+1)
+                .format("YYYY-MM-DD")
+            )
+            next_workers["success 2.5km 18"].extend(
+                [
+                    NextWorker("nowcast.workers.download_weather", args=["00", "1km"]),
+                    NextWorker("nowcast.workers.download_weather", args=["12", "1km"]),
+                    NextWorker("nowcast.workers.collect_weather", args=["00", "2.5km"]),
+                    NextWorker(
+                        "nowcast.workers.crop_gribs",
+                        args=["00", "--fcst-date", fcst_date],
+                    ),
+                ]
+            )
     return next_workers[msg.type]
 
 
