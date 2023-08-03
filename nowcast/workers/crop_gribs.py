@@ -212,9 +212,8 @@ def _xarray_to_grib(ssc_ds, ssc_grib_file):
 
 
 class _GribFileEventHandler(watchdog.events.FileSystemEventHandler):
-    """watchdog file system event handler that detects completion of HRDPS file downloads
-    when they move from .grib2.tmp to .grib2, and moves the .grib2 files to the atmospheric
-    forcing tree.
+    """watchdog file system event handler that detects completion of HRDPS file moves
+    from the downloads directory into the atmospheric forcing tree.
     """
 
     def __init__(self, eccc_grib_files, config):
@@ -222,10 +221,10 @@ class _GribFileEventHandler(watchdog.events.FileSystemEventHandler):
         self.eccc_grib_files = eccc_grib_files
         self.config = config
 
-    def on_moved(self, event):
+    def on_closed(self, event):
         super().on_moved(event)
-        if Path(event.dest_path) in self.eccc_grib_files:
-            eccc_grib_file = Path(event.dest_path)
+        if Path(event.src_path) in self.eccc_grib_files:
+            eccc_grib_file = Path(event.src_path)
             _write_ssc_grib_file(eccc_grib_file, self.config)
             self.eccc_grib_files.remove(eccc_grib_file)
 
