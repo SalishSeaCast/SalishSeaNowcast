@@ -305,13 +305,23 @@ class TestAfterCollectWeather:
 
     def test_success_2_5_km_00(self, config, checklist):
         workers = next_workers.after_collect_weather(
-            Message("collect_weather", "success 2.5km 00"), config, checklist
+            Message("collect_weather", "success 2.5km 00"),
+            config,
+            checklist={
+                "weather forecast": {
+                    "00 2.5km": "forcing/atmospheric/continental2.5/GRIB/20230804/00",
+                }
+            },
         )
         expected = [
             NextWorker(
                 "nowcast.workers.collect_weather", ["06", "2.5km"], host="localhost"
             ),
-            NextWorker("nowcast.workers.crop_gribs", ["06"], host="localhost"),
+            NextWorker(
+                "nowcast.workers.crop_gribs",
+                ["06", "--fcst-date", "2023-08-04"],
+                host="localhost",
+            ),
         ]
         assert workers == expected
 
