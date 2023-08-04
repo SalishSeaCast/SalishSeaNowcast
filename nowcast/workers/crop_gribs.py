@@ -26,6 +26,7 @@ new GRIB2 files.
 
 
 import logging
+import os
 import warnings
 from pathlib import Path
 
@@ -101,12 +102,12 @@ def crop_gribs(parsed_args, config, *args):
     grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
     fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
     grib_fcst_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr)
-    observer.schedule(handler, grib_fcst_dir, recursive=True)
+    observer.schedule(handler, os.fspath(grib_fcst_dir), recursive=True)
     logger.info(f"starting to watch for ECCC grib files to crop in {grib_fcst_dir}/")
     observer.start()
     while eccc_grib_files:
         # We need to have a timeout on the observer thread so that the status
-        # of the expected files set gets checked, otherwise the worker never
+        # of the ECCC grib files set gets checked, otherwise the worker never
         # finishes because the main thread is blocked by the observer thread.
         observer.join(timeout=1)
     observer.stop()
@@ -114,13 +115,6 @@ def crop_gribs(parsed_args, config, *args):
     logger.info(
         f"finished cropping ECCC grib files to SalishSeaCast subdomain in {grib_fcst_dir}"
     )
-
-    # ssc_grib_files = _calc_grib_file_paths(
-    #     ssc_file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var, config
-    # )
-    # _write_ssc_grib_files(
-    #     msc_var, grib_var, eccc_grib_files, ssc_grib_files, config
-    # )
     checklist[fcst_hr] = "cropped to SalishSeaCast subdomain"
     return checklist
 
@@ -222,11 +216,14 @@ class _GribFileEventHandler(watchdog.events.FileSystemEventHandler):
         self.config = config
 
     def on_closed(self, event):
-        super().on_moved(event)
+        super().on_closed(event)
         if Path(event.src_path) in self.eccc_grib_files:
             eccc_grib_file = Path(event.src_path)
             _write_ssc_grib_file(eccc_grib_file, self.config)
             self.eccc_grib_files.remove(eccc_grib_file)
+            logger.debug(
+                f"observer thread files remaining to process: {len(self.eccc_grib_files)}"
+            )
 
 
 if __name__ == "__main__":
