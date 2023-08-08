@@ -19,11 +19,13 @@
 """Unit test for SalishSeaCast crop_gribs worker.
 """
 import logging
+import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
+import attr
 import nemo_nowcast
 import numpy
 import pytest
@@ -407,6 +409,70 @@ class TestWriteSscGribFile:
 class TestGribFileEventHandler:
     """Unit tests for _GribFileEventHandler class."""
 
-    def test_constructor(self):
-        handler = crop_gribs._GribFileEventHandler(eccc_grib_files=set())
+    def test_constructor(self, config):
+        handler = crop_gribs._GribFileEventHandler(eccc_grib_files=set(), config=config)
         assert handler.eccc_grib_files == set()
+        assert handler.config == config
+
+    def test_crop_expected_file(self, config, caplog, tmp_path, monkeypatch):
+        @attr.s
+        class MockWatchdogEvent:
+            src_path = attr.ib()
+
+        def mock_write_ssc_grib_file(eccc_grib_file, config):
+            pass
+
+        monkeypatch.setattr(
+            crop_gribs, "_write_ssc_grib_file", mock_write_ssc_grib_file
+        )
+
+        grib_dir = tmp_path / config["weather"]["download"]["2.5 km"]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        grib_forecast_dir = grib_dir / "20230808" / "18" / "043"
+        grib_forecast_dir.mkdir(parents=True)
+        eccc_grib_file = (
+            grib_forecast_dir
+            / "20230808T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT043H.grib2"
+        )
+        eccc_grib_file.write_bytes(b"")
+        eccc_grib_files = {eccc_grib_file}
+
+        caplog.set_level(logging.DEBUG)
+
+        handler = crop_gribs._GribFileEventHandler(eccc_grib_files, config)
+        handler.on_closed(MockWatchdogEvent(src_path=os.fspath(eccc_grib_file)))
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"observer thread files remaining to process: 0"
+        assert caplog.messages[0] == expected
+        assert eccc_grib_file not in eccc_grib_files
+
+    def test_ignore_unexpected_file(self, config, caplog, tmp_path, monkeypatch):
+        @attr.s
+        class MockWatchdogEvent:
+            src_path = attr.ib()
+
+        grib_dir = tmp_path / config["weather"]["download"]["2.5 km"]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        grib_forecast_dir = grib_dir / "20230808" / "18" / "043"
+        grib_forecast_dir.mkdir(parents=True)
+        eccc_grib_file = (
+            grib_forecast_dir
+            / "20230808T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT043H.grib2"
+        )
+        eccc_grib_file.write_bytes(b"")
+        eccc_grib_files = {eccc_grib_file}
+
+        caplog.set_level(logging.DEBUG)
+
+        handler = crop_gribs._GribFileEventHandler(eccc_grib_files, config)
+        handler.on_closed(MockWatchdogEvent(src_path="foo"))
+
+        assert not caplog.records
+        assert eccc_grib_file in eccc_grib_files
