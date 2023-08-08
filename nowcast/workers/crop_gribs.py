@@ -128,7 +128,7 @@ def _calc_grib_file_paths(
     :param str fcst_hr:
     :param int fcst_dur:
     :param list msc_var_names:
-    :param dict config:
+    :param :py:class:`nemo_nowcast.Config` config:
 
     :rtype: set
     """
@@ -154,7 +154,7 @@ def _calc_grib_file_paths(
 def _write_ssc_grib_file(eccc_grib_file, config):
     """
     :param :py:class:`pathlib.Path` eccc_grib_file:
-    :param dict config:
+    :param :py:class:`nemo_nowcast.Config` config:
     """
     y_min, y_max = config["weather"]["download"]["2.5 km"]["lat indices"]
     x_min, x_max = config["weather"]["download"]["2.5 km"]["lon indices"]
