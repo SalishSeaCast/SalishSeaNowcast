@@ -23,11 +23,16 @@ new GRIB2 files.
 # Development notebook:
 #
 # * https://github.com/SalishSeaCast/analysis-doug/tree/main/notebooks/continental-HRDPS/crop-grib-to-SSC-domain.ipynb.ipynb
+
+
 import logging
+import os
 import warnings
 from pathlib import Path
 
 import arrow
+import watchdog.observers
+import watchdog.events
 import xarray
 from cfgrib import xarray_to_grib
 from nemo_nowcast import NowcastWorker
@@ -77,66 +82,79 @@ def crop_gribs(parsed_args, config, *args):
     and produces day-long NEMO atmospheric forcing netCDF files.
     """
     checklist = {}
-    forecast = parsed_args.forecast
+    fcst_hr = parsed_args.forecast
     fcst_date = parsed_args.fcst_date
     logger.info(
         f"cropping {fcst_date.format('YYYY-MM-DD')} ECCC HRDPS 2.5km continental "
-        f"{forecast}Z GRIB files to SalishSeaCast subdomain"
+        f"{fcst_hr}Z GRIB files to SalishSeaCast subdomain"
     )
+
     eccc_file_tmpl = config["weather"]["download"]["2.5 km"]["ECCC file template"]
-    ssc_file_tmpl = config["weather"]["download"]["2.5 km"]["SSC cropped file template"]
     var_names = config["weather"]["download"]["2.5 km"]["variables"]
     fcst_dur = config["weather"]["download"]["2.5 km"]["forecast duration"]
-    for msc_var, grib_var, _ in var_names:
-        eccc_grib_files = _calc_grib_file_paths(
-            eccc_file_tmpl, fcst_date, forecast, fcst_dur, msc_var, config
-        )
-        ssc_grib_files = _calc_grib_file_paths(
-            ssc_file_tmpl, fcst_date, forecast, fcst_dur, msc_var, config
-        )
-        _write_ssc_grib_files(
-            msc_var, grib_var, eccc_grib_files, ssc_grib_files, config
-        )
-    checklist[forecast] = "cropped to SalishSeaCast subdomain"
+    msc_var_names = [vars[0] for vars in var_names]
+    eccc_grib_files = _calc_grib_file_paths(
+        eccc_file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var_names, config
+    )
+
+    handler = _GribFileEventHandler(eccc_grib_files, config)
+    observer = watchdog.observers.Observer()
+    grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+    fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
+    grib_fcst_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr)
+    observer.schedule(handler, os.fspath(grib_fcst_dir), recursive=True)
+    logger.info(f"starting to watch for ECCC grib files to crop in {grib_fcst_dir}/")
+    observer.start()
+    while eccc_grib_files:
+        # We need to have a timeout on the observer thread so that the status
+        # of the ECCC grib files set gets checked, otherwise the worker never
+        # finishes because the main thread is blocked by the observer thread.
+        observer.join(timeout=1)
+    observer.stop()
+    observer.join()
+    logger.info(
+        f"finished cropping ECCC grib files to SalishSeaCast subdomain in {grib_fcst_dir}"
+    )
+    checklist[fcst_hr] = "cropped to SalishSeaCast subdomain"
     return checklist
 
 
-def _calc_grib_file_paths(file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var, config):
+def _calc_grib_file_paths(
+    file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var_names, config
+):
     """
     :param str file_tmpl:
     :param :py:class:`arrow.Arrow` fcst_date:
     :param str fcst_hr:
     :param int fcst_dur:
-    :param str msc_var:
-    :rtype: list
+    :param list msc_var_names:
+    :param :py:class:`nemo_nowcast.Config` config:
+
+    :rtype: set
     """
     grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
     fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
-    grib_domain = "ECCC" if "SSC" not in file_tmpl else "SSC"
     logger.debug(
-        f"creating {msc_var} {grib_domain} GRIB file paths list for "
-        f"{fcst_yyyymmdd} {fcst_hr}Z forecast"
+        f"creating ECCC GRIB file paths list for {fcst_yyyymmdd} {fcst_hr}Z forecast"
     )
-    grib_files = []
-    for fcst_step in range(1, fcst_dur + 1):
-        grib_hr_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr, f"{fcst_step:03d}")
-        grib_file = file_tmpl.format(
-            date=fcst_yyyymmdd,
-            forecast=fcst_hr,
-            variable=msc_var,
-            hour=f"{fcst_step:03d}",
-        )
-        grib_files.append(grib_hr_dir / grib_file)
+    grib_files = set()
+    for msc_var in msc_var_names:
+        for fcst_step in range(1, fcst_dur + 1):
+            grib_hr_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr, f"{fcst_step:03d}")
+            grib_file = file_tmpl.format(
+                date=fcst_yyyymmdd,
+                forecast=fcst_hr,
+                variable=msc_var,
+                hour=f"{fcst_step:03d}",
+            )
+            grib_files.add(grib_hr_dir / grib_file)
     return grib_files
 
 
-def _write_ssc_grib_files(msc_var, grib_var, eccc_grib_files, ssc_grib_files, config):
+def _write_ssc_grib_file(eccc_grib_file, config):
     """
-    :param str msc_var:
-    :param str grib_var:
-    :param list eccc_grib_files:
-    :param list ssc_grib_files:
-    :param dict config:
+    :param :py:class:`pathlib.Path` eccc_grib_file:
+    :param :py:class:`nemo_nowcast.Config` config:
     """
     y_min, y_max = config["weather"]["download"]["2.5 km"]["lat indices"]
     x_min, x_max = config["weather"]["download"]["2.5 km"]["lon indices"]
@@ -145,24 +163,67 @@ def _write_ssc_grib_files(msc_var, grib_var, eccc_grib_files, ssc_grib_files, co
     y_slice = slice(y_min, y_max + 1)
     x_slice = slice(x_min, x_max + 1)
     ny, nx = y_max - y_min + 1, x_max - x_min + 1
-    for eccc_grib_file, ssc_grib_file in zip(eccc_grib_files, ssc_grib_files):
-        with xarray.open_dataset(
-            eccc_grib_file, engine="cfgrib", backend_kwargs={"indexpath": ""}
-        ) as eccc_ds:
-            ssc_ds = eccc_ds.sel(y=y_slice, x=x_slice)
-        ssc_ds[grib_var].attrs.update(
-            {
-                "GRIB_numberOfPoints": nx * ny,
-                "GRIB_Nx": nx,
-                "GRIB_Ny": ny,
-            }
-        )
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            xarray_to_grib.to_grib(ssc_ds, ssc_grib_file)
-        logger.debug(
-            f"wrote {msc_var} GRIB file cropped to SalishSeaCast subdomain: {ssc_grib_file}"
-        )
+
+    with xarray.open_dataset(
+        eccc_grib_file, engine="cfgrib", backend_kwargs={"indexpath": ""}
+    ) as eccc_ds:
+        ssc_ds = eccc_ds.sel(y=y_slice, x=x_slice)
+
+    # **NOTE:** This is brittle if the ECCC HRDPS file name convention changes
+    msc_var = eccc_grib_file.stem.split("HRDPS_")[1].split("_RLatLon")[0]
+    vars = config["weather"]["download"]["2.5 km"]["variables"]
+    for var in vars:
+        if var[0] == msc_var:
+            grib_var = var[1]
+            break
+
+    ssc_ds[grib_var].attrs.update(
+        {
+            "GRIB_numberOfPoints": nx * ny,
+            "GRIB_Nx": nx,
+            "GRIB_Ny": ny,
+        }
+    )
+    ssc_grib_file = (
+        f"{eccc_grib_file.parent / eccc_grib_file.stem}_SSC{eccc_grib_file.suffix}"
+    )
+    _xarray_to_grib(ssc_ds, ssc_grib_file)
+
+    logger.debug(f"wrote GRIB file cropped to SalishSeaCast subdomain: {ssc_grib_file}")
+
+
+def _xarray_to_grib(ssc_ds, ssc_grib_file):
+    """Write GRIB file.
+
+    This is a separate function to facilitate unit testing of _write_ssc_grib_file().
+
+    :param :py:class:`xarray.Dataset` ssc_ds:
+    :param :py:class:`pathlib.Path` ssc_grib_file:
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        xarray_to_grib.to_grib(ssc_ds, ssc_grib_file)
+
+
+class _GribFileEventHandler(watchdog.events.FileSystemEventHandler):
+    """watchdog file system event handler that detects completion of HRDPS file moves
+    from the downloads directory into the atmospheric forcing tree.
+    """
+
+    def __init__(self, eccc_grib_files, config):
+        super().__init__()
+        self.eccc_grib_files = eccc_grib_files
+        self.config = config
+
+    def on_closed(self, event):
+        super().on_closed(event)
+        if Path(event.src_path) in self.eccc_grib_files:
+            eccc_grib_file = Path(event.src_path)
+            _write_ssc_grib_file(eccc_grib_file, self.config)
+            self.eccc_grib_files.remove(eccc_grib_file)
+            logger.debug(
+                f"observer thread files remaining to process: {len(self.eccc_grib_files)}"
+            )
 
 
 if __name__ == "__main__":

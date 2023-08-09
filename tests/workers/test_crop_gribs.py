@@ -19,13 +19,17 @@
 """Unit test for SalishSeaCast crop_gribs worker.
 """
 import logging
+import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
+import attr
 import nemo_nowcast
+import numpy
 import pytest
+import xarray
 
 from nowcast.workers import crop_gribs
 
@@ -156,6 +160,12 @@ class TestConfig:
         assert weather_download["lon indices"] == [300, 490]
         assert weather_download["lat indices"] == [230, 460]
 
+    def test_logging_section(self, prod_config):
+        loggers = prod_config["logging"]["publisher"]["loggers"]
+        assert loggers["watchdog"]["qualname"] == "watchdog"
+        assert loggers["watchdog"]["level"] == "WARNING"
+        assert loggers["watchdog"]["formatter"] == "simple"
+
 
 @pytest.mark.parametrize(
     "forecast, forecast_date",
@@ -217,19 +227,37 @@ class TestCropGribs:
 
     @staticmethod
     @pytest.fixture
-    def mock_write_ssc_grib_files(monkeypatch):
-        def _mock_write_ssc_grib_files(
-            msc_var, grib_var, eccc_grib_files, ssc_grib_files, config
-        ):
-            pass
+    def mock_calc_grib_file_paths(monkeypatch):
+        def mock_calc_grib_file_paths(*args):
+            return set()
 
         monkeypatch.setattr(
-            crop_gribs, "_write_ssc_grib_files", _mock_write_ssc_grib_files
+            crop_gribs, "_calc_grib_file_paths", mock_calc_grib_file_paths
         )
 
-    def test_checklist(self, forecast, mock_write_ssc_grib_files, config, caplog):
+    @staticmethod
+    @pytest.fixture
+    def mock_observer(monkeypatch):
+        class MockObserver:
+            def schedule(self, event_handler, path, recursive):
+                pass
+
+            def join(self, **kwargs):
+                pass
+
+            def start(self):
+                pass
+
+            def stop(self):
+                pass
+
+        monkeypatch.setattr(crop_gribs.watchdog.observers, "Observer", MockObserver)
+
+    def test_checklist(
+        self, forecast, mock_calc_grib_file_paths, mock_observer, config, caplog
+    ):
         parsed_args = SimpleNamespace(
-            forecast=forecast, fcst_date=arrow.get("2023-04-02")
+            forecast=forecast, fcst_date=arrow.get("2023-07-21")
         )
         caplog.set_level(logging.DEBUG)
 
@@ -238,9 +266,17 @@ class TestCropGribs:
         expected = {forecast: "cropped to SalishSeaCast subdomain"}
         assert checklist == expected
 
-    def test_log_messages(self, forecast, mock_write_ssc_grib_files, config, caplog):
+    def test_log_messages(
+        self,
+        forecast,
+        mock_calc_grib_file_paths,
+        mock_observer,
+        config,
+        caplog,
+        monkeypatch,
+    ):
         parsed_args = SimpleNamespace(
-            forecast=forecast, fcst_date=arrow.get("2023-04-02")
+            forecast=forecast, fcst_date=arrow.get("2023-07-21")
         )
         caplog.set_level(logging.DEBUG)
 
@@ -248,7 +284,7 @@ class TestCropGribs:
 
         assert caplog.records[0].levelname == "INFO"
         expected = (
-            f"cropping 2023-04-02 ECCC HRDPS 2.5km continental {forecast}Z GRIB files to "
+            f"cropping 2023-07-21 ECCC HRDPS 2.5km continental {forecast}Z GRIB files to "
             f"SalishSeaCast subdomain"
         )
         assert caplog.messages[0] == expected
@@ -262,109 +298,181 @@ class TestCalcGribFilePaths:
         fcst_date = arrow.get("2023-04-03")
         fcst_hr = "12"
         fcst_dur = 2
-        msc_var = "UGRD_AGL-10m"
+        msc_var_names = ["UGRD_AGL-10m", "VGRD_AGL-10m"]
 
         grib_files = crop_gribs._calc_grib_file_paths(
-            file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var, config
+            file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var_names, config
         )
 
-        expected = [
+        expected = {
             Path(
                 "forcing/atmospheric/continental2.5/GRIB/20230403/12/001/"
                 "20230403T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H.grib2"
             ),
             Path(
+                "forcing/atmospheric/continental2.5/GRIB/20230403/12/001/"
+                "20230403T12Z_MSC_HRDPS_VGRD_AGL-10m_RLatLon0.0225_PT001H.grib2"
+            ),
+            Path(
                 "forcing/atmospheric/continental2.5/GRIB/20230403/12/002/"
                 "20230403T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT002H.grib2"
             ),
-        ]
-        assert grib_files == expected
-
-    def test_SSC_cropped_grib_file_paths(self, config):
-        file_tmpl = config["weather"]["download"]["2.5 km"]["SSC cropped file template"]
-        fcst_date = arrow.get("2023-04-03")
-        fcst_hr = "12"
-        fcst_dur = 2
-        msc_var = "UGRD_AGL-10m"
-
-        grib_files = crop_gribs._calc_grib_file_paths(
-            file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var, config
-        )
-
-        expected = [
-            Path(
-                "forcing/atmospheric/continental2.5/GRIB/20230403/12/001/"
-                "20230403T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H_SSC.grib2"
-            ),
             Path(
                 "forcing/atmospheric/continental2.5/GRIB/20230403/12/002/"
-                "20230403T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT002H_SSC.grib2"
+                "20230403T12Z_MSC_HRDPS_VGRD_AGL-10m_RLatLon0.0225_PT002H.grib2"
             ),
-        ]
+        }
         assert grib_files == expected
 
-    @pytest.mark.parametrize(
-        "grib_domain, file_tmpl_key",
-        (
-            ("ECCC", "ECCC file template"),
-            ("SSC", "SSC cropped file template"),
-        ),
-    )
-    def test_log_messages(self, grib_domain, file_tmpl_key, config, caplog):
-        file_tmpl = config["weather"]["download"]["2.5 km"][file_tmpl_key]
-        fcst_date = arrow.get("2023-04-03")
+    def test_log_messages(self, config, caplog):
+        file_tmpl = config["weather"]["download"]["2.5 km"]["ECCC file template"]
+        fcst_date = arrow.get("2023-07-21")
         fcst_hr = "12"
         fcst_dur = 2
-        msc_var = "UGRD_AGL-10m"
+        msc_var_names = ["UGRD_AGL-10m", "UGRD_AGL-10m"]
         caplog.set_level(logging.DEBUG)
 
         crop_gribs._calc_grib_file_paths(
-            file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var, config
+            file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var_names, config
         )
 
         assert caplog.records[0].levelname == "DEBUG"
-        expected = f"creating UGRD_AGL-10m {grib_domain} GRIB file paths list for 20230403 12Z forecast"
+        expected = f"creating ECCC GRIB file paths list for 20230721 12Z forecast"
         assert caplog.messages[0] == expected
 
 
-# class TestWriteSscGribFiles:
-#     """Unit tests for _write_ssc_grib_files() function."""
-#
-#     def test_log_messages(self, config, caplog, monkeypatch):
-#         def mock_open_dataset(path, engine, backend_kwargs):
-#             pass
-#
-#         monkeypatch.setattr(crop_gribs.xarray, "open_dataset", mock_open_dataset)
-#
-#         msc_var = "UGRD_AGL-10m"
-#         grib_var = "u10"
-#         eccc_grib_files = [
-#             Path(
-#                 "forcing/atmospheric/continental2.5/GRIB/20230403/12/001/"
-#                 "20230403T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H.grib2"
-#             ),
-#             Path(
-#                 "forcing/atmospheric/continental2.5/GRIB/20230403/12/002/"
-#                 "20230403T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT002H.grib2"
-#             ),
-#         ]
-#         ssc_grib_files = [
-#             Path(
-#                 "forcing/atmospheric/continental2.5/GRIB/20230403/12/001/"
-#                 "20230403T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H_SSC.grib2"
-#             ),
-#             Path(
-#                 "forcing/atmospheric/continental2.5/GRIB/20230403/12/002/"
-#                 "20230403T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT002H_SSC.grib2"
-#             ),
-#         ]
-#         caplog.set_level(logging.DEBUG)
-#
-#         crop_gribs._write_ssc_grib_files(msc_var, grib_var, eccc_grib_files, ssc_grib_files, config)
-#
-#         assert caplog.records[0].levelname == "DEBUG"
-#         expected = (
-#             f"wrote UGRD_AGL-10m GRIB file cropped to SalishSeaCast subdomain: "
-#             f""
-#         )
-#         assert caplog.messages[0] == expected
+class TestWriteSscGribFile:
+    """Unit test for _write_ssc_grib_file() function."""
+
+    @staticmethod
+    @pytest.fixture
+    def mock_open_dataset(monkeypatch):
+        def _mock_open_dataset(path, engine, backend_kwargs):
+            class Mock_open_dataset:
+                def __int__(self):
+                    pass
+
+                def __enter__(self):
+                    return xarray.Dataset(
+                        data_vars={
+                            "u10": (["y", "x"], numpy.array([[], []], dtype=float))
+                        },
+                    )
+
+                def __exit__(self, exc_type, exc_val, exc_tb):
+                    pass
+
+            return Mock_open_dataset()
+
+        monkeypatch.setattr(crop_gribs.xarray, "open_dataset", _mock_open_dataset)
+
+    @staticmethod
+    @pytest.fixture
+    def mock_xarray_to_grib(monkeypatch):
+        def _mock_xarray_to_grib(ssc_ds, ssc_grib_file):
+            pass
+
+        monkeypatch.setattr(crop_gribs, "_xarray_to_grib", _mock_xarray_to_grib)
+
+    def test_log_message(
+        self,
+        mock_open_dataset,
+        mock_xarray_to_grib,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        grib_dir = tmp_path / "forcing/atmospheric/continental2.5/GRIB/"
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        grib_file_dir = grib_dir / "20230727/12/001/"
+        grib_file_dir.mkdir(parents=True)
+        eccc_grib_file = Path(
+            grib_file_dir
+            / "20230727T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H.grib2"
+        )
+        caplog.set_level(logging.DEBUG)
+
+        crop_gribs._write_ssc_grib_file(eccc_grib_file, config)
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = (
+            f"wrote GRIB file cropped to SalishSeaCast subdomain: "
+            f"{grib_file_dir / '20230727T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H_SSC.grib2'}"
+        )
+        assert caplog.messages[0] == expected
+
+
+class TestGribFileEventHandler:
+    """Unit tests for _GribFileEventHandler class."""
+
+    def test_constructor(self, config):
+        handler = crop_gribs._GribFileEventHandler(eccc_grib_files=set(), config=config)
+        assert handler.eccc_grib_files == set()
+        assert handler.config == config
+
+    def test_crop_expected_file(self, config, caplog, tmp_path, monkeypatch):
+        @attr.s
+        class MockWatchdogEvent:
+            src_path = attr.ib()
+
+        def mock_write_ssc_grib_file(eccc_grib_file, config):
+            pass
+
+        monkeypatch.setattr(
+            crop_gribs, "_write_ssc_grib_file", mock_write_ssc_grib_file
+        )
+
+        grib_dir = tmp_path / config["weather"]["download"]["2.5 km"]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        grib_forecast_dir = grib_dir / "20230808" / "18" / "043"
+        grib_forecast_dir.mkdir(parents=True)
+        eccc_grib_file = (
+            grib_forecast_dir
+            / "20230808T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT043H.grib2"
+        )
+        eccc_grib_file.write_bytes(b"")
+        eccc_grib_files = {eccc_grib_file}
+
+        caplog.set_level(logging.DEBUG)
+
+        handler = crop_gribs._GribFileEventHandler(eccc_grib_files, config)
+        handler.on_closed(MockWatchdogEvent(src_path=os.fspath(eccc_grib_file)))
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"observer thread files remaining to process: 0"
+        assert caplog.messages[0] == expected
+        assert eccc_grib_file not in eccc_grib_files
+
+    def test_ignore_unexpected_file(self, config, caplog, tmp_path, monkeypatch):
+        @attr.s
+        class MockWatchdogEvent:
+            src_path = attr.ib()
+
+        grib_dir = tmp_path / config["weather"]["download"]["2.5 km"]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        grib_forecast_dir = grib_dir / "20230808" / "18" / "043"
+        grib_forecast_dir.mkdir(parents=True)
+        eccc_grib_file = (
+            grib_forecast_dir
+            / "20230808T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT043H.grib2"
+        )
+        eccc_grib_file.write_bytes(b"")
+        eccc_grib_files = {eccc_grib_file}
+
+        caplog.set_level(logging.DEBUG)
+
+        handler = crop_gribs._GribFileEventHandler(eccc_grib_files, config)
+        handler.on_closed(MockWatchdogEvent(src_path="foo"))
+
+        assert not caplog.records
+        assert eccc_grib_file in eccc_grib_files
