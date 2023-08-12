@@ -59,6 +59,16 @@ def main():
         default=arrow.now().floor("day"),
         help="Forecast date to crop files in.",
     )
+    worker.cli.add_argument(
+        "--var-hour",
+        type=int,
+        help="forecast hour to crop file for specific variable in; must be used with --var",
+    )
+    worker.cli.add_argument(
+        "--var",
+        dest="msc_var_name",
+        help="forecast variable to crop file for; must be used with --var-hour",
+    )
     worker.run(crop_gribs, success, failure)
     return worker
 
@@ -84,6 +94,8 @@ def crop_gribs(parsed_args, config, *args):
     checklist = {}
     fcst_hr = parsed_args.forecast
     fcst_date = parsed_args.fcst_date
+    var_hour = parsed_args.var_hour
+    msc_var_name = parsed_args.msc_var_name
     logger.info(
         f"cropping {fcst_date.format('YYYY-MM-DD')} ECCC HRDPS 2.5km continental "
         f"{fcst_hr}Z GRIB files to SalishSeaCast subdomain"
@@ -91,10 +103,16 @@ def crop_gribs(parsed_args, config, *args):
 
     eccc_file_tmpl = config["weather"]["download"]["2.5 km"]["ECCC file template"]
     var_names = config["weather"]["download"]["2.5 km"]["variables"]
-    fcst_dur = config["weather"]["download"]["2.5 km"]["forecast duration"]
+    fcst_dur = var_hour or config["weather"]["download"]["2.5 km"]["forecast duration"]
     msc_var_names = [vars[0] for vars in var_names]
     eccc_grib_files = _calc_grib_file_paths(
-        eccc_file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var_names, config
+        eccc_file_tmpl,
+        fcst_date,
+        fcst_hr,
+        fcst_dur,
+        msc_var_names,
+        config,
+        msc_var_name,
     )
 
     handler = _GribFileEventHandler(eccc_grib_files, config)
@@ -120,7 +138,7 @@ def crop_gribs(parsed_args, config, *args):
 
 
 def _calc_grib_file_paths(
-    file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var_names, config
+    file_tmpl, fcst_date, fcst_hr, fcst_dur, msc_var_names, config, msc_var_name=None
 ):
     """
     :param str file_tmpl:
@@ -129,6 +147,7 @@ def _calc_grib_file_paths(
     :param int fcst_dur:
     :param list msc_var_names:
     :param :py:class:`nemo_nowcast.Config` config:
+    :param msc_var_name:
 
     :rtype: set
     """
@@ -137,9 +156,13 @@ def _calc_grib_file_paths(
     logger.debug(
         f"creating ECCC GRIB file paths list for {fcst_yyyymmdd} {fcst_hr}Z forecast"
     )
+    fcst_steps_start = 1
+    if msc_var_name:
+        msc_var_names = [msc_var_name]
+        fcst_steps_start = fcst_dur
     grib_files = set()
     for msc_var in msc_var_names:
-        for fcst_step in range(1, fcst_dur + 1):
+        for fcst_step in range(fcst_steps_start, fcst_dur + 1):
             grib_hr_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr, f"{fcst_step:03d}")
             grib_file = file_tmpl.format(
                 date=fcst_yyyymmdd,

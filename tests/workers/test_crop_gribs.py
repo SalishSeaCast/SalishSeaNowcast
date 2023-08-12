@@ -102,6 +102,17 @@ class TestMain:
         assert worker.cli.parser._actions[4].default == arrow.now().floor("day")
         assert worker.cli.parser._actions[4].help
 
+    def test_add_forecast_hour_option(self, mock_worker):
+        worker = crop_gribs.main()
+        assert worker.cli.parser._actions[5].dest == "var_hour"
+        assert worker.cli.parser._actions[5].type == int
+        assert worker.cli.parser._actions[5].help
+
+    def test_add_variable_option(self, mock_worker):
+        worker = crop_gribs.main()
+        assert worker.cli.parser._actions[6].dest == "msc_var_name"
+        assert worker.cli.parser._actions[6].help
+
 
 class TestConfig:
     """Unit tests for production YAML config file elements related to worker."""
@@ -257,7 +268,10 @@ class TestCropGribs:
         self, forecast, mock_calc_grib_file_paths, mock_observer, config, caplog
     ):
         parsed_args = SimpleNamespace(
-            forecast=forecast, fcst_date=arrow.get("2023-07-21")
+            forecast=forecast,
+            fcst_date=arrow.get("2023-08-11"),
+            var_hour=None,
+            msc_var_name=None,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -276,7 +290,10 @@ class TestCropGribs:
         monkeypatch,
     ):
         parsed_args = SimpleNamespace(
-            forecast=forecast, fcst_date=arrow.get("2023-07-21")
+            forecast=forecast,
+            fcst_date=arrow.get("2023-08-11"),
+            var_hour=None,
+            msc_var_name=None,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -284,7 +301,7 @@ class TestCropGribs:
 
         assert caplog.records[0].levelname == "INFO"
         expected = (
-            f"cropping 2023-07-21 ECCC HRDPS 2.5km continental {forecast}Z GRIB files to "
+            f"cropping 2023-08-11 ECCC HRDPS 2.5km continental {forecast}Z GRIB files to "
             f"SalishSeaCast subdomain"
         )
         assert caplog.messages[0] == expected
@@ -320,6 +337,31 @@ class TestCalcGribFilePaths:
             Path(
                 "forcing/atmospheric/continental2.5/GRIB/20230403/12/002/"
                 "20230403T12Z_MSC_HRDPS_VGRD_AGL-10m_RLatLon0.0225_PT002H.grib2"
+            ),
+        }
+        assert grib_files == expected
+
+    def test_ECCC_grib_file_path_for_one_file(self, config):
+        file_tmpl = config["weather"]["download"]["2.5 km"]["ECCC file template"]
+        fcst_date = arrow.get("2023-08-11")
+        fcst_hr = "12"
+        fcst_dur = 28
+        msc_var_names = ["UGRD_AGL-10m", "VGRD_AGL-10m"]
+
+        grib_files = crop_gribs._calc_grib_file_paths(
+            file_tmpl,
+            fcst_date,
+            fcst_hr,
+            fcst_dur,
+            msc_var_names,
+            config,
+            "VGRD_AGL-10m",
+        )
+
+        expected = {
+            Path(
+                "forcing/atmospheric/continental2.5/GRIB/20230811/12/028/"
+                "20230811T12Z_MSC_HRDPS_VGRD_AGL-10m_RLatLon0.0225_PT028H.grib2"
             ),
         }
         assert grib_files == expected
