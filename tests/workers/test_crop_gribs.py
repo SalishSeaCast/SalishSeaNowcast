@@ -280,7 +280,7 @@ class TestCropGribs:
         expected = {forecast: "cropped to SalishSeaCast subdomain"}
         assert checklist == expected
 
-    def test_log_messages(
+    def test_observer_log_messages(
         self,
         forecast,
         mock_calc_grib_file_paths,
@@ -291,7 +291,7 @@ class TestCropGribs:
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
-            fcst_date=arrow.get("2023-08-11"),
+            fcst_date=arrow.get("2023-08-14"),
             var_hour=None,
             msc_var_name=None,
         )
@@ -301,10 +301,70 @@ class TestCropGribs:
 
         assert caplog.records[0].levelname == "INFO"
         expected = (
-            f"cropping 2023-08-11 ECCC HRDPS 2.5km continental {forecast}Z GRIB files to "
+            f"cropping 2023-08-14 ECCC HRDPS 2.5km continental {forecast}Z GRIB files to "
             f"SalishSeaCast subdomain"
         )
         assert caplog.messages[0] == expected
+
+        assert caplog.records[1].levelname == "INFO"
+        expected = (
+            f"starting to watch for ECCC grib files to crop in "
+            f"forcing/atmospheric/continental2.5/GRIB/20230814/{forecast}/"
+        )
+        assert caplog.messages[1] == expected
+
+        assert caplog.records[2].levelname == "INFO"
+        expected = (
+            f"finished cropping ECCC grib files to SalishSeaCast subdomain in "
+            f"forcing/atmospheric/continental2.5/GRIB/20230814/{forecast}/"
+        )
+        assert caplog.messages[2] == expected
+
+    def test_crop_one_file_log_messages(
+        self,
+        forecast,
+        mock_observer,
+        config,
+        caplog,
+        monkeypatch,
+    ):
+        def mock_write_ssc_grib_file(eccc_grib_file, config):
+            pass
+
+        monkeypatch.setattr(
+            crop_gribs, "_write_ssc_grib_file", mock_write_ssc_grib_file
+        )
+
+        parsed_args = SimpleNamespace(
+            forecast=forecast,
+            fcst_date=arrow.get("2023-08-14"),
+            var_hour=29,
+            msc_var_name="APCP_Sfc",
+        )
+        caplog.set_level(logging.DEBUG)
+
+        crop_gribs.crop_gribs(parsed_args, config)
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"cropping 2023-08-14 ECCC HRDPS 2.5km continental {forecast}Z GRIB files to "
+            f"SalishSeaCast subdomain"
+        )
+        assert caplog.messages[0] == expected
+
+        assert caplog.records[1].levelname == "DEBUG"
+        expected = (
+            f"creating ECCC GRIB file paths list for 20230814 {forecast}Z forecast"
+        )
+        assert caplog.messages[1] == expected
+
+        assert caplog.records[2].levelname == "INFO"
+        expected = (
+            f"finished cropping ECCC grib file to SalishSeaCast subdomain: "
+            f"forcing/atmospheric/continental2.5/GRIB/20230814/{forecast}/029/"
+            f"20230814T{forecast}Z_MSC_HRDPS_APCP_Sfc_RLatLon0.0225_PT029H.grib2"
+        )
+        assert caplog.messages[2] == expected
 
 
 class TestCalcGribFilePaths:

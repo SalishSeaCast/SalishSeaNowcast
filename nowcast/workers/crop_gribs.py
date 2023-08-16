@@ -115,6 +115,16 @@ def crop_gribs(parsed_args, config, *args):
         msc_var_name,
     )
 
+    if msc_var_name and var_hour:
+        # Crop a single variable-hour file
+        eccc_grib_file = eccc_grib_files.pop()
+        _write_ssc_grib_file(eccc_grib_file, config)
+        logger.info(
+            f"finished cropping ECCC grib file to SalishSeaCast subdomain: {eccc_grib_file}"
+        )
+        checklist[fcst_hr] = "cropped to SalishSeaCast subdomain"
+        return checklist
+
     handler = _GribFileEventHandler(eccc_grib_files, config)
     observer = watchdog.observers.Observer()
     grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
@@ -131,7 +141,7 @@ def crop_gribs(parsed_args, config, *args):
     observer.stop()
     observer.join()
     logger.info(
-        f"finished cropping ECCC grib files to SalishSeaCast subdomain in {grib_fcst_dir}"
+        f"finished cropping ECCC grib files to SalishSeaCast subdomain in {grib_fcst_dir}/"
     )
     checklist[fcst_hr] = "cropped to SalishSeaCast subdomain"
     return checklist
