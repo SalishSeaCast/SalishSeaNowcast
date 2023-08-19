@@ -195,10 +195,10 @@ ssh:
   download:
     # URL from which to download NOAA Neah Bay sea surface height obs/forecast files
     # **Must be quoted to project {} characters**
-    url template: 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/etss/prod/etss.{yyyymmdd}/etss.t{forecast}z.csv_tar'
+    url template: 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/petss/prod/etss.{yyyymmdd}/etss.t{forecast}z.csv.tar.gz'
     # Template for the downloaded CSV tarball file name
     # **Must be quoted to project {} characters**
-    tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar'
+    tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar_gz'
     # Template for the directory and file name of the CSV file to extract from the tarball
     # **Must be quoted to project {} characters**
     tarball csv file template: 'etss.{yyyymmdd}/t{forecast}z_csv/9443090.csv'
