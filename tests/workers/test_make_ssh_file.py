@@ -43,7 +43,7 @@ def config(base_config):
 
                 ssh:
                   download:
-                    tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar'
+                    tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar_gz'
 
                   coordinates: /SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc
                   tidal predictions: /SalishSeaCast/tidal-predictions/
@@ -148,7 +148,8 @@ class TestConfig:
     def test_ssh_download_section(self, prod_config):
         ssh_download = prod_config["ssh"]["download"]
         assert (
-            ssh_download["tar file template"] == "etss.{yyyymmdd}.t{forecast}z.csv_tar"
+            ssh_download["tar file template"]
+            == "etss.{yyyymmdd}.t{forecast}z.csv_tar_gz"
         )
 
     def test_results_archive_section(self, prod_config):

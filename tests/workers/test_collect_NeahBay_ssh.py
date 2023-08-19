@@ -41,9 +41,9 @@ def config(base_config):
                 """\
                 ssh:
                   download:
-                    url template: 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/etss/prod/etss.{yyyymmdd}/etss.t{forecast}z.csv_tar'
+                    url template: 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/petss/prod/etss.{yyyymmdd}/etss.t{forecast}z.csv,tar.gz'
                     tar file template: 'etss.{yyyymmdd}.t{forecast}z.csv_tar'
-                    tarball csv file template: 'etss.{yyyymmdd}/t{forecast}z_csv/9443090.csv'
+                    tarball csv file template: 'etss.{yyyymmdd}/t{forecast}z_csv/9443090.csv_tar_gz'
 
                   ssh dir: /results/forcing/sshNeahBay/
                 """
@@ -115,10 +115,11 @@ class TestConfig:
         ssh_download = prod_config["ssh"]["download"]
         assert (
             ssh_download["url template"]
-            == "https://nomads.ncep.noaa.gov/pub/data/nccf/com/etss/prod/etss.{yyyymmdd}/etss.t{forecast}z.csv_tar"
+            == "https://nomads.ncep.noaa.gov/pub/data/nccf/com/petss/prod/etss.{yyyymmdd}/etss.t{forecast}z.csv.tar.gz"
         )
         assert (
-            ssh_download["tar file template"] == "etss.{yyyymmdd}.t{forecast}z.csv_tar"
+            ssh_download["tar file template"]
+            == "etss.{yyyymmdd}.t{forecast}z.csv_tar_gz"
         )
         assert (
             ssh_download["tarball csv file template"]
