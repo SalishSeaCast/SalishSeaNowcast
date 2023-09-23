@@ -137,7 +137,7 @@ def crop_gribs(parsed_args, config, *args):
         # We need to have a timeout on the observer thread so that the status
         # of the ECCC grib files set gets checked, otherwise the worker never
         # finishes because the main thread is blocked by the observer thread.
-        observer.join(timeout=1)
+        observer.join(timeout=0.5)
     observer.stop()
     observer.join()
     logger.info(
