@@ -485,7 +485,7 @@ class TestWriteSscGribFile:
         tmp_path,
         monkeypatch,
     ):
-        grib_dir = tmp_path / "forcing/atmospheric/continental2.5/GRIB/"
+        grib_dir = tmp_path / config["weather"]["download"]["2.5 km"]["GRIB dir"]
         grib_dir.mkdir(parents=True)
         monkeypatch.setitem(
             config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
@@ -506,6 +506,89 @@ class TestWriteSscGribFile:
             f"{grib_file_dir / '20230727T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H_SSC.grib2'}"
         )
         assert caplog.messages[0] == expected
+
+
+class TestHandleStalledObserver:
+    """Unit tests for _handle_stalled_observer() function."""
+
+    def test_gt_10_files_unprocessed(self, config, caplog):
+        grib_dir = Path("forcing/atmospheric/continental2.5/GRIB/20230920/12/043/")
+        eccc_grib_files = {
+            grib_dir / "20230920T12Z_MSC_HRDPS_APCP_Sfc_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_DLWRF_Sfc_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_DSWRF_Sfc_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_LHTFL_Sfc_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_PRATE_Sfc_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_PRMSL_MSL_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_RH_AGL-2m_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_SPFH_AGL-2m_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_TMP_AGL-2m_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT043H.grib2",
+            grib_dir / "20230920T12Z_MSC_HRDPS_VGRD_AGL-10m_RLatLon0.0225_PT043H.grib2",
+        }
+        fcst_hr = "12"
+        caplog.set_level(logging.DEBUG)
+
+        crop_gribs._handle_stalled_observer(eccc_grib_files, fcst_hr, config)
+
+        assert len(caplog.records) == 1
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
+            f"crop_gribs 12 has watched for 8h and 11 files remain unprocessed: "
+            f"{' '.join(os.fspath(eccc_grib_file) for eccc_grib_file in eccc_grib_files)}"
+        )
+        assert caplog.messages[0] == expected
+
+    def test_retry_success(self, config, caplog, tmp_path, monkeypatch):
+        def _mock_write_ssc_grib_file(eccc_grib_file, config):
+            pass
+
+        monkeypatch.setattr(
+            crop_gribs, "_write_ssc_grib_file", _mock_write_ssc_grib_file
+        )
+        grib_dir = tmp_path / config["weather"]["download"]["2.5 km"]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        grib_file_dir = grib_dir / "20230920/12/043/"
+        grib_file_dir.mkdir(parents=True)
+        eccc_grib_files = {
+            grib_dir / "20230920T12Z_MSC_HRDPS_APCP_Sfc_RLatLon0.0225_PT043H.grib2",
+        }
+        fcst_hr = "12"
+        caplog.set_level(logging.DEBUG)
+
+        crop_gribs._handle_stalled_observer(eccc_grib_files, fcst_hr, config)
+
+        assert len(caplog.records) == 1
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"crop_gribs 12 has watched for 8h; retrying remaining 1 file(s)"
+        assert caplog.messages[0] == expected
+
+    def test_file_not_found(self, config, caplog, tmp_path, monkeypatch):
+        grib_dir = tmp_path / config["weather"]["download"]["2.5 km"]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "GRIB dir", grib_dir
+        )
+        grib_file_dir = grib_dir / "20230920/12/043/"
+        grib_file_dir.mkdir(parents=True)
+        eccc_grib_files = {
+            grib_dir / "20230920T12Z_MSC_HRDPS_APCP_Sfc_RLatLon0.0225_PT043H.grib2",
+        }
+        fcst_hr = "12"
+        caplog.set_level(logging.DEBUG)
+
+        crop_gribs._handle_stalled_observer(eccc_grib_files, fcst_hr, config)
+
+        assert len(caplog.records) == 2
+        assert caplog.records[1].levelname == "CRITICAL"
+        expected = (
+            f"crop_gribs 12 has watched for 8h and at least 1 file has not "
+            f"yet been downloaded: {' '.join(os.fspath(eccc_grib_file) for eccc_grib_file in eccc_grib_files)}"
+        )
+        assert caplog.messages[1] == expected
 
 
 class TestGribFileEventHandler:
