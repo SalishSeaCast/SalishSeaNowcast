@@ -184,6 +184,7 @@ class TestSlackNotifications:
         slack_notifications = prod_config["slack notifications"]
         expected = [
             "collect_weather",
+            "crop_gribs",
             "download_weather",
             "download_live_ocean",
             "watch_NEMO",
