@@ -37,6 +37,8 @@ import xarray
 from cfgrib import xarray_to_grib
 from nemo_nowcast import NowcastWorker
 
+from nowcast import lib
+
 
 NAME = "crop_gribs"
 logger = logging.getLogger(NAME)
@@ -132,6 +134,14 @@ def crop_gribs(parsed_args, config, *args):
     grib_fcst_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr)
     observer.schedule(handler, os.fspath(grib_fcst_dir), recursive=True)
     logger.info(f"starting to watch for ECCC grib files to crop in {grib_fcst_dir}/")
+    # Create the directory we're going to watch to handle 2 rare situations that can cause
+    # a FileNotFoundError to be raised (issue #197):
+    # 1. collect_weather and crop_gribs are launched concurrently. Occasionally crop_gribs tries
+    #    to start watching the directory before collect_weather creates it.
+    # 2. When collect_weather --backfill has to be run to recover from automation problems we need
+    #    to start crop_gribs first. So, it needs to create the directory.
+    grp_name = config["file group"]
+    lib.mkdir(grib_fcst_dir, logger, grp_name=grp_name)
     observer.start()
     start_time = arrow.now()
     while eccc_grib_files:

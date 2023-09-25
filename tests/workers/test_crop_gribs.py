@@ -18,6 +18,7 @@
 
 """Unit test for SalishSeaCast crop_gribs worker.
 """
+import grp
 import logging
 import os
 import textwrap
@@ -42,6 +43,8 @@ def config(base_config):
         f.write(
             textwrap.dedent(
                 """\
+                file group: allen
+
                 weather:
                   download:
                     2.5 km:
@@ -136,6 +139,10 @@ class TestConfig:
             "failure 18",
             "crash",
         ]
+
+    def test_file_group(self, prod_config):
+        assert "file group" in prod_config
+        assert prod_config["file group"] == "sallen"
 
     def test_weather_download_2_5_km_section(self, prod_config):
         weather_download = prod_config["weather"]["download"]["2.5 km"]
@@ -265,8 +272,16 @@ class TestCropGribs:
         monkeypatch.setattr(crop_gribs.watchdog.observers, "Observer", MockObserver)
 
     def test_checklist(
-        self, forecast, mock_calc_grib_file_paths, mock_observer, config, caplog
+        self,
+        forecast,
+        mock_calc_grib_file_paths,
+        mock_observer,
+        config,
+        caplog,
+        monkeypatch,
     ):
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
         parsed_args = SimpleNamespace(
             forecast=forecast,
             fcst_date=arrow.get("2023-08-11"),
@@ -289,6 +304,8 @@ class TestCropGribs:
         caplog,
         monkeypatch,
     ):
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
         parsed_args = SimpleNamespace(
             forecast=forecast,
             fcst_date=arrow.get("2023-08-14"),
