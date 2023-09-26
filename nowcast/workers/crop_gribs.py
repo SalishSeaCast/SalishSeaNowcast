@@ -37,6 +37,8 @@ import xarray
 from cfgrib import xarray_to_grib
 from nemo_nowcast import NowcastWorker
 
+from nowcast import lib
+
 
 NAME = "crop_gribs"
 logger = logging.getLogger(NAME)
@@ -132,12 +134,24 @@ def crop_gribs(parsed_args, config, *args):
     grib_fcst_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr)
     observer.schedule(handler, os.fspath(grib_fcst_dir), recursive=True)
     logger.info(f"starting to watch for ECCC grib files to crop in {grib_fcst_dir}/")
+    # Create the directory we're going to watch to handle 2 rare situations that can cause
+    # a FileNotFoundError to be raised (issue #197):
+    # 1. collect_weather and crop_gribs are launched concurrently. Occasionally crop_gribs tries
+    #    to start watching the directory before collect_weather creates it.
+    # 2. When collect_weather --backfill has to be run to recover from automation problems we need
+    #    to start crop_gribs first. So, it needs to create the directory.
+    grp_name = config["file group"]
+    lib.mkdir(grib_fcst_dir, logger, grp_name=grp_name)
     observer.start()
+    start_time = arrow.now()
     while eccc_grib_files:
+        if (arrow.now() - start_time).seconds > 3600 * 8:  # 8 hours
+            _handle_stalled_observer(eccc_grib_files, fcst_hr, config)
+            break
         # We need to have a timeout on the observer thread so that the status
         # of the ECCC grib files set gets checked, otherwise the worker never
         # finishes because the main thread is blocked by the observer thread.
-        observer.join(timeout=1)
+        observer.join(timeout=0.5)
     observer.stop()
     observer.join()
     logger.info(
@@ -236,6 +250,40 @@ def _xarray_to_grib(ssc_ds, ssc_grib_file):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         xarray_to_grib.to_grib(ssc_ds, ssc_grib_file)
+
+
+def _handle_stalled_observer(eccc_grib_files, fcst_hr, config):
+    """
+    :param set eccc_grib_files:
+    :param str fcst_hr:
+    :param :py:class:`nemo_nowcast.Config` config:
+    """
+    if (remaining_files := len(eccc_grib_files)) > 10:
+        logger.critical(
+            f"crop_gribs {fcst_hr} has watched for 8h and {remaining_files} "
+            f"files remain unprocessed: "
+            f"{' '.join(os.fspath(eccc_grib_file) for eccc_grib_file in eccc_grib_files)}"
+        )
+        # We need to break rather than raise WorkerError because crop_gribs needs to
+        # appear to finish successfully regardless so that the instance for the next
+        # forecast is started.
+        return
+    logger.info(
+        f"crop_gribs {fcst_hr} has watched for 8h; retrying remaining {remaining_files} file(s)"
+    )
+    for eccc_grib_file in eccc_grib_files:
+        try:
+            _write_ssc_grib_file(eccc_grib_file, config)
+        except FileNotFoundError:
+            logger.critical(
+                f"crop_gribs {fcst_hr} has watched for 8h and at least 1 file has not "
+                f"yet been downloaded: "
+                f"{' '.join(os.fspath(eccc_grib_file) for eccc_grib_file in eccc_grib_files)}"
+            )
+            # We need to return rather than raise WorkerError because crop_gribs needs to
+            # appear to finish successfully regardless so that the instance for the next
+            # forecast is started.
+            return
 
 
 class _GribFileEventHandler(watchdog.events.FileSystemEventHandler):

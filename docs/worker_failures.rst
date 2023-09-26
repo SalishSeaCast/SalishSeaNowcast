@@ -37,7 +37,7 @@ we can recover observed sea surface heights from the `NOAA tides and water level
 :mod:`make_ssh_files` can take a date so that older files can be run.
 Files from the observation site can also be run with the appropriate flag.
 
-.. _NOAA forecast: https://nomads.ncep.noaa.gov/pub/data/nccf/com/etss/prod/
+.. _NOAA forecast: https://nomads.ncep.noaa.gov/pub/data/nccf/com/petss/prod/
 
 .. _NOAA tides and water levels: https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
 

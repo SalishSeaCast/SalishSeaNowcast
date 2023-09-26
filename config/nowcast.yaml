@@ -1138,11 +1138,12 @@ logging:
 
 
 slack notifications:
-  # Environment variable is which the slack channel incoming webhook URL is stored
+  # Environment variable is which the Slack channel incoming webhook URL is stored
   SLACK_SSC_DAILY_PROGRESS:
     # List of workers for which notifications will be sent on completion
     # to #ssc-daily-progress channel
     - collect_weather
+    - crop_gribs
     - download_weather
     - download_live_ocean
     - watch_NEMO
