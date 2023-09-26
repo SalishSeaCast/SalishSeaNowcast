@@ -18,26 +18,29 @@
 
 .. _ArbutusCloudDeployment:
 
-*******************************
-:kbd:`arbutus.cloud` Deployment
-*******************************
+****************************
+``arbutus.cloud`` Deployment
+****************************
 
-In April 2019 the `Ocean Networks Canada`_ private cloud computing facility was migrated from :kbd:`west.cloud` to the Compute Canada `arbutus.cloud`_.
-:kbd:`arbutus.cloud` runs on `OpenStack`_.
+In April 2019 the `Ocean Networks Canada`_ private cloud computing facility was migrated from ``west.cloud`` to the Digital Research Alliance of Canada
+(aka the Alliance, formerly Compute Canada)
+`arbutus.cloud`_.
+``arbutus.cloud`` runs on `OpenStack`_.
 
 .. _Ocean Networks Canada: https://www.oceannetworks.ca/
 .. _arbutus.cloud: https://docs.alliancecan.ca/wiki/Cloud_resources#Arbutus_cloud
 .. _OpenStack: https://www.openstack.org/
 
 The `OpenStack dashboard`_ provides a web interface to manage and report on cloud resources.
-The :kbd:`arbutus.cloud` dashboard is at :kbd:`https://arbutus.cloud.computecanada.ca/`.
+The ``arbutus.cloud`` dashboard is at https://arbutus.cloud.computecanada.ca/.
 
 .. _OpenStack dashboard: https://docs.openstack.org/horizon/stein/user/
 
-Authentication and authorization for :kbd:`arbutus.cloud` is managed by `computecanada`_,
-so those are the userid/password that are required to log in to the dashboard.
+Authentication and authorization for ``arbutus.cloud`` is managed by the Alliance,
+so the userid/password that are required to log in to the dashboard are the same as those
+used for the `CCDB`_
 
-.. _computecanada: https://www.computecanada.ca/
+.. _CCDB: https://ccdb.alliancecan.ca/security/login
 
 
 Web Interface
@@ -49,7 +52,7 @@ Initial setup was done via the https://arbutus.cloud.computecanada.ca/ web inter
 .. _Compute Canada Cloud Quickstart Guide: https://docs.alliancecan.ca/wiki/Cloud_Quick_Start
 .. _OpenStack End User Guide: https://docs.openstack.org/queens/user/
 
-The project (aka tenant) name for the SalishSeaCast system is :kbd:`rrg-allen`.
+The project (aka tenant) name for the SalishSeaCast system is ``ctb-onc-allen``.
 
 
 Network
@@ -57,7 +60,7 @@ Network
 
 The network configuration was done for us by Compute Canada.
 It's configuration can be inspected via the :guilabel:`Network` section of the web interface.
-The subnet of the VMs is :kbd:`rrg-allen-network` and it routes to the publich network via the :kbd:`rrg-allen-router`.
+The subnet of the VMs is ``rrg-allen-network`` and it routes to the public network via the ``rrg-allen-router``.
 There is 1 floating IP address available for assignment to provide access from the public network to a VM.
 
 
@@ -143,26 +146,26 @@ Use the :guilabel:`Compute > Instances` section of the web interface to manage i
 To launch an instance to use as the head node use the :guilabel:`Launch Instance` button.
 On the :guilabel:`Details` tab set the following parameters:
 
-* Instance Name: :kbd:`nowcast0`
-* Description: :kbd:`SalishSeaCast system head node`
-* Availability Zone: :kbd:`Any Availability Zone`
-* Count: :kbd:`1`
+* Instance Name: ``nowcast0``
+* Description: ``SalishSeaCast system head node``
+* Availability Zone: ``Any Availability Zone``
+* Count: ``1``
 
 On the :guilabel:`Source` tab set the following parameters:
 
-* Select Boot Source: :kbd:`Image`
-* Create New Volume: :kbd:`No`
-* Image: :kbd:`Ubuntu-18.04-Bionic-x64-2018-09`
+* Select Boot Source: ``Image``
+* Create New Volume: ``No``
+* Image: ``Ubuntu-18.04-Bionic-x64-2018-09``
 
 .. note::
-    We have to use the :kbd:`Ubuntu-18.04-Bionic-x64-2018-09` image,
-    not the :kbd:`Ubuntu-18.04-Bionic-minimal-x64-2018-08` image because the latter does not include the kernel elements required for the head node to run the NFS server service.
+    We have to use the ``Ubuntu-18.04-Bionic-x64-2018-09`` image,
+    not the ``Ubuntu-18.04-Bionic-minimal-x64-2018-08`` image because the latter does not include the kernel elements required for the head node to run the NFS server service.
 
-On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c16-60gb-90-numa-test`
+On the :guilabel:`Flavor` tab choose: ```nemo-c16-60gb-90-numa-test```
 
-On the :guilabel:`Network` tab confirm that :kbd:`rrg-allen-network` is selected.
+On the :guilabel:`Network` tab confirm that ``rrg-allen-network`` is selected.
 
-On the :guilabel:`Security Groups` tab confirm that :kbd:`default` is selected.
+On the :guilabel:`Security Groups` tab confirm that ``default`` is selected.
 
 On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :ref:`AccessAndSecurity` section above is selected.
 
@@ -176,7 +179,8 @@ On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :
 
 Click the :guilabel:`Launch` button to launch the instance.
 
-Once the instance is running use the :guilabel:`More > Associate Floating IP` menu item to associate a public IP address with the instance.
+Once the instance is running use the :guilabel:`More > Associate Floating IP`
+menu item to associate a public IP address with the instance.
 
 
 .. _ComputeNodeInstance:
@@ -189,24 +193,25 @@ Use the :guilabel:`Compute > Instances` section of the web interface to manage i
 To launch an instance to use as a compute node template use the :guilabel:`Launch Instance` button.
 On the :guilabel:`Details` tab set the following parameters:
 
-* Instance Name: :kbd:`nowcast1`
-* Description: :kbd:`SalishSeaCast system compute node`
-* Availability Zone: :kbd:`Any Availability Zone`
-* Count: :kbd:`1`
+* Instance Name: ``nowcast1``
+* Description: ``SalishSeaCast system compute node``
+* Availability Zone: ``Any Availability Zone``
+* Count: ``1``
 
 On the :guilabel:`Source` tab set the following parameters:
 
-* Select Boot Source: :kbd:`Image`
-* Create New Volume: :kbd:`No`
-* Image: :kbd:`Ubuntu-18.04-Bionic-x64-2018-09`
+* Select Boot Source: ``Image``
+* Create New Volume: ``No``
+* Image: ``Ubuntu-18.04-Bionic-x64-2018-09``
 
-On the :guilabel:`Flavor` tab choose: :kbd:`nemo-c16-60gb-90-numa-test`
+On the :guilabel:`Flavor` tab choose: ``nemo-c16-60gb-90-numa-test``
 
-On the :guilabel:`Network` tab confirm that :kbd:`rrg-allen-network` is selected.
+On the :guilabel:`Network` tab confirm that ``rrg-allen-network`` is selected.
 
-On the :guilabel:`Security Groups` tab confirm that :kbd:`default` is selected.
+On the :guilabel:`Security Groups` tab confirm that ``default`` is selected.
 
-On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the :ref:`AccessAndSecurity` section above is selected.
+On the :guilabel:`Key Pairs` tab confirm that the key pair you imported in the
+:ref:`AccessAndSecurity` section above is selected.
 
 .. note::
 
@@ -228,14 +233,14 @@ Use the :guilabel:`Volumes > Volumes` section of the web interface to manage the
 
 To create a persistent shared storage volume that will be mounted on all instances use the :guilabel:`Create Volume` button and fill in the dialog with the following parameters:
 
-* Volume Name: :kbd:`nemoShare`
-* Description: :kbd:`SalishSeaCast system shared persistent storage`
-* Volume Source: :kbd:`No source, empty volume`
-* Type: :kbd:`Default`
-* Size (GB): :kbd:`1024`
-* Availability Zone: :kbd:`nova`
+* Volume Name: ``nemoShare``
+* Description: ``SalishSeaCast system shared persistent storage``
+* Volume Source: ``No source, empty volume``
+* Type: ``Default``
+* Size (GB): ``1024``
+* Availability Zone: ``nova``
 
-Use :guilabel:`Actions > Manage Attachments` to attach the volume to the :kbd:`nowcast0` :ref:`HeadNodeInstance`.
+Use :guilabel:`Actions > Manage Attachments` to attach the volume to the ``nowcast0`` :ref:`HeadNodeInstance`.
 
 
 :command:`ssh` Access
@@ -248,13 +253,13 @@ Log in to the publicly accessible head node instance with the command:
     $ ssh -i $HOME/.ssh/arbutus.cloud_id_rsa ubuntu@<ip-address>
 
 The first time you connect to an instance you will be prompted to accept its RSA host key fingerprint.
-You can verify the fingerprint by looking for the :kbd:`SSH HOST KEY FINGERPRINT` section in the instance log in the :guilabel:`Instances > nowcast0 > Log` tab.
+You can verify the fingerprint by looking for the ``SSH HOST KEY FINGERPRINT`` section in the instance log in the :guilabel:`Instances > nowcast0 > Log` tab.
 If you have previously associated a different instance with the IP address you may receive a message about host key verification failure and potential man-in-the-middle attacks.
 To resolve the issue delete the prior host key from your :file:`$HOME/.ssh/known_hosts` file.
 The message will tell you what line it is on.
 
-You will also be prompted for the pasphrase that you assigned to the ssh key pair when you created it.
-On Linux and OS/X authenticating the ssh key with your pasphrase has the side-effect of adding it to the :command:`ssh-agent` instance that was started when you logged into the system.
+You will also be prompted for the passphrase that you assigned to the ssh key pair when you created it.
+On Linux and OS/X authenticating the ssh key with your passphrase has the side-effect of adding it to the :command:`ssh-agent` instance that was started when you logged into the system.
 You can add the key to the agent yourself with the command:
 
 .. code-block:: bash
@@ -288,7 +293,8 @@ Provisioning and Configuration
 Head Node
 ---------
 
-Fetch and apply any available updates on the :kbd:`nowcast0` :ref:`HeadNodeInstance` that you launched above with:
+Fetch and apply any available updates on the ``nowcast0`` :ref:`HeadNodeInstance`
+that you launched above with:
 
 .. code-block:: bash
 
@@ -305,7 +311,7 @@ Set the timezone with:
 Confirm the date,
 time,
 time zone,
-and that the :kbd:`systemd-timesyncd.service` is activate with:
+and that the ``systemd-timesyncd.service`` is activate with:
 
 .. code-block:: bash
 
@@ -373,7 +379,7 @@ Create :file:`$HOME/.bash_aliases` containing a command to make :command:`rm` de
 Shared Persistent Storage
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Confirm that the :ref:`PersistentSharedStorage` volume is attached on :kbd:`vdc` with:
+Confirm that the :ref:`PersistentSharedStorage` volume is attached on ``vdc`` with:
 
 .. code-block:: bash
 
@@ -445,7 +451,7 @@ Restart the NFS service:
 Compute Node Template
 ---------------------
 
-Fetch and apply any available updates on the :kbd:`nowcast1` :ref:`ComputeNodeInstance` that you launched above with:
+Fetch and apply any available updates on the ``nowcast1`` :ref:`ComputeNodeInstance` that you launched above with:
 
 .. code-block:: bash
 
@@ -462,7 +468,7 @@ Set the timezone with:
 Confirm the date,
 time,
 time zone,
-and that the :kbd:`systemd-timesyncd.service` is activate with:
+and that the ``systemd-timesyncd.service`` is activate with:
 
 .. code-block:: bash
 
@@ -519,7 +525,7 @@ copy the public key of the passphrase-less ssh key pair that will be used for no
     $ ssh-copy-id -f -i $HOME/.ssh/id_rsa nowcast1
 
 Capture a snapshot image of the instance to use to as the boot image for the other compute nodes using the :guilabel:`Create Snapshot` button on the :guilabel:`Compute > Instances` page.
-Use a name like :kbd:`nowcast-c16-60g-numa-compute-v0` for the image.
+Use a name like ``nowcast-c16-60g-numa-compute-v0`` for the image.
 
 
 Hosts Mappings
@@ -590,12 +596,12 @@ MPI Hosts Mappings
   192.168.238.18 slots=15 max-slots=16
   192.168.238.15 slots=15 max-slots=16
 
-:file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for :kbd:`x2` model configuration runs containing::
+:file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for ``x2`` model configuration runs containing::
 
   192.168.238.12 slots=15 max-slots=16
   192.168.238.7  slots=15 max-slots=16
 
-:file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for :kbd:`r12` model configuration runs containing::
+:file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for ``r12`` model configuration runs containing::
 
   192.168.238.20 slots=15 max-slots=16
   192.168.238.11 slots=15 max-slots=16
@@ -635,7 +641,7 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
 Build XIOS-2
 ============
 
-Symlink the XIOS-2 build configuration files for :kbd:`arbutus.cloud` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
+Symlink the XIOS-2 build configuration files for ``arbutus.cloud`` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
 .. code-block:: bash
 
@@ -680,9 +686,9 @@ The eventual reply will provide a username and password that can be used to acce
     $ cd /nemoShare/MEOPAR/nowcast-sys/
     $ curl -u username:password -LO download_url
 
-where :kbd:`username`,
-:kbd:`password`,
-and :kbd:`download_url` are those provided in the reply to the email request.
+where ``username``,
+``password``,
+and ``download_url`` are those provided in the reply to the email request.
 
 Follow the instructions in the Installing Files section of the `wwatch3 manual`_ to unpack the tarball to create a local installation in :file:`/nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/`
 that will use the :program:`gfortran` and :program:`gcc` compilers:
