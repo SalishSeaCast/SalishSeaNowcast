@@ -207,7 +207,7 @@ trove-classifiers==2023.9.19
 typing_extensions==4.8.0
 tzdata==2023.3
 ukkonen==1.0.1
-urllib3==2.0.5
+urllib3==2.0.6
 userpath==1.7.0
 utm==0.7.0
 verboselogs==1.7
