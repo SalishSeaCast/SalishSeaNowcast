@@ -51,6 +51,7 @@ def config(base_config, tmp_path):
                 f"""\
                 wave forecasts:
                     run prep dir: {run_prep_dir}
+                    mpi hosts file: ${{HOME}}/mpi_hosts.wwatch3
                     wwatch3 exe path: wwatch3-5.16/exe
                     salishsea cmd: salishsea
                     results:
@@ -145,6 +146,10 @@ class TestConfig:
     def test_run_prep_dir(self, prod_config):
         run_prep_dir = prod_config["wave forecasts"]["run prep dir"]
         assert run_prep_dir == "/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs"
+
+    def test_mpi_hosts_file(self, prod_config):
+        mpi_hosts_file = prod_config["wave forecasts"]["mpi hosts file"]
+        assert mpi_hosts_file == "${HOME}/mpi_hosts.wwatch3"
 
     def test_wwatch3_exe(self, prod_config):
         wwatch3_exe_path = prod_config["wave forecasts"]["wwatch3 exe path"]
@@ -500,7 +505,7 @@ class TestDefinitions:
         WORK_DIR="wwatch3-runs/tmp_run_dir"
         RESULTS_DIR="wwatch3-{run_type}/29mar17"
         WW3_EXE="wwatch3-5.16/exe"
-        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts"
+        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts.wwatch3"
         GATHER="salishsea gather"
         """
 
