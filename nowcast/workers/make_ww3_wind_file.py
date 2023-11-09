@@ -114,7 +114,30 @@ def make_ww3_wind_file(parsed_args, config, *args):
         lats = lats_lons.nav_lat
         lons = lats_lons.nav_lon
         logger.debug(f"lats and lons from: {datasets[0]}")
-    with xarray.open_mfdataset(datasets) as hrdps:
+    drop_vars = {
+        "LHTFL_surface",
+        "PRATE_surface",
+        "RH_2maboveground",
+        "atmpres",
+        "precip",
+        "qair",
+        "solar",
+        "tair",
+        "therm_rad",
+    }
+    chunks = {
+        "time_counter": 1,
+        "y": 230,
+        "x": 190,
+    }
+    with xarray.open_mfdataset(
+        datasets,
+        chunks=chunks,
+        compat="override",
+        coords="minimal",
+        data_vars="minimal",
+        drop_variables=drop_vars,
+    ) as hrdps:
         ds = _create_dataset(
             hrdps.time_counter, lats, lons, hrdps.u_wind, hrdps.v_wind, datasets
         )

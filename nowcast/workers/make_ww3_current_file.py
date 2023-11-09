@@ -119,12 +119,51 @@ def make_ww3_current_file(parsed_args, config, *args):
         lats = grid.nav_lat[1:, 1:]
         lons = grid.nav_lon[1:, 1:] + 360
         logger.debug(f"lats and lons from: {mesh_mask}")
-    with xarray.open_mfdataset(datasets["u"]) as u_nemo:
+    drop_vars = {
+        "area",
+        "bounds_lon",
+        "bounds_lat",
+        "bounds_nav_lon",
+        "bounds_nav_lat",
+        "depthu_bounds",
+        "depthv_bounds",
+        "time_centered_bounds",
+        "time_counter_bounds",
+    }
+    chunks = {
+        "u": {
+            "time_counter": 3,
+            "depthu": 40,
+            "y": 898,
+            "x": 398,
+        },
+        "v": {
+            "time_counter": 3,
+            "depthv": 40,
+            "y": 898,
+            "x": 398,
+        },
+    }
+    with xarray.open_mfdataset(
+        datasets["u"],
+        chunks=chunks["u"],
+        compat="override",
+        coords="minimal",
+        data_vars="minimal",
+        drop_variables=drop_vars,
+    ) as u_nemo:
         logger.debug(f'u velocities from {datasets["u"]}')
-        with xarray.open_mfdataset(datasets["v"]) as v_nemo:
+        with xarray.open_mfdataset(
+            datasets["v"],
+            chunks=chunks["v"],
+            compat="override",
+            coords="minimal",
+            data_vars="minimal",
+            drop_variables=drop_vars,
+        ) as v_nemo:
             logger.debug(f'v velocities from {datasets["v"]}')
             u_unstaggered, v_unstaggered = viz_tools.unstagger(
-                u_nemo.vozocrtx[:, 0, ...], v_nemo.vomecrty[:, 0, ...]
+                u_nemo.vozocrtx.isel(depthu=0), v_nemo.vomecrty.isel(depthv=0)
             )
             del u_unstaggered.coords["time_centered"]
             del u_unstaggered.coords["depthu"]

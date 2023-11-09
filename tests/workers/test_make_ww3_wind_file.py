@@ -226,8 +226,29 @@ class TestMakeWW3WindFile:
         m_open_dataset.assert_called_once_with(
             Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc")
         )
+        chunks = {
+            "time_counter": 1,
+            "y": 230,
+            "x": 190,
+        }
+        drop_vars = {
+            "LHTFL_surface",
+            "PRATE_surface",
+            "RH_2maboveground",
+            "atmpres",
+            "precip",
+            "qair",
+            "solar",
+            "tair",
+            "therm_rad",
+        }
         m_open_mfdataset.assert_called_once_with(
-            [Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc")]
+            [Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc")],
+            chunks=chunks,
+            compat="override",
+            coords="minimal",
+            data_vars="minimal",
+            drop_variables=drop_vars,
         )
 
     def test_forecast_datasets(
@@ -242,12 +263,33 @@ class TestMakeWW3WindFile:
         m_open_dataset.assert_called_once_with(
             Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc")
         )
+        chunks = {
+            "time_counter": 1,
+            "y": 230,
+            "x": 190,
+        }
+        drop_vars = {
+            "LHTFL_surface",
+            "PRATE_surface",
+            "RH_2maboveground",
+            "atmpres",
+            "precip",
+            "qair",
+            "solar",
+            "tair",
+            "therm_rad",
+        }
         m_open_mfdataset.assert_called_once_with(
             [
                 Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc"),
                 Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d08.nc"),
                 Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d09.nc"),
-            ]
+            ],
+            chunks=chunks,
+            compat="override",
+            coords="minimal",
+            data_vars="minimal",
+            drop_variables=drop_vars,
         )
 
     def test_forecast2_datasets(
@@ -262,10 +304,31 @@ class TestMakeWW3WindFile:
         m_open_dataset.assert_called_once_with(
             Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc")
         )
+        chunks = {
+            "time_counter": 1,
+            "y": 230,
+            "x": 190,
+        }
+        drop_vars = {
+            "LHTFL_surface",
+            "PRATE_surface",
+            "RH_2maboveground",
+            "atmpres",
+            "precip",
+            "qair",
+            "solar",
+            "tair",
+            "therm_rad",
+        }
         m_open_mfdataset.assert_called_once_with(
             [
                 Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc"),
                 Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d08.nc"),
                 Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d09.nc"),
-            ]
+            ],
+            chunks=chunks,
+            compat="override",
+            coords="minimal",
+            data_vars="minimal",
+            drop_variables=drop_vars,
         )
