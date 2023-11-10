@@ -26,7 +26,7 @@ name = "SalishSeaNowcast"
 dynamic = [ "version" ]
 description = "SalishSeaCast ocean modeling automation system"
 readme = "README.rst"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { file = "LICENSE" }
 authors = [
     { name = "Doug Latornell", email = "dlatornell@eoas.ubc.ca" },
@@ -65,7 +65,6 @@ dependencies = [
     "mako",
     "matplotlib",
     "nc-time-axis",
-    "nemo_nowcast",
     "netcdf4",
     "numpy",
     "numpy-indexed",

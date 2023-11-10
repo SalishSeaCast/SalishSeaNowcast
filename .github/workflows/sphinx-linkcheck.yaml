@@ -15,7 +15,7 @@ jobs:
       matrix:
         # Need to specify Python version here because we use test env which gets its
         # Python version via matrix
-        python-version: [ '3.11' ]
+        python-version: [ '3.12' ]
     uses: UBC-MOAD/gha-workflows/.github/workflows/sphinx-linkcheck.yaml@main
     with:
       python-version: ${{ matrix.python-version }}

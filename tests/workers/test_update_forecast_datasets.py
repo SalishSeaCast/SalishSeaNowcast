@@ -650,14 +650,25 @@ class TestAddForecastResults:
             run_type,
             config,
         )
-        assert m_symlink_results.called_once_with(
-            Path(f"opp/wwatch3/{run_type}"),
-            run_date,
-            new_forecast_dir,
-            run_date,
-            model,
-            run_type,
-        )
+        expected = [
+            call(
+                Path(f"/tmp/{model}_forecast"),
+                run_date,
+                new_forecast_dir,
+                run_date,
+                model,
+                run_type,
+            ),
+            call(
+                Path(f"opp/wwatch3/{run_type}"),
+                run_date,
+                new_forecast_dir,
+                run_date.shift(days=+1),
+                model,
+                run_type,
+            ),
+        ]
+        m_symlink_results.assert_has_calls(expected)
 
     @patch(
         "nowcast.workers.update_forecast_datasets._extract_1st_forecast_day",

@@ -1,7 +1,7 @@
 # conda environment description file for docs build environment
 # on readthedocs.org
 
-name: sphinx-build
+name: salishsea-nowcast-rtd
 
 channels:
   - conda-forge
@@ -12,16 +12,12 @@ dependencies:
   - matplotlib
   - pip
   - pygrib
-  - python=3.11
+  - python=3.12
   - retrying
 
   # RTD packages
   - mock
   - pillow
-  - sphinx
-  - sphinx_rtd_theme=1.2
-  - sphinx-notfound-page
-
   - pip:
     # Install NEMO_Nowcast and SalishSeaNowcast packages in editable mode
     - --editable git+https://github.com/43ravens/NEMO_Nowcast.git#egg=NEMO_Nowcast
