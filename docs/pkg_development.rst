@@ -404,7 +404,7 @@ The output looks something like::
   (line   60) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/index.html#frameworkarchitecture
   (line   22) ok        https://salishsea.eos.ubc.ca/nemo/
   (line   60) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo-nowcastbuiltinworkers
-  (line   22) ok        https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html
+  (line   22) ok        https://eccc-msc.github.io/open-data/msc-data/nwp_hrdps/readme_hrdps_en/
   (line  110) ok        http://www.apache.org/licenses/LICENSE-2.0
   (line  106) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
   writing output... [ 90%] pkg_development

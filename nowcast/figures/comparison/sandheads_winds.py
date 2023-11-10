@@ -288,7 +288,7 @@ def _attribution_text(ax, theme):
         "Modelled winds are from the High Resolution Deterministic Prediction\n"
         "System (HRDPS) of Environment and Climate Change "
         "Canada\n"
-        "https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html",
+        "https://eccc-msc.github.io/open-data/msc-data/nwp_hrdps/readme_hrdps_en/",
         horizontalalignment="left",
         verticalalignment="top",
         transform=ax.transAxes,

@@ -32,7 +32,7 @@ Environment and Climate Change Canada `High Resolution Deterministic Prediction 
 operational GEM 2.5km resolution model.
 
 .. _SalishSeaCast ocean models: https://salishsea.eos.ubc.ca/nemo/
-.. _High Resolution Deterministic Prediction System (HRDPS): https://weather.gc.ca/grib/grib2_HRDPS_HR_e.html
+.. _High Resolution Deterministic Prediction System (HRDPS): https://eccc-msc.github.io/open-data/msc-data/nwp_hrdps/readme_hrdps_en/
 
 The runs are automated using an asynchronous,
 distributed,
