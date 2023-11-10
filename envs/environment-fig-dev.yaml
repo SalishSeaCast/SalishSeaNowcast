@@ -51,7 +51,7 @@ dependencies:
   - pypdf2
   - pyproj
   - pytables
-  - python=3.11
+  - python=3.12
   - pyyaml
   - rasterio
   - requests
