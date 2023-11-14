@@ -811,33 +811,32 @@ def after_watch_NEMO(msg, config, checklist):
                 ]
             )
         if run_type == "forecast":
-            if wave_forecast_after == "forecast":
-                host_name = config["wave forecasts"]["host"]
-                next_workers[msg.type].extend(
-                    [
-                        NextWorker(
-                            "nowcast.workers.make_ww3_wind_file",
-                            args=[
-                                host_name,
-                                "forecast",
-                                "--run-date",
-                                msg.payload[run_type]["run date"],
-                            ],
-                            host=host_name,
-                        ),
-                        NextWorker(
-                            "nowcast.workers.make_ww3_current_file",
-                            args=[
-                                host_name,
-                                "forecast",
-                                "--run-date",
-                                msg.payload[run_type]["run date"],
-                            ],
-                            host=host_name,
-                        ),
-                    ]
-                )
-                race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
+            host_name = config["wave forecasts"]["host"]
+            next_workers[msg.type].extend(
+                [
+                    NextWorker(
+                        "nowcast.workers.make_ww3_wind_file",
+                        args=[
+                            host_name,
+                            "forecast",
+                            "--run-date",
+                            msg.payload[run_type]["run date"],
+                        ],
+                        host=host_name,
+                    ),
+                    NextWorker(
+                        "nowcast.workers.make_ww3_current_file",
+                        args=[
+                            host_name,
+                            "forecast",
+                            "--run-date",
+                            msg.payload[run_type]["run date"],
+                        ],
+                        host=host_name,
+                    ),
+                ]
+            )
+            race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
             for host in config["run"]["enabled hosts"]:
                 if not config["run"]["enabled hosts"][host]["shared storage"]:
                     next_workers[msg.type].append(
@@ -852,33 +851,6 @@ def after_watch_NEMO(msg, config, checklist):
                         )
                     )
         if run_type == "nowcast-green":
-            if wave_forecast_after == "nowcast-green":
-                host_name = config["wave forecasts"]["host"]
-                next_workers[msg.type].extend(
-                    [
-                        NextWorker(
-                            "nowcast.workers.make_ww3_wind_file",
-                            args=[
-                                host_name,
-                                "forecast",
-                                "--run-date",
-                                msg.payload[run_type]["run date"],
-                            ],
-                            host=host_name,
-                        ),
-                        NextWorker(
-                            "nowcast.workers.make_ww3_current_file",
-                            args=[
-                                host_name,
-                                "forecast",
-                                "--run-date",
-                                msg.payload[run_type]["run date"],
-                            ],
-                            host=host_name,
-                        ),
-                    ]
-                )
-                race_condition_workers = {"make_ww3_wind_file", "make_ww3_current_file"}
             for host in config["run"]["enabled hosts"]:
                 run_types = config["run"]["enabled hosts"][host]["run types"]
                 if "nowcast-dev" in run_types:

@@ -163,9 +163,6 @@ class TestConfig:
         )
         assert wave_forecasts["current file template"] == "SoG_current_{yyyymmdd}.nc"
 
-    def test_run_when(self, prod_config):
-        assert prod_config["wave forecasts"]["run when"] == "after nowcast-green"
-
     def test_run_types_section(self, prod_config):
         run_types = prod_config["run types"]
         assert run_types["nowcast"]["mesh mask"] == "mesh_mask201702.nc"
