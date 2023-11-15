@@ -789,7 +789,6 @@ def after_watch_NEMO(msg, config, checklist):
     race_condition_workers = {}
     if msg.type.startswith("success"):
         run_type = msg.type.split()[1]
-        wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[1]
         if run_type == "nowcast":
             next_workers[msg.type].extend(
                 [

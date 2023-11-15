@@ -97,20 +97,13 @@ def make_ww3_current_file(parsed_args, config, *args):
     mesh_mask = os.fspath(grid_dir / config["run types"]["nowcast"]["mesh mask"])
     nemo_dir = Path(host_config["run types"]["nowcast"]["results"]).parent
     nemo_file_tmpl = config["wave forecasts"]["NEMO file template"]
-    wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[1]
     dest_dir = Path(config["wave forecasts"]["run prep dir"], "current")
     filepath_tmpl = config["wave forecasts"]["current file template"]
     nc_filepath = dest_dir / filepath_tmpl.format(yyyymmdd=run_date.format("YYYYMMDD"))
     if run_type in {"nowcast", "forecast"}:
-        datasets = _calc_nowcast_datasets(
-            run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
-        )
+        datasets = _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl)
     if run_type == "forecast":
-        datasets.update(
-            _calc_forecast_datasets(
-                run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
-            )
-        )
+        datasets.update(_calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl))
     if run_type == "forecast2":
         datasets = _calc_forecast2_datasets(
             run_date, nemo_dir, nemo_file_tmpl, dest_dir
@@ -185,15 +178,14 @@ def make_ww3_current_file(parsed_args, config, *args):
     return checklist
 
 
-def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after):
+def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl):
     datasets = {"u": [], "v": []}
-    nemo_results = "nowcast" if wave_forecast_after == "forecast" else "nowcast-green"
     dmy = run_date.format("DDMMMYY").lower()
     s_yyyymmdd = e_yyyymmdd = run_date.format("YYYYMMDD")
     for grid in datasets:
         nowcast_file = (
             nemo_dir
-            / Path(nemo_results, dmy)
+            / Path("nowcast", dmy)
             / nemo_file_tmpl.format(
                 s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
             )
@@ -203,15 +195,14 @@ def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl, wave_forecast_aft
     return datasets
 
 
-def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after):
+def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
     datasets = {"u": [], "v": []}
-    nemo_results = "nowcast" if wave_forecast_after == "forecast" else "nowcast-green"
     dmy = run_date.format("DDMMMYY").lower()
     s_yyyymmdd = e_yyyymmdd = run_date.format("YYYYMMDD")
     for grid in datasets:
         nowcast_file = (
             nemo_dir
-            / Path(nemo_results, dmy)
+            / Path("nowcast", dmy)
             / nemo_file_tmpl.format(
                 s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
             )

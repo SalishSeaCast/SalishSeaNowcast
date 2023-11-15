@@ -264,7 +264,6 @@ class TestMakeWW3CurrentFile:
                     arrow.get("2017-04-12"),
                     Path("/nemoShare/MEOPAR/SalishSea/"),
                     "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc",
-                    "nowcast-green",
                 ),
             ),
             (
@@ -273,7 +272,6 @@ class TestMakeWW3CurrentFile:
                     arrow.get("2017-04-12"),
                     Path("/nemoShare/MEOPAR/SalishSea/"),
                     "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc",
-                    "nowcast-green",
                 ),
             ),
         ],
@@ -348,46 +346,14 @@ class TestMakeWW3CurrentFile:
 class TestCalcNowcastDatasets:
     """Unit tests for _calc_nowcast_datasets() function."""
 
-    def test_nowcast_datasets_after_nowcast_green(self, caplog):
+    def test_calc_nowcast_datasets(self, caplog):
         run_date = arrow.get("2023-03-16")
         nemo_dir = Path("/nemoShare/MEOPAR/SalishSea/")
         nemo_file_tmpl = "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc"
-        wave_forecast_after = "nowcast-green"
         caplog.set_level("DEBUG")
 
         datasets = make_ww3_current_file._calc_nowcast_datasets(
-            run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
-        )
-
-        assert datasets == {
-            "u": [
-                Path(
-                    "/nemoShare/MEOPAR/SalishSea/nowcast-green/16mar23/SalishSea_1h_20230316_20230316_grid_U.nc"
-                )
-            ],
-            "v": [
-                Path(
-                    "/nemoShare/MEOPAR/SalishSea/nowcast-green/16mar23/SalishSea_1h_20230316_20230316_grid_V.nc"
-                )
-            ],
-        }
-        expected = [
-            "u dataset: /nemoShare/MEOPAR/SalishSea/nowcast-green/16mar23/SalishSea_1h_20230316_20230316_grid_U.nc",
-            "v dataset: /nemoShare/MEOPAR/SalishSea/nowcast-green/16mar23/SalishSea_1h_20230316_20230316_grid_V.nc",
-        ]
-        for i in range(len(expected)):
-            assert caplog.records[i].levelname == "DEBUG"
-            assert caplog.messages[i] == expected[i]
-
-    def test_nowcast_datasets_after_forecast(self, caplog):
-        run_date = arrow.get("2023-03-16")
-        nemo_dir = Path("/nemoShare/MEOPAR/SalishSea/")
-        nemo_file_tmpl = "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc"
-        wave_forecast_after = "forecast"
-        caplog.set_level("DEBUG")
-
-        datasets = make_ww3_current_file._calc_nowcast_datasets(
-            run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
+            run_date, nemo_dir, nemo_file_tmpl
         )
 
         assert datasets == {
@@ -414,54 +380,14 @@ class TestCalcNowcastDatasets:
 class TestCalcForecastDatasets:
     """Unit tests for _calc_forecast_datasets() function."""
 
-    def test_forecast_datasets_after_nowcast_green(self, caplog):
+    def test_calc_forecast_datasets(self, caplog):
         run_date = arrow.get("2023-03-16")
         nemo_dir = Path("/nemoShare/MEOPAR/SalishSea/")
         nemo_file_tmpl = "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc"
-        wave_forecast_after = "nowcast-green"
         caplog.set_level("DEBUG")
 
         datasets = make_ww3_current_file._calc_forecast_datasets(
-            run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
-        )
-
-        assert datasets == {
-            "u": [
-                Path(
-                    "/nemoShare/MEOPAR/SalishSea/nowcast-green/16mar23/SalishSea_1h_20230316_20230316_grid_U.nc"
-                ),
-                Path(
-                    "/nemoShare/MEOPAR/SalishSea/forecast/16mar23/SalishSea_1h_20230317_20230318_grid_U.nc"
-                ),
-            ],
-            "v": [
-                Path(
-                    "/nemoShare/MEOPAR/SalishSea/nowcast-green/16mar23/SalishSea_1h_20230316_20230316_grid_V.nc"
-                ),
-                Path(
-                    "/nemoShare/MEOPAR/SalishSea/forecast/16mar23/SalishSea_1h_20230317_20230318_grid_V.nc"
-                ),
-            ],
-        }
-        expected = [
-            "u dataset: /nemoShare/MEOPAR/SalishSea/nowcast-green/16mar23/SalishSea_1h_20230316_20230316_grid_U.nc",
-            "v dataset: /nemoShare/MEOPAR/SalishSea/nowcast-green/16mar23/SalishSea_1h_20230316_20230316_grid_V.nc",
-            "u dataset: /nemoShare/MEOPAR/SalishSea/forecast/16mar23/SalishSea_1h_20230317_20230318_grid_U.nc",
-            "v dataset: /nemoShare/MEOPAR/SalishSea/forecast/16mar23/SalishSea_1h_20230317_20230318_grid_V.nc",
-        ]
-        for i in range(len(expected)):
-            assert caplog.records[i].levelname == "DEBUG"
-            assert caplog.messages[i] == expected[i]
-
-    def test_forecast_datasets_after_forecast(self, caplog):
-        run_date = arrow.get("2023-03-16")
-        nemo_dir = Path("/nemoShare/MEOPAR/SalishSea/")
-        nemo_file_tmpl = "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc"
-        wave_forecast_after = "forecast"
-        caplog.set_level("DEBUG")
-
-        datasets = make_ww3_current_file._calc_forecast_datasets(
-            run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
+            run_date, nemo_dir, nemo_file_tmpl
         )
 
         assert datasets == {
