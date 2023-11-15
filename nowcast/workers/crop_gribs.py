@@ -62,14 +62,22 @@ def main():
         help="Forecast date to crop files in.",
     )
     worker.cli.add_argument(
+        "--backfill",
+        action="store_true",
+        help="""
+            Crop files immediately instead of waiting for file system events to signal their
+            existence. This is intended for use in recovery from automation failures.
+            """,
+    )
+    worker.cli.add_argument(
         "--var-hour",
         type=int,
-        help="forecast hour to crop file for specific variable in; must be used with --var",
+        help="Forecast hour to crop file for specific variable in; must be used with --var",
     )
     worker.cli.add_argument(
         "--var",
         dest="msc_var_name",
-        help="forecast variable to crop file for; must be used with --var-hour",
+        help="Forecast variable to crop file for; must be used with --var-hour",
     )
     worker.run(crop_gribs, success, failure)
     return worker
@@ -96,6 +104,7 @@ def crop_gribs(parsed_args, config, *args):
     checklist = {}
     fcst_hr = parsed_args.forecast
     fcst_date = parsed_args.fcst_date
+    backfill = parsed_args.backfill
     var_hour = parsed_args.var_hour
     msc_var_name = parsed_args.msc_var_name
     logger.info(
@@ -116,6 +125,15 @@ def crop_gribs(parsed_args, config, *args):
         config,
         msc_var_name,
     )
+
+    if backfill:
+        for eccc_grib_file in eccc_grib_files:
+            _write_ssc_grib_file(eccc_grib_file, config)
+        logger.info(
+            f"finished cropping ECCC grib file to SalishSeaCast subdomain: {eccc_grib_file}"
+        )
+        checklist[fcst_hr] = "cropped to SalishSeaCast subdomain"
+        return checklist
 
     if msc_var_name and var_hour:
         # Crop a single variable-hour file
@@ -203,6 +221,15 @@ def _write_ssc_grib_file(eccc_grib_file, config):
     :param :py:class:`pathlib.Path` eccc_grib_file:
     :param :py:class:`nemo_nowcast.Config` config:
     """
+    ssc_grib_file = (
+        f"{eccc_grib_file.parent / eccc_grib_file.stem}_SSC{eccc_grib_file.suffix}"
+    )
+    if Path(ssc_grib_file).exists():
+        logger.debug(
+            f"cropping skipped because SalishSeaCast subdomain GRIB file exist: {ssc_grib_file}"
+        )
+        return
+
     y_min, y_max = config["weather"]["download"]["2.5 km"]["lat indices"]
     x_min, x_max = config["weather"]["download"]["2.5 km"]["lon indices"]
     # We need 1 point more than the final domain size to facilitate calculation of the
@@ -230,9 +257,6 @@ def _write_ssc_grib_file(eccc_grib_file, config):
             "GRIB_Nx": nx,
             "GRIB_Ny": ny,
         }
-    )
-    ssc_grib_file = (
-        f"{eccc_grib_file.parent / eccc_grib_file.stem}_SSC{eccc_grib_file.suffix}"
     )
     _xarray_to_grib(ssc_ds, ssc_grib_file)
 
