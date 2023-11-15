@@ -105,16 +105,22 @@ class TestMain:
         assert worker.cli.parser._actions[4].default == arrow.now().floor("day")
         assert worker.cli.parser._actions[4].help
 
+    def test_add_backfill_option(self, mock_worker):
+        worker = crop_gribs.main()
+        assert worker.cli.parser._actions[5].dest == "backfill"
+        assert worker.cli.parser._actions[5].default is False
+        assert worker.cli.parser._actions[5].help
+
     def test_add_forecast_hour_option(self, mock_worker):
         worker = crop_gribs.main()
-        assert worker.cli.parser._actions[5].dest == "var_hour"
-        assert worker.cli.parser._actions[5].type == int
-        assert worker.cli.parser._actions[5].help
+        assert worker.cli.parser._actions[6].dest == "var_hour"
+        assert worker.cli.parser._actions[6].type == int
+        assert worker.cli.parser._actions[6].help
 
     def test_add_variable_option(self, mock_worker):
         worker = crop_gribs.main()
-        assert worker.cli.parser._actions[6].dest == "msc_var_name"
-        assert worker.cli.parser._actions[6].help
+        assert worker.cli.parser._actions[7].dest == "msc_var_name"
+        assert worker.cli.parser._actions[7].help
 
 
 class TestConfig:
@@ -246,11 +252,11 @@ class TestCropGribs:
     @staticmethod
     @pytest.fixture
     def mock_calc_grib_file_paths(monkeypatch):
-        def mock_calc_grib_file_paths(*args):
+        def _mock_calc_grib_file_paths(*args):
             return set()
 
         monkeypatch.setattr(
-            crop_gribs, "_calc_grib_file_paths", mock_calc_grib_file_paths
+            crop_gribs, "_calc_grib_file_paths", _mock_calc_grib_file_paths
         )
 
     @staticmethod
@@ -271,7 +277,17 @@ class TestCropGribs:
 
         monkeypatch.setattr(crop_gribs.watchdog.observers, "Observer", MockObserver)
 
-    def test_checklist(
+    @staticmethod
+    @pytest.fixture
+    def mock_write_ssc_grib_file(monkeypatch):
+        def _mock_write_ssc_grib_file(eccc_grib_file, config):
+            pass
+
+        monkeypatch.setattr(
+            crop_gribs, "_write_ssc_grib_file", _mock_write_ssc_grib_file
+        )
+
+    def test_checklist_not_backfill(
         self,
         forecast,
         mock_calc_grib_file_paths,
@@ -285,12 +301,55 @@ class TestCropGribs:
         parsed_args = SimpleNamespace(
             forecast=forecast,
             fcst_date=arrow.get("2023-08-11"),
+            backfill=False,
             var_hour=None,
             msc_var_name=None,
         )
         caplog.set_level(logging.DEBUG)
 
         checklist = crop_gribs.crop_gribs(parsed_args, config)
+
+        expected = {forecast: "cropped to SalishSeaCast subdomain"}
+        assert checklist == expected
+
+    def test_checklist_backfill(
+        self,
+        forecast,
+        mock_write_ssc_grib_file,
+        config,
+        caplog,
+        monkeypatch,
+    ):
+        def _mock_calc_grib_file_paths(*args):
+            return {
+                f"forcing/atmospheric/continental2.5/GRIB/20231115/{forecast}/029/"
+                f"20231115T{forecast}Z_MSC_HRDPS_APCP_Sfc_RLatLon0.0225_PT029H.grib2",
+            }
+
+        monkeypatch.setattr(
+            crop_gribs, "_calc_grib_file_paths", _mock_calc_grib_file_paths
+        )
+
+        grp_name = grp.getgrgid(os.getgid()).gr_name
+        monkeypatch.setitem(config, "file group", grp_name)
+        parsed_args = SimpleNamespace(
+            forecast=forecast,
+            fcst_date=arrow.get("2023-11-15"),
+            backfill=True,
+            var_hour=None,
+            msc_var_name=None,
+        )
+        caplog.set_level(logging.DEBUG)
+
+        checklist = crop_gribs.crop_gribs(parsed_args, config)
+
+        assert caplog.records[1].levelname == "INFO"
+        expected = (
+            f"finished cropping ECCC grib file to SalishSeaCast subdomain: "
+            f"forcing/atmospheric/continental2.5/GRIB/20231115/{forecast}/029/"
+            f"20231115T{forecast}Z_MSC_HRDPS_APCP_Sfc_RLatLon0.0225_PT029H.grib2"
+        )
+        assert caplog.messages[1] == expected
 
         expected = {forecast: "cropped to SalishSeaCast subdomain"}
         assert checklist == expected
@@ -309,6 +368,7 @@ class TestCropGribs:
         parsed_args = SimpleNamespace(
             forecast=forecast,
             fcst_date=arrow.get("2023-08-14"),
+            backfill=False,
             var_hour=None,
             msc_var_name=None,
         )
@@ -340,21 +400,16 @@ class TestCropGribs:
     def test_crop_one_file_log_messages(
         self,
         forecast,
+        mock_write_ssc_grib_file,
         mock_observer,
         config,
         caplog,
         monkeypatch,
     ):
-        def mock_write_ssc_grib_file(eccc_grib_file, config):
-            pass
-
-        monkeypatch.setattr(
-            crop_gribs, "_write_ssc_grib_file", mock_write_ssc_grib_file
-        )
-
         parsed_args = SimpleNamespace(
             forecast=forecast,
             fcst_date=arrow.get("2023-08-14"),
+            backfill=False,
             var_hour=29,
             msc_var_name="APCP_Sfc",
         )
@@ -492,6 +547,31 @@ class TestWriteSscGribFile:
             pass
 
         monkeypatch.setattr(crop_gribs, "_xarray_to_grib", _mock_xarray_to_grib)
+
+    def test_grib_file_exists_so_no_write(self, config, caplog, tmp_path):
+        grib_dir = tmp_path / config["weather"]["download"]["2.5 km"]["GRIB dir"]
+        grib_dir.mkdir(parents=True)
+        grib_file_dir = grib_dir / "20231115/12/001/"
+        grib_file_dir.mkdir(parents=True)
+        eccc_grib_file = Path(
+            grib_file_dir
+            / "20231115T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H.grib2"
+        )
+        ssc_grib_file = Path(
+            grib_file_dir
+            / "20231115T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H_SSC.grib2"
+        )
+        ssc_grib_file.write_bytes(b"")
+        caplog.set_level(logging.DEBUG)
+
+        crop_gribs._write_ssc_grib_file(eccc_grib_file, config)
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = (
+            f"cropping skipped because SalishSeaCast subdomain GRIB file exist: "
+            f"{grib_file_dir / '20231115T12Z_MSC_HRDPS_UGRD_AGL-10m_RLatLon0.0225_PT001H_SSC.grib2'}"
+        )
+        assert caplog.messages[0] == expected
 
     def test_log_message(
         self,
