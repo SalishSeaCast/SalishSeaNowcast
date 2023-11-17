@@ -191,13 +191,14 @@ Coding Style
 ============
 
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
-   :target: https://github.com/pre-commit/pre-commit
+   :target: https://pre-commit.com
    :alt: pre-commit
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 
-The :kbd:`SalishSeaNowcast` package uses Git pre-commit hooks managed by `pre-commit`_ to maintain consistent code style and and other aspects of code,
+The :kbd:`SalishSeaNowcast` package uses Git pre-commit hooks managed by `pre-commit`_
+to maintain consistent code style and and other aspects of code,
 docs,
 and repo QA.
 
@@ -213,7 +214,9 @@ and run :command:`pre-commit install`:
     $ conda activate salishsea-nowcast
     (salishsea-nowcast)$ pre-commit install
 
-.. note:: You only need to install the hooks once immediately after you make a new clone of the `SalishSeaNowcast repository`_ and build your :ref:`SalishSeaNowcastDevelopmentEnvironment`.
+.. note::
+    You only need to install the hooks once immediately after you make a new clone of the
+    `SalishSeaNowcast repository`_ and build your :ref:`SalishSeaNowcastDevelopmentEnvironment`.
 
 .. _SalishSeaNowcast repository: https://github.com/SalishSeaCast/SalishSeaNowcast
 
