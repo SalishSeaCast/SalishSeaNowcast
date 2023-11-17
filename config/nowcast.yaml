@@ -749,10 +749,6 @@ run:
 wave forecasts:
   # Compute host to run wave forecast on
   host: arbutus.cloud-nowcast
-  # NEMO run to run wwatch3 forecast run after
-  # User 'after forecast' during storm surge season and 'after nowcast-green`
-  # the rest of the year
-  run when: after nowcast-green
   # Directory on compute host where files (e.g. ww3_*.inp,  mod_def.ww3) and
   # directories (e,g. wind/ current/) necessary to prepare the wwatch3 runs
   # are stored
@@ -768,6 +764,10 @@ wave forecasts:
   # Template for NEMO hourly results file name
   # **Must be quoted to project {} characters**
   NEMO file template: 'SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc'
+  # Location on the compute host of the file that contains IP addresses
+  # and MPI slots specifications.
+  # Only required for runs on cloud hosts.
+  mpi hosts file: ${HOME}/mpi_hosts.wwatch3
   # Path to the wwatch3 executables directory
   wwatch3 exe path: /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/exe
   # Path to the salishsea command processor executable to use in the run script

@@ -127,14 +127,6 @@ def checklist():
     return {}
 
 
-class TestConfig:
-    """Unit tests for production YAML config file elements related to next_workers."""
-
-    def test_wave_forecasts_run_when(self, prod_config):
-        wave_fcsts = prod_config["wave forecasts"]
-        assert wave_fcsts["run when"] == "after nowcast-green"
-
-
 class TestAfterWorkerFunctions:
     """Unit test to confirm that all worker modules have a corresponding after_*() function
     in the next_workers module.
@@ -1121,8 +1113,6 @@ class TestAfterWatchNEMO:
     def test_success_forecast_launch_make_ww3_wind_file_forecast(
         self, config, checklist, monkeypatch
     ):
-        """storm surge season case of wwatch3 running after NEMO forecast"""
-        monkeypatch.setitem(config["wave forecasts"], "run when", "after forecast")
         workers, race_condition_workers = next_workers.after_watch_NEMO(
             Message(
                 "watch_NEMO",
@@ -1130,7 +1120,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast": {
                         "host": "arbutus.cloud",
-                        "run date": "2023-03-16",
+                        "run date": "2023-11-14",
                         "completed": True,
                     }
                 },
@@ -1140,7 +1130,7 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-11-14"],
             host="arbutus.cloud",
         )
         assert workers[0] == expected
@@ -1149,8 +1139,6 @@ class TestAfterWatchNEMO:
     def test_success_forecast_launch_make_ww3_current_file_forecast(
         self, config, checklist, monkeypatch
     ):
-        """storm surge season case of wwatch3 running after NEMO forecast"""
-        monkeypatch.setitem(config["wave forecasts"], "run when", "after forecast")
         workers, race_condition_workers = next_workers.after_watch_NEMO(
             Message(
                 "watch_NEMO",
@@ -1158,7 +1146,7 @@ class TestAfterWatchNEMO:
                 {
                     "forecast": {
                         "host": "arbutus.cloud",
-                        "run date": "2023-03-16",
+                        "run date": "2023-11-14",
                         "completed": True,
                     }
                 },
@@ -1168,50 +1156,13 @@ class TestAfterWatchNEMO:
         )
         expected = NextWorker(
             "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
+            args=["arbutus.cloud", "forecast", "--run-date", "2023-11-14"],
             host="arbutus.cloud",
         )
         assert workers[1] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
 
-    def test_success_forecast_ww3_after_nowcast_green_launch_upload_forcing_turbidity(
-        self, config, checklist, monkeypatch
-    ):
-        workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success forecast",
-                {
-                    "forecast": {
-                        "host": "arbutus.cloud",
-                        "run date": "2023-07-15",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-
-        expected = [
-            NextWorker(
-                "nowcast.workers.upload_forcing",
-                args=["arbutus.cloud", "turbidity", "--run-date", "2023-07-15"],
-            ),
-            NextWorker(
-                "nowcast.workers.upload_forcing",
-                args=["orcinus", "turbidity", "--run-date", "2023-07-15"],
-            ),
-        ]
-        assert workers[0:2] == expected
-        not_expected = NextWorker(
-            "nowcast.workers.upload_forcing",
-            args=["salish-nowcast", "turbidity"],
-            host="localhost",
-        )
-        assert not_expected not in workers
-
-    def test_success_forecast_ww3_after_forecast_launch_upload_forcing_turbidity(
+    def test_success_forecast_launch_upload_forcing_turbidity(
         self, config, checklist, monkeypatch
     ):
         monkeypatch.setitem(config["wave forecasts"], "run when", "after forecast")
@@ -1325,64 +1276,10 @@ class TestAfterWatchNEMO:
         assert workers[1] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
 
-    def test_success_nowcast_green_launch_make_ww3_wind_file_forecast(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(config["wave forecasts"], "run when", "after nowcast-green")
-        workers, race_condition_workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success nowcast-green",
-                {
-                    "nowcast-green": {
-                        "host": "arbutus.cloud",
-                        "run date": "2023-03-16",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_ww3_wind_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
-            host="arbutus.cloud",
-        )
-        assert workers[0] == expected
-        assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
-
-    def test_success_nowcast_green_launch_make_ww3_current_file_forecast(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(config["wave forecasts"], "run when", "after nowcast-green")
-        workers, race_condition_workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success nowcast-green",
-                {
-                    "nowcast-green": {
-                        "host": "arbutus.cloud",
-                        "run date": "2023-03-16",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_ww3_current_file",
-            args=["arbutus.cloud", "forecast", "--run-date", "2023-03-16"],
-            host="arbutus.cloud",
-        )
-        assert workers[1] == expected
-        assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
-
     def test_success_nowcast_green_launch_make_forcing_links_nowcastp_shared_storage(
         self, config, checklist
     ):
-        workers, race_condition_workers = next_workers.after_watch_NEMO(
+        workers = next_workers.after_watch_NEMO(
             Message(
                 "watch_NEMO",
                 "success nowcast-green",
@@ -1402,8 +1299,7 @@ class TestAfterWatchNEMO:
             args=["salish", "nowcast+", "--shared-storage"],
             host="localhost",
         )
-        assert expected in workers
-        assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
+        assert workers[0] == expected
 
     @pytest.mark.parametrize(
         "msg",

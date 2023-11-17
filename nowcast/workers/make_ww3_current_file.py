@@ -97,20 +97,13 @@ def make_ww3_current_file(parsed_args, config, *args):
     mesh_mask = os.fspath(grid_dir / config["run types"]["nowcast"]["mesh mask"])
     nemo_dir = Path(host_config["run types"]["nowcast"]["results"]).parent
     nemo_file_tmpl = config["wave forecasts"]["NEMO file template"]
-    wave_forecast_after = config["wave forecasts"]["run when"].split("after ")[1]
     dest_dir = Path(config["wave forecasts"]["run prep dir"], "current")
     filepath_tmpl = config["wave forecasts"]["current file template"]
     nc_filepath = dest_dir / filepath_tmpl.format(yyyymmdd=run_date.format("YYYYMMDD"))
     if run_type in {"nowcast", "forecast"}:
-        datasets = _calc_nowcast_datasets(
-            run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
-        )
+        datasets = _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl)
     if run_type == "forecast":
-        datasets.update(
-            _calc_forecast_datasets(
-                run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after
-            )
-        )
+        datasets.update(_calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl))
     if run_type == "forecast2":
         datasets = _calc_forecast2_datasets(
             run_date, nemo_dir, nemo_file_tmpl, dest_dir
@@ -119,12 +112,51 @@ def make_ww3_current_file(parsed_args, config, *args):
         lats = grid.nav_lat[1:, 1:]
         lons = grid.nav_lon[1:, 1:] + 360
         logger.debug(f"lats and lons from: {mesh_mask}")
-    with xarray.open_mfdataset(datasets["u"]) as u_nemo:
+    drop_vars = {
+        "area",
+        "bounds_lon",
+        "bounds_lat",
+        "bounds_nav_lon",
+        "bounds_nav_lat",
+        "depthu_bounds",
+        "depthv_bounds",
+        "time_centered_bounds",
+        "time_counter_bounds",
+    }
+    chunks = {
+        "u": {
+            "time_counter": 3,
+            "depthu": 40,
+            "y": 898,
+            "x": 398,
+        },
+        "v": {
+            "time_counter": 3,
+            "depthv": 40,
+            "y": 898,
+            "x": 398,
+        },
+    }
+    with xarray.open_mfdataset(
+        datasets["u"],
+        chunks=chunks["u"],
+        compat="override",
+        coords="minimal",
+        data_vars="minimal",
+        drop_variables=drop_vars,
+    ) as u_nemo:
         logger.debug(f'u velocities from {datasets["u"]}')
-        with xarray.open_mfdataset(datasets["v"]) as v_nemo:
+        with xarray.open_mfdataset(
+            datasets["v"],
+            chunks=chunks["v"],
+            compat="override",
+            coords="minimal",
+            data_vars="minimal",
+            drop_variables=drop_vars,
+        ) as v_nemo:
             logger.debug(f'v velocities from {datasets["v"]}')
             u_unstaggered, v_unstaggered = viz_tools.unstagger(
-                u_nemo.vozocrtx[:, 0, ...], v_nemo.vomecrty[:, 0, ...]
+                u_nemo.vozocrtx.isel(depthu=0), v_nemo.vomecrty.isel(depthv=0)
             )
             del u_unstaggered.coords["time_centered"]
             del u_unstaggered.coords["depthu"]
@@ -146,15 +178,14 @@ def make_ww3_current_file(parsed_args, config, *args):
     return checklist
 
 
-def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after):
+def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl):
     datasets = {"u": [], "v": []}
-    nemo_results = "nowcast" if wave_forecast_after == "forecast" else "nowcast-green"
     dmy = run_date.format("DDMMMYY").lower()
     s_yyyymmdd = e_yyyymmdd = run_date.format("YYYYMMDD")
     for grid in datasets:
         nowcast_file = (
             nemo_dir
-            / Path(nemo_results, dmy)
+            / Path("nowcast", dmy)
             / nemo_file_tmpl.format(
                 s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
             )
@@ -164,15 +195,14 @@ def _calc_nowcast_datasets(run_date, nemo_dir, nemo_file_tmpl, wave_forecast_aft
     return datasets
 
 
-def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl, wave_forecast_after):
+def _calc_forecast_datasets(run_date, nemo_dir, nemo_file_tmpl):
     datasets = {"u": [], "v": []}
-    nemo_results = "nowcast" if wave_forecast_after == "forecast" else "nowcast-green"
     dmy = run_date.format("DDMMMYY").lower()
     s_yyyymmdd = e_yyyymmdd = run_date.format("YYYYMMDD")
     for grid in datasets:
         nowcast_file = (
             nemo_dir
-            / Path(nemo_results, dmy)
+            / Path("nowcast", dmy)
             / nemo_file_tmpl.format(
                 s_yyyymmdd=s_yyyymmdd, e_yyyymmdd=e_yyyymmdd, grid=grid.upper()
             )

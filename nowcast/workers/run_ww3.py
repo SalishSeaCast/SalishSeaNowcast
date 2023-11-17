@@ -463,13 +463,14 @@ def _definitions(run_date, run_type, run_dir_path, results_path, config):
     """
     ddmmmyy = run_date.format("DDMMMYY").lower()
     wwatch3_exe_path = config["wave forecasts"]["wwatch3 exe path"]
+    mpi_hosts_file = config["wave forecasts"]["mpi hosts file"]
     salishsea_cmd = config["wave forecasts"]["salishsea cmd"]
     defns = (
         f'RUN_ID="{ddmmmyy}ww3-{run_type}"\n'
         f'WORK_DIR="{run_dir_path}"\n'
         f'RESULTS_DIR="{results_path/ddmmmyy}"\n'
         f'WW3_EXE="{wwatch3_exe_path}"\n'
-        f'MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${{HOME}}/mpi_hosts"\n'
+        f'MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile {mpi_hosts_file}"\n'
         f'GATHER="{salishsea_cmd} gather"\n'
     )
     return defns
