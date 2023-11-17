@@ -718,6 +718,9 @@ Release Process
 .. image:: https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaNowcast?logo=github
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/releases
     :alt: Releases
+.. image:: https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg
+    :target: https://github.com/pypa/hatch
+    :alt: Hatch project
 
 Releases are done at Doug's discretion when significant pieces of development work have been
 completed.
