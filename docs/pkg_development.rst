@@ -22,42 +22,50 @@
 :kbd:`SalishSeaNowcast` Package Development
 *******************************************
 
-.. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg
-    :target: https://www.apache.org/licenses/LICENSE-2.0
-    :alt: Licensed under the Apache License, Version 2.0
-.. image:: https://img.shields.io/badge/Python-3.12-blue?logo=python&label=Python&logoColor=gold
-    :target: https://docs.python.org/3.12/
-    :alt: Python Version
-.. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
-    :target: https://github.com/SalishSeaCast/SalishSeaNowcast
-    :alt: Git on GitHub
-.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
-   :target: https://github.com/pre-commit/pre-commit
-   :alt: pre-commit
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://black.readthedocs.io/en/stable/
-    :alt: The uncompromising Python code formatter
-.. image:: https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg
-    :alt: Hatch project
-    :target: https://github.com/pypa/hatch
-.. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
-    :target: https://salishsea-nowcast.readthedocs.io/en/latest/
-    :alt: Documentation Status
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/sphinx-linkcheck/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
-      :alt: Sphinx linkcheck
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/pytest-with-coverage/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
-    :alt: pytest and test coverage analysis
-.. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/main/graph/badge.svg
-    :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaNowcast
-    :alt: Codecov Testing Coverage Report
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3ACodeQL
-      :alt: CodeQL analysis
-.. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
-    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues
-    :alt: Issue Tracker
++------------------------------+---------------------------------------------------------------------------------------------------------------------+
+|  **Continuous Integration**  |  .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage.yaml/badge.svg |
+|                              |       :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:pytest-with-coverage        |
+|                              |       :alt: Pytest with Coverage Status                                                                             |
+|                              |  .. image:: https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/main/graph/badge.svg                        |
+|                              |       :target: https://app.codecov.io/gh/SalishSeaCast/SalishSeaNowcast                                             |
+|                              |       :alt: Codecov Testing Coverage Report                                                                         |
+|                              |  .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg      |
+|                              |      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CodeQL                       |
+|                              |      :alt: CodeQL analysis                                                                                          |
++------------------------------+---------------------------------------------------------------------------------------------------------------------+
+|  **Documentation**           |  .. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest                                |
+|                              |      :target: https://salishsea-nowcast.readthedocs.io/en/latest/                                                   |
+|                              |      :alt: Documentation Status                                                                                     |
+|                              |  .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/sphinx-linkcheck.yaml/badge.svg     |
+|                              |      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck             |
+|                              |      :alt: Sphinx linkcheck                                                                                         |
++------------------------------+---------------------------------------------------------------------------------------------------------------------+
+|  **Package**                 |  .. image:: https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaNowcast?logo=github                      |
+|                              |      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/releases                                            |
+|                              |      :alt: Releases                                                                                                 |
+|                              |  .. image:: https://img.shields.io/badge/Python-3.12-blue?logo=python&label=Python&logoColor=gold                   |
+|                              |      :target: https://docs.python.org/3.12/                                                                         |
+|                              |      :alt: Python Version                                                                                           |
+|                              |  .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github                         |
+|                              |      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues                                              |
+|                              |      :alt: Issue Tracker                                                                                            |
++------------------------------+---------------------------------------------------------------------------------------------------------------------+
+|  **Meta**                    |  .. image:: https://img.shields.io/badge/license-Apache%202-cb2533.svg                                              |
+|                              |      :target: https://www.apache.org/licenses/LICENSE-2.0                                                           |
+|                              |      :alt: Licensed under the Apache License, Version 2.0                                                           |
+|                              |  .. image:: https://img.shields.io/badge/version%20control-git-blue.svg?logo=github                                 |
+|                              |      :target: https://github.com/SalishSeaCast/SalishSeaNowcast                                                     |
+|                              |      :alt: Git on GitHub                                                                                            |
+|                              |  .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white            |
+|                              |      :target: https://pre-commit.com                                                                                |
+|                              |      :alt: pre-commit                                                                                               |
+|                              |  .. image:: https://img.shields.io/badge/code%20style-black-000000.svg                                              |
+|                              |      :target: https://black.readthedocs.io/en/stable/                                                               |
+|                              |      :alt: The uncompromising Python code formatter                                                                 |
+|                              |  .. image:: https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg                                              |
+|                              |      :alt: Hatch project                                                                                            |
+|                              |      :target: https://github.com/pypa/hatch                                                                         |
++------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
 The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with
 running the SalishSeaCast ocean models in a daily nowcast/forecast mode.
@@ -183,13 +191,14 @@ Coding Style
 ============
 
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
-   :target: https://github.com/pre-commit/pre-commit
+   :target: https://pre-commit.com
    :alt: pre-commit
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 
-The :kbd:`SalishSeaNowcast` package uses Git pre-commit hooks managed by `pre-commit`_ to maintain consistent code style and and other aspects of code,
+The :kbd:`SalishSeaNowcast` package uses Git pre-commit hooks managed by `pre-commit`_
+to maintain consistent code style and and other aspects of code,
 docs,
 and repo QA.
 
@@ -205,7 +214,9 @@ and run :command:`pre-commit install`:
     $ conda activate salishsea-nowcast
     (salishsea-nowcast)$ pre-commit install
 
-.. note:: You only need to install the hooks once immediately after you make a new clone of the `SalishSeaNowcast repository`_ and build your :ref:`SalishSeaNowcastDevelopmentEnvironment`.
+.. note::
+    You only need to install the hooks once immediately after you make a new clone of the
+    `SalishSeaNowcast repository`_ and build your :ref:`SalishSeaNowcastDevelopmentEnvironment`.
 
 .. _SalishSeaNowcast repository: https://github.com/SalishSeaCast/SalishSeaNowcast
 
@@ -277,8 +288,8 @@ whenever you push changes to GitHub the documentation is automatically re-built 
 Link Checking the Documentation
 -------------------------------
 
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/sphinx-linkcheck/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Asphinx-linkcheck
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/sphinx-linkcheck.yaml/badge.svg
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
       :alt: Sphinx linkcheck
 
 
@@ -435,7 +446,7 @@ The output looks something like::
   (line   20) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (line   20) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   20) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
-  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/pytest-with-coverage/badge.svg
+  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage/badge.svg
   (line   20) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
   (line  556) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions
   (line  203) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
@@ -509,7 +520,7 @@ The output looks something like::
 
 :command:`make linkcheck` is run monthly via a `scheduled GitHub Actions workflow`_
 
-.. _scheduled GitHub Actions workflow: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Asphinx-linkcheck
+.. _scheduled GitHub Actions workflow: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
 
 
 .. _SalishSeaNowcastRunningTheUnitTests:
@@ -636,8 +647,8 @@ to produce an HTML report that you can view in your browser by opening :file:`Sa
 Continuous Integration
 ----------------------
 
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/pytest-with-coverage/badge.svg
-    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage.yaml/badge.svg
+    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:pytest-with-coverage
     :alt: GitHub Workflow Status
 
 The :kbd:`SalishSeaNowcast` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.
@@ -703,6 +714,13 @@ Please see the LICENSE file for details of the license.
 
 Release Process
 ===============
+
+.. image:: https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaNowcast?logo=github
+    :target: https://github.com/SalishSeaCast/SalishSeaNowcast/releases
+    :alt: Releases
+.. image:: https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg
+    :target: https://github.com/pypa/hatch
+    :alt: Hatch project
 
 Releases are done at Doug's discretion when significant pieces of development work have been
 completed.
