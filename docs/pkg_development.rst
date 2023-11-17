@@ -288,8 +288,8 @@ whenever you push changes to GitHub the documentation is automatically re-built 
 Link Checking the Documentation
 -------------------------------
 
-.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/sphinx-linkcheck/badge.svg
-      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Asphinx-linkcheck
+.. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/sphinx-linkcheck.yaml/badge.svg
+      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
       :alt: Sphinx linkcheck
 
 
@@ -446,7 +446,7 @@ The output looks something like::
   (line   20) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
   (line   20) ok        https://img.shields.io/badge/code%20style-black-000000.svg
   (line   20) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
-  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/workflows/pytest-with-coverage/badge.svg
+  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage/badge.svg
   (line   20) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
   (line  556) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions
   (line  203) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
