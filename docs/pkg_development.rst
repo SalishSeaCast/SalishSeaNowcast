@@ -59,6 +59,7 @@
 |                              |  .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white            |
 |                              |      :target: https://pre-commit.com                                                                                |
 |                              |      :alt: pre-commit                                                                                               |
++                              +---------------------------------------------------------------------------------------------------------------------+
 |                              |  .. image:: https://img.shields.io/badge/code%20style-black-000000.svg                                              |
 |                              |      :target: https://black.readthedocs.io/en/stable/                                                               |
 |                              |      :alt: The uncompromising Python code formatter                                                                 |
