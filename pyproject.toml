@@ -119,5 +119,8 @@ source = ["nowcast", "tests"]
 show_missing = true
 
 
+[tool.hatch.build.targets.wheel]
+packages = ["nowcast"]
+
 [tool.hatch.version]
 path = "nowcast/__about__.py"
