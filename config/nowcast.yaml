@@ -289,7 +289,7 @@ run types:
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_202108.nc
     mesh mask: mesh_mask202108.nc
-    land processor elimination: bathymetry_201702.csv
+    land processor elimination: bathymetry_202108.csv
     duration: 1  # day
     restart from: nowcast-green
   nowcast-dev:
@@ -305,7 +305,7 @@ run types:
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_202108.nc
     mesh mask: mesh_mask202108.nc
-    land processor elimination: bathymetry_201702.csv
+    land processor elimination: bathymetry_202108.csv
     duration: 1  # day
     restart from: nowcast-green
   nowcast-agrif:
@@ -322,7 +322,7 @@ run types:
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_202108.nc
     mesh mask: mesh_mask202108.nc
-    land processor elimination: bathymetry_201702.csv
+    land processor elimination: bathymetry_202108.csv
     duration: 1.5  # days
     restart from: nowcast
   forecast2:
@@ -330,7 +330,7 @@ run types:
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_202108.nc
     mesh mask: mesh_mask202108.nc
-    land processor elimination: bathymetry_201702.csv
+    land processor elimination: bathymetry_202108.csv
     duration: 1.25  # days
     restart from: forecast
 
