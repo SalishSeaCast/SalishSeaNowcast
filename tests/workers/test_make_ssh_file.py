@@ -131,7 +131,7 @@ class TestConfig:
         ssh = prod_config["ssh"]
         assert (
             ssh["coordinates"]
-            == "/SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc"
+            == "/SalishSeaCast/grid/coordinates_seagrid_SalishSea201702.nc"
         )
         assert ssh["tidal predictions"] == "/SalishSeaCast/tidal-predictions/"
         assert (
