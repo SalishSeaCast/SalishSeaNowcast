@@ -287,7 +287,7 @@ run types:
   nowcast:
     config name: SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
+    bathymetry: bathymetry_202108.nc
     mesh mask: mesh_mask202108.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1  # day
@@ -303,7 +303,7 @@ run types:
   nowcast-green:
     config name:  SalishSeaCast
     coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
+    bathymetry: bathymetry_202108.nc
     mesh mask: mesh_mask202108.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1  # day
@@ -320,7 +320,7 @@ run types:
   forecast:
     config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
+    bathymetry: bathymetry_202108.nc
     mesh mask: mesh_mask202108.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1.5  # days
@@ -328,7 +328,7 @@ run types:
   forecast2:
     config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
+    bathymetry: bathymetry_202108.nc
     mesh mask: mesh_mask202108.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1.25  # days

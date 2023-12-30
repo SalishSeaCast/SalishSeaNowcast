@@ -187,7 +187,7 @@ class TestConfig:
             run_types[run_type]["coordinates"]
             == "coordinates_seagrid_SalishSea201702.nc"
         )
-        assert run_types[run_type]["bathymetry"] == "bathymetry_201702.nc"
+        assert run_types[run_type]["bathymetry"] == "bathymetry_202108.nc"
         assert run_types[run_type]["mesh mask"] == "mesh_mask202108.nc"
 
 
