@@ -239,7 +239,7 @@ temperature salinity:
   # **Must be quoted to project {} characters**
   file template: 'LiveOcean_v201905_{:y%Ym%md%d}.nc'
   # Mesh mask from which to get grid parameters for boundary conditions files
-  mesh mask: /SalishSeaCast/grid/mesh_mask201702.nc
+  mesh mask: /SalishSeaCast/grid/mesh_mask202108.nc
   # Parameter set to use to convert from LiveOcean to SalishSeaCast
   parameter set: v201905
 
@@ -288,7 +288,7 @@ run types:
     config name: SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
+    mesh mask: mesh_mask202108.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1  # day
     restart from: nowcast-green
@@ -304,7 +304,7 @@ run types:
     config name:  SalishSeaCast
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
+    mesh mask: mesh_mask202108.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1  # day
     restart from: nowcast-green
@@ -321,7 +321,7 @@ run types:
     config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
+    mesh mask: mesh_mask202108.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1.5  # days
     restart from: nowcast
@@ -329,7 +329,7 @@ run types:
     config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
     bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
+    mesh mask: mesh_mask202108.nc
     land processor elimination: bathymetry_201702.csv
     duration: 1.25  # days
     restart from: forecast

@@ -141,9 +141,9 @@ class TestConfig:
 
     def test_run_types_section(self, prod_config):
         run_types = prod_config["run types"]
-        assert run_types["nowcast"]["mesh mask"] == "mesh_mask201702.nc"
-        assert run_types["forecast"]["mesh mask"] == "mesh_mask201702.nc"
-        assert run_types["forecast2"]["mesh mask"] == "mesh_mask201702.nc"
+        assert run_types["nowcast"]["mesh mask"] == "mesh_mask202108.nc"
+        assert run_types["forecast"]["mesh mask"] == "mesh_mask202108.nc"
+        assert run_types["forecast2"]["mesh mask"] == "mesh_mask202108.nc"
 
     def test_results_archive_section(self, prod_config):
         results_archive = prod_config["results archive"]

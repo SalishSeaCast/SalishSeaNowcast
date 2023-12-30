@@ -122,7 +122,7 @@ class TestConfig:
         )
         assert (
             temperature_salinity["mesh mask"]
-            == "/SalishSeaCast/grid/mesh_mask201702.nc"
+            == "/SalishSeaCast/grid/mesh_mask202108.nc"
         )
         assert (
             temperature_salinity["download"]["dest dir"]
