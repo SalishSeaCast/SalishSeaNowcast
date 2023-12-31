@@ -84,7 +84,6 @@ def after_download_weather(msg, config, checklist):
                 )
                 race_condition_workers = {
                     "grib_to_netcdf",
-                    "make_runoff_file",
                     "make_v202111_runoff_file",
                 }
                 return next_workers[msg.type], race_condition_workers
@@ -106,7 +105,6 @@ def after_download_weather(msg, config, checklist):
             race_condition_workers = {
                 "grib_to_netcdf",
                 "make_live_ocean_files",
-                "make_runoff_file",
                 "make_v202111_runoff_file",
             }
             return next_workers[msg.type], race_condition_workers
@@ -391,7 +389,6 @@ def after_make_ssh_files(msg, config, checklist):
         next_workers[msg.type].append(
             NextWorker("nowcast.workers.make_v202111_runoff_file")
         )
-        next_workers[msg.type].append(NextWorker("nowcast.workers.make_runoff_file"))
     return next_workers[msg.type]
 
 
