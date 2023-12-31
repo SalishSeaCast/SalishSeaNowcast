@@ -276,6 +276,7 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
         "tracers": {"link to": os.fspath((run_prep_dir / "tracers/").resolve())},
         "LiveOcean": {"link to": os.fspath((run_prep_dir / "LiveOcean/").resolve())},
         "rivers": {"link to": os.fspath((run_prep_dir / "rivers/").resolve())},
+        "river_turb": {"link to": os.fspath((run_prep_dir / "rivers/").resolve())},
         "bfr_coef.nc": {"link to": os.fspath(bottom_friction_mask)},
         "grid": {"link to": os.fspath((run_prep_dir / "grid/").resolve())},
         "rivers-climatology": {
@@ -315,7 +316,7 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
         ]
         namelist_smelt_sections = (
             "namelist_smelt_biology",
-            "namelist_smelt_rivers.arbutus",
+            "namelist_smelt_rivers",
             "namelist_smelt_skog",
         )
         namelists["namelist_smelt_cfg"] = [
