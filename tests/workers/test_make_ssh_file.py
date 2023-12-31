@@ -154,8 +154,8 @@ class TestConfig:
 
     def test_results_archive_section(self, prod_config):
         results_archive = prod_config["results archive"]
-        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201905/"
-        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201905/"
+        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.202111/"
+        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.202111/"
 
 
 @pytest.mark.parametrize(

@@ -134,8 +134,8 @@ class TestConfig:
     @pytest.mark.parametrize(
         "run_type, results_path",
         (
-            ("nowcast", "/results/SalishSea/nowcast-blue.201905/"),
-            ("nowcast-green", "/results2/SalishSea/nowcast-green.201905/"),
+            ("nowcast", "/results/SalishSea/nowcast-blue.202111/"),
+            ("nowcast-green", "/results2/SalishSea/nowcast-green.202111/"),
             ("nowcast-agrif", "/results/SalishSea/nowcast-agrif.201702/"),
         ),
     )

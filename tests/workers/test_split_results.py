@@ -98,11 +98,11 @@ class TestConfig:
 
     def test_results_archive(self, prod_config):
         archives = {
-            "nowcast": "/results/SalishSea/nowcast-blue.201905/",
+            "nowcast": "/results/SalishSea/nowcast-blue.202111/",
             "nowcast-dev": "/results/SalishSea/nowcast-dev.201905/",
-            "forecast": "/results/SalishSea/forecast.201905/",
-            "forecast2": "/results/SalishSea/forecast2.201905/",
-            "nowcast-green": "/results2/SalishSea/nowcast-green.201905/",
+            "forecast": "/results/SalishSea/forecast.202111/",
+            "forecast2": "/results/SalishSea/forecast2.202111/",
+            "nowcast-green": "/results2/SalishSea/nowcast-green.202111/",
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
                 "localhost": "/results2/SalishSea/nowcast-green.202111/",

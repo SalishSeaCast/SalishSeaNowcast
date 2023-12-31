@@ -171,13 +171,13 @@ class TestConfig:
     def test_results_archive_section(self, prod_config):
         assert "results archive" in prod_config
         results_archive = prod_config["results archive"]
-        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201905/"
+        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.202111/"
         assert (
             results_archive["nowcast-green"]
-            == "/results2/SalishSea/nowcast-green.201905/"
+            == "/results2/SalishSea/nowcast-green.202111/"
         )
-        assert results_archive["forecast"] == "/results/SalishSea/forecast.201905/"
-        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201905/"
+        assert results_archive["forecast"] == "/results/SalishSea/forecast.202111/"
+        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.202111/"
 
     @pytest.mark.parametrize("run_type", ["nowcast-green", "forecast", "forecast2"])
     def test_run_types_section(self, run_type, prod_config):
