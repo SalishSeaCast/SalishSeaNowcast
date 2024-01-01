@@ -174,7 +174,7 @@ rivers:
   # **Must be quoted to project {} characters**
   # TODO: collapse to single item for v202111; b201702 key not required
   file templates:
-#    b201702:  "R201702DFraCElse_{:y%Ym%md%d}.nc"
+    b201702:  "R201702DFraCElse_{:y%Ym%md%d}.nc"
     b202108:  "R202108Dailies_{:y%Ym%md%d}.nc"
   # Module containing dictionary of the proportions that each river occupies in its watershed
   # TODO: collapse to single item for v202111; b201702 key not required
