@@ -444,7 +444,7 @@ def _prep_nowcast_green_research_fig_functions(
     )
     yyyymmdd = run_date.format("YYYYMMDD")
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
-    ptrc_T_hr = _results_dataset("1h", "ptrc_T", results_dir)
+    biol_T_hr = _results_dataset("1h", "biol_T", results_dir)
     turb_T_hr = _results_dataset("1h", "carp_T", results_dir)
     fig_functions = {}
     image_loops = {
@@ -537,7 +537,7 @@ def _prep_nowcast_green_research_fig_functions(
     }
     for tracer, params in image_loops.items():
         clevels_thalweg, clevels_surface = tracer_thalweg_and_surface_hourly.clevels(
-            ptrc_T_hr.variables[params["nemo var"]],
+            biol_T_hr.variables[params["nemo var"]],
             mesh_mask,
             depth_integrated=params["depth integrated"],
         )
@@ -547,7 +547,7 @@ def _prep_nowcast_green_research_fig_functions(
                     "function": tracer_thalweg_and_surface_hourly.make_figure,
                     "args": (
                         hr,
-                        ptrc_T_hr.variables[params["nemo var"]],
+                        biol_T_hr.variables[params["nemo var"]],
                         bathy,
                         mesh_mask,
                         clevels_thalweg,
