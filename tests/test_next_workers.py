@@ -213,6 +213,7 @@ class TestAfterDownloadWeather:
         assert workers == expected
         assert race_condition_workers == {
             "grib_to_netcdf",
+            "make_runoff_file",
             "make_v202111_runoff_file",
         }
 
@@ -239,6 +240,7 @@ class TestAfterDownloadWeather:
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_live_ocean_files",
+            "make_runoff_file",
             "make_v202111_runoff_file",
         }
 
@@ -334,6 +336,7 @@ class TestAfterCollectWeather:
         assert workers == expected
         assert race_condition_workers == {
             "grib_to_netcdf",
+            "make_runoff_file",
             "make_v202111_runoff_file",
         }
 
@@ -364,6 +367,7 @@ class TestAfterCollectWeather:
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_live_ocean_files",
+            "make_runoff_file",
             "make_v202111_runoff_file",
         }
 
@@ -552,6 +556,13 @@ class TestAfterMakeSshFiles:
             Message("make_ssh_files", msg_type), config, checklist
         )
         assert workers[0] == NextWorker("nowcast.workers.make_v202111_runoff_file")
+
+    @pytest.mark.parametrize("msg_type", ["success nowcast", "success forecast2"])
+    def test_success_launch_make_runoff_file(self, msg_type, config, checklist):
+        workers = next_workers.after_make_ssh_files(
+            Message("make_ssh_files", msg_type), config, checklist
+        )
+        assert workers[1] == NextWorker("nowcast.workers.make_runoff_file")
 
 
 class TestAfterGribToNetcdf:
