@@ -514,11 +514,6 @@ def _prep_nowcast_green_research_fig_functions(
             "cmap": cmocean.cm.algae,
             "depth integrated": True,
         },
-        "ciliates": {
-            "nemo var": "ciliates",
-            "cmap": cmocean.cm.algae,
-            "depth integrated": True,
-        },
         "flagellates": {
             "nemo var": "flagellates",
             "cmap": cmocean.cm.algae,
@@ -625,7 +620,7 @@ def _prep_nowcast_green_research_fig_functions(
             },
             "mesodinium_flagellates_timeseries": {
                 "function": time_series_plots.make_figure,
-                "args": (bio_dataset, "ciliates", "flagellates", place),
+                "args": (bio_dataset, "microzooplankton", "flagellates", place),
             },
             "mesozoo_microzoo_timeseries": {
                 "function": time_series_plots.make_figure,
