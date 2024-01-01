@@ -563,8 +563,8 @@ def _prep_nowcast_green_research_fig_functions(
             f"nowcast-green research render list"
         )
     image_loops = {
-        "Fraser_tracer": {
-            "nemo var": "Fraser_tracer",
+        "turbidity": {
+            "nemo var": "turbidity",
             "cmap": cmocean.cm.turbid,
             "depth integrated": False,
         }
