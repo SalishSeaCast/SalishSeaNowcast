@@ -163,6 +163,11 @@ class TestDownloadLiveOcean:
 
         monkeypatch.setattr(download_live_ocean, "get_web_data", mock_get_web_data)
 
+        def mock_deflate(filepaths, max_concurrent_jobs):
+            pass
+
+        monkeypatch.setattr(download_live_ocean.nemo_cmd.api, "deflate", mock_deflate)
+
         dest_dir = tmp_path / config["temperature salinity"]["download"]["dest dir"]
         dest_dir.mkdir(parents=True)
         monkeypatch.setitem(
