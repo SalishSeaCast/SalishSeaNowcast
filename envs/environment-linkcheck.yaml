@@ -24,7 +24,7 @@ dependencies:
   - dask
   - docutils
   - f90nml
-  - feedgen>=0.9.0
+  - feedgen
   - flox
   - geopandas
   - gitpython
