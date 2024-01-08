@@ -47,15 +47,13 @@ def make_figure(
     theme=nowcast.figures.website_theme,
 ):
     """
-    :param xr_dataset: Hourly average 3d biological fields
-                       (ubcSSg3DBiologyFields1hV17-02) and tracer fields
-                       (ubcSSg3DTracerFields1hV17-02) from the gridapp datasets
-                       of the data server ERDAPP
+    :param xr_dataset: Hourly average 3d biological fields and tracer fields
+                       from the gridapp datasets of the data server ERDAPP
                        (https://salishsea.eos.ubc.ca/erddap/griddap/index.html?page=1&itemsPerPage=1000).
     :type xr_dataset: :class:`xarray.core.dataset.Dataset`
 
     :param left_variable: One of the data variables among 'nitrate',
-                          'mesozooplankton', 'ciliates', 'temperature'.
+                          'mesozooplankton', 'microzooplankton', 'temperature'.
     :type left_variable: :class:`xarray.Variable`
 
     :param right_variable: One of the data variables among 'diatoms',

@@ -203,7 +203,7 @@ ssh:
     # **Must be quoted to project {} characters**
     tarball csv file template: 'etss.{yyyymmdd}/t{forecast}z_csv/9443090.csv'
   # Coordinates file to get lats/lons from
-  coordinates: /SalishSeaCast/grid/coordinates_seagrid_SalishSea2.nc
+  coordinates: /SalishSeaCast/grid/coordinates_seagrid_SalishSea201702.nc
   # Directory containing tidal predication file for sea surface height correction
   tidal predictions: /SalishSeaCast/tidal-predictions/
   # Name of Neah Bay hourly prediction file
@@ -239,7 +239,7 @@ temperature salinity:
   # **Must be quoted to project {} characters**
   file template: 'LiveOcean_v201905_{:y%Ym%md%d}.nc'
   # Mesh mask from which to get grid parameters for boundary conditions files
-  mesh mask: /SalishSeaCast/grid/mesh_mask201702.nc
+  mesh mask: /SalishSeaCast/grid/mesh_mask202108.nc
   # Parameter set to use to convert from LiveOcean to SalishSeaCast
   parameter set: v201905
 
@@ -287,9 +287,9 @@ run types:
   nowcast:
     config name: SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-    land processor elimination: bathymetry_201702.csv
+    bathymetry: bathymetry_202108.nc
+    mesh mask: mesh_mask202108.nc
+    land processor elimination: bathymetry_202108.csv
     duration: 1  # day
     restart from: nowcast-green
   nowcast-dev:
@@ -303,9 +303,9 @@ run types:
   nowcast-green:
     config name:  SalishSeaCast
     coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-    land processor elimination: bathymetry_201702.csv
+    bathymetry: bathymetry_202108.nc
+    mesh mask: mesh_mask202108.nc
+    land processor elimination: bathymetry_202108.csv
     duration: 1  # day
     restart from: nowcast-green
   nowcast-agrif:
@@ -320,17 +320,17 @@ run types:
   forecast:
     config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-    land processor elimination: bathymetry_201702.csv
+    bathymetry: bathymetry_202108.nc
+    mesh mask: mesh_mask202108.nc
+    land processor elimination: bathymetry_202108.csv
     duration: 1.5  # days
     restart from: nowcast
   forecast2:
     config name:  SalishSeaCast_Blue
     coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-    land processor elimination: bathymetry_201702.csv
+    bathymetry: bathymetry_202108.nc
+    mesh mask: mesh_mask202108.nc
+    land processor elimination: bathymetry_202108.csv
     duration: 1.25  # days
     restart from: forecast
 
@@ -339,11 +339,11 @@ results archive:
   # Keys are run types.
   # Values are directories on results server where run results are stored
   # in ddmmmyy/ directories.
-  nowcast: /results/SalishSea/nowcast-blue.201905/
+  nowcast: /results/SalishSea/nowcast-blue.202111/
   nowcast-dev: /results/SalishSea/nowcast-dev.201905/
-  forecast: /results/SalishSea/forecast.201905/
-  forecast2: /results/SalishSea/forecast2.201905/
-  nowcast-green: /results2/SalishSea/nowcast-green.201905/
+  forecast: /results/SalishSea/forecast.202111/
+  forecast2: /results/SalishSea/forecast2.202111/
+  nowcast-green: /results2/SalishSea/nowcast-green.202111/
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
   hindcast:
     localhost: /results2/SalishSea/nowcast-green.202111/
@@ -584,22 +584,22 @@ run:
       # compute host; keyed by run type
       run types:
         nowcast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201905/nowcast-blue/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/nowcast-blue/
           # How is the domain to be distributed over the processors in the
           # i (longitude) and j (latitude) directions?
           mpi decomposition: 11x18
           # Directory on compute host where results are stored
           results: /nemoShare/MEOPAR/SalishSea/nowcast/
         forecast:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201905/forecast/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/forecast/
           mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/forecast/
         forecast2:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201905/forecast2/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/forecast2/
           mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/forecast2/
         nowcast-green:
-          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v201905/nowcast-green/
+          run sets dir: /nemoShare/MEOPAR/nowcast-sys/SS-run-sets/v202111/nowcast-green/
           mpi decomposition: 11x18
           results: /nemoShare/MEOPAR/SalishSea/nowcast-green/
       forcing:

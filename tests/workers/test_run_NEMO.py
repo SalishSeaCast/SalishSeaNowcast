@@ -732,6 +732,7 @@ class TestRunDescription:
             ("arbutus.cloud", "nowcast", "tracers", "tracers"),
             ("arbutus.cloud", "nowcast", "LiveOcean", "LiveOcean"),
             ("arbutus.cloud", "nowcast", "rivers", "rivers"),
+            ("arbutus.cloud", "nowcast", "river_turb", "rivers"),
             ("arbutus.cloud", "nowcast", "grid", "grid"),
             ("arbutus.cloud", "nowcast", "rivers-climatology", "rivers-climatology"),
             ("arbutus.cloud", "nowcast-green", "NEMO-atmos", "NEMO-atmos"),
@@ -740,6 +741,7 @@ class TestRunDescription:
             ("arbutus.cloud", "nowcast-green", "tracers", "tracers"),
             ("arbutus.cloud", "nowcast-green", "LiveOcean", "LiveOcean"),
             ("arbutus.cloud", "nowcast-green", "rivers", "rivers"),
+            ("arbutus.cloud", "nowcast-green", "river_turb", "rivers"),
             ("arbutus.cloud", "nowcast-green", "grid", "grid"),
             (
                 "arbutus.cloud",
@@ -753,6 +755,7 @@ class TestRunDescription:
             ("salish-nowcast", "nowcast-dev", "tracers", "tracers"),
             ("salish-nowcast", "nowcast-dev", "LiveOcean", "LiveOcean"),
             ("salish-nowcast", "nowcast-dev", "rivers", "rivers"),
+            ("salish-nowcast", "nowcast-dev", "river_turb", "rivers"),
             ("salish-nowcast", "nowcast-dev", "grid", "grid"),
             (
                 "salish-nowcast",
@@ -766,6 +769,7 @@ class TestRunDescription:
             ("arbutus.cloud", "forecast", "tracers", "tracers"),
             ("arbutus.cloud", "forecast", "LiveOcean", "LiveOcean"),
             ("arbutus.cloud", "forecast", "rivers", "rivers"),
+            ("arbutus.cloud", "forecast", "river_turb", "rivers"),
             ("arbutus.cloud", "forecast", "grid", "grid"),
             ("arbutus.cloud", "forecast", "rivers-climatology", "rivers-climatology"),
             ("arbutus.cloud", "forecast2", "NEMO-atmos", "NEMO-atmos"),
@@ -774,6 +778,7 @@ class TestRunDescription:
             ("arbutus.cloud", "forecast2", "tracers", "tracers"),
             ("arbutus.cloud", "forecast2", "LiveOcean", "LiveOcean"),
             ("arbutus.cloud", "forecast2", "rivers", "rivers"),
+            ("arbutus.cloud", "forecast2", "river_turb", "rivers"),
             ("arbutus.cloud", "forecast2", "grid", "grid"),
             ("arbutus.cloud", "forecast2", "rivers-climatology", "rivers-climatology"),
         ],
@@ -956,7 +961,7 @@ class TestRunDescription:
         assert run_desc["namelists"]["namelist_top_cfg"] == expected
         expected = [
             str(tmp_run_sets.join("namelist_smelt_biology")),
-            str(tmp_run_sets.join("namelist_smelt_rivers.arbutus")),
+            str(tmp_run_sets.join("namelist_smelt_rivers")),
             str(tmp_run_sets.join("namelist_smelt_skog")),
         ]
         assert run_desc["namelists"]["namelist_smelt_cfg"] == expected

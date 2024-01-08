@@ -165,7 +165,7 @@ class TestConfig:
 
     def test_run_types_section(self, prod_config):
         run_types = prod_config["run types"]
-        assert run_types["nowcast"]["mesh mask"] == "mesh_mask201702.nc"
+        assert run_types["nowcast"]["mesh mask"] == "mesh_mask202108.nc"
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])

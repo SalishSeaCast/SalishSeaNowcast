@@ -141,15 +141,15 @@ class TestConfig:
 
     def test_run_types_section(self, prod_config):
         run_types = prod_config["run types"]
-        assert run_types["nowcast"]["mesh mask"] == "mesh_mask201702.nc"
-        assert run_types["forecast"]["mesh mask"] == "mesh_mask201702.nc"
-        assert run_types["forecast2"]["mesh mask"] == "mesh_mask201702.nc"
+        assert run_types["nowcast"]["mesh mask"] == "mesh_mask202108.nc"
+        assert run_types["forecast"]["mesh mask"] == "mesh_mask202108.nc"
+        assert run_types["forecast2"]["mesh mask"] == "mesh_mask202108.nc"
 
     def test_results_archive_section(self, prod_config):
         results_archive = prod_config["results archive"]
-        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.201905/"
-        assert results_archive["forecast"] == "/results/SalishSea/forecast.201905/"
-        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.201905/"
+        assert results_archive["nowcast"] == "/results/SalishSea/nowcast-blue.202111/"
+        assert results_archive["forecast"] == "/results/SalishSea/forecast.202111/"
+        assert results_archive["forecast2"] == "/results/SalishSea/forecast2.202111/"
 
     def test_file_group(self, prod_config):
         assert prod_config["file group"] == "sallen"
