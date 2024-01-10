@@ -157,9 +157,9 @@ class TestConfig:
         assert erddap["datasetIDs"]["nowcast-green"] == [
             "ubcSSg3DBiologyFields1hV19-05",
             "ubcSSg3DTracerFields1hV19-05",
-            "ubcSSg3DuGridFields1hV19-05",
-            "ubcSSg3DvGridFields1hV19-05",
-            "ubcSSg3DwGridFields1hV19-05",
+            "ubcSSg3DuGridFields1hV21-11",
+            "ubcSSg3DvGridFields1hV21-11",
+            "ubcSSg3DwGridFields1hV21-11",
             "ubcSSgSurfaceTracerFields1hV19-05",
             "ubcSSg3DAuxiliaryFields1hV19-05",
         ]
