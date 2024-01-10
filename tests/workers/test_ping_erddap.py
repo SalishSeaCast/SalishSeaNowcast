@@ -155,7 +155,7 @@ class TestConfig:
         # assert erddap["datasetIDs"]["USDDL-CTD"] == ["ubcONCUSDDLCTD15mV1"]
         assert erddap["datasetIDs"]["TWDP-ferry"] == ["ubcONCTWDP1mV1"]
         assert erddap["datasetIDs"]["nowcast-green"] == [
-            "ubcSSg3DBiologyFields1hV19-05",
+            "ubcSSg3DBiologyFields1hV21-11",
             "ubcSSg3DTracerFields1hV19-05",
             "ubcSSg3DuGridFields1hV21-11",
             "ubcSSg3DvGridFields1hV21-11",
