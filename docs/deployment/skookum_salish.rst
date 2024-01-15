@@ -228,9 +228,6 @@ On the hosts where the nowcast system NEMO runs will be executed create a
 
 The hosts and their :file:`runs` directories presently in use are:
 
-* :kbd:`salish`
-    :file:`/SalishSeaCast/runs/`
-
 * :kbd:`arbutus.cloud`
     See :ref:`ArbutusCloudNEMORunsDirectory`
 
