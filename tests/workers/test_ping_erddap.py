@@ -163,6 +163,7 @@ class TestConfig:
             "ubcSSg3DuGridFields1hV21-11",
             "ubcSSg3DvGridFields1hV21-11",
             "ubcSSg3DwGridFields1hV21-11",
+            "ubcSSgVariableVolumeLayers1hV21-11",
             "ubcSSg3DAuxiliaryFields1hV19-05",
         ]
         assert erddap["datasetIDs"]["nemo-forecast"] == [
