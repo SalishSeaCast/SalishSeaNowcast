@@ -155,13 +155,16 @@ class TestConfig:
         # assert erddap["datasetIDs"]["USDDL-CTD"] == ["ubcONCUSDDLCTD15mV1"]
         assert erddap["datasetIDs"]["TWDP-ferry"] == ["ubcONCTWDP1mV1"]
         assert erddap["datasetIDs"]["nowcast-green"] == [
-            "ubcSSg3DBiologyFields1hV19-05",
-            "ubcSSg3DTracerFields1hV19-05",
-            "ubcSSg3DuGridFields1hV19-05",
-            "ubcSSg3DvGridFields1hV19-05",
-            "ubcSSg3DwGridFields1hV19-05",
-            "ubcSSgSurfaceTracerFields1hV19-05",
-            "ubcSSg3DAuxiliaryFields1hV19-05",
+            "ubcSSg3DBiologyFields1hV21-11",
+            "ubcSSg3DLightFields1hV21-11",
+            "ubcSSg3DChemistryFields1hV21-11",
+            "ubcSSgSeaSurfaceCO2FluxField1hV21-11",
+            "ubcSSg3DPhysicsFields1hV21-11",
+            "ubcSSgSeaSurfaceHeightField1hV21-11",
+            "ubcSSg3DuGridFields1hV21-11",
+            "ubcSSg3DvGridFields1hV21-11",
+            "ubcSSg3DwGridFields1hV21-11",
+            "ubcSSg3DVariableVolumeLayers1hV21-11",
         ]
         assert erddap["datasetIDs"]["nemo-forecast"] == [
             "ubcSSfBoundaryBaySSH10m",
