@@ -187,7 +187,6 @@ class TestConfig:
                 "arbutus.cloud-nowcast",
                 ["nowcast", "forecast", "forecast2", "nowcast-green"],
             ),
-            ("salish-nowcast", ["nowcast-dev", "nowcast-green"]),
             ("orcinus-nowcast-agrif", ["nowcast-agrif"]),
             ("graham-dtn", []),
             ("optimum-hindcast", []),
@@ -225,18 +224,6 @@ class TestConfig:
             ),
             (
                 "enabled hosts",
-                "salish-nowcast",
-                "nowcast-dev",
-                "/results/SalishSea/nowcast-dev.201905/",
-            ),
-            (
-                "enabled hosts",
-                "salish-nowcast",
-                "nowcast-green",
-                "/results2/SalishSea/nowcast-green.201905/",
-            ),
-            (
-                "enabled hosts",
                 "orcinus-nowcast-agrif",
                 "nowcast-agrif",
                 "/global/scratch/dlatorne/nowcast-agrif/",
@@ -266,7 +253,6 @@ class TestConfig:
     def test_results_archive(self, prod_config):
         archives = {
             "nowcast": "/results/SalishSea/nowcast-blue.202111/",
-            "nowcast-dev": "/results/SalishSea/nowcast-dev.201905/",
             "forecast": "/results/SalishSea/forecast.202111/",
             "forecast2": "/results/SalishSea/forecast2.202111/",
             "nowcast-green": "/results2/SalishSea/nowcast-green.202111/",

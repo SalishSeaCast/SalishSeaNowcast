@@ -667,19 +667,17 @@ def after_make_forcing_links(msg, config, checklist):
         "failure nowcast+": [],
         "failure nowcast-green": [],
         "failure nowcast-agrif": [],
-        "failure nowcast-dev": [],
         "failure forecast2": [],
         "failure ssh": [],
         "success nowcast+": [],
         "success nowcast-green": [],
         "success nowcast-agrif": [],
-        "success nowcast-dev": [],
         "success forecast2": [],
         "success ssh": [],
     }
     if msg.type.startswith("success"):
         run_types = {
-            "nowcast+": ("nowcast", "nowcast-dev"),
+            "nowcast+": ("nowcast",),
             "nowcast-green": ("nowcast-green",),
             "nowcast-agrif": ("nowcast-agrif",),
             "ssh": ("forecast",),
@@ -738,12 +736,10 @@ def after_run_NEMO(msg, config, checklist):
         "crash": [],
         "failure nowcast": [],
         "failure nowcast-green": [],
-        "failure nowcast-dev": [],
         "failure forecast": [],
         "failure forecast2": [],
         "success nowcast": [],
         "success nowcast-green": [],
-        "success nowcast-dev": [],
         "success forecast": [],
         "success forecast2": [],
     }
@@ -777,12 +773,10 @@ def after_watch_NEMO(msg, config, checklist):
         "crash": [],
         "failure nowcast": [],
         "failure nowcast-green": [],
-        "failure nowcast-dev": [],
         "failure forecast": [],
         "failure forecast2": [],
         "success nowcast": [],
         "success nowcast-green": [],
-        "success nowcast-dev": [],
         "success forecast": [],
         "success forecast2": [],
     }
@@ -847,16 +841,6 @@ def after_watch_NEMO(msg, config, checklist):
                                 "--run-date",
                                 msg.payload[run_type]["run date"],
                             ],
-                        )
-                    )
-        if run_type == "nowcast-green":
-            for host in config["run"]["enabled hosts"]:
-                run_types = config["run"]["enabled hosts"][host]["run types"]
-                if "nowcast-dev" in run_types:
-                    next_workers[msg.type].append(
-                        NextWorker(
-                            "nowcast.workers.make_forcing_links",
-                            args=[host, "nowcast+", "--shared-storage"],
                         )
                     )
         if run_type == "forecast2":

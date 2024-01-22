@@ -292,14 +292,10 @@ run types:
     land processor elimination: bathymetry_202108.csv
     duration: 1  # day
     restart from: nowcast-green
+  ### retained because plots for nowcast-dev haven't been removed from
+  ### make_plots.make_plots() yet
   nowcast-dev:
-    config name: SalishSeaCast_Blue
-    coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
     mesh mask: mesh_mask201702.nc
-    land processor elimination: bathymetry_201702.csv
-    duration: 1  # day
-    restart from: nowcast-dev
   nowcast-green:
     config name:  SalishSeaCast
     coordinates: coordinates_seagrid_SalishSea201702.nc
@@ -340,7 +336,6 @@ results archive:
   # Values are directories on results server where run results are stored
   # in ddmmmyy/ directories.
   nowcast: /results/SalishSea/nowcast-blue.202111/
-  nowcast-dev: /results/SalishSea/nowcast-dev.201905/
   forecast: /results/SalishSea/forecast.202111/
   forecast2: /results/SalishSea/forecast2.202111/
   nowcast-green: /results2/SalishSea/nowcast-green.202111/
@@ -623,34 +618,11 @@ run:
         weather dir: /nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/
 
     salish-nowcast:
-      shared storage: True
-      make forcing links: True
+      ### retained because workers.test_upload_forcing.TestConfig.test_ssh_keys() needs
+      ### to find this item for every enabled host
       ssh key: SalishSeaNEMO-nowcast_id_rsa
-      envvars: /SalishSeaCast/nowcast-env/etc/conda/activate.d/envvars.sh
-      python: /SalishSeaCast/nowcast-env/bin/python3
-      config file: /SalishSeaCast/SalishSeaNowcast/config/nowcast.yaml
-      run prep dir: /SalishSeaCast/runs/
+      ### retained because make_*_runoff_file workers use this to get grid files
       grid dir: /SalishSeaCast/grid/
-      salishsea_cmd: /SalishSeaCast/nowcast-env/bin/salishsea
-      job exec cmd: qsub
-      # Optional email address to which to send notifications of the beginning
-      # and end of execution of the run, as well as notification of abnormal
-      # abort messages.
-      email: sallen@eoas.ubc.ca
-      run types:
-        nowcast-dev:
-          run sets dir: /SalishSeaCast/SS-run-sets/v201905/nowcast-dev/
-          mpi decomposition: 1x7
-          walltime: 23:30:00
-          results: /results/SalishSea/nowcast-dev.201905/
-        nowcast-green:
-          results: /results2/SalishSea/nowcast-green.201905/
-      forcing:
-        ssh dir: /results/forcing/sshNeahBay/
-        bc dir: /results/forcing/LiveOcean/boundary_conditions/
-        rivers dir: /results/forcing/rivers/
-        bottom friction mask: /SalishSeaCast/grid/jetty_mask_bathy201702.nc
-        weather dir: /results/forcing/atmospheric/continental2.5/nemo_forcing/
 
     orcinus-nowcast-agrif:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
@@ -1372,8 +1344,6 @@ message registry:
       failure nowcast: nowcast NEMO run failed
       success nowcast-green: nowcast-green NEMO run started
       failure nowcast-green: nowcast-green NEMO run failed
-      success nowcast-dev: nowcast-dev NEMO run started
-      failure nowcast-dev: nowcast-dev NEMO run failed
       success forecast: forecast NEMO run started
       failure forecast: forecast NEMO run failed
       success forecast2: forecast2 NEMO run started
@@ -1399,8 +1369,6 @@ message registry:
       failure nowcast: nowcast watch_NEMO failed
       success nowcast-green: nowcast-green NEMO run ended
       failure nowcast-green: nowcast-green watch_NEMO failed
-      success nowcast-dev: nowcast-dev NEMO run ended
-      failure nowcast-dev: nowcast-dev watch_NEMO failed
       success forecast: forecast NEMO run ended
       failure forecast: forecast watch_NEMO failed
       success forecast2: forecast2 NEMO run ended
