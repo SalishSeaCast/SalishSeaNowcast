@@ -79,7 +79,7 @@ and it operation.
 .. toctree::
    :maxdepth: 2
 
-   skookum_salish
+   skookum
    arbutus_cloud
    operations
 

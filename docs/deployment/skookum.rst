@@ -16,11 +16,11 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 
-.. _SkookumSalishDeployment:
+.. _SkookumDeployment:
 
-***************************************
-:kbd:`skookum`/:kbd:`salish` Deployment
-***************************************
+************************
+:kbd:`skookum`Deployment
+************************
 
 Git Repositories
 ================
