@@ -625,6 +625,8 @@ run:
       ### retained because workers.test_upload_forcing.TestConfig.test_ssh_keys() needs
       ### to find this item for every enabled host
       ssh key: SalishSeaNEMO-nowcast_id_rsa
+      ### retained because next_workers needs to know until salish is fully removed
+      shared storage: True
       ### retained because make_*_runoff_file workers use this to get grid files
       grid dir: /SalishSeaCast/grid/
 
