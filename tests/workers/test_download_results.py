@@ -253,6 +253,7 @@ class TestConfig:
     def test_results_archive(self, prod_config):
         archives = {
             "nowcast": "/results/SalishSea/nowcast-blue.202111/",
+            "nowcast-dev": "/results/SalishSea/nowcast-dev.201905/",
             "forecast": "/results/SalishSea/forecast.202111/",
             "forecast2": "/results/SalishSea/forecast2.202111/",
             "nowcast-green": "/results2/SalishSea/nowcast-green.202111/",
