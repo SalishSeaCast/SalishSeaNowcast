@@ -43,8 +43,6 @@ def config(base_config):
                 run types:
                   nowcast:
                     duration: 1  # day
-                  nowcast-dev:
-                    duration: 1  # day
                   nowcast-green:
                     duration: 1  # day
                   forecast:
@@ -59,8 +57,6 @@ def config(base_config):
                           results: results/SalishSea/nowcast/
                         nowcast-green:
                           results: results/SalishSea/nowcast-green/
-                        nowcast-dev:
-                          results: results/SalishSea/nowcast-dev/
                         forecast:
                           results: results/SalishSea/forecast/
                         forecast2:
@@ -104,7 +100,6 @@ class TestMain:
         assert kwargs["choices"] == {
             "nowcast",
             "nowcast-green",
-            "nowcast-dev",
             "forecast",
             "forecast2",
         }
@@ -127,7 +122,6 @@ class TestSuccess:
         [
             ("nowcast", "arbutus.cloud-nowcast"),
             ("nowcast-green", "arbutus.cloud-nowcast"),
-            ("nowcast-dev", "salish-nowcast"),
             ("forecast", "arbutus.cloud-nowcast"),
             ("forecast2", "arbutus.cloud-nowcast"),
         ],
@@ -144,7 +138,6 @@ class TestSuccess:
     [
         ("nowcast", "arbutus.cloud-nowcast"),
         ("nowcast-green", "arbutus.cloud-nowcast"),
-        ("nowcast-dev", "salish-nowcast"),
         ("forecast", "arbutus.cloud-nowcast"),
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
@@ -165,7 +158,6 @@ class TestFailure:
     [
         ("nowcast", "arbutus.cloud-nowcast"),
         ("nowcast-green", "arbutus.cloud-nowcast"),
-        ("nowcast-dev", "salish-nowcast"),
         ("forecast", "arbutus.cloud-nowcast"),
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
@@ -429,7 +421,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -457,7 +448,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -483,7 +473,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -516,7 +505,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -545,7 +533,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -573,7 +560,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -622,7 +608,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -651,7 +636,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -680,7 +664,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],
@@ -709,7 +692,6 @@ class TestConfirmRunSuccess:
         [
             ("nowcast", 2160, 2160),
             ("nowcast-green", 2160, 2160),
-            ("nowcast-dev", 2160, 2160),
             ("forecast", 3240, 2160),
             ("forecast2", 2700, 2160),
         ],

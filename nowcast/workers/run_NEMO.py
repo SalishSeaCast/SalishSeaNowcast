@@ -12,10 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that prepares the YAML run
-description file and bash run script for a nowcast, nowcast-green, nowcast-dev,
-forecast or forecast2 run on the ONC cloud or salish,
-and launches the run.
+"""SalishSeaCast worker that prepares the YAML run description file and bash run script
+for a nowcast, nowcast-green, forecast or forecast2 run on the ONC cloud, and launches the run.
 """
 import logging
 import os
@@ -49,12 +47,11 @@ def main():
     worker.cli.add_argument("host_name", help="Name of the host to execute the run on")
     worker.cli.add_argument(
         "run_type",
-        choices={"nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"},
+        choices={"nowcast", "nowcast-green", "forecast", "forecast2"},
         help="""
         Type of run to execute:
         'nowcast' means nowcast physics run,
         'nowcast-green' means nowcast green ocean run,
-        'nowcast-dev' means nowcast physics run with in-development features,
         'forecast' means updated forecast run,
         'forecast2' means preliminary forecast run,
         """,
@@ -145,7 +142,6 @@ def _create_run_desc_file(run_date, run_type, host_name, config):
     run_days = {
         "nowcast": run_date,
         "nowcast-green": run_date,
-        "nowcast-dev": run_date,
         "forecast": run_date.shift(days=1),
         "forecast2": run_date.shift(days=2),
     }
@@ -170,7 +166,6 @@ def _update_time_namelist(run_date, run_type, run_duration, host_config, run_pre
         # run-type: based-on run-type, date offset
         "nowcast": ("nowcast", -1),
         "nowcast-green": ("nowcast-green", -1),
-        "nowcast-dev": ("nowcast-dev", -1),
         "forecast": ("nowcast", 0),
         "forecast2": ("forecast", 0),
     }
@@ -207,7 +202,6 @@ def _calc_new_namelist_lines(
     run_date_offset = {
         "nowcast": 0,
         "nowcast-green": 0,
-        "nowcast-dev": 0,
         "forecast": 1,
         "forecast2": 2,
     }
@@ -246,7 +240,6 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
         # run-type: previous run's ddmmmyy results directory name
         "nowcast": run_date.shift(days=-1).format("DDMMMYY").lower(),
         "nowcast-green": run_date.shift(days=-1).format("DDMMMYY").lower(),
-        "nowcast-dev": run_date.shift(days=-1).format("DDMMMYY").lower(),
         "forecast": run_date.shift(days=-1).format("DDMMMYY").lower(),
         "forecast2": run_date.shift(days=-2).format("DDMMMYY").lower(),
     }
@@ -346,9 +339,7 @@ def _run_description(run_date, run_type, run_id, restart_timestep, host_name, co
         grid_dir / config["run types"][run_type]["bathymetry"]
     )
     lpe_filename = config["run types"][run_type]["land processor elimination"]
-    run_desc["grid"]["land processor elimination"] = (
-        False if host_name == "salish-nowcast" else os.fspath(grid_dir / lpe_filename)
-    )
+    run_desc["grid"]["land processor elimination"] = os.fspath(grid_dir / lpe_filename)
     run_desc["restart"] = restart_filepaths
     run_desc["output"].update(
         {

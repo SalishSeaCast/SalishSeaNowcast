@@ -64,8 +64,6 @@ def config(base_config):
                 run types:
                   nowcast:
                     config name: SalishSeaCast_Blue
-                  nowcast-dev:
-                    config name: SalishSeaCast_Blue
                   nowcast-green:
                     config name:  SalishSeaCast
                   nowcast-agrif:
@@ -89,12 +87,6 @@ def config(base_config):
                           run sets dir: SS-run-sets/v201905/forecast2/
                         nowcast-green:
                           run sets dir: SS-run-sets/v201905/nowcast-green/
-                    salish:
-                      shared storage: True
-                      make forcing links: True
-                      run types:
-                        nowcast-dev:
-                          run sets dir: SS-run-sets/v201905/nowcast-dev/
                     orcinus:
                       shared storage: False
                       make forcing links: True
@@ -957,11 +949,6 @@ class TestAfterMakeForcingLinks:
                 "arbutus.cloud",
             ),
             (
-                "success nowcast+",
-                ["salish", "nowcast-dev", "--run-date", "2016-10-23"],
-                "salish",
-            ),
-            (
                 "success ssh",
                 ["arbutus.cloud", "forecast", "--run-date", "2016-10-23"],
                 "arbutus.cloud",
@@ -1022,7 +1009,6 @@ class TestAfterRunNEMO:
             "crash",
             "failure nowcast",
             "failure nowcast-green",
-            "failure nowcast-dev",
             "failure forecast",
             "failure forecast2",
         ],
@@ -1038,7 +1024,6 @@ class TestAfterRunNEMO:
         [
             ("success nowcast", "arbutus.cloud"),
             ("success nowcast-green", "arbutus.cloud"),
-            ("success nowcast-dev", "salish"),
             ("success forecast", "arbutus.cloud"),
             ("success forecast2", "arbutus.cloud"),
         ],
@@ -1063,7 +1048,6 @@ class TestAfterWatchNEMO:
             "crash",
             "failure nowcast",
             "failure nowcast-green",
-            "failure nowcast-dev",
             "failure forecast",
             "failure forecast2",
         ],
@@ -1194,12 +1178,6 @@ class TestAfterWatchNEMO:
         ]
         assert workers[2:4] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
-        not_expected = NextWorker(
-            "nowcast.workers.upload_forcing",
-            args=["salish-nowcast", "turbidity"],
-            host="localhost",
-        )
-        assert not_expected not in workers
 
     def test_success_forecast_no_launch_make_fvcom_boundary(self, config, checklist):
         workers = next_workers.after_watch_NEMO(
@@ -1276,31 +1254,6 @@ class TestAfterWatchNEMO:
         assert workers[1] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
 
-    def test_success_nowcast_green_launch_make_forcing_links_nowcastp_shared_storage(
-        self, config, checklist
-    ):
-        workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success nowcast-green",
-                {
-                    "nowcast-green": {
-                        "host": "arbutus.cloud",
-                        "run date": "2017-05-31",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_forcing_links",
-            args=["salish", "nowcast+", "--shared-storage"],
-            host="localhost",
-        )
-        assert workers[0] == expected
-
     @pytest.mark.parametrize(
         "msg",
         [
@@ -1373,38 +1326,6 @@ class TestAfterWatchNEMO:
                 "make_ww3_wind_file",
                 "make_ww3_current_file",
             }
-
-    @pytest.mark.parametrize(
-        "msg",
-        [
-            Message(
-                "watch_NEMO",
-                "success nowcast-dev",
-                {
-                    "nowcast-dev": {
-                        "host": "salish",
-                        "run date": "2016-10-15",
-                        "completed": True,
-                    }
-                },
-            )
-        ],
-    )
-    def test_success_nowcast_dev_no_launch_download_results(
-        self, msg, config, checklist
-    ):
-        workers = next_workers.after_watch_NEMO(msg, config, checklist)
-        download_results = NextWorker(
-            "nowcast.workers.download_results",
-            args=[
-                msg.payload["nowcast-dev"]["host"],
-                msg.type.split()[1],
-                "--run-date",
-                msg.payload["nowcast-dev"]["run date"],
-            ],
-            host="localhost",
-        )
-        assert download_results not in workers
 
 
 class TestAfterRunNEMO_AGRIF:

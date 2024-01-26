@@ -187,7 +187,6 @@ class TestConfig:
                 "arbutus.cloud-nowcast",
                 ["nowcast", "forecast", "forecast2", "nowcast-green"],
             ),
-            ("salish-nowcast", ["nowcast-dev", "nowcast-green"]),
             ("orcinus-nowcast-agrif", ["nowcast-agrif"]),
             ("graham-dtn", []),
             ("optimum-hindcast", []),
@@ -222,18 +221,6 @@ class TestConfig:
                 "arbutus.cloud-nowcast",
                 "nowcast-green",
                 "/nemoShare/MEOPAR/SalishSea/nowcast-green/",
-            ),
-            (
-                "enabled hosts",
-                "salish-nowcast",
-                "nowcast-dev",
-                "/results/SalishSea/nowcast-dev.201905/",
-            ),
-            (
-                "enabled hosts",
-                "salish-nowcast",
-                "nowcast-green",
-                "/results2/SalishSea/nowcast-green.201905/",
             ),
             (
                 "enabled hosts",

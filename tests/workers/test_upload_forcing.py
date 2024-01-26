@@ -141,7 +141,6 @@ class TestConfig:
         "host, ssh_key",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
-            ("salish-nowcast", "/results/forcing/sshNeahBay/"),
             (
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
@@ -181,7 +180,6 @@ class TestConfig:
         "host, expected",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
-            ("salish-nowcast", "/results/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
             ("graham-dtn", "/project/def-allen/SalishSea/forcing/rivers/"),
@@ -198,10 +196,6 @@ class TestConfig:
         "host, expected",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
-            (
-                "salish-nowcast",
-                "/results/forcing/atmospheric/continental2.5/nemo_forcing/",
-            ),
             (
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/atmospheric/continental2.5/nemo_forcing/",
@@ -227,7 +221,6 @@ class TestConfig:
         "host, expected",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
-            ("salish-nowcast", "/results/forcing/LiveOcean/boundary_conditions/"),
             (
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",

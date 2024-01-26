@@ -16,11 +16,11 @@
 .. SPDX-License-Identifier: Apache-2.0
 
 
-.. _SkookumSalishDeployment:
+.. _SkookumDeployment:
 
-***************************************
-:kbd:`skookum`/:kbd:`salish` Deployment
-***************************************
+************************
+:kbd:`skookum`Deployment
+************************
 
 Git Repositories
 ================
@@ -47,42 +47,6 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@gitlab.com:douglatornell/OPPTools.git
-    $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
-    $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
-    $ git clone git@github.com:SalishSeaCast/XIOS-2.git
-
-
-Build XIOS-2
-============
-
-Symlink the XIOS-2 build configuration files for :kbd:`salish` from the
-:file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
-
-.. code-block:: bash
-
-    $ cd /SalishSeaCast/XIOS-2/arch
-    $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_SALISH.fcm
-    $ ln -s ../../XIOS-ARCH/UBC-EOAS/arch-GCC_SALISH.path
-
-:command:`ssh` to :kbd:`salish` and build XIOS-2 with:
-
-.. code-block:: bash
-
-    $ cd /SalishSeaCast/XIOS-2
-    $ ./make_xios --arch GCC_SALISH --netcdf_lib netcdf4_seq --job 8
-
-
-Build NEMO-3.6
-==============
-
-Build NEMO-3.6 and :program:`rebuild_nemo.exe`:
-
-.. code-block:: bash
-
-    $ cd /SalishSeaCast/NEMO-3.6-code/NEMOGCM/CONFIG
-    $ XIOS_HOME=/SalishSeaCast/XIOS-2 ./makenemo -m GCC_SALISH -n SalishSeaCast_Blue -j8
-    $ cd /SalishSeaCast/NEMO-3.6-code/NEMOGCM/TOOLS/
-    $ XIOS_HOME=/SalishSeaCast/XIOS-2 ./maketools -m GCC_SALISH -n REBUILD_NEMO
 
 
 Python Packages
@@ -263,9 +227,6 @@ On the hosts where the nowcast system NEMO runs will be executed create a
     $ ln -s ../tracers
 
 The hosts and their :file:`runs` directories presently in use are:
-
-* :kbd:`salish`
-    :file:`/SalishSeaCast/runs/`
 
 * :kbd:`arbutus.cloud`
     See :ref:`ArbutusCloudNEMORunsDirectory`

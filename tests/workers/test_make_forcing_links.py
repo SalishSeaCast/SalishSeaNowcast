@@ -56,12 +56,11 @@ def config(base_config):
                         rivers dir: rivers/
                         Fraser turbidity dir: rivers/river_turb/
 
+                    ### retained to test --shared-storage option
                     salish-nowcast:
                       run prep dir: runs/
                       forcing:
                         ssh dir: sshNeahBay/
-                        rivers dir: rivers/
-                        Fraser turbidity dir: rivers/river_turb/
                 """
             )
         )
@@ -156,7 +155,6 @@ class TestConfig:
         "host, ssh_key",
         (
             ("arbutus.cloud-nowcast", "SalishSeaNEMO-nowcast_id_rsa"),
-            ("salish-nowcast", "SalishSeaNEMO-nowcast_id_rsa"),
             ("orcinus-nowcast-agrif", "SalishSeaNEMO-nowcast_id_rsa"),
             ("graham-dtn", "SalishSeaNEMO-nowcast_id_rsa"),
             ("optimum-hindcast", "SalishSeaNEMO-nowcast_id_rsa"),
@@ -169,7 +167,6 @@ class TestConfig:
         "host, run_prep_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/nowcast-sys/runs"),
-            ("salish-nowcast", "/SalishSeaCast/runs/"),
             ("orcinus-nowcast-agrif", "/home/dlatorne/nowcast-agrif-sys/runs"),
         ),
     )
@@ -183,7 +180,6 @@ class TestConfig:
         "host, ssh_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
-            ("salish-nowcast", "/results/forcing/sshNeahBay/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/sshNeahBay/"),
             ("graham-dtn", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
             (
@@ -207,7 +203,6 @@ class TestConfig:
         "host, rivers_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
-            ("salish-nowcast", "/results/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
             ("graham-dtn", "/project/def-allen/SalishSea/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
@@ -253,10 +248,6 @@ class TestConfig:
         "host, weather_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/"),
-            (
-                "salish-nowcast",
-                "/results/forcing/atmospheric/continental2.5/nemo_forcing/",
-            ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/continental2.5/NEMO-atmos/"),
             (
                 "graham-dtn",
@@ -284,7 +275,6 @@ class TestConfig:
         "host, bc_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
-            ("salish-nowcast", "/results/forcing/LiveOcean/boundary_conditions/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/LiveOcean/"),
             ("graham-dtn", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
             (
@@ -302,7 +292,6 @@ class TestConfig:
     (
         ("nowcast+", "arbutus.cloud-nowcast", False),
         ("nowcast+", "orcinus-nowcast-agrif", False),
-        ("nowcast+", "salish-nowcast", True),
         ("ssh", "arbutus.cloud-nowcast", False),
         ("nowcast-green", "arbutus.cloud-nowcast", False),
         ("nowcast-agrif", "orcinus-nowcast-agrif", False),
@@ -335,7 +324,6 @@ class TestSuccess:
     (
         ("nowcast+", "arbutus.cloud-nowcast", False),
         ("nowcast+", "orcinus-nowcast-agrif", False),
-        ("nowcast+", "salish-nowcast", True),
         ("ssh", "arbutus.cloud-nowcast", False),
         ("nowcast-green", "arbutus.cloud-nowcast", False),
         ("nowcast-agrif", "orcinus-nowcast-agrif", False),
@@ -476,11 +464,8 @@ class TestMakeRunoffLinks:
         "run_type, host",
         (
             ("nowcast+", "arbutus.cloud"),
-            ("nowcast+", "salish-nowcast"),
             ("forecast2", "arbutus.cloud"),
-            ("forecast2", "salish-nowcast"),
             ("ssh", "arbutus.cloud"),
-            ("ssh", "salish-nowcast"),
             ("nowcast-green", "arbutus.cloud"),
             ("nowcast-agrif", "arbutus.cloud"),
         ),

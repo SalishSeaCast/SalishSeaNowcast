@@ -23,7 +23,7 @@ Nowcast Production Deployments
 ******************************
 
 In October 2016 the production deployment of the nowcast system was changed to use the :ref:`SalishSeaNowcast-repo` package that is based on the `NEMO_Nowcast framework`_ framework.
-The production deployment uses 3 systems:
+The production deployment uses 2 systems:
 
 .. _NEMO_Nowcast framework: https://nemo-nowcast.readthedocs.io/en/latest/
 
@@ -31,14 +31,6 @@ The production deployment uses 3 systems:
    :py:mod:`nemo_nowcast.manager`,
    :py:mod:`nemo_nowcast.log_aggregator`,
    most of the pre- and post-processing workers run on the :ref:`SalishSeaModelResultsServer`, :kbd:`skookum`, where the deployment is in the :file:`/SalishSeaCast/` directory tree.
-
-#. The development compute server,
-   :kbd:`salish`,
-   is used to run the daily development model run,
-   :kbd:`nowcast-dev` NEMO-3.6 model run.
-   :kbd:`salish` and :kbd:`skookum` share storage via NFS mounts,
-   so,
-   :kbd:`salish` uses the same deployment in the :file:`/SalishSeaCast/` directory tree.
 
 #. The daily
    :kbd:`forecast2`
@@ -73,13 +65,13 @@ The production deployment uses 3 systems:
    .. _arbutus.cloud: https://docs.alliancecan.ca/wiki/Cloud_resources#Arbutus_cloud
    .. _Ceph object storage: https://en.wikipedia.org/wiki/Ceph_(software)
 
-These sections describe the setup of the nowcast system on :kbd:`skookum`/:kbd:`salish` and :kbd:`arbutus.cloud`,
-and it operation.
+These sections describe the setup of the nowcast system on :kbd:`skookum` and :kbd:`arbutus.cloud`,
+and their operation.
 
 .. toctree::
    :maxdepth: 2
 
-   skookum_salish
+   skookum
    arbutus_cloud
    operations
 
@@ -106,3 +98,10 @@ The setup on :kbd:`optimum` is described in:
 See also the `#optimum-cluster`_ Slack channel.
 
 .. _#optimum-cluster: https://salishseacast.slack.com/?redir=%2Farchives%2FC011S7BCWGK
+
+With the update of the production to run the V21-11 model version in January 2024,
+we decided to end the daily :kbd:`nowcast-dev` development model runs on :kbd:`salish`.
+Development is now generally done in research runs on :kbd:`graham`.
+:kbd:`salish` is now mostly used for analysis tasks, post-processing of NEMO model results files
+to produce day-average and month-average dataset files,
+and Lagrangian particle tracking analysis with :program:`ariane` and :program:`OceanParcels`.

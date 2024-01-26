@@ -22,7 +22,7 @@ import subprocess
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import call, patch, Mock
+from unittest.mock import patch, Mock
 
 import arrow
 import nemo_nowcast
@@ -41,7 +41,6 @@ def config(base_config):
                 """\
                 results archive:
                   nowcast: results/SalishSea/nowcast-blue.201905/
-                  nowcast-dev: results/SalishSea/nowcast-dev.201905/
                   nowcast-green: results2/SalishSea/nowcast-green.201905/
                   forecast: results/SalishSea/forecast.201905/
                   forecast2: results/SalishSea/forecast2.201905/
@@ -55,14 +54,6 @@ def config(base_config):
                     land processor elimination: bathymetry_201702.csv
                     duration: 1  # day
                     restart from: nowcast
-                  nowcast-dev:
-                    config name: SalishSeaCast_Blue
-                    coordinates: coordinates_seagrid_SalishSea201702.nc
-                    bathymetry: bathymetry_201702.nc
-                    mesh mask: mesh_mask201702.nc
-                    land processor elimination: bathymetry_201702.csv
-                    duration: 1  # day
-                    restart from: nowcast-dev
                   nowcast-green:
                     config name:  SalishSeaCast
                     coordinates: coordinates_seagrid_SalishSea201702.nc
@@ -116,23 +107,6 @@ def config(base_config):
                           results: results/SalishSea/nowcast-green/
                       forcing:
                         bottom friction mask: grid/jetty_mask_bathy201702.nc
-
-                    salish-nowcast:
-                      run prep dir: nowcast-sys/runs/
-                      grid dir: nowcast-sys/grid/
-                      salishsea_cmd: bin/salishsea
-                      job exec cmd: qsub
-                      email: somebody@example.com
-                      run types:
-                        nowcast-dev:
-                          run sets dir: SS-run-sets/SalishSea/nemo3.6/nowcast-dev/
-                          mpi decomposition: 1x7
-                          walltime: "23:30:00"
-                          results: results/SalishSea/nowcast-dev/
-                        nowcast-green:
-                          results: results/SalishSea/nowcast-dev/
-                      forcing:
-                        bottom friction mask: grid/jetty_mask_bathy201702.nc
                 """
             )
         )
@@ -153,7 +127,7 @@ def tmp_results(tmpdir, run_date, scope="function"):
     Created anew for each test function/method.
     """
     tmp_results = tmpdir.ensure_dir("results")
-    for run_type in ("nowcast", "nowcast-green", "nowcast-dev", "forecast"):
+    for run_type in ("nowcast", "nowcast-green", "forecast"):
         tmp_results.ensure(
             "SalishSea",
             run_type,
@@ -211,7 +185,6 @@ def tmp_results(tmpdir, run_date, scope="function"):
         "run prep dir": tmp_run_prep,
         "results": {
             "nowcast": tmp_results.ensure_dir("SalishSea", "nowcast"),
-            "nowcast-dev": tmp_results.ensure_dir("SalishSea", "nowcast-dev"),
             "nowcast-green": tmp_results.ensure_dir("SalishSea", "nowcast-green"),
             "forecast": tmp_results.ensure_dir("SalishSea", "forecast"),
             "forecast2": tmp_results.ensure_dir("SalishSea", "forecast2"),
@@ -250,7 +223,6 @@ class TestMain:
         assert kwargs["choices"] == {
             "nowcast",
             "nowcast-green",
-            "nowcast-dev",
             "forecast",
             "forecast2",
         }
@@ -272,7 +244,7 @@ class TestMain:
 
 
 @pytest.mark.parametrize(
-    "run_type", ["nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"]
+    "run_type", ["nowcast", "nowcast-green", "forecast", "forecast2"]
 )
 @patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestSuccess:
@@ -290,7 +262,7 @@ class TestSuccess:
 
 
 @pytest.mark.parametrize(
-    "run_type", ["nowcast", "nowcast-green", "nowcast-dev", "forecast", "forecast2"]
+    "run_type", ["nowcast", "nowcast-green", "forecast", "forecast2"]
 )
 @patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestFailure:
@@ -445,7 +417,6 @@ class TestRunDescription:
         [
             ("arbutus.cloud", "nowcast", "SalishSeaCast_Blue"),
             ("arbutus.cloud", "nowcast-green", "SalishSeaCast"),
-            ("salish-nowcast", "nowcast-dev", "SalishSeaCast_Blue"),
             ("arbutus.cloud", "forecast", "SalishSeaCast_Blue"),
             ("arbutus.cloud", "forecast2", "SalishSeaCast_Blue"),
         ],
@@ -474,7 +445,6 @@ class TestRunDescription:
         [
             ("arbutus.cloud", "nowcast", "04jan16nowcast"),
             ("arbutus.cloud", "nowcast-green", "04jan16nowcast-green"),
-            ("salish-nowcast", "nowcast-dev", "04jan16nowcast-dev"),
             ("arbutus.cloud", "forecast", "04jan16forecast"),
             ("arbutus.cloud", "forecast2", "04jan16forecast2"),
         ],
@@ -503,7 +473,6 @@ class TestRunDescription:
         [
             ("arbutus.cloud", "nowcast", "11x18"),
             ("arbutus.cloud", "nowcast-green", "11x18"),
-            ("salish-nowcast", "nowcast-dev", "1x7"),
             ("arbutus.cloud", "forecast", "11x18"),
             ("arbutus.cloud", "forecast2", "11x18"),
         ],
@@ -532,7 +501,6 @@ class TestRunDescription:
         [
             ("arbutus.cloud", "nowcast", None),
             ("arbutus.cloud", "nowcast-green", None),
-            ("salish-nowcast", "nowcast-dev", "23:30:00"),
             ("arbutus.cloud", "forecast", None),
             ("arbutus.cloud", "forecast2", None),
         ],
@@ -587,7 +555,6 @@ class TestRunDescription:
         [
             ("arbutus.cloud", "nowcast", "runs directory"),
             ("arbutus.cloud", "nowcast-green", "runs directory"),
-            ("salish-nowcast", "nowcast-dev", "runs directory"),
             ("arbutus.cloud", "forecast", "runs directory"),
             ("arbutus.cloud", "forecast2", "runs directory"),
         ],
@@ -621,11 +588,6 @@ class TestRunDescription:
             (
                 "arbutus.cloud",
                 "nowcast-green",
-                "nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc",
-            ),
-            (
-                "salish-nowcast",
-                "nowcast-dev",
                 "nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc",
             ),
             (
@@ -668,7 +630,6 @@ class TestRunDescription:
                 "nowcast-green",
                 "nowcast-sys/grid/bathymetry_201702.nc",
             ),
-            ("salish-nowcast", "nowcast-dev", "nowcast-sys/grid/bathymetry_201702.nc"),
             ("arbutus.cloud", "forecast", "nowcast-sys/grid/bathymetry_201702.nc"),
             ("arbutus.cloud", "forecast2", "nowcast-sys/grid/bathymetry_201702.nc"),
         ],
@@ -701,7 +662,6 @@ class TestRunDescription:
                 "nowcast-green",
                 "nowcast-sys/grid/bathymetry_201702.csv",
             ),
-            ("salish-nowcast", "nowcast-dev", False),
         ],
     )
     def test_grid_land_processor_elimination(
@@ -746,20 +706,6 @@ class TestRunDescription:
             (
                 "arbutus.cloud",
                 "nowcast-green",
-                "rivers-climatology",
-                "rivers-climatology",
-            ),
-            ("salish-nowcast", "nowcast-dev", "NEMO-atmos", "NEMO-atmos"),
-            ("salish-nowcast", "nowcast-dev", "ssh", "ssh"),
-            ("salish-nowcast", "nowcast-dev", "tides", "tides"),
-            ("salish-nowcast", "nowcast-dev", "tracers", "tracers"),
-            ("salish-nowcast", "nowcast-dev", "LiveOcean", "LiveOcean"),
-            ("salish-nowcast", "nowcast-dev", "rivers", "rivers"),
-            ("salish-nowcast", "nowcast-dev", "river_turb", "rivers"),
-            ("salish-nowcast", "nowcast-dev", "grid", "grid"),
-            (
-                "salish-nowcast",
-                "nowcast-dev",
                 "rivers-climatology",
                 "rivers-climatology",
             ),
@@ -816,7 +762,6 @@ class TestRunDescription:
             ("arbutus.cloud", "nowcast"),
             ("arbutus.cloud", "forecast"),
             ("arbutus.cloud", "nowcast-green"),
-            ("salish-nowcast", "nowcast-dev"),
             ("arbutus.cloud", "forecast2"),
         ],
     )
@@ -890,7 +835,6 @@ class TestRunDescription:
         [
             ("arbutus.cloud", "nowcast"),
             ("arbutus.cloud", "nowcast-green"),
-            ("salish-nowcast", "nowcast-dev"),
             ("arbutus.cloud", "forecast"),
             ("arbutus.cloud", "forecast2"),
         ],
@@ -1138,89 +1082,6 @@ class TestBuildScript:
         for i, line in enumerate(expected.splitlines()[:-1]):
             assert script[i].strip() == line.strip()
 
-    @patch("nowcast.workers.run_NEMO.nemo_cmd.prepare.load_run_desc")
-    @patch("nowcast.workers.run_NEMO.nemo_cmd.prepare.get_n_processors", return_value=7)
-    def test_script_salish(self, m_gnp, m_lrd, config, tmpdir):
-        tmp_run_dir = tmpdir.ensure_dir("tmp_run_dir")
-        run_desc_file = tmpdir.ensure("13may17.yaml")
-        host_config = config["run"]["enabled hosts"]["salish-nowcast"]
-        results_dir = tmpdir.ensure_dir(
-            host_config["run types"]["nowcast-dev"]["results"]
-        )
-        p_config = patch.dict(
-            config["results archive"], {"nowcast-dev": str(results_dir)}
-        )
-        m_lrd.return_value = {
-            "run_id": "13may17nowcast",
-            "MPI decomposition": "1x7",
-            "walltime": "23:30:00",
-            "output": {"XIOS servers": 1},
-        }
-        with p_config:
-            with patch("salishsea_cmd.run.SYSTEM", "salish"):
-                script = run_NEMO._build_script(
-                    Path(str(tmp_run_dir)),
-                    "nowcast-dev",
-                    Path(str(run_desc_file)),
-                    Path(str(results_dir)) / "13may17",
-                    "salish-nowcast",
-                    config,
-                )
-        expected = f"""#!/bin/bash
-
-        #PBS -N 13may17nowcast
-        #PBS -S /bin/bash
-        #PBS -l walltime=23:30:00
-        # email when the job [b]egins and [e]nds, or is [a]borted
-        #PBS -m bea
-        #PBS -M somebody@example.com
-        #PBS -l procs=8
-        # total memory for job
-        #PBS -l mem=64gb
-
-        RUN_ID="13may17nowcast"
-        RUN_DESC="13may17.yaml"
-        WORK_DIR="{tmp_run_dir}"
-        RESULTS_DIR="{results_dir}/13may17"
-        MPIRUN="mpirun"
-        COMBINE="bin/salishsea combine"
-        GATHER="bin/salishsea gather"
-
-        mkdir -p ${{RESULTS_DIR}}
-
-        cd ${{WORK_DIR}}
-        echo "working dir: $(pwd)" >>${{RESULTS_DIR}}/stdout
-
-        echo "Starting run at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{MPIRUN}} -np 7 --bind-to none ./nemo.exe : \
--np 1 --bind-to none ./xios_server.exe \
->>${{RESULTS_DIR}}/stdout 2>>${{RESULTS_DIR}}/stderr
-        echo "Ended run at $(date)" >>${{RESULTS_DIR}}/stdout
-
-        echo "Results combining started at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{COMBINE}} ${{RUN_DESC}} --debug \
->>${{RESULTS_DIR}}/stdout
-        echo "Results combining ended at $(date)" >>${{RESULTS_DIR}}/stdout
-
-        echo "Results gathering started at $(date)" >>${{RESULTS_DIR}}/stdout
-        ${{GATHER}} ${{RESULTS_DIR}} --debug \
->>${{RESULTS_DIR}}/stdout
-        echo "Results gathering ended at $(date)" >>${{RESULTS_DIR}}/stdout
-
-        chmod g+rwx ${{RESULTS_DIR}}
-        chmod g+rw ${{RESULTS_DIR}}/*
-        chmod o+rx ${{RESULTS_DIR}}
-        chmod o+r ${{RESULTS_DIR}}/*
-
-        echo "Deleting run directory" >>${{RESULTS_DIR}}/stdout
-        rmdir $(pwd)
-        echo "Finished at $(date)" >>${{RESULTS_DIR}}/stdout
-        """
-
-        script = script.splitlines()
-        for i, line in enumerate(expected.splitlines()[:-1]):
-            assert script[i].strip() == line.strip()
-
 
 class TestDefinitions:
     """Unit test for _definitions() function."""
@@ -1240,14 +1101,14 @@ class TestDefinitions:
             run_desc_filepath,
             run_dir,
             results_dir,
-            "salish-nowcast",
+            "arbutus.cloud",
             config,
         )
         expected = """RUN_ID="03dec16nowcast"
         RUN_DESC="03dec16.yaml"
         WORK_DIR="tmp_run_dir"
         RESULTS_DIR="results_dir"
-        MPIRUN="mpirun"
+        MPIRUN="mpirun --mca btl ^openib --mca orte_tmpdir_base /dev/shm --hostfile ${HOME}/mpi_hosts"
         COMBINE="bin/salishsea combine"
         GATHER="bin/salishsea gather"
         """
@@ -1365,18 +1226,6 @@ class TestLaunchRun:
         run_NEMO._launch_run_script(run_type, "SalishSeaNEMO.sh", host, config)
         m_popen.assert_called_once_with(["bash", "SalishSeaNEMO.sh"])
 
-    @pytest.mark.parametrize("run_type, host", [("nowcast-dev", "salish-nowcast")])
-    def test_qsub_launch_run_script(
-        self, m_run, m_popen, m_logger, run_type, host, config
-    ):
-        run_NEMO._launch_run_script(run_type, "SalishSeaNEMO.sh", host, config)
-        assert m_run.call_args_list[0] == call(
-            ["qsub", "SalishSeaNEMO.sh"],
-            stdout=subprocess.PIPE,
-            check=True,
-            universal_newlines=True,
-        )
-
     @pytest.mark.parametrize(
         "run_type, host",
         [
@@ -1392,22 +1241,6 @@ class TestLaunchRun:
         run_NEMO._launch_run_script(run_type, "SalishSeaNEMO.sh", host, config)
         m_run.assert_called_once_with(
             ["pgrep", "--newest", "--exact", "--full", "bash SalishSeaNEMO.sh"],
-            stdout=subprocess.PIPE,
-            check=True,
-            universal_newlines=True,
-        )
-
-    @pytest.mark.parametrize("run_type, host", [("nowcast-dev", "salish-nowcast")])
-    def test_find_qsub_run_process_pid(
-        self, m_run, m_popen, m_logger, run_type, host, config
-    ):
-        m_run.side_effect = [
-            SimpleNamespace(stdout="4343.master"),
-            SimpleNamespace(stdout="4444"),
-        ]
-        run_NEMO._launch_run_script(run_type, "SalishSeaNEMO.sh", host, config)
-        assert m_run.call_args_list[1] == call(
-            ["pgrep", "4343.master"],
             stdout=subprocess.PIPE,
             check=True,
             universal_newlines=True,
@@ -1429,15 +1262,3 @@ class TestLaunchRun:
         )
         assert run_exec_cmd == "bash SalishSeaNEMO.sh"
         assert run_id is None
-
-    @pytest.mark.parametrize("run_type, host", [("nowcast-dev", "salish-nowcast")])
-    def test_qsub_run(self, m_run, m_popen, m_logger, run_type, host, config):
-        m_run.side_effect = [
-            SimpleNamespace(stdout="4343.master"),
-            SimpleNamespace(stdout="4444"),
-        ]
-        run_exec_cmd, run_id = run_NEMO._launch_run_script(
-            run_type, "SalishSeaNEMO.sh", host, config
-        )
-        assert run_exec_cmd == "qsub SalishSeaNEMO.sh"
-        assert run_id == "4343.master"
