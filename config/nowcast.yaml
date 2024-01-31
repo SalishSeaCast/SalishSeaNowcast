@@ -162,23 +162,23 @@ rivers:
     TheodosiaDiversion: /results/forcing/rivers/observations/Theodosia_Diversion_flow
   # File that describes Fraser River climatology separation from measured
   # flow at Hope
-  # TODO: remove for v202111; not required
+  # **Required for 201702 runoff files used by nowcast-agrif**
   Fraser climatology: /SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
   # Monthly climatology
-  # TODO: remove for v202111; not required
+  # **Required for 201702 runoff files used by nowcast-agrif**
   monthly climatology:
     b201702: /SalishSeaCast/rivers-climatology/rivers_month_201702.nc
   # Templates for the runoff forcing file name
   # **Must be quoted to project {} characters**
-  # TODO: collapse to single item for v202111; b201702 key not required
   file templates:
+    # **201702 runoff files are used by nowcast-agrif**
     b201702:  "R201702DFraCElse_{:y%Ym%md%d}.nc"
     b202108:  "R202108Dailies_{:y%Ym%md%d}.nc"
   # Module containing dictionary of the proportions that each river occupies in its watershed
-  # TODO: collapse to single item for v202111; b201702 key not required
   prop_dict modules:
+    # **201702 runoff files are used by nowcast-agrif**
     b201702: salishsea_tools.river_201702
     b202108: salishsea_tools.river_202108
   turbidity:
