@@ -495,21 +495,32 @@ class TestUploadLiveOceanFiles:
         [("nowcast+", logging.CRITICAL), ("forecast2", logging.INFO)],
     )
     def test_live_ocean_persistence_symlink_logging_level(
-        self, m_upload_file, run_type, logging_level, mock_sftp_client, config, caplog
+        self,
+        mock_upload_file,
+        run_type,
+        logging_level,
+        mock_sftp_client,
+        config,
+        caplog,
+        monkeypatch,
     ):
+        def mock_symlink_to(localpath, remotepath):
+            pass
+
+        monkeypatch.setattr(upload_forcing.Path, "symlink_to", mock_symlink_to)
+
         run_date = arrow.get("2017-09-03")
         host_config = config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
         caplog.set_level(logging_level)
 
-        with patch("nowcast.workers.upload_forcing.Path.symlink_to"):
-            upload_forcing._upload_live_ocean_files(
-                mock_sftp_client,
-                run_type,
-                run_date,
-                config,
-                "arbutus.cloud",
-                host_config,
-            )
+        upload_forcing._upload_live_ocean_files(
+            mock_sftp_client,
+            run_type,
+            run_date,
+            config,
+            "arbutus.cloud",
+            host_config,
+        )
 
         if logging_level is None:
             assert not caplog.messages
