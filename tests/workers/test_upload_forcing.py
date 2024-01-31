@@ -39,6 +39,12 @@ def config(base_config):
         f.write(
             textwrap.dedent(
                 """\
+                rivers:
+                  rivers dir: /results/forcing/rivers/
+                  file templates:
+                    b201702:  "R201702DFraCElse_{:y%Ym%md%d}.nc"
+                    b202108:  "R202108Dailies_{:y%Ym%md%d}.nc"
+
                 temperature salinity:
                     bc dir: /results/forcing/LiveOcean/modified
                     file template: 'single_LO_{:y%Ym%md%d}.nc'
@@ -49,12 +55,19 @@ def config(base_config):
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
                                 bc dir: /nemoShare/MEOPAR/LiveOcean/
+                                rivers dir: /nemoShare/MEOPAR/rivers/
                         orcinus-nowcast-agrif:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
+                            forcing:
+                                rivers dir: /home/sallen/MEOPAR/rivers/
                         graham-dtn:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
+                            forcing:
+                                rivers dir: /project/def-allen/SalishSea/forcing/rivers/
                         optimum-hindcast:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
+                            forcing:
+                                rivers dir: /data/sallen/shared/SalishSeaCast/forcing/rivers/
                 """
             )
         )
@@ -484,7 +497,47 @@ class TestChecklist:
 
 @patch(
     "nowcast.workers.upload_forcing.ssh_sftp.upload_file",
-    side_effect=[FileNotFoundError, None, FileNotFoundError, None],
+    side_effect=[FileNotFoundError, None] * 4,
+    autospec=True,
+)
+class TestUploadRiverRunoffFiles:
+    """Unit tests for _upload_river_runoff_files() function."""
+
+    @pytest.mark.parametrize(
+        "run_type",
+        ["nowcast+", "forecast2"],
+    )
+    def test_runoff_files_persistence_symlink_logging_level(
+        self,
+        mock_upload_file,
+        run_type,
+        mock_sftp_client,
+        config,
+        caplog,
+        monkeypatch,
+    ):
+        def mock_symlink_to(localpath, remotepath):
+            pass
+
+        monkeypatch.setattr(upload_forcing.Path, "symlink_to", mock_symlink_to)
+
+        run_date = arrow.get("2024-01-31")
+        host_config = config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
+        caplog.set_level(logging.DEBUG)
+
+        upload_forcing._upload_river_runoff_files(
+            mock_sftp_client, run_date, config, "arbutus.cloud", host_config
+        )
+
+        assert caplog.records[0].levelno == logging.CRITICAL
+        assert caplog.messages[0].endswith("R201702DFraCElse_y2024m01d30.nc")
+        assert caplog.records[1].levelno == logging.CRITICAL
+        assert caplog.messages[1].endswith("R202108Dailies_y2024m01d30.nc")
+
+
+@patch(
+    "nowcast.workers.upload_forcing.ssh_sftp.upload_file",
+    side_effect=[FileNotFoundError, None] * 2,
     autospec=True,
 )
 class TestUploadLiveOceanFiles:
@@ -511,7 +564,7 @@ class TestUploadLiveOceanFiles:
 
         run_date = arrow.get("2017-09-03")
         host_config = config["run"]["enabled hosts"]["arbutus.cloud-nowcast"]
-        caplog.set_level(logging_level)
+        caplog.set_level(logging.DEBUG)
 
         upload_forcing._upload_live_ocean_files(
             mock_sftp_client,
