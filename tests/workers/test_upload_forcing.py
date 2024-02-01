@@ -530,9 +530,9 @@ class TestUploadRiverRunoffFiles:
         )
 
         assert caplog.records[0].levelno == logging.CRITICAL
-        assert caplog.messages[0].endswith("R201702DFraCElse_y2024m01d30.nc")
+        assert caplog.messages[0].endswith("R201702DFraCElse_y2024m01d29.nc")
         assert caplog.records[1].levelno == logging.CRITICAL
-        assert caplog.messages[1].endswith("R202108Dailies_y2024m01d30.nc")
+        assert caplog.messages[1].endswith("R202108Dailies_y2024m01d29.nc")
 
 
 @patch(
