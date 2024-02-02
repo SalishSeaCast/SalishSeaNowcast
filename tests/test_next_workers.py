@@ -138,6 +138,14 @@ class TestAfterWorkerFunctions:
             assert f"after_{worker_module.stem}" in after_funcs
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements used in after_*() functions"""
+
+    def test_obs_ctd_data(self, prod_config):
+        cdt_data = prod_config["observations"]["ctd data"]
+        assert cdt_data["stations"] == ["SCVIP", "SEVIP"]
+
+
 class TestAfterDownloadWeather:
     """Unit tests for the after_download_weather function."""
 
