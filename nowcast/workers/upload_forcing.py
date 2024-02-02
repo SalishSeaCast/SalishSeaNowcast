@@ -191,7 +191,25 @@ def _upload_river_runoff_files(sftp_client, run_date, config, host_name, host_co
         filename = tmpl.format(run_date.shift(days=-1).date())
         localpath = Path(config["rivers"]["rivers dir"], filename)
         remotepath = Path(host_config["forcing"]["rivers dir"], filename)
-        ssh_sftp.upload_file(sftp_client, host_name, localpath, remotepath, logger)
+        try:
+            ssh_sftp.upload_file(sftp_client, host_name, localpath, remotepath, logger)
+        except FileNotFoundError:
+            # River runoff file does not exist, so create symlink to
+            # persist previous day's file.
+            prev_day_fn = tmpl.format(run_date.shift(days=-2).date())
+            try:
+                localpath.symlink_to(localpath.with_name(prev_day_fn))
+            except FileExistsError:
+                # This probably happens due to a race condition when 2 or more
+                # upload_forcing workers are running concurrently.
+                # So, we assume that another instance created the symlink, and
+                # don't worry.
+                pass
+            logger.critical(
+                f"Rivers runoff forcing file not found; created symlink to "
+                f"{localpath.with_name(prev_day_fn)}"
+            )
+            ssh_sftp.upload_file(sftp_client, host_name, localpath, remotepath, logger)
 
 
 def _upload_weather(sftp_client, run_type, run_date, config, host_name, host_config):
