@@ -79,15 +79,15 @@ def failure(parsed_args):
 def get_onc_ctd(parsed_args, config, *args):
     ymd = parsed_args.data_date.format("YYYY-MM-DD")
     logger.info(f"requesting ONC {parsed_args.onc_station} CTD T&S data for {ymd}")
-    TOKEN = os.environ["ONC_USER_TOKEN"]
     onc_data = data_tools.get_onc_data(
         "scalardata",
-        "getByStation",
-        TOKEN,
-        station=parsed_args.onc_station,
-        deviceCategory="CTD",
-        sensors="salinity,temperature",
+        "getByLocation",
+        os.environ["ONC_USER_TOKEN"],
+        locationCode=parsed_args.onc_station,
+        deviceCategoryCode="CTD",
+        sensorCategoryCodes="salinity,temperature",
         dateFrom=data_tools.onc_datetime(f"{ymd} 00:00", "utc"),
+        dateTo=data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
     )
     try:
         ctd_data = data_tools.onc_json_to_dataset(onc_data)
