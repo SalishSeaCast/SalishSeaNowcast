@@ -86,9 +86,89 @@ class TestConfig:
             "crash",
         ]
 
+    def test_TWDP_ferry_platform(self, prod_config):
+        ferry_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"]
+        assert ferry_config["route name"] == "Tsawwassen - Duke Point"
+        expected = "Mobile Platforms, British Columbia Ferries, Tsawwassen - Duke Point"
+        assert ferry_config["ONC station description"] == expected
+
+    def test_TWDP_location(self, prod_config):
+        location_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"][
+            "location"
+        ]
+        assert location_config["stations"] == ["TWDP.N1", "TWDP.N2"]
+        assert location_config["device category"] == "NAV"
+        assert location_config["sensors"] == ["longitude", "latitude"]
+        assert location_config["terminals"] == ["Tsawwassen", "Duke Pt."]
+
+    def test_TWDP_devices(self, prod_config):
+        devices_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"][
+            "devices"
+        ]
+        expected = {
+            "TSG": {
+                "sensors": {
+                    "temperature": "temperature",
+                    "conductivity": "conductivity",
+                    "salinity": "salinity",
+                },
+            },
+            "OXYSENSOR": {
+                "sensors": {
+                    "o2_saturation": "oxygen_saturation",
+                    "o2_concentration_corrected": "oxygen_corrected",
+                    "o2_temperature": "temperature",
+                },
+            },
+            "TURBCHLFL": {
+                "sensors": {
+                    "cdom_fluorescence": "cdom_fluorescence",
+                    "chlorophyll": "chlorophyll",
+                    "turbidity": "turbidity",
+                },
+            },
+            "CO2SENSOR": {
+                "sensors": {
+                    "co2_partial_pressure": "partial_pressure",
+                    "co2_concentration_linearized": "co2",
+                },
+            },
+            "TEMPHUMID": {
+                "sensors": {
+                    "air_temperature": "air_temperature",
+                    "relative_humidity": "rel_humidity",
+                },
+            },
+            "BARPRESS": {
+                "sensors": {
+                    "barometric_pressure": "barometric_pressure",
+                },
+            },
+            "PYRANOMETER": {
+                "sensors": {
+                    "solar_radiation": "solar_radiation",
+                },
+            },
+            "PYRGEOMETER": {
+                "sensors": {
+                    "longwave_radiation": "downward_radiation",
+                },
+            },
+        }
+        assert devices_config == expected
+
     def test_lon_lat_ji_map_path(self, prod_config):
         nemo_ji_map = prod_config["observations"]["lon/lat to NEMO ji map"]
         assert nemo_ji_map == "/SalishSeaCast/grid/grid_from_lat_lon_mask999.nc"
+
+    def test_TWDP_file_path_template(self, prod_config):
+        file_path_tmpl = prod_config["observations"]["ferry data"]["ferries"]["TWDP"][
+            "filepath template"
+        ]
+        assert (
+            file_path_tmpl
+            == "{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_METEO_1m_{yyyymmdd}.nc"
+        )
 
     def test_dest_dir(self, prod_config):
         ferry_data_config = prod_config["observations"]["ferry data"]
@@ -103,7 +183,7 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
-        caplog.set_level(logging.INFO)
+        caplog.set_level(logging.DEBUG)
 
         msg_type = get_onc_ferry.success(parsed_args)
 
@@ -121,7 +201,7 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
-        caplog.set_level(logging.CRITICAL)
+        caplog.set_level(logging.DEBUG)
 
         msg_type = get_onc_ferry.failure(parsed_args)
 
