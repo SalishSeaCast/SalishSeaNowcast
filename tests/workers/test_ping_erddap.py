@@ -153,7 +153,7 @@ class TestConfig:
         assert erddap["datasetIDs"]["SEVIP-CTD"] == ["ubcONCSEVIPCTD15mV1"]
         # USDDL-CTD went out of service since 22-Dec-2019; repair ETA unknown
         # assert erddap["datasetIDs"]["USDDL-CTD"] == ["ubcONCUSDDLCTD15mV1"]
-        assert erddap["datasetIDs"]["TWDP-ferry"] == ["ubcONCTWDP1mV1"]
+        assert erddap["datasetIDs"]["TWDP-ferry"] == ["ubcONCTWDP1mV18-01"]
         assert erddap["datasetIDs"]["nowcast-green"] == [
             "ubcSSg3DBiologyFields1hV21-11",
             "ubcSSg3DLightFields1hV21-11",
