@@ -156,8 +156,6 @@ class TestCalcLocationArrays:
 class TestResampleNavCoord:
     """Unit test for _resample_nav_coord() function."""
 
-    # TODO: remove this skip when issue #174 is resolved
-    @pytest.mark.skip(reason="fails on GHA with pandas=2.0.0; see issue #174")
     def test_resample_nav_coord(self, ferry_platform):
         nav_data = xarray.Dataset(
             data_vars={
