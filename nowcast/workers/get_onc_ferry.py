@@ -15,9 +15,9 @@
 """SalishSeaCast worker that downloads data for a specified UTC day from an ONC BC Ferries
 measurement platform.
 
-The data are filtered to include only values for which qaqcFlag == 1
+The data are filtered to include only values for which qaqcFlag <= 1 or qaqcFlag >= 7
 (meaning that all of ONC's automated QA/QC tests were passed).
-After filtering the data are aggregated into 1 minute bins.
+After filtering, the data are aggregated into 1-minute bins.
 The aggregation functions are mean, standard deviation, and sample count.
 
 The data are stored as a netCDF-4/HDF5 file that is accessible via
@@ -138,6 +138,7 @@ def get_onc_ferry(parsed_args, config, *args):
         os.fspath(nc_filepath), encoding=encoding, unlimited_dims=("time",)
     )
     checklist = {ferry_platform: os.fspath(nc_filepath)}
+    return checklist
 
 
 def _get_nav_data(ferry_platform, ymd, location_config):
@@ -148,12 +149,15 @@ def _get_nav_data(ferry_platform, ymd, location_config):
         try:
             onc_data = data_tools.get_onc_data(
                 "scalardata",
-                "getByStation",
+                "getByLocation",
                 os.environ["ONC_USER_TOKEN"],
-                station=station,
-                deviceCategory=device_category,
-                sensors=sensors,
+                locationCode=station,
+                deviceCategoryCode=device_category,
+                sensorCategoryCodes=sensors,
                 dateFrom=(data_tools.onc_datetime(f"{ymd} 00:00", "utc")),
+                dateTo=data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
+                resampleType="avg",
+                resamplePeriod=1,
             )
         except requests.HTTPError as e:
             msg = (
@@ -260,12 +264,15 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
     try:
         onc_data = data_tools.get_onc_data(
             "scalardata",
-            "getByStation",
+            "getByLocation",
             os.environ["ONC_USER_TOKEN"],
-            station=ferry_platform,
-            deviceCategory=device_category,
-            sensors=sensors,
-            dateFrom=(data_tools.onc_datetime(f"{ymd} 00:00", "utc")),
+            locationCode=ferry_platform,
+            deviceCategoryCode=device_category,
+            sensorCategoryCodes=sensors,
+            dateFrom=data_tools.onc_datetime(f"{ymd} 00:00", "utc"),
+            dateTo=data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
+            resampleType="avg",
+            resamplePeriod=1,
         )
     except requests.HTTPError as e:
         if e.response.status_code == 504:
