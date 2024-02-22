@@ -41,7 +41,7 @@ coloredlogs==15.0.1
 colorspacious==1.1.2
 contourpy==1.2.0
 coverage==7.4.0
-cryptography==42.0.2
+cryptography==42.0.4
 cycler==0.12.1
 cytoolz==0.12.2
 dask==2023.12.1
