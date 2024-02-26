@@ -445,28 +445,40 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             "ioos category": "location",
             "standard name": "longitude",
             "long name": "Longitude",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?&locationCode={ferry_platform}"
+                f"&deviceCategoryCode={location_config['device category']}"
+            ),
         },
         "latitude": {
             "name": "latitude",
             "ioos category": "location",
             "standard name": "latitude",
             "long name": "Latitude",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+                f"&deviceCategoryCode={location_config['device category']}"
+            ),
         },
         "nemo_grid_j": {
             "name": "nemo_grid_j",
             "ioos category": "location",
             "standard name": "nemo_grid_j",
             "long name": "NEMO grid j index",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+                f"&deviceCategoryCode={location_config['device category']}"
+            ),
         },
         "nemo_grid_i": {
             "name": "nemo_grid_i",
             "ioos category": "location",
             "standard name": "nemo_grid_i",
             "long name": "NEMO grid i index",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+                f"&deviceCategoryCode={location_config['device category']}"
+            ),
         },
         "on_crossing_mask": {
             "name": "on_crossing_mask",
@@ -475,7 +487,9 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             "long name": "On Crossing",
             "flag_values": "0, 1",
             "flag_meanings": "in berth, on crossing",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?location={ferry_platform}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+            ),
         },
         "crossing_number": {
             "name": "crossing_number",
@@ -493,7 +507,9 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             "crossing_number==n observation from the previous day, "
             "where n is max(crossing_number). "
             "The number of crossings per day varies throughout the year.",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?location={ferry_platform}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+            ),
         },
         "temperature": {
             "name": "temperature",
@@ -814,11 +830,11 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             dataset_array.attrs["ONC_stationCode"] = array.attrs["station"]
             dataset_array.attrs[
                 "ONC_data_product_url"
-            ] += f'&location={array.attrs["station"]}'
+            ] += f'&locationCode={array.attrs["station"]}'
     except KeyError:
         dataset_array.attrs["ONC_data_product_url"] = (
-            f"http://dmas.uvic.ca/DataSearch?location={ferry_platform}"
-            f"&deviceCategory={array.device_category}"
+            f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+            f"&deviceCategoryCode={array.device_category}"
         )
     return dataset_array
 
