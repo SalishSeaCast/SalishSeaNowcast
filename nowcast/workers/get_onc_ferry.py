@@ -293,11 +293,13 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
     return device_data
 
 
-def _empty_device_data(ferry_platform, device_category, ymd, sensors):
+def _empty_device_data(
+    ferry_platform, device_category, ymd, sensors, time_coord="sampleTime"
+):
     # Response from ONC contains no sensor data, so return an
     # empty DataArray
     logger.warning(
-        f"No ONC {ferry_platform} {device_category} data for {ymd}; "
+        f"No ONC {ferry_platform} {device_category} {sensors} data for {ymd}; "
         f"substituting empty dataset"
     )
     onc_units = {
@@ -321,15 +323,21 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
         sensor: xarray.DataArray(
             name=sensor,
             data=numpy.array([], dtype=float),
-            coords={"sampleTime": numpy.array([], dtype="datetime64[ns]")},
-            dims="sampleTime",
+            coords={time_coord: numpy.array([], dtype="datetime64[ns]")},
+            dims=time_coord,
             attrs={
+                "device_category": device_category,
                 "qaqcFlag": numpy.array([], dtype=numpy.int64),
                 "unitOfMeasure": onc_units[sensor],
+                "units": "degrees_Celcius"
+                if sensor in {"temperature", "air_temperature"}
+                else onc_units[sensor],
             },
         )
         for sensor in sensors.split(",")
     }
+    if len(data_arrays) == 1:
+        return data_arrays[sensors]
     return xarray.Dataset(data_arrays)
 
 
@@ -341,9 +349,14 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
             f"filtering ONC {ferry_platform} {device} {onc_sensor} data "
             f"for {ymd} to exclude 1<qaqcFlag<7"
         )
-        onc_data = getattr(device_data, onc_sensor)
-        not_nan_mask = numpy.logical_not(numpy.isnan(onc_data.values))
-        sensor_qaqc_mask = onc_data.attrs["qaqcFlag"] <= 1
+        try:
+            onc_data = getattr(device_data, onc_sensor)
+        except AttributeError:
+            data_array = _empty_device_data(
+                ferry_platform, device, ymd, onc_sensor, time_coord="time"
+            )
+            sensor_data_arrays.append(data_array)
+            continue
         sensor_qaqc_mask = numpy.logical_or(
             onc_data.attrs["qaqcFlag"] <= 1, onc_data.attrs["qaqcFlag"] >= 7
         )
@@ -351,17 +364,19 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
             cf_units = cf_units_mapping[onc_data.unitOfMeasure]
         except KeyError:
             cf_units = onc_data.unitOfMeasure
-        sensor_data_arrays.append(
-            xarray.DataArray(
+        if not sensor_qaqc_mask.any():
+            data_array = _empty_device_data(
+                ferry_platform, device, ymd, onc_sensor, time_coord="time"
+            )
+        else:
+            data_array = xarray.DataArray(
                 name=sensor,
-                data=onc_data[not_nan_mask][sensor_qaqc_mask].values,
-                coords={
-                    "time": onc_data.sampleTime[not_nan_mask][sensor_qaqc_mask].values
-                },
+                data=onc_data[sensor_qaqc_mask].values,
+                coords={"time": onc_data.sampleTime[sensor_qaqc_mask].values},
                 dims="time",
                 attrs={"device_category": device, "units": cf_units},
             )
-        )
+        sensor_data_arrays.append(data_array)
     return sensor_data_arrays
 
 
@@ -387,7 +402,7 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
         else:
             try:
                 data_array = array.resample(time="1Min").mean()
-            except IndexError:
+            except (IndexError, ValueError):
                 # array is empty, meaning there are no observations with
                 # qaqcFlag<=1 or qaqcFlac>=7, so substitute a DataArray full of NaNs
                 logger.warning(
@@ -418,7 +433,11 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
             sample_count_var = f"{var}_sample_count"
             sample_count_array = array.resample(time="1Min").count()
             sample_count_array.attrs = array.attrs
-            del sample_count_array.attrs["units"]
+            try:
+                del sample_count_array.attrs["units"]
+            except KeyError:
+                # empty data arrays lack units attributes
+                pass
             data_vars[sample_count_var] = _create_dataarray(
                 sample_count_var, sample_count_array, ferry_platform, location_config
             )

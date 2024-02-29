@@ -291,16 +291,30 @@ class TestGetWaterData:
     pass
 
 
-@pytest.mark.parametrize(
-    "ferry_platform, device, sensors",
-    [("TWDP", "TSG", "temperature,conductivity,salinity")],
-)
 class TestEmptyDeviceData:
     """Unit tests for _empty_device_data() function."""
 
-    def test_empty_device_data(self, ferry_platform, device, sensors, caplog):
+    def test_msg(self, caplog):
+        caplog.set_level(logging.DEBUG)
+
+        get_onc_ferry._empty_device_data(
+            "TWDP", "TSG", "2024-02-08", "temperature,conductivity,salinity"
+        )
+
+        expected = (
+            f"No ONC TWDP TSG temperature,conductivity,salinity data for 2024-02-08; "
+            f"substituting empty dataset"
+        )
+        assert caplog.records[0].levelname == "WARNING"
+        assert caplog.messages[0] == expected
+
+    @pytest.mark.parametrize(
+        "ferry_platform, device_category, sensors",
+        [("TWDP", "TSG", "temperature,conductivity,salinity")],
+    )
+    def test_empty_device_data(self, ferry_platform, device_category, sensors, caplog):
         dataset = get_onc_ferry._empty_device_data(
-            ferry_platform, device, "2017-12-01", sensors
+            ferry_platform, device_category, "2017-12-01", sensors
         )
         for sensor in sensors.split(","):
             assert sensor in dataset.data_vars
@@ -310,6 +324,35 @@ class TestEmptyDeviceData:
             assert dataset.sampleTime.shape == (0,)
             assert dataset.sampleTime.dtype == "datetime64[ns]"
             assert "sampleTime" in dataset.dims
+
+    @pytest.mark.parametrize(
+        "ferry_platform, device_category, sensors, uom, units",
+        [
+            ("TWDP", "TSG", "temperature", "C", "degrees_Celcius"),
+            ("TWDP", "TSG", "conductivity", "S/m", "S/m"),
+            ("TWDP", "TSG", "salinity", "g/kg", "g/kg"),
+            ("TWDP", "OXYSENSOR", "oxygen_saturation", "percent", "percent"),
+            ("TWDP", "OXYSENSOR", "oxygen_corrected", "ml/l", "ml/l"),
+            ("TWDP", "OXYSENSOR", "temperature", "C", "degrees_Celcius"),
+            ("TWDP", "TURBCHLFL", "cdom_fluorescence", "ppb", "ppb"),
+            ("TWDP", "TURBCHLFL", "chlorophyll", "ug/l", "ug/l"),
+            ("TWDP", "TURBCHLFL", "turbidity", "NTU", "NTU"),
+            ("TWDP", "CO2SENSOR", "partial_pressure", "pCO2 uatm", "pCO2 uatm"),
+            ("TWDP", "CO2SENSOR", "co2", "umol/mol", "umol/mol"),
+            ("TWDP", "TEMPHUMID", "air_temperature", "C", "degrees_Celcius"),
+            ("TWDP", "TEMPHUMID", "rel_humidity", "%", "%"),
+            ("TWDP", "BARPRESS", "barometric_pressure", "hPa", "hPa"),
+            ("TWDP", "PYRANOMETER", "solar_radiation", "W/m^2", "W/m^2"),
+            ("TWDP", "PYRGEOMETER", "downward_radiation", "W/m^2", "W/m^2"),
+        ],
+    )
+    def test_attrs(self, ferry_platform, device_category, sensors, uom, units, caplog):
+        dataset = get_onc_ferry._empty_device_data(
+            ferry_platform, device_category, "2024-02-08", sensors
+        )
+        assert dataset.attrs["device_category"] == device_category
+        assert dataset.attrs["unitOfMeasure"] == uom
+        assert dataset.attrs["units"] == units
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
