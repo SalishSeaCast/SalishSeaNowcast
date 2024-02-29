@@ -18,10 +18,11 @@
 
 """Unit tests for SalishSeaCast get_onc_ctd worker.
 """
+import logging
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import get_onc_ctd
@@ -33,69 +34,94 @@ def config(base_config):
     return base_config
 
 
-@patch("nowcast.workers.get_onc_ctd.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(get_onc_ctd, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ctd.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("get_onc_ctd",)
-        assert "description" in kwargs
+    def test_instantiate_worker(self, mock_worker):
+        worker = get_onc_ctd.main()
+        assert worker.name == "get_onc_ctd"
+        assert worker.description.startswith(
+            "Salish Sea nowcast worker that downloads CTD temperature and salinity data"
+        )
 
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ctd.main()
-        m_worker().init_cli.assert_called_once_with()
+    def test_add_onc_station_arg(self, mock_worker):
+        worker = get_onc_ctd.main()
+        assert worker.cli.parser._actions[3].dest == "onc_station"
+        assert worker.cli.parser._actions[3].choices == {"SCVIP", "SEVIP", "USDDL"}
+        assert worker.cli.parser._actions[3].help
 
-    def test_add_onc_station_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ctd.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("onc_station",)
-        assert kwargs["choices"] == {"SCVIP", "SEVIP", "USDDL"}
-        assert "help" in kwargs
+    def test_add_run_date_option(self, mock_worker):
+        worker = get_onc_ctd.main()
+        assert worker.cli.parser._actions[4].dest == "data_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[4].type == expected
+        expected = arrow.utcnow().floor("day").shift(days=-1)
+        assert worker.cli.parser._actions[4].default == expected
+        assert worker.cli.parser._actions[4].help
 
-    def test_add_data_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ctd.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--data-date",)
-        assert kwargs["default"] == arrow.utcnow().floor("day").shift(days=-1)
-        assert "help" in kwargs
 
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_onc_ctd.main()
-        args, kwargs = m_worker().run.call_args
-        expected = (get_onc_ctd.get_onc_ctd, get_onc_ctd.success, get_onc_ctd.failure)
-        assert args == expected
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "get_onc_ctd" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["get_onc_ctd"]
+        assert msg_registry["checklist key"] == "ONC CTD data"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["get_onc_ctd"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success SCVIP",
+            "success SEVIP",
+            "success USDDL",
+            "failure",
+            "crash",
+        ]
+
+    def test_obs_ctd_data_section(self, prod_config):
+        ctd_data = prod_config["observations"]["ctd data"]
+        assert ctd_data["dest dir"] == "/results/observations/ONC/CTD/"
+        expected = "{station}/{station}_CTD_15m_{yyyymmdd}.nc"
+        assert ctd_data["filepath template"] == expected
 
 
 @pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
-@patch("nowcast.workers.get_onc_ctd.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, onc_station):
+    def test_success(self, onc_station, caplog):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get("2016-09-09")
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = get_onc_ctd.success(parsed_args)
-        assert m_logger.info.called
-        assert msg_type == "success {}".format(onc_station)
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"2016-09-09 ONC {onc_station} CTD T&S file created"
+        assert caplog.messages[0] == expected
+        assert msg_type == f"success {onc_station}"
 
 
 @pytest.mark.parametrize("onc_station", ["SCVIP", "SEVIP", "USDDL"])
-@patch("nowcast.workers.get_onc_ctd.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, onc_station):
+    def test_failure(self, onc_station, caplog):
         parsed_args = SimpleNamespace(
             onc_station=onc_station, data_date=arrow.get("2016-09-09")
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = get_onc_ctd.failure(parsed_args)
-        assert m_logger.critical.called
-        assert msg_type == "failure"
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"2016-09-09 ONC {onc_station} CTD T&S file creation failed"
+        assert caplog.messages[0] == expected
+        assert msg_type == f"failure"

@@ -15,9 +15,9 @@
 """SalishSeaCast worker that downloads data for a specified UTC day from an ONC BC Ferries
 measurement platform.
 
-The data are filtered to include only values for which qaqcFlag == 1
+The data are filtered to include only values for which qaqcFlag <= 1 or qaqcFlag >= 7
 (meaning that all of ONC's automated QA/QC tests were passed).
-After filtering the data are aggregated into 1 minute bins.
+After filtering, the data are aggregated into 1-minute bins.
 The aggregation functions are mean, standard deviation, and sample count.
 
 The data are stored as a netCDF-4/HDF5 file that is accessible via
@@ -138,6 +138,7 @@ def get_onc_ferry(parsed_args, config, *args):
         os.fspath(nc_filepath), encoding=encoding, unlimited_dims=("time",)
     )
     checklist = {ferry_platform: os.fspath(nc_filepath)}
+    return checklist
 
 
 def _get_nav_data(ferry_platform, ymd, location_config):
@@ -148,12 +149,15 @@ def _get_nav_data(ferry_platform, ymd, location_config):
         try:
             onc_data = data_tools.get_onc_data(
                 "scalardata",
-                "getByStation",
+                "getByLocation",
                 os.environ["ONC_USER_TOKEN"],
-                station=station,
-                deviceCategory=device_category,
-                sensors=sensors,
+                locationCode=station,
+                deviceCategoryCode=device_category,
+                sensorCategoryCodes=sensors,
                 dateFrom=(data_tools.onc_datetime(f"{ymd} 00:00", "utc")),
+                dateTo=data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
+                resampleType="avg",
+                resamplePeriod=1,
             )
         except requests.HTTPError as e:
             msg = (
@@ -260,12 +264,15 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
     try:
         onc_data = data_tools.get_onc_data(
             "scalardata",
-            "getByStation",
+            "getByLocation",
             os.environ["ONC_USER_TOKEN"],
-            station=ferry_platform,
-            deviceCategory=device_category,
-            sensors=sensors,
-            dateFrom=(data_tools.onc_datetime(f"{ymd} 00:00", "utc")),
+            locationCode=ferry_platform,
+            deviceCategoryCode=device_category,
+            sensorCategoryCodes=sensors,
+            dateFrom=data_tools.onc_datetime(f"{ymd} 00:00", "utc"),
+            dateTo=data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
+            resampleType="avg",
+            resamplePeriod=1,
         )
     except requests.HTTPError as e:
         if e.response.status_code == 504:
@@ -286,11 +293,13 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
     return device_data
 
 
-def _empty_device_data(ferry_platform, device_category, ymd, sensors):
+def _empty_device_data(
+    ferry_platform, device_category, ymd, sensors, time_coord="sampleTime"
+):
     # Response from ONC contains no sensor data, so return an
     # empty DataArray
     logger.warning(
-        f"No ONC {ferry_platform} {device_category} data for {ymd}; "
+        f"No ONC {ferry_platform} {device_category} {sensors} data for {ymd}; "
         f"substituting empty dataset"
     )
     onc_units = {
@@ -305,7 +314,7 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
         "partial_pressure": "pCO2 uatm",
         "co2": "umol/mol",
         "air_temperature": "C",
-        "REL_HUMIDITY": "%",
+        "rel_humidity": "%",
         "barometric_pressure": "hPa",
         "solar_radiation": "W/m^2",
         "downward_radiation": "W/m^2",
@@ -314,15 +323,21 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
         sensor: xarray.DataArray(
             name=sensor,
             data=numpy.array([], dtype=float),
-            coords={"sampleTime": numpy.array([], dtype="datetime64[ns]")},
-            dims="sampleTime",
+            coords={time_coord: numpy.array([], dtype="datetime64[ns]")},
+            dims=time_coord,
             attrs={
+                "device_category": device_category,
                 "qaqcFlag": numpy.array([], dtype=numpy.int64),
                 "unitOfMeasure": onc_units[sensor],
+                "units": "degrees_Celcius"
+                if sensor in {"temperature", "air_temperature"}
+                else onc_units[sensor],
             },
         )
         for sensor in sensors.split(",")
     }
+    if len(data_arrays) == 1:
+        return data_arrays[sensors]
     return xarray.Dataset(data_arrays)
 
 
@@ -332,26 +347,36 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
     for sensor, onc_sensor in devices_config[device]["sensors"].items():
         logger.debug(
             f"filtering ONC {ferry_platform} {device} {onc_sensor} data "
-            f"for {ymd} to exlude qaqcFlag!=1"
+            f"for {ymd} to exclude 1<qaqcFlag<7"
         )
-        onc_data = getattr(device_data, onc_sensor)
-        not_nan_mask = numpy.logical_not(numpy.isnan(onc_data.values))
-        sensor_qaqc_mask = onc_data.attrs["qaqcFlag"] <= 1
+        try:
+            onc_data = getattr(device_data, onc_sensor)
+        except AttributeError:
+            data_array = _empty_device_data(
+                ferry_platform, device, ymd, onc_sensor, time_coord="time"
+            )
+            sensor_data_arrays.append(data_array)
+            continue
+        sensor_qaqc_mask = numpy.logical_or(
+            onc_data.attrs["qaqcFlag"] <= 1, onc_data.attrs["qaqcFlag"] >= 7
+        )
         try:
             cf_units = cf_units_mapping[onc_data.unitOfMeasure]
         except KeyError:
             cf_units = onc_data.unitOfMeasure
-        sensor_data_arrays.append(
-            xarray.DataArray(
+        if not sensor_qaqc_mask.any():
+            data_array = _empty_device_data(
+                ferry_platform, device, ymd, onc_sensor, time_coord="time"
+            )
+        else:
+            data_array = xarray.DataArray(
                 name=sensor,
-                data=onc_data[not_nan_mask][sensor_qaqc_mask].values,
-                coords={
-                    "time": onc_data.sampleTime[not_nan_mask][sensor_qaqc_mask].values
-                },
+                data=onc_data[sensor_qaqc_mask].values,
+                coords={"time": onc_data.sampleTime[sensor_qaqc_mask].values},
                 dims="time",
                 attrs={"device_category": device, "units": cf_units},
             )
-        )
+        sensor_data_arrays.append(data_array)
     return sensor_data_arrays
 
 
@@ -377,12 +402,12 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
         else:
             try:
                 data_array = array.resample(time="1Min").mean()
-            except IndexError:
+            except (IndexError, ValueError):
                 # array is empty, meaning there are no observations with
-                # qaqcFlag!=1, so substitute a DataArray full of NaNs
+                # qaqcFlag<=1 or qaqcFlac>=7, so substitute a DataArray full of NaNs
                 logger.warning(
                     f"ONC {ferry_platform} {array.device_category} "
-                    f"{array.name} data for {ymd} contains no qaqcFlag==1 "
+                    f"{array.name} data for {ymd} contains no qaqcFlag<=1 or qaqcFlac>=7 "
                     f"values; substituting NaNs"
                 )
                 nan_values = numpy.empty_like(data_vars["longitude"].values)
@@ -408,7 +433,11 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
             sample_count_var = f"{var}_sample_count"
             sample_count_array = array.resample(time="1Min").count()
             sample_count_array.attrs = array.attrs
-            del sample_count_array.attrs["units"]
+            try:
+                del sample_count_array.attrs["units"]
+            except KeyError:
+                # empty data arrays lack units attributes
+                pass
             data_vars[sample_count_var] = _create_dataarray(
                 sample_count_var, sample_count_array, ferry_platform, location_config
             )
@@ -418,7 +447,7 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
         coords={"time": data_arrays.longitude.time.values},
         attrs={
             "history": f"""{now} Download raw data from ONC scalardata API.
-{now} Filter to exclude data with qaqcFlag != 1.
+{now} Filter to exclude data with 1<qaqcFlag<7.
 {now} Resample data to 1 minute intervals using mean, standard deviation and
 count as aggregation functions.
 {now} Add SalishSeaCast NEMO grid nearest ji indices corresponding to lons/lats.
@@ -438,28 +467,40 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             "ioos category": "location",
             "standard name": "longitude",
             "long name": "Longitude",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?&locationCode={ferry_platform}"
+                f"&deviceCategoryCode={location_config['device category']}"
+            ),
         },
         "latitude": {
             "name": "latitude",
             "ioos category": "location",
             "standard name": "latitude",
             "long name": "Latitude",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+                f"&deviceCategoryCode={location_config['device category']}"
+            ),
         },
         "nemo_grid_j": {
             "name": "nemo_grid_j",
             "ioos category": "location",
             "standard name": "nemo_grid_j",
             "long name": "NEMO grid j index",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+                f"&deviceCategoryCode={location_config['device category']}"
+            ),
         },
         "nemo_grid_i": {
             "name": "nemo_grid_i",
             "ioos category": "location",
             "standard name": "nemo_grid_i",
             "long name": "NEMO grid i index",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?deviceCategory={location_config['device category']}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+                f"&deviceCategoryCode={location_config['device category']}"
+            ),
         },
         "on_crossing_mask": {
             "name": "on_crossing_mask",
@@ -468,7 +509,9 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             "long name": "On Crossing",
             "flag_values": "0, 1",
             "flag_meanings": "in berth, on crossing",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?location={ferry_platform}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+            ),
         },
         "crossing_number": {
             "name": "crossing_number",
@@ -486,7 +529,9 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             "crossing_number==n observation from the previous day, "
             "where n is max(crossing_number). "
             "The number of crossings per day varies throughout the year.",
-            "ONC_data_product_url": f"http://dmas.uvic.ca/DataSearch?location={ferry_platform}",
+            "ONC_data_product_url": (
+                f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+            ),
         },
         "temperature": {
             "name": "temperature",
@@ -807,11 +852,11 @@ def _create_dataarray(var, array, ferry_platform, location_config):
             dataset_array.attrs["ONC_stationCode"] = array.attrs["station"]
             dataset_array.attrs[
                 "ONC_data_product_url"
-            ] += f'&location={array.attrs["station"]}'
+            ] += f'&locationCode={array.attrs["station"]}'
     except KeyError:
         dataset_array.attrs["ONC_data_product_url"] = (
-            f"http://dmas.uvic.ca/DataSearch?location={ferry_platform}"
-            f"&deviceCategory={array.device_category}"
+            f"http://data.oceannetworks.ca/DataSearch?locationCode={ferry_platform}"
+            f"&deviceCategoryCode={array.device_category}"
         )
     return dataset_array
 

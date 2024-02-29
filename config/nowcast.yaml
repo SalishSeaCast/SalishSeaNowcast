@@ -245,7 +245,7 @@ temperature salinity:
 
 
 observations:
-  # Dataset that maps high resolution lon/lat grid on to NEMO j/i indices
+  # Dataset that maps high-resolution lon/lat grid on to NEMO j/i indices
   lon/lat to NEMO ji map: /SalishSeaCast/grid/grid_from_lat_lon_mask999.nc
   # ONC Strait of Georgia nodes real-time CTD data
   ctd data:
@@ -259,12 +259,69 @@ observations:
     dest dir: /results/observations/ONC/CTD/
     # Template for ONC CTD T&S data file path
     # **Must be quoted to project {} characters**
-    filepath template: '{station}/{station}_CTD_15m_{yyyymmdd}.nc'
+    filepath template: "{station}/{station}_CTD_15m_{yyyymmdd}.nc"
 
   # ONC Strait of Georgia ferry platforms real-time data
   ferry data:
-    ferries: {}
-      # see PR#109 for TWDP ferry example of this section and corresponding config tests
+    ferries:
+      # Tsawwassen - Duke Point route
+      TWDP:
+        route name: Tsawwassen - Duke Point
+        ONC station description: Mobile Platforms, British Columbia Ferries, Tsawwassen - Duke Point
+        location:
+          # ONC scalardata.getByStation API query parameters:
+          #
+          # ONC station identifiers to use for nav data, in priority order
+          stations:
+            - TWDP.N1
+            - TWDP.N2
+          device category: NAV
+          sensors:
+            - longitude
+            - latitude
+          terminals:
+            # Terminal names from salishsea_tools.places.PLACES
+            - Tsawwassen
+            - Duke Pt.
+        devices:
+          # ONC device category
+          TSG:
+            # device sensor names
+            sensors:
+              # ERDDAP sensor name: ONC sensor name
+              temperature: temperature
+              conductivity: conductivity
+              salinity: salinity
+          OXYSENSOR:
+            sensors:
+              o2_saturation: oxygen_saturation
+              o2_concentration_corrected: oxygen_corrected
+              o2_temperature: temperature
+          TURBCHLFL:
+            sensors:
+              cdom_fluorescence: cdom_fluorescence
+              chlorophyll: chlorophyll
+              turbidity: turbidity
+          CO2SENSOR:
+            sensors:
+              co2_partial_pressure: partial_pressure
+              co2_concentration_linearized: co2
+          TEMPHUMID:
+            sensors:
+              air_temperature: air_temperature
+              relative_humidity: rel_humidity
+          BARPRESS:
+            sensors:
+              barometric_pressure: barometric_pressure
+          PYRANOMETER:
+            sensors:
+              solar_radiation: solar_radiation
+          PYRGEOMETER:
+            sensors:
+              longwave_radiation: downward_radiation
+        # Template for ONC ferry data file path
+        # **Must be quoted to project {} characters**
+        filepath template: "{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_METEO_1m_{yyyymmdd}.nc"
     # Destination directory for ONC ferry data netCDF files
     dest dir: /results/observations/ONC/ferries/
 
@@ -274,7 +331,7 @@ observations:
     csv dir: /opp/observations/AISDATA/
     # Destination directory for VFPA HADCP data netCDF files
     dest dir: /opp/observations/AISDATA/netcdf/
-    # Template for VFPA HADCP data file path
+    # Template for the VFPA HADCP data file path
     # **Must be quoted to project {} characters**
     filepath template: 'VFPA_2ND_NARROWS_HADCP_2s_{yyyymm}.nc'
 
@@ -429,7 +486,7 @@ erddap:
 #      out of service since 22-Dec-2019; repair ETA unknown
 #      - ubcONCUSDDLCTD15mV1
     TWDP-ferry:
-      - ubcONCTWDP1mV1
+      - ubcONCTWDP1mV18-01
     nowcast-green:
       - ubcSSg3DBiologyFields1hV21-11
       - ubcSSg3DLightFields1hV21-11

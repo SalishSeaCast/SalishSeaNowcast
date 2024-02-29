@@ -86,9 +86,89 @@ class TestConfig:
             "crash",
         ]
 
+    def test_TWDP_ferry_platform(self, prod_config):
+        ferry_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"]
+        assert ferry_config["route name"] == "Tsawwassen - Duke Point"
+        expected = "Mobile Platforms, British Columbia Ferries, Tsawwassen - Duke Point"
+        assert ferry_config["ONC station description"] == expected
+
+    def test_TWDP_location(self, prod_config):
+        location_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"][
+            "location"
+        ]
+        assert location_config["stations"] == ["TWDP.N1", "TWDP.N2"]
+        assert location_config["device category"] == "NAV"
+        assert location_config["sensors"] == ["longitude", "latitude"]
+        assert location_config["terminals"] == ["Tsawwassen", "Duke Pt."]
+
+    def test_TWDP_devices(self, prod_config):
+        devices_config = prod_config["observations"]["ferry data"]["ferries"]["TWDP"][
+            "devices"
+        ]
+        expected = {
+            "TSG": {
+                "sensors": {
+                    "temperature": "temperature",
+                    "conductivity": "conductivity",
+                    "salinity": "salinity",
+                },
+            },
+            "OXYSENSOR": {
+                "sensors": {
+                    "o2_saturation": "oxygen_saturation",
+                    "o2_concentration_corrected": "oxygen_corrected",
+                    "o2_temperature": "temperature",
+                },
+            },
+            "TURBCHLFL": {
+                "sensors": {
+                    "cdom_fluorescence": "cdom_fluorescence",
+                    "chlorophyll": "chlorophyll",
+                    "turbidity": "turbidity",
+                },
+            },
+            "CO2SENSOR": {
+                "sensors": {
+                    "co2_partial_pressure": "partial_pressure",
+                    "co2_concentration_linearized": "co2",
+                },
+            },
+            "TEMPHUMID": {
+                "sensors": {
+                    "air_temperature": "air_temperature",
+                    "relative_humidity": "rel_humidity",
+                },
+            },
+            "BARPRESS": {
+                "sensors": {
+                    "barometric_pressure": "barometric_pressure",
+                },
+            },
+            "PYRANOMETER": {
+                "sensors": {
+                    "solar_radiation": "solar_radiation",
+                },
+            },
+            "PYRGEOMETER": {
+                "sensors": {
+                    "longwave_radiation": "downward_radiation",
+                },
+            },
+        }
+        assert devices_config == expected
+
     def test_lon_lat_ji_map_path(self, prod_config):
         nemo_ji_map = prod_config["observations"]["lon/lat to NEMO ji map"]
         assert nemo_ji_map == "/SalishSeaCast/grid/grid_from_lat_lon_mask999.nc"
+
+    def test_TWDP_file_path_template(self, prod_config):
+        file_path_tmpl = prod_config["observations"]["ferry data"]["ferries"]["TWDP"][
+            "filepath template"
+        ]
+        assert (
+            file_path_tmpl
+            == "{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_METEO_1m_{yyyymmdd}.nc"
+        )
 
     def test_dest_dir(self, prod_config):
         ferry_data_config = prod_config["observations"]["ferry data"]
@@ -103,7 +183,7 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
-        caplog.set_level(logging.INFO)
+        caplog.set_level(logging.DEBUG)
 
         msg_type = get_onc_ferry.success(parsed_args)
 
@@ -121,7 +201,7 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             ferry_platform=ferry_platform, data_date=arrow.get("2016-09-09")
         )
-        caplog.set_level(logging.CRITICAL)
+        caplog.set_level(logging.DEBUG)
 
         msg_type = get_onc_ferry.failure(parsed_args)
 
@@ -156,8 +236,6 @@ class TestCalcLocationArrays:
 class TestResampleNavCoord:
     """Unit test for _resample_nav_coord() function."""
 
-    # TODO: remove this skip when issue #174 is resolved
-    @pytest.mark.skip(reason="fails on GHA with pandas=2.0.0; see issue #174")
     def test_resample_nav_coord(self, ferry_platform):
         nav_data = xarray.Dataset(
             data_vars={
@@ -213,16 +291,30 @@ class TestGetWaterData:
     pass
 
 
-@pytest.mark.parametrize(
-    "ferry_platform, device, sensors",
-    [("TWDP", "TSG", "temperature,conductivity,salinity")],
-)
 class TestEmptyDeviceData:
     """Unit tests for _empty_device_data() function."""
 
-    def test_empty_device_data(self, ferry_platform, device, sensors, caplog):
+    def test_msg(self, caplog):
+        caplog.set_level(logging.DEBUG)
+
+        get_onc_ferry._empty_device_data(
+            "TWDP", "TSG", "2024-02-08", "temperature,conductivity,salinity"
+        )
+
+        expected = (
+            f"No ONC TWDP TSG temperature,conductivity,salinity data for 2024-02-08; "
+            f"substituting empty dataset"
+        )
+        assert caplog.records[0].levelname == "WARNING"
+        assert caplog.messages[0] == expected
+
+    @pytest.mark.parametrize(
+        "ferry_platform, device_category, sensors",
+        [("TWDP", "TSG", "temperature,conductivity,salinity")],
+    )
+    def test_empty_device_data(self, ferry_platform, device_category, sensors, caplog):
         dataset = get_onc_ferry._empty_device_data(
-            ferry_platform, device, "2017-12-01", sensors
+            ferry_platform, device_category, "2017-12-01", sensors
         )
         for sensor in sensors.split(","):
             assert sensor in dataset.data_vars
@@ -232,6 +324,35 @@ class TestEmptyDeviceData:
             assert dataset.sampleTime.shape == (0,)
             assert dataset.sampleTime.dtype == "datetime64[ns]"
             assert "sampleTime" in dataset.dims
+
+    @pytest.mark.parametrize(
+        "ferry_platform, device_category, sensors, uom, units",
+        [
+            ("TWDP", "TSG", "temperature", "C", "degrees_Celcius"),
+            ("TWDP", "TSG", "conductivity", "S/m", "S/m"),
+            ("TWDP", "TSG", "salinity", "g/kg", "g/kg"),
+            ("TWDP", "OXYSENSOR", "oxygen_saturation", "percent", "percent"),
+            ("TWDP", "OXYSENSOR", "oxygen_corrected", "ml/l", "ml/l"),
+            ("TWDP", "OXYSENSOR", "temperature", "C", "degrees_Celcius"),
+            ("TWDP", "TURBCHLFL", "cdom_fluorescence", "ppb", "ppb"),
+            ("TWDP", "TURBCHLFL", "chlorophyll", "ug/l", "ug/l"),
+            ("TWDP", "TURBCHLFL", "turbidity", "NTU", "NTU"),
+            ("TWDP", "CO2SENSOR", "partial_pressure", "pCO2 uatm", "pCO2 uatm"),
+            ("TWDP", "CO2SENSOR", "co2", "umol/mol", "umol/mol"),
+            ("TWDP", "TEMPHUMID", "air_temperature", "C", "degrees_Celcius"),
+            ("TWDP", "TEMPHUMID", "rel_humidity", "%", "%"),
+            ("TWDP", "BARPRESS", "barometric_pressure", "hPa", "hPa"),
+            ("TWDP", "PYRANOMETER", "solar_radiation", "W/m^2", "W/m^2"),
+            ("TWDP", "PYRGEOMETER", "downward_radiation", "W/m^2", "W/m^2"),
+        ],
+    )
+    def test_attrs(self, ferry_platform, device_category, sensors, uom, units, caplog):
+        dataset = get_onc_ferry._empty_device_data(
+            ferry_platform, device_category, "2024-02-08", sensors
+        )
+        assert dataset.attrs["device_category"] == device_category
+        assert dataset.attrs["unitOfMeasure"] == uom
+        assert dataset.attrs["units"] == units
 
 
 @pytest.mark.parametrize("ferry_platform", ["TWDP"])
