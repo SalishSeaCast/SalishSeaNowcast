@@ -312,7 +312,7 @@ def _empty_device_data(ferry_platform, device_category, ymd, sensors):
         "partial_pressure": "pCO2 uatm",
         "co2": "umol/mol",
         "air_temperature": "C",
-        "REL_HUMIDITY": "%",
+        "rel_humidity": "%",
         "barometric_pressure": "hPa",
         "solar_radiation": "W/m^2",
         "downward_radiation": "W/m^2",
