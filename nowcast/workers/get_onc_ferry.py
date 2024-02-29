@@ -339,11 +339,14 @@ def _qaqc_filter(ferry_platform, device, device_data, ymd, devices_config):
     for sensor, onc_sensor in devices_config[device]["sensors"].items():
         logger.debug(
             f"filtering ONC {ferry_platform} {device} {onc_sensor} data "
-            f"for {ymd} to exlude qaqcFlag!=1"
+            f"for {ymd} to exclude 1<qaqcFlag<7"
         )
         onc_data = getattr(device_data, onc_sensor)
         not_nan_mask = numpy.logical_not(numpy.isnan(onc_data.values))
         sensor_qaqc_mask = onc_data.attrs["qaqcFlag"] <= 1
+        sensor_qaqc_mask = numpy.logical_or(
+            onc_data.attrs["qaqcFlag"] <= 1, onc_data.attrs["qaqcFlag"] >= 7
+        )
         try:
             cf_units = cf_units_mapping[onc_data.unitOfMeasure]
         except KeyError:
@@ -386,10 +389,10 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
                 data_array = array.resample(time="1Min").mean()
             except IndexError:
                 # array is empty, meaning there are no observations with
-                # qaqcFlag!=1, so substitute a DataArray full of NaNs
+                # qaqcFlag<=1 or qaqcFlac>=7, so substitute a DataArray full of NaNs
                 logger.warning(
                     f"ONC {ferry_platform} {array.device_category} "
-                    f"{array.name} data for {ymd} contains no qaqcFlag==1 "
+                    f"{array.name} data for {ymd} contains no qaqcFlag<=1 or qaqcFlac>=7 "
                     f"values; substituting NaNs"
                 )
                 nan_values = numpy.empty_like(data_vars["longitude"].values)
@@ -425,7 +428,7 @@ def _create_dataset(data_arrays, ferry_platform, ferry_config, location_config, 
         coords={"time": data_arrays.longitude.time.values},
         attrs={
             "history": f"""{now} Download raw data from ONC scalardata API.
-{now} Filter to exclude data with qaqcFlag != 1.
+{now} Filter to exclude data with 1<qaqcFlag<7.
 {now} Resample data to 1 minute intervals using mean, standard deviation and
 count as aggregation functions.
 {now} Add SalishSeaCast NEMO grid nearest ji indices corresponding to lons/lats.
