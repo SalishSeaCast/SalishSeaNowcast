@@ -1503,8 +1503,15 @@ def after_download_results(msg, config, checklist):
                 )
             if run_type == "nowcast-green":
                 next_workers[msg.type].append(
-                    NextWorker("nowcast.workers.ping_erddap", args=["nowcast-green"])
+                    NextWorker("nowcast.workers.ping_erddap", args=["nowcast-green"]),
                 )
+                for var_group in {"biology", "chemistry", "physics"}:
+                    next_workers[msg.type].append(
+                        NextWorker(
+                            "nowcast.workers.make_averaged_dataset",
+                            args=["skookum", "day", var_group, "--run-date", run_date],
+                        )
+                    )
                 if arrow.get(run_date).shift(days=+1).day == 1:
                     yyyymmm = arrow.get(run_date).format("YYYY-MMM").lower()
                     next_workers[msg.type].append(

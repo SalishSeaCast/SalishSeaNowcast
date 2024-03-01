@@ -2089,6 +2089,26 @@ class TestAfterDownloadResults:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize("var_group", ("biology", "chemistry", "physics"))
+    def test_success_nowcast_green_launch_make_averaged_dataset_day(
+        self, var_group, config, checklist
+    ):
+        workers = next_workers.after_download_results(
+            Message(
+                "download_results",
+                "success nowcast-green",
+                payload={"nowcast-green": {"run date": "2024-02-07"}},
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_averaged_dataset",
+            args=["skookum", "day", var_group, "--run-date", "2024-02-07"],
+            host="localhost",
+        )
+        assert expected in workers
+
     def test_success_nowcast_green_not_monthend_no_launch_archive_tarball(
         self, config, checklist
     ):
