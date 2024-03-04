@@ -86,37 +86,31 @@ class TestMain:
             "SalishSeaCast worker that creates a down-sampled time-series dataset netCDF4 file"
         )
 
-    def test_add_host_name_arg(self, mock_worker):
-        worker = make_averaged_dataset.main()
-
-        assert worker.cli.parser._actions[3].dest == "host_name"
-        assert worker.cli.parser._actions[3].help
-
     def test_add_avg_time_interval_arg(self, mock_worker):
         worker = make_averaged_dataset.main()
 
-        assert worker.cli.parser._actions[4].dest == "avg_time_interval"
-        assert worker.cli.parser._actions[4].choices == {"day", "month"}
-        assert worker.cli.parser._actions[4].help
+        assert worker.cli.parser._actions[3].dest == "avg_time_interval"
+        assert worker.cli.parser._actions[3].choices == {"day", "month"}
+        assert worker.cli.parser._actions[3].help
 
     def test_add_reshapr_var_group_arg(self, mock_worker):
         worker = make_averaged_dataset.main()
 
-        assert worker.cli.parser._actions[5].dest == "reshapr_var_group"
-        assert worker.cli.parser._actions[5].choices == {
+        assert worker.cli.parser._actions[4].dest == "reshapr_var_group"
+        assert worker.cli.parser._actions[4].choices == {
             "biology",
             "chemistry",
             "physics",
         }
-        assert worker.cli.parser._actions[5].help
+        assert worker.cli.parser._actions[4].help
 
     def test_add_run_date_option(self, mock_worker):
         worker = make_averaged_dataset.main()
-        assert worker.cli.parser._actions[6].dest == "run_date"
+        assert worker.cli.parser._actions[5].dest == "run_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
-        assert worker.cli.parser._actions[6].type == expected
-        assert worker.cli.parser._actions[6].default == arrow.now().floor("day")
-        assert worker.cli.parser._actions[6].help
+        assert worker.cli.parser._actions[5].type == expected
+        assert worker.cli.parser._actions[5].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[5].help
 
 
 class TestConfig:

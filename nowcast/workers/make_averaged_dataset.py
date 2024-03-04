@@ -48,9 +48,6 @@ def main():
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
-        "host_name", help="Name of the host to run the downsampling extraction on"
-    )
-    worker.cli.add_argument(
         "avg_time_interval",
         choices={"day", "month"},
         help="Time interval over which to average the dataset",

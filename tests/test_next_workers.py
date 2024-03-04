@@ -2104,7 +2104,7 @@ class TestAfterDownloadResults:
         )
         expected = NextWorker(
             "nowcast.workers.make_averaged_dataset",
-            args=["skookum", "day", var_group, "--run-date", "2024-02-07"],
+            args=["day", var_group, "--run-date", "2024-02-07"],
             host="localhost",
         )
         assert expected in workers
@@ -2246,7 +2246,7 @@ class TestAfterMakeAveragedDataset:
         workers = next_workers.after_make_averaged_dataset(msg, config, checklist)
         expected = NextWorker(
             "nowcast.workers.make_averaged_dataset",
-            args=["skookum", "month", reshapr_var_group, "--run-date", "2024-02-01"],
+            args=["month", reshapr_var_group, "--run-date", "2024-02-01"],
             host="localhost",
         )
         assert expected in workers

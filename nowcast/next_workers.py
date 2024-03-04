@@ -1509,7 +1509,7 @@ def after_download_results(msg, config, checklist):
                     next_workers[msg.type].append(
                         NextWorker(
                             "nowcast.workers.make_averaged_dataset",
-                            args=["skookum", "day", var_group, "--run-date", run_date],
+                            args=["day", var_group, "--run-date", run_date],
                         )
                     )
                 if arrow.get(run_date).shift(days=+1).day == 1:
@@ -1571,13 +1571,7 @@ def after_make_averaged_dataset(msg, config, checklist):
             next_workers[msg.type].append(
                 NextWorker(
                     "nowcast.workers.make_averaged_dataset",
-                    args=[
-                        "skookum",
-                        "month",
-                        reshapr_var_group,
-                        "--run-date",
-                        first_of_month,
-                    ],
+                    args=["month", reshapr_var_group, "--run-date", first_of_month],
                     host="localhost",
                 )
             )
