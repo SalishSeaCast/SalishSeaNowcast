@@ -138,8 +138,18 @@ class TestConfig:
 
         assert list(msg_registry.keys()) == [
             "checklist key",
-            "success",
-            "failure",
+            "success day biology",
+            "failure day biology",
+            "success day chemistry",
+            "failure day chemistry",
+            "success day physics",
+            "failure day physics",
+            "success month biology",
+            "failure month biology",
+            "success month chemistry",
+            "failure month chemistry",
+            "success month physics",
+            "failure month physics",
             "crash",
         ]
 
@@ -238,7 +248,7 @@ class TestSuccess:
         host_name = parsed_args.host_name
         expected = f"{avg_time_interval}-averaged dataset for 10-Nov-2022 {reshapr_var_group} created on {host_name}"
         assert caplog.messages[0] == expected
-        assert msg_type == "success"
+        assert msg_type == f"success {avg_time_interval} {reshapr_var_group}"
 
     @pytest.mark.parametrize(
         "avg_time_interval, reshapr_var_group",
@@ -265,7 +275,7 @@ class TestSuccess:
         host_name = parsed_args.host_name
         expected = f"{avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} created on {host_name}"
         assert caplog.messages[0] == expected
-        assert msg_type == "success"
+        assert msg_type == f"success {avg_time_interval} {reshapr_var_group}"
 
 
 class TestFailure:
@@ -296,7 +306,7 @@ class TestFailure:
         host_name = parsed_args.host_name
         expected = f"{avg_time_interval}-averaged dataset for 10-Nov-2022 {reshapr_var_group} creation on {host_name} failed"
         assert caplog.messages[0] == expected
-        assert msg_type == "failure"
+        assert msg_type == f"failure {avg_time_interval} {reshapr_var_group}"
 
     @pytest.mark.parametrize(
         "avg_time_interval, reshapr_var_group",
@@ -323,7 +333,7 @@ class TestFailure:
         host_name = parsed_args.host_name
         expected = f"{avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} creation on {host_name} failed"
         assert caplog.messages[0] == expected
-        assert msg_type == "failure"
+        assert msg_type == f"failure {avg_time_interval} {reshapr_var_group}"
 
 
 class TestMakeAveragedDataset:

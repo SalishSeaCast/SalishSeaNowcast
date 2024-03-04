@@ -125,7 +125,7 @@ def success(parsed_args):
                 f"{avg_time_interval}-averaged dataset for {run_date.format('MMM-YYYY')} "
                 f"{reshapr_var_group} created on {host_name}"
             )
-    msg_type = "success"
+    msg_type = f"success {avg_time_interval} {reshapr_var_group}"
     return msg_type
 
 
@@ -145,7 +145,7 @@ def failure(parsed_args):
                 f"{avg_time_interval}-averaged dataset for {run_date.format('MMM-YYYY')} "
                 f"{reshapr_var_group} creation on {host_name} failed"
             )
-    msg_type = "failure"
+    msg_type = f"failure {avg_time_interval} {reshapr_var_group}"
     return msg_type
 
 

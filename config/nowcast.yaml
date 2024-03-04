@@ -1579,8 +1579,18 @@ message registry:
 
     make_averaged_dataset:
       checklist key: averaged dataset
-      success: dataset averaged
-      failure: dataset averaging failed
+      success day biology: biology dataset day-averaged
+      failure day biology: biology dataset day-averaging failed
+      success day chemistry: chemistry dataset day-averaged
+      failure day chemistry: chemistry dataset day-averaging failed
+      success day physics: physics dataset day-averaged
+      failure day physics: physics dataset day-averaging failed
+      success month biology: biology dataset month-averaged
+      failure month biology: biology dataset month-averaging failed
+      success month chemistry: chemistry dataset month-averaged
+      failure month chemistry: chemistry dataset month-averaging failed
+      success month physics: physics dataset month-averaged
+      failure month physics: physics dataset month-averaging failed
       crash: make_averaged_dataset worker crashed
 
     archive_tarball:

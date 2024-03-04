@@ -2200,7 +2200,21 @@ class TestAfterDownloadResults:
 class TestAfterMakeAveragedDataset:
     """Unit tests for the after_make_averaged_dataset function."""
 
-    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "crash",
+            "failure day biology",
+            "failure day chemistry",
+            "failure day physics",
+            "success month biology",
+            "success month chemistry",
+            "success month physics",
+            "failure month biology",
+            "failure month chemistry",
+            "failure month physics",
+        ],
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_averaged_dataset(
             Message("make_averaged_dataset", msg_type), config, checklist
