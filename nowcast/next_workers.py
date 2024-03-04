@@ -1548,7 +1548,40 @@ def after_make_averaged_dataset(msg, config, checklist):
     :returns: Worker(s) to launch next
     :rtype: list
     """
-    return []
+    next_workers = {
+        "crash": [],
+        "failure day biology": [],
+        "failure day chemistry": [],
+        "failure day physics": [],
+        "failure month biology": [],
+        "failure month chemistry": [],
+        "failure month physics": [],
+        "success day biology": [],
+        "success day chemistry": [],
+        "success day physics": [],
+        "success month biology": [],
+        "success month chemistry": [],
+        "success month physics": [],
+    }
+    if msg.type.startswith("success day"):
+        *_, reshapr_var_group = msg.type.split()
+        run_date = arrow.get(msg.payload[f"day {reshapr_var_group}"]["run date"])
+        if run_date.shift(days=+1).day == 1:
+            first_of_month = run_date.format("YYYY-MM-01")
+            next_workers[msg.type].append(
+                NextWorker(
+                    "nowcast.workers.make_averaged_dataset",
+                    args=[
+                        "skookum",
+                        "month",
+                        reshapr_var_group,
+                        "--run-date",
+                        first_of_month,
+                    ],
+                    host="localhost",
+                )
+            )
+    return next_workers[msg.type]
 
 
 def after_archive_tarball(msg, config, checklist):

@@ -2221,6 +2221,36 @@ class TestAfterMakeAveragedDataset:
         )
         assert workers == []
 
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "success day biology",
+            "success day chemistry",
+            "success day physics",
+        ],
+    )
+    def test_month_end_day_success_launch_month_average(
+        self, msg_type, config, checklist
+    ):
+        *_, reshapr_var_group = msg_type.split()
+        msg = Message(
+            "make_averaged_dataset",
+            msg_type,
+            payload={
+                f"day {reshapr_var_group}": {
+                    "run date": "2024-02-29",
+                    "file path": "SalishSea_1d_20240301_20240301_biol_T.nc",
+                }
+            },
+        )
+        workers = next_workers.after_make_averaged_dataset(msg, config, checklist)
+        expected = NextWorker(
+            "nowcast.workers.make_averaged_dataset",
+            args=["skookum", "month", reshapr_var_group, "--run-date", "2024-02-01"],
+            host="localhost",
+        )
+        assert expected in workers
+
 
 class TestAfterArchiveTarball:
     """Unit tests for the after_archive_tarball function."""
