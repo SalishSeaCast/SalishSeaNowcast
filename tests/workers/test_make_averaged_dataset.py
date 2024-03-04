@@ -388,9 +388,10 @@ class TestMakeAveragedDataset:
         )
         assert caplog.messages[0] == expected
         expected = {
-            f"2022-11-16 {avg_time_interval} {reshapr_var_group}": os.fspath(
-                tmp_path / "16nov22" / nc_filename
-            )
+            f"{avg_time_interval} {reshapr_var_group}": {
+                "run date": "2022-11-16",
+                "file path": os.fspath(tmp_path / "16nov22" / nc_filename),
+            }
         }
         assert checklist == expected
 
@@ -440,13 +441,14 @@ class TestMakeAveragedDataset:
         )
         assert caplog.messages[0] == expected
         expected = {
-            f"2022-11-01 {avg_time_interval} {reshapr_var_group}": os.fspath(
-                tmp_path / "test_results.nc"
-            )
+            f"{avg_time_interval} {reshapr_var_group}": {
+                "run date": "2022-11-01",
+                "file path": os.fspath(tmp_path / "test_results.nc"),
+            }
         }
         assert checklist == expected
 
-    def test_bad_month_avg_run_date(self, caplog):
+    def test_bad_month_avg_run_date(self, caplog, config):
         parsed_args = SimpleNamespace(
             avg_time_interval="month",
             run_date=arrow.get("2022-11-10"),
