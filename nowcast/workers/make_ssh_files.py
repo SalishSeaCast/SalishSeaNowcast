@@ -143,9 +143,11 @@ def make_ssh_file(parsed_args, config, *args):
     neah_bay_hourly_tides = config["ssh"]["neah bay hourly"]
     dates, sshs, fflags = residuals.NeahBay_forcing_anom(
         data_file,
-        run_date.datetime
-        if run_type == "nowcast"
-        else run_date.shift(days=-1).datetime,
+        (
+            run_date.datetime
+            if run_type == "nowcast"
+            else run_date.shift(days=-1).datetime
+        ),
         tidal_preds_dir / neah_bay_hourly_tides,
         parsed_args.archive,
         parsed_args.text_file is None,

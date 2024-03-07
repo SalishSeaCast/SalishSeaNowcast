@@ -554,9 +554,11 @@ class TestDownloadResults:
         )
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
-            side_effect=[[Path("namelist_cfg")], [], []]
-            if run_type == "hindcast"
-            else [[], [Path("namelist_cfg")], [], []],
+            side_effect=(
+                [[Path("namelist_cfg")], [], []]
+                if run_type == "hindcast"
+                else [[], [Path("namelist_cfg")], [], []]
+            ),
         )
         with p_glob:
             download_results.download_results(parsed_args, config)
@@ -585,18 +587,20 @@ class TestDownloadResults:
         )
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
-            side_effect=[
-                [],
-                [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],
-                [Path("Salishsea_1d_20180522_20180522_grid_T.nc")],
-            ]
-            if run_type == "hindcast"
-            else [
-                [],
-                [],
-                [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],
-                [Path("Salishsea_1d_20180522_20180522_grid_T.nc")],
-            ],
+            side_effect=(
+                [
+                    [],
+                    [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],
+                    [Path("Salishsea_1d_20180522_20180522_grid_T.nc")],
+                ]
+                if run_type == "hindcast"
+                else [
+                    [],
+                    [],
+                    [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],
+                    [Path("Salishsea_1d_20180522_20180522_grid_T.nc")],
+                ]
+            ),
         )
         with p_glob:
             checklist = download_results.download_results(parsed_args, config)

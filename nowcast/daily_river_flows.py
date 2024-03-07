@@ -1,6 +1,7 @@
 """
     Module for calculating daily river flows
 """
+
 import functools
 import warnings
 from pathlib import Path

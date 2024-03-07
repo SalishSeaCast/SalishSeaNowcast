@@ -329,9 +329,11 @@ def _empty_device_data(
                 "device_category": device_category,
                 "qaqcFlag": numpy.array([], dtype=numpy.int64),
                 "unitOfMeasure": onc_units[sensor],
-                "units": "degrees_Celcius"
-                if sensor in {"temperature", "air_temperature"}
-                else onc_units[sensor],
+                "units": (
+                    "degrees_Celcius"
+                    if sensor in {"temperature", "air_temperature"}
+                    else onc_units[sensor]
+                ),
             },
         )
         for sensor in sensors.split(",")
