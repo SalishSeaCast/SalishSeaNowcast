@@ -120,7 +120,6 @@ class TestLoggingPublisher:
             "run_NEMO_hindcast",
             "watch_NEMO_hindcast",
             "split_results",
-            "make_averaged_dataset",
             "reshapr",
             "checklist",
             "cfgrib",

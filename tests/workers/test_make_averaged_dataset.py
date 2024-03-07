@@ -86,37 +86,31 @@ class TestMain:
             "SalishSeaCast worker that creates a down-sampled time-series dataset netCDF4 file"
         )
 
-    def test_add_host_name_arg(self, mock_worker):
-        worker = make_averaged_dataset.main()
-
-        assert worker.cli.parser._actions[3].dest == "host_name"
-        assert worker.cli.parser._actions[3].help
-
     def test_add_avg_time_interval_arg(self, mock_worker):
         worker = make_averaged_dataset.main()
 
-        assert worker.cli.parser._actions[4].dest == "avg_time_interval"
-        assert worker.cli.parser._actions[4].choices == {"day", "month"}
-        assert worker.cli.parser._actions[4].help
+        assert worker.cli.parser._actions[3].dest == "avg_time_interval"
+        assert worker.cli.parser._actions[3].choices == {"day", "month"}
+        assert worker.cli.parser._actions[3].help
 
     def test_add_reshapr_var_group_arg(self, mock_worker):
         worker = make_averaged_dataset.main()
 
-        assert worker.cli.parser._actions[5].dest == "reshapr_var_group"
-        assert worker.cli.parser._actions[5].choices == {
+        assert worker.cli.parser._actions[4].dest == "reshapr_var_group"
+        assert worker.cli.parser._actions[4].choices == {
             "biology",
             "chemistry",
             "physics",
         }
-        assert worker.cli.parser._actions[5].help
+        assert worker.cli.parser._actions[4].help
 
     def test_add_run_date_option(self, mock_worker):
         worker = make_averaged_dataset.main()
-        assert worker.cli.parser._actions[6].dest == "run_date"
+        assert worker.cli.parser._actions[5].dest == "run_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
-        assert worker.cli.parser._actions[6].type == expected
-        assert worker.cli.parser._actions[6].default == arrow.now().floor("day")
-        assert worker.cli.parser._actions[6].help
+        assert worker.cli.parser._actions[5].type == expected
+        assert worker.cli.parser._actions[5].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[5].help
 
 
 class TestConfig:
@@ -138,8 +132,18 @@ class TestConfig:
 
         assert list(msg_registry.keys()) == [
             "checklist key",
-            "success",
-            "failure",
+            "success day biology",
+            "failure day biology",
+            "success day chemistry",
+            "failure day chemistry",
+            "success day physics",
+            "failure day physics",
+            "success month biology",
+            "failure month biology",
+            "success month chemistry",
+            "failure month chemistry",
+            "success month physics",
+            "failure month physics",
             "crash",
         ]
 
@@ -238,7 +242,7 @@ class TestSuccess:
         host_name = parsed_args.host_name
         expected = f"{avg_time_interval}-averaged dataset for 10-Nov-2022 {reshapr_var_group} created on {host_name}"
         assert caplog.messages[0] == expected
-        assert msg_type == "success"
+        assert msg_type == f"success {avg_time_interval} {reshapr_var_group}"
 
     @pytest.mark.parametrize(
         "avg_time_interval, reshapr_var_group",
@@ -265,7 +269,7 @@ class TestSuccess:
         host_name = parsed_args.host_name
         expected = f"{avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} created on {host_name}"
         assert caplog.messages[0] == expected
-        assert msg_type == "success"
+        assert msg_type == f"success {avg_time_interval} {reshapr_var_group}"
 
 
 class TestFailure:
@@ -296,7 +300,7 @@ class TestFailure:
         host_name = parsed_args.host_name
         expected = f"{avg_time_interval}-averaged dataset for 10-Nov-2022 {reshapr_var_group} creation on {host_name} failed"
         assert caplog.messages[0] == expected
-        assert msg_type == "failure"
+        assert msg_type == f"failure {avg_time_interval} {reshapr_var_group}"
 
     @pytest.mark.parametrize(
         "avg_time_interval, reshapr_var_group",
@@ -323,7 +327,7 @@ class TestFailure:
         host_name = parsed_args.host_name
         expected = f"{avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} creation on {host_name} failed"
         assert caplog.messages[0] == expected
-        assert msg_type == "failure"
+        assert msg_type == f"failure {avg_time_interval} {reshapr_var_group}"
 
 
 class TestMakeAveragedDataset:
@@ -378,9 +382,10 @@ class TestMakeAveragedDataset:
         )
         assert caplog.messages[0] == expected
         expected = {
-            f"2022-11-16 {avg_time_interval} {reshapr_var_group}": os.fspath(
-                tmp_path / "16nov22" / nc_filename
-            )
+            f"{avg_time_interval} {reshapr_var_group}": {
+                "run date": "2022-11-16",
+                "file path": os.fspath(tmp_path / "16nov22" / nc_filename),
+            }
         }
         assert checklist == expected
 
@@ -430,13 +435,14 @@ class TestMakeAveragedDataset:
         )
         assert caplog.messages[0] == expected
         expected = {
-            f"2022-11-01 {avg_time_interval} {reshapr_var_group}": os.fspath(
-                tmp_path / "test_results.nc"
-            )
+            f"{avg_time_interval} {reshapr_var_group}": {
+                "run date": "2022-11-01",
+                "file path": os.fspath(tmp_path / "test_results.nc"),
+            }
         }
         assert checklist == expected
 
-    def test_bad_month_avg_run_date(self, caplog):
+    def test_bad_month_avg_run_date(self, caplog, config):
         parsed_args = SimpleNamespace(
             avg_time_interval="month",
             run_date=arrow.get("2022-11-10"),

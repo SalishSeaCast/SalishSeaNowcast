@@ -2089,6 +2089,26 @@ class TestAfterDownloadResults:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize("var_group", ("biology", "chemistry", "physics"))
+    def test_success_nowcast_green_launch_make_averaged_dataset_day(
+        self, var_group, config, checklist
+    ):
+        workers = next_workers.after_download_results(
+            Message(
+                "download_results",
+                "success nowcast-green",
+                payload={"nowcast-green": {"run date": "2024-02-07"}},
+            ),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.make_averaged_dataset",
+            args=["day", var_group, "--run-date", "2024-02-07"],
+            host="localhost",
+        )
+        assert expected in workers
+
     def test_success_nowcast_green_not_monthend_no_launch_archive_tarball(
         self, config, checklist
     ):
@@ -2180,12 +2200,56 @@ class TestAfterDownloadResults:
 class TestAfterMakeAveragedDataset:
     """Unit tests for the after_make_averaged_dataset function."""
 
-    @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "crash",
+            "failure day biology",
+            "failure day chemistry",
+            "failure day physics",
+            "success month biology",
+            "success month chemistry",
+            "success month physics",
+            "failure month biology",
+            "failure month chemistry",
+            "failure month physics",
+        ],
+    )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
         workers = next_workers.after_make_averaged_dataset(
             Message("make_averaged_dataset", msg_type), config, checklist
         )
         assert workers == []
+
+    @pytest.mark.parametrize(
+        "msg_type",
+        [
+            "success day biology",
+            "success day chemistry",
+            "success day physics",
+        ],
+    )
+    def test_month_end_day_success_launch_month_average(
+        self, msg_type, config, checklist
+    ):
+        *_, reshapr_var_group = msg_type.split()
+        msg = Message(
+            "make_averaged_dataset",
+            msg_type,
+            payload={
+                f"day {reshapr_var_group}": {
+                    "run date": "2024-02-29",
+                    "file path": "SalishSea_1d_20240301_20240301_biol_T.nc",
+                }
+            },
+        )
+        workers = next_workers.after_make_averaged_dataset(msg, config, checklist)
+        expected = NextWorker(
+            "nowcast.workers.make_averaged_dataset",
+            args=["month", reshapr_var_group, "--run-date", "2024-02-01"],
+            host="localhost",
+        )
+        assert expected in workers
 
 
 class TestAfterArchiveTarball:
