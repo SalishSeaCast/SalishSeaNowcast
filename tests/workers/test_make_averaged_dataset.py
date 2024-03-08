@@ -230,7 +230,6 @@ class TestSuccess:
             avg_time_interval=avg_time_interval,
             run_date=arrow.get("2022-11-10"),
             reshapr_var_group=reshapr_var_group,
-            host_name="test.host",
         )
         caplog.set_level(logging.DEBUG)
 
@@ -239,8 +238,7 @@ class TestSuccess:
         assert caplog.records[0].levelname == "INFO"
         avg_time_interval = parsed_args.avg_time_interval
         reshapr_var_group = parsed_args.reshapr_var_group
-        host_name = parsed_args.host_name
-        expected = f"{avg_time_interval}-averaged dataset for 10-Nov-2022 {reshapr_var_group} created on {host_name}"
+        expected = f"{avg_time_interval}-averaged dataset for 10-Nov-2022 {reshapr_var_group} created"
         assert caplog.messages[0] == expected
         assert msg_type == f"success {avg_time_interval} {reshapr_var_group}"
 
@@ -257,7 +255,6 @@ class TestSuccess:
             avg_time_interval=avg_time_interval,
             run_date=arrow.get("2022-11-01"),
             reshapr_var_group=reshapr_var_group,
-            host_name="test.host",
         )
         caplog.set_level(logging.DEBUG)
 
@@ -266,8 +263,7 @@ class TestSuccess:
         assert caplog.records[0].levelname == "INFO"
         avg_time_interval = parsed_args.avg_time_interval
         reshapr_var_group = parsed_args.reshapr_var_group
-        host_name = parsed_args.host_name
-        expected = f"{avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} created on {host_name}"
+        expected = f"{avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} created"
         assert caplog.messages[0] == expected
         assert msg_type == f"success {avg_time_interval} {reshapr_var_group}"
 
@@ -288,7 +284,6 @@ class TestFailure:
             avg_time_interval=avg_time_interval,
             run_date=arrow.get("2022-11-10"),
             reshapr_var_group=reshapr_var_group,
-            host_name="test.host",
         )
         caplog.set_level(logging.DEBUG)
 
@@ -297,8 +292,7 @@ class TestFailure:
         assert caplog.records[0].levelname == "CRITICAL"
         avg_time_interval = parsed_args.avg_time_interval
         reshapr_var_group = parsed_args.reshapr_var_group
-        host_name = parsed_args.host_name
-        expected = f"{avg_time_interval}-averaged dataset for 10-Nov-2022 {reshapr_var_group} creation on {host_name} failed"
+        expected = f"{avg_time_interval}-averaged dataset for 10-Nov-2022 {reshapr_var_group} creation failed"
         assert caplog.messages[0] == expected
         assert msg_type == f"failure {avg_time_interval} {reshapr_var_group}"
 
@@ -315,7 +309,6 @@ class TestFailure:
             avg_time_interval=avg_time_interval,
             run_date=arrow.get("2022-11-01"),
             reshapr_var_group=reshapr_var_group,
-            host_name="test.host",
         )
         caplog.set_level(logging.DEBUG)
 
@@ -324,8 +317,7 @@ class TestFailure:
         assert caplog.records[0].levelname == "CRITICAL"
         avg_time_interval = parsed_args.avg_time_interval
         reshapr_var_group = parsed_args.reshapr_var_group
-        host_name = parsed_args.host_name
-        expected = f"{avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} creation on {host_name} failed"
+        expected = f"{avg_time_interval}-averaged dataset for Nov-2022 {reshapr_var_group} creation failed"
         assert caplog.messages[0] == expected
         assert msg_type == f"failure {avg_time_interval} {reshapr_var_group}"
 
@@ -369,7 +361,6 @@ class TestMakeAveragedDataset:
             avg_time_interval=avg_time_interval,
             run_date=arrow.get("2022-11-16"),
             reshapr_var_group=reshapr_var_group,
-            host_name="test.host",
         )
         caplog.set_level(logging.DEBUG)
 
@@ -378,7 +369,7 @@ class TestMakeAveragedDataset:
         assert caplog.records[0].levelname == "INFO"
         expected = (
             f"creating {avg_time_interval}-averaged dataset for 16-Nov-2022 "
-            f"{reshapr_var_group} on test.host"
+            f"{reshapr_var_group}"
         )
         assert caplog.messages[0] == expected
         expected = {
@@ -422,7 +413,6 @@ class TestMakeAveragedDataset:
             avg_time_interval=avg_time_interval,
             run_date=arrow.get("2022-11-01"),
             reshapr_var_group=reshapr_var_group,
-            host_name="test.host",
         )
         caplog.set_level(logging.DEBUG)
 
@@ -431,7 +421,7 @@ class TestMakeAveragedDataset:
         assert caplog.records[0].levelname == "INFO"
         expected = (
             f"creating {avg_time_interval}-averaged dataset for Nov-2022 "
-            f"{reshapr_var_group} on test.host"
+            f"{reshapr_var_group}"
         )
         assert caplog.messages[0] == expected
         expected = {
@@ -447,7 +437,6 @@ class TestMakeAveragedDataset:
             avg_time_interval="month",
             run_date=arrow.get("2022-11-10"),
             reshapr_var_group="biology",
-            host_name="test.host",
         )
         caplog.set_level(logging.DEBUG)
 
