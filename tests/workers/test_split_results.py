@@ -105,7 +105,7 @@ class TestConfig:
             "nowcast-green": "/results2/SalishSea/nowcast-green.202111/",
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
-                "localhost": "/results2/SalishSea/nowcast-green.202111/",
+                "localhost": "/ocean/sallen/timbucktwo/rivers/",
                 "robot.graham": "/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
             },
         }

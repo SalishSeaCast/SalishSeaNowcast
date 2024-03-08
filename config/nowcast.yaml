@@ -402,7 +402,7 @@ results archive:
   nowcast-green: /results2/SalishSea/nowcast-green.202111/
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
   hindcast:
-    localhost: /results2/SalishSea/nowcast-green.202111/
+    localhost: /ocean/sallen/timbucktwo/rivers/
     robot.graham: /nearline/rrg-allen/SalishSea/nowcast-green.202111/
 
 
@@ -746,7 +746,7 @@ run:
       # Comma separated list of compute host user ids to use in queue and accounting queries
       users: sallen,dlatorne
       # Directory on compute host where temporary run directories and run results are stored
-      scratch dir: /scratch/sallen/dlatorne/v202111/
+      scratch dir: /scratch/sallen/dlatorne/rivers/
       # Directory on compute host where files (e.g. namelist.time) necessary to prepare
       # the NEMO runs are stored
       run prep dir: /home/sallen/dlatorne/SalishSeaCast/hindcast-sys/runs
@@ -766,7 +766,7 @@ run:
       run types:
         hindcast:
           # Directory on compute host where results are stored
-          results: /scratch/sallen/dlatorne/v202111/
+          results: /scratch/sallen/dlatorne/rivers/
 
     sockeye-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa

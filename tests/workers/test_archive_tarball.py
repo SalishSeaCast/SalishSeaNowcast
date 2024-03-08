@@ -143,7 +143,7 @@ class TestConfig:
         assert prod_config["results archive"][run_type] == results_path
 
     def test_hindcast_results_archive(self, prod_config):
-        expected = "/results2/SalishSea/nowcast-green.202111/"
+        expected = "/ocean/sallen/timbucktwo/rivers/"
         assert prod_config["results archive"]["hindcast"]["localhost"] == expected
 
     @pytest.mark.parametrize(
