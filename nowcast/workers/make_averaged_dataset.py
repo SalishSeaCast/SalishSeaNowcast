@@ -110,17 +110,16 @@ def success(parsed_args):
     avg_time_interval = parsed_args.avg_time_interval
     run_date = parsed_args.run_date
     reshapr_var_group = parsed_args.reshapr_var_group
-    host_name = parsed_args.host_name
     match avg_time_interval:
         case "day":
             logger.info(
                 f"{avg_time_interval}-averaged dataset for {run_date.format('DD-MMM-YYYY')} "
-                f"{reshapr_var_group} created on {host_name}"
+                f"{reshapr_var_group} created"
             )
         case "month":
             logger.info(
                 f"{avg_time_interval}-averaged dataset for {run_date.format('MMM-YYYY')} "
-                f"{reshapr_var_group} created on {host_name}"
+                f"{reshapr_var_group} created"
             )
     msg_type = f"success {avg_time_interval} {reshapr_var_group}"
     return msg_type
@@ -130,17 +129,16 @@ def failure(parsed_args):
     avg_time_interval = parsed_args.avg_time_interval
     run_date = parsed_args.run_date
     reshapr_var_group = parsed_args.reshapr_var_group
-    host_name = parsed_args.host_name
     match avg_time_interval:
         case "day":
             logger.critical(
                 f"{avg_time_interval}-averaged dataset for {run_date.format('DD-MMM-YYYY')} "
-                f"{reshapr_var_group} creation on {host_name} failed"
+                f"{reshapr_var_group} creation failed"
             )
         case "month":
             logger.critical(
                 f"{avg_time_interval}-averaged dataset for {run_date.format('MMM-YYYY')} "
-                f"{reshapr_var_group} creation on {host_name} failed"
+                f"{reshapr_var_group} creation failed"
             )
     msg_type = f"failure {avg_time_interval} {reshapr_var_group}"
     return msg_type
@@ -149,7 +147,6 @@ def failure(parsed_args):
 def make_averaged_dataset(parsed_args, config, *args):
     avg_time_interval = parsed_args.avg_time_interval
     reshapr_var_group = parsed_args.reshapr_var_group
-    host_name = parsed_args.host_name
     run_date = parsed_args.run_date
     if avg_time_interval == "month" and run_date.day != 1:
         logger.error(
@@ -165,7 +162,7 @@ def make_averaged_dataset(parsed_args, config, *args):
         case "day":
             logger.info(
                 f"creating {avg_time_interval}-averaged dataset for "
-                f"{run_date.format('DD-MMM-YYYY')} {reshapr_var_group} on {host_name}"
+                f"{run_date.format('DD-MMM-YYYY')} {reshapr_var_group}"
             )
             reshapr_config = reshapr.api.v1.extract.load_extraction_config(
                 reshapr_config_dir / reshapr_config_yaml, run_date, run_date
@@ -176,7 +173,7 @@ def make_averaged_dataset(parsed_args, config, *args):
         case "month":
             logger.info(
                 f"creating {avg_time_interval}-averaged dataset for "
-                f"{run_date.format('MMM-YYYY')} {reshapr_var_group} on {host_name}"
+                f"{run_date.format('MMM-YYYY')} {reshapr_var_group}"
             )
             start_date = run_date
             end_date = run_date.shift(months=+1, days=-1)
