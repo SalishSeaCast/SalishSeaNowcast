@@ -403,7 +403,7 @@ results archive:
   nowcast-agrif: /results/SalishSea/nowcast-agrif.201702/
   hindcast:
     localhost: /results2/SalishSea/nowcast-green.202111/
-    graham-dtn: /nearline/rrg-allen/SalishSea/nowcast-green.202111/
+    robot.graham: /nearline/rrg-allen/SalishSea/nowcast-green.202111/
 
 
 # Config for archival storage of month-long tarballs of results
@@ -415,7 +415,7 @@ results tarballs:
   temporary tarball dir: /ocean/dlatorne/
   # Remote host and path to rsync tarballs to;
   # results dir stem (e.g. nowcast-green.201905) will be added to path
-  graham-dtn: /nearline/rrg-allen/SalishSea/
+  robot.graham: /nearline/rrg-allen/SalishSea/
 
 
 # Config for post-run resampling via Reshapr to create day-averaged and month-averaged
@@ -705,8 +705,8 @@ run:
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/continental2.5/NEMO-atmos/
 
-    graham-dtn:
-      ssh key: SalishSeaNEMO-nowcast_id_rsa
+    robot.graham:
+      ssh key: SalishSeaCast_robot.graham_ed25519
       shared storage: False
       make forcing links: False
       # Empty collection of run types because all we want to do is upload daily forcing

@@ -106,7 +106,7 @@ class TestConfig:
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
                 "localhost": "/results2/SalishSea/nowcast-green.202111/",
-                "graham-dtn": "/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
+                "robot.graham": "/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
             },
         }
         assert prod_config["results archive"].keys() == archives.keys()

@@ -1517,7 +1517,7 @@ def after_download_results(msg, config, checklist):
                     next_workers[msg.type].append(
                         NextWorker(
                             "nowcast.workers.archive_tarball",
-                            args=["nowcast-green", yyyymmm, "graham-dtn"],
+                            args=["nowcast-green", yyyymmm, "robot.graham"],
                         )
                     )
                 return next_workers[msg.type]
@@ -1668,7 +1668,7 @@ def after_split_results(msg, config, checklist):
                 next_workers[msg.type].append(
                     NextWorker(
                         "nowcast.workers.archive_tarball",
-                        args=["hindcast", yyyymmm, "graham-dtn"],
+                        args=["hindcast", yyyymmm, "robot.graham"],
                     )
                 )
     return next_workers[msg.type]

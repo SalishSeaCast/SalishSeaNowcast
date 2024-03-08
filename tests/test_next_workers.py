@@ -814,7 +814,7 @@ class TestAfterUploadForcing:
             "run",
             {
                 "enabled hosts": {
-                    "graham-dtn": {"run types": {}, "make forcing links": False}
+                    "robot.graham": {"run types": {}, "make forcing links": False}
                 }
             },
         )
@@ -822,7 +822,7 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 f"success {run_type}",
-                {"graham-dtn": {run_type: {"run date": "2020-06-29"}}},
+                {"robot.graham": {run_type: {"run date": "2020-06-29"}}},
             ),
             config,
             checklist,
@@ -2123,7 +2123,7 @@ class TestAfterDownloadResults:
         )
         archive_tarball = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["nowcast-green", "2022-may", "graham-dtn"],
+            args=["nowcast-green", "2022-may", "robot.graham"],
             host="localhost",
         )
         assert archive_tarball not in workers
@@ -2142,7 +2142,7 @@ class TestAfterDownloadResults:
         )
         expected = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["nowcast-green", "2022-may", "graham-dtn"],
+            args=["nowcast-green", "2022-may", "robot.graham"],
             host="localhost",
         )
         assert expected in workers
@@ -2347,7 +2347,7 @@ class TestAfterSplitResults:
         workers = next_workers.after_split_results(msg, config, checklist)
         archive_tarball = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["hindcast", "2022-nov", "graham-dtn"],
+            args=["hindcast", "2022-nov", "robot.graham"],
         )
         assert archive_tarball not in workers
 
@@ -2373,7 +2373,7 @@ class TestAfterSplitResults:
         )
         expected = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["hindcast", "2022-oct", "graham-dtn"],
+            args=["hindcast", "2022-oct", "robot.graham"],
         )
         assert workers[-1] == expected
 
@@ -2398,7 +2398,7 @@ class TestAfterSplitResults:
         )
         archive_tarball = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["hindcast", "2022-oct", "graham-dtn"],
+            args=["hindcast", "2022-oct", "robot.graham"],
         )
         assert archive_tarball not in workers
 
