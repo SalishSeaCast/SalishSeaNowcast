@@ -49,7 +49,7 @@ def config(base_config):
                 results tarballs:
                   archive hindcast: True
                   temporary tarball dir: ocean/dlatorne/
-                  graham-dtn: /nearline/rrg-allen/SalishSea/
+                  robot.graham: /nearline/rrg-allen/SalishSea/
                 """
             )
         )
@@ -94,7 +94,7 @@ class TestMain:
     def test_add_dest_host_arg(self, mock_worker):
         worker = archive_tarball.main()
         assert worker.cli.parser._actions[5].dest == "dest_host"
-        assert worker.cli.parser._actions[5].default == "graham-dtn"
+        assert worker.cli.parser._actions[5].default == "robot.graham"
         assert worker.cli.parser._actions[5].help
 
 
@@ -147,7 +147,7 @@ class TestConfig:
         assert prod_config["results archive"]["hindcast"]["localhost"] == expected
 
     @pytest.mark.parametrize(
-        "dest_host, dest_dir", (("graham-dtn", "/nearline/rrg-allen/SalishSea/"),)
+        "dest_host, dest_dir", (("robot.graham", "/nearline/rrg-allen/SalishSea/"),)
     )
     def test_dest_host_dir(self, dest_host, dest_dir, prod_config):
         assert prod_config["results tarballs"][dest_host] == dest_dir
@@ -167,7 +167,7 @@ class TestSuccess:
 
     def test_success(self, run_type, caplog):
         yyyy_mmm = arrow.get("2022-may", "YYYY-MMM")
-        dest_host = "graham-dtn"
+        dest_host = "robot.graham"
         parsed_args = SimpleNamespace(
             run_type=run_type, yyyy_mmm=yyyy_mmm, dest_host=dest_host
         )
@@ -196,7 +196,7 @@ class TestFailure:
 
     def test_failure(self, run_type, caplog):
         yyyy_mmm = arrow.get("2022-may", "YYYY-MMM")
-        dest_host = "graham-dtn"
+        dest_host = "robot.graham"
         parsed_args = SimpleNamespace(
             run_type=run_type, yyyy_mmm=yyyy_mmm, dest_host=dest_host
         )
@@ -253,7 +253,7 @@ class TestArchiveTarball:
 
         yyyy_mmm = arrow.get("2022-may", "YYYY-MMM")
         parsed_args = SimpleNamespace(
-            run_type="nowcast-green", yyyy_mmm=yyyy_mmm, dest_host="graham-dtn"
+            run_type="nowcast-green", yyyy_mmm=yyyy_mmm, dest_host="robot.graham"
         )
         caplog.set_level(logging.DEBUG)
         checklist = archive_tarball.archive_tarball(parsed_args, config)
@@ -270,14 +270,14 @@ class TestArchiveTarball:
         assert caplog.messages[1] == expected
         expected = (
             "rsync-ing ocean/dlatorne/nowcast-green.201905-may22.tar and index to "
-            "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.201905/"
+            "robot.graham:/nearline/rrg-allen/SalishSea/nowcast-green.201905/"
         )
         assert caplog.messages[2] == expected
         expected = {
             "tarball archived": {
                 "tarball": "ocean/dlatorne/nowcast-green.201905-may22.tar",
                 "index": "ocean/dlatorne/nowcast-green.201905-may22.index",
-                "destination": "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.201905/",
+                "destination": "robot.graham:/nearline/rrg-allen/SalishSea/nowcast-green.201905/",
             }
         }
         assert checklist == expected
@@ -307,7 +307,7 @@ class TestArchiveTarball:
 
         yyyy_mmm = arrow.get("2022-oct", "YYYY-MMM")
         parsed_args = SimpleNamespace(
-            run_type="hindcast", yyyy_mmm=yyyy_mmm, dest_host="graham-dtn"
+            run_type="hindcast", yyyy_mmm=yyyy_mmm, dest_host="robot.graham"
         )
         caplog.set_level(logging.DEBUG)
         checklist = archive_tarball.archive_tarball(parsed_args, config)
@@ -324,14 +324,14 @@ class TestArchiveTarball:
         assert caplog.messages[1] == expected
         expected = (
             "rsync-ing ocean/dlatorne/nowcast-green.202111-oct22.tar and index to "
-            "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.202111/"
+            "robot.graham:/nearline/rrg-allen/SalishSea/nowcast-green.202111/"
         )
         assert caplog.messages[2] == expected
         expected = {
             "tarball archived": {
                 "tarball": "ocean/dlatorne/nowcast-green.202111-oct22.tar",
                 "index": "ocean/dlatorne/nowcast-green.202111-oct22.index",
-                "destination": "graham-dtn:/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
+                "destination": "robot.graham:/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
             }
         }
         assert checklist == expected
