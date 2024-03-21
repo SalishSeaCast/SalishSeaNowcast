@@ -356,9 +356,9 @@ and its dashboard port on 4387:
     $ conda activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ dask scheduler --port 4386 --dashboard-address :4387
 
-Use :kbd:`Ctrl-b ,` to rename the :program:`tmux` terminal to ``dask-scheduler``.
+Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-scheduler``.
 
-Start a second :program:`tmux` terminal with :kbd:`Ctrl-b c`,
+Start a second :program:`tmux` terminal with :kbd:`Control-b c`,
 activate the :file:`/SalishSeaCast/nowcast-env` environment,
 and launch the 4 :command:`dask worker` processes with these properties:
 
@@ -376,4 +376,4 @@ and launch the 4 :command:`dask worker` processes with these properties:
       --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
       localhost:4386
 
-Use :kbd:`Ctrl-b ,` to rename the :program:`tmux` terminal to ``dask-workers``.
+Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-workers``.
