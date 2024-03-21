@@ -91,6 +91,7 @@ autodoc_mock_imports = [
     "pandas",
     "paramiko",
     "PyPDF2",
+    "reshapr",
     "salishsea_cmd",
     "salishsea_cmd.api",
     "salishsea_tools",
