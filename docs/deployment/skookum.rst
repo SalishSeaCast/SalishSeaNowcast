@@ -18,9 +18,9 @@
 
 .. _SkookumDeployment:
 
-************************
-:kbd:`skookum`Deployment
-************************
+*************************
+:kbd:`skookum` Deployment
+*************************
 
 Git Repositories
 ================
