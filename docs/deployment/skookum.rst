@@ -354,13 +354,13 @@ and its dashboard port on 4387:
 .. code-block:: bash
 
     $ conda activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ dask-scheduler --port 4386 --dashboard-address :4387
+    (/SalishSeaCast/nowcast-env)$ dask scheduler --port 4386 --dashboard-address :4387
 
 Use :kbd:`Control-b ,` to rename the ``tmux`` terminal to ``dask-scheduler``.
 
 Start a second ``tmux`` terminal with :kbd:`Control-b c`,
 activate the :file:`/SalishSeaCast/nowcast-env` environment,
-and launch the 4 :command:`dask-worker` processes with there properties:
+and launch the 4 :command:`dask worker` processes with these properties:
 
 * 4 threads per worker
 * memory limit per worker process computed automatically
@@ -371,7 +371,7 @@ and launch the 4 :command:`dask-worker` processes with there properties:
 .. code-block:: bash
 
     $ conda activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ dask-worker --nworkers=4 --nthreads=4 --memory-limit auto \
+    (/SalishSeaCast/nowcast-env)$ dask worker --nworkers=4 --nthreads=4 --memory-limit auto \
                                     --local-directory /dev/shm \
                                     --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
                                     localhost:4386
