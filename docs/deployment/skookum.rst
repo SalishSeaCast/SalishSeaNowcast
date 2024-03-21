@@ -340,13 +340,13 @@ That means that there are often concurrent instances of the worker.
 Instead of letting each worker instance spin up its own *ad hoc* dask cluster,
 we use a persistent dask cluster on ``salish`` that the worker dispatches tasks to.
 
-Create a ``tmux`` session on ``salish`` for the dask cluster:
+Create a :program:`tmux` session on ``salish`` for the dask cluster:
 
 .. code-block:: bash
 
     $ tmux new -s make_averaged_dataset
 
-In the first ``tmux`` terminal,
+In the first :program:`tmux` terminal,
 activate the :file:`/SalishSeaCast/nowcast-env` environment,
 and launch the :command:`dask-scheduler` with its serving port on 4386,
 and its dashboard port on 4387:
@@ -356,9 +356,9 @@ and its dashboard port on 4387:
     $ conda activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ dask scheduler --port 4386 --dashboard-address :4387
 
-Use :kbd:`Control-b ,` to rename the ``tmux`` terminal to ``dask-scheduler``.
+Use :kbd:`Ctrl-b ,` to rename the :program:`tmux` terminal to ``dask-scheduler``.
 
-Start a second ``tmux`` terminal with :kbd:`Control-b c`,
+Start a second :program:`tmux` terminal with :kbd:`Ctrl-b c`,
 activate the :file:`/SalishSeaCast/nowcast-env` environment,
 and launch the 4 :command:`dask worker` processes with these properties:
 
@@ -376,4 +376,4 @@ and launch the 4 :command:`dask worker` processes with these properties:
       --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
       localhost:4386
 
-Use :kbd:`Control-b ,` to rename the ``tmux`` terminal to ``dask-workers``.
+Use :kbd:`Ctrl-b ,` to rename the :program:`tmux` terminal to ``dask-workers``.
