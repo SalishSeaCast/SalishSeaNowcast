@@ -362,18 +362,18 @@ Start a second ``tmux`` terminal with :kbd:`Control-b c`,
 activate the :file:`/SalishSeaCast/nowcast-env` environment,
 and launch the 4 :command:`dask worker` processes with these properties:
 
-* 4 threads per worker
-* memory limit per worker process computed automatically
-* worker files stored on the :file:`/dev/shm` shared memory file system
+* 1 thread per worker
+* 64G memory limit per worker
+* worker files stored on the :file:`/tmp/` file system
 * workers restart every 3600 seconds with 60 second random staggering of their restart times
 * workers communicate with the scheduler on port 4386
 
 .. code-block:: bash
 
     $ conda activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ dask worker --nworkers=4 --nthreads=4 --memory-limit auto \
-                                    --local-directory /dev/shm \
-                                    --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
-                                    localhost:4386
+    (/SalishSeaCast/nowcast-env)$ dask worker --nworkers=4 --nthreads=1 --memory-limit 64G \
+      --local-directory /tmp \
+      --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
+      localhost:4386
 
 Use :kbd:`Control-b ,` to rename the ``tmux`` terminal to ``dask-workers``.
