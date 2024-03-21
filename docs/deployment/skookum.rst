@@ -18,9 +18,9 @@
 
 .. _SkookumDeployment:
 
-*************************
-:kbd:`skookum` Deployment
-*************************
+**********************
+``skookum`` Deployment
+**********************
 
 Git Repositories
 ================
@@ -60,7 +60,7 @@ The Python packages that the system depends on are installed in conda environmen
 
    .. _Mambaforge-pypy3: https://github.com/conda-forge/miniforge
 
-For the :kbd:`SalishSeaCast` automation system:
+For the ``SalishSeaCast`` automation system:
 
 .. code-block:: bash
 
@@ -228,17 +228,17 @@ On the hosts where the nowcast system NEMO runs will be executed create a
 
 The hosts and their :file:`runs` directories presently in use are:
 
-* :kbd:`arbutus.cloud`
+* ``arbutus.cloud``
     See :ref:`ArbutusCloudNEMORunsDirectory`
 
-* :kbd:`orcinus`
+* ``orcinus``
     :file:`/home/sallen/MEOPAR/nowcast/`
 
 
 ECCC MSC Datamart Mirror Directories
 ====================================
 
-Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and
+Create directories on ``skookum`` for storage of the HRDPS forecast files and
 rivers hydrometric files maintained by the `sarracenia client`_:
 
 .. code-block:: bash
@@ -250,7 +250,7 @@ rivers hydrometric files maintained by the `sarracenia client`_:
 Logging Directories
 ===================
 
-Create directories on :kbd:`skookum` for storage of the nowcast system and
+Create directories on ``skookum`` for storage of the nowcast system and
 `salishsea-site web app`_ log files:
 
 .. code-block:: bash
@@ -338,9 +338,9 @@ The :py:mod:`~nowcast.workers.make_averaged_dataset` worker is launched:
 
 That means that there are often concurrent instances of the worker.
 Instead of letting each worker instance spin up its own *ad hoc* dask cluster,
-we use a persistent dask cluster on :kbd:`salish` that the worker dispatches tasks to.
+we use a persistent dask cluster on ``salish`` that the worker dispatches tasks to.
 
-Create a ``tmux`` session on :kbd:`salish` for the dask cluster:
+Create a ``tmux`` session on ``salish`` for the dask cluster:
 
 .. code-block:: bash
 
