@@ -140,15 +140,15 @@ Testing the Website View
 Automatic Code Formatting
 =========================
 
-The :kbd:`salishsea_site` package uses the `yapf`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+The :kbd:`salishsea_site` package uses the`black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
 
-.. _yapf: https://github.com/google/yapf
-.. _PEP 8: https://peps.python.org/pep-0008/
+.. _black: https://black.readthedocs.io/en/stable/
+.. _PEP 8: https://www.python.org/dev/peps/pep-0008/
 
-:command:`yapf` is installed as part of the :ref:`NowcastFiguresDevEnv` setup.
+:command:`black` is installed as part of the :ref:`NowcastFiguresDevEnv` setup.
 
-Before each commit of the :py:mod:`salishsea_site.views.salishseacast` module please run :program:`yapf` to automatically format the code with the command:
+Before each commit of the :py:mod:`salishsea_site.views.salishseacast` module please run :program:`black` to automatically format the code with the command:
 
 .. code-block:: bash
 
-    $ yapf --in-place salishsea_site/views/salishseacast.py
+    $ black salishsea_site/views/salishseacast.py

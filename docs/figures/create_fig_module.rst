@@ -867,16 +867,16 @@ the content added to :file:`SalishSeaNowcast/docs/workers.rst` is:
 Automatic Code Formatting
 =========================
 
-The :kbd:`SalishSeaNowcast` package uses the `yapf`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
+The ``SalishSeaNowcast`` package uses the `black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
 
-.. _yapf: https://github.com/google/yapf
-.. _PEP 8: https://peps.python.org/pep-0008/
+.. _black: https://black.readthedocs.io/en/stable/
+.. _PEP 8: https://www.python.org/dev/peps/pep-0008/
 
-:command:`yapf` is installed as part of the :ref:`NowcastFiguresDevEnv` setup.
+:command:`black` is installed as part of the :ref:`NowcastFiguresDevEnv` setup.
 
-Before each commit of your figure module please run :program:`yapf` to automatically format your code.
+Before each commit of your figure module please run :program:`black` to automatically format your code.
 For our example :py:mod:`~nowcast.figures.research.tracer_thalweg_and_surface` module the command would be:
 
 .. code-block:: bash
 
-    $ yapf --in-place nowcast/figures/research/tracer_thalweg_and_surface.py
+    $ black nowcast/figures/research/tracer_thalweg_and_surface.py
