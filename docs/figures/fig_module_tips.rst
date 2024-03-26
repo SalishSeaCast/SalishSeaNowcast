@@ -22,8 +22,7 @@
 Figure Module Tips
 ******************
 
-This section contains pointers to useful visualization functions in the :kbd:`SalishSeaTools` package.
-It also contains pointers to website figure module functions that do common things so that you can copy code rather than having to reinvent the wheel.
+This section contains pointers to website figure module functions that do common things so that you can copy code rather than having to reinvent the wheel.
 
 
 Format Date/Time Tick Labels on an Axes

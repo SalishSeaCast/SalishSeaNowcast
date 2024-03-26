@@ -76,30 +76,30 @@ Start it with:
 .. _supervisorctl: http://supervisord.org/running.html#running-supervisorctl
 
 See the `supervisorctl`_ docs,
-or use the :kbd:`help` command within :command:`supervisorctl` to get information on the available commands.
+or use the ``help`` command within :command:`supervisorctl` to get information on the available commands.
 A few that are useful:
 
-* :kbd:`avail` to get a list of the processes that :command:`supervisord` is configured to manage
-* :kbd:`status` to see their status
-* :kbd:`stop` to stop a process;
-  e.g. :kbd:`stop manager`
-* :kbd:`start` to start a stopped process;
-  e.g. :kbd:`start manager`
-* :kbd:`restart` to stop and restart a process;
-  e.g. :kbd:`restart manager`
-* :kbd:`signal hup` to send a :kbd:`HUP` signal to a process,
+* ``avail`` to get a list of the processes that :command:`supervisord` is configured to manage
+* ``status`` to see their status
+* ``stop`` to stop a process;
+  e.g. ``stop manager``
+* ``start`` to start a stopped process;
+  e.g. ``start manager``
+* ``restart`` to stop and restart a process;
+  e.g. ``restart manager``
+* ``signal hup`` to send a ``HUP`` signal to a process,
   which will cause it to reload its configuration from the :envvar:`NOWCAST_YAML` file that the process was started with;
-  e.g. :kbd:`signal hup manager`.
+  e.g. ``signal hup manager``.
   This is the way to communicate nowcast system configuration changes to the long-running processes.
-* :kbd:`shutdown` to stop all of the processes and shutdown :command:`supervisord`
+* ``shutdown`` to stop all of the processes and shutdown :command:`supervisord`
 
-Use :kbd:`quit` or :kbd:`exit` to exit from :command:`supervisorctl`.
+Use ``quit`` or ``exit`` to exit from :command:`supervisorctl`.
 
 `sr_subscribe`_ is the command-line interface for interacting with the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
 
 .. _sr_subscribe: https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
 
-:command:`sr_subscribe` is run in :kbd:`foreground` mode instead of daemonized so that it can be managed by ::command:`supervisord`.
+:command:`sr_subscribe` is run in ``foreground`` mode instead of daemonized so that it can be managed by ::command:`supervisord`.
 Use :command:`supervisorctl` to view the :command:`sr_subscribe` log files:\
 
 .. code-block:: bash
@@ -116,8 +116,8 @@ or
 Use :command:`tail -f` to follow the logs to view updates as they occur.
 
 
-Automatic Deployment of Changes to :kbd:`salishsea-site` App
-============================================================
+Automatic Deployment of Changes to ``salishsea-site`` App
+=========================================================
 
 A `GitHub Actions workflow`_ causes changes to be pulled and updated to :file:`/SalishSeaCast/salishsea-site/` and the app to be restarted via :command:`supervisorctl` whenever changes are pushed to the repo on GitHub.
 

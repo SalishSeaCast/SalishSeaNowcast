@@ -50,7 +50,7 @@ def make_figure(
     by the SoG WaveWatch3(TM) model,
     and observed wave heights and dominant wave periods from the NOAA NDBC
     https://www.ndbc.noaa.gov/data/realtime2/ web service for the wave buoy
-    at :kbd:`buoy`.
+    at ``buoy``.
 
     :arg str buoy: Wave buoy name;
                    must be a key in :py:obj:`moad_tools.places.PLACES`.

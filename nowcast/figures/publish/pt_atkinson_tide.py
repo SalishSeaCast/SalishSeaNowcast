@@ -49,7 +49,7 @@ def make_figure(
     theme=nowcast.figures.website_theme,
 ):
     """Plot the tidal cycle at Point Atkinson during a 4 week period centred
-    around the model results in :kbd:`grid_T` with that period indicated on
+    around the model results in ``grid_T`` with that period indicated on
     the graph.
 
     :arg grid_T_hr: Hourly tracer results dataset from NEMO.

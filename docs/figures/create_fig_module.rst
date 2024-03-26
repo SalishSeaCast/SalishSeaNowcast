@@ -291,7 +291,7 @@ and then we'll look at each section in detail.
 .. note::
 
     Line numbers beside the code fragments in this section would be a definite improvement.
-    Unfortunately they are badly misaligned in the :kbd:`sphinx_rtd_theme` presently deployed on readthedocs.org (v0.1.7).
+    Unfortunately they are badly misaligned in the ``sphinx_rtd_theme`` presently deployed on readthedocs.org (v0.1.7).
     That bug is fixed in v0.1.9,
     broken again somewhere between that version and v0.2.4,
     and fixed again in v0.2.5b1.
@@ -406,7 +406,7 @@ the
 
 import must be present in every figure module.
 :py:mod:`nowcast.figures.website_theme` provides the definition of colours and fonts that figure modules must use in order to ensure consistency from one to the next,
-and with the :kbd:`salishsea.eos.ubc.ca` site NEMO results section styling.
+and with the ``salishsea.eos.ubc.ca`` site NEMO results section styling.
 
 See :ref:`nowcast.figures.website_theme` for more details about the :py:mod:`~nowcast.figures.website_theme` module.
 
@@ -493,16 +493,16 @@ The function signature
 
 should use model results dataset objects rather than file names so that the datasets are loaded once by the :py:mod:`nowcast.workers.make_plots` worker and references to them passed into the figure creation functions.
 
-The signature ends with the default-values keyword arguments :kbd:`figsize` and :kbd:`theme`.
+The signature ends with the default-values keyword arguments ``figsize`` and ``theme``.
 
-The :kbd:`figsize` 2-tuple give the width and height of the figure,
+The ``figsize`` 2-tuple give the width and height of the figure,
 but more importantly its aspect ratio.
 Choose values that are appropriate to the information presented in the figure.
 If you don't have a good reason to choose something else,
-use :kbd:`figsize=(16, 9)` because that matches the aspect ration of wide displays that most people use to view web sites
+use ``figsize=(16, 9)`` because that matches the aspect ration of wide displays that most people use to view web sites
 (even phones in landscape orientation).
 
-The :kbd:`theme` should be defaulted to :py:mod:`nowcast.figures.website_theme`, a module that provides colours and font specifications that fit with the `salishsea site`_ colour scheme and provide consistency among the figures.
+``theme`` should be defaulted to :py:mod:`nowcast.figures.website_theme`, a module that provides colours and font specifications that fit with the `salishsea site`_ colour scheme and provide consistency among the figures.
 
 .. _salishsea site: https://salishsea.eos.ubc.ca
 
@@ -549,7 +549,7 @@ Those are written using `Sphinx Info Field List markup`_ so that they render nic
 .. _Sphinx Info Field List markup: https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists
 
 Simple,
-1-word type information can be included in the :kbd:`:param ...:` role,
+1-word type information can be included in the ``:param ...:`` role,
 for example:
 
 .. code-block:: restructuredtext
@@ -557,7 +557,7 @@ for example:
     :param boolean depth_integrated: Integrate the tracer over the water column
                                      depth when :py:obj:`True`.
 
-More complicated type information should go in a separate :kbd:`:type ...:` role like:
+More complicated type information should go in a separate ``:type ...:`` role like:
 
 .. code-block:: restructuredtext
 
@@ -588,9 +588,9 @@ The function code does 4 things:
    * a tuple of :py:class:`matplotlib.axes.Axes` objects,
      one for each axes in the figure
 
-   The :py:func:`_prep_fig_axes` function accept arguments named :kbd:`figsize` and :kbd:`theme`.
-   :kbd:`figsize` provides the size and shape of the figure area.
-   :kbd:`theme` provides the :py:mod:`nowcast.figures.website_theme` :ref:`WebsiteTheme` module which defines things like the figure and axes background colours.
+   The :py:func:`_prep_fig_axes` function accept arguments named ``figsize`` and ``theme``.
+   ``figsize`` provides the size and shape of the figure area.
+   ``theme`` provides the :py:mod:`nowcast.figures.website_theme` :ref:`WebsiteTheme` module which defines things like the figure and axes background colours.
 
    The tuple of axes objects returned by :py:func:`_prep_fig_axes` should be given meaningful names as shown above rather than:
 
@@ -685,9 +685,8 @@ Please see :ref:`LibraryCodeSalishSeaToolsPlaces` for more details.
 :py:func:`_prep_fig_axes` Function
 ==================================
 
-The :py:func:`_prep_fig_axes` function accepts arguments named :kbd:`figsize` and :kbd:`theme`.
-:kbd:`figsize` provides the size and shape of the figure area.
-:kbd:`theme` provides the :py:mod:`nowcast.figures.website_theme` :ref:`WebsiteTheme` module which defines things like the figure and axes background colours.
+The :py:func:`_prep_fig_axes` function accepts arguments named ``figsize`` and ``theme``.
+``figsize`` provides the size and shape of the figure ``theme`` provides the :py:mod:`nowcast.figures.website_theme` :ref:`WebsiteTheme` module which defines things like the figure and axes background colours.
 
 .. code-block:: python
 
@@ -732,16 +731,16 @@ one for each :py:obj:`matplotlib.axes.Axes` object returned by :py:func:`_prep_f
 Those functions generally accept:
 
 * a :py:obj:`matplotlib.axes.Axes` object as their 1st argument,
-  called :kbd:`ax` by convention
+  called ``ax`` by convention
 * the :py:obj:`~types.SimpleNamespace` object that was returned by the :py:func:`_prep_plot_data` function,
-  called :kbd:`plot_data` by convention
+  called ``plot_data`` by convention
 * the :py:mod:`nowcast.figures.website_theme` module as their last argument,
-  called :kbd:`theme` by convention
+  ``theme`` by convention
 
 They may accept other arguments as necessary.
 
 The job of the :py:func:`_plot_*` functions is to act on the :py:obj:`matplotlib.axes.Axes` object
-(:kbd:`ax`)
+(``ax``)
 so they may or may not return anything.
 
 
@@ -787,7 +786,7 @@ It returns the :py:obj:`cbar` colour bar object for a separate :py:func:`_thalwe
             fontproperties=theme.FONTS['axis'])
         theme.set_axis_colors(ax)
 
-This function shows how text colours and fonts are obtained from :kbd:`theme`.
+This function shows how text colours and fonts are obtained from ``theme``.
 It finishes with a call to the :py:func:`theme.set_axis_colors` convenience function to set the colours of axis labels,
 ticks,
 and spines so that they are consistent with the web site theme.
@@ -804,7 +803,7 @@ The code format the colour bar labels is in separate :py:func:`_cbar_labels` fun
             fontproperties=theme.FONTS['axis'],
             color=theme.COLOURS['text']['axis'])
 
-The colour of the tick labels on the colorbar is set by calling the :py:meth:`axes.tick_params` method on the axes object with a colour provided by :kbd:`theme`.
+The colour of the tick labels on the colorbar is set by calling the :py:meth:`axes.tick_params` method on the axes object with a colour provided by ``theme``.
 
 
 .. _PlotTracerSurface:

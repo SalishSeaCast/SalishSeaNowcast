@@ -18,11 +18,11 @@
 
 .. _OptimumDeployment:
 
-*******************************************
-:kbd:`optimum` Deployment for Hindcast Runs
-*******************************************
+****************************************
+``optimum`` Deployment for Hindcast Runs
+****************************************
 
-Doug maintains the production deployment on :kbd:`optimum` in the group :kbd:`sallen` directory trees.
+Doug maintains the production deployment on ``optimum`` in the group ``sallen`` directory trees.
 That means that,
 for the purposes of these docs,
 the value of :envvar:`HOME` is :file:`/home/sallen/dlatorne`.
@@ -36,7 +36,7 @@ Add these environment variable definitions to :file:`$HOME/.bash_profile`::
   export FORCING=/data/sallen/shared
   export PROJECT=/home/sallen/dlatorne
 
-:kbd:`optimum` provides automatically defined environment variables for:
+``optimum`` provides automatically defined environment variables for:
 
   :envvar:`ARCHIVEDIR`
     for storing semi-permanent input and results. (no backup)
@@ -51,14 +51,14 @@ Add these environment variable definitions to :file:`$HOME/.bash_profile`::
 Module Loads
 ============
 
-The default module loads to use on :kbd:`optimum` are::
+The default module loads to use on ``optimum`` are::
 
   module load OpenMPI/2.1.6/GCC/SYSTEM
   module load GIT/2/03.03
 
 Loading of those modules is included in :file:`$HOME/.bashrc`.
 
-There is a :kbd:`Miniconda/3` module available for building Python Conda environments.
+There is a ``Miniconda/3`` module available for building Python Conda environments.
 Conda environments created with that module loaded are stored in :file:`$HOME/.conda/envs/`.
 
 There is something funky about :program:`REBUILD_NEMO` and the way it uses netCDF that requires a different collection of modules in order to avoid a run-time error about netCDF4 operations on netCDF3 files
@@ -123,7 +123,7 @@ Clone the following repos into :file:`$PROJECT/SalishSeaCast/hindcast-sys/`:
 Build XIOS-2
 ============
 
-Symlink the XIOS-2 build configuration files for :kbd:`optimum` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
+Symlink the XIOS-2 build configuration files for ``optimum`` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
 .. code-block:: bash
 
@@ -135,10 +135,10 @@ Symlink the XIOS-2 build configuration files for :kbd:`optimum` from the :file:`
 Despite many attempts with various combinations of compilers,
 OpenMPI library versions,
 and netCDF library versions,
-the only way found to successfully build XIOS-2 is with the :kbd:`OpenMPI/2.1.6/GCC/SYSTEM` module.
-That forces us to use the SVN :kbd:`r1066` checkout version of XIOS-2.
-That version is pointed to by both the :kbd:`XIOS-2r1066` and the :kbd:`PROD-hindcast_201905-v3`
-(and later :kbd:`PROD-hindcast_*`)
+the only way found to successfully build XIOS-2 is with the ``OpenMPI/2.1.6/GCC/SYSTEM`` module.
+That forces us to use the SVN ``r1066`` checkout version of XIOS-2.
+That version is pointed to by both the ``XIOS-2r1066`` and the ``PROD-hindcast_201905-v3``
+(and later ``PROD-hindcast_*``)
 Git tags,
 so create a branch to checkout the repo at one of those tags:
 
@@ -153,7 +153,7 @@ and build XIOS-2 with:
     $ cd $PROJECT/SalishSeaCast/hindcast-sys/XIOS-2/
     $ ./make_xios --arch GCC_OPTIMUM --netcdf_lib netcdf4_seq --job 8
 
-:kbd:`--netcdf_lib netcdf4_seq` is necessary because the :kbd:`OpenMPI/2.1.6/GCC/SYSTEM`  NetCDF libraries are not built for parallel output.
+``--netcdf_lib netcdf4_seq`` is necessary because the ``OpenMPI/2.1.6/GCC/SYSTEM``  NetCDF libraries are not built for parallel output.
 
 To clear away all artifacts of a previous build of XIOS-2 use:
 
@@ -209,7 +209,7 @@ Build it with:
 Install Python Packages
 =======================
 
-Load the :kbd:`Miniconda/3` module and create a Conda environment:
+Load the ``Miniconda/3`` module and create a Conda environment:
 
 .. code-block:: bash
 

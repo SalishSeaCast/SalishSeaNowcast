@@ -25,11 +25,11 @@ SalishSeaCast Web Page View Figure Metadata
 This section discusses:
 
 * how to add figure metadata to the :py:mod:`salishsea_site.views.salishseacast` module to make a figure appear on a web page
-* how to run a local instance of the :kbd:`salishsea` website to confirm that the figure is on the web page
+* how to run a local instance of the ``salishsea`` website to confirm that the figure is on the web page
 
 We'll use the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` figure module as an example.
 
-You should run your local :kbd:`salishsea` website server for testing in a :ref:`NowcastFiguresDevEnv`.
+You should run your local ``salishsea`` website server for testing in a :ref:`NowcastFiguresDevEnv`.
 You can activate it with:
 
 .. code-block:: bash
@@ -49,7 +49,7 @@ The `salishsea.eos.ubc.ca site web app`_ gathers figures that have been rendered
 Each row on the https://salishsea.eos.ubc.ca/nemo/results/ page contains links to pages that are generated from a page template by a view function in the :py:mod:`salishsea_site.views.salishseacast` module.
 Each view function uses a list of :py:class:`salishsea_site.views.salishseacast.FigureMetadata` objects that is also defined in the :py:mod:`salishsea_site.views.salishseacast` module.
 The :py:class:`~salishsea_site.views.salishseacast.FigureMetadata` objects set the title for the figure that will appear on the web page,
-and the :kbd:`svg_name` of the figure files rendered by the :py:mod:`make_plots` worker.
+and the ``svg_name`` of the figure files rendered by the :py:mod:`make_plots` worker.
 
 So,
 to add a figure rendered from our :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` figure module to the :guilabel:`Biology` page,
@@ -62,15 +62,15 @@ we add a :py:class:`~salishsea_site.views.salishseacast.FigureMetadata` object t
         svg_name='nitrate_thalweg_and_surface',
     )
 
-The value of the :kbd:`title` attribute appears in :guilabel:`Plots` list on the page as a link to the figure lower down on the page,
+The value of the ``title`` attribute appears in :guilabel:`Plots` list on the page as a link to the figure lower down on the page,
 and it appears as a heading above the figure image.
 
-The value of the :kbd:`svg_name` attribute is key that we used to register our figure function module in the :py:mod:`make_plots` worker.
+The value of the ``svg_name`` attribute is key that we used to register our figure function module in the :py:mod:`make_plots` worker.
 Recall that the key is also used as the root part of the file name into which the figure is rendered.
 That is:
 
-* We :ref:`registered a call <RegisteringMakeFigureCallsInTheMakePlotsWorker>` to the :py:func:`nowcast.figures.research.tracer_thalweg_and_surface.make_figure` function in the :py:func:`nowcast.workers.make_plots._prep_nowcast_green_research_fig_functions` function using the key :kbd:`nitrate_thalweg_and_surface` to produce a nitrate thalweg and surface figure
-* When the :py:mod:`make_plots` was run with the command-line options :kbd:`nowcast-green research --run-date 2017-04-29` it stored the rendered figure with the file name :file:`nitrate_thalweg_and_surface_29apr17.svg`
+* We :ref:`registered a call <RegisteringMakeFigureCallsInTheMakePlotsWorker>` to the :py:func:`nowcast.figures.research.tracer_thalweg_and_surface.make_figure` function in the :py:func:`nowcast.workers.make_plots._prep_nowcast_green_research_fig_functions` function using the key ``nitrate_thalweg_and_surface`` to produce a nitrate thalweg and surface figure
+* When the :py:mod:`make_plots` was run with the command-line options ``nowcast-green research --run-date 2017-04-29`` it stored the rendered figure with the file name :file:`nitrate_thalweg_and_surface_29apr17.svg`
 
 The order of :py:class:`~salishsea_site.views.salishseacast.FigureMetadata` objects in the :py:obj:`~salishsea_site.views.salishseacast.biology_figures` list determines the order in which the figures appear on the web page.
 
@@ -123,9 +123,9 @@ Testing the Website View
 
    but the PID number will be different.
    The web server is now running in this terminal session.
-   You can stop it with :kbd:`Ctrl-C` when you are finished.
+   You can stop it with :kbd:`Control-c` when you are finished.
 
-#. Use your browser to navigate to :kbd:`http://localhost:6543/nemo/results/`.
+#. Use your browser to navigate to ``http://localhost:6543/nemo/results/``.
    From there you should be able to navigate to the page that will show you the figures
    for the date that you ran the :py:mod:`make_plots` worker for;
    for our test of the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` figure module,

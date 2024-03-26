@@ -23,13 +23,13 @@ Nowcast Figures Development Environment
 ***************************************
 
 This section explains how to set up an isolated `Conda`_ environment for nowcast web site figure development and testing.
-The environment will have both the :kbd:`SalishSeaNowcast` nowcast system package,
-and the :kbd:`salishsea-site` web site app package installed in it,
+The environment will have both the ``SalishSeaNowcast`` nowcast system package,
+and the ``salishsea-site`` web site app package installed in it,
 along with all of their dependencies.
 
 .. _Conda: https://conda.io/en/latest/
 
-The :kbd:`SalishSeaNowcast` and :kbd:`salishsea-site` packages use some Python language features that are not available in versions prior to Python 3.6,
+The ``SalishSeaNowcast`` and ``salishsea-site`` packages use some Python language features that are not available in versions prior to Python 3.6,
 in particular:
 
 * `formatted string literals`_
@@ -79,7 +79,7 @@ you can create and activate a figures development environment with these command
     (nowcast-fig-dev)$ python3 -m pip install --editable ../salishsea-site/
     (nowcast-fig-dev)$ python3 -m pip install --editable .
 
-The :kbd:`--editable` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
+The ``--editable`` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
 
 To deactivate the environment use:
 

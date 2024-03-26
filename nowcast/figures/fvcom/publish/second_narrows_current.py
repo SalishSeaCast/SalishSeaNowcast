@@ -55,7 +55,7 @@ def make_figure(
     :arg fvcom_stns_datasets: Dictionary of VHFR FVCOM model tide gauge station
                               sea surface height time series of
                               py:class:`xarray.Dataset` objects keyed by model
-                              model configuration (:kbd:`x2`, :kbd:`r12`).
+                              model configuration (``x2``, ``r12``).
     :type fvcom_stns_datasets: :py:class:`dict`
 
     :arg obs_dataset: Observed horizontal ADCP station sea water current time series dataset.

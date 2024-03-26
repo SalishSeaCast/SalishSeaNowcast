@@ -65,19 +65,19 @@ The :py:mod:`~nowcast.workers.make_plots` worker organizes figures by NEMO run t
 The :command:`python -m nowcast.workers.make_plots -h` command will show you a list of the run types and plot types.
 At present the run types are:
 
-* :kbd:`nowcast`
-* :kbd:`nowcast-green`
-* :kbd:`forecast`
-* :kbd:`forecast2`
+* ``nowcast``
+* ``nowcast-green``
+* ``forecast``
+* ``forecast2``
 
 and the plot types are:
 
-* :kbd:`research`
-* :kbd:`comparison`
-* :kbd:`publish`
+* ``research``
+* ``comparison``
+* ``publish``
 
-:py:mod:`~nowcast.workers.make_plots` also accepts a :kbd:`--run-date` to specify the date of the daily nowcast system NEMO run to create the figure for.
-Without :kbd:`--run-date` today's date is used.
+:py:mod:`~nowcast.workers.make_plots` also accepts a ``--run-date`` to specify the date of the daily nowcast system NEMO run to create the figure for.
+Without ``--run-date`` today's date is used.
 
 The :py:func:`~nowcast.workers.make_plots.make_plots` function uses paths defined in the nowcast system configuration file
 (:file:`SalishSeaNowcast/config/nowcast.yaml`)
@@ -109,8 +109,8 @@ To use the :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` to prod
         return fig_functions
 
 That function presently loads only one results dataset,
-from the hourly :kbd:`SalishSea_*_ptrc_T.nc` file from a :kbd:`nowcast-green` run.
-If you wanted to also produce a salinity thalweg and surface figure you would need to add a line to load the corresponding :kbd:`grid_T.nc` dataset,
+from the hourly ``SalishSea_*_ptrc_T.nc`` file from a ``nowcast-green`` run.
+If you wanted to also produce a salinity thalweg and surface figure you would need to add a line to load the corresponding ``grid_T.nc`` dataset,
 something like:
 
 .. code-block:: python
@@ -128,15 +128,15 @@ Each :py:func:`make_figure` call that we want :py:mod:`~nowcast.workers.make_plo
     }
 
 The key,
-:kbd:`nitrate_thalweg_and_surface` is the the root part of the file name into which the figure will be rendered.
-If :py:mod:`~nowcast.workers.make_plots` is run with the command-line options :kbd:`nowcast-green research --run-date 2017-04-29`,
+``nitrate_thalweg_and_surface`` is the the root part of the file name into which the figure will be rendered.
+If :py:mod:`~nowcast.workers.make_plots` is run with the command-line options ``nowcast-green research --run-date 2017-04-29``,
 it will stored the rendered figure with the file name :file:`nitrate_thalweg_and_surface_29apr17.svg`.
 
 The value is a :py:obj:`dict` that defines how to call the :py:func:`make_figure` function.
 It has 2 required key/value pairs,
 and 2 optional ones.
 
-The :kbd:`function` key is required.
+The ``function`` key is required.
 Its value is the name of the website figure module and the function in it to call (i.e. :py:func:`make_figure`) in dotted notation.
 *Note that the value is a function object, so it is* **not** *enclosed in quotes.*
 The website figure module must be imported at the top of the :py:mod:`~nowcast.workers.make_plots` module; e.g.
@@ -145,18 +145,18 @@ The website figure module must be imported at the top of the :py:mod:`~nowcast.w
 
     from nowcast.figures.research import tracer_thalweg_and_surface
 
-The :kbd:`args` key is required.
+The ``args`` key is required.
 Its value is is a :py:obj:`tuple` containing the positional arguments that :py:func:`make_figure` is to be called with.
 
-The :kbd:`kwargs` key is optional.
+The ``kwargs`` key is optional.
 Its value is a :py:obj:`dict` containing the keyword arguments and their values that :py:func:`make_plots` is to be called with.
-If no keyword arguments are needed you can omit :kbd:`kwargs`.
+If no keyword arguments are needed you can omit ``kwargs``.
 
-The other optional key is :kbd:`format`.
+The other optional key is ``format``.
 Its value is the image format to use to store the rendered figure.
-It defaults to :kbd:`svg`,
+It defaults to ``svg``,
 our preferred figure image format because it is a resolution-independent vector format.
-The :kbd:`format` key is provided for the occassional special instances when we want to save images as :kbd:`png` bitmap images.
+The ``format`` key is provided for the occasional special instances when we want to save images as ``png`` bitmap images.
 
 So,
 the :py:obj:`fig_functions` item:
@@ -215,15 +215,15 @@ We can test that we have set up the necessary dataset loading and registered our
 
    The command line elements are:
 
-   * :kbd:`-m` to tell Python to run a module
-   * :kbd:`nowcast.workers.make_plots`, the module to run
-   * :kbd:`config/nowcast.yaml` the path and file name of the nowcast system configuration file
-   * :kbd:`nowcast-green`, the run type
-   * :kbd:`research`, the plots type
-   * :kbd:`--debug` to send logging output to the terminal and *not* communicate with the nowcast system manager process (**very important**)
-   * :kbd:`--test-figure` to produce a test figure
-   * :kbd:`nitrate_thalweg_and_surface` the key of the :py:func:`make_figure` call to test
-   * :kbd:`--run-date` to say what date's run results to render the figure for
+   * ``-m`` to tell Python to run a module
+   * ``nowcast.workers.make_plots``, the module to run
+   * ``config/nowcast.yaml``, the path and file name of the nowcast system configuration file
+   * ```nowcast-green``, the run type
+   * ``research``, the plots type
+   * ``--debug`` to send logging output to the terminal and *not* communicate with the nowcast system manager process (**very important**)
+   * ``--test-figure`` to produce a test figure
+   * ``nitrate_thalweg_and_surface``, the key of the :py:func:`make_figure` call to test
+   * ``--run-date``, to say what date's run results to render the figure for
 
    The output of a successful test should look something like::
 
@@ -233,7 +233,7 @@ We can test that we have set up the necessary dataset loading and registered our
      2017-05-05 17:11:16,358 DEBUG [make_plots] starting nowcast.figures.research.tracer_thalweg_and_surface.make_figure
      2017-05-05 17:11:18,645 INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
      2017-05-05 17:11:18,646 INFO [make_plots] research plots for 2017-04-29 nowcast-green completed
-     2017-05-05 17:11:18,647 DEBUG [make_plots] **debug mode** message that would have been sent to manager: (success nowcast-green research nowcast-green reseach plots produced)
+     2017-05-05 17:11:18,647 DEBUG [make_plots] **debug mode** message that would have been sent to manager: (success nowcast-green research nowcast-green research plots produced)
      2017-05-05 17:11:18,647 DEBUG [make_plots] shutting down
 
    It is particularly important that your output contains the line that tells you that your figure was saved::

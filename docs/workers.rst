@@ -65,8 +65,8 @@ Workers
 
 .. _CollectWeatherWorker:
 
-:kbd:`collect_weather`
------------------------
+``collect_weather``
+--------------------
 
 .. automodule:: nowcast.workers.collect_weather
     :members: main
@@ -74,8 +74,8 @@ Workers
 
 .. _DownloadWeatherWorker:
 
-:kbd:`download_weather`
------------------------
+``download_weather``
+--------------------
 
 .. automodule:: nowcast.workers.download_weather
     :members: main
@@ -83,8 +83,8 @@ Workers
 
 .. _CropGribsWorker:
 
-:kbd:`crop_gribs`
----------------------
+``crop_gribs``
+------------------
 
 .. automodule:: nowcast.workers.crop_gribs
     :members: main
@@ -92,29 +92,29 @@ Workers
 
 .. _GribToNetcdfWorker:
 
-:kbd:`grib_to_netcdf`
----------------------
+``grib_to_netcdf``
+------------------
 
 .. automodule:: nowcast.workers.grib_to_netcdf
     :members: main
 
 
-:kbd:`collect_river_data`
--------------------------
+``collect_river_data``
+----------------------
 
 .. automodule:: nowcast.workers.collect_river_data
     :members: main
 
 
-:kbd:`make_runoff_file`
------------------------
+``make_runoff_file``
+--------------------
 
 .. automodule:: nowcast.workers.make_runoff_file
     :members: main
 
 
-:kbd:`make_v202111_runoff_file`
--------------------------------
+``make_v202111_runoff_file``
+----------------------------
 
 .. automodule:: nowcast.workers.make_v202111_runoff_file
     :members: main
@@ -122,8 +122,8 @@ Workers
 
 .. _CollectNeahBaySshWorker:
 
-:kbd:`collect_NeahBay_ssh`
---------------------------
+``collect_NeahBay_ssh``
+-----------------------
 
 .. automodule:: nowcast.workers.collect_NeahBay_ssh
     :members: main
@@ -131,8 +131,8 @@ Workers
 
 .. _MakeSshFilesWorker:
 
-:kbd:`make_ssh_files`
----------------------
+``make_ssh_files``
+------------------
 
 .. automodule:: nowcast.workers.make_ssh_files
     :members: main
@@ -140,8 +140,8 @@ Workers
 
 .. _DownloadLiveOceanWorker:
 
-:kbd:`download_live_ocean`
---------------------------
+``download_live_ocean``
+-----------------------
 
 .. automodule:: nowcast.workers.download_live_ocean
     :members: main
@@ -149,8 +149,8 @@ Workers
 
 .. _MakeLiveOceanFilesWorker:
 
-:kbd:`make_live_ocean_files`
-----------------------------
+``make_live_ocean_files``
+-------------------------
 
 .. automodule:: nowcast.workers.make_live_ocean_files
     :members: main
@@ -158,36 +158,36 @@ Workers
 
 .. _UploadForcingWorker:
 
-:kbd:`upload_forcing`
----------------------
+``upload_forcing``
+------------------
 
 .. automodule:: nowcast.workers.upload_forcing
     :members: main
 
 
-:kbd:`make_forcing_links`
--------------------------
+``make_forcing_links``
+----------------------
 
 .. automodule:: nowcast.workers.make_forcing_links
     :members: main
 
 
-:kbd:`run_NEMO`
----------------
+``run_NEMO``
+------------
 
 .. automodule:: nowcast.workers.run_NEMO
     :members: main
 
 
-:kbd:`run_NEMO_agrif`
----------------------
+``run_NEMO_agrif``
+------------------
 
 .. automodule:: nowcast.workers.run_NEMO_agrif
     :members: main
 
 
-:kbd:`run_NEMO_hindcast`
-------------------------
+``run_NEMO_hindcast``
+---------------------
 
 .. automodule:: nowcast.workers.run_NEMO_hindcast
     :members: main
@@ -195,71 +195,71 @@ Workers
 
 .. _WatchNEMO-Worker:
 
-:kbd:`watch_NEMO`
------------------
+``watch_NEMO``
+--------------
 
 .. automodule:: nowcast.workers.watch_NEMO
     :members: main
 
 
-:kbd:`watch_NEMO_agrif`
------------------------
+``watch_NEMO_agrif``
+--------------------
 
 .. automodule:: nowcast.workers.watch_NEMO_agrif
     :members: main
 
 
-:kbd:`watch_NEMO_hindcast`
---------------------------
+``watch_NEMO_hindcast``
+-----------------------
 
 .. automodule:: nowcast.workers.watch_NEMO_hindcast
     :members: main
 
 
-:kbd:`make_turbidity_file`
---------------------------
+``make_turbidity_file``
+-----------------------
 
 .. automodule:: nowcast.workers.make_turbidity_file
     :members: main
 
 
-:kbd:`make_fvcom_boundary`
---------------------------
+``make_fvcom_boundary``
+-----------------------
 
 .. automodule:: nowcast.workers.make_fvcom_boundary
     :members: main
 
 
-:kbd:`make_fvcom_rivers_forcing`
---------------------------------
+``make_fvcom_rivers_forcing``
+-----------------------------
 
 .. automodule:: nowcast.workers.make_fvcom_rivers_forcing
     :members: main
 
 
-:kbd:`make_fvcom_atmos_forcing`
--------------------------------
+``make_fvcom_atmos_forcing``
+----------------------------
 
 .. automodule:: nowcast.workers.make_fvcom_atmos_forcing
     :members: main
 
 
-:kbd:`upload_fvcom_atmos_forcing`
----------------------------------
+``upload_fvcom_atmos_forcing``
+------------------------------
 
 .. automodule:: nowcast.workers.upload_fvcom_atmos_forcing
     :members: main
 
 
-:kbd:`run_fvcom`
-----------------
+``run_fvcom``
+-------------
 
 .. automodule:: nowcast.workers.run_fvcom
     :members: main
 
 
-:kbd:`watch_fvcom`
-------------------
+``watch_fvcom``
+---------------
 
 .. automodule:: nowcast.workers.watch_fvcom
     :members: main
@@ -267,8 +267,8 @@ Workers
 
 .. _MakeWW3WindFile-Worker:
 
-:kbd:`make_ww3_wind_file`
--------------------------
+``make_ww3_wind_file``
+----------------------
 
 .. automodule:: nowcast.workers.make_ww3_wind_file
     :members: main
@@ -276,85 +276,85 @@ Workers
 
 .. _MakeWW3CurrentFile-Worker:
 
-:kbd:`make_ww3_current_file`
-----------------------------
+``make_ww3_current_file``
+-------------------------
 
 .. automodule:: nowcast.workers.make_ww3_current_file
     :members: main
 
 
-:kbd:`run_ww3`
----------------
+``run_ww3``
+------------
 
 .. automodule:: nowcast.workers.run_ww3
     :members: main
 
 
-:kbd:`watch_ww3`
------------------
+``watch_ww3``
+--------------
 
 .. automodule:: nowcast.workers.watch_ww3
     :members: main
 
 
-:kbd:`download_results`
------------------------
+``download_results``
+--------------------
 
 .. automodule:: nowcast.workers.download_results
     :members: main
 
 
-:kbd:`make_averaged_dataset`
-----------------------------
+``make_averaged_dataset``
+-------------------------
 
 .. automodule:: nowcast.workers.make_averaged_dataset
     :members: main
 
 
-:kbd:`archive_tarball`
-----------------------
+``archive_tarball``
+-------------------
 
 .. automodule:: nowcast.workers.archive_tarball
     :members: main
 
 
-:kbd:`split_results`
---------------------
+``split_results``
+-----------------
 
 .. automodule:: nowcast.workers.split_results
     :members: main
 
 
-:kbd:`download_wwatch3_results`
--------------------------------
+``download_wwatch3_results``
+----------------------------
 
 .. automodule:: nowcast.workers.download_wwatch3_results
     :members: main
 
 
-:kbd:`download_fvcom_results`
------------------------------
+``download_fvcom_results``
+--------------------------
 
 .. automodule:: nowcast.workers.download_fvcom_results
     :members: main
 
 
-:kbd:`get_onc_ctd`
-------------------
+``get_onc_ctd``
+---------------
 
 .. automodule:: nowcast.workers.get_onc_ctd
     :members: main
 
 
-:kbd:`update_forecast_datasets`
--------------------------------
+``update_forecast_datasets``
+----------------------------
 
 .. automodule:: nowcast.workers.update_forecast_datasets
     :members: main
 
 
-:kbd:`ping_erddap`
-------------------
+``ping_erddap``
+---------------
 
 .. automodule:: nowcast.workers.ping_erddap
     :members: main
@@ -362,36 +362,36 @@ Workers
 
 .. _MakePlotsWorker:
 
-:kbd:`make_plots`
------------------
+``make_plots``
+--------------
 
 .. automodule:: nowcast.workers.make_plots
     :members: main
 
 
-:kbd:`make_surface_current_tiles`
----------------------------------
+``make_surface_current_tiles``
+------------------------------
 
 .. automodule:: nowcast.workers.make_surface_current_tiles
     :members: main
 
 
-:kbd:`make_feeds`
------------------
+``make_feeds``
+--------------
 
 .. automodule:: nowcast.workers.make_feeds
     :members: main
 
 
-:kbd:`clear_checklist`
-----------------------
+``clear_checklist``
+-------------------
 
 .. automodule:: nemo_nowcast.workers.clear_checklist
     :members: main
 
 
-:kbd:`rotate_logs`
-------------------
+``rotate_logs``
+---------------
 
 .. automodule:: nemo_nowcast.workers.rotate_logs
     :members: main
@@ -410,22 +410,22 @@ Worker Utility Functions
 Special Workers
 ---------------
 
-:kbd:`launch_remote_worker`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``launch_remote_worker``
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: nowcast.workers.launch_remote_worker
     :members: main
 
 
-:kbd:`rotate_hindcast_logs`
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``rotate_hindcast_logs``
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: nowcast.workers.rotate_hindcast_logs
     :members: main
 
 
-:kbd:`next_workers` Module
-==========================
+:py:mod:`next_workers` Module
+=============================
 
 .. automodule:: nowcast.next_workers
     :members:

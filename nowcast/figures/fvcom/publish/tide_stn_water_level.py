@@ -19,7 +19,7 @@
 """Produce a figure that shows water levels at a tide gauge station
 calculated by the VHFR FVCOM and SalishSeaCast NEMO models,
 and predicted and observed water levels from the CHS
-:kbd:`https://ws-shc.qc.dfo-mpo.gc.ca/` water levels web service.
+``https://ws-shc.qc.dfo-mpo.gc.ca/`` water levels web service.
 
 Testing notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestTideStnWaterLevel.ipynb
@@ -55,8 +55,8 @@ def make_figure(
 ):
     """Plot water levels calculated by the VHFR FVCOM and SalishSeaCast NEMO
     models, and predicted and observed water levels from the CHS
-    :kbd:`https://ws-shc.qc.dfo-mpo.gc.ca/` water levels web service for the
-    tide gauge station at :kbd:`place`.
+    ``https://ws-shc.qc.dfo-mpo.gc.ca/`` water levels web service for the
+    tide gauge station at ``place``.
 
     :arg str place: Tide gauge station name;
                     must be a key in :py:obj:`salishsea_tools.places.PLACES`.
@@ -64,7 +64,7 @@ def make_figure(
     :arg fvcom_ssh_datasets: Dictionary of VHFR FVCOM model tide gauge station
                              sea surface height time series of
                              py:class:`xarray.Dataset` objects keyed by model
-                             model configuration (:kbd:`x2`, :kbd:`r12`).
+                             model configuration (``x2``, ``r12``).
     :type fvcom_ssh_datasets: :py:class:`dict`
 
     :arg str nemo_ssh_dataset_url_tmpl: ERDDAP URL template for SalishSeaCast

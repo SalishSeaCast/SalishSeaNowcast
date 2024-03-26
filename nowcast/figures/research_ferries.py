@@ -187,9 +187,9 @@ def ferry_salinity(ferry_data_dir, route_name, dmy, step=1):
 
     :arg str ferry_data_dir: storage file location for ONC ferry data.
 
-    :arg str route_name: name of a ferre route. HBDB, TWDP or TWSB.
+    :arg str route_name: name of a ferry route. ``HBDB``, ``TWDP`` or ``TWSB``.
 
-    :arg str dmy: today's date in :kbd:`ddmmmyy` format
+    :arg str dmy: today's date in ``ddmmmyy`` format
 
     :arg int step: selecting every nth data point
 
