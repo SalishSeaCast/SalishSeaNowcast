@@ -28,14 +28,12 @@ Development notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
 """
 from contextlib import suppress
-from pathlib import Path
 from types import SimpleNamespace
 
 import matplotlib.dates
 import matplotlib.pyplot as plt
 import moad_tools.observations
 import moad_tools.places
-import requests
 import xarray
 from pandas.plotting import register_matplotlib_converters
 
