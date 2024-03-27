@@ -377,3 +377,72 @@ and launch the 4 :command:`dask worker` processes with these properties:
       localhost:4386
 
 Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-workers``.
+
+
+
+``ssh`` Keys and Configuration
+==============================
+
+Generate a passphrase-less RSA key pair to use for connections to most remote hosts:
+
+.. code-block:: bash
+
+    $ ssh-keygen -t rsa -f $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa -C SalishSeaNEMO-nowcast
+
+Use :command:`ssh-copy-id` to install the public key on ``arbutus``,
+``optimum``,
+and ``orcinus``;
+e.g.
+
+.. code-block:: bash
+
+    $ ssh-copy-id -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud
+
+Generate a passphrase-less ED25519 key pair to use for connections to the ``graham`` HPC cluster:
+
+.. code-block:: bash
+
+    ssh-keygen -t ed25519 -f $HOME/.ssh/SalishSeaCast_robot.graham_ed25519 -C "SalishSeaCast robot.graham"
+
+Edit the public key to prefix it with the constraint predicates necessary for automation in the
+context of multuifactor authentication on the ``graham`` cluster.
+The constraint predicates are:
+
+.. code-block:: text
+
+    restrict,from="142.103.36.*",command="/cvmfs/soft.computecanada.ca/custom/bin/computecanada/allowed_commands/transfer_commands.sh"
+
+Use https://ccdb.computecanada.ca/ssh_authorized_keys to install the public key for ``graham`` via
+the Alliance CCDB.
+
+Add the following stanzas to :file:`$HOME/.ssh/config` on ``skookum``:
+
+.. code-block:: text
+
+    Host arbutus.cloud-nowcast
+        HostName        <ip-address>
+        User            ubuntu
+        IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
+        ForwardAgent    no
+
+    Host robot.graham
+        HostName     robot.graham.alliancecan.ca
+        User         <userid>
+        IdentityFile    ~/.ssh/SalishSeaCast_robot.graham_ed25519
+        ForwardAgent no
+
+    Host optimum-hindcast
+        HostName optimum.eos.ubc.ca
+        User <userid>
+        HostKeyAlgorithms=+ssh-rsa
+        PubkeyAcceptedKeyTypes=+ssh-rsa
+        IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
+        ForwardAgent no
+
+    Host orcinus-nowcast-agrif
+        HostName     orcinus.westgrid.ca
+        User         <userid>
+        HostKeyAlgorithms=+ssh-rsa
+        PubkeyAcceptedKeyTypes=+ssh-rsa
+        IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
+        ForwardAgent no
