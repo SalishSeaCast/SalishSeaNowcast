@@ -17,10 +17,10 @@
 
 
 """A collection of functions for use by multiple figure modules in the
-:kbd:`nowcast.figures` namespaces.
+``nowcast.figures`` namespaces.
 
 .. note::
-    These functions are intended for use *only* by :kbd:`nowcast.figures`
+    These functions are intended for use *only* by ``nowcast.figures``
     modules.
     If you find that you want to use one of these functions outside of those
     namespaces please talk to the group about refactoring the function into
@@ -61,8 +61,7 @@ def plot_map(
     :arg ax: Axes object to plot the map on.
     :type ax: :py:class:`matplotlib.axes.Axes`
 
-    :arg dict coastline: Pacific Northwest Coastline from matlab :kbd:`.mat`
-                         file.
+    :arg dict coastline: Pacific Northwest Coastline from matlab ``.mat`` file.
 
     :arg 2-tuple lat_range: Latitude range to be plotted.
 
@@ -150,8 +149,8 @@ def find_ssh_max(tide_gauge_stn, ssh_ts, ttide):
                  :py:class:`~datetime.datetime` object.
     :type ssh_ts: :py:class:`collections.namedtuple`
 
-    :arg ttide: Tidal predictions data structure with :kbd:`time`,
-                :kbd:`pred_all`, :kbd:`pred_8`, and :kbd:`pred_noshallow`
+    :arg ttide: Tidal predictions data structure with ``time``,
+                ``pred_all``, ``pred_8``, and ``pred_noshallow``
                 columns.
     :type ttide: :py:class:`pandas.DataFrame`
     """
@@ -175,11 +174,11 @@ def correct_model_ssh(ssh_model, t_model, ttide):
     :type ssh_model: :py:class:`numpy.ndarray`
 
     :arg t_model: Model :py:class:`~datetime.datetime` objects corresponding to
-                  :kbd:`ssh_model`.
+                  ``ssh_model``.
     :type t_model: :py:class:`numpy.ndarray`
 
-    :arg ttide: Tidal predictions data structure with :kbd:`time`,
-                :kbd:`pred_all`, :kbd:`pred_8`, and :kbd:`pred_noshallow`
+    :arg ttide: Tidal predictions data structure with ``time``,
+                ``pred_all``, ``pred_8``, and ``pred_noshallow``
                 columns.
     :type ttide: :py:class:`pandas.DataFrame`
 
@@ -205,11 +204,11 @@ def interp_to_model_time(t_model, values, t_values):
     :arg values: Values to be interpolated to model output times.
     :type values: :py:class:`numpy.ndarray`
 
-    :arg t_values: Times corresponding to :kbd:`values` as
+    :arg t_values: Times corresponding to ``values`` as
                    :py:class:`~datetime.datetime` objects.
     :type t_values: :py:class:`numpy.ndarray`
 
-    :returns: Values interpolated to :kbd:`t_model` times.
+    :returns: Values interpolated to ``t_model`` times.
     :rtype: :py:class:`numpy.ndarray`
     """
     epoch = t_model[0]
@@ -237,9 +236,9 @@ def plot_risk_level_marker(
                          perhaps from
                          :py:func:`salishsea_tools.stormtools.storm_surge_risk_level`:
                          :py:obj:`None` for no storm surge risk,
-                         :kbd:`moderate risk` for water level between max tide
+                         ``moderate risk`` for water level between max tide
                          level and the half-way threshold,
-                         and :kbd:`extreme risk` for water level above the
+                         and ``extreme risk`` for water level above the
                          half-way threshold
 
     :arg str marker: Marker identifier from :py:mod:`matplotlib.markers`.
@@ -310,7 +309,7 @@ def plot_wind_arrow(ax, lon, lat, u_wind, v_wind, theme, wind_arrow_scale_factor
 def interpolate_tracer_to_depths(
     tracer, tracer_depths, interp_depths, tracer_mask, w_depths
 ):
-    """Calculate the interpolated value of :kbd:`tracer` at :kbd:`interp_depths`
+    """Calculate the interpolated value of ``tracer`` at ``interp_depths``
     using linear interpolation.
 
     :arg tracer: Depth profile of a model tracer variable.
@@ -323,8 +322,8 @@ def interpolate_tracer_to_depths(
                         of the model variable or data quantity.
     :type interp_depths: :py:class:`numpy.ndarray` or number
 
-    :arg tracer_mask: Mask to use obtain the water sections of :kbd:`tracer`
-                      and :kbd:`tracer_depths`;
+    :arg tracer_mask: Mask to use obtain the water sections of ``tracer``
+                      and ``tracer_depths``;
                       i.e. a 1D slice of :py:attr:`tmask` from the mesh mask.
     :type tracer_mask: :py:class:`numpy.ndarray`
 
@@ -338,11 +337,10 @@ def interpolate_tracer_to_depths(
                          is zero-masked.
     :type w_depths: :py:class:`numpy.ndarray`
 
-    :returns: Value(s) of :kbd:`tracer` linearly interpolated to
-              :kbd:`interp_depths`.
+    :returns: Value(s) of ``tracer`` linearly interpolated to ``interp_depths``.
     :rtype: :py:class:`numpy.ndarray` or number
 
-    :raises: :py:exc:`ValueError` if any of the values in :kbd:`interp_depths`
+    :raises: :py:exc:`ValueError` if any of the values in ``interp_depths``
              exceed the maximum model grid depth.
     """
     try:
@@ -361,12 +359,12 @@ def interpolate_tracer_to_depths(
 
 
 def localize_time(data_array, time_coord="time", local_datetime=None):
-    """Offset :kbd:`data_array` times to account for local time zone
-    difference from UTC and add :kbd:`tz_name` attribute to :kbd:`data_array`.
+    """Offset ``data_array`` times to account for local time zone
+    difference from UTC and add ``tz_name`` attribute to ``data_array``.
 
     .. note::
         This function is intended for use just before presentation/output
-        of :kbd:`data_array`. It is strongly recommended to do all date/time
+        of ``data_array``. It is strongly recommended to do all date/time
         calculations in UTC to avoid time change issues.
 
     :param data_array: Data array or dataset object to adjust time values of.
@@ -376,8 +374,8 @@ def localize_time(data_array, time_coord="time", local_datetime=None):
 
     :param local_datetime: Optional timezone-aware local date/time to use as
                            basis to calculate offset from UTC. The 1st element
-                           of :kbd:`data_array` is used when
-                           :kbd:`local_datetime` is :py:class:`None`.
+                           of ``data_array`` is used when
+                           ``local_datetime`` is :py:class:`None`.
     :type local_datetime: :py:class:`arrow.Arrow`
     """
     time_values = getattr(data_array, time_coord).values

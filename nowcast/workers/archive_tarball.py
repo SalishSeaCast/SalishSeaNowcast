@@ -59,7 +59,7 @@ def main():
     worker.cli.add_argument(
         "dest_host",
         default="robot.graham",
-        help="Name of the host to move tarball and index files to. Default is :kbd:`robot.graham`.",
+        help="Name of the host to move tarball and index files to. Default is ``robot.graham``.",
     )
     worker.run(archive_tarball, success, failure)
     return worker

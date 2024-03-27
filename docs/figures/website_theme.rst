@@ -23,7 +23,7 @@ Website Theme
 *************
 
 The :py:mod:`nowcast.figures.website_theme` module provides the definition of colours and fonts that figure modules must use in order to ensure consistency from one to the next,
-and with the :kbd:`salishsea.eos.ubc.ca` site NEMO results section styling.
+and with the ``salishsea.eos.ubc.ca`` site NEMO results section styling.
 
 The module contains:
 
@@ -38,10 +38,10 @@ The module contains:
 :py:const:`~nowcast.figures.website_theme.SITE_BACKGROUND_COLOUR`
 =================================================================
 
-:py:const:`SITE_BACKGROUND_COLOUR` is the hex code for the :kbd:`salishsea.eos.ubc.ca/` pages background colour,
+:py:const:`SITE_BACKGROUND_COLOUR` is the hex code for the ``salishsea.eos.ubc.ca/`` pages background colour,
 from the https://bootswatch.com/superhero/ theme.
 It is defined explicitly to make it obvious in the :py:mod:`~nowcast.figures.website_theme` module.
-It is used in the :py:const:`COLOURS` dictionary as :kbd:`COLOURS['figure']['facecolor']` so that you can apply it to :py:class:`~matplotlib.figure.Figure` objects by creating them with calls like:
+It is used in the :py:const:`COLOURS` dictionary as ``COLOURS['figure']['facecolor']`` so that you can apply it to :py:class:`~matplotlib.figure.Figure` objects by creating them with calls like:
 
 .. code-block:: python
 

@@ -55,7 +55,7 @@ def main():
     worker.cli.add_argument(
         "--dest-host",
         default="localhost",
-        help="Name of the host to download results files to. Default is :kbd:`localhost`.",
+        help="Name of the host to download results files to. Default is ``localhost``.",
     )
     worker.cli.add_date_option(
         "--run-date",

@@ -18,9 +18,9 @@
 
 .. _SkookumDeployment:
 
-************************
-:kbd:`skookum`Deployment
-************************
+**********************
+``skookum`` Deployment
+**********************
 
 Git Repositories
 ================
@@ -60,7 +60,7 @@ The Python packages that the system depends on are installed in conda environmen
 
    .. _Mambaforge-pypy3: https://github.com/conda-forge/miniforge
 
-For the :kbd:`SalishSeaCast` automation system:
+For the ``SalishSeaCast`` automation system:
 
 .. code-block:: bash
 
@@ -228,17 +228,17 @@ On the hosts where the nowcast system NEMO runs will be executed create a
 
 The hosts and their :file:`runs` directories presently in use are:
 
-* :kbd:`arbutus.cloud`
+* ``arbutus.cloud``
     See :ref:`ArbutusCloudNEMORunsDirectory`
 
-* :kbd:`orcinus`
+* ``orcinus``
     :file:`/home/sallen/MEOPAR/nowcast/`
 
 
 ECCC MSC Datamart Mirror Directories
 ====================================
 
-Create directories on :kbd:`skookum` for storage of the HRDPS forecast files and
+Create directories on ``skookum`` for storage of the HRDPS forecast files and
 rivers hydrometric files maintained by the `sarracenia client`_:
 
 .. code-block:: bash
@@ -250,7 +250,7 @@ rivers hydrometric files maintained by the `sarracenia client`_:
 Logging Directories
 ===================
 
-Create directories on :kbd:`skookum` for storage of the nowcast system and
+Create directories on ``skookum`` for storage of the nowcast system and
 `salishsea-site web app`_ log files:
 
 .. code-block:: bash
@@ -338,15 +338,15 @@ The :py:mod:`~nowcast.workers.make_averaged_dataset` worker is launched:
 
 That means that there are often concurrent instances of the worker.
 Instead of letting each worker instance spin up its own *ad hoc* dask cluster,
-we use a persistent dask cluster on :kbd:`salish` that the worker dispatches tasks to.
+we use a persistent dask cluster on ``salish`` that the worker dispatches tasks to.
 
-Create a ``tmux`` session on :kbd:`salish` for the dask cluster:
+Create a :program:`tmux` session on ``salish`` for the dask cluster:
 
 .. code-block:: bash
 
     $ tmux new -s make_averaged_dataset
 
-In the first ``tmux`` terminal,
+In the first :program:`tmux` terminal,
 activate the :file:`/SalishSeaCast/nowcast-env` environment,
 and launch the :command:`dask-scheduler` with its serving port on 4386,
 and its dashboard port on 4387:
@@ -354,26 +354,95 @@ and its dashboard port on 4387:
 .. code-block:: bash
 
     $ conda activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ dask-scheduler --port 4386 --dashboard-address :4387
+    (/SalishSeaCast/nowcast-env)$ dask scheduler --port 4386 --dashboard-address :4387
 
-Use :kbd:`Control-b ,` to rename the ``tmux`` terminal to ``dask-scheduler``.
+Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-scheduler``.
 
-Start a second ``tmux`` terminal with :kbd:`Control-b c`,
+Start a second :program:`tmux` terminal with :kbd:`Control-b c`,
 activate the :file:`/SalishSeaCast/nowcast-env` environment,
-and launch the 4 :command:`dask-worker` processes with there properties:
+and launch the 4 :command:`dask worker` processes with these properties:
 
-* 4 threads per worker
-* memory limit per worker process computed automatically
-* worker files stored on the :file:`/dev/shm` shared memory file system
+* 1 thread per worker
+* 64G memory limit per worker
+* worker files stored on the :file:`/tmp/` file system
 * workers restart every 3600 seconds with 60 second random staggering of their restart times
 * workers communicate with the scheduler on port 4386
 
 .. code-block:: bash
 
     $ conda activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ dask-worker --nworkers=4 --nthreads=4 --memory-limit auto \
-                                    --local-directory /dev/shm \
-                                    --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
-                                    localhost:4386
+    (/SalishSeaCast/nowcast-env)$ dask worker --nworkers=4 --nthreads=1 --memory-limit 64G \
+      --local-directory /tmp \
+      --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
+      localhost:4386
 
-Use :kbd:`Control-b ,` to rename the ``tmux`` terminal to ``dask-workers``.
+Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-workers``.
+
+
+
+``ssh`` Keys and Configuration
+==============================
+
+Generate a passphrase-less RSA key pair to use for connections to most remote hosts:
+
+.. code-block:: bash
+
+    $ ssh-keygen -t rsa -f $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa -C SalishSeaNEMO-nowcast
+
+Use :command:`ssh-copy-id` to install the public key on ``arbutus``,
+``optimum``,
+and ``orcinus``;
+e.g.
+
+.. code-block:: bash
+
+    $ ssh-copy-id -i $HOME/.ssh/SalishSeaNEMO-nowcast_id_rsa arbutus.cloud
+
+Generate a passphrase-less ED25519 key pair to use for connections to the ``graham`` HPC cluster:
+
+.. code-block:: bash
+
+    ssh-keygen -t ed25519 -f $HOME/.ssh/SalishSeaCast_robot.graham_ed25519 -C "SalishSeaCast robot.graham"
+
+Edit the public key to prefix it with the constraint predicates necessary for automation in the
+context of multuifactor authentication on the ``graham`` cluster.
+The constraint predicates are:
+
+.. code-block:: text
+
+    restrict,from="142.103.36.*",command="/cvmfs/soft.computecanada.ca/custom/bin/computecanada/allowed_commands/transfer_commands.sh"
+
+Use https://ccdb.computecanada.ca/ssh_authorized_keys to install the public key for ``graham`` via
+the Alliance CCDB.
+
+Add the following stanzas to :file:`$HOME/.ssh/config` on ``skookum``:
+
+.. code-block:: text
+
+    Host arbutus.cloud-nowcast
+        HostName        <ip-address>
+        User            ubuntu
+        IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
+        ForwardAgent    no
+
+    Host robot.graham
+        HostName     robot.graham.alliancecan.ca
+        User         <userid>
+        IdentityFile    ~/.ssh/SalishSeaCast_robot.graham_ed25519
+        ForwardAgent no
+
+    Host optimum-hindcast
+        HostName optimum.eos.ubc.ca
+        User <userid>
+        HostKeyAlgorithms=+ssh-rsa
+        PubkeyAcceptedKeyTypes=+ssh-rsa
+        IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
+        ForwardAgent no
+
+    Host orcinus-nowcast-agrif
+        HostName     orcinus.westgrid.ca
+        User         <userid>
+        HostKeyAlgorithms=+ssh-rsa
+        PubkeyAcceptedKeyTypes=+ssh-rsa
+        IdentityFile    ~/.ssh/SalishSeaNEMO-nowcast_id_rsa
+        ForwardAgent no

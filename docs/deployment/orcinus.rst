@@ -18,9 +18,9 @@
 
 .. _OrcinusDeployment:
 
-*******************************************************
-:kbd:`orcinus` Deployment for :kbd:`nowcast-agrif` Runs
-*******************************************************
+*************************************************
+``orcinus`` Deployment for ``nowcast-agrif`` Runs
+*************************************************
 
 Create Directory Trees
 ======================
@@ -65,7 +65,7 @@ Clone the following repos into :file:`/home/dlatorne/nowcast-agrif-sys/`:
 Build XIOS-2
 ============
 
-Symlink the XIOS-2 build configuration files for :kbd:`orcinus` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
+Symlink the XIOS-2 build configuration files for ``orcinus`` from the :file:`XIOS-ARCH` repo clone into the :file:`XIOS-2/arch/` directory:
 
 .. code-block:: bash
 
@@ -80,7 +80,7 @@ and build XIOS-2 with:
     $ cd /home/dlatorne/nowcast-agrif-sys/XIOS-2
     $ ./make_xios --arch X64_ORCINUS --netcdf_lib netcdf4_seq --job 8
 
-:kbd:`--netcdf_lib netcdf4_seq` is necessary because AGRIF does not support parallel NetCDF output.
+``--netcdf_lib netcdf4_seq`` is necessary because AGRIF does not support parallel NetCDF output.
 
 To clear away all artifacts of a previous build of XIOS-2 use:
 
@@ -157,7 +157,7 @@ Sub-grid Initialization Preparation with Nesting Tools
 Build Nesting Tools
 -------------------
 
-Clone Michael Dunphies' debugged version of the nesting tools for AGRIF from :file:`NEMO-3.6-code/NEMOGCM/TOOLS/NESTING/` on to :kbd:`salish`:
+Clone Michael Dunphies' debugged version of the nesting tools for AGRIF from :file:`NEMO-3.6-code/NEMOGCM/TOOLS/NESTING/` on to ``salish``:
 
 .. code-block:: bash
 
@@ -197,7 +197,7 @@ Coordinates
 For the Baynes Sound sub-grid,
 use :program:`agrif_create_coordinates.exe` to create the sub-grid coordinates file from the full domain coordinates
 (path provided in the :file:`namelist.nesting.BaynesSound` file),
-and add it to the :kbd:`grid` repo:
+and add it to the ``grid`` repo:
 
 .. code-block:: bash
 
@@ -231,7 +231,7 @@ Bathymetry
 
 .. note::
     Need to understand the details of how sub-grid bathymetries are generated.
-    They appear to be based on :file:`/home/mdunphy/MEOPAR/WORK/Bathy-201702/BC3/BC3_For_Nesting_Tools.nc` and a :kbd:`bathymetry` namelist like:
+    They appear to be based on :file:`/home/mdunphy/MEOPAR/WORK/Bathy-201702/BC3/BC3_For_Nesting_Tools.nc` and a ``bathymetry`` namelist like:
 
     .. code-block:: bash
 
@@ -260,7 +260,7 @@ we can construct an acceptable rivers biological tracers forcing file for the Ba
     This will have to be revisited if/when we change the Puntledge River to use real-time discharges values from a gauge.
 
 Calculate the :file:`rivers-climatology/bio/subgrids/BaynesSound/bio/rivers_bio_tracers_mean.nc`,
-and add it to the :kbd:`rivers-climatology` repo:
+and add it to the ``rivers-climatology`` repo:
 
 .. code-block:: bash
 
@@ -281,7 +281,7 @@ The commands in this section are for generation of sub-grid physics restart file
 
 For the Baynes Sound sub-grid,
 use :program:`agrif_create_restart.exe` to create the sub-grid physics restart file from the full domain physics restart file,
-and upload both files to the appropriate run results directory on :kbd:`orcinus`:
+and upload both files to the appropriate run results directory on :`s``:
 
 .. code-block:: bash
 
@@ -316,7 +316,7 @@ The commands in this section are for generation of sub-grid tracer restart files
 
 For the Baynes Sound sub-grid,
 use :program:`agrif_create_restart_trc.exe` to create the sub-grid tracer restart file from the full domain tracer restart file,
-and upload both files to the appropriate run results directory on :kbd:`orcinus`:
+and upload both files to the appropriate run results directory on :`s``:
 
 .. code-block:: bash
 
@@ -339,10 +339,10 @@ start by using :program:`agrif_create_restart_trc.exe` to create the sub-grid tr
     $ /data/dlatorne/MEOPAR/NestingTools/NEMOGCM/TOOLS/NESTING/agrif_create_restart_trc.exe \
         namelist.nesting.HaroStrait
 
-For some reason :program:`agrif_create_restart_trc.exe` fails to store the variable :kbd:`TRBTRA`
-(the Fraser River tracer :kbd:`B` field, and the final variable)
+For some reason :program:`agrif_create_restart_trc.exe` fails to store the variable ``TRBTRA``
+(the Fraser River tracer ``B`` field, and the final variable)
 in the file it produces.
-To deal with that we duplicate the :kbd:`TRNTRA` field values as :kbd:`TRBTRA` and append that variable to the file:
+To deal with that we duplicate the ``TRNTRA`` field values as ``TRBTRA`` and append that variable to the file:
 
 .. code-block:: bash
 
@@ -351,7 +351,7 @@ To deal with that we duplicate the :kbd:`TRNTRA` field values as :kbd:`TRBTRA` a
     $ ncrename -O -v TRNTRA,TRBTRA TRNTRA.nc TRBTRA.nc
     $ ncks -4 -A TRBTRA.nc 1_SalishSea_02935440_restart_trc.nc
 
-and upload the file to the appropriate run results directory on :kbd:`orcinus`:
+and upload the file to the appropriate run results directory on :`s``:
 
 .. code-block:: bash
 

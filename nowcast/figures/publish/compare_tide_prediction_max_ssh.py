@@ -79,7 +79,7 @@ def make_figure(
     """Plot tidal prediction and models water level timeseries,
     storm surge residual timeseries, sea surface height contours
     on a Salish Sea map, and summary text for the tide gauge station at
-    :kbd:`place`.
+    ``place``.
 
     :arg str place: Tide gauge station name;
                     must be a key in :py:obj:`salishsea_tools.places.PLACES`.

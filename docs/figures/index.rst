@@ -29,7 +29,7 @@ In summary:
   and how to develop and test a figure module with the help of a Jupyter notebook.
 
 * The :py:func:`make_figure` functions from figure modules are called by the nowcast system :py:mod:`nowcast.workers.make_plots` worker.
-  The figure object that a :py:func:`make_figure` function returns is rendered to storage on the :kbd:`salishsea.eos.ubc.ca` figures server.
+  The figure object that a :py:func:`make_figure` function returns is rendered to storage on the ``salishsea.eos.ubc.ca`` figures server.
   See :ref:`CallingMakeFigureFunctionsInTheMakePlotsWorker` for details of variables that the :py:mod:`~nowcast.workers.make_plots` worker can provide to :py:func:`make_figure` functions,
   and how to store the figure to the figures server.
 

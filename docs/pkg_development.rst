@@ -18,9 +18,9 @@
 
 .. _SalishSeaNowcastPackagedDevelopment:
 
-*******************************************
-:kbd:`SalishSeaNowcast` Package Development
-*******************************************
+****************************************
+``SalishSeaNowcast`` Package Development
+****************************************
 
 +------------------------------+---------------------------------------------------------------------------------------------------------------------+
 |  **Continuous Integration**  |  .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage.yaml/badge.svg |
@@ -68,7 +68,7 @@
 |                              |      :target: https://github.com/pypa/hatch                                                                         |
 +------------------------------+---------------------------------------------------------------------------------------------------------------------+
 
-The :kbd:`SalishSeaNowcast` package is a collection of Python modules associated with
+The ``SalishSeaNowcast`` package is a collection of Python modules associated with
 running the SalishSeaCast ocean models in a daily nowcast/forecast mode.
 The package uses the `NEMO_Nowcast`_ framework to implement the :ref:`SalishSeaNowcastSystem`.
 
@@ -84,7 +84,7 @@ Python Version
     :target: https://docs.python.org/3.12/
     :alt: Python Version
 
-The :kbd:`SalishSeaNowcast` package is developed and tested using `Python`_ 3.12.
+The ``SalishSeaNowcast`` package is developed and tested using `Python`_ 3.12.
 
 .. _Python: https://www.python.org/
 
@@ -114,14 +114,14 @@ Development Environment
 
 Setting up an isolated development environment using `Conda`_ is recommended.
 Assuming that you have `Miniconda`_ installed,
-you can create and activate an environment called :kbd:`salishsea-nowcast` that will have all of the Python packages necessary for development,
+you can create and activate an environment called ``salishsea-nowcast`` that will have all of the Python packages necessary for development,
 testing,
 and building the documentation with the commands below.
 
 .. _Conda: https://conda.io/en/latest/
 .. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
 
-:kbd:`SalishSeaNowcast` depends on a collection of other Python packages developed by the SalishSeaCast project and friends:
+``SalishSeaNowcast`` depends on a collection of other Python packages developed by the SalishSeaCast project and friends:
 
 * `NEMO_Nowcast`_
 * `moad_tools`_
@@ -156,8 +156,8 @@ you can clone those repos with:
 If you already have clones of those repos,
 please ensure that they are up to date.
 
-Assuming that those repos are cloned beside your :kbd:`SalishSeaNowcast` clone,
-the commands below install the packages into your :kbd:`salishsea-nowcast` development environment.
+Assuming that those repos are cloned beside your ``SalishSeaNowcast`` clone,
+the commands below install the packages into your ``salishsea-nowcast`` development environment.
 
 .. code-block:: bash
 
@@ -177,7 +177,7 @@ the commands below install the packages into your :kbd:`salishsea-nowcast` devel
     (salishsea-nowcast)$ python3 -m pip install --editable ../FVCOM-Cmd
     (salishsea-nowcast)$ python3 -m pip install --editable .
 
-The :kbd:`--editable` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
+The ``--editable`` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
 
 To deactivate the environment use:
 
@@ -198,7 +198,7 @@ Coding Style
     :target: https://black.readthedocs.io/en/stable/
     :alt: The uncompromising Python code formatter
 
-The :kbd:`SalishSeaNowcast` package uses Git pre-commit hooks managed by `pre-commit`_
+The ``SalishSeaNowcast`` package uses Git pre-commit hooks managed by `pre-commit`_
 to maintain consistent code style and and other aspects of code,
 docs,
 and repo QA.
@@ -231,10 +231,10 @@ Building the Documentation
     :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status
 
-The documentation for the :kbd:`SalishSeaNowcast` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
+The documentation for the ``SalishSeaNowcast`` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
 Creating a :ref:`SalishSeaNowcastDevelopmentEnvironment` as described above includes the installation of Sphinx.
 Building the documentation is driven by the :file:`docs/Makefile`.
-With your :kbd:`salishsea-nowcast` development environment activated,
+With your ``salishsea-nowcast`` development environment activated,
 use:
 
 .. _reStructuredText: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
@@ -295,7 +295,7 @@ Link Checking the Documentation
 
 
 Sphinx also provides a link checker utility which can be run to find broken or redirected links in the docs.
-With your :kbd:`salishsea-nowcast` environment activated,
+With your ``salishsea-nowcast`` environment activated,
 use:
 
 .. code-block:: bash
@@ -529,12 +529,12 @@ The output looks something like::
 Running the Unit Tests
 ======================
 
-The test suite for the :kbd:`SalishSeaNowcast` package is in :file:`SalishSeaNowcast/tests/`.
+The test suite for the ``SalishSeaNowcast`` package is in :file:`SalishSeaNowcast/tests/`.
 The `pytest`_ tool is used for test parametrization and as the test runner for the suite.
 
 .. _pytest: https://docs.pytest.org/en/latest/
 
-With your :kbd:`salishsea-nowcast` development environment activated,
+With your ``salishsea-nowcast`` development environment activated,
 use:
 
 .. code-block:: bash
@@ -652,7 +652,7 @@ Continuous Integration
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:pytest-with-coverage
     :alt: GitHub Workflow Status
 
-The :kbd:`SalishSeaNowcast` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.
+The ``SalishSeaNowcast`` package unit test suite is run and a coverage report is generated whenever changes are pushed to GitHub.
 The results are visible on the `repo actions page`_,
 from the green checkmarks beside commits on the `repo commits page`_,
 or from the green checkmark to the left of the "Latest commit" message on the `repo code overview page`_ .
@@ -677,7 +677,7 @@ Version Control Repository
     :target: https://github.com/SalishSeaCast/SalishSeaNowcast
     :alt: Git on GitHub
 
-The :kbd:`SalishSeaNowcast` package code and documentation source files are available as a `Git`_ repository at https://github.com/SalishSeaCast/SalishSeaNowcast.
+The ``SalishSeaNowcast`` package code and documentation source files are available as a `Git`_ repository at https://github.com/SalishSeaCast/SalishSeaNowcast.
 
 .. _Git: https://git-scm.com/
 

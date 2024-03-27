@@ -1242,7 +1242,7 @@ message registry:
     no after_worker function: ERROR - after_worker function not found in next_workers module
 
   # Module from which to load :py:func:`after_<worker_name>` functions
-  # that provide lists of workers to launch when :kbd:`worker_name` finishes.
+  # that provide lists of workers to launch when ``worker_name`` finishes.
   # Use fully qualified, dotted notation.
   next workers module: nowcast.next_workers
 
