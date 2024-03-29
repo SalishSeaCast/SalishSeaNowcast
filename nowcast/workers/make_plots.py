@@ -682,7 +682,6 @@ def _prep_comparison_fig_functions(
         f"preparing render list for {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue comparison figures"
     )
     hrdps_dataset_url = config["figures"]["dataset URLs"]["HRDPS fields"]
-    ferry_data_dir = config["observations"]["ferry data"]
     dev_results_dir = os.path.join(dev_results_home, dmy)
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
     dev_grid_T_hr = _results_dataset("1h", "grid_T", dev_results_dir)
