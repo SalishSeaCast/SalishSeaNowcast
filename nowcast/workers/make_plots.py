@@ -601,7 +601,7 @@ def _prep_nowcast_green_research_fig_functions(
         )
     place = "S3"
     phys_dataset = xarray.open_dataset(
-        config["figures"]["dataset URLs"]["3d tracer fields"]
+        config["figures"]["dataset URLs"]["3d physics fields"]
     )
     bio_dataset = xarray.open_dataset(
         config["figures"]["dataset URLs"]["3d biology fields"]

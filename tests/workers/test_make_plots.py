@@ -237,7 +237,7 @@ class TestConfig:
                 "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02",
             ),
             (
-                "3d tracer fields",
+                "3d physics fields",
                 "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DPhysicsFields1hV21-11",
             ),
             (
