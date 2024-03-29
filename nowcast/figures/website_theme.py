@@ -65,6 +65,8 @@ COLOURS = {
         "flagellates": "darkgreen",
         "mesozooplankton": "brown",
         "microzooplankton": "darkgreen",
+        "z1_zooplankton": "brown",
+        "z2_zooplankton": "darkgreen",
         "nitrate": "darkgreen",
         "salinity": "blue",
         "2nd Narrows model current direction": {"x2": "blue", "r12": "purple"},
