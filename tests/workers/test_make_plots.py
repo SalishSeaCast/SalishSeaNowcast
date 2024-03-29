@@ -144,6 +144,176 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["make_plots"]
         assert msg in msg_registry
 
+    def test_timezone(self, prod_config):
+        timezone = prod_config["figures"]["timezone"]
+
+        assert timezone == "Canada/Pacific"
+
+    def test_dev_results_archive(self, prod_config):
+        dev_results_archive = prod_config["results archive"]["nowcast-dev"]
+
+        assert dev_results_archive == "/results/SalishSea/nowcast-dev.201905/"
+
+    def test_weather_path(self, prod_config):
+        weather_path = prod_config["weather"]["ops dir"]
+
+        assert (
+            weather_path == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
+        )
+
+    @pytest.mark.parametrize(
+        "run_type, results_archive",
+        (
+            ("nowcast", "/results/SalishSea/nowcast-blue.202111/"),
+            ("nowcast-green", "/results2/SalishSea/nowcast-green.202111/"),
+            ("nowcast-agrif", "/results/SalishSea/nowcast-agrif.201702/"),
+            ("forecast", "/results/SalishSea/forecast.202111/"),
+            ("forecast2", "/results/SalishSea/forecast2.202111/"),
+        ),
+    )
+    def test_results_archives(self, run_type, results_archive, prod_config):
+        run_type_results_archive = prod_config["results archive"][run_type]
+
+        assert run_type_results_archive == results_archive
+
+    def test_grid_dir(self, prod_config):
+        grid_dir = prod_config["figures"]["grid dir"]
+
+        assert grid_dir == "/SalishSeaCast/grid/"
+
+    @pytest.mark.parametrize(
+        "run_type, bathymetry",
+        (
+            ("nowcast", "bathymetry_202108.nc"),
+            ("nowcast-green", "bathymetry_202108.nc"),
+            ("nowcast-agrif", "bathymetry_201702.nc"),
+            ("forecast", "bathymetry_202108.nc"),
+            ("forecast2", "bathymetry_202108.nc"),
+        ),
+    )
+    def test_bathymetry(self, run_type, bathymetry, prod_config):
+        run_type_bathy = prod_config["run types"][run_type]["bathymetry"]
+
+        assert run_type_bathy == bathymetry
+
+    @pytest.mark.parametrize(
+        "run_type, mesh_mask",
+        (
+            ("nowcast", "mesh_mask202108.nc"),
+            ("nowcast-green", "mesh_mask202108.nc"),
+            ("nowcast-agrif", "mesh_mask201702.nc"),
+            ("forecast", "mesh_mask202108.nc"),
+            ("forecast2", "mesh_mask202108.nc"),
+        ),
+    )
+    def test_mesh_mask(self, run_type, mesh_mask, prod_config):
+        run_type_mesh_mask = prod_config["run types"][run_type]["mesh mask"]
+
+        assert run_type_mesh_mask == mesh_mask
+
+    def test_dev_mesh_mask(self, prod_config):
+        dev_mesh_mask = prod_config["run types"]["nowcast-dev"]["mesh mask"]
+
+        assert dev_mesh_mask == "mesh_mask201702.nc"
+
+    def test_coastline(self, prod_config):
+        coastline = prod_config["figures"]["coastline"]
+
+        assert coastline == "/ocean/rich/more/mmapbase/bcgeo/PNW.mat"
+
+    @pytest.mark.parametrize(
+        "dataset, dataset_url",
+        (
+            (
+                "tide stn ssh time series",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10m",
+            ),
+            (
+                "2nd narrows hadcp time series",
+                "https://salishsea.eos.ubc.ca/erddap/tabledap/ubcVFPA2ndNarrowsCurrent2sV1",
+            ),
+            (
+                "wwatch3 fields",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02",
+            ),
+            (
+                "3d tracer fields",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV19-05",
+            ),
+            (
+                "3d biology fields",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV19-05",
+            ),
+            (
+                "HRDPS fields",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1",
+            ),
+        ),
+    )
+    def test_dataset_urls(self, dataset, dataset_url, prod_config):
+        url = prod_config["figures"]["dataset URLs"][dataset]
+
+        assert url == dataset_url
+
+    def test_agrif_bathymetryy(self, prod_config):
+        url = prod_config["figures"]["dataset URLs"]["bathymetry"]
+        bs_grid = prod_config["run types"]["nowcast-agrif"]["sub-grid bathymetry"]
+
+        assert (
+            url == "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02"
+        )
+        assert (
+            bs_grid
+            == "/SalishSeaCast/grid/subgrids/BaynesSound/bathymetry_201702_BS.nc"
+        )
+
+    def test_tidal_predictions(self, prod_config):
+        tidal_predictions = prod_config["ssh"]["tidal predictions"]
+
+        assert tidal_predictions == "/SalishSeaCast/tidal-predictions/"
+
+    @pytest.mark.parametrize(
+        "run_type, duration",
+        (
+            ("nowcast", 1),
+            ("nowcast-green", 1),
+            ("nowcast-agrif", 1),
+            ("forecast", 1.5),
+            ("forecast2", 1.25),
+        ),
+    )
+    def test_durations(self, run_type, duration, prod_config):
+        run_type_duration = prod_config["run types"][run_type]["duration"]
+
+        assert run_type_duration == duration
+
+    def test_test_path(self, prod_config):
+        test_path = prod_config["figures"]["test path"]
+
+        assert test_path == "/results/nowcast-sys/figures/test/"
+
+    def test_storage_path(self, prod_config):
+        storage_path = prod_config["figures"]["storage path"]
+
+        assert storage_path == "/results/nowcast-sys/figures/"
+
+    def test_file_group(self, prod_config):
+        file_group = prod_config["file group"]
+
+        assert file_group == "sallen"
+
+    @pytest.mark.parametrize(
+        "key, expected_path",
+        (
+            ("storm surge alerts thumbnail", "Website_thumbnail"),
+            ("storm surge info portal path", "storm-surge/"),
+        ),
+    )
+    def test_storm_surge_paths(self, key, expected_path, prod_config):
+        path = prod_config["figures"][key]
+
+        assert path == expected_path
+
 
 @pytest.mark.parametrize(
     "model, run_type, plot_type",

@@ -540,7 +540,7 @@ figures:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1
     tide stn ssh time series:
       # **Must be quoted to project {} characters**
-      'https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10m'
+      "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10m"
     3d tracer fields:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV19-05
     3d biology fields:
