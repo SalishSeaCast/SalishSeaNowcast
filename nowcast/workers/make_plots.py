@@ -620,9 +620,9 @@ def _prep_nowcast_green_research_fig_functions(
                 "function": time_series_plots.make_figure,
                 "args": (bio_dataset, "microzooplankton", "flagellates", place),
             },
-            "mesozoo_microzoo_timeseries": {
+            "z1_z2_zooplankton_timeseries": {
                 "function": time_series_plots.make_figure,
-                "args": (bio_dataset, "mesozooplankton", "microzooplankton", place),
+                "args": (bio_dataset, "z1_zooplankton", "z2_zooplankton", place),
             },
         }
     )
