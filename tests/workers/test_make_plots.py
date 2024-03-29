@@ -238,11 +238,11 @@ class TestConfig:
             ),
             (
                 "3d tracer fields",
-                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DTracerFields1hV19-05",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DPhysicsFields1hV21-11",
             ),
             (
                 "3d biology fields",
-                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV19-05",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV21-11",
             ),
             (
                 "HRDPS fields",
