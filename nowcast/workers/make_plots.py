@@ -616,9 +616,9 @@ def _prep_nowcast_green_research_fig_functions(
                 "function": time_series_plots.make_figure,
                 "args": (bio_dataset, "nitrate", "diatoms", place),
             },
-            "mesodinium_flagellates_timeseries": {
+            "diatoms_flagellates_timeseries": {
                 "function": time_series_plots.make_figure,
-                "args": (bio_dataset, "microzooplankton", "flagellates", place),
+                "args": (bio_dataset, "diatoms", "flagellates", place),
             },
             "z1_z2_zooplankton_timeseries": {
                 "function": time_series_plots.make_figure,
