@@ -139,6 +139,7 @@ def main():
         """,
     )
     worker.run(make_plots, success, failure)
+    return worker
 
 
 def success(parsed_args):
