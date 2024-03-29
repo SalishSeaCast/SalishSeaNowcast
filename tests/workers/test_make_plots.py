@@ -18,8 +18,8 @@
 
 """Unit tests for SalishSeaCast make_plots worker.
 """
+import logging
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -162,19 +162,27 @@ class TestConfig:
         ("wwatch3", "forecast2", "publish"),
     ],
 )
-@patch("nowcast.workers.make_plots.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, model, run_type, plot_type):
+    def test_success(self, model, run_type, plot_type, caplog):
         parsed_args = SimpleNamespace(
             model=model,
             run_type=run_type,
             plot_type=plot_type,
             run_date=arrow.get("2017-01-02"),
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_plots.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"{parsed_args.model} {parsed_args.plot_type} plots for "
+            f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+            f"{parsed_args.run_type} completed"
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {model} {run_type} {plot_type}"
 
 
@@ -195,17 +203,24 @@ class TestSuccess:
         ("wwatch3", "forecast2", "publish"),
     ],
 )
-@patch("nowcast.workers.make_plots.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, model, run_type, plot_type):
+    def test_failure(self, model, run_type, plot_type, caplog):
         parsed_args = SimpleNamespace(
             model=model,
             run_type=run_type,
             plot_type=plot_type,
             run_date=arrow.get("2017-01-02"),
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_plots.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
+            f"{parsed_args.model} {parsed_args.plot_type} plots failed for "
+            f'{parsed_args.run_date.format("YYYY-MM-DD")} {parsed_args.run_type}'
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {model} {run_type} {plot_type}"
