@@ -18,10 +18,11 @@
 
 """Unit tests for SalishSeaCast make_plots worker.
 """
+import logging
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import make_plots
@@ -33,36 +34,34 @@ def config(base_config):
     return base_config
 
 
-@patch("nowcast.workers.make_plots.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(make_plots, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_plots.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("make_plots",)
-        assert list(kwargs.keys()) == ["description"]
+    def test_instantiate_worker(self, mock_worker):
+        worker = make_plots.main()
 
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_plots.main()
-        m_worker().init_cli.assert_called_once_with()
+        assert worker.name == "make_plots"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that produces visualization images for"
+        )
 
-    def test_add_model_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_plots.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("model",)
-        assert kwargs["choices"] == {"nemo", "fvcom", "wwatch3"}
-        assert "help" in kwargs
+    def test_add_model_arg(self, mock_worker):
+        worker = make_plots.main()
 
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_plots.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {
+        assert worker.cli.parser._actions[3].dest == "model"
+        assert worker.cli.parser._actions[3].choices == {"nemo", "fvcom", "wwatch3"}
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_run_type_arg(self, mock_worker):
+        worker = make_plots.main()
+
+        assert worker.cli.parser._actions[4].dest == "run_type"
+        assert worker.cli.parser._actions[4].choices == {
             "nowcast",
             "nowcast-green",
             "nowcast-agrif",
@@ -72,36 +71,33 @@ class TestMain:
             "forecast2",
             "forecast-x2",
         }
-        assert "help" in kwargs
+        assert worker.cli.parser._actions[4].help
 
-    def test_add_plot_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_plots.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
-        assert args == ("plot_type",)
-        assert kwargs["choices"] == {"publish", "research", "comparison"}
-        assert "help" in kwargs
+    def test_add_plot_type_arg(self, mock_worker):
+        worker = make_plots.main()
 
-    def test_add_run_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_plots.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
+        assert worker.cli.parser._actions[5].dest == "plot_type"
+        assert worker.cli.parser._actions[5].choices == {
+            "publish",
+            "research",
+            "comparison",
+        }
+        assert worker.cli.parser._actions[5].help
 
-    def test_add_test_figure_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_plots.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[3]
-        assert args == ("--test-figure",)
-        assert "help" in kwargs
+    def test_add_run_date_option(self, mock_worker):
+        worker = make_plots.main()
+        assert worker.cli.parser._actions[6].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[6].type == expected
+        assert worker.cli.parser._actions[6].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[6].help
 
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_plots.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (make_plots.make_plots, make_plots.success, make_plots.failure)
+    def test_add_test_figure_arg(self, mock_worker):
+        worker = make_plots.main()
+
+        assert worker.cli.parser._actions[7].dest == "test_figure"
+        assert worker.cli.parser._actions[7].default is None
+        assert worker.cli.parser._actions[7].help
 
 
 class TestConfig:
@@ -148,6 +144,176 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["make_plots"]
         assert msg in msg_registry
 
+    def test_timezone(self, prod_config):
+        timezone = prod_config["figures"]["timezone"]
+
+        assert timezone == "Canada/Pacific"
+
+    def test_dev_results_archive(self, prod_config):
+        dev_results_archive = prod_config["results archive"]["nowcast-dev"]
+
+        assert dev_results_archive == "/results/SalishSea/nowcast-dev.201905/"
+
+    def test_weather_path(self, prod_config):
+        weather_path = prod_config["weather"]["ops dir"]
+
+        assert (
+            weather_path == "/results/forcing/atmospheric/continental2.5/nemo_forcing/"
+        )
+
+    @pytest.mark.parametrize(
+        "run_type, results_archive",
+        (
+            ("nowcast", "/results/SalishSea/nowcast-blue.202111/"),
+            ("nowcast-green", "/results2/SalishSea/nowcast-green.202111/"),
+            ("nowcast-agrif", "/results/SalishSea/nowcast-agrif.201702/"),
+            ("forecast", "/results/SalishSea/forecast.202111/"),
+            ("forecast2", "/results/SalishSea/forecast2.202111/"),
+        ),
+    )
+    def test_results_archives(self, run_type, results_archive, prod_config):
+        run_type_results_archive = prod_config["results archive"][run_type]
+
+        assert run_type_results_archive == results_archive
+
+    def test_grid_dir(self, prod_config):
+        grid_dir = prod_config["figures"]["grid dir"]
+
+        assert grid_dir == "/SalishSeaCast/grid/"
+
+    @pytest.mark.parametrize(
+        "run_type, bathymetry",
+        (
+            ("nowcast", "bathymetry_202108.nc"),
+            ("nowcast-green", "bathymetry_202108.nc"),
+            ("nowcast-agrif", "bathymetry_201702.nc"),
+            ("forecast", "bathymetry_202108.nc"),
+            ("forecast2", "bathymetry_202108.nc"),
+        ),
+    )
+    def test_bathymetry(self, run_type, bathymetry, prod_config):
+        run_type_bathy = prod_config["run types"][run_type]["bathymetry"]
+
+        assert run_type_bathy == bathymetry
+
+    @pytest.mark.parametrize(
+        "run_type, mesh_mask",
+        (
+            ("nowcast", "mesh_mask202108.nc"),
+            ("nowcast-green", "mesh_mask202108.nc"),
+            ("nowcast-agrif", "mesh_mask201702.nc"),
+            ("forecast", "mesh_mask202108.nc"),
+            ("forecast2", "mesh_mask202108.nc"),
+        ),
+    )
+    def test_mesh_mask(self, run_type, mesh_mask, prod_config):
+        run_type_mesh_mask = prod_config["run types"][run_type]["mesh mask"]
+
+        assert run_type_mesh_mask == mesh_mask
+
+    def test_dev_mesh_mask(self, prod_config):
+        dev_mesh_mask = prod_config["run types"]["nowcast-dev"]["mesh mask"]
+
+        assert dev_mesh_mask == "mesh_mask201702.nc"
+
+    def test_coastline(self, prod_config):
+        coastline = prod_config["figures"]["coastline"]
+
+        assert coastline == "/ocean/rich/more/mmapbase/bcgeo/PNW.mat"
+
+    @pytest.mark.parametrize(
+        "dataset, dataset_url",
+        (
+            (
+                "tide stn ssh time series",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10m",
+            ),
+            (
+                "2nd narrows hadcp time series",
+                "https://salishsea.eos.ubc.ca/erddap/tabledap/ubcVFPA2ndNarrowsCurrent2sV1",
+            ),
+            (
+                "wwatch3 fields",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf2DWaveFields30mV17-02",
+            ),
+            (
+                "3d physics fields",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DPhysicsFields1hV21-11",
+            ),
+            (
+                "3d biology fields",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSg3DBiologyFields1hV21-11",
+            ),
+            (
+                "HRDPS fields",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1",
+            ),
+        ),
+    )
+    def test_dataset_urls(self, dataset, dataset_url, prod_config):
+        url = prod_config["figures"]["dataset URLs"][dataset]
+
+        assert url == dataset_url
+
+    def test_agrif_bathymetryy(self, prod_config):
+        url = prod_config["figures"]["dataset URLs"]["bathymetry"]
+        bs_grid = prod_config["run types"]["nowcast-agrif"]["sub-grid bathymetry"]
+
+        assert (
+            url == "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02"
+        )
+        assert (
+            bs_grid
+            == "/SalishSeaCast/grid/subgrids/BaynesSound/bathymetry_201702_BS.nc"
+        )
+
+    def test_tidal_predictions(self, prod_config):
+        tidal_predictions = prod_config["ssh"]["tidal predictions"]
+
+        assert tidal_predictions == "/SalishSeaCast/tidal-predictions/"
+
+    @pytest.mark.parametrize(
+        "run_type, duration",
+        (
+            ("nowcast", 1),
+            ("nowcast-green", 1),
+            ("nowcast-agrif", 1),
+            ("forecast", 1.5),
+            ("forecast2", 1.25),
+        ),
+    )
+    def test_durations(self, run_type, duration, prod_config):
+        run_type_duration = prod_config["run types"][run_type]["duration"]
+
+        assert run_type_duration == duration
+
+    def test_test_path(self, prod_config):
+        test_path = prod_config["figures"]["test path"]
+
+        assert test_path == "/results/nowcast-sys/figures/test/"
+
+    def test_storage_path(self, prod_config):
+        storage_path = prod_config["figures"]["storage path"]
+
+        assert storage_path == "/results/nowcast-sys/figures/"
+
+    def test_file_group(self, prod_config):
+        file_group = prod_config["file group"]
+
+        assert file_group == "sallen"
+
+    @pytest.mark.parametrize(
+        "key, expected_path",
+        (
+            ("storm surge alerts thumbnail", "Website_thumbnail"),
+            ("storm surge info portal path", "storm-surge/"),
+        ),
+    )
+    def test_storm_surge_paths(self, key, expected_path, prod_config):
+        path = prod_config["figures"][key]
+
+        assert path == expected_path
+
 
 @pytest.mark.parametrize(
     "model, run_type, plot_type",
@@ -166,19 +332,27 @@ class TestConfig:
         ("wwatch3", "forecast2", "publish"),
     ],
 )
-@patch("nowcast.workers.make_plots.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, model, run_type, plot_type):
+    def test_success(self, model, run_type, plot_type, caplog):
         parsed_args = SimpleNamespace(
             model=model,
             run_type=run_type,
             plot_type=plot_type,
             run_date=arrow.get("2017-01-02"),
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_plots.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"{parsed_args.model} {parsed_args.plot_type} plots for "
+            f'{parsed_args.run_date.format("YYYY-MM-DD")} '
+            f"{parsed_args.run_type} completed"
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {model} {run_type} {plot_type}"
 
 
@@ -199,17 +373,24 @@ class TestSuccess:
         ("wwatch3", "forecast2", "publish"),
     ],
 )
-@patch("nowcast.workers.make_plots.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, model, run_type, plot_type):
+    def test_failure(self, model, run_type, plot_type, caplog):
         parsed_args = SimpleNamespace(
             model=model,
             run_type=run_type,
             plot_type=plot_type,
             run_date=arrow.get("2017-01-02"),
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_plots.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
+            f"{parsed_args.model} {parsed_args.plot_type} plots failed for "
+            f'{parsed_args.run_date.format("YYYY-MM-DD")} {parsed_args.run_type}'
+        )
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {model} {run_type} {plot_type}"

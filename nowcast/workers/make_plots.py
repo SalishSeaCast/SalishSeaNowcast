@@ -64,9 +64,7 @@ logger = logging.getLogger(NAME)
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.make_plots --help`
     """
@@ -139,6 +137,7 @@ def main():
         """,
     )
     worker.run(make_plots, success, failure)
+    return worker
 
 
 def success(parsed_args):
@@ -157,8 +156,7 @@ def success(parsed_args):
 def failure(parsed_args):
     logger.critical(
         f"{parsed_args.model} {parsed_args.plot_type} plots failed for "
-        f'{parsed_args.run_date.format("YYYY-MM-DD")} {parsed_args.run_type} '
-        f"failed"
+        f'{parsed_args.run_date.format("YYYY-MM-DD")} {parsed_args.run_type}'
     )
     msg_type = (
         f"failure {parsed_args.model} {parsed_args.run_type} "
@@ -603,7 +601,7 @@ def _prep_nowcast_green_research_fig_functions(
         )
     place = "S3"
     phys_dataset = xarray.open_dataset(
-        config["figures"]["dataset URLs"]["3d tracer fields"]
+        config["figures"]["dataset URLs"]["3d physics fields"]
     )
     bio_dataset = xarray.open_dataset(
         config["figures"]["dataset URLs"]["3d biology fields"]
@@ -618,13 +616,13 @@ def _prep_nowcast_green_research_fig_functions(
                 "function": time_series_plots.make_figure,
                 "args": (bio_dataset, "nitrate", "diatoms", place),
             },
-            "mesodinium_flagellates_timeseries": {
+            "diatoms_flagellates_timeseries": {
                 "function": time_series_plots.make_figure,
-                "args": (bio_dataset, "microzooplankton", "flagellates", place),
+                "args": (bio_dataset, "diatoms", "flagellates", place),
             },
-            "mesozoo_microzoo_timeseries": {
+            "z1_z2_zooplankton_timeseries": {
                 "function": time_series_plots.make_figure,
-                "args": (bio_dataset, "mesozooplankton", "microzooplankton", place),
+                "args": (bio_dataset, "z1_zooplankton", "z2_zooplankton", place),
             },
         }
     )
@@ -684,7 +682,6 @@ def _prep_comparison_fig_functions(
         f"preparing render list for {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue comparison figures"
     )
     hrdps_dataset_url = config["figures"]["dataset URLs"]["HRDPS fields"]
-    ferry_data_dir = config["observations"]["ferry data"]
     dev_results_dir = os.path.join(dev_results_home, dmy)
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
     dev_grid_T_hr = _results_dataset("1h", "grid_T", dev_results_dir)
