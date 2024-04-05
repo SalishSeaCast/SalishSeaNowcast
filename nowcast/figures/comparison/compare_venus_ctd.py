@@ -163,11 +163,11 @@ def _prep_plot_data(
     # Observations
     onc_data = data_tools.get_onc_data(
         "scalardata",
-        "getByStation",
+        "getByLocation",
         os.environ["ONC_USER_TOKEN"],
-        station=station_code,
-        deviceCategory="CTD",
-        sensors="salinity,temperature",
+        locationCode=station_code,
+        deviceCategoryCode="CTD",
+        sensorCategoryCodes="salinity,temperature",
         dateFrom=data_tools.onc_datetime(model_time[0], "utc"),
         dateTo=data_tools.onc_datetime(model_time[-1], "utc"),
     )
