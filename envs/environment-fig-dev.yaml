@@ -67,6 +67,7 @@ dependencies:
 
   # For figures development
   - jupyterlab
+  - notebook
 
   # For documentation
   - sphinx=7.2.6
