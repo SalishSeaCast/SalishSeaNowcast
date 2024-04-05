@@ -12,7 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""
+"""Produce a 2-panel figure that shows time series of temperature and salinity observations and
+model run results at an Ocean Networks Canada (ONC) Salish Sea (VENUS) node.
+
+Testing notebook for this module is
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestCompareVENUS_CTD.ipynb
 """
 import os
 from collections import namedtuple
