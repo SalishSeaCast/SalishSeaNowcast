@@ -725,17 +725,6 @@ def _prep_comparison_fig_functions(
                 dev_mesh_mask,
             ),
         },
-        "Compare_VENUS_Delta_DDL": {
-            "function": compare_venus_ctd.make_figure,
-            "args": (
-                "Delta DDL node",
-                grid_T_hr,
-                dev_grid_T_hr,
-                timezone,
-                mesh_mask,
-                dev_mesh_mask,
-            ),
-        },
         "Central_ADCP": {
             "function": research_VENUS.plotADCP,
             "args": (
