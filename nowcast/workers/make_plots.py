@@ -176,7 +176,11 @@ def make_plots(parsed_args, config, *args):
 
     fig_functions = {}
     if model == "nemo":
-        dev_results_home = Path(config["results archive"]["nowcast-dev"])
+        dev_results_home = (
+            None
+            if config["results archive"]["nowcast-dev"] == "None"
+            else Path(config["results archive"]["nowcast-dev"])
+        )
         weather_path = Path(config["weather"]["ops dir"])
         if run_type in ["forecast", "forecast2"]:
             weather_path = weather_path / "fcst"
@@ -682,9 +686,11 @@ def _prep_comparison_fig_functions(
         f"preparing render list for {run_date.format('YYYY-MM-DD')} NEMO nowcast-blue comparison figures"
     )
     hrdps_dataset_url = config["figures"]["dataset URLs"]["HRDPS fields"]
-    dev_results_dir = os.path.join(dev_results_home, dmy)
+    if dev_results_home is None:
+        dev_grid_T_hr = None
+    else:
+        dev_grid_T_hr = _results_dataset("1h", "grid_T", dev_results_home / dmy)
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
-    dev_grid_T_hr = _results_dataset("1h", "grid_T", dev_results_dir)
     grid_central = _results_dataset_gridded("central", results_dir)
     grid_obs_central = sio.loadmat("/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat")
     grid_east = _results_dataset_gridded("east", results_dir)
@@ -712,17 +718,6 @@ def _prep_comparison_fig_functions(
             "function": compare_venus_ctd.make_figure,
             "args": (
                 "Central node",
-                grid_T_hr,
-                dev_grid_T_hr,
-                timezone,
-                mesh_mask,
-                dev_mesh_mask,
-            ),
-        },
-        "Compare_VENUS_Delta_DDL": {
-            "function": compare_venus_ctd.make_figure,
-            "args": (
-                "Delta DDL node",
                 grid_T_hr,
                 dev_grid_T_hr,
                 timezone,

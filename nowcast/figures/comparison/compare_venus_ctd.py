@@ -12,7 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""
+"""Produce a 2-panel figure that shows time series of temperature and salinity observations and
+model run results at an Ocean Networks Canada (ONC) Salish Sea (VENUS) node.
+
+Testing notebook for this module is
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestCompareVENUS_CTD.ipynb
 """
 import os
 from collections import namedtuple
@@ -127,40 +131,43 @@ def _prep_plot_data(
         w_depths,
     )
     # Development model results
-    dev_model_time = nc_tools.timestamp(
-        dev_grid_T_hr, range(grid_T_hr.variables["time_counter"].size)
-    )
-    tracer_depths = dev_mesh_mask.variables["gdept_0"][..., j, i][0]
-    tracer_mask = dev_mesh_mask.variables["tmask"][..., j, i][0]
-    w_depths = dev_mesh_mask.variables["gdepw_0"][..., j, i][0]
-    salinity_profiles = dev_grid_T_hr.variables["vosaline"][..., j, i]
-    temperature_profiles = dev_grid_T_hr.variables["votemper"][..., j, i]
-    dev_model_salinity_ts = _calc_results_time_series(
-        salinity_profiles,
-        dev_model_time,
-        node_depth,
-        timezone,
-        tracer_depths,
-        tracer_mask,
-        w_depths,
-    )
-    dev_model_temperature_ts = _calc_results_time_series(
-        temperature_profiles,
-        dev_model_time,
-        node_depth,
-        timezone,
-        tracer_depths,
-        tracer_mask,
-        w_depths,
-    )
+    if dev_grid_T_hr is None:
+        dev_model_salinity_ts, dev_model_temperature_ts = None, None
+    else:
+        dev_model_time = nc_tools.timestamp(
+            dev_grid_T_hr, range(grid_T_hr.variables["time_counter"].size)
+        )
+        tracer_depths = dev_mesh_mask.variables["gdept_0"][..., j, i][0]
+        tracer_mask = dev_mesh_mask.variables["tmask"][..., j, i][0]
+        w_depths = dev_mesh_mask.variables["gdepw_0"][..., j, i][0]
+        salinity_profiles = dev_grid_T_hr.variables["vosaline"][..., j, i]
+        temperature_profiles = dev_grid_T_hr.variables["votemper"][..., j, i]
+        dev_model_salinity_ts = _calc_results_time_series(
+            salinity_profiles,
+            dev_model_time,
+            node_depth,
+            timezone,
+            tracer_depths,
+            tracer_mask,
+            w_depths,
+        )
+        dev_model_temperature_ts = _calc_results_time_series(
+            temperature_profiles,
+            dev_model_time,
+            node_depth,
+            timezone,
+            tracer_depths,
+            tracer_mask,
+            w_depths,
+        )
     # Observations
     onc_data = data_tools.get_onc_data(
         "scalardata",
-        "getByStation",
+        "getByLocation",
         os.environ["ONC_USER_TOKEN"],
-        station=station_code,
-        deviceCategory="CTD",
-        sensors="salinity,temperature",
+        locationCode=station_code,
+        deviceCategoryCode="CTD",
+        sensorCategoryCodes="salinity,temperature",
         dateFrom=data_tools.onc_datetime(model_time[0], "utc"),
         dateTo=data_tools.onc_datetime(model_time[-1], "utc"),
     )
@@ -241,14 +248,15 @@ def _plot_salinity_time_series(ax, place, plot_data, theme):
         color=theme.COLOURS["time series"]["VENUS node model salinity"],
         alpha=0.7,
     )
-    ax.plot(
-        [t.datetime for t in plot_data.dev_model_salinity_ts.time],
-        plot_data.dev_model_salinity_ts.var,
-        linewidth=2,
-        label="Dev Model",
-        color=theme.COLOURS["time series"]["VENUS node dev model salinity"],
-        alpha=0.5,
-    )
+    if plot_data.dev_model_salinity_ts is not None:
+        ax.plot(
+            [t.datetime for t in plot_data.dev_model_salinity_ts.time],
+            plot_data.dev_model_salinity_ts.var,
+            linewidth=2,
+            label="Dev Model",
+            color=theme.COLOURS["time series"]["VENUS node dev model salinity"],
+            alpha=0.5,
+        )
     _salinity_axis_labels(ax, place, plot_data, theme)
 
 
@@ -297,14 +305,15 @@ def _plot_temperature_time_series(ax, plot_data, timezone, theme):
         color=theme.COLOURS["time series"]["VENUS node model temperature"],
         alpha=0.7,
     )
-    ax.plot(
-        [t.datetime for t in plot_data.dev_model_temperature_ts.time],
-        plot_data.dev_model_temperature_ts.var,
-        linewidth=2,
-        label="Dev Model",
-        color=theme.COLOURS["time series"]["VENUS node dev model temperature"],
-        alpha=0.5,
-    )
+    if plot_data.dev_model_salinity_ts is not None:
+        ax.plot(
+            [t.datetime for t in plot_data.dev_model_temperature_ts.time],
+            plot_data.dev_model_temperature_ts.var,
+            linewidth=2,
+            label="Dev Model",
+            color=theme.COLOURS["time series"]["VENUS node dev model temperature"],
+            alpha=0.5,
+        )
     tzname = plot_data.model_temperature_ts.time[0].datetime.tzname()
     _temperature_axis_labels(ax, plot_data, timezone, tzname, theme)
 

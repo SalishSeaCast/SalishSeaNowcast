@@ -393,10 +393,8 @@ results archive:
   # Values are directories on results server where run results are stored
   # in ddmmmyy/ directories.
   nowcast: /results/SalishSea/nowcast-blue.202111/
-  ### retained until make_plots is refactored to remove nowcast-dev
-  ### that refactoring needs to come after compare_venus_ctd fig module is updated
-  ### to handle ONC API v3
-  nowcast-dev: /results/SalishSea/nowcast-dev.201905/
+  ### nowcast-dev is not presently bing run
+  nowcast-dev: None
   forecast: /results/SalishSea/forecast.202111/
   forecast2: /results/SalishSea/forecast2.202111/
   nowcast-green: /results2/SalishSea/nowcast-green.202111/
