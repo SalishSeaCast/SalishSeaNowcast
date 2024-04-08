@@ -246,7 +246,7 @@ class TestConfig:
             ),
             (
                 "HRDPS fields",
-                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1",
+                "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV23-02",
             ),
         ),
     )

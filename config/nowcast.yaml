@@ -535,7 +535,7 @@ figures:
     bathymetry:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02
     HRDPS fields:
-      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV1
+      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV23-02
     tide stn ssh time series:
       # **Must be quoted to project {} characters**
       "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSf{place}SSH10m"
