@@ -152,7 +152,7 @@ class TestConfig:
     def test_dev_results_archive(self, prod_config):
         dev_results_archive = prod_config["results archive"]["nowcast-dev"]
 
-        assert dev_results_archive == "/results/SalishSea/nowcast-dev.201905/"
+        assert dev_results_archive == "None"
 
     def test_weather_path(self, prod_config):
         weather_path = prod_config["weather"]["ops dir"]
