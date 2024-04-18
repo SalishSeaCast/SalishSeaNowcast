@@ -364,7 +364,7 @@ and launch the 4 :command:`dask worker` processes with these properties:
 
 * 1 thread per worker
 * 64G memory limit per worker
-* worker files stored on the :file:`/tmp/` file system
+* worker files stored on the :file:`/tmp/SalishSeaCast/` directory
 * workers restart every 3600 seconds with 60 second random staggering of their restart times
 * workers communicate with the scheduler on port 4386
 
@@ -372,7 +372,7 @@ and launch the 4 :command:`dask worker` processes with these properties:
 
     $ conda activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ dask worker --nworkers=4 --nthreads=1 --memory-limit 64G \
-      --local-directory /tmp \
+      --local-directory /tmp/SalishSeaCast \
       --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
       localhost:4386
 
