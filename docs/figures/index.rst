@@ -40,7 +40,7 @@ In summary:
   The figure titles and file names are added to the list as :py:class:`FigureMetadata` instances.
   See :ref:`SalishSeaCastWebPageViewFigureMetadata` for details of how to add figure titles and file names to the site web app view module.
 
-  .. _salishsea.eos.ubc.ca Site Web App: https://salishsea-site.readthedocs.io/en/latest/
+  .. _salishsea.eos.ubc.ca Site Web App: https://salishsea-site.readthedocs.io/
 
 The :ref:`NowcastFiguresDevEnv` section below explains how to set up a conda environment that you can use to:
 
