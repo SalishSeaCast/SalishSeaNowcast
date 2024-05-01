@@ -44,7 +44,7 @@ You can activate it with:
 
 The `salishsea.eos.ubc.ca site web app`_ gathers figures that have been rendered by the nowcast system :py:mod:`make_plots` worker and presents them on web pages that are linked by date from the https://salishsea.eos.ubc.ca/nemo/results/ page.
 
-.. _salishsea.eos.ubc.ca site web app: https://salishsea-site.readthedocs.io/en/latest/
+.. _salishsea.eos.ubc.ca site web app: https://salishsea-site.readthedocs.io
 
 Each row on the https://salishsea.eos.ubc.ca/nemo/results/ page contains links to pages that are generated from a page template by a view function in the :py:mod:`salishsea_site.views.salishseacast` module.
 Each view function uses a list of :py:class:`salishsea_site.views.salishseacast.FigureMetadata` objects that is also defined in the :py:mod:`salishsea_site.views.salishseacast` module.

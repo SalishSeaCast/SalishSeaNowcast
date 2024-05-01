@@ -57,7 +57,7 @@ intersphinx_mapping = {
         "https://salishsea-meopar-tools.readthedocs.io/en/latest/",
         None,
     ),
-    "salishseasite": ("https://salishsea-site.readthedocs.io/en/latest/", None),
+    "salishseasite": ("https://salishsea-site.readthedocs.io", None),
     "salishseacmd": ("https://salishseacmd.readthedocs.io/en/latest/", None),
 }
 
