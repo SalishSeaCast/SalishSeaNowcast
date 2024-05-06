@@ -54,7 +54,7 @@ jobs:
           pytest --cov=$GITHUB_WORKSPACE --cov-report=xml
 
       - name: Upload coverage report to Codecov
-        uses: codecov/codecov-action@84508663e988701840491b86de86b666e8a86bed
+        uses: codecov/codecov-action@5ecb98a3c6b747ed38dc09f787459979aebb39be
         with:
           file: ./coverage.xml
           flags: unittests
