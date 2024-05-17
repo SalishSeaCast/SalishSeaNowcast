@@ -48,7 +48,7 @@ dependencies:
   - pip
   - poppler
   - pygrib
-  - pypdf2
+  - pypdf
   - pyproj
   - pytables
   - python=3.12

@@ -65,7 +65,6 @@ folium==0.16.0
 fonttools==4.51.0
 fsspec==2024.5.0
 future==1.0.0
-FVCOM-Cmd==0.1
 GDAL==3.8.5
 geopandas==0.14.4
 gitdb==4.0.11
@@ -118,7 +117,6 @@ numpy==1.26.4
 numpy-groupies==0.11.1
 numpy-indexed==0.3.7
 openpyxl==3.1.2
-OPPTools==0.1.0
 packaging==24.0
 pandas==2.2.2
 paramiko==3.4.0
@@ -143,7 +141,7 @@ Pygments==2.18.0
 pygrib==2.1.5
 PyNaCl==1.5.0
 pyparsing==3.1.2
-PyPDF2==2.11.1
+pypdf==4.2.0
 pyperclip==1.8.2
 pyproj==3.6.1
 PyQt5==5.15.9

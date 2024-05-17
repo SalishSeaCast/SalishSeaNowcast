@@ -31,7 +31,7 @@ from queue import Empty
 import arrow
 import netCDF4
 import pytz
-from PyPDF2 import PdfFileMerger
+from pypdf import PdfWriter
 from matplotlib.backend_bases import FigureCanvasBase
 from nemo_nowcast import NowcastWorker
 
@@ -366,20 +366,20 @@ def _apply_pngquant(outfile, level):
 def _pdf_concatenate(path, tile_coords_dic):
     """
     For each tile combine the time series of pdf files into one file.
-    Delete the individual pdf files, leaving only the per tile files.
+    Delete the individual pdf files, leaving only the per-tile files.
     Shrink the merged pdf files.
     """
     logger.info(f"starting PDF concatenation and shrinking of tiles in {path}")
     for tile in tile_coords_dic:
         result = (path / tile).with_suffix(".pdf")
         logger.debug(f"concatenating {tile} pdf files into: {result}")
-        merger = PdfFileMerger()
+        merger = PdfWriter()
         for pdf in sorted(path.glob(f"surface_currents_{tile}*.pdf")):
-            merger.append(os.fspath(pdf))
+            merger.append(pdf)
             logger.debug(f"added {pdf}")
             pdf.unlink()
             logger.debug(f"deleted {pdf}")
-        merger.write(os.fspath(result))
+        merger.write(result)
         logger.debug(f"saved {result}")
         merger.close()
         _pdf_shrink(result)
