@@ -18,10 +18,10 @@
 
 """Unit tests for SalishSeaCast make_surface_current_tiles worker.
 """
+import logging
 from pathlib import Path
 import textwrap
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -192,48 +192,69 @@ class TestConfig:
 
 
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
-@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function."""
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=(arrow.get("2018-11-29"))
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_surface_current_tiles.success(parsed_args)
-        m_logger.info.assert_called_once_with(
+
+        assert caplog.records[0].levelname == "INFO"
+        expected_msg = (
             f"surface current tile figures for 2018-11-29 {run_type} completed"
         )
+        assert caplog.messages[0] == expected_msg
         assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
-@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function."""
+    """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=(arrow.get("2018-11-29"))
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_surface_current_tiles.failure(parsed_args)
-        m_logger.critical.assert_called_once_with(
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected_msg = (
             f"surface current tile figures production for 2018-11-29 {run_type} failed"
         )
+        assert caplog.messages[0] == expected_msg
         assert msg_type == f"failure {run_type}"
 
 
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
-@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestMakeSurfaceCurrentTiles:
     """Unit tests for make_surface_current_tiles() function."""
 
-    def test_checklist(self, m_logger, run_type, config):
+    def test_checklist(self, run_type, config, caplog):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=(arrow.get("2018-11-29")), nprocs=6
         )
+        caplog.set_level(logging.DEBUG)
+
         # checklist = make_surface_current_tiles.make_surface_current_tiles(
         #     parsed_args, config
         # )
-        expected = {}
+        #
+        # assert caplog.records[0].levelname == "INFO"
+        # expected_msg = (
+        #     f"finished rendering of tiles for 2018-11-29 {run_type} "
+        #     f"into nowcast-sys/figures/surface_currents/"
+        # )
+        # assert caplog.messages[0] == expected_msg
+        #
+        # expected = {
+        #     "run date": "2018-11-29",
+        #     "png": [],
+        #     "pdf": [],
+        # }
         # assert checklist == expected
