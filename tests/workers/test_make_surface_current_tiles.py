@@ -19,6 +19,7 @@
 """Unit tests for SalishSeaCast make_surface_current_tiles worker.
 """
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -35,34 +36,36 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-file group: allen
+            textwrap.dedent(
+                """\
+                file group: allen
 
-figures:
-  grid dir: nowcast-sys/grid/
-  surface current tiles:
-    storage path: nowcast-sys/figures/surface_currents/
+                figures:
+                  grid dir: nowcast-sys/grid/
+                  surface current tiles:
+                    storage path: nowcast-sys/figures/surface_currents/
 
-results archive:
-  nowcast: results/nowcast-blue.201806/
-  nowcast-green: results/nowcast-green.201806/
-  forecast: results/forecast.201806/
-  forecast2: results/forecast2.201806/
+                results archive:
+                  nowcast: results/nowcast-blue.201806/
+                  nowcast-green: results/nowcast-green.201806/
+                  forecast: results/forecast.201806/
+                  forecast2: results/forecast2.201806/
 
-run types:
-  nowcast-green:
-    coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-  forecast:
-    coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-  forecast2:
-    coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-"""
+                run types:
+                  nowcast-green:
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                  forecast:
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                  forecast2:
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
