@@ -13,9 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """SalishSeaCast worker that produces tiles of surface current visualization
-images for the web site from run results.
+images for the website from run results.
 
-The tile specifications and initial code implementation were provided by IOS.
+IOS provided the tile specifications and initial code implementation.
 """
 import datetime
 import logging
@@ -77,6 +77,7 @@ def main():
     )
 
     worker.run(make_surface_current_tiles, success, failure)
+    return worker
 
 
 def success(parsed_args):
