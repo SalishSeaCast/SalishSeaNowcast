@@ -43,7 +43,7 @@ dependencies:
   - pip
   - poppler
   - pygrib
-  - pypdf2
+  - pypdf
   - pyproj
   - pytables
   - pyyaml
