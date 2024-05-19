@@ -232,7 +232,7 @@ class TestConfig:
                 "hindcast hosts",
                 "optimum-hindcast",
                 "hindcast",
-                "/scratch/sallen/dlatorne/rivers/",
+                "/scratch/sallen/dlatorne/oxygen/",
             ),
             (
                 "hindcast hosts",
@@ -259,7 +259,7 @@ class TestConfig:
             "nowcast-green": "/results2/SalishSea/nowcast-green.202111/",
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
-                "localhost": "/ocean/sallen/timbucktwo/rivers/",
+                "localhost": "/ocean/sallen/timbucktwo/oxygen/",
                 "robot.graham": "/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
             },
         }
