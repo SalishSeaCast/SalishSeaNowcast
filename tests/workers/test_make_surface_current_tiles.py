@@ -18,9 +18,10 @@
 
 """Unit tests for SalishSeaCast make_surface_current_tiles worker.
 """
+import logging
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
 
 import arrow
 import nemo_nowcast
@@ -35,95 +36,94 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-file group: allen
+            textwrap.dedent(
+                """\
+                file group: allen
 
-figures:
-  grid dir: nowcast-sys/grid/
-  surface current tiles:
-    storage path: nowcast-sys/figures/surface_currents/
+                figures:
+                  grid dir: nowcast-sys/grid/
+                  surface current tiles:
+                    storage path: nowcast-sys/figures/surface_currents/
 
-results archive:
-  nowcast: results/nowcast-blue.201806/
-  nowcast-green: results/nowcast-green.201806/
-  forecast: results/forecast.201806/
-  forecast2: results/forecast2.201806/
+                results archive:
+                  nowcast: results/nowcast-blue.201806/
+                  nowcast-green: results/nowcast-green.201806/
+                  forecast: results/forecast.201806/
+                  forecast2: results/forecast2.201806/
 
-run types:
-  nowcast-green:
-    coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-  forecast:
-    coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-  forecast2:
-    coordinates: coordinates_seagrid_SalishSea201702.nc
-    bathymetry: bathymetry_201702.nc
-    mesh mask: mesh_mask201702.nc
-"""
+                run types:
+                  nowcast-green:
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                  forecast:
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                  forecast2:
+                    coordinates: coordinates_seagrid_SalishSea201702.nc
+                    bathymetry: bathymetry_201702.nc
+                    mesh mask: mesh_mask201702.nc
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_
 
 
-@patch("nowcast.workers.make_surface_current_tiles.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(
+        make_surface_current_tiles, "NowcastWorker", mock_nowcast_worker
+    )
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_surface_current_tiles.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("make_surface_current_tiles",)
-        assert list(kwargs.keys()) == ["description"]
+    def test_instantiate_worker(self, mock_worker):
+        worker = make_surface_current_tiles.main()
 
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_surface_current_tiles.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_surface_current_tiles.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {"nowcast-green", "forecast", "forecast2"}
-        assert "help" in kwargs
-
-    def test_add_run_date_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_surface_current_tiles.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    @patch(
-        "nowcast.workers.make_surface_current_tiles.multiprocessing.cpu_count",
-        return_value=12,
-        autospec=True,
-    )
-    def test_add_nprocs_arg(self, m_cpu_count, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_surface_current_tiles.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("--nprocs",)
-        assert kwargs["type"] == int
-        assert kwargs["default"] == 6
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_surface_current_tiles.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            make_surface_current_tiles.make_surface_current_tiles,
-            make_surface_current_tiles.success,
-            make_surface_current_tiles.failure,
+        assert worker.name == "make_surface_current_tiles"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that produces tiles of surface current visualization"
         )
+
+    def test_add_run_type_arg(self, mock_worker):
+        worker = make_surface_current_tiles.main()
+
+        assert worker.cli.parser._actions[3].dest == "run_type"
+        assert worker.cli.parser._actions[3].choices == {
+            "nowcast-green",
+            "forecast",
+            "forecast2",
+        }
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = make_surface_current_tiles.main()
+
+        assert worker.cli.parser._actions[4].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[4].type == expected
+        assert worker.cli.parser._actions[4].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[4].help
+
+    def test_add_nprocs_option(self, mock_worker, monkeypatch):
+        def mock_cpu_count():
+            return 12
+
+        monkeypatch.setattr(
+            make_surface_current_tiles.multiprocessing, "cpu_count", mock_cpu_count
+        )
+
+        worker = make_surface_current_tiles.main()
+
+        assert worker.cli.parser._actions[5].dest == "nprocs"
+        assert worker.cli.parser._actions[5].type == int
+        assert worker.cli.parser._actions[5].default == 6
+        assert worker.cli.parser._actions[5].help
 
 
 class TestConfig:
@@ -192,48 +192,69 @@ class TestConfig:
 
 
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
-@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function."""
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=(arrow.get("2018-11-29"))
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_surface_current_tiles.success(parsed_args)
-        m_logger.info.assert_called_once_with(
+
+        assert caplog.records[0].levelname == "INFO"
+        expected_msg = (
             f"surface current tile figures for 2018-11-29 {run_type} completed"
         )
+        assert caplog.messages[0] == expected_msg
         assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
-@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestFailure:
-    """Unit test for failure() function."""
+    """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=(arrow.get("2018-11-29"))
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_surface_current_tiles.failure(parsed_args)
-        m_logger.critical.assert_called_once_with(
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected_msg = (
             f"surface current tile figures production for 2018-11-29 {run_type} failed"
         )
+        assert caplog.messages[0] == expected_msg
         assert msg_type == f"failure {run_type}"
 
 
 @pytest.mark.parametrize("run_type", ("nowcast-green", "forecast", "forecast2"))
-@patch("nowcast.workers.make_surface_current_tiles.logger", autospec=True)
 class TestMakeSurfaceCurrentTiles:
     """Unit tests for make_surface_current_tiles() function."""
 
-    def test_checklist(self, m_logger, run_type, config):
+    def test_checklist(self, run_type, config, caplog):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=(arrow.get("2018-11-29")), nprocs=6
         )
+        caplog.set_level(logging.DEBUG)
+
         # checklist = make_surface_current_tiles.make_surface_current_tiles(
         #     parsed_args, config
         # )
-        expected = {}
+        #
+        # assert caplog.records[0].levelname == "INFO"
+        # expected_msg = (
+        #     f"finished rendering of tiles for 2018-11-29 {run_type} "
+        #     f"into nowcast-sys/figures/surface_currents/"
+        # )
+        # assert caplog.messages[0] == expected_msg
+        #
+        # expected = {
+        #     "run date": "2018-11-29",
+        #     "png": [],
+        #     "pdf": [],
+        # }
         # assert checklist == expected

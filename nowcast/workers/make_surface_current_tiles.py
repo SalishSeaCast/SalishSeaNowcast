@@ -13,9 +13,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """SalishSeaCast worker that produces tiles of surface current visualization
-images for the web site from run results.
+images for the website from run results.
 
-The tile specifications and initial code implementation were provided by IOS.
+IOS provided the tile specifications and initial code implementation.
 """
 import datetime
 import logging
@@ -31,7 +31,7 @@ from queue import Empty
 import arrow
 import netCDF4
 import pytz
-from PyPDF2 import PdfFileMerger
+from pypdf import PdfWriter
 from matplotlib.backend_bases import FigureCanvasBase
 from nemo_nowcast import NowcastWorker
 
@@ -44,9 +44,7 @@ logger = logging.getLogger(NAME)
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.make_surface_current_tiles --help`
     """
@@ -79,6 +77,7 @@ def main():
     )
 
     worker.run(make_surface_current_tiles, success, failure)
+    return worker
 
 
 def success(parsed_args):
@@ -367,20 +366,20 @@ def _apply_pngquant(outfile, level):
 def _pdf_concatenate(path, tile_coords_dic):
     """
     For each tile combine the time series of pdf files into one file.
-    Delete the individual pdf files, leaving only the per tile files.
+    Delete the individual pdf files, leaving only the per-tile files.
     Shrink the merged pdf files.
     """
     logger.info(f"starting PDF concatenation and shrinking of tiles in {path}")
     for tile in tile_coords_dic:
         result = (path / tile).with_suffix(".pdf")
         logger.debug(f"concatenating {tile} pdf files into: {result}")
-        merger = PdfFileMerger()
+        merger = PdfWriter()
         for pdf in sorted(path.glob(f"surface_currents_{tile}*.pdf")):
-            merger.append(os.fspath(pdf))
+            merger.append(pdf)
             logger.debug(f"added {pdf}")
             pdf.unlink()
             logger.debug(f"deleted {pdf}")
-        merger.write(os.fspath(result))
+        merger.write(result)
         logger.debug(f"saved {result}")
         merger.close()
         _pdf_shrink(result)
