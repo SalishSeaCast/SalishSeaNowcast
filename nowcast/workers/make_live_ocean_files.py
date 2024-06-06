@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea nowcast worker that produces hourly temperature and salinity
+"""SalishSeaCast nowcast worker that produces hourly temperature and salinity
 boundary conditions files for the SalishSeaCast NEMO model western (Juan de Fuca)
 open boundary from the University of Washington Live Ocean model forecast
 product.
@@ -30,9 +30,7 @@ logger = logging.getLogger(NAME)
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.make_live_ocean_files -h`
     """
