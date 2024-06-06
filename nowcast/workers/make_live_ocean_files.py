@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""Salish Sea nowcast worker that produces hourly temperature and salinity
+"""SalishSeaCast nowcast worker that produces hourly temperature and salinity
 boundary conditions files for the SalishSeaCast NEMO model western (Juan de Fuca)
 open boundary from the University of Washington Live Ocean model forecast
 product.
@@ -30,9 +30,7 @@ logger = logging.getLogger(NAME)
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.make_live_ocean_files -h`
     """
@@ -79,7 +77,7 @@ def make_live_ocean_files(parsed_args, config, *args):
     LO_to_SSC_parameters = LiveOcean_parameters.set_parameters(
         config["temperature salinity"]["parameter set"]
     )
-    filepaths = create_LiveOcean_TS_BCs(
+    filepath = create_LiveOcean_TS_BCs(
         ymd,
         file_template=file_template,
         meshfilename=meshfilename,
@@ -87,8 +85,8 @@ def make_live_ocean_files(parsed_args, config, *args):
         LO_dir=download_dir,
         LO_to_SSC_parameters=LO_to_SSC_parameters,
     )
-    logger.info(f"Stored T&S western boundary conditions file: {filepaths[0]}")
-    checklist = {"temperature & salinity": filepaths[0]}
+    logger.info(f"Stored T&S western boundary conditions file: {filepath}")
+    checklist = {"temperature & salinity": filepath}
     return checklist
 
 
