@@ -77,7 +77,7 @@ def make_live_ocean_files(parsed_args, config, *args):
     LO_to_SSC_parameters = LiveOcean_parameters.set_parameters(
         config["temperature salinity"]["parameter set"]
     )
-    filepaths = create_LiveOcean_TS_BCs(
+    filepath = create_LiveOcean_TS_BCs(
         ymd,
         file_template=file_template,
         meshfilename=meshfilename,
@@ -85,8 +85,8 @@ def make_live_ocean_files(parsed_args, config, *args):
         LO_dir=download_dir,
         LO_to_SSC_parameters=LO_to_SSC_parameters,
     )
-    logger.info(f"Stored T&S western boundary conditions file: {filepaths[0]}")
-    checklist = {"temperature & salinity": filepaths[0]}
+    logger.info(f"Stored T&S western boundary conditions file: {filepath}")
+    checklist = {"temperature & salinity": filepath}
     return checklist
 
 

@@ -180,7 +180,7 @@ class TestMakeLiveOceanFiles:
         filename = config["temperature salinity"]["file template"].format(
             run_date.datetime
         )
-        m_create_ts.return_value = [filename]
+        m_create_ts.return_value = filename
 
         checklist = make_live_ocean_files.make_live_ocean_files(parsed_args, config)
         assert checklist == {"temperature & salinity": filename}
@@ -191,7 +191,7 @@ class TestMakeLiveOceanFiles:
         filename = config["temperature salinity"]["file template"].format(
             run_date.datetime
         )
-        m_create_ts.return_value = [filename]
+        m_create_ts.return_value = filename
         caplog.set_level(logging.DEBUG)
 
         make_live_ocean_files.make_live_ocean_files(parsed_args, config)
