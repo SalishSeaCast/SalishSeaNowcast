@@ -106,7 +106,14 @@ def make_ww3_current_file(parsed_args, config, *args):
         datasets = _calc_forecast2_datasets(
             run_date, nemo_dir, nemo_file_tmpl, dest_dir
         )
-    with xarray.open_dataset(mesh_mask) as grid:
+    drop_vars = {
+         'gphiu', 'vmask', 'gdept_0', 'gdepw_0', 'umask', 'gphif', 'e3v_0', 'time_counter',
+         'isfdraft', 'glamu', 'e1f', 'vmaskutil', 'mbathy', 'e2t', 'e2u', 'e3u_0', 'ff', 'gdept_1d',
+         'gphit', 'e3w_0', 'e1u', 'e1t', 'e2v', 'fmaskutil', 'tmaskutil', 'gdepv', 'misf', 'gphiv',
+         'e3t_1d', 'fmask', 'tmask', 'e3t_0', 'gdepw_1d', 'gdepu', 'glamt', 'glamf',
+         'e3w_1d', 'e1v', 'umaskutil', 'glamv', 'e2f',
+    }
+    with xarray.open_dataset(mesh_mask, drop_variables=drop_vars) as grid:
         lats = grid.nav_lat[1:, 1:]
         lons = grid.nav_lon[1:, 1:] + 360
         logger.debug(f"lats and lons from: {mesh_mask}")
@@ -118,6 +125,7 @@ def make_ww3_current_file(parsed_args, config, *args):
         "bounds_nav_lat",
         "depthu_bounds",
         "depthv_bounds",
+        "time_centered",
         "time_centered_bounds",
         "time_counter_bounds",
     }
@@ -156,9 +164,7 @@ def make_ww3_current_file(parsed_args, config, *args):
             u_unstaggered, v_unstaggered = viz_tools.unstagger(
                 u_nemo.vozocrtx.isel(depthu=0), v_nemo.vomecrty.isel(depthv=0)
             )
-            del u_unstaggered.coords["time_centered"]
             del u_unstaggered.coords["depthu"]
-            del v_unstaggered.coords["time_centered"]
             del v_unstaggered.coords["depthv"]
             logger.debug("unstaggered velocity components on to mesh mask lats/lons")
             u_current, v_current = viz_tools.rotate_vel(u_unstaggered, v_unstaggered)
