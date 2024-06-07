@@ -113,7 +113,7 @@ def make_ww3_current_file(parsed_args, config, *args):
          'e3t_1d', 'fmask', 'tmask', 'e3t_0', 'gdepw_1d', 'gdepu', 'glamt', 'glamf',
          'e3w_1d', 'e1v', 'umaskutil', 'glamv', 'e2f',
     }
-    with xarray.open_dataset(mesh_mask, drop_variables=drop_vars) as grid:
+    with xarray.open_dataset(mesh_mask, drop_variables=drop_vars, engine="h5netcdf") as grid:
         lats = grid.nav_lat[1:, 1:]
         lons = grid.nav_lon[1:, 1:] + 360
         logger.debug(f"lats and lons from: {mesh_mask}")
@@ -150,6 +150,7 @@ def make_ww3_current_file(parsed_args, config, *args):
         coords="minimal",
         data_vars="minimal",
         drop_variables=drop_vars,
+        engine="h5netcdf",
     ) as u_nemo:
         logger.debug(f'u velocities from {datasets["u"]}')
         with xarray.open_mfdataset(
@@ -159,6 +160,7 @@ def make_ww3_current_file(parsed_args, config, *args):
             coords="minimal",
             data_vars="minimal",
             drop_variables=drop_vars,
+            engine="h5netcdf",
         ) as v_nemo:
             logger.debug(f'v velocities from {datasets["v"]}')
             u_unstaggered, v_unstaggered = viz_tools.unstagger(
