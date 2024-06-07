@@ -223,8 +223,22 @@ class TestMakeWW3WindFile:
             run_date=arrow.get("2019-03-24"),
         )
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
+        drop_vars = {
+            "LHTFL_surface",
+            "PRATE_surface",
+            "RH_2maboveground",
+            "atmpres",
+            "precip",
+            "qair",
+            "solar",
+            "tair",
+            "therm_rad",
+            "u_wind",
+            "v_wind",
+        }
         m_open_dataset.assert_called_once_with(
-            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc")
+            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc"),
+            drop_variables=drop_vars,
         )
         chunks = {
             "time_counter": 1,
@@ -241,6 +255,8 @@ class TestMakeWW3WindFile:
             "solar",
             "tair",
             "therm_rad",
+            "nav_lon",
+            "nav_lat",
         }
         m_open_mfdataset.assert_called_once_with(
             [Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc")],
@@ -260,8 +276,22 @@ class TestMakeWW3WindFile:
             run_date=arrow.get("2017-04-07"),
         )
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
+        drop_vars = {
+            "LHTFL_surface",
+            "PRATE_surface",
+            "RH_2maboveground",
+            "atmpres",
+            "precip",
+            "qair",
+            "solar",
+            "tair",
+            "therm_rad",
+            "u_wind",
+            "v_wind",
+        }
         m_open_dataset.assert_called_once_with(
-            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc")
+            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc"),
+            drop_variables=drop_vars,
         )
         chunks = {
             "time_counter": 1,
@@ -278,6 +308,8 @@ class TestMakeWW3WindFile:
             "solar",
             "tair",
             "therm_rad",
+            "nav_lon",
+            "nav_lat",
         }
         m_open_mfdataset.assert_called_once_with(
             [
@@ -301,8 +333,22 @@ class TestMakeWW3WindFile:
             run_date=arrow.get("2017-04-07"),
         )
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
+        drop_vars = {
+            "LHTFL_surface",
+            "PRATE_surface",
+            "RH_2maboveground",
+            "atmpres",
+            "precip",
+            "qair",
+            "solar",
+            "tair",
+            "therm_rad",
+            "u_wind",
+            "v_wind",
+        }
         m_open_dataset.assert_called_once_with(
-            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc")
+            Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc"),
+            drop_variables=drop_vars,
         )
         chunks = {
             "time_counter": 1,
@@ -319,6 +365,8 @@ class TestMakeWW3WindFile:
             "solar",
             "tair",
             "therm_rad",
+            "nav_lon",
+            "nav_lat",
         }
         m_open_mfdataset.assert_called_once_with(
             [

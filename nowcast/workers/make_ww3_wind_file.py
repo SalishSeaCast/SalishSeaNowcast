@@ -108,10 +108,6 @@ def make_ww3_wind_file(parsed_args, config, *args):
     dest_dir = Path(config["wave forecasts"]["run prep dir"], "wind")
     filepath_tmpl = config["wave forecasts"]["wind file template"]
     nc_filepath = dest_dir / filepath_tmpl.format(yyyymmdd=run_date.format("YYYYMMDD"))
-    with xarray.open_dataset(datasets[0]) as lats_lons:
-        lats = lats_lons.nav_lat
-        lons = lats_lons.nav_lon
-        logger.debug(f"lats and lons from: {datasets[0]}")
     drop_vars = {
         "LHTFL_surface",
         "PRATE_surface",
@@ -122,7 +118,18 @@ def make_ww3_wind_file(parsed_args, config, *args):
         "solar",
         "tair",
         "therm_rad",
+        "u_wind",
+        "v_wind",
     }
+    with xarray.open_dataset(datasets[0], drop_variables=drop_vars) as lats_lons:
+        lats = lats_lons.nav_lat
+        lons = lats_lons.nav_lon
+        logger.debug(f"lats and lons from: {datasets[0]}")
+    drop_vars = drop_vars.union({
+        "nav_lon",
+        "nav_lat",
+    })
+    drop_vars = drop_vars.difference({"u_wind", "v_wind"})
     chunks = {
         "time_counter": 1,
         "y": 230,
