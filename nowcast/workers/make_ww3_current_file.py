@@ -131,13 +131,13 @@ def make_ww3_current_file(parsed_args, config, *args):
     }
     chunks = {
         "u": {
-            "time_counter": 3,
+            "time_counter": 1,
             "depthu": 40,
             "y": 898,
             "x": 398,
         },
         "v": {
-            "time_counter": 3,
+            "time_counter": 1,
             "depthv": 40,
             "y": 898,
             "x": 398,
