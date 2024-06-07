@@ -131,7 +131,7 @@ def make_ww3_wind_file(parsed_args, config, *args):
     })
     drop_vars = drop_vars.difference({"u_wind", "v_wind"})
     chunks = {
-        "time_counter": 1,
+        "time_counter": 24,
         "y": 230,
         "x": 190,
     }

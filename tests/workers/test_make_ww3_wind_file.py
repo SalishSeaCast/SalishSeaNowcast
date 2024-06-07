@@ -242,7 +242,7 @@ class TestMakeWW3WindFile:
             engine="h5netcdf",
         )
         chunks = {
-            "time_counter": 1,
+            "time_counter": 24,
             "y": 230,
             "x": 190,
         }
@@ -297,7 +297,7 @@ class TestMakeWW3WindFile:
             engine="h5netcdf",
         )
         chunks = {
-            "time_counter": 1,
+            "time_counter": 24,
             "y": 230,
             "x": 190,
         }
@@ -356,7 +356,7 @@ class TestMakeWW3WindFile:
             engine="h5netcdf",
         )
         chunks = {
-            "time_counter": 1,
+            "time_counter": 24,
             "y": 230,
             "x": 190,
         }
