@@ -121,7 +121,7 @@ def make_ww3_wind_file(parsed_args, config, *args):
         "u_wind",
         "v_wind",
     }
-    with xarray.open_dataset(datasets[0], drop_variables=drop_vars) as lats_lons:
+    with xarray.open_dataset(datasets[0], drop_variables=drop_vars, engine = "h5netcdf") as lats_lons:
         lats = lats_lons.nav_lat
         lons = lats_lons.nav_lon
         logger.debug(f"lats and lons from: {datasets[0]}")
@@ -142,6 +142,7 @@ def make_ww3_wind_file(parsed_args, config, *args):
         coords="minimal",
         data_vars="minimal",
         drop_variables=drop_vars,
+        engine="h5netcdf",
     ) as hrdps:
         ds = _create_dataset(
             hrdps.time_counter, lats, lons, hrdps.u_wind, hrdps.v_wind, datasets

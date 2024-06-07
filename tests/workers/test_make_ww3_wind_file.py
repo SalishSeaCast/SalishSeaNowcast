@@ -239,6 +239,7 @@ class TestMakeWW3WindFile:
         m_open_dataset.assert_called_once_with(
             Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2019m03d24.nc"),
             drop_variables=drop_vars,
+            engine="h5netcdf",
         )
         chunks = {
             "time_counter": 1,
@@ -265,6 +266,7 @@ class TestMakeWW3WindFile:
             coords="minimal",
             data_vars="minimal",
             drop_variables=drop_vars,
+            engine="h5netcdf",
         )
 
     def test_forecast_datasets(
@@ -292,6 +294,7 @@ class TestMakeWW3WindFile:
         m_open_dataset.assert_called_once_with(
             Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/ops_y2017m04d07.nc"),
             drop_variables=drop_vars,
+            engine="h5netcdf",
         )
         chunks = {
             "time_counter": 1,
@@ -322,6 +325,7 @@ class TestMakeWW3WindFile:
             coords="minimal",
             data_vars="minimal",
             drop_variables=drop_vars,
+            engine="h5netcdf"
         )
 
     def test_forecast2_datasets(
@@ -349,6 +353,7 @@ class TestMakeWW3WindFile:
         m_open_dataset.assert_called_once_with(
             Path("/nemoShare/MEOPAR/GEM2.5/ops/NEMO-atmos/fcst/ops_y2017m04d07.nc"),
             drop_variables=drop_vars,
+            engine="h5netcdf",
         )
         chunks = {
             "time_counter": 1,
@@ -379,4 +384,5 @@ class TestMakeWW3WindFile:
             coords="minimal",
             data_vars="minimal",
             drop_variables=drop_vars,
+            engine="h5netcdf"
         )
