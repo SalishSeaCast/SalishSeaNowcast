@@ -176,6 +176,11 @@ def make_ww3_current_file(parsed_args, config, *args):
             )
             logger.debug("created currents dataset")
             ds.to_netcdf(os.fspath(nc_filepath))
+            dask_scheduler = {
+                "scheduler": "processes",
+                "max_workers": 8,
+            }
+            ds.compute(**dask_scheduler)
     logger.debug(f"stored currents forcing file: {nc_filepath}")
     checklist = {
         run_type: os.fspath(nc_filepath),
