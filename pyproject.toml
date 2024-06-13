@@ -74,9 +74,9 @@ dependencies = [
     "pillow",
     # "poppler",  # pip doesn't see poppler pkg installed by conda to provide pdftocairo
     "pygrib",
-    "pypdf2",
+    "pypdf",
     "pyproj",
-    "tables",  # pkg name is pytables but pip see it as tables
+    "tables",  # pkg name is pytables but pip sees it as tables
     "python-hglib",
     "pyyaml",
     "rasterio",
