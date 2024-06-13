@@ -16,4 +16,4 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-__version__ = "24.1"
+__version__ = "24.2.dev0"
