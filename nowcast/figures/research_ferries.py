@@ -306,8 +306,8 @@ def _model_IDW(obs, bathy, grid_T_hr, sal_a, sal_b):
     # more of the surrounding grid point are land with NaN.
     interp_area = sal_a[x1 - 1 : x1 + 2, y1 - 1 : y1 + 2]
     if interp_area.size - np.count_nonzero(interp_area) >= 4:
-        sal_a_idw = np.NaN
-        sal_b_idw = np.NaN
+        sal_a_idw = np.nan
+        sal_b_idw = np.nan
     else:
         for i in np.arange(x1 - 1, x1 + 2):
             for j in np.arange(y1 - 1, y1 + 2):

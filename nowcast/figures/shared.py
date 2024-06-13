@@ -215,7 +215,7 @@ def interp_to_model_time(t_model, values, t_values):
     t_values_wrt_epoch = np.array([(t - epoch).total_seconds() for t in t_values])
     t_model_wrt_epoch = np.array([(t - epoch).total_seconds() for t in t_model])
     return np.interp(
-        t_model_wrt_epoch, t_values_wrt_epoch, values, left=np.NaN, right=np.NaN
+        t_model_wrt_epoch, t_values_wrt_epoch, values, left=np.nan, right=np.NaN
     )
 
 
