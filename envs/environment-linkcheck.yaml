@@ -30,6 +30,7 @@ dependencies:
   - gitpython
   - gsw
   - httpx
+  - h5netcdf
   - lxml
   - mako
   - matplotlib
