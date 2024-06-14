@@ -1445,10 +1445,10 @@ class TestCalcRunoffDataset:
             obs_date, runoff_array, config
         )
 
-        assert len(runoff_ds.dims) == 3
-        assert runoff_ds.dims["time_counter"] == 1
-        assert runoff_ds.dims["y"] == runoff_array.shape[0]
-        assert runoff_ds.dims["x"] == runoff_array.shape[1]
+        assert len(runoff_ds.sizes) == 3
+        assert runoff_ds.sizes["time_counter"] == 1
+        assert runoff_ds.sizes["y"] == runoff_array.shape[0]
+        assert runoff_ds.sizes["x"] == runoff_array.shape[1]
 
     def test_dataset_attrs(self, runoff_array, config, monkeypatch):
         def mock_now(tz):
