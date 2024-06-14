@@ -108,7 +108,9 @@ class TestReadRiverCSV:
             """
         )
 
-        river_flow = daily_river_flows._read_river_csv(io.StringIO(csv_lines))
+        with pytest.warns(pandas.errors.ParserWarning) as warning_record:
+            # We expect a ParserWarning due to the difference in length of the lines we're parsing
+            river_flow = daily_river_flows._read_river_csv(io.StringIO(csv_lines))
 
         expected = pandas.DataFrame(
             {
@@ -119,6 +121,8 @@ class TestReadRiverCSV:
             }
         )
         pandas.testing.assert_frame_equal(river_flow, expected)
+        expected = "Length of header or names does not match length of data. This leads to a loss of data with index_col=False."
+        assert str(warning_record[0].message) == expected
 
 
 class TestSetDateAsIndex:
