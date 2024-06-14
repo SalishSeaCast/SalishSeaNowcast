@@ -193,8 +193,8 @@ def _read_river_Theodosia(config):
     # Used for dates before Scotty part was gauged, or in the event of missing obs
     parts[2]["FlowFromDiversion"] = parts[2].Diversion * theodosia_from_diversion_only
     theodosia = theodosia.merge(parts[2], how="outer", on="date", sort=True)
-    theodosia["Secondary River Flow"].fillna(
-        theodosia["FlowFromDiversion"], inplace=True
+    theodosia["Secondary River Flow"] = theodosia["Secondary River Flow"].fillna(
+        theodosia["FlowFromDiversion"]
     )
 
     theodosia.drop(
