@@ -246,7 +246,7 @@ class TestResampleNavCoord:
             },
             coords={
                 "sampleTime": pandas.date_range(
-                    start="2021-03-08T10:14:43.082000000", periods=59, freq="1S"
+                    start="2021-03-08T10:14:43.082000000", periods=59, freq="1s"
                 )
             },
             attrs={"station": "TWDP.N1"},
