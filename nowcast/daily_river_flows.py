@@ -121,7 +121,7 @@ _read_river_csv = functools.partial(
     # .csv files
     pd.read_csv,
     header=None,
-    delim_whitespace=True,
+    sep="\\s+",
     index_col=False,
     names=["year", "month", "day", "flow"],
     engine="python",
@@ -193,8 +193,8 @@ def _read_river_Theodosia(config):
     # Used for dates before Scotty part was gauged, or in the event of missing obs
     parts[2]["FlowFromDiversion"] = parts[2].Diversion * theodosia_from_diversion_only
     theodosia = theodosia.merge(parts[2], how="outer", on="date", sort=True)
-    theodosia["Secondary River Flow"].fillna(
-        theodosia["FlowFromDiversion"], inplace=True
+    theodosia["Secondary River Flow"] = theodosia["Secondary River Flow"].fillna(
+        theodosia["FlowFromDiversion"]
     )
 
     theodosia.drop(
