@@ -121,7 +121,7 @@ _read_river_csv = functools.partial(
     # .csv files
     pd.read_csv,
     header=None,
-    delim_whitespace=True,
+    sep="\\s+",
     index_col=False,
     names=["year", "month", "day", "flow"],
     engine="python",
