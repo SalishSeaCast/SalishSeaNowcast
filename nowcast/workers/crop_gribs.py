@@ -27,7 +27,6 @@ new GRIB2 files.
 
 import logging
 import os
-import warnings
 from pathlib import Path
 
 import arrow
@@ -271,9 +270,7 @@ def _xarray_to_grib(ssc_ds, ssc_grib_file):
     :param :py:class:`xarray.Dataset` ssc_ds:
     :param :py:class:`pathlib.Path` ssc_grib_file:
     """
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        xarray_to_grib.to_grib(ssc_ds, ssc_grib_file)
+    xarray_to_grib.to_grib(ssc_ds, ssc_grib_file, no_warn=True)
 
 
 def _handle_stalled_observer(eccc_grib_files, fcst_hr, config):
