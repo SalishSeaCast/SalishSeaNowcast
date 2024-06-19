@@ -48,7 +48,7 @@ dependencies = [
     "beautifulsoup4",
     "bottleneck",
     "cartopy",
-    "cfgrib",
+    "cfgrib == 0.9.11.0",
     "click",
     "cliff",
     "cmocean",
