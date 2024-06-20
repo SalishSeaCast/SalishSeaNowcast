@@ -176,7 +176,7 @@ def _create_dataset(onc_station, temperature, salinity):
         salinity_mean = salinity.resample(time="15Min").mean()
         salinity_std_dev = salinity.resample(time="15Min").std()
         salinity_sample_count = salinity.resample(time="15Min").count()
-    except IndexError:
+    except (IndexError, ValueError):
         logger.warning(f"no {onc_station} salinity data")
         salinity_mean = temperature_mean.copy()
         salinity_mean.name = "salinity"
