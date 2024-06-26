@@ -124,12 +124,15 @@ def crop_gribs(parsed_args, config, *args):
         config,
         msc_var_name,
     )
+    grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
+    fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
+    grib_fcst_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr)
 
     if backfill:
         for eccc_grib_file in eccc_grib_files:
             _write_ssc_grib_file(eccc_grib_file, config)
         logger.info(
-            f"finished cropping ECCC grib file to SalishSeaCast subdomain: {eccc_grib_file}"
+            f"finished cropping ECCC grib files to SalishSeaCast subdomain in {grib_fcst_dir}/"
         )
         checklist[fcst_hr] = "cropped to SalishSeaCast subdomain"
         return checklist
@@ -146,9 +149,6 @@ def crop_gribs(parsed_args, config, *args):
 
     handler = _GribFileEventHandler(eccc_grib_files, config)
     observer = watchdog.observers.Observer()
-    grib_dir = Path(config["weather"]["download"]["2.5 km"]["GRIB dir"])
-    fcst_yyyymmdd = fcst_date.format("YYYYMMDD")
-    grib_fcst_dir = grib_dir / Path(fcst_yyyymmdd, fcst_hr)
     observer.schedule(handler, os.fspath(grib_fcst_dir), recursive=True)
     logger.info(f"starting to watch for ECCC grib files to crop in {grib_fcst_dir}/")
     # Create the directory we're going to watch to handle 2 rare situations that can cause

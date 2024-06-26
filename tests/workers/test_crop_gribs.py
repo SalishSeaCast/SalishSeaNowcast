@@ -345,9 +345,8 @@ class TestCropGribs:
 
         assert caplog.records[1].levelname == "INFO"
         expected = (
-            f"finished cropping ECCC grib file to SalishSeaCast subdomain: "
-            f"forcing/atmospheric/continental2.5/GRIB/20231115/{forecast}/029/"
-            f"20231115T{forecast}Z_MSC_HRDPS_APCP_Sfc_RLatLon0.0225_PT029H.grib2"
+            f"finished cropping ECCC grib files to SalishSeaCast subdomain in "
+            f"forcing/atmospheric/continental2.5/GRIB/20231115/{forecast}/"
         )
         assert caplog.messages[1] == expected
 
