@@ -29,4 +29,4 @@ six==1.16.0
 vine==5.0.0
 watchdog==2.2.1
 wheel==0.38.4
-zipp==3.12.0
+zipp==3.19.1
