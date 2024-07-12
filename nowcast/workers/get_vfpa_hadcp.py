@@ -255,7 +255,7 @@ def _csv_to_dataset(csv_file, place):
             df = df.drop([col], axis="columns")
         except KeyError:
             pass
-    df.index = pandas.to_datetime(df.index, format="%d/%m/%Y %H:%M")
+    df.index = pandas.to_datetime(df.index, format="%Y-%m-%d %H:%M")
     df.index.name = "time"
     df.columns = ("speed", "direction")
     return xarray.Dataset.from_dataframe(df)
