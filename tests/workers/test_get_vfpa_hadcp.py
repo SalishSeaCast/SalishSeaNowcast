@@ -21,7 +21,7 @@
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -51,39 +51,29 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.get_vfpa_hadcp.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(get_vfpa_hadcp, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_vfpa_hadcp.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("get_vfpa_hadcp",)
-        assert list(kwargs.keys()) == ["description"]
+    def test_instantiate_worker(self, mock_worker):
+        worker = get_vfpa_hadcp.main()
 
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_vfpa_hadcp.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_data_date_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_vfpa_hadcp.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--data-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        get_vfpa_hadcp.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            get_vfpa_hadcp.get_vfpa_hadcp,
-            get_vfpa_hadcp.success,
-            get_vfpa_hadcp.failure,
+        assert worker.name == "get_vfpa_hadcp"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that processes VFPA HADCP observations from the 2nd Narrows Rail Bridge"
         )
+
+    def test_add_data_date_option(self, mock_worker):
+        worker = get_vfpa_hadcp.main()
+        assert worker.cli.parser._actions[3].dest == "data_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[3].type == expected
+        assert worker.cli.parser._actions[3].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[3].help
 
 
 class TestConfig:

@@ -49,6 +49,7 @@ def main():
         help="UTC date to get VFPA HADPC data for.",
     )
     worker.run(get_vfpa_hadcp, success, failure)
+    return worker
 
 
 def success(parsed_args):
