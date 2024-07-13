@@ -208,6 +208,11 @@ class TestAfterDownloadWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
+            NextWorker(
+                "nowcast.workers.get_vfpa_hadcp",
+                ["--data-date", "2018-12-26"],
+                host="localhost",
+            ),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
         ]
         assert workers == expected
@@ -327,6 +332,11 @@ class TestAfterCollectWeather:
             NextWorker("nowcast.workers.get_onc_ctd", ["SCVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["SEVIP"], host="localhost"),
             NextWorker("nowcast.workers.get_onc_ctd", ["USDDL"], host="localhost"),
+            NextWorker(
+                "nowcast.workers.get_vfpa_hadcp",
+                ["--data-date", "2018-12-26"],
+                host="localhost",
+            ),
             NextWorker("nowcast.workers.collect_NeahBay_ssh", ["00"], host="localhost"),
             NextWorker(
                 "nowcast.workers.collect_weather", ["12", "2.5km"], host="localhost"
