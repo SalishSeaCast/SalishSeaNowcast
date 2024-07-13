@@ -18,6 +18,7 @@
 
 """Unit tests for SalishSeaCast get_vfpa_hadcp worker.
 """
+import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -97,29 +98,29 @@ class TestConfig:
         assert hadcp_obs["filepath template"] == "VFPA_2ND_NARROWS_HADCP_2s_{yyyymm}.nc"
 
 
-@patch("nowcast.workers.get_vfpa_hadcp.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function."""
 
-    def test_success(self, m_logger):
+    def test_success(self, caplog):
         parsed_args = SimpleNamespace(data_date=arrow.get("2018-10-01"))
+        caplog.set_level(logging.DEBUG)
         msg_type = get_vfpa_hadcp.success(parsed_args)
-        m_logger.info.assert_called_once_with(
-            "VFPA HADCP observations added to 2018-10 netcdf file"
-        )
+        assert caplog.records[0].levelname == "INFO"
+        expected = "VFPA HADCP observations added to 2018-10 netcdf file"
+        assert caplog.messages[0] == expected
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.get_vfpa_hadcp.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function."""
 
-    def test_failure(self, m_logger):
+    def test_failure(self, caplog):
         parsed_args = SimpleNamespace(data_date=arrow.get("2018-10-01"))
+        caplog.set_level(logging.DEBUG)
         msg_type = get_vfpa_hadcp.failure(parsed_args)
-        m_logger.critical.assert_called_once_with(
-            "Addition of VFPA HADCP observations to 2018-10 netcdf file failed"
-        )
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = "Addition of VFPA HADCP observations to 2018-10 netcdf file failed"
+        assert caplog.messages[0] == expected
         assert msg_type == "failure"
 
 
