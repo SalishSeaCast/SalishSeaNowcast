@@ -78,6 +78,11 @@ def after_download_weather(msg, config, checklist):
                 next_workers["success 2.5km 06"].append(
                     NextWorker("nowcast.workers.get_onc_ferry", args=[ferry])
                 )
+            next_workers["success 2.5km 06"].append(
+                NextWorker(
+                    "nowcast.workers.get_vfpa_hadcp", args=["--data-date", data_date]
+                )
+            )
             if "forecast2" in config["run types"]:
                 next_workers["success 2.5km 06"].append(
                     NextWorker("nowcast.workers.collect_NeahBay_ssh", args=["00"]),
