@@ -31,9 +31,7 @@ POLL_INTERVAL = 5 * 60  # seconds
 
 
 def main():
-    """Set up and run the worker.
-
-    For command-line usage see:
+    """For command-line usage see:
 
     :command:`python -m nowcast.workers.watch_fvcom --help`
     """

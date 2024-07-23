@@ -39,6 +39,10 @@ logger = logging.getLogger(NAME)
 
 
 def main():
+    """For command-line usage see:
+
+    :command:`python -m nowcast.workers.rotate_hindcast_logs --help`
+    """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.run(rotate_hindcast_logs, success, failure)

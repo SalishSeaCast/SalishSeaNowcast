@@ -37,6 +37,10 @@ logger = logging.getLogger(NAME)
 
 
 def main():
+    """For command-line usage see:
+
+    :command:`python -m nowcast.workers.make_feeds --help`
+    """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
     worker.cli.add_argument(
