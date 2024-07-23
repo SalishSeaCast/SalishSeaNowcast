@@ -22,7 +22,7 @@ import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -54,40 +54,29 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.make_live_ocean_files.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(make_live_ocean_files, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_live_ocean_files.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("make_live_ocean_files",)
-        assert "description" in kwargs
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_live_ocean_files.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_date_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_live_ocean_files.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_live_ocean_files.main()
-        args, kwargs = m_worker().run.call_args
-        expected = (
-            make_live_ocean_files.make_live_ocean_files,
-            make_live_ocean_files.success,
-            make_live_ocean_files.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = make_live_ocean_files.main()
+        assert worker.name == "make_live_ocean_files"
+        assert worker.description.startswith(
+            "SalishSeaCast nowcast worker that produces hourly temperature and salinity"
         )
-        assert args == expected
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = make_live_ocean_files.main()
+        assert worker.cli.parser._actions[3].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[3].type == expected
+        expected = arrow.now().floor("day")
+        assert worker.cli.parser._actions[3].default == expected
+        assert worker.cli.parser._actions[3].help
 
 
 class TestConfig:
