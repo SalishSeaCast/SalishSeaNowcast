@@ -44,6 +44,7 @@ def main():
         """,
     )
     worker.run(make_live_ocean_files, success, failure)
+    return worker
 
 
 def success(parsed_args):
