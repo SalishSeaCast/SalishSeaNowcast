@@ -22,7 +22,6 @@ import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -155,32 +154,46 @@ class TestFailure:
         assert msg_type == "failure"
 
 
-@patch(
-    "nowcast.workers.make_live_ocean_files.LiveOcean_parameters.set_parameters",
-    autospec=True,
-)
-@patch("nowcast.workers.make_live_ocean_files.create_LiveOcean_TS_BCs", spec=True)
 class TestMakeLiveOceanFiles:
     """Unit test for make_live_ocean_files() function."""
 
-    def test_checklist(self, m_create_ts, m_set_params, config, caplog):
-        run_date = arrow.get("2020-02-15")
+    @staticmethod
+    @pytest.fixture
+    def mock_create_LiveOcean_TS_BCs(config, monkeypatch):
+        def _mock_create_LiveOcean_TS_BCs(
+            date, file_template, meshfilename, bc_dir, LO_dir, LO_to_SSC_parameters
+        ):
+            return (
+                "forcing/LiveOcean/boundary_conditions/LiveOcean_v201905_y2024m07d26.nc"
+            )
+
+        monkeypatch.setattr(
+            make_live_ocean_files,
+            "create_LiveOcean_TS_BCs",
+            _mock_create_LiveOcean_TS_BCs,
+        )
+
+    def test_checklist(self, mock_create_LiveOcean_TS_BCs, config, caplog):
+        run_date = arrow.get("2024-07-26")
         parsed_args = SimpleNamespace(run_date=run_date)
         filename = config["temperature salinity"]["file template"].format(
             run_date.datetime
         )
-        m_create_ts.return_value = filename
+        bc_dir = config["temperature salinity"]["bc dir"]
+        filepath = f"{bc_dir}/{filename}"
+        caplog.set_level(logging.DEBUG)
 
         checklist = make_live_ocean_files.make_live_ocean_files(parsed_args, config)
-        assert checklist == {"temperature & salinity": filename}
+        assert checklist == {"temperature & salinity": filepath}
 
-    def test_log_messages(self, m_create_ts, m_set_params, config, caplog):
-        run_date = arrow.get("2019-02-15")
+    def test_log_messages(self, mock_create_LiveOcean_TS_BCs, config, caplog):
+        run_date = arrow.get("2024-07-26")
         parsed_args = SimpleNamespace(run_date=run_date)
         filename = config["temperature salinity"]["file template"].format(
             run_date.datetime
         )
-        m_create_ts.return_value = filename
+        bc_dir = config["temperature salinity"]["bc dir"]
+        filepath = f"{bc_dir}/{filename}"
         caplog.set_level(logging.DEBUG)
 
         make_live_ocean_files.make_live_ocean_files(parsed_args, config)
@@ -193,5 +206,5 @@ class TestMakeLiveOceanFiles:
         assert caplog.records[1].levelname == "INFO"
         assert (
             caplog.messages[1]
-            == f"Stored T&S western boundary conditions file: {filename}"
+            == f"Stored T&S western boundary conditions file: {filepath}"
         )
