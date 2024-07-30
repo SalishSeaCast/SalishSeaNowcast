@@ -1203,9 +1203,9 @@ zmq:
       workers: [
         5562, 5563, 5564, 5565, 5566, 5567, 5568, 5569,
         5570, 5571, 5572, 5573, 5574, 5575, 5576, 5577, 5578, 5579,
-        5590, 5591, 5592, 5593, 5594
+        5590, 5591, 5592, 5593, 5594, 5595, 5596, 5597, 5598, 5599,
       ]
-    # **host:port pairs in lists must be quoted to protect : characters**
+    # **host:port pairs in lists must be quoted to protect ":" characters**
       run_NEMO: ['salish.eos.ubc.ca:5556', '206.12.100.213:5556']
       watch_NEMO: ['salish.eos.ubc.ca:5557', '206.12.100.213:5557']
       make_ww3_wind_file: '206.12.100.213:5570'
