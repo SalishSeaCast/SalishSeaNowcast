@@ -323,7 +323,7 @@ def _makeTiles(
         )
         ax.set_rasterization_zorder(-1)
         viz_tools.plot_coastline(ax, dsBathy, coords="map")
-        viz_tools.set_aspect(ax, coords="map", lats=coord_yt)
+        viz_tools.set_aspect(ax, coords="map", lats=numpy.ma.filled(coord_yt))
 
         tiles += [tile]
         figs += [fig]
