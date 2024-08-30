@@ -315,8 +315,8 @@ def _makeTiles(
             )  # Makes the x and y numbers and axis lines into near-white
 
         x_tick_loc = ax.get_xticks()
-        x_tick_label = ["{:.1f}".format(q) for q in x_tick_loc]
-        ax.set_xticklabels(x_tick_label, rotation=45)
+        x_tick_labels = ["{:.1f}".format(q) for q in x_tick_loc]
+        ax.set_xticks(x_tick_loc, x_tick_labels, rotation=45)
 
         viz_tools.plot_land_mask(
             ax, dsBathy, coords="map", color="burlywood", zorder=-9
