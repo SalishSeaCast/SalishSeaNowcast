@@ -128,7 +128,7 @@ def _calc_eccc_day_avg_discharge(river_name, data_date, config):
         csv_file,
         usecols=["Date", "Discharge / Débit (cms)"],
         index_col="Date",
-        date_parser=lambda x: pandas.to_datetime(x.rpartition("-")[0]),
+        date_format="ISO8601",
     )
     day_avg_discharge = df.loc[f"{data_date.format('YYYY-MM-DD')}"].mean()[
         "Discharge / Débit (cms)"
