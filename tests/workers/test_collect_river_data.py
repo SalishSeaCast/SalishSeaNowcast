@@ -284,7 +284,7 @@ class TestCalcECCC_DayAvgDischarge:
     """Unit test for _calc_eccc_day_avg_discharge() function."""
 
     def test_calc_eccc_day_avg_discharge(self, config, caplog, tmp_path, monkeypatch):
-        def mock_read_csv(csv_file, usecols, index_col, date_parser):
+        def mock_read_csv(csv_file, usecols, index_col, date_format):
             return pandas.DataFrame(
                 numpy.linspace(41.9, 44.1, 290),
                 index=pandas.date_range(
