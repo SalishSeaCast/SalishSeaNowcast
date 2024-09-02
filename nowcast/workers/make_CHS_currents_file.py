@@ -247,7 +247,7 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
         "units": "m/s",
     }
 
-    myds = myds.drop("time_centered")
+    myds = myds.drop_vars("time_centered")
     myds = myds.rename({"x": "gridX", "y": "gridY"})
 
     encoding = {
