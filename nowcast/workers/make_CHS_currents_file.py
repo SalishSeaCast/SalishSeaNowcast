@@ -287,7 +287,7 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
     }
 
     filename = src_dir / "CHS_currents.nc"
-    myds.to_netcdf(filename, encoding=encoding, unlimited_dims=("time",))
+    myds.to_netcdf(filename, encoding=encoding, unlimited_dims=("time_counter",))
 
     logger.debug(f"{run_type}: netcdf file written: {filename}")
 
