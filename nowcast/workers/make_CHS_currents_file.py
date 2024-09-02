@@ -21,6 +21,7 @@ from pathlib import Path
 
 import arrow
 import xarray
+from build.lib.nemo_nowcast.worker import WorkerError
 from nemo_nowcast import NowcastWorker
 from salishsea_tools import viz_tools
 
@@ -98,15 +99,18 @@ def make_CHS_currents_file(parsed_args, config, *args):
     """
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    if run_type == "nowcast":
-        start_date = run_date.format("YYYYMMDD")
-        end_date = run_date.format("YYYYMMDD")
-    elif run_type == "forecast":
-        start_date = run_date.shift(days=1).format("YYYYMMDD")
-        end_date = run_date.shift(days=2).format("YYYYMMDD")
-    elif run_type == "forecast2":
-        start_date = run_date.shift(days=2).format("YYYYMMDD")
-        end_date = run_date.shift(days=3).format("YYYYMMDD")
+    match run_type:
+        case "nowcast":
+            start_date = run_date.format("YYYYMMDD")
+            end_date = run_date.format("YYYYMMDD")
+        case "forecast":
+            start_date = run_date.shift(days=1).format("YYYYMMDD")
+            end_date = run_date.shift(days=2).format("YYYYMMDD")
+        case "forecast2":
+            start_date = run_date.shift(days=2).format("YYYYMMDD")
+            end_date = run_date.shift(days=3).format("YYYYMMDD")
+        case _:
+            raise WorkerError(f"unexpected run type: {run_type}")
 
     grid_dir = Path(config["figures"]["grid dir"])
     meshfilename = grid_dir / config["run types"][run_type]["mesh mask"]
