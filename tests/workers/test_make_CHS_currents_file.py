@@ -189,12 +189,16 @@ class TestFailure:
     return_value=("urot5", "vrot5", "urot10", "vrot10"),
     autospec=True,
 )
-@patch(
-    "nowcast.workers.make_CHS_currents_file._write_netcdf",
-    spec=make_CHS_currents_file._write_netcdf,
-)
 class TestMakeCHSCurrentsFile:
     """Unit tests for make_CHS_currents_function."""
+
+    @staticmethod
+    @pytest.fixture
+    def mock_write_netcdf(monkeypatch):
+        def _mock_write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
+            return f"{src_dir}/CHS_currents.nc"
+
+        monkeypatch.setattr(make_CHS_currents_file, "_write_netcdf", _mock_write_netcdf)
 
     @staticmethod
     @pytest.fixture
@@ -206,13 +210,15 @@ class TestMakeCHSCurrentsFile:
 
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
     def test_checklist(
-        self, m_write_ncdf, m_read_aur, mock_fix_perms, run_type, config, caplog
+        self, m_read_aur, mock_write_netcdf, mock_fix_perms, run_type, config, caplog
     ):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
+        run_date = arrow.get("2018-09-01")
+        parsed_args = SimpleNamespace(run_type=run_type, run_date=run_date)
         checklist = make_CHS_currents_file.make_CHS_currents_file(parsed_args, config)
-        expected = {run_type: {"filename": m_write_ncdf(), "run date": "2018-09-01"}}
+        expected_filepath = f"{Path(config["results archive"][run_type])
+            /run_date.format("DDMMMYY").lower()
+            /"CHS_currents.nc"}"
+        expected = {run_type: {"filename": expected_filepath, "run date": "2018-09-01"}}
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -240,8 +246,8 @@ class TestMakeCHSCurrentsFile:
     )
     def test_read_avg_unstagger_rotatehecklist(
         self,
-        m_write_ncdf,
         m_read_aur,
+        mock_write_netcdf,
         mock_fix_perms,
         run_type,
         results_archive,
