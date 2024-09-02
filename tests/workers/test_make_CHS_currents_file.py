@@ -18,6 +18,7 @@
 
 """Unit tests for SalishSeaCast make_CHS_currents_file worker.
 """
+import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -148,30 +149,38 @@ class TestConfig:
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-@patch("nowcast.workers.make_CHS_currents_file.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
+    def test_success(self, run_type, caplog):
+        run_date = arrow.get("2018-09-01")
+        parsed_args = SimpleNamespace(run_type=run_type, run_date=run_date)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_CHS_currents_file.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"Made CHS currents file for {run_date.format("YYYY-MM-DD")} for {run_type}"
+        )
+        assert caplog.records[0].message == expected
         assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-@patch("nowcast.workers.make_CHS_currents_file.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
+    def test_failure(self, run_type, caplog):
+        run_date = arrow.get("2018-09-01")
+        parsed_args = SimpleNamespace(run_type=run_type, run_date=run_date)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_CHS_currents_file.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"Making CHS currents file for {run_date.format("YYYY-MM-DD")} failed for {run_type}"
+        assert caplog.records[0].message == expected
         assert msg_type == f"failure {run_type}"
 
 
@@ -189,7 +198,9 @@ class TestMakeCHSCurrentsFile:
     """Unit tests for make_CHS_currents_function."""
 
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-    def test_checklist(self, m_fix_perms, m_write_ncdf, m_read_aur, run_type, config):
+    def test_checklist(
+        self, m_fix_perms, m_write_ncdf, m_read_aur, run_type, config, caplog
+    ):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-09-01")
         )
@@ -230,6 +241,7 @@ class TestMakeCHSCurrentsFile:
         ufile,
         vfile,
         config,
+        caplog,
     ):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-09-01")
