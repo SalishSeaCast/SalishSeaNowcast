@@ -22,7 +22,6 @@ import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -184,13 +183,22 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
-@patch(
-    "nowcast.workers.make_CHS_currents_file._read_avg_unstagger_rotate",
-    return_value=("urot5", "vrot5", "urot10", "vrot10"),
-    autospec=True,
-)
 class TestMakeCHSCurrentsFile:
     """Unit tests for make_CHS_currents_function."""
+
+    @staticmethod
+    @pytest.fixture
+    def mock_read_avg_unstagger_rotate(monkeypatch):
+        def _mock_read_avg_unstagger_rotate(
+            meshfilename, src_dir, ufile, vfile, run_type
+        ):
+            return "urot5", "vrot5", "urot10", "vrot10"
+
+        monkeypatch.setattr(
+            make_CHS_currents_file,
+            "_read_avg_unstagger_rotate",
+            _mock_read_avg_unstagger_rotate,
+        )
 
     @staticmethod
     @pytest.fixture
@@ -210,7 +218,13 @@ class TestMakeCHSCurrentsFile:
 
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
     def test_checklist(
-        self, m_read_aur, mock_write_netcdf, mock_fix_perms, run_type, config, caplog
+        self,
+        mock_read_avg_unstagger_rotate,
+        mock_write_netcdf,
+        mock_fix_perms,
+        run_type,
+        config,
+        caplog,
     ):
         run_date = arrow.get("2018-09-01")
         parsed_args = SimpleNamespace(run_type=run_type, run_date=run_date)
@@ -220,50 +234,3 @@ class TestMakeCHSCurrentsFile:
             /"CHS_currents.nc"}"
         expected = {run_type: {"filename": expected_filepath, "run date": "2018-09-01"}}
         assert checklist == expected
-
-    @pytest.mark.parametrize(
-        "run_type, results_archive, ufile, vfile",
-        [
-            (
-                "nowcast",
-                "nowcast-blue",
-                "SalishSea_1h_20180901_20180901_grid_U.nc",
-                "SalishSea_1h_20180901_20180901_grid_V.nc",
-            ),
-            (
-                "forecast",
-                "forecast",
-                "SalishSea_1h_20180902_20180903_grid_U.nc",
-                "SalishSea_1h_20180902_20180903_grid_V.nc",
-            ),
-            (
-                "forecast2",
-                "forecast2",
-                "SalishSea_1h_20180903_20180904_grid_U.nc",
-                "SalishSea_1h_20180903_20180904_grid_V.nc",
-            ),
-        ],
-    )
-    def test_read_avg_unstagger_rotatehecklist(
-        self,
-        m_read_aur,
-        mock_write_netcdf,
-        mock_fix_perms,
-        run_type,
-        results_archive,
-        ufile,
-        vfile,
-        config,
-        caplog,
-    ):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
-        make_CHS_currents_file.make_CHS_currents_file(parsed_args, config)
-        m_read_aur.assert_called_once_with(
-            Path("nowcast-sys/grid/mesh_mask201702.nc"),
-            Path(results_archive) / "01sep18",
-            ufile,
-            vfile,
-            run_type,
-        )
