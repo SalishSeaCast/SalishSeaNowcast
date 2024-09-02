@@ -21,8 +21,7 @@ from pathlib import Path
 
 import arrow
 import xarray
-from build.lib.nemo_nowcast.worker import WorkerError
-from nemo_nowcast import NowcastWorker
+from nemo_nowcast import NowcastWorker, WorkerError
 from salishsea_tools import viz_tools
 
 from nowcast import lib
