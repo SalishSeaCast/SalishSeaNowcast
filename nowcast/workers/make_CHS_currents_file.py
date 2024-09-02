@@ -144,9 +144,9 @@ def _read_avg_unstagger_rotate(meshfilename, src_dir, ufile, vfile, run_type):
     """
     :param str meshfilename:
     :param :py:class:`pathlib.Path` src_dir:
-    :param str: ufile:
-    :param str: vfile:
-    :param str: run_type:
+    :param str ufile:
+    :param str vfile:
+    :param str run_type:
 
     :return: 4_tuple of data arrays
                urot5: east velocity averaged over top 5 grid cells
@@ -203,7 +203,7 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
     :param :py:class:`xarray.DataArray` vrot5:
     :param :py:class:`xarray.DataArray` urot10:
     :param :py:class:`xarray.DataArray` vrot10:
-    :param str: run_type:
+    :param str run_type:
 
     :return: str CHS_currents_filename
     """
