@@ -18,10 +18,10 @@
 
 """Unit tests for SalishSeaCast make_CHS_currents_file worker.
 """
+import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
 
 import arrow
 import nemo_nowcast
@@ -64,47 +64,39 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.make_CHS_currents_file.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(make_CHS_currents_file, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_CHS_currents_file.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("make_CHS_currents_file",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_CHS_currents_file.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_CHS_currents_file.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {"nowcast", "forecast", "forecast2"}
-        assert "help" in kwargs
-
-    def test_add_run_date_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_CHS_currents_file.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_CHS_currents_file.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            make_CHS_currents_file.make_CHS_currents_file,
-            make_CHS_currents_file.success,
-            make_CHS_currents_file.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = make_CHS_currents_file.main()
+        assert worker.name == "make_CHS_currents_file"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that averages, unstaggers and rotates the near surface velocities,"
         )
+
+    def test_add_run_type_arg(self, mock_worker):
+        worker = make_CHS_currents_file.main()
+        assert worker.cli.parser._actions[3].dest == "run_type"
+        assert worker.cli.parser._actions[3].choices == {
+            "nowcast",
+            "forecast",
+            "forecast2",
+        }
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = make_CHS_currents_file.main()
+        assert worker.cli.parser._actions[4].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[4].type == expected
+        expected = arrow.now().floor("day")
+        assert worker.cli.parser._actions[4].default == expected
+        assert worker.cli.parser._actions[4].help
 
 
 class TestConfig:
@@ -156,97 +148,89 @@ class TestConfig:
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-@patch("nowcast.workers.make_CHS_currents_file.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
+    def test_success(self, run_type, caplog):
+        run_date = arrow.get("2018-09-01")
+        parsed_args = SimpleNamespace(run_type=run_type, run_date=run_date)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_CHS_currents_file.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"Made CHS currents file for {run_date.format("YYYY-MM-DD")} for {run_type}"
+        )
+        assert caplog.records[0].message == expected
         assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-@patch("nowcast.workers.make_CHS_currents_file.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
+    def test_failure(self, run_type, caplog):
+        run_date = arrow.get("2018-09-01")
+        parsed_args = SimpleNamespace(run_type=run_type, run_date=run_date)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_CHS_currents_file.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"Making CHS currents file for {run_date.format("YYYY-MM-DD")} failed for {run_type}"
+        assert caplog.records[0].message == expected
         assert msg_type == f"failure {run_type}"
 
 
-@patch(
-    "nowcast.workers.make_CHS_currents_file._read_avg_unstagger_rotate",
-    return_value=("urot5", "vrot5", "urot10", "vrot10"),
-    autospec=True,
-)
-@patch(
-    "nowcast.workers.make_CHS_currents_file._write_netcdf",
-    spec=make_CHS_currents_file._write_netcdf,
-)
-@patch("nowcast.workers.make_CHS_currents_file.lib.fix_perms", autospec=True)
 class TestMakeCHSCurrentsFile:
     """Unit tests for make_CHS_currents_function."""
 
-    @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
-    def test_checklist(self, m_fix_perms, m_write_ncdf, m_read_aur, run_type, config):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
-        checklist = make_CHS_currents_file.make_CHS_currents_file(parsed_args, config)
-        expected = {run_type: {"filename": m_write_ncdf(), "run date": "2018-09-01"}}
-        assert checklist == expected
+    @staticmethod
+    @pytest.fixture
+    def mock_read_avg_unstagger_rotate(monkeypatch):
+        def _mock_read_avg_unstagger_rotate(
+            meshfilename, src_dir, ufile, vfile, run_type
+        ):
+            return "urot5", "vrot5", "urot10", "vrot10"
 
-    @pytest.mark.parametrize(
-        "run_type, results_archive, ufile, vfile",
-        [
-            (
-                "nowcast",
-                "nowcast-blue",
-                "SalishSea_1h_20180901_20180901_grid_U.nc",
-                "SalishSea_1h_20180901_20180901_grid_V.nc",
-            ),
-            (
-                "forecast",
-                "forecast",
-                "SalishSea_1h_20180902_20180903_grid_U.nc",
-                "SalishSea_1h_20180902_20180903_grid_V.nc",
-            ),
-            (
-                "forecast2",
-                "forecast2",
-                "SalishSea_1h_20180903_20180904_grid_U.nc",
-                "SalishSea_1h_20180903_20180904_grid_V.nc",
-            ),
-        ],
-    )
-    def test_read_avg_unstagger_rotatehecklist(
+        monkeypatch.setattr(
+            make_CHS_currents_file,
+            "_read_avg_unstagger_rotate",
+            _mock_read_avg_unstagger_rotate,
+        )
+
+    @staticmethod
+    @pytest.fixture
+    def mock_write_netcdf(monkeypatch):
+        def _mock_write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
+            return f"{src_dir}/CHS_currents.nc"
+
+        monkeypatch.setattr(make_CHS_currents_file, "_write_netcdf", _mock_write_netcdf)
+
+    @staticmethod
+    @pytest.fixture
+    def mock_fix_perms(monkeypatch):
+        def _mock_fix_perms(path, grp_name):
+            pass
+
+        monkeypatch.setattr(make_CHS_currents_file.lib, "fix_perms", _mock_fix_perms)
+
+    @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
+    def test_checklist(
         self,
-        m_fix_perms,
-        m_write_ncdf,
-        m_read_aur,
+        mock_read_avg_unstagger_rotate,
+        mock_write_netcdf,
+        mock_fix_perms,
         run_type,
-        results_archive,
-        ufile,
-        vfile,
         config,
+        caplog,
     ):
-        parsed_args = SimpleNamespace(
-            run_type=run_type, run_date=arrow.get("2018-09-01")
-        )
-        make_CHS_currents_file.make_CHS_currents_file(parsed_args, config)
-        m_read_aur.assert_called_once_with(
-            Path("nowcast-sys/grid/mesh_mask201702.nc"),
-            Path(results_archive) / "01sep18",
-            ufile,
-            vfile,
-            run_type,
-        )
+        run_date = arrow.get("2018-09-01")
+        parsed_args = SimpleNamespace(run_type=run_type, run_date=run_date)
+        checklist = make_CHS_currents_file.make_CHS_currents_file(parsed_args, config)
+        expected_filepath = f"{Path(config["results archive"][run_type])
+            /run_date.format("DDMMMYY").lower()
+            /"CHS_currents.nc"}"
+        expected = {run_type: {"filename": expected_filepath, "run date": "2018-09-01"}}
+        assert checklist == expected

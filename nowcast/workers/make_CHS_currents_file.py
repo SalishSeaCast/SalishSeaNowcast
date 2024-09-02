@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that average, unstaggers and rotates the near
-surface velocities, and writes them out in an nc file for CHS to use
+"""SalishSeaCast worker that averages, unstaggers and rotates the near surface velocities,
+and writes them out in a netCDF file for CHS to use.
 """
 import logging
 import os
@@ -21,7 +21,7 @@ from pathlib import Path
 
 import arrow
 import xarray
-from nemo_nowcast import NowcastWorker
+from nemo_nowcast import NowcastWorker, WorkerError
 from salishsea_tools import viz_tools
 
 from nowcast import lib
@@ -53,6 +53,7 @@ def main():
         help="Date to process the velocities for.",
     )
     worker.run(make_CHS_currents_file, success, failure)
+    return worker
 
 
 def success(parsed_args):
@@ -97,15 +98,18 @@ def make_CHS_currents_file(parsed_args, config, *args):
     """
     run_type = parsed_args.run_type
     run_date = parsed_args.run_date
-    if run_type == "nowcast":
-        start_date = run_date.format("YYYYMMDD")
-        end_date = run_date.format("YYYYMMDD")
-    elif run_type == "forecast":
-        start_date = run_date.shift(days=1).format("YYYYMMDD")
-        end_date = run_date.shift(days=2).format("YYYYMMDD")
-    elif run_type == "forecast2":
-        start_date = run_date.shift(days=2).format("YYYYMMDD")
-        end_date = run_date.shift(days=3).format("YYYYMMDD")
+    match run_type:
+        case "nowcast":
+            start_date = run_date.format("YYYYMMDD")
+            end_date = run_date.format("YYYYMMDD")
+        case "forecast":
+            start_date = run_date.shift(days=1).format("YYYYMMDD")
+            end_date = run_date.shift(days=2).format("YYYYMMDD")
+        case "forecast2":
+            start_date = run_date.shift(days=2).format("YYYYMMDD")
+            end_date = run_date.shift(days=3).format("YYYYMMDD")
+        case _:
+            raise WorkerError(f"unexpected run type: {run_type}")
 
     grid_dir = Path(config["figures"]["grid dir"])
     meshfilename = grid_dir / config["run types"][run_type]["mesh mask"]
@@ -139,9 +143,9 @@ def _read_avg_unstagger_rotate(meshfilename, src_dir, ufile, vfile, run_type):
     """
     :param str meshfilename:
     :param :py:class:`pathlib.Path` src_dir:
-    :param str: ufile:
-    :param str: vfile:
-    :param str: run_type:
+    :param str ufile:
+    :param str vfile:
+    :param str run_type:
 
     :return: 4_tuple of data arrays
                urot5: east velocity averaged over top 5 grid cells
@@ -198,7 +202,7 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
     :param :py:class:`xarray.DataArray` vrot5:
     :param :py:class:`xarray.DataArray` urot10:
     :param :py:class:`xarray.DataArray` vrot10:
-    :param str: run_type:
+    :param str run_type:
 
     :return: str CHS_currents_filename
     """
@@ -242,7 +246,7 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
         "units": "m/s",
     }
 
-    myds = myds.drop("time_centered")
+    myds = myds.drop_vars("time_centered")
     myds = myds.rename({"x": "gridX", "y": "gridY"})
 
     encoding = {
@@ -282,7 +286,7 @@ def _write_netcdf(src_dir, urot5, vrot5, urot10, vrot10, run_type):
     }
 
     filename = src_dir / "CHS_currents.nc"
-    myds.to_netcdf(filename, encoding=encoding, unlimited_dims=("time",))
+    myds.to_netcdf(filename, encoding=encoding, unlimited_dims=("time_counter",))
 
     logger.debug(f"{run_type}: netcdf file written: {filename}")
 
