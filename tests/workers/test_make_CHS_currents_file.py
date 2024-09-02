@@ -193,13 +193,20 @@ class TestFailure:
     "nowcast.workers.make_CHS_currents_file._write_netcdf",
     spec=make_CHS_currents_file._write_netcdf,
 )
-@patch("nowcast.workers.make_CHS_currents_file.lib.fix_perms", autospec=True)
 class TestMakeCHSCurrentsFile:
     """Unit tests for make_CHS_currents_function."""
 
+    @staticmethod
+    @pytest.fixture
+    def mock_fix_perms(monkeypatch):
+        def _mock_fix_perms(path, grp_name):
+            pass
+
+        monkeypatch.setattr(make_CHS_currents_file.lib, "fix_perms", _mock_fix_perms)
+
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast", "forecast2"])
     def test_checklist(
-        self, m_fix_perms, m_write_ncdf, m_read_aur, run_type, config, caplog
+        self, m_write_ncdf, m_read_aur, mock_fix_perms, run_type, config, caplog
     ):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2018-09-01")
@@ -233,9 +240,9 @@ class TestMakeCHSCurrentsFile:
     )
     def test_read_avg_unstagger_rotatehecklist(
         self,
-        m_fix_perms,
         m_write_ncdf,
         m_read_aur,
+        mock_fix_perms,
         run_type,
         results_archive,
         ufile,
