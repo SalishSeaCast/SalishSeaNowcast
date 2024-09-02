@@ -76,7 +76,7 @@ class TestMain:
         worker = make_CHS_currents_file.main()
         assert worker.name == "make_CHS_currents_file"
         assert worker.description.startswith(
-            "SalishSeaCast worker that average, unstaggers and rotates the near surface velocities,"
+            "SalishSeaCast worker that averages, unstaggers and rotates the near surface velocities,"
         )
 
     def test_add_run_type_arg(self, mock_worker):

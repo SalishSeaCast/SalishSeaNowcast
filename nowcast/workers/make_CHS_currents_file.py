@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that average, unstaggers and rotates the near surface velocities,
-and writes them out in an nc file for CHS to use
+"""SalishSeaCast worker that averages, unstaggers and rotates the near surface velocities,
+and writes them out in a netCDF file for CHS to use.
 """
 import logging
 import os
