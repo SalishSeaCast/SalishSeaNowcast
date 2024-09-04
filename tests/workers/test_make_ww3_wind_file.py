@@ -325,7 +325,7 @@ class TestMakeWW3WindFile:
             coords="minimal",
             data_vars="minimal",
             drop_variables=drop_vars,
-            engine="h5netcdf"
+            engine="h5netcdf",
         )
 
     def test_forecast2_datasets(
@@ -384,5 +384,5 @@ class TestMakeWW3WindFile:
             coords="minimal",
             data_vars="minimal",
             drop_variables=drop_vars,
-            engine="h5netcdf"
+            engine="h5netcdf",
         )
