@@ -442,6 +442,12 @@ averaged datasets:
     chemistry:
       reshapr config: month-average_202111_chemistry.yaml
       file pattern: "SalishSeaCast_1m_chem_T_{yyyymmdd}_{yyyymmdd}.nc"
+    grazing:
+      reshapr config: month-average_202111_grazing_mortality.yaml
+      file pattern: "SalishSeaCast_1m_graz_T_{yyyymmdd}_{yyyymmdd}.nc"
+    growth:
+      reshapr config: month-average_202111_bio_growth_rates.yaml
+      file pattern: "SalishSeaCast_1m_prod_T_{yyyymmdd}_{yyyymmdd}.nc"
     physics:
       reshapr config: month-average_202111_physics.yaml
       file pattern: "SalishSeaCast_1m_grid_T_{yyyymmdd}_{yyyymmdd}.nc"
@@ -1587,6 +1593,10 @@ message registry:
       failure month biology: biology dataset month-averaging failed
       success month chemistry: chemistry dataset month-averaged
       failure month chemistry: chemistry dataset month-averaging failed
+      success month grazing: grazing dataset month-averaged
+      failure month grazing: grazing dataset month-averaging failed
+      success month growth: biology growth rates dataset month-averaged
+      failure month growth: biology growth rates dataset month-averaging failed
       success month physics: physics dataset month-averaged
       failure month physics: physics dataset month-averaging failed
       crash: make_averaged_dataset worker crashed
