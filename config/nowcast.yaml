@@ -1587,6 +1587,8 @@ message registry:
       failure day biology: biology dataset day-averaging failed
       success day chemistry: chemistry dataset day-averaged
       failure day chemistry: chemistry dataset day-averaging failed
+      failure day grazing: grazing dataset day-averaging failed
+      failure day growth: growth dataset day-averaging failed
       success day physics: physics dataset day-averaged
       failure day physics: physics dataset day-averaging failed
       success month biology: biology dataset month-averaged

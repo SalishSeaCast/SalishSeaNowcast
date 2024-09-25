@@ -144,6 +144,8 @@ class TestConfig:
             "failure day biology",
             "success day chemistry",
             "failure day chemistry",
+            "failure day grazing",
+            "failure day growth",
             "success day physics",
             "failure day physics",
             "success month biology",
