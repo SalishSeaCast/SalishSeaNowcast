@@ -2216,10 +2216,12 @@ class TestAfterMakeAveragedDataset:
             "crash",
             "failure day biology",
             "failure day chemistry",
+            "failure day grazing",
+            "failure day growth",
             "failure day physics",
             "success month biology",
             "success month chemistry",
-            "success month physics",
+            "success month growth",
             "failure month biology",
             "failure month chemistry",
             "failure month physics",
@@ -2257,6 +2259,44 @@ class TestAfterMakeAveragedDataset:
         expected = NextWorker(
             "nowcast.workers.make_averaged_dataset",
             args=["month", reshapr_var_group, "--run-date", "2024-02-01"],
+            host="localhost",
+        )
+        assert expected in workers
+
+    def test_month_physics_success_launch_month_grazing(self, config, checklist):
+        msg = Message(
+            "make_averaged_dataset",
+            "success month physics",
+            payload={
+                "month physics": {
+                    "run date": "2024-09-01",
+                    "file path": "SalishSea_1m_20240901_20240930_grid_T.nc",
+                }
+            },
+        )
+        workers = next_workers.after_make_averaged_dataset(msg, config, checklist)
+        expected = NextWorker(
+            "nowcast.workers.make_averaged_dataset",
+            args=["month", "grazing", "--run-date", "2024-09-01"],
+            host="localhost",
+        )
+        assert expected in workers
+
+    def test_month_grazing_success_launch_month_growth(self, config, checklist):
+        msg = Message(
+            "make_averaged_dataset",
+            "success month grazing",
+            payload={
+                "month grazing": {
+                    "run date": "2024-09-01",
+                    "file path": "SalishSea_1m_20240901_20240930_graz_T.nc",
+                }
+            },
+        )
+        workers = next_workers.after_make_averaged_dataset(msg, config, checklist)
+        expected = NextWorker(
+            "nowcast.workers.make_averaged_dataset",
+            args=["month", "growth", "--run-date", "2024-09-01"],
             host="localhost",
         )
         assert expected in workers
