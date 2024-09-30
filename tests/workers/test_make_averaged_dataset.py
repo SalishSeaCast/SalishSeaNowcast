@@ -59,6 +59,12 @@ def config(base_config):
                     chemistry:
                       reshapr config: month-average_202111_chemistry.yaml
                       file pattern: "SalishSeaCast_1m_chem_T_{yyyymmdd}_{yyyymmdd}.nc"
+                    grazing:
+                      reshapr config: month-average_202111_grazing_mortality.yaml
+                      file pattern: "SalishSeaCast_1m_graz_T_{yyyymmdd}_{yyyymmdd}.nc"
+                    growth:
+                      reshapr config: month-average_202111_bio_growth_rates.yaml
+                      file pattern: "SalishSeaCast_1m_prod_T_{yyyymmdd}_{yyyymmdd}.nc"
                     physics:
                       reshapr config: month-average_202111_physics.yaml
                       file pattern: "SalishSeaCast_1m_grid_T_{yyyymmdd}_{yyyymmdd}.nc"
@@ -100,6 +106,8 @@ class TestMain:
         assert worker.cli.parser._actions[4].choices == {
             "biology",
             "chemistry",
+            "grazing",
+            "growth",
             "physics",
         }
         assert worker.cli.parser._actions[4].help
@@ -136,18 +144,24 @@ class TestConfig:
             "failure day biology",
             "success day chemistry",
             "failure day chemistry",
+            "failure day grazing",
+            "failure day growth",
             "success day physics",
             "failure day physics",
             "success month biology",
             "failure month biology",
             "success month chemistry",
             "failure month chemistry",
+            "success month grazing",
+            "failure month grazing",
+            "success month growth",
+            "failure month growth",
             "success month physics",
             "failure month physics",
             "crash",
         ]
 
-    def test_averaged_datasets(self, prod_config):
+    def test_reshapr_configs(self, prod_config):
         averaged_datasets = prod_config["averaged datasets"]
         expected = "/SalishSeaCast/SalishSeaNowcast/config/reshapr/"
 
@@ -195,6 +209,16 @@ class TestConfig:
                 "chemistry",
                 "month-average_202111_chemistry.yaml",
                 "SalishSeaCast_1m_chem_T_{yyyymmdd}_{yyyymmdd}.nc",
+            ),
+            (
+                "grazing",
+                "month-average_202111_grazing_mortality.yaml",
+                "SalishSeaCast_1m_graz_T_{yyyymmdd}_{yyyymmdd}.nc",
+            ),
+            (
+                "growth",
+                "month-average_202111_bio_growth_rates.yaml",
+                "SalishSeaCast_1m_prod_T_{yyyymmdd}_{yyyymmdd}.nc",
             ),
             (
                 "physics",
@@ -247,6 +271,8 @@ class TestSuccess:
         (
             ("month", "biology"),
             ("month", "chemistry"),
+            ("month", "grazing"),
+            ("month", "growth"),
             ("month", "physics"),
         ),
     )
@@ -301,6 +327,8 @@ class TestFailure:
         (
             ("month", "biology"),
             ("month", "chemistry"),
+            ("month", "grazing"),
+            ("month", "growth"),
             ("month", "physics"),
         ),
     )
@@ -385,6 +413,8 @@ class TestMakeAveragedDataset:
         (
             ("month", "biology"),
             ("month", "chemistry"),
+            ("month", "grazing"),
+            ("month", "growth"),
             ("month", "physics"),
         ),
     )
@@ -445,4 +475,23 @@ class TestMakeAveragedDataset:
 
         assert caplog.records[0].levelname == "ERROR"
         expected = f"Month-averaging must start on the first day of a month but run_date = 2022-11-10"
+        assert caplog.messages[0] == expected
+
+    @pytest.mark.parametrize("reshapr_var_group", ("grazing", "growth"))
+    def test_month_avg_only_var_groups(self, reshapr_var_group, caplog, config):
+        parsed_args = SimpleNamespace(
+            avg_time_interval="day",
+            run_date=arrow.get("2024-09-24"),
+            reshapr_var_group=reshapr_var_group,
+        )
+        caplog.set_level(logging.DEBUG)
+
+        with pytest.raises(WorkerError):
+            make_averaged_dataset.make_averaged_dataset(parsed_args, config)
+
+        assert caplog.records[0].levelname == "ERROR"
+        expected = (
+            f"Day-average {reshapr_var_group} datasets are calculated by NEMO; "
+            f"use this worker for month-averaging"
+        )
         assert caplog.messages[0] == expected

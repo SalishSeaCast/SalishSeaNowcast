@@ -54,7 +54,7 @@ def main():
     )
     worker.cli.add_argument(
         "reshapr_var_group",
-        choices={"biology", "chemistry", "physics"},
+        choices={"biology", "chemistry", "grazing", "growth", "physics"},
         help="Dataset variable group to run extraction for",
     )
     worker.cli.add_date_option(
@@ -152,6 +152,12 @@ def make_averaged_dataset(parsed_args, config, *args):
         logger.error(
             f"Month-averaging must start on the first day of a month but "
             f"run_date = {run_date.format('YYYY-MM-DD')}"
+        )
+        raise WorkerError
+    if avg_time_interval == "day" and reshapr_var_group in {"grazing", "growth"}:
+        logger.error(
+            f"Day-average {reshapr_var_group} datasets are calculated by NEMO; "
+            f"use this worker for month-averaging"
         )
         raise WorkerError
     reshapr_config_dir = Path(config["averaged datasets"]["reshapr config dir"])

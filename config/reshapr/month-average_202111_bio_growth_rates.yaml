@@ -1,0 +1,32 @@
+# `reshapr extract` config to resample v202111 day-average grzing & mortality fields
+# to month-average
+
+dataset:
+  model profile: SalishSeaCast-202111-salish.yaml
+  time base: day
+  variables group: biology growth rates
+
+dask cluster: tcp://142.103.36.12:4386
+
+# Placeholder state/end dates that are overridden by worker's run-date arg
+start date: 2007-01-01
+end date: 2007-01-31
+
+extract variables:
+  - PPDIAT
+  - PPPHY
+  - PPDIATNO3
+  - PPPHYNO3
+  - TQ10
+
+resample:
+  time interval: 1M
+  aggregation: mean
+
+extracted dataset:
+  name: SalishSeaCast_1m_prod_T
+  description: Month-averaged biology growth rate variables resampled from
+               v202111 SalishSea_1d_*_prod_T.nc
+  deflate: True
+  format: NETCDF4
+  dest dir: /results2/SalishSea/month-avg.202111/

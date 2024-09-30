@@ -1557,6 +1557,8 @@ def after_make_averaged_dataset(msg, config, checklist):
         "crash": [],
         "failure day biology": [],
         "failure day chemistry": [],
+        "failure day grazing": [],
+        "failure day growth": [],
         "failure day physics": [],
         "failure month biology": [],
         "failure month chemistry": [],
@@ -1566,6 +1568,8 @@ def after_make_averaged_dataset(msg, config, checklist):
         "success day physics": [],
         "success month biology": [],
         "success month chemistry": [],
+        "success month grazing": [],
+        "success month growth": [],
         "success month physics": [],
     }
     if msg.type.startswith("success day"):
@@ -1580,6 +1584,33 @@ def after_make_averaged_dataset(msg, config, checklist):
                     host="localhost",
                 )
             )
+    if msg.type.startswith("success month"):
+        *_, reshapr_var_group = msg.type.split()
+        match reshapr_var_group:
+            case "physics":
+                run_date = arrow.get(msg.payload["month physics"]["run date"]).format(
+                    "YYYY-MM-DD"
+                )
+                next_workers[msg.type].append(
+                    NextWorker(
+                        "nowcast.workers.make_averaged_dataset",
+                        args=["month", "grazing", "--run-date", run_date],
+                        host="localhost",
+                    )
+                )
+            case "grazing":
+                run_date = arrow.get(msg.payload["month grazing"]["run date"]).format(
+                    "YYYY-MM-DD"
+                )
+                next_workers[msg.type].append(
+                    NextWorker(
+                        "nowcast.workers.make_averaged_dataset",
+                        args=["month", "growth", "--run-date", run_date],
+                        host="localhost",
+                    )
+                )
+            case _:
+                pass
     return next_workers[msg.type]
 
 
