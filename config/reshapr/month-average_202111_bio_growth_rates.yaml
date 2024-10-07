@@ -1,4 +1,4 @@
-# `reshapr extract` config to resample v202111 day-average grzing & mortality fields
+# `reshapr extract` config to resample v202111 day-average biology growth rates fields
 # to month-average
 
 dataset:
