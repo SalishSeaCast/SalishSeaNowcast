@@ -244,37 +244,49 @@ use:
     (salishsea-nowcast)$ (cd docs && make clean html)
 
 to do a clean build of the documentation.
-The output looks something like::
+The output looks something like:
 
-  Removing everything under '_build'...
-  Running Sphinx v3.3.1
-  making output directory... done
-  loading intersphinx inventory from https://docs.python.org/3/objects.inv...
-  loading intersphinx inventory from https://nemo-nowcast.readthedocs.io/en/latest/objects.inv...
-  loading intersphinx inventory from https://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv...
-  loading intersphinx inventory from https://salishsea-meopar-tools.readthedocs.io/en/latest/objects.inv...
-  loading intersphinx inventory from https://salishsea-site.readthedocs.io/objects.inv...
-  loading intersphinx inventory from https://salishseacmd.readthedocs.io/en/latest/objects.inv...
-  building [mo]: targets for 0 po files that are out of date
-  building [html]: targets for 20 source files that are out of date
-  updating environment: [new config] 20 added, 0 changed, 0 removed
-  reading sources... [100%] workers
-  looking for now-outdated files... none found
-  pickling environment... done
-  checking consistency... done
-  preparing documents... done
-  writing output... [100%] workers
-  generating indices... genindex py-modindex done
-  highlighting module code... [100%] nowcast.workers.watch_ww3
-  writing additional pages... search done
-  copying images... [100%] ProcessFlow.png
-  copying static files... done
-  copying extra files... done
-  dumping search index in English (code: en)... done
-  dumping object inventory... done
-  build succeeded.
+.. code-block:: text
 
-  The HTML pages are in _build/html.
+    Removing everything under '_build'...
+    Running Sphinx v8.1.3
+    loading translations [en]... done
+    making output directory... done
+    loading intersphinx inventory 'python' from https://docs.python.org/3/objects.inv ...
+    loading intersphinx inventory 'nemonowcast' from https://nemo-nowcast.readthedocs.io/en/latest/objects.inv ...
+    loading intersphinx inventory 'salishseadocs' from https://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv ...
+    loading intersphinx inventory 'salishseatools' from https://salishsea-meopar-tools.readthedocs.io/en/latest/objects.inv ...
+    loading intersphinx inventory 'salishseasite' from https://salishsea-site.readthedocs.io/objects.inv ...
+    loading intersphinx inventory 'salishseacmd' from https://salishseacmd.readthedocs.io/en/latest/objects.inv ...
+    building [mo]: targets for 0 po files that are out of date
+    writing output...
+    building [html]: targets for 20 source files that are out of date
+    updating environment: [new config] 20 added, 0 changed, 0 removed
+    reading sources... [100%] workers
+    looking for now-outdated files... none found
+    pickling environment... done
+    checking consistency... done
+    preparing documents... done
+    copying assets...
+    copying static files...
+    Writing evaluated template result to /media/doug/warehouse/MEOPAR/SalishSeaNowcast/docs/_build/html/_static/language_data.js
+    Writing evaluated template result to /media/doug/warehouse/MEOPAR/SalishSeaNowcast/docs/_build/html/_static/basic.css
+    Writing evaluated template result to /media/doug/warehouse/MEOPAR/SalishSeaNowcast/docs/_build/html/_static/documentation_options.js
+    Writing evaluated template result to /media/doug/warehouse/MEOPAR/SalishSeaNowcast/docs/_build/html/_static/js/versions.js
+    copying static files: done
+    copying extra files...
+    copying extra files: done
+    copying assets: done
+    writing output... [100%] workers
+    generating indices... genindex py-modindex done
+    highlighting module code... [100%] nowcast.workers.watch_ww3
+    writing additional pages... search done
+    copying images... [100%] ProcessFlow.png
+    dumping search index in English (code: en)... done
+    dumping object inventory... done
+    build succeeded.
+
+    The HTML pages are in _build/html.
 
 The HTML rendering of the docs ends up in :file:`docs/_build/html/`.
 You can open the :file:`index.html` file in that directory tree in your browser to preview the results of the build.
@@ -302,221 +314,199 @@ use:
     (salishsea-nowcast)$ cd SalishSeaNowcast/docs/
     (salishsea-nowcast) docs$ make linkcheck
 
-The output looks something like::
+The output looks something like:
 
-  Running Sphinx v3.3.1
-  making output directory... done
-  loading intersphinx inventory from https://docs.python.org/3/objects.inv...
-  loading intersphinx inventory from https://nemo-nowcast.readthedocs.io/en/latest/objects.inv...
-  loading intersphinx inventory from https://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv...
-  loading intersphinx inventory from https://salishsea-meopar-tools.readthedocs.io/en/latest/objects.inv...
-  loading intersphinx inventory from https://salishsea-site.readthedocs.io/objects.inv...
-  loading intersphinx inventory from https://salishseacmd.readthedocs.io/en/latest/objects.inv...
-  building [mo]: targets for 0 po files that are out of date
-  building [linkcheck]: targets for 20 source files that are out of date
-  updating environment: [new config] 20 added, 0 changed, 0 removed
-  reading sources... [100%] workers
-  looking for now-outdated files... none found
-  pickling environment... done
-  checking consistency... done
-  preparing documents... done
-  writing output... [  5%] config
-  writing output... [ 10%] creating_workers
-  (line   22) ok        https://nemo-nowcast.readthedocs.io/en/latest/
-  (line   22) ok        https://nemo-nowcast.readthedocs.io/en/latest/nowcast_system/workers.html#creatingnowcastworkermodules
-  writing output... [ 15%] deployment/arbutus_cloud
-  (line   22) ok        https://www.oceannetworks.ca/
-  (line   29) ok        https://docs.openstack.org/horizon/stein/user/
-  (line   22) ok        https://www.openstack.org/
-  (line   22) ok        https://docs.computecanada.ca/wiki/Cloud_resources#Arbutus_cloud
-  (line   43) redirect  https://arbutus.cloud.computecanada.ca/ - with Found to https://arbutus.cloud.computecanada.ca/auth/login/?next=/
-  (line   34) ok        https://www.computecanada.ca/
-  (line   43) ok        https://docs.openstack.org/queens/user/
-  (line   43) ok        https://docs.computecanada.ca/wiki/Cloud_Quick_Start
-  (line  670) ok        https://polar.ncep.noaa.gov/waves/wavewatch/license.shtml
-  (line  684) ok        https://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
-  (line  772) ok        https://docs.conda.io/en/latest/miniconda.html
-  (line  670) ok        https://polar.ncep.noaa.gov/waves/wavewatch/distribution/ - unauthorized
-  (line  419) ok        https://help.ubuntu.com/community/SettingUpNFSHowTo
-  (line  755) -ignored- https://gitlab.com/mdunphy/FVCOM41: 503 Server Error: Service Temporarily Unavailable for url: https://gitlab.com/users/sign_in
-  writing output... [ 20%] deployment/index
-  (line   27) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/results_server/index.html#salishseamodelresultsserver
-  (line   22) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseanowcast-repo
-  (line   27) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.message_broker
-  (line   27) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.log_aggregator
-  (line   27) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.manager
-  (line   40) ok        https://en.wikipedia.org/wiki/Ceph_(software)
-  (line  103) ok        https://salishseacast.slack.com/?redir=%2Farchives%2FC011S7BCWGK
-  writing output... [ 25%] deployment/operations
-  (line   53) ok        https://salishsea.eos.ubc.ca
-  (line   53) ok        http://supervisord.org/
-  (line   32) ok        http://supervisord.org/
-  (line   65) ok        http://supervisord.org/running.html#running-supervisorctl
-  (line   75) ok        http://supervisord.org/running.html#running-supervisorctl
-  (line   32) ok        https://dd.weather.gc.ca/
-  (line   95) ok        https://dd.weather.gc.ca/
-  (line  119) ok        https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow%3Adeployment
-  (line   95) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
-  (line   95) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
-  (line   32) ok        https://github.com/MetPX/sarracenia/blob/v2_stable/doc/sr_subscribe.1.rst
-  writing output... [ 30%] deployment/optimum
-  writing output... [ 35%] deployment/orcinus
-  writing output... [ 40%] deployment/skookum_salish
-  (line  329) ok        https://salishsea.eos.ubc.ca/
-  (line  129) ok        https://salishsea.eos.ubc.ca/
-  (line  275) ok        https://github.com/SalishSeaCast/salishsea-site
-  (line  129) ok        https://github.com/SalishSeaCast/salishsea-site
-  (line  286) ok        https://github.com/SalishSeaCast/salishsea-site
-  writing output... [ 45%] figures/create_fig_module
-  (line   22) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaNowcast/index.html#salishseanowcastpackage
-  (line  334) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodestandardcopyrightheaderblock
-  (line  357) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodeautogenerateddocs
-  (line  387) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/index.html#salishseatoolspackage
-  (line  405) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodeimports
-  (line  415) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodepublicandprivate
-  (line  665) ok        https://docs.python.org/3/library/types.html#types.SimpleNamespace
-  (line  665) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodereturnsimplenamespacesfromfunctions
-  (line  538) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists
-  (line  670) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodesalishseatoolsplaces
-  (line  670) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#module-salishsea_tools.places
-  (line  757) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.visualisations.contour_thalweg
-  (line  863) ok        https://www.python.org/dev/peps/pep-0008/
-  (line   39) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
-  (line   33) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
-  (line  863) ok        https://github.com/google/yapf
-  writing output... [ 50%] figures/fig_dev_env
-  (line   34) ok        https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
-  (line   32) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
-  (line   22) ok        https://docs.conda.io/en/latest/
-  (line   54) ok        https://github.com/SalishSeaCast/SalishSeaCmd
-  (line   50) ok        https://github.com/43ravens/NEMO_Nowcast
-  (line   53) ok        https://github.com/SalishSeaCast/NEMO-Cmd
-  (line   51) ok        https://github.com/UBC-MOAD/moad_tools
-  (line   52) ok        https://github.com/SalishSeaCast/tools
-  (line   55) ok        https://github.com/SalishSeaCast/SalishSeaNowcast
-  writing output... [ 55%] figures/fig_module_tips
-  writing output... [ 60%] figures/fig_modules
-  (line   59) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.viz_tools.set_aspect
-  writing output... [ 65%] figures/index
-  (line   33) ok        https://salishsea-site.readthedocs.io
-  (line   20) ok        https://salishsea.eos.ubc.ca/nemo/results/
-  (line   33) ok        https://salishsea.eos.ubc.ca/nemo/results/
-  writing output... [ 70%] figures/make_figure_calls
-  (line  145) ok        https://docs.python.org/3/library/stdtypes.html#tuple
-  (line  117) ok        https://docs.python.org/3/library/stdtypes.html#dict
-  (line  148) ok        https://docs.python.org/3/library/stdtypes.html#dict
-  (line  132) ok        https://docs.python.org/3/library/stdtypes.html#dict
-  writing output... [ 75%] figures/site_view_fig_metadata
-  writing output... [ 80%] figures/website_theme
-  (line   38) ok        https://bootswatch.com/superhero/
-  writing output... [ 85%] index
-  (line   54) ok        https://www.westgrid.ca/
-  (line   49) ok        https://salishsea.eos.ubc.ca/erddap/index.html
-  (line   60) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/index.html#frameworkarchitecture
-  (line   22) ok        https://salishsea.eos.ubc.ca/nemo/
-  (line   60) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo-nowcastbuiltinworkers
-  (line   22) ok        https://eccc-msc.github.io/open-data/msc-data/nwp_hrdps/readme_hrdps_en/
-  (line  110) ok        http://www.apache.org/licenses/LICENSE-2.0
-  (line  106) ok        https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
-  writing output... [ 90%] pkg_development
-  (line   20) ok        https://docs.python.org/3.9/
-  (line   20) ok        https://black.readthedocs.io/en/stable/
-  (line   20) ok        https://salishsea-nowcast.readthedocs.io/en/latest/
-  (line   62) ok        https://www.python.org/
-  (line  110) ok        https://ubc-moad-tools.readthedocs.io/en/latest/index.html
-  (line   20) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast
-  (line  113) ok        https://nemo-cmd.readthedocs.io/en/latest/
-  (line  112) ok        https://gitlab.com/mdunphy/OPPTools
-  (line  114) ok        https://salishseacmd.readthedocs.io/en/latest/index.html#salishseacmdprocessor
-  (line  209) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
-  (line  209) ok        https://www.sphinx-doc.org/en/master/
-  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/issues
-  (line  475) ok        https://docs.pytest.org/en/latest/
-  (line   20) ok        https://www.apache.org/licenses/LICENSE-2.0
-  (line  525) ok        https://coverage.readthedocs.io/en/latest/
-  (line  525) ok        https://pytest-cov.readthedocs.io/en/latest/
-  (line  115) ok        https://github.com/SalishSeaCast/FVCOM-Cmd
-  (line  550) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
-  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow%3Apytest-with-coverage
-  (line  567) ok        https://docs.github.com/en/free-pro-team@latest/actions
-  (line  581) ok        https://git-scm.com/
-  (line  262) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/issues/19
-  (line   20) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
-  (line   20) ok        https://img.shields.io/badge/python-3.12-blue.svg
-  (line   20) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
-  (line   20) ok        https://img.shields.io/badge/code%20style-black-000000.svg
-  (line   20) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/master/graph/badge.svg
-  (line   20) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage/badge.svg
-  (line   20) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
-  (line  556) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions
-  (line  203) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
-  (line   20) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
-  (line  556) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/commits/master
-  (line  589) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
-  writing output... [ 95%] worker_failures
-  (line   58) ok        https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
-  (line   67) ok        https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.debug.log
-  (line   25) ok        https://www.nws.noaa.gov/mdl/etsurge/index.php?page=stn&region=wc&datum=mllw&list=&map=0-48&type=both&stn=waneah
-  (line  161) ok        https://dd.weather.gc.ca/model_hrdps/west/grib2/06/001/
-  (line  161) ok        https://dd.weather.gc.ca/model_hrdps/west/grib2/
-  (line   29) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/SSH_NeahBay.ipynb
-  (line   25) ok        https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
-  writing output... [100%] workers
-  (line   38) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/message_broker.html#messagebroker
-  (line   34) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/manager.html#systemmanager
-  (line    9) ok        https://salishsea.eos.ubc.ca/erddap/tabledap/index.html?page=1&itemsPerPage=1000
-  (line   34) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/messaging.html#messagingsystem
-  (line  362) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
-  (line  362) ok        https://docs.python.org/3/library/logging.html#logging.Logger
-  (line  362) ok        https://docs.python.org/3/library/functions.html#int
-  (line  362) ok        https://docs.python.org/3/library/stdtypes.html#str
-  (line  362) ok        https://docs.python.org/3/library/functions.html#int
-  (line  362) ok        https://docs.python.org/3/library/stdtypes.html#str
-  (line  379) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.message.Message
-  (line  362) ok        https://docs.python.org/3/library/stdtypes.html#str
-  (line  362) ok        https://docs.python.org/3/library/stdtypes.html#list
-  (line  379) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.config.Config
-  (line  379) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.config.Config
-  (line  379) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.config.Config
-  (line  379) ok        https://docs.python.org/3/library/stdtypes.html#list
-  (line  397) ok        https://docs.python.org/3/library/datetime.html#datetime.datetime
-  (line  397) ok        https://docs.python.org/3/library/datetime.html#datetime.datetime
-  (line  397) ok        https://docs.python.org/3/library/datetime.html#datetime.datetime
-  (line   33) ok        https://docs.python.org/3/library/exceptions.html#ValueError
-  (line    4) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.correct_model
-  (line  397) ok        https://docs.python.org/3/library/functions.html#float
-  (line  397) ok        https://docs.python.org/3/library/constants.html#None
-  (line  397) ok        https://docs.python.org/3/library/functions.html#float
-  (line  397) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.storm_surge_risk_level
-  (line  429) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.places.PLACES
-  (line   12) ok        https://nbviewer.org/github/SalishSeaCast/analysis-doug/blob/main/notebooks/ONC-CTD-DataToERDDAP.ipynb
-  (line    5) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestSecondNarrowsCurrent.ipynb
-  (line    1) ok        https://climate.weather.gc.ca/
-  (line    8) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopSecondNarrowsCurrent.ipynb
-  (line    9) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopTideStnWaterLevel.ipynb
-  (line   12) ok        https://www.eoas.ubc.ca/~rich/#T_Tide
-  (line    5) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
-  (line   23) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
-  (line   10) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
-  (line    6) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestTideStnWaterLevel.ipynb
-  (line    8) ok        https://salishsea.eos.ubc.ca/storm-surge/
-  (line    4) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/research/TestSurfaceCurrents.ipynb
-  (line    7) ok        https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html#creating-a-figure-module
-  (line   26) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
-  (line  545) ok        https://docs.python.org/3/library/constants.html#True
-  (line   11) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
-  (line  553) ok        https://salishsea.eos.ubc.ca/erddap/griddap/index.html?page=1&itemsPerPage=1000
-  (line    1) ok        https://www.ndbc.noaa.gov/data/realtime2/
-  (line   11) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
-  (line   13) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
-  (line    6) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
-  (line   10) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTimeSeriesPlots.ipynb
-  (line   13) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb
-  (line    9) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
+.. code-block:: text
 
-  build succeeded.
+    Removing everything under '_build'...
+    Running Sphinx v8.1.3
+    loading translations [en]... done
+    making output directory... done
+    loading intersphinx inventory 'python' from https://docs.python.org/3/objects.inv ...
+    loading intersphinx inventory 'nemonowcast' from https://nemo-nowcast.readthedocs.io/en/latest/objects.inv ...
+    loading intersphinx inventory 'salishseadocs' from https://salishsea-meopar-docs.readthedocs.io/en/latest/objects.inv ...
+    loading intersphinx inventory 'salishseatools' from https://salishsea-meopar-tools.readthedocs.io/en/latest/objects.inv ...
+    loading intersphinx inventory 'salishseasite' from https://salishsea-site.readthedocs.io/objects.inv ...
+    loading intersphinx inventory 'salishseacmd' from https://salishseacmd.readthedocs.io/en/latest/objects.inv ...
+    building [mo]: targets for 0 po files that are out of date
+    writing output...
+    building [linkcheck]: targets for 20 source files that are out of date
+    updating environment: [new config] 20 added, 0 changed, 0 removed
+    reading sources... [100%] workers
+    looking for now-outdated files... none found
+    pickling environment... done
+    checking consistency... done
+    preparing documents... done
+    copying assets...
+    copying assets: done
+    writing output... [100%] workers
 
-  Look for any errors in the above output or in _build/linkcheck/output.txt
+    (deployment/arbutus_cloud: line  679) -ignored- https://polar.ncep.noaa.gov/waves/wavewatch/distribution/
+    (deployment/arbutus_cloud: line  764) -ignored- https://gitlab.com/mdunphy/FVCOM41
+    (figures/fig_dev_env: line   59) -ignored- https://github.com/SalishSeaCast/tidal-predictions
+    (deployment/operations: line   35) ok        http://supervisord.org/
+    (deployment/operations: line   68) ok        http://supervisord.org/running.html#running-supervisorctl
+    (deployment/arbutus_cloud: line   34) redirect  https://arbutus.cloud.computecanada.ca/ - with Found to https://arbutus.cloud.computecanada.ca/auth/login/?next=/
+    (deployment/arbutus_cloud: line   39) ok        https://ccdb.alliancecan.ca/security/login
+    (           index: line   60) ok        https://alliancecan.ca/en
+    ( pkg_development: line   23) ok        https://app.codecov.io/gh/SalishSeaCast/SalishSeaNowcast
+    (figures/create_fig_module: line  870) ok        https://black.readthedocs.io/en/stable/
+    (           index: line   60) ok        https://arc.ubc.ca/
+    (deployment/arbutus_cloud: line   49) ok        https://docs.alliancecan.ca/wiki/Cloud_Quick_Start
+    ( pkg_development: line  637) ok        https://coverage.readthedocs.io/en/latest/
+    (figures/website_theme: line   41) ok        https://bootswatch.com/superhero/
+    ( pkg_development: line   29) ok        https://codecov.io/gh/SalishSeaCast/SalishSeaNowcast/branch/main/graph/badge.svg
+    (figures/fig_dev_env: line   25) ok        https://docs.conda.io/en/latest/
+    (deployment/arbutus_cloud: line  781) ok        https://docs.conda.io/en/latest/miniconda.html
+    (deployment/operations: line   35) ok        https://dd.weather.gc.ca/
+    ( pkg_development: line  679) ok        https://docs.github.com/en/actions
+    (deployment/arbutus_cloud: line   25) ok        https://docs.alliancecan.ca/wiki/Cloud_resources#Arbutus_cloud
+    (deployment/skookum: line  415) redirect  https://ccdb.computecanada.ca/ssh_authorized_keys - with Found to https://ccdb.alliancecan.ca/security/login
+    (deployment/arbutus_cloud: line   49) ok        https://docs.openstack.org/queens/user/
+    ( pkg_development: line  545) ok        https://docs.pytest.org/en/latest/
+    (deployment/arbutus_cloud: line   34) ok        https://docs.openstack.org/horizon/stein/user/
+    ( pkg_development: line   23) ok        https://docs.python.org/3.12/
+    (         workers: line  594) ok        https://docs.python.org/3/library/constants.html#True
+    (         workers: line  446) ok        https://docs.python.org/3/library/constants.html#None
+    (         workers: line   32) ok        https://docs.python.org/3/library/exceptions.html#ValueError
+    (         workers: line  446) ok        https://docs.python.org/3/library/datetime.html#datetime.datetime
+    (         workers: line    3) ok        https://docs.python.org/3/library/logging.handlers.html#logging.handlers.RotatingFileHandler
+    (         workers: line  446) ok        https://docs.python.org/3/library/functions.html#float
+    (         workers: line    3) ok        https://docs.python.org/3/library/logging.handlers.html#logging.handlers.RotatingFileHandler.doRollover
+    (         workers: line  404) ok        https://docs.python.org/3/library/functions.html#int
+    (         workers: line  404) ok        https://docs.python.org/3/library/logging.html#logging.Logger
+    (         workers: line  404) ok        https://docs.python.org/3/library/pathlib.html#pathlib.Path
+    (         workers: line  404) ok        https://docs.python.org/3/library/stdtypes.html#list
+    (         workers: line  404) ok        https://docs.python.org/3/library/stdtypes.html#str
+    (figures/make_figure_calls: line  120) ok        https://docs.python.org/3/library/stdtypes.html#dict
+    (figures/create_fig_module: line  673) ok        https://docs.python.org/3/library/types.html#types.SimpleNamespace
+    (figures/make_figure_calls: line  148) ok        https://docs.python.org/3/library/stdtypes.html#tuple
+    (figures/fig_dev_env: line   37) ok        https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
+    (figures/fig_dev_env: line   35) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
+    (           index: line   25) ok        https://eccc-msc.github.io/open-data/msc-data/nwp_hrdps/readme_hrdps_en/
+    (deployment/index: line   35) ok        https://en.wikipedia.org/wiki/Ceph_(software)
+    ( pkg_development: line  693) ok        https://git-scm.com/
+    (figures/fig_dev_env: line   53) ok        https://github.com/43ravens/NEMO_Nowcast
+    (deployment/operations: line   35) ok        https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
+    (figures/fig_dev_env: line   56) ok        https://github.com/SalishSeaCast/NEMO-Cmd
+    (         workers: line    1) ok        https://climate.weather.gc.ca/
+    ( pkg_development: line  132) ok        https://github.com/SalishSeaCast/FVCOM-Cmd
+    ( pkg_development: line   26) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage.yaml/badge.svg
+    (figures/fig_dev_env: line   58) ok        https://github.com/SalishSeaCast/SalishSeaNowcast
+    (figures/fig_dev_env: line   57) ok        https://github.com/SalishSeaCast/SalishSeaCmd
+    ( pkg_development: line   32) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/codeql-analysis.yaml/badge.svg
+    ( pkg_development: line  668) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions
+    ( pkg_development: line   39) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/sphinx-linkcheck.yaml/badge.svg
+    ( pkg_development: line  668) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/commits/main
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/issues
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CodeQL
+    (           index: line  115) ok        https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:sphinx-linkcheck
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:pytest-with-coverage
+    (deployment/skookum: line   99) ok        https://github.com/SalishSeaCast/salishsea-site
+    ( pkg_development: line   23) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/releases
+    (figures/fig_dev_env: line   55) ok        https://github.com/SalishSeaCast/tools
+    (figures/fig_dev_env: line   54) ok        https://github.com/UBC-MOAD/moad_tools
+    (deployment/skookum: line   58) ok        https://github.com/conda-forge/miniforge
+    ( pkg_development: line   23) ok        https://github.com/pypa/hatch
+    ( pkg_development: line   65) ok        https://img.shields.io/badge/%F0%9F%A5%9A-Hatch-4051b5.svg
+    ( pkg_development: line   53) ok        https://img.shields.io/badge/license-Apache%202-cb2533.svg
+    ( pkg_development: line   59) ok        https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+    ( pkg_development: line   62) ok        https://img.shields.io/badge/code%20style-black-000000.svg
+    ( pkg_development: line   56) ok        https://img.shields.io/badge/version%20control-git-blue.svg?logo=github
+    ( pkg_development: line   49) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
+    ( pkg_development: line   43) ok        https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaNowcast?logo=github
+    ( pkg_development: line   46) ok        https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaNowcast/main/pyproject.toml&logo=Python&logoColor=gold&label=Python
+    ( pkg_development: line  129) ok        https://gitlab.com/mdunphy/OPPTools
+    (         workers: line   10) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
+    (         workers: line    5) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
+    (         workers: line    9) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopTideStnWaterLevel.ipynb
+    (         workers: line    5) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestSecondNarrowsCurrent.ipynb
+    (deployment/operations: line  122) ok        https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow:deployment
+    (         workers: line    6) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestTideStnWaterLevel.ipynb
+    (         workers: line    4) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/research/TestSurfaceCurrents.ipynb
+    (         workers: line   23) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
+    (         workers: line    8) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopSecondNarrowsCurrent.ipynb
+    (         workers: line   11) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
+    (         workers: line   11) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
+    (         workers: line   13) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
+    (         workers: line   13) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTimeSeriesPlots.ipynb
+    (figures/create_fig_module: line   36) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/DevelopTracerThalwegAndSurfaceModule.ipynb
+    (         workers: line   26) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
+    (figures/create_fig_module: line   42) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb
+    (         workers: line   10) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTimeSeriesPlots.ipynb
+    (         workers: line    9) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
+    (         workers: line    6) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/TestWaveHeightPeriod.ipynb
+    (         workers: line   12) ok        https://nbviewer.org/github/SalishSeaCast/analysis-doug/blob/main/notebooks/ONC-CTD-DataToERDDAP.ipynb
+    (creating_workers: line   25) ok        https://nemo-nowcast.readthedocs.io/en/latest/
+    (deployment/index: line   30) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.manager
+    (deployment/index: line   30) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.log_aggregator
+    ( pkg_development: line  130) ok        https://nemo-cmd.readthedocs.io/en/latest/
+    (deployment/index: line   30) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#module-nemo_nowcast.message_broker
+    (         workers: line  428) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.config.Config
+    (deployment/arbutus_cloud: line  428) ok        https://help.ubuntu.com/community/SettingUpNFSHowTo
+    (           index: line   69) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo-nowcastbuiltinworkers
+    (         workers: line  428) ok        https://nemo-nowcast.readthedocs.io/en/latest/api.html#nemo_nowcast.message.Message
+    (           index: line   69) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/index.html#frameworkarchitecture
+    (         workers: line   41) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/message_broker.html#messagebroker
+    (         workers: line   37) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/manager.html#systemmanager
+    (         workers: line   37) ok        https://nemo-nowcast.readthedocs.io/en/latest/architecture/messaging.html#messagingsystem
+    (creating_workers: line   25) ok        https://nemo-nowcast.readthedocs.io/en/latest/nowcast_system/workers.html#creatingnowcastworkermodules
+    ( worker_failures: line   28) ok        https://nomads.ncep.noaa.gov/pub/data/nccf/com/petss/prod/
+    (figures/create_fig_module: line  870) ok        https://peps.python.org/pep-0008/
+    ( pkg_development: line  637) ok        https://pytest-cov.readthedocs.io/en/latest/
+    (deployment/arbutus_cloud: line  693) ok        https://polar.ncep.noaa.gov/waves/wavewatch/manual.v5.16.pdf
+    (deployment/arbutus_cloud: line  679) ok        https://polar.ncep.noaa.gov/waves/wavewatch/license.shtml
+    ( pkg_development: line   23) ok        https://pre-commit.com
+    (deployment/index: line   25) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/repos_organization.html#salishseanowcast-repo
+    ( pkg_development: line  200) ok        https://pre-commit.com/
+    ( pkg_development: line  127) ok        https://reshapr.readthedocs.io/en/latest/index.html
+    (deployment/index: line   30) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/results_server/index.html#salishseamodelresultsserver
+    (figures/create_fig_module: line   25) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaNowcast/index.html#salishseanowcastpackage
+    ( pkg_development: line   36) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
+    (figures/create_fig_module: line  678) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#module-salishsea_tools.places
+    (         workers: line    4) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.correct_model
+    (         workers: line  478) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.places.PLACES
+    (         workers: line  446) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.storm_surge_risk_level
+    (figures/create_fig_module: line  764) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.visualisations.contour_thalweg
+    (figures/create_fig_module: line  365) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodeautogenerateddocs
+    (figures/create_fig_module: line  395) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/index.html#salishseatoolspackage
+    (figures/fig_modules: line   62) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.viz_tools.set_aspect
+    (figures/create_fig_module: line  413) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodeimports
+    (figures/create_fig_module: line  673) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodereturnsimplenamespacesfromfunctions
+    (figures/create_fig_module: line  423) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodepublicandprivate
+    (figures/create_fig_module: line  340) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodestandardcopyrightheaderblock
+    (figures/create_fig_module: line  678) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/python_packaging/library_code.html#librarycodesalishseatoolsplaces
+    ( pkg_development: line   23) ok        https://salishsea-nowcast.readthedocs.io/en/latest/
+    (figures/site_view_fig_metadata: line   45) ok        https://salishsea-site.readthedocs.io
+    (         workers: line    7) ok        https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html#creating-a-figure-module
+    (   figures/index: line   36) ok        https://salishsea-site.readthedocs.io/
+    (deployment/operations: line   56) ok        https://salishsea.eos.ubc.ca
+    (           index: line   25) ok        https://salishsea.eos.ubc.ca/nemo/
+    (deployment/skookum: line   99) ok        https://salishsea.eos.ubc.ca/
+    (         workers: line  602) ok        https://salishsea.eos.ubc.ca/erddap/griddap/index.html?page=1&itemsPerPage=1000
+    ( worker_failures: line   52) ok        https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.debug.log
+    (           index: line   55) ok        https://salishsea.eos.ubc.ca/erddap/index.html
+    (         workers: line    9) ok        https://salishsea.eos.ubc.ca/erddap/tabledap/index.html?page=1&itemsPerPage=1000
+    ( worker_failures: line   52) ok        https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
+    (         workers: line    8) ok        https://salishsea.eos.ubc.ca/storm-surge/
+    (   figures/index: line   23) ok        https://salishsea.eos.ubc.ca/nemo/results/
+    ( pkg_development: line  131) ok        https://salishseacmd.readthedocs.io/en/latest/index.html#salishseacmdprocessor
+    ( pkg_development: line  126) ok        https://ubc-moad-tools.readthedocs.io/en/latest/index.html
+    (           index: line  120) ok        https://www.apache.org/licenses/LICENSE-2.0
+    (deployment/arbutus_cloud: line   25) ok        https://www.oceannetworks.ca/
+    (         workers: line   12) redirect  https://www.eoas.ubc.ca/~rich/#T_Tide - temporarily to https://www-old.eoas.ubc.ca/~rich/
+    (deployment/index: line   98) ok        https://salishseacast.slack.com/?redir=%2Farchives%2FC011S7BCWGK
+    ( worker_failures: line   28) ok        https://tidesandcurrents.noaa.gov/waterlevels.html?id=9443090
+    ( pkg_development: line   86) ok        https://www.python.org/
+    ( pkg_development: line  233) ok        https://www.sphinx-doc.org/en/master/
+    (deployment/arbutus_cloud: line   25) ok        https://www.openstack.org/
+    ( pkg_development: line  233) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+    (figures/create_fig_module: line  546) ok        https://www.sphinx-doc.org/en/master/usage/restructuredtext/domains.html#info-field-lists
+    (         workers: line    1) ok        https://www.ndbc.noaa.gov/data/realtime2/
+    build succeeded.
+
+    Look for any errors in the above output or in _build/linkcheck/output.txt
 
 :command:`make linkcheck` is run monthly via a `scheduled GitHub Actions workflow`_
 
@@ -542,83 +532,96 @@ use:
     (salishsea-nowcast)$ pytest
 
 to run the test suite.
-The output looks something like::
+The output looks something like:
 
-  ============================ test session starts ============================
-  platform linux -- Python 3.9.2, pytest-6.2.3, py-1.10.0, pluggy-0.13.1
-  Using --randomly-seed=1204534893
-  rootdir: /media/doug/warehouse/MEOPAR/SalishSeaNowcast
-  plugins: randomly-3.7.0, xdist-2.2.1, forked-1.3.0
-  collected 2063 items
+.. code-block:: text
 
-  tests/workers/test_make_fvcom_atmos_forcing.py .....................................
-  tests/workers/test_upload_fvcom_atmos_forcing.py ..............................
-  tests/workers/test_get_onc_ctd.py ...........
-  tests/test_residuals.py ...
-  tests/workers/test_upload_forcing.py ...............................................
-  ..........................
-  tests/workers/test_make_surface_current_tiles.py .............................
-  tests/workers/test_ping_erddap.py .................................
-  tests/workers/test_run_NEMO_hindcast.py ............................................
-  ....................................................................................
-  ................
-  tests/workers/test_collect_river_data.py ............
-  tests/workers/test_watch_NEMO.py ...................................................
-  .............................................
-  tests/workers/test_run_NEMO_agrif.py .................
-  tests/workers/test_get_onc_ferry.py .............
-  tests/workers/test_split_results.py .............
-  tests/workers/test_run_NEMO.py .....................................................
-  ....................................................................................
-  .................
-  tests/workers/test_grib_to_netcdf.py ..................
-  tests/workers/test_make_fvcom_rivers_forcing.py ....................................
-  tests/workers/test_run_fvcom.py ....................................................
-  ................
-  tests/workers/test_download_live_ocean.py ..........
-  tests/workers/test_download_results.py .............................................
-  .............................
-  tests/workers/test_make_runoff_file.py ...........
-  tests/workers/test_make_turbidity_file.py ......
-  tests/workers/test_make_ssh_file.py .................
-  tests/test_config.py .............
-  tests/workers/test_update_forecast_datasets.py .....................................
-  ..............................
-  tests/workers/test_make_CHS_currents_file.py .............................
-  tests/workers/test_make_forcing_links.py ...........................................
-  ..............................
-  tests/workers/test_download_wwatch3_results.py ............
-  tests/workers/test_watch_fvcom.py ...............................
-  tests/test_next_workers.py .........................................................
-  ....................................................................................
-  ....................................................................................
-  ....................................................................................
-  ..........................................
-  tests/release_mgmt/test_tag_release.py .........
-  tests/workers/test_run_ww3.py ......................................................
-  ..............
-  tests/workers/test_download_weather.py .............................................
-  .....................
-  tests/workers/test_make_feeds.py .....................
-  tests/test_analyze.py .................
-  tests/workers/test_make_fvcom_boundary.py .....................................
-  tests/workers/test_watch_NEMO_hindcast.py ..........................................
-  .....................
-  tests/workers/test_collect_weather.py ..............................................
-  .......
-  tests/workers/test_download_fvcom_results.py .............................
-  tests/workers/test_collect_NeahBay_ssh.py ...................
-  tests/workers/test_make_live_ocean_files.py ...........
-  tests/workers/test_watch_ww3.py ................
-  tests/workers/test_make_ww3_current_file.py .................................
-  tests/workers/test_make_plots.py ...................................................
-  .............
-  tests/workers/test_get_vfpa_hadcp.py ...............
-  tests/workers/test_watch_NEMO_agrif.py ....................
-  tests/workers/test_launch_remote_worker.py ...............
-  tests/workers/test_make_ww3_wind_file.py ..........................
+    ================================ test session starts ================================
+    platform linux -- Python 3.12.7, pytest-8.3.3, pluggy-1.5.0
+    Using --randomly-seed=3033986199
+    rootdir: /media/doug/warehouse/MEOPAR/SalishSeaNowcast
+    configfile: pyproject.toml
+    plugins: httpx-0.32.0, randomly-3.15.0, cov-6.0.0, anyio-4.6.2.post1, xdist-3.6.1
+    collected 2372 items
 
-  ===================== 2063 passed in 95.74s (0:01:35) ======================
+    tests/workers/test_make_live_ocean_files.py .........                          [  0%]
+    tests/workers/test_run_ww3.py .......................................................
+    ..............                                                                 [  3%]
+    tests/test_next_workers.py ..........................................................
+    .....................................................................................
+    .....................................................................................
+    .....................................................................................
+    ..................................................................             [ 19%]
+    tests/workers/test_watch_NEMO.py ....................................................
+    ............................                                                   [ 22%]
+    tests/workers/test_collect_weather.py ...............................................
+    ......                                                                         [ 24%]
+    tests/workers/test_run_NEMO_agrif.py .................                         [ 25%]
+    tests/workers/test_make_plots.py ....................................................
+    .............................................                                  [ 29%]
+    tests/workers/test_upload_fvcom_atmos_forcing.py ............................  [ 30%]
+    tests/workers/test_make_feeds.py .....................                         [ 31%]
+    tests/workers/test_get_onc_ferry.py ................................           [ 33%]
+    tests/workers/test_watch_ww3.py ..................                             [ 33%]
+    tests/workers/test_make_fvcom_rivers_forcing.py ..............................
+    ....                                                                           [ 35%]
+    tests/test_daily_river_flows.py ......................................         [ 36%]
+    tests/workers/test_make_v202111_runoff_file.py ......................................
+    ........................                                                       [ 39%]
+    tests/workers/test_collect_NeahBay_ssh.py ...................                  [ 40%]
+    tests/workers/test_make_fvcom_atmos_forcing.py ...............................
+    ....                                                                           [ 41%]
+    tests/workers/test_download_fvcom_results.py ...........................       [ 42%]
+    tests/workers/test_upload_forcing.py .........................................
+    ...............................                                                [ 45%]
+    tests/workers/test_launch_remote_worker.py ...............                     [ 46%]
+    tests/test_analyze.py .................                                        [ 47%]
+    tests/workers/test_watch_fvcom.py .............................                [ 48%]
+    tests/workers/test_watch_NEMO_agrif.py ....................                    [ 49%]
+    tests/workers/test_make_surface_current_tiles.py ...........................   [ 50%]
+    tests/workers/test_make_averaged_dataset.py ..................................
+    ........                                                                       [ 52%]
+    tests/workers/test_make_ssh_file.py .................                          [ 52%]
+    tests/workers/test_get_onc_ctd.py ............                                 [ 53%]
+    tests/workers/test_split_results.py .............                              [ 54%]
+    tests/workers/test_run_NEMO_hindcast.py .............................................
+    .....................................................................................
+    ..............                                                                 [ 60%]
+    tests/workers/test_rotate_hindcast_logs.py ..........                          [ 60%]
+    tests/workers/test_make_fvcom_boundary.py ...................................  [ 62%]
+    tests/workers/test_make_forcing_links.py ............................................
+    ..................                                                             [ 64%]
+    tests/workers/test_ping_erddap.py ..........................................   [ 66%]
+    tests/workers/test_get_vfpa_hadcp.py ..............                            [ 66%]
+    tests/workers/test_grib_to_netcdf.py ................................................
+    .............                                                                  [ 69%]
+    tests/workers/test_download_live_ocean.py .........                            [ 69%]
+    tests/test_residuals.py ...                                                    [ 70%]
+    tests/workers/test_make_turbidity_file.py ......                               [ 70%]
+    tests/workers/test_make_ww3_current_file.py .................................  [ 71%]
+    tests/release_mgmt/test_tag_release.py .........                               [ 72%]
+    tests/workers/test_download_results.py ..............................................
+    .........................                                                      [ 75%]
+    tests/workers/test_watch_NEMO_hindcast.py ...........................................
+    ....................                                                           [ 77%]
+    tests/workers/test_make_runoff_file.py ............                            [ 78%]
+    tests/workers/test_crop_gribs.py ..............................................[ 80%]
+    tests/test_config.py ..............................                            [ 81%]
+    tests/workers/test_download_weather.py ..............................................
+    ......                                                                         [ 83%]
+    tests/workers/test_archive_tarball.py ........................                 [ 84%]
+    tests/workers/test_make_ww3_wind_file.py ..........................            [ 85%]
+    tests/workers/test_collect_river_data.py ...........................           [ 86%]
+    tests/workers/test_run_NEMO.py ......................................................
+    .............................................................................. [ 92%]
+    tests/workers/test_make_CHS_currents_file.py ........................          [ 93%]
+    tests/workers/test_run_fvcom.py .....................................................
+    .............                                                                  [ 96%]
+    tests/workers/test_update_forecast_datasets.py ......................................
+    .....................................                                          [ 99%]
+    tests/workers/test_download_wwatch3_results.py ............                    [100%]
+
+    =============================== 2372 passed in 41.82s ================================
 
 You can monitor what lines of code the test suite exercises using the `coverage.py`_ and `pytest-cov`_ tools with the command:
 
