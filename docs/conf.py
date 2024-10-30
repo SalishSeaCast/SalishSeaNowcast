@@ -62,9 +62,10 @@ intersphinx_mapping = {
 }
 
 linkcheck_ignore = [
-    # Private GitHub and GitLab repositories that linkcheck will ignore
+    # Private GitHub and GitLab repositories and pages that linkcheck will ignore
     "https://github.com/SalishSeaCast/tidal-predictions",
     "https://gitlab.com/mdunphy/FVCOM41",
+    "https://polar.ncep.noaa.gov/waves/wavewatch/distribution/",
 ]
 
 todo_include_todos = True
@@ -112,10 +113,9 @@ autodoc_mock_imports = [
 templates_path = ["_templates"]
 
 # The suffix(es) of source filenames.
-# You can specify multiple suffix as a list of string:
-#
-# source_suffix = ['.rst', '.md']
-source_suffix = ".rst"
+# You can specify multiple suffix as a dictionary mapping the file extensions (suffixes)
+# of source files to their file types:
+source_suffix = {".rst": "restructuredtext"}
 
 # The master toctree document.
 master_doc = "index"
