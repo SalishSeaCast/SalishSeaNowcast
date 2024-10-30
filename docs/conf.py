@@ -62,9 +62,10 @@ intersphinx_mapping = {
 }
 
 linkcheck_ignore = [
-    # Private GitHub and GitLab repositories that linkcheck will ignore
+    # Private GitHub and GitLab repositories and pages that linkcheck will ignore
     "https://github.com/SalishSeaCast/tidal-predictions",
     "https://gitlab.com/mdunphy/FVCOM41",
+    "https://polar.ncep.noaa.gov/waves/wavewatch/distribution/",
 ]
 
 todo_include_todos = True

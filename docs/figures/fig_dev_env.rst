@@ -27,7 +27,7 @@ The environment will have both the ``SalishSeaNowcast`` nowcast system package,
 and the ``salishsea-site`` web site app package installed in it,
 along with all of their dependencies.
 
-.. _Conda: https://conda.io/en/latest/
+.. _Conda: https://docs.conda.io/en/latest/
 
 The ``SalishSeaNowcast`` and ``salishsea-site`` packages use some Python language features that are not available in versions prior to Python 3.6,
 in particular:

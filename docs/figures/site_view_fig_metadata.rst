@@ -143,7 +143,7 @@ Automatic Code Formatting
 The :kbd:`salishsea_site` package uses the`black`_ code formatting tool to maintain a coding style that is very close to `PEP 8`_.
 
 .. _black: https://black.readthedocs.io/en/stable/
-.. _PEP 8: https://www.python.org/dev/peps/pep-0008/
+.. _PEP 8: https://peps.python.org/pep-0008/
 
 :command:`black` is installed as part of the :ref:`NowcastFiguresDevEnv` setup.
 

@@ -117,7 +117,7 @@ you can create and activate an environment called ``salishsea-nowcast`` that wil
 testing,
 and building the documentation with the commands below.
 
-.. _Conda: https://conda.io/en/latest/
+.. _Conda: https://docs.conda.io/en/latest/
 .. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
 
 ``SalishSeaNowcast`` depends on a collection of other Python packages developed by the SalishSeaCast project and friends:
@@ -227,7 +227,7 @@ Building the Documentation
 ==========================
 
 .. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
-    :target: https://salishsea-nowcast.readthedocs.io
+    :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status
 
 The documentation for the ``SalishSeaNowcast`` package is written in `reStructuredText`_ and converted to HTML using `Sphinx`_.
@@ -387,7 +387,7 @@ The output looks something like::
   writing output... [ 50%] figures/fig_dev_env
   (line   34) ok        https://docs.python.org/3/whatsnew/3.6.html#whatsnew36-pep519
   (line   32) ok        https://docs.python.org/3/reference/lexical_analysis.html#f-strings
-  (line   22) ok        https://conda.io/en/latest/
+  (line   22) ok        https://docs.conda.io/en/latest/
   (line   54) ok        https://github.com/SalishSeaCast/SalishSeaCmd
   (line   50) ok        https://github.com/43ravens/NEMO_Nowcast
   (line   53) ok        https://github.com/SalishSeaCast/NEMO-Cmd
