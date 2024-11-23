@@ -203,7 +203,7 @@ tomli==2.0.2
 tomli_w==1.1.0
 tomlkit==0.13.2
 toolz==1.0.0
-tornado==6.4.1
+tornado==6.4.2
 tqdm==4.66.6
 trove-classifiers==2024.10.21.16
 types-python-dateutil==2.9.0.20241003
