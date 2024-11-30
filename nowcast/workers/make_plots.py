@@ -1021,7 +1021,7 @@ def _render_figures(
         try:
             fig = _calc_figure(fig_func, args, kwargs)
         except (FileNotFoundError, IndexError, KeyError, TypeError):
-            # **IMPORTANT**: the collection of exception above must match those
+            # **IMPORTANT**: the collection of exceptions above must match those
             # handled in the _calc_figure() function
             continue
         if test_figure:
