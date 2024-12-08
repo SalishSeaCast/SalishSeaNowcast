@@ -140,7 +140,7 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "robot.graham",
+            # "robot.graham",
             "optimum-hindcast",
         ]
 
@@ -150,9 +150,9 @@ class TestConfig:
                 ssh_key = prod_config["run"]["enabled hosts"][host]["ssh key"]
                 assert ssh_key == "SalishSeaNEMO-nowcast_id_rsa"
 
-    def test_robot_graham_ssh_key(self, prod_config):
-        ssh_key = prod_config["run"]["enabled hosts"]["robot.graham"]["ssh key"]
-        assert ssh_key == "SalishSeaCast_robot.graham_ed25519"
+    # def test_robot_graham_ssh_key(self, prod_config):
+    #     ssh_key = prod_config["run"]["enabled hosts"]["robot.graham"]["ssh key"]
+    #     assert ssh_key == "SalishSeaCast_robot.graham_ed25519"
 
     @pytest.mark.parametrize(
         "host, ssh_key",
@@ -163,7 +163,7 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/sshNeahBay/"),
-            ("robot.graham", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
+            # ("robot.graham", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
     def test_ssh_uploads(self, host, ssh_key, prod_config):
@@ -180,10 +180,10 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/rivers/river_turb/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/river_turb/"),
-            (
-                "robot.graham",
-                "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
-            ),
+            # (
+            #     "robot.graham",
+            #     "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
+            # ),
         ),
     )
     def test_fraser_turbidity_uploads(self, host, expected, prod_config):
@@ -199,7 +199,7 @@ class TestConfig:
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
-            ("robot.graham", "/project/def-allen/SalishSea/forcing/rivers/"),
+            # ("robot.graham", "/project/def-allen/SalishSea/forcing/rivers/"),
         ),
     )
     def test_river_runoff_uploads(self, host, expected, prod_config):
@@ -219,10 +219,10 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/continental2.5/NEMO-atmos/"),
-            (
-                "robot.graham",
-                "/project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
-            ),
+            # (
+            #     "robot.graham",
+            #     "/project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
+            # ),
         ),
     )
     def test_weather_uploads(self, host, expected, prod_config):
@@ -244,7 +244,7 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",
             ),
             ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/LiveOcean/"),
-            ("robot.graham", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
+            # ("robot.graham", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
         ),
     )
     def test_live_ocean_uploads(self, host, expected, prod_config):

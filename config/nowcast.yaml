@@ -707,19 +707,19 @@ run:
         Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
         weather dir: /home/sallen/MEOPAR/continental2.5/NEMO-atmos/
 
-    robot.graham:
-      ssh key: SalishSeaCast_robot.graham_ed25519
-      shared storage: False
-      make forcing links: False
-      # Empty collection of run types because all we want to do is upload daily forcing
-      # files
-      run types: {}
-      forcing:
-        ssh dir: /project/def-allen/SalishSea/forcing/sshNeahBay/
-        bc dir: /project/def-allen/SalishSea/forcing/LiveOcean/
-        rivers dir: /project/def-allen/SalishSea/forcing/rivers/
-        Fraser turbidity dir: /project/def-allen/SalishSea/forcing/rivers/river_turb/
-        weather dir: /project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/
+#    robot.graham:
+#      ssh key: SalishSeaCast_robot.graham_ed25519
+#      shared storage: False
+#      make forcing links: False
+#      # Empty collection of run types because all we want to do is upload daily forcing
+#      # files
+#      run types: {}
+#      forcing:
+#        ssh dir: /project/def-allen/SalishSea/forcing/sshNeahBay/
+#        bc dir: /project/def-allen/SalishSea/forcing/LiveOcean/
+#        rivers dir: /project/def-allen/SalishSea/forcing/rivers/
+#        Fraser turbidity dir: /project/def-allen/SalishSea/forcing/rivers/river_turb/
+#        weather dir: /project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/
 
     optimum-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa
