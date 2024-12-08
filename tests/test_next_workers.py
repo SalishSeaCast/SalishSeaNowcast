@@ -2137,24 +2137,24 @@ class TestAfterDownloadResults:
         )
         assert archive_tarball not in workers
 
-    def test_success_nowcast_green_monthend_launch_archive_tarball(
-        self, config, checklist
-    ):
-        workers = next_workers.after_download_results(
-            Message(
-                "download_results",
-                "success nowcast-green",
-                payload={"nowcast-green": {"run date": "2022-05-31"}},
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.archive_tarball",
-            args=["nowcast-green", "2022-may", "robot.graham"],
-            host="localhost",
-        )
-        assert expected in workers
+    # def test_success_nowcast_green_monthend_launch_archive_tarball(
+    #     self, config, checklist
+    # ):
+    #     workers = next_workers.after_download_results(
+    #         Message(
+    #             "download_results",
+    #             "success nowcast-green",
+    #             payload={"nowcast-green": {"run date": "2022-05-31"}},
+    #         ),
+    #         config,
+    #         checklist,
+    #     )
+    #     expected = NextWorker(
+    #         "nowcast.workers.archive_tarball",
+    #         args=["nowcast-green", "2022-may", "robot.graham"],
+    #         host="localhost",
+    #     )
+    #     assert expected in workers
 
     @pytest.mark.parametrize(
         "run_type, run_date",

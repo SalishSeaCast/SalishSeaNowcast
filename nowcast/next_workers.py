@@ -1517,14 +1517,14 @@ def after_download_results(msg, config, checklist):
                             args=["day", var_group, "--run-date", run_date],
                         )
                     )
-                if arrow.get(run_date).shift(days=+1).day == 1:
-                    yyyymmm = arrow.get(run_date).format("YYYY-MMM").lower()
-                    next_workers[msg.type].append(
-                        NextWorker(
-                            "nowcast.workers.archive_tarball",
-                            args=["nowcast-green", yyyymmm, "robot.graham"],
-                        )
-                    )
+                # if arrow.get(run_date).shift(days=+1).day == 1:
+                #     yyyymmm = arrow.get(run_date).format("YYYY-MMM").lower()
+                #     next_workers[msg.type].append(
+                #         NextWorker(
+                #             "nowcast.workers.archive_tarball",
+                #             args=["nowcast-green", yyyymmm, "robot.graham"],
+                #         )
+                #     )
                 return next_workers[msg.type]
         if run_type.startswith("forecast"):
             next_workers[msg.type].append(
