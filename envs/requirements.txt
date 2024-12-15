@@ -38,10 +38,10 @@ colorama==0.4.6
 coloredlogs==15.0.1
 colorspacious==1.1.2
 contourpy==1.3.1
-coverage==7.6.8
+coverage==7.6.9
 cryptography==44.0.0
 cycler==0.12.1
-cytoolz==1.0.0
+cytoolz==1.0.1
 dask==2024.12.0
 dask-expr==1.1.20
 distlib==0.3.9
@@ -57,7 +57,7 @@ feedgen==1.0.0
 filelock==3.16.1
 findlibs==0.0.5
 flox==0.9.15
-fonttools==4.55.2
+fonttools==4.55.3
 fsspec==2024.10.0
 future==1.0.0
 FVCOM-Cmd==0.1
@@ -85,7 +85,7 @@ iniconfig==2.0.0
 isodate==0.7.2
 jaraco.classes==3.4.0
 jaraco.context==6.0.1
-jaraco.functools==4.0.0
+jaraco.functools==4.1.0
 jeepney==0.8.0
 Jinja2==3.1.4
 keyring==25.5.0
@@ -96,7 +96,7 @@ lz4==4.3.3
 Mako==1.3.8
 markdown-it-py==3.0.0
 MarkupSafe==3.0.2
-matplotlib==3.9.3
+matplotlib==3.9.4
 mdurl==0.1.2
 moad_tools==24.0.dev0
 more-itertools==10.5.0
@@ -108,7 +108,7 @@ NEMO-Cmd==24.2.dev0
 NEMO_Nowcast==25.1.dev0
 netCDF4==1.7.2
 nodeenv==1.9.1
-numpy==2.1.3
+numpy==2.2.0
 numpy-groupies==0.11.2
 numpy-indexed==0.3.7
 openpyxl==3.1.5
@@ -138,7 +138,7 @@ pypdf==5.1.0
 pyperclip==1.9.0
 pyproj==3.7.0
 pyshp==2.3.1
-PySide6==6.8.0.2
+PySide6==6.8.1
 PySocks==1.7.1
 pytest==8.3.4
 pytest-cov==6.0.0
@@ -158,7 +158,7 @@ retrying==1.3.3
 rich==13.9.4
 SalishSeaCmd==24.2.dev0
 SalishSeaNowcast==24.2.dev0
-SalishSeaTools==2.0
+SalishSeaTools==24.1.dev0
 schedule==1.2.2
 scipy==1.14.1
 scour==0.38.2
@@ -167,7 +167,7 @@ sentry-sdk==2.19.2
 setuptools==75.6.0
 shapely==2.0.6
 shellingham==1.5.4
-shiboken6==6.8.0.2
+shiboken6==6.8.1
 six==1.17.0
 smmap==5.0.0
 sniffio==1.3.1
