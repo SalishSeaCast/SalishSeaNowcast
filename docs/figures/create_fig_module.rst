@@ -25,7 +25,7 @@ Creating a Figure Module
 This section discusses the elements of a :py:obj:`nowcast.figures` module.
 We'll use :py:mod:`nowcast.figures.research.tracer_thalweg_and_surface` as the basis of the example.
 The example focuses on the structure of the module and the functions it contains,
-as well as the interfaces between those and the rest of the :ref:`SalishSeaNowcastPackage`.
+as well as the interfaces between those and the rest of the ``SalishSeaNowcastPackage``.
 
 There are some very strong opinions in this section about what function names to use,
 and how to break the code that creates a figure up into functions.
