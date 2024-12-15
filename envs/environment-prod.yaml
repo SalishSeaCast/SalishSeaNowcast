@@ -38,7 +38,6 @@ dependencies:
   - f90nml
   - feedgen
   - flox
-  - geopandas
   - gitpython
   - gsw
   - h5netcdf
@@ -58,11 +57,9 @@ dependencies:
   - pygrib
   - pypdf
   - pyproj
-  - pytables
   - python=3.12
   - pyyaml
   - pyzmq
-  - rasterio
   - requests
   - retrying
   - rich
@@ -70,7 +67,6 @@ dependencies:
   - scipy
   - scour
   - sentry-sdk
-  - shapely
   - structlog
   - supervisor
   - tenacity

@@ -104,7 +104,6 @@ autodoc_mock_imports = [
     "scipy",
     "scipy.interpolate",
     "scipy.io",
-    "shapely",
     "watchdog",
     "xarray",
 ]
