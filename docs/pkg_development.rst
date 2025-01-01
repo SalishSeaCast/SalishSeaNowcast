@@ -741,7 +741,13 @@ The release process steps are:
 #. Push the version bump commit and tag to GitHub
 
 #. Use the GitHub web interface to create a release,
-   editing the auto-generated release notes as necessary
+   editing the auto-generated release notes into sections:
+
+   * Features
+   * Bug Fixes
+   * Documentation
+   * Maintenance
+   * Dependency Updates
 
 #. Use the GitHub :guilabel:`Issues -> Milestones` web interface to edit the release
    milestone:
