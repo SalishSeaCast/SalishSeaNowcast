@@ -50,7 +50,7 @@ dependencies:
   - pygrib
   - pypdf
   - pyproj
-  - python=3.12
+  - python=3.13
   - pyyaml
   - requests
   - scipy

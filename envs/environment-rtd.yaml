@@ -12,7 +12,7 @@ dependencies:
   - matplotlib
   - pip
   - pygrib
-  - python=3.12
+  - python=3.13
   - retrying
 
   # Sphinx and extensions

@@ -44,7 +44,7 @@
 |                            |      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/releases                                                                                                                                 |
 |                            |      :alt: Releases                                                                                                                                                                                      |
 |                            | .. image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaNowcast/main/pyproject.toml&logo=Python&logoColor=gold&label=Python |
-|                            |      :target: https://docs.python.org/3.12/                                                                                                                                                              |
+|                            |      :target: https://docs.python.org/3/                                                                                                                                                                 |
 |                            |      :alt: Python Version from PEP 621 TOML                                                                                                                                                              |
 |                            | .. image:: https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github                                                                                                               |
 |                            |      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/issues                                                                                                                                   |
@@ -80,10 +80,10 @@ Python Version
 ==============
 
 .. image:: https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaNowcast/main/pyproject.toml&logo=Python&logoColor=gold&label=Python
-     :target: https://docs.python.org/3.12/
+     :target: https://docs.python.org/3/
      :alt: Python Version from PEP 621 TOML
 
-The ``SalishSeaNowcast`` package is developed and tested using `Python`_ 3.12.
+The ``SalishSeaNowcast`` package is developed and tested using `Python`_ 3.13.
 
 .. _Python: https://www.python.org/
 
@@ -537,11 +537,11 @@ The output looks something like:
 .. code-block:: text
 
     ================================ test session starts ================================
-    platform linux -- Python 3.12.7, pytest-8.3.3, pluggy-1.5.0
-    Using --randomly-seed=3033986199
+    platform linux -- Python 3.13.1, pytest-8.3.4, pluggy-1.5.0
+    Using --randomly-seed=4145810385
     rootdir: /media/doug/warehouse/MEOPAR/SalishSeaNowcast
     configfile: pyproject.toml
-    plugins: httpx-0.32.0, randomly-3.15.0, cov-6.0.0, anyio-4.6.2.post1, xdist-3.6.1
+    plugins: anyio-4.8.0, randomly-3.15.0, httpx-0.35.0, cov-6.0.0, xdist-3.6.1
     collected 2372 items
 
     tests/workers/test_make_live_ocean_files.py .........                          [  0%]
