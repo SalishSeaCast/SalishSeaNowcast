@@ -23,6 +23,7 @@ dependencies:
   - coloredlogs
   - dask
   - docutils
+  - et_xmlfile
   - f90nml
   - feedgen
   - flox
@@ -36,6 +37,7 @@ dependencies:
   - netcdf4
   - numpy
   - numpy-indexed
+  - openpyxl
   - pandas
   - paramiko
   - pillow
@@ -56,6 +58,7 @@ dependencies:
   - structlog
   - supervisor
   - tenacity
+  - tqdm
   - utm
   - verboselogs
   - watchdog
