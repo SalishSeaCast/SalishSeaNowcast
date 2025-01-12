@@ -31,6 +31,7 @@ dependencies:
   - coloredlogs
   - dask
   - docutils
+  - et_xmlfile
   - gitpython
   - gsw
   - h5netcdf
@@ -42,6 +43,7 @@ dependencies:
   - netcdf4
   - numpy
   - numpy-indexed
+  - openpyxl
   - pandas
   - paramiko
   - pillow
@@ -55,6 +57,7 @@ dependencies:
   - requests
   - scipy
   - sentry-sdk
+  - tqdm
   - verboselogs
   - watchdog
   - xarray
