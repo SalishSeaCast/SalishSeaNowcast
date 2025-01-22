@@ -240,8 +240,8 @@ def _plot_surface_field(ax, ss_var, bs_var, cmap, ss_grid, bs_grid, theme):
     """
     plain_crs = cartopy.crs.PlateCarree()
     clevels = numpy.linspace(
-        numpy.floor(bs_var.where(bs_var > 0).min()),
-        numpy.ceil(bs_var.where(bs_var > 0).max()),
+        numpy.floor(bs_var.where(bs_var > 0).min()).values,
+        numpy.ceil(bs_var.where(bs_var > 0).max()).values,
         20,
     )
     ax.contourf(
