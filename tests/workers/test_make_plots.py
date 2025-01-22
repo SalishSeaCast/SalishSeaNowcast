@@ -19,6 +19,7 @@
 """Unit tests for SalishSeaCast make_plots worker.
 """
 import logging
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
@@ -256,15 +257,17 @@ class TestConfig:
         assert url == dataset_url
 
     def test_agrif_bathymetryy(self, prod_config):
-        url = prod_config["figures"]["dataset URLs"]["bathymetry"]
-        bs_grid = prod_config["run types"]["nowcast-agrif"]["sub-grid bathymetry"]
-
-        assert (
-            url == "https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02"
+        grid_dir = Path(prod_config["figures"]["grid dir"])
+        ss_grid_path = (
+            grid_dir / prod_config["run types"]["nowcast-agrif"]["bathymetry"]
         )
-        assert (
-            bs_grid
-            == "/SalishSeaCast/grid/subgrids/BaynesSound/bathymetry_201702_BS.nc"
+        bs_grid_path = Path(
+            prod_config["run types"]["nowcast-agrif"]["sub-grid bathymetry"]
+        )
+
+        assert ss_grid_path == Path("/SalishSeaCast/grid/bathymetry_201702.nc")
+        assert bs_grid_path == Path(
+            "/SalishSeaCast/grid/subgrids/BaynesSound/bathymetry_201702_BS.nc"
         )
 
     def test_tidal_predictions(self, prod_config):

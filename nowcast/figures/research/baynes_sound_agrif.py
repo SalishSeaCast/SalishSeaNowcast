@@ -41,15 +41,17 @@ def make_figure(
     bs_phys_path,
     bs_bio_path,
     run_date,
-    ss_grid_url,
+    ss_grid_path,
     bs_grid_path,
     figsize=(22, 9),
     theme=nowcast.figures.website_theme,
 ):
-    """Plot 4-panel figure that shows surface values of temperature, salinity,
-    diatoms biomass, and nitrate concentration in the Baynes Sound region at
-    12:30 Pacific time. Each panel shows all of the Baynes Sound sub-grid
-    as well as a fringe of the full domain on the 3 non-land sides. The axes
+    """Plot a 4-panel figure that shows surface values of temperature, salinity,
+    diatom biomass, and nitrate concentration in the Baynes Sound region at
+    12:30 Pacific time.
+    Each panel shows the whole Baynes Sound sub-grid
+    as well as a fringe of the full domain on the 3 non-land sides.
+    The axes
     grid and tick labels are an angled lon/lat grid.
 
     :param ss_tracers_path: File path of full domain hourly physics tracers
@@ -67,9 +69,10 @@ def make_figure(
     :param run_date: Run date to produce the figure for.
     :type :py:class:`arrow.Arrow` run_date:
 
-    :param str ss_grid_url: ERDDAP URL for the full domain geo-location and
-                            bathymetry dataset that provides longitudes and
-                            latitudes of the domain grid, and water depths.
+    :param ss_grid_path: File path of the full domain geolocation and
+                         bathymetry dataset that provides longitudes and
+                         latitudes of the domain grid, and water depths.
+    :type :py:class:`pathlib.Path` ss_grid_path:
 
     :param bs_grid_path: File path of Baynes Sound sub-grid bathymetry dataset
                          that provides longitudes and latitudes of the
@@ -79,13 +82,14 @@ def make_figure(
     :param 2-tuple figsize: Figure size (width, height) in inches.
 
     :param theme: Module-like object that defines the style elements for the
-                  figure. See :py:mod:`nowcast.figures.website_theme` for an
+                  figure.
+                  See :py:mod:`nowcast.figures.website_theme` for an
                   example.
 
     :returns: :py:class:`matplotlib.figure.Figure`
     """
     plot_data = _prep_plot_data(
-        ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url, bs_grid_path
+        ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_path, bs_grid_path
     )
     fig, axs = _prep_fig_axes(figsize, plot_data, theme)
     _plot_surface_fields(axs, plot_data, theme)
@@ -109,25 +113,26 @@ def make_figure(
 
 
 def _prep_plot_data(
-    ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_url, bs_grid_path
+    ss_tracers_path, bs_phys_path, bs_bio_path, run_date, ss_grid_path, bs_grid_path
 ):
     """
     :type ss_tracers_path: :py:class:`pathlib.Path`
     :type bs_phys_path: :py:class:`pathlib.Path`
     :type bs_bio_path: :py:class:`pathlib.Path`
     :type run_date: :py:class:`arrow.Arrow`
-    :type ss_grid_url: str
+    :type ss_grid_path: :py:class:`pathlib.Path`
     :type bs_grid_path: :py:class:`pathlib.Path`
 
     :rtype: :py:class:`types.SimpleNamespace`
     """
-    SS_BAYNES_SOUND_X, SS_BAYNES_SOUND_Y = slice(112, 166), slice(550, 699)
-    ss_grid = xarray.open_dataset(ss_grid_url, mask_and_scale=False).sel(
-        gridX=SS_BAYNES_SOUND_X, gridY=SS_BAYNES_SOUND_Y
+    # SS_BAYNES_SOUND_X, SS_BAYNES_SOUND_Y = slice(112, 166), slice(550, 699)
+    SS_BAYNES_SOUND_X, SS_BAYNES_SOUND_Y = slice(111, 166), slice(549, 699)
+    ss_grid = xarray.open_dataset(ss_grid_path, mask_and_scale=False).sel(
+        x=SS_BAYNES_SOUND_X, y=SS_BAYNES_SOUND_Y
     )
-    ss_water_mask = (ss_grid.bathymetry != 0).values
+    ss_water_mask = numpy.array(ss_grid.Bathymetry != 0)
     bs_grid = xarray.open_dataset(bs_grid_path, mask_and_scale=False)
-    bs_water_mask = (bs_grid.Bathymetry != 0).values
+    bs_water_mask = numpy.array(bs_grid.Bathymetry != 0)
 
     ss_tracers = xarray.open_dataset(ss_tracers_path)
     shared.localize_time(ss_tracers, time_coord="time_counter")
@@ -166,7 +171,7 @@ def _prep_plot_data(
 def _get_data_array(ds_var, water_mask, run_date):
     """
     :type ds_var: :py:class:`xarray.DataArray`
-    :type water_mask: :py:class:`xarray.DataArray`
+    :type water_mask: :py:class:`numpy.ndarray`
     :type run_date: :py:class:`arrow.Arrow`
 
     :rtype: :py:class:`xarray.DataArray`
@@ -240,8 +245,8 @@ def _plot_surface_field(ax, ss_var, bs_var, cmap, ss_grid, bs_grid, theme):
         20,
     )
     ax.contourf(
-        ss_grid.longitude,
-        ss_grid.latitude,
+        ss_grid.nav_lon,
+        ss_grid.nav_lat,
         ss_var,
         transform=plain_crs,
         cmap=cmap,
