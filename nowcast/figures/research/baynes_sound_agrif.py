@@ -127,18 +127,18 @@ def _prep_plot_data(
     """
     # SS_BAYNES_SOUND_X, SS_BAYNES_SOUND_Y = slice(112, 166), slice(550, 699)
     SS_BAYNES_SOUND_X, SS_BAYNES_SOUND_Y = slice(111, 166), slice(549, 699)
-    ss_grid = xarray.open_dataset(ss_grid_path, mask_and_scale=False).sel(
-        x=SS_BAYNES_SOUND_X, y=SS_BAYNES_SOUND_Y
-    )
+    ss_grid = xarray.open_dataset(
+        ss_grid_path, mask_and_scale=False, engine="h5netcdf"
+    ).sel(x=SS_BAYNES_SOUND_X, y=SS_BAYNES_SOUND_Y)
     ss_water_mask = numpy.array(ss_grid.Bathymetry != 0)
-    bs_grid = xarray.open_dataset(bs_grid_path, mask_and_scale=False)
+    bs_grid = xarray.open_dataset(bs_grid_path, mask_and_scale=False, engine="h5netcdf")
     bs_water_mask = numpy.array(bs_grid.Bathymetry != 0)
 
-    ss_tracers = xarray.open_dataset(ss_tracers_path)
+    ss_tracers = xarray.open_dataset(ss_tracers_path, engine="h5netcdf")
     shared.localize_time(ss_tracers, time_coord="time_counter")
 
-    bs_phys = xarray.open_dataset(bs_phys_path)
-    bs_bio = xarray.open_dataset(bs_bio_path)
+    bs_phys = xarray.open_dataset(bs_phys_path, engine="h5netcdf")
+    bs_bio = xarray.open_dataset(bs_bio_path, engine="h5netcdf")
     for dataset in (bs_phys, bs_bio):
         shared.localize_time(dataset, time_coord="time_counter")
 
