@@ -538,8 +538,6 @@ erddap:
 figures:
   # ERDDAP dataset URLs
   dataset URLs:
-    bathymetry:
-      https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSnBathymetryV17-02
     HRDPS fields:
       https://salishsea.eos.ubc.ca/erddap/griddap/ubcSSaSurfaceAtmosphereFieldsV23-02
     tide stn ssh time series:
