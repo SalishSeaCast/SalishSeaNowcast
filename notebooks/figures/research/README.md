@@ -73,6 +73,17 @@ Descriptions below the links are from the first cell of the notebooks
     It follows the function organization patterns described in
     [Creating a Figure Module](https://salishsea-nowcast.readthedocs.io/en/latest/figures/create_fig_module.html) docs.
 
+* ## [TestPlotVelNEGridded.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestPlotVelNEGridded.ipynb)
+
+    **Test `research_VENUS.plot_vel_NE_gridded` Function**
+
+    Render figure object produced by the `nowcast.figures.research_VENUS.plot_vel_NE_gridded` function.
+
+    Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker
+    to help ensure that the module will work in the nowcast production context.
+
+    **NOTE:** `research_VENUS.plot_vel_NE_gridded` needs to be refactored into a figure module.
+
 * ## [TestTracerThalwegAndSurface.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTracerThalwegAndSurface.ipynb)
 
     **Test `tracer_thalweg_and_surface` Module**
@@ -104,7 +115,7 @@ Descriptions below the links are from the first cell of the notebooks
 ## License
 
 These notebooks and files are copyright by the
-[SalishSeaCast Project Contributors](https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst)
+[SalishSeaCast Project Contributors](https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst)
 and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
