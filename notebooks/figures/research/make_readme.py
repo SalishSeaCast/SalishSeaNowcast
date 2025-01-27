@@ -54,7 +54,7 @@ Descriptions below the links are from the first cell of the notebooks
 
 """
     for fn in Path(".").glob("*.ipynb"):
-        readme += f"* ## [{fn}]({url}/{fn})  \n    \n"
+        readme += f"* ## [{fn}]({url}/{fn})\n\n"
         readme += notebook_description(fn)
 
     license = f"""
