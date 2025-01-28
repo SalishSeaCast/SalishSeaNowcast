@@ -16,8 +16,12 @@
 model run results at an Ocean Networks Canada (ONC) Salish Sea (VENUS) node.
 
 Testing notebook for this module is
-https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/comparison/TestCompareVENUS_CTD.ipynb
+https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestCompareVENUS_CTD.ipynb
 """
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 import os
 from collections import namedtuple
 
