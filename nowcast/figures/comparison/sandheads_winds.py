@@ -24,6 +24,10 @@ Text below the map acknowledges the sources of the observations and HRDPS produc
 Testing notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
 """
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 from types import SimpleNamespace
 
 import matplotlib.dates
