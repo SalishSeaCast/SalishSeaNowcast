@@ -155,7 +155,9 @@ def _prep_plot_data(
             .to_xarray()
             .rename({"index": "time"})
         )
-        obs_10min_avg = obs_1min.resample(time="10min", loffset="5min").mean()
+        obs_10min_avg = obs_1min.resample(time="10min").mean()
+        offset = pandas.tseries.frequencies.to_offset("10min") / 2
+        obs_10min_avg["time"] = obs_10min_avg.get_index("time") + offset
         obs = obs_10min_avg.to_dataset(name="water_level")
     except (AttributeError, KeyError):
         # No observations available
