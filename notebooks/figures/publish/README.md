@@ -3,10 +3,10 @@ the results figures generation modules of the SalishSeaCast automation system.
 
 The links below are to static renderings of the notebooks via
 [nbviewer.org](https://nbviewer.org/).
-Descriptions under the links below are from the first cell of the notebooks
+Descriptions below the links are from the first cell of the notebooks
 (if that cell contains Markdown or raw text).
 
-* ## [TestPtAtkinsonTideModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/publish/TestPtAtkinsonTideModule.ipynb)
+* ## [TestPtAtkinsonTideModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb)
 
     **Test `pt_atkinson_tide` Module**
 
@@ -15,7 +15,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestCompareTidePredictionMaxSSH.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestCompareTidePredictionMaxSSH.ipynb)
+* ## [TestCompareTidePredictionMaxSSH.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb)
 
     **Test `compare_tide_prediction_max_ssh` Module**
 
@@ -24,7 +24,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestStormSurgeAlertsModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestStormSurgeAlertsModule.ipynb)
+* ## [TestStormSurgeAlertsModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb)
 
     **Test `storm_surge_alerts` Module**
 
@@ -33,13 +33,13 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [DevelopCompareTidePredictionMaxSSH.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/DevelopCompareTidePredictionMaxSSH.ipynb)
+* ## [DevelopCompareTidePredictionMaxSSH.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb)
 
     **Develop `compare_tide_prediction_max_ssh` Figure Module**
 
     Development of functions for `nowcast.figures.publish.compare_tide_prediction_max_ssh` web site figure module.
 
-* ## [TestStormSurgeAlertsThumbnailModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestStormSurgeAlertsThumbnailModule.ipynb)
+* ## [TestStormSurgeAlertsThumbnailModule.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb)
 
     **Test `storm_surge_alerts_thumbnail` Module**
 
@@ -48,7 +48,7 @@ Descriptions under the links below are from the first cell of the notebooks
 
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_plots` worker.
 
-* ## [TestSurfaceCurrentTiles.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/master/publish/TestSurfaceCurrentTiles.ipynb)
+* ## [TestSurfaceCurrentTiles.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestSurfaceCurrentTiles.ipynb)
 
     **Test `surface_current_tiles` Module**
 
@@ -58,12 +58,12 @@ Descriptions under the links below are from the first cell of the notebooks
     Set-up and function call replicates as nearly as possible what is done in the `nowcast.workers.make_surface_current_tiles` worker.
 
 
-##License
+## License
 
-These notebooks and files are copyright 2013 – present
-by the SalishSeaCast Project Contributors
+These notebooks and files are copyright by the
+[SalishSeaCast Project Contributors](https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst)
 and The University of British Columbia.
 
 They are licensed under the Apache License, Version 2.0.
 https://www.apache.org/licenses/LICENSE-2.0
-Please see the LICENSE file for details of the license.
+Please see the LICENSE file in this repository for details of the license.
