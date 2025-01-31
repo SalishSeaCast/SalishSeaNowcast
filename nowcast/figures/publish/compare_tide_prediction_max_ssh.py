@@ -182,7 +182,6 @@ def _prep_plot_data(
         obs_period = None
     # Predicted tide water levels dataset from ttide
     ttide = shared.get_tides(place, tidal_predictions)
-    ttide.rename(columns={" pred_noshallow ": "pred_noshallow"}, inplace=True)
     ttide.index = pandas.to_datetime(ttide.time.values, format="%Y-%m-%d %H:%M:%S")
     ttide_ds = ttide.to_xarray().drop_vars(["time"]).rename({"index": "time"})
     # Localize ttide dataset timezone to ssh_forecast times because ttide
