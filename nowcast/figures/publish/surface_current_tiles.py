@@ -16,7 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-""" Produce surface currents tile figures in both website themed and unthemed style.
+""" Produce surface currents tile figures in both the website themed and un-themed style.
 """
 
 import datetime
