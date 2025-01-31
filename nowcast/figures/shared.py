@@ -185,7 +185,7 @@ def correct_model_ssh(ssh_model, t_model, ttide):
     :returns: Corrected model sea surface height.
     :rtype: :py:class:`numpy.ndarray`
     """
-    difference = np.array(ttide[" pred_noshallow "] - ttide["pred_8"])
+    difference = np.array(ttide["pred_noshallow"] - ttide["pred_8"])
     corr = interp_to_model_time(t_model, difference, ttide.time)
     corr_model = ssh_model + corr
     return corr_model
