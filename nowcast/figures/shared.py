@@ -185,7 +185,7 @@ def correct_model_ssh(ssh_model, t_model, ttide):
     :returns: Corrected model sea surface height.
     :rtype: :py:class:`numpy.ndarray`
     """
-    difference = np.array(ttide[" pred_noshallow "] - ttide["pred_8"])
+    difference = np.array(ttide["pred_noshallow"] - ttide["pred_8"])
     corr = interp_to_model_time(t_model, difference, ttide.time)
     corr_model = ssh_model + corr
     return corr_model
@@ -193,7 +193,7 @@ def correct_model_ssh(ssh_model, t_model, ttide):
 
 ## TODO: This should probably be in a salishsea_tools module.
 def interp_to_model_time(t_model, values, t_values):
-    """Interpolate a an array of values to model output times.
+    """Interpolate an array of values to model output times.
 
     Strategy: Convert times to seconds past a reference value and use those
     as the independent variable in interpolation.
@@ -215,7 +215,7 @@ def interp_to_model_time(t_model, values, t_values):
     t_values_wrt_epoch = np.array([(t - epoch).total_seconds() for t in t_values])
     t_model_wrt_epoch = np.array([(t - epoch).total_seconds() for t in t_model])
     return np.interp(
-        t_model_wrt_epoch, t_values_wrt_epoch, values, left=np.nan, right=np.NaN
+        t_model_wrt_epoch, t_values_wrt_epoch, values, left=np.nan, right=np.nan
     )
 
 

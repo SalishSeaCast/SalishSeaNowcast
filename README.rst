@@ -87,7 +87,7 @@ License
 The SalishSeaCast ocean model automation system code and documentation are copyright 2013 – present
 by the `SalishSeaCast Project Contributors`_ and The University of British Columbia.
 
-.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/master/CONTRIBUTORS.rst
+.. _SalishSeaCast Project Contributors: https://github.com/SalishSeaCast/docs/blob/main/CONTRIBUTORS.rst
 
 They are licensed under the Apache License, Version 2.0.
 http://www.apache.org/licenses/LICENSE-2.0

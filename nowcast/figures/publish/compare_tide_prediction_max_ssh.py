@@ -155,7 +155,9 @@ def _prep_plot_data(
             .to_xarray()
             .rename({"index": "time"})
         )
-        obs_10min_avg = obs_1min.resample(time="10min", loffset="5min").mean()
+        obs_10min_avg = obs_1min.resample(time="10min").mean()
+        offset = pandas.tseries.frequencies.to_offset("10min") / 2
+        obs_10min_avg["time"] = obs_10min_avg.get_index("time") + offset
         obs = obs_10min_avg.to_dataset(name="water_level")
     except (AttributeError, KeyError):
         # No observations available
@@ -180,7 +182,6 @@ def _prep_plot_data(
         obs_period = None
     # Predicted tide water levels dataset from ttide
     ttide = shared.get_tides(place, tidal_predictions)
-    ttide.rename(columns={" pred_noshallow ": "pred_noshallow"}, inplace=True)
     ttide.index = pandas.to_datetime(ttide.time.values, format="%Y-%m-%d %H:%M:%S")
     ttide_ds = ttide.to_xarray().drop_vars(["time"]).rename({"index": "time"})
     # Localize ttide dataset timezone to ssh_forecast times because ttide
