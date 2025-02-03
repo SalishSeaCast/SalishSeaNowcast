@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for daily_river_flows module.
-"""
+"""Unit tests for daily_river_flows module."""
 import io
 import os
 import textwrap

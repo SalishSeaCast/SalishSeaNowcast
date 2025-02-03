@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast collect_weather worker.
-"""
+"""Unit tests for SalishSeaCast collect_weather worker."""
 import grp
 import logging
 import os

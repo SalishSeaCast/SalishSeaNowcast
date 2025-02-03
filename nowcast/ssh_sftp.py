@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCast ssh and sftp client functions.
-"""
+"""SalishSeaCast ssh and sftp client functions."""
 import os
 
 import paramiko

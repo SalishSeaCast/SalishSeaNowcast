@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_feeds worker.
-"""
+"""Unit tests for SalishSeaCast make_feeds worker."""
 import datetime
 import os
 import textwrap

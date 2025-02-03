@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast download_results worker.
-"""
+"""Unit tests for SalishSeaCast download_results worker."""
 import logging
 import shlex
 import textwrap

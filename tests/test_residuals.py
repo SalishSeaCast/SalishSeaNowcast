@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast residuals module.
-"""
+"""Unit tests for SalishSeaCast residuals module."""
 from datetime import datetime
 
 import pytest

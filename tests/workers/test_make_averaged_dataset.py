@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_averaged_dataset worker.
-"""
+"""Unit tests for SalishSeaCast make_averaged_dataset worker."""
 import logging
 import os
 import textwrap

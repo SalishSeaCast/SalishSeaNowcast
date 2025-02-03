@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast watch_NEMO worker.
-"""
+"""Unit tests for SalishSeaCast watch_NEMO worker."""
 import subprocess
 import textwrap
 from pathlib import Path

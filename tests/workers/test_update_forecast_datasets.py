@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast update_forecast_datasets worker.
-"""
+"""Unit tests for SalishSeaCast update_forecast_datasets worker."""
 import logging
 import shlex
 import textwrap

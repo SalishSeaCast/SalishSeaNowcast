@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCast utility functions for use by workers.
-"""
+"""SalishSeaCast utility functions for use by workers."""
 import grp
 import logging
 import logging.handlers

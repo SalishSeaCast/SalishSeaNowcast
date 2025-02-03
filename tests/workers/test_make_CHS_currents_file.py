@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_CHS_currents_file worker.
-"""
+"""Unit tests for SalishSeaCast make_CHS_currents_file worker."""
 import logging
 import textwrap
 from pathlib import Path

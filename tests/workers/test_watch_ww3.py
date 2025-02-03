@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for Salish Sea nowcast watch_ww3 worker.
-"""
+"""Unit tests for Salish Sea nowcast watch_ww3 worker."""
 import logging
 from types import SimpleNamespace
 

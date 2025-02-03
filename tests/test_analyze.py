@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for analyze module.
-"""
+"""Unit tests for analyze module."""
 import numpy as np
 import pytest
 
