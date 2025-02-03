@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast rotate_hindcast_logs worker.
-"""
+"""Unit tests for SalishSeaCast rotate_hindcast_logs worker."""
 import logging
 import logging.config
 import textwrap

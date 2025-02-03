@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast tag_release script.
-"""
+"""Unit tests for SalishSeaCast tag_release script."""
 from unittest.mock import Mock, call, patch
 
 import hglib

@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast watch_NEMO_hindcast worker.
-"""
+"""Unit tests for SalishSeaCast watch_NEMO_hindcast worker."""
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace

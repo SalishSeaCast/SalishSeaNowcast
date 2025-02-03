@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast get_onc_ferry worker.
-"""
+"""Unit tests for SalishSeaCast get_onc_ferry worker."""
 import logging
 from types import SimpleNamespace
 

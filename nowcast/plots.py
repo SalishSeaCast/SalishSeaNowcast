@@ -1,9 +1,9 @@
-""" script to generate plots for a simulation
-    Use: python plots.py sim_date mode
-    Eg:  python plots.py 2015-03-06 nowcast generates plots for the
-    March 6, 2015 nowcast. sim_date corresponds to the date simulated.
-    plots are stored in a directory mode/run_dat, where run_date is the
-    date the simulation was run.
+"""script to generate plots for a simulation
+Use: python plots.py sim_date mode
+Eg:  python plots.py 2015-03-06 nowcast generates plots for the
+March 6, 2015 nowcast. sim_date corresponds to the date simulated.
+plots are stored in a directory mode/run_dat, where run_date is the
+date the simulation was run.
 """
 
 import datetime

@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_plots worker.
-"""
+"""Unit tests for SalishSeaCast make_plots worker."""
 import logging
 from pathlib import Path
 from types import SimpleNamespace

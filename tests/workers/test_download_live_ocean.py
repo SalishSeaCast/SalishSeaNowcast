@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast download_live_ocean worker.
-"""
+"""Unit tests for SalishSeaCast download_live_ocean worker."""
 import grp
 import logging
 import os

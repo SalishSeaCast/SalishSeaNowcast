@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_ssh_file worker.
-"""
+"""Unit tests for SalishSeaCast make_ssh_file worker."""
 import logging
 import os
 import textwrap

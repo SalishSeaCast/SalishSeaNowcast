@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast get_vfpa_hadcp worker.
-"""
+"""Unit tests for SalishSeaCast get_vfpa_hadcp worker."""
 import logging
 import os
 import textwrap

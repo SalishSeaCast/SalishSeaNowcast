@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_runoff_file worker.
-"""
+"""Unit tests for SalishSeaCast make_runoff_file worker."""
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch

@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """SalishSeaCast worker that creates flag files to tell the ERDDAP server
- to reload datasets for which new results have been downloaded.
+to reload datasets for which new results have been downloaded.
 """
 import logging
 from pathlib import Path

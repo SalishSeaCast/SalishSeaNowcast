@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast download_fvcom_results worker.
-"""
+"""Unit tests for SalishSeaCast download_fvcom_results worker."""
 import shlex
 import textwrap
 from pathlib import Path

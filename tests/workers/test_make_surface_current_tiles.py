@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_surface_current_tiles worker.
-"""
+"""Unit tests for SalishSeaCast make_surface_current_tiles worker."""
 import logging
 from pathlib import Path
 import textwrap

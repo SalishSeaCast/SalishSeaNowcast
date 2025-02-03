@@ -13,7 +13,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 """Salish Sea nowcast worker that monitors and reports on the progress of a WaveWatch3 run
- on the ONC cloud computing facility.
+on the ONC cloud computing facility.
 """
 import logging
 import os

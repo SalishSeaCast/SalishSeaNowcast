@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_forcing_links worker.
-"""
+"""Unit tests for SalishSeaCast make_forcing_links worker."""
 import logging
 import os
 import textwrap

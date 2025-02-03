@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast collect_river_data worker.
-"""
+"""Unit tests for SalishSeaCast collect_river_data worker."""
 import logging
 import textwrap
 from pathlib import Path

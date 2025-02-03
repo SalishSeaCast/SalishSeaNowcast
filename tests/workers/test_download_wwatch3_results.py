@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast system download_wwatch3_results worker.
-"""
+"""Unit tests for SalishSeaCast system download_wwatch3_results worker."""
 from unittest.mock import Mock, patch
 
 import arrow

@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for Vancouver Harbour & Fraser River FVCOM run_fvcom worker.
-"""
+"""Unit tests for Vancouver Harbour & Fraser River FVCOM run_fvcom worker."""
 import os
 import subprocess
 import textwrap

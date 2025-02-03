@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit test for SalishSeaCast make_v202111_runoff_file worker.
-"""
+"""Unit test for SalishSeaCast make_v202111_runoff_file worker."""
 import logging
 import os
 import textwrap

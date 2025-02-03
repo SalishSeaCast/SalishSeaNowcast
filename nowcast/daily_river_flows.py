@@ -1,5 +1,5 @@
 """
-    Module for calculating daily river flows
+Module for calculating daily river flows
 """
 
 import functools

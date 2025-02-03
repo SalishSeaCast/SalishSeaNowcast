@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Fixtures for SalishSeaCast test suite.
-"""
+"""Fixtures for SalishSeaCast test suite."""
 from pathlib import Path
 from unittest.mock import patch
 

@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast watch_fvcom worker.
-"""
+"""Unit tests for SalishSeaCast watch_fvcom worker."""
 import subprocess
 from types import SimpleNamespace
 from unittest.mock import call, Mock, patch

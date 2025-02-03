@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast ping_erddap worker.
-"""
+"""Unit tests for SalishSeaCast ping_erddap worker."""
 import logging
 import textwrap
 from pathlib import Path

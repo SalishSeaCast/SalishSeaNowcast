@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit test for SalishSeaCast crop_gribs worker.
-"""
+"""Unit test for SalishSeaCast crop_gribs worker."""
 import grp
 import logging
 import os

@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_turbidity_file worker.
-"""
+"""Unit tests for SalishSeaCast make_turbidity_file worker."""
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 

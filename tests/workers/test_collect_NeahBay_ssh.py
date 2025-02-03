@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast collect_NeahBay_ssh worker.
-"""
+"""Unit tests for SalishSeaCast collect_NeahBay_ssh worker."""
 import logging
 import os
 import textwrap

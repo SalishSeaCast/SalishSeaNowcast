@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast launch_remote_worker worker.
-"""
+"""Unit tests for SalishSeaCast launch_remote_worker worker."""
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 

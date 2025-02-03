@@ -16,8 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for nowcast.next_workers module.
-"""
+"""Unit tests for nowcast.next_workers module."""
 import inspect
 import textwrap
 from pathlib import Path
