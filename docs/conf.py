@@ -13,14 +13,18 @@
 
 import importlib.metadata
 import os
+from pathlib import Path
 import sys
+import tomllib
 
 sys.path.insert(0, os.path.abspath(".."))
 
 
 # -- Project information -----------------------------------------------------
 
-project = "SalishSeaNowcast"
+with Path("../pyproject.toml").open("rb") as f:
+    pkg_info = tomllib.load(f)
+project = pkg_info["project"]["name"]
 author = "SalishSeaCast Project Contributors and The University of British Columbia"
 pkg_creation_year = 2013
 copyright = f"{pkg_creation_year} – present, {author}"
