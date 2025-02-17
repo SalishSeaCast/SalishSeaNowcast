@@ -1517,14 +1517,14 @@ def after_download_results(msg, config, checklist):
                             args=["day", var_group, "--run-date", run_date],
                         )
                     )
-                if arrow.get(run_date).shift(days=+1).day == 1:
-                    yyyymmm = arrow.get(run_date).format("YYYY-MMM").lower()
-                    next_workers[msg.type].append(
-                        NextWorker(
-                            "nowcast.workers.archive_tarball",
-                            args=["nowcast-green", yyyymmm, "robot.graham"],
-                        )
-                    )
+                # if arrow.get(run_date).shift(days=+1).day == 1:
+                #     yyyymmm = arrow.get(run_date).format("YYYY-MMM").lower()
+                #     next_workers[msg.type].append(
+                #         NextWorker(
+                #             "nowcast.workers.archive_tarball",
+                #             args=["nowcast-green", yyyymmm, "robot.graham"],
+                #         )
+                #     )
                 return next_workers[msg.type]
         if run_type.startswith("forecast"):
             next_workers[msg.type].append(
@@ -1699,14 +1699,14 @@ def after_split_results(msg, config, checklist):
     if msg.type.startswith("success"):
         if config["results tarballs"]["archive hindcast"]:
             last_date = max(map(arrow.get, msg.payload))
-            if arrow.get(last_date).shift(days=+1).day == 1:
-                yyyymmm = arrow.get(last_date).format("YYYY-MMM").lower()
-                next_workers[msg.type].append(
-                    NextWorker(
-                        "nowcast.workers.archive_tarball",
-                        args=["hindcast", yyyymmm, "robot.graham"],
-                    )
-                )
+            # if arrow.get(last_date).shift(days=+1).day == 1:
+            #     yyyymmm = arrow.get(last_date).format("YYYY-MMM").lower()
+            #     next_workers[msg.type].append(
+            #         NextWorker(
+            #             "nowcast.workers.archive_tarball",
+            #             args=["hindcast", yyyymmm, "robot.graham"],
+            #         )
+            #     )
     return next_workers[msg.type]
 
 
