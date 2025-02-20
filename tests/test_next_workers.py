@@ -2137,24 +2137,24 @@ class TestAfterDownloadResults:
         )
         assert archive_tarball not in workers
 
-    def test_success_nowcast_green_monthend_launch_archive_tarball(
-        self, config, checklist
-    ):
-        workers = next_workers.after_download_results(
-            Message(
-                "download_results",
-                "success nowcast-green",
-                payload={"nowcast-green": {"run date": "2022-05-31"}},
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.archive_tarball",
-            args=["nowcast-green", "2022-may", "robot.graham"],
-            host="localhost",
-        )
-        assert expected in workers
+    # def test_success_nowcast_green_monthend_launch_archive_tarball(
+    #     self, config, checklist
+    # ):
+    #     workers = next_workers.after_download_results(
+    #         Message(
+    #             "download_results",
+    #             "success nowcast-green",
+    #             payload={"nowcast-green": {"run date": "2022-05-31"}},
+    #         ),
+    #         config,
+    #         checklist,
+    #     )
+    #     expected = NextWorker(
+    #         "nowcast.workers.archive_tarball",
+    #         args=["nowcast-green", "2022-may", "robot.graham"],
+    #         host="localhost",
+    #     )
+    #     assert expected in workers
 
     @pytest.mark.parametrize(
         "run_type, run_date",
@@ -2400,31 +2400,31 @@ class TestAfterSplitResults:
         )
         assert archive_tarball not in workers
 
-    def test_success_archive_hindcast_monthend_launch_archive_tarball_hindcast(
-        self, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(config["results tarballs"], "archive hindcast", True)
-        workers = next_workers.after_split_results(
-            Message(
-                "split_results",
-                "success hindcast",
-                payload={
-                    "2022-10-26",
-                    "2022-10-27",
-                    "2022-10-28",
-                    "2022-10-29",
-                    "2022-10-30",
-                    "2022-10-31",
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.archive_tarball",
-            args=["hindcast", "2022-oct", "robot.graham"],
-        )
-        assert workers[-1] == expected
+    # def test_success_archive_hindcast_monthend_launch_archive_tarball_hindcast(
+    #     self, config, checklist, monkeypatch
+    # ):
+    #     monkeypatch.setitem(config["results tarballs"], "archive hindcast", True)
+    #     workers = next_workers.after_split_results(
+    #         Message(
+    #             "split_results",
+    #             "success hindcast",
+    #             payload={
+    #                 "2022-10-26",
+    #                 "2022-10-27",
+    #                 "2022-10-28",
+    #                 "2022-10-29",
+    #                 "2022-10-30",
+    #                 "2022-10-31",
+    #             },
+    #         ),
+    #         config,
+    #         checklist,
+    #     )
+    #     expected = NextWorker(
+    #         "nowcast.workers.archive_tarball",
+    #         args=["hindcast", "2022-oct", "robot.graham"],
+    #     )
+    #     assert workers[-1] == expected
 
     def test_success_archive_hindcast_not_monthend_launch_archive_tarball_hindcast(
         self, config, checklist, monkeypatch

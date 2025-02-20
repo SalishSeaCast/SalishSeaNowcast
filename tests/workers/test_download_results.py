@@ -68,8 +68,8 @@ def config(base_config):
                       run types:
                         nowcast-agrif:
                           results: SalishSea/nowcast-agrif/
-                    robot.graham:
-                      ssh key: SalishSeaNEMO-nowcast_id_rsa
+                    # robot.graham:
+                    #   ssh key: SalishSeaNEMO-nowcast_id_rsa
 
                   hindcast hosts:
                       optimum-hindcast:
@@ -175,7 +175,7 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "robot.graham",
+            # "robot.graham",
             "optimum-hindcast",
         ]
 
@@ -187,7 +187,7 @@ class TestConfig:
                 ["nowcast", "forecast", "forecast2", "nowcast-green"],
             ),
             ("orcinus-nowcast-agrif", ["nowcast-agrif"]),
-            ("robot.graham", []),
+            # ("robot.graham", []),
             ("optimum-hindcast", []),
         ),
     )
@@ -459,7 +459,10 @@ class TestDownloadResults:
 
     @pytest.mark.parametrize(
         "host_name, dest_host",
-        (("optimum-hindcast", "localhost"), ("sockeye-hindcast", "robot.graham")),
+        (
+            ("optimum-hindcast", "localhost"),
+            ("sockeye-hindcast", "robot.graham"),
+        ),
     )
     def test_hindcast_not_unlink_fvcom_boundary_files(
         self,
