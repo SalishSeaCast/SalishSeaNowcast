@@ -778,41 +778,41 @@ Fetch and merge changes from the `FVCOM41 repo on GitLab`_ and do a clean build:
 Python Packages
 ===============
 
-Install the `Miniconda`_ environment and package manager:
+Install the `Miniforge-pypy3`_ environment and package manager:
 
-.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
+.. _Miniforge-pypy3: https://github.com/conda-forge/miniforge
+
 
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ curl -LO https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-    $ bash Miniconda3-latest-Linux-x86_64.sh
+    $ curl -LO https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge-pypy3-Linux-x86_64.sh
+    $ bash Miniforge-pypy3-Linux-x86_64.sh
 
-Answer :file:`/nemoShare/MEOPAR/nowcast-sys/miniconda3` when the installer asks for an installation location.
+Answer :file:`/nemoShare/MEOPAR/nowcast-sys/miniforge-pypy3` when the installer asks for an installation location.
 
-Answer no when the install asks :guilabel:`Do you wish the installer to initialize Miniconda3 by running conda init? [yes|no]`.
+Answer ``yes`` when the install asks :guilabel:`Do you wish to update your shell profile to automatically initialize conda? ... [yes|no]`.
 
 The Python packages that the system depends on are installed in a conda environment with:
 
 .. code-block:: bash
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ conda update -n base -c defaults conda
-    $ conda env create \
+    $ mamba env create \
         --prefix /nemoShare/MEOPAR/nowcast-sys/nowcast-env \
         -f SalishSeaNowcast/envs/environment-prod.yaml
-    $ source /nemoShare/MEOPAR/nowcast-sys/miniconda3/bin/activate /nemoShare/MEOPAR/nowcast-sys/nowcast-env/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable NEMO_Nowcast/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable moad_tools/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable tools/SalishSeaTools/
+    $ mamba activate /nemoShare/MEOPAR/nowcast-sys/nowcast-env/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO_Nowcast/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable moad_tools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable tools/SalishSeaTools/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ cd OPPTools/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ git switch SalishSeaCast-prod
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ cd /nemoShare/MEOPAR/nowcast-sys/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable OPPTools/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable NEMO-Cmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable SalishSeaCmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable FVCOM-Cmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python3 -m pip install --editable SalishSeaNowcast/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable OPPTools/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO-Cmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaCmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable FVCOM-Cmd/
+    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaNowcast/
 
 
 Environment Variables

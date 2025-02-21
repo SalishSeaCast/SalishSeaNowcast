@@ -56,9 +56,11 @@ The Python packages that the system depends on are installed in conda environmen
 
 .. note::
    In Mar-2022 the Python environment and package management tool used for the system
-   was changed from Miniconda3 to `Mambaforge-pypy3`_.
+   was changed from Miniconda3 to Mambaforge-pypy3.
+   In Oct-2024 it was changed again to `Miniforge-pypy3`_ to reflect the merge of
+   Mambaforge into Miniforge and the deprecation of mambaforge in Jul-2024.
 
-   .. _Mambaforge-pypy3: https://github.com/conda-forge/miniforge
+   .. _Miniforge-pypy3: https://github.com/conda-forge/miniforge
 
 For the ``SalishSeaCast`` automation system:
 
@@ -68,18 +70,18 @@ For the ``SalishSeaCast`` automation system:
     $ mamba env create \
         --prefix /SalishSeaCast/nowcast-env \
         -f SalishSeaNowcast/envs/environment-prod.yaml
-    $ conda activate /SalishSeaCast/nowcast-env
-    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable NEMO_Nowcast/
-    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable moad_tools/
-    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable Reshapr/
-    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable tools/SalishSeaTools/
+    $ mamba activate /SalishSeaCast/nowcast-env
+    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable NEMO_Nowcast/
+    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable moad_tools/
+    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable Reshapr/
+    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable tools/SalishSeaTools/
     (/SalishSeaCast/nowcast-env)$ cd OPPTools/
     (/SalishSeaCast/nowcast-env)$ git switch SalishSeaCast-prod
     (/SalishSeaCast/nowcast-env)$ cd /SalishSeaCast/
-    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable OPPTools/
-    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable NEMO-Cmd/
-    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable SalishSeaCmd/
-    (/SalishSeaCast/nowcast-env)$ python3 -m pip install --editable SalishSeaNowcast/
+    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable OPPTools/
+    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable NEMO-Cmd/
+    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable SalishSeaCmd/
+    (/SalishSeaCast/nowcast-env)$ python -m pip install --editable SalishSeaNowcast/
 
 For the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and
 rivers hydrometric files from the `ECCC MSC datamart service`_:
@@ -93,7 +95,7 @@ rivers hydrometric files from the `ECCC MSC datamart service`_:
     $ mamba env create \
         --prefix /SalishSeaCast/sarracenia-env \
         -f SalishSeaNowcast/envs/environment-sarracenia.yaml
-    $ conda activate /SalishSeaCast/sarracenia-env
+    $ mamba activate /SalishSeaCast/sarracenia-env
     (/SalishSeaCast/sarracenia-env)$ sr_subscribe edit credentials.conf  # initialize datamart credentials
 
 For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.ca/:
@@ -106,7 +108,7 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
     $ mamba env create \
         --prefix /SalishSeaCast/salishsea-site-env \
         -f salishsea-site/envs/environment-prod.yaml
-    $ conda activate /SalishSeaCast/salishsea-site-env
+    $ mamba activate /SalishSeaCast/salishsea-site-env
     (/SalishSeaCast/salishsea-site-env) $ python3 -m pip install --editable salishsea-site/
 
 
@@ -163,7 +165,7 @@ and :command:`unset` them when it is deactivated.
 
 The :file:`/SalishSeaCast/sarracenia-env` environment variables are included in the
 :file:`SalishSeaNowcast/envs/environment-sarracenia.yaml` file so that they are managed by
-:command:`conda` to automatically :command:`export` the environment variables required by the
+:command:`mamba` to automatically :command:`export` the environment variables required by the
 sarracenia client when the environment is activated and :command:`unset` them when the
 environment is deactivated.
 To see the variables and their values:
@@ -172,7 +174,7 @@ To see the variables and their values:
 
     $ cd /SalishSeaCast/sarracenia-env
     $ source activate /SalishSeaCast/salishsea-site-env
-    (/SalishSeaCast/salishsea-site-env) $ conda env config vars list
+    (/SalishSeaCast/salishsea-site-env) $ mamba env config vars list
 
 
 :file:`/SalishSeaCast/salishsea-site-env`
@@ -353,7 +355,7 @@ and its dashboard port on 4387:
 
 .. code-block:: bash
 
-    $ conda activate /SalishSeaCast/nowcast-env
+    $ mamba activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ dask scheduler --port 4386 --dashboard-address :4387
 
 Use :kbd:`Control-b ,` to rename the :program:`tmux` terminal to ``dask-scheduler``.
@@ -370,7 +372,7 @@ and launch the 4 :command:`dask worker` processes with these properties:
 
 .. code-block:: bash
 
-    $ conda activate /SalishSeaCast/nowcast-env
+    $ mamba activate /SalishSeaCast/nowcast-env
     (/SalishSeaCast/nowcast-env)$ dask worker --nworkers=4 --nthreads=1 --memory-limit 64G \
       --local-directory /tmp/SalishSeaCast \
       --lifetime 3600 --lifetime-stagger 60 --lifetime-restart \
