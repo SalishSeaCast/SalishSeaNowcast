@@ -39,7 +39,7 @@ and the manager,
 are managed by the `supervisor`_ process manager tool.
 So is the `sarracenia client`_ that maintains mirrors of the HRDPS forecast files and rivers hydrometric files from the `ECCC MSC datamart service`_.
 
-.. _supervisor: http://supervisord.org/
+.. _supervisor: https://supervisord.org/
 .. _sarracenia client: https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
 .. _ECCC MSC datamart service: https://dd.weather.gc.ca/
 
@@ -73,7 +73,7 @@ Start it with:
     $ source activate /results/nowcast-sys/nowcast-env
     (/results/nowcast-sys/nowcast-env)$ supervisorctl --configuration $NOWCAST_CONFIG/supervisord.ini
 
-.. _supervisorctl: http://supervisord.org/running.html#running-supervisorctl
+.. _supervisorctl: https://supervisord.org/running.html#running-supervisorctl
 
 See the `supervisorctl`_ docs,
 or use the ``help`` command within :command:`supervisorctl` to get information on the available commands.
