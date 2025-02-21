@@ -778,9 +778,10 @@ Fetch and merge changes from the `FVCOM41 repo on GitLab`_ and do a clean build:
 Python Packages
 ===============
 
-Install the `Miniconda`_ environment and package manager:
+Install the `Miniforge-pypy3`_ environment and package manager:
 
-.. _Miniconda: https://docs.conda.io/en/latest/miniconda.html
+.. _Miniforge-pypy3: https://github.com/conda-forge/miniforge
+
 
 .. code-block:: bash
 
