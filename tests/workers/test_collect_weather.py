@@ -182,7 +182,7 @@ class TestConfig:
             ["VGRD_AGL-10m", "v10", "v_wind"],
             ["DSWRF_Sfc", "ssrd", "solar"],
             ["DLWRF_Sfc", "strd", "therm_rad"],
-            ["LHTFL_Sfc", "lhtfl", "LHTFL_surface"],
+            ["LHTFL_Sfc", "slhtf", "LHTFL_surface"],
             ["TMP_AGL-2m", "t2m", "tair"],
             ["SPFH_AGL-2m", "sh2", "qair"],
             ["RH_AGL-2m", "r2", "RH_2maboveground"],
