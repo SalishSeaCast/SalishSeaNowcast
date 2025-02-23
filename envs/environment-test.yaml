@@ -62,7 +62,7 @@ dependencies:
   - utm
   - verboselogs
   - watchdog
-  - xarray
+  - xarray=2024.7.0
 
   # For unit tests and coverage monitoring
   - pytest
