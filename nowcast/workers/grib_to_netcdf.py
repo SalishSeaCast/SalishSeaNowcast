@@ -727,7 +727,7 @@ def _write_netcdf(nemo_ds, file_date, run_date, run_type, config, fcst=False):
         {
             "history": (
                 f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
-                f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
+                f"python -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
                 f"{run_type} --run-date {run_date.format('YYYY-MM-DD')}"
             ),
         }
