@@ -328,7 +328,7 @@ def _trim_grib(ds, y_slice, x_slice):
         # Select region of interest
         ds = ds.sel(y=y_slice, x=x_slice)
     # Drop coordinates that we don't need
-    keep_coords = ("time", "step", "latitude", "longitude")
+    keep_coords = ("valid_time", "latitude", "longitude")
     ds = ds.reset_coords(
         [coord for coord in ds.coords if coord not in keep_coords],
         drop=True,
@@ -369,15 +369,14 @@ def _calc_nemo_var_ds(
         grib_files,
         preprocess=_partial_trim_grib,
         combine="nested",
-        concat_dim="step",
+        concat_dim="valid_time",
         engine="cfgrib",
         backend_kwargs={"indexpath": ""},
     )
-    time_counter = grib_ds.step.values + grib_ds.time.values
     nemo_da = xarray.DataArray(
         data=grib_ds[grib_var].data,
         coords={
-            "time_counter": time_counter,
+            "time_counter": grib_ds.valid_time.values,
             "y": grib_ds.y,
             "x": grib_ds.x,
         },
@@ -400,7 +399,7 @@ def _calc_nemo_var_ds(
             nemo_var: nemo_da,
         },
         coords={
-            "time_counter": time_counter,
+            "time_counter": grib_ds.valid_time.values,
             "y": grib_ds.y,
             "x": grib_ds.x,
             "nav_lon": nav_lon,
@@ -413,7 +412,7 @@ def _calc_nemo_var_ds(
         # Drop unneeded variables that come from full continental domain GRIB files.
         # Drop time separately from lons/lats because drop_vars() fails is any of the vars
         # in the list don't exist.
-        nemo_ds = nemo_ds.drop_vars(["time"])
+        nemo_ds = nemo_ds.drop_vars(["valid_time"])
         nemo_ds = nemo_ds.drop_vars(["longitude", "latitude"])
     except ValueError:
         # We don't care if some or all of them don't exist in the dataset

@@ -25,7 +25,7 @@ dependencies:
   - beautifulsoup4
   - bottleneck
   - cartopy
-  - cfgrib=0.9.11.0
+  - cfgrib
   - cliff
   - cmocean
   - coloredlogs
@@ -60,7 +60,7 @@ dependencies:
   - tqdm
   - verboselogs
   - watchdog
-  - xarray=2024.7.0
+  - xarray=2025.1.1
 
   # For code style & repo QA
   - pre-commit
