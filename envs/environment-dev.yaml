@@ -28,7 +28,7 @@ dependencies:
   - beautifulsoup4
   - bottleneck
   - cartopy
-  - cfgrib=0.9.11.0
+  - cfgrib
   - click
   - cliff
   - cmocean
@@ -76,7 +76,7 @@ dependencies:
   - utm
   - verboselogs
   - watchdog
-  - xarray=2024.7.0
+  - xarray=2025.1.1
 
   # For coding style, repo QA, and pkg management
   - black
