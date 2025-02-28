@@ -248,7 +248,14 @@ class TestGribToNetcdf:
     @pytest.fixture
     def mock_calc_nemo_var_ds(monkeypatch):
         def _mock_calc_nemo_var_ds(
-            msc_var, grib_var, nemo_var, grib_files, full_grid, georef_ds, config
+            msc_var,
+            grib_var,
+            nemo_var,
+            grib_files,
+            fcst_step_range,
+            full_grid,
+            georef_ds,
+            config,
         ):
             pass
 
