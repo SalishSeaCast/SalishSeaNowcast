@@ -163,18 +163,18 @@ the commands below install the packages into your ``salishsea-nowcast`` developm
     $ cd SalishSeaNowcast
     $ conda env create -f envs/environment-dev.yaml
     $ conda activate salishsea-nowcast
-    (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO_Nowcast
-    (salishsea-nowcast)$ python3 -m pip install --editable ../moad_tools
-    (salishsea-nowcast)$ python3 -m pip install --editable ../Reshapr
-    (salishsea-nowcast)$ python3 -m pip install --editable ../tools/SalishSeaTools
+    (salishsea-nowcast)$ python -m pip install --editable ../NEMO_Nowcast
+    (salishsea-nowcast)$ python -m pip install --editable ../moad_tools
+    (salishsea-nowcast)$ python -m pip install --editable ../Reshapr
+    (salishsea-nowcast)$ python -m pip install --editable ../tools/SalishSeaTools
     (salishsea-nowcast)$ cd ../OPPTools
     (salishsea-nowcast)$ git switch SalishSeaCast-prod
     (salishsea-nowcast)$ cd ../SalishSeaNowcast
-    (salishsea-nowcast)$ python3 -m pip install --editable OPPTools
-    (salishsea-nowcast)$ python3 -m pip install --editable ../NEMO-Cmd
-    (salishsea-nowcast)$ python3 -m pip install --editable ../SalishSeaCmd
-    (salishsea-nowcast)$ python3 -m pip install --editable ../FVCOM-Cmd
-    (salishsea-nowcast)$ python3 -m pip install --editable .
+    (salishsea-nowcast)$ python -m pip install --editable OPPTools
+    (salishsea-nowcast)$ python -m pip install --editable ../NEMO-Cmd
+    (salishsea-nowcast)$ python -m pip install --editable ../SalishSeaCmd
+    (salishsea-nowcast)$ python -m pip install --editable ../FVCOM-Cmd
+    (salishsea-nowcast)$ python -m pip install --editable .
 
 The ``--editable`` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
 

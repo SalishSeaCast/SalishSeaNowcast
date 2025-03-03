@@ -34,7 +34,7 @@ class TestConfig:
 
     def test_python(self, prod_config, tmpdir):
         # Config.load() transforms NOWCAST.ENV part of envvars
-        assert prod_config["python"] == f"{tmpdir}/nowcast-env/bin/python3"
+        assert prod_config["python"] == f"{tmpdir}/nowcast-env/bin/python"
 
 
 class TestLoggingPublisher:

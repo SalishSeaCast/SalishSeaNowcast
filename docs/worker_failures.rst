@@ -87,7 +87,7 @@ then run the worker as follows:
 
    .. code-block:: bash
 
-       (/SalishSeaCast/nowcast-env)skookum$ python3 -m nowcast.workers.download_weather $NOWCAST_YAML 12 2.5km --debug
+       (/SalishSeaCast/nowcast-env)skookum$ python -m nowcast.workers.download_weather $NOWCAST_YAML 12 2.5km --debug
 
    The command above downloads the 12 forecast.
    The ``--debug`` flag causes the logging output of the worker to be displayed

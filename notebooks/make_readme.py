@@ -19,7 +19,7 @@ rename a notebook,
 or change the description of a notebook in its first Markdown cell,
 please generate a updated `README.md` file with:
 
-    python3 -m make_readme
+    python -m make_readme
 
 and commit and push the updated `README.md` to GitHub.
 """

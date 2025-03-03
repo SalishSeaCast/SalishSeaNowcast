@@ -613,7 +613,7 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
             ],
             "history": (
                 f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
-                f"python3 -m nowcast.workers.make_v202111_runoff_file $NOWCAST_YAML "
+                f"python -m nowcast.workers.make_v202111_runoff_file $NOWCAST_YAML "
                 f"--run-date {obs_date_yyyymmdd}"
             ),
         },

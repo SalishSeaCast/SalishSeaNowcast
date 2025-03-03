@@ -1496,7 +1496,7 @@ class TestCalcRunoffDataset:
         )
         assert runoff_ds.attrs["history"] == (
             f"[Thu {obs_date.format('YYYY-MM-DD')} 14:51:43 -07:00] "
-            f"python3 -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
+            f"python -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
             f"--run-date {obs_date.format('YYYY-MM-DD')}"
         )
 

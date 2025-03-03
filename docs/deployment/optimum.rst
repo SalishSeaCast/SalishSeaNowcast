@@ -217,15 +217,15 @@ Load the ``Miniconda/3`` module and create a Conda environment:
     $ conda create -n salishseacast -c conda-forge python=3 pip arrow \
       attrs cliff f90nml gitpython pyyaml
     $ source activate salishseacast
-    (salishseacast)$ python3 -m pip install python-hglib
+    (salishseacast)$ python -m pip install python-hglib
 
 Install the SalishSeaCast NEMO-Cmd and SalishSeaCmd packages from their repo clones:
 
 .. code-block:: bash
 
     (salishseacast)$ cd $PROJECT/SalishSeaCast/hindcast-sys/
-    (salishseacast)$ python3 -m pip install --editable NEMO-Cmd/
-    (salishseacast)$ python3 -m pip install --editable SalishSeaCmd/
+    (salishseacast)$ python -m pip install --editable NEMO-Cmd/
+    (salishseacast)$ python -m pip install --editable SalishSeaCmd/
 
 
 Populate Run Preparation Directory
