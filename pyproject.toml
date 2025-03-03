@@ -48,7 +48,7 @@ dependencies = [
     "beautifulsoup4",
     "bottleneck",
     "cartopy",
-    "cfgrib == 0.9.11.0",
+    "cfgrib",
     "click",
     "cliff",
     "cmocean",
@@ -91,7 +91,7 @@ dependencies = [
     "tqdm",
     "utm",
     "watchdog",
-    "xarray",
+    "xarray == 2025.1.1",
     # 'NEMO_Nowcast',  # use python3 -m pip install --editable NEMO_Nowcast/
     # 'moad_tools',  # use python3 -m pip install --editable moad_tools
     # 'Reshapr',  # use python3 -m pip install --editable Reshapr
