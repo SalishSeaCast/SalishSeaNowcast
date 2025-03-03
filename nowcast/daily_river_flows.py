@@ -530,7 +530,7 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
             "rivers_watersheds_proportions": "salishsea_tools.river_202108",
             "history": (
                 f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
-                f"python3 -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
+                f"python -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
                 f"--run-date {obs_date.format('YYYY-MM-DD')}"
             ),
         },

@@ -4,7 +4,7 @@
 checklist file: $(NOWCAST.ENV.NOWCAST_LOGS)/nowcast_checklist.yaml
 
 # Python interpreter in environment with all dependencies installed
-python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python3
+python: $(NOWCAST.ENV.NOWCAST_ENV)/bin/python
 
 # Filesystem group name to use for ownership of newly created files
 file group: sallen
@@ -627,7 +627,7 @@ run:
       # Python interpreter on compute host in an environment with all
       # dependencies installed. Used to, for example, launch run_NEMO and
       # watch_NEMO workers.
-      python: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/python3
+      python: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/python
       # Location on the compute host of the nowcast system config file
       config file: /nemoShare/MEOPAR/nowcast-sys/SalishSeaNowcast/config/nowcast.yaml
       # Directory on compute host where files (e.g. namelist.time) and symlinks

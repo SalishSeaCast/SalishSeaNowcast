@@ -109,7 +109,7 @@ For the `salishsea-site web app`_ that is mounted at https://salishsea.eos.ubc.c
         --prefix /SalishSeaCast/salishsea-site-env \
         -f salishsea-site/envs/environment-prod.yaml
     $ mamba activate /SalishSeaCast/salishsea-site-env
-    (/SalishSeaCast/salishsea-site-env) $ python3 -m pip install --editable salishsea-site/
+    (/SalishSeaCast/salishsea-site-env) $ python -m pip install --editable salishsea-site/
 
 
 Environment Variables

@@ -5,7 +5,7 @@
 # to create an isolated production environment.
 #
 # Create/update this file with:
-#   (sarracenia-env)$ python3 -m pip list --format=freeze >> envs/requirements-sarracenia.txt
+#   (sarracenia-env)$ python -m pip list --format=freeze >> envs/requirements-sarracenia.txt
 
 amqp==5.1.0
 appdirs==1.4.4
