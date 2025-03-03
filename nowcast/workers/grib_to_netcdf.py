@@ -266,7 +266,14 @@ def _calc_nemo_ds(
             fcst_date, fcst_hr, fcst_step_range, msc_var, full_grid, config
         )
         nemo_datasets[nemo_var] = _calc_nemo_var_ds(
-            msc_var, grib_var, nemo_var, grib_files, full_grid, georef_ds, config
+            msc_var,
+            grib_var,
+            nemo_var,
+            grib_files,
+            fcst_step_range,
+            full_grid,
+            georef_ds,
+            config,
         )
     nemo_ds = xarray.combine_by_coords(
         nemo_datasets.values(), combine_attrs="drop_conflicts"
@@ -328,7 +335,7 @@ def _trim_grib(ds, y_slice, x_slice):
         # Select region of interest
         ds = ds.sel(y=y_slice, x=x_slice)
     # Drop coordinates that we don't need
-    keep_coords = ("time", "step", "latitude", "longitude")
+    keep_coords = ("time", "step", "valid_time", "latitude", "longitude")
     ds = ds.reset_coords(
         [coord for coord in ds.coords if coord not in keep_coords],
         drop=True,
@@ -337,13 +344,21 @@ def _trim_grib(ds, y_slice, x_slice):
 
 
 def _calc_nemo_var_ds(
-    msc_var, grib_var, nemo_var, grib_files, full_grid, georef_ds, config
+    msc_var,
+    grib_var,
+    nemo_var,
+    grib_files,
+    fcst_step_range,
+    full_grid,
+    georef_ds,
+    config,
 ):
     """
     :param str msc_var:
     :param str grib_var:
     :param str nemo_var:
     :param list grib_files:
+    :param tuple fcst_step_range:
     :param boolean full_grid:
     :param :py:class:`xarray.Dataset` or None georef_ds:
     :param dict config:
@@ -373,7 +388,10 @@ def _calc_nemo_var_ds(
         engine="cfgrib",
         backend_kwargs={"indexpath": ""},
     )
-    time_counter = grib_ds.step.values + grib_ds.time.values
+    start, stop = fcst_step_range
+    time_counter = grib_ds.time.values + numpy.array(
+        [numpy.timedelta64(fcst_step, "h") for fcst_step in range(start, stop + 1)]
+    )
     nemo_da = xarray.DataArray(
         data=grib_ds[grib_var].data,
         coords={
@@ -413,8 +431,8 @@ def _calc_nemo_var_ds(
         # Drop unneeded variables that come from full continental domain GRIB files.
         # Drop time separately from lons/lats because drop_vars() fails is any of the vars
         # in the list don't exist.
-        nemo_ds = nemo_ds.drop_vars(["time"])
-        nemo_ds = nemo_ds.drop_vars(["longitude", "latitude"])
+        nemo_ds = nemo_ds.drop_vars(["time", "valid_time"])
+        nemo_ds = nemo_ds.drop_vars(["latitude", "longitude"])
     except ValueError:
         # We don't care if some or all of them don't exist in the dataset
         pass
@@ -728,7 +746,7 @@ def _write_netcdf(nemo_ds, file_date, run_date, run_type, config, fcst=False):
         {
             "history": (
                 f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
-                f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
+                f"python -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
                 f"{run_type} --run-date {run_date.format('YYYY-MM-DD')}"
             ),
         }

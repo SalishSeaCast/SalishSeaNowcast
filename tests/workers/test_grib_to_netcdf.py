@@ -52,7 +52,7 @@ def config(base_config):
                         - [VGRD_AGL-10m, v10, v_wind]           # v component of wind velocity at 10m elevation
                         - [DSWRF_Sfc, ssrd, solar]              # accumulated downward shortwave (solar) radiation at ground level
                         - [DLWRF_Sfc, strd, therm_rad]          # accumulated downward longwave (thermal) radiation at ground level
-                        - [LHTFL_Sfc, lhtfl, LHTFL_surface]     # upward surface latent heat flux (for VHFR FVCOM)
+                        - [LHTFL_Sfc, slhtf, LHTFL_surface]     # upward surface latent heat flux (for VHFR FVCOM)
                         - [TMP_AGL-2m, t2m, tair]               # air temperature at 2m elevation
                         - [SPFH_AGL-2m, sh2, qair]              # specific humidity at 2m elevation
                         - [RH_AGL-2m, r2, RH_2maboveground]     # relative humidity at 2m elevation (for VHFR FVCOM)
@@ -248,7 +248,14 @@ class TestGribToNetcdf:
     @pytest.fixture
     def mock_calc_nemo_var_ds(monkeypatch):
         def _mock_calc_nemo_var_ds(
-            msc_var, grib_var, nemo_var, grib_files, full_grid, georef_ds, config
+            msc_var,
+            grib_var,
+            nemo_var,
+            grib_files,
+            fcst_step_range,
+            full_grid,
+            georef_ds,
+            config,
         ):
             pass
 
@@ -842,7 +849,7 @@ class TestWriteNetcdf:
 
         expected = (
             f"[Sun 2023-03-12 16:02:43 -07:00] "
-            f"python3 -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
+            f"python -m nowcast.workers.grib_to_netcdf $NOWCAST_YAML "
             f"{run_type} --run-date 2023-03-12"
         )
         assert nemo_ds.attrs["history"] == expected
