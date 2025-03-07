@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that monitors and reports on the progress of a
-NEMO hindcast run on an HPC cluster that uses the SLURM scheduler.
+"""SalishSeaCast worker that monitors and reports on the progress of a NEMO hindcast run
+on an HPC cluster that uses the SLURM scheduler.
 """
 import logging
 import os
@@ -42,6 +42,7 @@ def main():
     worker.cli.add_argument("host_name", help="Name of the host to monitor the run on")
     worker.cli.add_argument("--run-id", help="Run id to watch; e.g. 01dec14hindcast")
     worker.run(watch_NEMO_hindcast, success, failure)
+    return worker
 
 
 def success(parsed_args):

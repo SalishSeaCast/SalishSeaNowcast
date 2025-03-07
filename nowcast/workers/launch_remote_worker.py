@@ -42,6 +42,7 @@ def main():
         help="Quoted string of arguments to launch the remote worker with",
     )
     worker.run(launch_remote_worker, success, failure)
+    return worker
 
 
 def success(parsed_args):

@@ -60,6 +60,7 @@ def main():
         help="Date to execute the run for.",
     )
     worker.run(run_NEMO, success, failure)
+    return worker
 
 
 def success(parsed_args):

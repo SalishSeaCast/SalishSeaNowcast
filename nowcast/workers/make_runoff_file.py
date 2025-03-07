@@ -48,6 +48,7 @@ def main():
         help="Date of the run to produce runoff file for.",
     )
     worker.run(make_runoff_file, success, failure)
+    return worker
 
 
 def success(parsed_args):

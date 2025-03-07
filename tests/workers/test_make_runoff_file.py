@@ -18,8 +18,9 @@
 
 """Unit tests for SalishSeaCast make_runoff_file worker."""
 from pathlib import Path
+import textwrap
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -34,58 +35,49 @@ def config(base_config):
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
         f.write(
-            """
-rivers:
-  rivers dir: forcing/rivers/
-  file templates:
-    b201702: 'R201702DFraCElse_{:y%Ym%md%d}.nc'
-  monthly climatology:
-    b201702: rivers-climatology/rivers_month_201702.nc
-  prop_dict modules:
-    b201702: salishsea_tools.river_201702
-  SOG river files:
-    Fraser: SOG-forcing/ECget/Fraser_flow
-  Fraser climatology: tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
-"""
+            textwrap.dedent(
+                """\
+                rivers:
+                  rivers dir: forcing/rivers/
+                  file templates:
+                    b201702: 'R201702DFraCElse_{:y%Ym%md%d}.nc'
+                  monthly climatology:
+                    b201702: rivers-climatology/rivers_month_201702.nc
+                  prop_dict modules:
+                    b201702: salishsea_tools.river_201702
+                  SOG river files:
+                    Fraser: SOG-forcing/ECget/Fraser_flow
+                  Fraser climatology: tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
+                """
+            )
         )
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_
 
 
-@patch("nowcast.workers.make_runoff_file.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(make_runoff_file, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_runoff_file.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("make_runoff_file",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_runoff_file.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_date_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_runoff_file.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_runoff_file.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            make_runoff_file.make_runoff_file,
-            make_runoff_file.success,
-            make_runoff_file.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = make_runoff_file.main()
+        assert worker.name == "make_runoff_file"
+        assert worker.description.startswith(
+            "SalishSeaCast runoff file generation worker."
         )
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = make_runoff_file.main()
+        assert worker.cli.parser._actions[3].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[3].type == expected
+        assert worker.cli.parser._actions[3].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[3].help
 
 
 class TestConfig:

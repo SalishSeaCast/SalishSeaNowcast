@@ -49,6 +49,7 @@ def main():
         help="Date of the run to produce turbidity file for.",
     )
     worker.run(make_turbidity_file, success, failure)
+    return worker
 
 
 def success(parsed_args):

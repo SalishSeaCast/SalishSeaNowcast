@@ -12,7 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that repares the YAML run description file and
+"""SalishSeaCast worker that prepares the YAML run description file and
 bash run script for a NEMO SMELT AGRIF run on an HPC cluster that uses the
 TORQUE/MOAB scheduler, and queues the run.
 """
@@ -55,6 +55,7 @@ def main():
         help="Date to execute the run for.",
     )
     worker.run(run_NEMO_agrif, success, failure)
+    return worker
 
 
 def success(parsed_args):

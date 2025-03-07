@@ -59,45 +59,30 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.watch_NEMO_hindcast.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(watch_NEMO_hindcast, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO_hindcast.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("watch_NEMO_hindcast",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO_hindcast.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_host_name_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO_hindcast.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("host_name",)
-        assert "help" in kwargs
-
-    def test_add_run_id_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO_hindcast.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("--run-id",)
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO_hindcast.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            watch_NEMO_hindcast.watch_NEMO_hindcast,
-            watch_NEMO_hindcast.success,
-            watch_NEMO_hindcast.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = watch_NEMO_hindcast.main()
+        assert worker.name == "watch_NEMO_hindcast"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that monitors and reports on the progress of a NEMO hindcast run"
         )
+
+    def test_add_host_name_arg(self, mock_worker):
+        worker = watch_NEMO_hindcast.main()
+        assert worker.cli.parser._actions[3].dest == "host_name"
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_run_id_option(self, mock_worker):
+        worker = watch_NEMO_hindcast.main()
+        assert worker.cli.parser._actions[4].dest == "run_id"
+        assert worker.cli.parser._actions[4].help
 
 
 class TestConfig:

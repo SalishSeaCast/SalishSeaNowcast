@@ -18,7 +18,7 @@
 
 """Unit tests for SalishSeaCast launch_remote_worker worker."""
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -31,52 +31,35 @@ def config(base_config):
     return base_config
 
 
-@patch("nowcast.workers.launch_remote_worker.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(launch_remote_worker, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        launch_remote_worker.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("launch_remote_worker",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        launch_remote_worker.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_host_name_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        launch_remote_worker.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("host_name",)
-        assert "help" in kwargs
-
-    def test_add_remote_worker_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        launch_remote_worker.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("remote_worker",)
-        assert "help" in kwargs
-
-    def test_add_worker_args_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        launch_remote_worker.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[2]
-        assert args == ("worker_args",)
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        launch_remote_worker.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            launch_remote_worker.launch_remote_worker,
-            launch_remote_worker.success,
-            launch_remote_worker.failure,
+    def test_init_cli(self, mock_worker):
+        worker = launch_remote_worker.main()
+        assert worker.name == "launch_remote_worker"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that launches a specified worker on a remote host."
         )
+
+    def test_add_host_name_arg(self, mock_worker):
+        worker = launch_remote_worker.main()
+        assert worker.cli.parser._actions[3].dest == "host_name"
+        assert worker.cli.parser._actions[3].help
+
+    def test_add_remote_worker_arg(self, mock_worker):
+        worker = launch_remote_worker.main()
+        assert worker.cli.parser._actions[4].dest == "remote_worker"
+        assert worker.cli.parser._actions[4].help
+
+    def test_add_worker_args_arg(self, mock_worker):
+        worker = launch_remote_worker.main()
+        assert worker.cli.parser._actions[5].dest == "worker_args"
+        assert worker.cli.parser._actions[5].help
 
 
 class TestConfig:
