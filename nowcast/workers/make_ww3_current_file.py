@@ -16,7 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Salish Sea WaveWatch3 forecast worker that produces the hourly
+"""SalishSeaCast WaveWatch3 forecast worker that produces the hourly
 ocean currents forcing file for a prelim-forecast or forecast run
 """
 import logging
@@ -60,6 +60,7 @@ def main():
         help="Start date of run to create the currents file for.",
     )
     worker.run(make_ww3_current_file, success, failure)
+    return worker
 
 
 def success(parsed_args):

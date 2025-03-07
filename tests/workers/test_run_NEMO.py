@@ -191,55 +191,40 @@ def tmp_results(tmpdir, run_date, scope="function"):
     }
 
 
-@patch("nowcast.workers.run_NEMO.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(run_NEMO, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        run_NEMO.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("run_NEMO",)
-        assert list(kwargs.keys()) == ["description"]
+    def test_instantiate_worker(self, mock_worker):
+        worker = run_NEMO.main()
+        assert worker.name == "run_NEMO"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that prepares the YAML run description file and bash run script"
+        )
 
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        run_NEMO.main()
-        m_worker().init_cli.assert_called_once_with()
+    def test_add_host_name_arg(self, mock_worker):
+        worker = run_NEMO.main()
+        assert worker.cli.parser._actions[3].dest == "host_name"
+        assert worker.cli.parser._actions[3].help
 
-    def test_add_host_name_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        run_NEMO.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("host_name",)
-        assert "help" in kwargs
+    def test_add_run_type_arg(self, mock_worker):
+        worker = run_NEMO.main()
+        assert worker.cli.parser._actions[4].dest == "run_type"
+        expected = {"nowcast", "nowcast-green", "forecast", "forecast2"}
+        assert worker.cli.parser._actions[4].choices == expected
+        assert worker.cli.parser._actions[4].help
 
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        run_NEMO.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {
-            "nowcast",
-            "nowcast-green",
-            "forecast",
-            "forecast2",
-        }
-        assert "help" in kwargs
-
-    def test_add_run_date_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        run_NEMO.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        run_NEMO.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (run_NEMO.run_NEMO, run_NEMO.success, run_NEMO.failure)
+    def test_add_run_date_option(self, mock_worker):
+        worker = run_NEMO.main()
+        assert worker.cli.parser._actions[5].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[5].type == expected
+        assert worker.cli.parser._actions[5].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[5].help
 
 
 @pytest.mark.parametrize(

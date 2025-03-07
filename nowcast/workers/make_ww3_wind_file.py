@@ -53,6 +53,7 @@ def main():
         help="Start date of run to create the wind file for.",
     )
     worker.run(make_ww3_wind_file, success, failure)
+    return worker
 
 
 def success(parsed_args):

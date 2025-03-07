@@ -50,6 +50,7 @@ def main():
         help="Date of the run to download results files from.",
     )
     worker.run(download_wwatch3_results, success, failure)
+    return worker
 
 
 def success(parsed_args):

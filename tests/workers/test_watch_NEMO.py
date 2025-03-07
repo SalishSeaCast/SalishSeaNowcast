@@ -68,48 +68,32 @@ def config(base_config):
     return config_
 
 
-@patch("nowcast.workers.watch_NEMO.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(watch_NEMO, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("watch_NEMO",)
-        assert list(kwargs.keys()) == ["description"]
+    def test_instantiate_worker(self, mock_worker):
+        worker = watch_NEMO.main()
+        assert worker.name == "watch_NEMO"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that monitors and reports on the progress of a run on the cloud"
+        )
 
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO.main()
-        m_worker().init_cli.assert_called_once_with()
+    def test_add_host_name_arg(self, mock_worker):
+        worker = watch_NEMO.main()
+        assert worker.cli.parser._actions[3].dest == "host_name"
+        assert worker.cli.parser._actions[3].help
 
-    def test_add_host_name_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[0]
-        assert args == ("host_name",)
-        assert "help" in kwargs
-
-    def test_add_run_type_arg(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO.main()
-        args, kwargs = m_worker().cli.add_argument.call_args_list[1]
-        assert args == ("run_type",)
-        assert kwargs["choices"] == {
-            "nowcast",
-            "nowcast-green",
-            "forecast",
-            "forecast2",
-        }
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        watch_NEMO.main()
-        args, kwargs = m_worker().run.call_args
-        expected = (watch_NEMO.watch_NEMO, watch_NEMO.success, watch_NEMO.failure)
-        assert args == expected
+    def test_add_run_type_arg(self, mock_worker):
+        worker = watch_NEMO.main()
+        assert worker.cli.parser._actions[4].dest == "run_type"
+        expected = {"nowcast", "nowcast-green", "forecast", "forecast2"}
+        assert worker.cli.parser._actions[4].choices == expected
+        assert worker.cli.parser._actions[4].help
 
 
 @patch("nowcast.workers.watch_NEMO.logger", autospec=True)

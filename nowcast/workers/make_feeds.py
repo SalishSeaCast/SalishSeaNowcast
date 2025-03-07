@@ -58,6 +58,7 @@ def main():
         help="Date of the run to create feeds for.",
     )
     worker.run(make_feeds, success, failure)
+    return worker
 
 
 def success(parsed_args):

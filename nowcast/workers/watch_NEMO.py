@@ -12,8 +12,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast worker that monitors and reports on the
-progress of a run on the ONC cloud computing facility or salish.
+"""SalishSeaCast worker that monitors and reports on the progress of a run on the cloud
+computing facility or salish.
 """
 import logging
 import os
@@ -52,6 +52,7 @@ def main():
         """,
     )
     worker.run(watch_NEMO, success, failure)
+    return worker
 
 
 def success(parsed_args):

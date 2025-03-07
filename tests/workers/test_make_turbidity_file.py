@@ -18,9 +18,10 @@
 
 """Unit tests for SalishSeaCast make_turbidity_file worker."""
 from types import SimpleNamespace
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import arrow
+import nemo_nowcast
 import pytest
 
 from nowcast.workers import make_turbidity_file
@@ -32,39 +33,28 @@ def config(base_config):
     return base_config
 
 
-@patch("nowcast.workers.make_turbidity_file.NowcastWorker", spec=True)
+@pytest.fixture
+def mock_worker(mock_nowcast_worker, monkeypatch):
+    monkeypatch.setattr(make_turbidity_file, "NowcastWorker", mock_nowcast_worker)
+
+
 class TestMain:
     """Unit tests for main() function."""
 
-    def test_instantiate_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_turbidity_file.main()
-        args, kwargs = m_worker.call_args
-        assert args == ("make_turbidity_file",)
-        assert list(kwargs.keys()) == ["description"]
-
-    def test_init_cli(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_turbidity_file.main()
-        m_worker().init_cli.assert_called_once_with()
-
-    def test_add_run_date_option(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_turbidity_file.main()
-        args, kwargs = m_worker().cli.add_date_option.call_args_list[0]
-        assert args == ("--run-date",)
-        assert kwargs["default"] == arrow.now().floor("day")
-        assert "help" in kwargs
-
-    def test_run_worker(self, m_worker):
-        m_worker().cli = Mock(name="cli")
-        make_turbidity_file.main()
-        args, kwargs = m_worker().run.call_args
-        assert args == (
-            make_turbidity_file.make_turbidity_file,
-            make_turbidity_file.success,
-            make_turbidity_file.failure,
+    def test_instantiate_worker(self, mock_worker):
+        worker = make_turbidity_file.main()
+        assert worker.name == "make_turbidity_file"
+        assert worker.description.startswith(
+            "SalishSeaCast worker that produces daily average Fraser River"
         )
+
+    def test_add_run_date_option(self, mock_worker):
+        worker = make_turbidity_file.main()
+        assert worker.cli.parser._actions[3].dest == "run_date"
+        expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
+        assert worker.cli.parser._actions[3].type == expected
+        assert worker.cli.parser._actions[3].default == arrow.now().floor("day")
+        assert worker.cli.parser._actions[3].help
 
 
 @patch("nowcast.workers.make_turbidity_file.logger", autospec=True)

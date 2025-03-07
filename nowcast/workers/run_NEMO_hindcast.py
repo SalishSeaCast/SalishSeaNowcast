@@ -64,6 +64,7 @@ def main():
         """,
     )
     worker.run(run_NEMO_hindcast, success, failure)
+    return worker
 
 
 def success(parsed_args):
