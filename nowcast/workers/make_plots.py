@@ -16,10 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCast worker that produces visualization images for
-the web site from run results.
-"""
-import datetime
+"""SalishSeaCast worker that produces visualization images for the website from run results."""
 import logging
 import os
 import shlex
@@ -696,13 +693,6 @@ def _prep_comparison_fig_functions(
     else:
         dev_grid_T_hr = _results_dataset("1h", "grid_T", dev_results_home / dmy)
     grid_T_hr = _results_dataset("1h", "grid_T", results_dir)
-    grid_central = _results_dataset_gridded("central", results_dir)
-    grid_obs_central = sio.loadmat("/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPcentral.mat")
-    grid_east = _results_dataset_gridded("east", results_dir)
-    grid_obs_east = sio.loadmat("/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPeast.mat")
-    grid_ddl = _results_dataset_gridded("delta", results_dir)
-    grid_obs_ddl = sio.loadmat("/ocean/dlatorne/MEOPAR/ONC_ADCP/ADCPddl.mat")
-    adcp_datetime = datetime.datetime.strptime(dmy, "%d%b%y").replace(minute=45)
     fig_functions = {
         "SH_wind": {
             "function": sandheads_winds.make_figure,
@@ -729,48 +719,6 @@ def _prep_comparison_fig_functions(
                 mesh_mask,
                 dev_mesh_mask,
             ),
-        },
-        "Central_ADCP": {
-            "function": research_VENUS.plotADCP,
-            "args": (
-                grid_central,
-                grid_obs_central,
-                adcp_datetime,
-                "Central",
-                [0, 285],
-            ),
-        },
-        "Central_depavADCP": {
-            "function": research_VENUS.plotdepavADCP,
-            "args": (grid_central, grid_obs_central, adcp_datetime, "Central"),
-        },
-        "Central_timeavADCP": {
-            "function": research_VENUS.plottimeavADCP,
-            "args": (grid_central, grid_obs_central, adcp_datetime, "Central"),
-        },
-        "East_ADCP": {
-            "function": research_VENUS.plotADCP,
-            "args": (grid_east, grid_obs_east, adcp_datetime, "East", [0, 150]),
-        },
-        "East_depavADCP": {
-            "function": research_VENUS.plotdepavADCP,
-            "args": (grid_east, grid_obs_east, adcp_datetime, "East"),
-        },
-        "East_timeavADCP": {
-            "function": research_VENUS.plottimeavADCP,
-            "args": (grid_east, grid_obs_east, adcp_datetime, "East"),
-        },
-        "ddl_ADCP": {
-            "function": research_VENUS.plotADCP,
-            "args": (grid_ddl, grid_obs_ddl, adcp_datetime, "ddl", [0, 148]),
-        },
-        "ddl_depavADCP": {
-            "function": research_VENUS.plotdepavADCP,
-            "args": (grid_ddl, grid_obs_ddl, adcp_datetime, "ddl"),
-        },
-        "ddl_timeavADCP": {
-            "function": research_VENUS.plottimeavADCP,
-            "args": (grid_ddl, grid_obs_ddl, adcp_datetime, "ddl"),
         },
     }
     for fig_func in fig_functions:
@@ -1100,18 +1048,6 @@ def _calc_figure(fig_func, args, kwargs):
         else:
             logger.error(
                 f"unexpected FileNotFoundError in {fig_func.__name__}:", exc_info=True
-            )
-        raise
-    except IndexError:
-        adcp_plot_funcs = ("plotADCP", "plotdepavADCP", "plottimeavADCP")
-        if fig_func.__name__.endswith(adcp_plot_funcs):
-            logger.warning(
-                f"VENUS {args[3]} ADCP comparison figure failed: "
-                f"No observations available"
-            )
-        else:
-            logger.error(
-                f"unexpected IndexError in {fig_func.__name__}:", exc_info=True
             )
         raise
     except KeyError:

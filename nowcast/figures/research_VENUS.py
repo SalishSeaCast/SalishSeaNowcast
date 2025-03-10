@@ -32,7 +32,7 @@ from matplotlib.patches import Ellipse
 from salishsea_tools import nc_tools, tidetools as tt, viz_tools, geo_tools
 from scipy import interpolate as interp
 
-from nowcast import analyze, residuals
+from nowcast import residuals
 
 # Font format
 title_font = {
@@ -242,12 +242,9 @@ def unstag_rot(ugrid, vgrid):
     :arg vgrid: v velocity component values with axes (..., y, x)
     :type vgrid: :py:class:`numpy.ndarray`
 
-    :arg station: Name of the station ('East' or 'Central')
-    :type station: string
-
     :returns u_E, v_N, depths: u_E and v_N velocties is the North and East
-     directions at the cell center,
-    and the depth of the station
+                               directions at the cell center,
+                               and the depth of the station
     """
 
     # We need to access the u velocity that is between i and i-1
@@ -532,253 +529,30 @@ def load_vel(day, grid, source, station, deprange):
     return u, v, dep
 
 
-## TODO: Move/rename to figures.comparison as adcp_something module
-def plotADCP(grid_m, grid_o, day, station, profile):
-    """This function will plots the velocities on a colour map with depth of the
-    model and observational values.
-    data over a whole day at a particular station.
-
-    :arg grid_m: The model grid
-    :type grid_m: neCDF4 dataset.
-
-    :arg grid_o: The observational grid
-    :type grid_o: dictionary
-
-    :arg day: day of interest
-    :type day: datetime object
-
-    :arg station: Station of interest. Either 'Central' or 'East' or 'ddl'.
-    :type station: string
-
-    :arg profile: the range of depths that will be looked at in meters.
-        (ex. [min, max])
-    :type profile: list
-
-    :return: fig
-    """
-    # Get grids into unstaggered and masked velocities at the chose depths
-    u_E, v_N, dep_t = load_vel(day, grid_m, "model", station, profile)
-    u, v, dep = load_vel(day, grid_o, "observation", station, profile)
-
-    # Begin figure
-    fig, ([axmu, axou], [axmv, axov]) = plt.subplots(
-        2, 2, figsize=(20, 10), sharex=True
-    )
-    fig.patch.set_facecolor("#2B3E50")
-
-    # Find the absolute maximum value between the model and observational
-    # velocities to set the colorbar
-    max_v = np.nanmax(abs(v))
-    max_u = np.nanmax(abs(u))
-    max_vm = np.nanmax(abs(v_N))
-    max_um = np.nanmax(abs(u_E))
-    max_speed = np.amax([max_v, max_u, max_vm, max_um])
-    vmax = np.ceil(max_speed * 10) / 10.0
-    vmin = -vmax
-    step = 0.05
-    cs = np.arange(vmin, vmax + step, step)
-
-    cmap = plt.get_cmap("bwr")
-
-    # Setting the date for title
-    date = day.strftime("%d%b%y")
-
-    # Plotting the comparison between the model and the obs velocities
-    increment = [0.25, 0.5, 0.25, 0.5]
-    velocities = [u_E.transpose(), u, v_N.transpose(), v]
-    axes = [axmu, axou, axmv, axov]
-    depths = [dep_t, dep, dep_t, dep]
-    names = ["Model", "Observations", "Model", "Observations"]
-    direction = ["East/West", "East/West", "North/South", "North/South"]
-
-    for ax, vel, timestep, depth, name, direc in zip(
-        axes, velocities, increment, depths, names, direction
-    ):
-        ax.invert_yaxis()
-        mesh = ax.contourf(
-            # The range below adjusts for the observations starting at 00:15
-            # and being in 30 minutes increments.
-            np.arange(timestep - 0.25, 24 + timestep - 0.25, timestep),
-            depth[:],
-            vel,
-            cs,
-            cmap=cmap,
-        )
-        ax.set_ylim([profile[1], profile[0]])
-        ax.set_xlim([0.25, 23])
-        ax.set_ylabel("Depth [m]", **axis_font)
-
-        axis_colors(ax, "gray")
-        ax.set_title(
-            f"{direc} {name} Velocities at VENUS {station} - {date}", **title_font
-        )
-
-    cbar_ax = fig.add_axes([0.95, 0.2, 0.03, 0.6])
-    cbar = fig.colorbar(mesh, cax=cbar_ax)
-    plt.setp(plt.getp(cbar.ax.axes, "yticklabels"), color="w")
-    cbar.set_label("[m/s]", **axis_font)
-    axmv.set_xlabel("Hour [UTC]", **axis_font)
-    axov.set_xlabel("Hour [UTC]", **axis_font)
-
-    return fig
-
-
-## TODO: Move/rename to figures.comparison as adcp_time_avg module
-def plottimeavADCP(grid_m, grid_o, day, station):
-    """This function plots a comparison of the time averaged velocities of the
-    model and the observations.
-
-    :arg grid_m: The model grid
-    :type grid_m: neCDF4 dataset.
-
-    :arg grid_o: The observational grid
-    :type grid_o: dictionary
-
-    :arg day: day of interest
-    :type day: datetime object
-
-    :arg station: Station of interest. Either 'Central' or 'East' or 'ddl'
-    :type station: string
-
-    :return: fig
-    """
-    if station == "Central":
-        profile = [0, 290]
-    elif station == "East":
-        profile = [0, 150]
-    else:
-        profile = [0, 150]
-
-    # Get grids into unstaggered and masked velocities at the chose depths
-    u_E, v_N, dep_t = load_vel(day, grid_m, "model", station, profile)
-    u, v, dep = load_vel(day, grid_o, "observation", station, profile)
-
-    # Begin figure
-    fig, ([ax1, ax2]) = plt.subplots(1, 2, figsize=(8, 10), sharex=True)
-    fig.patch.set_facecolor("#2B3E50")
-
-    # Setting the date for title
-    date = day.strftime("%d%b%y")
-
-    velocities = [u_E[:, :-1], v_N[:, :-1]]
-    vellast = [u_E[:, -2:], v_N[:, -2:]]
-    veloobs = [u, v]
-    axes = [ax1, ax2]
-    direction = ["E/W", "N/S"]
-
-    for ax, vel, velo, lastvel, direc in zip(
-        axes, velocities, veloobs, vellast, direction
-    ):
-        ax.plot(np.nanmean(vel, axis=0), dep_t[:-1], label="Model")
-        ax.plot(np.nanmean(velo, axis=1), dep[:], label="Observations")
-        ax.plot(
-            np.nanmean(lastvel, axis=0), dep_t[-2:], "--b", label="Bottom grid cell"
-        )
-        ax.set_xlabel("Daily averaged velocity [m/s]", **axis_font)
-        ax.set_ylabel("Depth [m]", **axis_font)
-        axis_colors(ax, "gray")
-        ax.set_title(f"{direc} velocities at VENUS {station}", **title_font)
-        ax.grid()
-        ax.set_ylim(profile)
-        ax.set_xlim([-0.5, 0.5])
-        ax.invert_yaxis()
-    ax1.legend(loc=0)
-
-    return fig
-
-
-## TODO: Move/rename to figures.comparison as adcp_depth_avg module
-def plotdepavADCP(grid_m, grid_o, day, station):
-    """This function plots a comparison of the depth averaged velocities of
-    the model and the observations.
-
-    :arg grid_m: The model grid
-    :type grid_m: netCDF4 dataset.
-
-    :arg grid_o: The observational grid
-    :type grid_o: dictionary
-
-    :arg day: day of interest
-    :type day: datetime object
-
-    :arg station: Station of interest. Either 'Central' or 'East' or 'ddl'
-    :type station: string
-
-    :return: fig
-    """
-    if station == "Central":
-        profile = [40, 270]
-    elif station == "East":
-        profile = [30, 150]
-    else:
-        profile = [25, 130]
-
-    # Get grids into unstaggered and masked velocities at the chose depths
-    u_E, v_N, dep_t = load_vel(day, grid_m, "model", station, profile)
-    u, v, dep = load_vel(day, grid_o, "observation", station, profile)
-
-    # Depth averaging center of water column
-    uE_av = analyze.depth_average(u_E, dep_t, 1)
-    vN_av = analyze.depth_average(v_N, dep_t, 1)
-    u_av = analyze.depth_average(u, dep[::-1], 0)
-    v_av = analyze.depth_average(v, dep[::-1], 0)
-
-    # Begin figure
-    fig, ([ax1, ax2]) = plt.subplots(2, 1, figsize=(15, 10), sharex=True)
-    fig.patch.set_facecolor("#2B3E50")
-
-    # Setting the date for title
-    date = day.strftime("%d%b%y")
-
-    timestep = 0.5
-    velocities = [uE_av, vN_av]
-    veloobs = [u_av, v_av]
-    axes = [ax1, ax2]
-    direction = ["East/West", "North/South"]
-
-    for ax, vel, velo, direc in zip(axes, velocities, veloobs, direction):
-        ax.plot(np.arange(0, 24, timestep / 2), vel, label="Model")
-        ax.plot(np.arange(0.25, 24, timestep), velo, label="Observations")
-        ax.set_xlim([0, 24])
-        ax.set_ylabel("Velocity [m/s]", **axis_font)
-        axis_colors(ax, "gray")
-        ax.set_title(
-            f"Depth Averaged ({profile[0]}-{profile[1]}m) {direc} velocities "
-            f"at VENUS {station} -{date}",
-            **title_font,
-        )
-        ax.grid()
-        ax.set_ylim([-0.6, 0.6])
-    ax1.legend(loc=0)
-    ax2.set_xlabel("Hour [UTC]")
-
-    return fig
-
-
 def plot_ellipses(
     params, x, y, depth="None", numellips=1, imin=0, imax=398, jmin=0, jmax=898
 ):
     """Plot ellipses on a map in the Salish Sea.
     :arg params: a array containing the parameters (possibly at different
-        depths and or locations).The parameters must have 0 as major axis,
-        1 as minor axis and 2 as inclination
-    :type param: np.array
+                 depths and or locations).The parameters must have 0 as major axis,
+                 1 as minor axis and 2 as inclination
+    :type params: np.array
 
     :arg x: Horizontal index of the location at which the ellipse should be
-        positioned. Should have equal or more values than numellips.
+            positioned. Should have equal or more values than numellips.
     :type x: float or np.array
 
     :arg y: Vertical index of the location at which the ellipse should be
-        positioned. Should have equal or more values than numellips.
+            positioned. Should have equal or more values than numellips.
     :type y: float or np.array
 
     :arg depth: The depth at which you want to see the ellipse. If the param
-         array has no depth dimensions put 'None'. Default 'None'.
+                array has no depth dimensions put 'None'. Default 'None'.
     :arg depth: int
 
     :arg numellips: Number of ellipse that will be plotted from the params
-        array. If =1 the function assumes there is no locations dimensions,
-        only parameter and possibly depth if notified.
+                    array. If =1 the function assumes there is no locations dimensions,
+                    only parameter and possibly depth if notified.
     :type numellips: int
 
     :arg imin: Minimum horizontal index that will be plotted.
@@ -898,11 +672,11 @@ def plot_ellipses_area(
 ):
     """Plot ellipses on a map in the Salish Sea.
     :arg params: a array containing the parameters (possibly at different
-        depths and or locations).
-    :type param: np.array
+                 depths and or locations).
+    :type params: np.array
 
     :arg depth: The depth at which you want to see the ellipse. If the param
-         array has no depth dimensions put 'None'. Default 'None'.
+                array has no depth dimensions put 'None'. Default 'None'.
     :arg depth: int
 
     :arg imin: Minimum horizontal index that will be plotted.
