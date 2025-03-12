@@ -121,10 +121,10 @@ Workers
     :members: main
 
 
-``make_v202111_runoff_file``
-----------------------------
+``make_runoff_file``
+--------------------
 
-.. automodule:: nowcast.workers.make_v202111_runoff_file
+.. automodule:: nowcast.workers.make_runoff_file
     :members: main
 
 

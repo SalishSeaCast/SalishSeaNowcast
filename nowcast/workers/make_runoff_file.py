@@ -16,11 +16,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCast worker that calculates NEMO runoff forcing file from day-averaged river
-discharge observations (lagged by 1 day) from representative gauged rivers in all watersheds
-and fits developed by Susan Allen.
+"""SalishSeaCast worker that calculates NEMO runoff forcing file.
+
+The runoff forcing is calculated from day-averaged river discharge observations
+(lagged by 1 day) from representative gauged rivers in all watersheds and fits developed by
+Susan Allen.
 Missing river discharge observations are handled by a scheme of persistence or scaling of
-a nearby gauged river, depending on time span of missing observations.
+a nearby gauged river, depending on the time span of missing observations.
 """
 import functools
 import logging
@@ -38,7 +40,7 @@ from salishsea_tools import rivertools
 from salishsea_tools import river_202108 as rivers
 
 
-NAME = "make_v202111_runoff_file"
+NAME = "make_runoff_file"
 logger = logging.getLogger(NAME)
 
 
@@ -137,7 +139,7 @@ backup_dictionary = {"SanJuan_PortRenfrew": "RobertsCreek", "Theodosia": "Englis
 def main():
     """For command-line usage see:
 
-    :command:`python -m nowcast.workers.make_v202111_runoff_file --help`
+    :command:`python -m nowcast.workers.make_runoff_file --help`
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
@@ -146,7 +148,7 @@ def main():
         default=arrow.now().floor("day").shift(days=-1),
         help="Date to make runoff file for.",
     )
-    worker.run(make_v202111_runoff_file, success, failure)
+    worker.run(make_runoff_file, success, failure)
     return worker
 
 
@@ -164,7 +166,7 @@ def failure(parsed_args):
     return "failure"
 
 
-def make_v202111_runoff_file(parsed_args, config, *args):
+def make_runoff_file(parsed_args, config, *args):
     obs_date = parsed_args.data_date
     logger.info(
         f"calculating NEMO runoff forcing for 202108 bathymetry for {obs_date.format('YYYY-MM-DD')}"
@@ -594,7 +596,7 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
         attrs={
             "creator_email": "sallen@eoas.ubc.ca",
             "creator_name": "SalishSeaCast Project contributors",
-            "creator_url": "https://github.com/SalishSeaCast/SalishSeaNowcast/blob/main/nowcast/workers/make_v202111_runoff_file.py",
+            "creator_url": "https://github.com/SalishSeaCast/SalishSeaNowcast/blob/main/nowcast/workers/make_runoff_file.py",
             "institution": "UBC EOAS",
             "institution_fullname": (
                 "Earth, Ocean & Atmospheric Sciences, University of British Columbia"
@@ -613,7 +615,7 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
             ],
             "history": (
                 f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
-                f"python -m nowcast.workers.make_v202111_runoff_file $NOWCAST_YAML "
+                f"python -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
                 f"--run-date {obs_date_yyyymmdd}"
             ),
         },

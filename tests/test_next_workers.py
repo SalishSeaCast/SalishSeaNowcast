@@ -218,7 +218,7 @@ class TestAfterDownloadWeather:
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_201702_runoff_file",
-            "make_v202111_runoff_file",
+            "make_runoff_file",
         }
 
     def test_success_2_5_km_12(self, config, checklist, monkeypatch):
@@ -245,7 +245,7 @@ class TestAfterDownloadWeather:
             "grib_to_netcdf",
             "make_live_ocean_files",
             "make_201702_runoff_file",
-            "make_v202111_runoff_file",
+            "make_runoff_file",
         }
 
     def test_success_2_5_km_18(self, config, checklist, monkeypatch):
@@ -346,7 +346,7 @@ class TestAfterCollectWeather:
         assert race_condition_workers == {
             "grib_to_netcdf",
             "make_201702_runoff_file",
-            "make_v202111_runoff_file",
+            "make_runoff_file",
         }
 
     def test_success_2_5_km_12(self, config, checklist, monkeypatch):
@@ -377,7 +377,7 @@ class TestAfterCollectWeather:
             "grib_to_netcdf",
             "make_live_ocean_files",
             "make_201702_runoff_file",
-            "make_v202111_runoff_file",
+            "make_runoff_file",
         }
 
     def test_success_2_5_km_18(self, config, checklist):
@@ -471,12 +471,12 @@ class TestAfterCollectRiverData:
 
 
 class TestAfterMakeV202111RunoffFile:
-    """Unit tests for the after_make_v202111_runoff_file function."""
+    """Unit tests for the after_make_runoff_file function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_make_v202111_runoff_file(
-            Message("make_v202111_runoff_file", msg_type), config, checklist
+        workers = next_workers.after_make_runoff_file(
+            Message("make_runoff_file", msg_type), config, checklist
         )
         assert workers == []
 
@@ -560,11 +560,11 @@ class TestAfterMakeSshFiles:
         assert workers == []
 
     @pytest.mark.parametrize("msg_type", ["success nowcast", "success forecast2"])
-    def test_success_launch_make_v202111_runoff_file(self, msg_type, config, checklist):
+    def test_success_launch_make_runoff_file(self, msg_type, config, checklist):
         workers = next_workers.after_make_ssh_files(
             Message("make_ssh_files", msg_type), config, checklist
         )
-        assert workers[0] == NextWorker("nowcast.workers.make_v202111_runoff_file")
+        assert workers[0] == NextWorker("nowcast.workers.make_runoff_file")
 
     @pytest.mark.parametrize("msg_type", ["success nowcast", "success forecast2"])
     def test_success_launch_make_201702_runoff_file(self, msg_type, config, checklist):

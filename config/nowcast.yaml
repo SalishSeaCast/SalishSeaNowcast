@@ -1306,14 +1306,14 @@ message registry:
     make_201702_runoff_file:
       checklist key: v201702 rivers forcing
       success: v201702 rivers forcing ready
-      failure: v201702 rivers forcing files preparation failed
+      failure: v201702 rivers forcing file preparation failed
       crash: make_201702_runoff_file worker crashed
 
-    make_v202111_runoff_file:
-      checklist key: v202111 rivers forcing
-      success: v202111 rivers forcing ready
-      failure: v202111 rivers forcing files preparation failed
-      crash: make_v202111_runoff_file worker crashed
+    make_runoff_file:
+      checklist key: rivers forcing
+      success: rivers forcing ready
+      failure: rivers forcing file preparation failed
+      crash: make_runoff_file worker crashed
 
     collect_NeahBay_ssh:
       checklist key: Neah Bay ssh data

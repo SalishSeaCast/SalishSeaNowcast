@@ -16,7 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit test for SalishSeaCast make_v202111_runoff_file worker."""
+"""Unit test for SalishSeaCast make_runoff_file worker."""
 import logging
 import os
 import textwrap
@@ -30,7 +30,7 @@ import pandas
 import pytest
 import xarray
 
-from nowcast.workers import make_v202111_runoff_file
+from nowcast.workers import make_runoff_file
 
 
 @pytest.fixture()
@@ -72,22 +72,22 @@ def config(base_config):
 
 @pytest.fixture
 def mock_worker(mock_nowcast_worker, monkeypatch):
-    monkeypatch.setattr(make_v202111_runoff_file, "NowcastWorker", mock_nowcast_worker)
+    monkeypatch.setattr(make_runoff_file, "NowcastWorker", mock_nowcast_worker)
 
 
 class TestMain:
     """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
-        worker = make_v202111_runoff_file.main()
+        worker = make_runoff_file.main()
 
-        assert worker.name == "make_v202111_runoff_file"
+        assert worker.name == "make_runoff_file"
         assert worker.description.startswith(
-            "SalishSeaCast worker that calculates NEMO runoff forcing file from day-averaged river"
+            "SalishSeaCast worker that calculates NEMO runoff forcing file."
         )
 
     def test_add_data_date_option(self, mock_worker):
-        worker = make_v202111_runoff_file.main()
+        worker = make_runoff_file.main()
 
         assert worker.cli.parser._actions[3].dest == "data_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
@@ -101,19 +101,15 @@ class TestConfig:
     """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
-        assert "make_v202111_runoff_file" in prod_config["message registry"]["workers"]
+        assert "make_runoff_file" in prod_config["message registry"]["workers"]
 
     def test_checklist_key(self, prod_config):
-        msg_registry = prod_config["message registry"]["workers"][
-            "make_v202111_runoff_file"
-        ]
+        msg_registry = prod_config["message registry"]["workers"]["make_runoff_file"]
 
-        assert msg_registry["checklist key"] == "v202111 rivers forcing"
+        assert msg_registry["checklist key"] == "rivers forcing"
 
     def test_message_registry_keys(self, prod_config):
-        msg_registry = prod_config["message registry"]["workers"][
-            "make_v202111_runoff_file"
-        ]
+        msg_registry = prod_config["message registry"]["workers"]["make_runoff_file"]
 
         assert list(msg_registry.keys()) == [
             "checklist key",
@@ -177,7 +173,7 @@ class TestConfig:
 class TestModuleVariables:
     """
     Unit tests for config-type information that is stored in module variables in the
-    make_v202111_runoff_file worker.
+    make_runoff_file worker.
     """
 
     def test_watershed_names(self):
@@ -194,7 +190,7 @@ class TestModuleVariables:
             "fraser",
         ]
 
-        assert make_v202111_runoff_file.watershed_names == expected
+        assert make_runoff_file.watershed_names == expected
 
     def test_rivers_for_watershed(self):
         expected = {
@@ -216,7 +212,7 @@ class TestModuleVariables:
             "fraser": {"primary": "Fraser", "secondary": "Nicomekl_Langley"},
         }
 
-        assert make_v202111_runoff_file.rivers_for_watershed == expected
+        assert make_runoff_file.rivers_for_watershed == expected
 
     def test_watershed_from_river(self):
         expected = {
@@ -232,10 +228,10 @@ class TestModuleVariables:
             "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
         }
 
-        assert make_v202111_runoff_file.watershed_from_river == expected
+        assert make_runoff_file.watershed_from_river == expected
 
     def test_theodosia_from_diversion_only(self):
-        assert make_v202111_runoff_file.theodosia_from_diversion_only == 1.429
+        assert make_runoff_file.theodosia_from_diversion_only == 1.429
 
     def test_persist_until(self):
         expected = {
@@ -256,7 +252,7 @@ class TestModuleVariables:
             "Clowhom_ClowhomLake": 2,
         }
 
-        assert make_v202111_runoff_file.persist_until == expected
+        assert make_runoff_file.persist_until == expected
 
     def test_patching_dictionary(self):
         expected = {
@@ -276,18 +272,18 @@ class TestModuleVariables:
             "Clowhom_ClowhomLake": ["fit", "persist"],
         }
 
-        assert make_v202111_runoff_file.patching_dictionary == expected
+        assert make_runoff_file.patching_dictionary == expected
 
     def test_patching_fit_types(self):
         # Valid fit types are limited to cases handled in _patch_missing_ob()
         valid_fit_types = ["persist", "fit", "backup"]
 
-        for fit_types in make_v202111_runoff_file.patching_dictionary.values():
+        for fit_types in make_runoff_file.patching_dictionary.values():
             for fit_type in fit_types:
                 assert fit_type in valid_fit_types
 
     def test_persist_is_last_patching_fit_type(self):
-        for fit_types in make_v202111_runoff_file.patching_dictionary.values():
+        for fit_types in make_runoff_file.patching_dictionary.values():
             assert fit_types[-1] == "persist"
 
     def test_matching_dictionary(self):
@@ -307,12 +303,12 @@ class TestModuleVariables:
             "Clowhom_ClowhomLake": "Theodosia_Diversion",
         }
 
-        assert make_v202111_runoff_file.matching_dictionary == expected
+        assert make_runoff_file.matching_dictionary == expected
 
     def test_backup_dictionary(self):
         expected = {"SanJuan_PortRenfrew": "RobertsCreek", "Theodosia": "Englishman"}
 
-        assert make_v202111_runoff_file.backup_dictionary == expected
+        assert make_runoff_file.backup_dictionary == expected
 
 
 class TestSuccess:
@@ -322,7 +318,7 @@ class TestSuccess:
         parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
         caplog.set_level(logging.DEBUG)
 
-        msg_type = make_v202111_runoff_file.success(parsed_args)
+        msg_type = make_runoff_file.success(parsed_args)
 
         assert caplog.records[0].levelname == "INFO"
         assert caplog.messages[0] == "2023-05-19 runoff file creation completed"
@@ -336,7 +332,7 @@ class TestFailure:
         parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
         caplog.set_level(logging.DEBUG)
 
-        msg_type = make_v202111_runoff_file.failure(parsed_args)
+        msg_type = make_runoff_file.failure(parsed_args)
 
         assert caplog.records[0].levelname == "CRITICAL"
         assert caplog.messages[0] == "2023-05-19 runoff file creation failed"
@@ -344,7 +340,7 @@ class TestFailure:
 
 
 class TestMakeV202111RunoffFile:
-    """Unit tests for make_v202111_runoff_file() function."""
+    """Unit tests for make_runoff_file() function."""
 
     @staticmethod
     @pytest.fixture
@@ -366,7 +362,7 @@ class TestMakeV202111RunoffFile:
             return flows
 
         monkeypatch.setattr(
-            make_v202111_runoff_file,
+            make_runoff_file,
             "_calc_watershed_flows",
             _mock_calc_watershed_flows,
         )
@@ -380,7 +376,7 @@ class TestMakeV202111RunoffFile:
             return grid_cell_areas
 
         monkeypatch.setattr(
-            make_v202111_runoff_file, "_get_grid_cell_areas", _mock_get_grid_cell_areas
+            make_runoff_file, "_get_grid_cell_areas", _mock_get_grid_cell_areas
         )
 
     @staticmethod
@@ -389,7 +385,7 @@ class TestMakeV202111RunoffFile:
         def _mock_to_netcdf(runoff_ds, encoding, nc_file_path):
             pass
 
-        monkeypatch.setattr(make_v202111_runoff_file, "to_netcdf", _mock_to_netcdf)
+        monkeypatch.setattr(make_runoff_file, "to_netcdf", _mock_to_netcdf)
 
     def test_checklist(
         self,
@@ -408,9 +404,7 @@ class TestMakeV202111RunoffFile:
 
         parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
 
-        checklist = make_v202111_runoff_file.make_v202111_runoff_file(
-            parsed_args, config
-        )
+        checklist = make_runoff_file.make_runoff_file(parsed_args, config)
 
         expected = {
             "b202108": os.fspath(tmp_rivers_dir / "R202108Dailies_y2023m05d19.nc")
@@ -435,7 +429,7 @@ class TestMakeV202111RunoffFile:
         parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-26"))
         caplog.set_level(logging.DEBUG)
 
-        make_v202111_runoff_file.make_v202111_runoff_file(parsed_args, config)
+        make_runoff_file.make_runoff_file(parsed_args, config)
 
         assert caplog.records[0].levelname == "INFO"
         expected = (
@@ -477,9 +471,7 @@ class TestCalcWatershedFlows:
         ):
             return mock_watershed_flows.pop(0)[1]
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_do_a_river_pair", _mock_do_a_river_pair
-        )
+        monkeypatch.setattr(make_runoff_file, "_do_a_river_pair", _mock_do_a_river_pair)
 
     @staticmethod
     @pytest.fixture
@@ -487,14 +479,14 @@ class TestCalcWatershedFlows:
         def _mock_do_fraser(obs_date, config):
             return 1094.5609129386, 63.9781423614
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_do_fraser", _mock_do_fraser)
+        monkeypatch.setattr(make_runoff_file, "_do_fraser", _mock_do_fraser)
 
     def test_calc_watershed_flows(
         self, mock_do_a_river_pair, mock_do_fraser, config, monkeypatch
     ):
         obs_date = arrow.get("2023-02-19")
 
-        flows = make_v202111_runoff_file._calc_watershed_flows(obs_date, config)
+        flows = make_runoff_file._calc_watershed_flows(obs_date, config)
 
         expected = {
             "bute": 83.3223456,
@@ -508,7 +500,7 @@ class TestCalcWatershedFlows:
             "toba": 56.474250732,
             "fraser": 1094.5609129386,
         }
-        for name in make_v202111_runoff_file.watershed_names:
+        for name in make_runoff_file.watershed_names:
             assert flows[name] == pytest.approx(expected[name])
         assert flows["non_fraser"] == pytest.approx(63.9781423614)
 
@@ -518,7 +510,7 @@ class TestCalcWatershedFlows:
         obs_date = arrow.get("2023-02-26")
         caplog.set_level(logging.DEBUG)
 
-        make_v202111_runoff_file._calc_watershed_flows(obs_date, config)
+        make_runoff_file._calc_watershed_flows(obs_date, config)
 
         assert caplog.records[0].levelname == "DEBUG"
         assert caplog.messages[0] == "no secondary river for bute watershed"
@@ -574,13 +566,11 @@ class TestDoFraser:
         def mock_read_river(river_name, ps, config_):
             return mock_dataframes.pop(0)
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         obs_date = arrow.get("2023-02-19")
 
-        fraser_flux, secondary_flux = make_v202111_runoff_file._do_fraser(
-            obs_date, config
-        )
+        fraser_flux, secondary_flux = make_runoff_file._do_fraser(obs_date, config)
 
         assert fraser_flux == pytest.approx(1094.56091294)
         assert secondary_flux == pytest.approx(63.978142)
@@ -618,7 +608,7 @@ class TestDoFraser:
         def mock_read_river(river_name, ps, config_):
             return mock_dataframes.pop(0)
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         mock_river_flows = [
             # Fraser
@@ -630,15 +620,11 @@ class TestDoFraser:
         def mock_get_river_flow(river_name, river_flow, obs_date, config):
             return mock_river_flows.pop(0)
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_get_river_flow", mock_get_river_flow
-        )
+        monkeypatch.setattr(make_runoff_file, "_get_river_flow", mock_get_river_flow)
 
         obs_date = arrow.get("2023-02-19")
 
-        fraser_flux, secondary_flux = make_v202111_runoff_file._do_fraser(
-            obs_date, config
-        )
+        fraser_flux, secondary_flux = make_runoff_file._do_fraser(obs_date, config)
 
         assert fraser_flux == pytest.approx(1083.249638)
         assert secondary_flux == pytest.approx(63.978142)
@@ -676,7 +662,7 @@ class TestDoFraser:
         def mock_read_river(river_name, ps, config_):
             return mock_dataframes.pop(0)
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
         mock_river_flows = [
             # Fraser
             6.625833e02,
@@ -687,15 +673,11 @@ class TestDoFraser:
         def mock_get_river_flow(river_name, river_flow, obs_date, config):
             return mock_river_flows.pop(0)
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_get_river_flow", mock_get_river_flow
-        )
+        monkeypatch.setattr(make_runoff_file, "_get_river_flow", mock_get_river_flow)
 
         obs_date = arrow.get("2023-02-19")
 
-        fraser_flux, secondary_flux = make_v202111_runoff_file._do_fraser(
-            obs_date, config
-        )
+        fraser_flux, secondary_flux = make_runoff_file._do_fraser(obs_date, config)
 
         assert fraser_flux == pytest.approx(1094.56091294)
         assert secondary_flux == pytest.approx(63.978142)
@@ -719,14 +701,14 @@ class TestDoARiverPair:
                 },
             )
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         watershed_name = "bute"
         obs_date = arrow.get("2023-02-13")
         primary_river_name = "Homathko_Mouth"
         secondary_river_name = None
 
-        watershed_flux = make_v202111_runoff_file._do_a_river_pair(
+        watershed_flux = make_runoff_file._do_a_river_pair(
             watershed_name, obs_date, primary_river_name, config, secondary_river_name
         )
 
@@ -747,14 +729,14 @@ class TestDoARiverPair:
                 },
             )
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         def mock_patch_missing_obs(river_name, river_flow, obs_date, config):
             mock_flux = 5.338837e01
             return mock_flux
 
         monkeypatch.setattr(
-            make_v202111_runoff_file, "_patch_missing_obs", mock_patch_missing_obs
+            make_runoff_file, "_patch_missing_obs", mock_patch_missing_obs
         )
 
         watershed_name = "bute"
@@ -762,7 +744,7 @@ class TestDoARiverPair:
         primary_river_name = "Homathko_Mouth"
         secondary_river_name = None
 
-        watershed_flux = make_v202111_runoff_file._do_a_river_pair(
+        watershed_flux = make_runoff_file._do_a_river_pair(
             watershed_name, obs_date, primary_river_name, config, secondary_river_name
         )
 
@@ -801,14 +783,14 @@ class TestDoARiverPair:
         def mock_read_river(river_name, ps, config_):
             return mock_dataframes.pop(0)
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         watershed_name = "jervis"
         obs_date = arrow.get("2023-02-13")
         primary_river_name = "Clowhom_ClowhomLake"
         secondary_river_name = "RobertsCreek"
 
-        watershed_flux = make_v202111_runoff_file._do_a_river_pair(
+        watershed_flux = make_runoff_file._do_a_river_pair(
             watershed_name, obs_date, primary_river_name, config, secondary_river_name
         )
 
@@ -829,7 +811,7 @@ class TestDoARiverPair:
                 },
             )
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         def mock_read_river_Theodosia(config_):
             return pandas.DataFrame(
@@ -846,7 +828,7 @@ class TestDoARiverPair:
             )
 
         monkeypatch.setattr(
-            make_v202111_runoff_file, "_read_river_Theodosia", mock_read_river_Theodosia
+            make_runoff_file, "_read_river_Theodosia", mock_read_river_Theodosia
         )
 
         watershed_name = "toba"
@@ -854,7 +836,7 @@ class TestDoARiverPair:
         primary_river_name = "Homathko_Mouth"
         secondary_river_name = "Theodosia"
 
-        watershed_flux = make_v202111_runoff_file._do_a_river_pair(
+        watershed_flux = make_runoff_file._do_a_river_pair(
             watershed_name, obs_date, primary_river_name, config, secondary_river_name
         )
 
@@ -893,14 +875,14 @@ class TestDoARiverPair:
         def mock_read_river(river_name, ps, config_):
             return mock_dataframes.pop(0)
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         def mock_patch_missing_obs(river_name, river_flow, obs_date, config):
             mock_flux = 8.285429e-01
             return mock_flux
 
         monkeypatch.setattr(
-            make_v202111_runoff_file, "_patch_missing_obs", mock_patch_missing_obs
+            make_runoff_file, "_patch_missing_obs", mock_patch_missing_obs
         )
 
         watershed_name = "jervis"
@@ -908,7 +890,7 @@ class TestDoARiverPair:
         primary_river_name = "Clowhom_ClowhomLake"
         secondary_river_name = "RobertsCreek"
 
-        watershed_flux = make_v202111_runoff_file._do_a_river_pair(
+        watershed_flux = make_runoff_file._do_a_river_pair(
             watershed_name, obs_date, primary_river_name, config, secondary_river_name
         )
 
@@ -942,7 +924,7 @@ class TestGetRiverFlow:
         )
         obs_date = arrow.get("2023-02-15")
 
-        river_flow = make_v202111_runoff_file._get_river_flow(
+        river_flow = make_runoff_file._get_river_flow(
             river_name, river_df, obs_date, config
         )
 
@@ -954,7 +936,7 @@ class TestGetRiverFlow:
             return flux
 
         monkeypatch.setattr(
-            make_v202111_runoff_file, "_patch_missing_obs", mock_patch_missing_obs
+            make_runoff_file, "_patch_missing_obs", mock_patch_missing_obs
         )
 
         river_name = "SanJuan_PortRenfrew"
@@ -978,7 +960,7 @@ class TestGetRiverFlow:
         obs_date = arrow.get("2023-02-16")
         caplog.set_level(logging.DEBUG)
 
-        river_flow = make_v202111_runoff_file._get_river_flow(
+        river_flow = make_runoff_file._get_river_flow(
             river_name, river_df, obs_date, config
         )
 
@@ -1012,13 +994,11 @@ class TestReadRiver:
                 }
             )
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_read_river_csv", mock_read_river_csv
-        )
+        monkeypatch.setattr(make_runoff_file, "_read_river_csv", mock_read_river_csv)
 
         river_name = "Squamish_Brackendale"
 
-        river_flow = make_v202111_runoff_file._read_river(river_name, ps, config)
+        river_flow = make_runoff_file._read_river(river_name, ps, config)
 
         expected = pandas.DataFrame(
             data={
@@ -1039,7 +1019,7 @@ class TestParseLongCSVLine:
     """Unit test for _parse_long_csv_line()."""
 
     def test_parse_long_csv_line(self):
-        line = make_v202111_runoff_file._parse_long_csv_line(
+        line = make_runoff_file._parse_long_csv_line(
             "1923 02 13 1.100000E+01 B".split()
         )
 
@@ -1059,7 +1039,7 @@ class TestSetDateAsIndex:
             }
         )
 
-        make_v202111_runoff_file._set_date_as_index(river_flow)
+        make_runoff_file._set_date_as_index(river_flow)
 
         expected = pandas.DataFrame(
             data={
@@ -1113,11 +1093,9 @@ class TestReadRiverTheodosia:
         def mock_read_river_csv(filename):
             return mock_dataframes.pop(0)
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_read_river_csv", mock_read_river_csv
-        )
+        monkeypatch.setattr(make_runoff_file, "_read_river_csv", mock_read_river_csv)
 
-        theodosia = make_v202111_runoff_file._read_river_Theodosia(config)
+        theodosia = make_runoff_file._read_river_Theodosia(config)
 
         expected = pandas.DataFrame(
             data={
@@ -1167,11 +1145,9 @@ class TestReadRiverTheodosia:
         def mock_read_river_csv(filename):
             return mock_dataframes.pop(0)
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_read_river_csv", mock_read_river_csv
-        )
+        monkeypatch.setattr(make_runoff_file, "_read_river_csv", mock_read_river_csv)
 
-        theodosia = make_v202111_runoff_file._read_river_Theodosia(config)
+        theodosia = make_runoff_file._read_river_Theodosia(config)
 
         expected = pandas.DataFrame(
             data={
@@ -1190,7 +1166,7 @@ class TestReadRiverTheodosia:
 
 
 class TestPatchMissingObs:
-    """Unit tests for make_v202111_runoff_file._patch_missing_obs()."""
+    """Unit tests for make_runoff_file._patch_missing_obs()."""
 
     def test_obs_date_not_at_end_of_timeseries(self, config, caplog):
         river_name = "Nicomekl_Langley"
@@ -1224,7 +1200,7 @@ class TestPatchMissingObs:
         with pytest.raises(
             ValueError, match=r".* is not beyond end of time series at .*"
         ):
-            make_v202111_runoff_file._patch_missing_obs(
+            make_runoff_file._patch_missing_obs(
                 river_name, river_flow, obs_date, config
             )
 
@@ -1250,7 +1226,7 @@ class TestPatchMissingObs:
         obs_date = arrow.get("2023-02-16")
         caplog.set_level(logging.DEBUG)
 
-        flux = make_v202111_runoff_file._patch_missing_obs(
+        flux = make_runoff_file._patch_missing_obs(
             river_name, river_flow, obs_date, config
         )
 
@@ -1269,9 +1245,7 @@ class TestPatchMissingObs:
             flux = 54.759385
             return flux
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_patch_fitting", mock_patch_fitting
-        )
+        monkeypatch.setattr(make_runoff_file, "_patch_fitting", mock_patch_fitting)
 
         river_name = "Squamish_Brackendale"
         river_flow = pandas.DataFrame(
@@ -1304,7 +1278,7 @@ class TestPatchMissingObs:
         obs_date = arrow.get("2023-02-14")
         caplog.set_level(logging.DEBUG)
 
-        flux = make_v202111_runoff_file._patch_missing_obs(
+        flux = make_runoff_file._patch_missing_obs(
             river_name, river_flow, obs_date, config
         )
 
@@ -1326,9 +1300,7 @@ class TestPatchMissingObs:
         ):
             return mock_patch_fitting_returns.pop(0)
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_patch_fitting", mock_patch_fitting
-        )
+        monkeypatch.setattr(make_runoff_file, "_patch_fitting", mock_patch_fitting)
 
         river_name = "SanJuan_PortRenfrew"
         river_flow = pandas.DataFrame(
@@ -1351,7 +1323,7 @@ class TestPatchMissingObs:
         obs_date = arrow.get("2023-02-16")
         caplog.set_level(logging.DEBUG)
 
-        flux = make_v202111_runoff_file._patch_missing_obs(
+        flux = make_runoff_file._patch_missing_obs(
             river_name, river_flow, obs_date, config
         )
 
@@ -1373,9 +1345,7 @@ class TestPatchMissingObs:
         ):
             return mock_patch_fitting_returns.pop(0)
 
-        monkeypatch.setattr(
-            make_v202111_runoff_file, "_patch_fitting", mock_patch_fitting
-        )
+        monkeypatch.setattr(make_runoff_file, "_patch_fitting", mock_patch_fitting)
 
         river_name = "SanJuan_PortRenfrew"
         river_flow = pandas.DataFrame(
@@ -1398,7 +1368,7 @@ class TestPatchMissingObs:
         obs_date = arrow.get("2023-02-16")
         caplog.set_level(logging.DEBUG)
 
-        flux = make_v202111_runoff_file._patch_missing_obs(
+        flux = make_runoff_file._patch_missing_obs(
             river_name, river_flow, obs_date, config
         )
 
@@ -1412,7 +1382,7 @@ class TestPatchMissingObs:
 
 
 class TestPatchFitting:
-    """Unit tests for make_v202111_runoff_file._patch_fitting()."""
+    """Unit tests for make_runoff_file._patch_fitting()."""
 
     def test_1_day_missing_patch_successful(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config):
@@ -1447,7 +1417,7 @@ class TestPatchFitting:
                 },
             )
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
             # Squamish_Brackendale
@@ -1481,7 +1451,7 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
-        flux = make_v202111_runoff_file._patch_fitting(
+        flux = make_runoff_file._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
@@ -1524,7 +1494,7 @@ class TestPatchFitting:
                 },
             )
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
             # Squamish_Brackendale
@@ -1558,7 +1528,7 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 3
 
-        flux = make_v202111_runoff_file._patch_fitting(
+        flux = make_runoff_file._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
@@ -1597,7 +1567,7 @@ class TestPatchFitting:
                 },
             )
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
             # Squamish_Brackendale
@@ -1631,7 +1601,7 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
-        flux = make_v202111_runoff_file._patch_fitting(
+        flux = make_runoff_file._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
@@ -1670,7 +1640,7 @@ class TestPatchFitting:
                 },
             )
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
             # Squamish_Brackendale
@@ -1704,7 +1674,7 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
-        flux = make_v202111_runoff_file._patch_fitting(
+        flux = make_runoff_file._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
@@ -1743,7 +1713,7 @@ class TestPatchFitting:
                 },
             )
 
-        monkeypatch.setattr(make_v202111_runoff_file, "_read_river", mock_read_river)
+        monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
             # Squamish_Brackendale
@@ -1777,7 +1747,7 @@ class TestPatchFitting:
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
-        flux = make_v202111_runoff_file._patch_fitting(
+        flux = make_runoff_file._patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
 
@@ -1785,7 +1755,7 @@ class TestPatchFitting:
 
 
 class TestCreateRunoffArray:
-    """Unit test for make_v202111_runoff_file._create_runoff_array()."""
+    """Unit test for make_runoff_file._create_runoff_array()."""
 
     def test_create_runoff_array(self, config):
         flows = {
@@ -1804,7 +1774,7 @@ class TestCreateRunoffArray:
         mock_grid_cell_areas = numpy.empty((898, 398), dtype=float)
         mock_grid_cell_areas.fill(200_000)
 
-        runoff_array = make_v202111_runoff_file._create_runoff_array(
+        runoff_array = make_runoff_file._create_runoff_array(
             flows, mock_grid_cell_areas
         )
 
@@ -1822,7 +1792,7 @@ class TestCreateRunoffArray:
 
 
 class TestCalcRunoffDataset:
-    """Unit tests for make_v202111_runoff_file._calc_runoff_dataset()."""
+    """Unit tests for make_runoff_file._calc_runoff_dataset()."""
 
     @staticmethod
     @pytest.fixture(scope="class")
@@ -1834,7 +1804,7 @@ class TestCalcRunoffDataset:
     def test_data_array_values(self, runoff_array, config):
         obs_date = arrow.get("2023-05-11")
 
-        runoff_ds = make_v202111_runoff_file._calc_runoff_dataset(
+        runoff_ds = make_runoff_file._calc_runoff_dataset(
             obs_date, runoff_array, config
         )
 
@@ -1845,7 +1815,7 @@ class TestCalcRunoffDataset:
     def test_data_array_attrs(self, runoff_array, config):
         obs_date = arrow.get("2023-05-11")
 
-        runoff_ds = make_v202111_runoff_file._calc_runoff_dataset(
+        runoff_ds = make_runoff_file._calc_runoff_dataset(
             obs_date, runoff_array, config
         )
 
@@ -1856,7 +1826,7 @@ class TestCalcRunoffDataset:
     def test_coords(self, runoff_array, config):
         obs_date = arrow.get("2023-05-11")
 
-        runoff_ds = make_v202111_runoff_file._calc_runoff_dataset(
+        runoff_ds = make_runoff_file._calc_runoff_dataset(
             obs_date, runoff_array, config
         )
 
@@ -1868,7 +1838,7 @@ class TestCalcRunoffDataset:
     def test_dims(self, runoff_array, config):
         obs_date = arrow.get("2023-05-11")
 
-        runoff_ds = make_v202111_runoff_file._calc_runoff_dataset(
+        runoff_ds = make_runoff_file._calc_runoff_dataset(
             obs_date, runoff_array, config
         )
 
@@ -1881,11 +1851,11 @@ class TestCalcRunoffDataset:
         def mock_now(tz):
             return arrow.get("2023-05-11 14:51:43-07:00")
 
-        monkeypatch.setattr(make_v202111_runoff_file.arrow, "now", mock_now)
+        monkeypatch.setattr(make_runoff_file.arrow, "now", mock_now)
 
         obs_date = arrow.get("2023-05-11")
 
-        runoff_ds = make_v202111_runoff_file._calc_runoff_dataset(
+        runoff_ds = make_runoff_file._calc_runoff_dataset(
             obs_date, runoff_array, config
         )
 
@@ -1893,7 +1863,7 @@ class TestCalcRunoffDataset:
         assert runoff_ds.attrs["creator_name"] == "SalishSeaCast Project contributors"
         assert (
             runoff_ds.attrs["creator_url"]
-            == "https://github.com/SalishSeaCast/SalishSeaNowcast/blob/main/nowcast/workers/make_v202111_runoff_file.py"
+            == "https://github.com/SalishSeaCast/SalishSeaNowcast/blob/main/nowcast/workers/make_runoff_file.py"
         )
         assert runoff_ds.attrs["institution"] == "UBC EOAS"
         assert (
@@ -1920,19 +1890,19 @@ class TestCalcRunoffDataset:
         )
         assert runoff_ds.attrs["history"] == (
             f"[Thu {obs_date.format('YYYY-MM-DD')} 14:51:43 -07:00] "
-            f"python -m nowcast.workers.make_v202111_runoff_file $NOWCAST_YAML "
+            f"python -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
             f"--run-date {obs_date.format('YYYY-MM-DD')}"
         )
 
 
 class TestWriteNetcdf:
-    """Unit test for make_v202111_runoff_file._write_netcdf()."""
+    """Unit test for make_runoff_file._write_netcdf()."""
 
     def test_write_netcdf(self, config, caplog, tmp_path, monkeypatch):
         def mock_to_netcdf(runoff_ds, encoding, nc_file_path):
             pass
 
-        monkeypatch.setattr(make_v202111_runoff_file, "to_netcdf", mock_to_netcdf)
+        monkeypatch.setattr(make_runoff_file, "to_netcdf", mock_to_netcdf)
         rivers_dir = Path(config["rivers"]["rivers dir"])
         tmp_rivers_dir = tmp_path / rivers_dir
         tmp_rivers_dir.mkdir(parents=True)
@@ -1942,9 +1912,7 @@ class TestWriteNetcdf:
         obs_date = arrow.get("2023-05-30")
         caplog.set_level("DEBUG")
 
-        nc_file_path = make_v202111_runoff_file._write_netcdf(
-            runoff_ds, obs_date, config
-        )
+        nc_file_path = make_runoff_file._write_netcdf(runoff_ds, obs_date, config)
 
         assert caplog.records[0].levelname == "DEBUG"
         assert (
