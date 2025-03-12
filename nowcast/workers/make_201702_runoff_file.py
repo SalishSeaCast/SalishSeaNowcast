@@ -12,12 +12,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-"""SalishSeaCast runoff file generation worker.
+"""SalishSeaCast runoff file generation worker for v201702 bathymetry.
 
-Blend Environment Canada gauge data for the Fraser River at Hope with
-climatology for the Fraser downstream of Hope,
-and climatologies for all of the other modeled rivers to generate the runoff
-forcing file.
+Blend Environment Canada river gauge data for the Fraser River at Hope with climatology for the
+Fraser downstream of Hope,
+and climatology for all the other modelled rivers to generate the runoff forcing file.
 """
 import importlib
 import logging
@@ -31,14 +30,14 @@ import yaml
 from nemo_nowcast import NowcastWorker
 from salishsea_tools import rivertools
 
-NAME = "make_runoff_file"
+NAME = "make_201702_runoff_file"
 logger = logging.getLogger(NAME)
 
 
 def main():
     """For command-line usage see:
 
-    :command:`python -m nowcast.workers.make_runoff_file --help`
+    :command:`python -m nowcast.workers.make_201702_runoff_file --help`
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
@@ -47,7 +46,7 @@ def main():
         default=arrow.now().floor("day"),
         help="Date of the run to produce runoff file for.",
     )
-    worker.run(make_runoff_file, success, failure)
+    worker.run(make_201702_runoff_file, success, failure)
     return worker
 
 
@@ -66,9 +65,9 @@ def failure(parsed_args):
     return "failure"
 
 
-def make_runoff_file(parsed_args, config, *args):
-    """Create a rivers runoff file from real-time Fraser River at Hope
-    average flow yesterday and climatology for all of the other rivers.
+def make_201702_runoff_file(parsed_args, config, *args):
+    """Create a rivers runoff file for the v201702 bathymetry from real-time Fraser River at Hope
+    average flow yesterday and climatology for all the other rivers.
     """
     yesterday = parsed_args.run_date.shift(days=-1)
     # Find history of fraser flow

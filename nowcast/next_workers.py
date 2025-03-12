@@ -89,7 +89,7 @@ def after_download_weather(msg, config, checklist):
                 )
                 race_condition_workers = {
                     "grib_to_netcdf",
-                    "make_runoff_file",
+                    "make_201702_runoff_file",
                     "make_v202111_runoff_file",
                 }
                 return next_workers[msg.type], race_condition_workers
@@ -111,7 +111,7 @@ def after_download_weather(msg, config, checklist):
             race_condition_workers = {
                 "grib_to_netcdf",
                 "make_live_ocean_files",
-                "make_runoff_file",
+                "make_201702_runoff_file",
                 "make_v202111_runoff_file",
             }
             return next_workers[msg.type], race_condition_workers
@@ -296,8 +296,8 @@ def after_make_v202111_runoff_file(msg, config, checklist):
     return next_workers[msg.type]
 
 
-def after_make_runoff_file(msg, config, checklist):
-    """Calculate the list of workers to launch after the make_runoff_file
+def after_make_201702_runoff_file(msg, config, checklist):
+    """Calculate the list of workers to launch after the make_201702_runoff_file
     worker ends.
 
     :arg msg: Nowcast system message.
@@ -396,7 +396,9 @@ def after_make_ssh_files(msg, config, checklist):
         next_workers[msg.type].append(
             NextWorker("nowcast.workers.make_v202111_runoff_file")
         )
-        next_workers[msg.type].append(NextWorker("nowcast.workers.make_runoff_file"))
+        next_workers[msg.type].append(
+            NextWorker("nowcast.workers.make_201702_runoff_file")
+        )
     return next_workers[msg.type]
 
 

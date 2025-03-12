@@ -49,11 +49,19 @@ For example:
 
 * The :py:mod:`~nowcast.workers.collect_weather` worker is launched four times daily,
   to get the hour 00, 06, 12, and 18 UTC forecast products.
-* The :py:mod:`~nowcast.workers.make_runoff_file` worker is only launched after the 06 forecast download finishes because the river runoff forcing is based on daily average discharge values and climatology.
-* The :py:mod:`~nowcast.workers.grib_to_netcdf` worker is only launched after the 06 and 12 forecast downloads finish to prepare the atmospheric forcing files that will be used by the preliminary forecast run,
+* The :py:mod:`~nowcast.workers.make_runoff_file` worker is launched both after the 06 forecast
+  download finishes to calculate the river runoff forcing for the preliminary forecast runs
+  from the previous day's ECCC gauged rivers average discharge values.
+  It is launched again to update the river runoff forcing for the nowcast and final forecast
+  runs with the previous day's USGS gauged rivers average discharge values that are unavailable at
+  preliminary forecast time.
+* The :py:mod:`~nowcast.workers.grib_to_netcdf` worker is only launched after the
+  06 and 12 forecast downloads finish to prepare the atmospheric forcing files that will
+  be used by the preliminary forecast run,
   and the nowcast and updated forecast runs.
   However,
-  :py:mod:`~nowcast.workers.grib_to_netcdf` uses results from several preceding forecast products downloads to do its job.
+  :py:mod:`~nowcast.workers.grib_to_netcdf` uses results from several preceding forecast
+  products downloads to do its job.
 * Etc.
 
 To fully understand the flow and interactions of workers,
@@ -106,10 +114,10 @@ Workers
     :members: main
 
 
-``make_runoff_file``
---------------------
+``make_201702_runoff_file``
+---------------------------
 
-.. automodule:: nowcast.workers.make_runoff_file
+.. automodule:: nowcast.workers.make_201702_runoff_file
     :members: main
 
 

@@ -16,7 +16,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""Unit tests for SalishSeaCast make_runoff_file worker."""
+"""Unit tests for SalishSeaCast make_201702_runoff_file worker."""
 from pathlib import Path
 import textwrap
 from types import SimpleNamespace
@@ -26,7 +26,7 @@ import arrow
 import nemo_nowcast
 import pytest
 
-from nowcast.workers import make_runoff_file
+from nowcast.workers import make_201702_runoff_file
 
 
 @pytest.fixture()
@@ -58,21 +58,21 @@ def config(base_config):
 
 @pytest.fixture
 def mock_worker(mock_nowcast_worker, monkeypatch):
-    monkeypatch.setattr(make_runoff_file, "NowcastWorker", mock_nowcast_worker)
+    monkeypatch.setattr(make_201702_runoff_file, "NowcastWorker", mock_nowcast_worker)
 
 
 class TestMain:
     """Unit tests for main() function."""
 
     def test_instantiate_worker(self, mock_worker):
-        worker = make_runoff_file.main()
-        assert worker.name == "make_runoff_file"
+        worker = make_201702_runoff_file.main()
+        assert worker.name == "make_201702_runoff_file"
         assert worker.description.startswith(
-            "SalishSeaCast runoff file generation worker."
+            "SalishSeaCast runoff file generation worker for v201702 bathymetry."
         )
 
     def test_add_run_date_option(self, mock_worker):
-        worker = make_runoff_file.main()
+        worker = make_201702_runoff_file.main()
         assert worker.cli.parser._actions[3].dest == "run_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
         assert worker.cli.parser._actions[3].type == expected
@@ -84,13 +84,17 @@ class TestConfig:
     """Unit tests for production YAML config file elements related to worker."""
 
     def test_message_registry(self, prod_config):
-        assert "make_runoff_file" in prod_config["message registry"]["workers"]
-        msg_registry = prod_config["message registry"]["workers"]["make_runoff_file"]
-        assert msg_registry["checklist key"] == "rivers forcing"
+        assert "make_201702_runoff_file" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_201702_runoff_file"
+        ]
+        assert msg_registry["checklist key"] == "v201702 rivers forcing"
 
     @pytest.mark.parametrize("msg", ("success", "failure", "crash"))
     def test_message_types(self, msg, prod_config):
-        msg_registry = prod_config["message registry"]["workers"]["make_runoff_file"]
+        msg_registry = prod_config["message registry"]["workers"][
+            "make_201702_runoff_file"
+        ]
         assert msg in msg_registry
 
     def test_rivers_sections(self, prod_config):
@@ -114,23 +118,23 @@ class TestConfig:
         )
 
 
-@patch("nowcast.workers.make_runoff_file.logger", autospec=True)
+@patch("nowcast.workers.make_201702_runoff_file.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function."""
 
     def test_success(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-05-17"))
-        msg_type = make_runoff_file.success(parsed_args)
+        msg_type = make_201702_runoff_file.success(parsed_args)
         assert m_logger.info.called
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.make_runoff_file.logger", autospec=True)
+@patch("nowcast.workers.make_201702_runoff_file.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function."""
 
     def test_failure(self, m_logger):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-05-17"))
-        msg_type = make_runoff_file.failure(parsed_args)
+        msg_type = make_201702_runoff_file.failure(parsed_args)
         assert m_logger.critical.called
         assert msg_type == "failure"
