@@ -17,10 +17,10 @@
 
 
 """Unit tests for SalishSeaCast make_201702_runoff_file worker."""
+import logging
 from pathlib import Path
 import textwrap
 from types import SimpleNamespace
-from unittest.mock import patch
 
 import arrow
 import nemo_nowcast
@@ -118,23 +118,30 @@ class TestConfig:
         )
 
 
-@patch("nowcast.workers.make_201702_runoff_file.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function."""
 
-    def test_success(self, m_logger):
+    def test_success(self, caplog):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-05-17"))
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_201702_runoff_file.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = "2017-05-17 runoff file creation from Fraser at Hope and climatology elsewhere complete"
+        assert caplog.messages[0] == expected
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.make_201702_runoff_file.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function."""
 
-    def test_failure(self, m_logger):
+    def test_failure(self, caplog):
         parsed_args = SimpleNamespace(run_date=arrow.get("2017-05-17"))
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_201702_runoff_file.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        assert caplog.messages[0] == "2017-05-17 runoff file creation failed"
         assert msg_type == "failure"
