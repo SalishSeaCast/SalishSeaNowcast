@@ -566,8 +566,8 @@ The output looks something like:
     tests/workers/test_make_fvcom_rivers_forcing.py ..............................
     ....                                                                           [ 35%]
     tests/test_daily_river_flows.py ......................................         [ 36%]
-    tests/workers/test_make_v202111_runoff_file.py ......................................
-    ........................                                                       [ 39%]
+    tests/workers/make_runoff_file.py ...................................................
+    ...........                                                                    [ 39%]
     tests/workers/test_collect_NeahBay_ssh.py ...................                  [ 40%]
     tests/workers/test_make_fvcom_atmos_forcing.py ...............................
     ....                                                                           [ 41%]
@@ -604,7 +604,7 @@ The output looks something like:
     .........................                                                      [ 75%]
     tests/workers/test_watch_NEMO_hindcast.py ...........................................
     ....................                                                           [ 77%]
-    tests/workers/test_make_runoff_file.py ............                            [ 78%]
+    tests/workers/test_make_201702_runoff_file.py ............                     [ 78%]
     tests/workers/test_crop_gribs.py ..............................................[ 80%]
     tests/test_config.py ..............................                            [ 81%]
     tests/workers/test_download_weather.py ..............................................
