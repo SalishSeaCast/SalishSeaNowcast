@@ -18,6 +18,7 @@
 
 """Unit tests for SalishSeaCast make_feeds worker."""
 import datetime
+import logging
 import os
 import textwrap
 from collections import namedtuple
@@ -98,30 +99,38 @@ class TestMain:
 
 
 @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
-@patch("nowcast.workers.make_feeds.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2015-12-21")
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_feeds.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"ATOM feeds for 2015-12-21 {run_type} run completed"
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize("run_type", ["forecast", "forecast2"])
-@patch("nowcast.workers.make_feeds.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             run_type=run_type, run_date=arrow.get("2015-12-21")
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_feeds.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"ATOM feeds for 2015-12-21 {run_type} run failed"
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {run_type}"
 
 
@@ -321,14 +330,13 @@ class TestCalcMaxSshRisk:
         assert max_ssh_info["risk_level"] == m_ssrl()
 
 
-@patch("nowcast.workers.make_feeds.logger", autospec=True)
 @patch("nowcast.workers.make_feeds.nc.Dataset", autospec=True)
 @patch("nowcast.workers.make_feeds.nc_tools.ssh_timeseries_at_point", autospec=True)
 @patch("nowcast.workers.make_feeds.nowcast.figures.shared.find_ssh_max", autospec=True)
 class TestCalcMaxSsh:
     """Unit test for _calc_max_ssh() function."""
 
-    def test_calc_max_ssh(self, m_fsshmax, m_sshtapt, m_ncd, m_logger, config):
+    def test_calc_max_ssh(self, m_fsshmax, m_sshtapt, m_ncd, config, caplog):
         ssh_ts = namedtuple("ssh_ts", "ssh, time")
         m_sshtapt.return_value = ssh_ts(
             np.array([1.93]), np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)])
@@ -337,20 +345,24 @@ class TestCalcMaxSsh:
             np.array([5.09]),
             np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)]),
         )
+        caplog.set_level(logging.DEBUG)
+
         max_ssh, max_ssh_time = make_feeds._calc_max_ssh(
             "pmv.xml", "ttide", arrow.get("2015-12-22").floor("day"), "forecast", config
         )
+
         m_ncd.assert_called_once_with(
             "/results/SalishSea/forecast/22dec15/PointAtkinson.nc"
         )
         m_sshtapt.assert_called_once_with(m_ncd(), 0, 0, datetimes=True)
-        assert not m_logger.critical.called
+        for log_record in caplog.records:
+            assert log_record.levelname != "CRITICAL"
         np.testing.assert_array_equal(max_ssh, np.array([5.09]))
         np.testing.assert_array_equal(
             max_ssh_time, np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)])
         )
 
-    def test_max_ssh_is_nan(self, m_fsshmax, m_sshtapt, m_ncd, m_logger, config):
+    def test_max_ssh_is_nan(self, m_fsshmax, m_sshtapt, m_ncd, config, caplog):
         ssh_ts = namedtuple("ssh_ts", "ssh, time")
         m_sshtapt.return_value = ssh_ts(
             np.array([np.nan]), np.array([datetime.datetime(2017, 10, 7, 17, 48, 42)])
@@ -359,6 +371,8 @@ class TestCalcMaxSsh:
             np.array([np.nan]),
             np.array([datetime.datetime(2015, 12, 22, 22, 40, 42)]),
         )
+        caplog.set_level(logging.DEBUG)
+
         with pytest.raises(WorkerError):
             max_ssh, max_ssh_time = make_feeds._calc_max_ssh(
                 "pmv.xml",
@@ -367,4 +381,5 @@ class TestCalcMaxSsh:
                 "forecast",
                 config,
             )
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"

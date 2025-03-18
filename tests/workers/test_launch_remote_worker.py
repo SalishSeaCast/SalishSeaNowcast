@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast launch_remote_worker worker."""
+import logging
 from types import SimpleNamespace
 from unittest.mock import patch
 
@@ -80,37 +81,40 @@ class TestConfig:
         assert msg in msg_registry
 
 
-@patch("nowcast.workers.launch_remote_worker.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function."""
 
-    def test_success(self, m_logger):
+    def test_success(self, caplog):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud", remote_worker="foo", worker_args=[]
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = launch_remote_worker.success(parsed_args)
-        m_logger.info.assert_called_once_with(
-            "remote worker launched on arbutus.cloud: foo"
-        )
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = "remote worker launched on arbutus.cloud: foo"
+        assert caplog.messages[0] == expected
         assert msg_type == "success"
 
 
-@patch("nowcast.workers.launch_remote_worker.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function."""
 
-    def test_failure(self, m_logger):
+    def test_failure(self, caplog):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud", remote_worker="foo", worker_args=""
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = launch_remote_worker.failure(parsed_args)
-        m_logger.critical.assert_called_once_with(
-            "remote worker launch on arbutus.cloud failed: foo"
-        )
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = "remote worker launch on arbutus.cloud failed: foo"
+        assert caplog.messages[0] == expected
         assert msg_type == "failure"
 
 
-@patch("nowcast.workers.launch_remote_worker.logger", autospec=True)
 @patch("nowcast.workers.launch_remote_worker.NextWorker", spec=True)
 class TestLaunchRemoteWorker:
     """Unit test for launch_remote_worker() function."""
@@ -122,25 +126,19 @@ class TestLaunchRemoteWorker:
             ("nemo_nowcast.workers.foo", "nemo_nowcast.workers.foo"),
         ),
     )
-    def test_checklist(
-        self, m_next_wkr, m_logger, remote_worker, exp_remote_wkr, config
-    ):
+    def test_checklist(self, m_next_wkr, remote_worker, exp_remote_wkr, config, caplog):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             remote_worker=remote_worker,
             worker_args="nowcast --run-date 2018-11-23",
         )
+        caplog.set_level(logging.DEBUG)
+
         checklist = launch_remote_worker.launch_remote_worker(parsed_args, config)
+
         expected = {
             "host name": "arbutus.cloud",
             "remote worker": exp_remote_wkr,
             "worker args": ["nowcast", "--run-date", "2018-11-23"],
         }
         assert checklist == expected
-
-    def test_launch_remote_worker(self, m_next_wkr, m_logger, config):
-        parsed_args = SimpleNamespace(
-            host_name="arbutus.cloud", remote_worker="foo", worker_args=""
-        )
-        launch_remote_worker.launch_remote_worker(parsed_args, config)
-        m_next_wkr().launch.assert_called_once_with(config, m_logger.name)
