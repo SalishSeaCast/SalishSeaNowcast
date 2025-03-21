@@ -1216,7 +1216,6 @@ zmq:
       make_ww3_current_file: '206.12.100.213:5571'
       run_ww3: '206.12.100.213:5572'
       watch_ww3: '206.12.100.213:5573'
-      make_fvcom_boundary: ['206.12.100.213:5580','206.12.100.213:5581']
       make_fvcom_rivers_forcing: ['206.12.100.213:5582','206.12.100.213:5583']
       run_fvcom: ['206.12.100.213:5584', '206.12.100.213:5585']
       watch_fvcom: ['206.12.100.213:5586', '206.12.100.213:5587']
@@ -1460,14 +1459,6 @@ message registry:
       success: Fraser River turbidity file created
       failure: Fraser River turbidity file creation failed
       crash: make_turbidity_file worker crashed
-
-    make_fvcom_boundary:
-      checklist key: FVCOM boundary conditions
-      success x2 nowcast: x2 configuration nowcast FVCOM boundary condition file created
-      failure x2 nowcast: x2 configuration nowcast FVCOM boundary condition file creation failed
-      success r12 nowcast: r12 configuration nowcast FVCOM boundary condition file created
-      failure r12 nowcast: r12 configuration forecast FVCOM boundary condition file creation failed
-      crash: make_fvcom_boundary worker crashed
 
     make_fvcom_rivers_forcing:
       checklist key: FVCOM rivers forcing

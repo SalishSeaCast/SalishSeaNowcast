@@ -231,13 +231,6 @@ Workers
     :members: main
 
 
-``make_fvcom_boundary``
------------------------
-
-.. automodule:: nowcast.workers.make_fvcom_boundary
-    :members: main
-
-
 ``make_fvcom_rivers_forcing``
 -----------------------------
 

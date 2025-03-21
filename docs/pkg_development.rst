@@ -588,7 +588,6 @@ The output looks something like:
     .....................................................................................
     ..............                                                                 [ 60%]
     tests/workers/test_rotate_hindcast_logs.py ..........                          [ 60%]
-    tests/workers/test_make_fvcom_boundary.py ...................................  [ 62%]
     tests/workers/test_make_forcing_links.py ............................................
     ..................                                                             [ 64%]
     tests/workers/test_ping_erddap.py ..........................................   [ 66%]

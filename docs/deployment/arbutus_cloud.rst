@@ -124,17 +124,6 @@ ZeroMQ distributed logging subscription Rules:
   * Remote: CIDR
   * CIDR: 142.103.36.0/24
 
-* For :py:mod:`~nowcast.workers.make_fvcom_boundary`,
-  :py:mod:`~nowcast.workers.make_fvcom_rivers_forcing`,
-  :py:mod:`~nowcast.workers.run_fvcom`,
-  and :py:mod:`~nowcast.workers.watch_fvcom`:
-
-  * Rule: Custom TCP
-  * Direction: Ingress
-  * Port range: 5580 - 5587
-  * Remote: CIDR
-  * CIDR: 142.103.36.0/24
-
 
 .. _HeadNodeInstance:
 

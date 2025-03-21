@@ -800,12 +800,6 @@ def after_watch_NEMO(msg, config, checklist):
                             msg.payload[run_type]["run date"],
                         ],
                     ),
-                    ## TODO: Add a config switch to control running FVCOM VHFR
-                    # NextWorker(
-                    #     "nowcast.workers.make_fvcom_boundary",
-                    #     args=[(config["vhfr fvcom runs"]["host"]), "x2", "nowcast"],
-                    #     host=(config["vhfr fvcom runs"]["host"]),
-                    # ),
                 ]
             )
         if run_type == "forecast":
@@ -1024,58 +1018,6 @@ def after_run_NEMO_hindcast(msg, config, checklist):
     return next_workers[msg.type]
 
 
-def after_make_fvcom_boundary(msg, config, checklist):
-    """Calculate the list of workers to launch after the
-    after_make_fvcom_boundary worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        run_type = msg.type.split()[2]
-        model_config = msg.payload[run_type]["model config"]
-        run_date = msg.payload[run_type]["run date"]
-        next_workers[msg.type].extend(
-            [
-                NextWorker(
-                    "nowcast.workers.make_fvcom_atmos_forcing",
-                    args=[model_config, run_type, "--run-date", run_date],
-                    host="localhost",
-                ),
-                NextWorker(
-                    "nowcast.workers.make_fvcom_rivers_forcing",
-                    args=[
-                        (config["vhfr fvcom runs"]["host"]),
-                        model_config,
-                        run_type,
-                        "--run-date",
-                        run_date,
-                    ],
-                    host=(config["vhfr fvcom runs"]["host"]),
-                ),
-            ]
-        )
-    return next_workers[msg.type]
-
-
 def after_make_fvcom_rivers_forcing(msg, config, checklist):
     """Calculate the list of workers to launch after the
     after_make_fvcom_rivers_forcing worker ends.
@@ -1260,20 +1202,6 @@ def after_watch_fvcom(msg, config, checklist):
                 ],
             )
         )
-        if run_type == "nowcast" and model_config == "x2":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_fvcom_boundary",
-                    args=[
-                        (config["vhfr fvcom runs"]["host"]),
-                        "r12",
-                        "nowcast",
-                        "--run-date",
-                        msg.payload[f"{model_config} {run_type}"]["run date"],
-                    ],
-                    host=(config["vhfr fvcom runs"]["host"]),
-                )
-            )
     return next_workers[msg.type]
 
 

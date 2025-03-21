@@ -1097,12 +1097,6 @@ class TestAfterWatchNEMO:
                 args=["arbutus.cloud", "ssh", "--run-date", "2021-04-26"],
                 host="localhost",
             ),
-            ## TODO: Add a config switch to control running FVCOM VHFR
-            # NextWorker(
-            #     "nowcast.workers.make_fvcom_boundary",
-            #     args=["arbutus.cloud", "x2", "nowcast"],
-            #     host="arbutus.cloud",
-            # ),
             NextWorker(
                 "nowcast.workers.download_results",
                 args=["arbutus.cloud", "nowcast", "--run-date", "2021-04-26"],
@@ -1195,29 +1189,6 @@ class TestAfterWatchNEMO:
         ]
         assert workers[2:4] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
-
-    def test_success_forecast_no_launch_make_fvcom_boundary(self, config, checklist):
-        workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success forecast",
-                {
-                    "forecast": {
-                        "host": "arbutus.cloud",
-                        "run date": "2018-01-20",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_boundary",
-            args=["arbutus.cloud", "x2", "forecast"],
-            host="arbutus.cloud",
-        )
-        assert expected not in workers
 
     def test_success_forecast2_launch_make_ww3_wind_file_forecast2(
         self, config, checklist
@@ -1415,75 +1386,6 @@ class TestAfterWatchNEMO_AGRIF:
         assert expected in workers
 
 
-class TestAfterMakeFVCOMBoundary:
-    """Unit tests for the after_make_fvcom_boundary function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_make_fvcom_boundary(
-            Message("make_fvcom_boundary", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_make_fvcom_atmos_forcing(
-        self, model_config, run_type, config, checklist
-    ):
-        msg = Message(
-            "make_fvcom_boundary",
-            f"success {model_config} {run_type}",
-            payload={
-                run_type: {
-                    "run date": "2018-03-16",
-                    "model config": model_config,
-                    "open boundary file": f"input/bdy_{model_config}_nowcast_btrp_20180316.nc",
-                }
-            },
-        )
-        workers = next_workers.after_make_fvcom_boundary(msg, config, checklist)
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_atmos_forcing",
-            args=[model_config, run_type, "--run-date", "2018-03-16"],
-            host="localhost",
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_make_fvcom_rivers_forcing(
-        self, model_config, run_type, config, checklist
-    ):
-        workers = next_workers.after_make_fvcom_boundary(
-            Message(
-                "make_fvcom_boundary",
-                f"success {model_config} {run_type}",
-                payload={
-                    run_type: {
-                        "run date": "2019-02-06",
-                        "model config": model_config,
-                        "open boundary file": f"input/bdy_{model_config}_nowcast_btrp_20180316.nc",
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_rivers_forcing",
-            args=["arbutus.cloud", model_config, run_type, "--run-date", "2019-02-06"],
-            host="arbutus.cloud",
-        )
-        assert expected in workers
-
-
 class TestAfterMakeFVCOMRiversForcing:
     """Unit tests for the after_make_fvcom_rivers_forcing function."""
 
@@ -1661,48 +1563,6 @@ class TestAfterWatchFVCOM:
             host="localhost",
         )
         assert workers[0] == expected
-
-    @pytest.mark.parametrize(
-        "done_model_config, done_run_type, launch_model_config, launch_run_type",
-        [("x2", "nowcast", "r12", "nowcast")],
-    )
-    def test_success_launch_make_fvcom_boundary(
-        self,
-        done_model_config,
-        done_run_type,
-        launch_model_config,
-        launch_run_type,
-        config,
-        checklist,
-    ):
-        workers = next_workers.after_watch_fvcom(
-            Message(
-                "watch_fvcom",
-                f"success {done_model_config} {done_run_type}",
-                {
-                    f"{done_model_config} {done_run_type}": {
-                        "host": "arbutus.cloud",
-                        "model config": done_model_config,
-                        "run date": "2021-05-27",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_boundary",
-            args=[
-                "arbutus.cloud",
-                launch_model_config,
-                launch_run_type,
-                "--run-date",
-                "2021-05-27",
-            ],
-            host="arbutus.cloud",
-        )
-        assert workers[1] == expected
 
 
 class TestAfterMakeWW3WindFile:
