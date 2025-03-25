@@ -562,8 +562,6 @@ The output looks something like:
     tests/workers/test_make_feeds.py .....................                         [ 31%]
     tests/workers/test_get_onc_ferry.py ................................           [ 33%]
     tests/workers/test_watch_ww3.py ..................                             [ 33%]
-    tests/workers/test_make_fvcom_rivers_forcing.py ..............................
-    ....                                                                           [ 35%]
     tests/test_daily_river_flows.py ......................................         [ 36%]
     tests/workers/make_runoff_file.py ...................................................
     ...........                                                                    [ 39%]

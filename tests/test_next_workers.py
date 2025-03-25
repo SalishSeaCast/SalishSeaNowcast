@@ -1386,28 +1386,6 @@ class TestAfterWatchNEMO_AGRIF:
         assert expected in workers
 
 
-class TestAfterMakeFVCOMRiversForcing:
-    """Unit tests for the after_make_fvcom_rivers_forcing function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        [
-            "crash",
-            "success x2 nowcast",
-            "failure x2 nowcast",
-            "success x2 forecast",
-            "failure x2 forecast",
-            "success r12 nowcast",
-            "failure r12 nowcast",
-        ],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_make_fvcom_rivers_forcing(
-            Message("make_fvcom_rivers_forcing", msg_type), config, checklist
-        )
-        assert workers == []
-
-
 class TestAfterRunFVCOM:
     """Unit tests for the after_run_fvcom function."""
 

@@ -919,13 +919,6 @@ vhfr fvcom runs:
       - wnd
 
   rivers forcing:
-    # Directory on compute host where NEMO runoff forcing files are stored
-    nemo rivers dir: /nemoShare/MEOPAR/rivers/
-    # Template for NEMO runoff forcing file names
-    # **Must be quoted to project {} characters**
-    runoff file template: 'R201702DFraCElse_{yyyymmdd}.nc'
-    # File containing monthly average conservative temperature climatology for NEMO runoff forcing
-    temperature climatology: /nemoShare/MEOPAR/nowcast-sys/rivers-climatology/rivers_ConsTemp_month.nc
     # Template for rivers forcing file names
     # **Must be quoted to project {} characters**
     rivers file template: 'rivers_{model_config}_{run_type}_{yyyymmdd}.nc'
@@ -1216,7 +1209,6 @@ zmq:
       make_ww3_current_file: '206.12.100.213:5571'
       run_ww3: '206.12.100.213:5572'
       watch_ww3: '206.12.100.213:5573'
-      make_fvcom_rivers_forcing: ['206.12.100.213:5582','206.12.100.213:5583']
       run_fvcom: ['206.12.100.213:5584', '206.12.100.213:5585']
       watch_fvcom: ['206.12.100.213:5586', '206.12.100.213:5587']
       make_averaged_dataset: [
@@ -1459,14 +1451,6 @@ message registry:
       success: Fraser River turbidity file created
       failure: Fraser River turbidity file creation failed
       crash: make_turbidity_file worker crashed
-
-    make_fvcom_rivers_forcing:
-      checklist key: FVCOM rivers forcing
-      success x2 nowcast: x2 configuration nowcast FVCOM rivers forcing file created
-      failure x2 nowcast: x2 configuration nowcast FVCOM rivers forcing file creation failed
-      success r12 nowcast: r12 configuration nowcast FVCOM rivers forcing file created
-      failure r12 nowcast: r12 configuration nowcast FVCOM rivers forcing file creation failed
-      crash: make_fvcom_rivers_forcing worker crashed
 
     run_fvcom:
       checklist key: FVCOM run

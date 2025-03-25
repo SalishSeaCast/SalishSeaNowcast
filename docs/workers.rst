@@ -231,13 +231,6 @@ Workers
     :members: main
 
 
-``make_fvcom_rivers_forcing``
------------------------------
-
-.. automodule:: nowcast.workers.make_fvcom_rivers_forcing
-    :members: main
-
-
 ``run_fvcom``
 -------------
 
