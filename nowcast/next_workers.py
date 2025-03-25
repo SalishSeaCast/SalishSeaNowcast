@@ -1046,46 +1046,6 @@ def after_make_fvcom_rivers_forcing(msg, config, checklist):
     return []
 
 
-def after_upload_fvcom_atmos_forcing(msg, config, checklist):
-    """Calculate the list of workers to launch after the
-    after_upload_fvcom_atmos_forcing worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        host_name = config["vhfr fvcom runs"]["host"]
-        run_type = msg.type.split()[2]
-        model_config = msg.payload[host_name][run_type]["model config"]
-        run_date = msg.payload[host_name][run_type]["run date"]
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.run_fvcom",
-                args=[host_name, model_config, run_type, "--run-date", run_date],
-                host=host_name,
-            )
-        )
-    return next_workers[msg.type]
-
-
 def after_run_fvcom(msg, config, checklist):
     """Calculate the list of workers to launch after the after_run_fvcom worker
     ends.

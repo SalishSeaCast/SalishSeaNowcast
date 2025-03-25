@@ -238,13 +238,6 @@ Workers
     :members: main
 
 
-``upload_fvcom_atmos_forcing``
-------------------------------
-
-.. automodule:: nowcast.workers.upload_fvcom_atmos_forcing
-    :members: main
-
-
 ``run_fvcom``
 -------------
 

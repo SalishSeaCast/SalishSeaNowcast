@@ -559,7 +559,6 @@ The output looks something like:
     tests/workers/test_run_NEMO_agrif.py .................                         [ 25%]
     tests/workers/test_make_plots.py ....................................................
     .............................................                                  [ 29%]
-    tests/workers/test_upload_fvcom_atmos_forcing.py ............................  [ 30%]
     tests/workers/test_make_feeds.py .....................                         [ 31%]
     tests/workers/test_get_onc_ferry.py ................................           [ 33%]
     tests/workers/test_watch_ww3.py ..................                             [ 33%]

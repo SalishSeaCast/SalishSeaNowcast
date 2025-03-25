@@ -1408,42 +1408,6 @@ class TestAfterMakeFVCOMRiversForcing:
         assert workers == []
 
 
-class TestAfterUploadFVCOMAtmosForcing:
-    """Unit tests for the after_upload_fvcom_atmos_forcing function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_upload_fvcom_atmos_forcing(
-            Message("upload_fvcom_atmos_forcing", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_run_fvcom(self, model_config, run_type, config, checklist):
-        msg = Message(
-            "upload_fvcom_atmos_forcing",
-            f"success {model_config} {run_type}",
-            payload={
-                "arbutus.cloud": {
-                    run_type: {"run date": "2018-04-04", "model config": model_config}
-                }
-            },
-        )
-        workers = next_workers.after_upload_fvcom_atmos_forcing(msg, config, checklist)
-        expected = NextWorker(
-            "nowcast.workers.run_fvcom",
-            args=["arbutus.cloud", model_config, run_type, "--run-date", "2018-04-04"],
-            host="arbutus.cloud",
-        )
-        assert expected in workers
-
-
 class TestAfterRunFVCOM:
     """Unit tests for the after_run_fvcom function."""
 
