@@ -1466,15 +1466,7 @@ message registry:
       failure x2 nowcast: x2 configuration nowcast FVCOM rivers forcing file creation failed
       success r12 nowcast: r12 configuration nowcast FVCOM rivers forcing file created
       failure r12 nowcast: r12 configuration nowcast FVCOM rivers forcing file creation failed
-      crash: make_fvcom_atmos_forcing worker crashed
-
-    make_fvcom_atmos_forcing:
-      checklist key: FVCOM atmospheric forcing
-      success x2 nowcast: x2 configuration nowcast FVCOM atmospheric forcing file created
-      failure x2 nowcast: x2 configuration nowcast FVCOM atmospheric forcing file creation failed
-      success r12 nowcast: r12 configuration nowcast FVCOM atmospheric forcing file created
-      failure r12 nowcast: r12 configuration nowcast FVCOM atmospheric forcing file creation failed
-      crash: make_fvcom_atmos_forcing worker crashed
+      crash: make_fvcom_rivers_forcing worker crashed
 
     upload_fvcom_atmos_forcing:
       checklist key: FVCOM atmospheric forcing upload
