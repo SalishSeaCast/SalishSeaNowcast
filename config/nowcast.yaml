@@ -827,165 +827,6 @@ wave forecasts:
 
 # Vancouver Harbour & Fraser River FVCOM model runs
 vhfr fvcom runs:
-  # Compute host to run VHFR FVCOM model on
-  host: arbutus.cloud-nowcast
-  # Passphrase-less deployment key used by automation for authentication
-  # on the host.
-  # The key-pair is assumed to be stored in $HOME/.ssh/.
-  ssh key: SalishSeaNEMO-nowcast_id_rsa
-  # FVCOM case name
-  case name:
-    x2: vh_x2
-    r12: vh_r12
-  # Directory on compute host where files and directories necessary to
-  # prepare and execute the fvcom runs are stored
-  run prep dir: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/
-
-  fvcom grid:
-    # Directory on compute host where FVCOM grid files are stored
-    grid dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/grid/
-    # UTM zone:
-    utm zone: 10
-    # Model configurations (aka case names)
-    x2:
-      # Grid file
-      grid file: vh_x2_grd.dat
-      # Depths file
-      depths file: vh_x2_dep.dat
-      # Sigma levels file
-      sigma file: vh_x2_sigma.dat
-      # Coriolis file
-      coriolis file: vh_x2_cor.dat
-      # Sponge file
-      sponge file: vh_x2_nospg_spg.dat
-      # Open boundaries nodes list file
-      obc nodes file: vh_x2_obc.dat
-      # Fraser River nodes list file
-      fraser nodes file: vh_x2_river_nodes_fraser.txt
-    r12:
-      grid file: vh_r12_grd.dat
-      depths file: vh_r12_smp3_dep.dat
-      sigma file: vh_r12_sigma.dat
-      coriolis file: vh_r12_cor.dat
-      sponge file: vh_r12_nospg_spg.dat
-      obc nodes file: vh_r12_obc.dat
-      fraser nodes file: vh_r12_river_nodes_fraser.txt
-
-  nemo coupling:
-    # Directory on compute host where FVCOM-NEMO coupling files are stored
-    coupling dir: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/coupling_nemo_cut/
-    # Model configurations (aka case names)
-    x2:
-      # File containing FVCOM indices for the NEMO nesting zone
-      fvcom nest indices file: vh_x2_nesting_indices.txt
-      # File containing nesting zone reference line for weights calculation
-      fvcom nest ref line file: vh_x2_nesting_innerboundary.txt
-    r12:
-      fvcom nest indices file: vh_r12_nesting_indices.txt
-      fvcom nest ref line file: vh_r12_nesting_innerboundary.txt
-    # NEMO index ranges contained in the boundary files
-    nemo cut i range: [225, 369]
-    nemo cut j range: [340, 561]
-    # Transition zone width [m] over which weights rise from 0 to 1
-    transition zone width: 8500
-    # Transition profile tanh function parameters
-    tanh dl: 2
-    tanh du: 2
-    # NEMO coordinates file
-    nemo coordinates: /nemoShare/MEOPAR/nowcast-sys/grid/coordinates_seagrid_SalishSea201702.nc
-    # NEMO mesh mask file
-    nemo mesh mask: /nemoShare/MEOPAR/nowcast-sys/grid/mesh_mask201702.nc
-    # NEMO bathymetry file
-    nemo bathymetry: /nemoShare/MEOPAR/nowcast-sys/grid/bathymetry_201702.nc
-    # Template for boundary forcing file names
-    # **Must be quoted to project {} characters**
-    boundary file template: 'bdy_{model_config}_{run_type}_brcl_{yyyymmdd}.nc'
-
-  atmospheric forcing:
-    # Directory on host where make_fccom_atmos_forcing worker runs where HRDPS GRIB files are stored
-    hrdps grib dir: /results/forcing/atmospheric/GEM2.5/GRIB/
-    # Directory on host where make_fccom_atmos_forcing worker runs where FVCOM atmospheric forcing files are stored
-    fvcom atmos dir: /results/forcing/atmospheric/GEM2.5/vhfr-fvcom
-    # Template for atmospheric forcing file names
-    # **Must be quoted to project {} characters**
-    atmos file template: 'atmos_{model_config}_{run_type}_{field_type}_{yyyymmdd}.nc'
-    # Directory on host where make_fvcom_atmos_forcing worker runs where FVCOM grid files are stored
-    fvcom grid dir: /SalishSeaCast/FVCOM-VHFR-config/grid/
-    # Atmospheric forcing field types to generate files for
-    # (ftype parameter values in OPPTools.atm.create_atm_hrdps())
-    field types:
-      - hfx
-      - precip
-      - wnd
-
-  rivers forcing:
-    # Template for rivers forcing file names
-    # **Must be quoted to project {} characters**
-    rivers file template: 'rivers_{model_config}_{run_type}_{yyyymmdd}.nc'
-
-  # Directory on compute host where FVCOM input files are stored
-  input dir:
-    x2: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.x2/
-    r12: /nemoShare/MEOPAR/nowcast-sys/fvcom-runs/input.r12/
-  # Path and name of file on compute host that defines the tide gauge stations
-  # to produce point outputs at
-  output station timeseries:
-    x2: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_x2_station.txt
-    r12: /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/output/vh_r12_station.txt
-  namelists:
-    # Name of the namelist file to create by concatenating the list of namelist
-    # section files below
-    vh_x2_run.nml:
-      - namelist.case
-      - namelist.startup.hotstart
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
-      - namelist.numerics
-      - namelist.restart
-      - namelist.netcdf
-      - namelist.physics
-      - namelist.surface
-      - namelist.rivers.x2
-      - namelist.obc
-      - namelist.grid
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check
-      - namelist.nesting
-      - namelist.station_timeseries
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models
-    vh_r12_run.nml:
-      - namelist.case
-      - namelist.startup.hotstart
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.io
-      - namelist.numerics
-      - namelist.restart
-      - namelist.netcdf
-      - namelist.physics
-      - namelist.surface
-      - namelist.rivers.r12
-      - namelist.obc
-      - namelist.grid
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.groundwater
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.lagrangian
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.probes
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.bounds_check
-      - namelist.nesting
-      - namelist.station_timeseries
-      - /nemoShare/MEOPAR/nowcast-sys/FVCOM-VHFR-config/namelists/namelist.additional_models
-  # Path to the tree that contains the FVCOM executable at FVCOM_source/fvcom
-  FVCOM exe path: /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
-  # Number of processors
-  number of processors:
-    x2: 30
-    r12: 90
-  # Location on the compute host of the file that contains IP addresses
-  # and MPI slots specifications.
-  mpi hosts file:
-    x2: ${HOME}/mpi_hosts.fvcom.x2
-    r12: ${HOME}/mpi_hosts.fvcom.r12
-  # Path to the FVCOM command processor executable to use in the run script
-  fvc_cmd: /nemoShare/MEOPAR/nowcast-sys/nowcast-env/bin/fvc
   # Run type specific configurations for the runs that are executed on the
   # compute host; keyed by run type
   run types:
@@ -1209,7 +1050,6 @@ zmq:
       make_ww3_current_file: '206.12.100.213:5571'
       run_ww3: '206.12.100.213:5572'
       watch_ww3: '206.12.100.213:5573'
-      run_fvcom: ['206.12.100.213:5584', '206.12.100.213:5585']
       watch_fvcom: ['206.12.100.213:5586', '206.12.100.213:5587']
       make_averaged_dataset: [
         "salish.eos.ubc.ca:5562", "salish.eos.ubc.ca:5563", "salish.eos.ubc.ca:5564",
@@ -1451,14 +1291,6 @@ message registry:
       success: Fraser River turbidity file created
       failure: Fraser River turbidity file creation failed
       crash: make_turbidity_file worker crashed
-
-    run_fvcom:
-      checklist key: FVCOM run
-      success x2 nowcast: x2 configuration nowcast FVCOM run started
-      failure x2 nowcast: x2 configuration nowcast FVCOM run failed
-      success r12 nowcast: r12 configuration nowcast FVCOM run started
-      failure r12 nowcast: r12 configuration nowcast FVCOM run failed
-      crash: run_fvcom worker crashed
 
     watch_fvcom:
       checklist key: FVCOM run

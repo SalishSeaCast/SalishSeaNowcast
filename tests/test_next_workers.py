@@ -1386,48 +1386,6 @@ class TestAfterWatchNEMO_AGRIF:
         assert expected in workers
 
 
-class TestAfterRunFVCOM:
-    """Unit tests for the after_run_fvcom function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_run_fvcom(
-            Message("run_fvcom", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_watch_fvcom(
-        self, model_config, run_type, config, checklist
-    ):
-        workers = next_workers.after_run_fvcom(
-            Message(
-                "run_fvcom",
-                f"success {model_config} {run_type}",
-                {
-                    f"{model_config} {run_type}": {
-                        "host": "arbutus.cloud",
-                        "model config": model_config,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.watch_fvcom",
-            args=["arbutus.cloud", model_config, run_type],
-            host="arbutus.cloud",
-        )
-        assert workers == [expected]
-
-
 class TestAfterWatchFVCOM:
     """Unit tests for the after_watch_fvcom function."""
 

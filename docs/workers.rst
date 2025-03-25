@@ -231,13 +231,6 @@ Workers
     :members: main
 
 
-``run_fvcom``
--------------
-
-.. automodule:: nowcast.workers.run_fvcom
-    :members: main
-
-
 ``watch_fvcom``
 ---------------
 
