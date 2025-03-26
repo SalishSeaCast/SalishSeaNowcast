@@ -1018,48 +1018,6 @@ def after_run_NEMO_hindcast(msg, config, checklist):
     return next_workers[msg.type]
 
 
-def after_watch_fvcom(msg, config, checklist):
-    """Calculate the list of workers to launch after the after_watch_fvcom worker
-    ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        _, model_config, run_type = msg.type.split()
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.download_fvcom_results",
-                args=[
-                    msg.payload[f"{model_config} {run_type}"]["host"],
-                    model_config,
-                    run_type,
-                    "--run-date",
-                    msg.payload[f"{model_config} {run_type}"]["run date"],
-                ],
-            )
-        )
-    return next_workers[msg.type]
-
-
 def after_make_ww3_wind_file(msg, config, checklist):
     """Calculate the list of workers to launch after the
     after_make_ww3_wind_file worker ends.

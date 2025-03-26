@@ -571,7 +571,6 @@ The output looks something like:
     ...............................                                                [ 45%]
     tests/workers/test_launch_remote_worker.py ...............                     [ 46%]
     tests/test_analyze.py .................                                        [ 47%]
-    tests/workers/test_watch_fvcom.py .............................                [ 48%]
     tests/workers/test_watch_NEMO_agrif.py ....................                    [ 49%]
     tests/workers/test_make_surface_current_tiles.py ...........................   [ 50%]
     tests/workers/test_make_averaged_dataset.py ..................................

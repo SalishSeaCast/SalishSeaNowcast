@@ -231,13 +231,6 @@ Workers
     :members: main
 
 
-``watch_fvcom``
----------------
-
-.. automodule:: nowcast.workers.watch_fvcom
-    :members: main
-
-
 .. _MakeWW3WindFile-Worker:
 
 ``make_ww3_wind_file``

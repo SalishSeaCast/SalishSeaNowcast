@@ -847,10 +847,6 @@ vhfr fvcom runs:
   results archive:
     nowcast x2: /opp/fvcom/nowcast-x2/
     nowcast r12: /opp/fvcom/nowcast-r12/
-  # Name of the results file containing the tide gauge stations sea surface height time series
-  stations dataset filename:
-    x2: vh_x2_station_timeseries.nc
-    r12: vh_r12_station_timeseries.nc
 
 
 # Distributed logging system configuration
@@ -1015,7 +1011,6 @@ slack notifications:
     - download_live_ocean
     - watch_NEMO
     - watch_NEMO_agrif
-    - watch_fvcom
     - watch_ww3
   SLACK_SSC_HINDCAST_PROGRESS:
     # notifications will be sent to #ssc-hindcast-progress channel
@@ -1050,7 +1045,6 @@ zmq:
       make_ww3_current_file: '206.12.100.213:5571'
       run_ww3: '206.12.100.213:5572'
       watch_ww3: '206.12.100.213:5573'
-      watch_fvcom: ['206.12.100.213:5586', '206.12.100.213:5587']
       make_averaged_dataset: [
         "salish.eos.ubc.ca:5562", "salish.eos.ubc.ca:5563", "salish.eos.ubc.ca:5564",
         "salish.eos.ubc.ca:5565", "salish.eos.ubc.ca:5566", "salish.eos.ubc.ca:5567",
@@ -1291,15 +1285,6 @@ message registry:
       success: Fraser River turbidity file created
       failure: Fraser River turbidity file creation failed
       crash: make_turbidity_file worker crashed
-
-    watch_fvcom:
-      checklist key: FVCOM run
-      need: FVCOM run information dict requested
-      success x2 nowcast: x2 configuration nowcast FVCOM run completed
-      failure x2 nowcast: x2 configuration nowcast FVCOM run failed
-      success r12 nowcast: r12 configuration nowcast FVCOM run completed
-      failure r12 nowcast: r12 configuration nowcast FVCOM run failed
-      crash: watch_fvcom worker crashed
 
     get_vfpa_hadcp:
       checklist key: VFPA HADCP data

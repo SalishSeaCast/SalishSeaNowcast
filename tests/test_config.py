@@ -188,7 +188,6 @@ class TestSlackNotifications:
             "download_live_ocean",
             "watch_NEMO",
             "watch_NEMO_agrif",
-            "watch_fvcom",
             "watch_ww3",
         ]
         assert slack_notifications["SLACK_SSC_DAILY_PROGRESS"] == expected
@@ -269,7 +268,6 @@ class Test0mqMessageSystem:
             "make_ww3_current_file": "206.12.100.213:5571",
             "run_ww3": "206.12.100.213:5572",
             "watch_ww3": "206.12.100.213:5573",
-            "watch_fvcom": ["206.12.100.213:5586", "206.12.100.213:5587"],
             "make_averaged_dataset": [
                 "salish.eos.ubc.ca:5562",
                 "salish.eos.ubc.ca:5563",
