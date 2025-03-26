@@ -1491,62 +1491,6 @@ def after_download_wwatch3_results(msg, config, checklist):
     return next_workers[msg.type]
 
 
-def after_download_fvcom_results(msg, config, checklist):
-    """Calculate the list of workers to launch after the
-    download_fvcom_results worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        run_type = msg.type.split()[2]
-        run_date = msg.payload[run_type]["run date"]
-        model_config = msg.payload[run_type]["model config"]
-        next_workers[msg.type].extend(
-            [
-                NextWorker(
-                    "nowcast.workers.get_vfpa_hadcp", args=["--data-date", run_date]
-                ),
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=[
-                        "fvcom",
-                        f"{run_type}-{model_config}",
-                        "research",
-                        "--run-date",
-                        run_date,
-                    ],
-                ),
-            ]
-        )
-        if run_type == "nowcast":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.ping_erddap",
-                    args=[f"fvcom-{model_config}-nowcast"],
-                )
-            )
-    return next_workers[msg.type]
-
-
 def after_get_vfpa_hadcp(msg, config, checklist):
     """Calculate the list of workers to launch after the
     after_get_vfpa_hadcp worker ends.

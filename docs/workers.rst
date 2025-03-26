@@ -298,13 +298,6 @@ Workers
     :members: main
 
 
-``download_fvcom_results``
---------------------------
-
-.. automodule:: nowcast.workers.download_fvcom_results
-    :members: main
-
-
 ``get_onc_ctd``
 ---------------
 

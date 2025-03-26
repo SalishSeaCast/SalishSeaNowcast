@@ -827,21 +827,6 @@ wave forecasts:
 
 # Vancouver Harbour & Fraser River FVCOM model runs
 vhfr fvcom runs:
-  # Run type specific configurations for the runs that are executed on the
-  # compute host; keyed by run type
-  run types:
-    nowcast x2:
-      # Directory on compute host where NEMO run results for boundary forcing
-      # are stored
-      nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
-      # Integration time step [seconds]
-      time step: 0.5
-      # Directory on compute host where results are stored
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-x2/
-    nowcast r12:
-      nemo boundary results: /nemoShare/MEOPAR/SalishSea/nowcast/
-      time step: 0.2
-      results: /nemoShare/MEOPAR/SalishSea/fvcom-nowcast-r12/
   # Directories on results server where run results are stored
   # in ddmmmyy/ directories; keyed by run type
   results archive:
@@ -1398,14 +1383,6 @@ message registry:
       success forecast: WaveWatch3 forecast results files downloaded
       failure forecast: WaveWatch3 forecast results files download failed
       crash: download_wwatch3_results worker crashed
-
-    download_fvcom_results:
-      checklist key: VHFR FVCOM results files
-      success x2 nowcast: VHFR FVCOM x2 configuration nowcast results files downloaded
-      failure x2 nowcast: VHFR FVCOM x2 configuration nowcast results files download failed
-      success r12 nowcast: VHFR FVCOM r12 configuration nowcast results files downloaded
-      failure r12 nowcast: VHFR FVCOM r12 configuration nowcast results files download failed
-      crash: download_fvcom_results worker crashed
 
     update_forecast_datasets:
      checklist key: update forecast datasets

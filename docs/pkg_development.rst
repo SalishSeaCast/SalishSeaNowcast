@@ -566,7 +566,6 @@ The output looks something like:
     tests/workers/make_runoff_file.py ...................................................
     ...........                                                                    [ 39%]
     tests/workers/test_collect_NeahBay_ssh.py ...................                  [ 40%]
-    tests/workers/test_download_fvcom_results.py ...........................       [ 42%]
     tests/workers/test_upload_forcing.py .........................................
     ...............................                                                [ 45%]
     tests/workers/test_launch_remote_worker.py ...............                     [ 46%]
