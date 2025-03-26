@@ -47,8 +47,6 @@ def config(base_config):
                 rolling forecasts:
                   days from past: 5
                   temporary results archives: /tmp/
-                  fvcom:
-                    most recent forecast dir: opp/fvcom/most_recent_forecast
                   nemo:
                     dest dir: rolling-forecasts/nemo/
                   wwatch3:
@@ -60,11 +58,6 @@ def config(base_config):
                     nowcast: opp/wwatch3/nowcast/
                     forecast: opp/wwatch3/forecast/
                     forecast2: opp/wwatch3/forecast2/
-
-                vhfr fvcom runs:
-                  results archive:
-                    nowcast x2: opp/fvcom/nowcast x2/
-                    forecast x2: opp/fvcom/forecast x2/
                 """
             )
         )
@@ -91,7 +84,7 @@ class TestMain:
     def test_add_model_arg(self, mock_worker):
         worker = update_forecast_datasets.main()
         assert worker.cli.parser._actions[3].dest == "model"
-        assert worker.cli.parser._actions[3].choices == {"fvcom", "nemo", "wwatch3"}
+        assert worker.cli.parser._actions[3].choices == {"nemo", "wwatch3"}
         assert worker.cli.parser._actions[3].help
 
     def test_add_run_type_arg(self, mock_worker):
@@ -145,9 +138,6 @@ class TestConfig:
         assert msg in msg_registry
 
     def test_results_archives(self, prod_config):
-        fvcom_run_types = ("nowcast x2", "nowcast r12")
-        for run_type in fvcom_run_types:
-            assert run_type in prod_config["vhfr fvcom runs"]["results archive"]
         nemo_run_types = ("nowcast", "forecast", "forecast2")
         for run_type in nemo_run_types:
             assert run_type in prod_config["results archive"]
@@ -170,7 +160,6 @@ class TestConfig:
 @pytest.mark.parametrize(
     "model, run_type",
     [
-        ("fvcom", "forecast"),
         ("nemo", "forecast"),
         ("nemo", "forecast2"),
         ("wwatch3", "forecast"),
@@ -184,8 +173,10 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
         )
-        caplog.set_level(logging.INFO)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = update_forecast_datasets.success(parsed_args)
+
         assert caplog.records[0].levelname == "INFO"
         expected = f"{model} 2017-11-10 {run_type} rolling forecast datasets updated"
         assert caplog.messages[0] == expected
@@ -195,7 +186,6 @@ class TestSuccess:
 @pytest.mark.parametrize(
     "model, run_type",
     [
-        ("fvcom", "forecast"),
         ("nemo", "forecast"),
         ("nemo", "forecast2"),
         ("wwatch3", "forecast"),
@@ -209,8 +199,10 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
         )
-        caplog.set_level(logging.CRITICAL)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = update_forecast_datasets.failure(parsed_args)
+
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             f"{model} 2017-11-10 {run_type} rolling forecast datasets update failed"
@@ -252,7 +244,7 @@ class TestUpdateForecastDatasets:
 
     @pytest.mark.parametrize(
         "model, run_type",
-        [("fvcom", "forecast"), ("wwatch3", "forecast"), ("wwatch3", "forecast2")],
+        [("wwatch3", "forecast"), ("wwatch3", "forecast2")],
     )
     def test_most_recent_forecast_checklist(
         self,
@@ -263,64 +255,111 @@ class TestUpdateForecastDatasets:
         config,
         caplog,
         tmpdir,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2018-10-24")
         )
         tmp_forecast_results_archive = tmpdir.ensure_dir("tmp")
+        dest_dir = Path(config["rolling forecasts"][model]["dest dir"])
         most_recent_fcst_dir = tmpdir.ensure_dir(
             config["rolling forecasts"][model]["most recent forecast dir"]
         )
-        with patch.dict(
+        monkeypatch.setitem(
             config["rolling forecasts"],
-            {
-                "temporary results archives": str(tmp_forecast_results_archive),
-                model: {"most recent forecast dir": str(most_recent_fcst_dir)},
-            },
-        ):
-            checklist = update_forecast_datasets.update_forecast_datasets(
-                parsed_args, config
-            )
-        expected = {model: {run_type: [str(most_recent_fcst_dir)]}}
+            "temporary results archives",
+            str(tmp_forecast_results_archive),
+        )
+        monkeypatch.setitem(
+            config["rolling forecasts"][model],
+            "most recent forecast dir",
+            str(most_recent_fcst_dir),
+        )
+
+        checklist = update_forecast_datasets.update_forecast_datasets(
+            parsed_args, config
+        )
+
+        expected = {model: {run_type: [str(most_recent_fcst_dir), str(dest_dir)]}}
         assert checklist == expected
 
     @pytest.mark.parametrize(
-        "model, run_type",
-        [
-            ("nemo", "forecast"),
-            ("nemo", "forecast2"),
-            ("wwatch3", "forecast"),
-            ("wwatch3", "forecast2"),
-        ],
+        "run_type",
+        ("forecast", "forecast2"),
     )
-    def test_rolling_forecast_checklist(
+    def test_nemo_rolling_forecast_checklist(
         self,
         mock_update_rolling_forecast,
         mock_symlink_most_recent_forecast,
-        model,
         run_type,
         config,
         caplog,
         tmpdir,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
-            model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
+            model="nemo", run_type=run_type, run_date=arrow.get("2017-11-10")
         )
         tmp_forecast_results_archive = tmpdir.ensure_dir("tmp")
         rolling_fcst_dir = tmpdir.ensure_dir(
-            config["rolling forecasts"][model]["dest dir"]
+            config["rolling forecasts"]["nemo"]["dest dir"]
         )
-        with patch.dict(
+        monkeypatch.setitem(
             config["rolling forecasts"],
-            {
-                "temporary results archives": str(tmp_forecast_results_archive),
-                model: {"dest dir": str(rolling_fcst_dir)},
-            },
-        ):
-            checklist = update_forecast_datasets.update_forecast_datasets(
-                parsed_args, config
-            )
-        expected = {model: {run_type: [str(rolling_fcst_dir)]}}
+            "temporary results archives",
+            str(tmp_forecast_results_archive),
+        )
+        monkeypatch.setitem(
+            config["rolling forecasts"]["nemo"], "dest dir", str(rolling_fcst_dir)
+        )
+
+        checklist = update_forecast_datasets.update_forecast_datasets(
+            parsed_args, config
+        )
+
+        expected = {"nemo": {run_type: [str(rolling_fcst_dir)]}}
+        assert checklist == expected
+
+    @pytest.mark.parametrize(
+        "run_type",
+        ("forecast", "forecast2"),
+    )
+    def test_wwatch3_rolling_forecast_checklist(
+        self,
+        mock_update_rolling_forecast,
+        mock_symlink_most_recent_forecast,
+        run_type,
+        config,
+        caplog,
+        tmpdir,
+        monkeypatch,
+    ):
+        parsed_args = SimpleNamespace(
+            model="wwatch3", run_type=run_type, run_date=arrow.get("2017-11-10")
+        )
+        tmp_forecast_results_archive = tmpdir.ensure_dir("tmp")
+        rolling_fcst_dir = tmpdir.ensure_dir(
+            config["rolling forecasts"]["wwatch3"]["dest dir"]
+        )
+        most_recent_fcst_dir = Path(
+            config["rolling forecasts"]["wwatch3"]["most recent forecast dir"]
+        )
+        monkeypatch.setitem(
+            config["rolling forecasts"],
+            "temporary results archives",
+            str(tmp_forecast_results_archive),
+        )
+        monkeypatch.setitem(
+            config["rolling forecasts"]["wwatch3"], "dest dir", str(rolling_fcst_dir)
+        )
+
+        checklist = update_forecast_datasets.update_forecast_datasets(
+            parsed_args, config
+        )
+
+        expected = {
+            "wwatch3": {run_type: [str(most_recent_fcst_dir), str(rolling_fcst_dir)]}
+        }
         assert checklist == expected
 
     @pytest.mark.parametrize(
@@ -335,6 +374,7 @@ class TestUpdateForecastDatasets:
         config,
         caplog,
         tmpdir,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2017-11-10")
@@ -346,19 +386,24 @@ class TestUpdateForecastDatasets:
         rolling_fcst_dir = tmpdir.ensure_dir(
             config["rolling forecasts"][model]["dest dir"]
         )
-        with patch.dict(
+        monkeypatch.setitem(
             config["rolling forecasts"],
-            {
-                "temporary results archives": str(tmp_forecast_results_archive),
-                model: {
-                    "dest dir": str(rolling_fcst_dir),
-                    "most recent forecast dir": str(most_recent_fcst_dir),
-                },
-            },
-        ):
-            checklist = update_forecast_datasets.update_forecast_datasets(
-                parsed_args, config
-            )
+            "temporary results archives",
+            str(tmp_forecast_results_archive),
+        )
+        monkeypatch.setitem(
+            config["rolling forecasts"][model], "dest dir", str(rolling_fcst_dir)
+        )
+        monkeypatch.setitem(
+            config["rolling forecasts"][model],
+            "most recent forecast dir",
+            str(most_recent_fcst_dir),
+        )
+
+        checklist = update_forecast_datasets.update_forecast_datasets(
+            parsed_args, config
+        )
+
         expected = {
             model: {run_type: [str(most_recent_fcst_dir), str(rolling_fcst_dir)]}
         }
@@ -370,7 +415,7 @@ class TestSymlinkMostRecentForecast:
 
     @pytest.mark.parametrize(
         "model, run_type",
-        [("fvcom", "forecast"), ("wwatch3", "forecast"), ("wwatch3", "forecast2")],
+        [("wwatch3", "forecast"), ("wwatch3", "forecast2")],
     )
     def test_unlink_prev_forecast_files(self, model, run_type, config, caplog, tmpdir):
         parsed_args = SimpleNamespace(
@@ -394,9 +439,11 @@ class TestSymlinkMostRecentForecast:
 
     @pytest.mark.parametrize(
         "model, run_type",
-        [("fvcom", "forecast"), ("wwatch3", "forecast"), ("wwatch3", "forecast2")],
+        [("wwatch3", "forecast"), ("wwatch3", "forecast2")],
     )
-    def test_symlink_new_forecast_files(self, model, run_type, config, caplog, tmpdir):
+    def test_symlink_new_forecast_files(
+        self, model, run_type, config, caplog, tmpdir, monkeypatch
+    ):
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2018-10-25")
         )
@@ -411,17 +458,20 @@ class TestSymlinkMostRecentForecast:
         new_fcst_files = ["foo.nc", "foo_restart.nc", "bar.nc"]
         for f in new_fcst_files:
             results_archive.ensure_dir("25oct18").ensure(f)
-        with patch.dict(
+        monkeypatch.setitem(
             config[runs[model]]["results archive"],
-            {results_archive_run_type_key: str(results_archive)},
-        ):
-            update_forecast_datasets._symlink_most_recent_forecast(
-                parsed_args.run_date,
-                Path(str(most_recent_fcst_dir)),
-                model,
-                run_type,
-                config,
-            )
+            results_archive_run_type_key,
+            str(results_archive),
+        )
+
+        update_forecast_datasets._symlink_most_recent_forecast(
+            parsed_args.run_date,
+            Path(str(most_recent_fcst_dir)),
+            model,
+            run_type,
+            config,
+        )
+
         new_fcst_files.remove("foo_restart.nc")
         for f in new_fcst_files:
             assert most_recent_fcst_dir.join(f).check(link=True)
@@ -440,7 +490,9 @@ class TestUpdateRollingForecast:
             ("wwatch3", "forecast2"),
         ],
     )
-    def test_update_rolling_forecast(self, model, run_type, config, caplog, tmpdir):
+    def test_update_rolling_forecast(
+        self, model, run_type, config, caplog, tmpdir, monkeypatch
+    ):
         parsed_args = SimpleNamespace(
             model=model, run_type=run_type, run_date=arrow.get("2018-10-25")
         )
@@ -448,20 +500,20 @@ class TestUpdateRollingForecast:
         rolling_fcst_dir = tmpdir.ensure_dir(
             config["rolling forecasts"][model]["dest dir"]
         )
-        with patch.dict(
+        monkeypatch.setitem(
             config["rolling forecasts"],
-            {
-                "temporary results archives": str(tmp_forecast_results_archive),
-                model: {"dest dir": str(rolling_fcst_dir)},
-            },
-        ):
-            update_forecast_datasets._update_rolling_forecast(
-                parsed_args.run_date,
-                Path(str(rolling_fcst_dir)),
-                model,
-                run_type,
-                config,
-            )
+            "temporary results archives",
+            str(tmp_forecast_results_archive),
+        )
+
+        update_forecast_datasets._update_rolling_forecast(
+            parsed_args.run_date,
+            Path(str(rolling_fcst_dir)),
+            model,
+            run_type,
+            config,
+        )
+
         assert rolling_fcst_dir.check(dir=True)
 
 

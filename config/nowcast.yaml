@@ -825,15 +825,6 @@ wave forecasts:
     forecast2: /opp/wwatch3/forecast2/
 
 
-# Vancouver Harbour & Fraser River FVCOM model runs
-vhfr fvcom runs:
-  # Directories on results server where run results are stored
-  # in ddmmmyy/ directories; keyed by run type
-  results archive:
-    nowcast x2: /opp/fvcom/nowcast-x2/
-    nowcast r12: /opp/fvcom/nowcast-r12/
-
-
 # Distributed logging system configuration
 logging:
   aggregator:
