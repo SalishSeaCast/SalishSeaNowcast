@@ -426,47 +426,6 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
     :members:
 
 
-.. _nowcast.figures.fvcom:
-
-:py:obj:`nowcast.figures.fvcom`  Figure Modules
------------------------------------------------
-
-.. _nowcast.figures.fvcom.publish.tide_stn_water_level:
-
-:py:mod:`nowcast.figures.fvcom.publish.tide_stn_water_level` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.publish.tide_stn_water_level
-    :members:
-
-
-.. _nowcast.figures.fvcom.publish.second_narrows_current:
-
-:py:mod:`nowcast.figures.fvcom.publish.second_narrows_current` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.publish.second_narrows_current
-    :members:
-
-
-.. _nowcast.figures.fvcom.research.surface_currents:
-
-:py:mod:`nowcast.figures.fvcom.research.surface_currents` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.research.surface_currents
-    :members:
-
-
-.. _nowcast.figures.fvcom.research.thalweg_transect:
-
-:py:mod:`nowcast.figures.fvcom.research.thalweg_transect` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.research.thalweg_transect
-    :members:
-
-
 
 .. _nowcast.figures.comparison:
 

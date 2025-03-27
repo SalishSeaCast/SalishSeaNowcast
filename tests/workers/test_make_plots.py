@@ -54,7 +54,7 @@ class TestMain:
         worker = make_plots.main()
 
         assert worker.cli.parser._actions[3].dest == "model"
-        assert worker.cli.parser._actions[3].choices == {"nemo", "fvcom", "wwatch3"}
+        assert worker.cli.parser._actions[3].choices == {"nemo", "wwatch3"}
         assert worker.cli.parser._actions[3].help
 
     def test_add_run_type_arg(self, mock_worker):
@@ -65,11 +65,8 @@ class TestMain:
             "nowcast",
             "nowcast-green",
             "nowcast-agrif",
-            "nowcast-x2",
-            "nowcast-r12",
             "forecast",
             "forecast2",
-            "forecast-x2",
         }
         assert worker.cli.parser._actions[4].help
 
@@ -108,9 +105,10 @@ class TestConfig:
         msg_registry = prod_config["message registry"]["workers"]["make_plots"]
         assert msg_registry["checklist key"] == "plots"
 
-    @pytest.mark.parametrize(
-        "msg",
-        (
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["make_plots"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
             "success nemo nowcast publish",
             "success nemo nowcast research",
             "success nemo nowcast comparison",
@@ -125,24 +123,12 @@ class TestConfig:
             "failure nemo forecast publish",
             "success nemo forecast2 publish",
             "failure nemo forecast2 publish",
-            "success fvcom nowcast-x2 publish",
-            "failure fvcom nowcast-x2 publish",
-            "success fvcom nowcast-r12 publish",
-            "failure fvcom nowcast-r12 publish",
-            "success fvcom nowcast-x2 research",
-            "failure fvcom nowcast-x2 research",
-            "success fvcom nowcast-r12 research",
-            "failure fvcom nowcast-r12 research",
             "success wwatch3 forecast publish",
             "failure wwatch3 forecast publish",
             "success wwatch3 forecast2 publish",
             "failure wwatch3 forecast2 publish",
             "crash",
-        ),
-    )
-    def test_message_types(self, msg, prod_config):
-        msg_registry = prod_config["message registry"]["workers"]["make_plots"]
-        assert msg in msg_registry
+        ]
 
     def test_timezone(self, prod_config):
         timezone = prod_config["figures"]["timezone"]
@@ -327,9 +313,6 @@ class TestConfig:
         ("nemo", "nowcast-agrif", "research"),
         ("nemo", "forecast", "publish"),
         ("nemo", "forecast2", "publish"),
-        ("fvcom", "nowcast-x2", "publish"),
-        ("fvcom", "forecast-x2", "publish"),
-        ("fvcom", "nowcast-r12", "publish"),
         ("wwatch3", "forecast", "publish"),
         ("wwatch3", "forecast2", "publish"),
     ],
@@ -368,9 +351,6 @@ class TestSuccess:
         ("nemo", "nowcast-agrif", "research"),
         ("nemo", "forecast", "publish"),
         ("nemo", "forecast2", "publish"),
-        ("fvcom", "nowcast-x2", "publish"),
-        ("fvcom", "forecast-x2", "publish"),
-        ("fvcom", "nowcast-r12", "publish"),
         ("wwatch3", "forecast", "publish"),
         ("wwatch3", "forecast2", "publish"),
     ],

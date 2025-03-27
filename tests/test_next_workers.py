@@ -2190,10 +2190,7 @@ class TestAfterGetVFPA_HADCP:
         assert workers == []
 
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-    def test_success_launch_make_plots(self, run_type, config, checklist, monkeypatch):
-        monkeypatch.setitem(
-            checklist, "FVCOM run", {run_type: {"run date": "2018-10-25"}}
-        )
+    def test_success_launch_make_plots(self, run_type, config, checklist):
         workers = next_workers.after_get_vfpa_hadcp(
             Message("after_get_vfpa_hadcp", "success"), config, checklist
         )
@@ -2361,10 +2358,6 @@ class TestAfterMakePlots:
             "failure nemo nowcast-agrif research",
             "failure nemo forecast publish",
             "failure nemo forecast2 publish",
-            "failure fvcom nowcast-x2 publish",
-            "failure fvcom nowcast-r12 publish",
-            "failure fvcom nowcast-x2 research",
-            "failure fvcom nowcast-r12 research",
             "failure wwatch3 forecast publish",
             "failure wwatch3 forecast2 publish",
             "success nemo nowcast research",
@@ -2372,10 +2365,6 @@ class TestAfterMakePlots:
             "success nemo nowcast publish",
             "success nemo nowcast-green research",
             "success nemo nowcast-agrif research",
-            "success fvcom nowcast-x2 publish",
-            "success fvcom nowcast-r12 publish",
-            "success fvcom nowcast-x2 research",
-            "success fvcom nowcast-r12 research",
             "success wwatch3 forecast publish",
             "success wwatch3 forecast2 publish",
         ],
