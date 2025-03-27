@@ -450,17 +450,16 @@ class TestSymlinkMostRecentForecast:
         most_recent_fcst_dir = tmpdir.ensure_dir(
             config["rolling forecasts"][model]["most recent forecast dir"]
         )
-        runs = {"fvcom": "vhfr fvcom runs", "wwatch3": "wave forecasts"}
-        results_archive_run_type_key = "forecast x2" if model == "fvcom" else run_type
+        runs = {"wwatch3": "wave forecasts"}
         results_archive = tmpdir.ensure_dir(
-            config[runs[model]]["results archive"][results_archive_run_type_key]
+            config[runs[model]]["results archive"][run_type]
         )
         new_fcst_files = ["foo.nc", "foo_restart.nc", "bar.nc"]
         for f in new_fcst_files:
             results_archive.ensure_dir("25oct18").ensure(f)
         monkeypatch.setitem(
             config[runs[model]]["results archive"],
-            results_archive_run_type_key,
+            run_type,
             str(results_archive),
         )
 
