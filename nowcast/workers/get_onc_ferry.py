@@ -273,7 +273,7 @@ def _get_water_data(ferry_platform, device_category, ymd, devices_config):
             resamplePeriod=1,
         )
     except requests.HTTPError as e:
-        if e.response.status_code == 504:
+        if e.response.status_code in (400, 504):
             return _empty_device_data(ferry_platform, device_category, ymd, sensors)
         else:
             logger.error(

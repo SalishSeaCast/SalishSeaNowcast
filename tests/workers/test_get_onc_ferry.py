@@ -18,6 +18,8 @@
 
 """Unit tests for SalishSeaCast get_onc_ferry worker."""
 import logging
+import textwrap
+from pathlib import Path
 from types import SimpleNamespace
 
 import arrow
@@ -25,6 +27,7 @@ import nemo_nowcast
 import numpy
 import pandas
 import pytest
+import requests
 import xarray
 
 from nowcast.workers import get_onc_ferry
@@ -33,7 +36,73 @@ from nowcast.workers import get_onc_ferry
 @pytest.fixture()
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
-    return base_config
+    config_file = Path(base_config.file)
+    with config_file.open("at") as f:
+        f.write(
+            textwrap.dedent(
+                """\
+                observations:
+                  lon/lat to NEMO ji map: /SalishSeaCast/grid/grid_from_lat_lon_mask999.nc
+
+                  ferry data:
+                    ferries:
+                      TWDP:
+                        route name: Tsawwassen - Duke Point
+                        ONC station description: Mobile Platforms, British Columbia Ferries, Tsawwassen - Duke Point
+                        location:
+                          stations:
+                            - TWDP.N1
+                            - TWDP.N2
+                          device category: NAV
+                          sensors:
+                            - longitude
+                            - latitude
+                          terminals:
+                            - Tsawwassen
+                            - Duke Pt.
+                        devices:
+                          TSG:
+                            sensors:
+                              temperature: temperature
+                              conductivity: conductivity
+                              salinity: salinity
+                          OXYSENSOR:
+                            sensors:
+                              o2_saturation: oxygen_saturation
+                              o2_concentration_corrected: oxygen_corrected
+                              o2_temperature: temperature
+                          TURBCHLFL:
+                            sensors:
+                              cdom_fluorescence: cdom_fluorescence
+                              chlorophyll: chlorophyll
+                              turbidity: turbidity
+                          CO2SENSOR:
+                            sensors:
+                              co2_partial_pressure: partial_pressure
+                              co2_concentration_linearized: co2
+                          TEMPHUMID:
+                            sensors:
+                              air_temperature: air_temperature
+                              relative_humidity: rel_humidity
+                          BARPRESS:
+                            sensors:
+                              barometric_pressure: barometric_pressure
+                          PYRANOMETER:
+                            sensors:
+                              solar_radiation: solar_radiation
+                          PYRGEOMETER:
+                            sensors:
+                              longwave_radiation: downward_radiation
+
+                        filepath template: "{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_METEO_1m_{yyyymmdd}.nc"
+
+                    dest dir: /results/observations/ONC/ferries/
+                    """
+            )
+        )
+    config_ = nemo_nowcast.Config()
+    config_.load(config_file)
+    return config_
 
 
 @pytest.fixture
@@ -283,11 +352,36 @@ class TestCalcCrossingNumbers:
     pass
 
 
-@pytest.mark.parametrize("ferry_platform", ["TWDP"])
 class TestGetWaterData:
     """Unit tests for _get_water_data() function."""
 
-    pass
+    @pytest.mark.parametrize("status_code", (400, 504))
+    def test_get_water_data_http_error(self, status_code, config, monkeypatch):
+        def mock_get_onc_data(
+            endpoint,
+            method,
+            token,
+            **query_params,
+        ):
+            response = requests.Response()
+            response.status_code = status_code
+            raise requests.HTTPError(response=response)
+
+        monkeypatch.setattr(get_onc_ferry.data_tools, "get_onc_data", mock_get_onc_data)
+
+        monkeypatch.setenv("ONC_USER_TOKEN", "mock_token")
+        ferry_config = config["observations"]["ferry data"]["ferries"]["TWDP"]
+        devices_config = ferry_config["devices"]
+
+        device_data = get_onc_ferry._get_water_data(
+            "TWDP", "CO2SENSOR", "2025-03-28", devices_config
+        )
+
+        sensors = ",".join(devices_config["CO2SENSOR"]["sensors"].values())
+        expected = get_onc_ferry._empty_device_data(
+            "TWDP", "CO2SENSOR", "2025-03-28", sensors
+        )
+        xarray.testing.assert_equal(device_data, expected)
 
 
 class TestEmptyDeviceData:
