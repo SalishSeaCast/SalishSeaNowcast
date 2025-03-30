@@ -124,14 +124,14 @@ def get_onc_ferry(parsed_args, config, *args):
             "chunksizes": [dataset.time.size],
         }
     }
-    encoding.update({var: {"chunksizes": [dataset[var].size]} for var in dataset})
-    encoding.update(
-        {
-            var: {"dtype": "int32", "_FillValue": 0, "chunksizes": [dataset[var].size]}
-            for var in dataset
-            if var.endswith("sample_count")
-        }
-    )
+    chunksizes = {var: {"chunksizes": [dataset[var].size]} for var in dataset}
+    encoding.update(**chunksizes)
+    sample_counts_encoding = {
+        var: {"dtype": "int32", "_FillValue": 0, "chunksizes": [dataset[var].size]}
+        for var in dataset
+        if var.endswith("sample_count")
+    }
+    encoding.update(**sample_counts_encoding)
     dataset.to_netcdf(
         os.fspath(nc_filepath), encoding=encoding, unlimited_dims=("time",)
     )
@@ -144,18 +144,21 @@ def _get_nav_data(ferry_platform, ymd, location_config):
         device_category = location_config["device category"]
         sensors = ",".join(location_config["sensors"])
         logger.info(f"requesting ONC {station} {device_category} data for {ymd}")
+        query_params = {
+            "locationCode": station,
+            "deviceCategoryCode": device_category,
+            "sensorCategoryCodes": sensors,
+            "dateFrom": data_tools.onc_datetime(f"{ymd} 00:00", "utc"),
+            "dateTo": data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
+            "resampleType": "avg",
+            "resamplePeriod": 1,
+        }
         try:
             onc_data = data_tools.get_onc_data(
                 "scalardata",
                 "getByLocation",
                 os.environ["ONC_USER_TOKEN"],
-                locationCode=station,
-                deviceCategoryCode=device_category,
-                sensorCategoryCodes=sensors,
-                dateFrom=(data_tools.onc_datetime(f"{ymd} 00:00", "utc")),
-                dateTo=data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
-                resampleType="avg",
-                resamplePeriod=1,
+                **query_params,
             )
         except requests.HTTPError as e:
             msg = (
@@ -259,21 +262,24 @@ def _calc_crossing_numbers(on_crossing_mask):
 def _get_water_data(ferry_platform, device_category, ymd, devices_config):
     sensors = ",".join(devices_config[device_category]["sensors"].values())
     logger.info(f"requesting ONC {ferry_platform} {device_category} data for {ymd}")
+    query_params = {
+        "locationCode": ferry_platform,
+        "deviceCategoryCode": device_category,
+        "sensorCategoryCodes": sensors,
+        "dateFrom": data_tools.onc_datetime(f"{ymd} 00:00", "utc"),
+        "dateTo": data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
+        "resampleType": "avg",
+        "resamplePeriod": 1,
+    }
     try:
         onc_data = data_tools.get_onc_data(
             "scalardata",
             "getByLocation",
             os.environ["ONC_USER_TOKEN"],
-            locationCode=ferry_platform,
-            deviceCategoryCode=device_category,
-            sensorCategoryCodes=sensors,
-            dateFrom=data_tools.onc_datetime(f"{ymd} 00:00", "utc"),
-            dateTo=data_tools.onc_datetime(f"{ymd} 23:59", "utc"),
-            resampleType="avg",
-            resamplePeriod=1,
+            **query_params,
         )
     except requests.HTTPError as e:
-        if e.response.status_code == 504:
+        if e.response.status_code in (400, 504):
             return _empty_device_data(ferry_platform, device_category, ymd, sensors)
         else:
             logger.error(
