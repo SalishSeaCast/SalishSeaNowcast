@@ -331,7 +331,6 @@ The output looks something like:
     writing output... [100%] workers
 
     (deployment/arbutus_cloud: line  679) -ignored- https://polar.ncep.noaa.gov/waves/wavewatch/distribution/
-    (deployment/arbutus_cloud: line  764) -ignored- https://gitlab.com/mdunphy/FVCOM41
     (figures/fig_dev_env: line   59) -ignored- https://github.com/SalishSeaCast/tidal-predictions
     (deployment/operations: line   35) ok        http://supervisord.org/
     (deployment/operations: line   68) ok        http://supervisord.org/running.html#running-supervisorctl

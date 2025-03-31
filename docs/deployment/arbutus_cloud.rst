@@ -619,7 +619,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:SalishSeaCast/tides.git
     $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
-    $ git clone git@gitlab.com:mdunphy/FVCOM41.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
@@ -727,39 +726,6 @@ Build the suite of wwatch3 programs with:
 
     $ cd /nemoShare/MEOPAR/nowcast-sys/wwatch3-5.16/work
     $ w3_make
-
-
-.. _ArbutusCloudBuildFVCOM41:
-
-Build FVCOM-4.1
-===============
-
-Build FVCOM with:
-
-.. code-block:: bash
-
-    $ cd /nemoShare/MEOPAR/nowcast-sys/FVCOM41/Configure
-    $ ./setup -c VancouverHarbourX2 -a UBUNTU-18.04-GCC
-    $ make libs gotm fvcom
-
-
-.. _ArbutusCloudUpdateFVCOM41:
-
-Update FVCOM-4.1
-----------------
-
-Fetch and merge changes from the `FVCOM41 repo on GitLab`_ and do a clean build:
-
-.. _FVCOM41 repo on GitLab: https://gitlab.com/mdunphy/FVCOM41
-
-.. code-block:: bash
-
-    $ cd /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
-    $ git pull origin master
-    $ cd Configure/
-    $ ./setup -c VancouverHarbourX2 -a UBUNTU-18.04-GCC
-    $ make clean
-    $ make libs gotm fvcom
 
 
 Python Packages
