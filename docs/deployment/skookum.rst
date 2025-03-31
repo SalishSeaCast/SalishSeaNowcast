@@ -45,7 +45,6 @@ Clone the following repos into :file:`/SalishSeaCast/`:
     $ git clone git@github.com:SalishSeaCast/tides.git
     $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
-    $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
 
 
 Python Packages
