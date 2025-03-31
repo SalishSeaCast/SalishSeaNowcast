@@ -100,7 +100,6 @@ dependencies = [
     # 'OPPTools',  # use python -m pip install --editable OPPTools/
     # 'NEMO-Cmd',  # use python -m pip install --editable NEMO-Cmd/
     # 'SalishSeaCmd',  # use python -m pip install --editable SalishSeaCmd/
-    # 'FVCOM-Cmd',  # use python -m pip install --editable FVCOM-Cmd/
     # 'SalishSeaNowcast',  # use python -m pip install -e SalishSeaNowcast/
 ]
 

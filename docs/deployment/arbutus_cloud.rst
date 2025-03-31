@@ -621,7 +621,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:SalishSeaCast/tracers.git
     $ git clone git@gitlab.com:mdunphy/FVCOM41.git
     $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
-    $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
     $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
@@ -800,7 +799,6 @@ The Python packages that the system depends on are installed in a conda environm
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable OPPTools/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO-Cmd/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaCmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable FVCOM-Cmd/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaNowcast/
 
 

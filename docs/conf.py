@@ -82,7 +82,6 @@ autodoc_mock_imports = [
     "feedgen",
     "feedgen.entry",
     "feedgen.feed",
-    "fvcom_cmd",
     "gsw",
     "mako",
     "mako.template",

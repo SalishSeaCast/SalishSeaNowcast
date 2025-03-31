@@ -13,7 +13,6 @@
 #    $ python -m pip install --editable OPPTools/
 #    $ python -m pip install --editable NEMO-Cmd/
 #    $ python -m pip install --editable SalishSeaCmd/
-#    $ python -m pip install --editable FVCOM-Cmd/
 #    $ python -m pip install --editable SalishSeaNowcast/
 
 name: salishsea-nowcast

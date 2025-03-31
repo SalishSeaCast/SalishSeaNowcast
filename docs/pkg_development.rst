@@ -129,13 +129,11 @@ and building the documentation with the commands below.
 * `OPPTools`_
 * `NEMO-Cmd`_
 * :ref:`SalishSeaCmdProcessor`
-* `FVCOM-Cmd`_
 
 .. _moad_tools: https://ubc-moad-tools.readthedocs.io/en/latest/index.html
 .. _Reshapr: https://reshapr.readthedocs.io/en/latest/index.html
 .. _OPPTools: https://gitlab.com/mdunphy/OPPTools
 .. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
-.. _FVCOM-Cmd: https://github.com/SalishSeaCast/FVCOM-Cmd
 
 If you have not done so already,
 you can clone those repos with:
@@ -150,7 +148,6 @@ you can clone those repos with:
     $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
-    $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
 
 If you already have clones of those repos,
 please ensure that they are up to date.
@@ -173,7 +170,6 @@ the commands below install the packages into your ``salishsea-nowcast`` developm
     (salishsea-nowcast)$ python -m pip install --editable OPPTools
     (salishsea-nowcast)$ python -m pip install --editable ../NEMO-Cmd
     (salishsea-nowcast)$ python -m pip install --editable ../SalishSeaCmd
-    (salishsea-nowcast)$ python -m pip install --editable ../FVCOM-Cmd
     (salishsea-nowcast)$ python -m pip install --editable .
 
 The ``--editable`` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
@@ -390,7 +386,6 @@ The output looks something like:
     (deployment/operations: line   35) ok        https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
     (figures/fig_dev_env: line   56) ok        https://github.com/SalishSeaCast/NEMO-Cmd
     (         workers: line    1) ok        https://climate.weather.gc.ca/
-    ( pkg_development: line  132) ok        https://github.com/SalishSeaCast/FVCOM-Cmd
     ( pkg_development: line   26) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage.yaml/badge.svg
     (figures/fig_dev_env: line   58) ok        https://github.com/SalishSeaCast/SalishSeaNowcast
     (figures/fig_dev_env: line   57) ok        https://github.com/SalishSeaCast/SalishSeaCmd
