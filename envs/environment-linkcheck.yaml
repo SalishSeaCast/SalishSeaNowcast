@@ -46,7 +46,6 @@ dependencies:
   - poppler
   - pygrib
   - pypdf
-  - pyproj
   - pyyaml
   - pyzmq
   - requests
@@ -60,7 +59,6 @@ dependencies:
   - supervisor
   - tenacity
   - tqdm
-  - utm
   - verboselogs
   - watchdog
   - xarray=2025.1.1

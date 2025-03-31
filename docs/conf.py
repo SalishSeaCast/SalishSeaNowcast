@@ -91,7 +91,6 @@ autodoc_mock_imports = [
     "mpl_toolkits.basemap",
     "nemo_cmd",
     "netCDF4",
-    "OPPTools",
     "pandas",
     "paramiko",
     "pypdf",

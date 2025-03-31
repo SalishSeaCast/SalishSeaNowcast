@@ -110,7 +110,6 @@ numpy==2.2.3
 numpy-groupies==0.11.2
 numpy-indexed==0.3.7
 openpyxl==3.1.5
-OPPTools==0.1.0
 packaging==24.2
 pandas==2.2.3
 paramiko==3.5.1
@@ -134,7 +133,6 @@ PyNaCl==1.5.0
 pyparsing==3.2.1
 pypdf==5.3.1
 pyperclip==1.9.0
-pyproj==3.7.1
 pyshp==2.3.1
 PySide6==6.8.2
 PySocks==1.7.1
@@ -163,7 +161,6 @@ scour==0.38.2
 SecretStorage==3.3.3
 sentry-sdk==2.22.0
 setuptools==75.8.2
-shapely==2.0.7
 shellingham==1.5.4
 shiboken6==6.8.2
 six==1.17.0
@@ -202,14 +199,12 @@ tzdata==2025.1
 ukkonen==1.0.1
 urllib3==2.3.0
 userpath==1.9.2
-utm==0.7.0
 verboselogs==1.7
 virtualenv==20.29.2
 watchdog==6.0.0
 wcwidth==0.2.13
 xarray==2025.1.1
 xyzservices==2025.1.0
-zeep==4.3.1
 zict==3.0.0
 zipp==3.21.0
 zstandard==0.23.0

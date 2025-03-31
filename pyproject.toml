@@ -76,7 +76,6 @@ dependencies = [
     # "poppler",  # pip doesn't see poppler pkg installed by conda to provide pdftocairo
     "pygrib",
     "pypdf",
-    "pyproj",
     "python-hglib",
     "pyyaml",
     "retrying",
@@ -89,7 +88,6 @@ dependencies = [
     "sysrsync",
     "tenacity",
     "tqdm",
-    "utm",
     "watchdog",
     "xarray == 2025.1.1",
     # 'NEMO_Nowcast',  # use python -m pip install --editable NEMO_Nowcast/
@@ -97,7 +95,6 @@ dependencies = [
     # 'Reshapr',  # use python -m pip install --editable Reshapr
     # 'SalishSeaTools',  # use python -m pip install --editable tools/SalishSeaTools/
     # 'Reshapr',  # use python -m pip install --editable Reshapr/
-    # 'OPPTools',  # use python -m pip install --editable OPPTools/
     # 'NEMO-Cmd',  # use python -m pip install --editable NEMO-Cmd/
     # 'SalishSeaCmd',  # use python -m pip install --editable SalishSeaCmd/
     # 'SalishSeaNowcast',  # use python -m pip install -e SalishSeaNowcast/

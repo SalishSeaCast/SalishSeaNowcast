@@ -126,13 +126,11 @@ and building the documentation with the commands below.
 * `moad_tools`_
 * `Reshapr`_
 * :ref:`SalishSeaToolsPackage`
-* `OPPTools`_
 * `NEMO-Cmd`_
 * :ref:`SalishSeaCmdProcessor`
 
 .. _moad_tools: https://ubc-moad-tools.readthedocs.io/en/latest/index.html
 .. _Reshapr: https://reshapr.readthedocs.io/en/latest/index.html
-.. _OPPTools: https://gitlab.com/mdunphy/OPPTools
 .. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
 
 If you have not done so already,
@@ -145,7 +143,6 @@ you can clone those repos with:
     $ git clone git@github.com:UBC-MOAD/moad_tools.git
     $ git clone git@github.com:UBC-MOAD/Reshapr.git
     $ git clone git@github.com:SalishSeaCast/tools.git
-    $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
 
@@ -164,10 +161,6 @@ the commands below install the packages into your ``salishsea-nowcast`` developm
     (salishsea-nowcast)$ python -m pip install --editable ../moad_tools
     (salishsea-nowcast)$ python -m pip install --editable ../Reshapr
     (salishsea-nowcast)$ python -m pip install --editable ../tools/SalishSeaTools
-    (salishsea-nowcast)$ cd ../OPPTools
-    (salishsea-nowcast)$ git switch SalishSeaCast-prod
-    (salishsea-nowcast)$ cd ../SalishSeaNowcast
-    (salishsea-nowcast)$ python -m pip install --editable OPPTools
     (salishsea-nowcast)$ python -m pip install --editable ../NEMO-Cmd
     (salishsea-nowcast)$ python -m pip install --editable ../SalishSeaCmd
     (salishsea-nowcast)$ python -m pip install --editable .
@@ -412,7 +405,6 @@ The output looks something like:
     ( pkg_development: line   49) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
     ( pkg_development: line   43) ok        https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaNowcast?logo=github
     ( pkg_development: line   46) ok        https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaNowcast/main/pyproject.toml&logo=Python&logoColor=gold&label=Python
-    ( pkg_development: line  129) ok        https://gitlab.com/mdunphy/OPPTools
     (         workers: line   10) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
     (         workers: line    5) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
     (deployment/operations: line  122) ok        https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow:deployment
