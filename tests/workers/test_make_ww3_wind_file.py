@@ -19,6 +19,7 @@
 """Unit tests for Salish Sea WaveWatch3 forecast worker make_ww3_wind_file
 worker.
 """
+import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -143,40 +144,47 @@ class TestConfig:
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
-@patch("nowcast.workers.make_ww3_wind_file.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             run_type=run_type,
             run_date=arrow.get("2017-04-07"),
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_ww3_wind_file.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"wwatch3 wind forcing file created on arbutus.cloud for 2017-04-07 {run_type} run"
+        assert caplog.messages[0] == expected
         assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
-@patch("nowcast.workers.make_ww3_wind_file.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             run_type=run_type,
             run_date=arrow.get("2017-04-07"),
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = make_ww3_wind_file.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"wwatch3 wind forcing file creation failed on arbutus.cloud for 2017-04-07 {run_type} run"
+        assert caplog.messages[0] == expected
         assert msg_type == f"failure {run_type}"
 
 
 @patch("nowcast.workers.make_ww3_wind_file.xarray.open_mfdataset", autospec=True)
 @patch("nowcast.workers.make_ww3_wind_file.xarray.open_dataset", autospec=True)
-@patch("nowcast.workers.make_ww3_wind_file.logger", autospec=True)
 @patch("nowcast.workers.make_ww3_wind_file._create_dataset", autospec=True)
 class TestMakeWW3WindFile:
     """Unit tests for make_ww3_wind_file() function."""
@@ -185,32 +193,38 @@ class TestMakeWW3WindFile:
     def test_checklist(
         self,
         m_create_dataset,
-        m_logger,
         m_open_dataset,
         m_open_mfdataset,
         run_type,
         config,
+        caplog,
     ):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             run_type=run_type,
             run_date=arrow.get("2017-04-07"),
         )
+        caplog.set_level(logging.DEBUG)
+
         checklist = make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
+
         assert checklist == {
             run_type: "/nemoShare/MEOPAR/nowcast-sys/wwatch3-runs/wind/"
             "SoG_wind_20170407.nc"
         }
 
     def test_nowcast_dataset(
-        self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset, config
+        self, m_create_dataset, m_open_dataset, m_open_mfdataset, config, caplog
     ):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             run_type="nowcast",
             run_date=arrow.get("2019-03-24"),
         )
+        caplog.set_level(logging.DEBUG)
+
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
+
         drop_vars = {
             "LHTFL_surface",
             "PRATE_surface",
@@ -258,14 +272,17 @@ class TestMakeWW3WindFile:
         )
 
     def test_forecast_datasets(
-        self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset, config
+        self, m_create_dataset, m_open_dataset, m_open_mfdataset, config, caplog
     ):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             run_type="forecast",
             run_date=arrow.get("2017-04-07"),
         )
+        caplog.set_level(logging.DEBUG)
+
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
+
         drop_vars = {
             "LHTFL_surface",
             "PRATE_surface",
@@ -317,14 +334,17 @@ class TestMakeWW3WindFile:
         )
 
     def test_forecast2_datasets(
-        self, m_create_dataset, m_logger, m_open_dataset, m_open_mfdataset, config
+        self, m_create_dataset, m_open_dataset, m_open_mfdataset, config, caplog
     ):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             run_type="forecast2",
             run_date=arrow.get("2017-04-07"),
         )
+        caplog.set_level(logging.DEBUG)
+
         make_ww3_wind_file.make_ww3_wind_file(parsed_args, config)
+
         drop_vars = {
             "LHTFL_surface",
             "PRATE_surface",
