@@ -43,9 +43,6 @@ def main():
             "nowcast-green",
             "nemo-forecast",
             "wwatch3-forecast",
-            "fvcom-x2-nowcast",
-            "fvcom-r12-nowcast",
-            "fvcom-forecast",
         },
         help="""
         Type of dataset to notify ERDDAP of:
@@ -62,9 +59,6 @@ def main():
         'nowcast-green' means nowcast green ocean run,
         'nemo-forecast' means updated NEMO rolling forecast,
         'wwatch3-forecast' means updated WaveWatch3 rolling forecast,
-        'fvcom-x2-nowcast' means updated VHFR FVCOM x2 nowcast run,
-        'fvcom-r12-nowcast' means updated VHFR FVCOM r12 nowcast run,
-        'fvcom-forecast' means updated VHFR FVCOM x2 rolling forecast
         """,
     )
     worker.run(ping_erddap, success, failure)

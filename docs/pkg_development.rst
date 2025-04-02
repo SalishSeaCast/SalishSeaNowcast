@@ -126,16 +126,12 @@ and building the documentation with the commands below.
 * `moad_tools`_
 * `Reshapr`_
 * :ref:`SalishSeaToolsPackage`
-* `OPPTools`_
 * `NEMO-Cmd`_
 * :ref:`SalishSeaCmdProcessor`
-* `FVCOM-Cmd`_
 
 .. _moad_tools: https://ubc-moad-tools.readthedocs.io/en/latest/index.html
 .. _Reshapr: https://reshapr.readthedocs.io/en/latest/index.html
-.. _OPPTools: https://gitlab.com/mdunphy/OPPTools
 .. _NEMO-Cmd: https://nemo-cmd.readthedocs.io/en/latest/
-.. _FVCOM-Cmd: https://github.com/SalishSeaCast/FVCOM-Cmd
 
 If you have not done so already,
 you can clone those repos with:
@@ -147,10 +143,8 @@ you can clone those repos with:
     $ git clone git@github.com:UBC-MOAD/moad_tools.git
     $ git clone git@github.com:UBC-MOAD/Reshapr.git
     $ git clone git@github.com:SalishSeaCast/tools.git
-    $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-Cmd.git
     $ git clone git@github.com:SalishSeaCast/SalishSeaCmd.git
-    $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
 
 If you already have clones of those repos,
 please ensure that they are up to date.
@@ -167,13 +161,8 @@ the commands below install the packages into your ``salishsea-nowcast`` developm
     (salishsea-nowcast)$ python -m pip install --editable ../moad_tools
     (salishsea-nowcast)$ python -m pip install --editable ../Reshapr
     (salishsea-nowcast)$ python -m pip install --editable ../tools/SalishSeaTools
-    (salishsea-nowcast)$ cd ../OPPTools
-    (salishsea-nowcast)$ git switch SalishSeaCast-prod
-    (salishsea-nowcast)$ cd ../SalishSeaNowcast
-    (salishsea-nowcast)$ python -m pip install --editable OPPTools
     (salishsea-nowcast)$ python -m pip install --editable ../NEMO-Cmd
     (salishsea-nowcast)$ python -m pip install --editable ../SalishSeaCmd
-    (salishsea-nowcast)$ python -m pip install --editable ../FVCOM-Cmd
     (salishsea-nowcast)$ python -m pip install --editable .
 
 The ``--editable`` option in the :command:`pip install` command above installs the packages from the cloned repos via symlinks so that the installed packages will be automatically updated as the repos evolve.
@@ -342,7 +331,6 @@ The output looks something like:
     writing output... [100%] workers
 
     (deployment/arbutus_cloud: line  679) -ignored- https://polar.ncep.noaa.gov/waves/wavewatch/distribution/
-    (deployment/arbutus_cloud: line  764) -ignored- https://gitlab.com/mdunphy/FVCOM41
     (figures/fig_dev_env: line   59) -ignored- https://github.com/SalishSeaCast/tidal-predictions
     (deployment/operations: line   35) ok        http://supervisord.org/
     (deployment/operations: line   68) ok        http://supervisord.org/running.html#running-supervisorctl
@@ -390,7 +378,6 @@ The output looks something like:
     (deployment/operations: line   35) ok        https://github.com/MetPX/sarracenia/blob/v2_dev/doc/sr_subscribe.1.rst
     (figures/fig_dev_env: line   56) ok        https://github.com/SalishSeaCast/NEMO-Cmd
     (         workers: line    1) ok        https://climate.weather.gc.ca/
-    ( pkg_development: line  132) ok        https://github.com/SalishSeaCast/FVCOM-Cmd
     ( pkg_development: line   26) ok        https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/pytest-with-coverage.yaml/badge.svg
     (figures/fig_dev_env: line   58) ok        https://github.com/SalishSeaCast/SalishSeaNowcast
     (figures/fig_dev_env: line   57) ok        https://github.com/SalishSeaCast/SalishSeaCmd
@@ -417,16 +404,10 @@ The output looks something like:
     ( pkg_development: line   49) ok        https://img.shields.io/github/issues/SalishSeaCast/SalishSeaNowcast?logo=github
     ( pkg_development: line   43) ok        https://img.shields.io/github/v/release/SalishSeaCast/SalishSeaNowcast?logo=github
     ( pkg_development: line   46) ok        https://img.shields.io/python/required-version-toml?tomlFilePath=https://raw.githubusercontent.com/SalishSeaCast/SalishSeaNowcast/main/pyproject.toml&logo=Python&logoColor=gold&label=Python
-    ( pkg_development: line  129) ok        https://gitlab.com/mdunphy/OPPTools
     (         workers: line   10) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSandHeadsWinds.ipynb
     (         workers: line    5) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
-    (         workers: line    9) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopTideStnWaterLevel.ipynb
-    (         workers: line    5) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestSecondNarrowsCurrent.ipynb
     (deployment/operations: line  122) ok        https://github.com/SalishSeaCast/salishsea-site/actions?query=workflow:deployment
-    (         workers: line    6) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/TestTideStnWaterLevel.ipynb
-    (         workers: line    4) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/research/TestSurfaceCurrents.ipynb
     (         workers: line   23) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestCompareTidePredictionMaxSSH.ipynb
-    (         workers: line    8) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/fvcom/publish/DevelopSecondNarrowsCurrent.ipynb
     (         workers: line   11) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
     (         workers: line   11) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
     (         workers: line   13) ok        https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
@@ -559,24 +540,17 @@ The output looks something like:
     tests/workers/test_run_NEMO_agrif.py .................                         [ 25%]
     tests/workers/test_make_plots.py ....................................................
     .............................................                                  [ 29%]
-    tests/workers/test_upload_fvcom_atmos_forcing.py ............................  [ 30%]
     tests/workers/test_make_feeds.py .....................                         [ 31%]
     tests/workers/test_get_onc_ferry.py ................................           [ 33%]
     tests/workers/test_watch_ww3.py ..................                             [ 33%]
-    tests/workers/test_make_fvcom_rivers_forcing.py ..............................
-    ....                                                                           [ 35%]
     tests/test_daily_river_flows.py ......................................         [ 36%]
     tests/workers/make_runoff_file.py ...................................................
     ...........                                                                    [ 39%]
     tests/workers/test_collect_NeahBay_ssh.py ...................                  [ 40%]
-    tests/workers/test_make_fvcom_atmos_forcing.py ...............................
-    ....                                                                           [ 41%]
-    tests/workers/test_download_fvcom_results.py ...........................       [ 42%]
     tests/workers/test_upload_forcing.py .........................................
     ...............................                                                [ 45%]
     tests/workers/test_launch_remote_worker.py ...............                     [ 46%]
     tests/test_analyze.py .................                                        [ 47%]
-    tests/workers/test_watch_fvcom.py .............................                [ 48%]
     tests/workers/test_watch_NEMO_agrif.py ....................                    [ 49%]
     tests/workers/test_make_surface_current_tiles.py ...........................   [ 50%]
     tests/workers/test_make_averaged_dataset.py ..................................
@@ -588,7 +562,6 @@ The output looks something like:
     .....................................................................................
     ..............                                                                 [ 60%]
     tests/workers/test_rotate_hindcast_logs.py ..........                          [ 60%]
-    tests/workers/test_make_fvcom_boundary.py ...................................  [ 62%]
     tests/workers/test_make_forcing_links.py ............................................
     ..................                                                             [ 64%]
     tests/workers/test_ping_erddap.py ..........................................   [ 66%]
@@ -615,8 +588,6 @@ The output looks something like:
     tests/workers/test_run_NEMO.py ......................................................
     .............................................................................. [ 92%]
     tests/workers/test_make_CHS_currents_file.py ........................          [ 93%]
-    tests/workers/test_run_fvcom.py .....................................................
-    .............                                                                  [ 96%]
     tests/workers/test_update_forecast_datasets.py ......................................
     .....................................                                          [ 99%]
     tests/workers/test_download_wwatch3_results.py ............                    [100%]

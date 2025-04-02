@@ -16,10 +16,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-"""SalishSeaCast worker that downloads the results files from a run
-on an HPC/cloud facility to archival storage.
+"""SalishSeaCast worker that downloads the results files from an HPC/cloud facility run
+to archival storage.
 """
-import contextlib
 import logging
 import os
 import shlex
@@ -28,7 +27,7 @@ from pathlib import Path
 import arrow
 from nemo_nowcast import NowcastWorker, WorkerError
 
-from nowcast import lib, ssh_sftp
+from nowcast import lib
 
 NAME = "download_results"
 logger = logging.getLogger(NAME)
@@ -123,17 +122,12 @@ def download_results(parsed_args, config, *args):
                 map(os.fspath, results_archive_dir.glob(f"*SalishSea_{freq}_*.nc"))
             )
     else:
-        _tidy_dest_host(run_type, dest_host, dest_path, results_dir, config)
         checklist[run_type]["destination"] = dest
     return checklist
 
 
 def _tidy_localhost(run_type, dest, results_dir, config):
     results_archive_dir = dest / results_dir
-    if not run_type == "hindcast":
-        # Keep FVCOM boundary slab files from hindcast runs so that we can do FVCOM hindcast runs
-        for filepath in results_archive_dir.glob("FVCOM_[TUVW].nc"):
-            filepath.unlink()
     lib.fix_perms(
         results_archive_dir,
         mode=int(lib.FilePerms(user="rwx", group="rwx", other="rx")),
@@ -142,26 +136,6 @@ def _tidy_localhost(run_type, dest, results_dir, config):
     for filepath in results_archive_dir.glob("*"):
         lib.fix_perms(filepath, grp_name=config["file group"])
     return results_archive_dir
-
-
-def _tidy_dest_host(run_type, dest_host, dest_path, results_dir, config):
-    ssh_key = Path(
-        os.environ["HOME"], ".ssh", config["run"]["enabled hosts"][dest_host]["ssh key"]
-    )
-    ssh_client, sftp_client = ssh_sftp.sftp(dest_host, ssh_key)
-    with contextlib.ExitStack() as stack:
-        [stack.enter_context(client) for client in (ssh_client, sftp_client)]
-        results_archive_dir = dest_path / results_dir
-        if not run_type == "hindcast":
-            # Keep FVCOM boundary slab files from hindcast runs so that we can do FVCOM hindcast runs
-            fvcom_bdy_slabs = ("FVCOM_T.nc", "FVCOM_U.nc", "FVCOM_V.nc", "FVCOM_W.nc")
-            fvcom_bdy_files = [
-                f
-                for f in sftp_client.listdir(results_archive_dir)
-                if Path(f).name in fvcom_bdy_slabs
-            ]
-            for f in fvcom_bdy_files:
-                sftp_client.unlink(f)
 
 
 if __name__ == "__main__":

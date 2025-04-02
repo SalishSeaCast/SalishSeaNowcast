@@ -43,9 +43,6 @@ jobs:
           python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/NEMO-Cmd.git#egg=NEMO-Cmd
           python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/SalishSeaCmd.git#egg=SalishSeaCmd
           python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable "git+https://github.com/SalishSeaCast/tools#egg=SalishSeaTools&subdirectory=SalishSeaTools"
-          python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://github.com/SalishSeaCast/FVCOM-Cmd.git#egg=FVCOM-Cmd
-          # OPPTools is a private GitLab repo, so an access token is required
-          python -m pip install --src $GITHUB_WORKSPACE/../vcs_pkgs/ --editable git+https://oauth2:${{ secrets.GITLAB_ACCESS_TOKEN }}@gitlab.com/mdunphy/OPPTools.git@6c784a4dc44dd9030aafe9a8519e5ae0b6cc3183#egg=OPPTools
           python -m pip install --editable $GITHUB_WORKSPACE
 
       - name: pytest package with coverage

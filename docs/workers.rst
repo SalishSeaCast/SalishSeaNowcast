@@ -231,48 +231,6 @@ Workers
     :members: main
 
 
-``make_fvcom_boundary``
------------------------
-
-.. automodule:: nowcast.workers.make_fvcom_boundary
-    :members: main
-
-
-``make_fvcom_rivers_forcing``
------------------------------
-
-.. automodule:: nowcast.workers.make_fvcom_rivers_forcing
-    :members: main
-
-
-``make_fvcom_atmos_forcing``
-----------------------------
-
-.. automodule:: nowcast.workers.make_fvcom_atmos_forcing
-    :members: main
-
-
-``upload_fvcom_atmos_forcing``
-------------------------------
-
-.. automodule:: nowcast.workers.upload_fvcom_atmos_forcing
-    :members: main
-
-
-``run_fvcom``
--------------
-
-.. automodule:: nowcast.workers.run_fvcom
-    :members: main
-
-
-``watch_fvcom``
----------------
-
-.. automodule:: nowcast.workers.watch_fvcom
-    :members: main
-
-
 .. _MakeWW3WindFile-Worker:
 
 ``make_ww3_wind_file``
@@ -337,13 +295,6 @@ Workers
 ----------------------------
 
 .. automodule:: nowcast.workers.download_wwatch3_results
-    :members: main
-
-
-``download_fvcom_results``
---------------------------
-
-.. automodule:: nowcast.workers.download_fvcom_results
     :members: main
 
 
@@ -472,47 +423,6 @@ The figures are also stored in the :file:`figures/` sub-directory of each run's 
 -------------------------------------------------------
 
 .. automodule:: nowcast.figures.surface_current_domain
-    :members:
-
-
-.. _nowcast.figures.fvcom:
-
-:py:obj:`nowcast.figures.fvcom`  Figure Modules
------------------------------------------------
-
-.. _nowcast.figures.fvcom.publish.tide_stn_water_level:
-
-:py:mod:`nowcast.figures.fvcom.publish.tide_stn_water_level` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.publish.tide_stn_water_level
-    :members:
-
-
-.. _nowcast.figures.fvcom.publish.second_narrows_current:
-
-:py:mod:`nowcast.figures.fvcom.publish.second_narrows_current` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.publish.second_narrows_current
-    :members:
-
-
-.. _nowcast.figures.fvcom.research.surface_currents:
-
-:py:mod:`nowcast.figures.fvcom.research.surface_currents` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.research.surface_currents
-    :members:
-
-
-.. _nowcast.figures.fvcom.research.thalweg_transect:
-
-:py:mod:`nowcast.figures.fvcom.research.thalweg_transect` Module
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: nowcast.figures.fvcom.research.thalweg_transect
     :members:
 
 

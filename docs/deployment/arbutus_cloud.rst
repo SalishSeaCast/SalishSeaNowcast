@@ -124,17 +124,6 @@ ZeroMQ distributed logging subscription Rules:
   * Remote: CIDR
   * CIDR: 142.103.36.0/24
 
-* For :py:mod:`~nowcast.workers.make_fvcom_boundary`,
-  :py:mod:`~nowcast.workers.make_fvcom_rivers_forcing`,
-  :py:mod:`~nowcast.workers.run_fvcom`,
-  and :py:mod:`~nowcast.workers.watch_fvcom`:
-
-  * Rule: Custom TCP
-  * Direction: Ingress
-  * Port range: 5580 - 5587
-  * Remote: CIDR
-  * CIDR: 142.103.36.0/24
-
 
 .. _HeadNodeInstance:
 
@@ -630,10 +619,6 @@ Clone the following repos into :file:`/nemoShare/MEOPAR/nowcast-sys/`:
     $ git clone git@github.com:SalishSeaCast/tides.git
     $ git clone git@github.com:SalishSeaCast/tools.git
     $ git clone git@github.com:SalishSeaCast/tracers.git
-    $ git clone git@gitlab.com:mdunphy/FVCOM41.git
-    $ git clone git@gitlab.com:mdunphy/FVCOM-VHFR-config.git
-    $ git clone git@github.com:SalishSeaCast/FVCOM-Cmd.git
-    $ git clone git@gitlab.com:douglatornell/OPPTools.git
     $ git clone git@github.com:SalishSeaCast/NEMO-3.6-code.git
     $ git clone git@github.com:SalishSeaCast/XIOS-ARCH.git
     $ git clone git@github.com:SalishSeaCast/XIOS-2.git
@@ -742,39 +727,6 @@ Build the suite of wwatch3 programs with:
     $ w3_make
 
 
-.. _ArbutusCloudBuildFVCOM41:
-
-Build FVCOM-4.1
-===============
-
-Build FVCOM with:
-
-.. code-block:: bash
-
-    $ cd /nemoShare/MEOPAR/nowcast-sys/FVCOM41/Configure
-    $ ./setup -c VancouverHarbourX2 -a UBUNTU-18.04-GCC
-    $ make libs gotm fvcom
-
-
-.. _ArbutusCloudUpdateFVCOM41:
-
-Update FVCOM-4.1
-----------------
-
-Fetch and merge changes from the `FVCOM41 repo on GitLab`_ and do a clean build:
-
-.. _FVCOM41 repo on GitLab: https://gitlab.com/mdunphy/FVCOM41
-
-.. code-block:: bash
-
-    $ cd /nemoShare/MEOPAR/nowcast-sys/FVCOM41/
-    $ git pull origin master
-    $ cd Configure/
-    $ ./setup -c VancouverHarbourX2 -a UBUNTU-18.04-GCC
-    $ make clean
-    $ make libs gotm fvcom
-
-
 Python Packages
 ===============
 
@@ -805,13 +757,8 @@ The Python packages that the system depends on are installed in a conda environm
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO_Nowcast/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable moad_tools/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable tools/SalishSeaTools/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ cd OPPTools/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ git switch SalishSeaCast-prod
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ cd /nemoShare/MEOPAR/nowcast-sys/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable OPPTools/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable NEMO-Cmd/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaCmd/
-    (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable FVCOM-Cmd/
     (/nemoShare/MEOPAR/nowcast-sys/nowcast-env)$ python -m pip install --editable SalishSeaNowcast/
 
 
@@ -923,32 +870,6 @@ Create a :file:`wwatch3-runs/` directory tree and populate it with:
   * Symlinks :file:`ww3_prnc_current.inp` as :file:`ww3_prnc.inp`
   * Runs :program:`ww3_prnc` to produce the wwatch3 current forcing files for the run.
     The output of :program:`ww3_prnc` is stored in the run's :file:`stdout` file.
-
-
-FVCOM Runs Directory
-======================
-
-Create an :file:`fvcom-runs/` directory for the VHFR FVCOM runs and populate it with:
-
-.. code-block:: bash
-
-    $ cd /nemoShare/MEOPAR/nowcast-sys/
-    $ mkdir fvcom-runs
-    $ chmod g+ws fvcom-runs
-    $ cd fvcom-runs/
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.case.template namelist.case
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.grid.template namelist.grid
-    $ cp ../FVCOM-VHFR-config/namelists/namelists/namelist.nesting.template namelist.nesting
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.netcdf.template namelist.netcdf
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.numerics.template namelist.numerics
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.obc.template namelist.obc
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.physics.template namelist.physics
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.restart.template namelist.restart
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.rivers.template namelist.rivers.x2
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.rivers.template namelist.rivers.r12
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.startup.hotstart.template namelist.startup.hotstart
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.station_timeseries.template namelist.station_timeseries
-    $ cp ../FVCOM-VHFR-config/namelists/namelist.surface.template namelist.surface
 
 
 Managing Compute Nodes

@@ -53,8 +53,6 @@ from nowcast.figures.publish import (
     storm_surge_alerts_thumbnail,
     compare_tide_prediction_max_ssh,
 )
-from nowcast.figures.fvcom.research import thalweg_transect, surface_currents
-from nowcast.figures.fvcom.publish import second_narrows_current, tide_stn_water_level
 from nowcast.figures.wwatch3 import wave_height_period
 
 # Legacy figures code
@@ -73,11 +71,10 @@ def main():
     worker.init_cli()
     worker.cli.add_argument(
         "model",
-        choices={"nemo", "fvcom", "wwatch3"},
+        choices={"nemo", "wwatch3"},
         help="""
         Model to produce plots for:
         'nemo' means the SalishSeaCast NEMO model,
-        'fvcom' means the Vancouver Harbour/Fraser River FVCOM model,
         'wwatch3' means the Strait of Georgia WaveWatch3(TM) model,
         """,
     )
@@ -87,23 +84,17 @@ def main():
             "nowcast",
             "nowcast-green",
             "nowcast-agrif",
-            "nowcast-x2",
-            "nowcast-r12",
             "forecast",
             "forecast2",
-            "forecast-x2",
         },
         help="""
         Type of run to produce plots for:
         'nowcast' means NEMO nowcast physics-only run, or wwatch3 nowcast run,
         'nowcast-green' means NEMO nowcast-green physics/biology run,
         'nowcast-agrif' means NEMO nowcast-green physics/biology runs with AGRIF sub-grid(s),
-        'nowcast-x2' means VHFR FVCOM x2 configuration nowcast run,
-        'nowcast-r12' means VHFR FVCOM r12 configuration nowcast run,
         'forecast' means NEMO forecast physics-only runs, or wwatch3 forecast run,
         'forecast2' means NEMO preliminary forecast physics-only runs, or wwatch3 preliminary
         forecast run,
-        'forecast-x2' means VHFR FVCOM x2 configuration forecast run,
         """,
     )
     worker.cli.add_argument(
@@ -232,90 +223,6 @@ def make_plots(parsed_args, config, *args):
                 timezone,
             )
 
-    if model == "fvcom":
-        _, model_config = run_type.split("-")
-        fvcom_results_dataset_filename = f"vh_{model_config}_0001.nc"
-        fvcom_stns_datasets = {}
-        if run_type.startswith("nowcast"):
-            model_configs = ("x2", "r12") if model_config == "r12" else ("x2",)
-            for mdl_cfg in model_configs:
-                fvcom_stns_dataset_filename = config["vhfr fvcom runs"][
-                    "stations dataset filename"
-                ][mdl_cfg]
-                results_dir = Path(
-                    config["vhfr fvcom runs"]["results archive"][f"nowcast {mdl_cfg}"],
-                    dmy,
-                )
-                if plot_type == "publish":
-                    fvcom_stns_dataset_path = results_dir / fvcom_stns_dataset_filename
-                    _rename_fvcom_vars(fvcom_stns_dataset_path)
-                    fvcom_stns_datasets[mdl_cfg] = xarray.open_dataset(
-                        f"/tmp/{fvcom_stns_dataset_path.name}"
-                    )
-            if plot_type == "research":
-                fvcom_results_dataset = nc.Dataset(
-                    results_dir / fvcom_results_dataset_filename
-                )
-        else:
-            fvcom_stns_dataset_filename = config["vhfr fvcom runs"][
-                "stations dataset filename"
-            ][model_config]
-            nowcast_results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"][f"nowcast {model_config}"],
-                dmy,
-            )
-            forecast_results_dir = Path(
-                config["vhfr fvcom runs"]["results archive"][
-                    f"forecast {model_config}"
-                ],
-                dmy,
-            )
-            if plot_type == "publish":
-                nowcast_dataset_path = nowcast_results_dir / fvcom_stns_dataset_filename
-                forecast_dataset_path = (
-                    forecast_results_dir / fvcom_stns_dataset_filename
-                )
-                fvcom_stns_dataset_path = Path("/tmp", fvcom_stns_dataset_filename)
-                cmd = (
-                    f"ncrcat -O {nowcast_dataset_path} {forecast_dataset_path} "
-                    f"-o {fvcom_stns_dataset_path}"
-                )
-                subprocess.check_output(shlex.split(cmd))
-                _rename_fvcom_vars(fvcom_stns_dataset_path)
-                fvcom_stns_datasets[model_config] = xarray.open_dataset(
-                    f"/tmp/{fvcom_stns_dataset_path.name}"
-                )
-            if plot_type == "research":
-                cmd = (
-                    f"ncrcat -O {nowcast_results_dir / fvcom_results_dataset_filename} "
-                    f"{forecast_results_dir / fvcom_results_dataset_filename} "
-                    f"-o /tmp/{fvcom_results_dataset_filename}"
-                )
-                subprocess.check_output(shlex.split(cmd))
-                fvcom_results_dataset = nc.Dataset(
-                    f"/tmp/{fvcom_results_dataset_filename}"
-                )
-        if plot_type == "publish":
-            nemo_ssh_dataset_url_tmpl = config["figures"]["dataset URLs"][
-                "tide stn ssh time series"
-            ]
-            obs_hadcp_dataset = xarray.open_dataset(
-                config["figures"]["dataset URLs"]["2nd narrows hadcp time series"]
-            )
-            fig_functions = _prep_fvcom_publish_fig_functions(
-                fvcom_stns_datasets,
-                nemo_ssh_dataset_url_tmpl,
-                obs_hadcp_dataset,
-                run_type,
-                run_date,
-            )
-        if plot_type == "research":
-            fig_functions = _prep_fvcom_research_fig_functions(
-                fvcom_results_dataset,
-                run_type,
-                run_date,
-                run_duration=24 if run_type.startswith("nowcast") else 60,
-            )
     if model == "wwatch3":
         wwatch3_dataset_url = config["figures"]["dataset URLs"]["wwatch3 fields"]
         fig_functions = _prep_wwatch3_publish_fig_functions(
@@ -326,14 +233,6 @@ def make_plots(parsed_args, config, *args):
         config, model, run_type, plot_type, dmy, fig_functions, test_figure_id
     )
     return checklist
-
-
-def _rename_fvcom_vars(fvcom_dataset_path):
-    cmd = (
-        f"ncrename -O -v siglay,sigma_layer -v siglev,sigma_level "
-        f"{fvcom_dataset_path} /tmp/{fvcom_dataset_path.name}"
-    )
-    subprocess.check_output(shlex.split(cmd))
 
 
 def _results_dataset(period, grid, results_dir):
@@ -813,114 +712,6 @@ def _prep_publish_fig_functions(
         )
         logger.info(
             f"added {place} figure to {run_date.format('YYYY-MM-DD')} NEMO {run_type} publish render list"
-        )
-    return fig_functions
-
-
-def _prep_fvcom_publish_fig_functions(
-    fvcom_stns_datasets,
-    nemo_ssh_dataset_url_tmpl,
-    obs_hadcp_dataset,
-    run_type,
-    run_date,
-):
-    logger.info(
-        f"preparing render list for {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} publish figures"
-    )
-    fig_functions = {}
-    names = {
-        "Calamity Point": "CP_waterlevel",
-        "Indian Arm Head": "IAH_waterlevel",
-        "New Westminster": "NW_waterlevel",
-        "Port Moody": "PM_waterlevel",
-        "Sand Heads": "SH_waterlevel",
-        "Sandy Cove": "SC_waterlevel",
-        "Vancouver Harbour": "VH_waterlevel",
-        "Woodwards Landing": "WL_waterlevel",
-    }
-    for place, svg_root in names.items():
-        fig_functions.update(
-            {
-                svg_root: {
-                    "function": tide_stn_water_level.make_figure,
-                    "args": (place, fvcom_stns_datasets, nemo_ssh_dataset_url_tmpl),
-                }
-            }
-        )
-        logger.info(
-            f"added {place} figure to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} publish render list"
-        )
-    fig_functions.update(
-        {
-            "2ndNarrows_current": {
-                "function": second_narrows_current.make_figure,
-                "args": ("2nd Narrows", fvcom_stns_datasets, obs_hadcp_dataset),
-            }
-        }
-    )
-    logger.info(
-        f"added 2ndNarrows_current figure to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} "
-        f"publish render list"
-    )
-    return fig_functions
-
-
-def _prep_fvcom_research_fig_functions(
-    fvcom_results_dataset, run_type, run_date, run_duration
-):
-    logger.info(
-        f"preparing render list for {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} research figures"
-    )
-    fig_functions = {}
-    names = {
-        "English Bay": "EnglishBay_surface_currents",
-        "Vancouver Harbour": "VancouverHarbour_surface_currents",
-        "Indian Arm": "IndianArm_surface_currents",
-    }
-    for place, svg_root in names.items():
-        for time_index in range(run_duration):
-            hr = time_index + 1
-            yyyymmdd = run_date.shift(hours=hr).format("YYYYMMDD")
-            hhmmss = run_date.shift(hours=hr).format("HHmmss")
-            fig_functions.update(
-                {
-                    f"{svg_root}_{yyyymmdd}_{hhmmss}_UTC": {
-                        "function": surface_currents.make_figure,
-                        "args": (place, time_index, fvcom_results_dataset),
-                        "format": "png",
-                        "image loop": True,
-                    }
-                }
-            )
-        logger.info(
-            f"added {svg_root} figures to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} "
-            f"research render list"
-        )
-    names = {
-        "Vancouver Harbour": "VancouverHarbour_thalweg",
-        "Port Moody": "PortMoody_thalweg",
-        "Indian Arm": "IndianArm_thalweg",
-    }
-    for place, svg_root in names.items():
-        for time_index in range(run_duration):
-            hr = time_index + 1
-            yyyymmdd = run_date.shift(hours=hr).format("YYYYMMDD")
-            hhmmss = run_date.shift(hours=hr).format("HHmmss")
-            for varname in ["salinity", "temp", "tangential velocity"]:
-                fvarname = varname.replace(" ", "_")
-                fig_functions.update(
-                    {
-                        f"{svg_root}_{fvarname}_{yyyymmdd}_{hhmmss}_UTC": {
-                            "function": thalweg_transect.make_figure,
-                            "args": (place, time_index, fvcom_results_dataset, varname),
-                            "format": "png",
-                            "image loop": True,
-                        }
-                    }
-                )
-        logger.info(
-            f"added {svg_root} figures to {run_date.format('YYYY-MM-DD')} VHFR FVCOM {run_type} "
-            f"research render list"
         )
     return fig_functions
 

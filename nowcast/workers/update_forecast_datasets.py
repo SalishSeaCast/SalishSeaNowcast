@@ -39,10 +39,9 @@ def main():
     worker.init_cli()
     worker.cli.add_argument(
         "model",
-        choices={"fvcom", "nemo", "wwatch3"},
+        choices={"nemo", "wwatch3"},
         help="""
         Model to update the rolling forecast datasets for:
-        'fvcom' means the Vancouver Harbour Fraser River (VHFR) FVCOM model,
         'nemo' means the SalishSeaCast NEMO model,
         'wwatch3' means the Strait of Georgia WaveWatch3(TM) model.
         """,
@@ -99,13 +98,9 @@ def update_forecast_datasets(parsed_args, config, *args):
     except KeyError:
         # no most recent forecast dir for NEMO, and that's okay
         pass
-    try:
-        forecast_dir = Path(config["rolling forecasts"][model]["dest dir"])
-        _update_rolling_forecast(run_date, forecast_dir, model, run_type, config)
-        updated_dirs.append(os.fspath(forecast_dir))
-    except KeyError:
-        # no rolling forecast dir for VHFR FVCOM, and that's okay
-        pass
+    forecast_dir = Path(config["rolling forecasts"][model]["dest dir"])
+    _update_rolling_forecast(run_date, forecast_dir, model, run_type, config)
+    updated_dirs.append(os.fspath(forecast_dir))
     checklist = {model: {run_type: updated_dirs}}
     return checklist
 
@@ -120,11 +115,9 @@ def _symlink_most_recent_forecast(
     for f in most_recent_fcst_dir.iterdir():
         f.unlink()
     logger.debug(f"deleted previous forecast symlinks from {most_recent_fcst_dir}")
-    runs = {"fvcom": "vhfr fvcom runs", "wwatch3": "wave forecasts"}
     results_archive = {
         "nemo": Path(config["results archive"]["nowcast"]),
-        "fvcom": Path(config[runs["fvcom"]]["results archive"]["forecast x2"]),
-        "wwatch3": Path(config[runs["wwatch3"]]["results archive"][run_type]),
+        "wwatch3": Path(config["wave forecasts"]["results archive"][run_type]),
     }[model]
     for f in (results_archive / ddmmmyy).glob("*.nc"):
         if "restart" not in f.name:

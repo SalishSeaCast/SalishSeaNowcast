@@ -100,7 +100,7 @@ class TestMain:
         worker = download_results.main()
         assert worker.name == "download_results"
         assert worker.description.startswith(
-            "SalishSeaCast worker that downloads the results files from a run"
+            "SalishSeaCast worker that downloads the results files from an HPC/cloud facility run"
         )
 
     def test_add_host_name_arg(self, mock_worker):
@@ -386,14 +386,7 @@ class TestDownloadResults:
             download_results.logger.error,
         )
 
-    def test_scp_to_dest_host_subprocess(
-        self, m_fix_perms, m_run_in_subproc, config, monkeypatch
-    ):
-        def mock_tidy_dest_host(*args):
-            pass
-
-        monkeypatch.setattr(download_results, "_tidy_dest_host", mock_tidy_dest_host)
-
+    def test_scp_to_dest_host_subprocess(self, m_fix_perms, m_run_in_subproc, config):
         parsed_args = SimpleNamespace(
             host_name="sockeye-hindcast",
             run_type="hindcast",
@@ -408,99 +401,6 @@ class TestDownloadResults:
             download_results.logger.debug,
             download_results.logger.error,
         )
-
-    @pytest.mark.parametrize(
-        "run_type, host_name",
-        [
-            ("nowcast", "arbutus.cloud-nowcast"),
-            ("forecast", "arbutus.cloud-nowcast"),
-            ("forecast2", "arbutus.cloud-nowcast"),
-        ],
-    )
-    def test_unlink_fvcom_boundary_files(
-        self,
-        m_fix_perms,
-        m_run_in_subproc,
-        run_type,
-        host_name,
-        config,
-        tmp_path,
-        monkeypatch,
-    ):
-        fvcom_t = tmp_path / "FVCOM_T.nc"
-        fvcom_t.write_bytes(b"")
-        fvcom_u = tmp_path / "FVCOM_U.nc"
-        fvcom_u.write_bytes(b"")
-        fvcom_v = tmp_path / "FVCOM_V.nc"
-        fvcom_v.write_bytes(b"")
-        fvcom_w = tmp_path / "FVCOM_W.nc"
-        fvcom_w.write_bytes(b"")
-
-        def mock_glob(path, pattern):
-            return (
-                [fvcom_t, fvcom_u, fvcom_v, fvcom_w]
-                if pattern.startswith("FVCOM")
-                else []
-            )
-
-        monkeypatch.setattr(download_results.Path, "glob", mock_glob)
-
-        parsed_args = SimpleNamespace(
-            host_name=host_name,
-            run_type=run_type,
-            dest_host="localhost",
-            run_date=arrow.get("2018-05-22"),
-        )
-        download_results.download_results(parsed_args, config)
-        assert not fvcom_t.exists()
-        assert not fvcom_u.exists()
-        assert not fvcom_v.exists()
-        assert not fvcom_w.exists()
-
-    @pytest.mark.parametrize(
-        "host_name, dest_host",
-        (("optimum-hindcast", "localhost"), ("sockeye-hindcast", "robot.graham")),
-    )
-    def test_hindcast_not_unlink_fvcom_boundary_files(
-        self,
-        m_fix_perms,
-        m_run_in_subproc,
-        host_name,
-        dest_host,
-        config,
-        tmp_path,
-        monkeypatch,
-    ):
-        def mock_glob(*args):
-            return []
-
-        monkeypatch.setattr(download_results.Path, "glob", mock_glob)
-
-        def mock_tidy_dest_host(*args):
-            pass
-
-        monkeypatch.setattr(download_results, "_tidy_dest_host", mock_tidy_dest_host)
-
-        fvcom_t = tmp_path / "FVCOM_T.nc"
-        fvcom_t.write_bytes(b"")
-        fvcom_u = tmp_path / "FVCOM_U.nc"
-        fvcom_u.write_bytes(b"")
-        fvcom_v = tmp_path / "FVCOM_V.nc"
-        fvcom_v.write_bytes(b"")
-        fvcom_w = tmp_path / "FVCOM_W.nc"
-        fvcom_w.write_bytes(b"")
-
-        parsed_args = SimpleNamespace(
-            host_name=host_name,
-            run_type="hindcast",
-            dest_host=dest_host,
-            run_date=arrow.get("2019-09-03"),
-        )
-        download_results.download_results(parsed_args, config)
-        assert fvcom_t.exists()
-        assert fvcom_u.exists()
-        assert fvcom_v.exists()
-        assert fvcom_w.exists()
 
     @pytest.mark.parametrize(
         "run_type, host_name",
@@ -553,11 +453,7 @@ class TestDownloadResults:
         )
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
-            side_effect=(
-                [[Path("namelist_cfg")], [], []]
-                if run_type == "hindcast"
-                else [[], [Path("namelist_cfg")], [], []]
-            ),
+            side_effect=([[Path("namelist_cfg")], [], []]),
         )
         with p_glob:
             download_results.download_results(parsed_args, config)
@@ -595,7 +491,6 @@ class TestDownloadResults:
                 if run_type == "hindcast"
                 else [
                     [],
-                    [],
                     [Path("Salishsea_1h_20180522_20180522_grid_T.nc")],
                     [Path("Salishsea_1d_20180522_20180522_grid_T.nc")],
                 ]
@@ -621,7 +516,6 @@ class TestDownloadResults:
         p_glob = patch(
             "nowcast.workers.download_results.Path.glob",
             side_effect=[
-                [],
                 [],
                 [Path("1_Salishsea_1h_20180522_20180522_grid_T.nc")],
                 [

@@ -120,8 +120,10 @@ class TestSuccess:
         parsed_args = SimpleNamespace(
             run_type="hindcast", run_date=arrow.get("2019-10-27")
         )
-        caplog.set_level(logging.INFO)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = split_results.success(parsed_args)
+
         assert caplog.records[0].levelname == "INFO"
         assert "results files split into daily directories" in caplog.messages[0]
         assert msg_type == "success hindcast"
@@ -134,8 +136,10 @@ class TestFailure:
         parsed_args = SimpleNamespace(
             run_type="hindcast", run_date=arrow.get("2019-10-27")
         )
-        caplog.set_level(logging.CRITICAL)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = split_results.failure(parsed_args)
+
         assert caplog.records[0].levelname == "CRITICAL"
         assert "results files splitting failed" in caplog.messages[0]
         assert msg_type == "failure hindcast"
@@ -235,7 +239,7 @@ class TestMoveResultsNcFile:
         run_type_results.mkdir()
         results_dir = run_type_results / "01jan07"
         results_dir.mkdir()
-        nc_file = results_dir / "FVCOM_T_20070101-20070101.nc"
+        nc_file = results_dir / "SandyCove_20070101-20070101.nc"
         nc_file.write_bytes(b"")
         dest_dir = run_type_results / "02jan07"
         dest_dir.mkdir()
@@ -243,9 +247,9 @@ class TestMoveResultsNcFile:
         caplog.set_level(logging.DEBUG)
 
         split_results._move_results_nc_file(nc_file, dest_dir, arrow.get("2007-01-02"))
-        assert (dest_dir / "FVCOM_T.nc").exists()
+        assert (dest_dir / "SandyCove.nc").exists()
         assert caplog.records[0].levelname == "DEBUG"
-        expected = f"moved {nc_file} to {dest_dir / 'FVCOM_T.nc'}"
+        expected = f"moved {nc_file} to {dest_dir / 'SandyCove.nc'}"
         assert caplog.messages[0] == expected
 
 

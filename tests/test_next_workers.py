@@ -99,9 +99,6 @@ def config(base_config):
                 wave forecasts:
                   host: arbutus.cloud
                   run when: after nowcast-green
-
-                vhfr fvcom runs:
-                  host: arbutus.cloud
                 """
             )
         )
@@ -1097,12 +1094,6 @@ class TestAfterWatchNEMO:
                 args=["arbutus.cloud", "ssh", "--run-date", "2021-04-26"],
                 host="localhost",
             ),
-            ## TODO: Add a config switch to control running FVCOM VHFR
-            # NextWorker(
-            #     "nowcast.workers.make_fvcom_boundary",
-            #     args=["arbutus.cloud", "x2", "nowcast"],
-            #     host="arbutus.cloud",
-            # ),
             NextWorker(
                 "nowcast.workers.download_results",
                 args=["arbutus.cloud", "nowcast", "--run-date", "2021-04-26"],
@@ -1195,29 +1186,6 @@ class TestAfterWatchNEMO:
         ]
         assert workers[2:4] == expected
         assert race_condition_workers == {"make_ww3_wind_file", "make_ww3_current_file"}
-
-    def test_success_forecast_no_launch_make_fvcom_boundary(self, config, checklist):
-        workers = next_workers.after_watch_NEMO(
-            Message(
-                "watch_NEMO",
-                "success forecast",
-                {
-                    "forecast": {
-                        "host": "arbutus.cloud",
-                        "run date": "2018-01-20",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_boundary",
-            args=["arbutus.cloud", "x2", "forecast"],
-            host="arbutus.cloud",
-        )
-        assert expected not in workers
 
     def test_success_forecast2_launch_make_ww3_wind_file_forecast2(
         self, config, checklist
@@ -1413,296 +1381,6 @@ class TestAfterWatchNEMO_AGRIF:
             host="localhost",
         )
         assert expected in workers
-
-
-class TestAfterMakeFVCOMBoundary:
-    """Unit tests for the after_make_fvcom_boundary function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_make_fvcom_boundary(
-            Message("make_fvcom_boundary", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_make_fvcom_atmos_forcing(
-        self, model_config, run_type, config, checklist
-    ):
-        msg = Message(
-            "make_fvcom_boundary",
-            f"success {model_config} {run_type}",
-            payload={
-                run_type: {
-                    "run date": "2018-03-16",
-                    "model config": model_config,
-                    "open boundary file": f"input/bdy_{model_config}_nowcast_btrp_20180316.nc",
-                }
-            },
-        )
-        workers = next_workers.after_make_fvcom_boundary(msg, config, checklist)
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_atmos_forcing",
-            args=[model_config, run_type, "--run-date", "2018-03-16"],
-            host="localhost",
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_make_fvcom_rivers_forcing(
-        self, model_config, run_type, config, checklist
-    ):
-        workers = next_workers.after_make_fvcom_boundary(
-            Message(
-                "make_fvcom_boundary",
-                f"success {model_config} {run_type}",
-                payload={
-                    run_type: {
-                        "run date": "2019-02-06",
-                        "model config": model_config,
-                        "open boundary file": f"input/bdy_{model_config}_nowcast_btrp_20180316.nc",
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_rivers_forcing",
-            args=["arbutus.cloud", model_config, run_type, "--run-date", "2019-02-06"],
-            host="arbutus.cloud",
-        )
-        assert expected in workers
-
-
-class TestAfterMakeFVCOMRiversForcing:
-    """Unit tests for the after_make_fvcom_rivers_forcing function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        [
-            "crash",
-            "success x2 nowcast",
-            "failure x2 nowcast",
-            "success x2 forecast",
-            "failure x2 forecast",
-            "success r12 nowcast",
-            "failure r12 nowcast",
-        ],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_make_fvcom_rivers_forcing(
-            Message("make_fvcom_rivers_forcing", msg_type), config, checklist
-        )
-        assert workers == []
-
-
-class TestAfterMakeFVCOMAtmosForcing:
-    """Unit tests for the after_make_fvcom_atmos_forcing function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_make_fvcom_atmos_forcing(
-            Message("make_fvcom_atmos_forcing", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_upload_fvcom_atmos_forcing(
-        self, model_config, run_type, config, checklist
-    ):
-        msg = Message(
-            "make_fvcom_atmos_forcing",
-            f"success {model_config} {run_type}",
-            payload={
-                run_type: {"run date": "2018-04-04", "model config": model_config}
-            },
-        )
-        workers = next_workers.after_make_fvcom_atmos_forcing(msg, config, checklist)
-        expected = NextWorker(
-            "nowcast.workers.upload_fvcom_atmos_forcing",
-            args=["arbutus.cloud", model_config, run_type, "--run-date", "2018-04-04"],
-            host="localhost",
-        )
-        assert expected in workers
-
-
-class TestAfterUploadFVCOMAtmosForcing:
-    """Unit tests for the after_upload_fvcom_atmos_forcing function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_upload_fvcom_atmos_forcing(
-            Message("upload_fvcom_atmos_forcing", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_run_fvcom(self, model_config, run_type, config, checklist):
-        msg = Message(
-            "upload_fvcom_atmos_forcing",
-            f"success {model_config} {run_type}",
-            payload={
-                "arbutus.cloud": {
-                    run_type: {"run date": "2018-04-04", "model config": model_config}
-                }
-            },
-        )
-        workers = next_workers.after_upload_fvcom_atmos_forcing(msg, config, checklist)
-        expected = NextWorker(
-            "nowcast.workers.run_fvcom",
-            args=["arbutus.cloud", model_config, run_type, "--run-date", "2018-04-04"],
-            host="arbutus.cloud",
-        )
-        assert expected in workers
-
-
-class TestAfterRunFVCOM:
-    """Unit tests for the after_run_fvcom function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_run_fvcom(
-            Message("run_fvcom", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_watch_fvcom(
-        self, model_config, run_type, config, checklist
-    ):
-        workers = next_workers.after_run_fvcom(
-            Message(
-                "run_fvcom",
-                f"success {model_config} {run_type}",
-                {
-                    f"{model_config} {run_type}": {
-                        "host": "arbutus.cloud",
-                        "model config": model_config,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.watch_fvcom",
-            args=["arbutus.cloud", model_config, run_type],
-            host="arbutus.cloud",
-        )
-        assert workers == [expected]
-
-
-class TestAfterWatchFVCOM:
-    """Unit tests for the after_watch_fvcom function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_watch_fvcom(
-            Message("watch_fvcom", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_download_fvcom_results(
-        self, model_config, run_type, config, checklist
-    ):
-        workers = next_workers.after_watch_fvcom(
-            Message(
-                "watch_fvcom",
-                f"success {model_config} {run_type}",
-                {
-                    f"{model_config} {run_type}": {
-                        "host": "arbutus.cloud",
-                        "model config": model_config,
-                        "run date": "2019-02-27",
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.download_fvcom_results",
-            args=["arbutus.cloud", model_config, run_type, "--run-date", "2019-02-27"],
-            host="localhost",
-        )
-        assert workers[0] == expected
-
-    @pytest.mark.parametrize(
-        "done_model_config, done_run_type, launch_model_config, launch_run_type",
-        [("x2", "nowcast", "r12", "nowcast")],
-    )
-    def test_success_launch_make_fvcom_boundary(
-        self,
-        done_model_config,
-        done_run_type,
-        launch_model_config,
-        launch_run_type,
-        config,
-        checklist,
-    ):
-        workers = next_workers.after_watch_fvcom(
-            Message(
-                "watch_fvcom",
-                f"success {done_model_config} {done_run_type}",
-                {
-                    f"{done_model_config} {done_run_type}": {
-                        "host": "arbutus.cloud",
-                        "model config": done_model_config,
-                        "run date": "2021-05-27",
-                        "completed": True,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_fvcom_boundary",
-            args=[
-                "arbutus.cloud",
-                launch_model_config,
-                launch_run_type,
-                "--run-date",
-                "2021-05-27",
-            ],
-            host="arbutus.cloud",
-        )
-        assert workers[1] == expected
 
 
 class TestAfterMakeWW3WindFile:
@@ -2501,141 +2179,6 @@ class TestAfterDownloadWWatch3Results:
         assert workers == []
 
 
-class TestAfterDownloadFVCOMResults:
-    """Unit tests for the after_download_fvcom_results function."""
-
-    @pytest.mark.parametrize(
-        "msg_type",
-        ["crash", "failure x2 nowcast", "failure r12 nowcast"],
-    )
-    def test_no_next_worker_msg_types(self, msg_type, config, checklist):
-        workers = next_workers.after_download_fvcom_results(
-            Message("download_fvcom_results", msg_type), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        [("x2", "nowcast"), ("r12", "nowcast")],
-    )
-    def test_success_launch_get_vfpa_hadcp(
-        self, model_config, run_type, config, checklist
-    ):
-        workers = next_workers.after_download_fvcom_results(
-            Message(
-                "download_fvcom_results",
-                f"success {model_config} {run_type}",
-                {
-                    run_type: {
-                        "host": "arbutus.cloud",
-                        "model config": model_config,
-                        "run date": "2018-10-25",
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.get_vfpa_hadcp",
-            args=["--data-date", "2018-10-25"],
-            host="localhost",
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        (("x2", "nowcast"), ("r12", "nowcast")),
-    )
-    def test_success_vfpa_hadcp_launch_make_plots_fvcom_research(
-        self, model_config, run_type, config, checklist
-    ):
-        run_date = "2018-10-25"
-        workers = next_workers.after_download_fvcom_results(
-            Message(
-                "download_fvcom_results",
-                f"success {model_config} {run_type}",
-                {
-                    run_type: {
-                        "host": "arbutus.cloud",
-                        "model config": model_config,
-                        "run date": run_date,
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=[
-                "fvcom",
-                f"{run_type}-{model_config}",
-                "research",
-                "--run-date",
-                run_date,
-            ],
-            host="localhost",
-        )
-        assert expected in workers
-
-    @pytest.mark.parametrize(
-        "model_config, run_type", (("x2", "nowcast"), ("r12", "nowcast"))
-    )
-    def test_success_nowcast_launch_ping_erddap(
-        self, model_config, run_type, config, checklist
-    ):
-        workers = next_workers.after_download_fvcom_results(
-            Message(
-                "download_fvcom_results",
-                f"success {model_config} {run_type}",
-                {
-                    run_type: {
-                        "host": "arbutus.cloud",
-                        "model config": model_config,
-                        "run date": "2021-05-13",
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.ping_erddap",
-            args=[f"fvcom-{model_config}-nowcast"],
-            host="localhost",
-        )
-        assert workers[2] == expected
-
-    @pytest.mark.parametrize(
-        "model_config, run_type", (("x2", "nowcast"), ("r12", "nowcast"))
-    )
-    def test_success_nowcast_no_launch_update_forecast_datasets(
-        self, model_config, run_type, config, checklist
-    ):
-        workers = next_workers.after_download_fvcom_results(
-            Message(
-                "download_fvcom_results",
-                f"success {model_config} {run_type}",
-                {
-                    run_type: {
-                        "host": "arbutus.cloud",
-                        "model config": model_config,
-                        "run date": "2018-10-25",
-                    }
-                },
-            ),
-            config,
-            checklist,
-        )
-        expected = NextWorker(
-            "nowcast.workers.update_forecast_datasets",
-            args=["fvcom", "nowcast", "--run-date", "2018-10-25"],
-            host="localhost",
-        )
-        assert expected not in workers
-
-
 class TestAfterGetVFPA_HADCP:
     """Unit tests for the after_get_vfpa_hadcp function."""
 
@@ -2647,10 +2190,7 @@ class TestAfterGetVFPA_HADCP:
         assert workers == []
 
     @pytest.mark.parametrize("run_type", ["nowcast", "forecast"])
-    def test_success_launch_make_plots(self, run_type, config, checklist, monkeypatch):
-        monkeypatch.setitem(
-            checklist, "FVCOM run", {run_type: {"run date": "2018-10-25"}}
-        )
+    def test_success_launch_make_plots(self, run_type, config, checklist):
         workers = next_workers.after_get_vfpa_hadcp(
             Message("after_get_vfpa_hadcp", "success"), config, checklist
         )
@@ -2770,16 +2310,12 @@ class TestAfterPingERDDAP:
             "failure nowcast-green",
             "failure nemo-forecast",
             "failure wwatch3-forecast",
-            "failure fvcom-x2-nowcast",
-            "failure fvcom-r12-nowcast",
             "success weather",
             "success SCVIP-CTD",
             "success SEVIP-CTD",
             "success USDDL-CTD",
             "success TWDP-ferry",
             "success nemo-forecast",
-            "success fvcom-x2-nowcast",
-            "success fvcom-r12-nowcast",
         ],
     )
     def test_no_next_worker_msg_types(self, msg_type, config, checklist):
@@ -2807,205 +2343,6 @@ class TestAfterPingERDDAP:
         )
         assert expected in workers
 
-    def test_success_vfpa_hadcp_nowcast_x2_launch_make_plots_fvcom_publish_nowcast_x2(
-        self, config, checklist, monkeypatch
-    ):
-        run_date = "2020-07-07"
-        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
-        monkeypatch.setitem(
-            checklist,
-            "FVCOM run",
-            {
-                "x2 nowcast": {
-                    "completed": True,
-                    "model config": "x2",
-                    "run date": run_date,
-                },
-                "r12 nowcast": {
-                    "model config": "r12",
-                    "run date": run_date,
-                },
-            },
-        )
-        workers = next_workers.after_ping_erddap(
-            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-        )
-        expected = [
-            NextWorker(
-                "nowcast.workers.make_plots",
-                args=[
-                    "fvcom",
-                    "nowcast-x2",
-                    "publish",
-                    "--run-date",
-                    run_date,
-                ],
-                host="localhost",
-            )
-        ]
-        assert workers == expected
-
-    def test_success_vfpa_hadcp_forecast_x2_launch_make_plots_fvcom_publish_nowcast_forecast_x2(
-        self, config, checklist, monkeypatch
-    ):
-        run_date = "2020-07-07"
-        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
-        monkeypatch.setitem(
-            checklist,
-            "FVCOM run",
-            {
-                "x2 nowcast": {
-                    "completed": True,
-                    "model config": "x2",
-                    "run date": run_date,
-                },
-                "x2 forecast": {
-                    "completed": True,
-                    "model config": "x2",
-                    "run date": run_date,
-                },
-                "r12 nowcast": {
-                    "model config": "r12",
-                    "run date": run_date,
-                },
-            },
-        )
-        workers = next_workers.after_ping_erddap(
-            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-        )
-        expected = [
-            NextWorker(
-                "nowcast.workers.make_plots",
-                args=[
-                    "fvcom",
-                    "nowcast-x2",
-                    "publish",
-                    "--run-date",
-                    run_date,
-                ],
-                host="localhost",
-            ),
-            NextWorker(
-                "nowcast.workers.make_plots",
-                args=[
-                    "fvcom",
-                    "forecast-x2",
-                    "publish",
-                    "--run-date",
-                    run_date,
-                ],
-                host="localhost",
-            ),
-        ]
-        assert workers == expected
-
-    def test_success_vfpa_hadcp_nowcast_r12_launch_make_plots_fvcom_publish_nowcast_r12(
-        self, config, checklist, monkeypatch
-    ):
-        run_date = "2020-07-07"
-        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
-        monkeypatch.setitem(
-            checklist,
-            "FVCOM run",
-            {
-                "x2 nowcast": {
-                    "completed": True,
-                    "model config": "x2",
-                    "run date": run_date,
-                },
-                "x2 forecast": {
-                    "completed": True,
-                    "model config": "x2",
-                    "run date": run_date,
-                },
-                "r12 nowcast": {
-                    "completed": True,
-                    "model config": "r12",
-                    "run date": run_date,
-                },
-            },
-        )
-        workers = next_workers.after_ping_erddap(
-            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-        )
-        expected = [
-            NextWorker(
-                "nowcast.workers.make_plots",
-                args=[
-                    "fvcom",
-                    "nowcast-r12",
-                    "publish",
-                    "--run-date",
-                    run_date,
-                ],
-                host="localhost",
-            ),
-        ]
-        assert workers == expected
-
-    @pytest.mark.parametrize(
-        "model_config, run_type",
-        (("x2", "nowcast"), ("x2", "forecast"), ("r12", "nowcast")),
-    )
-    def test_success_vfpa_hadcp_no_fvcom_run_in_checklist(
-        self, model_config, run_type, config, checklist, monkeypatch
-    ):
-        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
-        workers = next_workers.after_ping_erddap(
-            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-        )
-        assert workers == []
-
-    @pytest.mark.parametrize(
-        "model_config, run_type", (("x2", "nowcast"), ("x2", "forecast"))
-    )
-    def test_success_vfpa_hadcp_not_complete_run_no_launch_make_plots_fvcom_publish(
-        self, model_config, run_type, config, checklist, monkeypatch
-    ):
-        run_date = "2018-10-25"
-        monkeypatch.setitem(checklist, "ERDDAP flag files", {"VFPA-HADCP": []})
-        monkeypatch.setitem(
-            checklist,
-            "FVCOM run",
-            {
-                f"{model_config} {run_type}": {
-                    "completed": True,
-                    "model config": model_config,
-                    "run date": run_date,
-                }
-            },
-        )
-        monkeypatch.setitem(
-            checklist,
-            "r12 nowcast",
-            {
-                "model config": "R12",
-                "run date": run_date,
-                "run exec cmd": "bash VHFR_FVCOM.sh",
-            },
-        )
-        workers = next_workers.after_ping_erddap(
-            Message("ping_erddap", f"success VFPA-HADCP"), config, checklist
-        )
-        expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=[
-                "fvcom",
-                f"{run_type}-{model_config}",
-                "publish",
-                "--run-date",
-                run_date,
-            ],
-            host="localhost",
-        )
-        assert expected in workers
-        not_expected = NextWorker(
-            "nowcast.workers.make_plots",
-            args=["fvcom", "nowcast-r12", "publish", "--run-date", run_date],
-            host="localhost",
-        )
-        assert not_expected not in workers
-
 
 class TestAfterMakePlots:
     """Unit tests for the after_make_plots function."""
@@ -3021,10 +2358,6 @@ class TestAfterMakePlots:
             "failure nemo nowcast-agrif research",
             "failure nemo forecast publish",
             "failure nemo forecast2 publish",
-            "failure fvcom nowcast-x2 publish",
-            "failure fvcom nowcast-r12 publish",
-            "failure fvcom nowcast-x2 research",
-            "failure fvcom nowcast-r12 research",
             "failure wwatch3 forecast publish",
             "failure wwatch3 forecast2 publish",
             "success nemo nowcast research",
@@ -3032,10 +2365,6 @@ class TestAfterMakePlots:
             "success nemo nowcast publish",
             "success nemo nowcast-green research",
             "success nemo nowcast-agrif research",
-            "success fvcom nowcast-x2 publish",
-            "success fvcom nowcast-r12 publish",
-            "success fvcom nowcast-x2 research",
-            "success fvcom nowcast-r12 research",
             "success wwatch3 forecast publish",
             "success wwatch3 forecast2 publish",
         ],
