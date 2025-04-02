@@ -61,6 +61,17 @@ The production deployment uses 2 systems:
    an even higher resolution Vancouver Harbour and Lower Fraser River model configuration was added to the system,
    running daily nowcast runs as ``fvcom-nowcast-r12``.
 
+   In February 2023,
+   we stopped running the Vancouver Harbour and Lower Fraser River FVCOM v4.1-beta model configurations
+   because the focus of high resolution models being developed for harbours and the like by DFO had
+   shifted to nested NEMO grid configurations.
+   In April 2024,
+   all of the code,
+   tests,
+   documentation,
+   and configuration for running FVCOM was removed from the ``SalishSeaNowcast`` package.
+   Version 25.1 of ``SalishSeaNowcast`` was released before that removal was started.
+
    .. _Ocean Networks Canada: https://www.oceannetworks.ca/
    .. _arbutus.cloud: https://docs.alliancecan.ca/wiki/Cloud_resources#Arbutus_cloud
    .. _Ceph object storage: https://en.wikipedia.org/wiki/Ceph_(software)
