@@ -122,7 +122,9 @@ class TestLaunchRemoteWorker:
             ("nemo_nowcast.workers.foo", "nemo_nowcast.workers.foo"),
         ),
     )
-    def test_checklist(self, m_next_wkr, m_logger, remote_worker, exp_remote_wkr):
+    def test_checklist(
+        self, m_next_wkr, m_logger, remote_worker, exp_remote_wkr, config
+    ):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             remote_worker=remote_worker,
