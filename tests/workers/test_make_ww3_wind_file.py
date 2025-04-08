@@ -31,7 +31,7 @@ import pytest
 from nowcast.workers import make_ww3_wind_file
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)

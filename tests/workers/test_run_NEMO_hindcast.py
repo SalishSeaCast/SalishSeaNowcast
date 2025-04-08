@@ -30,7 +30,7 @@ import nowcast.ssh_sftp
 from nowcast.workers import run_NEMO_hindcast
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)

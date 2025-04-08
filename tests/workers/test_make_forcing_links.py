@@ -30,7 +30,7 @@ import pytest
 from nowcast.workers import make_forcing_links
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
@@ -352,7 +352,7 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_clear_links(monkeypatch):
     def mock_clear_links(sftp_client, run_prep_dir, forcing_dir):
         pass

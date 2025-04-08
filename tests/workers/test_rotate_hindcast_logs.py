@@ -29,7 +29,7 @@ import pytest
 from nowcast.workers import rotate_hindcast_logs
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config, tmp_path):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)

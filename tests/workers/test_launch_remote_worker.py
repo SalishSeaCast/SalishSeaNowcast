@@ -25,7 +25,7 @@ import pytest
 from nowcast.workers import launch_remote_worker
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     return base_config
@@ -122,7 +122,9 @@ class TestLaunchRemoteWorker:
             ("nemo_nowcast.workers.foo", "nemo_nowcast.workers.foo"),
         ),
     )
-    def test_checklist(self, m_next_wkr, m_logger, remote_worker, exp_remote_wkr):
+    def test_checklist(
+        self, m_next_wkr, m_logger, remote_worker, exp_remote_wkr, config
+    ):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             remote_worker=remote_worker,

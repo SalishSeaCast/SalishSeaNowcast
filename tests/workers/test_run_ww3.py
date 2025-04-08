@@ -33,7 +33,7 @@ import pytest
 from nowcast.workers import run_ww3
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config, tmp_path):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     run_prep_dir = tmp_path / "wwatch3-runs"

@@ -22,6 +22,7 @@ import shlex
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Mapping
 from unittest.mock import patch
 
 import arrow
@@ -32,8 +33,8 @@ from nowcast import lib
 from nowcast.workers import download_results
 
 
-@pytest.fixture()
-def config(base_config):
+@pytest.fixture
+def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | Mapping:
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
