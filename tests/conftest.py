@@ -30,7 +30,7 @@ import structlog
 
 @pytest.fixture()
 def base_config(tmp_path: Path) -> nemo_nowcast.Config | Mapping:
-    """:py:class:`nemo_nowcast.Config` instance from YAML fragment containing elements
+    """:py:class:`nemo_nowcast.Config` instance from a YAML fragment containing the elements
     required by all unit tests.
     """
     config_file = tmp_path / "config.yaml"
@@ -52,13 +52,15 @@ def base_config(tmp_path: Path) -> nemo_nowcast.Config | Mapping:
 
 
 @pytest.fixture()
-def prod_config(tmpdir):
-    """:py:class:`nemo_nowcast.Config` instance from production config YAML file to use for
+def prod_config(tmp_path):
+    """:py:class:`nemo_nowcast.Config` instance from the production config YAML file to use for
     testing its contents.
     """
     prod_config_ = nemo_nowcast.Config()
-    p_logs_dir = tmpdir.ensure_dir("nowcast_logs")
-    p_env_dir = tmpdir.ensure_dir("nowcast-env")
+    p_logs_dir = tmp_path / "nowcast_logs"
+    p_logs_dir.mkdir()
+    p_env_dir = tmp_path / "nowcast-env"
+    p_env_dir.mkdir()
     p_environ = patch.dict(
         nemo_nowcast.config.os.environ,
         {"NOWCAST_LOGS": str(p_logs_dir), "NOWCAST_ENV": str(p_env_dir)},
