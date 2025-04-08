@@ -20,7 +20,6 @@
 from pathlib import Path
 import textwrap
 from typing import Mapping
-from unittest.mock import patch
 
 import attr
 import nemo_nowcast
@@ -52,7 +51,7 @@ def base_config(tmp_path: Path) -> nemo_nowcast.Config | Mapping:
 
 
 @pytest.fixture()
-def prod_config(tmp_path):
+def prod_config(tmp_path, monkeypatch):
     """:py:class:`nemo_nowcast.Config` instance from the production config YAML file to use for
     testing its contents.
     """
@@ -61,13 +60,13 @@ def prod_config(tmp_path):
     p_logs_dir.mkdir()
     p_env_dir = tmp_path / "nowcast-env"
     p_env_dir.mkdir()
-    p_environ = patch.dict(
-        nemo_nowcast.config.os.environ,
-        {"NOWCAST_LOGS": str(p_logs_dir), "NOWCAST_ENV": str(p_env_dir)},
-    )
+
+    monkeypatch.setenv("NOWCAST_LOGS", str(p_logs_dir))
+    monkeypatch.setenv("NOWCAST_ENV", str(p_env_dir))
+
     prod_config_file = (Path(__file__).parent / "../config/nowcast.yaml").resolve()
-    with p_environ:
-        prod_config_.load(prod_config_file)
+    prod_config_.load(prod_config_file)
+
     return prod_config_
 
 
