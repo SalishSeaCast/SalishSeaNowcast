@@ -32,7 +32,7 @@ import xarray
 from nowcast import daily_river_flows
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)

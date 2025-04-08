@@ -28,7 +28,7 @@ import pytest
 from nowcast.workers import ping_erddap
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)

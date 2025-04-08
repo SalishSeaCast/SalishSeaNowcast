@@ -32,7 +32,7 @@ import pytest
 from nowcast.workers import download_live_ocean
 
 
-@pytest.fixture()
+@pytest.fixture
 def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | Mapping:
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)

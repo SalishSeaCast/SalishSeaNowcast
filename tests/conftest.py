@@ -27,7 +27,7 @@ import pytest
 import structlog
 
 
-@pytest.fixture()
+@pytest.fixture
 def base_config(tmp_path: Path) -> nemo_nowcast.Config | Mapping:
     """:py:class:`nemo_nowcast.Config` instance from a YAML fragment containing the elements
     required by all unit tests.
@@ -50,7 +50,7 @@ def base_config(tmp_path: Path) -> nemo_nowcast.Config | Mapping:
     return config_
 
 
-@pytest.fixture()
+@pytest.fixture
 def prod_config(tmp_path, monkeypatch):
     """:py:class:`nemo_nowcast.Config` instance from the production config YAML file to use for
     testing its contents.
