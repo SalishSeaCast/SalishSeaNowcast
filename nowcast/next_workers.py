@@ -800,12 +800,6 @@ def after_watch_NEMO(msg, config, checklist):
                             msg.payload[run_type]["run date"],
                         ],
                     ),
-                    ## TODO: Add a config switch to control running FVCOM VHFR
-                    # NextWorker(
-                    #     "nowcast.workers.make_fvcom_boundary",
-                    #     args=[(config["vhfr fvcom runs"]["host"]), "x2", "nowcast"],
-                    #     host=(config["vhfr fvcom runs"]["host"]),
-                    # ),
                 ]
             )
         if run_type == "forecast":
@@ -1021,259 +1015,6 @@ def after_run_NEMO_hindcast(msg, config, checklist):
     :rtype: list
     """
     next_workers = {"crash": [], "failure": [], "success": []}
-    return next_workers[msg.type]
-
-
-def after_make_fvcom_boundary(msg, config, checklist):
-    """Calculate the list of workers to launch after the
-    after_make_fvcom_boundary worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        run_type = msg.type.split()[2]
-        model_config = msg.payload[run_type]["model config"]
-        run_date = msg.payload[run_type]["run date"]
-        next_workers[msg.type].extend(
-            [
-                NextWorker(
-                    "nowcast.workers.make_fvcom_atmos_forcing",
-                    args=[model_config, run_type, "--run-date", run_date],
-                    host="localhost",
-                ),
-                NextWorker(
-                    "nowcast.workers.make_fvcom_rivers_forcing",
-                    args=[
-                        (config["vhfr fvcom runs"]["host"]),
-                        model_config,
-                        run_type,
-                        "--run-date",
-                        run_date,
-                    ],
-                    host=(config["vhfr fvcom runs"]["host"]),
-                ),
-            ]
-        )
-    return next_workers[msg.type]
-
-
-def after_make_fvcom_rivers_forcing(msg, config, checklist):
-    """Calculate the list of workers to launch after the
-    after_make_fvcom_rivers_forcing worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    return []
-
-
-def after_make_fvcom_atmos_forcing(msg, config, checklist):
-    """Calculate the list of workers to launch after the
-    after_make_fvcom_atmos_forcing worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        host_name = config["vhfr fvcom runs"]["host"]
-        run_type = msg.type.split()[2]
-        model_config = msg.payload[run_type]["model config"]
-        run_date = msg.payload[run_type]["run date"]
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.upload_fvcom_atmos_forcing",
-                args=[host_name, model_config, run_type, "--run-date", run_date],
-            )
-        )
-    return next_workers[msg.type]
-
-
-def after_upload_fvcom_atmos_forcing(msg, config, checklist):
-    """Calculate the list of workers to launch after the
-    after_upload_fvcom_atmos_forcing worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        host_name = config["vhfr fvcom runs"]["host"]
-        run_type = msg.type.split()[2]
-        model_config = msg.payload[host_name][run_type]["model config"]
-        run_date = msg.payload[host_name][run_type]["run date"]
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.run_fvcom",
-                args=[host_name, model_config, run_type, "--run-date", run_date],
-                host=host_name,
-            )
-        )
-    return next_workers[msg.type]
-
-
-def after_run_fvcom(msg, config, checklist):
-    """Calculate the list of workers to launch after the after_run_fvcom worker
-    ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        _, model_config, run_type = msg.type.split()
-        host_name = msg.payload[f"{model_config} {run_type}"]["host"]
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.watch_fvcom",
-                args=[host_name, model_config, run_type],
-                host=host_name,
-            )
-        )
-    return next_workers[msg.type]
-
-
-def after_watch_fvcom(msg, config, checklist):
-    """Calculate the list of workers to launch after the after_watch_fvcom worker
-    ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        _, model_config, run_type = msg.type.split()
-        next_workers[msg.type].append(
-            NextWorker(
-                "nowcast.workers.download_fvcom_results",
-                args=[
-                    msg.payload[f"{model_config} {run_type}"]["host"],
-                    model_config,
-                    run_type,
-                    "--run-date",
-                    msg.payload[f"{model_config} {run_type}"]["run date"],
-                ],
-            )
-        )
-        if run_type == "nowcast" and model_config == "x2":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_fvcom_boundary",
-                    args=[
-                        (config["vhfr fvcom runs"]["host"]),
-                        "r12",
-                        "nowcast",
-                        "--run-date",
-                        msg.payload[f"{model_config} {run_type}"]["run date"],
-                    ],
-                    host=(config["vhfr fvcom runs"]["host"]),
-                )
-            )
     return next_workers[msg.type]
 
 
@@ -1750,62 +1491,6 @@ def after_download_wwatch3_results(msg, config, checklist):
     return next_workers[msg.type]
 
 
-def after_download_fvcom_results(msg, config, checklist):
-    """Calculate the list of workers to launch after the
-    download_fvcom_results worker ends.
-
-    :arg msg: Nowcast system message.
-    :type msg: :py:class:`nemo_nowcast.message.Message`
-
-    :arg config: :py:class:`dict`-like object that holds the nowcast system
-                 configuration that is loaded from the system configuration
-                 file.
-    :type config: :py:class:`nemo_nowcast.config.Config`
-
-    :arg dict checklist: System checklist: data structure containing the
-                         present state of the nowcast system.
-
-    :returns: Worker(s) to launch next
-    :rtype: list
-    """
-    next_workers = {
-        "crash": [],
-        "failure x2 nowcast": [],
-        "failure r12 nowcast": [],
-        "success x2 nowcast": [],
-        "success r12 nowcast": [],
-    }
-    if msg.type.startswith("success"):
-        run_type = msg.type.split()[2]
-        run_date = msg.payload[run_type]["run date"]
-        model_config = msg.payload[run_type]["model config"]
-        next_workers[msg.type].extend(
-            [
-                NextWorker(
-                    "nowcast.workers.get_vfpa_hadcp", args=["--data-date", run_date]
-                ),
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=[
-                        "fvcom",
-                        f"{run_type}-{model_config}",
-                        "research",
-                        "--run-date",
-                        run_date,
-                    ],
-                ),
-            ]
-        )
-        if run_type == "nowcast":
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.ping_erddap",
-                    args=[f"fvcom-{model_config}-nowcast"],
-                )
-            )
-    return next_workers[msg.type]
-
-
 def after_get_vfpa_hadcp(msg, config, checklist):
     """Calculate the list of workers to launch after the
     after_get_vfpa_hadcp worker ends.
@@ -1922,10 +1607,6 @@ def after_ping_erddap(msg, config, checklist):
         "failure nemo-forecast": [],
         "success wwatch3-forecast": [],
         "failure wwatch3-forecast": [],
-        "success fvcom-x2-nowcast": [],
-        "failure fvcom-x2-nowcast": [],
-        "success fvcom-r12-nowcast": [],
-        "failure fvcom-r12-nowcast": [],
     }
     if msg.type == "success wwatch3-forecast":
         run_types = checklist["WWATCH3 run"].keys()
@@ -1937,47 +1618,6 @@ def after_ping_erddap(msg, config, checklist):
                 args=["wwatch3", run_type, "publish", "--run-date", run_date],
             )
         )
-    if msg.type == "success VFPA-HADCP":
-        try:
-            keys = checklist["FVCOM run"].keys()
-        except KeyError:
-            # "FVCOM run" is only in the checklist after runs.
-            # If it's too early in the day, just return.
-            return next_workers[msg.type]
-        for key in keys:
-            model_config, run_type = key.split()
-            run_date = checklist["FVCOM run"][f"{model_config} {run_type}"]["run date"]
-            if (
-                model_config == "r12"
-                and "completed" in checklist["FVCOM run"]["r12 nowcast"]
-            ):
-                next_workers[msg.type] = [
-                    NextWorker(
-                        "nowcast.workers.make_plots",
-                        args=[
-                            "fvcom",
-                            "nowcast-r12",
-                            "publish",
-                            "--run-date",
-                            run_date,
-                        ],
-                    )
-                ]
-                break
-            if "completed" not in checklist["FVCOM run"][f"{model_config} {run_type}"]:
-                continue
-            next_workers[msg.type].append(
-                NextWorker(
-                    "nowcast.workers.make_plots",
-                    args=[
-                        "fvcom",
-                        f"{run_type}-{model_config}",
-                        "publish",
-                        "--run-date",
-                        run_date,
-                    ],
-                )
-            )
     return next_workers[msg.type]
 
 
@@ -2008,10 +1648,6 @@ def after_make_plots(msg, config, checklist):
         "failure nemo nowcast-agrif research": [],
         "failure nemo forecast publish": [],
         "failure nemo forecast2 publish": [],
-        "failure fvcom nowcast-x2 publish": [],
-        "failure fvcom nowcast-r12 publish": [],
-        "failure fvcom nowcast-x2 research": [],
-        "failure fvcom nowcast-r12 research": [],
         "failure wwatch3 forecast publish": [],
         "failure wwatch3 forecast2 publish": [],
         "success nemo nowcast research": [],
@@ -2021,10 +1657,6 @@ def after_make_plots(msg, config, checklist):
         "success nemo nowcast-agrif research": [],
         "success nemo forecast publish": [],
         "success nemo forecast2 publish": [],
-        "success fvcom nowcast-x2 publish": [],
-        "success fvcom nowcast-r12 publish": [],
-        "success fvcom nowcast-x2 research": [],
-        "success fvcom nowcast-r12 research": [],
         "success wwatch3 forecast publish": [],
         "success wwatch3 forecast2 publish": [],
     }

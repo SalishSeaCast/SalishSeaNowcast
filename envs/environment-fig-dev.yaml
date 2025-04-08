@@ -51,7 +51,6 @@ dependencies:
   - poppler
   - pygrib
   - pypdf
-  - pyproj
   - python=3.13
   - pyyaml
   - requests
@@ -88,6 +87,4 @@ dependencies:
     - schedule
     - scour
     - supervisor
-    - utm
     - waitress
-    - zeep

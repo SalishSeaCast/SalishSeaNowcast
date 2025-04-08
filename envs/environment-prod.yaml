@@ -10,10 +10,8 @@
 #    $ python -m pip install --editable moad_tools/
 #    $ python -m pip install --editable tools/SalishSeaTools/
 #    $ python -m pip install --editable Reshapr/
-#    $ python -m pip install --editable OPPTools/
 #    $ python -m pip install --editable NEMO-Cmd/
 #    $ python -m pip install --editable SalishSeaCmd/
-#    $ python -m pip install --editable FVCOM-Cmd/
 #    $ python -m pip install --editable SalishSeaNowcast/
 
 name: nowcast-env
@@ -58,7 +56,6 @@ dependencies:
   - poppler
   - pygrib
   - pypdf
-  - pyproj
   - python=3.13
   - pyyaml
   - pyzmq
@@ -73,7 +70,6 @@ dependencies:
   - supervisor
   - tenacity
   - tqdm
-  - utm
   - verboselogs
   - watchdog
   - xarray=2025.1.1

@@ -68,7 +68,6 @@ intersphinx_mapping = {
 linkcheck_ignore = [
     # Private GitHub and GitLab repositories and pages that linkcheck will ignore
     "https://github.com/SalishSeaCast/tidal-predictions",
-    "https://gitlab.com/mdunphy/FVCOM41",
     "https://polar.ncep.noaa.gov/waves/wavewatch/distribution/",
 ]
 
@@ -82,7 +81,6 @@ autodoc_mock_imports = [
     "feedgen",
     "feedgen.entry",
     "feedgen.feed",
-    "fvcom_cmd",
     "gsw",
     "mako",
     "mako.template",
@@ -92,7 +90,6 @@ autodoc_mock_imports = [
     "mpl_toolkits.basemap",
     "nemo_cmd",
     "netCDF4",
-    "OPPTools",
     "pandas",
     "paramiko",
     "pypdf",
