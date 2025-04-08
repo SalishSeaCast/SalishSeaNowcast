@@ -2167,6 +2167,25 @@ class TestAfterDownloadWWatch3Results:
         )
         assert expected in workers
 
+    @pytest.mark.parametrize("run_type", ("forecast", "forecast2"))
+    def test_success_forecast_no_wwatch3_run_in_checklist(
+        self, run_type, config, checklist
+    ):
+        """Test handling of the occasional occurrence of missing "WWATCH3 run" item in checklist
+        due to checklist being cleared while download_wwatch3_results is still running.
+        """
+        next_workers_ = next_workers.after_download_wwatch3_results(
+            Message("download_wwatch3_results", f"success {run_type}"),
+            config,
+            checklist,
+        )
+        expected = NextWorker(
+            "nowcast.workers.update_forecast_datasets",
+            args=["wwatch3", run_type],
+            host="localhost",
+        )
+        assert next_workers_[0] == expected
+
     def test_success_nowcast_no_launch_update_forecast_datasets(
         self, config, checklist, monkeypatch
     ):

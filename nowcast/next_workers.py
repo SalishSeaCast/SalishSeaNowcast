@@ -1480,14 +1480,25 @@ def after_download_wwatch3_results(msg, config, checklist):
     }
     if msg.type.startswith("success"):
         run_type = msg.type.split()[1]
-        run_date = checklist["WWATCH3 run"][run_type]["run date"]
+        try:
+            run_date = checklist["WWATCH3 run"][run_type]["run date"]
+        except KeyError:
+            # Handling for the occasional occurrence of missing "WWATCH3 run" item in checklist
+            # due to checklist being cleared while download_wwatch3_results is still running
+            run_date = None
         if run_type.startswith("forecast"):
-            next_workers[msg.type].append(
+            next_worker = (
                 NextWorker(
                     "nowcast.workers.update_forecast_datasets",
                     args=["wwatch3", run_type, "--run-date", run_date],
                 )
+                if run_date is not None
+                else NextWorker(
+                    "nowcast.workers.update_forecast_datasets",
+                    args=["wwatch3", run_type],
+                )
             )
+            next_workers[msg.type].append(next_worker)
     return next_workers[msg.type]
 
 
