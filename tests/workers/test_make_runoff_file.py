@@ -40,7 +40,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | dict:
     with config_file.open("at") as f:
         f.write(
             textwrap.dedent(
-                """\
+                """
                 rivers:
                   SOG river files:
                     HomathkoMouth: forcing/rivers/observations/Homathko_Mouth_flow
@@ -194,28 +194,28 @@ class TestModuleVariables:
     @pytest.mark.parametrize(
         "watershed, rivers",
         (
-            ("bute", {"primary": "Homathko_Mouth", "secondary": None}),
-            ("evi_n", {"primary": "Salmon_Sayward", "secondary": None}),
-            ("jervis", {"primary": "Clowhom_ClowhomLake", "secondary": "RobertsCreek"}),
+            ("bute", {"primary": "HomathkoMouth", "secondary": None}),
+            ("evi_n", {"primary": "SalmonSayward", "secondary": None}),
+            ("jervis", {"primary": "ClowhomClowhomLake", "secondary": "RobertsCreek"}),
             ("evi_s", {"primary": "Englishman", "secondary": None}),
-            ("howe", {"primary": "Squamish_Brackendale", "secondary": None}),
-            ("jdf", {"primary": "SanJuan_PortRenfrew", "secondary": None}),
+            ("howe", {"primary": "SquamishBrackendale", "secondary": None}),
+            ("jdf", {"primary": "SanJuanPortRenfrew", "secondary": None}),
             (
                 "skagit",
                 {
-                    "primary": "Skagit_MountVernon",
-                    "secondary": "Snohomish_Monroe",
+                    "primary": "SkagitMountVernon",
+                    "secondary": "SnohomishMonroe",
                 },
             ),
             (
                 "puget",
                 {
-                    "primary": "Nisqually_McKenna",
-                    "secondary": "Greenwater_Greenwater",
+                    "primary": "NisquallyMcKenna",
+                    "secondary": "GreenwaterGreenwater",
                 },
             ),
-            ("toba", {"primary": "Homathko_Mouth", "secondary": "Theodosia"}),
-            ("fraser", {"primary": "Fraser", "secondary": "Nicomekl_Langley"}),
+            ("toba", {"primary": "HomathkoMouth", "secondary": "Theodosia"}),
+            ("fraser", {"primary": "Fraser", "secondary": "NicomeklLangley"}),
         ),
     )
     def test_watershed_rivers(self, watershed, rivers):
@@ -251,16 +251,16 @@ class TestModuleVariables:
             "Fraser",
             "Theodosia",
             "RobertsCreek",
-            "Salmon_Sayward",
-            "Squamish_Brackendale",
-            "SanJuan_PortRenfrew",
-            "Nisqually_McKenna",
-            "Snohomish_Monroe",
-            "Skagit_MountVernon",
-            "Homathko_Mouth",
-            "Nicomekl_Langley",
-            "Greenwater_Greenwater",
-            "Clowhom_ClowhomLake",
+            "SalmonSayward",
+            "SquamishBrackendale",
+            "SanJuanPortRenfrew",
+            "NisquallyMcKenna",
+            "SnohomishMonroe",
+            "SkagitMountVernon",
+            "HomathkoMouth",
+            "NicomeklLangley",
+            "GreenwaterGreenwater",
+            "ClowhomClowhomLake",
         ]
         assert list(make_runoff_file.river_patching.keys()) == river_names
 
@@ -271,16 +271,16 @@ class TestModuleVariables:
             ("Fraser", 10_000),  # always persist
             ("Theodosia", 0),
             ("RobertsCreek", 0),
-            ("Salmon_Sayward", 0),
-            ("Squamish_Brackendale", 0),
-            ("SanJuan_PortRenfrew", 0),
-            ("Nisqually_McKenna", 4),
-            ("Snohomish_Monroe", 0),
-            ("Skagit_MountVernon", 3),
-            ("Homathko_Mouth", 1),
-            ("Nicomekl_Langley", 0),
-            ("Greenwater_Greenwater", 1),
-            ("Clowhom_ClowhomLake", 2),
+            ("SalmonSayward", 0),
+            ("SquamishBrackendale", 0),
+            ("SanJuanPortRenfrew", 0),
+            ("NisquallyMcKenna", 4),
+            ("SnohomishMonroe", 0),
+            ("SkagitMountVernon", 3),
+            ("HomathkoMouth", 1),
+            ("NicomeklLangley", 0),
+            ("GreenwaterGreenwater", 1),
+            ("ClowhomClowhomLake", 2),
         ),
     )
     def test_river_patching_persist_until(self, river, persist_until):
@@ -293,16 +293,16 @@ class TestModuleVariables:
             ("Fraser", ["persist"]),
             ("Theodosia", ["fit", "backup", "persist"]),
             ("RobertsCreek", ["fit", "persist"]),
-            ("Salmon_Sayward", ["fit", "persist"]),
-            ("Squamish_Brackendale", ["fit", "persist"]),
-            ("SanJuan_PortRenfrew", ["fit", "backup", "persist"]),
-            ("Nisqually_McKenna", ["fit", "persist"]),
-            ("Snohomish_Monroe", ["fit", "persist"]),
-            ("Skagit_MountVernon", ["fit", "persist"]),
-            ("Homathko_Mouth", ["fit", "persist"]),
-            ("Nicomekl_Langley", ["fit", "persist"]),
-            ("Greenwater_Greenwater", ["fit", "persist"]),
-            ("Clowhom_ClowhomLake", ["fit", "persist"]),
+            ("SalmonSayward", ["fit", "persist"]),
+            ("SquamishBrackendale", ["fit", "persist"]),
+            ("SanJuanPortRenfrew", ["fit", "backup", "persist"]),
+            ("NisquallyMcKenna", ["fit", "persist"]),
+            ("SnohomishMonroe", ["fit", "persist"]),
+            ("SkagitMountVernon", ["fit", "persist"]),
+            ("HomathkoMouth", ["fit", "persist"]),
+            ("NicomeklLangley", ["fit", "persist"]),
+            ("GreenwaterGreenwater", ["fit", "persist"]),
+            ("ClowhomClowhomLake", ["fit", "persist"]),
         ),
     )
     def test_river_patching_patch_strats(self, river, patch_strats):
@@ -327,19 +327,19 @@ class TestModuleVariables:
     @pytest.mark.parametrize(
         "river, fit_from",
         (
-            ("Englishman", "Salmon_Sayward"),
-            ("Theodosia", "Clowhom_ClowhomLake"),
+            ("Englishman", "SalmonSayward"),
+            ("Theodosia", "ClowhomClowhomLake"),
             ("RobertsCreek", "Englishman"),
-            ("Salmon_Sayward", "Englishman"),
-            ("Squamish_Brackendale", "Homathko_Mouth"),
-            ("SanJuan_PortRenfrew", "Englishman"),
-            ("Nisqually_McKenna", "Snohomish_Monroe"),
-            ("Snohomish_Monroe", "Skagit_MountVernon"),
-            ("Skagit_MountVernon", "Snohomish_Monroe"),
-            ("Homathko_Mouth", "Squamish_Brackendale"),
-            ("Nicomekl_Langley", "RobertsCreek"),
-            ("Greenwater_Greenwater", "Snohomish_Monroe"),
-            ("Clowhom_ClowhomLake", "Theodosia_Diversion"),
+            ("SalmonSayward", "Englishman"),
+            ("SquamishBrackendale", "HomathkoMouth"),
+            ("SanJuanPortRenfrew", "Englishman"),
+            ("NisquallyMcKenna", "SnohomishMonroe"),
+            ("SnohomishMonroe", "SkagitMountVernon"),
+            ("SkagitMountVernon", "SnohomishMonroe"),
+            ("HomathkoMouth", "SquamishBrackendale"),
+            ("NicomeklLangley", "RobertsCreek"),
+            ("GreenwaterGreenwater", "SnohomishMonroe"),
+            ("ClowhomClowhomLake", "TheodosiaDiversion"),
         ),
     )
     def test_river_patching_fit_from(self, river, fit_from):
@@ -348,7 +348,7 @@ class TestModuleVariables:
     @pytest.mark.parametrize(
         "river, backup_fit_from",
         (
-            ("SanJuan_PortRenfrew", "RobertsCreek"),
+            ("SanJuanPortRenfrew", "RobertsCreek"),
             ("Theodosia", "Englishman"),
         ),
     )
@@ -597,7 +597,7 @@ class TestDoFraser:
             ),
             # Secondary river
             pandas.DataFrame(
-                # Nicomekl_Langley
+                # NicomeklLangley
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-19"),
@@ -639,7 +639,7 @@ class TestDoFraser:
             ),
             # Secondary river
             pandas.DataFrame(
-                # Nicomekl_Langley
+                # NicomeklLangley
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-19"),
@@ -660,7 +660,7 @@ class TestDoFraser:
         mock_river_flows = [
             # Fraser
             6.528406e02,
-            # Nicomekl_Langley
+            # NicomeklLangley
             2.402962e00,
         ]
 
@@ -693,7 +693,7 @@ class TestDoFraser:
             ),
             # Secondary river
             pandas.DataFrame(
-                # Nicomekl_Langley
+                # NicomeklLangley
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-18"),
@@ -713,7 +713,7 @@ class TestDoFraser:
         mock_river_flows = [
             # Fraser
             6.625833e02,
-            # Nicomekl_Langley
+            # NicomeklLangley
             2.402962e00,
         ]
 
@@ -736,7 +736,7 @@ class TestDoARiverPair:
     def test_primary_river_only_no_patch_required(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config_):
             return pandas.DataFrame(
-                # Homathko_Mouth
+                # HomathkoMouth
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-13"),
@@ -752,7 +752,7 @@ class TestDoARiverPair:
 
         watershed_name = "bute"
         obs_date = arrow.get("2023-02-13")
-        primary_river_name = "Homathko_Mouth"
+        primary_river_name = "HomathkoMouth"
         secondary_river_name = None
 
         watershed_flux = make_runoff_file._do_a_river_pair(
@@ -764,7 +764,7 @@ class TestDoARiverPair:
     def test_primary_river_patched(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config_):
             return pandas.DataFrame(
-                # Homathko_Mouth
+                # HomathkoMouth
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-17"),
@@ -788,7 +788,7 @@ class TestDoARiverPair:
 
         watershed_name = "bute"
         obs_date = arrow.get("2023-02-18")
-        primary_river_name = "Homathko_Mouth"
+        primary_river_name = "HomathkoMouth"
         secondary_river_name = None
 
         watershed_flux = make_runoff_file._do_a_river_pair(
@@ -801,7 +801,7 @@ class TestDoARiverPair:
         mock_dataframes = [
             # Primary river
             pandas.DataFrame(
-                # Clowhom_ClowhomLake
+                # ClowhomClowhomLake
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-13"),
@@ -834,7 +834,7 @@ class TestDoARiverPair:
 
         watershed_name = "jervis"
         obs_date = arrow.get("2023-02-13")
-        primary_river_name = "Clowhom_ClowhomLake"
+        primary_river_name = "ClowhomClowhomLake"
         secondary_river_name = "RobertsCreek"
 
         watershed_flux = make_runoff_file._do_a_river_pair(
@@ -846,7 +846,7 @@ class TestDoARiverPair:
     def test_secondary_Theodosia_no_patches(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config_):
             return pandas.DataFrame(
-                # Homathko_Mouth
+                # HomathkoMouth
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-18"),
@@ -880,7 +880,7 @@ class TestDoARiverPair:
 
         watershed_name = "toba"
         obs_date = arrow.get("2023-02-18")
-        primary_river_name = "Homathko_Mouth"
+        primary_river_name = "HomathkoMouth"
         secondary_river_name = "Theodosia"
 
         watershed_flux = make_runoff_file._do_a_river_pair(
@@ -893,7 +893,7 @@ class TestDoARiverPair:
         mock_dataframes = [
             # Primary river
             pandas.DataFrame(
-                # Clowhom_ClowhomLake
+                # ClowhomClowhomLake
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-18"),
@@ -934,7 +934,7 @@ class TestDoARiverPair:
 
         watershed_name = "jervis"
         obs_date = arrow.get("2023-02-13")
-        primary_river_name = "Clowhom_ClowhomLake"
+        primary_river_name = "ClowhomClowhomLake"
         secondary_river_name = "RobertsCreek"
 
         watershed_flux = make_runoff_file._do_a_river_pair(
@@ -951,7 +951,7 @@ class TestGetRiverFlow:
     """Unit tests for _get_river_flow()."""
 
     def test_get_river_flow(self, flow_col_label, config):
-        river_name = "SanJuan_PortRenfrew"
+        river_name = "SanJuanPortRenfrew"
         river_df = pandas.DataFrame(
             index=pandas.Index(
                 data=[
@@ -986,7 +986,7 @@ class TestGetRiverFlow:
             make_runoff_file, "_patch_missing_obs", mock_patch_missing_obs
         )
 
-        river_name = "SanJuan_PortRenfrew"
+        river_name = "SanJuanPortRenfrew"
         river_df = pandas.DataFrame(
             index=pandas.Index(
                 data=[
@@ -1014,7 +1014,7 @@ class TestGetRiverFlow:
         assert caplog.records[0].levelname == "ERROR"
         assert (
             caplog.messages[0]
-            == "no 2023-02-16 discharge obs for SanJuan_PortRenfrew: patching"
+            == "no 2023-02-16 discharge obs for SanJuanPortRenfrew: patching"
         )
 
         assert river_flow == pytest.approx(4.749479e01)
@@ -1043,7 +1043,7 @@ class TestReadRiver:
 
         monkeypatch.setattr(make_runoff_file, "_read_river_csv", mock_read_river_csv)
 
-        river_name = "Squamish_Brackendale"
+        river_name = "SquamishBrackendale"
 
         river_flow = make_runoff_file._read_river(river_name, ps, config)
 
@@ -1216,7 +1216,7 @@ class TestPatchMissingObs:
     """Unit tests for make_runoff_file._patch_missing_obs()."""
 
     def test_obs_date_not_at_end_of_timeseries(self, config, caplog):
-        river_name = "Nicomekl_Langley"
+        river_name = "NicomeklLangley"
         river_flow = pandas.DataFrame(
             index=pandas.Index(
                 data=[
@@ -1252,7 +1252,7 @@ class TestPatchMissingObs:
             )
 
     def test_persist(self, config, caplog):
-        river_name = "Clowhom_ClowhomLake"
+        river_name = "ClowhomClowhomLake"
         river_flow = pandas.DataFrame(
             index=pandas.Index(
                 data=[
@@ -1279,7 +1279,7 @@ class TestPatchMissingObs:
 
         assert caplog.records[0].levelname == "DEBUG"
         expected = (
-            "patched missing 2023-02-16 Clowhom_ClowhomLake discharge by persistence"
+            "patched missing 2023-02-16 ClowhomClowhomLake discharge by persistence"
         )
         assert caplog.messages[0] == expected
 
@@ -1294,7 +1294,7 @@ class TestPatchMissingObs:
 
         monkeypatch.setattr(make_runoff_file, "_patch_fitting", mock_patch_fitting)
 
-        river_name = "Squamish_Brackendale"
+        river_name = "SquamishBrackendale"
         river_flow = pandas.DataFrame(
             index=pandas.Index(
                 data=[
@@ -1330,7 +1330,7 @@ class TestPatchMissingObs:
         )
 
         assert caplog.records[0].levelname == "DEBUG"
-        expected = "patched missing 2023-02-14 Squamish_Brackendale discharge by fitting from Homathko_Mouth"
+        expected = "patched missing 2023-02-14 SquamishBrackendale discharge by fitting from HomathkoMouth"
         assert caplog.messages[0] == expected
 
         assert flux == pytest.approx(54.759385)
@@ -1349,7 +1349,7 @@ class TestPatchMissingObs:
 
         monkeypatch.setattr(make_runoff_file, "_patch_fitting", mock_patch_fitting)
 
-        river_name = "SanJuan_PortRenfrew"
+        river_name = "SanJuanPortRenfrew"
         river_flow = pandas.DataFrame(
             index=pandas.Index(
                 data=[
@@ -1375,7 +1375,7 @@ class TestPatchMissingObs:
         )
 
         assert caplog.records[0].levelname == "DEBUG"
-        expected = "patched missing 2023-02-16 SanJuan_PortRenfrew discharge by fitting from backup river: RobertsCreek"
+        expected = "patched missing 2023-02-16 SanJuanPortRenfrew discharge by fitting from backup river: RobertsCreek"
         assert caplog.messages[0] == expected
 
         assert flux == pytest.approx(68.43567)
@@ -1394,7 +1394,7 @@ class TestPatchMissingObs:
 
         monkeypatch.setattr(make_runoff_file, "_patch_fitting", mock_patch_fitting)
 
-        river_name = "SanJuan_PortRenfrew"
+        river_name = "SanJuanPortRenfrew"
         river_flow = pandas.DataFrame(
             index=pandas.Index(
                 data=[
@@ -1421,7 +1421,7 @@ class TestPatchMissingObs:
 
         assert caplog.records[0].levelname == "DEBUG"
         expected = (
-            "patched missing 2023-02-16 SanJuan_PortRenfrew discharge by persistence"
+            "patched missing 2023-02-16 SanJuanPortRenfrew discharge by persistence"
         )
         assert caplog.messages[0] == expected
 
@@ -1434,7 +1434,7 @@ class TestPatchFitting:
     def test_1_day_missing_patch_successful(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config):
             return pandas.DataFrame(
-                # Homathko_Mouth
+                # HomathkoMouth
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-06"),
@@ -1467,7 +1467,7 @@ class TestPatchFitting:
         monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
-            # Squamish_Brackendale
+            # SquamishBrackendale
             index=pandas.Index(
                 data=[
                     pandas.to_datetime("2023-02-06"),
@@ -1494,7 +1494,7 @@ class TestPatchFitting:
                 ],
             },
         )
-        fit_from_river_name = "Homathko_Mouth"
+        fit_from_river_name = "HomathkoMouth"
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
@@ -1507,7 +1507,7 @@ class TestPatchFitting:
     def test_3_days_missing_patch_successful(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config):
             return pandas.DataFrame(
-                # Homathko_Mouth
+                # HomathkoMouth
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-04"),
@@ -1544,7 +1544,7 @@ class TestPatchFitting:
         monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
-            # Squamish_Brackendale
+            # SquamishBrackendale
             index=pandas.Index(
                 data=[
                     pandas.to_datetime("2023-02-04"),
@@ -1571,7 +1571,7 @@ class TestPatchFitting:
                 ],
             },
         )
-        fit_from_river_name = "Homathko_Mouth"
+        fit_from_river_name = "HomathkoMouth"
         obs_date = arrow.get("2023-02-14")
         gap_length = 3
 
@@ -1584,7 +1584,7 @@ class TestPatchFitting:
     def test_gap_in_river_to_patch_failure(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config):
             return pandas.DataFrame(
-                # Homathko_Mouth
+                # HomathkoMouth
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-06"),
@@ -1617,7 +1617,7 @@ class TestPatchFitting:
         monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
-            # Squamish_Brackendale
+            # SquamishBrackendale
             index=pandas.Index(
                 data=[
                     pandas.to_datetime("2023-02-06"),
@@ -1644,7 +1644,7 @@ class TestPatchFitting:
                 ],
             },
         )
-        fit_from_river_name = "Homathko_Mouth"
+        fit_from_river_name = "HomathkoMouth"
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
@@ -1657,7 +1657,7 @@ class TestPatchFitting:
     def test_gap_in_river_to_fit_from_failure(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config):
             return pandas.DataFrame(
-                # Homathko_Mouth
+                # HomathkoMouth
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-06"),
@@ -1690,7 +1690,7 @@ class TestPatchFitting:
         monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
-            # Squamish_Brackendale
+            # SquamishBrackendale
             index=pandas.Index(
                 data=[
                     pandas.to_datetime("2023-02-06"),
@@ -1717,7 +1717,7 @@ class TestPatchFitting:
                 ],
             },
         )
-        fit_from_river_name = "Homathko_Mouth"
+        fit_from_river_name = "HomathkoMouth"
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 
@@ -1730,7 +1730,7 @@ class TestPatchFitting:
     def test_river_to_patch_from_missing_obs_date_failure(self, config, monkeypatch):
         def mock_read_river(river_name, ps, config):
             return pandas.DataFrame(
-                # Homathko_Mouth
+                # HomathkoMouth
                 index=pandas.Index(
                     data=[
                         pandas.to_datetime("2023-02-06"),
@@ -1763,7 +1763,7 @@ class TestPatchFitting:
         monkeypatch.setattr(make_runoff_file, "_read_river", mock_read_river)
 
         river_flow = pandas.DataFrame(
-            # Squamish_Brackendale
+            # SquamishBrackendale
             index=pandas.Index(
                 data=[
                     pandas.to_datetime("2023-02-06"),
@@ -1790,7 +1790,7 @@ class TestPatchFitting:
                 ],
             },
         )
-        fit_from_river_name = "Homathko_Mouth"
+        fit_from_river_name = "HomathkoMouth"
         obs_date = arrow.get("2023-02-14")
         gap_length = 1
 

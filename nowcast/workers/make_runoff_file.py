@@ -49,16 +49,16 @@ watersheds = {
     # keys are watershed names
     "bute": {
         # primary and secondary rivers in the watershed
-        "rivers": {"primary": "Homathko_Mouth", "secondary": None},
+        "rivers": {"primary": "HomathkoMouth", "secondary": None},
         # flow factors to scale river flows to total watershed flow
         "flow factors": {"primary": 2.015},
     },
     "evi_n": {
-        "rivers": {"primary": "Salmon_Sayward", "secondary": None},
+        "rivers": {"primary": "SalmonSayward", "secondary": None},
         "flow factors": {"primary": 10.334},
     },
     "jervis": {
-        "rivers": {"primary": "Clowhom_ClowhomLake", "secondary": "RobertsCreek"},
+        "rivers": {"primary": "ClowhomClowhomLake", "secondary": "RobertsCreek"},
         "flow factors": {"primary": 8.810, "secondary": 140.3},
     },
     "evi_s": {
@@ -66,30 +66,30 @@ watersheds = {
         "flow factors": {"primary": 24.60},
     },
     "howe": {
-        "rivers": {"primary": "Squamish_Brackendale", "secondary": None},
+        "rivers": {"primary": "SquamishBrackendale", "secondary": None},
         "flow factors": {"primary": 2.276},
     },
     "jdf": {
-        "rivers": {"primary": "SanJuan_PortRenfrew", "secondary": None},
+        "rivers": {"primary": "SanJuanPortRenfrew", "secondary": None},
         "flow factors": {"primary": 8.501},
     },
     "skagit": {
-        "rivers": {"primary": "Skagit_MountVernon", "secondary": "Snohomish_Monroe"},
+        "rivers": {"primary": "SkagitMountVernon", "secondary": "SnohomishMonroe"},
         "flow factors": {"primary": 1.267, "secondary": 1.236},
     },
     "puget": {
         "rivers": {
-            "primary": "Nisqually_McKenna",
-            "secondary": "Greenwater_Greenwater",
+            "primary": "NisquallyMcKenna",
+            "secondary": "GreenwaterGreenwater",
         },
         "flow factors": {"primary": 8.790, "secondary": 29.09},
     },
     "toba": {
-        "rivers": {"primary": "Homathko_Mouth", "secondary": "Theodosia"},
+        "rivers": {"primary": "HomathkoMouth", "secondary": "Theodosia"},
         "flow factors": {"primary": 0.4563, "secondary": 14.58},
     },
     "fraser": {
-        "rivers": {"primary": "Fraser", "secondary": "Nicomekl_Langley"},
+        "rivers": {"primary": "Fraser", "secondary": "NicomeklLangley"},
         "flow factors": {
             "primary": 1.161,
             "secondary": 162,
@@ -106,7 +106,7 @@ river_patching = {
         # patching strategies to use after the persistence period is over
         "patch strats": ["fit", "persist"],
         # river to use to calculate flow by fitting from
-        "fit from": "Salmon_Sayward",
+        "fit from": "SalmonSayward",
     },
     "Fraser": {
         "persist until": 10_000,  # always persist
@@ -115,7 +115,7 @@ river_patching = {
     "Theodosia": {
         "persist until": 0,
         "patch strats": ["fit", "backup", "persist"],
-        "fit from": "Clowhom_ClowhomLake",
+        "fit from": "ClowhomClowhomLake",
         # backup river to use to calculate flow by fitting from if flow obs from  "fit from" river
         # is not available
         "backup fit from": "Englishman",
@@ -125,56 +125,56 @@ river_patching = {
         "patch strats": ["fit", "persist"],
         "fit from": "Englishman",
     },
-    "Salmon_Sayward": {
+    "SalmonSayward": {
         "persist until": 0,
         "patch strats": ["fit", "persist"],
         "fit from": "Englishman",
     },
-    "Squamish_Brackendale": {
+    "SquamishBrackendale": {
         "persist until": 0,
         "patch strats": ["fit", "persist"],
-        "fit from": "Homathko_Mouth",
+        "fit from": "HomathkoMouth",
     },
-    "SanJuan_PortRenfrew": {
+    "SanJuanPortRenfrew": {
         "persist until": 0,
         "patch strats": ["fit", "backup", "persist"],
         "fit from": "Englishman",
         "backup fit from": "RobertsCreek",
     },
-    "Nisqually_McKenna": {
+    "NisquallyMcKenna": {
         "persist until": 4,
         "patch strats": ["fit", "persist"],
-        "fit from": "Snohomish_Monroe",
+        "fit from": "SnohomishMonroe",
     },
-    "Snohomish_Monroe": {
+    "SnohomishMonroe": {
         "persist until": 0,
         "patch strats": ["fit", "persist"],
-        "fit from": "Skagit_MountVernon",
+        "fit from": "SkagitMountVernon",
     },
-    "Skagit_MountVernon": {
+    "SkagitMountVernon": {
         "persist until": 3,
         "patch strats": ["fit", "persist"],
-        "fit from": "Snohomish_Monroe",
+        "fit from": "SnohomishMonroe",
     },
-    "Homathko_Mouth": {
+    "HomathkoMouth": {
         "persist until": 1,
         "patch strats": ["fit", "persist"],
-        "fit from": "Squamish_Brackendale",
+        "fit from": "SquamishBrackendale",
     },
-    "Nicomekl_Langley": {
+    "NicomeklLangley": {
         "persist until": 0,
         "patch strats": ["fit", "persist"],
         "fit from": "RobertsCreek",
     },
-    "Greenwater_Greenwater": {
+    "GreenwaterGreenwater": {
         "persist until": 1,
         "patch strats": ["fit", "persist"],
-        "fit from": "Snohomish_Monroe",
+        "fit from": "SnohomishMonroe",
     },
-    "Clowhom_ClowhomLake": {
+    "ClowhomClowhomLake": {
         "persist until": 2,
         "patch strats": ["fit", "persist"],
-        "fit from": "Theodosia_Diversion",
+        "fit from": "TheodosiaDiversion",
     },
 }
 
@@ -265,9 +265,9 @@ def _do_fraser(obs_date, config):
     primary_river = _read_river("Fraser", "primary", config)
     primary_flow = _get_river_flow("Fraser", primary_river, obs_date, config)
 
-    secondary_river = _read_river("Nicomekl_Langley", "secondary", config)
+    secondary_river = _read_river("NicomeklLangley", "secondary", config)
     secondary_flow = _get_river_flow(
-        "Nicomekl_Langley", secondary_river, obs_date, config
+        "NicomeklLangley", secondary_river, obs_date, config
     )
 
     fraser_flux = (
