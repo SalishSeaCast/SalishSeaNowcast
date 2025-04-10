@@ -176,8 +176,8 @@ class TestModuleVariables:
     make_runoff_file worker.
     """
 
-    def test_watershed_names(self):
-        expected = [
+    def test_watersheds_keys(self):
+        watershed_names = [
             "bute",
             "evi_n",
             "jervis",
@@ -189,126 +189,173 @@ class TestModuleVariables:
             "toba",
             "fraser",
         ]
+        assert list(make_runoff_file.watersheds.keys()) == watershed_names
 
-        assert make_runoff_file.watershed_names == expected
+    @pytest.mark.parametrize(
+        "watershed, rivers",
+        (
+            ("bute", {"primary": "Homathko_Mouth", "secondary": None}),
+            ("evi_n", {"primary": "Salmon_Sayward", "secondary": None}),
+            ("jervis", {"primary": "Clowhom_ClowhomLake", "secondary": "RobertsCreek"}),
+            ("evi_s", {"primary": "Englishman", "secondary": None}),
+            ("howe", {"primary": "Squamish_Brackendale", "secondary": None}),
+            ("jdf", {"primary": "SanJuan_PortRenfrew", "secondary": None}),
+            (
+                "skagit",
+                {
+                    "primary": "Skagit_MountVernon",
+                    "secondary": "Snohomish_Monroe",
+                },
+            ),
+            (
+                "puget",
+                {
+                    "primary": "Nisqually_McKenna",
+                    "secondary": "Greenwater_Greenwater",
+                },
+            ),
+            ("toba", {"primary": "Homathko_Mouth", "secondary": "Theodosia"}),
+            ("fraser", {"primary": "Fraser", "secondary": "Nicomekl_Langley"}),
+        ),
+    )
+    def test_watershed_rivers(self, watershed, rivers):
+        assert make_runoff_file.watersheds[watershed]["rivers"] == rivers
 
-    def test_rivers_for_watershed(self):
-        expected = {
-            "bute": {"primary": "Homathko_Mouth", "secondary": None},
-            "evi_n": {"primary": "Salmon_Sayward", "secondary": None},
-            "jervis": {"primary": "Clowhom_ClowhomLake", "secondary": "RobertsCreek"},
-            "evi_s": {"primary": "Englishman", "secondary": None},
-            "howe": {"primary": "Squamish_Brackendale", "secondary": None},
-            "jdf": {"primary": "SanJuan_PortRenfrew", "secondary": None},
-            "skagit": {
-                "primary": "Skagit_MountVernon",
-                "secondary": "Snohomish_Monroe",
-            },
-            "puget": {
-                "primary": "Nisqually_McKenna",
-                "secondary": "Greenwater_Greenwater",
-            },
-            "toba": {"primary": "Homathko_Mouth", "secondary": "Theodosia"},
-            "fraser": {"primary": "Fraser", "secondary": "Nicomekl_Langley"},
-        }
-
-        assert make_runoff_file.rivers_for_watershed == expected
-
-    def test_watershed_from_river(self):
-        expected = {
-            "bute": {"primary": 2.015},
-            "jervis": {"primary": 8.810, "secondary": 140.3},
-            "howe": {"primary": 2.276},
-            "jdf": {"primary": 8.501},
-            "evi_n": {"primary": 10.334},
-            "evi_s": {"primary": 24.60},
-            "toba": {"primary": 0.4563, "secondary": 14.58},
-            "skagit": {"primary": 1.267, "secondary": 1.236},
-            "puget": {"primary": 8.790, "secondary": 29.09},
-            "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
-        }
-
-        assert make_runoff_file.watershed_from_river == expected
+    @pytest.mark.parametrize(
+        "watershed, flow_factors",
+        (
+            ("bute", {"primary": 2.015}),
+            ("jervis", {"primary": 8.810, "secondary": 140.3}),
+            ("howe", {"primary": 2.276}),
+            ("jdf", {"primary": 8.501}),
+            ("evi_n", {"primary": 10.334}),
+            ("evi_s", {"primary": 24.60}),
+            ("toba", {"primary": 0.4563, "secondary": 14.58}),
+            ("skagit", {"primary": 1.267, "secondary": 1.236}),
+            ("puget", {"primary": 8.790, "secondary": 29.09}),
+            (
+                "fraser",
+                {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
+            ),
+        ),
+    )
+    def test_watershed_flow_factors(self, watershed, flow_factors):
+        assert make_runoff_file.watersheds[watershed]["flow factors"] == flow_factors
 
     def test_theodosia_from_diversion_only(self):
         assert make_runoff_file.theodosia_from_diversion_only == 1.429
 
-    def test_persist_until(self):
-        expected = {
-            # number of days to persist last observation for before switching to fitting strategies
-            "Englishman": 0,
-            "Fraser": 10_000,  # always persist
-            "Theodosia": 0,
-            "RobertsCreek": 0,
-            "Salmon_Sayward": 0,
-            "Squamish_Brackendale": 0,
-            "SanJuan_PortRenfrew": 0,
-            "Nisqually_McKenna": 4,
-            "Snohomish_Monroe": 0,
-            "Skagit_MountVernon": 3,
-            "Homathko_Mouth": 1,
-            "Nicomekl_Langley": 0,
-            "Greenwater_Greenwater": 1,
-            "Clowhom_ClowhomLake": 2,
-        }
+    def test_river_patching_keys(self):
+        river_names = [
+            "Englishman",
+            "Fraser",
+            "Theodosia",
+            "RobertsCreek",
+            "Salmon_Sayward",
+            "Squamish_Brackendale",
+            "SanJuan_PortRenfrew",
+            "Nisqually_McKenna",
+            "Snohomish_Monroe",
+            "Skagit_MountVernon",
+            "Homathko_Mouth",
+            "Nicomekl_Langley",
+            "Greenwater_Greenwater",
+            "Clowhom_ClowhomLake",
+        ]
+        assert list(make_runoff_file.river_patching.keys()) == river_names
 
-        assert make_runoff_file.persist_until == expected
+    @pytest.mark.parametrize(
+        "river, persist_until",
+        (
+            ("Englishman", 0),
+            ("Fraser", 10_000),  # always persist
+            ("Theodosia", 0),
+            ("RobertsCreek", 0),
+            ("Salmon_Sayward", 0),
+            ("Squamish_Brackendale", 0),
+            ("SanJuan_PortRenfrew", 0),
+            ("Nisqually_McKenna", 4),
+            ("Snohomish_Monroe", 0),
+            ("Skagit_MountVernon", 3),
+            ("Homathko_Mouth", 1),
+            ("Nicomekl_Langley", 0),
+            ("Greenwater_Greenwater", 1),
+            ("Clowhom_ClowhomLake", 2),
+        ),
+    )
+    def test_river_patching_persist_until(self, river, persist_until):
+        assert make_runoff_file.river_patching[river]["persist until"] == persist_until
 
-    def test_patching_dictionary(self):
-        expected = {
-            "Englishman": ["fit", "persist"],
-            "Fraser": ["persist"],
-            "Theodosia": ["fit", "backup", "persist"],
-            "RobertsCreek": ["fit", "persist"],
-            "Salmon_Sayward": ["fit", "persist"],
-            "Squamish_Brackendale": ["fit", "persist"],
-            "SanJuan_PortRenfrew": ["fit", "backup", "persist"],
-            "Nisqually_McKenna": ["fit", "persist"],
-            "Snohomish_Monroe": ["fit", "persist"],
-            "Skagit_MountVernon": ["fit", "persist"],
-            "Homathko_Mouth": ["fit", "persist"],
-            "Nicomekl_Langley": ["fit", "persist"],
-            "Greenwater_Greenwater": ["fit", "persist"],
-            "Clowhom_ClowhomLake": ["fit", "persist"],
-        }
+    @pytest.mark.parametrize(
+        "river, patch_strats",
+        (
+            ("Englishman", ["fit", "persist"]),
+            ("Fraser", ["persist"]),
+            ("Theodosia", ["fit", "backup", "persist"]),
+            ("RobertsCreek", ["fit", "persist"]),
+            ("Salmon_Sayward", ["fit", "persist"]),
+            ("Squamish_Brackendale", ["fit", "persist"]),
+            ("SanJuan_PortRenfrew", ["fit", "backup", "persist"]),
+            ("Nisqually_McKenna", ["fit", "persist"]),
+            ("Snohomish_Monroe", ["fit", "persist"]),
+            ("Skagit_MountVernon", ["fit", "persist"]),
+            ("Homathko_Mouth", ["fit", "persist"]),
+            ("Nicomekl_Langley", ["fit", "persist"]),
+            ("Greenwater_Greenwater", ["fit", "persist"]),
+            ("Clowhom_ClowhomLake", ["fit", "persist"]),
+        ),
+    )
+    def test_river_patching_patch_strats(self, river, patch_strats):
+        assert make_runoff_file.river_patching[river]["patch strats"] == patch_strats
 
-        assert make_runoff_file.patching_dictionary == expected
+    def test_patching_strategies(self):
+        """Valid patch strategies are limited to cases handled in _patch_missing_obs()"""
+        valid_patch_strats = ["persist", "fit", "backup"]
 
-    def test_patching_fit_types(self):
-        # Valid fit types are limited to cases handled in _patch_missing_ob()
-        valid_fit_types = ["persist", "fit", "backup"]
+        for river in make_runoff_file.river_patching:
+            for patch_strategy in make_runoff_file.river_patching[river][
+                "patch strats"
+            ]:
+                assert patch_strategy in valid_patch_strats
 
-        for fit_types in make_runoff_file.patching_dictionary.values():
-            for fit_type in fit_types:
-                assert fit_type in valid_fit_types
+    def test_persist_is_last_patching_strategy(self):
+        for river in make_runoff_file.river_patching:
+            assert (
+                make_runoff_file.river_patching[river]["patch strats"][-1] == "persist"
+            )
 
-    def test_persist_is_last_patching_fit_type(self):
-        for fit_types in make_runoff_file.patching_dictionary.values():
-            assert fit_types[-1] == "persist"
+    @pytest.mark.parametrize(
+        "river, fit_from",
+        (
+            ("Englishman", "Salmon_Sayward"),
+            ("Theodosia", "Clowhom_ClowhomLake"),
+            ("RobertsCreek", "Englishman"),
+            ("Salmon_Sayward", "Englishman"),
+            ("Squamish_Brackendale", "Homathko_Mouth"),
+            ("SanJuan_PortRenfrew", "Englishman"),
+            ("Nisqually_McKenna", "Snohomish_Monroe"),
+            ("Snohomish_Monroe", "Skagit_MountVernon"),
+            ("Skagit_MountVernon", "Snohomish_Monroe"),
+            ("Homathko_Mouth", "Squamish_Brackendale"),
+            ("Nicomekl_Langley", "RobertsCreek"),
+            ("Greenwater_Greenwater", "Snohomish_Monroe"),
+            ("Clowhom_ClowhomLake", "Theodosia_Diversion"),
+        ),
+    )
+    def test_river_patching_fit_from(self, river, fit_from):
+        assert make_runoff_file.river_patching[river]["fit from"] == fit_from
 
-    def test_matching_dictionary(self):
-        expected = {
-            "Englishman": "Salmon_Sayward",
-            "Theodosia": "Clowhom_ClowhomLake",
-            "RobertsCreek": "Englishman",
-            "Salmon_Sayward": "Englishman",
-            "Squamish_Brackendale": "Homathko_Mouth",
-            "SanJuan_PortRenfrew": "Englishman",
-            "Nisqually_McKenna": "Snohomish_Monroe",
-            "Snohomish_Monroe": "Skagit_MountVernon",
-            "Skagit_MountVernon": "Snohomish_Monroe",
-            "Homathko_Mouth": "Squamish_Brackendale",
-            "Nicomekl_Langley": "RobertsCreek",
-            "Greenwater_Greenwater": "Snohomish_Monroe",
-            "Clowhom_ClowhomLake": "Theodosia_Diversion",
-        }
-
-        assert make_runoff_file.matching_dictionary == expected
-
-    def test_backup_dictionary(self):
-        expected = {"SanJuan_PortRenfrew": "RobertsCreek", "Theodosia": "Englishman"}
-
-        assert make_runoff_file.backup_dictionary == expected
+    @pytest.mark.parametrize(
+        "river, backup_fit_from",
+        (
+            ("SanJuan_PortRenfrew", "RobertsCreek"),
+            ("Theodosia", "Englishman"),
+        ),
+    )
+    def test_river_patching_backup_fit_from(self, river, backup_fit_from):
+        assert (
+            make_runoff_file.river_patching[river]["backup fit from"] == backup_fit_from
+        )
 
 
 class TestSuccess:
@@ -500,7 +547,7 @@ class TestCalcWatershedFlows:
             "toba": 56.474250732,
             "fraser": 1094.5609129386,
         }
-        for name in make_runoff_file.watershed_names:
+        for name in make_runoff_file.watersheds:
             assert flows[name] == pytest.approx(expected[name])
         assert flows["non_fraser"] == pytest.approx(63.9781423614)
 

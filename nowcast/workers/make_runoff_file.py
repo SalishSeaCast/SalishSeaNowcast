@@ -45,95 +45,138 @@ logger = logging.getLogger(NAME)
 
 
 # TODO: Ideally these module-level variables should be in the main or a supplemental config file.
-#       They should also be in a better data structure.
-#       We're leaving them here for now because it's "good enough",
-#       and the priority is getting v202111 into production.
-watershed_names = [
-    "bute",
-    "evi_n",
-    "jervis",
-    "evi_s",
-    "howe",
-    "jdf",
-    "skagit",
-    "puget",
-    "toba",
-    "fraser",
-]
-rivers_for_watershed = {
-    "bute": {"primary": "Homathko_Mouth", "secondary": None},
-    "evi_n": {"primary": "Salmon_Sayward", "secondary": None},
-    "jervis": {"primary": "Clowhom_ClowhomLake", "secondary": "RobertsCreek"},
-    "evi_s": {"primary": "Englishman", "secondary": None},
-    "howe": {"primary": "Squamish_Brackendale", "secondary": None},
-    "jdf": {"primary": "SanJuan_PortRenfrew", "secondary": None},
-    "skagit": {"primary": "Skagit_MountVernon", "secondary": "Snohomish_Monroe"},
-    "puget": {"primary": "Nisqually_McKenna", "secondary": "Greenwater_Greenwater"},
-    "toba": {"primary": "Homathko_Mouth", "secondary": "Theodosia"},
-    "fraser": {"primary": "Fraser", "secondary": "Nicomekl_Langley"},
-}
-watershed_from_river = {
-    "bute": {"primary": 2.015},
-    "jervis": {"primary": 8.810, "secondary": 140.3},
-    "howe": {"primary": 2.276},
-    "jdf": {"primary": 8.501},
-    "evi_n": {"primary": 10.334},
-    "evi_s": {"primary": 24.60},
-    "toba": {"primary": 0.4563, "secondary": 14.58},
-    "skagit": {"primary": 1.267, "secondary": 1.236},
-    "puget": {"primary": 8.790, "secondary": 29.09},
-    "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
+watersheds = {
+    # keys are watershed names
+    "bute": {
+        # primary and secondary rivers in the watershed
+        "rivers": {"primary": "Homathko_Mouth", "secondary": None},
+        # flow factors to scale river flows to total watershed flow
+        "flow factors": {"primary": 2.015},
+    },
+    "evi_n": {
+        "rivers": {"primary": "Salmon_Sayward", "secondary": None},
+        "flow factors": {"primary": 10.334},
+    },
+    "jervis": {
+        "rivers": {"primary": "Clowhom_ClowhomLake", "secondary": "RobertsCreek"},
+        "flow factors": {"primary": 8.810, "secondary": 140.3},
+    },
+    "evi_s": {
+        "rivers": {"primary": "Englishman", "secondary": None},
+        "flow factors": {"primary": 24.60},
+    },
+    "howe": {
+        "rivers": {"primary": "Squamish_Brackendale", "secondary": None},
+        "flow factors": {"primary": 2.276},
+    },
+    "jdf": {
+        "rivers": {"primary": "SanJuan_PortRenfrew", "secondary": None},
+        "flow factors": {"primary": 8.501},
+    },
+    "skagit": {
+        "rivers": {"primary": "Skagit_MountVernon", "secondary": "Snohomish_Monroe"},
+        "flow factors": {"primary": 1.267, "secondary": 1.236},
+    },
+    "puget": {
+        "rivers": {
+            "primary": "Nisqually_McKenna",
+            "secondary": "Greenwater_Greenwater",
+        },
+        "flow factors": {"primary": 8.790, "secondary": 29.09},
+    },
+    "toba": {
+        "rivers": {"primary": "Homathko_Mouth", "secondary": "Theodosia"},
+        "flow factors": {"primary": 0.4563, "secondary": 14.58},
+    },
+    "fraser": {
+        "rivers": {"primary": "Fraser", "secondary": "Nicomekl_Langley"},
+        "flow factors": {
+            "primary": 1.161,
+            "secondary": 162,
+            "nico_into_fraser": 0.83565,
+        },
+    },
 }
 theodosia_from_diversion_only = 1.429  # see Susan's TheodosiaWOScotty notebook
-persist_until = {
-    # number of days to persist last observation for before switching to fitting strategies
-    "Englishman": 0,
-    "Fraser": 10_000,  # always persist
-    "Theodosia": 0,
-    "RobertsCreek": 0,
-    "Salmon_Sayward": 0,
-    "Squamish_Brackendale": 0,
-    "SanJuan_PortRenfrew": 0,
-    "Nisqually_McKenna": 4,
-    "Snohomish_Monroe": 0,
-    "Skagit_MountVernon": 3,
-    "Homathko_Mouth": 1,
-    "Nicomekl_Langley": 0,
-    "Greenwater_Greenwater": 1,
-    "Clowhom_ClowhomLake": 2,
+river_patching = {
+    # keys are the river names from the `rivers.SOG river files` section of the `nowcast.yaml` file
+    "Englishman": {
+        # number of days to persist last observation for before switching to patching strategies
+        "persist until": 0,
+        # patching strategies to use after the persistence period is over
+        "patch strats": ["fit", "persist"],
+        # river to use to calculate flow by fitting from
+        "fit from": "Salmon_Sayward",
+    },
+    "Fraser": {
+        "persist until": 10_000,  # always persist
+        "patch strats": ["persist"],
+    },
+    "Theodosia": {
+        "persist until": 0,
+        "patch strats": ["fit", "backup", "persist"],
+        "fit from": "Clowhom_ClowhomLake",
+        # backup river to use to calculate flow by fitting from if flow obs from  "fit from" river
+        # is not available
+        "backup fit from": "Englishman",
+    },
+    "RobertsCreek": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Englishman",
+    },
+    "Salmon_Sayward": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Englishman",
+    },
+    "Squamish_Brackendale": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Homathko_Mouth",
+    },
+    "SanJuan_PortRenfrew": {
+        "persist until": 0,
+        "patch strats": ["fit", "backup", "persist"],
+        "fit from": "Englishman",
+        "backup fit from": "RobertsCreek",
+    },
+    "Nisqually_McKenna": {
+        "persist until": 4,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Snohomish_Monroe",
+    },
+    "Snohomish_Monroe": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Skagit_MountVernon",
+    },
+    "Skagit_MountVernon": {
+        "persist until": 3,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Snohomish_Monroe",
+    },
+    "Homathko_Mouth": {
+        "persist until": 1,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Squamish_Brackendale",
+    },
+    "Nicomekl_Langley": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "RobertsCreek",
+    },
+    "Greenwater_Greenwater": {
+        "persist until": 1,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Snohomish_Monroe",
+    },
+    "Clowhom_ClowhomLake": {
+        "persist until": 2,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Theodosia_Diversion",
+    },
 }
-patching_dictionary = {
-    "Englishman": ["fit", "persist"],
-    "Fraser": ["persist"],
-    "Theodosia": ["fit", "backup", "persist"],
-    "RobertsCreek": ["fit", "persist"],
-    "Salmon_Sayward": ["fit", "persist"],
-    "Squamish_Brackendale": ["fit", "persist"],
-    "SanJuan_PortRenfrew": ["fit", "backup", "persist"],
-    "Nisqually_McKenna": ["fit", "persist"],
-    "Snohomish_Monroe": ["fit", "persist"],
-    "Skagit_MountVernon": ["fit", "persist"],
-    "Homathko_Mouth": ["fit", "persist"],
-    "Nicomekl_Langley": ["fit", "persist"],
-    "Greenwater_Greenwater": ["fit", "persist"],
-    "Clowhom_ClowhomLake": ["fit", "persist"],
-}
-matching_dictionary = {
-    "Englishman": "Salmon_Sayward",
-    "Theodosia": "Clowhom_ClowhomLake",
-    "RobertsCreek": "Englishman",
-    "Salmon_Sayward": "Englishman",
-    "Squamish_Brackendale": "Homathko_Mouth",
-    "SanJuan_PortRenfrew": "Englishman",
-    "Nisqually_McKenna": "Snohomish_Monroe",
-    "Snohomish_Monroe": "Skagit_MountVernon",
-    "Skagit_MountVernon": "Snohomish_Monroe",
-    "Homathko_Mouth": "Squamish_Brackendale",
-    "Nicomekl_Langley": "RobertsCreek",
-    "Greenwater_Greenwater": "Snohomish_Monroe",
-    "Clowhom_ClowhomLake": "Theodosia_Diversion",
-}
-backup_dictionary = {"SanJuan_PortRenfrew": "RobertsCreek", "Theodosia": "Englishman"}
 
 
 def main():
@@ -193,18 +236,18 @@ def _calc_watershed_flows(obs_date, config):
     """
 
     flows = {}
-    for watershed_name in watershed_names:
+    for watershed_name in watersheds:
         if watershed_name == "fraser":
             flows["fraser"], flows["non_fraser"] = _do_fraser(obs_date, config)
         else:
-            if rivers_for_watershed[watershed_name]["secondary"] is None:
+            if watersheds[watershed_name]["rivers"]["secondary"] is None:
                 logger.debug(f"no secondary river for {watershed_name} watershed")
             flows[watershed_name] = _do_a_river_pair(
                 watershed_name,
                 obs_date,
-                rivers_for_watershed[watershed_name]["primary"],
+                watersheds[watershed_name]["rivers"]["primary"],
                 config,
-                rivers_for_watershed[watershed_name]["secondary"],
+                watersheds[watershed_name]["rivers"]["secondary"],
             )
         logger.debug(
             f"{watershed_name} watershed flow: {flows[watershed_name]:.3f} m3 s-1"
@@ -230,17 +273,17 @@ def _do_fraser(obs_date, config):
     fraser_flux = (
         # Fraser at Hope plus its portion that is proxy for glacial runoff dominated rivers
         # (e.g. Harrison) that flow into Fraser below Hope
-        primary_flow * watershed_from_river["fraser"]["primary"]
+        primary_flow * watersheds["fraser"]["flow factors"]["primary"]
         # Proxy for rainfall runoff dominated rivers that flow into Fraser below Hope
         + secondary_flow
-        * watershed_from_river["fraser"]["secondary"]
-        * watershed_from_river["fraser"]["nico_into_fraser"]
+        * watersheds["fraser"]["flow factors"]["secondary"]
+        * watersheds["fraser"]["flow factors"]["nico_into_fraser"]
     )
     secondary_flux = (
         # Proxy for rainfall runoff dominated rivers in the Fraser Basin that flow into SoG
         secondary_flow
-        * watershed_from_river["fraser"]["secondary"]
-        * (1 - watershed_from_river["fraser"]["nico_into_fraser"])
+        * watersheds["fraser"]["flow factors"]["secondary"]
+        * (1 - watersheds["fraser"]["flow factors"]["nico_into_fraser"])
     )
     return fraser_flux, secondary_flux
 
@@ -263,7 +306,9 @@ def _do_a_river_pair(
     """
     primary_river = _read_river(primary_river_name, "primary", config)
     primary_flow = _get_river_flow(primary_river_name, primary_river, obs_date, config)
-    watershed_flow = primary_flow * watershed_from_river[watershed_name]["primary"]
+    watershed_flow = (
+        primary_flow * watersheds[watershed_name]["flow factors"]["primary"]
+    )
     if secondary_river_name is None:
         return watershed_flow
 
@@ -275,7 +320,9 @@ def _do_a_river_pair(
     secondary_flow = _get_river_flow(
         secondary_river_name, secondary_river, obs_date, config
     )
-    watershed_flow += secondary_flow * watershed_from_river[watershed_name]["secondary"]
+    watershed_flow += (
+        secondary_flow * watersheds[watershed_name]["flow factors"]["secondary"]
+    )
     return watershed_flow
 
 
@@ -422,7 +469,7 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
         )
 
     gap_length = (obs_date - last_obs_date).days
-    if gap_length <= persist_until[river_name]:
+    if gap_length <= river_patching[river_name]["persist until"]:
         # Handle rivers for which Susan's statistical investigation showed that persistence
         # is better than fitting for short periods of missing observations.
         flux = river_flow.iloc[-1, -1]
@@ -431,8 +478,8 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
         )
         return flux
 
-    for fit_type in patching_dictionary[river_name]:
-        match fit_type:
+    for patch_strategy in river_patching[river_name]["patch strats"]:
+        match patch_strategy:
             case "persist":
                 flux = river_flow.iloc[-1, -1]
                 logger.debug(
@@ -440,16 +487,16 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
                 )
                 return flux
             case "fit":
-                fit_from_river_name = matching_dictionary[river_name]
+                fit_from_river_name = river_patching[river_name]["fit from"]
             case "backup":
-                fit_from_river_name = backup_dictionary[river_name]
+                fit_from_river_name = river_patching[river_name]["backup fit from"]
             case _:
                 raise ValueError("typo in fit types list")
         flux = _patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
         if not numpy.isnan(flux):
-            if fit_type == "backup":
+            if patch_strategy == "backup":
                 logger.debug(
                     f"patched missing {obs_date_yyyymmdd} {river_name} discharge by fitting from "
                     f"backup river: {fit_from_river_name}"
@@ -531,7 +578,7 @@ def _create_runoff_array(flows, grid_cell_areas):
     runoff_depth = numpy.ones_like(runoff_array)
     runoff_temperature = numpy.empty_like(runoff_array)
 
-    for watershed_name in watershed_names:
+    for watershed_name in watersheds:
         if watershed_name == "fraser":
             fraser_ratio = rivers.prop_dict["fraser"]["Fraser"]["prop"]
             for key in rivers.prop_dict[watershed_name]:
