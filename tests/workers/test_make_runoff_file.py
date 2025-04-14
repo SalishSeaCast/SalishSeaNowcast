@@ -87,15 +87,22 @@ class TestMain:
             "SalishSeaCast worker that calculates NEMO runoff forcing file."
         )
 
+    def test_add_bathy_version_arg(self, mock_worker):
+        worker = make_runoff_file.main()
+
+        assert worker.cli.parser._actions[3].dest == "bathy_version"
+        assert worker.cli.parser._actions[3].choices == {"v202108"}
+        assert worker.cli.parser._actions[3].help
+
     def test_add_data_date_option(self, mock_worker):
         worker = make_runoff_file.main()
 
-        assert worker.cli.parser._actions[3].dest == "data_date"
+        assert worker.cli.parser._actions[4].dest == "data_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
-        assert worker.cli.parser._actions[3].type == expected
+        assert worker.cli.parser._actions[4].type == expected
         expected = arrow.now().floor("day").shift(days=-1)
-        assert worker.cli.parser._actions[3].default == expected
-        assert worker.cli.parser._actions[3].help
+        assert worker.cli.parser._actions[4].default == expected
+        assert worker.cli.parser._actions[4].help
 
 
 class TestConfig:
@@ -454,7 +461,9 @@ class TestMakeRunoffFile:
         tmp_rivers_dir.mkdir(parents=True)
         monkeypatch.setitem(config["rivers"], "rivers dir", tmp_rivers_dir)
 
-        parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-19"))
+        parsed_args = SimpleNamespace(
+            bathy_version="v202108", data_date=arrow.get("2023-05-19")
+        )
 
         checklist = make_runoff_file.make_runoff_file(parsed_args, config)
 
@@ -478,7 +487,9 @@ class TestMakeRunoffFile:
         tmp_rivers_dir.mkdir(parents=True)
         monkeypatch.setitem(config["rivers"], "rivers dir", tmp_rivers_dir)
 
-        parsed_args = SimpleNamespace(data_date=arrow.get("2023-05-26"))
+        parsed_args = SimpleNamespace(
+            bathy_version="v202108", data_date=arrow.get("2023-05-26")
+        )
         caplog.set_level(logging.DEBUG)
 
         make_runoff_file.make_runoff_file(parsed_args, config)

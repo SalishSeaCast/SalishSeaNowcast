@@ -186,6 +186,11 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
+    worker.cli.add_argument(
+        "bathy_version",
+        choices={"v202108"},
+        help="Bathymetry version to make runoff file for.",
+    )
     worker.cli.add_date_option(
         "--data-date",
         default=arrow.now().floor("day").shift(days=-1),
@@ -210,7 +215,7 @@ def failure(parsed_args):
 
 
 def make_runoff_file(parsed_args, config, *args):
-    bathy_version = "v202108"
+    bathy_version = parsed_args.bathy_version
     rivers = importlib.import_module(
         config["rivers"]["bathy params"][bathy_version]["prop_dict module"]
     )

@@ -393,9 +393,11 @@ def after_make_ssh_files(msg, config, checklist):
         "success forecast2": [],
     }
     if msg.type.startswith("success"):
-        next_workers[msg.type].append(NextWorker("nowcast.workers.make_runoff_file"))
-        next_workers[msg.type].append(
-            NextWorker("nowcast.workers.make_201702_runoff_file")
+        next_workers[msg.type].extend(
+            [
+                NextWorker("nowcast.workers.make_runoff_file", args=["v202108"]),
+                NextWorker("nowcast.workers.make_201702_runoff_file"),
+            ]
         )
     return next_workers[msg.type]
 
