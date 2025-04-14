@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """SalishSeaCast runoff file generation worker for v201702 bathymetry.
 
 Blend Environment Canada river gauge data for the Fraser River at Hope with climatology for the
@@ -81,19 +85,21 @@ def make_201702_runoff_file(parsed_args, config, *args):
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
 
     checklist = {}
-    bathy_type = "b201702"
+    bathy_version = "v201702"
     logger.info(f"calculating runoff forcing for b201702 bathymetry")
     # Get climatology
-    climatology_file = Path(config["rivers"]["monthly climatology"][bathy_type])
+    climatology_file = Path(
+        config["rivers"]["bathy params"][bathy_version]["monthly climatology"]
+    )
     criverflow, area = _get_river_climatology(climatology_file)
     # Interpolate to today
     driverflow = _calculate_daily_flow(yesterday, criverflow)
     logger.debug(f'calculated flow for {yesterday.format("YYYY-MM-DD")}')
     # Calculate combined runoff and write file
     directory = Path(config["rivers"]["rivers dir"])
-    filename_tmpls = config["rivers"]["file templates"][bathy_type]
+    filename_tmpls = config["rivers"]["bathy params"][bathy_version]["file template"]
     prop_dict = importlib.import_module(
-        config["rivers"]["prop_dict modules"][bathy_type]
+        config["rivers"]["bathy params"][bathy_version]["prop_dict module"]
     ).prop_dict
     filepath = _combine_runoff(
         prop_dict,
@@ -108,7 +114,7 @@ def make_201702_runoff_file(parsed_args, config, *args):
         directory,
         filename_tmpls,
     )
-    checklist[bathy_type] = os.fspath(filepath)
+    checklist[bathy_version] = os.fspath(filepath)
     return checklist
 
 
@@ -156,7 +162,9 @@ def _calculate_daily_flow(yesterday, criverflow):
 
 def _fraser_climatology(config):
     """Read in the Fraser climatology separated from Hope flow."""
-    fraser_climatology_file = Path(config["rivers"]["Fraser climatology"])
+    fraser_climatology_file = Path(
+        config["rivers"]["bathy params"]["v201702"]["Fraser climatology"]
+    )
     with fraser_climatology_file.open("rt") as f:
         fraser_climatology = yaml.safe_load(f)
     logger.debug(f"read Fraser climatology from {fraser_climatology_file}")

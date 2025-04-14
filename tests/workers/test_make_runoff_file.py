@@ -17,6 +17,7 @@
 
 
 """Unit test for SalishSeaCast make_runoff_file worker."""
+import importlib
 import logging
 import os
 import textwrap
@@ -48,11 +49,11 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | dict:
                     TheodosiaScotty: forcing/rivers/observations/Theodosia_Scotty_flow
                     TheodosiaBypass: forcing/rivers/observations/Theodosia_Bypass_flow
                     TheodosiaDiversion: forcing/rivers/observations/Theodosia_Diversion_flow
+                  bathy params:
+                    v202108:
+                      file template: "R202108Dailies_{:y%Ym%md%d}.nc"
+                      prop_dict module: salishsea_tools.river_202108
                   rivers dir: results/forcing/rivers/
-                  file templates:
-                    b202108:  "R202108Dailies_{:y%Ym%md%d}.nc"
-                  prop_dict modules:
-                    b202108: salishsea_tools.river_202108
 
                 run types:
                   nowcast-green:
@@ -147,12 +148,16 @@ class TestConfig:
         assert prod_config["rivers"]["rivers dir"] == "/results/forcing/rivers/"
 
     def test_filename_tmpl(self, prod_config):
-        filename_tmpl = prod_config["rivers"]["file templates"]["b202108"]
+        filename_tmpl = prod_config["rivers"]["bathy params"]["v202108"][
+            "file template"
+        ]
 
         assert filename_tmpl == "R202108Dailies_{:y%Ym%md%d}.nc"
 
-    def test_prop_dict_modules(self, prod_config):
-        prop_dict_module = prod_config["rivers"]["prop_dict modules"]["b202108"]
+    def test_prop_dict_module(self, prod_config):
+        prop_dict_module = prod_config["rivers"]["bathy params"]["v202108"][
+            "prop_dict module"
+        ]
 
         assert prop_dict_module == "salishsea_tools.river_202108"
 
@@ -386,7 +391,7 @@ class TestFailure:
         assert msg_type == "failure"
 
 
-class TestMakeV202111RunoffFile:
+class TestMakeRunoffFile:
     """Unit tests for make_runoff_file() function."""
 
     @staticmethod
@@ -454,7 +459,7 @@ class TestMakeV202111RunoffFile:
         checklist = make_runoff_file.make_runoff_file(parsed_args, config)
 
         expected = {
-            "b202108": os.fspath(tmp_rivers_dir / "R202108Dailies_y2023m05d19.nc")
+            "v202108": os.fspath(tmp_rivers_dir / "R202108Dailies_y2023m05d19.nc")
         }
         assert checklist == expected
 
@@ -480,12 +485,12 @@ class TestMakeV202111RunoffFile:
 
         assert caplog.records[0].levelname == "INFO"
         expected = (
-            "calculating NEMO runoff forcing for 202108 bathymetry for 2023-05-26"
+            "calculating NEMO runoff forcing for v202108 bathymetry for 2023-05-26"
         )
         assert caplog.messages[0] == expected
         assert caplog.records[2].levelname == "INFO"
         expected = (
-            f"stored NEMO runoff forcing for 202108 bathymetry for 2023-05-26: "
+            f"stored NEMO runoff forcing for v202108 bathymetry for 2023-05-26: "
             f"{tmp_rivers_dir / 'R202108Dailies_y2023m05d26.nc'}"
         )
         assert caplog.messages[2] == expected
@@ -1805,6 +1810,9 @@ class TestCreateRunoffArray:
     """Unit test for make_runoff_file._create_runoff_array()."""
 
     def test_create_runoff_array(self, config):
+        rivers = importlib.import_module(
+            config["rivers"]["bathy params"]["v202108"]["prop_dict module"]
+        )
         flows = {
             "bute": 97.0915257,
             "evi_n": 565.25543574,
@@ -1822,7 +1830,7 @@ class TestCreateRunoffArray:
         mock_grid_cell_areas.fill(200_000)
 
         runoff_array = make_runoff_file._create_runoff_array(
-            flows, mock_grid_cell_areas
+            rivers, flows, mock_grid_cell_areas
         )
 
         # Check selected river runoffs
@@ -1849,10 +1857,11 @@ class TestCalcRunoffDataset:
         return _runoff_array
 
     def test_data_array_values(self, runoff_array, config):
+        bathy_version = "v202108"
         obs_date = arrow.get("2023-05-11")
 
         runoff_ds = make_runoff_file._calc_runoff_dataset(
-            obs_date, runoff_array, config
+            bathy_version, obs_date, runoff_array, config
         )
 
         numpy.testing.assert_allclose(
@@ -1860,10 +1869,11 @@ class TestCalcRunoffDataset:
         )
 
     def test_data_array_attrs(self, runoff_array, config):
+        bathy_version = "v202108"
         obs_date = arrow.get("2023-05-11")
 
         runoff_ds = make_runoff_file._calc_runoff_dataset(
-            obs_date, runoff_array, config
+            bathy_version, obs_date, runoff_array, config
         )
 
         assert runoff_ds["rorunoff"].attrs["standard_name"] == "runoff_flux"
@@ -1871,10 +1881,11 @@ class TestCalcRunoffDataset:
         assert runoff_ds["rorunoff"].attrs["units"] == "kg m-2 s-1"
 
     def test_coords(self, runoff_array, config):
+        bathy_version = "v202108"
         obs_date = arrow.get("2023-05-11")
 
         runoff_ds = make_runoff_file._calc_runoff_dataset(
-            obs_date, runoff_array, config
+            bathy_version, obs_date, runoff_array, config
         )
 
         assert len(runoff_ds.coords) == 3
@@ -1883,10 +1894,11 @@ class TestCalcRunoffDataset:
         assert all(runoff_ds.coords["x"] == numpy.arange(runoff_array.shape[1]))
 
     def test_dims(self, runoff_array, config):
+        bathy_version = "v202108"
         obs_date = arrow.get("2023-05-11")
 
         runoff_ds = make_runoff_file._calc_runoff_dataset(
-            obs_date, runoff_array, config
+            bathy_version, obs_date, runoff_array, config
         )
 
         assert len(runoff_ds.sizes) == 3
@@ -1900,10 +1912,11 @@ class TestCalcRunoffDataset:
 
         monkeypatch.setattr(make_runoff_file.arrow, "now", mock_now)
 
+        bathy_version = "v202108"
         obs_date = arrow.get("2023-05-11")
 
         runoff_ds = make_runoff_file._calc_runoff_dataset(
-            obs_date, runoff_array, config
+            bathy_version, obs_date, runoff_array, config
         )
 
         assert runoff_ds.attrs["creator_email"] == "sallen@eoas.ubc.ca"
@@ -1945,7 +1958,12 @@ class TestCalcRunoffDataset:
 class TestWriteNetcdf:
     """Unit test for make_runoff_file._write_netcdf()."""
 
-    def test_write_netcdf(self, config, caplog, tmp_path, monkeypatch):
+    @pytest.mark.parametrize(
+        "bathy_version, file_tmpl", (("v202108", "R202108Dailies_{:y%Ym%md%d}.nc"),)
+    )
+    def test_write_netcdf(
+        self, bathy_version, file_tmpl, config, caplog, tmp_path, monkeypatch
+    ):
         def mock_to_netcdf(runoff_ds, encoding, nc_file_path):
             pass
 
@@ -1959,12 +1977,11 @@ class TestWriteNetcdf:
         obs_date = arrow.get("2023-05-30")
         caplog.set_level("DEBUG")
 
-        nc_file_path = make_runoff_file._write_netcdf(runoff_ds, obs_date, config)
-
-        assert caplog.records[0].levelname == "DEBUG"
-        assert (
-            caplog.messages[0]
-            == f"wrote {tmp_rivers_dir / 'R202108Dailies_y2023m05d30.nc'}"
+        nc_file_path = make_runoff_file._write_netcdf(
+            runoff_ds, bathy_version, obs_date, config
         )
 
-        assert nc_file_path == tmp_rivers_dir / "R202108Dailies_y2023m05d30.nc"
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = file_tmpl.format(obs_date.date())
+        assert caplog.messages[0] == f"wrote {tmp_rivers_dir / expected}"
+        assert nc_file_path == tmp_rivers_dir / expected

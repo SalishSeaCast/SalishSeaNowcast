@@ -185,7 +185,8 @@ def _upload_fraser_turbidity_file(
 
 
 def _upload_river_runoff_files(sftp_client, run_date, config, host_name, host_config):
-    for tmpl in config["rivers"]["file templates"].values():
+    for bathy_version in config["rivers"]["bathy params"]:
+        tmpl = config["rivers"]["bathy params"][bathy_version]["file template"]
         filename = tmpl.format(run_date.shift(days=-1).date())
         localpath = Path(config["rivers"]["rivers dir"], filename)
         remotepath = Path(host_config["forcing"]["rivers dir"], filename)

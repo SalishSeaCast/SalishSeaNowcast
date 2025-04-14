@@ -37,17 +37,17 @@ def config(base_config):
         f.write(
             textwrap.dedent(
                 """\
+                SOG river files:
+                  Fraser: SOG-forcing/ECget/Fraser_flow
                 rivers:
+                  bathy params:
+                    v201702:  # **Required for runoff files used by nowcast-agrif**
+                      Fraser climatology: tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
+                      monthly climatology: rivers-climatology/rivers_month_201702.nc
+                      file template: "R201702DFraCElse_{:y%Ym%md%d}.nc"
+                      prop_dict modules: salishsea_tools.river_201702
                   rivers dir: forcing/rivers/
-                  file templates:
-                    b201702: 'R201702DFraCElse_{:y%Ym%md%d}.nc'
-                  monthly climatology:
-                    b201702: rivers-climatology/rivers_month_201702.nc
-                  prop_dict modules:
-                    b201702: salishsea_tools.river_201702
-                  SOG river files:
-                    Fraser: SOG-forcing/ECget/Fraser_flow
-                  Fraser climatology: tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
+
                 """
             )
         )
@@ -99,21 +99,28 @@ class TestConfig:
 
     def test_rivers_sections(self, prod_config):
         rivers = prod_config["rivers"]
-        assert rivers["file templates"]["b201702"] == "R201702DFraCElse_{:y%Ym%md%d}.nc"
+        assert (
+            rivers["bathy params"]["v201702"]["file template"]
+            == "R201702DFraCElse_{:y%Ym%md%d}.nc"
+        )
         assert rivers["rivers dir"] == "/results/forcing/rivers/"
-        assert rivers["prop_dict modules"]["b201702"] == "salishsea_tools.river_201702"
+        assert (
+            rivers["bathy params"]["v201702"]["prop_dict module"]
+            == "salishsea_tools.river_201702"
+        )
         assert (
             rivers["SOG river files"]["Capilano"]
             == "/opp/observations/rivers/Capilano/Caplilano_08GA010_day_avg_flow"
         )
 
     def test_rivers_climatology(self, prod_config):
+        climatolgies = prod_config["rivers"]["bathy params"]["v201702"]
         assert (
-            prod_config["rivers"]["Fraser climatology"]
+            climatolgies["Fraser climatology"]
             == "/SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml"
         )
         assert (
-            prod_config["rivers"]["monthly climatology"]["b201702"]
+            climatolgies["monthly climatology"]
             == "/SalishSeaCast/rivers-climatology/rivers_month_201702.nc"
         )
 

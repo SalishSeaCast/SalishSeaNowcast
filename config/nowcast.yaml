@@ -101,14 +101,14 @@ rivers:
   datamart dir: /SalishSeaCast/datamart/hydrometric/
   # ECCC datamart hydrometric CSV file name template
   # **Must be quoted to protect {} characters**
-  csv file template: 'BC_{stn_id}_hourly_hydrometric.csv'
+  csv file template: "BC_{stn_id}_hourly_hydrometric.csv"
   # USGS waterservice URL
   usgs url: https://waterservices.usgs.gov/nwis/dv/
   # USGS Water Service REST query parameters
   usgs params:
     format: json
     # Parameter code for discharge in cubic ft per second
-    # **Must be quaoted to protect leading zeros**
+    # **Must be quoted to protect leading zeros**
     parameterCd: "00060"
     # River station id and start/end dates that change for every query
     sites: ""
@@ -160,27 +160,27 @@ rivers:
     TheodosiaScotty: /results/forcing/rivers/observations/Theodosia_Scotty_flow
     TheodosiaBypass: /results/forcing/rivers/observations/Theodosia_Bypass_flow
     TheodosiaDiversion: /results/forcing/rivers/observations/Theodosia_Diversion_flow
-  # File that describes Fraser River climatology separation from measured
-  # flow at Hope
-  # **Required for 201702 runoff files used by nowcast-agrif**
-  Fraser climatology: /SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
+  # Parameters for make_runoff_file workers that vary with the bathymetry version
+  bathy params:
+    # Keyed by bathymetry version
+    v202108:  # SalishSeaCast production bathymetry
+      # Template for the runoff forcing file name
+      file template: "R202108Dailies_{:y%Ym%md%d}.nc"
+      # Module containing dictionary of the proportions that each river occupies in its watershed
+      prop_dict module: salishsea_tools.river_202108
+    v201702:  # **Required for runoff files used by nowcast-agrif**
+      # File that describes Fraser River climatology separation from measured
+      # flow at Hope
+      Fraser climatology: /SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
+      # Monthly climatology
+      monthly climatology: /SalishSeaCast/rivers-climatology/rivers_month_201702.nc
+      # Template for the runoff forcing file name
+      file template: "R201702DFraCElse_{:y%Ym%md%d}.nc"
+      # Module containing dictionary of the proportions that each river occupies in its watershed
+      prop_dict module: salishsea_tools.river_201702
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
-  # Monthly climatology
-  # **Required for 201702 runoff files used by nowcast-agrif**
-  monthly climatology:
-    b201702: /SalishSeaCast/rivers-climatology/rivers_month_201702.nc
-  # Templates for the runoff forcing file name
-  # **Must be quoted to project {} characters**
-  file templates:
-    # **201702 runoff files are used by nowcast-agrif**
-    b201702:  "R201702DFraCElse_{:y%Ym%md%d}.nc"
-    b202108:  "R202108Dailies_{:y%Ym%md%d}.nc"
-  # Module containing dictionary of the proportions that each river occupies in its watershed
-  prop_dict modules:
-    # **201702 runoff files are used by nowcast-agrif**
-    b201702: salishsea_tools.river_201702
-    b202108: salishsea_tools.river_202108
+
   turbidity:
     # File containing hourly real-time Fraser River water quality buoy turbidity data
     ECget Fraser turbidity: /results/observations/ECCC/fraser_buoy.csv
@@ -188,7 +188,7 @@ rivers:
     forcing dir: /results/forcing/rivers/river_turb/
     # Template for the turbidity forcing file names
     # **Must be quoted to protect {} characters**
-    file template: 'riverTurbDaily2_{:y%Ym%md%d}.nc'
+    file template: "riverTurbDaily2_{:y%Ym%md%d}.nc"
 
 
 ssh:

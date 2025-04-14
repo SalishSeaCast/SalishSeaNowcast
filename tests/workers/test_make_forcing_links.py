@@ -194,7 +194,7 @@ class TestConfig:
 
     def test_rivers_file_templates(self, prod_config):
         assert (
-            prod_config["rivers"]["file templates"]["b201702"]
+            prod_config["rivers"]["bathy params"]["v201702"]["file template"]
             == "R201702DFraCElse_{:y%Ym%md%d}.nc"
         )
 

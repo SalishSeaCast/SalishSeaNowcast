@@ -25,6 +25,7 @@ Missing river discharge observations are handled by a scheme of persistence or s
 a nearby gauged river, depending on the time span of missing observations.
 """
 import functools
+import importlib
 import logging
 import os
 import warnings
@@ -37,7 +38,6 @@ import xarray
 from nemo_nowcast import NowcastWorker
 
 from salishsea_tools import rivertools
-from salishsea_tools import river_202108 as rivers
 
 
 NAME = "make_runoff_file"
@@ -210,20 +210,24 @@ def failure(parsed_args):
 
 
 def make_runoff_file(parsed_args, config, *args):
+    bathy_version = "v202108"
+    rivers = importlib.import_module(
+        config["rivers"]["bathy params"][bathy_version]["prop_dict module"]
+    )
     obs_date = parsed_args.data_date
     logger.info(
-        f"calculating NEMO runoff forcing for 202108 bathymetry for {obs_date.format('YYYY-MM-DD')}"
+        f"calculating NEMO runoff forcing for {bathy_version} bathymetry for {obs_date.format('YYYY-MM-DD')}"
     )
     flows = _calc_watershed_flows(obs_date, config)
     grid_cell_areas = _get_grid_cell_areas(config)
-    runoff_array = _create_runoff_array(flows, grid_cell_areas)
-    runoff_ds = _calc_runoff_dataset(obs_date, runoff_array, config)
-    nc_file_path = _write_netcdf(runoff_ds, obs_date, config)
+    runoff_array = _create_runoff_array(rivers, flows, grid_cell_areas)
+    runoff_ds = _calc_runoff_dataset(bathy_version, obs_date, runoff_array, config)
+    nc_file_path = _write_netcdf(runoff_ds, bathy_version, obs_date, config)
     logger.info(
-        f"stored NEMO runoff forcing for 202108 bathymetry for {obs_date.format('YYYY-MM-DD')}: "
+        f"stored NEMO runoff forcing for {bathy_version} bathymetry for {obs_date.format('YYYY-MM-DD')}: "
         f"{nc_file_path}"
     )
-    checklist = {"b202108": os.fspath(nc_file_path)}
+    checklist = {bathy_version: os.fspath(nc_file_path)}
     return checklist
 
 
@@ -334,7 +338,7 @@ def _read_river(river_name, ps, config):
 
     :rtype: :py:class:`pandas.Dataframe`
     """
-    filename = Path(config["rivers"]["SOG river files"][river_name.replace("_", "")])
+    filename = Path(config["rivers"]["SOG river files"][river_name])
     with warnings.catch_warnings():
         # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
         warnings.simplefilter("ignore")
@@ -565,8 +569,9 @@ def _get_grid_cell_areas(config):
     return grid_cell_areas.to_numpy()
 
 
-def _create_runoff_array(flows, grid_cell_areas):
+def _create_runoff_array(rivers, flows, grid_cell_areas):
     """
+    :param :py:class:`module` rivers:
     :param dict flows:
     :param :py:class:`numpy.ndarray` grid_cell_areas:
 
@@ -613,8 +618,9 @@ def _create_runoff_array(flows, grid_cell_areas):
     return runoff_array
 
 
-def _calc_runoff_dataset(obs_date, runoff_array, config):
+def _calc_runoff_dataset(bathy_version, obs_date, runoff_array, config):
     """
+    :param str bathy_version:
     :param :py:class:`arrow.Arrow` obs_date:
     :param :py:class:`numpy.ndarray` runoff_array:
     :param dict config:
@@ -637,6 +643,9 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
             "units": "kg m-2 s-1",
         },
     )
+    prop_dict_module = config["rivers"]["bathy params"][bathy_version][
+        "prop_dict module"
+    ]
     runoff_ds = xarray.Dataset(
         data_vars={"rorunoff": runoff_da},
         coords=coords,
@@ -657,9 +666,7 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
                 f"fits developed by Susan Allen."
             ),
             "development_notebook": "https://github.com/SalishSeaCast/tools/blob/main/I_ForcingFiles/Rivers/ProductionDailyRiverNCfile.ipynb",
-            "rivers_watersheds_proportions": config["rivers"]["prop_dict modules"][
-                "b202108"
-            ],
+            "rivers_watersheds_proportions": prop_dict_module,
             "history": (
                 f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
                 f"python -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
@@ -670,9 +677,10 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
     return runoff_ds
 
 
-def _write_netcdf(runoff_ds, obs_date, config):
+def _write_netcdf(runoff_ds, bathy_version, obs_date, config):
     """
     :param :py:class:`xarray.Dataset` runoff_ds:
+    :param str bathy_version:
     :param :py:class:`arrow.Arrow` obs_date:
     :param dict config:
 
@@ -688,7 +696,7 @@ def _write_netcdf(runoff_ds, obs_date, config):
         {var: {"zlib": True, "complevel": 4} for var in runoff_ds.data_vars}
     )
     rivers_dir = Path(config["rivers"]["rivers dir"])
-    filename_tmpl = config["rivers"]["file templates"]["b202108"]
+    filename_tmpl = config["rivers"]["bathy params"][bathy_version]["file template"]
     nc_filename = filename_tmpl.format(obs_date.date())
     to_netcdf(runoff_ds, encoding, rivers_dir / nc_filename)
     logger.debug(f"wrote {rivers_dir / nc_filename}")
