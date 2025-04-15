@@ -41,8 +41,11 @@ def config(base_config):
                 ssh:
                   file template: "ssh_{:y%Ym%md%d}.nc"
                 rivers:
-                  file templates:
-                    b201702: "R201702DFraCElse_{:y%Ym%md%d}.nc"
+                  bathy params:
+                    v202108:  # SalishSeaCast production bathymetry
+                      file template: "R202108Dailies_{:y%Ym%md%d}.nc"
+                    v201702:  # **Required for runoff files used by nowcast-agrif**
+                      file template: "R201702DFraCElse_{:y%Ym%md%d}.nc"
                   turbidity:
                     file template: "riverTurbDaily2_{:y%Ym%md%d}.nc"
 
@@ -450,10 +453,12 @@ class TestMakeRunoffLinks:
         run_prep_dir = tmp_path / host_config["run prep dir"]
         run_prep_dir.mkdir()
         (run_prep_dir / "rivers").mkdir()
-        filename_tmpls = config["rivers"]["file templates"]
+        filename_tmpls = [
+            config["rivers"]["bathy params"][bathy_version]["file template"]
+            for bathy_version in config["rivers"]["bathy params"]
+        ]
         filenames = [
-            tmpl.format(run_date.shift(days=-1).date())
-            for tmpl in filename_tmpls.values()
+            tmpl.format(run_date.shift(days=-1).date()) for tmpl in filename_tmpls
         ]
         for filename in filenames:
             (rivers_dir / filename).write_text("")
@@ -493,9 +498,12 @@ class TestMakeRunoffLinks:
             mock_sftp_client, run_type, run_date, config, host
         )
 
-        filename_tmpls = config["rivers"]["file templates"]
+        filename_tmpls = [
+            config["rivers"]["bathy params"][bathy_version]["file template"]
+            for bathy_version in config["rivers"]["bathy params"]
+        ]
         i = 0
-        for tmpl in filename_tmpls.values():
+        for tmpl in filename_tmpls:
             src_filename = tmpl.format(run_date.shift(days=-1).date())
             for day in range(-1, 3):
                 filename = tmpl.format(run_date.shift(days=day).date())
