@@ -148,7 +148,8 @@ def _make_runoff_links(sftp_client, run_type, run_date, config, host_name):
     host_config = config["run"]["enabled hosts"][host_name]
     run_prep_dir = Path(host_config["run prep dir"])
     _clear_links(sftp_client, run_prep_dir, "rivers")
-    for tmpl in config["rivers"]["file templates"].values():
+    for bathy_version in config["rivers"]["bathy params"]:
+        tmpl = config["rivers"]["bathy params"][bathy_version]["file template"]
         src = Path(
             host_config["forcing"]["rivers dir"],
             tmpl.format(run_date.shift(days=-1).date()),

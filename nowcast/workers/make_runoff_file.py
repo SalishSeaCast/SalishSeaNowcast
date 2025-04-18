@@ -25,6 +25,7 @@ Missing river discharge observations are handled by a scheme of persistence or s
 a nearby gauged river, depending on the time span of missing observations.
 """
 import functools
+import importlib
 import logging
 import os
 import warnings
@@ -37,7 +38,6 @@ import xarray
 from nemo_nowcast import NowcastWorker
 
 from salishsea_tools import rivertools
-from salishsea_tools import river_202108 as rivers
 
 
 NAME = "make_runoff_file"
@@ -45,95 +45,138 @@ logger = logging.getLogger(NAME)
 
 
 # TODO: Ideally these module-level variables should be in the main or a supplemental config file.
-#       They should also be in a better data structure.
-#       We're leaving them here for now because it's "good enough",
-#       and the priority is getting v202111 into production.
-watershed_names = [
-    "bute",
-    "evi_n",
-    "jervis",
-    "evi_s",
-    "howe",
-    "jdf",
-    "skagit",
-    "puget",
-    "toba",
-    "fraser",
-]
-rivers_for_watershed = {
-    "bute": {"primary": "Homathko_Mouth", "secondary": None},
-    "evi_n": {"primary": "Salmon_Sayward", "secondary": None},
-    "jervis": {"primary": "Clowhom_ClowhomLake", "secondary": "RobertsCreek"},
-    "evi_s": {"primary": "Englishman", "secondary": None},
-    "howe": {"primary": "Squamish_Brackendale", "secondary": None},
-    "jdf": {"primary": "SanJuan_PortRenfrew", "secondary": None},
-    "skagit": {"primary": "Skagit_MountVernon", "secondary": "Snohomish_Monroe"},
-    "puget": {"primary": "Nisqually_McKenna", "secondary": "Greenwater_Greenwater"},
-    "toba": {"primary": "Homathko_Mouth", "secondary": "Theodosia"},
-    "fraser": {"primary": "Fraser", "secondary": "Nicomekl_Langley"},
-}
-watershed_from_river = {
-    "bute": {"primary": 2.015},
-    "jervis": {"primary": 8.810, "secondary": 140.3},
-    "howe": {"primary": 2.276},
-    "jdf": {"primary": 8.501},
-    "evi_n": {"primary": 10.334},
-    "evi_s": {"primary": 24.60},
-    "toba": {"primary": 0.4563, "secondary": 14.58},
-    "skagit": {"primary": 1.267, "secondary": 1.236},
-    "puget": {"primary": 8.790, "secondary": 29.09},
-    "fraser": {"primary": 1.161, "secondary": 162, "nico_into_fraser": 0.83565},
+watersheds = {
+    # keys are watershed names
+    "bute": {
+        # primary and secondary rivers in the watershed
+        "rivers": {"primary": "HomathkoMouth", "secondary": None},
+        # flow factors to scale river flows to total watershed flow
+        "flow factors": {"primary": 2.015},
+    },
+    "evi_n": {
+        "rivers": {"primary": "SalmonSayward", "secondary": None},
+        "flow factors": {"primary": 10.334},
+    },
+    "jervis": {
+        "rivers": {"primary": "ClowhomClowhomLake", "secondary": "RobertsCreek"},
+        "flow factors": {"primary": 8.810, "secondary": 140.3},
+    },
+    "evi_s": {
+        "rivers": {"primary": "Englishman", "secondary": None},
+        "flow factors": {"primary": 24.60},
+    },
+    "howe": {
+        "rivers": {"primary": "SquamishBrackendale", "secondary": None},
+        "flow factors": {"primary": 2.276},
+    },
+    "jdf": {
+        "rivers": {"primary": "SanJuanPortRenfrew", "secondary": None},
+        "flow factors": {"primary": 8.501},
+    },
+    "skagit": {
+        "rivers": {"primary": "SkagitMountVernon", "secondary": "SnohomishMonroe"},
+        "flow factors": {"primary": 1.267, "secondary": 1.236},
+    },
+    "puget": {
+        "rivers": {
+            "primary": "NisquallyMcKenna",
+            "secondary": "GreenwaterGreenwater",
+        },
+        "flow factors": {"primary": 8.790, "secondary": 29.09},
+    },
+    "toba": {
+        "rivers": {"primary": "HomathkoMouth", "secondary": "Theodosia"},
+        "flow factors": {"primary": 0.4563, "secondary": 14.58},
+    },
+    "fraser": {
+        "rivers": {"primary": "Fraser", "secondary": "NicomeklLangley"},
+        "flow factors": {
+            "primary": 1.161,
+            "secondary": 162,
+            "nico_into_fraser": 0.83565,
+        },
+    },
 }
 theodosia_from_diversion_only = 1.429  # see Susan's TheodosiaWOScotty notebook
-persist_until = {
-    # number of days to persist last observation for before switching to fitting strategies
-    "Englishman": 0,
-    "Fraser": 10_000,  # always persist
-    "Theodosia": 0,
-    "RobertsCreek": 0,
-    "Salmon_Sayward": 0,
-    "Squamish_Brackendale": 0,
-    "SanJuan_PortRenfrew": 0,
-    "Nisqually_McKenna": 4,
-    "Snohomish_Monroe": 0,
-    "Skagit_MountVernon": 3,
-    "Homathko_Mouth": 1,
-    "Nicomekl_Langley": 0,
-    "Greenwater_Greenwater": 1,
-    "Clowhom_ClowhomLake": 2,
+river_patching = {
+    # keys are the river names from the `rivers.SOG river files` section of the `nowcast.yaml` file
+    "Englishman": {
+        # number of days to persist last observation for before switching to patching strategies
+        "persist until": 0,
+        # patching strategies to use after the persistence period is over
+        "patch strats": ["fit", "persist"],
+        # river to use to calculate flow by fitting from
+        "fit from": "SalmonSayward",
+    },
+    "Fraser": {
+        "persist until": 10_000,  # always persist
+        "patch strats": ["persist"],
+    },
+    "Theodosia": {
+        "persist until": 0,
+        "patch strats": ["fit", "backup", "persist"],
+        "fit from": "ClowhomClowhomLake",
+        # backup river to use to calculate flow by fitting from if flow obs from  "fit from" river
+        # is not available
+        "backup fit from": "Englishman",
+    },
+    "RobertsCreek": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Englishman",
+    },
+    "SalmonSayward": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "Englishman",
+    },
+    "SquamishBrackendale": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "HomathkoMouth",
+    },
+    "SanJuanPortRenfrew": {
+        "persist until": 0,
+        "patch strats": ["fit", "backup", "persist"],
+        "fit from": "Englishman",
+        "backup fit from": "RobertsCreek",
+    },
+    "NisquallyMcKenna": {
+        "persist until": 4,
+        "patch strats": ["fit", "persist"],
+        "fit from": "SnohomishMonroe",
+    },
+    "SnohomishMonroe": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "SkagitMountVernon",
+    },
+    "SkagitMountVernon": {
+        "persist until": 3,
+        "patch strats": ["fit", "persist"],
+        "fit from": "SnohomishMonroe",
+    },
+    "HomathkoMouth": {
+        "persist until": 1,
+        "patch strats": ["fit", "persist"],
+        "fit from": "SquamishBrackendale",
+    },
+    "NicomeklLangley": {
+        "persist until": 0,
+        "patch strats": ["fit", "persist"],
+        "fit from": "RobertsCreek",
+    },
+    "GreenwaterGreenwater": {
+        "persist until": 1,
+        "patch strats": ["fit", "persist"],
+        "fit from": "SnohomishMonroe",
+    },
+    "ClowhomClowhomLake": {
+        "persist until": 2,
+        "patch strats": ["fit", "persist"],
+        "fit from": "TheodosiaDiversion",
+    },
 }
-patching_dictionary = {
-    "Englishman": ["fit", "persist"],
-    "Fraser": ["persist"],
-    "Theodosia": ["fit", "backup", "persist"],
-    "RobertsCreek": ["fit", "persist"],
-    "Salmon_Sayward": ["fit", "persist"],
-    "Squamish_Brackendale": ["fit", "persist"],
-    "SanJuan_PortRenfrew": ["fit", "backup", "persist"],
-    "Nisqually_McKenna": ["fit", "persist"],
-    "Snohomish_Monroe": ["fit", "persist"],
-    "Skagit_MountVernon": ["fit", "persist"],
-    "Homathko_Mouth": ["fit", "persist"],
-    "Nicomekl_Langley": ["fit", "persist"],
-    "Greenwater_Greenwater": ["fit", "persist"],
-    "Clowhom_ClowhomLake": ["fit", "persist"],
-}
-matching_dictionary = {
-    "Englishman": "Salmon_Sayward",
-    "Theodosia": "Clowhom_ClowhomLake",
-    "RobertsCreek": "Englishman",
-    "Salmon_Sayward": "Englishman",
-    "Squamish_Brackendale": "Homathko_Mouth",
-    "SanJuan_PortRenfrew": "Englishman",
-    "Nisqually_McKenna": "Snohomish_Monroe",
-    "Snohomish_Monroe": "Skagit_MountVernon",
-    "Skagit_MountVernon": "Snohomish_Monroe",
-    "Homathko_Mouth": "Squamish_Brackendale",
-    "Nicomekl_Langley": "RobertsCreek",
-    "Greenwater_Greenwater": "Snohomish_Monroe",
-    "Clowhom_ClowhomLake": "Theodosia_Diversion",
-}
-backup_dictionary = {"SanJuan_PortRenfrew": "RobertsCreek", "Theodosia": "Englishman"}
 
 
 def main():
@@ -143,6 +186,11 @@ def main():
     """
     worker = NowcastWorker(NAME, description=__doc__)
     worker.init_cli()
+    worker.cli.add_argument(
+        "bathy_version",
+        choices={"v202108"},
+        help="Bathymetry version to make runoff file for.",
+    )
     worker.cli.add_date_option(
         "--data-date",
         default=arrow.now().floor("day").shift(days=-1),
@@ -167,20 +215,24 @@ def failure(parsed_args):
 
 
 def make_runoff_file(parsed_args, config, *args):
+    bathy_version = parsed_args.bathy_version
+    rivers = importlib.import_module(
+        config["rivers"]["bathy params"][bathy_version]["prop_dict module"]
+    )
     obs_date = parsed_args.data_date
     logger.info(
-        f"calculating NEMO runoff forcing for 202108 bathymetry for {obs_date.format('YYYY-MM-DD')}"
+        f"calculating NEMO runoff forcing for {bathy_version} bathymetry for {obs_date.format('YYYY-MM-DD')}"
     )
     flows = _calc_watershed_flows(obs_date, config)
     grid_cell_areas = _get_grid_cell_areas(config)
-    runoff_array = _create_runoff_array(flows, grid_cell_areas)
-    runoff_ds = _calc_runoff_dataset(obs_date, runoff_array, config)
-    nc_file_path = _write_netcdf(runoff_ds, obs_date, config)
+    runoff_array = _create_runoff_array(rivers, flows, grid_cell_areas)
+    runoff_ds = _calc_runoff_dataset(bathy_version, obs_date, runoff_array, config)
+    nc_file_path = _write_netcdf(runoff_ds, bathy_version, obs_date, config)
     logger.info(
-        f"stored NEMO runoff forcing for 202108 bathymetry for {obs_date.format('YYYY-MM-DD')}: "
+        f"stored NEMO runoff forcing for {bathy_version} bathymetry for {obs_date.format('YYYY-MM-DD')}: "
         f"{nc_file_path}"
     )
-    checklist = {"b202108": os.fspath(nc_file_path)}
+    checklist = {bathy_version: os.fspath(nc_file_path)}
     return checklist
 
 
@@ -193,18 +245,18 @@ def _calc_watershed_flows(obs_date, config):
     """
 
     flows = {}
-    for watershed_name in watershed_names:
+    for watershed_name in watersheds:
         if watershed_name == "fraser":
             flows["fraser"], flows["non_fraser"] = _do_fraser(obs_date, config)
         else:
-            if rivers_for_watershed[watershed_name]["secondary"] is None:
+            if watersheds[watershed_name]["rivers"]["secondary"] is None:
                 logger.debug(f"no secondary river for {watershed_name} watershed")
             flows[watershed_name] = _do_a_river_pair(
                 watershed_name,
                 obs_date,
-                rivers_for_watershed[watershed_name]["primary"],
+                watersheds[watershed_name]["rivers"]["primary"],
                 config,
-                rivers_for_watershed[watershed_name]["secondary"],
+                watersheds[watershed_name]["rivers"]["secondary"],
             )
         logger.debug(
             f"{watershed_name} watershed flow: {flows[watershed_name]:.3f} m3 s-1"
@@ -222,25 +274,25 @@ def _do_fraser(obs_date, config):
     primary_river = _read_river("Fraser", "primary", config)
     primary_flow = _get_river_flow("Fraser", primary_river, obs_date, config)
 
-    secondary_river = _read_river("Nicomekl_Langley", "secondary", config)
+    secondary_river = _read_river("NicomeklLangley", "secondary", config)
     secondary_flow = _get_river_flow(
-        "Nicomekl_Langley", secondary_river, obs_date, config
+        "NicomeklLangley", secondary_river, obs_date, config
     )
 
     fraser_flux = (
         # Fraser at Hope plus its portion that is proxy for glacial runoff dominated rivers
         # (e.g. Harrison) that flow into Fraser below Hope
-        primary_flow * watershed_from_river["fraser"]["primary"]
+        primary_flow * watersheds["fraser"]["flow factors"]["primary"]
         # Proxy for rainfall runoff dominated rivers that flow into Fraser below Hope
         + secondary_flow
-        * watershed_from_river["fraser"]["secondary"]
-        * watershed_from_river["fraser"]["nico_into_fraser"]
+        * watersheds["fraser"]["flow factors"]["secondary"]
+        * watersheds["fraser"]["flow factors"]["nico_into_fraser"]
     )
     secondary_flux = (
         # Proxy for rainfall runoff dominated rivers in the Fraser Basin that flow into SoG
         secondary_flow
-        * watershed_from_river["fraser"]["secondary"]
-        * (1 - watershed_from_river["fraser"]["nico_into_fraser"])
+        * watersheds["fraser"]["flow factors"]["secondary"]
+        * (1 - watersheds["fraser"]["flow factors"]["nico_into_fraser"])
     )
     return fraser_flux, secondary_flux
 
@@ -263,7 +315,9 @@ def _do_a_river_pair(
     """
     primary_river = _read_river(primary_river_name, "primary", config)
     primary_flow = _get_river_flow(primary_river_name, primary_river, obs_date, config)
-    watershed_flow = primary_flow * watershed_from_river[watershed_name]["primary"]
+    watershed_flow = (
+        primary_flow * watersheds[watershed_name]["flow factors"]["primary"]
+    )
     if secondary_river_name is None:
         return watershed_flow
 
@@ -275,7 +329,9 @@ def _do_a_river_pair(
     secondary_flow = _get_river_flow(
         secondary_river_name, secondary_river, obs_date, config
     )
-    watershed_flow += secondary_flow * watershed_from_river[watershed_name]["secondary"]
+    watershed_flow += (
+        secondary_flow * watersheds[watershed_name]["flow factors"]["secondary"]
+    )
     return watershed_flow
 
 
@@ -287,7 +343,7 @@ def _read_river(river_name, ps, config):
 
     :rtype: :py:class:`pandas.Dataframe`
     """
-    filename = Path(config["rivers"]["SOG river files"][river_name.replace("_", "")])
+    filename = Path(config["rivers"]["SOG river files"][river_name])
     with warnings.catch_warnings():
         # ignore ParserWarning until https://github.com/pandas-dev/pandas/issues/49279 is fixed
         warnings.simplefilter("ignore")
@@ -422,7 +478,7 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
         )
 
     gap_length = (obs_date - last_obs_date).days
-    if gap_length <= persist_until[river_name]:
+    if gap_length <= river_patching[river_name]["persist until"]:
         # Handle rivers for which Susan's statistical investigation showed that persistence
         # is better than fitting for short periods of missing observations.
         flux = river_flow.iloc[-1, -1]
@@ -431,8 +487,8 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
         )
         return flux
 
-    for fit_type in patching_dictionary[river_name]:
-        match fit_type:
+    for patch_strategy in river_patching[river_name]["patch strats"]:
+        match patch_strategy:
             case "persist":
                 flux = river_flow.iloc[-1, -1]
                 logger.debug(
@@ -440,16 +496,16 @@ def _patch_missing_obs(river_name, river_flow, obs_date, config):
                 )
                 return flux
             case "fit":
-                fit_from_river_name = matching_dictionary[river_name]
+                fit_from_river_name = river_patching[river_name]["fit from"]
             case "backup":
-                fit_from_river_name = backup_dictionary[river_name]
+                fit_from_river_name = river_patching[river_name]["backup fit from"]
             case _:
                 raise ValueError("typo in fit types list")
         flux = _patch_fitting(
             river_flow, fit_from_river_name, obs_date, gap_length, config
         )
         if not numpy.isnan(flux):
-            if fit_type == "backup":
+            if patch_strategy == "backup":
                 logger.debug(
                     f"patched missing {obs_date_yyyymmdd} {river_name} discharge by fitting from "
                     f"backup river: {fit_from_river_name}"
@@ -518,8 +574,9 @@ def _get_grid_cell_areas(config):
     return grid_cell_areas.to_numpy()
 
 
-def _create_runoff_array(flows, grid_cell_areas):
+def _create_runoff_array(rivers, flows, grid_cell_areas):
     """
+    :param :py:class:`module` rivers:
     :param dict flows:
     :param :py:class:`numpy.ndarray` grid_cell_areas:
 
@@ -531,7 +588,7 @@ def _create_runoff_array(flows, grid_cell_areas):
     runoff_depth = numpy.ones_like(runoff_array)
     runoff_temperature = numpy.empty_like(runoff_array)
 
-    for watershed_name in watershed_names:
+    for watershed_name in watersheds:
         if watershed_name == "fraser":
             fraser_ratio = rivers.prop_dict["fraser"]["Fraser"]["prop"]
             for key in rivers.prop_dict[watershed_name]:
@@ -566,8 +623,9 @@ def _create_runoff_array(flows, grid_cell_areas):
     return runoff_array
 
 
-def _calc_runoff_dataset(obs_date, runoff_array, config):
+def _calc_runoff_dataset(bathy_version, obs_date, runoff_array, config):
     """
+    :param str bathy_version:
     :param :py:class:`arrow.Arrow` obs_date:
     :param :py:class:`numpy.ndarray` runoff_array:
     :param dict config:
@@ -590,6 +648,9 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
             "units": "kg m-2 s-1",
         },
     )
+    prop_dict_module = config["rivers"]["bathy params"][bathy_version][
+        "prop_dict module"
+    ]
     runoff_ds = xarray.Dataset(
         data_vars={"rorunoff": runoff_da},
         coords=coords,
@@ -610,9 +671,7 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
                 f"fits developed by Susan Allen."
             ),
             "development_notebook": "https://github.com/SalishSeaCast/tools/blob/main/I_ForcingFiles/Rivers/ProductionDailyRiverNCfile.ipynb",
-            "rivers_watersheds_proportions": config["rivers"]["prop_dict modules"][
-                "b202108"
-            ],
+            "rivers_watersheds_proportions": prop_dict_module,
             "history": (
                 f"[{arrow.now('local').format('ddd YYYY-MM-DD HH:mm:ss ZZ')}] "
                 f"python -m nowcast.workers.make_runoff_file $NOWCAST_YAML "
@@ -623,9 +682,10 @@ def _calc_runoff_dataset(obs_date, runoff_array, config):
     return runoff_ds
 
 
-def _write_netcdf(runoff_ds, obs_date, config):
+def _write_netcdf(runoff_ds, bathy_version, obs_date, config):
     """
     :param :py:class:`xarray.Dataset` runoff_ds:
+    :param str bathy_version:
     :param :py:class:`arrow.Arrow` obs_date:
     :param dict config:
 
@@ -641,7 +701,7 @@ def _write_netcdf(runoff_ds, obs_date, config):
         {var: {"zlib": True, "complevel": 4} for var in runoff_ds.data_vars}
     )
     rivers_dir = Path(config["rivers"]["rivers dir"])
-    filename_tmpl = config["rivers"]["file templates"]["b202108"]
+    filename_tmpl = config["rivers"]["bathy params"][bathy_version]["file template"]
     nc_filename = filename_tmpl.format(obs_date.date())
     to_netcdf(runoff_ds, encoding, rivers_dir / nc_filename)
     logger.debug(f"wrote {rivers_dir / nc_filename}")

@@ -468,7 +468,7 @@ class TestAfterCollectRiverData:
         assert workers == []
 
 
-class TestAfterMakeV202111RunoffFile:
+class TestAfterMakeRunoffFile:
     """Unit tests for the after_make_runoff_file function."""
 
     @pytest.mark.parametrize("msg_type", ["crash", "failure", "success"])
@@ -562,7 +562,9 @@ class TestAfterMakeSshFiles:
         workers = next_workers.after_make_ssh_files(
             Message("make_ssh_files", msg_type), config, checklist
         )
-        assert workers[0] == NextWorker("nowcast.workers.make_runoff_file")
+        assert workers[0] == NextWorker(
+            "nowcast.workers.make_runoff_file", args=["v202108"]
+        )
 
     @pytest.mark.parametrize("msg_type", ["success nowcast", "success forecast2"])
     def test_success_launch_make_201702_runoff_file(self, msg_type, config, checklist):

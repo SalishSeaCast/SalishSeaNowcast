@@ -39,10 +39,12 @@ def config(base_config):
             textwrap.dedent(
                 """\
                 rivers:
+                  bathy params:
+                    v202108:  # SalishSeaCast production bathymetry
+                      file template: "R202108Dailies_{:y%Ym%md%d}.nc"
+                    v201702:  # **Required for runoff files used by nowcast-agrif**
+                      file template: "R201702DFraCElse_{:y%Ym%md%d}.nc"
                   rivers dir: /results/forcing/rivers/
-                  file templates:
-                    b201702:  "R201702DFraCElse_{:y%Ym%md%d}.nc"
-                    b202108:  "R202108Dailies_{:y%Ym%md%d}.nc"
 
                 temperature salinity:
                     bc dir: /results/forcing/LiveOcean/modified
@@ -204,8 +206,14 @@ class TestConfig:
     )
     def test_river_runoff_uploads(self, host, expected, prod_config):
         rivers = prod_config["rivers"]
-        assert rivers["file templates"]["b201702"] == "R201702DFraCElse_{:y%Ym%md%d}.nc"
-        assert rivers["file templates"]["b202108"] == "R202108Dailies_{:y%Ym%md%d}.nc"
+        assert (
+            rivers["bathy params"]["v201702"]["file template"]
+            == "R201702DFraCElse_{:y%Ym%md%d}.nc"
+        )
+        assert (
+            rivers["bathy params"]["v202108"]["file template"]
+            == "R202108Dailies_{:y%Ym%md%d}.nc"
+        )
         assert rivers["rivers dir"] == "/results/forcing/rivers/"
         host_config = prod_config["run"]["enabled hosts"][host]
         assert host_config["forcing"]["rivers dir"] == expected
@@ -534,9 +542,17 @@ class TestUploadRiverRunoffFiles:
         )
 
         assert caplog.records[0].levelno == logging.CRITICAL
-        assert caplog.messages[0].endswith("R201702DFraCElse_y2024m01d29.nc")
+        expected = (
+            "Rivers runoff forcing file not found; created symlink to "
+            "/results/forcing/rivers/R202108Dailies_y2024m01d29.nc"
+        )
+        assert caplog.messages[0] == expected
         assert caplog.records[1].levelno == logging.CRITICAL
-        assert caplog.messages[1].endswith("R202108Dailies_y2024m01d29.nc")
+        expected = (
+            "Rivers runoff forcing file not found; created symlink to "
+            "/results/forcing/rivers/R201702DFraCElse_y2024m01d29.nc"
+        )
+        assert caplog.messages[1] == expected
 
 
 @patch(
