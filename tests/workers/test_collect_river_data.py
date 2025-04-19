@@ -77,6 +77,7 @@ class TestMain:
 
     def test_instantiate_worker(self, mock_worker):
         worker = collect_river_data.main()
+
         assert worker.name == "collect_river_data"
         assert worker.description.startswith(
             "SalishSeaCast worker that collects river discharge observation data"
@@ -84,18 +85,21 @@ class TestMain:
 
     def test_add_data_source_arg(self, mock_worker):
         worker = collect_river_data.main()
+
         assert worker.cli.parser._actions[3].dest == "data_src"
         assert worker.cli.parser._actions[3].choices == {"ECCC", "USGS"}
         assert worker.cli.parser._actions[3].help
 
     def test_add_river_name_arg(self, mock_worker):
         worker = collect_river_data.main()
+
         assert worker.cli.parser._actions[4].dest == "river_name"
         assert worker.cli.parser._actions[4].default is None
         assert worker.cli.parser._actions[4].help
 
     def test_add_data_date_option(self, mock_worker):
         worker = collect_river_data.main()
+
         assert worker.cli.parser._actions[5].dest == "data_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
         assert worker.cli.parser._actions[5].type == expected
@@ -197,7 +201,9 @@ class TestSuccess:
             data_src="ECCC", river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
         caplog.set_level(logging.INFO)
+
         msg_type = collect_river_data.success(parsed_args)
+
         assert caplog.records[0].levelname == "INFO"
         expected = "ECCC Fraser river data collection for 2018-12-26 completed"
         assert caplog.messages[0] == expected
@@ -212,7 +218,9 @@ class TestFailure:
             data_src="ECCC", river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
         caplog.set_level(logging.CRITICAL)
+
         msg_type = collect_river_data.failure(parsed_args)
+
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             "Calculation of ECCC Fraser river average discharge for 2018-12-26 or "
