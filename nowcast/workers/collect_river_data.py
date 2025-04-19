@@ -21,6 +21,7 @@ an ECCC datamart CSV file mirror, or the USGS Water Service REST service,
 and appends a day-average discharge to a SOG-format forcing file.
 """
 import logging
+import os
 from pathlib import Path
 
 import arrow
@@ -107,7 +108,10 @@ def collect_river_data(parsed_args, config, *args):
     day_avg_discharge = day_avg_discharge_funcs[data_src](river_name, data_date, config)
     daily_avg_file = Path(config["rivers"]["SOG river files"][river_name])
     _store_day_avg_discharge(data_date, day_avg_discharge, daily_avg_file)
-    checklist = {"river name": river_name, "data date": data_date.format("YYYY-MM-DD")}
+    checklist = {
+        river_name: os.fspath(daily_avg_file),
+        "data date": data_date.format("YYYY-MM-DD"),
+    }
     logger.info(
         f"Appended {data_src} {river_name} river average discharge for "
         f"{data_date.format('YYYY-MM-DD')} to: {daily_avg_file}"

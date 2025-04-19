@@ -18,6 +18,7 @@
 
 """Unit tests for SalishSeaCast collect_river_data worker."""
 import logging
+import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -286,7 +287,10 @@ class TestCollectRiverData:
 
         checklist = collect_river_data.collect_river_data(parsed_args, config)
 
-        expected = {"river name": river_name, "data date": "2018-12-26"}
+        expected = {
+            river_name: os.fspath(tmp_path / sog_river_file),
+            "data date": "2018-12-26",
+        }
         assert checklist == expected
 
     def test_log_messages(
