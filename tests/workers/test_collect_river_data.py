@@ -18,6 +18,7 @@
 
 """Unit tests for SalishSeaCast collect_river_data worker."""
 import logging
+import os
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -77,6 +78,7 @@ class TestMain:
 
     def test_instantiate_worker(self, mock_worker):
         worker = collect_river_data.main()
+
         assert worker.name == "collect_river_data"
         assert worker.description.startswith(
             "SalishSeaCast worker that collects river discharge observation data"
@@ -84,18 +86,21 @@ class TestMain:
 
     def test_add_data_source_arg(self, mock_worker):
         worker = collect_river_data.main()
+
         assert worker.cli.parser._actions[3].dest == "data_src"
         assert worker.cli.parser._actions[3].choices == {"ECCC", "USGS"}
         assert worker.cli.parser._actions[3].help
 
     def test_add_river_name_arg(self, mock_worker):
         worker = collect_river_data.main()
+
         assert worker.cli.parser._actions[4].dest == "river_name"
         assert worker.cli.parser._actions[4].default is None
         assert worker.cli.parser._actions[4].help
 
     def test_add_data_date_option(self, mock_worker):
         worker = collect_river_data.main()
+
         assert worker.cli.parser._actions[5].dest == "data_date"
         expected = nemo_nowcast.cli.CommandLineInterface.arrow_date
         assert worker.cli.parser._actions[5].type == expected
@@ -197,7 +202,9 @@ class TestSuccess:
             data_src="ECCC", river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
         caplog.set_level(logging.INFO)
+
         msg_type = collect_river_data.success(parsed_args)
+
         assert caplog.records[0].levelname == "INFO"
         expected = "ECCC Fraser river data collection for 2018-12-26 completed"
         assert caplog.messages[0] == expected
@@ -212,7 +219,9 @@ class TestFailure:
             data_src="ECCC", river_name="Fraser", data_date=arrow.get("2018-12-26")
         )
         caplog.set_level(logging.CRITICAL)
+
         msg_type = collect_river_data.failure(parsed_args)
+
         assert caplog.records[0].levelname == "CRITICAL"
         expected = (
             "Calculation of ECCC Fraser river average discharge for 2018-12-26 or "
@@ -232,39 +241,79 @@ class TestFailure:
 class TestCollectRiverData:
     """Unit test for collect_river_data() function."""
 
-    def test_checklist(
-        self, data_src, river_name, config, caplog, tmp_path, monkeypatch
-    ):
-        def mock_calc_eccc_day_avg_discharge(river_name, data_date, config):
+    @staticmethod
+    @pytest.fixture
+    def mock_calc_eccc_day_avg_discharge(monkeypatch):
+        def _mock_calc_eccc_day_avg_discharge(river_name, data_date, config):
             return 12345.6
 
         monkeypatch.setattr(
             collect_river_data,
             "_calc_eccc_day_avg_discharge",
-            mock_calc_eccc_day_avg_discharge,
+            _mock_calc_eccc_day_avg_discharge,
         )
 
-        def mock_get_usgs_day_avg_discharge(river_name, data_date, config):
+    @staticmethod
+    @pytest.fixture
+    def mock_get_usgs_day_avg_discharge(monkeypatch):
+        def _mock_get_usgs_day_avg_discharge(river_name, data_date, config):
             return 12345.6
 
         monkeypatch.setattr(
             collect_river_data,
             "_get_usgs_day_avg_discharge",
-            mock_get_usgs_day_avg_discharge,
+            _mock_get_usgs_day_avg_discharge,
         )
 
+    def test_checklist(
+        self,
+        mock_calc_eccc_day_avg_discharge,
+        mock_get_usgs_day_avg_discharge,
+        data_src,
+        river_name,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
         sog_river_file = config["rivers"]["SOG river files"][river_name]
         monkeypatch.setitem(
             config["rivers"]["SOG river files"], river_name, tmp_path / sog_river_file
         )
-
         parsed_args = SimpleNamespace(
             data_src=data_src, river_name=river_name, data_date=arrow.get("2018-12-26")
         )
-
         caplog.set_level(logging.DEBUG)
 
         checklist = collect_river_data.collect_river_data(parsed_args, config)
+
+        expected = {
+            river_name: os.fspath(tmp_path / sog_river_file),
+            "data date": "2018-12-26",
+        }
+        assert checklist == expected
+
+    def test_log_messages(
+        self,
+        mock_calc_eccc_day_avg_discharge,
+        mock_get_usgs_day_avg_discharge,
+        data_src,
+        river_name,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
+        sog_river_file = config["rivers"]["SOG river files"][river_name]
+        monkeypatch.setitem(
+            config["rivers"]["SOG river files"], river_name, tmp_path / sog_river_file
+        )
+        parsed_args = SimpleNamespace(
+            data_src=data_src, river_name=river_name, data_date=arrow.get("2018-12-26")
+        )
+        caplog.set_level(logging.DEBUG)
+
+        collect_river_data.collect_river_data(parsed_args, config)
 
         assert caplog.records[0].levelname == "INFO"
         expected = f"Collecting {data_src} {river_name} river data for 2018-12-26"
@@ -275,8 +324,6 @@ class TestCollectRiverData:
             f"{Path(config['rivers']['SOG river files'][river_name])}"
         )
         assert caplog.messages[2] == expected
-        expected = {"river name": river_name, "data date": "2018-12-26"}
-        assert checklist == expected
 
 
 class TestCalcECCC_DayAvgDischarge:
