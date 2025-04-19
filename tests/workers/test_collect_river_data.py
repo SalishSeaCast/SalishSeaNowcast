@@ -240,36 +240,48 @@ class TestFailure:
 class TestCollectRiverData:
     """Unit test for collect_river_data() function."""
 
-    def test_checklist(
-        self, data_src, river_name, config, caplog, tmp_path, monkeypatch
-    ):
-        def mock_calc_eccc_day_avg_discharge(river_name, data_date, config):
+    @staticmethod
+    @pytest.fixture
+    def mock_calc_eccc_day_avg_discharge(monkeypatch):
+        def _mock_calc_eccc_day_avg_discharge(river_name, data_date, config):
             return 12345.6
 
         monkeypatch.setattr(
             collect_river_data,
             "_calc_eccc_day_avg_discharge",
-            mock_calc_eccc_day_avg_discharge,
+            _mock_calc_eccc_day_avg_discharge,
         )
 
-        def mock_get_usgs_day_avg_discharge(river_name, data_date, config):
+    @staticmethod
+    @pytest.fixture
+    def mock_get_usgs_day_avg_discharge(monkeypatch):
+        def _mock_get_usgs_day_avg_discharge(river_name, data_date, config):
             return 12345.6
 
         monkeypatch.setattr(
             collect_river_data,
             "_get_usgs_day_avg_discharge",
-            mock_get_usgs_day_avg_discharge,
+            _mock_get_usgs_day_avg_discharge,
         )
 
+    def test_checklist(
+        self,
+        mock_calc_eccc_day_avg_discharge,
+        mock_get_usgs_day_avg_discharge,
+        data_src,
+        river_name,
+        config,
+        caplog,
+        tmp_path,
+        monkeypatch,
+    ):
         sog_river_file = config["rivers"]["SOG river files"][river_name]
         monkeypatch.setitem(
             config["rivers"]["SOG river files"], river_name, tmp_path / sog_river_file
         )
-
         parsed_args = SimpleNamespace(
             data_src=data_src, river_name=river_name, data_date=arrow.get("2018-12-26")
         )
-
         caplog.set_level(logging.DEBUG)
 
         checklist = collect_river_data.collect_river_data(parsed_args, config)
