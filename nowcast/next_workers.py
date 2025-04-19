@@ -1560,13 +1560,12 @@ def after_update_forecast_datasets(msg, config, checklist):
         "success wwatch3 forecast2": [],
     }
     if msg.type.startswith("success"):
-        model = msg.type.split()[1]
-        run_type = msg.type.split()[2]
-        run_date = checklist[f"{model.upper()} run"][run_type]["run date"]
+        _, model, run_type = msg.type.split()
         next_workers[msg.type].append(
             NextWorker("nowcast.workers.ping_erddap", args=[f"{model}-forecast"])
         )
         if model == "nemo":
+            run_date = checklist[f"{model.upper()} run"][run_type]["run date"]
             next_workers[msg.type].extend(
                 [
                     NextWorker(
