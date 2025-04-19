@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """SalishSeaCast worker that collects river discharge observation data from
 an ECCC datamart CSV file mirror, or the USGS Water Service REST service,
 and appends a day-average discharge to a SOG-format forcing file.
