@@ -84,7 +84,6 @@ def make_201702_runoff_file(parsed_args, config, *args):
     # Get Fraser Watershed Climatology without Fraser
     otherratio, fraserratio, nonFraser, afterHope = _fraser_climatology(config)
 
-    checklist = {}
     bathy_version = "v201702"
     logger.info(f"calculating runoff forcing for b201702 bathymetry")
     # Get climatology
@@ -114,7 +113,7 @@ def make_201702_runoff_file(parsed_args, config, *args):
         directory,
         filename_tmpls,
     )
-    checklist[bathy_version] = os.fspath(filepath)
+    checklist = {bathy_version: os.fspath(filepath)}
     return checklist
 
 
@@ -225,7 +224,7 @@ def _combine_runoff(
     driverflow,
     area,
     directory,
-    filename_tmpls,
+    filename_tmpl,
 ):
     """
     :param :py:class:`pathlib.Path` directory:
@@ -244,7 +243,7 @@ def _combine_runoff(
         area,
     )
     # set up filename to follow NEMO conventions
-    filepath = directory / filename_tmpls.format(yesterday.date())
+    filepath = directory / filename_tmpl.format(yesterday.date())
     _write_file(filepath, yesterday, runoff)
     logger.debug(f"wrote file to {filepath}")
     return filepath

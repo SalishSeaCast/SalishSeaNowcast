@@ -1101,7 +1101,7 @@ message registry:
       crash: collect_river_data worker crashed
 
     make_201702_runoff_file:
-      checklist key: v201702 rivers forcing
+      checklist key: rivers forcing
       success: v201702 rivers forcing ready
       failure: v201702 rivers forcing file preparation failed
       crash: make_201702_runoff_file worker crashed
