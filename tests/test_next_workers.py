@@ -2355,15 +2355,33 @@ class TestAfterPingERDDAP:
         monkeypatch.setitem(
             checklist, "WWATCH3 run", {run_type: {"run date": run_date}}
         )
-        workers = next_workers.after_ping_erddap(
+
+        next_workers_ = next_workers.after_ping_erddap(
             Message("ping_erddap", f"success wwatch3-forecast"), config, checklist
         )
+
         expected = NextWorker(
             "nowcast.workers.make_plots",
             args=["wwatch3", run_type, "publish", "--run-date", run_date],
             host="localhost",
         )
-        assert expected in workers
+        assert next_workers_[0] == expected
+
+    def test_success_forecast2_no_wwatch3_run_in_checklist(
+        self, config, checklist, monkeypatch
+    ):
+        monkeypatch.setitem(checklist, "ERDDAP flag files", {"wwatch3 - forecast2": []})
+
+        next_workers_ = next_workers.after_ping_erddap(
+            Message("ping_erddap", f"success wwatch3-forecast"), config, checklist
+        )
+
+        expected = NextWorker(
+            "nowcast.workers.make_plots",
+            args=["wwatch3", "forecast2", "publish"],
+            host="localhost",
+        )
+        assert next_workers_[0] == expected
 
 
 class TestAfterMakePlots:

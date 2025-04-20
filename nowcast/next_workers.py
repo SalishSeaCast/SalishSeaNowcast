@@ -1621,13 +1621,23 @@ def after_ping_erddap(msg, config, checklist):
         "failure wwatch3-forecast": [],
     }
     if msg.type == "success wwatch3-forecast":
-        run_types = checklist["WWATCH3 run"].keys()
-        run_type = "forecast2" if "forecast2" in run_types else "forecast"
-        run_date = checklist["WWATCH3 run"][run_type]["run date"]
+        try:
+            run_types = checklist["WWATCH3 run"].keys()
+            run_type = "forecast2" if "forecast2" in run_types else "forecast"
+            run_date = checklist["WWATCH3 run"][run_type]["run date"]
+        except KeyError:
+            # Handling for the occasional occurrence of missing "WWATCH3 run" item in checklist
+            # due to checklist being cleared before ping_erddap is launched
+            run_type = "forecast2"
+            run_date = None
         next_workers[msg.type].append(
             NextWorker(
                 "nowcast.workers.make_plots",
                 args=["wwatch3", run_type, "publish", "--run-date", run_date],
+            )
+            if run_date is not None
+            else NextWorker(
+                "nowcast.workers.make_plots", args=["wwatch3", "forecast2", "publish"]
             )
         )
     return next_workers[msg.type]
