@@ -486,7 +486,7 @@ class _SqueueHindcastJob:
             cmd, f"{self.run_id} on {self.host_name}: cancelled {self.job_id}"
         )
         if len(error_lines) != 1:
-            # More than 1 "E R R O R" line mean the run failed irrevocably
+            # More than 1 "E R R O R" line means the run failed irrevocably
             return False
         # Exactly 1 "E R R O R" line means the run is "stuck" and it can be re-queued
         self._handle_stuck_job()

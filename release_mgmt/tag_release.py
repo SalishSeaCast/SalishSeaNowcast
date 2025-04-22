@@ -131,9 +131,9 @@ def _tag_repo(repo, tag):
                 message=f"Tag production release {tag}.",
                 user=f"{COMMIT_AUTHOR} for {username}",
             )
-        logger.success(f"added {tag} to repo: {repo}")
+        logger.info(f"added {tag} to repo: {repo}")
         hg.push()
-        logger.success(f"pushed {tag} tag to Bitbucket from repo: {repo}")
+        logger.info(f"pushed {tag} tag to Bitbucket from repo: {repo}")
 
 
 if __name__ == "__main__":

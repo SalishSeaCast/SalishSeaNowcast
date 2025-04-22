@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast run_NEMO worker."""
+import logging
 import subprocess
 import textwrap
 from pathlib import Path
@@ -230,36 +231,44 @@ class TestMain:
 @pytest.mark.parametrize(
     "run_type", ["nowcast", "nowcast-green", "forecast", "forecast2"]
 )
-@patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, run_type):
+    def test_success(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             run_type=run_type,
             run_date=arrow.get("2015-12-28"),
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = run_NEMO.success(parsed_args)
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{run_type} NEMO run for 2015-12-28 on arbutus.cloud started"
+        assert caplog.records[0].message == expected
         assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize(
     "run_type", ["nowcast", "nowcast-green", "forecast", "forecast2"]
 )
-@patch("nowcast.workers.run_NEMO.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type):
+    def test_failure(self, run_type, caplog):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
             run_type=run_type,
             run_date=arrow.get("2015-12-28"),
         )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = run_NEMO.failure(parsed_args)
-        assert m_logger.critical.called
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"{run_type} NEMO run for 2015-12-28 on arbutus.cloud failed"
+        assert caplog.records[0].message == expected
         assert msg_type == f"failure {run_type}"
 
 
@@ -379,7 +388,7 @@ class TestGetNamelistValue:
 class TestRunDescription:
     """Unit tests for _run_description() function."""
 
-    def test_config_missing_results_dir(self, config):
+    def test_config_missing_results_dir(self, config, caplog):
         run_date = arrow.get("2015-12-30")
         dmy = run_date.format("DDMMMYY").lower()
         run_id = "{dmy}{run_type}".format(dmy=dmy, run_type="nowcast")
@@ -389,12 +398,20 @@ class TestRunDescription:
             {"run sets dir": "foo", "mpi decomposition": "11x18"},
             clear=True,
         )
+        caplog.set_level(logging.DEBUG)
+
         with p_config:
-            with patch("nowcast.workers.run_NEMO.logger", autospec=True):
-                with pytest.raises(run_NEMO.WorkerError):
-                    run_NEMO._run_description(
-                        run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
-                    )
+            with pytest.raises(run_NEMO.WorkerError):
+                run_NEMO._run_description(
+                    run_date, "nowcast", run_id, 2160, "arbutus.cloud", config
+                )
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
+            f"no results directory to get nowcast restart file from "
+            f"in arbutus.cloud run config"
+        )
+        assert caplog.records[0].message == expected
 
     @pytest.mark.parametrize(
         "host_name, run_type, expected",
@@ -1189,7 +1206,6 @@ class TestExecute:
             assert script[i].strip() == line.strip()
 
 
-@patch("nowcast.workers.run_NEMO.logger", autospec=True)
 @patch("nowcast.workers.run_NEMO.subprocess.Popen", autospec=True)
 @patch("nowcast.workers.run_NEMO.subprocess.run", autospec=True)
 class TestLaunchRun:
@@ -1205,9 +1221,12 @@ class TestLaunchRun:
         ],
     )
     def test_bash_launch_run_script(
-        self, m_run, m_popen, m_logger, run_type, host, config
+        self, m_run, m_popen, run_type, host, config, caplog
     ):
+        caplog.set_level(logging.DEBUG)
+
         run_NEMO._launch_run_script(run_type, "SalishSeaNEMO.sh", host, config)
+
         m_popen.assert_called_once_with(["bash", "SalishSeaNEMO.sh"])
 
     @pytest.mark.parametrize(
@@ -1220,9 +1239,12 @@ class TestLaunchRun:
         ],
     )
     def test_find_bash_run_process_pid(
-        self, m_run, m_popen, m_logger, run_type, host, config
+        self, m_run, m_popen, run_type, host, config, caplog
     ):
+        caplog.set_level(logging.DEBUG)
+
         run_NEMO._launch_run_script(run_type, "SalishSeaNEMO.sh", host, config)
+
         m_run.assert_called_once_with(
             ["pgrep", "--newest", "--exact", "--full", "bash SalishSeaNEMO.sh"],
             stdout=subprocess.PIPE,
@@ -1239,10 +1261,13 @@ class TestLaunchRun:
             ("forecast2", "arbutus.cloud"),
         ],
     )
-    def test_bash_run(self, m_run, m_popen, m_logger, run_type, host, config):
+    def test_bash_run(self, m_run, m_popen, run_type, host, config, caplog):
         m_run.return_value = SimpleNamespace(stdout="4444")
+        caplog.set_level(logging.DEBUG)
+
         run_exec_cmd, run_id = run_NEMO._launch_run_script(
             run_type, "SalishSeaNEMO.sh", host, config
         )
+
         assert run_exec_cmd == "bash SalishSeaNEMO.sh"
         assert run_id is None

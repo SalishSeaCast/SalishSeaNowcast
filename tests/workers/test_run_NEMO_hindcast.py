@@ -162,7 +162,7 @@ class TestSuccess:
         assert caplog.records[0].levelname == "INFO"
         expected = f"NEMO hindcast run queued on {host_name}"
         assert caplog.records[0].message == expected
-        assert msg_type == f"success"
+        assert msg_type == "success"
 
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
@@ -178,7 +178,7 @@ class TestFailure:
         assert caplog.records[0].levelname == "CRITICAL"
         expected = f"NEMO hindcast run failed to queue on {host_name}"
         assert caplog.records[0].message == expected
-        assert msg_type == f"failure"
+        assert msg_type == "failure"
 
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))

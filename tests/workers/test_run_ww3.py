@@ -201,7 +201,6 @@ class TestFailure:
         assert msg_type == f"failure {run_type}"
 
 
-@patch("nowcast.workers.run_ww3.logger", autospec=True)
 class TestRunWW3:
     """Unit tests for run_ww3() function."""
 
@@ -218,9 +217,9 @@ class TestRunWW3:
         m_launch_run,
         m_write_run_script,
         m_create_tmp_run_dir,
-        m_logger,
         run_type,
         config,
+        caplog,
     ):
         parsed_args = SimpleNamespace(
             host_name="arbutus.cloud",
@@ -230,8 +229,10 @@ class TestRunWW3:
         m_create_tmp_run_dir.return_value = Path(
             "/wwatch3-runs/a1e00274-11a3-11e7-ad44-80fa5b174bd6"
         )
+        caplog.set_level(logging.DEBUG)
 
         checklist = run_ww3.run_ww3(parsed_args, config)
+
         expected = {
             run_type: {
                 "host": "arbutus.cloud",
@@ -647,18 +648,23 @@ class TestCleanup:
 
 
 @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
-@patch("nowcast.workers.run_ww3.logger", autospec=True)
 @patch("nowcast.workers.run_ww3.subprocess.Popen", autospec=True)
 @patch("nowcast.workers.run_ww3.subprocess.run", autospec=True)
 class TestLaunchRun:
     """Unit tests for _launch_run() function."""
 
-    def test_launch_run(self, m_run, m_popen, m_logger, run_type):
+    def test_launch_run(self, m_run, m_popen, run_type, caplog):
+        caplog.set_level(logging.DEBUG)
+
         run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "arbutus.cloud")
+
         m_popen.assert_called_once_with(["bash", "SoGWW3.sh"])
 
-    def test_find_run_process_pid(self, m_run, m_popen, m_logger, run_type):
+    def test_find_run_process_pid(self, m_run, m_popen, run_type, caplog):
+        caplog.set_level(logging.DEBUG)
+
         run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "arbutus.cloud")
+
         m_run.assert_called_once_with(
             ["pgrep", "--newest", "--exact", "--full", "bash SoGWW3.sh"],
             stdout=subprocess.PIPE,
@@ -666,7 +672,10 @@ class TestLaunchRun:
             universal_newlines=True,
         )
 
-    def test_run_exec_cmd(self, m_run, m_popen, m_logger, run_type):
+    def test_run_exec_cmd(self, m_run, m_popen, run_type, caplog):
         m_run.return_value = SimpleNamespace(stdout=43)
+        caplog.set_level(logging.DEBUG)
+
         run_exec_cmd = run_ww3._launch_run(run_type, Path("SoGWW3.sh"), "arbutus.cloud")
+
         assert run_exec_cmd == "bash SoGWW3.sh"

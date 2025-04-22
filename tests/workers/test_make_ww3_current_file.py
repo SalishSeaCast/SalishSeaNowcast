@@ -403,7 +403,7 @@ class TestCalcNowcastDatasets:
         run_date = arrow.get("2023-03-16")
         nemo_dir = Path("/nemoShare/MEOPAR/SalishSea/")
         nemo_file_tmpl = "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc"
-        caplog.set_level("DEBUG")
+        caplog.set_level(logging.DEBUG)
 
         datasets = make_ww3_current_file._calc_nowcast_datasets(
             run_date, nemo_dir, nemo_file_tmpl
@@ -437,7 +437,7 @@ class TestCalcForecastDatasets:
         run_date = arrow.get("2023-03-16")
         nemo_dir = Path("/nemoShare/MEOPAR/SalishSea/")
         nemo_file_tmpl = "SalishSea_1h_{s_yyyymmdd}_{e_yyyymmdd}_grid_{grid}.nc"
-        caplog.set_level("DEBUG")
+        caplog.set_level(logging.DEBUG)
 
         datasets = make_ww3_current_file._calc_forecast_datasets(
             run_date, nemo_dir, nemo_file_tmpl
