@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast watch_NEMO_hindcast worker."""
+import logging
 import textwrap
 from pathlib import Path
 from types import SimpleNamespace
@@ -107,30 +108,37 @@ class TestConfig:
 
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
-@patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestSuccess:
     """Unit test for success() function."""
 
-    def test_success(self, m_logger, host_name):
+    def test_success(self, host_name, caplog):
         parsed_args = SimpleNamespace(host_name=host_name)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = watch_NEMO_hindcast.success(parsed_args)
-        assert m_logger.info.called
-        assert msg_type == f"success"
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"NEMO hindcast run on {host_name} watcher terminated"
+        assert caplog.records[0].message == expected
+        assert msg_type == "success"
 
 
 @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
-@patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestFailure:
     """Unit test for failure() function."""
 
-    def test_failure(self, m_logger, host_name):
+    def test_failure(self, host_name, caplog):
         parsed_args = SimpleNamespace(host_name=host_name)
+        caplog.set_level(logging.DEBUG)
+
         msg_type = watch_NEMO_hindcast.failure(parsed_args)
-        assert m_logger.critical.called
-        assert msg_type == f"failure"
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = f"NEMO hindcast run on {host_name} watcher failed"
+        assert caplog.records[0].message == expected
+        assert msg_type == "failure"
 
 
-@patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 @patch(
     "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.sftp",
     return_value=(Mock(name="ssh_client"), Mock(name="sftp_client")),
@@ -140,7 +148,7 @@ class TestWatchNEMO_Hindcast:
     """Unit test for watch_NEMO_hindcast() function."""
 
     @patch("nowcast.workers.watch_NEMO_hindcast._SqueueHindcastJob", spec=True)
-    def test_squeue_run_completed(self, m_job, m_sftp, m_logger, config):
+    def test_squeue_run_completed(self, m_job, m_sftp, config, caplog):
         parsed_args = SimpleNamespace(host_name="graham", run_id=None)
         m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "9813234", "01jul18hindcast"
@@ -148,7 +156,10 @@ class TestWatchNEMO_Hindcast:
         m_job().tmp_run_dir = Path("tmp_run_dir")
         m_job().is_running.return_value = False
         m_job().get_completion_state.return_value = "completed"
+        caplog.set_level(logging.DEBUG)
+
         checklist = watch_NEMO_hindcast.watch_NEMO_hindcast(parsed_args, config)
+
         expected = {
             "hindcast": {
                 "host": parsed_args.host_name,
@@ -162,7 +173,7 @@ class TestWatchNEMO_Hindcast:
         assert checklist == expected
 
     @patch("nowcast.workers.watch_NEMO_hindcast._QstatHindcastJob", spec=True)
-    def test_qstat_run_completed(self, m_job, m_sftp, m_logger, config):
+    def test_qstat_run_completed(self, m_job, m_sftp, config, caplog):
         parsed_args = SimpleNamespace(host_name="optimum", run_id=None)
         m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "62990.admin", "01jul18hindcast"
@@ -170,7 +181,10 @@ class TestWatchNEMO_Hindcast:
         m_job().tmp_run_dir = Path("tmp_run_dir")
         m_job().is_running.return_value = False
         m_job().get_completion_state.return_value = "completed"
+        caplog.set_level(logging.DEBUG)
+
         checklist = watch_NEMO_hindcast.watch_NEMO_hindcast(parsed_args, config)
+
         expected = {
             "hindcast": {
                 "host": parsed_args.host_name,
@@ -186,7 +200,7 @@ class TestWatchNEMO_Hindcast:
     @pytest.mark.parametrize("completion_state", ["cancelled", "aborted"])
     @patch("nowcast.workers.watch_NEMO_hindcast._SqueueHindcastJob", spec=True)
     def test_run_cancelled_or_aborted(
-        self, m_job, m_sftp, m_logger, completion_state, config
+        self, m_job, m_sftp, completion_state, config, caplog
     ):
         parsed_args = SimpleNamespace(host_name="graham", run_id=None)
         m_job().host_name = parsed_args.host_name
@@ -195,15 +209,16 @@ class TestWatchNEMO_Hindcast:
         m_job().tmp_run_dir = Path("tmp_run_dir")
         m_job().is_running.return_value = False
         m_job().get_completion_state.return_value = completion_state
+        caplog.set_level(logging.DEBUG)
+
         with pytest.raises(nemo_nowcast.WorkerError):
             watch_NEMO_hindcast.watch_NEMO_hindcast(parsed_args, config)
 
 
-@patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestQstatHindcastJob:
     """Unit tests for _SqueueHindcastJob class."""
 
-    def test_get_run_id(self, m_logger, config):
+    def test_get_run_id(self, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -217,31 +232,44 @@ class TestQstatHindcastJob:
                 "62991.admin.default.do dlatorne mpi 01jan13hindcast 22390 14 280 -- 06:00:00 R 00:20:53"
             ),
         )
+        caplog.set_level(logging.DEBUG)
+
         job.get_run_id()
+
         assert job.job_id == "62991.admin"
         assert job.run_id == "01jan13hindcast"
-        assert m_logger.info.called
+        assert caplog.records[0].levelname == "INFO"
+        expected = "watching 01jan13hindcast job 62991.admin on optimum"
+        assert caplog.records[0].message == expected
 
-    def test_is_queued_job_not_found(self, m_logger, config):
+    def test_is_queued_job_not_found(self, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "optimum",
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+            run_id="01jan13hindcast",
+            job_id="62991.admin",
         )
         job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
+        caplog.set_level(logging.DEBUG)
+
         with pytest.raises(nemo_nowcast.WorkerError):
             job.is_queued()
-        assert m_logger.error.called
+        assert caplog.records[0].levelname == "ERROR"
+        expected = "01jan13hindcast job 62991.admin not found on optimum queue"
+        assert caplog.records[0].message == expected
 
-    def test_is_queued(self, m_logger, config):
+    def test_is_queued(self, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "optimum",
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+            run_id="01jan13hindcast",
+            job_id="62991.admin",
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
@@ -249,10 +277,14 @@ class TestQstatHindcastJob:
                 "62991.admin.default.do dlatorne mpi 01jan13hindcast 22390 14 280 -- 06:00:00 Q 00:20:53"
             ),
         )
-        assert job.is_queued()
-        assert m_logger.info.called
+        caplog.set_level(logging.DEBUG)
 
-    def test_get_tmp_run_dir(self, m_logger, config):
+        assert job.is_queued()
+        assert caplog.records[0].levelname == "INFO"
+        expected = "01jan13hindcast job 62991.admin is queued"
+        assert caplog.records[0].message == expected
+
+    def test_get_tmp_run_dir(self, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -265,20 +297,26 @@ class TestQstatHindcastJob:
             name="_ssh_exec_command",
             return_value="/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700",
         )
+        caplog.set_level(logging.DEBUG)
+
         job.get_tmp_run_dir()
+
         assert job.tmp_run_dir == Path(
             "/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700"
         )
-        assert m_logger.debug.called
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = "found tmp run dir: optimum:/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700"
+        assert caplog.records[0].message == expected
 
     @patch("nowcast.workers.watch_NEMO_hindcast.f90nml.read", autospec=True)
-    def test_get_run_info(self, m_f90nml_read, m_logger, config):
+    def test_get_run_info(self, m_f90nml_read, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "optimum",
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+            run_id="01jan13hindcast",
         )
         job.tmp_run_dir = Path(
             "/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700"
@@ -287,14 +325,22 @@ class TestQstatHindcastJob:
             "namrun": {"nn_it000": 1, "nn_itend": 2160, "nn_date0": "20130101"},
             "namdom": {"rn_rdt": 40.0},
         }
+        caplog.set_level(logging.DEBUG)
+
         job.get_run_info()
+
         assert job.it000 == 1
         assert job.itend == 2160
         assert job.date0 == arrow.get("2013-01-01")
         assert job.rdt == 40.0
-        assert m_logger.debug.call_count == 2
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"downloaded {job.host_name}:{job.tmp_run_dir}/namelist_cfg"
+        assert caplog.records[0].message == expected
+        assert caplog.records[1].levelname == "DEBUG"
+        expected = f"{job.run_id} on {job.host_name}: it000=1, itend=2160, date0=2013-01-01T00:00:00+00:00, rdt=40.0"
+        assert caplog.records[1].message == expected
 
-    def test_is_running_not_running(self, m_logger, config):
+    def test_is_running_not_running(self, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -303,6 +349,8 @@ class TestQstatHindcastJob:
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="UNKNOWN")
+        caplog.set_level(logging.DEBUG)
+
         assert not job.is_running()
 
     @patch(
@@ -310,17 +358,23 @@ class TestQstatHindcastJob:
         side_effect=nowcast.ssh_sftp.SSHCommandError("cmd", "stdout", "stderr"),
         autospec=True,
     )
-    def test_is_running_no_time_step_file(self, m_ssh_exec_cmd, m_logger, config):
+    def test_is_running_no_time_step_file(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "optimum",
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+            run_id="01jan13hindcast",
         )
+        caplog.set_level(logging.DEBUG)
+
         job._get_job_state = Mock(name="_get_job_state", return_value="R")
+
         assert job.is_running()
-        assert m_logger.info.called
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{job.run_id} on {job.host_name}: time.step not found; continuing to watch..."
+        assert caplog.records[0].message == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
@@ -330,18 +384,23 @@ class TestQstatHindcastJob:
         ],
         autospec=True,
     )
-    def test_is_running_no_ocean_output(self, m_ssh_exec_cmd, m_logger, config):
+    def test_is_running_no_ocean_output(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "optimum",
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+            run_id="01jan13hindcast",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="R")
         job._report_progress = Mock(name="_report_progress")
+        caplog.set_level(logging.DEBUG)
+
         assert not job.is_running()
-        assert m_logger.error.called
+        assert caplog.records[0].levelname == "ERROR"
+        expected = f"{job.run_id} on {job.host_name}: ocean.output not found"
+        assert caplog.records[0].message == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
@@ -349,7 +408,7 @@ class TestQstatHindcastJob:
         autospec=True,
     )
     def test_is_running_ocean_output_errors_cancel_run(
-        self, m_ssh_exec_cmd, m_logger, config
+        self, m_ssh_exec_cmd, config, caplog
     ):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
@@ -357,12 +416,17 @@ class TestQstatHindcastJob:
             "optimum",
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+            run_id="01jan13hindcast",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="R")
         job._report_progress = Mock(name="_report_progress")
         job._ssh_exec_command = Mock(name="_ssh_exec_command")
+        caplog.set_level(logging.DEBUG)
+
         assert not job.is_running()
-        assert m_logger.error.called
+        assert caplog.records[0].levelname == "ERROR"
+        expected = f"{job.run_id} on {job.host_name}: found 2 'E R R O R' line(s) in ocean.output"
+        assert caplog.records[0].message == expected
         job._ssh_exec_command.assert_called_once_with(
             f"/usr/bin/qdel {job.job_id}",
             f"{job.run_id} on {job.host_name}: cancelled {job.job_id}",
@@ -373,33 +437,43 @@ class TestQstatHindcastJob:
         side_effect=["1\n", ""],
         autospec=True,
     )
-    def test_is_running(self, m_ssh_exec_cmd, m_logger, config):
+    def test_is_running(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedoptimumar",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="01jan13hindcast",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="R")
         job._report_progress = Mock(name="_report_progress")
+        caplog.set_level(logging.DEBUG)
+
         assert job.is_running()
 
     @pytest.mark.parametrize("exception", [nemo_nowcast.WorkerError, AttributeError])
-    def test_get_job_state_unknown(self, m_logger, exception, config):
+    def test_get_job_state_unknown(self, exception, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "optimum",
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
+            run_id="01jan13hindcast",
+            job_id="62991.admin",
         )
         job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
+        caplog.set_level(logging.DEBUG)
+
         state = job._get_job_state()
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{job.run_id} job {job.job_id} not found on {job.host_name} queue"
+        assert caplog.records[0].message == expected
         assert state == "UNKNOWN"
 
-    def test_get_job_state_running(self, m_logger, config):
+    def test_get_job_state_running(self, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -413,10 +487,13 @@ class TestQstatHindcastJob:
                 "62991.admin.default.do dlatorne mpi 01jan13hindcast 22390 14 280 -- 06:00:00 R 00:20:53"
             ),
         )
+        caplog.set_level(logging.DEBUG)
+
         state = job._get_job_state()
+
         assert state == "R"
 
-    def test_report_progress(self, m_logger, config):
+    def test_report_progress(self, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -429,18 +506,23 @@ class TestQstatHindcastJob:
         job.itend = 43200
         job.date0 = arrow.get("2013-01-11")
         job.rdt = 40.0
+        caplog.set_level(logging.DEBUG)
+
         job._report_progress("29697\n")
-        m_logger.info.assert_called_once_with(
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
             f"11jan13hindcast on {job.host_name}: timestep: "
             f"29697 = 2013-01-14 17:57:20 UTC, 37.5% complete"
         )
+        assert caplog.records[0].message == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
         return_value="/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700",
         autospec=True,
     )
-    def test_ssh_exec_command(self, m_ssh_exec_cmd, m_logger, config):
+    def test_ssh_exec_command(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -448,16 +530,18 @@ class TestQstatHindcastJob:
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
         )
+        caplog.set_level(logging.DEBUG)
+
         stdout = job._ssh_exec_command(f"ls -dtr {job.scratch_dir}/*hindcast*")
-        assert (
-            stdout == "/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700"
-        )
-        assert not m_logger.info.called
+
+        assert len(caplog.records) == 0
+        expected = "/scratch/hindcast/01jan13hindcast_2019-07-06T122741.810587-0700"
+        assert stdout == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
     )
-    def test_get_queue_info_no_job_id_no_jobs(self, m_ssh_exec_cmd, m_logger, config):
+    def test_get_queue_info_no_job_id_no_jobs(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -466,13 +550,18 @@ class TestQstatHindcastJob:
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
         )
         m_ssh_exec_cmd.return_value = ""
+        caplog.set_level(logging.DEBUG)
+
         with pytest.raises(nemo_nowcast.WorkerError):
             job._get_queue_info()
+        assert caplog.records[0].levelname == "ERROR"
+        expected = f"no jobs found on {job.host_name} queue"
+        assert caplog.records[0].message == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
     )
-    def test_get_queue_info_job_id_no_jobs(self, m_ssh_exec_cmd, m_logger, config):
+    def test_get_queue_info_job_id_no_jobs(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -482,13 +571,16 @@ class TestQstatHindcastJob:
         )
         job.job_id = "62991.admin"
         m_ssh_exec_cmd.return_value = ""
+        caplog.set_level(logging.DEBUG)
+
         queue_info = job._get_queue_info()
+
         assert queue_info is None
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
     )
-    def test_get_queue_info_run_id(self, m_ssh_exec_cmd, m_logger, config):
+    def test_get_queue_info_run_id(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -507,17 +599,18 @@ class TestQstatHindcastJob:
             62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53
             """
         )
+        caplog.set_level(logging.DEBUG)
+
         queue_info = job._get_queue_info()
-        assert (
-            queue_info
-            == "62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53"
-        )
+
+        expected = "62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53"
+        assert queue_info == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
     )
     def test_get_queue_info_run_id_ignore_completed(
-        self, m_ssh_exec_cmd, m_logger, config
+        self, m_ssh_exec_cmd, config, caplog
     ):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
@@ -538,16 +631,17 @@ class TestQstatHindcastJob:
             62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53
             """
         )
+        caplog.set_level(logging.DEBUG)
+
         queue_info = job._get_queue_info()
-        assert (
-            queue_info
-            == "62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53"
-        )
+
+        expected = "62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53"
+        assert queue_info == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
     )
-    def test_get_queue_info_no_run_id(self, m_ssh_exec_cmd, m_logger, config):
+    def test_get_queue_info_no_run_id(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -565,17 +659,18 @@ class TestQstatHindcastJob:
             62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53
             """
         )
+        caplog.set_level(logging.DEBUG)
+
         queue_info = job._get_queue_info()
-        assert (
-            queue_info
-            == "62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53"
-        )
+
+        expected = "62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53"
+        assert queue_info == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True
     )
     def test_get_queue_info_no_run_id_ignore_completed(
-        self, m_ssh_exec_cmd, m_logger, config
+        self, m_ssh_exec_cmd, config, caplog
     ):
         job = watch_NEMO_hindcast._QstatHindcastJob(
             Mock(name="ssh_client"),
@@ -595,18 +690,18 @@ class TestQstatHindcastJob:
             62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53
             """
         )
+        caplog.set_level(logging.DEBUG)
+
         queue_info = job._get_queue_info()
-        assert (
-            queue_info
-            == "62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53"
-        )
+
+        expected = "62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53"
+        assert queue_info == expected
 
 
-@patch("nowcast.workers.watch_NEMO_hindcast.logger", autospec=True)
 class TestSqueueHindcastJob:
     """Unit tests for _SqueueHindcastJob class."""
 
-    def test_get_run_id(self, m_logger, config):
+    def test_get_run_id(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -618,97 +713,132 @@ class TestSqueueHindcastJob:
             name="_get_queue_info",
             return_value="12426878 21dec16hindcast RUNNING None 2018-10-07T14:13:59",
         )
+        caplog.set_level(logging.DEBUG)
+
         job.get_run_id()
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = "watching 21dec16hindcast job 12426878 on cedar"
+        assert caplog.records[0].message == expected
         assert job.job_id == "12426878"
         assert job.run_id == "21dec16hindcast"
-        assert m_logger.info.called
 
-    def test_is_queued_job_not_found(self, m_logger, config):
+    def test_is_queued_job_not_found(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
+        caplog.set_level(logging.DEBUG)
+
         with pytest.raises(nemo_nowcast.WorkerError):
             job.is_queued()
-        assert m_logger.error.called
 
-    def test_is_queued_not_pending(self, m_logger, config):
+        assert caplog.records[0].levelname == "ERROR"
+        expected = f"{job.run_id} job {job.job_id} not found on {job.host_name} queue"
+        assert caplog.records[0].message == expected
+
+    def test_is_queued_not_pending(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
             return_value="12426878 21dec16hindcast RUNNING None 2018-10-07T14:13:59",
         )
+        caplog.set_level(logging.DEBUG)
+
         assert not job.is_queued()
 
-    def test_is_queued_pending_due_to_resources(self, m_logger, config):
+    def test_is_queued_pending_due_to_resources(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
             return_value="12426878 21dec16hindcast PENDING resources N/A",
         )
-        assert job.is_queued()
-        assert m_logger.info.call_args[0][0].endswith("pending due to resources")
+        caplog.set_level(logging.DEBUG)
 
-    def test_is_queued_pending_and_scheduled(self, m_logger, config):
+        assert job.is_queued()
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{job.run_id} job {job.job_id} pending due to resources"
+        assert caplog.records[0].message == expected
+
+    def test_is_queued_pending_and_scheduled(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedar",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
             return_value="12426878 21dec16hindcast PENDING resources 2018-10-07T14:13:59",
         )
-        assert job.is_queued()
-        assert m_logger.info.call_args[0][0].endswith(
-            "pending due to resources, scheduled for 2018-10-07T14:13:59"
-        )
+        caplog.set_level(logging.DEBUG)
 
-    def test_get_tmp_run_dir(self, m_logger, config):
+        assert job.is_queued()
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{job.run_id} job {job.job_id} pending due to resources, scheduled for 2018-10-07T14:13:59"
+        assert caplog.records[0].message == expected
+
+    def test_get_tmp_run_dir(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job.run_id = "21dec16hindcast"
         job._ssh_exec_command = Mock(
             name="_ssh_exec_command",
             return_value="/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700",
         )
+        caplog.set_level(logging.DEBUG)
+
         job.get_tmp_run_dir()
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"found tmp run dir: {job.host_name}:{job.tmp_run_dir}"
+        assert caplog.records[0].message == expected
         assert job.tmp_run_dir == Path(
             "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700"
         )
-        assert m_logger.debug.called
 
     @patch("nowcast.workers.watch_NEMO_hindcast.f90nml.read", autospec=True)
-    def test_get_run_info(self, m_f90nml_read, m_logger, config):
+    def test_get_run_info(self, m_f90nml_read, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job.tmp_run_dir = Path(
             "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700"
@@ -721,22 +851,36 @@ class TestSqueueHindcastJob:
             },
             "namdom": {"rn_rdt": 40.0},
         }
+        caplog.set_level(logging.DEBUG)
+
         job.get_run_info()
+
         assert job.it000 == 1_658_881
         assert job.itend == 1_682_640
         assert job.date0 == arrow.get("2016-12-21")
         assert job.rdt == 40.0
-        assert m_logger.debug.call_count == 2
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = f"downloaded {job.host_name}:{job.tmp_run_dir}/namelist_cfg"
+        assert caplog.records[0].message == expected
+        expected = (
+            f"{job.run_id} on {job.host_name}: "
+            f"it000={job.it000}, itend={job.itend}, date0={job.date0}, rdt={job.rdt}"
+        )
+        assert caplog.records[1].message == expected
 
-    def test_is_running_not_running(self, m_logger, config):
+    def test_is_running_not_running(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="UNKNOWN")
+        caplog.set_level(logging.DEBUG)
+
         assert not job.is_running()
 
     @patch(
@@ -744,17 +888,23 @@ class TestSqueueHindcastJob:
         side_effect=nowcast.ssh_sftp.SSHCommandError("cmd", "stdout", "stderr"),
         autospec=True,
     )
-    def test_is_running_no_time_step_file(self, m_ssh_exec_cmd, m_logger, config):
+    def test_is_running_no_time_step_file(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
+        caplog.set_level(logging.DEBUG)
+
         assert job.is_running()
-        assert m_logger.info.called
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{job.run_id} on {job.host_name}: time.step not found; continuing to watch..."
+        assert caplog.records[0].message == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
@@ -764,18 +914,24 @@ class TestSqueueHindcastJob:
         ],
         autospec=True,
     )
-    def test_is_running_no_ocean_output(self, m_ssh_exec_cmd, m_logger, config):
+    def test_is_running_no_ocean_output(self, m_logger, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         job._report_progress = Mock(name="_report_progress")
+        caplog.set_level(logging.DEBUG)
+
         assert not job.is_running()
-        assert m_logger.error.called
+        assert caplog.records[0].levelname == "ERROR"
+        expected = f"{job.run_id} on {job.host_name}: ocean.output not found"
+        assert caplog.records[0].message == expected
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
@@ -783,7 +939,7 @@ class TestSqueueHindcastJob:
         autospec=True,
     )
     def test_is_running_ocean_output_errors_cancel_run(
-        self, m_ssh_exec_cmd, m_logger, config
+        self, m_ssh_exec_cmd, config, caplog
     ):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
@@ -791,12 +947,21 @@ class TestSqueueHindcastJob:
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         job._report_progress = Mock(name="_report_progress")
         job._ssh_exec_command = Mock(name="_ssh_exec_command")
+        caplog.set_level(logging.DEBUG)
+
         assert not job.is_running()
-        assert m_logger.error.called
+        assert caplog.records[0].levelname == "ERROR"
+        expected = (
+            f"{job.run_id} on {job.host_name}: "
+            f"found 2 'E R R O R' line(s) in ocean.output"
+        )
+        assert caplog.records[0].message == expected
         job._ssh_exec_command.assert_called_once_with(
             f"/opt/software/slurm/bin/scancel {job.job_id}",
             f"{job.run_id} on {job.host_name}: cancelled {job.job_id}",
@@ -807,13 +972,15 @@ class TestSqueueHindcastJob:
         side_effect=["1658943\n", "E R R O R\n"],
         autospec=True,
     )
-    def test_is_running_handle_stuck_job(self, m_ssh_exec_cmd, m_logger, config):
+    def test_is_running_handle_stuck_job(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         job._report_progress = Mock(name="_report_progress")
@@ -822,8 +989,15 @@ class TestSqueueHindcastJob:
         job.is_queued = Mock(name="is_queued", return_value=False)
         job.get_tmp_run_dir = Mock(name="get_tmp_run_dir")
         job.get_run_info = Mock(name="get_run_info")
+        caplog.set_level(logging.DEBUG)
+
         assert job.is_running()
-        assert m_logger.error.called
+        assert caplog.records[0].levelname == "ERROR"
+        expected = (
+            f"{job.run_id} on {job.host_name}: "
+            f"found 1 'E R R O R' line(s) in ocean.output"
+        )
+        assert caplog.records[0].message == expected
         job._ssh_exec_command.assert_called_once_with(
             f"/opt/software/slurm/bin/scancel {job.job_id}",
             f"{job.run_id} on {job.host_name}: cancelled {job.job_id}",
@@ -835,67 +1009,89 @@ class TestSqueueHindcastJob:
         side_effect=["1658943\n", ""],
         autospec=True,
     )
-    def test_is_running(self, m_ssh_exec_cmd, m_logger, config):
+    def test_is_running(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="RUNNING")
         job._report_progress = Mock(name="_report_progress")
+        caplog.set_level(logging.DEBUG)
+
         assert job.is_running()
 
     @pytest.mark.parametrize("exception", [nemo_nowcast.WorkerError, AttributeError])
-    def test_get_job_state_unknown(self, m_logger, exception, config):
+    def test_get_job_state_unknown(self, exception, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_queue_info = Mock(name="_get_queue_info", return_value=None)
+        caplog.set_level(logging.DEBUG)
+
         state = job._get_job_state()
-        assert m_logger.info.called
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{job.run_id} job {job.job_id} not found on {job.host_name} queue"
+        assert caplog.records[0].message == expected
         assert state == "UNKNOWN"
 
-    def test_get_job_state_running(self, m_logger, config):
+    def test_get_job_state_running(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
             return_value="12426878 21dec16hindcast RUNNING N/A 2018-10-07T14:13:59",
         )
+        caplog.set_level(logging.DEBUG)
+
         state = job._get_job_state()
         assert state == "RUNNING"
 
-    def test_report_progress(self, m_logger, config):
+    def test_report_progress(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="1658943",
         )
         job.run_id = "01oct18hindcast"
         job.it000 = 1_658_881
         job.itend = 1_682_640
         job.date0 = arrow.get("2016-12-21")
         job.rdt = 40.0
+        caplog.set_level(logging.DEBUG)
+
         job._report_progress("1658943\n")
-        m_logger.info.assert_called_once_with(
-            f"01oct18hindcast on {job.host_name}: timestep: "
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = (
+            f"{job.run_id} on {job.host_name}: timestep: "
             f"1658943 = 2016-12-21 00:41:20 UTC, 0.3% complete"
         )
+        assert caplog.records[0].message == expected
 
-    def test_handle_stuck_job(self, m_logger, config):
+    def test_handle_stuck_job(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -919,7 +1115,13 @@ class TestSqueueHindcastJob:
             name="_get_queue_info",
             return_value="12426878 21dec16hindcast PENDING resources 2018-10-07T14:13:59",
         )
+        caplog.set_level(logging.DEBUG)
+
         job._handle_stuck_job()
+
+        assert caplog.records[1].levelname == "DEBUG"
+        expected = f"found next run tmp run dir: {job.host_name}:/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700"
+        assert caplog.records[1].message == expected
         assert job._ssh_exec_command.call_args_list == [
             call(
                 "/opt/software/slurm/bin/sbatch "
@@ -933,22 +1135,30 @@ class TestSqueueHindcastJob:
                 "01jan17hindcast on graham: re-queued",
             ),
         ]
-        assert m_logger.debug.called
 
-    def test_get_completion_state_unknown(self, m_logger, config):
+    def test_get_completion_state_unknown(self, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "graham",
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            run_id="21dec16hindcast",
+            job_id="12426878",
         )
         job._ssh_exec_command = Mock(
             name="_ssh_exec_command", return_value="State\n----------\n"
         )
+        caplog.set_level(logging.DEBUG)
+
         state = job.get_completion_state()
+
+        assert caplog.records[0].levelname == "DEBUG"
+        expected = (
+            f"{job.job_id} batch step not found in saact report; continuing to look..."
+        )
+        assert caplog.records[0].message == expected
         assert state == "unknown"
-        assert m_logger.debug.called
 
     @pytest.mark.parametrize(
         "job_state, expected",
@@ -959,7 +1169,7 @@ class TestSqueueHindcastJob:
             ("FOO", "aborted"),
         ],
     )
-    def test_get_completion_state(self, m_logger, job_state, expected, config):
+    def test_get_completion_state(self, job_state, expected, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -971,18 +1181,21 @@ class TestSqueueHindcastJob:
         job._ssh_exec_command = Mock(
             name="_ssh_exec_command", return_value=f"State\n----------\n{job_state}\n"
         )
+        caplog.set_level(logging.DEBUG)
+
         state = job.get_completion_state()
+
+        assert caplog.records[0].levelname == "INFO"
+        expected_msg = f"{job.run_id} on {job.host_name}: {job_state}"
+        assert caplog.records[0].message == expected_msg
         assert state == expected
-        m_logger.info.assert_called_once_with(
-            f"{job.run_id} on {job.host_name}: {job_state}"
-        )
 
     @patch(
         "nowcast.workers.watch_NEMO_hindcast.ssh_sftp.ssh_exec_command",
         return_value="/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700",
         autospec=True,
     )
-    def test_ssh_exec_command(self, m_ssh_exec_cmd, m_logger, config):
+    def test_ssh_exec_command(self, m_ssh_exec_cmd, config, caplog):
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
@@ -990,8 +1203,11 @@ class TestSqueueHindcastJob:
             config["run"]["hindcast hosts"]["graham"]["users"],
             Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
         )
+        caplog.set_level(logging.DEBUG)
+
         stdout = job._ssh_exec_command(f"ls -dtr {job.scratch_dir}/*hindcast*")
+
+        assert len(caplog.records) == 0
         assert (
             stdout == "/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700"
         )
-        assert not m_logger.info.called

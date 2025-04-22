@@ -12,6 +12,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+# SPDX-License-Identifier: Apache-2.0
+
+
 """SalishSeaCast worker that monitors and reports on the progress of a run on the cloud
 computing facility or salish.
 """
@@ -56,14 +60,16 @@ def main():
 
 
 def success(parsed_args):
-    logger.info("{0.run_type} NEMO run on {0.host_name} completed".format(parsed_args))
-    msg_type = "success {.run_type}".format(parsed_args)
+    logger.info(f"{parsed_args.run_type} NEMO run on {parsed_args.host_name} completed")
+    msg_type = f"success {parsed_args.run_type}"
     return msg_type
 
 
 def failure(parsed_args):
-    logger.critical("{0.run_type} NEMO run on {0.host_name} failed".format(parsed_args))
-    msg_type = "failure {.run_type}".format(parsed_args)
+    logger.critical(
+        f"{parsed_args.run_type} NEMO run on {parsed_args.host_name} failed"
+    )
+    msg_type = f"failure {parsed_args.run_type}"
     return msg_type
 
 
@@ -254,7 +260,7 @@ def _confirm_run_success(
                         run_succeeded = False
                         logger.critical(
                             f"{host_name} {run_type}/{dmy} run failed; "
-                            f'NaN in: {results_dir/"solver.stat"}'
+                            f'NaN in: {results_dir/"tracer.stat"}'
                         )
                         break
         except FileNotFoundError:

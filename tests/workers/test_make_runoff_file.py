@@ -1986,7 +1986,7 @@ class TestWriteNetcdf:
 
         runoff_ds = xarray.Dataset()
         obs_date = arrow.get("2023-05-30")
-        caplog.set_level("DEBUG")
+        caplog.set_level(logging.DEBUG)
 
         nc_file_path = make_runoff_file._write_netcdf(
             runoff_ds, bathy_version, obs_date, config

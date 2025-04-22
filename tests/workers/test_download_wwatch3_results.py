@@ -17,7 +17,8 @@
 
 
 """Unit tests for SalishSeaCast system download_wwatch3_results worker."""
-from unittest.mock import Mock, patch
+import logging
+from types import SimpleNamespace
 
 import arrow
 import nemo_nowcast
@@ -79,15 +80,21 @@ class TestMain:
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
-@patch("nowcast.workers.download_wwatch3_results.logger", autospec=True)
 class TestSuccess:
     """Unit tests for success() function."""
 
-    def test_success(self, m_logger, run_type, host_name):
-        parsed_args = Mock(host_name=host_name, run_type=run_type)
+    def test_success(self, run_type, host_name, caplog):
+        parsed_args = SimpleNamespace(
+            host_name=host_name, run_type=run_type, run_date=arrow.get("2025-03-18")
+        )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = download_wwatch3_results.success(parsed_args)
-        assert m_logger.info.called
-        assert msg_type == "success {}".format(run_type)
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"{run_type} 2025-03-18 results files from {host_name} downloaded"
+        assert caplog.messages[0] == expected
+        assert msg_type == f"success {run_type}"
 
 
 @pytest.mark.parametrize(
@@ -98,12 +105,20 @@ class TestSuccess:
         ("forecast2", "arbutus.cloud-nowcast"),
     ],
 )
-@patch("nowcast.workers.download_wwatch3_results.logger", autospec=True)
 class TestFailure:
     """Unit tests for failure() function."""
 
-    def test_failure(self, m_logger, run_type, host_name):
-        parsed_args = Mock(host_name=host_name, run_type=run_type)
+    def test_failure(self, run_type, host_name, caplog):
+        parsed_args = SimpleNamespace(
+            host_name=host_name, run_type=run_type, run_date=arrow.get("2025-03-18")
+        )
+        caplog.set_level(logging.DEBUG)
+
         msg_type = download_wwatch3_results.failure(parsed_args)
-        assert m_logger.critical.called
-        assert msg_type == "failure {}".format(run_type)
+
+        assert caplog.records[0].levelname == "CRITICAL"
+        expected = (
+            f"{run_type} 2025-03-18 results files download from {host_name} failed"
+        )
+        assert caplog.messages[0] == expected
+        assert msg_type == f"failure {run_type}"
