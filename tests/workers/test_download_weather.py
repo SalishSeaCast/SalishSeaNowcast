@@ -290,10 +290,17 @@ class TestFailure:
 
 
 @patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
-@patch("nowcast.workers.download_weather.lib.fix_perms", autospec=True)
 @patch("nowcast.workers.download_weather._get_file", autospec=True)
 class TestGetGrib:
     """Unit tests for get_grib() function."""
+
+    @staticmethod
+    @pytest.fixture
+    def mock_fix_perms(monkeypatch):
+        def _mock_fix_perms(filepath):
+            pass
+
+        monkeypatch.setattr(download_weather.lib, "fix_perms", _mock_fix_perms)
 
     @pytest.mark.parametrize(
         "forecast, resolution",
@@ -307,8 +314,8 @@ class TestGetGrib:
     def test_make_hour_dirs_2_5km(
         self,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         config,
@@ -344,8 +351,8 @@ class TestGetGrib:
     def test_make_hour_dirs_1km(
         self,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         config,
@@ -387,8 +394,8 @@ class TestGetGrib:
         self,
         m_session,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         variables,
@@ -427,6 +434,7 @@ class TestGetGrib:
         )
         assert kwargs == {}
 
+    @patch("nowcast.workers.download_weather.lib.fix_perms", autospec=True)
     @pytest.mark.parametrize(
         "forecast, resolution, variable",
         (
@@ -440,8 +448,8 @@ class TestGetGrib:
     )
     def test_fix_perms(
         self,
-        m_get_file,
         m_fix_perms,
+        m_get_file,
         m_mkdir,
         forecast,
         resolution,
@@ -479,8 +487,8 @@ class TestGetGrib:
     def test_checklist_2_5km(
         self,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         config,
@@ -510,8 +518,8 @@ class TestGetGrib:
     def test_checklist_1km(
         self,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         config,
