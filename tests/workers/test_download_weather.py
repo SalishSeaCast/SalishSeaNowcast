@@ -364,7 +364,9 @@ class TestGetGrib:
 
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
-            expected = f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            expected = Path(
+                f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            )
             assert args[0] == expected
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
@@ -401,7 +403,9 @@ class TestGetGrib:
 
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
-            expected = f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            expected = Path(
+                f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            )
             assert args[0] == expected
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 

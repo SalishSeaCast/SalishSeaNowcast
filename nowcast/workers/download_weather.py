@@ -121,7 +121,7 @@ def get_grib(parsed_args, config, *args):
         for forecast_hour in range(1, forecast_duration + 1):
             hr_str = f"{forecast_hour:0=3}"
             lib.mkdir(
-                os.path.join(dest_dir_root, date, forecast, hr_str),
+                Path(dest_dir_root, date, forecast, hr_str),
                 logger,
                 grp_name=grp_name,
                 exist_ok=False,
@@ -147,9 +147,9 @@ def get_grib(parsed_args, config, *args):
 
 
 def _mkdirs(dest_dir_root, date, forecast, grp_name, exist_ok):
-    lib.mkdir(os.path.join(dest_dir_root, date), logger, grp_name=grp_name)
+    lib.mkdir(Path(dest_dir_root, date), logger, grp_name=grp_name)
     lib.mkdir(
-        os.path.join(dest_dir_root, date, forecast),
+        Path(dest_dir_root, date, forecast),
         logger,
         grp_name=grp_name,
         exist_ok=exist_ok,
@@ -162,13 +162,11 @@ def _get_file(
     filename = filename_tmpl.format(
         variable=var, date=date, forecast=forecast, hour=hr_str
     )
-    filepath = os.path.join(dest_dir_root, date, forecast, hr_str, filename)
+    filepath = Path(dest_dir_root, date, forecast, hr_str, filename)
     file_url = url_tmpl.format(
         date=date, forecast=forecast, hour=hr_str, filename=filename
     )
-    get_web_data(
-        file_url, NAME, Path(filepath), session=session, wait_exponential_max=9000
-    )
+    get_web_data(file_url, NAME, filepath, session=session, wait_exponential_max=9000)
     size = os.stat(filepath).st_size
     logger.debug(f"downloaded {size} bytes from {file_url}")
     if size == 0:
