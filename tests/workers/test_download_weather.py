@@ -302,7 +302,9 @@ class TestGetGrib:
 
         monkeypatch.setattr(download_weather.lib, "fix_perms", _mock_fix_perms)
 
-    def test_log_messages(self, m_get_file, m_mkdir, mock_fix_perms, config, caplog):
+    def test_log_messages(
+        self, m_get_file, m_mkdir, mock_fix_perms, config, caplog, monkeypatch
+    ):
         parsed_args = SimpleNamespace(
             forecast="00",
             resolution="2.5km",
@@ -310,14 +312,12 @@ class TestGetGrib:
             no_verify_certs=False,
             backfill=False,
         )
-        p_config = patch.dict(
-            config["weather"]["download"]["2.5 km"],
-            {"forecast duration": 6},
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "forecast duration", 6
         )
         caplog.set_level(logging.DEBUG)
 
-        with p_config:
-            download_weather.get_grib(parsed_args, config)
+        download_weather.get_grib(parsed_args, config)
 
         assert caplog.records[0].levelname == "INFO"
         expected = f"downloading 00 2.5 km forecast GRIB2 files for 20250507"
@@ -346,6 +346,8 @@ class TestGetGrib:
         forecast,
         resolution,
         config,
+        caplog,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
@@ -354,13 +356,12 @@ class TestGetGrib:
             no_verify_certs=False,
             backfill=False,
         )
-        p_config = patch.dict(
-            config["weather"]["download"][resolution.replace("km", " km")],
-            {"forecast duration": 6},
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "forecast duration", 6
         )
+        caplog.set_level(logging.DEBUG)
 
-        with p_config:
-            download_weather.get_grib(parsed_args, config)
+        download_weather.get_grib(parsed_args, config)
 
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
@@ -385,6 +386,8 @@ class TestGetGrib:
         forecast,
         resolution,
         config,
+        caplog,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
@@ -393,13 +396,12 @@ class TestGetGrib:
             no_verify_certs=False,
             backfill=False,
         )
-        p_config = patch.dict(
-            config["weather"]["download"][resolution.replace("km", " km")],
-            {"forecast duration": 6},
+        monkeypatch.setitem(
+            config["weather"]["download"]["1 km"], "forecast duration", 6
         )
+        caplog.set_level(logging.DEBUG)
 
-        with p_config:
-            download_weather.get_grib(parsed_args, config)
+        download_weather.get_grib(parsed_args, config)
 
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
@@ -431,6 +433,8 @@ class TestGetGrib:
         resolution,
         variables,
         config,
+        caplog,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
@@ -439,13 +443,19 @@ class TestGetGrib:
             no_verify_certs=False,
             backfill=False,
         )
-        p_config = patch.dict(
+        monkeypatch.setitem(
             config["weather"]["download"][resolution.replace("km", " km")],
-            {"variables": [variables], "forecast duration": 1},
+            "variables",
+            [variables],
         )
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution.replace("km", " km")],
+            "forecast duration",
+            1,
+        )
+        caplog.set_level(logging.DEBUG)
 
-        with p_config:
-            download_weather.get_grib(parsed_args, config)
+        download_weather.get_grib(parsed_args, config)
 
         args, kwargs = m_get_file.call_args
         variable = variables[0] if resolution == "2.5km" else variables
@@ -486,6 +496,8 @@ class TestGetGrib:
         resolution,
         variable,
         config,
+        caplog,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
@@ -494,14 +506,21 @@ class TestGetGrib:
             no_verify_certs=False,
             backfill=False,
         )
-        p_config = patch.dict(
+        monkeypatch.setitem(
             config["weather"]["download"][resolution.replace("km", " km")],
-            {"variables": [variable], "forecast duration": 1},
+            "variables",
+            [variable],
         )
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution.replace("km", " km")],
+            "forecast duration",
+            1,
+        )
+        caplog.set_level(logging.DEBUG)
         m_get_file.return_value = "filepath"
         p_fix_perms = patch("nowcast.workers.download_weather.lib.fix_perms")
 
-        with p_config, p_fix_perms as m_fix_perms:
+        with p_fix_perms as m_fix_perms:
             download_weather.get_grib(parsed_args, config)
 
         m_fix_perms.assert_called_once_with("filepath")
@@ -523,6 +542,7 @@ class TestGetGrib:
         forecast,
         resolution,
         config,
+        caplog,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
@@ -531,6 +551,7 @@ class TestGetGrib:
             no_verify_certs=False,
             backfill=False,
         )
+        caplog.set_level(logging.DEBUG)
 
         checklist = download_weather.get_grib(parsed_args, config)
 
@@ -554,6 +575,7 @@ class TestGetGrib:
         forecast,
         resolution,
         config,
+        caplog,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
@@ -562,6 +584,7 @@ class TestGetGrib:
             no_verify_certs=False,
             backfill=False,
         )
+        caplog.set_level(logging.DEBUG)
 
         checklist = download_weather.get_grib(parsed_args, config)
 
