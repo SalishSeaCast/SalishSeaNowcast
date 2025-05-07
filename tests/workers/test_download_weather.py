@@ -27,6 +27,7 @@ import arrow
 import nemo_nowcast
 import pytest
 
+import nowcast.lib
 from nowcast.workers import download_weather
 
 
@@ -127,6 +128,12 @@ class TestMain:
         assert worker.cli.parser._actions[6].dest == "no_verify_certs"
         assert worker.cli.parser._actions[6].default is False
         assert worker.cli.parser._actions[6].help
+
+    def test_add_backfill_option(self, mock_worker):
+        worker = download_weather.main()
+        assert worker.cli.parser._actions[7].dest == "backfill"
+        assert worker.cli.parser._actions[7].default is False
+        assert worker.cli.parser._actions[7].help
 
 
 class TestConfig:
@@ -238,6 +245,7 @@ class TestSuccess:
             resolution=resolution,
             run_date=forecast_date,
             no_verify_certs=False,
+            backfill=False,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -269,6 +277,7 @@ class TestFailure:
             resolution=resolution,
             run_date=forecast_date,
             no_verify_certs=False,
+            backfill=False,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -309,6 +318,7 @@ class TestGetGrib:
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
@@ -345,6 +355,7 @@ class TestGetGrib:
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
@@ -388,6 +399,7 @@ class TestGetGrib:
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
@@ -441,6 +453,7 @@ class TestGetGrib:
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
         p_config = patch.dict(
             config["weather"]["download"][resolution.replace("km", " km")],
@@ -477,6 +490,7 @@ class TestGetGrib:
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
 
         checklist = download_weather.get_grib(parsed_args, config)
@@ -507,6 +521,7 @@ class TestGetGrib:
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
 
         checklist = download_weather.get_grib(parsed_args, config)
@@ -517,21 +532,25 @@ class TestGetGrib:
         assert checklist == expected
 
 
-@patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
+@pytest.mark.parametrize("exist_ok", (False, True))
 class TestMkdirs:
     """Unit tests for _mkdirs() function."""
 
-    def test_make_date_dir(self, m_mkdir):
-        download_weather._mkdirs("/tmp", "20150618", "06", "foo")
-        args, kwargs = m_mkdir.call_args_list[0]
-        assert args[0] == "/tmp/20150618"
-        assert kwargs == {"grp_name": "foo"}
+    @staticmethod
+    @pytest.fixture
+    def mock_fix_perms(monkeypatch):
+        def _mock_fix_perms(path, mode, grp_name):
+            pass
 
-    def test_make_forecast_dir(self, m_mkdir):
-        download_weather._mkdirs("/tmp", "20150618", "06", "foo")
-        args, kwargs = m_mkdir.call_args_list[1]
-        assert args[0] == "/tmp/20150618/06"
-        assert kwargs == {"grp_name": "foo", "exist_ok": False}
+        monkeypatch.setattr(nowcast.lib, "fix_perms", _mock_fix_perms)
+
+    def test_make_date_dir(self, exist_ok, tmp_path):
+        download_weather._mkdirs(tmp_path, "20150618", "06", None, exist_ok)
+        assert (tmp_path / "20150618").is_dir()
+
+    def test_make_forecast_dir(self, exist_ok, tmp_path):
+        download_weather._mkdirs(tmp_path, "20150618", "06", None, exist_ok)
+        assert (tmp_path / "20150618" / "06").is_dir()
 
 
 @patch("nowcast.workers.download_weather.get_web_data", autospec=True)

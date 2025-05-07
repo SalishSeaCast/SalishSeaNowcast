@@ -65,6 +65,14 @@ def main():
             which has still uses deprecated TLS-1.0.
         """,
     )
+    worker.cli.add_argument(
+        "--backfill",
+        action="store_true",
+        help="""
+            Don't abort if destination directory already exists.
+            NOTE: This is intended for use in recovery from automation failures.
+        """,
+    )
     worker.run(get_grib, success, failure)
     return worker
 
@@ -94,7 +102,10 @@ def get_grib(parsed_args, config, *args):
     logger.info(f"downloading {forecast} {resolution} forecast GRIB2 files for {date}")
     dest_dir_root = config["weather"]["download"][resolution]["GRIB dir"]
     grp_name = config["file group"]
-    _mkdirs(dest_dir_root, date, forecast, grp_name)
+    _mkdirs(dest_dir_root, date, forecast, grp_name, parsed_args.backfill)
+    logger.debug(
+        f"destination directory for {forecast} {resolution} forecast GRIB2 files: {dest_dir_root}"
+    )
     url_tmpl = config["weather"]["download"][resolution]["url template"]
     filename_tmpl = config["weather"]["download"][resolution]["ECCC file template"]
     var_names = config["weather"]["download"][resolution]["variables"]
@@ -134,13 +145,13 @@ def get_grib(parsed_args, config, *args):
     return checklist
 
 
-def _mkdirs(dest_dir_root, date, forecast, grp_name):
+def _mkdirs(dest_dir_root, date, forecast, grp_name, exist_ok):
     lib.mkdir(os.path.join(dest_dir_root, date), logger, grp_name=grp_name)
     lib.mkdir(
         os.path.join(dest_dir_root, date, forecast),
         logger,
         grp_name=grp_name,
-        exist_ok=False,
+        exist_ok=exist_ok,
     )
 
 
