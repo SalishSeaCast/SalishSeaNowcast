@@ -27,6 +27,7 @@ import arrow
 import nemo_nowcast
 import pytest
 
+import nowcast.lib
 from nowcast.workers import download_weather
 
 
@@ -127,6 +128,12 @@ class TestMain:
         assert worker.cli.parser._actions[6].dest == "no_verify_certs"
         assert worker.cli.parser._actions[6].default is False
         assert worker.cli.parser._actions[6].help
+
+    def test_add_backfill_option(self, mock_worker):
+        worker = download_weather.main()
+        assert worker.cli.parser._actions[7].dest == "backfill"
+        assert worker.cli.parser._actions[7].default is False
+        assert worker.cli.parser._actions[7].help
 
 
 class TestConfig:
@@ -238,6 +245,7 @@ class TestSuccess:
             resolution=resolution,
             run_date=forecast_date,
             no_verify_certs=False,
+            backfill=False,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -269,6 +277,7 @@ class TestFailure:
             resolution=resolution,
             run_date=forecast_date,
             no_verify_certs=False,
+            backfill=False,
         )
         caplog.set_level(logging.DEBUG)
 
@@ -281,10 +290,44 @@ class TestFailure:
 
 
 @patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
-@patch("nowcast.workers.download_weather.lib.fix_perms", autospec=True)
 @patch("nowcast.workers.download_weather._get_file", autospec=True)
 class TestGetGrib:
     """Unit tests for get_grib() function."""
+
+    @staticmethod
+    @pytest.fixture
+    def mock_fix_perms(monkeypatch):
+        def _mock_fix_perms(filepath):
+            pass
+
+        monkeypatch.setattr(download_weather.lib, "fix_perms", _mock_fix_perms)
+
+    def test_log_messages(
+        self, m_get_file, m_mkdir, mock_fix_perms, config, caplog, monkeypatch
+    ):
+        parsed_args = SimpleNamespace(
+            forecast="00",
+            resolution="2.5km",
+            run_date=arrow.get("2025-05-07"),
+            no_verify_certs=False,
+            backfill=False,
+        )
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "forecast duration", 6
+        )
+        caplog.set_level(logging.DEBUG)
+
+        download_weather.get_grib(parsed_args, config)
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"downloading 00 2.5 km forecast GRIB2 files for 20250507"
+        assert caplog.messages[0] == expected
+        assert caplog.records[1].levelname == "DEBUG"
+        expected = (
+            f"destination directory for 00 2.5 km forecast GRIB2 files: "
+            f"/results/forcing/atmospheric/continental2.5/GRIB/20250507/00"
+        )
+        assert caplog.messages[1] == expected
 
     @pytest.mark.parametrize(
         "forecast, resolution",
@@ -298,29 +341,33 @@ class TestGetGrib:
     def test_make_hour_dirs_2_5km(
         self,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         config,
+        caplog,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
-        p_config = patch.dict(
-            config["weather"]["download"][resolution.replace("km", " km")],
-            {"forecast duration": 6},
+        monkeypatch.setitem(
+            config["weather"]["download"]["2.5 km"], "forecast duration", 6
         )
+        caplog.set_level(logging.DEBUG)
 
-        with p_config:
-            download_weather.get_grib(parsed_args, config)
+        download_weather.get_grib(parsed_args, config)
 
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
-            expected = f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            expected = Path(
+                f"/results/forcing/atmospheric/continental{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            )
             assert args[0] == expected
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
@@ -334,29 +381,33 @@ class TestGetGrib:
     def test_make_hour_dirs_1km(
         self,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         config,
+        caplog,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
-        p_config = patch.dict(
-            config["weather"]["download"][resolution.replace("km", " km")],
-            {"forecast duration": 6},
+        monkeypatch.setitem(
+            config["weather"]["download"]["1 km"], "forecast duration", 6
         )
+        caplog.set_level(logging.DEBUG)
 
-        with p_config:
-            download_weather.get_grib(parsed_args, config)
+        download_weather.get_grib(parsed_args, config)
 
         for hr in range(1, 7):
             args, kwargs = m_mkdir.call_args_list[hr + 1]
-            expected = f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            expected = Path(
+                f"/results/forcing/atmospheric/GEM{float(resolution[:-2]):.1f}/GRIB/20230224/{forecast}/00{hr}"
+            )
             assert args[0] == expected
             assert kwargs == {"grp_name": "allen", "exist_ok": False}
 
@@ -376,26 +427,35 @@ class TestGetGrib:
         self,
         m_session,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         variables,
         config,
+        caplog,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
-        p_config = patch.dict(
+        monkeypatch.setitem(
             config["weather"]["download"][resolution.replace("km", " km")],
-            {"variables": [variables], "forecast duration": 1},
+            "variables",
+            [variables],
         )
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution.replace("km", " km")],
+            "forecast duration",
+            1,
+        )
+        caplog.set_level(logging.DEBUG)
 
-        with p_config:
-            download_weather.get_grib(parsed_args, config)
+        download_weather.get_grib(parsed_args, config)
 
         args, kwargs = m_get_file.call_args
         variable = variables[0] if resolution == "2.5km" else variables
@@ -415,6 +475,7 @@ class TestGetGrib:
         )
         assert kwargs == {}
 
+    @patch("nowcast.workers.download_weather.lib.fix_perms", autospec=True)
     @pytest.mark.parametrize(
         "forecast, resolution, variable",
         (
@@ -428,28 +489,38 @@ class TestGetGrib:
     )
     def test_fix_perms(
         self,
-        m_get_file,
         m_fix_perms,
+        m_get_file,
         m_mkdir,
         forecast,
         resolution,
         variable,
         config,
+        caplog,
+        monkeypatch,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
-        p_config = patch.dict(
+        monkeypatch.setitem(
             config["weather"]["download"][resolution.replace("km", " km")],
-            {"variables": [variable], "forecast duration": 1},
+            "variables",
+            [variable],
         )
+        monkeypatch.setitem(
+            config["weather"]["download"][resolution.replace("km", " km")],
+            "forecast duration",
+            1,
+        )
+        caplog.set_level(logging.DEBUG)
         m_get_file.return_value = "filepath"
         p_fix_perms = patch("nowcast.workers.download_weather.lib.fix_perms")
 
-        with p_config, p_fix_perms as m_fix_perms:
+        with p_fix_perms as m_fix_perms:
             download_weather.get_grib(parsed_args, config)
 
         m_fix_perms.assert_called_once_with("filepath")
@@ -466,18 +537,21 @@ class TestGetGrib:
     def test_checklist_2_5km(
         self,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         config,
+        caplog,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
+        caplog.set_level(logging.DEBUG)
 
         checklist = download_weather.get_grib(parsed_args, config)
 
@@ -496,18 +570,21 @@ class TestGetGrib:
     def test_checklist_1km(
         self,
         m_get_file,
-        m_fix_perms,
         m_mkdir,
+        mock_fix_perms,
         forecast,
         resolution,
         config,
+        caplog,
     ):
         parsed_args = SimpleNamespace(
             forecast=forecast,
             resolution=resolution,
             run_date=arrow.get("2023-02-24"),
             no_verify_certs=False,
+            backfill=False,
         )
+        caplog.set_level(logging.DEBUG)
 
         checklist = download_weather.get_grib(parsed_args, config)
 
@@ -517,21 +594,25 @@ class TestGetGrib:
         assert checklist == expected
 
 
-@patch("nowcast.workers.download_weather.lib.mkdir", autospec=True)
+@pytest.mark.parametrize("exist_ok", (False, True))
 class TestMkdirs:
     """Unit tests for _mkdirs() function."""
 
-    def test_make_date_dir(self, m_mkdir):
-        download_weather._mkdirs("/tmp", "20150618", "06", "foo")
-        args, kwargs = m_mkdir.call_args_list[0]
-        assert args[0] == "/tmp/20150618"
-        assert kwargs == {"grp_name": "foo"}
+    @staticmethod
+    @pytest.fixture
+    def mock_fix_perms(monkeypatch):
+        def _mock_fix_perms(path, mode, grp_name):
+            pass
 
-    def test_make_forecast_dir(self, m_mkdir):
-        download_weather._mkdirs("/tmp", "20150618", "06", "foo")
-        args, kwargs = m_mkdir.call_args_list[1]
-        assert args[0] == "/tmp/20150618/06"
-        assert kwargs == {"grp_name": "foo", "exist_ok": False}
+        monkeypatch.setattr(nowcast.lib, "fix_perms", _mock_fix_perms)
+
+    def test_make_date_dir(self, exist_ok, tmp_path):
+        download_weather._mkdirs(tmp_path, "20150618", "06", None, exist_ok)
+        assert (tmp_path / "20150618").is_dir()
+
+    def test_make_forecast_dir(self, exist_ok, tmp_path):
+        download_weather._mkdirs(tmp_path, "20150618", "06", None, exist_ok)
+        assert (tmp_path / "20150618" / "06").is_dir()
 
 
 @patch("nowcast.workers.download_weather.get_web_data", autospec=True)

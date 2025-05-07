@@ -65,6 +65,14 @@ def main():
             which has still uses deprecated TLS-1.0.
         """,
     )
+    worker.cli.add_argument(
+        "--backfill",
+        action="store_true",
+        help="""
+            Don't abort if destination directory already exists.
+            NOTE: This is intended for use in recovery from automation failures.
+        """,
+    )
     worker.run(get_grib, success, failure)
     return worker
 
@@ -94,7 +102,11 @@ def get_grib(parsed_args, config, *args):
     logger.info(f"downloading {forecast} {resolution} forecast GRIB2 files for {date}")
     dest_dir_root = config["weather"]["download"][resolution]["GRIB dir"]
     grp_name = config["file group"]
-    _mkdirs(dest_dir_root, date, forecast, grp_name)
+    _mkdirs(dest_dir_root, date, forecast, grp_name, parsed_args.backfill)
+    logger.debug(
+        f"destination directory for {forecast} {resolution} forecast GRIB2 files: "
+        f"{dest_dir_root}{date}/{forecast}"
+    )
     url_tmpl = config["weather"]["download"][resolution]["url template"]
     filename_tmpl = config["weather"]["download"][resolution]["ECCC file template"]
     var_names = config["weather"]["download"][resolution]["variables"]
@@ -109,7 +121,7 @@ def get_grib(parsed_args, config, *args):
         for forecast_hour in range(1, forecast_duration + 1):
             hr_str = f"{forecast_hour:0=3}"
             lib.mkdir(
-                os.path.join(dest_dir_root, date, forecast, hr_str),
+                Path(dest_dir_root, date, forecast, hr_str),
                 logger,
                 grp_name=grp_name,
                 exist_ok=False,
@@ -134,13 +146,13 @@ def get_grib(parsed_args, config, *args):
     return checklist
 
 
-def _mkdirs(dest_dir_root, date, forecast, grp_name):
-    lib.mkdir(os.path.join(dest_dir_root, date), logger, grp_name=grp_name)
+def _mkdirs(dest_dir_root, date, forecast, grp_name, exist_ok):
+    lib.mkdir(Path(dest_dir_root, date), logger, grp_name=grp_name)
     lib.mkdir(
-        os.path.join(dest_dir_root, date, forecast),
+        Path(dest_dir_root, date, forecast),
         logger,
         grp_name=grp_name,
-        exist_ok=False,
+        exist_ok=exist_ok,
     )
 
 
@@ -150,13 +162,11 @@ def _get_file(
     filename = filename_tmpl.format(
         variable=var, date=date, forecast=forecast, hour=hr_str
     )
-    filepath = os.path.join(dest_dir_root, date, forecast, hr_str, filename)
+    filepath = Path(dest_dir_root, date, forecast, hr_str, filename)
     file_url = url_tmpl.format(
         date=date, forecast=forecast, hour=hr_str, filename=filename
     )
-    get_web_data(
-        file_url, NAME, Path(filepath), session=session, wait_exponential_max=9000
-    )
+    get_web_data(file_url, NAME, filepath, session=session, wait_exponential_max=9000)
     size = os.stat(filepath).st_size
     logger.debug(f"downloaded {size} bytes from {file_url}")
     if size == 0:
