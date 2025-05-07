@@ -302,6 +302,33 @@ class TestGetGrib:
 
         monkeypatch.setattr(download_weather.lib, "fix_perms", _mock_fix_perms)
 
+    def test_log_messages(self, m_get_file, m_mkdir, mock_fix_perms, config, caplog):
+        parsed_args = SimpleNamespace(
+            forecast="00",
+            resolution="2.5km",
+            run_date=arrow.get("2025-05-07"),
+            no_verify_certs=False,
+            backfill=False,
+        )
+        p_config = patch.dict(
+            config["weather"]["download"]["2.5 km"],
+            {"forecast duration": 6},
+        )
+        caplog.set_level(logging.DEBUG)
+
+        with p_config:
+            download_weather.get_grib(parsed_args, config)
+
+        assert caplog.records[0].levelname == "INFO"
+        expected = f"downloading 00 2.5 km forecast GRIB2 files for 20250507"
+        assert caplog.messages[0] == expected
+        assert caplog.records[1].levelname == "DEBUG"
+        expected = (
+            f"destination directory for 00 2.5 km forecast GRIB2 files: "
+            f"/results/forcing/atmospheric/continental2.5/GRIB/20250507/00"
+        )
+        assert caplog.messages[1] == expected
+
     @pytest.mark.parametrize(
         "forecast, resolution",
         (

@@ -104,7 +104,8 @@ def get_grib(parsed_args, config, *args):
     grp_name = config["file group"]
     _mkdirs(dest_dir_root, date, forecast, grp_name, parsed_args.backfill)
     logger.debug(
-        f"destination directory for {forecast} {resolution} forecast GRIB2 files: {dest_dir_root}"
+        f"destination directory for {forecast} {resolution} forecast GRIB2 files: "
+        f"{dest_dir_root}{date}/{forecast}"
     )
     url_tmpl = config["weather"]["download"][resolution]["url template"]
     filename_tmpl = config["weather"]["download"][resolution]["ECCC file template"]
