@@ -23,7 +23,7 @@ Bottleneck==1.4.2
 Brotli==1.1.0
 cached-property==1.5.2
 Cartopy==0.24.0
-certifi==2025.1.31
+certifi==2025.4.26
 cffi==1.17.1
 cfgrib==0.9.15.0
 cfgv==3.3.1
@@ -69,7 +69,7 @@ h5py==3.12.1
 hatch==1.14.0
 hatchling==1.27.0
 hpack==4.1.0
-httpcore==1.0.7
+httpcore==1.0.9
 httpx==0.28.1
 humanfriendly==10.0
 hyperframe==6.1.0
