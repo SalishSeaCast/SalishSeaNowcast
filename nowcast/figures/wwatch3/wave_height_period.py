@@ -94,10 +94,16 @@ def _prep_plot_data(buoy, wwatch3_dataset_url):
     )
     try:
         obs = moad_tools.observations.get_ndbc_buoy(buoy)
+        wave_height = obs.loc[wwatch3_period, ("WVHT", "m")]
+        dominant_period = obs.loc[wwatch3_period, ("DPD", "sec")]
+        # Filter out missing values and cast to correct data types because presence of "MM"
+        # forces the data type to "object"
+        wave_height = wave_height[wave_height != "MM"].apply(float)
+        dominant_period = dominant_period[dominant_period != "MM"].apply(int)
         obs = xarray.Dataset(
             {
-                "wave_height": obs.loc[wwatch3_period, ("WVHT", "m")],
-                "dominant_period": obs.loc[wwatch3_period, ("DPD", "sec")],
+                "wave_height": wave_height.to_xarray(),
+                "dominant_period": dominant_period.to_xarray(),
             }
         )
     except ValueError:
