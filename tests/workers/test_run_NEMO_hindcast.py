@@ -533,9 +533,9 @@ class TestGetQstatQueueInfo:
                 m_ssh_client, "optimum", "/usr/bin/qstat", "sallen,dlatorne"
             )
 
-        assert caplog.records[0].levelname == "ERROR"
-        expected = "no jobs found on optimum queue"
-        assert caplog.messages[0] == expected
+            assert caplog.records[0].levelname == "ERROR"
+            expected = "no jobs found on optimum queue"
+            assert caplog.messages[0] == expected
 
     def test_queue_info_lines(self, m_ssh_exec_cmd, config, caplog):
         qstat_return = "\n".join(f"header{i}" for i in range(5))
