@@ -219,9 +219,9 @@ class TestRunNEMO_Hindcast:
             m_now.return_value = arrow.get("2019-01-30")
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
 
-        assert not m_launch_run.called
-        expected = {"hindcast": {"host": host_name, "run id": "None"}}
-        assert checklist == expected
+            assert not m_launch_run.called
+            expected = {"hindcast": {"host": host_name, "run id": "None"}}
+            assert checklist == expected
 
     def test_checklist_not_full_month_run_date_in_future(
         self,
@@ -247,9 +247,9 @@ class TestRunNEMO_Hindcast:
             m_now.return_value = arrow.get("2019-08-15")
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
 
-        assert m_launch_run.called
-        expected = {"hindcast": {"host": host_name, "run id": "11aug19hindcast"}}
-        assert checklist == expected
+            assert m_launch_run.called
+            expected = {"hindcast": {"host": host_name, "run id": "11aug19hindcast"}}
+            assert checklist == expected
 
     @pytest.mark.parametrize(
         "full_month, prev_run_date, expected_run_id",
@@ -514,9 +514,9 @@ class TestGetPrevRunQueueInfo:
         with pytest.raises(nemo_nowcast.WorkerError):
             run_NEMO_hindcast._get_prev_run_queue_info(m_ssh_client, host_name, config)
 
-        assert caplog.records[0].levelname == "ERROR"
-        expected = f"no hindcast jobs found on {host_name} queue"
-        assert caplog.messages[0] == expected
+            assert caplog.records[0].levelname == "ERROR"
+            expected = f"no hindcast jobs found on {host_name} queue"
+            assert caplog.messages[0] == expected
 
 
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
@@ -575,9 +575,9 @@ class TestGetSqueueQueueInfo:
                 "allen,dlatorne",
             )
 
-        assert caplog.records[0].levelname == "ERROR"
-        expected = "no jobs found on optimum queue"
-        assert caplog.messages[0] == expected
+            assert caplog.records[0].levelname == "ERROR"
+            expected = "no jobs found on optimum queue"
+            assert caplog.messages[0] == expected
 
     def test_queue_info_lines(self, m_ssh_exec_cmd, config, caplog):
         m_ssh_exec_cmd.return_value = (
@@ -940,5 +940,5 @@ class TestLaunchRun:
                 config=config,
             )
 
-        assert caplog.records[0].levelname == "ERROR"
-        assert caplog.messages[0] == "stderr"
+            assert caplog.records[0].levelname == "ERROR"
+            assert caplog.messages[0] == "stderr"
