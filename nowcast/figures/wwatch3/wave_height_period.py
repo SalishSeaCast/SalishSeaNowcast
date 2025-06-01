@@ -34,6 +34,7 @@ import matplotlib.dates
 import matplotlib.pyplot as plt
 import moad_tools.observations
 import moad_tools.places
+import tenacity
 import xarray
 from pandas.plotting import register_matplotlib_converters
 
@@ -130,6 +131,10 @@ def _prep_fig_axes(figsize, theme):
     return fig, (ax_sig_height, ax_peak_freq)
 
 
+@tenacity.retry(
+    wait=tenacity.wait_random(min=5, max=10),
+    stop=tenacity.stop_after_delay(10 * 60),
+)
 def _plot_wave_height_time_series(ax, plot_data, theme):
     with suppress(AttributeError):
         plot_data.obs.wave_height.plot(
@@ -169,6 +174,10 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
     theme.set_axis_colors(ax)
 
 
+@tenacity.retry(
+    wait=tenacity.wait_random(min=5, max=10),
+    stop=tenacity.stop_after_delay(10 * 60),
+)
 def _plot_dominant_period_time_series(ax, plot_data, theme):
     with suppress(AttributeError):
         plot_data.obs.dominant_period.plot(
