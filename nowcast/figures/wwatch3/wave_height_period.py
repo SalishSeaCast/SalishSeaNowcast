@@ -66,9 +66,9 @@ def make_figure(
     """
     plot_data = _prep_plot_data(buoy, wwatch3_dataset_url)
     fig, (ax_sig_height, ax_peak_freq) = _prep_fig_axes(figsize, theme)
-    _plot_wave_height_time_series(ax_sig_height, buoy, plot_data, theme)
+    _plot_wave_height_time_series(ax_sig_height, plot_data, theme)
     _wave_height_time_series_labels(ax_sig_height, buoy, plot_data, theme)
-    _plot_dominant_period_time_series(ax_peak_freq, buoy, plot_data, theme)
+    _plot_dominant_period_time_series(ax_peak_freq, plot_data, theme)
     _dominant_period_time_series_labels(ax_peak_freq, buoy, plot_data, theme)
     return fig
 
@@ -130,7 +130,7 @@ def _prep_fig_axes(figsize, theme):
     return fig, (ax_sig_height, ax_peak_freq)
 
 
-def _plot_wave_height_time_series(ax, buoy, plot_data, theme):
+def _plot_wave_height_time_series(ax, plot_data, theme):
     with suppress(AttributeError):
         plot_data.obs.wave_height.plot(
             ax=ax,
@@ -169,7 +169,7 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
     theme.set_axis_colors(ax)
 
 
-def _plot_dominant_period_time_series(ax, buoy, plot_data, theme):
+def _plot_dominant_period_time_series(ax, plot_data, theme):
     with suppress(AttributeError):
         plot_data.obs.dominant_period.plot(
             ax=ax,
