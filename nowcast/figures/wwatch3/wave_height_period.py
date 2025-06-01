@@ -164,6 +164,9 @@ def _wave_height_time_series_labels(ax, place, plot_data, theme):
         plot_data.wwatch3.wave_height.time.values[0],
         plot_data.wwatch3.wave_height.time.values[-1],
     )
+    for label in ax.get_xticklabels(which="both"):
+        label.set_visible(False)
+    ax.set_xlabel("")
     ax.set_ylabel(
         "Significant Wave Height [m]",
         fontproperties=theme.FONTS["axis"],
