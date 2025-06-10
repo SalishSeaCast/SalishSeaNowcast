@@ -146,7 +146,7 @@ python-hglib==2.6.2
 pytz==2024.1
 PyYAML==6.0.2
 pyzmq==26.2.1
-requests==2.32.3
+requests==2.32.4
 requests-file==2.1.0
 requests-toolbelt==1.0.0
 Reshapr==25.1.dev0
