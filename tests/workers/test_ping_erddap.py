@@ -134,7 +134,9 @@ class TestConfig:
     def test_erddap_section(self, prod_config):
         erddap = prod_config["erddap"]
         assert erddap["flag dir"] == "/results/erddap/flag/"
-        assert erddap["datasetIDs"]["weather"] == ["ubcSSaSurfaceAtmosphereFieldsV1"]
+        assert erddap["datasetIDs"]["weather"] == [
+            "ubcSSaSurfaceAtmosphereFieldsV23-02"
+        ]
         assert erddap["datasetIDs"]["SCVIP-CTD"] == ["ubcONCSCVIPCTD15mV1"]
         assert erddap["datasetIDs"]["SEVIP-CTD"] == ["ubcONCSEVIPCTD15mV1"]
         # USDDL-CTD went out of service since 22-Dec-2019; repair ETA unknown
