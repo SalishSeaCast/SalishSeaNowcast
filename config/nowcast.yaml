@@ -478,7 +478,7 @@ erddap:
     weather:
       # List of ERDDAP dataset ids to create flag files for to signal updates
       # to ERDDAP server
-      - ubcSSaSurfaceAtmosphereFieldsV1
+      - ubcSSaSurfaceAtmosphereFieldsV23-02
     SCVIP-CTD:
       - ubcONCSCVIPCTD15mV1
     SEVIP-CTD:
