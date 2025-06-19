@@ -197,7 +197,7 @@ types-python-dateutil==2.9.0.20241206
 typing_extensions==4.12.2
 tzdata==2025.1
 ukkonen==1.0.1
-urllib3==2.3.0
+urllib3==2.5.0
 userpath==1.9.2
 verboselogs==1.7
 virtualenv==20.29.2
