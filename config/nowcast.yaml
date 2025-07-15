@@ -222,10 +222,10 @@ temperature salinity:
   download:
     # Template for UW LiveOcean day-averaged forecast fields file processing status URL
     # **Must be quoted to project {} characters**
-    status file url template: 'https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc_done.txt'
+    status file url template: "https://s3.kopah.uw.edu/liveocean-share/f{yyyymmdd}/ubc_done.txt"
     # Template for UW LiveOcean day-averaged forecast fields file URL
     # **Must be quoted to project {} characters**
-    bc file url template: 'https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc.nc'
+    bc file url template: "https://s3.kopah.uw.edu/liveocean-share/f{yyyymmdd}/ubc.nc"
     # Destination directory for downloaded UW LiveOcean files
     dest dir: /results/forcing/LiveOcean/downloaded/
     # File name for local storage of UW LiveOcean day-averaged forecast file

@@ -105,11 +105,11 @@ class TestConfig:
         download = prod_config["temperature salinity"]["download"]
         assert (
             download["status file url template"]
-            == "https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc_done.txt"
+            == "https://s3.kopah.uw.edu/liveocean-share/f{yyyymmdd}/ubc_done.txt"
         )
         assert (
             download["bc file url template"]
-            == "https://liveocean.apl.uw.edu/output/f{yyyymmdd}/ubc.nc"
+            == "https://s3.kopah.uw.edu/liveocean-share/f{yyyymmdd}/ubc.nc"
         )
         assert download["dest dir"] == "/results/forcing/LiveOcean/downloaded/"
         assert download["file name"] == "low_passed_UBC.nc"
