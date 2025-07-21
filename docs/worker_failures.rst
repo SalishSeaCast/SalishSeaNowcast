@@ -54,10 +54,9 @@ The HRDPS products files that we use are downloaded every 6 hours via the
 If things are going really badly the
 :py:mod:`~nowcast.workers.collect_weather` worker may not finish
 hours after its expected completion time.
-That can be determined by reading the `info log file`_ or `debug log file`_.
+That can be determined by reading the `info log file`_ or the debug log file.
 
 .. _info log file: https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.log
-.. _debug log file: https://salishsea.eos.ubc.ca/nemo/nowcast/logs/nowcast.debug.log
 
 In the rare event that the nowcast automation system fails to download the HRDPS products,
 it is critical that someone runs the :py:mod:`nowcast.workers.download_weather`
