@@ -187,6 +187,7 @@ https://salishsea.eos.ubc.ca website app when the environment is activated:
     export SALISHSEA_SITE=/SalishSeaCast/salishsea-site
     export SALISHSEA_SITE_LOGS=/SalishSeaCast/logs/salishsea-site
     export NOWCAST_LOGS=/SalishSeaCast/logs/nowcast
+    export NOWCAST_DEBUG_LOG_TOKEN=the_token_for_the_debug_log_page
     export SENTRY_DSN=a_valid_sentry_dsn_url
     EOF
 
@@ -200,6 +201,7 @@ and :command:`unset` them when it is deactivated.
     unset SALISHSEA_SITE
     unset SALISHSEA_SITE_LOGS
     unset NOWCAST_LOGS
+    unset NOWCAST_DEBUG_LOG_TOKEN
     unset SENTRY_DSN
     EOF
 
