@@ -33,7 +33,7 @@
 |                            |      :target: https://github.com/SalishSeaCast/SalishSeaNowcast/actions?query=workflow:CodeQL                                                                                                            |
 |                            |      :alt: CodeQL analysis                                                                                                                                                                               |
 +----------------------------+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| **Documentation**          | .. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest                                                                                                                      |
+| **Documentation**          | .. image:: https://app.readthedocs.org/projects/salishsea-nowcast/badge/?version=latest                                                                                                                  |
 |                            |      :target: https://salishsea-nowcast.readthedocs.io/en/latest/                                                                                                                                        |
 |                            |      :alt: Documentation Status                                                                                                                                                                          |
 |                            | .. image:: https://github.com/SalishSeaCast/SalishSeaNowcast/actions/workflows/sphinx-linkcheck.yaml/badge.svg                                                                                           |
@@ -215,7 +215,7 @@ and run :command:`pre-commit install`:
 Building the Documentation
 ==========================
 
-.. image:: https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
+.. image:: https://app.readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
     :target: https://salishsea-nowcast.readthedocs.io/en/latest/
     :alt: Documentation Status
 
@@ -444,7 +444,7 @@ The output looks something like:
     ( pkg_development: line  127) ok        https://reshapr.readthedocs.io/en/latest/index.html
     (deployment/index: line   30) ok        https://salishsea-meopar-docs.readthedocs.io/en/latest/results_server/index.html#salishseamodelresultsserver
     (figures/create_fig_module: line   25) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaNowcast/index.html#salishseanowcastpackage
-    ( pkg_development: line   36) ok        https://readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
+    ( pkg_development: line   36) ok        https://app.readthedocs.org/projects/salishsea-nowcast/badge/?version=latest
     (figures/create_fig_module: line  678) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#module-salishsea_tools.places
     (         workers: line    4) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.stormtools.correct_model
     (         workers: line  478) ok        https://salishsea-meopar-tools.readthedocs.io/en/latest/SalishSeaTools/api.html#salishsea_tools.places.PLACES
