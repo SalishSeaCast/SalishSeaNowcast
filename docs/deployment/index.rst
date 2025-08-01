@@ -73,7 +73,7 @@ The production deployment uses 2 systems:
    Version 25.1 of ``SalishSeaNowcast`` was released before that removal was started.
 
    .. _Ocean Networks Canada: https://www.oceannetworks.ca/
-   .. _arbutus.cloud: https://docs.alliancecan.ca/wiki/Cloud_resources#Arbutus_cloud
+   .. _arbutus.cloud: https://docs.alliancecan.ca/wiki/Cloud_resources
    .. _Ceph object storage: https://en.wikipedia.org/wiki/Ceph_(software)
 
 These sections describe the setup of the nowcast system on ``skookum`` and ``arbutus.cloud``,
