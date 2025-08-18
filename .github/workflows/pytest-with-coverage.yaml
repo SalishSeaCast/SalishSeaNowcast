@@ -19,7 +19,7 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Conda environment with Micromamba
         uses: mamba-org/setup-micromamba@b09ef9b599704322748535812ca03efb2625677b
