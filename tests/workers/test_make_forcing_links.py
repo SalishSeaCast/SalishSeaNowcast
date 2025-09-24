@@ -169,7 +169,7 @@ class TestConfig:
         "host, run_prep_dir",
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/nowcast-sys/runs"),
-            ("orcinus-nowcast-agrif", "/home/dlatorne/nowcast-agrif-sys/runs"),
+            ("orcinus-nowcast-agrif", "/global/home/dlatorne/nowcast-agrif-sys/runs"),
         ),
     )
     def test_run_prep_dir(self, host, run_prep_dir, prod_config):
