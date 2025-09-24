@@ -697,11 +697,11 @@ run:
         nowcast-agrif:
           results: /global/scratch/dlatorne/nowcast-agrif/
       forcing:
-        ssh dir: /home/sallen/MEOPAR/sshNeahBay/
-        bc dir: /home/sallen/MEOPAR/LiveOcean/
-        rivers dir: /home/sallen/MEOPAR/rivers/
-        Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
-        weather dir: /home/sallen/MEOPAR/continental2.5/NEMO-atmos/
+        ssh dir: /global/home/sallen/MEOPAR/sshNeahBay/
+        bc dir: /global/home/sallen/MEOPAR/LiveOcean/
+        rivers dir: /global/home/sallen/MEOPAR/rivers/
+        Fraser turbidity dir: /global/home/sallen/MEOPAR/rivers/river_turb/
+        weather dir: /global/home/sallen/MEOPAR/continental2.5/NEMO-atmos/
 
     robot.graham:
       ssh key: SalishSeaCast_robot.graham_ed25519
