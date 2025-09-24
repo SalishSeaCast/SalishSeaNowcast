@@ -133,7 +133,7 @@ class TestConfig:
             prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"][
                 "salishsea cmd"
             ]
-            == "/home/dlatorne/.local/bin/salishsea"
+            == "/global/home/dlatorne/.local/bin/salishsea"
         )
 
 
