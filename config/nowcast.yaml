@@ -692,7 +692,7 @@ run:
       # Directory on compute host where temporary run directories and run results are stored
       scratch dir: /global/scratch/dlatorne/nowcast-agrif
       run prep dir: /global/home/dlatorne/nowcast-agrif-sys/runs
-      salishsea cmd: /home/dlatorne/.local/bin/salishsea
+      salishsea cmd: /global/home/dlatorne/.local/bin/salishsea
       run types:
         nowcast-agrif:
           results: /global/scratch/dlatorne/nowcast-agrif/
