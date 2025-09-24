@@ -60,7 +60,7 @@ def config(base_config):
                         orcinus-nowcast-agrif:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
-                                rivers dir: /home/sallen/MEOPAR/rivers/
+                                rivers dir: /global/home/sallen/MEOPAR/rivers/
                         robot.graham:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
@@ -164,7 +164,7 @@ class TestConfig:
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
             ),
-            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/sshNeahBay/"),
+            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/sshNeahBay/"),
             ("robot.graham", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
@@ -181,7 +181,7 @@ class TestConfig:
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/rivers/river_turb/",
             ),
-            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/river_turb/"),
+            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/river_turb/"),
             (
                 "robot.graham",
                 "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
@@ -200,7 +200,7 @@ class TestConfig:
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
-            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/rivers/"),
+            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/"),
             ("robot.graham", "/project/def-allen/SalishSea/forcing/rivers/"),
         ),
     )
@@ -226,7 +226,10 @@ class TestConfig:
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
-            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/continental2.5/NEMO-atmos/"),
+            (
+                "orcinus-nowcast-agrif",
+                "/global/home/sallen/MEOPAR/continental2.5/NEMO-atmos/",
+            ),
             (
                 "robot.graham",
                 "/project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
@@ -251,7 +254,7 @@ class TestConfig:
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",
             ),
-            ("orcinus-nowcast-agrif", "/home/sallen/MEOPAR/LiveOcean/"),
+            ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/LiveOcean/"),
             ("robot.graham", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
         ),
     )
