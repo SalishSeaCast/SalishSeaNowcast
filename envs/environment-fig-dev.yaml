@@ -59,7 +59,7 @@ dependencies:
   - tqdm
   - verboselogs
   - watchdog
-  - xarray=2025.1.1
+  - xarray
 
   # For code style & repo QA
   - pre-commit

@@ -60,7 +60,7 @@ dependencies:
   - tqdm
   - verboselogs
   - watchdog
-  - xarray=2025.1.1
+  - xarray
 
   # For unit tests and coverage monitoring
   - pytest
