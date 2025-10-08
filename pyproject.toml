@@ -89,7 +89,7 @@ dependencies = [
     "tenacity",
     "tqdm",
     "watchdog",
-    "xarray == 2025.1.1",
+    "xarray",
     # 'NEMO_Nowcast',  # use python -m pip install --editable NEMO_Nowcast/
     # 'moad_tools',  # use python -m pip install --editable moad_tools
     # 'Reshapr',  # use python -m pip install --editable Reshapr

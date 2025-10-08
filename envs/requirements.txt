@@ -25,7 +25,7 @@ cached-property==1.5.2
 Cartopy==0.25.0
 certifi==2025.8.3
 cffi==2.0.0
-cfgrib==0.9.15.0
+cfgrib==0.9.15.1
 cfgv==3.3.1
 cftime==1.6.4
 charset-normalizer==3.4.3
@@ -39,7 +39,7 @@ coloredlogs==15.0.1
 colorspacious==1.1.2
 contourpy==1.3.3
 coverage==7.10.7
-cryptography==46.0.1
+cryptography==46.0.2
 cycler==0.12.1
 cytoolz==1.0.1
 dask==2025.9.1
@@ -56,7 +56,7 @@ feedgen==1.0.0
 filelock==3.19.1
 findlibs==0.1.2
 flox==0.10.7
-fonttools==4.60.0
+fonttools==4.60.1
 fsspec==2025.9.0
 future==1.0.0
 gitdb==4.0.12
@@ -74,7 +74,7 @@ httpx==0.28.1
 humanfriendly==10.0
 hyperframe==6.1.0
 hyperlink==21.0.0
-identify==2.6.14
+identify==2.6.15
 idna==3.10
 imagesize==1.4.1
 importlib_metadata==8.7.0
@@ -112,7 +112,7 @@ numpy-groupies==0.11.3
 numpy-indexed==0.3.7
 openpyxl==3.1.5
 packaging==25.0
-pandas==2.3.2
+pandas==2.3.3
 paramiko==4.0.0
 partd==1.4.2
 pathspec==0.12.1
@@ -136,7 +136,7 @@ pypdf==6.1.1
 pyperclip==1.11.0
 pyproj==3.7.2
 pyshp==3.0.1
-PySide6==6.9.2
+PySide6==6.9.3
 PySocks==1.7.1
 pytest==8.4.2
 pytest-cov==7.0.0
@@ -164,7 +164,7 @@ sentry-sdk==2.39.0
 setuptools==80.9.0
 shapely==2.1.2
 shellingham==1.5.4
-shiboken6==6.9.2
+shiboken6==6.9.3
 six==1.17.0
 smmap==5.0.2
 sniffio==1.3.1
@@ -205,7 +205,7 @@ verboselogs==1.7
 virtualenv==20.34.0
 watchdog==6.0.0
 wcwidth==0.2.14
-xarray==2025.1.1
+xarray==2025.9.0
 xyzservices==2025.4.0
 zict==3.0.0
 zipp==3.23.0
