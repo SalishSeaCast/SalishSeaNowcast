@@ -207,19 +207,23 @@ class TestRunNEMO_Hindcast:
         host_name,
         config,
         caplog,
+        monkeypatch,
     ):
+        def mock_now():
+            return arrow.get("2019-01-30")
+
+        monkeypatch.setattr(run_NEMO_hindcast.arrow, "now", mock_now)
+
         parsed_args = SimpleNamespace(
             host_name=host_name, full_month=True, prev_run_date=arrow.get("2019-01-11")
         )
-        caplog.set_level(logging.DEBUG)
 
-        with patch("nowcast.workers.run_NEMO_hindcast.arrow.now") as m_now:
-            m_now.return_value = arrow.get("2019-01-30")
+        with caplog.at_level(logging.DEBUG):
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
 
-            assert not m_launch_run.called
-            expected = {"hindcast": {"host": host_name, "run id": "None"}}
-            assert checklist == expected
+        assert not m_launch_run.called
+        expected = {"hindcast": {"host": host_name, "run id": "None"}}
+        assert checklist == expected
 
     def test_checklist_not_full_month_run_date_in_future(
         self,
@@ -232,22 +236,26 @@ class TestRunNEMO_Hindcast:
         host_name,
         config,
         caplog,
+        monkeypatch,
     ):
+        def mock_now():
+            return arrow.get("2019-08-15")
+
+        monkeypatch.setattr(run_NEMO_hindcast.arrow, "now", mock_now)
+
         parsed_args = SimpleNamespace(
             host_name=host_name,
             full_month=False,
             prev_run_date=arrow.get("2019-08-06"),
             walltime=None,
         )
-        caplog.set_level(logging.DEBUG)
 
-        with patch("nowcast.workers.run_NEMO_hindcast.arrow.now") as m_now:
-            m_now.return_value = arrow.get("2019-08-15")
+        with caplog.at_level(logging.DEBUG):
             checklist = run_NEMO_hindcast.run_NEMO_hindcast(parsed_args, config)
 
-            assert m_launch_run.called
-            expected = {"hindcast": {"host": host_name, "run id": "11aug19hindcast"}}
-            assert checklist == expected
+        assert m_launch_run.called
+        expected = {"hindcast": {"host": host_name, "run id": "11aug19hindcast"}}
+        assert checklist == expected
 
     @pytest.mark.parametrize(
         "full_month, prev_run_date, expected_run_id",
