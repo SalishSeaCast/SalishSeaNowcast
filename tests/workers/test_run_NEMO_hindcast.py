@@ -39,35 +39,35 @@ def config(base_config):
         f.write(
             textwrap.dedent(
                 """\
-            run:
-                hindcast hosts:
-                    cedar:
-                        ssh key: SalishSeaNEMO-nowcast_id_rsa
-                        queue info cmd: /opt/software/slurm/bin/squeue
-                        users: allen,dlatorne
-                        scratch dir: scratch/
-                        run prep dir: runs/
-                        salishsea cmd:
-                            executable: bin/salishsea
-                            run options: --deflate --max-deflate-jobs 48
-                            envvars:
+                run:
+                    hindcast hosts:
+                        cedar:
+                            ssh key: SalishSeaNEMO-nowcast_id_rsa
+                            queue info cmd: /opt/software/slurm/bin/squeue
+                            users: allen,dlatorne
+                            scratch dir: scratch/
+                            run prep dir: runs/
+                            salishsea cmd:
+                                executable: bin/salishsea
+                                run options: --deflate --max-deflate-jobs 48
+                                envvars: {}
 
-                    optimum:
-                        ssh key: SalishSeaNEMO-nowcast_id_rsa
-                        queue info cmd: /usr/bin/qstat
-                        users: sallen,dlatorne
-                        scratch dir: scratch/
-                        run prep dir: runs/
-                        salishsea cmd:
-                            executable: bin/salishsea
-                            run options:
-                            envvars:
-                                PATH: $PATH:$HOME/bin
-                                FORCING: /shared
-                                PROJECT: /home
-                                SUSANPROJECT: /home
+                        optimum:
+                            ssh key: SalishSeaNEMO-nowcast_id_rsa
+                            queue info cmd: /usr/bin/qstat
+                            users: sallen,dlatorne
+                            scratch dir: scratch/
+                            run prep dir: runs/
+                            salishsea cmd:
+                                executable: bin/salishsea
+                                run options:
+                                envvars:
+                                    PATH: $PATH:$HOME/bin
+                                    FORCING: /shared
+                                    PROJECT: /home
+                                    SUSANPROJECT: /home
 
-            """
+                """
             )
         )
     config_ = nemo_nowcast.Config()
@@ -160,8 +160,7 @@ class TestSuccess:
         msg_type = run_NEMO_hindcast.success(parsed_args)
 
         assert caplog.records[0].levelname == "INFO"
-        expected = f"NEMO hindcast run queued on {host_name}"
-        assert caplog.records[0].message == expected
+        assert caplog.messages[0] == f"NEMO hindcast run queued on {host_name}"
         assert msg_type == "success"
 
 
@@ -176,8 +175,7 @@ class TestFailure:
         msg_type = run_NEMO_hindcast.failure(parsed_args)
 
         assert caplog.records[0].levelname == "CRITICAL"
-        expected = f"NEMO hindcast run failed to queue on {host_name}"
-        assert caplog.records[0].message == expected
+        assert caplog.messages[0] == f"NEMO hindcast run failed to queue on {host_name}"
         assert msg_type == "failure"
 
 
