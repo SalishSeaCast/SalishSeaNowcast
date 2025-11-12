@@ -23,6 +23,7 @@ dependencies:
   - coloredlogs
   - dask
   - docutils
+  - erddapy
   - et_xmlfile
   - f90nml
   - feedgen
