@@ -155,7 +155,7 @@ class TestSuccess:
     """Unit test for success() function."""
 
     @pytest.mark.skipif(
-        os.getenv("GITHUB_ACTIONS"),
+        os.getenv("GITHUB_ACTIONS") == "true",
         reason="Test is fails intermittently in GHA workflow",
     )
     def test_success(self, host_name, caplog):
@@ -174,7 +174,7 @@ class TestFailure:
     """Unit test for failure() function."""
 
     @pytest.mark.skipif(
-        os.getenv("GITHUB_ACTIONS"),
+        os.getenv("GITHUB_ACTIONS") == "true",
         reason="Test is fails intermittently in GHA workflow",
     )
     def test_failure(self, host_name, caplog):
@@ -949,7 +949,7 @@ class TestLaunchRun:
         )
 
     @pytest.mark.skipif(
-        os.getenv("GITHUB_ACTIONS"),
+        os.getenv("GITHUB_ACTIONS") == "true",
         reason="Test is fails intermittently in GHA workflow",
     )
     def test_ssh_error(
