@@ -54,6 +54,7 @@ dependencies = [
     "cmocean",
     "dask",
     "docutils",
+    "erddapy",
     "et_xmlfile",
     "f90nml",
     "feedgen",
