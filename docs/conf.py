@@ -70,6 +70,13 @@ linkcheck_ignore = [
     "https://github.com/SalishSeaCast/tidal-predictions",
     "https://polar.ncep.noaa.gov/waves/wavewatch/distribution/",
 ]
+if os.environ.get("GITHUB_ACTIONS") == "true":
+    # When we run on GitHub Actions, ignore a collection of URLs that have timeouts due to rate limiting
+    linkcheck_ignore.extend(
+        [
+            r"https://alliancecan.ca/.*",
+        ]
+    )
 
 todo_include_todos = True
 
