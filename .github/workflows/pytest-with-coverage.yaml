@@ -34,7 +34,7 @@ jobs:
            cache-environment: false
            cache-downloads: true
            # persist downloads cache for 1 day
-           cache-downloads-key: downloads-${{ steps.date.outputs.date }}
+           cache-downloads-key: downloads-${{ steps.date.outputs.date }}-pytest
            create-args: >-
              python=${{ matrix.python-version }}
 
