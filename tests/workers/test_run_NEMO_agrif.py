@@ -90,6 +90,53 @@ class TestMain:
         assert worker.cli.parser._actions[5].help
 
 
+class TestConfig:
+    """Unit tests for production YAML config file elements related to worker."""
+
+    def test_message_registry(self, prod_config):
+        assert "run_NEMO_agrif" in prod_config["message registry"]["workers"]
+        msg_registry = prod_config["message registry"]["workers"]["run_NEMO_agrif"]
+        assert msg_registry["checklist key"] == "NEMO run"
+
+    def test_message_registry_keys(self, prod_config):
+        msg_registry = prod_config["message registry"]["workers"]["run_NEMO_agrif"]
+        assert list(msg_registry.keys()) == [
+            "checklist key",
+            "success",
+            "failure",
+            "crash",
+        ]
+
+    def test_enabled_hosts(self, prod_config):
+        assert "orcinus-nowcast-agrif" in prod_config["run"]["enabled hosts"]
+
+    def test_ssh_key(self, prod_config):
+        assert (
+            prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"]["ssh key"]
+            == "SalishSeaNEMO-nowcast_id_rsa"
+        )
+
+    def test_scratch_dir(self, prod_config):
+        assert (
+            prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"]["scratch dir"]
+            == "/global/scratch/dlatorne/nowcast-agrif"
+        )
+
+    def test_run_prep_dir(self, prod_config):
+        assert (
+            prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"]["run prep dir"]
+            == "/global/home/dlatorne/nowcast-agrif-sys/runs"
+        )
+
+    def test_salishsea_cmd(self, prod_config):
+        assert (
+            prod_config["run"]["enabled hosts"]["orcinus-nowcast-agrif"][
+                "salishsea cmd"
+            ]
+            == "/global/home/dlatorne/.local/bin/salishsea"
+        )
+
+
 class TestSuccess:
     """Unit test for success() function."""
 

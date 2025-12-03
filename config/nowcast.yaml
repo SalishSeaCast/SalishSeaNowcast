@@ -691,17 +691,17 @@ run:
       make forcing links: True
       # Directory on compute host where temporary run directories and run results are stored
       scratch dir: /global/scratch/dlatorne/nowcast-agrif
-      run prep dir: /home/dlatorne/nowcast-agrif-sys/runs
-      salishsea cmd: /home/dlatorne/.local/bin/salishsea
+      run prep dir: /global/home/dlatorne/nowcast-agrif-sys/runs
+      salishsea cmd: /global/home/dlatorne/.local/bin/salishsea
       run types:
         nowcast-agrif:
           results: /global/scratch/dlatorne/nowcast-agrif/
       forcing:
-        ssh dir: /home/sallen/MEOPAR/sshNeahBay/
-        bc dir: /home/sallen/MEOPAR/LiveOcean/
-        rivers dir: /home/sallen/MEOPAR/rivers/
-        Fraser turbidity dir: /home/sallen/MEOPAR/rivers/river_turb/
-        weather dir: /home/sallen/MEOPAR/continental2.5/NEMO-atmos/
+        ssh dir: /global/home/sallen/MEOPAR/sshNeahBay/
+        bc dir: /global/home/sallen/MEOPAR/LiveOcean/
+        rivers dir: /global/home/sallen/MEOPAR/rivers/
+        Fraser turbidity dir: /global/home/sallen/MEOPAR/rivers/river_turb/
+        weather dir: /global/home/sallen/MEOPAR/continental2.5/NEMO-atmos/
 
     robot.graham:
       ssh key: SalishSeaCast_robot.graham_ed25519
