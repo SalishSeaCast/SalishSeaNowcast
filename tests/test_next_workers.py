@@ -823,7 +823,7 @@ class TestAfterUploadForcing:
             "run",
             {
                 "enabled hosts": {
-                    "robot.graham": {"run types": {}, "make forcing links": False}
+                    "robot.nibi": {"run types": {}, "make forcing links": False}
                 }
             },
         )
@@ -831,7 +831,7 @@ class TestAfterUploadForcing:
             Message(
                 "upload_forcing",
                 f"success {run_type}",
-                {"robot.graham": {run_type: {"run date": "2020-06-29"}}},
+                {"robot.nibi": {run_type: {"run date": "2020-06-29"}}},
             ),
             config,
             checklist,
@@ -1813,7 +1813,7 @@ class TestAfterDownloadResults:
         )
         archive_tarball = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["nowcast-green", "2022-may", "robot.graham"],
+            args=["nowcast-green", "2022-may", "robot.nibi"],
             host="localhost",
         )
         assert archive_tarball not in workers
@@ -1832,7 +1832,7 @@ class TestAfterDownloadResults:
         )
         expected = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["nowcast-green", "2022-may", "robot.graham"],
+            args=["nowcast-green", "2022-may", "robot.nibi"],
             host="localhost",
         )
         assert expected in workers
@@ -2077,7 +2077,7 @@ class TestAfterSplitResults:
         workers = next_workers.after_split_results(msg, config, checklist)
         archive_tarball = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["hindcast", "2022-nov", "robot.graham"],
+            args=["hindcast", "2022-nov", "robot.nibi"],
         )
         assert archive_tarball not in workers
 
@@ -2103,7 +2103,7 @@ class TestAfterSplitResults:
         )
         expected = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["hindcast", "2022-oct", "robot.graham"],
+            args=["hindcast", "2022-oct", "robot.nibi"],
         )
         assert workers[-1] == expected
 
@@ -2128,7 +2128,7 @@ class TestAfterSplitResults:
         )
         archive_tarball = NextWorker(
             "nowcast.workers.archive_tarball",
-            args=["hindcast", "2022-oct", "robot.graham"],
+            args=["hindcast", "2022-oct", "robot.nibi"],
         )
         assert archive_tarball not in workers
 
