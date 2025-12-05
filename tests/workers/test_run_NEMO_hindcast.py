@@ -42,8 +42,8 @@ def config(base_config):
                 """\
                 run:
                     hindcast hosts:
-                        cedar:
-                            ssh key: SalishSeaNEMO-nowcast_id_rsa
+                        nibi:
+                            ssh key: SalishSeaCast_robot.nibi_ed25519
                             queue info cmd: /opt/software/slurm/bin/squeue
                             users: allen,dlatorne
                             scratch dir: scratch/
@@ -150,7 +150,7 @@ class TestConfig:
         }
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+@pytest.mark.parametrize("host_name", ("nibi", "optimum"))
 class TestSuccess:
     """Unit test for success() function."""
 
@@ -169,7 +169,7 @@ class TestSuccess:
         assert msg_type == "success"
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+@pytest.mark.parametrize("host_name", ("nibi", "optimum"))
 class TestFailure:
     """Unit test for failure() function."""
 
@@ -188,7 +188,7 @@ class TestFailure:
         assert msg_type == "failure"
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+@pytest.mark.parametrize("host_name", ("nibi", "optimum"))
 @patch(
     "nowcast.workers.watch_NEMO_agrif.ssh_sftp.sftp",
     return_value=(Mock(name="ssh_client"), Mock(name="sftp_client")),
@@ -493,13 +493,13 @@ class TestGetPrevRunQueueInfo:
 
         with caplog.at_level(logging.DEBUG):
             prev_run_date, job_id = run_NEMO_hindcast._get_prev_run_queue_info(
-                m_ssh_client, "cedar", config
+                m_ssh_client, "nibi", config
             )
 
         assert prev_run_date == arrow.get("2018-05-01")
         assert job_id == "12345678"
         assert caplog.records[0].levelname == "INFO"
-        expected = "using 01may18hindcast job 12345678 on cedar as previous run"
+        expected = "using 01may18hindcast job 12345678 on nibi as previous run"
         assert caplog.messages[0] == expected
 
     @pytest.mark.skipif(
@@ -527,7 +527,7 @@ class TestGetPrevRunQueueInfo:
         os.getenv("GITHUB_ACTIONS") == "true",
         reason="Test is fails intermittently in GHA workflow",
     )
-    @pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+    @pytest.mark.parametrize("host_name", ("nibi", "optimum"))
     def test_no_prev_hindcast_job_found(
         self, m_squeue_info, m_qstat_info, host_name, config, caplog
     ):
@@ -634,7 +634,7 @@ class TestGetSqueueQueueInfo:
         ]
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+@pytest.mark.parametrize("host_name", ("nibi", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.ssh_sftp.ssh_exec_command", autospec=True)
 @patch("nowcast.workers.run_NEMO_hindcast.f90nml.read", autospec=True)
 class TestGetPrevRunNamelistInfo:
@@ -685,7 +685,7 @@ class TestGetPrevRunNamelistInfo:
         assert prev_namelist_info == SimpleNamespace(itend=2_717_280, rdt=40.0)
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+@pytest.mark.parametrize("host_name", ("nibi", "optimum"))
 @patch("nowcast.workers.run_NEMO_hindcast.f90nml.patch", autospec=True)
 class TestEditNamelistTime:
     """Unit tests for _edit_namelist_time() function."""
@@ -818,7 +818,7 @@ class TestEditNamelistTime:
         )
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+@pytest.mark.parametrize("host_name", ("nibi", "optimum"))
 @patch(
     "nowcast.workers.run_NEMO_agrif.yaml.safe_load",
     return_value={
@@ -914,7 +914,7 @@ class TestEditRunDesc:
 @pytest.mark.parametrize(
     "host_name, run_opts, envvars",
     (
-        ("cedar", "--deflate --max-deflate-jobs 48", ""),
+        ("nibi", "--deflate --max-deflate-jobs 48", ""),
         (
             "optimum",
             "",

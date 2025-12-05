@@ -112,7 +112,7 @@ See also the `#optimum-cluster`_ Slack channel.
 
 With the update of the production to run the V21-11 model version in January 2024,
 we decided to end the daily ``nowcast-dev`` development model runs on ``salish``.
-Development is now generally done in research runs on ``graham``.
+Development is now generally done in research runs on ``nibi``.
 ``salish`` is now mostly used for analysis tasks, post-processing of NEMO model results files
 to produce day-average and month-average dataset files,
 and Lagrangian particle tracking analysis with :program:`ariane` and :program:`OceanParcels`.

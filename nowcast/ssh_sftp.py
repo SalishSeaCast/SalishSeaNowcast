@@ -71,7 +71,7 @@ def ssh(host, key_filename, ssh_config_file="~/.ssh/config"):
         ssh_config.parse(f)
     host = ssh_config.lookup(host)
     try:
-        # Modern ssh server that uses a rsa-sha2 algorithm; e.g. arbutus and graham
+        # Modern ssh server that uses a rsa-sha2 algorithm; e.g. arbutus and nibi
         ssh_client.connect(
             host["hostname"],
             username=host["user"],

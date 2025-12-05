@@ -41,8 +41,8 @@ def config(base_config):
                 """\
                 run:
                   hindcast hosts:
-                    graham:
-                      ssh key: SalishSeaNEMO-nowcast_id_rsa
+                    nibi:
+                      ssh key: SalishSeaCast_robot.nibi_ed25519
                       queue info cmd: /opt/software/slurm/bin/squeue
                       users: allen,dlatorne
                       scratch dir: scratch/hindcast
@@ -107,7 +107,7 @@ class TestConfig:
         assert optimum_hindcast["scratch dir"] == "/scratch/sallen/dlatorne/oxygen/"
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+@pytest.mark.parametrize("host_name", ("nibi", "optimum"))
 class TestSuccess:
     """Unit test for success() function."""
 
@@ -123,7 +123,7 @@ class TestSuccess:
         assert msg_type == "success"
 
 
-@pytest.mark.parametrize("host_name", ("cedar", "optimum"))
+@pytest.mark.parametrize("host_name", ("nibi", "optimum"))
 class TestFailure:
     """Unit test for failure() function."""
 
@@ -149,7 +149,7 @@ class TestWatchNEMO_Hindcast:
 
     @patch("nowcast.workers.watch_NEMO_hindcast._SqueueHindcastJob", spec=True)
     def test_squeue_run_completed(self, m_job, m_sftp, config, caplog):
-        parsed_args = SimpleNamespace(host_name="graham", run_id=None)
+        parsed_args = SimpleNamespace(host_name="nibi", run_id=None)
         m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "9813234", "01jul18hindcast"
         m_job().is_queued.return_value = False
@@ -202,7 +202,7 @@ class TestWatchNEMO_Hindcast:
     def test_run_cancelled_or_aborted(
         self, m_job, m_sftp, completion_state, config, caplog
     ):
-        parsed_args = SimpleNamespace(host_name="graham", run_id=None)
+        parsed_args = SimpleNamespace(host_name="nibi", run_id=None)
         m_job().host_name = parsed_args.host_name
         m_job().job_id, m_job().run_id = "9813234", "01jul18hindcast"
         m_job().is_queued.return_value = False
@@ -442,8 +442,8 @@ class TestQstatHindcastJob:
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
             "cedoptimumar",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="01jan13hindcast",
         )
         job._get_job_state = Mock(name="_get_job_state", return_value="R")
@@ -705,9 +705,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
         )
         job._get_queue_info = Mock(
             name="_get_queue_info",
@@ -718,7 +718,7 @@ class TestSqueueHindcastJob:
         job.get_run_id()
 
         assert caplog.records[0].levelname == "INFO"
-        expected = "watching 21dec16hindcast job 12426878 on cedar"
+        expected = "watching 21dec16hindcast job 12426878 on nibi"
         assert caplog.records[0].message == expected
         assert job.job_id == "12426878"
         assert job.run_id == "21dec16hindcast"
@@ -727,9 +727,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -747,9 +747,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -765,9 +765,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -786,9 +786,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "cedar",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -807,9 +807,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -834,9 +834,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -872,9 +872,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -892,9 +892,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -918,9 +918,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -944,9 +944,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -976,9 +976,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -1013,9 +1013,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -1030,9 +1030,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -1050,9 +1050,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -1069,9 +1069,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="1658943",
         )
@@ -1095,9 +1095,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
         )
         job.run_id = "21dec16hindcast"
         job.tmp_run_dir = (
@@ -1126,13 +1126,13 @@ class TestSqueueHindcastJob:
             call(
                 "/opt/software/slurm/bin/sbatch "
                 "/scratch/hindcast/21dec16hindcast_2018-10-06T195251.255493-0700/SalishSeaNEMO.sh",
-                "21dec16hindcast on graham: re-queued",
+                "21dec16hindcast on nibi: re-queued",
             ),
             call(f"ls -dtr {job.scratch_dir}/*hindcast*"),
             call(
                 "/opt/software/slurm/bin/sbatch -d afterok:12426878 "
                 "/scratch/hindcast/01jan17hindcast_2018-10-07T141411.374009-0700/SalishSeaNEMO.sh",
-                "01jan17hindcast on graham: re-queued",
+                "01jan17hindcast on nibi: re-queued",
             ),
         ]
 
@@ -1140,9 +1140,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
             run_id="21dec16hindcast",
             job_id="12426878",
         )
@@ -1173,9 +1173,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
         )
         job.run_id = "01mar17hindcast"
         job._ssh_exec_command = Mock(
@@ -1199,9 +1199,9 @@ class TestSqueueHindcastJob:
         job = watch_NEMO_hindcast._SqueueHindcastJob(
             Mock(name="ssh_client"),
             Mock(name="sftp_client"),
-            "graham",
-            config["run"]["hindcast hosts"]["graham"]["users"],
-            Path(config["run"]["hindcast hosts"]["graham"]["scratch dir"]),
+            "nibi",
+            config["run"]["hindcast hosts"]["nibi"]["users"],
+            Path(config["run"]["hindcast hosts"]["nibi"]["scratch dir"]),
         )
         caplog.set_level(logging.DEBUG)
 
