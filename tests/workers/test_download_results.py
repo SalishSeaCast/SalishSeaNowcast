@@ -51,7 +51,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | Mapping:
                   nowcast-agrif: SalishSea/nowcast-agrif/
                   hindcast:
                     localhost: SalishSea/hindcast/
-                    robot.graham: nearline/SalishSea/hindcast/
+                    robot.nibi: nearline/SalishSea/hindcast/
 
                 run:
                   enabled hosts:
@@ -69,7 +69,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | Mapping:
                       run types:
                         nowcast-agrif:
                           results: SalishSea/nowcast-agrif/
-                    robot.graham:
+                    robot.nibi:
                       ssh key: SalishSeaNEMO-nowcast_id_rsa
 
                   hindcast hosts:
@@ -176,7 +176,7 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "robot.graham",
+            "robot.nibi",
             "optimum-hindcast",
         ]
 
@@ -188,7 +188,7 @@ class TestConfig:
                 ["nowcast", "forecast", "forecast2", "nowcast-green"],
             ),
             ("orcinus-nowcast-agrif", ["nowcast-agrif"]),
-            ("robot.graham", []),
+            ("robot.nibi", []),
             ("optimum-hindcast", []),
         ),
     )
@@ -260,7 +260,7 @@ class TestConfig:
             "nowcast-agrif": "/results/SalishSea/nowcast-agrif.201702/",
             "hindcast": {
                 "localhost": "/ocean/sallen/timbucktwo/oxygen/",
-                "robot.graham": "/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
+                "robot.nibi": "/nearline/rrg-allen/SalishSea/nowcast-green.202111/",
             },
         }
         assert prod_config["results archive"].keys() == archives.keys()
@@ -391,13 +391,13 @@ class TestDownloadResults:
         parsed_args = SimpleNamespace(
             host_name="sockeye-hindcast",
             run_type="hindcast",
-            dest_host="robot.graham",
+            dest_host="robot.nibi",
             run_date=arrow.get("2019-09-03"),
         )
         download_results.download_results(parsed_args, config)
         m_run_in_subproc.assert_called_once_with(
             shlex.split(
-                "scp -pr sockeye-hindcast:SalishSea/hindcast/03sep19 robot.graham:nearline/SalishSea/hindcast"
+                "scp -pr sockeye-hindcast:SalishSea/hindcast/03sep19 robot.nibi:nearline/SalishSea/hindcast"
             ),
             download_results.logger.debug,
             download_results.logger.error,

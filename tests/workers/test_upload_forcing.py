@@ -61,7 +61,7 @@ def config(base_config):
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
                                 rivers dir: /global/home/sallen/MEOPAR/rivers/
-                        robot.graham:
+                        robot.nibi:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
                                 rivers dir: /project/def-allen/SalishSea/forcing/rivers/
@@ -142,19 +142,19 @@ class TestConfig:
             "arbutus.cloud-nowcast",
             "salish-nowcast",
             "orcinus-nowcast-agrif",
-            "robot.graham",
+            "robot.nibi",
             "optimum-hindcast",
         ]
 
     def test_default_ssh_keys(self, prod_config):
         for host in prod_config["run"]["enabled hosts"]:
-            if host != "robot.graham":
+            if host != "robot.nibi":
                 ssh_key = prod_config["run"]["enabled hosts"][host]["ssh key"]
                 assert ssh_key == "SalishSeaNEMO-nowcast_id_rsa"
 
-    def test_robot_graham_ssh_key(self, prod_config):
-        ssh_key = prod_config["run"]["enabled hosts"]["robot.graham"]["ssh key"]
-        assert ssh_key == "SalishSeaCast_robot.graham_ed25519"
+    def test_robot_nibi_ssh_key(self, prod_config):
+        ssh_key = prod_config["run"]["enabled hosts"]["robot.nibi"]["ssh key"]
+        assert ssh_key == "SalishSeaCast_robot.nibi_ed25519"
 
     @pytest.mark.parametrize(
         "host, ssh_key",
@@ -165,7 +165,7 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
             ),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/sshNeahBay/"),
-            ("robot.graham", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
+            ("robot.nibi", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
     def test_ssh_uploads(self, host, ssh_key, prod_config):
@@ -183,7 +183,7 @@ class TestConfig:
             ),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/river_turb/"),
             (
-                "robot.graham",
+                "robot.nibi",
                 "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
             ),
         ),
@@ -201,7 +201,7 @@ class TestConfig:
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/"),
-            ("robot.graham", "/project/def-allen/SalishSea/forcing/rivers/"),
+            ("robot.nibi", "/project/def-allen/SalishSea/forcing/rivers/"),
         ),
     )
     def test_river_runoff_uploads(self, host, expected, prod_config):
@@ -231,7 +231,7 @@ class TestConfig:
                 "/global/home/sallen/MEOPAR/continental2.5/NEMO-atmos/",
             ),
             (
-                "robot.graham",
+                "robot.nibi",
                 "/project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
         ),
@@ -255,7 +255,7 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",
             ),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/LiveOcean/"),
-            ("robot.graham", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
+            ("robot.nibi", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
         ),
     )
     def test_live_ocean_uploads(self, host, expected, prod_config):
@@ -272,16 +272,16 @@ class TestConfig:
         ("nowcast+", "arbutus.cloud-nowcast"),
         ("nowcast+", "orcinus-nowcast-agrif"),
         ("nowcast+", "optimum-hindcast"),
-        ("nowcast+", "robot.graham"),
+        ("nowcast+", "robot.nibi"),
         ("ssh", "arbutus.cloud-nowcast"),
         ("forecast2", "arbutus.cloud-nowcast"),
         ("forecast2", "orcinus-nowcast-agrif"),
         ("forecast2", "optimum-hindcast"),
-        ("forecast2", "robot.graham"),
+        ("forecast2", "robot.nibi"),
         ("turbidity", "arbutus.cloud-nowcast"),
         ("turbidity", "orcinus-nowcast-agrif"),
         ("turbidity", "optimum-hindcast"),
-        ("turbidity", "robot.graham"),
+        ("turbidity", "robot.nibi"),
     ),
 )
 class TestSuccess:
@@ -311,16 +311,16 @@ class TestSuccess:
         ("nowcast+", "arbutus.cloud-nowcast"),
         ("nowcast+", "orcinus-nowcast-agrif"),
         ("nowcast+", "optimum-hindcast"),
-        ("nowcast+", "robot.graham"),
+        ("nowcast+", "robot.nibi"),
         ("ssh", "arbutus.cloud-nowcast"),
         ("forecast2", "arbutus.cloud-nowcast"),
         ("forecast2", "orcinus-nowcast-agrif"),
         ("forecast2", "optimum-hindcast"),
-        ("forecast2", "robot.graham"),
+        ("forecast2", "robot.nibi"),
         ("turbidity", "arbutus.cloud-nowcast"),
         ("turbidity", "orcinus-nowcast-agrif"),
         ("turbidity", "optimum-hindcast"),
-        ("turbidity", "robot.graham"),
+        ("turbidity", "robot.nibi"),
     ),
 )
 class TestFailure:
@@ -380,7 +380,7 @@ def mock_sftp_client(monkeypatch):
         ),
         (
             "nowcast+",
-            "robot.graham",
+            "robot.nibi",
             ["ssh", "rivers", "weather", "boundary conditions"],
         ),
         ("ssh", "arbutus.cloud-nowcast", ["ssh"]),
@@ -401,13 +401,13 @@ def mock_sftp_client(monkeypatch):
         ),
         (
             "forecast2",
-            "robot.graham",
+            "robot.nibi",
             ["ssh", "rivers", "weather", "boundary conditions"],
         ),
         ("turbidity", "arbutus.cloud-nowcast", ["turbidity"]),
         ("turbidity", "orcinus-nowcast-agrif", ["turbidity"]),
         ("turbidity", "optimum-hindcast", ["turbidity"]),
-        ("turbidity", "robot.graham", ["turbidity"]),
+        ("turbidity", "robot.nibi", ["turbidity"]),
     ),
 )
 class TestChecklist:
