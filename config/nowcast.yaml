@@ -704,7 +704,7 @@ run:
         weather dir: /global/home/sallen/MEOPAR/continental2.5/NEMO-atmos/
 
     robot.nibi:
-      ssh key: SalishSeaCast_robot.graham_ed25519
+      ssh key: SalishSeaCast_robot.nibi_ed25519
       shared storage: False
       make forcing links: False
       # Empty collection of run types because all we want to do is upload daily forcing

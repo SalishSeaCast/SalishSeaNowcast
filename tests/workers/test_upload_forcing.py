@@ -152,9 +152,9 @@ class TestConfig:
                 ssh_key = prod_config["run"]["enabled hosts"][host]["ssh key"]
                 assert ssh_key == "SalishSeaNEMO-nowcast_id_rsa"
 
-    def test_robot_graham_ssh_key(self, prod_config):
+    def test_robot_nibi_ssh_key(self, prod_config):
         ssh_key = prod_config["run"]["enabled hosts"]["robot.nibi"]["ssh key"]
-        assert ssh_key == "SalishSeaCast_robot.graham_ed25519"
+        assert ssh_key == "SalishSeaCast_robot.nibi_ed25519"
 
     @pytest.mark.parametrize(
         "host, ssh_key",

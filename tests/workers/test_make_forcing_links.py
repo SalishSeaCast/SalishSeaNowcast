@@ -158,7 +158,7 @@ class TestConfig:
         (
             ("arbutus.cloud-nowcast", "SalishSeaNEMO-nowcast_id_rsa"),
             ("orcinus-nowcast-agrif", "SalishSeaNEMO-nowcast_id_rsa"),
-            ("robot.nibi", "SalishSeaCast_robot.graham_ed25519"),
+            ("robot.nibi", "SalishSeaCast_robot.nibi_ed25519"),
             ("optimum-hindcast", "SalishSeaNEMO-nowcast_id_rsa"),
         ),
     )
