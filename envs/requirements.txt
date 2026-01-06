@@ -18,7 +18,7 @@ backports.tarfile==1.2.0
 bcrypt==5.0.0
 beautifulsoup4==4.14.2
 black==25.1.0
-bokeh==3.8.1
+bokeh==3.8.2
 Bottleneck==1.6.0
 Brotli==1.2.0
 cached-property==1.5.2
