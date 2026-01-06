@@ -131,7 +131,7 @@ pyarrow==22.0.0
 pycparser==2.22
 Pygments==2.19.2
 pygrib==2.1.6
-PyNaCl==1.6.0
+PyNaCl==1.6.2
 pyparsing==3.2.5
 pypdf==6.4.0
 pyperclip==1.11.0
