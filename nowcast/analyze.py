@@ -430,15 +430,15 @@ def calculate_error(res_mod, time_mod, res_obs, time_obs):
 
 def depth_average(var, depths, depth_axis):
     """Average var over depth using the trapezoid rule.
-    The var should be masked in order to apply this function.
-    The depth is calcluated based on masking.
-    If var is not masked then the maximum depth of the depths array is used.
+    The var should be masked to apply this function.
+    The depth is calculated based on masking.
+    If var is not masked, then the maximum depth of the depths array is used.
 
     :arg var: variable to average
-    :type var: masked numpy array
+    :type var: :py:class:`numpy.ma.core.MaskedArray`
 
     :arg depths: the depths associated with var
-    :type depths: numpy array
+    :type depths: :py:class:`numpy.ndarray`
 
     :arg depth_axis: The axis in var associated with depth
     :type depth_axis: int
@@ -449,10 +449,10 @@ def depth_average(var, depths, depth_axis):
     # Make sure depths is an array and not an netcdf variable.
     de = np.array(depths)
     # Integrate, the easy part
-    integral = np.trapz(var, x=de, axis=depth_axis)
+    integral = np.trapezoid(var, x=de, axis=depth_axis)
     # Find depth for averaging
-    # Need to expand the depths array to same shape as the integrand.
-    # This is really awkward..
+    # Need to expand the depths array to the same shape as the integrand.
+    # This is really awkward.
     for n in np.arange(var.ndim - 1):
         de = de[:, np.newaxis]
     roll = np.rollaxis(var, depth_axis)
