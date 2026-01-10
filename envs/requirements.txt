@@ -133,7 +133,7 @@ Pygments==2.19.2
 pygrib==2.1.6
 PyNaCl==1.6.2
 pyparsing==3.2.5
-pypdf==6.4.0
+pypdf==6.6.0
 pyperclip==1.11.0
 pyproj==3.7.2
 pyshp==3.0.2
