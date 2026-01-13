@@ -202,7 +202,7 @@ ukkonen==1.0.1
 urllib3==2.6.3
 userpath==1.9.2
 verboselogs==1.7
-virtualenv==20.35.4
+virtualenv==20.36.1
 watchdog==6.0.0
 wcwidth==0.2.14
 xarray==2025.10.1
