@@ -44,7 +44,7 @@ cycler==0.12.1
 cytoolz==1.1.0
 dask==2025.11.0
 distlib==0.4.0
-distributed==2025.11.0
+distributed==2026.1.1
 docutils==0.21.2
 eccodes==2.44.0
 editables==0.5
