@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast archive_tarball worker."""
+
 import argparse
 import logging
 import textwrap
@@ -35,9 +36,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 results archive:
                   nowcast: SalishSea/nowcast.201905/
                   nowcast-green: SalishSea/nowcast-green.201905/
@@ -49,9 +48,7 @@ def config(base_config):
                   archive hindcast: True
                   temporary tarball dir: ocean/dlatorne/
                   robot.nibi: /nearline/rrg-allen/SalishSea/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

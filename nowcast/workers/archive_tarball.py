@@ -22,6 +22,7 @@ because the netCDF files that compose most of it are already highly compressed.
 A .index text file containing a list of the files in the tarball is also created
 and moved to the remote storage.
 """
+
 import argparse
 import functools
 import logging

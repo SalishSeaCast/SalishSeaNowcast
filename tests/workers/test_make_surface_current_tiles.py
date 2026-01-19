@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast make_surface_current_tiles worker."""
+
 import logging
 from pathlib import Path
 import textwrap
@@ -34,9 +35,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 file group: allen
 
                 figures:
@@ -63,9 +62,7 @@ def config(base_config):
                     coordinates: coordinates_seagrid_SalishSea201702.nc
                     bathymetry: bathymetry_201702.nc
                     mesh mask: mesh_mask201702.nc
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

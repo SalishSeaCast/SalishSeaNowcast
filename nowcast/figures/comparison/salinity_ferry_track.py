@@ -19,6 +19,7 @@ vessel.
 Testing notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/comparison/TestSalinityFerryTrackModule.ipynb
 """
+
 from collections import namedtuple
 
 import matplotlib.pyplot as plt

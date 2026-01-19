@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast watch_NEMO_hindcast worker."""
+
 import logging
 import textwrap
 from pathlib import Path
@@ -36,9 +37,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 run:
                   hindcast hosts:
                     nibi:
@@ -52,9 +51,7 @@ def config(base_config):
                       queue info cmd: /usr/bin/qstat
                       users: sallen,dlatorne
                       scratch dir: scratch/hindcast
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_
@@ -589,16 +586,14 @@ class TestQstatHindcastJob:
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
         )
         job.run_id = "01jan13hindcast"
-        m_ssh_exec_cmd.return_value = textwrap.dedent(
-            """\
+        m_ssh_exec_cmd.return_value = textwrap.dedent("""\
 
             admin.default.domain:
                                                                                               Req'd    Req'd       Elap
             Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
             ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
             62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53
-            """
-        )
+            """)
         caplog.set_level(logging.DEBUG)
 
         queue_info = job._get_queue_info()
@@ -620,8 +615,7 @@ class TestQstatHindcastJob:
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
         )
         job.run_id = "11jan13hindcast"
-        m_ssh_exec_cmd.return_value = textwrap.dedent(
-            """\
+        m_ssh_exec_cmd.return_value = textwrap.dedent("""\
 
             admin.default.domain:
                                                                                               Req'd    Req'd       Elap
@@ -629,8 +623,7 @@ class TestQstatHindcastJob:
             ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
             62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     10:00:00  C      --
             62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53
-            """
-        )
+            """)
         caplog.set_level(logging.DEBUG)
 
         queue_info = job._get_queue_info()
@@ -649,16 +642,14 @@ class TestQstatHindcastJob:
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
         )
-        m_ssh_exec_cmd.return_value = textwrap.dedent(
-            """\
+        m_ssh_exec_cmd.return_value = textwrap.dedent("""\
 
             admin.default.domain:
                                                                                               Req'd    Req'd       Elap
             Job ID                  Username    Queue    Jobname          SessID  NDS   TSK   Memory   Time    S   Time
             ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
             62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     06:00:00  R 00:20:53
-            """
-        )
+            """)
         caplog.set_level(logging.DEBUG)
 
         queue_info = job._get_queue_info()
@@ -679,8 +670,7 @@ class TestQstatHindcastJob:
             config["run"]["hindcast hosts"]["optimum"]["users"],
             Path(config["run"]["hindcast hosts"]["optimum"]["scratch dir"]),
         )
-        m_ssh_exec_cmd.return_value = textwrap.dedent(
-            """\
+        m_ssh_exec_cmd.return_value = textwrap.dedent("""\
 
             admin.default.domain:
                                                                                               Req'd    Req'd       Elap
@@ -688,8 +678,7 @@ class TestQstatHindcastJob:
             ----------------------- ----------- -------- ---------------- ------ ----- ------ ------ --------- - ---------
             62991.admin.default.do  dlatorne    mpi      01jan13hindcast  22390  14    280    --     10:00:00  C      --
             62995.admin.default.do  dlatorne    mpi      11jan13hindcast  28434  14    280    --     10:00:00  R 00:20:53
-            """
-        )
+            """)
         caplog.set_level(logging.DEBUG)
 
         queue_info = job._get_queue_info()

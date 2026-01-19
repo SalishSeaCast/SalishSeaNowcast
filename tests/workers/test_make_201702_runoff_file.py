@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast make_201702_runoff_file worker."""
+
 import logging
 import os
 from pathlib import Path
@@ -35,9 +36,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 rivers:
                   SOG river files:
                     Fraser: SOG-forcing/ECget/Fraser_flow
@@ -48,9 +47,7 @@ def config(base_config):
                       file template: "R201702DFraCElse_{:y%Ym%md%d}.nc"
                       prop_dict module: salishsea_tools.river_201702
                   rivers dir: forcing/rivers/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

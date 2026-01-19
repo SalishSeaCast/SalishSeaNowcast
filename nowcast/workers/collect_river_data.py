@@ -20,6 +20,7 @@
 an ECCC datamart CSV file mirror, or the USGS Water Service REST service,
 and appends a day-average discharge to a SOG-format forcing file.
 """
+
 import logging
 import os
 from pathlib import Path

@@ -17,6 +17,7 @@
 
 
 """Unit tests for analyze module."""
+
 import numpy as np
 import pytest
 

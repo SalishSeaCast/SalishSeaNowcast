@@ -15,6 +15,7 @@
 """SalishSeaCast release management script that tags NEMO code and model
 configuration repos for a production release.
 """
+
 import argparse
 import logging
 from pathlib import Path
@@ -39,11 +40,9 @@ def main():
 
 
 def _command_line_interface():
-    parser = argparse.ArgumentParser(
-        description="""
+    parser = argparse.ArgumentParser(description="""
         Tag NEMO code and model configuration repos for a production release.
-        """
-    )
+        """)
     parser.prog = f"python -m release_mgmt.{NAME}"
     parser.add_argument(
         "repos_file",

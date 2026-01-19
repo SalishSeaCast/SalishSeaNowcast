@@ -17,6 +17,7 @@ boundary conditions files for the SalishSeaCast NEMO model western (Juan de Fuca
 open boundary from the University of Washington Live Ocean model forecast
 product.
 """
+
 import logging
 from pathlib import Path
 

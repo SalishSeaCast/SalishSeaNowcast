@@ -15,6 +15,7 @@
 """SalishSeaCast worker that generates a sea surface height boundary conditions file from
 NOAA Neah Bay observation and forecast values.
 """
+
 import datetime
 import logging
 import os

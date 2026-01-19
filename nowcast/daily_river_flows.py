@@ -14,7 +14,6 @@ import xarray as xr
 from salishsea_tools import rivertools
 from salishsea_tools import river_202108 as rivers
 
-
 watershed_names = [
     "bute",
     "evi_n",

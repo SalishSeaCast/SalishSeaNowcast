@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast download_weather worker."""
+
 import logging
 import textwrap
 from pathlib import Path
@@ -36,9 +37,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 file group: allen
 
                 weather:
@@ -79,9 +78,7 @@ def config(base_config):
                         - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
                         - PRMSL_MSL_0  # atmospheric pressure at mean sea level
                       forecast duration: 36  # hours
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

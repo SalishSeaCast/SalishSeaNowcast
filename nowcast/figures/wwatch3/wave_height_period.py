@@ -27,6 +27,7 @@ https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/f
 Development notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/wwatch3/DevelopWaveHeightPeriod.ipynb
 """
+
 from contextlib import suppress
 from types import SimpleNamespace
 

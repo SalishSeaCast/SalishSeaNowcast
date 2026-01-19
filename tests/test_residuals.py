@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast residuals module."""
+
 from datetime import datetime
 
 import pytest

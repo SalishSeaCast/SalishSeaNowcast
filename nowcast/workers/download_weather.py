@@ -19,6 +19,7 @@
 """SalishSeaCast worker that downloads the GRIB2 files from the 00, 06, 12, or 18
 Environment and Climate Change Canada GEM 2.5km HRDPS operational model forecast.
 """
+
 import logging
 import os
 from pathlib import Path

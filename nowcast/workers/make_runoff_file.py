@@ -24,6 +24,7 @@ Susan Allen.
 Missing river discharge observations are handled by a scheme of persistence or scaling of
 a nearby gauged river, depending on the time span of missing observations.
 """
+
 import functools
 import importlib
 import logging
@@ -38,7 +39,6 @@ import xarray
 from nemo_nowcast import NowcastWorker
 
 from salishsea_tools import rivertools
-
 
 NAME = "make_runoff_file"
 logger = logging.getLogger(NAME)

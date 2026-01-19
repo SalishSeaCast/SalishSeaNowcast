@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast upload_forcing worker."""
+
 import logging
 import textwrap
 from pathlib import Path
@@ -35,9 +36,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 rivers:
                   bathy params:
                     v202108:  # SalishSeaCast production bathymetry
@@ -69,9 +68,7 @@ def config(base_config):
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
                                 rivers dir: /data/sallen/shared/SalishSeaCast/forcing/rivers/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

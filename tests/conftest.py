@@ -17,6 +17,7 @@
 
 
 """Fixtures for SalishSeaCast test suite."""
+
 from pathlib import Path
 import textwrap
 from typing import Mapping
@@ -33,18 +34,14 @@ def base_config(tmp_path: Path) -> nemo_nowcast.Config | Mapping:
     required by all unit tests.
     """
     config_file = tmp_path / "config.yaml"
-    config_file.write_text(
-        textwrap.dedent(
-            """
+    config_file.write_text(textwrap.dedent("""
             # Items required by the Config instance
             checklist file: nowcast_checklist.yaml
             python: python
             logging:
               handlers: []
 
-            """
-        )
-    )
+            """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

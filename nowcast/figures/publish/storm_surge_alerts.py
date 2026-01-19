@@ -29,6 +29,7 @@ acknowledgement of data sources.
 Testing notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsModule.ipynb
 """
+
 from collections import namedtuple
 
 import arrow

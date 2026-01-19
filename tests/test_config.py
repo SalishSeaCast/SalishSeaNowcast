@@ -19,6 +19,7 @@
 """Unit tests for SalishSeaCast production config elements that are not likely to be
 tested in worker unit test modules.
 """
+
 import pytest
 
 

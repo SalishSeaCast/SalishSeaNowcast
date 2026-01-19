@@ -19,6 +19,7 @@
 """SalishSeaCast WaveWatch3 forecast worker that produces the hourly
 ocean currents forcing file for a prelim-forecast or forecast run
 """
+
 import logging
 import os
 import shlex

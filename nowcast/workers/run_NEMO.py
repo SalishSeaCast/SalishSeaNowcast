@@ -15,6 +15,7 @@
 """SalishSeaCast worker that prepares the YAML run description file and bash run script
 for a nowcast, nowcast-green, forecast or forecast2 run on the ONC cloud, and launches the run.
 """
+
 import logging
 import os
 import shlex

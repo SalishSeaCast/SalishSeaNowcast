@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast collect_NeahBay_ssh worker."""
+
 import logging
 import os
 import textwrap
@@ -35,9 +36,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 ssh:
                   download:
                     url template: 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/petss/prod/etss.{yyyymmdd}/etss.t{forecast}z.csv,tar.gz'
@@ -45,9 +44,7 @@ def config(base_config):
                     tarball csv file template: 'etss.{yyyymmdd}/t{forecast}z.csv/9443090.csv_tar_gz'
 
                   ssh dir: /results/forcing/sshNeahBay/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

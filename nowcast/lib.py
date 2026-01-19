@@ -17,6 +17,7 @@
 
 
 """SalishSeaCast utility functions for use by workers."""
+
 import grp
 import logging
 import logging.handlers

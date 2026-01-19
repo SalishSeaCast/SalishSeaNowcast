@@ -24,6 +24,7 @@ in the south and Johnstone Strait in the north.
 Testing notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestTracerThalwegAndSurfaceHourly.ipynb
 """
+
 from types import SimpleNamespace
 
 import matplotlib.pyplot as plt

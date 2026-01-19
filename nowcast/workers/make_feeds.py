@@ -15,6 +15,7 @@
 """SalishSeaCast worker that produces ATOM feeds from forecast
 and forecast2 run results.
 """
+
 import logging
 import os
 
