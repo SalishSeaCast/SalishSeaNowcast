@@ -21,6 +21,7 @@ end their work.
 
 Function names **must** be of the form :py:func:`after_worker_name`.
 """
+
 from pathlib import Path
 
 import arrow

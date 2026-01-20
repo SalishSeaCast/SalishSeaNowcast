@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast make_forcing_links worker."""
+
 import logging
 import os
 import textwrap
@@ -35,9 +36,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 ssh:
                   file template: "ssh_{:y%Ym%md%d}.nc"
                 rivers:
@@ -63,9 +62,7 @@ def config(base_config):
                       run prep dir: runs/
                       forcing:
                         ssh dir: sshNeahBay/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

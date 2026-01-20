@@ -19,6 +19,7 @@
 """SalishSeaCast worker that monitors and reports on the progress of a run on the cloud
 computing facility or salish.
 """
+
 import logging
 import os
 import shlex

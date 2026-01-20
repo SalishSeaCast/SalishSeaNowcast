@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast make_turbidity_file worker."""
+
 import logging
 from types import SimpleNamespace
 

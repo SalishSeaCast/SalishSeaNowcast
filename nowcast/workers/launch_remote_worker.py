@@ -18,6 +18,7 @@
 It does the job of `nemo_nowcast.worker.NextWorker.launch()` with a non-default
 `host` argument, avoiding the need to manually construct a complicated `ssh` command.*
 """
+
 import logging
 
 from nemo_nowcast import NowcastWorker, NextWorker

@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast grib_to_netcdf worker."""
+
 import logging
 import textwrap
 from pathlib import Path
@@ -36,9 +37,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | dict:
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 weather:
                   download:
                     2.5 km:
@@ -68,9 +67,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | dict:
 
                   ops dir: forcing/atmospheric/continental2.5/nemo_forcing/
                   file template: "hrdps_{:y%Ym%md%d}.nc"
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

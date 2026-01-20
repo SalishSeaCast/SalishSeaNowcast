@@ -19,6 +19,7 @@
 """SalishSeaCast worker that downloads the results files from an HPC/cloud facility run
 to archival storage.
 """
+
 import logging
 import os
 import shlex

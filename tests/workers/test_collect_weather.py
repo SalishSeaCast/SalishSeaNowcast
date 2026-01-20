@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast collect_weather worker."""
+
 import grp
 import logging
 import os
@@ -38,9 +39,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | Mapping:
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 file group: allen
 
                 weather:
@@ -79,9 +78,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | Mapping:
                         - APCP_SFC_0   # accumulated precipitation at ground level
                         - PRATE_SFC_0  # precipitation rate at ground level (for VHFR FVCOM)
                         - PRMSL_MSL_0  # atmospheric pressure at mean sea level
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

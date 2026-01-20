@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast launch_remote_worker worker."""
+
 import logging
 from types import SimpleNamespace
 from unittest.mock import patch

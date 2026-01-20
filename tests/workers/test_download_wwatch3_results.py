@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast system download_wwatch3_results worker."""
+
 import logging
 from types import SimpleNamespace
 

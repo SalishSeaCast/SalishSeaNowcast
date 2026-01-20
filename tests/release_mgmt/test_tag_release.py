@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast tag_release script."""
+
 import logging
 from unittest.mock import Mock, patch
 

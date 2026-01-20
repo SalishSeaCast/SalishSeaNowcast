@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast ping_erddap worker."""
+
 import logging
 import textwrap
 from pathlib import Path
@@ -33,9 +34,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 erddap:
                   flag dir: tmp_flag_dir/
                   datasetIDs:
@@ -58,9 +57,7 @@ def config(base_config):
                       - ubcSSf2DWaveFields30mV17-02
                     VFPA-HADCP:
                       - ubcVFPA2ndNarrowsCurrent2sV1
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

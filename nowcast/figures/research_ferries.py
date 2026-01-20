@@ -20,6 +20,7 @@
 salinity of British Columbia ferry observations data and the model results with
 visualization figures for analysis of daily nowcast runs.
 """
+
 import datetime
 import os
 

@@ -29,6 +29,7 @@ Text below the tidal cycle graph acknowledges the use of :program:`ttide`.
 Testing notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestPtAtkinsonTideModule.ipynb
 """
+
 from collections import namedtuple
 
 import matplotlib.pyplot as plt

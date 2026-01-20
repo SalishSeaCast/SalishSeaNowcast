@@ -17,6 +17,7 @@
 
 
 """Unit tests for daily_river_flows module."""
+
 import io
 import os
 import textwrap
@@ -37,9 +38,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | dict:
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 rivers:
                   SOG river files:
                     HomathkoMouth: forcing/rivers/observations/Homathko_Mouth_flow
@@ -57,9 +56,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | dict:
                   enabled hosts:
                     salish-nowcast:
                       grid dir: /SalishSeaCast/grid/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_
@@ -80,12 +77,10 @@ class TestReadRiverCSV:
     """Unit tests for daily_river_flows._read_river_csv()"""
 
     def test_well_formed_lines(self):
-        csv_lines = textwrap.dedent(
-            """\
+        csv_lines = textwrap.dedent("""\
             1923 01 26 2.750000E+01
             1923 01 27 2.970000E+01
-            """
-        )
+            """)
 
         river_flow = daily_river_flows._read_river_csv(io.StringIO(csv_lines))
 
@@ -100,12 +95,10 @@ class TestReadRiverCSV:
         pandas.testing.assert_frame_equal(river_flow, expected)
 
     def test_one_long_line(self):
-        csv_lines = textwrap.dedent(
-            """\
+        csv_lines = textwrap.dedent("""\
             1923 02 20 1.130000E+01 B
             1923 02 21 5.970000E+01
-            """
-        )
+            """)
 
         with pytest.warns(pandas.errors.ParserWarning) as warning_record:
             # We expect a ParserWarning due to the difference in length of the lines we're parsing

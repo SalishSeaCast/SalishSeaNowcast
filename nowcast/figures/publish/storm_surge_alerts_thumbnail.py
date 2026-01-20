@@ -31,6 +31,7 @@ Portal page https://salishsea.eos.ubc.ca/storm-surge/.
 Testing notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/TestStormSurgeAlertsThumbnailModule.ipynb
 """
+
 from collections import namedtuple
 
 import arrow

@@ -20,6 +20,7 @@
 files, crops them to the subdomain needed for SalishSeaCast NEMO forcing, and writes them to
 new GRIB2 files.
 """
+
 # Development notebook:
 #
 # * https://github.com/SalishSeaCast/analysis-doug/tree/main/notebooks/continental-HRDPS/crop-grib-to-SSC-domain.ipynb.ipynb
@@ -37,7 +38,6 @@ from cfgrib import xarray_to_grib
 from nemo_nowcast import NowcastWorker
 
 from nowcast import lib
-
 
 NAME = "crop_gribs"
 logger = logging.getLogger(NAME)

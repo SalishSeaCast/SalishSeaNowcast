@@ -21,6 +21,7 @@
 Collect weather forecast results from hourly GRIB2 files and produce
 day-long NEMO atmospheric forcing netCDF files.
 """
+
 """
 Development notebooks are in:
 
@@ -35,7 +36,6 @@ import arrow
 import numpy
 from nemo_nowcast import NowcastWorker
 import xarray
-
 
 NAME = "grib_to_netcdf"
 logger = logging.getLogger(NAME)

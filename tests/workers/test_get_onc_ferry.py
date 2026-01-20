@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast get_onc_ferry worker."""
+
 import logging
 import textwrap
 from pathlib import Path
@@ -38,9 +39,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 observations:
                   lon/lat to NEMO ji map: /SalishSeaCast/grid/grid_from_lat_lon_mask999.nc
 
@@ -97,9 +96,7 @@ def config(base_config):
                         filepath template: "{ferry_platform}/{ferry_platform}_TSG_O2_TURBCHLFL_CO2_METEO_1m_{yyyymmdd}.nc"
 
                     dest dir: /results/observations/ONC/ferries/
-                    """
-            )
-        )
+                    """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

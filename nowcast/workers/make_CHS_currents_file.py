@@ -15,6 +15,7 @@
 """SalishSeaCast worker that averages, unstaggers and rotates the near surface velocities,
 and writes them out in a netCDF file for CHS to use.
 """
+
 import logging
 import os
 from pathlib import Path

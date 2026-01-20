@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast get_onc_ctd worker."""
+
 import logging
 from types import SimpleNamespace
 

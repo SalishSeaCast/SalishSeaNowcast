@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast make_ssh_file worker."""
+
 import logging
 import os
 import textwrap
@@ -35,9 +36,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 file group: sallen
 
                 ssh:
@@ -54,9 +53,7 @@ def config(base_config):
                 results archive:
                   nowcast: /results/SalishSea/nowcast-blue.201905/
                   forecast2: /results/SalishSea/forecast2.201905/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

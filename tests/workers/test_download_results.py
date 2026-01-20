@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast download_results worker."""
+
 import logging
 import shlex
 import textwrap
@@ -38,9 +39,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | Mapping:
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 file group: allen
 
                 results archive:
@@ -81,9 +80,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | Mapping:
                         run types:
                           hindcast:
                             results: SalishSea/hindcast
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

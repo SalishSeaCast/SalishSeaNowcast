@@ -44,6 +44,7 @@ https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/f
 Development notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/publish/DevelopCompareTidePredictionMaxSSH.ipynb
 """
+
 from datetime import timedelta
 from pathlib import Path
 from types import SimpleNamespace

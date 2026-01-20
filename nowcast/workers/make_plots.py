@@ -17,6 +17,7 @@
 
 
 """SalishSeaCast worker that produces visualization images for the website from run results."""
+
 import logging
 import os
 import shlex

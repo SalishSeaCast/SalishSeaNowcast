@@ -27,6 +27,7 @@ https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/f
 Testing notebook for this module is
 https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/figures/research/TestVelocitySectionAndSurface.ipynb
 """
+
 from types import SimpleNamespace
 
 import cmocean

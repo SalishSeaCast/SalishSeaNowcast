@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast rotate_hindcast_logs worker."""
+
 import logging
 import logging.config
 import textwrap
@@ -34,9 +35,7 @@ def config(base_config, tmp_path):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                f"""\
+        f.write(textwrap.dedent(f"""\
                 logging:
                   aggregator:
                     handlers: {{}}
@@ -65,9 +64,7 @@ def config(base_config, tmp_path):
                         handlers:
                           - hindcast_info
                           - hindcast_debug
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

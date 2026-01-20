@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast get_vfpa_hadcp worker."""
+
 import logging
 import os
 import textwrap
@@ -36,17 +37,13 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 observations:
                   hadcp data:
                     csv dir: opp/obs/AISDATA/
                     dest dir: opp/obs/AISDATA/netcdf/
                     filepath template: 'VFPA_2ND_NARROWS_HADCP_2s_{yyyymm}.nc'
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

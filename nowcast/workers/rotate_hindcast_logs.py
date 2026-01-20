@@ -27,6 +27,7 @@ by the nowcast administrator as necessary for maintenance of the hindcast log fi
 e.g. when a new hindcast is started,
 or when the logs from a running hindcast become annoying long.
 """
+
 import logging
 import logging.config
 from pathlib import Path

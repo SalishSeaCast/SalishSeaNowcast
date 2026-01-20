@@ -17,6 +17,7 @@
 
 
 """Unit test for SalishSeaCast make_runoff_file worker."""
+
 import importlib
 import logging
 import os
@@ -39,9 +40,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | dict:
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """
+        f.write(textwrap.dedent("""
                 rivers:
                   SOG river files:
                     HomathkoMouth: forcing/rivers/observations/Homathko_Mouth_flow
@@ -63,9 +62,7 @@ def config(base_config: nemo_nowcast.Config) -> nemo_nowcast.Config | dict:
                   enabled hosts:
                     salish-nowcast:
                       grid dir: /SalishSeaCast/grid/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

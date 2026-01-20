@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast make_plots worker."""
+
 import logging
 from pathlib import Path
 from types import SimpleNamespace

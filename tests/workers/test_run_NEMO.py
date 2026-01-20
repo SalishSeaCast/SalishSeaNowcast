@@ -17,6 +17,7 @@
 
 
 """Unit tests for SalishSeaCast run_NEMO worker."""
+
 import logging
 import subprocess
 import textwrap
@@ -36,9 +37,7 @@ def config(base_config):
     """:py:class:`nemo_nowcast.Config` instance from YAML fragment to use as config for unit tests."""
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                """\
+        f.write(textwrap.dedent("""\
                 results archive:
                   nowcast: results/SalishSea/nowcast-blue.201905/
                   nowcast-green: results2/SalishSea/nowcast-green.201905/
@@ -107,9 +106,7 @@ def config(base_config):
                           results: results/SalishSea/nowcast-green/
                       forcing:
                         bottom friction mask: grid/jetty_mask_bathy201702.nc
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_

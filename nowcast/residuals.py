@@ -19,6 +19,7 @@
 """A collection of Python functions to produce model residual calculations and
 visualizations.
 """
+
 import datetime
 import io
 

@@ -26,6 +26,7 @@
     namespaces please talk to the group about refactoring the function into
     the :ref:`SalishSeaToolsPackage`.
 """
+
 import io
 import os
 

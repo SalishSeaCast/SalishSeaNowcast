@@ -17,6 +17,7 @@
 
 
 """Unit tests for Salish Sea WaveWatch3 nowcast/forecast run_ww3 worker."""
+
 import logging
 import os
 import stat
@@ -45,9 +46,7 @@ def config(base_config, tmp_path):
 
     config_file = Path(base_config.file)
     with config_file.open("at") as f:
-        f.write(
-            textwrap.dedent(
-                f"""\
+        f.write(textwrap.dedent(f"""\
                 wave forecasts:
                     run prep dir: {run_prep_dir}
                     mpi hosts file: ${{HOME}}/mpi_hosts.wwatch3
@@ -57,9 +56,7 @@ def config(base_config, tmp_path):
                         nowcast: {nowcast_results_dir}
                         forecast: {forecast_results_dir}
                         forecast2: wwatch3-forecast2/
-                """
-            )
-        )
+                """))
     config_ = nemo_nowcast.Config()
     config_.load(config_file)
     return config_
@@ -547,8 +544,7 @@ class TestExecute:
     @pytest.mark.parametrize("run_type", ["forecast2", "forecast"])
     def test_forecast_execute(self, run_type):
         execution = run_ww3._execute(run_type, arrow.get("2017-04-20"))
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
             ${MPIRUN} -np 75 --bind-to none ${WW3_EXE}/ww3_shel \\
               >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
@@ -557,22 +553,19 @@ class TestExecute:
             rm current/SoG_current_20170420.nc && \\
             rm wind/SoG_wind_20170420.nc
             echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
-            """
-        )
+            """)
         assert execution.splitlines() == expected.splitlines()
 
     def test_nowcast_execute(self):
         execution = run_ww3._execute("nowcast", arrow.get("2017-04-20"))
-        expected = textwrap.dedent(
-            """\
+        expected = textwrap.dedent("""\
             echo "Starting run at $(date)" >>${RESULTS_DIR}/stdout
             ${MPIRUN} -np 75 --bind-to none ${WW3_EXE}/ww3_shel \\
               >>${RESULTS_DIR}/stdout 2>>${RESULTS_DIR}/stderr && \\
             mv log.ww3 ww3_shel.log && \\
             rm current.ww3 wind.ww3 && \\
             echo "Ended run at $(date)" >>${RESULTS_DIR}/stdout
-            """
-        )
+            """)
         assert execution.splitlines() == expected.splitlines()
 
 

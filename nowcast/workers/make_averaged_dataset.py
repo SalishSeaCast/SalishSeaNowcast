@@ -19,6 +19,7 @@
 """SalishSeaCast worker that creates a down-sampled time-series dataset netCDF4 file from
 another model product file using the Reshapr API.
 """
+
 # Intended uses:
 #
 # * create day-averaged datasets from hour-averaged NEMO output files as a model run

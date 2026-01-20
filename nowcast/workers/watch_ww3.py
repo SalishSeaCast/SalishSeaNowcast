@@ -15,6 +15,7 @@
 """Salish Sea nowcast worker that monitors and reports on the progress of a WaveWatch3 run
 on the ONC cloud computing facility.
 """
+
 import logging
 import os
 import shlex
