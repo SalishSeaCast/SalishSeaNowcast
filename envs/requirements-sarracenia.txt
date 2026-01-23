@@ -28,5 +28,5 @@ setuptools==78.1.1
 six==1.16.0
 vine==5.0.0
 watchdog==2.2.1
-wheel==0.38.4
+wheel==0.46.2
 zipp==3.19.1
