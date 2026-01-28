@@ -87,5 +87,5 @@ dependencies:
     - retrying
     - schedule
     - scour
-    - supervisor
+    - supervisor>=4.3.0
     - waitress

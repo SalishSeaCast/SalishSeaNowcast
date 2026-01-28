@@ -23,7 +23,7 @@ Bottleneck==1.6.0
 Brotli==1.2.0
 cached-property==1.5.2
 Cartopy==0.25.0
-certifi==2025.10.5
+certifi==2026.1.4
 cffi==2.0.0
 cfgrib==0.9.15.1
 cfgv==3.3.1
@@ -184,7 +184,7 @@ sphinxcontrib-qthelp==2.0.0
 sphinxcontrib-serializinghtml==1.1.10
 stevedore==5.5.0
 structlog==25.5.0
-supervisor==4.2.5
+supervisor==4.3.0
 sysrsync==1.1.1
 tblib==3.2.1
 tenacity==9.1.2
