@@ -68,7 +68,7 @@ dependencies:
   - scour
   - sentry-sdk
   - structlog
-  - supervisor
+  - supervisor>=4.3.0
   - tenacity
   - tqdm
   - verboselogs
