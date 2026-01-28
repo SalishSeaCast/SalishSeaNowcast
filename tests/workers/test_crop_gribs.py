@@ -727,6 +727,7 @@ class TestGribFileEventHandler:
         expected = f"observer thread files remaining to process: 0"
         assert caplog.messages[0] == expected
         assert eccc_grib_file not in eccc_grib_files
+        assert not eccc_grib_file.exists()
 
     def test_ignore_unexpected_file(self, config, caplog, tmp_path, monkeypatch):
         @attr.s
@@ -754,3 +755,4 @@ class TestGribFileEventHandler:
 
         assert not caplog.records
         assert eccc_grib_file in eccc_grib_files
+        assert eccc_grib_file.exists()
