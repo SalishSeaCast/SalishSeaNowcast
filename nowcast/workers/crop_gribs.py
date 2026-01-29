@@ -323,6 +323,7 @@ class _GribFileEventHandler(watchdog.events.FileSystemEventHandler):
             eccc_grib_file = Path(event.src_path)
             _write_ssc_grib_file(eccc_grib_file, self.config)
             self.eccc_grib_files.remove(eccc_grib_file)
+            eccc_grib_file.unlink()
             logger.debug(
                 f"observer thread files remaining to process: {len(self.eccc_grib_files)}"
             )
