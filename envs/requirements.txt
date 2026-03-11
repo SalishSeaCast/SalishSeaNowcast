@@ -197,7 +197,7 @@ tomli==2.4.0
 tomli_w==1.2.0
 tomlkit==0.14.0
 toolz==1.1.0
-tornado==6.5.4
+tornado==6.5.5
 tqdm==4.67.3
 trove-classifiers==2026.1.14.14
 typing_extensions==4.15.0
