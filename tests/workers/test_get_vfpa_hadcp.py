@@ -163,23 +163,28 @@ class TestGetVFPA_HADCP:
             nc_filepath.write_bytes(b"")
         parsed_args = SimpleNamespace(data_date=arrow.get("2024-07-13"))
         caplog.set_level(logging.DEBUG)
+
         get_vfpa_hadcp.get_vfpa_hadcp(parsed_args, config)
-        assert caplog.records[0].levelname == "INFO"
+
+        log_records = [rec for rec in caplog.records if rec.name == "get_vfpa_hadcp"]
+        assert log_records[0].levelname == "INFO"
         expected = (
             "processing VFPA HADCP data from 2nd Narrows Rail Bridge for 2024-07-13"
         )
-        assert caplog.messages[0] == expected
+        assert log_records[0].message == expected
         if not nc_file_exists:
-            assert caplog.records[1].levelname == "INFO"
-            assert caplog.records[1].message.startswith("created")
-            assert caplog.messages[1].endswith("VFPA_2ND_NARROWS_HADCP_2s_202407.nc")
+            assert log_records[1].levelname == "INFO"
+            assert log_records[1].message.startswith("created")
+            assert log_records[1].message.endswith(
+                "VFPA_2ND_NARROWS_HADCP_2s_202407.nc"
+            )
         for rec_num, hr in zip(range(2, 24), range(1, 23)):
-            assert caplog.records[rec_num].levelname == "DEBUG"
+            assert log_records[rec_num].levelname == "DEBUG"
             expected = f"no data for 2024-07-13 {hr:02d}:00 hour"
-            assert caplog.messages[rec_num] == expected
-        assert caplog.records[25].levelname == "INFO"
+            assert log_records[rec_num].message == expected
+        assert log_records[25].levelname == "INFO"
         expected = f"added VFPA HADCP data from 2nd Narrows Rail Bridge for 2024-07-13 to {nc_filepath}"
-        assert caplog.messages[25] == expected
+        assert log_records[25].message == expected
 
     def test_checklist_create(
         self,

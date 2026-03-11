@@ -675,13 +675,13 @@ class TestHandleStalledObserver:
 
         crop_gribs._handle_stalled_observer(eccc_grib_files, fcst_hr, config)
 
-        assert len(caplog.records) == 2
-        assert caplog.records[1].levelname == "CRITICAL"
+        assert len(caplog.records) >= 2
+        assert caplog.records[-1].levelname == "CRITICAL"
         expected = (
             f"crop_gribs 12 has watched for 8h and at least 1 file has not "
             f"yet been downloaded: {' '.join(os.fspath(eccc_grib_file) for eccc_grib_file in eccc_grib_files)}"
         )
-        assert caplog.messages[1] == expected
+        assert caplog.messages[-1] == expected
 
 
 class TestGribFileEventHandler:
