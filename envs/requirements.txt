@@ -153,7 +153,7 @@ pytokens==0.4.1
 pytz==2025.2
 PyYAML==6.0.3
 pyzmq==27.1.0
-requests==2.32.5
+requests==2.33.0
 Reshapr==25.3.dev0
 retrying==1.4.2
 rich==14.3.3
