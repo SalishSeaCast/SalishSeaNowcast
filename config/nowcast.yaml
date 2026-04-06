@@ -168,16 +168,6 @@ rivers:
       file template: "R202108Dailies_{:y%Ym%md%d}.nc"
       # Module containing dictionary of the proportions that each river occupies in its watershed
       prop_dict module: salishsea_tools.river_202108
-    v201702:  # **Required for runoff files used by nowcast-agrif**
-      # File that describes Fraser River climatology separation from measured
-      # flow at Hope
-      Fraser climatology: /SalishSeaCast/tools/I_ForcingFiles/Rivers/FraserClimatologySeparation.yaml
-      # Monthly climatology
-      monthly climatology: /SalishSeaCast/rivers-climatology/rivers_month_201702.nc
-      # Template for the runoff forcing file name
-      file template: "R201702DFraCElse_{:y%Ym%md%d}.nc"
-      # Module containing dictionary of the proportions that each river occupies in its watershed
-      prop_dict module: salishsea_tools.river_201702
   # Destination directory for river runoff forcing file
   rivers dir: /results/forcing/rivers/
 
