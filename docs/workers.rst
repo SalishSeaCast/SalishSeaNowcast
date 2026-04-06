@@ -114,13 +114,6 @@ Workers
     :members: main
 
 
-``make_201702_runoff_file``
----------------------------
-
-.. automodule:: nowcast.workers.make_201702_runoff_file
-    :members: main
-
-
 ``make_runoff_file``
 --------------------
 
