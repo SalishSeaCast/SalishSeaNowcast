@@ -103,11 +103,6 @@ Descriptions under the links below are from the first cell of the notebooks
     This is an interim step toward fully automated web publication of
     analysis and monitoring figures from nowcast runs.
 
-* ## [MakeOldRunoffFiles.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/MakeOldRunoffFiles.ipynb)
-
-    **Code to make old runoff files ****
-    note: make_old_runoffs.yaml is identical to nowcast.yaml but puts the river output files somewhere other that /results to avoid accidental overwriting
-
 * ## [surge_warning.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/surge_warning.ipynb)
 
 * ## [ExamineResiduals.ipynb](https://nbviewer.org/github/SalishSeaCast/SalishSeaNowcast/blob/main/notebooks/ExamineResiduals.ipynb)

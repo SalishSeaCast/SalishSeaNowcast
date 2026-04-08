@@ -43,8 +43,6 @@ def config(base_config):
                   bathy params:
                     v202108:  # SalishSeaCast production bathymetry
                       file template: "R202108Dailies_{:y%Ym%md%d}.nc"
-                    v201702:  # **Required for runoff files used by nowcast-agrif**
-                      file template: "R201702DFraCElse_{:y%Ym%md%d}.nc"
                   turbidity:
                     file template: "riverTurbDaily2_{:y%Ym%md%d}.nc"
 
@@ -196,10 +194,6 @@ class TestConfig:
         assert (
             prod_config["rivers"]["bathy params"]["v202108"]["file template"]
             == "R202108Dailies_{:y%Ym%md%d}.nc"
-        )
-        assert (
-            prod_config["rivers"]["bathy params"]["v201702"]["file template"]
-            == "R201702DFraCElse_{:y%Ym%md%d}.nc"
         )
 
     @pytest.mark.parametrize(

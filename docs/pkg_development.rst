@@ -517,82 +517,81 @@ The output looks something like:
 
 .. code-block:: text
 
-    ================================ test session starts ================================
-    platform linux -- Python 3.13.1, pytest-8.3.4, pluggy-1.5.0
-    Using --randomly-seed=4145810385
+    ================================ test session starts =================================
+    platform linux -- Python 3.13.12, pytest-9.0.2, pluggy-1.6.0
+    Using --randomly-seed=2030551966
     rootdir: /media/doug/warehouse/MEOPAR/SalishSeaNowcast
     configfile: pyproject.toml
-    plugins: anyio-4.8.0, randomly-3.15.0, httpx-0.35.0, cov-6.0.0, xdist-3.6.1
-    collected 2372 items
+    plugins: anyio-4.13.0, randomly-3.15.0, xdist-3.8.0, cov-7.1.0, httpx-0.36.0
+    collected 2035 items
 
-    tests/workers/test_make_live_ocean_files.py .........                          [  0%]
+    tests/workers/test_get_vfpa_hadcp.py ..............                            [  0%]
+    tests/workers/test_launch_remote_worker.py ............                        [  1%]
+    tests/workers/test_make_surface_current_tiles.py ...........................   [  2%]
+    tests/workers/test_make_ssh_file.py .................                          [  3%]
+    tests/workers/test_collect_NeahBay_ssh.py ...................                  [  4%]
+    tests/workers/test_watch_NEMO_hindcast.py ...........................................
+    ..................                                                             [  7%]
+    tests/workers/test_update_forecast_datasets.py ......................................
+`   ................................                                               [ 10%]
+    tests/release_mgmt/test_tag_release.py .........                               [ 11%]
+    tests/workers/test_make_ww3_wind_file.py ........................              [ 12%]
+    tests/workers/test_make_CHS_currents_file.py ........................          [ 13%]
+    tests/test_residuals.py ...                                                    [ 13%]
+    tests/workers/test_make_plots.py ....................................................
+    .............                                                                  [ 16%]
+    tests/test_config.py ..............................                            [ 18%]
+    tests/workers/test_watch_NEMO.py ....................................................
+    ..........................                                                     [ 22%]
+    tests/workers/test_split_results.py .............                              [ 22%]
+    tests/workers/test_make_runoff_file.py ..............................................
+    ...........................................................................    [ 28%]
+    tests/workers/test_get_onc_ctd.py ............                                 [ 29%]
+    tests/workers/test_watch_ww3.py ..................                             [ 30%]
+    tests/workers/test_run_NEMO_agrif.py ......................                    [ 31%]
+    tests/workers/test_make_turbidity_file.py ....                                 [ 31%]
+    tests/workers/test_get_onc_ferry.py ..................................         [ 33%]
     tests/workers/test_run_ww3.py .......................................................
-    ..............                                                                 [  3%]
+    ..............                                                                 [ 36%]
+    tests/workers/test_make_live_ocean_files.py .........                          [ 37%]
+    tests/workers/test_watch_NEMO_agrif.py ..................                      [ 37%]
+    tests/test_daily_river_flows.py ......................................                                                                                                                                                                [ 39%]
+    tests/workers/test_upload_forcing.py ................................................
+    ........................                                                       [ 43%]
+    tests/workers/test_make_forcing_links.py ............................................
+    ..................                                                             [ 46%]
+    tests/workers/test_make_averaged_dataset.py ..................................
+    ........                                                                       [ 48%]
+    tests/workers/test_crop_gribs.py ..............................................[ 50%]
+    tests/test_analyze.py .................                                        [ 51%]
+    tests/workers/test_rotate_hindcast_logs.py ..........                          [ 52%]
+    tests/workers/test_collect_river_data.py .............................         [ 53%]
+    tests/workers/test_run_NEMO_hindcast.py ......................................
+    .....................................................................................
+    .....................                                                          [ 60%]
+    tests/workers/test_run_NEMO.py ......................................................
+    .............................................................................. [ 66%]
+    tests/workers/test_collect_weather.py ...............................................
+    ......                                                                         [ 69%]
+    tests/workers/test_download_results.py ...............................................
+    ...................                                                            [ 72%]
+    tests/workers/test_ping_erddap.py .................................            [ 74%]
+    tests/workers/test_archive_tarball.py ........................                 [ 75%]
+    tests/workers/test_download_weather.py ..............................................
+    ..........                                                                     [ 78%]
+    tests/workers/test_download_live_ocean.py .........                            [ 78%]
+    tests/workers/test_make_feeds.py ...................                           [ 79%]
+    tests/workers/test_grib_to_netcdf.py ................................................
+    .............                                                                  [ 82%]
     tests/test_next_workers.py ..........................................................
     .....................................................................................
+    ...........................................................                    [ 92%]
     .....................................................................................
-    .....................................................................................
-    ..................................................................             [ 19%]
-    tests/workers/test_watch_NEMO.py ....................................................
-    ............................                                                   [ 22%]
-    tests/workers/test_collect_weather.py ...............................................
-    ......                                                                         [ 24%]
-    tests/workers/test_run_NEMO_agrif.py .................                         [ 25%]
-    tests/workers/test_make_plots.py ....................................................
-    .............................................                                  [ 29%]
-    tests/workers/test_make_feeds.py .....................                         [ 31%]
-    tests/workers/test_get_onc_ferry.py ................................           [ 33%]
-    tests/workers/test_watch_ww3.py ..................                             [ 33%]
-    tests/test_daily_river_flows.py ......................................         [ 36%]
-    tests/workers/make_runoff_file.py ...................................................
-    ...........                                                                    [ 39%]
-    tests/workers/test_collect_NeahBay_ssh.py ...................                  [ 40%]
-    tests/workers/test_upload_forcing.py .........................................
-    ...............................                                                [ 45%]
-    tests/workers/test_launch_remote_worker.py ...............                     [ 46%]
-    tests/test_analyze.py .................                                        [ 47%]
-    tests/workers/test_watch_NEMO_agrif.py ....................                    [ 49%]
-    tests/workers/test_make_surface_current_tiles.py ...........................   [ 50%]
-    tests/workers/test_make_averaged_dataset.py ..................................
-    ........                                                                       [ 52%]
-    tests/workers/test_make_ssh_file.py .................                          [ 52%]
-    tests/workers/test_get_onc_ctd.py ............                                 [ 53%]
-    tests/workers/test_split_results.py .............                              [ 54%]
-    tests/workers/test_run_NEMO_hindcast.py .............................................
-    .....................................................................................
-    ..............                                                                 [ 60%]
-    tests/workers/test_rotate_hindcast_logs.py ..........                          [ 60%]
-    tests/workers/test_make_forcing_links.py ............................................
-    ..................                                                             [ 64%]
-    tests/workers/test_ping_erddap.py ..........................................   [ 66%]
-    tests/workers/test_get_vfpa_hadcp.py ..............                            [ 66%]
-    tests/workers/test_grib_to_netcdf.py ................................................
-    .............                                                                  [ 69%]
-    tests/workers/test_download_live_ocean.py .........                            [ 69%]
-    tests/test_residuals.py ...                                                    [ 70%]
-    tests/workers/test_make_turbidity_file.py ......                               [ 70%]
-    tests/workers/test_make_ww3_current_file.py .................................  [ 71%]
-    tests/release_mgmt/test_tag_release.py .........                               [ 72%]
-    tests/workers/test_download_results.py ..............................................
-    .........................                                                      [ 75%]
-    tests/workers/test_watch_NEMO_hindcast.py ...........................................
-    ....................                                                           [ 77%]
-    tests/workers/test_make_201702_runoff_file.py ............                     [ 78%]
-    tests/workers/test_crop_gribs.py ..............................................[ 80%]
-    tests/test_config.py ..............................                            [ 81%]
-    tests/workers/test_download_weather.py ..............................................
-    ......                                                                         [ 83%]
-    tests/workers/test_archive_tarball.py ........................                 [ 84%]
-    tests/workers/test_make_ww3_wind_file.py ..........................            [ 85%]
-    tests/workers/test_collect_river_data.py ...........................           [ 86%]
-    tests/workers/test_run_NEMO.py ......................................................
-    .............................................................................. [ 92%]
-    tests/workers/test_make_CHS_currents_file.py ........................          [ 93%]
-    tests/workers/test_update_forecast_datasets.py ......................................
-    .....................................                                          [ 99%]
-    tests/workers/test_download_wwatch3_results.py ............                    [100%]
+    .......................                                                        [ 97%]
+    tests/workers/test_download_wwatch3_results.py ..........                      [ 98%]
+    tests/workers/test_make_ww3_current_file.py ...............................    [100%]
 
-    =============================== 2372 passed in 41.82s ================================
+    =============================== 2035 passed in 25.93s ================================
 
 You can monitor what lines of code the test suite exercises using the `coverage.py`_ and `pytest-cov`_ tools with the command:
 

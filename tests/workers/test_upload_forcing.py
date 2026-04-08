@@ -41,8 +41,6 @@ def config(base_config):
                   bathy params:
                     v202108:  # SalishSeaCast production bathymetry
                       file template: "R202108Dailies_{:y%Ym%md%d}.nc"
-                    v201702:  # **Required for runoff files used by nowcast-agrif**
-                      file template: "R201702DFraCElse_{:y%Ym%md%d}.nc"
                   rivers dir: /results/forcing/rivers/
 
                 temperature salinity:
@@ -203,10 +201,6 @@ class TestConfig:
     )
     def test_river_runoff_uploads(self, host, expected, prod_config):
         rivers = prod_config["rivers"]
-        assert (
-            rivers["bathy params"]["v201702"]["file template"]
-            == "R201702DFraCElse_{:y%Ym%md%d}.nc"
-        )
         assert (
             rivers["bathy params"]["v202108"]["file template"]
             == "R202108Dailies_{:y%Ym%md%d}.nc"
@@ -547,12 +541,6 @@ class TestUploadRiverRunoffFiles:
             "/results/forcing/rivers/R202108Dailies_y2024m01d29.nc"
         )
         assert caplog.messages[0] == expected
-        assert caplog.records[1].levelno == logging.CRITICAL
-        expected = (
-            "Rivers runoff forcing file not found; created symlink to "
-            "/results/forcing/rivers/R201702DFraCElse_y2024m01d29.nc"
-        )
-        assert caplog.messages[1] == expected
 
 
 @patch(
