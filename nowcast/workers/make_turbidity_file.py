@@ -128,7 +128,7 @@ def make_turbidity_file(parsed_args, config, *args):
 
 def _loadturb(idate, turbidity_csv, mthresh, ymd):
     # Read file into pandas dataframe
-    tdf = pd.read_csv(turbidity_csv, header=0)
+    tdf = pd.read_csv(turbidity_csv, header=0, dtype={"water depth units": str})
     tdf["dtdate"] = pd.to_datetime(
         tdf["# date"] + " " + tdf["time"], format="%Y-%m-%d %H:%M:%S"
     )
