@@ -1224,6 +1224,63 @@ class TestReadRiverTheodosia:
         )
         pandas.testing.assert_frame_equal(theodosia, expected)
 
+    def test_read_river_Theodosia_wo_Diversion(self, config, monkeypatch):
+        """Ensure that missing Diversion obs results in a dataframe that excludes the missing obs date.
+
+        This is motivated by the missing TheodosianDiversion obs incident on 29apr2026 that caused
+        NEMO runs to crash.
+        """
+        mock_dataframes = [
+            # TheodosiaScotty
+            pandas.DataFrame(
+                {
+                    "year": 2026,
+                    "month": 4,
+                    "day": [27, 28, 29],
+                    "flow": [4.813090e00, 5.165451e00, 5.230903e00],
+                }
+            ),
+            # TheodosiaBypass
+            pandas.DataFrame(
+                {
+                    "year": 2026,
+                    "month": 4,
+                    "day": [27, 28, 29],
+                    "flow": [3.904384e00, 4.362500e00, 4.362115e00],
+                }
+            ),
+            # TheodosiaDiversion
+            pandas.DataFrame(
+                {
+                    "year": 2026,
+                    "month": 4,
+                    "day": [27, 28],
+                    "flow": [4.105278e00, 4.337471e00],
+                }
+            ),
+        ]
+
+        def mock_read_river_csv(filename):
+            return mock_dataframes.pop(0)
+
+        monkeypatch.setattr(make_runoff_file, "_read_river_csv", mock_read_river_csv)
+
+        theodosia = make_runoff_file._read_river_Theodosia(config)
+
+        expected = pandas.DataFrame(
+            data={
+                "Secondary River Flow": [5.01398, 5.14042],
+            },
+            index=pandas.Index(
+                data=[
+                    pandas.to_datetime("2026-04-27"),
+                    pandas.to_datetime("2026-04-28"),
+                ],
+                name="date",
+            ),
+        )
+        pandas.testing.assert_frame_equal(theodosia, expected)
+
 
 class TestPatchMissingObs:
     """Unit tests for make_runoff_file._patch_missing_obs()."""
