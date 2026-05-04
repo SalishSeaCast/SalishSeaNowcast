@@ -432,6 +432,10 @@ def _read_river_Theodosia(config):
         axis=1,
         inplace=True,
     )
+    # Drop any rows with missing values for the secondary river flow.
+    # This prevents the issue that arose on 29apr2026 when no obs for TheodosiaDiversion resulted in NaNs
+    # in the runoff file that caused NEMO to crash.
+    theodosia.dropna(subset=["Secondary River Flow"], inplace=True)
     return theodosia
 
 
