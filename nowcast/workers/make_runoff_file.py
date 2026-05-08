@@ -373,7 +373,7 @@ _read_river_csv = functools.partial(
     # .csv files
     pandas.read_csv,
     header=None,
-    delim_whitespace=True,
+    sep=r"\s+",
     index_col=False,
     names=["year", "month", "day", "flow"],
     engine="python",
