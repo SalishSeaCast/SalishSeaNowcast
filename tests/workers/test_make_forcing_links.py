@@ -178,7 +178,7 @@ class TestConfig:
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/sshNeahBay/"),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/sshNeahBay/"),
-            ("robot.nibi", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
+            ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/sshNeahBay/"),
             (
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
@@ -201,7 +201,7 @@ class TestConfig:
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/"),
-            ("robot.nibi", "/project/def-allen/SalishSea/forcing/rivers/"),
+            ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
         ),
     )
@@ -218,7 +218,7 @@ class TestConfig:
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/river_turb/"),
             (
                 "robot.nibi",
-                "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
+                "/project/rrg-allen/SalishSea/forcing/rivers/river_turb/",
             ),
             (
                 "optimum-hindcast",
@@ -251,7 +251,7 @@ class TestConfig:
             ),
             (
                 "robot.nibi",
-                "/project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
+                "/project/rrg-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
             (
                 "optimum-hindcast",
@@ -276,7 +276,7 @@ class TestConfig:
         (
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/LiveOcean/"),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/LiveOcean/"),
-            ("robot.nibi", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
+            ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/LiveOcean/"),
             (
                 "optimum-hindcast",
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",

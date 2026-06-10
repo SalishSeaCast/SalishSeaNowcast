@@ -701,11 +701,11 @@ run:
       # files
       run types: {}
       forcing:
-        ssh dir: /project/def-allen/SalishSea/forcing/sshNeahBay/
-        bc dir: /project/def-allen/SalishSea/forcing/LiveOcean/
-        rivers dir: /project/def-allen/SalishSea/forcing/rivers/
-        Fraser turbidity dir: /project/def-allen/SalishSea/forcing/rivers/river_turb/
-        weather dir: /project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/
+        ssh dir: /project/rrg-allen/SalishSea/forcing/sshNeahBay/
+        bc dir: /project/rrg-allen/SalishSea/forcing/LiveOcean/
+        rivers dir: /project/rrg-allen/SalishSea/forcing/rivers/
+        Fraser turbidity dir: /project/rrg-allen/SalishSea/forcing/rivers/river_turb/
+        weather dir: /project/rrg-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/
 
     optimum-hindcast:
       ssh key: SalishSeaNEMO-nowcast_id_rsa

@@ -61,7 +61,7 @@ def config(base_config):
                         robot.nibi:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
-                                rivers dir: /project/def-allen/SalishSea/forcing/rivers/
+                                rivers dir: /project/rrg-allen/SalishSea/forcing/rivers/
                         optimum-hindcast:
                             ssh key: SalishSeaNEMO-nowcast_id_rsa
                             forcing:
@@ -160,7 +160,7 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/sshNeahBay/",
             ),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/sshNeahBay/"),
-            ("robot.nibi", "/project/def-allen/SalishSea/forcing/sshNeahBay/"),
+            ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/sshNeahBay/"),
         ),
     )
     def test_ssh_uploads(self, host, ssh_key, prod_config):
@@ -179,7 +179,7 @@ class TestConfig:
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/river_turb/"),
             (
                 "robot.nibi",
-                "/project/def-allen/SalishSea/forcing/rivers/river_turb/",
+                "/project/rrg-allen/SalishSea/forcing/rivers/river_turb/",
             ),
         ),
     )
@@ -196,7 +196,7 @@ class TestConfig:
             ("arbutus.cloud-nowcast", "/nemoShare/MEOPAR/rivers/"),
             ("optimum-hindcast", "/data/sallen/shared/SalishSeaCast/forcing/rivers/"),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/rivers/"),
-            ("robot.nibi", "/project/def-allen/SalishSea/forcing/rivers/"),
+            ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/rivers/"),
         ),
     )
     def test_river_runoff_uploads(self, host, expected, prod_config):
@@ -223,7 +223,7 @@ class TestConfig:
             ),
             (
                 "robot.nibi",
-                "/project/def-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
+                "/project/rrg-allen/SalishSea/forcing/atmospheric/continental2.5/nemo_forcing/",
             ),
         ),
     )
@@ -246,7 +246,7 @@ class TestConfig:
                 "/data/sallen/shared/SalishSeaCast/forcing/LiveOcean/",
             ),
             ("orcinus-nowcast-agrif", "/global/home/sallen/MEOPAR/LiveOcean/"),
-            ("robot.nibi", "/project/def-allen/SalishSea/forcing/LiveOcean/"),
+            ("robot.nibi", "/project/rrg-allen/SalishSea/forcing/LiveOcean/"),
         ),
     )
     def test_live_ocean_uploads(self, host, expected, prod_config):
