@@ -17,4 +17,4 @@ jobs:
     permissions:
       issues: write
       pull-requests: write
-    uses: UBC-MOAD/gha-workflows/.github/workflows/auto-assign.yaml@main
+    uses: UBC-MOAD/gha-workflows/.github/workflows/auto-assign.yaml@main  # zizmor: ignore[unpinned-uses]

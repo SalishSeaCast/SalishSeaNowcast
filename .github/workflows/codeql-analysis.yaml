@@ -21,6 +21,6 @@ jobs:
       fail-fast: false
       matrix:
         language: [ 'python' ]
-    uses: UBC-MOAD/gha-workflows/.github/workflows/codeql-analysis.yaml@main
+    uses: UBC-MOAD/gha-workflows/.github/workflows/codeql-analysis.yaml@main  # zizmor: ignore[unpinned-uses]
     with:
       language: ${{ matrix.language }}
