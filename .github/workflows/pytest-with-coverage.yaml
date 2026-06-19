@@ -1,5 +1,7 @@
 name: pytest-with-coverage
 
+permissions: {}
+
 on:
   push:
     branches: ['*']

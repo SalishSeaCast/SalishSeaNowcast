@@ -1,5 +1,7 @@
 name: sphinx-linkcheck
 
+permissions: {}
+
 on:
   push:
     branches: ['*']
