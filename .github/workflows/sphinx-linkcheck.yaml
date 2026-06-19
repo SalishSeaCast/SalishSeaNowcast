@@ -11,7 +11,7 @@ on:
 jobs:
   sphinx-linkcheck:
     permissions:
-      contents: read
+      contents: read  # Required to check out the repo
     strategy:
       fail-fast: false
       matrix:
