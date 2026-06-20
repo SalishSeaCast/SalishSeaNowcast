@@ -1,5 +1,7 @@
 name: sphinx-linkcheck
 
+permissions: {}
+
 on:
   push:
     branches: ['*']
@@ -8,15 +10,16 @@ on:
 
 jobs:
   sphinx-linkcheck:
+    name: Sphinx linkcheck
     permissions:
-      contents: read
+      contents: read  # Required to check out the repo
     strategy:
       fail-fast: false
       matrix:
         # Need to specify the Python version here because we use test env which gets its
         # Python version via matrix
         python-version: [ '3.13' ]
-    uses: UBC-MOAD/gha-workflows/.github/workflows/sphinx-linkcheck.yaml@main
+    uses: UBC-MOAD/gha-workflows/.github/workflows/sphinx-linkcheck.yaml@main  # zizmor: ignore[unpinned-uses]
     with:
       python-version: ${{ matrix.python-version }}
       conda-env-file: envs/environment-linkcheck.yaml

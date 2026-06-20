@@ -1,5 +1,7 @@
 name: Add Milestone to Issue/PR
 
+permissions: {}
+
 on:
   issues:
     types:
@@ -12,7 +14,8 @@ on:
 
 jobs:
   add_milestone:
+    name: Add current milestone to issue/PR
     permissions:
-      issues: write
-      pull-requests: write
-    uses: UBC-MOAD/gha-workflows/.github/workflows/auto-milestone-issue-pr.yaml@main
+      issues: write  # Required to assign milestones to issues
+      pull-requests: write  # Required to add milestone to PRs
+    uses: UBC-MOAD/gha-workflows/.github/workflows/auto-milestone-issue-pr.yaml@main  # zizmor: ignore[unpinned-uses]

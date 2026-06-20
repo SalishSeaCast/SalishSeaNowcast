@@ -1,5 +1,7 @@
 name: pytest-with-coverage
 
+permissions: {}
+
 on:
   push:
     branches: ['*']
@@ -7,11 +9,17 @@ on:
   # primarily for testing conda env solution for new Python versions
   workflow_dispatch:
 
+# Helps prevent parallel runs of the workflow from overlapping
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pytest-with-coverage:
+    name: pytest with coverage
     permissions:
-      contents: read
-      pull-requests: write
+      contents: read  # Required to check out the repo
+      pull-requests: write  # Required to comment on pull requests
     strategy:
       fail-fast: false
       matrix:
@@ -19,7 +27,9 @@ jobs:
     runs-on: 'ubuntu-latest'
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v6  # zizmor: ignore[unpinned-uses]
+        with:
+          persist-credentials: false  # Required to avoid exposing secrets to pytest run in forked PRs
 
       - name: Get current date for downloads cache key
         id: date
@@ -59,4 +69,4 @@ jobs:
         with:
           files: ./coverage.xml
           flags: unittests
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}  # zizmor: ignore[secrets-outside-env]
