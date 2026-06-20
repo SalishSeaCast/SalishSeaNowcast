@@ -69,4 +69,4 @@ jobs:
         with:
           files: ./coverage.xml
           flags: unittests
-          token: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}  # zizmor: ignore[secrets-outside-env]
