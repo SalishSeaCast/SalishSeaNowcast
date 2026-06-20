@@ -14,6 +14,7 @@ on:
 
 jobs:
   add_milestone:
+    name: Add current milestone to issue/PR
     permissions:
       issues: write  # Required to assign milestones to issues
       pull-requests: write  # Required to add milestone to PRs

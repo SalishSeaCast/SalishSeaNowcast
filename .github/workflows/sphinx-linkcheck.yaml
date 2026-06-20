@@ -10,6 +10,7 @@ on:
 
 jobs:
   sphinx-linkcheck:
+    name: Sphinx linkcheck
     permissions:
       contents: read  # Required to check out the repo
     strategy:

@@ -11,6 +11,7 @@ on:
 
 jobs:
   pytest-with-coverage:
+    name: pytest with coverage
     permissions:
       contents: read  # Required to check out the repo
       pull-requests: write  # Required to comment on pull requests
