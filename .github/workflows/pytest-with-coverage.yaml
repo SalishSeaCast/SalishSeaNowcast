@@ -9,6 +9,11 @@ on:
   # primarily for testing conda env solution for new Python versions
   workflow_dispatch:
 
+# Helps prevent parallel runs of the workflow from overlapping
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pytest-with-coverage:
     name: pytest with coverage
