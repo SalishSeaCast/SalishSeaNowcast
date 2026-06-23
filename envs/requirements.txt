@@ -100,7 +100,7 @@ matplotlib==3.10.8
 mdurl==0.1.2
 moad_tools==25.2.dev0
 more-itertools==11.0.1
-msgpack==1.1.2
+msgpack==1.2.1
 munkres==1.1.4
 mypy_extensions==1.1.0
 narwhals==2.19.0
