@@ -533,7 +533,7 @@ The output looks something like:
     tests/workers/test_watch_NEMO_hindcast.py ...........................................
     ..................                                                             [  7%]
     tests/workers/test_update_forecast_datasets.py ......................................
-`   ................................                                               [ 10%]
+    ................................                                               [ 10%]
     tests/release_mgmt/test_tag_release.py .........                               [ 11%]
     tests/workers/test_make_ww3_wind_file.py ........................              [ 12%]
     tests/workers/test_make_CHS_currents_file.py ........................          [ 13%]
