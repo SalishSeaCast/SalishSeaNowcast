@@ -33,11 +33,13 @@ def configure_logging(config, logger, debug, email=True):
 
     This function assumes that the logger object has been created
     in the module from which the function is called.
-    That is typically done with a module-level commands like::
+    That is typically done with a module-level commands like:
 
-      worker_name = lib.get_module_name()
+    .. code-block:: python
 
-      logger = logging.getLogger(worker_name)
+        worker_name = lib.get_module_name()
+
+        logger = logging.getLogger(worker_name)
 
     :arg config: Configuration data structure.
     :type config: dict

@@ -261,9 +261,11 @@ You can list the keys that the agent is managing for you with:
 
     $ ssh-add -l
 
-You can simplify logins to the instance by adding the following lines to your :file:`$HOME/.ssh/config` file::
+You can simplify logins to the instance by adding the following lines to your :file:`$HOME/.ssh/config` file:
 
-  Host arbutus.cloud
+.. code-block:: text
+
+    Host arbutus.cloud
       Hostname        <ip-address>
       User            ubuntu
       IdentityFile    ~/.ssh/arbutus.cloud_id_rsa
@@ -374,15 +376,17 @@ Confirm that the :ref:`PersistentSharedStorage` volume is attached on ``vdc`` wi
 
     $ sudo lsblk -f
 
-The expected output is like::
+The expected output is like:
 
-  NAME    FSTYPE LABEL           UUID                                 MOUNTPOINT
-  vda
-  ├─vda1  ext4   cloudimg-rootfs 5e99de08-0334-45c0-82a2-7938eb21ac53 /
-  ├─vda14
-  └─vda15 vfat   UEFI            B60C-5465                            /boot/efi
-  vdb     ext4   ephemeral0      5f16e568-7cff-4a88-a51c-b3c0bd50803c /mnt
-  vdc
+.. code-block:: text
+
+    NAME    FSTYPE LABEL           UUID                                 MOUNTPOINT
+    vda
+    ├─vda1  ext4   cloudimg-rootfs 5e99de08-0334-45c0-82a2-7938eb21ac53 /
+    ├─vda14
+    └─vda15 vfat   UEFI            B60C-5465                            /boot/efi
+    vdb     ext4   ephemeral0      5f16e568-7cff-4a88-a51c-b3c0bd50803c /mnt
+    vdc
 
 
 Format the volume with an `ext4` file system and confirm:
@@ -392,15 +396,17 @@ Format the volume with an `ext4` file system and confirm:
     $ sudo mkfs.ext4 /dev/vdc
     $ sudo lsblk -f
 
-The expected output is like::
+The expected output is like:
 
-  NAME    FSTYPE LABEL           UUID                                 MOUNTPOINT
-  vda
-  ├─vda1  ext4   cloudimg-rootfs 5e99de08-0334-45c0-82a2-7938eb21ac53 /
-  ├─vda14
-  └─vda15 vfat   UEFI            B60C-5465                            /boot/efi
-  vdb     ext4   ephemeral0      5f16e568-7cff-4a88-a51c-b3c0bd50803c /mnt
-  vdc     ext4                   381a0eb2-9429-42b2-9be0-1ddb53087f94
+.. code-block:: text
+
+    NAME    FSTYPE LABEL           UUID                                 MOUNTPOINT
+    vda
+    ├─vda1  ext4   cloudimg-rootfs 5e99de08-0334-45c0-82a2-7938eb21ac53 /
+    ├─vda14
+    └─vda15 vfat   UEFI            B60C-5465                            /boot/efi
+    vdb     ext4   ephemeral0      5f16e568-7cff-4a88-a51c-b3c0bd50803c /mnt
+    vdc     ext4                   381a0eb2-9429-42b2-9be0-1ddb53087f94
 
 Create the :file:`/nemoShare/` mount point,
 mount the volume,
@@ -421,14 +427,18 @@ Reference: https://help.ubuntu.com/community/SettingUpNFSHowTo
     $ sudo mkdir -p /export/MEOPAR
     $ sudo mount --bind /nemoShare/MEOPAR /export/MEOPAR
 
-Add the following line to :file:`/etc/fstab`::
+Add the following line to :file:`/etc/fstab`:
 
-  /nemoShare/MEOPAR   /export/MEOPAR  none  bind  0  0
+.. code-block:: text
 
-Add the following lines to :file:`/etc/exports`::
+    /nemoShare/MEOPAR   /export/MEOPAR  none  bind  0  0
 
-  /export        192.168.238.0/24(rw,fsid=0,insecure,no_subtree_check,async)
-  /export/MEOPAR 192.168.238.0/24(rw,nohide,insecure,no_subtree_check,async)
+Add the following lines to :file:`/etc/exports`:
+
+.. code-block:: console
+
+    /export        192.168.238.0/24(rw,fsid=0,insecure,no_subtree_check,async)
+    /export/MEOPAR 192.168.238.0/24(rw,nohide,insecure,no_subtree_check,async)
 
 Restart the NFS service:
 
@@ -527,76 +537,82 @@ and MPI hosts mapping files for NEMO/WAVEWATCH VMs and FVCOM VMs on the head nod
 Head Node :file:`.ssh/config`
 -----------------------------
 
-::
+.. code-block:: text
 
-  Host *
+    Host *
        StrictHostKeyChecking no
 
-  # Head node and XIOS host
-  Host nowcast0
+    # Head node and XIOS host
+    Host nowcast0
     HostName 192.168.238.14
 
-  # NEMO compute nodes
-  Host nowcast1
+    # NEMO compute nodes
+    Host nowcast1
     HostName 192.168.238.10
-  Host nowcast2
+    Host nowcast2
     HostName 192.168.238.13
-  Host nowcast3
-   HostName 192.168.238.8
-  Host nowcast4
+    Host nowcast3
+    HostName 192.168.238.8
+    Host nowcast4
     HostName 192.168.238.16
-  Host nowcast5
+    Host nowcast5
     HostName 192.168.238.5
-  Host nowcast6
+    Host nowcast6
     HostName 192.168.238.6
-  Host nowcast7
+    Host nowcast7
     HostName 192.168.238.18
-  Host nowcast8
+    Host nowcast8
     HostName 192.168.238.15
 
-  # FVCOM compute nodes
-  Host fvcom0
+    # FVCOM compute nodes
+    Host fvcom0
     HostName 192.168.238.12
-  Host fvcom1
+    Host fvcom1
     HostName 192.168.238.7
-  Host fvcom2
+    Host fvcom2
     HostName 192.168.238.20
-  Host fvcom3
+    Host fvcom3
     HostName 192.168.238.11
-  Host fvcom4
+    Host fvcom4
     HostName 192.168.238.9
-  Host fvcom5
+    Host fvcom5
     HostName 192.168.238.28
-  Host fvcom6
+    Host fvcom6
     HostName 192.168.238.27
 
 
 MPI Hosts Mappings
 ------------------
 
-:file:`$HOME/mpi_hosts` for NEMO/WAVEWATCH VMs containing::
+:file:`$HOME/mpi_hosts` for NEMO/WAVEWATCH VMs containing:
 
-  192.168.238.10 slots=15 max-slots=16
-  192.168.238.13 slots=15 max-slots=16
-  192.168.238.8  slots=15 max-slots=16
-  192.168.238.16 slots=15 max-slots=16
-  192.168.238.5  slots=15 max-slots=16
-  192.168.238.6  slots=15 max-slots=16
-  192.168.238.18 slots=15 max-slots=16
-  192.168.238.15 slots=15 max-slots=16
+.. code-block:: text
 
-:file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for ``x2`` model configuration runs containing::
+    192.168.238.10 slots=15 max-slots=16
+    192.168.238.13 slots=15 max-slots=16
+    192.168.238.8  slots=15 max-slots=16
+    192.168.238.16 slots=15 max-slots=16
+    192.168.238.5  slots=15 max-slots=16
+    192.168.238.6  slots=15 max-slots=16
+    192.168.238.18 slots=15 max-slots=16
+    192.168.238.15 slots=15 max-slots=16
 
-  192.168.238.12 slots=15 max-slots=16
-  192.168.238.7  slots=15 max-slots=16
+:file:`$HOME/mpi_hosts.fvcom.x2` for FVCOM VMs used for ``x2`` model configuration runs containing:
 
-:file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for ``r12`` model configuration runs containing::
+.. code-block:: text
 
-  192.168.238.20 slots=15 max-slots=16
-  192.168.238.11 slots=15 max-slots=16
-  192.168.238.9  slots=15 max-slots=16
-  192.168.238.28 slots=15 max-slots=16
-  192.168.238.27 slots=15 max-slots=16
+    192.168.238.12 slots=15 max-slots=16
+    192.168.238.7  slots=15 max-slots=16
+
+:file:`$HOME/mpi_hosts.fvcom.r12` for FVCOM VMs used for ``r12`` model configuration runs containing:
+
+.. code-block:: text
+
+    192.168.238.20 slots=15 max-slots=16
+    192.168.238.11 slots=15 max-slots=16
+    192.168.238.9  slots=15 max-slots=16
+    192.168.238.28 slots=15 max-slots=16
+    192.168.238.27 slots=15 max-slots=16
 
 
 Git Repositories

@@ -31,10 +31,12 @@ the value of :envvar:`HOME` is :file:`/home/sallen/dlatorne`.
 Environment Variables
 =====================
 
-Add these environment variable definitions to :file:`$HOME/.bash_profile`::
+Add these environment variable definitions to :file:`$HOME/.bash_profile`:
 
-  export FORCING=/data/sallen/shared
-  export PROJECT=/home/sallen/dlatorne
+.. code-block:: console
+
+   export FORCING=/data/sallen/shared
+   export PROJECT=/home/sallen/dlatorne
 
 ``optimum`` provides automatically defined environment variables for:
 
@@ -51,10 +53,12 @@ Add these environment variable definitions to :file:`$HOME/.bash_profile`::
 Module Loads
 ============
 
-The default module loads to use on ``optimum`` are::
+The default module loads to use on ``optimum`` are:
 
-  module load OpenMPI/2.1.6/GCC/SYSTEM
-  module load GIT/2/03.03
+.. code-block:: console
+
+   module load OpenMPI/2.1.6/GCC/SYSTEM
+   module load GIT/2/03.03
 
 Loading of those modules is included in :file:`$HOME/.bashrc`.
 
@@ -62,14 +66,16 @@ There is a ``Miniconda/3`` module available for building Python Conda environmen
 Conda environments created with that module loaded are stored in :file:`$HOME/.conda/envs/`.
 
 There is something funky about :program:`REBUILD_NEMO` and the way it uses netCDF that requires a different collection of modules in order to avoid a run-time error about netCDF4 operations on netCDF3 files
-(or vice versa)::
+(or vice versa):
 
-  module load GCC/8.3
-  module load OpenMPI/2.1.6/GCC/8.3
-  module load ZLIB/1.2/11
-  module load use.paustin
-  module load HDF5/1.08/20
-  module load NETCDF/4.6/1
+.. code-block:: console
+
+   module load GCC/8.3
+   module load OpenMPI/2.1.6/GCC/8.3
+   module load ZLIB/1.2/11
+   module load use.paustin
+   module load HDF5/1.08/20
+   module load NETCDF/4.6/1
 
 .. warning::
     The above module loads can *only be used* for build and execution of :program:`REBUILD_NEMO`.

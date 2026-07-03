@@ -115,7 +115,9 @@ Testing the Website View
        (nowcast-fig-dev)$ cd salishsea-site/
        (nowcast-fig-dev)$ pserve --reload development.ini
 
-   You should see output like::
+   You should see output like:
+
+   .. code-block:: text
 
      Starting monitor for PID 10564.
      Starting server in PID 10564.

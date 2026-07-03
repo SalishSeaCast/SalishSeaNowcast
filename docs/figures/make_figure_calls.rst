@@ -225,24 +225,30 @@ We can test that we have set up the necessary dataset loading and registered our
    * ``nitrate_thalweg_and_surface``, the key of the :py:func:`make_figure` call to test
    * ``--run-date``, to say what date's run results to render the figure for
 
-   The output of a successful test should look something like::
+   The output of a successful test should look something like:
 
-     2017-05-05 17:11:16,119 INFO [make_plots] running in process 2993
-     2017-05-05 17:11:16,120 INFO [make_plots] read config from config/nowcast.yaml
-     2017-05-05 17:11:16,120 DEBUG [make_plots] **debug mode** no connection to manager
-     2017-05-05 17:11:16,358 DEBUG [make_plots] starting nowcast.figures.research.tracer_thalweg_and_surface.make_figure
-     2017-05-05 17:11:18,645 INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
-     2017-05-05 17:11:18,646 INFO [make_plots] research plots for 2017-04-29 nowcast-green completed
-     2017-05-05 17:11:18,647 DEBUG [make_plots] **debug mode** message that would have been sent to manager: (success nowcast-green research nowcast-green research plots produced)
-     2017-05-05 17:11:18,647 DEBUG [make_plots] shutting down
+   .. code-block:: text
 
-   It is particularly important that your output contains the line that tells you that your figure was saved::
+      2017-05-05 17:11:16,119 INFO [make_plots] running in process 2993
+      2017-05-05 17:11:16,120 INFO [make_plots] read config from config/nowcast.yaml
+      2017-05-05 17:11:16,120 DEBUG [make_plots] **debug mode** no connection to manager
+      2017-05-05 17:11:16,358 DEBUG [make_plots] starting nowcast.figures.research.tracer_thalweg_and_surface.make_figure
+      2017-05-05 17:11:18,645 INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
+      2017-05-05 17:11:18,646 INFO [make_plots] research plots for 2017-04-29 nowcast-green completed
+      2017-05-05 17:11:18,647 DEBUG [make_plots] **debug mode** message that would have been sent to manager: (success nowcast-green research nowcast-green research plots produced)
+      2017-05-05 17:11:18,647 DEBUG [make_plots] shutting down
 
-     INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
+   It is particularly important that your output contains the line that tells you that your figure was saved:
 
-   You can transform that path into a URL like::
+   .. code-block:: text
 
-     https://salishsea.eos.ubc.ca/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg
+      INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
+
+   You can transform that path into a URL like:
+
+   .. code-block:: text
+
+      https://salishsea.eos.ubc.ca/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg
 
    and visually check your figure in your browser.
 
