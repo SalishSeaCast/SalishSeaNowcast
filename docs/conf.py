@@ -46,6 +46,7 @@ release = version
 # ones.
 extensions = [
     "notfound.extension",
+    "sphinx_copybutton",
     "sphinx.ext.autodoc",
     "sphinx.ext.intersphinx",
     "sphinx.ext.mathjax",
