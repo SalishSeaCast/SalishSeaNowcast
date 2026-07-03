@@ -24,7 +24,7 @@ Bottleneck==1.6.0
 Brotli==1.2.0
 cached-property==1.5.2
 Cartopy==0.25.0
-certifi==2026.2.25
+certifi==2026.6.17
 cffi==2.0.0
 cfgrib==0.9.15.1
 cfgv==3.5.0
@@ -114,7 +114,7 @@ numpy-groupies==0.11.3
 numpy-indexed==0.3.7
 openpyxl==3.1.5
 packaging==26.0
-pandas==3.0.2
+pandas==2.3.3
 paramiko==4.0.0
 partd==1.4.2
 pathspec==1.0.4
@@ -177,6 +177,7 @@ snowballstemmer==3.0.1
 sortedcontainers==2.4.0
 soupsieve==2.8.3
 Sphinx==8.1.3
+sphinx-copybutton==0.5.2
 sphinx-notfound-page==1.0.4
 sphinx_rtd_theme==3.0.0
 sphinxcontrib-applehelp==2.0.0
