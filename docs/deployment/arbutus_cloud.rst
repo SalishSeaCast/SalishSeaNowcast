@@ -379,6 +379,7 @@ Confirm that the :ref:`PersistentSharedStorage` volume is attached on ``vdc`` wi
 The expected output is like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     NAME    FSTYPE LABEL           UUID                                 MOUNTPOINT
     vda
@@ -399,6 +400,7 @@ Format the volume with an `ext4` file system and confirm:
 The expected output is like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     NAME    FSTYPE LABEL           UUID                                 MOUNTPOINT
     vda

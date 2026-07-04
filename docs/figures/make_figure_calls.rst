@@ -228,6 +228,7 @@ We can test that we have set up the necessary dataset loading and registered our
    The output of a successful test should look something like:
 
    .. code-block:: text
+      :class: no-copybutton
 
       2017-05-05 17:11:16,119 INFO [make_plots] running in process 2993
       2017-05-05 17:11:16,120 INFO [make_plots] read config from config/nowcast.yaml
@@ -241,12 +242,14 @@ We can test that we have set up the necessary dataset loading and registered our
    It is particularly important that your output contains the line that tells you that your figure was saved:
 
    .. code-block:: text
+      :class: no-copybutton
 
       INFO [make_plots] /results/nowcast-sys/figures/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg saved
 
    You can transform that path into a URL like:
 
    .. code-block:: text
+      :class: no-copybutton
 
       https://salishsea.eos.ubc.ca/test/nowcast-green/29apr17/nitrate_thalweg_and_surface_29apr17.svg
 

@@ -236,6 +236,7 @@ to do a clean build of the documentation.
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     Removing everything under '_build'...
     Running Sphinx v8.1.3
@@ -306,6 +307,7 @@ use:
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     Removing everything under '_build'...
     Running Sphinx v8.1.3
@@ -516,6 +518,7 @@ to run the test suite.
 The output looks something like:
 
 .. code-block:: text
+   :class: no-copybutton
 
     ================================ test session starts =================================
     platform linux -- Python 3.13.12, pytest-9.0.2, pluggy-1.6.0

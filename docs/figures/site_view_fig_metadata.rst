@@ -118,10 +118,11 @@ Testing the Website View
    You should see output like:
 
    .. code-block:: text
+      :class: no-copybutton
 
-     Starting monitor for PID 10564.
-     Starting server in PID 10564.
-     serving on http://0.0.0.0:6543
+      Starting monitor for PID 10564.
+      Starting server in PID 10564.
+      serving on http://0.0.0.0:6543
 
    but the PID number will be different.
    The web server is now running in this terminal session.

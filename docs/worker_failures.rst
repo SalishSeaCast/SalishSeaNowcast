@@ -96,6 +96,7 @@ then run the worker as follows:
    The (abridged) output should look like:
 
    .. code-block:: text
+      :class: no-copybutton
 
         2023-02-24 10:18:07,831 INFO [download_weather] running in process 3006
         2023-02-24 10:18:07,831 INFO [download_weather] read config from /SalishSeaCast/SalishSeaNowcast/config/nowcast.yaml
@@ -122,6 +123,7 @@ and its option flags:
     (nowcast)$ python -m nowcast.workers.download_weather --help
 
 .. code-block:: text
+   :class: no-copybutton
 
     usage: python -m nowcast.workers.download_weather [-h] [--debug] [--run-date RUN_DATE]
            [--no-verify-certs] config_file {12,06,00,18} {1km,2.5km}
